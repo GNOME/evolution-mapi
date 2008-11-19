@@ -5,8 +5,8 @@ INCLUDES = -I .						\
 	-I$(top_srcdir)/src/libexchangemapi/		\
 	$(CAMEL_CFLAGS)					\
 	$(EVOLUTION_PLUGIN_CFLAGS)			\
-	$(EVOLUTION_CALENDAR_CFLAGS) \
-	$(EVOLUTION_ADDRESSBOOK_CFLAGS) \
+	$(EVOLUTION_CALENDAR_CFLAGS) 			\
+	$(EVOLUTION_ADDRESSBOOK_CFLAGS) 		\
 	$(LIBMAPI_CFLAGS)
 
 
@@ -23,17 +23,17 @@ liborg_gnome_exchange_mapi_la_SOURCES = 		\
 	exchange-mapi-account-listener.h
 
 liborg_gnome_exchange_mapi_la_LIBADD = 			\
-	$(top_builddir)/src/libexchangemapi/libexchangemapi-1.0.la	\
-	$(EVOLUTION_CALENDAR_LIBS) \
-	$(EVOLUTION_ADDRESSBOOK_LIBS) \
-	$(EVOLUTION_PLUGIN_LIBS)	\
-	$(CAMEL_LIBS) \
+	$(top_builddir)/src/libexchangemapi/libexchangemapi-1.0.la \
+	$(EVOLUTION_CALENDAR_LIBS) 			\
+	$(EVOLUTION_ADDRESSBOOK_LIBS) 			\
+	$(EVOLUTION_PLUGIN_LIBS)			\
+	$(CAMEL_LIBS) 					\
 	$(LIBMAPI_LIBS)
 
 liborg_gnome_exchange_mapi_la_LDFLAGS = -module -avoid-version -lmapi $(NO_UNDEFINED)
 liborg_gnome_exchange_mapi_la_CFLAGS = -I/usr/local/samba/include/
 
-EXTRA_DIST = 							\
+EXTRA_DIST = 						\
 	org-gnome-exchange-mapi.eplug.xml
 
 BUILT_SOURCES = org-gnome-exchange-mapi.eplug	

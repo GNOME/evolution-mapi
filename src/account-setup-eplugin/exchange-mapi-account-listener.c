@@ -44,9 +44,9 @@
 /* FIXME: The mapi should not be needed in the include statement.
 LIMBAPI_CFLAGS or something is going wrong */
 
-#include <mapi/exchange-mapi-folder.h>
-#include <mapi/exchange-mapi-connection.h>
-#include <mapi/exchange-mapi-utils.h>
+#include <exchange-mapi-folder.h>
+#include <exchange-mapi-connection.h>
+#include <exchange-mapi-utils.h>
 
 #define d(x) x
 

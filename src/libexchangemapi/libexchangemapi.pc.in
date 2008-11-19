@@ -5,14 +5,11 @@ includedir=@includedir@
 datarootdir=@datarootdir@
 datadir=@datadir@
 
-idldir=@idldir@
-IDL_INCLUDES=-I${idldir} @IDL_INCLUDES@
-
-privincludedir=@privincludedir@
+privincludedir=@edataserver_privincludedir@
 
 Name: libexchangemapi
-Description: Client library for accessing Exchange with libmapi
+Description: Client library for accessing Exchange with LibMAPI
 Version: @VERSION@
-Requires: @LIBMAPI@
+Requires: evolution-data-server-@API_VERSION@ >= @EDS_REQUIRED@ evolution-plugin >= @EVO_REQUIRED@ libmapi 
 Libs: -L${libdir} -lexchangemapi-1.0 -lmapi
 Cflags: -I${privincludedir}/mapi

@@ -3,7 +3,7 @@
 camel_provider_LTLIBRARIES = libcamelmapi.la
 camel_provider_DATA = libcamelmapi.urls
 
-INCLUDES = -I.. \
+INCLUDES = -I.. 				\
 	-I$(top_srcdir)/src/camel		\
 	-I$(top_srcdir)/src/libexchangemapi	\
 	$(CAMEL_CFLAGS)				\
@@ -27,9 +27,9 @@ noinst_HEADERS =         			\
 	camel-private.h				
 
 libcamelmapi_la_LDFLAGS = -avoid-version -module $(NO_UNDEFINED)
-libcamelmapi_la_LIBADD =                         \
-	$(top_builddir)/src/libexchangemapi/libexchangemapi-1.0.la		\
-	$(CAMEL_LIBS)                            \
+libcamelmapi_la_LIBADD = 			\
+	$(top_builddir)/src/libexchangemapi/libexchangemapi-1.0.la \
+	$(CAMEL_LIBS) 				\
         $(LIBMAPI_LIBS)
 
 EXTRA_DIST = libcamelmapi.urls

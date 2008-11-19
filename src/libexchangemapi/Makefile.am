@@ -1,9 +1,9 @@
 INCLUDES =					\
 	-DG_LOG_DOMAIN=\"libexchangemapi\"	\
 	-DMAPI_DATADIR=\""$(mapidatadir)"\"	\
+	-I$(top_srcdir)				\
 	$(EVOLUTION_DATA_SERVER_CFLAGS)		\
 	$(LIBEDATASERVER_CFLAGS)		\
-	-I$(top_srcdir)				\
 	$(EVOLUTION_CALENDAR_CFLAGS)		\
 	$(LIBMAPI_CFLAGS)
 
@@ -31,9 +31,11 @@ libexchangemapi_1_0_la_SOURCES =		\
 
 
 libexchangemapi_1_0_la_LIBADD =			\
-	$(EVOLUTION_DATA_SERVER_LIBS)			\
+	$(EVOLUTION_DATA_SERVER_LIBS)		\
 	$(EVOLUTION_CALENDAR_LIBS)		\
 	$(LIBMAPI_LIBS)
+
+libexchangemapi_1_0_la_LDFLAGS = $(NO_UNDEFINED)
 
 libexchangemapiincludedir = $(edataserver_privincludedir)/mapi
 
@@ -46,14 +48,14 @@ libexchangemapiinclude_HEADERS = 		\
 	exchange-mapi-cal-tz-utils.h		\
 	exchange-mapi-cal-recur-utils.h
 
-%-1.0.pc: %.pc.in
+%-1.0.pc: %.pc
 	 cp $< $@
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libexchangemapi-1.0.pc
 
-EXTRA_DIST = 						\
-	$(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in) 	\
+EXTRA_DIST = 					\
+	$(pkgconfig_DATA:-1.0.pc=.pc.in) 	\
 	$(mapidata_DATA)
 
 DISTCLEANFILES = $(pkgconfig_DATA)

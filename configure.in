@@ -6,6 +6,16 @@ AC_PREREQ(2.57)
 AC_INIT(evolution-mapi, 0.1, http://go-evolution.org/MAPIProvider, evolution-mapi)
 AC_CONFIG_SRCDIR(README)
 
+# Some requirements have versioned package names
+# XXX In the spirit of getting rid of versioned
+#     files, can we please drop these suffixes?
+EDS_PACKAGE=1.2
+
+# Required Packages
+m4_define([eds_minimum_version], [2.24.0])
+m4_define([evo_minimum_version], [2.24.0])
+m4_define([libmapi_minimum_version], [0.8])
+
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 
 AC_CONFIG_HEADER([config.h])
@@ -29,39 +39,43 @@ AC_PROG_LIBTOOL
 
 PKG_PROG_PKG_CONFIG
 
+dnl ********************************
+dnl Check for evolution-data-server 
+dnl ********************************
+PKG_CHECK_MODULES(EVOLUTION_DATA_SERVER, evolution-data-server-$EDS_PACKAGE >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBEDATASERVER, libedataserver-$EDS_PACKAGE >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBEBACKEND, libebackend-$EDS_PACKAGE >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBECAL, libecal-$EDS_PACKAGE >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBEDATACAL, libedata-cal-$EDS_PACKAGE >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBBOOK, libebook-$EDS_PACKAGE >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBEDATABOOK, libedata-book-$EDS_PACKAGE >= eds_minimum_version)
+PKG_CHECK_MODULES(CAMEL, camel-provider-$EDS_PACKAGE >= eds_minimum_version)
+
 dnl ****************************
 dnl Check for evolution plugins 
 dnl ****************************
+PKG_CHECK_MODULES(EVOLUTION_PLUGIN, evolution-plugin >= evo_minimum_version)
 
-AC_ARG_WITH(evolution, [  --evolution=[version] Use Evolution version.],
-			evolution_version="$withval", evolution_version="2.12")	
+dnl ****************************
+dnl Check for LibMAPI 
+dnl ****************************
+PKG_CHECK_MODULES(LIBMAPI, libmapi = libmapi_minimum_version)
 
-AC_ARG_WITH(evolution-camelprovider, [  --evolution-camel=[version] Use Evolution Camel Provider version.],
-				   evolution_camel_version="$withval", evolution_camel_version="1.2" )
-
-PKG_CHECK_MODULES(EVOLUTION_DATA_SERVER, evolution-data-server-${evolution_camel_version})
-PKG_CHECK_MODULES(EVOLUTION_PLUGIN, evolution-plugin)
-
-PKG_CHECK_MODULES(LIBEDATASERVER, libedataserver-${evolution_camel_version})
-PKG_CHECK_MODULES(LIBEBACKEND, libebackend-${evolution_camel_version})
-
-PKG_CHECK_MODULES(LIBECAL, libecal-${evolution_camel_version})
-PKG_CHECK_MODULES(LIBEDATACAL, libedata-cal-${evolution_camel_version})
-
-PKG_CHECK_MODULES(LIBBOOK, libebook-${evolution_camel_version})
-PKG_CHECK_MODULES(LIBEDATABOOK, libedata-book-${evolution_camel_version})
-
-PKG_CHECK_MODULES(CAMEL, camel-provider-${evolution_camel_version})
-
-dnl TODO : Version check. 
-PKG_CHECK_MODULES(LIBMAPI, libmapi)
+dnl ***********
+dnl GConf stuff
+dnl ***********
 PKG_CHECK_MODULES(GCONF2, gconf-2.0)
-
 AC_PATH_PROG(GCONFTOOL, gconftool-2, no)
 AM_GCONF_SOURCE_2
 
-API_VERSION=${evolution_camel_version}
+API_VERSION=$EDS_PACKAGE
 AC_SUBST(API_VERSION)
+
+EDS_REQUIRED=eds_minimum_version
+AC_SUBST(EDS_REQUIRED)
+
+EVO_REQUIRED=evo_minimum_version
+AC_SUBST(EVO_REQUIRED)
 
 BASE_VERSION=`pkg-config --variable=execversion evolution-shell`
 AC_SUBST(BASE_VERSION)
@@ -113,35 +127,37 @@ AC_SUBST(EVOLUTION_EBOOK_UNINSTALL)
 plugindir=`$PKG_CONFIG --variable=plugindir evolution-plugin`
 AC_SUBST(plugindir)
 
-camel_providerdir=`$PKG_CONFIG --variable=camel_providerdir camel-provider-${evolution_camel_version}`
+camel_providerdir=`$PKG_CONFIG --variable=camel_providerdir camel-provider-$EDS_PACKAGE`
 AC_SUBST(camel_providerdir)
 
-extensiondir=`$PKG_CONFIG --variable=extensiondir evolution-data-server-${evolution_camel_version}`
+extensiondir=`$PKG_CONFIG --variable=extensiondir evolution-data-server-$EDS_PACKAGE`
 AC_SUBST(extensiondir)
 
-libmapi_ldif_dir=`$PKG_CONFIG --variable=libdir libmapi`/openchange/setup
+libmapi_ldif_dir=`$PKG_CONFIG --variable=datadir libmapi`/setup
 AC_SUBST(libmapi_ldif_dir)
 
-eds_privdatadir=`$PKG_CONFIG --variable=privdatadir evolution-data-server-${evolution_camel_version}`
+eds_privdatadir=`$PKG_CONFIG --variable=privdatadir evolution-data-server-$EDS_PACKAGE`
 AC_SUBST(eds_privdatadir)
 
-edataserver_privincludedir=`$PKG_CONFIG --variable=privincludedir libedataserver-${evolution_camel_version}`
+edataserver_privincludedir=`$PKG_CONFIG --variable=privincludedir libedataserver-$EDS_PACKAGE`
 AC_SUBST(edataserver_privincludedir)
 
 mapidatadir="$eds_privdatadir/mapi"
 AC_SUBST(mapidatadir)
 
+
 dnl ***********************
-dnl Makefiles 
+dnl CONFIG_FILES
 dnl ***********************
 
-AC_CONFIG_FILES([Makefile 
+AC_CONFIG_FILES([ po/Makefile.in
+Makefile 
 src/Makefile
 src/libexchangemapi/Makefile
+src/libexchangemapi/libexchangemapi.pc
 src/calendar/Makefile
 src/addressbook/Makefile
 src/camel/Makefile
 src/account-setup-eplugin/Makefile
-po/Makefile.in
 ])
 AC_OUTPUT
