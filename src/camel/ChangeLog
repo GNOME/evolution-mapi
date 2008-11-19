@@ -1,3 +1,9 @@
+2008-11-19  Johnny Jacob  <jjohnny@novell.com>
+	
+	* camel-mapi-folder.c (mapi_folder_get_message)
+	(mapi_refresh_folder): Use the right flag for deciding Public/Ordinary
+	folder. Fixes BGO #560760.
+
 2008-11-12  Johnny Jacob  <jjohnny@novell.com>
 	
 	* camel-mapi-folder.c (fetch_item_cb, fetch_items_cb): Iterate once 

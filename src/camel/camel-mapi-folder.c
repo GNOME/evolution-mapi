@@ -620,7 +620,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 			goto end2;
 		}
 
-		if (((CamelMapiFolder *)folder)->type == MAPI_FAVOURITE_FOLDER)
+		if (((CamelMapiFolder *)folder)->type & CAMEL_MAPI_FOLDER_PUBLIC)
 			options |= MAPI_OPTIONS_USE_PFSTORE;
 
 		camel_operation_start (NULL, _("Fetching summary information for new messages in %s"), folder->name);
@@ -1169,7 +1169,7 @@ mapi_folder_get_message( CamelFolder *folder, const char *uid, CamelException *e
 	options = MAPI_OPTIONS_FETCH_ALL | MAPI_OPTIONS_FETCH_BODY_STREAM | MAPI_OPTIONS_GETBESTBODY ;
 	exchange_mapi_util_mapi_ids_from_uid (uid, &id_folder, &id_message);
 
-	if (((CamelMapiFolder *)folder)->type == MAPI_FAVOURITE_FOLDER){
+	if (((CamelMapiFolder *)folder)->type & CAMEL_MAPI_FOLDER_PUBLIC){
 		options |= MAPI_OPTIONS_USE_PFSTORE;
 	} 
 
