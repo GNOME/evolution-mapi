@@ -1,0 +1,269 @@
+2008-11-13  Suman Manjunath  <msuman@novell.com>
+
+	* Makefile.am:
+	* exchange-account-listener.c: Removed from source control
+	* exchange-account-listener.h: Removed from source control
+	* exchange-mapi-account-listener.c (dispose), (finalize),
+	(exchange_mapi_account_listener_class_init),
+	(exchange_mapi_account_listener_init),
+	(exchange_mapi_account_listener_peek_folder_list),
+	(exchange_mapi_account_listener_get_folder_list),
+	(exchange_mapi_account_listener_free_folder_list),
+	(is_mapi_account), (lookup_account_info), (add_cal_esource),
+	(remove_cal_esource), (modify_cal_esource), (add_calendar_sources),
+	(remove_calendar_sources), (modify_calendar_sources),
+	(add_addressbook_sources), (remove_addressbook_sources),
+	(modify_addressbook_sources), (account_added), (account_removed),
+	(account_changed), (exchange_mapi_account_listener_construct),
+	(exchange_mapi_account_listener_get_type),
+	(exchange_mapi_account_listener_new):
+	Added to source control
+	* exchange-mapi-account-listener.h: Added to source control
+	* exchange-mapi-account-setup.c (e_plugin_lib_enable),
+	(exchange_mapi_delete_profile), (exchange_mapi_create_profile),
+	(validate_credentials), (domain_entry_changed),
+	(org_gnome_exchange_mapi_account_setup),
+	(org_gnome_exchange_mapi_check_options), (add_folders),
+	(exchange_mapi_create), (exchange_mapi_book_commit),
+	(exchange_mapi_cal_check), (exchange_mapi_cal_commit):
+	* exchange-mapi-account-setup.h:
+	* org-gnome-exchange-mapi.eplug.xml:
+	Code cleanup.
+
+2008-10-22  Suman Manjunath  <msuman@novell.com>
+
+	* Makefile.am:
+	* exchange-account-listener.c
+	(exchange_account_listener_class_init),
+	(exchange_account_listener_init),
+	(exchange_account_listener_peek_folder_list),
+	(exchange_account_listener_get_folder_list),
+	(exchange_account_listener_free_folder_list), (is_mapi_account),
+	(lookup_account_info), (add_addressbook_sources), (account_added),
+	(account_removed), (exchange_account_listener_construct):
+	* exchange-account-listener.h:
+	* exchange-mapi-account-setup.c (e_plugin_lib_enable),
+	(exchange_mapi_delete_profile), (exchange_mapi_create_profile),
+	(org_gnome_exchange_mapi_account_setup), (check_node),
+	(add_folders), (exchange_mapi_create), (exchange_mapi_book_commit):
+	* exchange-mapi-account-setup.h:
+	Loads of code cleanup, remove most compilation warnings. 
+
+2008-08-12  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-mapi-account-setup.c (validate_credentials): 
+	Fixed double free. 
+
+2008-07-28  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-account-listener.c (add_cal_esource),
+	(remove_cal_esource): Set/unset "/apps/evolution/itip/delete_processed"
+	gconf-key. 
+
+2008-07-23  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-account-listener.c (add_cal_esource),
+	(add_addressbook_sources): Code cleanup. 
+	* exchange-mapi-account-setup.c (exchange_mapi_cal_check),
+	(exchange_mapi_cal_commit): Set the relative URI of newly created
+	folders correctly, code cleanup. 
+
+2008-07-23  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-account-listener.c (add_cal_esource): Default folders 
+	should not be deletable. 
+	* exchange-mapi-account-setup.c (exchange_mapi_cal_commit): Set 
+	"auth-type" on newly created folders. 
+
+2008-07-17  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-account-listener.c (add_cal_esource):
+	* exchange-mapi-account-setup.c (exchange_mapi_cal_commit):
+	Add the ACL properties to the source group as well as they are needed
+	by newly created folders. 
+
+2008-07-06  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-account-listener.c: (add_cal_esource): Only enable default
+	calendar/task list/memo list after account setup. 
+
+2008-06-10  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-account-listener.c: (add_cal_esource): Added a few ACL props
+	to the e-source entries. 
+
+2008-04-28  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-account-listener.c: (add_cal_esource),
+	(add_addressbook_sources):
+	* exchange-mapi-account-setup.c: (exchange_mapi_book_commit),
+	(exchange_mapi_cal_commit):
+	Use a common password component across e-d-s, Camel and Evolution.
+
+2008-04-14  Johnny Jacob  <jjohnny@novell.com>
+
+	* exchange-mapi-account-setup.c (org_gnome_exchange_mapi_account_setup): Added 
+	extra log messages in account setup.
+
+2008-04-01  Johnny Jacob  <jjohnny@novell.com>
+
+	* Makefile.am: Removed reference to libexchange-storage.
+
+2008-02-15  Johnny Jacob  <jjohnny@novell.com>
+	
+	* Makefile.am (INCLUDES): LIBAMPI_LDIF_DIR. Added.
+
+	* exchange-mapi-account-setup.c (exchange_mapi_create_profile): Remove
+	hardcoded path for createprofile's ldif directory.
+
+2008-02-01  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-mapi-account-setup.c: (exchange_mapi_cursor_change),
+	(exchange_mapi_book_commit), (exchange_mapi_cal_commit): Use utility 
+	functions for ID conversions, fixed setting of relative uri for newly
+	created calendars/task-lists/memo-lists.
+
+2008-01-16  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-account-listener.c: (add_cal_esource),
+	(remove_cal_esource), (modify_cal_esource), (add_calendar_sources),
+	(remove_calendar_sources), (modify_calendar_sources),
+	(add_addressbook_sources), (remove_addressbook_sources),
+	(modify_addressbook_sources), (account_changed): Use the same base_uri
+	for calendar ESource as addressbook does. Some code cleanup. 
+
+2008-01-01  Suman Manjunath  <msuman@novell.com>
+
+	* Makefile.am: Added a missing "\" separator.
+
+2007-12-04  Srinivasa Ragavan  <sragavan@novell.com>
+
+	** Fixup mapi folder 
+
+	* exchange-account-listener.c:
+	(exchange_account_listener_peek_folder_list),
+	(exchange_account_listener_free_folder_list), (account_changed):
+	* exchange-account-listener.h:
+	* exchange-mapi-account-setup.c: (exchange_mapi_book_commit),
+	(exchange_mapi_cal_commit):
+
+2007-11-28  Srinivasa Ragavan  <sragavan@novell.com>
+
+	** Cleanup everything in plugins.
+
+	* exchange-account-listener.c: (account_changed):
+	* exchange-mapi-account-setup.c: (exchange_mapi_delete_profile),
+	(validate_credentials):
+
+2007-11-27  Srinivasa Ragavan  <sragavan@novell.com>
+
+	** Add support for delete/disable accounts. Modify partly should work
+	unless you modify user/domain/host.
+
+	* exchange-account-listener.c: (add_addressbook_sources),
+	(account_added), (account_removed), (account_changed):
+	* exchange-mapi-account-setup.c: (exchange_mapi_delete_profile),
+	(exchange_mapi_create_profile), (validate_credentials),
+	(org_gnome_exchange_mapi_account_setup):
+
+2007-11-27  Srinivasa Ragavan  <sragavan@novell.com>
+
+	* exchange-mapi-account-setup.c: (create_profile),
+	(org_gnome_exchange_mapi_account_setup): Fix the domain name field
+
+2007-11-27  Srinivasa Ragavan  <sragavan@novell.com>
+
+	* exchange-mapi-account-setup.c: (create_profile): Fix 2 logins for
+	account creation.
+
+2007-11-26  Suman Manjunath  <msuman@novell.com>
+
+	** committing ChangeLog entry for r34580
+
+	* exchange-account-listener.c: (add_cal_esource):
+	* exchange-mapi-account-setup.c: (exchange_mapi_book_check), 
+	(exchange_mapi_book_commit), (exchange_mapi_cal_check), 
+	(exchange_mapi_cal_commit), (add_folders), (exchange_mapi_create):
+	* org-gnome-exchange-mapi.eplug.xml:
+	Support for adding new calendar/task list/memo list.
+
+2007-11-23  Srinivasa Ragavan  <sragavan@novell.com>
+
+	** Added support for Create Calendar/Addressbook.
+
+	* exchange-account-listener.c: (add_cal_esource),
+	(add_addressbook_sources),
+	(exchange_account_listener_peek_folder_list):
+	* exchange-mapi-account-setup.c: (check_node), (add_to_store),
+	(add_folders), (exchange_mapi_cursor_change),
+	(exchange_mapi_create), (exchange_mapi_check),
+	(exchange_mapi_commit):
+	* org-gnome-exchange-mapi.eplug.xml:
+
+2007-11-20  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-account-listener.c:
+	(exchange_account_listener_get_folder_list), (finalize),
+	(lookup_account_info), (add_cal_esource), (modify_cal_esource),
+	(modify_calendar_sources), (modify_addressbook_sources),
+	(account_added), (account_removed), (account_changed),
+	(exchange_account_listener_construct):
+	* exchange-account-listener.h: Hide e-source when account is disabled. 
+	Modfiy e-source if account info is changed. 
+	If new addressbooks/calendars are added/modified in other clients, the
+	changes can be seen in Evolution after a disable->enable account. 
+
+2007-11-19  Srinivasa Ragavan  <sragavan@novell.com>
+
+	* exchange-account-listener.c: (add_addressbook_sources): Set the GAL
+	and GAL limit part of the e-source.
+
+2007-11-15  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-account-listener.c: (add_cal_esource),
+	(remove_cal_esource), (modify_esource), (add_calendar_sources),
+	(remove_calendar_sources): Code optimization, changed _JOURNAL to _MEMO
+
+2007-10-29  Srinivasa Ragavan  <sragavan@novell.com>
+
+	* exchange-account-listener.c:
+	(exchange_account_listener_get_folder_list): Get the folder list from
+	the global list and use it.
+
+2007-10-22  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-account-listener.c: (add_cal_esource),
+	(remove_cal_esource), (add_calendar_sources),
+	(remove_calendar_sources), (add_addressbook_sources),
+	(remove_addressbook_sources), (account_added), (account_removed),
+	(exchange_account_listener_construct): Add esources for calendar, tasks, 
+	memos, also remove esources when account is deleted. 
+	**Note: Modify esources is not yet completed.
+
+2007-10-22  Srinivasa Ragavan  <sragavan@novell.com>
+
+	* exchange-account-listener.c: (add_addressbook_sources),
+	(account_added), (exchange_account_listener_get_folder_list):
+	* exchange-mapi-account-setup.c: (create_profile): Hack it, so that
+	folders are fetched during account setup.
+
+2007-10-22  Sankar P  <psankar@novell.com>
+
+	* Makefile.am:
+	Changed eplug.in to eplug.xml
+	.eplug.xml is the EPlugin standard
+
+2007-10-22  Sankar P  <psankar@novell.com>
+
+	* Makefile.am:
+	* exchange-account-listener.c: (add_addressbook_sources),
+	(account_added), (exchange_account_listener_construct):
+	* exchange-mapi-account-setup.c: (create_profile):
+	Uses the new functions exposed from
+	eds/servers/mapi
+
+	* Remove obsolete files exchange-mapi-folder.[ch]
+
+2007-10-22  Srinivasa Ragavan  <sragavan@novell.com>
+
+	* Initial code drop for the Exchange MAPI plugin
