@@ -23,6 +23,7 @@ liborg_gnome_exchange_mapi_la_SOURCES = 		\
 	exchange-mapi-account-listener.h
 
 liborg_gnome_exchange_mapi_la_LIBADD = 			\
+	$(top_builddir)/src/libexchangemapi/libexchangemapi-1.0.la	\
 	$(EVOLUTION_CALENDAR_LIBS) \
 	$(EVOLUTION_ADDRESSBOOK_LIBS) \
 	$(EVOLUTION_PLUGIN_LIBS)	\

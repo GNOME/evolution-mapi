@@ -1,3 +1,8 @@
+2008-11-19  Johnny Jacob  <jjohnny@novell.com>
+
+	* Makefile.am (liborg_gnome_exchange_mapi_la_LIBADD): Fixes
+	undefined symbol.
+
 2008-11-13  Suman Manjunath  <msuman@novell.com>
 
 	* Makefile.am:
