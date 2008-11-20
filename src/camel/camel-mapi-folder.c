@@ -410,9 +410,8 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 		return;
 	}
 
-	if (((CamelMapiFolder *)folder)->type == MAPI_FAVOURITE_FOLDER){
+	if (((CamelMapiFolder *)folder)->type & CAMEL_MAPI_FOLDER_PUBLIC)
 		options |= MAPI_OPTIONS_USE_PFSTORE;
-	} 
 
 	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store, folder->full_name) ;
 	exchange_mapi_util_mapi_id_from_string (folder_id, &fid);
