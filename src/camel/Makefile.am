@@ -21,6 +21,7 @@ libcamelmapi_la_SOURCES = 			\
 noinst_HEADERS =         			\
 	camel-mapi-folder.h			\
 	camel-mapi-store.h			\
+	camel-mapi-store-summary.h         	\
 	camel-mapi-summary.h	         	\
 	camel-mapi-transport.h			\
 	camel-mapi-private.h			\
