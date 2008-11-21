@@ -4,7 +4,7 @@ INCLUDES =					\
 	-I$(top_srcdir)				\
 	$(EVOLUTION_DATA_SERVER_CFLAGS)		\
 	$(LIBEDATASERVER_CFLAGS)		\
-	$(EVOLUTION_CALENDAR_CFLAGS)		\
+	$(LIBECAL_CFLAGS)			\
 	$(LIBMAPI_CFLAGS)
 
 
@@ -32,7 +32,8 @@ libexchangemapi_1_0_la_SOURCES =		\
 
 libexchangemapi_1_0_la_LIBADD =			\
 	$(EVOLUTION_DATA_SERVER_LIBS)		\
-	$(EVOLUTION_CALENDAR_LIBS)		\
+	$(LIBEDATASERVER_LIBS)			\
+	$(LIBECAL_LIBS)				\
 	$(LIBMAPI_LIBS)
 
 libexchangemapi_1_0_la_LDFLAGS = $(NO_UNDEFINED)

@@ -10,6 +10,6 @@ privincludedir=@edataserver_privincludedir@
 Name: libexchangemapi
 Description: Client library for accessing Exchange with LibMAPI
 Version: @VERSION@
-Requires: evolution-data-server-@API_VERSION@ >= @EDS_REQUIRED@ evolution-plugin >= @EVO_REQUIRED@ libmapi 
+Requires: evolution-data-server-@API_VERSION@ >= @EDS_REQUIRED@ evolution-plugin >= @EVO_REQUIRED@ libmapi = @LIBMAPI_REQUIRED@
 Libs: -L${libdir} -lexchangemapi-1.0 -lmapi
 Cflags: -I${privincludedir}/mapi

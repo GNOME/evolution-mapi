@@ -6,6 +6,8 @@ AC_PREREQ(2.57)
 AC_INIT(evolution-mapi, 0.1, http://go-evolution.org/MAPIProvider, evolution-mapi)
 AC_CONFIG_SRCDIR(README)
 
+AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
+
 # Some requirements have versioned package names
 # XXX In the spirit of getting rid of versioned
 #     files, can we please drop these suffixes?
@@ -16,15 +18,28 @@ m4_define([eds_minimum_version], [2.24.0])
 m4_define([evo_minimum_version], [2.24.0])
 m4_define([libmapi_minimum_version], [0.8])
 
-AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
+AC_CONFIG_HEADER(config.h)
 
-AC_CONFIG_HEADER([config.h])
-AC_DEFINE(_GNU_SOURCE, 1, [Use GNU extensions])
+dnl ****************************
+dnl Initialize maintainer mode
+dnl ****************************
+AM_MAINTAINER_MODE
+
+AC_ISC_POSIX
 AC_PROG_CC
+AC_PROG_CPP
+AC_C_INLINE
+AC_STDC_HEADERS
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
 
-AC_PROG_INTLTOOL([0.35.5])
+AC_DEFINE(_GNU_SOURCE, 1, [Use GNU extensions])
 
-dnl I18N stuff
+dnl ************
+dnl i18n stuff
+dnl ************
+IT_PROG_INTLTOOL([0.35.5])
 AM_GLIB_GNU_GETTEXT
 
 GETTEXT_PACKAGE=evolution-mapi
@@ -34,7 +49,10 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [Package name for gettex
 localedir='$(prefix)/$(DATADIRNAME)/locale'
 AC_SUBST(localedir)
 
+dnl ****************************
 dnl Initialize libtool
+dnl ****************************
+AM_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
 PKG_PROG_PKG_CONFIG
@@ -61,13 +79,9 @@ dnl Check for LibMAPI
 dnl ****************************
 PKG_CHECK_MODULES(LIBMAPI, libmapi = libmapi_minimum_version)
 
-dnl ***********
-dnl GConf stuff
-dnl ***********
-PKG_CHECK_MODULES(GCONF2, gconf-2.0)
-AC_PATH_PROG(GCONFTOOL, gconftool-2, no)
-AM_GCONF_SOURCE_2
-
+dnl ****************************
+dnl Expose version information
+dnl ****************************
 API_VERSION=$EDS_PACKAGE
 AC_SUBST(API_VERSION)
 
@@ -77,87 +91,52 @@ AC_SUBST(EDS_REQUIRED)
 EVO_REQUIRED=evo_minimum_version
 AC_SUBST(EVO_REQUIRED)
 
-BASE_VERSION=`pkg-config --variable=execversion evolution-shell`
-AC_SUBST(BASE_VERSION)
+LIBMAPI_REQUIRED=libmapi_minimum_version
+AC_SUBST(LIBMAPI_REQUIRED)
 
-GETTEXT_PACKAGE=evolution
-AC_SUBST(GETTEXT_PACKAGE)
-AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Package Name for Gettext])
-
+dnl *******************************
 dnl Add evolution plugin rules here
+dnl *******************************
 EVO_PLUGIN_RULE=$srcdir/eplugin-rule.mk
 AC_SUBST_FILE(EVO_PLUGIN_RULE)
 
-EVOLUTION_PLUGIN="evolution-plugin"
-AC_SUBST(EVOLUTION_PLUGIN)
-
-EVOLUTION_CAMEL="evolution-camel"
-AC_SUBST(EVOLUTION_CAMEL)
-
-EVOLUTION_CALENDAR="evolution-calendar"
-AC_SUBST(EVOLUTION_CALENDAR)
-
-EVOLUTION_EBOOK="evolution-ebook"
-AC_SUBST(EVOLUTION_EBOOK)
-
-EVOLUTION_PLUGIN_INSTALL="evolution-plugin-install"
-AC_SUBST(EVOLUTION_PLUGIN_INSTALL)
-
-EVOLUTION_CAMEL_INSTALL="evolution-camel-install"
-AC_SUBST(EVOLUTION_CAMEL_INSTALL)
-
-EVOLUTION_CALENDAR_INSTALL="evolution-calendar-install"
-AC_SUBST(EVOLUTION_CALENDAR_INSTALL)
-
-EVOLUTION_EBOOK_INSTALL="evolution-ebook-install"
-AC_SUBST(EVOLUTION_EBOOK_INSTALL)
-
-EVOLUTION_PLUGIN_UNINSTALL="evolution-plugin-uninstall"
-AC_SUBST(EVOLUTION_PLUGIN_UNINSTALL)
-
-EVOLUTION_CAMEL_UNINSTALL="evolution-camel-uninstall"
-AC_SUBST(EVOLUTION_CAMEL_UNINSTALL)
-
-EVOLUTION_CALENDAR_UNINSTALL="evolution-calendar-uninstall"
-AC_SUBST(EVOLUTION_CALENDAR_UNINSTALL)
-
-EVOLUTION_EBOOK_UNINSTALL="evolution-ebook-uninstall"
-AC_SUBST(EVOLUTION_EBOOK_UNINSTALL)
-
+dnl *******************
+dnl Special directories
+dnl *******************
 plugindir=`$PKG_CONFIG --variable=plugindir evolution-plugin`
 AC_SUBST(plugindir)
 
-camel_providerdir=`$PKG_CONFIG --variable=camel_providerdir camel-provider-$EDS_PACKAGE`
-AC_SUBST(camel_providerdir)
-
 extensiondir=`$PKG_CONFIG --variable=extensiondir evolution-data-server-$EDS_PACKAGE`
-AC_SUBST(extensiondir)
+AC_SUBST(extensiondir) 
 
-libmapi_ldif_dir=`$PKG_CONFIG --variable=datadir libmapi`/setup
-AC_SUBST(libmapi_ldif_dir)
-
-eds_privdatadir=`$PKG_CONFIG --variable=privdatadir evolution-data-server-$EDS_PACKAGE`
-AC_SUBST(eds_privdatadir)
+camel_providerdir=`$PKG_CONFIG --variable=camel_providerdir camel-provider-$EDS_PACKAGE`
+AC_SUBST(camel_providerdir) 
 
 edataserver_privincludedir=`$PKG_CONFIG --variable=privincludedir libedataserver-$EDS_PACKAGE`
 AC_SUBST(edataserver_privincludedir)
 
-mapidatadir="$eds_privdatadir/mapi"
+libmapi_ldif_dir=`$PKG_CONFIG --variable=datadir libmapi`/setup
+AC_SUBST(libmapi_ldif_dir)
+
+mapidatadir=`$PKG_CONFIG --variable=privdatadir evolution-data-server-$EDS_PACKAGE`/mapi
 AC_SUBST(mapidatadir)
 
+dnl *************
+dnl Gtk Doc stuff
+dnl *************
+GTK_DOC_CHECK(1.9)
 
-dnl ***********************
-dnl CONFIG_FILES
-dnl ***********************
-
-AC_CONFIG_FILES([ po/Makefile.in
+dnl **************************
+dnl Makefiles, generated .pc's
+dnl **************************
+AC_OUTPUT([
 Makefile 
 src/Makefile
+src/account-setup-eplugin/Makefile
+src/addressbook/Makefile
+src/calendar/Makefile
+src/camel/Makefile
 src/libexchangemapi/Makefile
 src/libexchangemapi/libexchangemapi.pc
-src/calendar/Makefile
-src/addressbook/Makefile
-src/camel/Makefile
-src/account-setup-eplugin/Makefile
+po/Makefile.in
 ])
-AC_OUTPUT

@@ -1,11 +1,8 @@
 INCLUDES =					\
 	-DG_LOG_DOMAIN=\"libecalbackendmapi\"	\
 	-I$(top_srcdir)/src/calendar		\
-	-I$(top_builddir)/src/calendar		\
 	-I$(top_srcdir)/src/libexchangemapi	\
-	-I$(top_builddir)/src/libexchangemapi	\
 	$(LIBEBACKEND_CFLAGS)			\
-	$(EVOLUTION_CALENDAR_CFLAGS)		\
 	$(LIBECAL_CFLAGS)			\
 	$(LIBEDATACAL_CFLAGS)			\
 	$(LIBMAPI_CFLAGS)
@@ -21,7 +18,6 @@ libecalbackendmapi_la_SOURCES =			\
 libecalbackendmapi_la_LIBADD =			\
 	$(top_builddir)/src/libexchangemapi/libexchangemapi-1.0.la \
 	$(LIBEBACKEND_LIBS)			\
-	$(EVOLUTION_CALENDAR_LIBS)		\
 	$(LIBECAL_LIBS)				\
 	$(LIBEDATACAL_LIBS)			\
 	$(LIBMAPI_LIBS)

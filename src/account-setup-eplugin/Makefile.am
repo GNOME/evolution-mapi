@@ -3,10 +3,8 @@ INCLUDES = -I .						\
 	-DCONNECTOR_GLADEDIR=\""$(gladedir)"\" 		\
 	-DLIBMAPI_LDIF_DIR=\""$(libmapi_ldif_dir)"\"	\
 	-I$(top_srcdir)/src/libexchangemapi/		\
-	$(CAMEL_CFLAGS)					\
 	$(EVOLUTION_PLUGIN_CFLAGS)			\
-	$(EVOLUTION_CALENDAR_CFLAGS) 			\
-	$(EVOLUTION_ADDRESSBOOK_CFLAGS) 		\
+	$(CAMEL_CFLAGS)					\
 	$(LIBMAPI_CFLAGS)
 
 
@@ -24,8 +22,6 @@ liborg_gnome_exchange_mapi_la_SOURCES = 		\
 
 liborg_gnome_exchange_mapi_la_LIBADD = 			\
 	$(top_builddir)/src/libexchangemapi/libexchangemapi-1.0.la \
-	$(EVOLUTION_CALENDAR_LIBS) 			\
-	$(EVOLUTION_ADDRESSBOOK_LIBS) 			\
 	$(EVOLUTION_PLUGIN_LIBS)			\
 	$(CAMEL_LIBS) 					\
 	$(LIBMAPI_LIBS)
@@ -39,3 +35,4 @@ EXTRA_DIST = 						\
 BUILT_SOURCES = org-gnome-exchange-mapi.eplug	
 
 CLEANFILES = $(BUILT_SOURCES)
+

@@ -1,6 +1,6 @@
-src/account-setup-eplugin/exchange-account-listener.c
+src/account-setup-eplugin/exchange-mapi-account-listener.c
 src/account-setup-eplugin/exchange-mapi-account-setup.c
-src/backends/calendar/e-cal-backend-mapi.c
+src/calendar/e-cal-backend-mapi.c
 src/camel/camel-mapi-folder.c
 src/camel/camel-mapi-provider.c
 src/camel/camel-mapi-store.c
