@@ -993,9 +993,15 @@ remove_other_attendees (ECalComponent *comp, const gchar *att)
 }
 
 static gboolean
-fetch_server_data_cb (struct mapi_SPropValue_array *properties, const mapi_id_t fid, const mapi_id_t mid, 
-	GSList *streams, GSList *recipients, GSList *attachments, gpointer data) 
+fetch_server_data_cb (FetchItemsCallbackData *item_data, gpointer data) 
 {
+	struct mapi_SPropValue_array *properties = item_data->properties;
+	const mapi_id_t fid = item_data->fid;
+	const mapi_id_t mid = item_data->mid;
+	GSList *streams = item_data->streams;
+	GSList *recipients = item_data->recipients;
+	GSList *attachments = item_data->attachments;
+
 	icalcomponent_kind kind = ICAL_VEVENT_COMPONENT;
 	gchar *filename = g_build_filename (g_get_home_dir (), TEMP_ATTACH_STORE, NULL);
 	gchar *fileuri = g_filename_to_uri (filename, NULL, NULL);
@@ -1236,7 +1242,7 @@ check_server_for_object (struct mapi_SPropValue_array *properties, mapi_id_t *mi
 	g_slist_free(l);
 }
 
-char *
+gchar *
 exchange_mapi_cal_util_camel_helper (struct mapi_SPropValue_array *properties, 
 				   GSList *streams, GSList *recipients, GSList *attachments)
 {

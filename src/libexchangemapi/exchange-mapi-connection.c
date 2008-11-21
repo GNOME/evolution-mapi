@@ -1345,7 +1345,14 @@ exchange_mapi_connection_fetch_item (mapi_id_t fid, mapi_id_t mid,
 				exchange_mapi_util_read_generic_stream (&obj_message, properties_array.lpProps[z].ulPropTag, &stream_list);
 
 		mapi_SPropValue_array_named(&obj_message, &properties_array);
+	}
 
+	/* Release the objects so that the callback may use the store. */
+	mapi_object_release(&obj_message);
+	mapi_object_release(&obj_folder);
+	mapi_object_release(&obj_store);
+
+	if (retval == MAPI_E_SUCCESS) {
 		FetchItemsCallbackData *item_data = g_new0 (FetchItemsCallbackData, 1);
 		item_data->fid = fid;
 		item_data->mid = mid;
@@ -1366,9 +1373,11 @@ exchange_mapi_connection_fetch_item (mapi_id_t fid, mapi_id_t mid,
 	result = TRUE;
 
 cleanup:
-	mapi_object_release(&obj_message);
-	mapi_object_release(&obj_folder);
-	mapi_object_release(&obj_store);
+	if (!result) {
+		mapi_object_release(&obj_message);
+		mapi_object_release(&obj_folder);
+		mapi_object_release(&obj_store);
+	}
 	talloc_free (mem_ctx);
 	LOGNONE();
 	UNLOCK();

@@ -1,3 +1,13 @@
+2008-11-21  Suman Manjunath  <msuman@novell.com>
+
+	** Fixes for bug #560465 and bug #560764
+
+	* exchange-mapi-cal-utils.c (fetch_server_data_cb): Fix the callback 
+	signature.
+	* exchange-mapi-cal-utils.h:
+	* exchange-mapi-connection.c (exchange_mapi_connection_fetch_item):
+	Release the mapi_objects before the callback. 
+
 2008-11-19  Suman Manjunath  <msuman@novell.com>
 
 	* Makefile.am: Some cleanup. 

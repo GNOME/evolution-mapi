@@ -90,7 +90,7 @@ exchange_mapi_cal_util_build_props (struct SPropValue **value, struct SPropTagAr
 void
 exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const char *uid, struct SBinary *sb);
 
-char *
+gchar *
 exchange_mapi_cal_util_camel_helper (struct mapi_SPropValue_array *properties, 
 				   GSList *streams, GSList *recipients, GSList *attachments);
 
