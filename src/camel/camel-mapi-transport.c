@@ -77,9 +77,8 @@ void	set_store(CamelStore *);
 
 static void
 mapi_item_add_recipient (const char *recipients, OlMailRecipientType type, GSList **recipient_list);
-static int
+static mapi_id_t
 mapi_message_item_send (MapiItem *item, GSList *attachments, GSList *recipients);
-
 
 static void
 mapi_item_debug_dump (MapiItem *item)
@@ -255,7 +254,7 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 	const char *namep;
 	const char *addressp;
 	const char *content_type;		
-	gint st;
+	mapi_id_t st = 0;
 	ssize_t	content_size;
 	GSList *recipient_list = NULL;
 	GSList *attach_list = NULL;
@@ -293,7 +292,7 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 
 	if (CAMEL_IS_MULTIPART(multipart)) {
 		if (mapi_do_multipart(CAMEL_MULTIPART(multipart), item))
-			printf("camel message multi part error\n");
+			printf("camel message multi part error\n"); 
 	} else {
 		content_stream = (CamelStream *)camel_stream_mem_new();
 		dw = camel_medium_get_content_object (CAMEL_MEDIUM (message));
@@ -308,13 +307,13 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 	/* send */
 	st = mapi_message_item_send(item, attach_list, recipient_list);
 
-	if (st == -1) {
-		printf("[!] cannot send(%s)\n", item->header.to);
-		mapi_errstr("Cannot Send", GetLastError()); 
-		return (FALSE);
+	if (st == 0) {
+		/*Fixme : Set a better error message. Would be helful in troubleshooting. */
+		camel_exception_setv (ex, CAMEL_EXCEPTION_SERVICE_UNAVAILABLE,_("Could not send message."));
+		return FALSE;
 	}
 	
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -443,12 +442,16 @@ mapi_item_add_recipient (const char *recipients, OlMailRecipientType type, GSLis
 	*recipient_list = g_slist_append (*recipient_list, recipient);
 }
 
-static int
+/*CreateItem would return the MID of the new message or '0' if we fail.*/
+static mapi_id_t
 mapi_message_item_send (MapiItem *item, GSList *attachments, GSList *recipients)
 {
 	guint64 fid = 0;
+	mapi_id_t mid = 0;
 
-	exchange_mapi_create_item (olFolderOutbox, fid, NULL, NULL, mail_build_props, item, recipients, item->attachments, item->generic_streams, 0);
+	mid = exchange_mapi_create_item (olFolderOutbox, fid, NULL, NULL, 
+					    mail_build_props, item, recipients, 
+					    item->attachments, item->generic_streams, 0);
 
-	return 0;
+	return mid;
 }

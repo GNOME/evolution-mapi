@@ -1,3 +1,9 @@
+2008-11-21  Johnny Jacob  <jjohnny@novell.com>
+
+	* camel-mapi-transport.c (mapi_message_item_send): Pass on the error 
+	code to camel when CreateItem fails.
+	(mapi_send_to): Set exception when sending fails.
+
 2008-11-20  Johnny Jacob  <jjohnny@novell.com>
 
 	* camel-mapi-folder.c (mapi_sync): Use the right flag for deciding 
