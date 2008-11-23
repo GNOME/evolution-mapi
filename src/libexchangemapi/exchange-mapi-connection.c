@@ -497,9 +497,9 @@ exchange_mapi_util_delete_attachments (mapi_object_t *obj_message)
 		goto cleanup;
 	}
 
-	retval = GetRowCount(&obj_tb_attach, &attach_count);
+	retval = QueryPosition(&obj_tb_attach, NULL, &attach_count);
 	if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("GetRowCount", GetLastError());
+		mapi_errstr("QueryPosition", GetLastError());
 		goto cleanup;
 	}
 
@@ -631,9 +631,9 @@ exchange_mapi_util_get_attachments (mapi_object_t *obj_message, GSList **attach_
 		goto cleanup;
 	}
 
-	retval = GetRowCount(&obj_tb_attach, &attach_count);
+	retval = QueryPosition(&obj_tb_attach, NULL, &attach_count);
 	if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("GetRowCount", GetLastError());
+		mapi_errstr("QueryPosition", GetLastError());
 		goto cleanup;
 	}
 
@@ -763,7 +763,7 @@ set_recipient_properties (TALLOC_CTX *mem_ctx, struct SRow *aRow, ExchangeMAPIRe
 	uint32_t i;
 
 	if (is_external && recipient->in.ext_lpProps) {
-		struct SBinary *oneoff_eid;
+		struct Binary_r *oneoff_eid;
 		struct SPropValue sprop; 
 		const gchar *dn = NULL, *email = NULL; 
 
@@ -792,7 +792,7 @@ exchange_mapi_util_modify_recipients (TALLOC_CTX *mem_ctx, mapi_object_t *obj_me
 	enum MAPISTATUS 	retval;
 	struct SPropTagArray 	*SPropTagArray = NULL;
 	struct SRowSet 		*SRowSet = NULL;
-	struct FlagList 	*FlagList = NULL;
+	struct SPropTagArray 	*FlagList = NULL;
 	GSList 			*l;
 	const char 		**users = NULL;
 	uint32_t 		i, j, count = 0;
@@ -814,7 +814,6 @@ exchange_mapi_util_modify_recipients (TALLOC_CTX *mem_ctx, mapi_object_t *obj_me
 //					  PR_TRANSMITTABLE_DISPLAY_NAME);
 
 	SRowSet = talloc_zero(mem_ctx, struct SRowSet);
-	FlagList = talloc_zero(mem_ctx, struct FlagList);
 	count = g_slist_length (recipients);
 	users = g_new0 (const char *, count + 1);
 
@@ -824,38 +823,34 @@ exchange_mapi_util_modify_recipients (TALLOC_CTX *mem_ctx, mapi_object_t *obj_me
 	}
 
 	/* Attempt to resolve names from the server */
-	retval = ResolveNames (users, SPropTagArray, &SRowSet, &FlagList, 0);
+	retval = ResolveNames (global_mapi_session, users, SPropTagArray, &SRowSet, &FlagList, 0);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("ResolveNames", GetLastError());
 		goto cleanup;
 	}
 
-	g_assert (count == FlagList->cFlags);
+	g_assert (count == FlagList->cValues);
 
 	for (i = 0, l = recipients, j = 0; (i < count && l != NULL); ++i, l = l->next) {
 		ExchangeMAPIRecipient *recipient = (ExchangeMAPIRecipient *)(l->data);
 		uint32_t last;
 
-		switch (FlagList->ulFlags[i]) {
-		case MAPI_AMBIGUOUS:
-		/* We should never get an ambiguous resolution as we use the email-id for resolving. 
-		 * However, if we do still get an ambiguous entry, we can't handle it :-( */
+		if (FlagList->aulPropTag[i] == MAPI_AMBIGUOUS) {
+			/* We should never get an ambiguous resolution as we use the email-id for resolving. 
+			 * However, if we do still get an ambiguous entry, we can't handle it :-( */
 			g_warning ("\n%s:%d %s() - '%s' is ambiguous ", __FILE__, __LINE__, __PRETTY_FUNCTION__, recipient->email_id);
-			break;
-		case MAPI_UNRESOLVED:
-		/* This is currently a bug in libmapi that unresolved recipients are not added to the SRowSet. 
-		 * Julien knows about it and would fix it. */
+		} else if (FlagList->aulPropTag[i] == MAPI_UNRESOLVED) {
+			/* This is currently a bug in libmapi that unresolved recipients are not added to the SRowSet. 
+			 * Julien knows about it and would fix it. */
 			SRowSet->aRow = talloc_realloc(mem_ctx, SRowSet->aRow, struct SRow, SRowSet->cRows + 1);
 			last = SRowSet->cRows;
 			SRowSet->aRow[last].cValues = 0;
 			SRowSet->aRow[last].lpProps = talloc_zero(mem_ctx, struct SPropValue);
 			set_recipient_properties (mem_ctx, &SRowSet->aRow[last], recipient, TRUE);
 			SRowSet->cRows += 1;
-			break;
-		case MAPI_RESOLVED:
+		} else if (FlagList->aulPropTag[i] == MAPI_RESOLVED) {
 			set_recipient_properties (mem_ctx, &SRowSet->aRow[j], recipient, FALSE);
 			j += 1;
-			break;
 		}
 	}
 
@@ -903,7 +898,7 @@ exchange_mapi_util_check_restriction (mapi_id_t fid, struct mapi_SRestriction *r
 	mapi_object_init(&obj_table);
 
 	/* Open the message store */
-	retval = OpenMsgStore(&obj_store);
+	retval = OpenMsgStore(global_mapi_session, &obj_store);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore", GetLastError());
 		goto cleanup;
@@ -949,7 +944,7 @@ exchange_mapi_util_check_restriction (mapi_id_t fid, struct mapi_SRestriction *r
 
 	if (res) {
 		/* Applying any restriction that are set. */
-		retval = Restrict(&obj_table, res);
+		retval = Restrict(&obj_table, res, NULL);
 		if (retval != MAPI_E_SUCCESS) {
 			mapi_errstr("Restrict", GetLastError());
 			goto cleanup;
@@ -957,7 +952,7 @@ exchange_mapi_util_check_restriction (mapi_id_t fid, struct mapi_SRestriction *r
 	}
 
 	/* Number of items in the container */
-	retval = GetRowCount(&obj_table, &count);
+	retval = QueryPosition(&obj_table, NULL, &count);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("GetRowCount", GetLastError());
 		goto cleanup;
@@ -1018,7 +1013,8 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 	mapi_object_init(&obj_table);
 
 	/* Open the message store */
-	retval = ((options & MAPI_OPTIONS_USE_PFSTORE) ? OpenPublicFolder(&obj_store) : OpenMsgStore(&obj_store));
+	retval = ((options & MAPI_OPTIONS_USE_PFSTORE) ? 
+		  OpenPublicFolder(global_mapi_session, &obj_store) : OpenMsgStore(global_mapi_session, &obj_store));
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore / OpenPublicFolder", GetLastError());
 		goto cleanup;
@@ -1056,7 +1052,7 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 
 	if (res) {
 		/* Applying any restriction that are set. */
-		retval = Restrict(&obj_table, res);
+		retval = Restrict(&obj_table, res, NULL);
 		if (retval != MAPI_E_SUCCESS) {
 			mapi_errstr("Restrict", GetLastError());
 			goto cleanup;
@@ -1064,9 +1060,9 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 	}
 
 	/* Number of items in the container */
-	retval = GetRowCount(&obj_table, &count);
+	retval = QueryPosition(&obj_table, NULL, &count);
 	if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("GetRowCount", GetLastError());
+		mapi_errstr("QueryPosition", GetLastError());
 		goto cleanup;
 	}
 
@@ -1246,7 +1242,8 @@ exchange_mapi_connection_fetch_item (mapi_id_t fid, mapi_id_t mid,
 	mapi_object_init(&obj_message);
 
 	/* Open the message store */
-	retval = ((options & MAPI_OPTIONS_USE_PFSTORE) ? OpenPublicFolder(&obj_store) : OpenMsgStore(&obj_store));
+	retval = ((options & MAPI_OPTIONS_USE_PFSTORE) ? 
+		  OpenPublicFolder(global_mapi_session, &obj_store) : OpenMsgStore(global_mapi_session, &obj_store));
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore", GetLastError());
 		goto cleanup;
@@ -1406,7 +1403,7 @@ exchange_mapi_create_folder (uint32_t olFolder, mapi_id_t pfid, const char *name
 	mapi_object_init(&obj_top);
 	mapi_object_init(&obj_folder);
 
-	retval = OpenMsgStore(&obj_store);
+	retval = OpenMsgStore(global_mapi_session, &obj_store);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore", GetLastError());
 		goto cleanup;
@@ -1486,7 +1483,7 @@ exchange_mapi_empty_folder (mapi_id_t fid)
 	mapi_object_init(&obj_store);
 	mapi_object_init(&obj_folder);
 
-	retval = OpenMsgStore(&obj_store);
+	retval = OpenMsgStore(global_mapi_session, &obj_store);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore", GetLastError());
 		goto cleanup;
@@ -1543,7 +1540,7 @@ exchange_mapi_remove_folder (uint32_t olFolder, mapi_id_t fid)
 	mapi_object_init(&obj_top);
 	mapi_object_init(&obj_folder);
 
-	retval = OpenMsgStore(&obj_store);
+	retval = OpenMsgStore(global_mapi_session, &obj_store);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore", GetLastError());
 		goto cleanup;
@@ -1577,7 +1574,7 @@ exchange_mapi_remove_folder (uint32_t olFolder, mapi_id_t fid)
 	}
 
 	/* Call DeleteFolder on the folder to be removed */
-	retval = DeleteFolder(&obj_top, fid);
+	retval = DeleteFolder(&obj_top, fid, DEL_FOLDERS, NULL);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("DeleteFolder", GetLastError());
 		goto cleanup;
@@ -1617,7 +1614,7 @@ exchange_mapi_rename_folder (mapi_id_t fid, const char *new_name)
 	mapi_object_init(&obj_store);
 	mapi_object_init(&obj_folder);
 
-	retval = OpenMsgStore(&obj_store);
+	retval = OpenMsgStore(global_mapi_session, &obj_store);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore", GetLastError());
 		goto cleanup;
@@ -1677,7 +1674,7 @@ exchange_mapi_util_resolve_named_props (uint32_t olFolder, mapi_id_t fid,
 	SPropTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
 
 	/* Open the message store */
-	retval = OpenMsgStore(&obj_store);
+	retval = OpenMsgStore(global_mapi_session, &obj_store);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore", GetLastError());
 		goto cleanup;
@@ -1754,7 +1751,7 @@ exchange_mapi_util_resolve_named_prop (uint32_t olFolder, mapi_id_t fid, uint16_
 	SPropTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
 
 	/* Open the message store */
-	retval = OpenMsgStore(&obj_store);
+	retval = OpenMsgStore(global_mapi_session, &obj_store);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore", GetLastError());
 		goto cleanup;
@@ -1833,7 +1830,7 @@ exchange_mapi_util_create_named_prop (uint32_t olFolder, mapi_id_t fid,
 	nameid[0].kind.lpwstr.Name = named_prop_name;
 
 	/* Open the message store */
-	retval = OpenMsgStore(&obj_store);
+	retval = OpenMsgStore(global_mapi_session, &obj_store);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore", GetLastError());
 		goto cleanup;
@@ -1890,7 +1887,7 @@ exchange_mapi_get_default_folder_id (uint32_t olFolder)
 	mapi_object_init(&obj_store);
 
 	/* Open the message store */
-	retval = OpenMsgStore(&obj_store);
+	retval = OpenMsgStore(global_mapi_session, &obj_store);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore", GetLastError());
 		goto cleanup;
@@ -1943,7 +1940,7 @@ exchange_mapi_create_item (uint32_t olFolder, mapi_id_t fid,
 	SPropTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
 
 	/* Open the message store */
-	retval = OpenMsgStore(&obj_store);
+	retval = OpenMsgStore(global_mapi_session, &obj_store);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore", GetLastError());
 		goto cleanup;
@@ -2019,7 +2016,7 @@ exchange_mapi_create_item (uint32_t olFolder, mapi_id_t fid,
 	}
 
 	/* Finally, save all changes */
-	retval = SaveChangesMessage(&obj_folder, &obj_message);
+	retval = SaveChangesMessage(&obj_folder, &obj_message, KeepOpenReadWrite);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("SaveChangesMessage", GetLastError());
 		goto cleanup;
@@ -2080,7 +2077,7 @@ exchange_mapi_modify_item (uint32_t olFolder, mapi_id_t fid, mapi_id_t mid,
 	SPropTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
 
 	/* Open the message store */
-	retval = OpenMsgStore(&obj_store);
+	retval = OpenMsgStore(global_mapi_session, &obj_store);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore", GetLastError());
 		goto cleanup;
@@ -2156,7 +2153,7 @@ exchange_mapi_modify_item (uint32_t olFolder, mapi_id_t fid, mapi_id_t mid,
 	}
  
 	/* Finally, save all changes */
-	retval = SaveChangesMessage(&obj_folder, &obj_message);
+	retval = SaveChangesMessage(&obj_folder, &obj_message, KeepOpenReadWrite);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("SaveChangesMessage", GetLastError());
 		goto cleanup;
@@ -2211,7 +2208,8 @@ exchange_mapi_set_flags (uint32_t olFolder, mapi_id_t fid, GSList *mids, uint32_
 		id_messages[i] = *((mapi_id_t *)tmp->data);
 
 	/* Open the message store */
-	retval = ((options & MAPI_OPTIONS_USE_PFSTORE) ? OpenPublicFolder(&obj_store) : OpenMsgStore(&obj_store)) ;
+	retval = ((options & MAPI_OPTIONS_USE_PFSTORE) ? 
+		  OpenPublicFolder(global_mapi_session, &obj_store) : OpenMsgStore(global_mapi_session, &obj_store)) ;
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore / OpenPublicFolder", GetLastError());
 		goto cleanup;
@@ -2263,7 +2261,7 @@ mapi_move_items (mapi_id_t src_fid, mapi_id_t dest_fid, GSList *mid_list, gboole
 	for (l = mid_list; l != NULL; l = g_slist_next (l))
 		mapi_id_array_add_id (&msg_id_array, *((mapi_id_t *)l->data));
 
-	retval = OpenMsgStore(&obj_store);
+	retval = OpenMsgStore(global_mapi_session, &obj_store);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore", GetLastError());
 		goto cleanup;
@@ -2361,7 +2359,7 @@ exchange_mapi_remove_items (uint32_t olFolder, mapi_id_t fid, GSList *mids)
 	}
 
 	/* Open the message store */
-	retval = OpenMsgStore(&obj_store);
+	retval = OpenMsgStore(global_mapi_session, &obj_store);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore", GetLastError());
 		goto cleanup;
@@ -2496,7 +2494,7 @@ set_default_folders (mapi_object_t *obj_store, GSList **mapi_folders)
 {
 	GSList *folder_list = *mapi_folders;
 	
-	while (folder_list = g_slist_next (folder_list)) {
+	while ((folder_list = g_slist_next (folder_list))) {
 		ExchangeMAPIFolder *folder = NULL;
 		guint32 default_type = 0;
 		folder = folder_list->data;
@@ -2511,14 +2509,14 @@ static void
 set_owner_name (gpointer data, gpointer user_data)
 {
 	ExchangeMAPIFolder *folder = (ExchangeMAPIFolder *)(data);
-	folder->owner_name = (const gchar *)(user_data);
+	folder->owner_name = (gchar *)(user_data);
 }
 
 static void 
 set_user_name (gpointer data, gpointer user_data)
 {
 	ExchangeMAPIFolder *folder = (ExchangeMAPIFolder *)(data);
-	folder->user_name = (const gchar *)(user_data);
+	folder->user_name = (gchar *)(user_data);
 }
 
 gboolean 
@@ -2547,7 +2545,7 @@ exchange_mapi_get_folders_list (GSList **mapi_folders)
 	mapi_object_init(&obj_store);
 
 	/* Open the message store */
-	retval = OpenMsgStore(&obj_store);
+	retval = OpenMsgStore(global_mapi_session, &obj_store);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenMsgStore", GetLastError());
 		goto cleanup;
@@ -2633,7 +2631,7 @@ exchange_mapi_get_pf_folders_list (GSList **mapi_folders)
 	mapi_object_init(&obj_store);
 
 	/* Open the PF message store */
-	retval = OpenPublicFolder(&obj_store);
+	retval = OpenPublicFolder(global_mapi_session, &obj_store);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("OpenPublicFolder", GetLastError());
 		goto cleanup;
@@ -2667,3 +2665,48 @@ cleanup:
 	return result;
 }
 
+
+/**
+   This function has temporarily been moved here for convenient
+   purposes. This is the only routine outside exchange-mapi-connection
+   using libmapi calls whih require to have a pointer on MAPI session.
+
+   The function will be moved back to its original location when the
+   session context is fixed.
+ */
+const gchar *
+exchange_mapi_util_ex_to_smtp (const gchar *ex_address)
+{
+	enum MAPISTATUS 	retval;
+	TALLOC_CTX 		*mem_ctx;
+	struct SPropTagArray	*SPropTagArray;
+	struct SRowSet 		*SRowSet = NULL;
+	struct SPropTagArray   	*flaglist = NULL;
+	const gchar 		*str_array[2];
+	const gchar 		*smtp_addr = NULL;
+
+	g_return_val_if_fail (ex_address != NULL, NULL);
+
+	str_array[0] = ex_address;
+	str_array[1] = NULL;
+
+	mem_ctx = talloc_init("ExchangeMAPI_EXtoSMTP");
+
+	SPropTagArray = set_SPropTagArray(mem_ctx, 0x2,
+					  PR_SMTP_ADDRESS,
+					  PR_SMTP_ADDRESS_UNICODE);
+
+	retval = ResolveNames(global_mapi_session, (const char **)str_array, SPropTagArray, &SRowSet, &flaglist, 0);
+	if (retval != MAPI_E_SUCCESS)
+		retval = ResolveNames(global_mapi_session, (const char **)str_array, SPropTagArray, &SRowSet, &flaglist, MAPI_UNICODE);
+
+	if (retval == MAPI_E_SUCCESS && SRowSet && SRowSet->cRows == 1) {
+		smtp_addr = (const char *) find_SPropValue_data(SRowSet->aRow, PR_SMTP_ADDRESS);
+		if (!smtp_addr)
+			smtp_addr = (const char *) find_SPropValue_data(SRowSet->aRow, PR_SMTP_ADDRESS_UNICODE);
+	}
+
+	talloc_free (mem_ctx);
+
+	return smtp_addr;
+}

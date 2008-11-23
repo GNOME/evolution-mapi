@@ -57,8 +57,8 @@ struct cbdata {
 	MAPIMeetingOptions meeting_type;
 	uint32_t appt_id;
 	uint32_t appt_seq;
-	struct SBinary *globalid;
-	struct SBinary *cleanglobalid;
+	const struct Binary_r *globalid;
+	const struct Binary_r *cleanglobalid;
 
 	uint32_t msgflags;
 	OlResponseStatus resp; 
@@ -88,7 +88,7 @@ int
 exchange_mapi_cal_util_build_props (struct SPropValue **value, struct SPropTagArray *proptag_array, gpointer data);
 
 void
-exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const char *uid, struct SBinary *sb);
+exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const char *uid, struct Binary_r *sb);
 
 gchar *
 exchange_mapi_cal_util_camel_helper (struct mapi_SPropValue_array *properties, 

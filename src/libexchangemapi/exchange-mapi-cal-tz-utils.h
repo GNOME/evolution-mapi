@@ -46,7 +46,7 @@ void
 exchange_mapi_cal_tz_util_dump (void);
 
 void
-exchange_mapi_cal_util_mapi_tz_to_bin (const char *mapi_tzid, struct SBinary *sb);
+exchange_mapi_cal_util_mapi_tz_to_bin (const char *mapi_tzid, struct Binary_r *sb);
 
 gchar *
 exchange_mapi_cal_util_bin_to_mapi_tz (GByteArray *ba);

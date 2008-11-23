@@ -289,42 +289,6 @@ exchange_mapi_util_free_stream_list (GSList **stream_list)
 	l = NULL;
 }
 
-const gchar *
-exchange_mapi_util_ex_to_smtp (const gchar *ex_address)
-{
-	enum MAPISTATUS 	retval;
-	TALLOC_CTX 		*mem_ctx;
-	struct SPropTagArray	*SPropTagArray;
-	struct SRowSet 		*SRowSet = NULL;
-	struct FlagList		*flaglist = NULL;
-	const gchar 		*str_array[2];
-	const gchar 		*smtp_addr = NULL;
-
-	g_return_val_if_fail (ex_address != NULL, NULL);
-
-	str_array[0] = ex_address;
-	str_array[1] = NULL;
-
-	mem_ctx = talloc_init("ExchangeMAPI_EXtoSMTP");
-
-	SPropTagArray = set_SPropTagArray(mem_ctx, 0x2,
-					  PR_SMTP_ADDRESS,
-					  PR_SMTP_ADDRESS_UNICODE);
-
-	retval = ResolveNames((const char **)str_array, SPropTagArray, &SRowSet, &flaglist, 0);
-	if (retval != MAPI_E_SUCCESS)
-		retval = ResolveNames((const char **)str_array, SPropTagArray, &SRowSet, &flaglist, MAPI_UNICODE);
-
-	if (retval == MAPI_E_SUCCESS && SRowSet && SRowSet->cRows == 1) {
-		smtp_addr = (const char *) find_SPropValue_data(SRowSet->aRow, PR_SMTP_ADDRESS);
-		if (!smtp_addr)
-			smtp_addr = (const char *) find_SPropValue_data(SRowSet->aRow, PR_SMTP_ADDRESS_UNICODE);
-	}
-
-	talloc_free (mem_ctx);
-
-	return smtp_addr;
-}
 
 void
 exchange_mapi_debug_property_dump (struct mapi_SPropValue_array *properties)
@@ -355,7 +319,7 @@ exchange_mapi_debug_property_dump (struct mapi_SPropValue_array *properties)
 				g_print (" (double) -  %lf", (double)lpProp->value.dbl);
 				break;
 			case PT_I8:
-				g_print (" (int) - 0x%016lX", lpProp->value.d);
+				g_print (" (int) - 0x%016llX", lpProp->value.d);
 				break;
 			case PT_SYSTIME: {
 					struct timeval t;
@@ -396,7 +360,7 @@ exchange_mapi_debug_property_dump (struct mapi_SPropValue_array *properties)
 /* Attention: Devs at work ;-) */
 
 static void 
-exchange_mapi_util_bin_append_uint16 (TALLOC_CTX *mem_ctx, struct SBinary *bin, const uint16_t val)
+exchange_mapi_util_bin_append_uint16 (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const uint16_t val)
 {
 	uint8_t *ptr = NULL;
 
@@ -410,7 +374,7 @@ exchange_mapi_util_bin_append_uint16 (TALLOC_CTX *mem_ctx, struct SBinary *bin, 
 }
 
 static void 
-exchange_mapi_util_bin_append_uint32 (TALLOC_CTX *mem_ctx, struct SBinary *bin, const uint32_t val)
+exchange_mapi_util_bin_append_uint32 (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const uint32_t val)
 {
 	uint8_t *ptr = NULL;
 
@@ -426,7 +390,7 @@ exchange_mapi_util_bin_append_uint32 (TALLOC_CTX *mem_ctx, struct SBinary *bin, 
 }
 
 static void 
-exchange_mapi_util_bin_append_string (TALLOC_CTX *mem_ctx, struct SBinary *bin, const char *val)
+exchange_mapi_util_bin_append_string (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const char *val)
 {
 	size_t len = strlen (val);
 	char *ptr = NULL;
@@ -440,13 +404,13 @@ exchange_mapi_util_bin_append_string (TALLOC_CTX *mem_ctx, struct SBinary *bin, 
 }
 
 static void 
-exchange_mapi_util_bin_append_unicode (TALLOC_CTX *mem_ctx, struct SBinary *bin, const char *val)
+exchange_mapi_util_bin_append_unicode (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const char *val)
 {
 	/* WRITE ME */
 }
 
 static void 
-exchange_mapi_util_bin_append_val (TALLOC_CTX *mem_ctx, struct SBinary *bin, const uint8_t *val, size_t len)
+exchange_mapi_util_bin_append_val (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const uint8_t *val, size_t len)
 {
 	uint8_t *ptr = NULL;
 
@@ -480,12 +444,12 @@ static const uint8_t MAPI_ONE_OFF_UID[] = {
  *
  * Return value: the recipient ENTRYID
  **/
-struct SBinary *
+struct Binary_r *
 exchange_mapi_util_entryid_generate_oneoff (TALLOC_CTX *mem_ctx, const char *display_name, const char *email, gboolean unicode)
 {
-	struct SBinary *entryid;
+	struct Binary_r *entryid;
 
-	entryid = talloc_zero (mem_ctx, struct SBinary);
+	entryid = talloc_zero (mem_ctx, struct Binary_r);
 
 	exchange_mapi_util_bin_append_uint32 (mem_ctx, entryid, 0);
 	exchange_mapi_util_bin_append_val (mem_ctx, entryid, MAPI_ONE_OFF_UID, sizeof(MAPI_ONE_OFF_UID));
@@ -523,12 +487,12 @@ static const uint8_t MAPI_LOCAL_UID[] = {
  *
  * Return value: the recipient ENTRYID
  **/
-struct SBinary *
+struct Binary_r *
 exchange_mapi_util_entryid_generate_local (TALLOC_CTX *mem_ctx, const char *exchange_dn)
 {
-	struct SBinary *entryid;
+	struct Binary_r *entryid;
 
-	entryid = talloc_zero (mem_ctx, struct SBinary);
+	entryid = talloc_zero (mem_ctx, struct Binary_r);
 
 	exchange_mapi_util_bin_append_uint32 (mem_ctx, entryid, 0);
 	exchange_mapi_util_bin_append_val (mem_ctx, entryid, MAPI_LOCAL_UID, sizeof(MAPI_LOCAL_UID));

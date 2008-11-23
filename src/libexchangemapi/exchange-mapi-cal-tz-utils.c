@@ -433,7 +433,7 @@ TZDEFINITION* BinToTZDEFINITION(ULONG cbDef, LPBYTE lpbDef)
 #define TZ_BIN_VERSION_MINOR  0x01 
 
 void
-exchange_mapi_cal_util_mapi_tz_to_bin (const char *mapi_tzid, struct SBinary *sb)
+exchange_mapi_cal_util_mapi_tz_to_bin (const char *mapi_tzid, struct Binary_r *sb)
 {
 	GByteArray *ba;
 	guint8 flag8;
@@ -446,31 +446,31 @@ exchange_mapi_cal_util_mapi_tz_to_bin (const char *mapi_tzid, struct SBinary *sb
 
 	/* UTF-8 length of the keyname */
 	flag16 = g_utf8_strlen (mapi_tzid, -1);
-	ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 	/* Keyname */
 	buf = g_utf8_to_utf16 (mapi_tzid, flag16, NULL, &items_written, NULL);
-	ba = g_byte_array_append (ba, buf, (sizeof (gunichar2) * items_written));
+	ba = g_byte_array_append (ba, (const guint8 *)buf, (sizeof (gunichar2) * items_written));
 	g_free (buf);
 
 	/* number of rules *//* FIXME: Need to support rules */
 	flag16 = 0x0000;
-	ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 	/* wFlags: we know only keyname based names */
 	flag16 = TZDEFINITION_FLAG_VALID_KEYNAME;
-	ba = g_byte_array_prepend (ba, &flag16, sizeof (guint16));
+	ba = g_byte_array_prepend (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 	/* Length in bytes until rules info */
 	flag16 = (guint16) (ba->len);
-	ba = g_byte_array_prepend (ba, &flag16, sizeof (guint16));
+	ba = g_byte_array_prepend (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 	/* Minor version */
 	flag8 = TZ_BIN_VERSION_MINOR;
-	ba = g_byte_array_prepend (ba, &flag8, sizeof (guint8));
+	ba = g_byte_array_prepend (ba, (const guint8 *)&flag8, sizeof (guint8));
 
 	/* Major version */
 	flag8 = TZ_BIN_VERSION_MAJOR;
-	ba = g_byte_array_prepend (ba, &flag8, sizeof (guint8));
+	ba = g_byte_array_prepend (ba, (const guint8 *)&flag8, sizeof (guint8));
 
 	/* Rules may now be appended here */
 

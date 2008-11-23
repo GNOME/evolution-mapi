@@ -235,7 +235,7 @@ exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp)
 	guint32 flag32;
 	guint8 *ptr = ba->data;
 	gint i;
-	GSList *exdate_list = NULL, *modified_list = NULL; 
+	GSList *exdate_list = NULL;
 	gboolean repeats_until_date = FALSE; 
 
 	icalrecurrencetype_clear (&rt);
@@ -830,63 +830,63 @@ exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps
 
 	/* Reader Version */
 	flag16 = READER_VERSION;
-	ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 	/* Writer Version */
 	flag16 = WRITER_VERSION;
-	ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 	if (rt->freq == ICAL_DAILY_RECURRENCE) {
 		flag16 = RecurFrequency_Daily;
-		ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 		/* Pattern Type - it would be PatternType_Day since we have only "Daily every N days" 
 		 * The other type would be parsed as a weekly recurrence. 
 		 */
 		flag16 = PatternType_Day;
-		ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 		/* Calendar Type */
 		flag16 = CAL_DEFAULT; 
-		ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 		/* FirstDateTime */
 		flag32 = compute_rdaily_firstdatetime (comp, (rt->interval * (60 * 24)));
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		/* INTERVAL */
 		flag32 = (rt->interval * (60 * 24)); 
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		/* This would be 0 for the stuff we handle */
 		flag32 = 0x0;
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		/* No PatternTypeSpecific for PatternType_Day */
 
 	} else if (rt->freq == ICAL_WEEKLY_RECURRENCE) {
 		flag16 = RecurFrequency_Weekly;
-		ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 		/* Pattern Type - it would be PatternType_Week since we don't support any other type. */
 		flag16 = PatternType_Week;
-		ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 		/* Calendar Type */
 		flag16 = CAL_DEFAULT; 
-		ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 		/* FirstDateTime */
 		flag32 = compute_rweekly_firstdatetime (comp, rt->week_start, (rt->interval * (60 * 24 * 7)));
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		/* INTERVAL */
 		flag32 = rt->interval; 
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		/* This would be 0 for the stuff we handle */
 		flag32 = 0x0;
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		/* BITMASK */
 		for (flag32 = 0x0, i = 0; i < ICAL_BY_DAY_SIZE; ++i) {
@@ -907,13 +907,13 @@ exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps
 			else 
 				break; 
 		}
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 	} else if (rt->freq == ICAL_MONTHLY_RECURRENCE) {
 		guint16 pattern = 0x0; guint32 mask = 0x0, flag = 0x0; 
 
 		flag16 = RecurFrequency_Monthly;
-		ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 		if (rt->by_month_day[0] >= 1 && rt->by_month_day[0] <= 31) {
 			pattern = PatternType_Month;
@@ -930,36 +930,36 @@ exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps
 
 		/* Pattern Type */
 		flag16 = pattern;
-		ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 		/* Calendar Type */
 		flag16 = CAL_DEFAULT; 
-		ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 		/* FirstDateTime */
 		flag32 = compute_rmonthly_firstdatetime (comp, rt->interval);
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		/* INTERVAL */
 		flag32 = rt->interval; 
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		/* This would be 0 for the stuff we handle */
 		flag32 = 0x0;
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		if (pattern == PatternType_Month) {
 			flag32 = flag;
-			ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+			ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 			if (!(flag))
 				g_warning ("Possibly setting incorrect values in the stream. "); 
 		} else if (pattern == PatternType_MonthNth) {
 			flag32 = mask;
-			ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+			ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 			flag32 = flag;
-			ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+			ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 			if (!(flag && mask))
 				g_warning ("Possibly setting incorrect values in the stream. "); 
@@ -968,27 +968,27 @@ exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps
 
 	} else if (rt->freq == ICAL_YEARLY_RECURRENCE) {
 		flag16 = RecurFrequency_Yearly;
-		ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 		/* Pattern Type - it would be PatternType_Month since we don't support any other type. */
 		flag16 = PatternType_Month;
-		ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 		/* Calendar Type */
 		flag16 = CAL_DEFAULT; 
-		ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 		/* FirstDateTime - uses the same function as monthly recurrence */
 		flag32 = compute_rmonthly_firstdatetime (comp, 0xC);
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		/* INTERVAL - should be 12 for yearly recurrence */
 		flag32 = 0xC; 
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		/* This would be 0 for the stuff we handle */
 		flag32 = 0x0;
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		/* MONTH_DAY */
 		{
@@ -997,44 +997,44 @@ exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps
 			flag32 = dtstart.value->day; 
 			e_cal_component_free_datetime (&dtstart); 
 		}
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 	} 
 
 	/* End Type followed by Occurence count */
 	if (!icaltime_is_null_time (rt->until)) {
 		flag32 = END_AFTER_DATE;
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		flag32 = calculate_no_of_occurrences (comp, rt); 
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		end_type = END_AFTER_DATE;
 	} else if (rt->count) {
 		flag32 = END_AFTER_N_OCCURRENCES;
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		flag32 = rt->count;
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		end_type = END_AFTER_N_OCCURRENCES;
 	} else {
 		flag32 = END_NEVER_END;
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		flag32 = 0x0;
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 		end_type = END_NEVER_END;
 	}
 
 	/* FirstDOW */
 	flag32 = get_mapi_weekstart (rt->week_start); 
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 	/* DeletedInstances */
 	flag32 = g_slist_length (exdate_list);
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 	if (flag32) {
 		GSList *l; 
 		guint32 *sorted_list = g_new0(guint32, flag32);
@@ -1048,7 +1048,7 @@ exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps
 		g_qsort_with_data (sorted_list, flag32, sizeof (guint32), compare_guint32, NULL); 
 
 		for (i = 0; i < flag32; ++i)
-			ba = g_byte_array_append (ba, &(sorted_list[i]), sizeof (guint32));
+			ba = g_byte_array_append (ba, (const guint8 *)&(sorted_list[i]), sizeof (guint32));
 
 		g_free (sorted_list);
 	}
@@ -1056,13 +1056,13 @@ exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps
 	/* FIXME: Add support for modified instances */
 	/* ModifiedInstanceCount */
 	flag32 = 0x0;
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 	if (flag32) {
 	}
 
 	/* StartDate */
 	flag32 = compute_startdate (comp); 
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 	/* EndDate */
 	{
@@ -1091,15 +1091,15 @@ exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps
 		} else 
 			flag32 = 0x0; 
 	}
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 	/* Reader Version 2 */
 	flag32 = READER_VERSION2;
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 	/* Writer Version 2 */
 	flag32 = WRITER_VERSION2;
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 	/* StartTimeOffset */
 	{
@@ -1108,7 +1108,7 @@ exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps
 		flag32 = (dtstart.value->hour * 60) + dtstart.value->minute; 
 		e_cal_component_free_datetime (&dtstart); 
 	}
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 	/* EndTimeOffset */
 	{
@@ -1117,24 +1117,24 @@ exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps
 		flag32 = (dtend.value->hour * 60) + dtend.value->minute; 
 		e_cal_component_free_datetime (&dtend); 
 	}
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 	/* FIXME: Add support for modified instances */
 	/* ModifiedExceptionCount */
 	flag16 = 0x0; 
-	ba = g_byte_array_append (ba, &flag16, sizeof (guint16));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 	/* FIXME: Add the ExceptionInfo here */
 
 	/* Reserved Block 1 Size */
 	flag32 = 0x0;
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 	/* FIXME: Add the ExtendedExceptionInfo here */
 
 	/* Reserved Block 2 Size */
 	flag32 = 0x0;
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 cleanup: 
 	e_cal_component_free_exdate_list (exdate_list);

@@ -1225,8 +1225,8 @@ capture_req_props (FetchItemsCallbackData *item_data, gpointer data)
 	ui32 = (const uint32_t *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_LONG, 0x8201));
 	if (ui32)
 		cbdata->appt_seq = *ui32;
-	cbdata->cleanglobalid = (const struct SBinary *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0023));
-	cbdata->globalid = (const struct SBinary *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0003));
+	cbdata->cleanglobalid = (const struct Binary_r *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0023));
+	cbdata->globalid = (const struct Binary_r *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0003));
 	cbdata->username = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME);
 	cbdata->useridtype = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE);
 	cbdata->userid = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS);
@@ -1245,7 +1245,7 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cbdata *cb
 	mapi_id_t mid;
 	struct mapi_SRestriction res;
 	struct SPropValue sprop;
-	struct SBinary sb;
+	struct Binary_r sb;
 	uint32_t proptag = 0x0;
 	struct SPropTagArray *array;
 
@@ -1293,7 +1293,7 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, char 
 	GSList *attachments = NULL;
 	GSList *streams = NULL;
 	struct cbdata cbdata;
-	struct SBinary globalid;
+	struct Binary_r globalid;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;

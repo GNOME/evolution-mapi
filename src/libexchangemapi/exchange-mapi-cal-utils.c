@@ -538,7 +538,7 @@ static const uint8_t GID_START_SEQ[] = {
 };
 
 void
-exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const char *uid, struct SBinary *sb)
+exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const char *uid, struct Binary_r *sb)
 {
 	GByteArray *ba;
 	guint32 flag32;
@@ -553,20 +553,20 @@ exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const char *u
 	/* FIXME for exceptions */
 	if (is_clean || TRUE) {
 		flag32 = 0;
-		ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 	}
 
 	/* creation time - may be all 0's  */
 	flag32 = 0;
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 	flag32 = 0;
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 	/* RESERVED - should be all 0's  */
 	flag32 = 0;
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 	flag32 = 0;
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 
 	/* FIXME: cleanup the UID first */
 
@@ -577,9 +577,9 @@ exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const char *u
 	flag32 = len;
 
 	/* Size in bytes of the following data */
-	ba = g_byte_array_append (ba, &flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
 	/* Data */
-	ba = g_byte_array_append (ba, buf, flag32);
+	ba = g_byte_array_append (ba, (const guint8 *)buf, flag32);
 	g_free (buf);
 
 	sb->lpb = ba->data;
@@ -770,7 +770,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (icalcomponent_kind kind, const gchar 
 		}
 
 		if (get_mapi_SPropValue_array_date_timeval (&t, properties, PROP_TAG(PT_SYSTIME, 0x820D)) == MAPI_E_SUCCESS) {
-			icaltimezone *zone = dtstart_tz ? icaltimezone_get_builtin_timezone_from_tzid (dtstart_tz) : default_zone;
+			icaltimezone *zone = dtstart_tz ? icaltimezone_get_builtin_timezone_from_tzid (dtstart_tz) : (icaltimezone *)default_zone;
 			prop = icalproperty_new_dtstart (icaltime_from_timet_with_zone (t.tv_sec, (b && *b), zone));
 			icalproperty_add_parameter (prop, icalparameter_new_tzid(dtstart_tz));
 			icalcomponent_add_property (ical_comp, prop);
@@ -784,7 +784,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (icalcomponent_kind kind, const gchar 
 		}
 
 		if (get_mapi_SPropValue_array_date_timeval (&t, properties, PROP_TAG(PT_SYSTIME, 0x820E)) == MAPI_E_SUCCESS) {
-			icaltimezone *zone = dtend_tz ? icaltimezone_get_builtin_timezone_from_tzid (dtend_tz) : default_zone;
+			icaltimezone *zone = dtend_tz ? icaltimezone_get_builtin_timezone_from_tzid (dtend_tz) : (icaltimezone *)default_zone;
 			prop = icalproperty_new_dtend (icaltime_from_timet_with_zone (t.tv_sec, (b && *b), zone));
 			icalproperty_add_parameter (prop, icalparameter_new_tzid(dtend_tz));
 			icalcomponent_add_property (ical_comp, prop);
@@ -1187,8 +1187,8 @@ update_server_object (struct mapi_SPropValue_array *properties, GSList *attachme
 		cbdata.resp = olResponseNone;
 		cbdata.appt_seq = (*(const uint32_t *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_LONG, 0x8201)));
 		cbdata.appt_id = (*(const uint32_t *)find_mapi_SPropValue_data(properties, PR_OWNER_APPT_ID));
-		cbdata.globalid = (const struct SBinary *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0003));
-		cbdata.cleanglobalid = (const struct SBinary *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0023));
+		cbdata.globalid = (const struct Binary_r *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0003));
+		cbdata.cleanglobalid = (const struct Binary_r *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0023));
 
 		exchange_mapi_cal_util_fetch_recipients (comp, &myrecipients);
 		myattachments = attachments;
@@ -1604,8 +1604,8 @@ exchange_mapi_cal_util_build_props (struct SPropValue **value, struct SPropTagAr
 	dtstart_tzid = icaltime_get_tzid (dtstart);
 	dtend_tzid = icaltime_get_tzid (dtend);
 
-	utc_dtstart = icaltime_convert_to_zone (dtstart, utc_zone);
-	utc_dtend = icaltime_convert_to_zone (dtend, utc_zone);
+	utc_dtstart = icaltime_convert_to_zone (dtstart, (icaltimezone *)utc_zone);
+	utc_dtend = icaltime_convert_to_zone (dtend, (icaltimezone *)utc_zone);
 
 	text = icalcomponent_get_summary (ical_comp);
 	if (!(text && *text)) 
@@ -1732,7 +1732,7 @@ exchange_mapi_cal_util_build_props (struct SPropValue **value, struct SPropTagAr
 
 	if (kind == ICAL_VEVENT_COMPONENT) {
 		const char *mapi_tzid;
-		struct SBinary start_tz, end_tz; 
+		struct Binary_r start_tz, end_tz; 
 
 		set_SPropValue_proptag(&props[i++], proptag_array->aulPropTag[I_MEET_APPTMSGCLASS], (const void *) IPM_APPOINTMENT);
 
