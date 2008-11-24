@@ -1,3 +1,75 @@
+2008-11-24  Suman Manjunath  <msuman@novell.com>
+
+	** Fix for bug #561640
+
+	* exchange-mapi-connection.c (exchange_mapi_util_set_attachments):
+	Send the right flags to SaveChangesAttachment()
+
+2008-11-24  Julien Kerihuel  <j.kerihuel@openchange.org>
+
+	Fix recipient related functions: sending emails to 
+	EX or SMTP users work.
+
+	FIXME: The SetRecipientType function only uses 
+	MAPI_TO at the moment (hardcoded).
+	Can someone have a look and fix this call so we use 
+	the correct recipient class instead?
+	(MAPI_TO, MAPI_CC or MAPI_BCC).
+
+	* exchange-mapi-connection.c (set_recipient_properties),
+	(exchange_mapi_util_modify_recipients):
+
+2008-11-24  Julien Kerihuel  <j.kerihuel@openchange.org>
+
+	- This commit makes evolution-mapi work with libmapi-0.8 
+	  latest trunk revision
+	- exchange_mapi_util_ex_to_smtp temporarily moved to 
+	  exchange-mapi-connection.c to use global_mapi_session
+	- various g_byte_array_append cast warnings fixed
+
+	Note: the current commit breaks the "set recipients" related 
+	routines and will be fixed in a further commit.
+
+	* exchange-mapi-cal-recur-utils.c
+	(exchange_mapi_cal_util_bin_to_rrule),
+	(exchange_mapi_cal_util_rrule_to_bin):
+	* exchange-mapi-cal-tz-utils.c
+	(exchange_mapi_cal_util_mapi_tz_to_bin):
+	* exchange-mapi-cal-tz-utils.h:
+	* exchange-mapi-cal-utils.c
+	(exchange_mapi_cal_util_generate_globalobjectid),
+	(exchange_mapi_cal_util_mapi_props_to_comp),
+	(update_server_object), (exchange_mapi_cal_util_build_props):
+	* exchange-mapi-cal-utils.h:
+	* exchange-mapi-connection.c
+	(exchange_mapi_util_delete_attachments),
+	(exchange_mapi_util_get_attachments), (set_recipient_properties),
+	(exchange_mapi_util_modify_recipients),
+	(exchange_mapi_util_check_restriction),
+	(exchange_mapi_connection_fetch_items),
+	(exchange_mapi_connection_fetch_item),
+	(exchange_mapi_create_folder), (exchange_mapi_empty_folder),
+	(exchange_mapi_remove_folder), (exchange_mapi_rename_folder),
+	(exchange_mapi_util_resolve_named_props),
+	(exchange_mapi_util_resolve_named_prop),
+	(exchange_mapi_util_create_named_prop),
+	(exchange_mapi_get_default_folder_id), (exchange_mapi_create_item),
+	(exchange_mapi_modify_item), (exchange_mapi_set_flags),
+	(mapi_move_items), (exchange_mapi_remove_items),
+	(set_default_folders), (set_owner_name), (set_user_name),
+	(exchange_mapi_get_folders_list),
+	(exchange_mapi_get_pf_folders_list),
+	(exchange_mapi_util_ex_to_smtp):
+	* exchange-mapi-utils.c (exchange_mapi_debug_property_dump),
+	(exchange_mapi_util_bin_append_uint16),
+	(exchange_mapi_util_bin_append_uint32),
+	(exchange_mapi_util_bin_append_string),
+	(exchange_mapi_util_bin_append_unicode),
+	(exchange_mapi_util_bin_append_val),
+	(exchange_mapi_util_entryid_generate_oneoff),
+	(exchange_mapi_util_entryid_generate_local):
+	* exchange-mapi-utils.h:
+
 2008-11-21  Suman Manjunath  <msuman@novell.com>
 
 	** Fixes for bug #560465 and bug #560764

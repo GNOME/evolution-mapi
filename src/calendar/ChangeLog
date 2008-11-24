@@ -1,3 +1,17 @@
+2008-11-24  Julien Kerihuel  <j.kerihuel@openchange.org>
+
+	- This commit makes evolution-mapi work with libmapi-0.8 
+	  latest trunk revision
+	- exchange_mapi_util_ex_to_smtp temporarily moved to 
+	  exchange-mapi-connection.c to use global_mapi_session
+	- various g_byte_array_append cast warnings fixed
+
+	Note: the current commit breaks the "set recipients" related 
+	routines and will be fixed in a further commit.
+
+	* e-cal-backend-mapi.c (capture_req_props), (get_server_data),
+	(e_cal_backend_mapi_create_object):
+
 2008-11-03  Suman Manjunath  <msuman@novell.com>
 
 	* e-cal-backend-mapi.c (get_element_type), (notify_progress),

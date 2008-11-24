@@ -573,7 +573,7 @@ exchange_mapi_util_set_attachments (mapi_object_t *obj_message, GSList *attach_l
 		exchange_mapi_util_write_generic_streams (&obj_attach, attachment->streams);
 
 		/* message->SaveChangesAttachment() */
-		retval = SaveChangesAttachment(obj_message, &obj_attach, KEEP_OPEN_READWRITE);
+		retval = SaveChangesAttachment(obj_message, &obj_attach, KeepOpenReadWrite);
 		if (retval != MAPI_E_SUCCESS) {
 			mapi_errstr("SaveChangesAttachment", GetLastError());
 			goto cleanup;
