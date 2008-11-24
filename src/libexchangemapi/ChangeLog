@@ -1,5 +1,16 @@
 2008-11-24  Suman Manjunath  <msuman@novell.com>
 
+	* exchange-mapi-cal-utils.c
+	(exchange_mapi_cal_util_fetch_recipients): Fixes for sending
+	meeting requests to recipients not in GAL.
+	* exchange-mapi-connection.c (set_recipient_properties),
+	(exchange_mapi_util_modify_recipients): Set properties for
+	recipients as required by the backends instead of a pre-defined
+	set, also prevent setting the entry-id property for now as it 
+	creates problems.
+
+2008-11-24  Suman Manjunath  <msuman@novell.com>
+
 	** Fix for bug #561640
 
 	* exchange-mapi-connection.c (exchange_mapi_util_set_attachments):

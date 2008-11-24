@@ -85,7 +85,7 @@ mapi_profile_load (const char *profname, const char *password)
 			g_print("\n%s(%d): %s: Already connected ", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 		goto cleanup;
 	}
-	
+
 	if (profname)
 		profile = profname;
 	else {
@@ -760,58 +760,34 @@ cleanup:
 static void 
 set_recipient_properties (TALLOC_CTX *mem_ctx, struct SRow *aRow, ExchangeMAPIRecipient *recipient, gboolean is_external)
 {
-	struct SPropValue	SPropValue;
-	uint32_t		i;
+	uint32_t i;
 
 	if (is_external && recipient->in.ext_lpProps) {
-		const gchar		*dn = NULL;
-		const gchar		*email = NULL; 
+	/* FIXME: Setting PR_ENTRYID property seems to create problems for now. We should take 
+	 * another look at this after the CreateOneoffEntryId API is provided by LibMAPI. */
+#if 0
+		struct Binary_r *oneoff_eid;
+		struct SPropValue sprop; 
+		const gchar *dn = NULL, *email = NULL; 
 
-		/* retrieve dn and email */
-		dn = (const gchar *) get_SPropValue(recipient->in.ext_lpProps, PR_DISPLAY_NAME);
+		dn = (const gchar *) get_SPropValue (recipient->in.ext_lpProps, PR_DISPLAY_NAME);
 		dn = (dn) ? dn : "";
-
-		email = (const gchar *) get_SPropValue(recipient->in.ext_lpProps, PR_SMTP_ADDRESS);
+		email = (const gchar *) get_SPropValue (recipient->in.ext_lpProps, PR_SMTP_ADDRESS);
 		email = (email) ? email : "";
+		oneoff_eid = exchange_mapi_util_entryid_generate_oneoff (mem_ctx, dn, email, FALSE);
+		set_SPropValue_proptag (&sprop, PR_ENTRYID, (const void *)(oneoff_eid));
+		SRow_addprop (aRow, sprop);
+#endif
 
-		/* PR_OBJECT_TYPE */
-		SPropValue.ulPropTag = PR_OBJECT_TYPE;
-		SPropValue.value.l = MAPI_MAILUSER;
-		SRow_addprop(aRow, SPropValue);
-
-		/* PR_DISPLAY_TYPE */
-		SPropValue.ulPropTag = PR_DISPLAY_TYPE;
-		SPropValue.value.l = 0;
-		SRow_addprop(aRow, SPropValue);
-
-		/* PR_GIVEN_NAME */
-		SPropValue.ulPropTag = PR_GIVEN_NAME;
-		SPropValue.value.lpszA = dn;
-		SRow_addprop(aRow, SPropValue);
-
-		/* PR_DISPLAY_NAME */
-		SPropValue.ulPropTag = PR_DISPLAY_NAME;
-		SPropValue.value.lpszA = dn;
-		SRow_addprop(aRow, SPropValue);
-
-		/* PR_7BIT_DISPLAY_NAME */
-		SPropValue.ulPropTag = PR_7BIT_DISPLAY_NAME;
-		SPropValue.value.lpszA = dn;
-		SRow_addprop(aRow, SPropValue);
-		
-		/* PR_SMTP_ADDRESS */
-		SPropValue.ulPropTag = PR_SMTP_ADDRESS;
-		SPropValue.value.lpszA = email;
-		SRow_addprop(aRow, SPropValue);
-		
-		/* PR_ADDRTYPE */
-		SPropValue.ulPropTag = PR_ADDRTYPE;
-		SPropValue.value.lpszA = "SMTP";
-		SRow_addprop(aRow, SPropValue);
+	/* Now, add the properties which are specified for unresolved recipients alone. */
+		for (i = 0; i < recipient->in.ext_cValues; ++i)
+			SRow_addprop (aRow, recipient->in.ext_lpProps[i]);
 	}
 
-	/* FIXME: Temporary - I have not found where RecipClass is defined/used */
-	SetRecipientType(aRow, MAPI_TO);
+	/* Now, add the properties which are specified for each recipient
+	 * irrespective of whether it was resolved or not. */
+	for (i = 0; i < recipient->in.req_cValues; ++i)
+		SRow_addprop (aRow, recipient->in.req_lpProps[i]);
 }
 
 static void
@@ -821,7 +797,6 @@ exchange_mapi_util_modify_recipients (TALLOC_CTX *mem_ctx, mapi_object_t *obj_me
 	struct SPropTagArray 	*SPropTagArray = NULL;
 	struct SRowSet 		*SRowSet = NULL;
 	struct SPropTagArray 	*FlagList = NULL;
-	struct SPropValue	SPropValue;
 	GSList 			*l;
 	const char 		**users = NULL;
 	uint32_t 		i, j, count = 0;
@@ -876,10 +851,6 @@ exchange_mapi_util_modify_recipients (TALLOC_CTX *mem_ctx, mapi_object_t *obj_me
 			j += 1;
 		}
 	}
-
-	SPropValue.ulPropTag = PR_SEND_INTERNET_ENCODING;
-	SPropValue.value.l = 0;
-	SRowSet_propcpy(mem_ctx, SRowSet, SPropValue);
 
 	if (remove_existing) {
 		RemoveAllRecipients (obj_message);

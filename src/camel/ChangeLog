@@ -1,3 +1,8 @@
+2008-11-24  Suman Manjunath  <msuman@novell.com>
+
+	* camel-mapi-transport.c (mapi_item_add_recipient): Fixes for sending 
+	mails to recipients not in GAL. 
+
 2008-11-21  Johnny Jacob  <jjohnny@novell.com>
 
 	* camel-mapi-transport.c (mapi_message_item_send): Pass on the error 

@@ -421,13 +421,17 @@ mapi_item_add_recipient (const char *recipients, OlMailRecipientType type, GSLis
 
 	/* this memory should be freed somewhere, perhaps in the existing
 	 * exchange_mapi_util_free_recipient_list() */
-	recipient->in.req_lpProps = g_new0 (struct SPropValue, 1);
-	recipient->in.req_cValues = 1;
+	recipient->in.req_lpProps = g_new0 (struct SPropValue, 2);
+	recipient->in.req_cValues = 2;
+
 	set_SPropValue_proptag (&(recipient->in.req_lpProps[0]), PR_RECIPIENT_TYPE, (const void *) &type);
 
+	val = 0;
+	set_SPropValue_proptag (&(recipient->in.req_lpProps[1]), PR_SEND_INTERNET_ENCODING, (const void *)&val);
+
 	/* External recipient properties - set them only when the recipient is unresolved */
-	recipient->in.ext_lpProps = g_new0 (struct SPropValue, 5);
-	recipient->in.ext_cValues = 5;
+	recipient->in.ext_lpProps = g_new0 (struct SPropValue, 7);
+	recipient->in.ext_cValues = 7;
 
 	val = DT_MAILUSER;
 	set_SPropValue_proptag (&(recipient->in.ext_lpProps[0]), PR_DISPLAY_TYPE, (const void *)&val);
@@ -437,7 +441,10 @@ mapi_item_add_recipient (const char *recipients, OlMailRecipientType type, GSLis
 	set_SPropValue_proptag (&(recipient->in.ext_lpProps[2]), PR_ADDRTYPE, (const void *)(str));
 	str = recipient->email_id;
 	set_SPropValue_proptag (&(recipient->in.ext_lpProps[3]), PR_SMTP_ADDRESS, (const void *)(str));
-	set_SPropValue_proptag (&(recipient->in.ext_lpProps[4]), PR_DISPLAY_NAME, (const void *)(str));
+	/* FIXME: Please add the correct names here instead of the e-mail ID */
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[4]), PR_GIVEN_NAME, (const void *)(str));
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[5]), PR_DISPLAY_NAME, (const void *)(str));
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[6]), PR_7BIT_DISPLAY_NAME, (const void *)(str));
 
 	*recipient_list = g_slist_append (*recipient_list, recipient);
 }

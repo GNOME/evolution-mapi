@@ -382,13 +382,12 @@ exchange_mapi_cal_util_fetch_recipients (ECalComponent *comp, GSList **recip_lis
 
 		param = icalproperty_get_first_parameter (att_prop, ICAL_CN_PARAMETER);
 		str = icalparameter_get_cn (param);
-		if (!(str && *str)) 
-			str = "";
+		str = (str) ? str : recipient->email_id;
 		set_SPropValue_proptag (&(recipient->in.req_lpProps[4]), PR_RECIPIENT_DISPLAY_NAME, (const void *)(str));
 
 		/* External recipient properties - set them only when the recipient is unresolved */
-		recipient->in.ext_lpProps = g_new0 (struct SPropValue, 5);
-		recipient->in.ext_cValues = 5;
+		recipient->in.ext_lpProps = g_new0 (struct SPropValue, 7);
+		recipient->in.ext_cValues = 7;
 
 		val = DT_MAILUSER;
 		set_SPropValue_proptag (&(recipient->in.ext_lpProps[0]), PR_DISPLAY_TYPE, (const void *)&val);
@@ -401,9 +400,10 @@ exchange_mapi_cal_util_fetch_recipients (ECalComponent *comp, GSList **recip_lis
 
 		param = icalproperty_get_first_parameter (att_prop, ICAL_CN_PARAMETER);
 		str = icalparameter_get_cn (param);
-		if (!(str && *str)) 
-			str = "";
-		set_SPropValue_proptag (&(recipient->in.ext_lpProps[4]), PR_DISPLAY_NAME, (const void *)(str));
+		str = (str) ? str : recipient->email_id;
+		set_SPropValue_proptag (&(recipient->in.ext_lpProps[4]), PR_GIVEN_NAME, (const void *)(str));
+		set_SPropValue_proptag (&(recipient->in.ext_lpProps[5]), PR_DISPLAY_NAME, (const void *)(str));
+		set_SPropValue_proptag (&(recipient->in.ext_lpProps[6]), PR_7BIT_DISPLAY_NAME, (const void *)(str));
 
 		*recip_list = g_slist_append (*recip_list, recipient);
 
