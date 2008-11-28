@@ -220,6 +220,8 @@ mapi_do_multipart(CamelMultipart *mp, MapiItem *item)
 		dw = camel_medium_get_content_object(CAMEL_MEDIUM(part));
 		content_stream = camel_stream_mem_new();
 		content_size = camel_data_wrapper_decode_to_stream (dw, (CamelStream *) content_stream);
+		camel_stream_write ((CamelStream *) content_stream, "", 1);
+
 		camel_seekable_stream_seek((CamelSeekableStream *)content_stream, 0, CAMEL_STREAM_SET);
 
 		description = camel_mime_part_get_description(part);
@@ -294,16 +296,19 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 		if (mapi_do_multipart(CAMEL_MULTIPART(multipart), item))
 			printf("camel message multi part error\n"); 
 	} else {
-		content_stream = (CamelStream *)camel_stream_mem_new();
 		dw = camel_medium_get_content_object (CAMEL_MEDIUM (message));
-		type = camel_mime_part_get_content_type((CamelMimePart *)message);
-		content_type = camel_content_type_simple (type);
-		content_size = camel_data_wrapper_write_to_stream(dw, (CamelStream *)content_stream);
-		mapi_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT);
+		if (dw) {
+			type = camel_mime_part_get_content_type((CamelMimePart *)message);
+			content_type = camel_content_type_simple (type);
+
+			content_stream = (CamelStream *)camel_stream_mem_new();
+			content_size = camel_data_wrapper_write_to_stream(dw, (CamelStream *)content_stream);
+			camel_stream_write ((CamelStream *) content_stream, "", 1);
+
+			mapi_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT);
+		}
 	}
 	
-	mapi_item_debug_dump (item);
-
 	/* send */
 	st = mapi_message_item_send(item, attach_list, recipient_list);
 
