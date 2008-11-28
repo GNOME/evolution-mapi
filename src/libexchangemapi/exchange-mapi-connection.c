@@ -812,7 +812,6 @@ exchange_mapi_util_modify_recipients (TALLOC_CTX *mem_ctx, mapi_object_t *obj_me
 					  PR_GIVEN_NAME);
 
 
-	SRowSet = talloc_zero(mem_ctx, struct SRowSet);
 	count = g_slist_length (recipients);
 	users = g_new0 (const char *, count + 1);
 
@@ -840,7 +839,12 @@ exchange_mapi_util_modify_recipients (TALLOC_CTX *mem_ctx, mapi_object_t *obj_me
 			g_warning ("\n%s:%d %s() - '%s' is ambiguous ", __FILE__, __LINE__, __PRETTY_FUNCTION__, recipient->email_id);
 		} else if (FlagList->aulPropTag[i] == MAPI_UNRESOLVED) {
 			/* If the recipient is unresolved, consider it is a SMTP one */
-			SRowSet->aRow = talloc_realloc(mem_ctx, SRowSet->aRow, struct SRow, SRowSet->cRows + 1);
+			if (SRowSet) {
+				SRowSet->aRow = talloc_realloc(mem_ctx, SRowSet->aRow, struct SRow, SRowSet->cRows + 1);
+			} else {
+				SRowSet = talloc_zero(mem_ctx, struct SRowSet);
+				SRowSet->aRow = talloc_zero(mem_ctx, struct SRow);
+			}
 			last = SRowSet->cRows;
 			SRowSet->aRow[last].cValues = 0;
 			SRowSet->aRow[last].lpProps = talloc_zero(mem_ctx, struct SPropValue);
