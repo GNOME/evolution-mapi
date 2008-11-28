@@ -1,3 +1,8 @@
+2008-11-28  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-mapi-account-listener.c (add_addressbook_sources): Don't
+	add galldap ESource.
+
 2008-11-19  Suman Manjunath  <msuman@novell.com>
 
 	* exchange-mapi-account-listener.c: Fixed a build break.

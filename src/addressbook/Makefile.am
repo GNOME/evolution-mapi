@@ -16,7 +16,7 @@ libebookbackendmapi_la_SOURCES =		\
 
 libebookbackendmapi_la_LIBADD =			\
 	$(top_builddir)/src/libexchangemapi/libexchangemapi-1.0.la \
-	$(LIBEBACKEND_CFLAGS)			\
+	$(LIBEBACKEND_LIBS)			\
 	$(LIBEBOOK_LIBS)			\
 	$(LIBEDATABOOK_LIBS)			\
 	$(LIBMAPI_LIBS)
