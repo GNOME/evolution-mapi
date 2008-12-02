@@ -124,7 +124,7 @@ exchange_mapi_connection_fetch_item (mapi_id_t fid, mapi_id_t mid,
 				     guint32 options);
 gboolean
 exchange_mapi_connection_fetch_items   (mapi_id_t fid, 
-					struct mapi_SRestriction *res,
+					struct mapi_SRestriction *res,struct SSortOrderSet *sort_order,
 					const uint32_t *GetPropsList, const uint16_t cn_props, 
 					BuildNameID build_name_id, gpointer build_name_data, 
 					FetchCallback cb, gpointer data, 

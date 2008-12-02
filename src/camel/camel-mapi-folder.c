@@ -271,6 +271,9 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 	if (item_data->total > 0)
                camel_operation_progress (NULL, (item_data->index * 100)/item_data->total);
 
+	if (camel_operation_cancel_check(NULL))
+		return FALSE;
+
 	return TRUE;
 }
 
@@ -545,6 +548,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 	gboolean status;
 
 	struct mapi_SRestriction *res = NULL;
+	struct SSortOrderSet *sort = NULL;
 	fetch_items_data *fetch_data = g_new0 (fetch_items_data, 1);
 
 	const gchar *folder_id = NULL;
@@ -608,7 +612,15 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 			//Creation time ? 
 			set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
 			cast_mapi_SPropValue (&(res->res.resProperty.lpProp), &sprop);
+
 		} 
+
+		/*Set sort order*/
+		sort = g_new0 (struct SSortOrderSet, 1);
+		sort->cSorts = 1;
+		sort->aSort = g_new0 (struct SSortOrder, sort->cSorts);
+		sort->aSort[0].ulPropTag = PR_LAST_MODIFICATION_TIME;
+		sort->aSort[0].ulOrder = TABLE_SORT_ASCEND;
 
 		exchange_mapi_util_mapi_id_from_string (folder_id, &temp_folder_id);
 
@@ -624,7 +636,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 
 		camel_operation_start (NULL, _("Fetching summary information for new messages in %s"), folder->name);
 
-		status = exchange_mapi_connection_fetch_items  (temp_folder_id, res, 
+		status = exchange_mapi_connection_fetch_items  (temp_folder_id, res, sort,
 								summary_prop_list, G_N_ELEMENTS (summary_prop_list), 
 								NULL, NULL, 
 								fetch_items_cb, fetch_data, 

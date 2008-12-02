@@ -900,7 +900,7 @@ e_book_backend_mapi_get_contact_list (EBookBackend *backend,
 				return ;				
 			}
 
-			if (!exchange_mapi_connection_fetch_items (priv->fid, &res, 
+			if (!exchange_mapi_connection_fetch_items (priv->fid, &res, NULL,
 								GetPropsList, n_GetPropsList, 
 								mapi_book_build_name_id_for_getprops, NULL, 
 								create_contact_list_cb, &vcard_str, 
@@ -1290,7 +1290,7 @@ book_view_thread (gpointer data)
 
 		//FIXME: We need to fetch only the query from the server live and not everything.
 		/* execute the query */
-		if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, 
+		if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
 							NULL, 0, 
 							NULL, NULL, 
 							create_contact_cb, book_view, 
@@ -1396,7 +1396,7 @@ build_cache (EBookBackendMAPI *ebmapi)
 	
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	
-	if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, 
+	if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
 						NULL, 0, 
 						NULL, NULL, 
 						cache_contact_cb, ebmapi, 
@@ -1442,7 +1442,7 @@ update_cache (EBookBackendMAPI *ebmapi)
 	
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	
-	if (!exchange_mapi_connection_fetch_items ( priv->fid, &res, 
+	if (!exchange_mapi_connection_fetch_items ( priv->fid, &res, NULL,
 						NULL, 0, 
 						NULL, NULL, 
 						cache_contact_cb, ebmapi, 

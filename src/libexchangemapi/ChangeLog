@@ -1,3 +1,13 @@
+2008-12-02  Johnny Jacob  <jjohnny@novell.com>
+
+	* exchange-mapi-connection.[ch] (exchange_mapi_connection_fetch_items): Enable
+	Sorting.
+
+2008-12-01  Johnny Jacob  <jjohnny@novell.com>
+
+	* exchange-mapi-connection.c (exchange_mapi_connection_fetch_items): When
+	callback returns false return from the API.
+
 2008-11-28  Suman Manjunath  <msuman@novell.com>
 
 	* exchange-mapi-connection.c

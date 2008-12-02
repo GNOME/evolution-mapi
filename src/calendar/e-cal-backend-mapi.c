@@ -563,7 +563,7 @@ get_deltas (gpointer handle)
 //	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	/* FIXME: GetProps does not seem to work for tasks :-( */
 	if (kind == ICAL_VTODO_COMPONENT) {
-		if (!exchange_mapi_connection_fetch_items (priv->fid, use_restriction ? &res : NULL, 
+		if (!exchange_mapi_connection_fetch_items (priv->fid, use_restriction ? &res : NULL, NULL,
 						NULL, 0, NULL, NULL, 
 						mapi_cal_get_changes_cb, cbmapi, 
 						MAPI_OPTIONS_FETCH_ALL)) {
@@ -573,7 +573,7 @@ get_deltas (gpointer handle)
 			g_static_mutex_unlock (&updating);
 			return FALSE;
 		}
-	} else if (!exchange_mapi_connection_fetch_items (priv->fid, use_restriction ? &res : NULL, 
+	} else if (!exchange_mapi_connection_fetch_items (priv->fid, use_restriction ? &res : NULL, NULL,
 						cal_GetPropsList, G_N_ELEMENTS (cal_GetPropsList), 
 						exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind), 
 						mapi_cal_get_changes_cb, cbmapi, 
@@ -599,7 +599,7 @@ get_deltas (gpointer handle)
 	 * The items in the list are pointers to internal data, 
 	 * so should not be freed, only the list should. */
 	priv->cache_keys = e_cal_backend_cache_get_keys (priv->cache);
-	if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, 
+	if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
 						cal_IDList, G_N_ELEMENTS (cal_IDList), 
 						NULL, NULL, 
 						handle_deleted_items_cb, cbmapi, 
@@ -956,7 +956,7 @@ populate_cache (ECalBackendMAPI *cbmapi)
 //	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	/* FIXME: GetProps does not seem to work for tasks :-( */
 	if (kind == ICAL_VTODO_COMPONENT) {
-		if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, 
+		if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
 						NULL, 0, NULL, NULL, 
 						mapi_cal_cache_create_cb, cbmapi, 
 						MAPI_OPTIONS_FETCH_ALL)) {
@@ -965,7 +965,7 @@ populate_cache (ECalBackendMAPI *cbmapi)
 			g_mutex_unlock (priv->mutex);
 			return GNOME_Evolution_Calendar_OtherError;
 		}
-	} else if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, 
+	} else if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
 						cal_GetPropsList, G_N_ELEMENTS (cal_GetPropsList), 
 						exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind), 
 						mapi_cal_cache_create_cb, cbmapi, 
@@ -1271,7 +1271,7 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cbdata *cb
 	set_SPropValue_proptag (&sprop, proptag, (const void *) &sb);
 	cast_mapi_SPropValue (&(res.res.resProperty.lpProp), &sprop);
 
-	exchange_mapi_connection_fetch_items (priv->fid, &res, 
+	exchange_mapi_connection_fetch_items (priv->fid, &res, NULL,
 					NULL, 0, 
 					NULL, NULL, 
 					capture_req_props, cbdata, 

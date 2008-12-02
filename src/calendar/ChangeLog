@@ -1,3 +1,9 @@
+2008-12-02  Johnny Jacob  <jjohnny@novell.com>
+
+	* e-cal-backend-mapi.c (get_deltas, populate_cache)
+	(get_server_data): Fix for exchange_mapi_connection_fetch_items 
+	API change.
+
 2008-11-28  Suman Manjunath  <msuman@novell.com>
 
 	* e-cal-backend-mapi.c

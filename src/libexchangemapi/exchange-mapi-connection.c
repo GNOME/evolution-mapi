@@ -987,7 +987,7 @@ cleanup:
 
 gboolean
 exchange_mapi_connection_fetch_items   (mapi_id_t fid, 
-					struct mapi_SRestriction *res,
+					struct mapi_SRestriction *res, struct SSortOrderSet *sort_order,
 					const uint32_t *GetPropsList, const uint16_t cn_props, 
 					BuildNameID build_name_id, gpointer build_name_data, 
 					FetchCallback cb, gpointer data, 
@@ -1059,6 +1059,14 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 		}
 	}
 
+	if (sort_order) {
+		retval = SortTable(&obj_table, sort_order);
+		if (retval != MAPI_E_SUCCESS) {
+			mapi_errstr("SortTable", GetLastError());
+			goto cleanup;
+		}
+	}
+
 	/* Number of items in the container */
 	retval = QueryPosition(&obj_table, NULL, &count);
 	if (retval != MAPI_E_SUCCESS) {
@@ -1119,6 +1127,7 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 		GSList *attach_list = NULL;
 		GSList *recip_list = NULL;
 		GSList *stream_list = NULL;
+		gboolean cb_retval = false;
 
 		mapi_object_init(&obj_message);
 
@@ -1184,9 +1193,7 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 			item_data->total = SRowSet.cRows;
 			item_data->index = i;
 
-			if (!cb (item_data, data)) {
-				g_warning ("\n%s(%d): %s: Callback failed for message-id %016llX ", __FILE__, __LINE__, __PRETTY_FUNCTION__, *pmid);
-			}
+			cb_retval = cb (item_data, data);
 
 			g_free (item_data);
 		}
@@ -1196,6 +1203,8 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 
 	loop_cleanup:
 		mapi_object_release(&obj_message);
+
+		if (!cb_retval) break;
 	}
 
 	result = TRUE;
