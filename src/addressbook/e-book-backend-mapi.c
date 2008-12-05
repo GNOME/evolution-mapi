@@ -102,10 +102,10 @@ static const struct field_element_mapping {
 	{ E_CONTACT_FAMILY_NAME, PT_STRING8, PR_SURNAME , ELEMENT_TYPE_SIMPLE},
 	{ E_CONTACT_NICKNAME, PT_STRING8, PR_NICKNAME, ELEMENT_TYPE_SIMPLE },
 
-	{ E_CONTACT_EMAIL_1, PT_STRING8, 0x8084001e, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_EMAIL_2, PT_STRING8, 0x8094001e, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_EMAIL_3, PT_STRING8, 0x80a4001e, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_IM_AIM, PT_STRING8, 0x8062001e, ELEMENT_TYPE_COMPLEX},
+	{ E_CONTACT_EMAIL_1, PT_STRING8, PROP_TAG(PT_UNICODE, 0x8084), ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_EMAIL_2, PT_STRING8, PROP_TAG(PT_UNICODE, 0x8094), ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_EMAIL_3, PT_STRING8, PROP_TAG(PT_UNICODE, 0x80a4), ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_IM_AIM,  PT_STRING8, PROP_TAG(PT_UNICODE, 0x8062), ELEMENT_TYPE_COMPLEX},	
 		
 	{ E_CONTACT_PHONE_BUSINESS, PT_STRING8, PR_OFFICE_TELEPHONE_NUMBER, ELEMENT_TYPE_SIMPLE},
 	{ E_CONTACT_PHONE_HOME, PT_STRING8, PR_HOME_TELEPHONE_NUMBER, ELEMENT_TYPE_SIMPLE},
@@ -176,7 +176,7 @@ find_book_view (EBookBackendMAPI *ebmapi)
 
 static gboolean
 build_restriction_emails_contains (struct mapi_SRestriction *res, 
-				   char *query)
+				   const char *query)
 {
 	char *email=NULL, *tmp, *tmp1;
 	int status;
@@ -213,6 +213,77 @@ build_restriction_emails_contains (struct mapi_SRestriction *res,
 	return TRUE;
 }
 
+static gboolean
+build_multiple_restriction_emails_contains (struct mapi_SRestriction *res, 
+				            struct mapi_SRestriction_or *or_res, 
+					    const char *query)
+{
+	char *email=NULL, *tmp, *tmp1;
+	//Number of restriction to apply
+	unsigned int res_count = 6;
+	int status;
+
+	/* This currently supports "email foo@bar.soo" */
+	tmp = strdup (query);
+	
+	tmp = strstr (tmp, "email");
+	if (tmp ) {
+		tmp = strchr (tmp, '\"');
+		if (tmp && ++tmp) {
+			tmp = strchr (tmp, '\"');
+			if (tmp && ++tmp) {
+				tmp1 = tmp;
+				tmp1 = strchr (tmp1, '\"');
+				if (tmp1) {
+					*tmp1 = 0;
+					email = tmp;
+				}
+			}
+		}
+	}
+
+	if (email==NULL || !strchr (email, '@'))
+		return FALSE;
+
+	or_res[0].rt = RES_CONTENT;
+	or_res[0].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
+	or_res[0].res.resContent.ulPropTag = PR_EMS_AB_MANAGER_T;
+	or_res[0].res.resContent.lpProp.value.lpszA = email;
+
+	or_res[1].rt = RES_CONTENT;
+	or_res[1].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
+	or_res[1].res.resContent.ulPropTag = PR_DISPLAY_NAME;
+	or_res[1].res.resContent.lpProp.value.lpszA = email;
+
+	or_res[2].rt = RES_CONTENT;
+	or_res[2].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
+	or_res[2].res.resContent.ulPropTag = PR_GIVEN_NAME;
+	or_res[2].res.resContent.lpProp.value.lpszA = email;
+
+	or_res[3].rt = RES_CONTENT;
+	or_res[3].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
+	or_res[3].res.resContent.ulPropTag = 0x8084001e;
+	or_res[3].res.resContent.lpProp.value.lpszA = email;
+
+	or_res[4].rt = RES_CONTENT;
+	or_res[4].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
+	or_res[4].res.resContent.ulPropTag = 0x8094001e;
+	or_res[4].res.resContent.lpProp.value.lpszA = email;
+
+	or_res[5].rt = RES_CONTENT;
+	or_res[5].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
+	or_res[5].res.resContent.ulPropTag = 0x80a4001e;
+	or_res[5].res.resContent.lpProp.value.lpszA = email;
+
+	res = g_new0 (struct mapi_SRestriction, 1);
+
+	res->rt = RES_OR;
+	res->res.resOr.cRes = res_count;
+	res->res.resOr.res = or_res;
+
+	return TRUE;
+}
+
 static char *
 get_filename_from_uri (const char *uri, const char *file)
 {
@@ -240,13 +311,12 @@ get_filename_from_uri (const char *uri, const char *file)
 }
 
 static GNOME_Evolution_Addressbook_CallStatus
-e_book_backend_mapi_load_source (EBookBackend           *backend,
-				       ESource                *source,
-				       gboolean                only_if_exists)
+e_book_backend_mapi_load_source (EBookBackend *backend,
+				 ESource      *source,
+				 gboolean     only_if_exists)
 {
-	char *tmp;
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
-	char * offline;
+	const gchar *offline, *tmp;
 	char **tokens;
 	char *uri;
 	if (enable_debug)
@@ -293,6 +363,8 @@ e_book_backend_mapi_load_source (EBookBackend           *backend,
 			priv->is_cache_ready = TRUE;
 		}
 		//FIXME: We may have to do a time based reload. Or deltas should upload.
+	} else {
+		priv->summary = e_book_backend_summary_new (NULL,SUMMARY_FLUSH_TIMEOUT);
 	}
 
 	g_free (uri);
@@ -564,7 +636,8 @@ e_book_backend_mapi_remove_contacts (EBookBackend *backend,
 					   guint32 opid,
 					   GList *id_list)
 {
-	GSList *list=NULL, *tmp = id_list;
+	GSList *list=NULL; 
+	GList *tmp = id_list;
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
 	mapi_id_t fid, mid;
 			
@@ -606,7 +679,7 @@ e_book_backend_mapi_remove_contacts (EBookBackend *backend,
 		
 		g_slist_free (list);
 		e_data_book_respond_remove_contacts (book, opid,
-							     GNOME_Evolution_Addressbook_Success,  id_list);
+							     GNOME_Evolution_Addressbook_Success, id_list);
 		return;
 	default:
 		break;
@@ -781,9 +854,15 @@ e_book_backend_mapi_get_contact (EBookBackend *backend,
 }
 
 static gboolean
-create_contact_list_cb (struct mapi_SPropValue_array *array, const mapi_id_t fid, const mapi_id_t mid, 
-			GSList *streams, GSList *recipients, GSList *attachments, gpointer data)
+create_contact_list_cb (FetchItemsCallbackData *item_data, gpointer data)
 {
+	struct mapi_SPropValue_array *array = item_data->properties;
+	const mapi_id_t fid = item_data->fid;
+	const mapi_id_t mid = item_data->mid;
+	GSList *streams = item_data->streams;
+	GSList *recipients = item_data->recipients;
+	GSList *attachments = item_data->attachments;
+
 	GList *list = * (GList **) data;
 	EContact *contact;
 	char *suid;
@@ -829,6 +908,8 @@ mapi_book_build_name_id_for_getprops (struct mapi_nameid *nameid, gpointer data)
 	mapi_nameid_lid_add(nameid, 0x8084, PSETID_Address); /* PT_STRING8 - EmailOriginalDisplayName */
 //	mapi_nameid_lid_add(nameid, 0x8020, PSETID_Address);
 //	mapi_nameid_lid_add(nameid, 0x8021, PSETID_Address);
+	mapi_nameid_lid_add(nameid, 0x8094, PSETID_Address);
+	mapi_nameid_lid_add(nameid, 0x80a4, PSETID_Address);
 
 	return TRUE;
 }
@@ -950,59 +1031,6 @@ get_closure (EDataBookView *book_view)
 	return g_object_get_data (G_OBJECT (book_view), "closure");
 }
 
-static void
-mapi_dump_props (struct mapi_SPropValue_array *properties)
-{
-	int i;
-	
-	for (i = 0; i < properties->cValues; i++) {
-		struct mapi_SPropValue *lpProp = &properties->lpProps[i];
-		const char *tmp =  get_proptag_name (lpProp->ulPropTag);
-		if (tmp && *tmp)
-			printf("%s \t",tmp);
-		else
-			printf("%x \t", lpProp->ulPropTag);
-		switch(lpProp->ulPropTag & 0xFFFF) {
-		case PT_BOOLEAN:
-			printf(" (bool) - %d\n", lpProp->value.b);
-			break;
-		case PT_I2:
-			printf(" (uint16_t) - %d\n", lpProp->value.i);
-			break;
-		case PT_LONG:
-			printf(" (long) - %ld\n", lpProp->value.l);
-			break;
-		case PT_DOUBLE:
-			printf (" (double) -  %lf\n", lpProp->value.dbl);
-			break;
-		case PT_I8:
-			printf (" (int) - %d\n", lpProp->value.d);
-			break;
-		case PT_SYSTIME:
-			printf (" (struct FILETIME *) - %p\n", &lpProp->value.ft);
-			break;
-		case PT_ERROR:
-			printf (" (error) - %p\n", lpProp->value.err);
-			break;
-		case PT_STRING8:
-			printf(" (string) - %s\n", lpProp->value.lpszA ? lpProp->value.lpszA : "null" );
-			break;
-		case PT_UNICODE:
-			printf(" (unicodestring) - %s\n", lpProp->value.lpszW ? lpProp->value.lpszW : "null");
-			break;
-		case PT_BINARY:
-			printf(" (struct SBinary_short *) - %p\n", &lpProp->value.bin);
-			break;
-		case PT_MV_STRING8:
-			printf(" (struct mapi_SLPSTRArray *) - %p\n", &lpProp->value.MVszA);
-			break;
-		default:
-			printf(" - NONE NULL\n");
-		}
-		
-	}
-	
-}
 //FIXME: Be more clever in dumping contacts. Can we have a callback mechanism for each types?
 static EContact *
 emapidump_contact(struct mapi_SPropValue_array *properties)
@@ -1010,7 +1038,7 @@ emapidump_contact(struct mapi_SPropValue_array *properties)
 	EContact *contact = e_contact_new ();
 	int i;
 	
-//	mapi_dump_props (properties);
+//	exchange_mapi_debug_property_dump (properties);
 	for (i=1; i<maplen; i++) {
 		gpointer value;
 
@@ -1080,9 +1108,7 @@ emapidump_contact(struct mapi_SPropValue_array *properties)
 						contact_addr->region = find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_STATE_OR_PROVINCE);
 						contact_addr->code = find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_POSTAL_CODE);
 						contact_addr->country = find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_COUNTRY);
-
 				} else {
-					
 						contact_addr->address_format = NULL;
 						contact_addr->po = NULL;
 						contact_addr->street = value;
@@ -1094,10 +1120,7 @@ emapidump_contact(struct mapi_SPropValue_array *properties)
 				}
 				e_contact_set (contact, mappings[i].field_id, contact_addr);
 				//FIXME: Free everything.
-				
 			}
-			
-			
 		}
 	}
 	
@@ -1167,13 +1190,17 @@ create_contact_cb (FetchItemsCallbackData *item_data, gpointer data)
 static void
 book_view_thread (gpointer data)
 {
+	struct mapi_SRestriction res;
+	struct mapi_SRestriction_or *or_res = NULL;
 	EDataBookView *book_view = data;
 	BESearchClosure *closure = get_closure (book_view);
-	EBookBackend  *backend = closure->bg;
-	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
+	EBookBackendMAPI *backend = closure->bg;
+	EBookBackendMAPIPrivate *priv = backend->priv;
 	const char *query = NULL;
 	GPtrArray *ids = NULL;
 	GList *contacts = NULL, *temp_list = NULL;
+	//Number of multiple restriction to apply
+	unsigned int res_count = 6;
 	
 	if (enable_debug)
 		printf("mapi: book view\n");
@@ -1241,7 +1268,7 @@ book_view_thread (gpointer data)
 	case GNOME_Evolution_Addressbook_MODE_REMOTE:
 
 		if (!exchange_mapi_connection_exists ()) {
-			e_book_backend_notify_auth_required (backend);
+			e_book_backend_notify_auth_required (E_BOOK_BACKEND (backend));
 			e_data_book_view_notify_complete (book_view,
 						GNOME_Evolution_Addressbook_AuthenticationRequired);
 			bonobo_object_unref (book_view);
@@ -1287,19 +1314,44 @@ book_view_thread (gpointer data)
 			bonobo_object_unref (book_view);
 			return;
 		}
+		
+		if (e_book_backend_summary_is_summary_query (priv->summary, query)) {
+			or_res = g_new (struct mapi_SRestriction_or, res_count);
+	
+			if (!build_multiple_restriction_emails_contains (&res, or_res, query)) {
+				e_data_book_view_notify_complete (book_view, 
+							  GNOME_Evolution_Addressbook_OtherError);
+				return ;
+			} 
 
-		//FIXME: We need to fetch only the query from the server live and not everything.
-		/* execute the query */
-		if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
+			//FIXME: We need to fetch only the query from the server live and not everything.
+			if (!exchange_mapi_connection_fetch_items (priv->fid, &res, NULL,
+							   GetPropsList, n_GetPropsList, 
+							   mapi_book_build_name_id_for_getprops, NULL, 
+							   create_contact_cb, book_view, 
+							   MAPI_OPTIONS_FETCH_ALL)) {
+        	                if (e_flag_is_set (closure->running))
+                	                e_data_book_view_notify_complete (book_view, 
+                        	                                          GNOME_Evolution_Addressbook_OtherError);      
+	                        bonobo_object_unref (book_view);
+					
+				if (or_res)
+					g_free(or_res);
+	
+        	                return;
+                	}
+		} else {
+			if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
 							NULL, 0, 
 							NULL, NULL, 
 							create_contact_cb, book_view, 
 							MAPI_OPTIONS_FETCH_ALL)) {
-			if (e_flag_is_set (closure->running))
-				e_data_book_view_notify_complete (book_view, 
-								  GNOME_Evolution_Addressbook_OtherError);	
-			bonobo_object_unref (book_view);
-			return;
+				if (e_flag_is_set (closure->running))
+					e_data_book_view_notify_complete (book_view, 
+									  GNOME_Evolution_Addressbook_OtherError);      
+				bonobo_object_unref (book_view);
+				return;
+			}
 		}
 
 		if (e_flag_is_set (closure->running))
@@ -1313,20 +1365,21 @@ book_view_thread (gpointer data)
 		break;
 	}
 
-	return;
-	
+	if (or_res)
+		g_free(or_res);
 
+	return;
 }
 
 static void
 e_book_backend_mapi_start_book_view (EBookBackend  *backend,
 					   EDataBookView *book_view)
 {
-	BESearchClosure *closure = init_closure (book_view, backend);
+	BESearchClosure *closure = init_closure (book_view, E_BOOK_BACKEND_MAPI (backend));
 
 	if (enable_debug)
 		printf ("mapi: start_book_view...\n");
-	closure->thread = g_thread_create (book_view_thread, book_view, FALSE, NULL);
+	closure->thread = g_thread_create ((GThreadFunc) book_view_thread, book_view, FALSE, NULL);
 	e_flag_wait (closure->running);
 	
 	/* at this point we know the book view thread is actually running */	
@@ -1494,7 +1547,7 @@ e_book_backend_mapi_authenticate_user (EBookBackend *backend,
 		} else if (priv->marked_for_offline && !priv->is_cache_ready) {
 			/* Means we dont have a cache. Lets build that first */
 			printf("Preparing to build cache\n");
-			g_thread_create ((GThreadFunc) build_cache, backend, FALSE, backend);
+			g_thread_create ((GThreadFunc) build_cache, backend, FALSE, NULL);
 		} 
 		e_book_backend_set_is_writable (backend, TRUE);
 		e_data_book_respond_authenticate_user (book, opid, GNOME_Evolution_Addressbook_Success);

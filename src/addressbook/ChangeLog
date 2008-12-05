@@ -1,3 +1,21 @@
+2008-12-05  Suman Manjunath  <msuman@novell.com>
+
+	Patch from Ashish Shrivastava  <shashish@novell.com>
+
+	** Partial fix for bug #560462
+
+	* e-book-backend-mapi.c (build_restriction_emails_contains),
+	(build_multiple_restriction_emails_contains),
+	(e_book_backend_mapi_load_source),
+	(e_book_backend_mapi_remove_contacts), (create_contact_list_cb),
+	(mapi_book_build_name_id_for_getprops), (emapidump_contact),
+	(book_view_thread), (e_book_backend_mapi_start_book_view),
+	(e_book_backend_mapi_authenticate_user):
+	Don't spawn more book_view_threads if one is already running.
+	Code cleanup to remove serious compilation warnings. 
+	Fixed API changes involving FetchItemCallbackData, which Johnny 
+	had missed earlier. 
+
 2008-12-02  Johnny Jacob  <jjohnny@novell.com>
 
 	* e-book-backend-mapi.c (e_book_backend_mapi_get_contact_list)
