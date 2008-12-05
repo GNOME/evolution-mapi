@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <glib.h>
+#include <glib/gstdio.h>
 
 #include <sys/time.h>
 /*
@@ -142,7 +143,7 @@ static const struct field_element_mapping {
 //		{ E_CONTACT_CATEGORIES, },		
 	};
 
-static maplen = G_N_ELEMENTS(mappings);
+static int maplen = G_N_ELEMENTS(mappings);
 
 static EDataBookView *
 find_book_view (EBookBackendMAPI *ebmapi)
@@ -179,7 +180,6 @@ build_restriction_emails_contains (struct mapi_SRestriction *res,
 				   const char *query)
 {
 	char *email=NULL, *tmp, *tmp1;
-	int status;
 
 	/* This currently supports "email foo@bar.soo" */
 	tmp = strdup (query);
@@ -221,7 +221,6 @@ build_multiple_restriction_emails_contains (struct mapi_SRestriction *res,
 	char *email=NULL, *tmp, *tmp1;
 	//Number of restriction to apply
 	unsigned int res_count = 6;
-	int status;
 
 	/* This currently supports "email foo@bar.soo" */
 	tmp = strdup (query);
@@ -318,7 +317,7 @@ e_book_backend_mapi_load_source (EBookBackend *backend,
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
 	const gchar *offline, *tmp;
 	char **tokens;
-	char *uri;
+	char *uri = NULL;
 	if (enable_debug)
 		printf("MAPI load source\n");
 	offline = e_source_get_property (source, "offline_sync");
@@ -417,7 +416,7 @@ e_book_backend_mapi_get_static_capabilities (EBookBackend *backend)
 gboolean
 mapi_book_build_name_id (struct mapi_nameid *nameid, gpointer data)
 {
-	EContact *contact = data;
+//	EContact *contact = data;
 	
 	mapi_nameid_lid_add(nameid, 0x8005, PSETID_Address);
 	mapi_nameid_lid_add(nameid, 0x8084, PSETID_Address);
@@ -448,7 +447,6 @@ int
 mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropTagArray, gpointer data)
 {
 	EContact *contact = data;	
-	int len = -1;
 	struct SPropValue *props;
 	int i=0;
 
@@ -588,9 +586,6 @@ e_book_backend_mapi_create_contact (EBookBackend *backend,
 	EContact *contact;
 	char *id;
 	mapi_id_t status;
-	int element_type;
-	char* value;
-	int i;
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
 
 	if(enable_debug)
@@ -696,8 +691,7 @@ e_book_backend_mapi_modify_contact (EBookBackend *backend,
 	EContact *contact;
 	mapi_id_t fid, mid;
 	gboolean status;
-	char *tmp, *id;
-	GList *l = NULL;
+	char *tmp;
 	
 	if(enable_debug)
 		printf("mapi: modify_contacts\n");
@@ -714,7 +708,7 @@ e_book_backend_mapi_modify_contact (EBookBackend *backend,
 		printf("modify id %s\n", tmp);
 		
 		status = exchange_mapi_modify_item (olFolderContacts, priv->fid, mid, mapi_book_build_name_id, contact, mapi_book_build_props, contact, NULL, NULL, NULL, 0);
-		printf("getting %016llX\n", status);
+		printf("getting %d\n", status);
 		if (!status) {
 			e_data_book_respond_modify(book, opid, GNOME_Evolution_Addressbook_OtherError, NULL);
 			return;
@@ -769,7 +763,7 @@ e_book_backend_mapi_get_contact (EBookBackend *backend,
 				       const char   *id)
 {
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
-	EContact *contact;
+	EContact *contact = NULL;
 	char *vcard;
 	
 	if (enable_debug)
@@ -859,9 +853,6 @@ create_contact_list_cb (FetchItemsCallbackData *item_data, gpointer data)
 	struct mapi_SPropValue_array *array = item_data->properties;
 	const mapi_id_t fid = item_data->fid;
 	const mapi_id_t mid = item_data->mid;
-	GSList *streams = item_data->streams;
-	GSList *recipients = item_data->recipients;
-	GSList *attachments = item_data->attachments;
 
 	GList *list = * (GList **) data;
 	EContact *contact;
@@ -1476,13 +1467,11 @@ update_cache (EBookBackendMAPI *ebmapi)
 	char *tmp = e_book_backend_cache_get_time (priv->cache);
 	//FIXME: What if book view is NULL? Can it be? Check that.
 	time_t t=0;
-	struct mapi_SRestriction res;
+//	struct mapi_SRestriction res;
 	
 	if (tmp)
 		t = atoi (tmp);
 
-	
-	
 //	res.rt = RES_PROPERTY;
 //	res.res.resProperty.relop = RES_PROPERTY;
 //	res.res.resProperty.ulPropTag = PR_LAST_MODIFICATION_TIME;

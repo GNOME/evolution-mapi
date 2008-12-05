@@ -2503,7 +2503,7 @@ set_default_folders (mapi_object_t *obj_store, GSList **mapi_folders)
 {
 	GSList *folder_list = *mapi_folders;
 	
-	while ((folder_list = g_slist_next (folder_list))) {
+	while (folder_list != NULL) {
 		ExchangeMAPIFolder *folder = NULL;
 		guint32 default_type = 0;
 		folder = folder_list->data;
@@ -2511,6 +2511,7 @@ set_default_folders (mapi_object_t *obj_store, GSList **mapi_folders)
 			folder->is_default = true; /* TODO : Clean up. Redundant.*/
 			folder->default_type = default_type;
 		}
+		folder_list = g_slist_next (folder_list); 
 	}
 }
 

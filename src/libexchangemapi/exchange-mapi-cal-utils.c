@@ -996,7 +996,6 @@ static gboolean
 fetch_server_data_cb (FetchItemsCallbackData *item_data, gpointer data) 
 {
 	struct mapi_SPropValue_array *properties = item_data->properties;
-	const mapi_id_t fid = item_data->fid;
 	const mapi_id_t mid = item_data->mid;
 	GSList *streams = item_data->streams;
 	GSList *recipients = item_data->recipients;

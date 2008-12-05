@@ -440,7 +440,6 @@ exchange_mapi_cal_util_mapi_tz_to_bin (const char *mapi_tzid, struct Binary_r *s
 	guint16 flag16;
 	gunichar2 *buf;
 	glong items_written;
-	guint32 i;
 
 	ba = g_byte_array_new ();
 
