@@ -345,25 +345,26 @@ gboolean
 org_gnome_exchange_mapi_check_options(EPlugin *epl, EConfigHookPageCheckData *data)
 {
 	EMConfigTargetAccount *target = (EMConfigTargetAccount *)(data->config->target);
-	gboolean status = FALSE;
+	gboolean status = TRUE;
 
 	if (data->pageid != NULL && g_ascii_strcasecmp (data->pageid, "10.receive") == 0) {
-		CamelURL *url = camel_url_new (e_account_get_string(target->account,  E_ACCOUNT_SOURCE_URL), NULL);
+		CamelURL *url = camel_url_new (e_account_get_string(target->account,  
+								    E_ACCOUNT_SOURCE_URL), NULL);
+
 		if (url && url->protocol && g_ascii_strcasecmp (url->protocol, "mapi") == 0) {
 			const gchar *prof = NULL;
 
 			/* We assume that if the profile is set, then the setting is valid. */
  			prof = camel_url_get_param (url, "profile");
 
-			if (prof && *prof)
-				status = TRUE;
-		}
+			/*Profile not set. Do not proceed with account creation.*/
+			if (!(prof && *prof))
+			        status = FALSE;
+		} 
+
 		if (url)
 			camel_url_free(url);
 	}
-
-	/* FIXME: don't know why we should always return TRUE */
-	return TRUE;
 
 	return status;
 }

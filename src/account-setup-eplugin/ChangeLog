@@ -1,3 +1,9 @@
+2008-12-08  Johnny Jacob  <jjohnny@novell.com>
+
+	* exchange-mapi-account-setup.c (org_gnome_exchange_mapi_check_options): If 
+	the account created is MAPI and not sucessfull, return FALSE . Otherwise return
+	TRUE (always).
+
 2008-11-28  Suman Manjunath  <msuman@novell.com>
 
 	* exchange-mapi-account-listener.c (add_addressbook_sources): Don't
