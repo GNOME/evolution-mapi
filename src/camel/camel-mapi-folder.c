@@ -1017,7 +1017,8 @@ mapi_populate_msg_body_from_item (CamelMultipart *multipart, MapiItem *item, Exc
 			type = (body->proptag == PR_BODY || body->proptag == PR_BODY_UNICODE) ? 
 				"text/plain" : "text/html";
 
-			camel_mime_part_set_content(part, body->value->data, body->value->len, type );
+			/*NOTE : Last byte null mess up CRLF*. Probably needs a fix in e*fetch_items. */
+			camel_mime_part_set_content(part, body->value->data, body->value->len - 1, type );
 		}
 	} else
 		camel_mime_part_set_content(part, " ", strlen(" "), "text/html");

@@ -1,3 +1,11 @@
+2008-12-09  Johnny Jacob  <jjohnny@novell.com>
+
+	** Fixes BGO #561792.
+	
+	* camel-mapi-folder.c (mapi_populate_msg_body_from_item): Remove 
+	last byte from string. Messes up CRLF. We may have to fix 
+	e*fetch_item for this.
+
 2008-12-02  Johnny Jacob  <jjohnny@novell.com>
 
 	* camel-mapi-folder.c (mapi_refresh_folder): Sort based on 
