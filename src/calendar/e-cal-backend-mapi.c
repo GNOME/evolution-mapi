@@ -1329,6 +1329,9 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, char 
 			if (tag_array) {
 				stream->proptag = tag_array->aulPropTag[0];
 				streams = g_slist_append (streams, stream); 
+
+				g_free (tag_array->aulPropTag); 
+				g_free (tag_array);
 			}
 		}
 	}
@@ -1752,13 +1755,26 @@ e_cal_backend_mapi_send_objects (ECalBackendSync *backend, EDataCal *cal, const 
 			mapi_id_t mid = 0;
 			GSList *recipients = NULL;
 			GSList *attachments = NULL;
+			GSList *streams = NULL;
 
 			e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
 
 			/* FIXME: Add support for recurrences */
 			if (e_cal_component_has_recurrences (comp)) {
-				g_object_unref (comp);
-				return GNOME_Evolution_Calendar_OtherError;
+				GByteArray *ba = exchange_mapi_cal_util_rrule_to_bin (comp, NULL); 
+				if (ba) {
+					struct SPropTagArray *tag_array; 
+					ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1); 
+					stream->value = ba; 
+					tag_array = exchange_mapi_util_resolve_named_prop (priv->olFolder, priv->fid, 0x8216, PSETID_Appointment); 
+					if (tag_array) {
+						stream->proptag = tag_array->aulPropTag[0];
+						streams = g_slist_append (streams, stream); 
+
+						g_free (tag_array->aulPropTag); 
+						g_free (tag_array);
+					}
+				}
 			}
 
 			if (e_cal_component_has_attachments (comp))
@@ -1806,7 +1822,7 @@ e_cal_backend_mapi_send_objects (ECalBackendSync *backend, EDataCal *cal, const 
 			mid = exchange_mapi_create_item (olFolderOutbox, 0, 
 							exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind), 
 							exchange_mapi_cal_util_build_props, &cbdata, 
-							recipients, attachments, NULL, 0);
+							recipients, attachments, streams, 0);
 			g_free (cbdata.props);
 			if (!mid) {
 				g_object_unref (comp);
