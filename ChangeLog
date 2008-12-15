@@ -1,5 +1,10 @@
 2008-12-15  Johnny Jacob  <jjohnny@novell.com>
 
+	* configure.in: Version bumped to 0.25.4 . Using 
+	post-release-version increment.
+	
+2008-12-15  Johnny Jacob  <jjohnny@novell.com>
+
 	* configure.in: Version bumped to 0.25.3 (from 0.1)
 
 	* NEWS: 0.25.3 updates.
