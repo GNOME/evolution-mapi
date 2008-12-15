@@ -4,6 +4,7 @@ camel_provider_LTLIBRARIES = libcamelmapi.la
 camel_provider_DATA = libcamelmapi.urls
 
 INCLUDES = -I.. 				\
+	-I$(top_srcdir)/src/			\
 	-I$(top_srcdir)/src/camel		\
 	-I$(top_srcdir)/src/libexchangemapi	\
 	$(CAMEL_CFLAGS)				\
