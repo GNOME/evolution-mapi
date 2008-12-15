@@ -107,7 +107,7 @@ mapi_item_set_subject(MapiItem *item, const char *subject)
 	if (item->header.subject)
 		free(item->header.subject);
 
-	item->header.subject = strdup(subject);
+	item->header.subject = g_strdup(subject);
 }
 
 #define MAX_READ_SIZE 0x1000
@@ -135,7 +135,7 @@ mapi_item_set_body_stream (MapiItem *item, CamelStream *body, MapiItemPartType p
 		stream->proptag = PR_HTML;
 		break;
 	case PART_TYPE_PLAIN_TEXT:
-		stream->proptag = PR_BODY;
+		stream->proptag = PR_BODY_UNICODE;
 		break;
 	}
 
@@ -147,21 +147,23 @@ mapi_item_set_body_stream (MapiItem *item, CamelStream *body, MapiItemPartType p
 }
 
 static gboolean
-mapi_item_add_attach(MapiItem *item, const gchar *filename, const char *description, 
-		     CamelStream *content_stream, int content_size)
+mapi_item_add_attach (MapiItem *item, CamelMimePart *part, CamelStream *content_stream)
 {
 	guint8 *buf = g_new0 (guint8 , STREAM_SIZE);
-	guint32	read_size, flag;
+	gchar *content_id = NULL;
+	guint32	read_size, flag, i = 0;
+
 	ExchangeMAPIAttachment *item_attach;
 	ExchangeMAPIStream *stream; 
 
+	const gchar *filename = camel_mime_part_get_filename (part);
+	
 	item_attach = g_new0 (ExchangeMAPIAttachment, 1);
 
-	item_attach->cValues = 4; 
-	item_attach->lpProps = g_new0 (struct SPropValue, 4); 
+	item_attach->lpProps = g_new0 (struct SPropValue, 5);
 
 	flag = ATTACH_BY_VALUE; 
-	set_SPropValue_proptag(&(item_attach->lpProps[0]), PR_ATTACH_METHOD, (const void *) (&flag));
+	set_SPropValue_proptag(&(item_attach->lpProps[i++]), PR_ATTACH_METHOD, (const void *) (&flag));
 
 	/* MSDN Documentation: When the supplied offset is -1 (0xFFFFFFFF), the 
 	 * attachment is not rendered using the PR_RENDERING_POSITION property. 
@@ -169,22 +171,38 @@ mapi_item_add_attach(MapiItem *item, const gchar *filename, const char *descript
 	 * the attachment is to be rendered. 
 	 */
 	flag = 0xFFFFFFFF;
-	set_SPropValue_proptag(&(item_attach->lpProps[1]), PR_RENDERING_POSITION, (const void *) (&flag));
+	set_SPropValue_proptag(&(item_attach->lpProps[i++]), PR_RENDERING_POSITION, (const void *) (&flag));
 
 	if (filename) {
-		set_SPropValue_proptag(&(item_attach->lpProps[2]), PR_ATTACH_FILENAME, (const void *) g_strdup(filename));
-		set_SPropValue_proptag(&(item_attach->lpProps[3]), PR_ATTACH_LONG_FILENAME, (const void *) g_strdup(filename));
+		set_SPropValue_proptag(&(item_attach->lpProps[i++]), 
+				       PR_ATTACH_FILENAME,
+				       (const void *) g_strdup(filename));
+
+		set_SPropValue_proptag(&(item_attach->lpProps[i++]), 
+				       PR_ATTACH_LONG_FILENAME, 
+				       (const void *) g_strdup(filename));
 	}
+
+	/* mime type : multipart/related */
+	content_id = camel_mime_part_get_content_id (part);
+	if (content_id) {
+		set_SPropValue_proptag(&(item_attach->lpProps[i++]), 
+				       PR_ATTACH_CONTENT_ID,
+				       (const void *) g_strdup(content_id));
+	}
+
+	item_attach->cValues = i;
 
 	stream = g_new0 (ExchangeMAPIStream, 1);
 	stream->proptag = PR_ATTACH_DATA_BIN; 
 	stream->value = g_byte_array_new ();
+
 	camel_seekable_stream_seek((CamelSeekableStream *)content_stream, 0, CAMEL_STREAM_SET);
 	while((read_size = camel_stream_read(content_stream, (char *)buf, STREAM_SIZE))){
 		stream->value = g_byte_array_append (stream->value, buf, read_size);
 	}
-	item_attach->streams = g_slist_append (item_attach->streams, stream); 
 
+	item_attach->streams = g_slist_append (item_attach->streams, stream); 
 	item->attachments = g_slist_append(item->attachments, item_attach);
 
 	return TRUE;
@@ -217,7 +235,6 @@ mapi_do_multipart(CamelMultipart *mp, MapiItem *item)
 		/* filename */
 		filename = camel_mime_part_get_filename(part);
 
-		dw = camel_medium_get_content_object(CAMEL_MEDIUM(part));
 		content_stream = camel_stream_mem_new();
 		content_size = camel_data_wrapper_decode_to_stream (dw, (CamelStream *) content_stream);
 		camel_stream_write ((CamelStream *) content_stream, "", 1);
@@ -234,8 +251,7 @@ mapi_do_multipart(CamelMultipart *mp, MapiItem *item)
 		} else if (camel_content_type_is (type, "text", "html")) {
 			mapi_item_set_body_stream (item, content_stream, PART_TYPE_TEXT_HTML);
 		} else {
-			mapi_item_add_attach(item, filename, description, 
-					     content_stream, content_size);
+			mapi_item_add_attach (item, part, content_stream);
 		}
 	}
 
@@ -385,8 +401,8 @@ mail_build_props (struct SPropValue **value, struct SPropTagArray *SPropTagArray
 
 	props = g_new0 (struct SPropValue, 6);
 
-	set_SPropValue_proptag(&props[i++], PR_CONVERSATION_TOPIC, g_strdup (item->header.subject));
-	set_SPropValue_proptag(&props[i++], PR_NORMALIZED_SUBJECT, g_strdup (item->header.subject));
+	set_SPropValue_proptag(&props[i++], PR_CONVERSATION_TOPIC_UNICODE, g_strdup (item->header.subject));
+	set_SPropValue_proptag(&props[i++], PR_NORMALIZED_SUBJECT_UNICODE, g_strdup (item->header.subject));
 
 	*msgflag = MSGFLAG_UNSENT;
 	set_SPropValue_proptag(&props[i++], PR_MESSAGE_FLAGS, (void *)msgflag);
@@ -399,7 +415,7 @@ mail_build_props (struct SPropValue **value, struct SPropTagArray *SPropTagArray
 		bin->lpb = (uint8_t *)stream->value->data;
 		if (stream->proptag == PR_HTML)
 			set_SPropValue_proptag(&props[i++], stream->proptag, (void *)bin);
-		else if (stream->proptag == PR_BODY)
+		else if (stream->proptag == PR_BODY_UNICODE)
 			set_SPropValue_proptag(&props[i++], stream->proptag, (void *)stream->value->data);
 	}
 

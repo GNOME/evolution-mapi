@@ -335,7 +335,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelException *ex, gboole
 			mi = (CamelMapiMessageInfo *)camel_message_info_new (folder->summary); 
 			if (mi->info.content == NULL) {
 				mi->info.content = camel_folder_summary_content_info_new (folder->summary);
-				mi->info.content->type = camel_content_type_new ("multipart", "mixed");	
+				mi->info.content->type = camel_content_type_new ("multipart", "related");      
 			}
 		}
 		
@@ -1023,7 +1023,6 @@ mapi_populate_msg_body_from_item (CamelMultipart *multipart, MapiItem *item, Exc
 	} else
 		camel_mime_part_set_content(part, " ", strlen(" "), "text/html");
 
-	camel_multipart_set_boundary (multipart, NULL);
 	camel_multipart_add_part (multipart, part);
 	camel_object_unref (part);
 }
@@ -1036,6 +1035,7 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 {
 	CamelMimeMessage *msg = NULL;
 	CamelMultipart *multipart = NULL;
+	CamelContentType *content_type = NULL;
 
 	GSList *attach_list = NULL;
 	int errno;
@@ -1049,6 +1049,14 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 	msg = camel_mime_message_new ();
 
 	multipart = camel_multipart_new ();
+
+	/*FIXME : Using set of default. Fix it during mimewriter*/
+	camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (multipart),
+					  "multipart/related");
+
+	camel_content_type_set_param (multipart, "type", "multipart/alternative");
+
+	camel_multipart_set_boundary (multipart, NULL);
 
 	camel_mime_message_set_message_id (msg, uid);
 	body_part_list = item->msg.body_parts;
@@ -1068,29 +1076,41 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 		for (al = attach_list; al != NULL; al = al->next) {
 			ExchangeMAPIAttachment *attach = (ExchangeMAPIAttachment *)al->data;
 			ExchangeMAPIStream *stream = NULL;
-			const char *filename, *mime_type; 
+			const char *filename, *mime_type, *content_id = NULL; 
 			CamelMimePart *part;
-
-			filename = (const char *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps, PR_ATTACH_LONG_FILENAME);
-			if (!(filename && *filename))
-				filename = (const char *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps, PR_ATTACH_FILENAME);
-
-			mime_type = (const char *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps, PR_ATTACH_MIME_TAG);
 
 			stream = exchange_mapi_util_find_stream (attach->streams, PR_ATTACH_DATA_BIN);
 
 			if (!stream || stream->value->len <= 0) {
 				continue;
 			}
+
 			part = camel_mime_part_new ();
 
+			filename = (const char *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps, 
+												 PR_ATTACH_LONG_FILENAME);
+
+			if (!(filename && *filename))
+				filename = (const char *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps, 
+													 PR_ATTACH_FILENAME);
 			camel_mime_part_set_filename(part, g_strdup(filename));
-			//Auto generate content-id
-			camel_mime_part_set_content_id (part, NULL);
-			camel_mime_part_set_content(part, stream->value->data, stream->value->len, mime_type);
 			camel_content_type_set_param (((CamelDataWrapper *) part)->mime_type, "name", filename);
 
-			camel_multipart_set_boundary(multipart, NULL);
+			/*Content-Type*/
+			mime_type = (const char *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps, 
+												  PR_ATTACH_MIME_TAG);
+
+			camel_mime_part_set_content(part, stream->value->data, stream->value->len, mime_type);
+
+			/*Content-ID*/
+			content_id = (const char *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps, 
+												   PR_ATTACH_CONTENT_ID);
+
+			camel_mime_part_set_content_id (part, content_id);
+
+			/*Fall back to default*/
+			camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
+
 			camel_multipart_add_part (multipart, part);
 			camel_object_unref (part);
 			

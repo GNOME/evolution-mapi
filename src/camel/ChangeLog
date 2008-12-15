@@ -1,5 +1,13 @@
 2008-12-15  Johnny Jacob  <jjohnny@novell.com>
 
+	* camel-mapi-transport.c (mapi_item_add_attach): Add conent-id in 
+	mapi object properties.
+
+	* camel-mapi-folder.c (mapi_folder_item_to_msg): Add content type as
+	multipart/related.
+
+2008-12-15  Johnny Jacob  <jjohnny@novell.com>
+
 	* Makefile.am (INCLUDES): fix for distcheck.
 
 2008-12-09  Johnny Jacob  <jjohnny@novell.com>
