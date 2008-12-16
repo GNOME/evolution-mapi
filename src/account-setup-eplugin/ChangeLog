@@ -1,3 +1,10 @@
+2008-12-16  Matthew Barnes  <mbarnes@redhat.com>
+
+	** Fixes part of bug #564553
+
+	* exchange-mapi-account-setup.c (check_node), (add_to_store):
+	Fix compiler warnings.
+
 2008-12-08  Johnny Jacob  <jjohnny@novell.com>
 
 	* exchange-mapi-account-setup.c (org_gnome_exchange_mapi_check_options): If 

@@ -42,6 +42,7 @@
 #include <exchange-mapi-defs.h>
 #include <exchange-mapi-utils.h>
 #include <exchange-mapi-folder.h>
+#include <exchange-mapi-cal-utils.h>
 
 #include "camel-mapi-store.h"
 #include "camel-mapi-folder.h"
@@ -202,7 +203,7 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 	for (j = 0; j < item_data->properties->cValues; j++) {
 
-		gpointer prop_data = get_mapi_SPropValue_data(&item_data->properties->lpProps[j]);
+		gconstpointer prop_data = get_mapi_SPropValue_data(&item_data->properties->lpProps[j]);
 
 		switch (item_data->properties->lpProps[j].ulPropTag) {
 		/* FIXME : Instead of duping. Use talloc_steal to reuse the memory */
@@ -306,6 +307,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelException *ex, gboole
 	for ( ; item_list != NULL ; item_list = g_slist_next (item_list) ) {
 		MapiItem *temp_item ;
 		MapiItem *item;
+		gchar *msg_uid;
 		guint64 id;
 
 		exists = FALSE;
@@ -322,7 +324,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelException *ex, gboole
 		/************************ First populate summary *************************/
 		mi = NULL;
 		pmi = NULL;
-		char *msg_uid = exchange_mapi_util_mapi_ids_to_uid (item->fid, item->mid);
+		msg_uid = exchange_mapi_util_mapi_ids_to_uid (item->fid, item->mid);
 		pmi = camel_folder_summary_uid (folder->summary, msg_uid);
 
 		if (pmi) {
@@ -437,9 +439,10 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 			const char *uid;
 			mapi_id_t *mid = g_new0 (mapi_id_t, 1); /* FIXME : */
 			mapi_id_t temp_fid;
+			guint32 flags;
 
 			uid = camel_message_info_uid (info);
-			guint32 flags= camel_message_info_flags (info);
+			flags= camel_message_info_flags (info);
 
 			/* Why are we getting so much noise here :-/ */
 			if (!exchange_mapi_util_mapi_ids_from_uid (uid, &temp_fid, mid))
@@ -595,6 +598,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 
 		fetch_data->last_modification_time = g_new0 (struct timeval, 1); /*First Sync*/
 
+		/* XXX Casting a timeval to a GTimeVal is not portable. */
 		if (mapi_summary->sync_time_stamp && *mapi_summary->sync_time_stamp &&
 		    g_time_val_from_iso8601 (mapi_summary->sync_time_stamp, fetch_data->last_modification_time)) {
 			struct SPropValue sprop;
@@ -649,6 +653,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		}
 
 		/*Preserve last_modification_time from this fetch for later use with restrictions.*/
+		/* XXX Casting a timeval to a GTimeVal is not portable. */
 		mapi_summary->sync_time_stamp = g_time_val_to_iso8601 (fetch_data->last_modification_time);
 
 		camel_folder_summary_touch (folder->summary);
@@ -839,7 +844,7 @@ fetch_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 	for (j = 0; j < item_data->properties->cValues; j++) {
 
-		gpointer prop_data = get_mapi_SPropValue_data(&item_data->properties->lpProps[j]);
+		gconstpointer prop_data = get_mapi_SPropValue_data(&item_data->properties->lpProps[j]);
 
 		switch (item_data->properties->lpProps[j].ulPropTag) {
 		/*FIXME : Instead of duping. Use talloc_steal to reuse the memory*/
@@ -976,6 +981,8 @@ mapi_populate_details_from_item (CamelMimeMessage *msg, MapiItem *item)
 	char *temp_str = NULL;
 	time_t recieved_time;
 	CamelInternetAddress *addr = NULL;
+	int offset = 0;
+	time_t actual_time;
 
 	temp_str = item->header.subject;
 	if(temp_str) 
@@ -983,8 +990,7 @@ mapi_populate_details_from_item (CamelMimeMessage *msg, MapiItem *item)
 
 	recieved_time = item->header.recieved_time;
 
-	int offset = 0;
-	time_t actual_time = camel_header_decode_date (ctime(&recieved_time), &offset);
+	actual_time = camel_header_decode_date (ctime(&recieved_time), &offset);
 	camel_mime_message_set_date (msg, actual_time, offset);
 
 	if (item->header.from) {
@@ -1005,10 +1011,10 @@ static void
 mapi_populate_msg_body_from_item (CamelMultipart *multipart, MapiItem *item, ExchangeMAPIStream *body)
 {
 	CamelMimePart *part;
+	const char* type = NULL;
 
 	part = camel_mime_part_new ();
 	camel_mime_part_set_encoding(part, CAMEL_TRANSFER_ENCODING_8BIT);
-	const char* type = NULL;
 	
 	if (body) { 
 		if (item->is_cal)
@@ -1139,6 +1145,11 @@ mapi_folder_get_message( CamelFolder *folder, const char *uid, CamelException *e
 	CamelStream *stream, *cache_stream;
 	int errno;
 
+	mapi_id_t id_folder;
+	mapi_id_t id_message;
+	MapiItem *item = NULL;
+	guint32 options = 0;
+
 	/* see if it is there in cache */
 
 	mi = (CamelMapiMessageInfo *) camel_folder_summary_uid (folder->summary, uid);
@@ -1192,11 +1203,6 @@ mapi_folder_get_message( CamelFolder *folder, const char *uid, CamelException *e
 		camel_message_info_free (&mi->info);
 		return NULL;
 	}
-
-	mapi_id_t id_folder;
-	mapi_id_t id_message;
-	MapiItem *item = NULL;
-	guint32 options = 0;
 
 	options = MAPI_OPTIONS_FETCH_ALL | MAPI_OPTIONS_FETCH_BODY_STREAM | MAPI_OPTIONS_GETBESTBODY ;
 	exchange_mapi_util_mapi_ids_from_uid (uid, &id_folder, &id_message);
@@ -1374,7 +1380,7 @@ mapi_expunge (CamelFolder *folder, CamelException *ex)
 				deleted_head = NULL;
 				deleted_head = deleted_items = g_slist_prepend (deleted_items, mid);
 			}
-			deleted_items_uid = g_slist_prepend (deleted_items_uid, uid);
+			deleted_items_uid = g_slist_prepend (deleted_items_uid, (gpointer) uid);
 		}
 		camel_message_info_free (info);
 	}
@@ -1424,7 +1430,7 @@ mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 	CamelMapiStore *mapi_store= CAMEL_MAPI_STORE(source->parent_store);
 	CamelFolderChangeInfo *changes = NULL;
 
-	char *folder_id = NULL;
+	const gchar *folder_id = NULL;
 	int i = 0;
 
 	GSList *src_msg_ids = NULL;

@@ -1663,8 +1663,8 @@ exchange_mapi_cal_util_build_props (struct SPropValue **value, struct SPropTagAr
 		e_cal_component_alarm_get_action (alarm, &action);
 		if (action == E_CAL_COMPONENT_ALARM_DISPLAY) {
 			ECalComponentAlarmTrigger trigger;
-			e_cal_component_alarm_get_trigger (alarm, &trigger);
 			int dur_int = 0; 
+			e_cal_component_alarm_get_trigger (alarm, &trigger);
 			switch (trigger.type) {
 			case E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START :
 				dur_int = (icaldurationtype_as_int (trigger.u.rel_duration)) / SECS_IN_MINUTE;

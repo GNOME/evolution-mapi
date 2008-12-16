@@ -402,7 +402,7 @@ mapi_fid_is_system_folder (CamelMapiStore *mapi_store, const char *fid)
 	if (!(fid && *fid)) 
 		return FALSE;
 
-	return (g_hash_table_find (priv->default_folders, hash_check_fid_presence, fid) != NULL);
+	return (g_hash_table_find (priv->default_folders, hash_check_fid_presence, (gpointer) fid) != NULL);
 }
 
 static const gchar*
@@ -920,9 +920,9 @@ mapi_get_folder_info_offline (CamelStore *store, const char *top,
 		if ( !strcmp(name, camel_mapi_store_info_full_name (mapi_store->summary, si))
 		     || match_path (path, camel_mapi_store_info_full_name (mapi_store->summary, si))) {
 
-			gchar *store_info_path = camel_store_info_path((CamelStoreSummary *)mapi_store->summary, si);
+			const gchar *store_info_path = camel_store_info_path((CamelStoreSummary *)mapi_store->summary, si);
 			gchar *parent_name = NULL;
-			gchar *folder_name = NULL;
+			const gchar *folder_name = NULL;
 
 			/* TODO : UTF8 / i18n*/
 			if (g_str_has_prefix (store_info_path, DISPLAY_NAME_ALL_PUBLIC_FOLDERS) && subscribed) {
@@ -1156,7 +1156,7 @@ mapi_folders_sync (CamelMapiStore *store, CamelException *ex)
 			continue;
 
 		info = mapi_convert_to_folder_info (store, folder, (const char *)url, ex);
-		if (!(mapi_si = camel_store_summary_path ((CamelStoreSummary *)store->summary, info->full_name))){
+		if (!(mapi_si = (CamelMapiStoreInfo *) camel_store_summary_path ((CamelStoreSummary *)store->summary, info->full_name))){
 			mapi_si = camel_mapi_store_summary_add_from_full (store->summary, info->full_name, '/');
 			if (mapi_si == NULL) {
 				continue;

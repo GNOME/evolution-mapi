@@ -1,3 +1,16 @@
+2008-12-16  Matthew Barnes  <mbarnes@redhat.com>
+
+	** Fixes part of bug #564553
+
+	* camel-mapi-store.c (mapi_fid_is_system_folder),
+	(mapi_get_folder_info_offline), (mapi_folders_sync):
+	* camel_mapi_transport.c (mapi_item_add_recipient):
+	* camel-mapi-folder.c (fetch_items_cb), (mapi_update_cache),
+	(mapi_sync), (mapi_refresh_folder), (fetch_item_cb),
+	(mapi_populate_details_from_item), (mapi_populate_msg_body_from_item),
+	(mapi_folder_get_message), (mapi_expunge), (mapi_transfer_messages_to):
+	Fix compiler warnings.
+
 2008-12-15  Johnny Jacob  <jjohnny@novell.com>
 
 	* camel-mapi-transport.c (mapi_item_add_attach): Add conent-id in 

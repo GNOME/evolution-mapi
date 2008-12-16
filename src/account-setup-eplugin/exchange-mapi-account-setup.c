@@ -380,10 +380,13 @@ enum {
 static gboolean
 check_node (GtkTreeStore *ts, ExchangeMAPIFolder *folder, GtkTreeIter *iter)
 {
+	GtkTreeModel *ts_model;
 	mapi_id_t fid;
 	gboolean status = FALSE;
+
+	ts_model = GTK_TREE_MODEL (ts);
 	
-	gtk_tree_model_get (GTK_TREE_MODEL (ts), iter, 1, &fid, -1);
+	gtk_tree_model_get (ts_model, iter, 1, &fid, -1);
 	if (fid && folder->parent_folder_id == fid) {
 		/* Do something */
 		GtkTreeIter node;
@@ -392,13 +395,13 @@ check_node (GtkTreeStore *ts, ExchangeMAPIFolder *folder, GtkTreeIter *iter)
 		return TRUE;
 	}
 
-	if (gtk_tree_model_iter_has_child (ts, iter)) {
+	if (gtk_tree_model_iter_has_child (ts_model, iter)) {
 		GtkTreeIter child;
-		gtk_tree_model_iter_children (ts, &child, iter);
+		gtk_tree_model_iter_children (ts_model, &child, iter);
 		status = check_node (ts, folder, &child);
 	}
 
-	while (gtk_tree_model_iter_next (ts, iter) && !status) {
+	while (gtk_tree_model_iter_next (ts_model, iter) && !status) {
 		status = check_node (ts, folder, iter);
 	}
 
@@ -408,9 +411,12 @@ check_node (GtkTreeStore *ts, ExchangeMAPIFolder *folder, GtkTreeIter *iter)
 static void
 add_to_store (GtkTreeStore *ts, ExchangeMAPIFolder *folder)
 {
+	GtkTreeModel *ts_model;
 	GtkTreeIter iter;
+
+	ts_model = GTK_TREE_MODEL (ts);
 	
-	gtk_tree_model_get_iter_first (ts, &iter);
+	gtk_tree_model_get_iter_first (ts_model, &iter);
 	if (!check_node (ts, folder, &iter)) {
 		GtkTreeIter node;
 		gtk_tree_store_append (ts, &node, &iter);		

@@ -430,13 +430,14 @@ mail_build_props (struct SPropValue **value, struct SPropTagArray *SPropTagArray
 static void
 mapi_item_add_recipient (const char *recipients, OlMailRecipientType type, GSList **recipient_list)
 {
+	ExchangeMAPIRecipient *recipient;
 	uint32_t val = 0;
 	const char *str = NULL;
 
 	if (!recipients)
 		return ;
 
-	ExchangeMAPIRecipient *recipient = g_new0 (ExchangeMAPIRecipient, 1);
+	recipient = g_new0 (ExchangeMAPIRecipient, 1);
 
 	recipient->email_id = recipients;
 

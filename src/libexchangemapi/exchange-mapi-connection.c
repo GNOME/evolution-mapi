@@ -1172,6 +1172,7 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 			retval = GetPropsAll (&obj_message, &properties_array);
 
 		if (retval == MAPI_E_SUCCESS) {
+			FetchItemsCallbackData *item_data;
 			uint32_t z;
 
 			/* just to get all the other streams */
@@ -1183,7 +1184,7 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 			mapi_SPropValue_array_named(&obj_message, &properties_array);
 
 			/* NOTE: stream_list, recipient_list and attach_list should be freed by the callback */
-			FetchItemsCallbackData *item_data = g_new0 (FetchItemsCallbackData, 1);
+			item_data = g_new0 (FetchItemsCallbackData, 1);
 			item_data->fid = *pfid;
 			item_data->mid = *pmid;
 			item_data->properties = &properties_array;

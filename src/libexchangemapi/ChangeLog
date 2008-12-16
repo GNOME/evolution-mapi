@@ -1,3 +1,11 @@
+2008-12-16  Matthew Barnes  <mbarnes@redhat.com>
+
+	** Fixes part of bug #564553
+
+	* exchange-mapi-cal-utils.c (exchange_mapi_cal_build_props):
+	* exchange-mapi-connection.c (exchange_mapi_connection_fetch_items):
+	Fix compiler warnings.
+
 2008-12-02  Johnny Jacob  <jjohnny@novell.com>
 
 	* exchange-mapi-connection.[ch] (exchange_mapi_connection_fetch_items): Enable

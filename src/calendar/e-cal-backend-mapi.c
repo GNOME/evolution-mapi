@@ -376,10 +376,12 @@ static void
 notify_progress (ECalBackendMAPI *cbmapi, guint64 index, guint64 total)
 {
 	guint percent = ((float)index/total) * 100 ;
+	gchar *progress_string;
+
 	if (percent > 100)
 		percent = 99; 
 
-	gchar *progress_string = g_strdup_printf (_("Loading %s items"), get_element_type (e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi)))); 
+	progress_string = g_strdup_printf (_("Loading %s items"), get_element_type (e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi)))); 
 
 	e_cal_backend_notify_view_progress (E_CAL_BACKEND (cbmapi), progress_string, percent);
 
