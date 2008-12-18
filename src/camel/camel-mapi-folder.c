@@ -1059,8 +1059,8 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 	/*FIXME : Using set of default. Fix it during mimewriter*/
 	camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (multipart),
 					  "multipart/related");
-
-	camel_content_type_set_param (multipart, "type", "multipart/alternative");
+	camel_content_type_set_param(CAMEL_DATA_WRAPPER (multipart)->mime_type, 
+				     "type", "multipart/alternative");
 
 	camel_multipart_set_boundary (multipart, NULL);
 
