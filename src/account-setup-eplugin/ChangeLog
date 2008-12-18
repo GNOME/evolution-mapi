@@ -1,3 +1,8 @@
+2008-12-18  Johnny Jacob  <jjohnny@novell.com>
+
+	* exchange-mapi-account-setup.c (exchange_mapi_create_profile): Do not show the 
+	password when debug statements are enabled.
+
 2008-12-16  Matthew Barnes  <mbarnes@redhat.com>
 
 	** Fixes part of bug #564553

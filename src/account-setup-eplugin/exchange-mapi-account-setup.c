@@ -143,7 +143,7 @@ exchange_mapi_create_profile(const char *username, const char *password, const c
 	gchar *profname = NULL, *profpath = NULL;
 	struct mapi_session *session = NULL;
 
-	d(g_print ("Create profile with %s %s (****) %s %s\n", username, password, domain, server));
+	d(g_print ("Create profile with %s %s %s\n", username, domain, server));
 
 	profpath = g_build_filename (g_get_home_dir(), DEFAULT_PROF_PATH, NULL);
 	profname = g_strdup_printf("%s@%s", username, domain);
