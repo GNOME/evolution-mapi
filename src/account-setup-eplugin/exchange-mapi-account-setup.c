@@ -310,12 +310,15 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 	target_account = (EMConfigTargetAccount *)data->config->target;
 	url = camel_url_new(e_account_get_string(target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
 
-	g_return_val_if_fail (url != NULL, NULL); 
+	/* is NULL on New Account creation */
+	if (url == NULL)
+		return NULL; 
 
 	if (!g_ascii_strcasecmp (url->protocol, "mapi")) {
 		GtkWidget *label;
 		GtkWidget *domain_name;
 		GtkWidget *auth_button;
+		const char *domain_value = camel_url_get_param (url, "domain");
 		int row = ((GtkTable *)data->parent)->nrows;
 
 		/* Domain name & Authenticate Button */
@@ -325,6 +328,8 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 
 		domain_name = gtk_entry_new ();
 		gtk_label_set_mnemonic_widget (GTK_LABEL (label), domain_name);
+		if (domain_value && *domain_value)
+			gtk_entry_set_text (GTK_ENTRY (domain_name), domain_value);
 		gtk_box_pack_start (GTK_BOX (hbox), domain_name, FALSE, FALSE, 0);
 		g_signal_connect (domain_name, "changed", G_CALLBACK(domain_entry_changed), data->config);
 
@@ -338,7 +343,7 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 	}
 
 	camel_url_free (url);
-	return GTK_WIDGET (hbox);
+	return hbox;
 }
 
 gboolean

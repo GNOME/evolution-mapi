@@ -1,3 +1,11 @@
+2008-12-19  Milan Crha  <mcrha@redhat.com>
+
+	** Fix for bug #564901
+
+	* exchange-mapi-account-setup.c:
+	(org_gnome_exchange_mapi_account_setup): 'url' is NULL on a New Account
+	creation, thus count with it. Also fill the 'Domain' entry on editing.
+
 2008-12-19  Suman Manjunath  <msuman@novell.com>
 
 	* exchange-mapi-account-setup.c (exchange_mapi_create_profile):
