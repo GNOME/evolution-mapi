@@ -35,6 +35,7 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
 AC_DEFINE(_GNU_SOURCE, 1, [Use GNU extensions])
+AC_DEFINE(HANDLE_LIBICAL_MEMORY, 1, [Define it once memory returned by libical is freed properly])
 
 dnl ************
 dnl i18n stuff

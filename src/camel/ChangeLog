@@ -1,3 +1,10 @@
+2008-12-19  Milan Crha  <mcrha@redhat.com>
+
+	** Part of fix for bug #564899
+
+	* camel-mapi-folder.c: (struct fetch_items_data), (fetch_items_cb),
+	(mapi_refresh_folder): Compiler warnings and memory leaks fix.
+
 2008-12-19  Suman Manjunath  <msuman@novell.com>
 
 	** Fixes part of bug #564553

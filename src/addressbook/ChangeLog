@@ -1,3 +1,10 @@
+2008-12-19  Milan Crha  <mcrha@redhat.com>
+
+	** Part of fix for bug #564899
+
+	* e-book-backend-mapi.c: (emapidump_contact):
+	Compiler warnings and memory leaks fix.
+
 2008-12-05  Suman Manjunath  <msuman@novell.com>
 
 	Patch from Ashish Shrivastava  <shashish@novell.com>

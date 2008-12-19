@@ -74,7 +74,7 @@ typedef struct {
 /*For collecting summary info from server*/
 typedef struct {
 	GSList *items_list;
-	GTimeVal *last_modification_time;
+	GTimeVal last_modification_time;
 }fetch_items_data;
 
 static CamelMimeMessage *mapi_folder_item_to_msg( CamelFolder *folder, MapiItem *item, CamelException *ex );
@@ -189,8 +189,8 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 	long *flags;
 	struct FILETIME *delivery_date = NULL;
 	struct FILETIME *last_modification_time = NULL;
-	struct timeval *item_modification_time = NULL;
-	struct timeval fi_data_mod_time;
+	struct timeval item_modification_time = { 0 };
+	struct timeval fi_data_mod_time = { 0 };
 	guint32 j = 0;
 	NTTIME ntdate;
 
@@ -258,16 +258,15 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 		ntdate = last_modification_time->dwHighDateTime;
 		ntdate = ntdate << 32;
 		ntdate |= last_modification_time->dwLowDateTime;
-		item_modification_time = g_new0 (struct timeval, 1);
-		nttime_to_timeval(item_modification_time, ntdate);
+		nttime_to_timeval (&item_modification_time, ntdate);
 	}
 
-	fi_data_mod_time.tv_sec = fi_data->last_modification_time->tv_sec;
-	fi_data_mod_time.tv_usec = fi_data->last_modification_time->tv_usec;
+	fi_data_mod_time.tv_sec = fi_data->last_modification_time.tv_sec;
+	fi_data_mod_time.tv_usec = fi_data->last_modification_time.tv_usec;
 
-	if (timeval_compare (item_modification_time, &fi_data_mod_time) == 1) {
-			fi_data->last_modification_time->tv_sec = item_modification_time->tv_sec;
-			fi_data->last_modification_time->tv_usec = item_modification_time->tv_usec;
+	if (timeval_compare (&item_modification_time, &fi_data_mod_time) == 1) {
+			fi_data->last_modification_time.tv_sec = item_modification_time.tv_sec;
+			fi_data->last_modification_time.tv_usec = item_modification_time.tv_usec;
 	}
 
 	if ((*flags & MSGFLAG_READ) != 0)
@@ -555,7 +554,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (folder);
 	CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (folder->summary);
 	gboolean is_proxy = folder->parent_store->flags & CAMEL_STORE_PROXY;
-	gboolean is_locked = TRUE;
+	gboolean is_locked = FALSE;
 	gboolean status;
 
 	struct mapi_SRestriction *res = NULL;
@@ -576,8 +575,8 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		PR_DISPLAY_BCC
 	};
 
-	if (((CamelOfflineStore *) mapi_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL) 
-		return;
+	if (((CamelOfflineStore *) mapi_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL)
+		goto end1;
 
 	/* Sync-up the (un)read changes before getting updates,
 	so that the getFolderList will reflect the most recent changes too */
@@ -587,7 +586,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 	folder_id = camel_mapi_store_folder_id_lookup (mapi_store, folder->full_name);
 	if (!folder_id) {
 		d(printf ("\nERROR - Folder id not present. Cannot refresh info for %s\n", folder->full_name));
-		return;
+		goto end1;
 	}
 
 	if (camel_folder_is_frozen (folder) ) {
@@ -595,6 +594,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 	}
 
 	CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
+	is_locked = TRUE;
 
 	if (!camel_mapi_store_connected (mapi_store, ex))
 		goto end1;
@@ -604,10 +604,8 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		mapi_id_t temp_folder_id;
 		guint32 options = 0;
 
-		fetch_data->last_modification_time = g_new0 (GTimeVal, 1); /*First Sync*/
-
 		if (mapi_summary->sync_time_stamp && *mapi_summary->sync_time_stamp &&
-		    g_time_val_from_iso8601 (mapi_summary->sync_time_stamp, fetch_data->last_modification_time)) {
+		    g_time_val_from_iso8601 (mapi_summary->sync_time_stamp, &fetch_data->last_modification_time)) {
 			struct SPropValue sprop;
 			struct timeval t;
 
@@ -617,8 +615,8 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 			res->res.resProperty.relop = RELOP_GE;
 			res->res.resProperty.ulPropTag = PR_LAST_MODIFICATION_TIME;
 
-			t.tv_sec = fetch_data->last_modification_time->tv_sec;
-			t.tv_usec = fetch_data->last_modification_time->tv_usec;
+			t.tv_sec = fetch_data->last_modification_time.tv_sec;
+			t.tv_usec = fetch_data->last_modification_time.tv_usec;
 
 			//Creation time ? 
 			set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
@@ -660,7 +658,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		}
 
 		/*Preserve last_modification_time from this fetch for later use with restrictions.*/
-		mapi_summary->sync_time_stamp = g_time_val_to_iso8601 (fetch_data->last_modification_time);
+		mapi_summary->sync_time_stamp = g_time_val_to_iso8601 (&fetch_data->last_modification_time);
 
 		camel_folder_summary_touch (folder->summary);
 		mapi_sync_summary (folder, ex);
@@ -673,15 +671,15 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 	CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 	is_locked = FALSE;
 
-	g_slist_foreach (fetch_data->items_list, (GFunc) mapi_item_free, NULL);
-	g_slist_free (fetch_data->items_list);
 end2:
 	//TODO:
 end1:
 	if (is_locked)
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
-	return;
 
+	g_slist_foreach (fetch_data->items_list, (GFunc) mapi_item_free, NULL);
+	g_slist_free (fetch_data->items_list);
+	g_free (fetch_data);
 }
 
 static const uint32_t camel_GetPropsList[] = {

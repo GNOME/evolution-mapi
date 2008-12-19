@@ -1033,8 +1033,8 @@ emapidump_contact(struct mapi_SPropValue_array *properties)
 	for (i=1; i<maplen; i++) {
 		gpointer value;
 
-		/* XXX Casting away return value const'ness. */
-		value = find_mapi_SPropValue_data (properties, mappings[i].mapi_id);
+		/* can cast it, no writing to the value; and it'll be freed not before the end of this function */
+		value = (gpointer) find_mapi_SPropValue_data (properties, mappings[i].mapi_id);
 		if (mappings[i].element_type == PT_STRING8 && mappings[i].contact_type == ELEMENT_TYPE_SIMPLE) {
 			if (value)
 				e_contact_set (contact, mappings[i].field_id, value);
@@ -1043,28 +1043,22 @@ emapidump_contact(struct mapi_SPropValue_array *properties)
 				struct FILETIME *t = value;
 				time_t time;
 				NTTIME nt;
-				char *tmp;
+				char buff[129];
+
 				nt = t->dwHighDateTime;
 				nt = nt << 32;
 				nt |= t->dwLowDateTime;
 				time = nt_time_to_unix (nt);
-				tmp = ctime (&time);
-				e_contact_set (contact, mappings[i].field_id, tmp);
-				//g_free (tmp);
+				e_contact_set (contact, mappings[i].field_id, ctime_r (&time, buff));
 			} else
 				printf("Nothing is printed\n");
 		} else if (mappings[i].contact_type == ELEMENT_TYPE_COMPLEX) {
 			if (mappings[i].field_id == E_CONTACT_IM_AIM) {
-				GList *list = NULL;
-				EVCardAttribute *attr;
-				
-				attr = e_vcard_attribute_new ("", e_contact_vcard_attribute(E_CONTACT_IM_AIM));
-//				e_vcard_attribute_add_param_with_value (attr, e_vcard_attribute_param_new (EVC_TYPE), "AIM");
-				e_vcard_attribute_add_value (attr, value);
-				list = g_list_append (list, value);
-				//printf("%s -----\n", value);
+				GList *list = g_list_append (NULL, value);
+
 				e_contact_set (contact, mappings[i].field_id, list);
-				//FIXME: FREE them
+
+				g_list_free (list);
 			} else if (mappings[i].field_id == E_CONTACT_BIRTH_DATE
 				   || mappings[i].field_id == E_CONTACT_ANNIVERSARY) {
 				struct FILETIME *t = value;
@@ -1072,46 +1066,44 @@ emapidump_contact(struct mapi_SPropValue_array *properties)
 				NTTIME nt;
 				struct tm * tmtime;
 				if (value) {
-					EContactDate *date = g_new (EContactDate, 1);
+					EContactDate date = {0};
 					nt = t->dwHighDateTime;
 					nt = nt << 32;
 					nt |= t->dwLowDateTime;
 					time = nt_time_to_unix (nt);
 					tmtime = gmtime (&time);
 					//FIXME: Move to new libmapi api to get string dates.
-					date->day = tmtime->tm_mday + 1;
-					date->month = tmtime->tm_mon + 1;
-					date->year = tmtime->tm_year + 1900;
-					e_contact_set (contact, mappings[i].field_id, date);
-					
+					date.day = tmtime->tm_mday + 1;
+					date.month = tmtime->tm_mon + 1;
+					date.year = tmtime->tm_year + 1900;
+					e_contact_set (contact, mappings[i].field_id, &date);
 				}
 				
 			} else if (mappings[i].field_id == E_CONTACT_ADDRESS_WORK
 				   || mappings[i].field_id == E_CONTACT_ADDRESS_HOME) {
-				EContactAddress *contact_addr;
+				EContactAddress contact_addr = { 0 };
 
-				contact_addr = g_new0(EContactAddress, 1);
+				/* type-casting below to not allocate memory twice; e_contact_set will copy values itself. */
 				if (mappings[i].field_id == E_CONTACT_ADDRESS_HOME) {
-						contact_addr->address_format = NULL;
-						contact_addr->po = NULL;
-						contact_addr->street = value;
-						contact_addr->ext = find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_POST_OFFICE_BOX);
-						contact_addr->locality = find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_CITY);
-						contact_addr->region = find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_STATE_OR_PROVINCE);
-						contact_addr->code = find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_POSTAL_CODE);
-						contact_addr->country = find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_COUNTRY);
+					contact_addr.address_format = NULL;
+					contact_addr.po = NULL;
+					contact_addr.street = (char *)value;
+					contact_addr.ext = (char *)find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_POST_OFFICE_BOX);
+					contact_addr.locality = (char *)find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_CITY);
+					contact_addr.region = (char *)find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_STATE_OR_PROVINCE);
+					contact_addr.code = (char *)find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_POSTAL_CODE);
+					contact_addr.country = (char *)find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_COUNTRY);
 				} else {
-						contact_addr->address_format = NULL;
-						contact_addr->po = NULL;
-						contact_addr->street = value;
-						contact_addr->ext = find_mapi_SPropValue_data (properties, PR_POST_OFFICE_BOX);
-						contact_addr->locality = find_mapi_SPropValue_data (properties, PR_LOCALITY);
-						contact_addr->region = find_mapi_SPropValue_data (properties, PR_STATE_OR_PROVINCE);
-						contact_addr->code = find_mapi_SPropValue_data (properties, PR_POSTAL_CODE);
-						contact_addr->country = find_mapi_SPropValue_data (properties, PR_COUNTRY);
+					contact_addr.address_format = NULL;
+					contact_addr.po = NULL;
+					contact_addr.street = (char *)value;
+					contact_addr.ext = (char *)find_mapi_SPropValue_data (properties, PR_POST_OFFICE_BOX);
+					contact_addr.locality = (char *)find_mapi_SPropValue_data (properties, PR_LOCALITY);
+					contact_addr.region = (char *)find_mapi_SPropValue_data (properties, PR_STATE_OR_PROVINCE);
+					contact_addr.code = (char *)find_mapi_SPropValue_data (properties, PR_POSTAL_CODE);
+					contact_addr.country = (char *)find_mapi_SPropValue_data (properties, PR_COUNTRY);
 				}
-				e_contact_set (contact, mappings[i].field_id, contact_addr);
-				//FIXME: Free everything.
+				e_contact_set (contact, mappings[i].field_id, &contact_addr);
 			}
 		}
 	}
