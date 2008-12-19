@@ -150,7 +150,7 @@ static gboolean
 mapi_item_add_attach (MapiItem *item, CamelMimePart *part, CamelStream *content_stream)
 {
 	guint8 *buf = g_new0 (guint8 , STREAM_SIZE);
-	gchar *content_id = NULL;
+	const gchar *content_id = NULL;
 	guint32	read_size, flag, i = 0;
 
 	ExchangeMAPIAttachment *item_attach;

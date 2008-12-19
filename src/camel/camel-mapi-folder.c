@@ -25,6 +25,8 @@
 #include <string.h>
 #include <time.h>
 
+#include <glib.h>
+
 #include <camel/camel-folder-search.h>
 #include <camel/camel-mime-part.h>
 #include <camel/camel-mime-utils.h>
@@ -72,7 +74,7 @@ typedef struct {
 /*For collecting summary info from server*/
 typedef struct {
 	GSList *items_list;
-	const struct timeval *last_modification_time;
+	GTimeVal *last_modification_time;
 }fetch_items_data;
 
 static CamelMimeMessage *mapi_folder_item_to_msg( CamelFolder *folder, MapiItem *item, CamelException *ex );
@@ -188,6 +190,7 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 	struct FILETIME *delivery_date = NULL;
 	struct FILETIME *last_modification_time = NULL;
 	struct timeval *item_modification_time = NULL;
+	struct timeval fi_data_mod_time;
 	guint32 j = 0;
 	NTTIME ntdate;
 
@@ -259,8 +262,13 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 		nttime_to_timeval(item_modification_time, ntdate);
 	}
 
-	if (timeval_compare (item_modification_time, fi_data->last_modification_time) == 1) 
-			fi_data->last_modification_time = item_modification_time;
+	fi_data_mod_time.tv_sec = fi_data->last_modification_time->tv_sec;
+	fi_data_mod_time.tv_usec = fi_data->last_modification_time->tv_usec;
+
+	if (timeval_compare (item_modification_time, &fi_data_mod_time) == 1) {
+			fi_data->last_modification_time->tv_sec = item_modification_time->tv_sec;
+			fi_data->last_modification_time->tv_usec = item_modification_time->tv_usec;
+	}
 
 	if ((*flags & MSGFLAG_READ) != 0)
 		item->header.flags |= CAMEL_MESSAGE_SEEN;
@@ -596,9 +604,8 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		mapi_id_t temp_folder_id;
 		guint32 options = 0;
 
-		fetch_data->last_modification_time = g_new0 (struct timeval, 1); /*First Sync*/
+		fetch_data->last_modification_time = g_new0 (GTimeVal, 1); /*First Sync*/
 
-		/* XXX Casting a timeval to a GTimeVal is not portable. */
 		if (mapi_summary->sync_time_stamp && *mapi_summary->sync_time_stamp &&
 		    g_time_val_from_iso8601 (mapi_summary->sync_time_stamp, fetch_data->last_modification_time)) {
 			struct SPropValue sprop;
@@ -653,7 +660,6 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		}
 
 		/*Preserve last_modification_time from this fetch for later use with restrictions.*/
-		/* XXX Casting a timeval to a GTimeVal is not portable. */
 		mapi_summary->sync_time_stamp = g_time_val_to_iso8601 (fetch_data->last_modification_time);
 
 		camel_folder_summary_touch (folder->summary);

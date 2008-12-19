@@ -1,3 +1,11 @@
+2008-12-19  Suman Manjunath  <msuman@novell.com>
+
+	** Fixes part of bug #564553
+
+	* camel-mapi-folder.c (fetch_items_cb), (mapi_refresh_folder):
+	* camel-mapi-transport.c (mapi_item_add_attach):
+	Fix compiler warnings.
+
 2008-12-17  Johnny Jacob  <jjohnny@novell.com>
 	
 	** Fixes #564613

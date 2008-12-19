@@ -1033,6 +1033,7 @@ emapidump_contact(struct mapi_SPropValue_array *properties)
 	for (i=1; i<maplen; i++) {
 		gpointer value;
 
+		/* XXX Casting away return value const'ness. */
 		value = find_mapi_SPropValue_data (properties, mappings[i].mapi_id);
 		if (mappings[i].element_type == PT_STRING8 && mappings[i].contact_type == ELEMENT_TYPE_SIMPLE) {
 			if (value)
