@@ -1,6 +1,11 @@
 2008-12-19  Suman Manjunath  <msuman@novell.com>
 
 	* exchange-mapi-account-setup.c (exchange_mapi_create_profile):
+	Remove the logging stuff from the previous commit. It segfaults :(
+
+2008-12-19  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-mapi-account-setup.c (exchange_mapi_create_profile):
 	Use en-US as the default language, pass the password to MapiLogonProvider()
 	and use debug mode while creating profile. 
 

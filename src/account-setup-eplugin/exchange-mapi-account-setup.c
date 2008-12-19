@@ -49,8 +49,6 @@
 #include <exchange-mapi-utils.h>
 
 #define d(x) x
-#define LOGALL() 	lp_set_cmdline(global_mapi_ctx->lp_ctx, "log level", "10"); global_mapi_ctx->dumpdata = TRUE;
-#define LOGNONE() 	lp_set_cmdline(global_mapi_ctx->lp_ctx, "log level", "0"); global_mapi_ctx->dumpdata = FALSE;
 
 int e_plugin_lib_enable (EPluginLib *ep, int enable);
 
@@ -145,8 +143,6 @@ exchange_mapi_create_profile(const char *username, const char *password, const c
 	gchar *profname = NULL, *profpath = NULL;
 	struct mapi_session *session = NULL;
 
-	LOGALL();
-
 	d(g_print ("Create profile with %s %s %s\n", username, domain, server));
 
 	profpath = g_build_filename (g_get_home_dir(), DEFAULT_PROF_PATH, NULL);
@@ -230,8 +226,6 @@ cleanup:
 
 	g_free (profname);
 	g_free (profpath);
-
-	LOGNONE();
 
 	return result;
 }
