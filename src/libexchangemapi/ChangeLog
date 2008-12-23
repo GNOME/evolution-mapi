@@ -1,3 +1,9 @@
+2008-12-23  Suman Manjunath  <msuman@novell.com>
+
+	* exchange-mapi-cal-utils.c (ical_attendees_from_props): Always add the
+	PARTSTAT and ROLE properties (by using default values when properties
+	are missing). Should resolve bug #450850 (bugzilla.novell.com)
+
 2008-12-16  Matthew Barnes  <mbarnes@redhat.com>
 
 	** Fixes part of bug #564553

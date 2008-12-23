@@ -508,16 +508,12 @@ ical_attendees_from_props (icalcomponent *ical_comp, GSList *recipients, gboolea
 			icalproperty_add_parameter (prop, param);
 			/* PARTSTAT */
 			ui32 = (const uint32_t *) get_SPropValue(recip->out.all_lpProps, PR_RECIPIENT_TRACKSTATUS);
-			if (ui32) {
-				param = icalparameter_new_partstat (get_partstat_from_trackstatus (*ui32));
-				icalproperty_add_parameter (prop, param);
-			}
+			param = icalparameter_new_partstat (get_partstat_from_trackstatus (ui32 ? *ui32 : olResponseNone));
+			icalproperty_add_parameter (prop, param);
 			/* ROLE */
 			ui32 = (const uint32_t *) get_SPropValue(recip->out.all_lpProps, PR_RECIPIENT_TYPE);
-			if (ui32) {
-				param = icalparameter_new_role (get_role_from_type (*ui32));
-				icalproperty_add_parameter (prop, param);
-			}
+			param = icalparameter_new_role (get_role_from_type (ui32 ? *ui32 : olTo));
+			icalproperty_add_parameter (prop, param);
 #if 0
 			/* CALENDAR USER TYPE */
 			param = icalparameter_new_cutype ();
