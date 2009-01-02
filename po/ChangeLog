@@ -1,3 +1,8 @@
+2009-01-02  Jorge Gonzalez  <jorgegonz@svn.gnome.org>
+
+	* LINGUAS: Added Spanish to LINGUAS.
+	* es.po: Added Spanish translation.
+
 2009-01-02  甘露(Gan Lu) <rhythm.gan@gmail.com>
 
         * zh_CN.po: Added Chinese Simplified translation
