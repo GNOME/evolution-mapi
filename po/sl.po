@@ -1,0 +1,256 @@
+# This file is distributed under the same license as the evolution package.
+#
+# Matej Urbančič <mateju@svn.gnome.org>, 2008.
+#
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution&amp;component=general\n"
+"POT-Creation-Date: 2009-01-02 12:56+0000\n"
+"PO-Revision-Date: 2009-01-02 15:11+0100\n"
+"Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
+"Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || n%100==4 ? 3 : 0);\n"
+"X-Poedit-Language: Slovenian\n"
+"X-Poedit-Country: SLOVENIA\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:248
+#, c-format
+msgid "Enter Password for %s@%s"
+msgstr "Vpišite geslo za %s@%s"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:326
+msgid "_Domain name:"
+msgstr "Ime _domene:"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:336
+msgid "_Authenticate"
+msgstr "_Overitev"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:438
+msgid "Personal Folders"
+msgstr "Osebne mape"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:500
+msgid "_Location:"
+msgstr "_Mesto:"
+
+#: ../src/calendar/e-cal-backend-mapi.c:111
+#: ../src/calendar/e-cal-backend-mapi.c:1045
+#: ../src/camel/camel-mapi-store.c:454
+msgid "Authentication failed"
+msgstr "Overitev ni uspela"
+
+#: ../src/calendar/e-cal-backend-mapi.c:384
+#, c-format
+msgid "Loading %s items"
+msgstr "Nalaganje %s predmetov"
+
+#. FIXME: better string please...
+#: ../src/calendar/e-cal-backend-mapi.c:573
+#: ../src/calendar/e-cal-backend-mapi.c:584
+#: ../src/calendar/e-cal-backend-mapi.c:610
+msgid "Error fetching changes from the server. Removing the cache might help."
+msgstr "Napaka med prenašanjem sprememb s strežnika. Odstranjevanje predpomnilnika lahko reši problem."
+
+#: ../src/calendar/e-cal-backend-mapi.c:965
+#: ../src/calendar/e-cal-backend-mapi.c:975
+#: ../src/calendar/e-cal-backend-mapi.c:1080
+#: ../src/calendar/e-cal-backend-mapi.c:1162
+msgid "Could not create cache file"
+msgstr "Ni mogoče ustvariti predpomnilniške datoteke"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1091
+msgid "Could not create thread for populating cache"
+msgstr "Ni mogoče ustvariti niti za polnjenje predpomnilnika"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1499
+msgid "Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server."
+msgstr "Podpora za spreminjanje ponavljajočih dogodkov še ni del programa. Na strežniku ni bilo nobene spremembe."
+
+#: ../src/camel/camel-mapi-folder.c:312
+#: ../src/camel/camel-mapi-folder.c:646
+#, c-format
+msgid "Fetching summary information for new messages in %s"
+msgstr "Prenašanje povzetkov novih sporočil v %s"
+
+#: ../src/camel/camel-mapi-folder.c:639
+#: ../src/camel/camel-mapi-folder.c:1198
+#: ../src/camel/camel-mapi-folder.c:1206
+msgid "This message is not available in offline mode."
+msgstr "To sporočilo ni na voljo v načinu brez povezave."
+
+#: ../src/camel/camel-mapi-folder.c:656
+msgid "Fetch items failed"
+msgstr "Neuspešno branje predmetov"
+
+#: ../src/camel/camel-mapi-folder.c:1162
+#, c-format
+msgid ""
+"Cannot get message: %s\n"
+"  %s"
+msgstr ""
+"Ni mogoče dobiti sporočila: %s\n"
+"  %s"
+
+#: ../src/camel/camel-mapi-folder.c:1162
+msgid "No such message"
+msgstr "Ni takega sporočila"
+
+#: ../src/camel/camel-mapi-folder.c:1174
+msgid "User canceled"
+msgstr "Uporabniški preklic"
+
+#: ../src/camel/camel-mapi-folder.c:1181
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "Ni mogoče dobiti sporočila %s: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1225
+#: ../src/camel/camel-mapi-folder.c:1235
+msgid "Could not get message"
+msgstr "Ni mogoče dobiti sporočila"
+
+#: ../src/camel/camel-mapi-folder.c:1582
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "Ni mogoče naložiti povzetka za %s"
+
+#: ../src/camel/camel-mapi-provider.c:51
+msgid "Checking for New Mail"
+msgstr "Preverjanje za novo pošto"
+
+#: ../src/camel/camel-mapi-provider.c:53
+msgid "C_heck for new messages in all folders"
+msgstr "Preveri za _nova sporočila v vseh mapah"
+
+#. i18n: GAL is an Outlookism, AD is a Windowsism
+#: ../src/camel/camel-mapi-provider.c:66
+msgid "Global Address List / Active Directory"
+msgstr "Splošni seznam naslovov / Aktivni imenik"
+
+#. i18n: "Global Catalog" is a Windowsism, but it's a
+#. technical term and may not have translations?
+#: ../src/camel/camel-mapi-provider.c:70
+msgid "_Global Catalog server name:"
+msgstr "Ime strežnika s _splošnim katalogom"
+
+#: ../src/camel/camel-mapi-provider.c:72
+#, c-format
+msgid "_Limit number of GAL responses: %s"
+msgstr "Omejitev števi_la odgovorov splošnega seznama: %s"
+
+#: ../src/camel/camel-mapi-provider.c:75
+msgid "Options"
+msgstr "Možnosti"
+
+#: ../src/camel/camel-mapi-provider.c:77
+msgid "Automatically synchroni_ze account locally"
+msgstr "Samodejno _uskladi krajevni račun"
+
+#. i18n: copy from evolution:camel-imap-provider.c
+#: ../src/camel/camel-mapi-provider.c:80
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "Uvelj_avi filtre na novih sporočilih v mapi dohodnih sporočil na tem strežniku"
+
+#: ../src/camel/camel-mapi-provider.c:82
+msgid "Check new messages for _Junk contents"
+msgstr "V novih sporočilih preveri za _neželeno pošto"
+
+#: ../src/camel/camel-mapi-provider.c:84
+msgid "Only check for Junk messag_es in the Inbox folder"
+msgstr "Neželeno pošto preveri samo v mapi _dohodnih sporočil"
+
+#: ../src/camel/camel-mapi-provider.c:96
+msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+msgstr "Za dostop do Microsoft Exchange / OpenChange strežnikov z uporabo MAPI protokola"
+
+#: ../src/camel/camel-mapi-provider.c:111
+msgid "Password"
+msgstr "Geslo"
+
+#: ../src/camel/camel-mapi-provider.c:112
+msgid "This option will connect to the Openchange server using a plaintext password."
+msgstr "Možnost omogoča vzpostavitev povezave s strežnikom Openchange z uporabo besedilnega gesla."
+
+#: ../src/camel/camel-mapi-store.c:61
+msgid "Favourites"
+msgstr "Priljubljeno"
+
+#: ../src/camel/camel-mapi-store.c:62
+msgid "All Public Folders"
+msgstr "Vse javne mape"
+
+#: ../src/camel/camel-mapi-store.c:262
+#, c-format
+msgid "Exchange MAPI server %s"
+msgstr "Exchange MAPI strežnik %s"
+
+#: ../src/camel/camel-mapi-store.c:264
+#, c-format
+msgid "Exchange MAPI for %s on %s"
+msgstr "Exchange MAPI za %s na %s"
+
+#: ../src/camel/camel-mapi-store.c:298
+#, c-format
+msgid "%sPlease enter the MAPI password for %s@%s"
+msgstr "%s Prosim, vnesite MAPI geslo za %s@%s"
+
+#: ../src/camel/camel-mapi-store.c:312
+msgid "You did not enter a password."
+msgstr "Niste vnesli gesla."
+
+#: ../src/camel/camel-mapi-store.c:320
+#, c-format
+msgid "Unable to authenticate to Exchange MAPI server. "
+msgstr "Ni mogoče overiti preko Exchange MAPI strežnika"
+
+#: ../src/camel/camel-mapi-store.c:438
+msgid "Cannot create MAPI folders in offline mode."
+msgstr "Ni mogoče ustvariti MAPI mape v načinu brez povezave."
+
+#: ../src/camel/camel-mapi-store.c:443
+#, c-format
+msgid "Cannot create new folder `%s'"
+msgstr "Ni mogoče ustvariti nove mape `%s'"
+
+#: ../src/camel/camel-mapi-store.c:663
+#, c-format
+msgid "Cannot rename MAPI folder `%s'. Folder doesn't exist"
+msgstr "Ni mogoče preimenovati MAPI mape `%s'. Mapa ne obstaja."
+
+#: ../src/camel/camel-mapi-store.c:671
+#, c-format
+msgid "Cannot rename Mapi folder `%s' to `%s'. Default folder."
+msgstr "Ni mogoče preimenovati MAPI mape `%s' v `%s'. PRivzeta mapa."
+
+#: ../src/camel/camel-mapi-store.c:687
+#, c-format
+msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgstr "Ni mogoče preimenovati mape MAPI `%s' v `%s'"
+
+#: ../src/camel/camel-mapi-store.c:1093
+msgid "Folder list not available in offline mode."
+msgstr "Seznam map ni na voljo v načinu brez povezave."
+
+#. Fixme : Set a better error message. Would be helful in troubleshooting.
+#: ../src/camel/camel-mapi-transport.c:333
+msgid "Could not send message."
+msgstr "Ni mogoče poslati sporočila."
+
+#: ../src/camel/camel-mapi-transport.c:345
+#, c-format
+msgid "MAPI server %s"
+msgstr "MAPI strežnik %s"
+
+#: ../src/camel/camel-mapi-transport.c:347
+#, c-format
+msgid "MAPI service for %s on %s"
+msgstr "Storitev MAPI za %s na %s"
+
