@@ -1,0 +1,253 @@
+# Swedish translation for evolution-mapi.
+# Copyright (C) 2009 Free Software Foundation, Inc.
+# This file is distributed under the same license as the evolution-mapi package.
+# Daniel Nylander <po@danielnylander.se>, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-mapi\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-01-03 01:00+0100\n"
+"PO-Revision-Date: 2009-01-03 01:11+0100\n"
+"Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
+"Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:248
+#, c-format
+msgid "Enter Password for %s@%s"
+msgstr "Ange lösenordet för %s@%s"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:326
+msgid "_Domain name:"
+msgstr "_Domännamn:"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:336
+msgid "_Authenticate"
+msgstr "_Autentisera"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:438
+msgid "Personal Folders"
+msgstr "Personliga mappar"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:500
+msgid "_Location:"
+msgstr "_Plats:"
+
+#: ../src/calendar/e-cal-backend-mapi.c:111
+#: ../src/calendar/e-cal-backend-mapi.c:1045
+#: ../src/camel/camel-mapi-store.c:454
+msgid "Authentication failed"
+msgstr "Autentisering misslyckades"
+
+#: ../src/calendar/e-cal-backend-mapi.c:384
+#, c-format
+msgid "Loading %s items"
+msgstr "Läser in %s objekt"
+
+#. FIXME: better string please...
+#: ../src/calendar/e-cal-backend-mapi.c:573
+#: ../src/calendar/e-cal-backend-mapi.c:584
+#: ../src/calendar/e-cal-backend-mapi.c:610
+msgid "Error fetching changes from the server. Removing the cache might help."
+msgstr "Fel vid hämtning av ändringar från servern. Borttagning av mellanlager kan hjälpa."
+
+#: ../src/calendar/e-cal-backend-mapi.c:965
+#: ../src/calendar/e-cal-backend-mapi.c:975
+#: ../src/calendar/e-cal-backend-mapi.c:1080
+#: ../src/calendar/e-cal-backend-mapi.c:1162
+msgid "Could not create cache file"
+msgstr "Kunde inte skapa mellanlagringsfil"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1091
+msgid "Could not create thread for populating cache"
+msgstr "Kunde inte skapa tråd för inmatning i mellanlager"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1499
+msgid "Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server."
+msgstr "Stöd för ändring av enstaka instanser för ett återkommande möte har ännu inte implementerats. Ingen ändring gjordes till mötet på servern."
+
+#: ../src/camel/camel-mapi-folder.c:312
+#: ../src/camel/camel-mapi-folder.c:646
+#, c-format
+msgid "Fetching summary information for new messages in %s"
+msgstr "Hämtning av sammandragsinformation för nya meddelanden i %s"
+
+#: ../src/camel/camel-mapi-folder.c:639
+#: ../src/camel/camel-mapi-folder.c:1198
+#: ../src/camel/camel-mapi-folder.c:1206
+msgid "This message is not available in offline mode."
+msgstr "Detta meddelande är inte tillgängligt i frånkopplat läge."
+
+#: ../src/camel/camel-mapi-folder.c:656
+msgid "Fetch items failed"
+msgstr "Hämtning av objekt misslyckades"
+
+#: ../src/camel/camel-mapi-folder.c:1162
+#, c-format
+msgid ""
+"Cannot get message: %s\n"
+"  %s"
+msgstr ""
+"Kan inte hämta meddelande: %s\n"
+"  %s"
+
+#: ../src/camel/camel-mapi-folder.c:1162
+msgid "No such message"
+msgstr "Det finns inget sådant meddelande"
+
+#: ../src/camel/camel-mapi-folder.c:1174
+msgid "User canceled"
+msgstr "Användaren avbröt"
+
+#: ../src/camel/camel-mapi-folder.c:1181
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "Kan inte hämta meddelandet %s: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1225
+#: ../src/camel/camel-mapi-folder.c:1235
+msgid "Could not get message"
+msgstr "Kunde inte hämta meddelandet"
+
+#: ../src/camel/camel-mapi-folder.c:1582
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "Kunde inte läsa in sammandrag för %s"
+
+#: ../src/camel/camel-mapi-provider.c:51
+msgid "Checking for New Mail"
+msgstr "Letar efter ny e-post"
+
+#: ../src/camel/camel-mapi-provider.c:53
+msgid "C_heck for new messages in all folders"
+msgstr "L_eta efter nya meddelanden i alla mappar"
+
+#. i18n: GAL is an Outlookism, AD is a Windowsism
+#: ../src/camel/camel-mapi-provider.c:66
+msgid "Global Address List / Active Directory"
+msgstr "Global Address List / Active Directory"
+
+#. i18n: "Global Catalog" is a Windowsism, but it's a
+#. technical term and may not have translations?
+#: ../src/camel/camel-mapi-provider.c:70
+msgid "_Global Catalog server name:"
+msgstr "Servernamn för _global katalog:"
+
+#: ../src/camel/camel-mapi-provider.c:72
+#, c-format
+msgid "_Limit number of GAL responses: %s"
+msgstr "_Begränsa antalet GAL-svar: %s"
+
+#: ../src/camel/camel-mapi-provider.c:75
+msgid "Options"
+msgstr "Alternativ"
+
+#: ../src/camel/camel-mapi-provider.c:77
+msgid "Automatically synchroni_ze account locally"
+msgstr "Syn_kronisera automatiskt kontot lokalt"
+
+#. i18n: copy from evolution:camel-imap-provider.c
+#: ../src/camel/camel-mapi-provider.c:80
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "_Tillämpa filter på nya meddelanden i Inbox på denna server"
+
+#: ../src/camel/camel-mapi-provider.c:82
+msgid "Check new messages for _Junk contents"
+msgstr "Kontrollera nya meddelanden efter _skräppost"
+
+#: ../src/camel/camel-mapi-provider.c:84
+msgid "Only check for Junk messag_es in the Inbox folder"
+msgstr "Kontrollera endast meddelanden i _Inbox-mappen efter skräppost"
+
+#: ../src/camel/camel-mapi-provider.c:96
+msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+msgstr "För åtkomst till Microsoft Exchange / OpenChange-servrar med MAPI"
+
+#: ../src/camel/camel-mapi-provider.c:111
+msgid "Password"
+msgstr "Lösenord"
+
+#: ../src/camel/camel-mapi-provider.c:112
+msgid "This option will connect to the Openchange server using a plaintext password."
+msgstr "Detta alternativ kommer att ansluta till Openchange-servern med ett klartextlösenord."
+
+#: ../src/camel/camel-mapi-store.c:61
+msgid "Favourites"
+msgstr "Favoriter"
+
+#: ../src/camel/camel-mapi-store.c:62
+msgid "All Public Folders"
+msgstr "Alla publika mappar"
+
+#: ../src/camel/camel-mapi-store.c:262
+#, c-format
+msgid "Exchange MAPI server %s"
+msgstr "Exchange MAPI-server %s"
+
+#: ../src/camel/camel-mapi-store.c:264
+#, c-format
+msgid "Exchange MAPI for %s on %s"
+msgstr "Exchange MAPI för %s på %s"
+
+#: ../src/camel/camel-mapi-store.c:298
+#, c-format
+msgid "%sPlease enter the MAPI password for %s@%s"
+msgstr "%sAnge MAPI-lösenordet för %s@%s"
+
+#: ../src/camel/camel-mapi-store.c:312
+msgid "You did not enter a password."
+msgstr "Du angav inte något lösenord."
+
+#: ../src/camel/camel-mapi-store.c:320
+#, c-format
+msgid "Unable to authenticate to Exchange MAPI server. "
+msgstr "Kunde inte autentisera mot Exchange MAPI-server. "
+
+#: ../src/camel/camel-mapi-store.c:438
+msgid "Cannot create MAPI folders in offline mode."
+msgstr "Kan inte skapa MAPI-mappar i frånkopplat läge."
+
+#: ../src/camel/camel-mapi-store.c:443
+#, c-format
+msgid "Cannot create new folder `%s'"
+msgstr "Kan inte skapa nya mappen \"%s\""
+
+#: ../src/camel/camel-mapi-store.c:663
+#, c-format
+msgid "Cannot rename MAPI folder `%s'. Folder doesn't exist"
+msgstr "Kan inte byta namn på MAPI-mappen \"%s\". Mappen finns inte"
+
+#: ../src/camel/camel-mapi-store.c:671
+#, c-format
+msgid "Cannot rename Mapi folder `%s' to `%s'. Default folder."
+msgstr "Kan inte byta namn på MAPI-mappen \"%s\" till \"%s\". Standardmapp."
+
+#: ../src/camel/camel-mapi-store.c:687
+#, c-format
+msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgstr "Kan inte byta namn på MAPI-mappen \"%s\" till \"%s\""
+
+#: ../src/camel/camel-mapi-store.c:1093
+msgid "Folder list not available in offline mode."
+msgstr "Mapplistan är inte tillgänglig i frånkopplat läge."
+
+#. Fixme : Set a better error message. Would be helful in troubleshooting.
+#: ../src/camel/camel-mapi-transport.c:333
+msgid "Could not send message."
+msgstr "Kunde inte skicka meddelande."
+
+#: ../src/camel/camel-mapi-transport.c:345
+#, c-format
+msgid "MAPI server %s"
+msgstr "MAPI-server %s"
+
+#: ../src/camel/camel-mapi-transport.c:347
+#, c-format
+msgid "MAPI service for %s on %s"
+msgstr "MAPI-tjänst för %s på %s"
+
