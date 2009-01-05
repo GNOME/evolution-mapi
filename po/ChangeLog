@@ -1,5 +1,9 @@
 2009-01-05  Kjartan Maraas  <kmaraas@gnome.org>
 
+	* LINGUAS: Forgot to add it here as well.
+
+2009-01-05  Kjartan Maraas  <kmaraas@gnome.org>
+
 	* nb.po: Added Norwegian bokmål translation.
 
 2009-01-04  Leonardo Ferreira Fontenelle  <leonardof@gnome.org>
