@@ -1,6 +1,24 @@
-Version 0.25.3
-15 Dec 2008
+evolution-mapi 0.25.4 2009-01-05
+---------------------------------------
+
+Bug Fixes:
+	#561654: Send the recurrence blob to meeting recipients (Suman Manjunath)
+	#564553: Fixes for compiler warnings (Matthew Barnes)
+	#564613: Memory corruption due to incorrect type passed to camel_content_set_type_param() (Johnny Jacob)
+	#564899: Fixes for compiler warnings and memory leaks (Milan Crha)
+	#564901: Fill the 'Domain' entry on editing (Milan Crha)
+	#450850: (bugzilla.novell.com) Fix for a crash when rendering meeting requests (Suman Manjunath)
+
+Updated Translations:
+	Leonardo Ferreira Fontenelle (pt_BR)
+	Simos Xenitellis (el)
+	Jorge Gonzalez (es)
+	Matej Urbančič (sl)
+	Daniel Nylander (sv)
+	甘露(Gan Lu) (zh_CN)
+
+evolution-mapi 0.25.3 2008-12-15
+---------------------------------------
 
 * Debut tarball
 
-------------------------------------------------------
