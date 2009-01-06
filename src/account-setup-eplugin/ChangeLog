@@ -1,3 +1,10 @@
+2008-12-18  Johnny Jacob  <jjohnny@novell.com>
+	
+	** Fixes #564897
+	
+	* exchange-mapi-account-setup.c (exchange_mapi_create_profile, validate_credentials): 
+	Make sure we have username , password, server, domain before proceeding.
+	
 2008-12-19  Milan Crha  <mcrha@redhat.com>
 
 	** Fix for bug #564901
@@ -19,8 +26,8 @@
 
 2008-12-18  Johnny Jacob  <jjohnny@novell.com>
 
-	* exchange-mapi-account-setup.c (exchange_mapi_create_profile): Do not show the 
-	password when debug statements are enabled.
+	* exchange-mapi-account-setup.c (exchange_mapi_create_profile): Do not
+	printout password when debug statements are enabled.
 
 2008-12-16  Matthew Barnes  <mbarnes@redhat.com>
 

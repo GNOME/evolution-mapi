@@ -143,6 +143,10 @@ exchange_mapi_create_profile(const char *username, const char *password, const c
 	gchar *profname = NULL, *profpath = NULL;
 	struct mapi_session *session = NULL;
 
+	/*We need all the params before proceeding.*/
+	g_return_val_if_fail (username && *username && password && *password &&
+			      domain && *domain && server && *server, FALSE);
+
 	d(g_print ("Create profile with %s %s %s\n", username, domain, server));
 
 	profpath = g_build_filename (g_get_home_dir(), DEFAULT_PROF_PATH, NULL);
@@ -237,7 +241,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	EMConfigTargetAccount *target_account = (EMConfigTargetAccount *)(config->target);
 	CamelURL *url = NULL;
  	gchar *key = NULL, *password = NULL;
-
+	const gchar *domain_name = NULL; 
 	url = camel_url_new (e_account_get_string (target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
 	key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
 	password = e_passwords_get_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
@@ -252,8 +256,10 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 		g_free (title);
 	}
 
-	if (password) {
-		const gchar *domain_name = camel_url_get_param (url, "domain");
+	domain_name = camel_url_get_param (url, "domain");
+
+	/*Can there be a account without password ?*/
+	if (password && *password && domain_name && *domain_name && *url->user && *url->host) {
 		gboolean status = exchange_mapi_create_profile (url->user, password, domain_name, url->host);
 		if (status) {
 			/* Things are successful */
