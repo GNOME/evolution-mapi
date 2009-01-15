@@ -1,5 +1,9 @@
 2009-01-15  Andre Klapper  <a9016009@gmx.de>
 
+	* de.po: Fix umlauts. Hopefully.
+
+2009-01-15  Andre Klapper  <a9016009@gmx.de>
+
 	* de.po: Translation added.
 	* LINGUAS: Added de
 
