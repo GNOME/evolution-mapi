@@ -1,3 +1,12 @@
+2009-01-15  Milan Crha  <mcrha@redhat.com>
+
+	** Fix for bug #567190
+
+	* exchange-mapi-account-setup.c: (validate_credentials),
+	(domain_entry_changed):
+	* exchange-mapi-account-listener.c: (mapi_account_changed):
+	Change transport and source URL of the EAccount together.
+
 2008-12-18  Johnny Jacob  <jjohnny@novell.com>
 	
 	** Fixes #564897

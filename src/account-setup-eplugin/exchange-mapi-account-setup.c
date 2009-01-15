@@ -270,7 +270,8 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 			g_free (profname);
 
 			uri = camel_url_to_string(url, 0);
-			e_account_set_string(target_account->account, E_ACCOUNT_SOURCE_URL, uri);
+			e_account_set_string (target_account->account, E_ACCOUNT_SOURCE_URL, uri);
+			e_account_set_string (target_account->account, E_ACCOUNT_TRANSPORT_URL, uri);
 			g_free (uri);
 		} else {
 			e_passwords_forget_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
@@ -301,6 +302,7 @@ domain_entry_changed(GtkWidget *entry, EConfig *config)
 
 	url_string = camel_url_to_string (url, 0);
 	e_account_set_string (target->account, E_ACCOUNT_SOURCE_URL, url_string);
+	e_account_set_string (target->account, E_ACCOUNT_TRANSPORT_URL, url_string);
 	g_free (url_string);
 
 	camel_url_free (url);

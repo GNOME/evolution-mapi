@@ -654,7 +654,8 @@ mapi_account_changed (EAccountList *account_listener, EAccount *account)
 			 * method uses e_account_set_string() which initiates another signal emmission
 			 * which we have to block for now. */
 			g_signal_handlers_block_by_func (config_listener->priv->account_list, G_CALLBACK (mapi_account_changed), NULL); 
-			e_account_set_string(account, E_ACCOUNT_SOURCE_URL, uri);
+			e_account_set_string (account, E_ACCOUNT_SOURCE_URL, uri);
+			e_account_set_string (account, E_ACCOUNT_TRANSPORT_URL, uri);
 			g_signal_handlers_unblock_by_func (config_listener->priv->account_list, G_CALLBACK (mapi_account_changed), NULL); 
 			g_free (uri);
 
@@ -686,7 +687,8 @@ mapi_account_changed (EAccountList *account_listener, EAccount *account)
 				 * method uses e_account_set_string() which initiates another signal emmission
 				 * which we have to block for now. */
 				g_signal_handlers_block_by_func (config_listener->priv->account_list, G_CALLBACK (mapi_account_changed), NULL); 
-				e_account_set_string(account, E_ACCOUNT_SOURCE_URL, uri);
+				e_account_set_string (account, E_ACCOUNT_SOURCE_URL, uri);
+				e_account_set_string (account, E_ACCOUNT_TRANSPORT_URL, uri);
 				g_signal_handlers_unblock_by_func (config_listener->priv->account_list, G_CALLBACK (mapi_account_changed), NULL); 
 				g_free (uri);
 
