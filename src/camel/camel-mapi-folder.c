@@ -653,7 +653,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		camel_operation_end (NULL);
 
 		if (!status) {
-			camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_INVALID, _("Fetch items failed"));
+			camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_INVALID, _("Fetching items failed"));
 			goto end2;
 		}
 

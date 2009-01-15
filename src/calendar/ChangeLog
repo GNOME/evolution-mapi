@@ -1,3 +1,10 @@
+2009-01-15  Suman Manjunath  <msuman@novell.com>
+
+	** Part of fix for bug #565964
+
+	* e-cal-backend-mapi.c (notify_progress):
+	Some string changes which fix a few translation issues. 
+
 2008-12-16  Matthew Barnes  <mbarnes@redhat.com>
 
 	** Fixes part of bug #564553

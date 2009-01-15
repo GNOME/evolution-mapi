@@ -58,7 +58,7 @@
 /* This definition should be in-sync with those in exchange-mapi-account-setup.c and exchange-account-listener.c */
 #define E_PASSWORD_COMPONENT "ExchangeMAPI"
 
-#define DISPLAY_NAME_FAVOURITES _("Favourites")
+#define DISPLAY_NAME_FAVOURITES _("Favorites")
 #define DISPLAY_NAME_ALL_PUBLIC_FOLDERS _("All Public Folders")
 
 #include <sys/types.h>
@@ -261,7 +261,7 @@ static char
 	if (brief) {
 		return g_strdup_printf(_("Exchange MAPI server %s"), service->url->host);
 	} else {
-		return g_strdup_printf(_("Exchange MAPI for %s on %s"),
+		return g_strdup_printf(_("Exchange MAPI service for %s on %s"),
 				       service->url->user, service->url->host);
 	}
 }
@@ -317,8 +317,7 @@ mapi_auth_loop (CamelService *service, CamelException *ex)
 		exchange_mapi_connection_new (NULL,service->url->passwd);
 
 		if (!exchange_mapi_connection_exists ()) {
-			errbuf = g_strdup_printf (_("Unable to authenticate "
-					    "to Exchange MAPI server. "));
+			errbuf = g_strdup_printf (_("Unable to authenticate to Exchange MAPI server."));
 						  
 			camel_exception_clear (ex);
 		} else 
@@ -660,7 +659,7 @@ mapi_rename_folder(CamelStore *store, const char *old_name, const char *new_name
 
 	folder_id = camel_mapi_store_folder_id_lookup (mapi_store, temp);
 	if (!folder_id) {
-		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename MAPI folder `%s'. Folder doesn't exist"),
+		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename MAPI folder `%s'. Folder does not exist."),
 				      old_name);
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 		return;
@@ -668,7 +667,7 @@ mapi_rename_folder(CamelStore *store, const char *old_name, const char *new_name
 
 	/*Do not allow rename for system folders.*/
 	if (mapi_fid_is_system_folder (mapi_store, folder_id)) {
-		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename Mapi folder `%s' to `%s'. Default folder."),
+		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename MAPI folder `%s' to `%s'. Default folder."),
 				      old_name, new_name);
 		return;
 	}

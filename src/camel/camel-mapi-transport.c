@@ -342,9 +342,9 @@ static char*
 mapi_transport_get_name(CamelService *service, gboolean brief)
 {
 	if (brief) {
-		return g_strdup_printf (_("MAPI server %s"), service->url->host);
+		return g_strdup_printf (_("Exchange MAPI server %s"), service->url->host);
 	} else {
-		return g_strdup_printf (_("MAPI service for %s on %s"),
+		return g_strdup_printf (_("Exchange MAPI service for %s on %s"),
 					service->url->user, service->url->host);
 	}
 }

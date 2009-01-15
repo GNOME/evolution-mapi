@@ -48,7 +48,7 @@ static gint mapi_url_equal (gconstpointer, gconstpointer);
 
 static CamelProviderConfEntry mapi_conf_entries[] = {
 	{ CAMEL_PROVIDER_CONF_SECTION_START, "mailcheck", NULL,
-	  N_("Checking for New Mail") },
+	  N_("Checking for new mail") },
 	{ CAMEL_PROVIDER_CONF_CHECKBOX, "check_all", NULL,
 	  N_("C_heck for new messages in all folders"), "1" },
 	{ CAMEL_PROVIDER_CONF_SECTION_END },

@@ -1,3 +1,14 @@
+2009-01-15  Suman Manjunath  <msuman@novell.com>
+
+	** Part of fix for bug #565964
+
+	* camel-mapi-folder.c (mapi_refresh_folder):
+	* camel-mapi-provider.c:
+	* camel-mapi-store.c (mapi_get_name), (mapi_auth_loop),
+	(mapi_rename_folder):
+	* camel-mapi-transport.c (mapi_transport_get_name):
+	Some string changes which fix a few translation issues. 
+
 2008-12-19  Milan Crha  <mcrha@redhat.com>
 
 	** Part of fix for bug #564899
