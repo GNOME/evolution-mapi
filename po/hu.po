@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: evolution-mapi HEAD\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.orgenter_bug.cgi?product=evolution-mapi&component=General\n"
 "POT-Creation-Date: 2009-01-06 04:43+0000\n"
-"PO-Revision-Date: 2009-01-14 00:15+0100\n"
+"PO-Revision-Date: 2009-01-15 19:53+0100\n"
 "Last-Translator: Gabor Kelemen <kelemeng@gnome.hu>\n"
 "Language-Team: Hungarian <gnome@fsf.hu>\n"
 "MIME-Version: 1.0\n"
@@ -55,7 +55,7 @@ msgstr "%s elem betöltése"
 #: ../src/calendar/e-cal-backend-mapi.c:584
 #: ../src/calendar/e-cal-backend-mapi.c:610
 msgid "Error fetching changes from the server. Removing the cache might help."
-msgstr ""
+msgstr "Hiba a változások letöltésekor a kiszolgálóról. A gyorsítótár törlése segíthet."
 
 #: ../src/calendar/e-cal-backend-mapi.c:965
 #: ../src/calendar/e-cal-backend-mapi.c:975
@@ -72,7 +72,7 @@ msgstr "Nem sikerült létrehozni szálat a gyorsítótárfájl megtöltéséhez
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
-msgstr ""
+msgstr "Ismétlődő értekezlet egyedi példányainak módosítása még nem támogatott. Az értekezlet nem módosult a kiszolgálón."
 
 #: ../src/camel/camel-mapi-folder.c:312 ../src/camel/camel-mapi-folder.c:646
 #, c-format
@@ -86,7 +86,7 @@ msgstr "Ez az üzenet nem érhető el kapcsolat nélküli módban."
 
 #: ../src/camel/camel-mapi-folder.c:656
 msgid "Fetch items failed"
-msgstr ""
+msgstr "Az elemek letöltése meghiúsult"
 
 #: ../src/camel/camel-mapi-folder.c:1162
 #, c-format
@@ -166,7 +166,7 @@ msgstr "Levélszemét keresése _csak az Érkezett mappában"
 
 #: ../src/camel/camel-mapi-provider.c:96
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
-msgstr ""
+msgstr "Microsoft Exchange / OpenChange kiszolgálók elérése MAPI használatával"
 
 #: ../src/camel/camel-mapi-provider.c:111
 msgid "Password"
@@ -174,7 +174,7 @@ msgstr "Jelszó"
 
 #: ../src/camel/camel-mapi-provider.c:112
 msgid "This option will connect to the Openchange server using a plaintext password."
-msgstr ""
+msgstr "Ez a lehetőség az Openchange kiszolgálóhoz egyszerű szöveges jelszóval csatlakozik."
 
 #: ../src/camel/camel-mapi-store.c:61
 msgid "Favourites"
@@ -187,17 +187,17 @@ msgstr "Minden nyilvános mappa"
 #: ../src/camel/camel-mapi-store.c:262
 #, c-format
 msgid "Exchange MAPI server %s"
-msgstr ""
+msgstr "Exchange MAPI kiszolgáló %s"
 
 #: ../src/camel/camel-mapi-store.c:264
 #, c-format
 msgid "Exchange MAPI for %s on %s"
-msgstr ""
+msgstr "Exchange MAPI %s számára ezen: %s"
 
 #: ../src/camel/camel-mapi-store.c:298
 #, c-format
 msgid "%sPlease enter the MAPI password for %s@%s"
-msgstr ""
+msgstr "%sAdja meg %s@%s MAPI jelszavát"
 
 #: ../src/camel/camel-mapi-store.c:312
 msgid "You did not enter a password."
@@ -206,48 +206,48 @@ msgstr "Nem adott meg jelszót."
 #: ../src/camel/camel-mapi-store.c:320
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server. "
-msgstr ""
+msgstr "Nem lehet bejelentkezni az Exchange MAPI kiszolgálóra. "
 
 #: ../src/camel/camel-mapi-store.c:438
 msgid "Cannot create MAPI folders in offline mode."
-msgstr ""
+msgstr "Nem lehet MAPI mappákat létrehozni offline módban."
 
 #: ../src/camel/camel-mapi-store.c:443
 #, c-format
 msgid "Cannot create new folder `%s'"
-msgstr ""
+msgstr "Nem hozható létre az új „%s” mappa"
 
 #: ../src/camel/camel-mapi-store.c:663
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder doesn't exist"
-msgstr ""
+msgstr "Nem nevezhető át a nem létező „%s” MAPI mappa."
 
 #: ../src/camel/camel-mapi-store.c:671
 #, c-format
 msgid "Cannot rename Mapi folder `%s' to `%s'. Default folder."
-msgstr ""
+msgstr "Nem nevezhető át az alapértelmezett „%s” MAPI mappa erre: „%s”."
 
 #: ../src/camel/camel-mapi-store.c:687
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
-msgstr ""
+msgstr "Nem nevezhető át a(z) „%s” MAPI mappa erre: „%s”."
 
 #: ../src/camel/camel-mapi-store.c:1093
 msgid "Folder list not available in offline mode."
-msgstr ""
+msgstr "A mappalista nem érhető el kapcsolat nélküli módban."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
 #: ../src/camel/camel-mapi-transport.c:333
 msgid "Could not send message."
-msgstr ""
+msgstr "Az üzenet nem küldhető el."
 
 #: ../src/camel/camel-mapi-transport.c:345
 #, c-format
 msgid "MAPI server %s"
-msgstr ""
+msgstr "%s MAPI kiszolgáló"
 
 #: ../src/camel/camel-mapi-transport.c:347
 #, c-format
 msgid "MAPI service for %s on %s"
-msgstr ""
+msgstr "MAPI szolgáltatás %s számára ezen: %s"
 
