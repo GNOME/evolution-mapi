@@ -165,7 +165,7 @@ msgstr "Filter auf neue Nachrichten im Eingang dieses Servers an_wenden"
 
 #: ../src/camel/camel-mapi-provider.c:82
 msgid "Check new messages for _Junk contents"
-msgstr "Neue Nachrichten auf _unerwünschten Inhalt prfen"
+msgstr "Neue Nachrichten auf _unerwünschten Inhalt prüfen"
 
 #: ../src/camel/camel-mapi-provider.c:84
 msgid "Only check for Junk messag_es in the Inbox folder"
@@ -173,7 +173,7 @@ msgstr "Ausschließlich den _Eingang auf unerwünschte Nachrichten prüfen"
 
 #: ../src/camel/camel-mapi-provider.c:96
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
-msgstr "Für den Zugriff auf Microsoft Exchange-/OpenChange-Server ber MAPI"
+msgstr "Für den Zugriff auf Microsoft Exchange-/OpenChange-Server über MAPI"
 
 #: ../src/camel/camel-mapi-provider.c:111
 msgid "Password"
