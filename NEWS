@@ -1,3 +1,22 @@
+evolution-mapi 0.25.5 2009-01-05
+---------------------------------------
+
+Bug Fixes:
+	#566883: Fetch summary does not complete in one attempt (Johnny Jacob)
+	#567190: Changing user name doesn't fix transport url of the account (Milan Crha)
+	#565964: String changes for translation issues. (Suman Manjunath)
+
+Update Translations:
+       Kjartan Maraas (nb)
+       Gabor Kelemen (hu)
+       Andre Klapper (de)
+       Daniel Nylander (sv)
+       Ilkka Tuohela (fi)
+       David Planella (ca)
+       Mario Blättermann (de)
+       Matej Urbančič (sl)
+       Jorge Gonzalez (es)
+
 evolution-mapi 0.25.4 2009-01-05
 ---------------------------------------
 
