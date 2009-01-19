@@ -1,3 +1,11 @@
+2009-01-09  Johnny Jacob  <jjohnny@novell.com>
+
+	** Fixes #566883.
+	
+	* exchange-mapi-connection.c (exchange_mapi_connection_fetch_items): QueryPosition
+	is not gauranteed to return the requested number of results. so we need to track 
+	current cursor position and iterate through the table.
+
 2008-12-23  Suman Manjunath  <msuman@novell.com>
 
 	* exchange-mapi-cal-utils.c (ical_attendees_from_props): Always add the
