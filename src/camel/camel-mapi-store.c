@@ -853,10 +853,11 @@ mapi_build_folder_info(CamelMapiStore *mapi_store, const char *parent_name, cons
 		fi->full_name = g_strdup(folder_name);
  
 	url = camel_url_new(priv->base_url,NULL);
-	//g_free(url->path);
+	g_free(url->path);
+
 	url->path = g_strdup_printf("/%s", fi->full_name);
 	fi->uri = camel_url_to_string(url,CAMEL_URL_HIDE_ALL);
-	//camel_url_free(url);
+	camel_url_free(url);
 
 	name = strrchr(fi->full_name,'/');
 	if(name == NULL)
