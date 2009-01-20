@@ -1,5 +1,9 @@
 2009-01-19  Johnny Jacob  <jjohnny@novell.com>
 
+	* configure.in: Version bumped to 0.25.6.
+	
+2009-01-19  Johnny Jacob  <jjohnny@novell.com>
+
 	* NEWS: Updates for 0.25.5 .
 
 2009-01-05  Suman Manjunath  <msuman@novell.com>
