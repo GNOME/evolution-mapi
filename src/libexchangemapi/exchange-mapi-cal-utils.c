@@ -1307,7 +1307,7 @@ exchange_mapi_cal_util_camel_helper (struct mapi_SPropValue_array *properties,
 	if (comp)
 		icalcomponent_add_component (icalcomp, 
 			icalcomponent_new_clone(e_cal_component_get_icalcomponent(comp)));
-	str = icalcomponent_as_ical_string (icalcomp);
+	str = icalcomponent_as_ical_string_r (icalcomp);
 	icalcomponent_free (icalcomp);
 	if (comp)
 		g_object_unref (comp);

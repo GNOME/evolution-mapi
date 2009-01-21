@@ -1070,7 +1070,7 @@ exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps
 			flag32 = 0x5AE980DF; 
 		else if (end_type == END_AFTER_N_OCCURRENCES) {
 			ECalComponentDateTime dtstart; 
-			gchar *rrule_str = icalrecurrencetype_as_string (rt); 
+			gchar *rrule_str = icalrecurrencetype_as_string_r (rt); 
 			time_t *array = g_new0 (time_t, rt->count); 
 
 			e_cal_component_get_dtstart (comp, &dtstart);

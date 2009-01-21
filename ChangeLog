@@ -1,3 +1,11 @@
+2009-01-21  Suman Manjunath  <msuman@novell.com>
+
+	** Fix for bug #541209
+
+	** Adapt to the new APIs from upstream libical.
+
+	* configure.in: HANDLE_LIBICAL_MEMORY need not be defined anymore.
+
 2009-01-19  Johnny Jacob  <jjohnny@novell.com>
 
 	* configure.in: Version bumped to 0.25.6.

@@ -1666,7 +1666,7 @@ e_cal_backend_mapi_remove_object (ECalBackendSync *backend, EDataCal *cal,
 			/*remove a single instance of a recurring event and modify */
 			time_rid = icaltime_from_string (rid);
 			e_cal_util_remove_instances (icalcomp, time_rid, mod);
-			new_calobj  = (char *) icalcomponent_as_ical_string (icalcomp);
+			new_calobj  = (char *) icalcomponent_as_ical_string_r (icalcomp);
 			status = e_cal_backend_mapi_modify_object (backend, cal, new_calobj, CALOBJ_MOD_ALL, &obj, &new_object);
 			if (status == GNOME_Evolution_Calendar_Success) {
 				*old_object = obj;
@@ -1911,7 +1911,7 @@ e_cal_backend_mapi_receive_objects (ECalBackendSync *backend, EDataCal *cal, con
 					icalcomponent_set_method (resp_comp, ICAL_METHOD_RESPONSE);
 					icalcomponent_add_component (resp_comp, 
 						icalcomponent_new_clone(e_cal_component_get_icalcomponent(comp)));
-					comp_str = icalcomponent_as_ical_string (resp_comp);
+					comp_str = icalcomponent_as_ical_string_r (resp_comp);
 					status = e_cal_backend_mapi_send_objects (backend, cal, comp_str, &users, &new_object);
 					g_free (comp_str);
 					g_free (new_object);
@@ -1977,7 +1977,7 @@ e_cal_backend_mapi_get_timezone (ECalBackendSync *backend, EDataCal *cal, const 
 	if (!icalcomp)
 		return GNOME_Evolution_Calendar_InvalidObject;
 
-	*object = icalcomponent_as_ical_string (icalcomp);
+	*object = icalcomponent_as_ical_string_r (icalcomp);
 
 	return GNOME_Evolution_Calendar_Success;
 }
