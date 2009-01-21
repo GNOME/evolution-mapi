@@ -1,5 +1,12 @@
 2009-01-21  Milan Crha  <mcrha@redhat.com>
 
+	** Fix for bug #567890
+
+	* exchange-mapi-account-listener.c: (check_equal),
+	(mapi_camel_url_equal): Do not pass NULL to a GLib function.
+
+2009-01-21  Milan Crha  <mcrha@redhat.com>
+
 	* Makefile.am: Use also LIBECAL_CFLAGS and LIBECAL_LIBS.
 
 2009-01-15  Milan Crha  <mcrha@redhat.com>

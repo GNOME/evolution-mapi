@@ -607,18 +607,27 @@ create_profile_entry (CamelURL *url)
 }
 
 static gboolean
+check_equal (const char *a, const char *b)
+{
+	if (!a && a == b)
+		return TRUE;
+
+	return a && b && g_ascii_strcasecmp (a, b) == 0;
+}
+
+static gboolean
 mapi_camel_url_equal (CamelURL *a, CamelURL *b)
 {
-	const char *params[] = { "profile", "domain", "ad_limit", "ad_server" }; 
-	guint n_params = G_N_ELEMENTS (params), i; 
-	gboolean retval = TRUE; 
+	const char *params[] = { "profile", "domain", "ad_limit", "ad_server" };
+	guint n_params = G_N_ELEMENTS (params), i;
+	gboolean retval = TRUE;
 
-	retval &= camel_url_equal (a, b); 
+	retval = camel_url_equal (a, b);
 
-	for (i = 0; i < n_params; ++i)
-		retval &= (g_ascii_strcasecmp (camel_url_get_param (a, params[i]), camel_url_get_param (b, params[i])) == 0);
+	for (i = 0; retval && i < n_params; ++i)
+		retval = retval && check_equal (camel_url_get_param (a, params[i]), camel_url_get_param (b, params[i]));
 
-	return retval; 
+	return retval;
 }
 
 static void
