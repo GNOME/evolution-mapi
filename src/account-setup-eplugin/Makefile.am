@@ -5,6 +5,7 @@ INCLUDES = -I .						\
 	-I$(top_srcdir)/src/libexchangemapi/		\
 	$(EVOLUTION_PLUGIN_CFLAGS)			\
 	$(CAMEL_CFLAGS)					\
+	$(LIBECAL_CFLAGS)				\
 	$(LIBMAPI_CFLAGS)
 
 
@@ -24,6 +25,7 @@ liborg_gnome_exchange_mapi_la_LIBADD = 			\
 	$(top_builddir)/src/libexchangemapi/libexchangemapi-1.0.la \
 	$(EVOLUTION_PLUGIN_LIBS)			\
 	$(CAMEL_LIBS) 					\
+	$(LIBECAL_LIBS)					\
 	$(LIBMAPI_LIBS)
 
 liborg_gnome_exchange_mapi_la_LDFLAGS = -module -avoid-version -lmapi $(NO_UNDEFINED)

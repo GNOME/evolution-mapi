@@ -8,6 +8,7 @@ INCLUDES = -I.. 				\
 	-I$(top_srcdir)/src/camel		\
 	-I$(top_srcdir)/src/libexchangemapi	\
 	$(CAMEL_CFLAGS)				\
+	$(LIBECAL_CFLAGS)			\
         $(LIBMAPI_CFLAGS)                       \
 	-DG_LOG_DOMAIN=\"camel-mapi-provider\"
 
@@ -32,6 +33,7 @@ libcamelmapi_la_LDFLAGS = -avoid-version -module $(NO_UNDEFINED)
 libcamelmapi_la_LIBADD = 			\
 	$(top_builddir)/src/libexchangemapi/libexchangemapi-1.0.la \
 	$(CAMEL_LIBS) 				\
+	$(LIBECAL_LIBS)				\
         $(LIBMAPI_LIBS)
 
 EXTRA_DIST = libcamelmapi.urls

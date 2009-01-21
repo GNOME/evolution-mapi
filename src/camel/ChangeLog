@@ -1,3 +1,7 @@
+2009-01-21  Milan Crha  <mcrha@redhat.com>
+
+	* Makefile.am: Use also LIBECAL_CFLAGS and LIBECAL_LIBS.
+
 2009-01-20  Johnny Jacob  <jjohnny@novell.com>
 
 	* camel-mapi-store.c (mapi_build_folder_info): Fix mem leaks.
