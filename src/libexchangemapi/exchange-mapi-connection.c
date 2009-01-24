@@ -1162,7 +1162,6 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 				struct SPropValue *lpProps;
 				uint32_t prop_count = 0, k;
 
-				lpProps = talloc_zero(mem_ctx, struct SPropValue);
 				retval = GetProps (&obj_message, GetPropsTagArray, &lpProps, &prop_count);
 
 				/* Conversion from SPropValue to mapi_SPropValue. (no padding here) */

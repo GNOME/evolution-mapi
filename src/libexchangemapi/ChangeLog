@@ -1,3 +1,8 @@
+2009-01-24  Johnny Jacob  <jjohnny@novell.com>
+
+	* exchange-mapi-connection.c (exchange_mapi_connection_fetch_items): Mem leak : Do not
+	allocate memory for lpProps.
+
 2009-01-21  Suman Manjunath  <msuman@novell.com>
 
 	** Fix for bug #541209
