@@ -1,3 +1,7 @@
+2009-01-24  甘露(Gan Lu) <rhythm.gan@gmail.com>
+
+        * zh_CN.po: Updated Chinese Simplified translation
+
 2009-01-24  Changwoo Ryu  <cwryu@debian.org>
 
 	* LINGUAS: Added ko.
@@ -84,6 +88,7 @@
 
 2009-01-02  甘露(Gan Lu) <rhythm.gan@gmail.com>
 
+        * LINGUAS: Added zh_CN to LINGUAS.
         * zh_CN.po: Added Chinese Simplified translation
 
 2008-11-19  Suman Manjunath  <msuman@novell.com>
