@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-01-15 22:20+0100\n"
-"PO-Revision-Date: 2009-01-15 22:00+0100\n"
+"PO-Revision-Date: 2009-01-24 17:47+0100\n"
 "Last-Translator: Andre Klapper <ak-47@gmx.net>\n"
 "Language-Team: German <gnome-de@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -156,7 +156,7 @@ msgstr "Optionen"
 
 #: ../src/camel/camel-mapi-provider.c:77
 msgid "Automatically synchroni_ze account locally"
-msgstr "Konto automatisch lokal s_ynchronisieren"
+msgstr "Konto automatisch lokal a_bgleichen"
 
 #. i18n: copy from evolution:camel-imap-provider.c
 #: ../src/camel/camel-mapi-provider.c:80
