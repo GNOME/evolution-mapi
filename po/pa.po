@@ -1,0 +1,243 @@
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Amanpreet Singh Alam <aalam@users.sf.net>, 2009.
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-mapi.HEAD\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
+"POT-Creation-Date: 2009-01-24 16:48+0000\n"
+"PO-Revision-Date: 2009-01-25 14:36+0530\n"
+"Last-Translator: Amanpreet Singh Alam <aalam@users.sf.net>\n"
+"Language-Team: Punjabi/Panjabi <punjab-l10n@list.sf.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Lokalize 0.2\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:252
+#, c-format
+msgid "Enter Password for %s@%s"
+msgstr "%s@%s ਲਈ ਪਾਸਵਰਡ ਦਿਓ"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:334
+msgid "_Domain name:"
+msgstr "ਡੋਮੇਨ ਨਾਂ(_D):"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:344
+msgid "_Authenticate"
+msgstr "ਪਰਮਾਣਕਿਤਾ(_A)"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:446
+msgid "Personal Folders"
+msgstr "ਨਿੱਜੀ ਫੋਲਡਰ"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:508
+msgid "_Location:"
+msgstr "ਟਿਕਾਣਾ(_L):"
+
+#: ../src/calendar/e-cal-backend-mapi.c:111
+#: ../src/calendar/e-cal-backend-mapi.c:1047
+#: ../src/camel/camel-mapi-store.c:453
+msgid "Authentication failed"
+msgstr "ਪਰਮਾਣਕਿਤਾ ਫੇਲ੍ਹ ਹੋਈ"
+
+#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
+#: ../src/calendar/e-cal-backend-mapi.c:385
+#, c-format
+msgid "Loading items in folder %s"
+msgstr "ਫੋਲਡਰ  %s ਵਿੱਚ ਆਈਟਮਾਂ ਲੋਡ ਕੀਤੀਆਂ ਜਾ ਰਹੀਆਂ ਹਨ"
+
+#. FIXME: better string please...
+#: ../src/calendar/e-cal-backend-mapi.c:575
+#: ../src/calendar/e-cal-backend-mapi.c:586
+#: ../src/calendar/e-cal-backend-mapi.c:612
+msgid "Error fetching changes from the server. Removing the cache might help."
+msgstr ""
+
+#: ../src/calendar/e-cal-backend-mapi.c:967
+#: ../src/calendar/e-cal-backend-mapi.c:977
+#: ../src/calendar/e-cal-backend-mapi.c:1082
+#: ../src/calendar/e-cal-backend-mapi.c:1164
+msgid "Could not create cache file"
+msgstr "ਕੈਸ਼ ਫਾਇਲ ਬਣਾਈ ਨਹੀਂ ਜਾ ਸਕੀ"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1093
+msgid "Could not create thread for populating cache"
+msgstr ""
+
+#: ../src/calendar/e-cal-backend-mapi.c:1501
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:312 ../src/camel/camel-mapi-folder.c:646
+#, c-format
+msgid "Fetching summary information for new messages in %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:639 ../src/camel/camel-mapi-folder.c:1198
+#: ../src/camel/camel-mapi-folder.c:1206
+msgid "This message is not available in offline mode."
+msgstr "ਇਹ ਸੁਨੇਹਾ ਆਫਲਾਈਨ ਮੋਡ ਵਿੱਚ ਉਪਲੱਬਧ ਨਹੀਂ ਹੈ।"
+
+#: ../src/camel/camel-mapi-folder.c:656
+msgid "Fetching items failed"
+msgstr "ਆਈਟਮਾਂ ਲੈਣ ਲਈ ਫੇਲ੍ਹ ਹੈ"
+
+#: ../src/camel/camel-mapi-folder.c:1162
+#, c-format
+msgid ""
+"Cannot get message: %s\n"
+"  %s"
+msgstr ""
+"ਸੁਨੇਹਾ ਮਿਲਿਆ: %s\n"
+" %s"
+
+#: ../src/camel/camel-mapi-folder.c:1162
+msgid "No such message"
+msgstr "ਕੋਈ ਇੰਝ ਦਾ ਸੁਨੇਹਾ ਨਹੀਂ"
+
+#: ../src/camel/camel-mapi-folder.c:1174
+msgid "User canceled"
+msgstr "ਯੂਜ਼ਰ ਨੇ ਰੱਦ ਕੀਤਾ"
+
+#: ../src/camel/camel-mapi-folder.c:1181
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:1225 ../src/camel/camel-mapi-folder.c:1235
+msgid "Could not get message"
+msgstr "ਸੁਨੇਹਾ ਲਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ"
+
+#: ../src/camel/camel-mapi-folder.c:1582
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "%s ਸੰਖੇਪ ਜਾਣਕਾਰੀ ਲੋਡ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ"
+
+#: ../src/camel/camel-mapi-provider.c:51
+msgid "Checking for new mail"
+msgstr "ਨਵੀਂ ਮੇਲ ਲਈ ਚੈੱਕ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"
+
+#: ../src/camel/camel-mapi-provider.c:53
+msgid "C_heck for new messages in all folders"
+msgstr "ਸਭ ਫੋਲਡਰਾਂ ਵਿੱਚ ਨਵੇਂ ਸੁਨੇਹਿਆਂ ਲਈ ਚੈੱਕ ਕਰੋ(_h)"
+
+#. i18n: GAL is an Outlookism, AD is a Windowsism
+#: ../src/camel/camel-mapi-provider.c:66
+msgid "Global Address List / Active Directory"
+msgstr "ਗਲੋਬਲ ਐਡਰੈੱਸ ਲਿਸਟ  / ਐਕਟਿਵ ਡਾਇਰੈਕਟਰੀ"
+
+#. i18n: "Global Catalog" is a Windowsism, but it's a
+#. technical term and may not have translations?
+#: ../src/camel/camel-mapi-provider.c:70
+msgid "_Global Catalog server name:"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:72
+#, c-format
+msgid "_Limit number of GAL responses: %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:75
+msgid "Options"
+msgstr "ਚੋਣਾਂ"
+
+#: ../src/camel/camel-mapi-provider.c:77
+msgid "Automatically synchroni_ze account locally"
+msgstr ""
+
+#. i18n: copy from evolution:camel-imap-provider.c
+#: ../src/camel/camel-mapi-provider.c:80
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:82
+msgid "Check new messages for _Junk contents"
+msgstr "ਜੰਕ ਸਮੱਗਰੀ ਲਈ ਨਵੇਂ ਸੁਨੇਹੇ ਚੈੱਕ ਕਰੋ(_J)"
+
+#: ../src/camel/camel-mapi-provider.c:84
+msgid "Only check for Junk messag_es in the Inbox folder"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:96
+msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:111
+msgid "Password"
+msgstr "ਪਾਸਵਰਡ"
+
+#: ../src/camel/camel-mapi-provider.c:112
+msgid "This option will connect to the Openchange server using a plaintext password."
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:61
+msgid "Favorites"
+msgstr "ਪਸੰਦ"
+
+#: ../src/camel/camel-mapi-store.c:62
+msgid "All Public Folders"
+msgstr "ਸਭ ਪਬਲਿਕ ਫੋਲਡਰ"
+
+#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:345
+#, c-format
+msgid "Exchange MAPI server %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:264 ../src/camel/camel-mapi-transport.c:347
+#, c-format
+msgid "Exchange MAPI service for %s on %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:298
+#, c-format
+msgid "%sPlease enter the MAPI password for %s@%s"
+msgstr "%s%s@%s ਵਾਸਤੇ MAPI ਪਾਸਵਰਡ ਦਿਓ ਜੀ"
+
+#: ../src/camel/camel-mapi-store.c:312
+msgid "You did not enter a password."
+msgstr "ਤੁਸੀਂ ਪਾਸਵਰਡ ਨਹੀਂ ਦਿੱਤਾ ਹੈ।"
+
+#: ../src/camel/camel-mapi-store.c:320
+#, c-format
+msgid "Unable to authenticate to Exchange MAPI server."
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:437
+msgid "Cannot create MAPI folders in offline mode."
+msgstr "ਆਫਲਾਈਨ ਮੋਡ ਵਿੱਚ MAPI ਫੋਲਡਰ ਬਣਾਏ ਨਹੀਂ ਜਾ ਸਕਦੇ ਹਨ।"
+
+#: ../src/camel/camel-mapi-store.c:442
+#, c-format
+msgid "Cannot create new folder `%s'"
+msgstr "ਨਵਾਂ ਫੋਲਡਰ `%s' ਬਣਾਇਆ ਨਹੀਂ ਜਾ ਸਕਿਆ"
+
+#: ../src/camel/camel-mapi-store.c:662
+#, c-format
+msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:670
+#, c-format
+msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:686
+#, c-format
+msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:1093
+msgid "Folder list not available in offline mode."
+msgstr "ਫੋਲਡਰ ਲਿਸਟ ਆਫਲਾਈਨ ਮੋਡ ਵਿੱਚ ਉਪਲੱਬਧ ਨਹੀਂ ਹੈ।"
+
+#. Fixme : Set a better error message. Would be helful in troubleshooting.
+#: ../src/camel/camel-mapi-transport.c:333
+msgid "Could not send message."
+msgstr "ਸੁਨੇਹਾ ਭੇਜਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ।"
+
