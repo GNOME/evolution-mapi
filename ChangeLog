@@ -1,3 +1,9 @@
+2009-01-27  Johnny Jacob  <jjohnny@novell.com>
+
+	** Committing on behalf of Jelmer Vernooij <jelmer@samba.org>
+
+	* configure.in : Allow newer libmapi versions.
+
 2009-01-21  Suman Manjunath  <msuman@novell.com>
 
 	** Fix for bug #541209

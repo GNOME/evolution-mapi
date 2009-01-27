@@ -77,7 +77,7 @@ PKG_CHECK_MODULES(EVOLUTION_PLUGIN, evolution-plugin >= evo_minimum_version)
 dnl ****************************
 dnl Check for LibMAPI 
 dnl ****************************
-PKG_CHECK_MODULES(LIBMAPI, libmapi = libmapi_minimum_version)
+PKG_CHECK_MODULES(LIBMAPI, libmapi >= libmapi_minimum_version)
 
 dnl ****************************
 dnl Expose version information
