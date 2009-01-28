@@ -1,3 +1,9 @@
+2009-01-28  Johnny Jacob  <jjohnny@novell.com>
+
+	* camel-mapi-folder.c (mapi_folder_item_to_msg): Fixes BNC 462371.
+	Do not have a default encoding value. TODO : Fix along with
+	Mime writer/reader work.
+
 2009-01-21  Milan Crha  <mcrha@redhat.com>
 
 	* Makefile.am: Use also LIBECAL_CFLAGS and LIBECAL_LIBS.

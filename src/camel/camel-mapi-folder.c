@@ -1118,8 +1118,8 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 
 			camel_mime_part_set_content_id (part, content_id);
 
-			/*Fall back to default*/
-			camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
+			/*FIXME : Mime Reader / Writer work*/
+			//camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
 
 			camel_multipart_add_part (multipart, part);
 			camel_object_unref (part);
