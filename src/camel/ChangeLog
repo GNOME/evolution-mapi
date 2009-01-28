@@ -1,5 +1,12 @@
 2009-01-28  Johnny Jacob  <jjohnny@novell.com>
 
+	** Fixes #569246. Patch by Jelmer Vernooij <jelmer@samba.org>
+
+	* camel-mapi-store-summary.c:
+	* camel-mapi-folder.c: Include config.h .
+
+2009-01-28  Johnny Jacob  <jjohnny@novell.com>
+
 	* camel-mapi-folder.c (mapi_folder_item_to_msg): Fixes BNC 462371.
 	Do not have a default encoding value. TODO : Fix along with
 	Mime writer/reader work.

@@ -22,6 +22,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "exchange-mapi-connection.h"
 #include "exchange-mapi-folder.h"
 #include "exchange-mapi-utils.h"

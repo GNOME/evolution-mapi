@@ -1,3 +1,9 @@
+2009-01-28  Johnny Jacob  <jjohnny@novell.com>
+
+	** Fixes #569246. Patch by Jelmer Vernooij <jelmer@samba.org>
+
+	* e-cal-backend-mapi.c: Include config.h
+
 2009-01-21  Suman Manjunath  <msuman@novell.com>
 
 	** Fix for bug #541209

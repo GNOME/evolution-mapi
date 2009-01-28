@@ -21,6 +21,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "exchange-mapi-utils.h"
 
 #ifdef G_OS_WIN32

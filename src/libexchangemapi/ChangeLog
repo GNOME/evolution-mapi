@@ -1,3 +1,14 @@
+2009-01-28  Johnny Jacob  <jjohnny@novell.com>
+
+	** Fixes #569246. Patch by Jelmer Vernooij <jelmer@samba.org>
+
+	* exchange-mapi-cal-recur-utils.c:
+	* exchange-mapi-utils.c:
+	* exchange-mapi-folder.c:
+	* exchange-mapi-connection.c:
+	* exchange-mapi-cal-utils.c:
+	* exchange-mapi-cal-tz-utils.c: Include config.h
+
 2009-01-28  Milan Crha  <mcrha@redhat.com>
 
 	** Fix for bug #564897

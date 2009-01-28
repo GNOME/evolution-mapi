@@ -21,6 +21,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <glib/gstdio.h>
 #include <fcntl.h>
 #include <libecal/e-cal-util.h>

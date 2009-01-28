@@ -1,3 +1,9 @@
+2009-01-28  Johnny Jacob  <jjohnny@novell.com>
+
+	** Fixes #569246. Patch by Jelmer Vernooij <jelmer@samba.org>
+
+	* configure.in (_GNU_SOURCE): Use GNU extensions.
+
 2009-01-27  Johnny Jacob  <jjohnny@novell.com>
 
 	** Committing on behalf of Jelmer Vernooij <jelmer@samba.org>

@@ -21,6 +21,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "exchange-mapi-cal-tz-utils.h"
 
 #define d(x) 
