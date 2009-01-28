@@ -38,7 +38,6 @@
 #include <libedataserverui/e-passwords.h>
 #include <libedataserver/e-account.h>
 #include <e-util/e-dialog-utils.h>
-#include <libmapi/libmapi.h>
 #include "mail/em-config.h"
 #include "exchange-mapi-account-setup.h"
 #include <addressbook/gui/widgets/eab-config.h>
@@ -95,146 +94,6 @@ exchange_mapi_accounts_peek_config_listener ()
 	return config_listener; 
 }
 
-gboolean
-exchange_mapi_delete_profile (const char *profile)
-{
-	enum MAPISTATUS	retval;
-	gboolean result = FALSE; 
-	gchar *profpath = NULL;
-
-	profpath = g_build_filename (g_get_home_dir(), DEFAULT_PROF_PATH, NULL);
-	if (!g_file_test (profpath, G_FILE_TEST_EXISTS)) {
-		g_warning ("No need to delete profile. DB itself is missing \n");
-		result = TRUE;
-		goto cleanup; 
-	}
-
-	retval = MAPIInitialize(profpath); 
-	if (retval == MAPI_E_SESSION_LIMIT)
-	/* do nothing, the profile store is already initialized */
-		; 
-	else if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("MAPIInitialize", GetLastError());
-		goto cleanup; 
-	}
-
-	g_debug ("Deleting profile %s ", profile); 
-	retval = DeleteProfile(profile); 
-	if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("DeleteProfile", GetLastError());
-		goto cleanup; 
-	}
-
-	exchange_mapi_connection_close ();
-	result = TRUE; 
-
-cleanup: 
-	g_free(profpath);
-
-	return result;
-}
-
-gboolean 
-exchange_mapi_create_profile(const char *username, const char *password, const char *domain, const char *server)
-{
-	enum MAPISTATUS	retval;
-	gboolean result = FALSE; 
-	const gchar *workstation = "localhost";
-	gchar *profname = NULL, *profpath = NULL;
-	struct mapi_session *session = NULL;
-
-	/*We need all the params before proceeding.*/
-	g_return_val_if_fail (username && *username && password && *password &&
-			      domain && *domain && server && *server, FALSE);
-
-	d(g_print ("Create profile with %s %s %s\n", username, domain, server));
-
-	profpath = g_build_filename (g_get_home_dir(), DEFAULT_PROF_PATH, NULL);
-	profname = g_strdup_printf("%s@%s", username, domain);
-
-	if (!g_file_test (profpath, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR)) {
-		/* Create a ProfileStore */
-		retval = CreateProfileStore (profpath, LIBMAPI_LDIF_DIR); 
-		if (retval != MAPI_E_SUCCESS) {
-			mapi_errstr("CreateProfileStore", GetLastError());
-			goto cleanup; 
-		}
-	}
-
-	retval = MAPIInitialize(profpath); 
-	if (retval == MAPI_E_SESSION_LIMIT)
-	/* do nothing, the profile store is already initialized */
-		mapi_errstr("MAPIInitialize", GetLastError()); 
-	else if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("MAPIInitialize", GetLastError());
-		goto cleanup; 
-	}
-
-	/* Delete any existing profiles with the same profilename */
-	retval = DeleteProfile(profname); 
-	/* don't bother to check error - it would be valid if we got an error */
-
-	retval = CreateProfile(profname, username, password, 0); 
-	if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("CreateProfile", GetLastError());
-		goto cleanup; 
-	}
-
-	mapi_profile_add_string_attr(profname, "binding", server);
-	mapi_profile_add_string_attr(profname, "workstation", workstation);
-	mapi_profile_add_string_attr(profname, "domain", domain);
-	
-	/* This is only convenient here and should be replaced at some point */
-	mapi_profile_add_string_attr(profname, "codepage", "0x4e4");
-	mapi_profile_add_string_attr(profname, "language", "0x409");
-	mapi_profile_add_string_attr(profname, "method", "0x409");
-	
-	/* Login now */
-	d(g_print("Logging into the server... "));
-	retval = MapiLogonProvider(&session, profname, password, PROVIDER_ID_NSPI); 
-	if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("MapiLogonProvider", GetLastError());
-		g_debug ("Deleting profile %s ", profname); 
-		retval = DeleteProfile(profname); 
-		if (retval != MAPI_E_SUCCESS)
-			mapi_errstr("DeleteProfile", GetLastError());
-		goto cleanup; 
-	}
-	d(g_print("succeeded \n"));
-
-	retval = ProcessNetworkProfile(session, username, NULL, NULL); 
-	if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("ProcessNetworkProfile", GetLastError());
-		goto cleanup; 
-	}
-
-	/* Set it as the default profile. Is this needed? */
-	retval = SetDefaultProfile(profname); 
-	if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("SetDefaultProfile", GetLastError());
-		goto cleanup; 
-	}
-
-	/* Close the connection, so that we can login with what we created */
-	exchange_mapi_connection_close ();
-
-	/* Initialize a global connection */
-	if (exchange_mapi_connection_new (profname, password)) {
-		result = TRUE;
-		exchange_mapi_account_listener_get_folder_list ();
-	}
-
-cleanup: 
-	if (!result)
-		MAPIUninitialize ();
-
-	g_free (profname);
-	g_free (profpath);
-
-	return result;
-}
-
-
 static void
 validate_credentials (GtkWidget *widget, EConfig *config)
 {
@@ -242,7 +101,15 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	CamelURL *url = NULL;
  	gchar *key = NULL, *password = NULL;
 	const gchar *domain_name = NULL; 
+
 	url = camel_url_new (e_account_get_string (target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
+	domain_name = camel_url_get_param (url, "domain");
+
+	if (!url->user || !*url->user || !url->host || !*url->host || !domain_name || !*domain_name) {
+		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Server, username and domain name cannot be empty. Please fill them with correct values."));
+		return;
+	}
+
 	key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
 	password = e_passwords_get_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
 	if (!password) {
@@ -256,11 +123,10 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 		g_free (title);
 	}
 
-	domain_name = camel_url_get_param (url, "domain");
-
 	/*Can there be a account without password ?*/
 	if (password && *password && domain_name && *domain_name && *url->user && *url->host) {
-		gboolean status = exchange_mapi_create_profile (url->user, password, domain_name, url->host);
+		char *error_msg = NULL;
+		gboolean status = exchange_mapi_create_profile (url->user, password, domain_name, url->host, &error_msg);
 		if (status) {
 			/* Things are successful */
 			gchar *profname = NULL, *uri = NULL; 
@@ -273,10 +139,21 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 			e_account_set_string (target_account->account, E_ACCOUNT_SOURCE_URL, uri);
 			e_account_set_string (target_account->account, E_ACCOUNT_TRANSPORT_URL, uri);
 			g_free (uri);
+
+			e_notice (NULL, GTK_MESSAGE_INFO, "%s", _("Authentication finished successfully."));
 		} else {
+			char *e;
+
 			e_passwords_forget_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
-			/* FIXME: Run an error dialog here */
+
+			e = g_strconcat (_("Authentication failed."), "\n", error_msg, NULL);
+
+			e_notice (NULL, GTK_MESSAGE_ERROR, "%s", e);
+
+			g_free (e);
 		}
+
+		g_free (error_msg);
 	}
 
 	g_free (password);

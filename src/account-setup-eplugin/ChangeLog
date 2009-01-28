@@ -1,3 +1,15 @@
+2009-01-28  Milan Crha  <mcrha@redhat.com>
+
+	** Fix for bug #564897
+
+	* Makefile.am:
+	* exchange-mapi-account-setup.h:
+	* exchange-mapi-account-setup.c: (exchange_mapi_delete_profile),
+	(exchange_mapi_create_profile): Functions moved to libexchangemapi.
+	* exchange-mapi-account-listener.c: (create_profile_entry):
+	* exchange-mapi-account-setup.c: (validate_credentials):
+	Show user result of the validation process.
+
 2009-01-21  Milan Crha  <mcrha@redhat.com>
 
 	** Fix for bug #567890

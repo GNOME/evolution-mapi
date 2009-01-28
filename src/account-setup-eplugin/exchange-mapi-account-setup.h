@@ -38,10 +38,4 @@
 ExchangeMAPIAccountListener *
 exchange_mapi_accounts_peek_config_listener (void); 
 
-gboolean 
-exchange_mapi_create_profile(const char *username, const char *password, const char *domain, const char *server);
-
-gboolean
-exchange_mapi_delete_profile (const char *profile); 
-
 #endif /* EXCHANGE_MAPI_ACCOUNT_SETUP_H */

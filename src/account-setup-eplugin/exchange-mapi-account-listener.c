@@ -598,7 +598,7 @@ create_profile_entry (CamelURL *url)
 		g_free (key);
 
 		if (password)
-			status = exchange_mapi_create_profile (url->user, password, camel_url_get_param (url, "domain"), url->host);
+			status = exchange_mapi_create_profile (url->user, password, camel_url_get_param (url, "domain"), url->host, NULL);
 
 		++attempts; 
 	}

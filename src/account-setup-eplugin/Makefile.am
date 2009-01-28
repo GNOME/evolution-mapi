@@ -1,7 +1,6 @@
 INCLUDES = -I .						\
 	-DEVOLUTION_GLADEDIR=\""$(gladedir)"\" 		\
 	-DCONNECTOR_GLADEDIR=\""$(gladedir)"\" 		\
-	-DLIBMAPI_LDIF_DIR=\""$(libmapi_ldif_dir)"\"	\
 	-I$(top_srcdir)/src/libexchangemapi/		\
 	$(EVOLUTION_PLUGIN_CFLAGS)			\
 	$(CAMEL_CFLAGS)					\
