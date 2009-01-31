@@ -1,3 +1,7 @@
+2009-01-30  Johnny Jacob  <jjohnny@novell.com>
+
+	* configure.in: Ahem. itz 0.25.90 not 0.25.6 :) . Fixes version glitch.
+
 2009-01-28  Johnny Jacob  <jjohnny@novell.com>
 
 	** Fixes #569246. Patch by Jelmer Vernooij <jelmer@samba.org>
