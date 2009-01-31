@@ -1,5 +1,12 @@
 2009-01-29  Johnny Jacob  <jjohnny@novell.com>
 
+	** Fixes #568663.
+
+	* camel-mapi-store.c (mapi_unsubscribe_folder)
+	(mapi_subscribe_folder): Do not process 'All public folder'.
+
+2009-01-29  Johnny Jacob  <jjohnny@novell.com>
+
 	** Fixes #568521.
 
 	* camel-mapi-store.c (mapi_rename_folder): Update summary.

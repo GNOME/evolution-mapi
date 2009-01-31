@@ -1291,6 +1291,8 @@ mapi_subscribe_folder(CamelStore *store, const char *folder_name, CamelException
 		f_name = strrchr(folder_name,'/');
 		if(f_name != NULL)
 			folder_name = ++f_name;
+		else  //Don't process All Public Folder.
+			return;
 	}
 
 	fi = mapi_build_folder_info(mapi_store, parent_name, g_strdup (folder_name)); /* FIXME */
@@ -1348,6 +1350,8 @@ mapi_unsubscribe_folder(CamelStore *store, const char *folder_name, CamelExcepti
 		f_name = strrchr(folder_name,'/');
 		if(f_name != NULL)
 			folder_name = ++f_name;
+		else //Don't process All Public Folder.
+			return;
 	}
 
 	fi = mapi_build_folder_info(mapi_store, parent_name, g_strdup (folder_name)); /* FIXME */
