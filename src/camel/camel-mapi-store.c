@@ -501,18 +501,6 @@ mapi_forget_folder (CamelMapiStore *mapi_store, const char *folder_name, CamelEx
 		return;
 	}
 
-	summary_file = g_strdup_printf ("%s/summary", folder_dir);
-	summary = camel_mapi_summary_new(NULL,summary_file);
-	if(!summary) {
-		g_free(summary_file);
-		g_free(folder_dir);
-		return;
-	}
-
-	camel_object_unref (summary);
-	g_unlink (summary_file);
-	g_free (summary_file);
-
 	state_file = g_strdup_printf ("%s/cmeta", folder_dir);
 	g_unlink (state_file);
 	g_free (state_file);
