@@ -638,6 +638,7 @@ mapi_rename_folder(CamelStore *store, const char *old_name, const char *new_name
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
 	CamelMapiStorePrivate  *priv = mapi_store->priv;
+	CamelStoreInfo *si = NULL;
 	char *oldpath, *newpath, *storepath;
 	const char *folder_id;
 	char *temp = NULL;
@@ -659,7 +660,8 @@ mapi_rename_folder(CamelStore *store, const char *old_name, const char *new_name
 
 	folder_id = camel_mapi_store_folder_id_lookup (mapi_store, temp);
 	if (!folder_id) {
-		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename MAPI folder `%s'. Folder does not exist."),
+		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, 
+				      _("Cannot rename MAPI folder `%s'. Folder does not exist."),
 				      old_name);
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 		return;
@@ -667,11 +669,11 @@ mapi_rename_folder(CamelStore *store, const char *old_name, const char *new_name
 
 	/*Do not allow rename for system folders.*/
 	if (mapi_fid_is_system_folder (mapi_store, folder_id)) {
-		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename MAPI folder `%s' to `%s'. Default folder."),
+		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, 
+				      _("Cannot rename MAPI folder `%s' to `%s'. Default folder."),
 				      old_name, new_name);
 		return;
 	}
-
 
 	exchange_mapi_util_mapi_id_from_string (folder_id, &fid);
 		
@@ -683,11 +685,14 @@ mapi_rename_folder(CamelStore *store, const char *old_name, const char *new_name
 	
 	if (!exchange_mapi_rename_folder (fid , temp))
 	{
-		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename MAPI folder `%s' to `%s'"),
-				      old_name, new_name);
+		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, 
+				      _("Cannot rename MAPI folder `%s' to `%s'"), old_name, new_name);
+
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 		return;
 	}
+
+	CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 
 	g_hash_table_replace (priv->id_hash, g_strdup(folder_id), g_strdup(temp));
 
@@ -700,6 +705,17 @@ mapi_rename_folder(CamelStore *store, const char *old_name, const char *new_name
 	g_free (storepath);
 
 	/*XXX: make sure the summary is also renamed*/
+	si = camel_store_summary_path ((CamelStoreSummary *)mapi_store->summary, old_name);
+
+	if (si) {
+		camel_store_info_set_string((CamelStoreSummary *)mapi_store->summary, si,
+					    CAMEL_STORE_INFO_PATH, new_name);
+		camel_store_info_set_string((CamelStoreSummary *)mapi_store->summary, si,
+					    CAMEL_MAPI_STORE_INFO_FULL_NAME, new_name);
+
+		camel_store_summary_touch((CamelStoreSummary *)mapi_store->summary);
+	}
+
 	if (g_rename (oldpath, newpath) == -1) {
 		g_warning ("Could not rename message cache '%s' to '%s': %s: cache reset",
 				oldpath, newpath, strerror (errno));
@@ -707,7 +723,7 @@ mapi_rename_folder(CamelStore *store, const char *old_name, const char *new_name
 
 	g_free (oldpath);
 	g_free (newpath);
-	CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
+
 }
 
 static guint32 hexnib(guint32 c)
@@ -953,7 +969,7 @@ mapi_get_folder_info_offline (CamelStore *store, const char *top,
 	}
 
 	/*FIXME*/
-	if (!((!subscribed) && info_fast) ) {
+	if (!((!subscribed) && info_fast) && top[0] == '\0') {
 		fi = mapi_build_folder_info(mapi_store, NULL, DISPLAY_NAME_FAVOURITES);
 		fi->flags |= CAMEL_FOLDER_NOSELECT;
 		fi->flags |= CAMEL_FOLDER_SYSTEM;

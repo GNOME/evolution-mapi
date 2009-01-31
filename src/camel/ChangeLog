@@ -1,3 +1,10 @@
+2009-01-29  Johnny Jacob  <jjohnny@novell.com>
+
+	** Fixes #568521.
+
+	* camel-mapi-store.c (mapi_rename_folder): Update summary.
+	* camel-mapi-folder.c (mapi_folder_rename): Added.
+
 2009-01-28  Johnny Jacob  <jjohnny@novell.com>
 
 	** Fixes #569246. Patch by Jelmer Vernooij <jelmer@samba.org>

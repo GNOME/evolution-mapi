@@ -1489,6 +1489,12 @@ mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 }
 
 static void
+mapi_folder_rename (CamelFolder *folder, const char *new)
+{
+	((CamelFolderClass *)parent_class)->rename(folder, new);
+}
+
+static void
 camel_mapi_folder_class_init (CamelMapiFolderClass *camel_mapi_folder_class)
 {
 	CamelFolderClass *camel_folder_class = CAMEL_FOLDER_CLASS (camel_mapi_folder_class);
@@ -1498,7 +1504,7 @@ camel_mapi_folder_class_init (CamelMapiFolderClass *camel_mapi_folder_class)
 	((CamelObjectClass *) camel_mapi_folder_class)->getv = mapi_getv;
 
 	camel_folder_class->get_message = mapi_folder_get_message;
-/*  	camel_folder_class->rename = mapi_folder_rename; */
+ 	camel_folder_class->rename = mapi_folder_rename;
 	camel_folder_class->search_by_expression = mapi_folder_search_by_expression;
 /* 	camel_folder_class->get_message_info = mapi_get_message_info; */
 /* 	camel_folder_class->search_by_uids = mapi_folder_search_by_uids;  */
