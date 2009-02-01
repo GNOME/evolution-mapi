@@ -7,9 +7,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-18 11:18+0100\n"
-"PO-Revision-Date: 2009-01-16 19:31+0100\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-mapi\n"
+"POT-Creation-Date: 2009-02-01 23:58+0100\n"
+"PO-Revision-Date: 2009-01-30 21:40+0100\n"
 "Last-Translator: David Planella <david.planella@gmail.com>\n"
 "Language-Team: Catalan <tradgnome@softcatala.org>\n"
 "MIME-Version: 1.0\n"
@@ -17,60 +18,76 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:252
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Introduïu la contrasenya per a %s@%s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:334
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"El servidor, el nom d'usuari i el nom del domini no poden ser buits. "
+"Hauríeu d'escriure-hi valors correctes."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+msgid "Authentication finished successfully."
+msgstr "Ha finalitzat satisfactòriament l'autenticació."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+msgid "Authentication failed."
+msgstr "Ha fallat l'autenticació."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
 msgid "_Domain name:"
 msgstr "Nom del _domini:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:344
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
 msgid "_Authenticate"
 msgstr "_Autentica"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:446
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
 msgid "Personal Folders"
 msgstr "Carpetes personals"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:508
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:385
 msgid "_Location:"
 msgstr "_Ubicació:"
 
-#: ../src/calendar/e-cal-backend-mapi.c:111
-#: ../src/calendar/e-cal-backend-mapi.c:1047
+#: ../src/calendar/e-cal-backend-mapi.c:115
+#: ../src/calendar/e-cal-backend-mapi.c:1051
 #: ../src/camel/camel-mapi-store.c:453
 msgid "Authentication failed"
 msgstr "Ha fallat l'autenticació"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:385
+#: ../src/calendar/e-cal-backend-mapi.c:389
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "S'estan carregant els elements a la carpeta %s"
 
 #. FIXME: better string please...
-#: ../src/calendar/e-cal-backend-mapi.c:575
-#: ../src/calendar/e-cal-backend-mapi.c:586
-#: ../src/calendar/e-cal-backend-mapi.c:612
+#: ../src/calendar/e-cal-backend-mapi.c:579
+#: ../src/calendar/e-cal-backend-mapi.c:590
+#: ../src/calendar/e-cal-backend-mapi.c:616
 msgid "Error fetching changes from the server. Removing the cache might help."
 msgstr ""
 "S'ha produït un error en recollir els canvis del servidor. Pot ser que "
 "suprimir la memòria cau sigui d'ajuda."
 
-#: ../src/calendar/e-cal-backend-mapi.c:967
-#: ../src/calendar/e-cal-backend-mapi.c:977
-#: ../src/calendar/e-cal-backend-mapi.c:1082
-#: ../src/calendar/e-cal-backend-mapi.c:1164
+#: ../src/calendar/e-cal-backend-mapi.c:971
+#: ../src/calendar/e-cal-backend-mapi.c:981
+#: ../src/calendar/e-cal-backend-mapi.c:1086
+#: ../src/calendar/e-cal-backend-mapi.c:1168
 msgid "Could not create cache file"
 msgstr "No s'ha pogut crear el fitxer de memòria cau"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1093
+#: ../src/calendar/e-cal-backend-mapi.c:1097
 msgid "Could not create thread for populating cache"
 msgstr "No s'ha pogut crear el fil per a emplenar la memòria cau"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1501
+#: ../src/calendar/e-cal-backend-mapi.c:1505
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -79,21 +96,21 @@ msgstr ""
 "individuals d'una cita periòdica. No s'ha fet cap canvi a la cita al "
 "servidor."
 
-#: ../src/camel/camel-mapi-folder.c:312 ../src/camel/camel-mapi-folder.c:646
+#: ../src/camel/camel-mapi-folder.c:316 ../src/camel/camel-mapi-folder.c:650
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "S'està recollint la informació de resum per als missatges nous a %s"
 
-#: ../src/camel/camel-mapi-folder.c:639 ../src/camel/camel-mapi-folder.c:1198
-#: ../src/camel/camel-mapi-folder.c:1206
+#: ../src/camel/camel-mapi-folder.c:643 ../src/camel/camel-mapi-folder.c:1202
+#: ../src/camel/camel-mapi-folder.c:1210
 msgid "This message is not available in offline mode."
 msgstr "Aquest missatge no està disponible en mode fora de línia."
 
-#: ../src/camel/camel-mapi-folder.c:656
+#: ../src/camel/camel-mapi-folder.c:660
 msgid "Fetching items failed"
 msgstr "Ha fallat la recol·lecció d'elements"
 
-#: ../src/camel/camel-mapi-folder.c:1162
+#: ../src/camel/camel-mapi-folder.c:1166
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -102,24 +119,24 @@ msgstr ""
 "No s'ha pogut obtenir el missatge: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1162
+#: ../src/camel/camel-mapi-folder.c:1166
 msgid "No such message"
 msgstr "No hi ha tal missatge"
 
-#: ../src/camel/camel-mapi-folder.c:1174
+#: ../src/camel/camel-mapi-folder.c:1178
 msgid "User canceled"
 msgstr "Cancel·lat per l'usuari"
 
-#: ../src/camel/camel-mapi-folder.c:1181
+#: ../src/camel/camel-mapi-folder.c:1185
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "No s'ha pogut obtenir el missatge %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1225 ../src/camel/camel-mapi-folder.c:1235
+#: ../src/camel/camel-mapi-folder.c:1229 ../src/camel/camel-mapi-folder.c:1239
 msgid "Could not get message"
 msgstr "No s'ha pogut obtenir el missatge"
 
-#: ../src/camel/camel-mapi-folder.c:1582
+#: ../src/camel/camel-mapi-folder.c:1592
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No s'ha pogut carregar el resum per a %s"
@@ -229,25 +246,25 @@ msgstr "No es poden crear carpetes MAPI en mode fora de línia."
 msgid "Cannot create new folder `%s'"
 msgstr "No s'ha pogut crear la carpeta nova «%s»"
 
-#: ../src/camel/camel-mapi-store.c:662
+#: ../src/camel/camel-mapi-store.c:652
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr ""
 "No es pot canviar el nom de la carpeta MAPI «%s». No existeix la carpeta."
 
-#: ../src/camel/camel-mapi-store.c:670
+#: ../src/camel/camel-mapi-store.c:661
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
 msgstr ""
 "No es pot canviar el nom de la carpeta MAPI «%s» a «%s». Carpeta "
 "predeterminada."
 
-#: ../src/camel/camel-mapi-store.c:686
+#: ../src/camel/camel-mapi-store.c:677
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "No es pot canviar el nom de la carpeta MAPI «%s» a «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1092
+#: ../src/camel/camel-mapi-store.c:1097
 msgid "Folder list not available in offline mode."
 msgstr "La llista de carpetes no està disponible en mode fora de línia."
 
