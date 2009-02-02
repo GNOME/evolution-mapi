@@ -1,3 +1,10 @@
+2009-02-02  Suman Manjunath  <msuman@novell.com>
+
+	** Part of fix for bug #568554
+
+	* camel-mapi-store.c (mapi_subscribe_folder): Fix for a compiler 
+	warning.
+
 2009-01-30  Johnny Jacob  <jjohnny@novell.com>
 
 	** Fixes #566735.

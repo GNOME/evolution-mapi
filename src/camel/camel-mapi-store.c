@@ -1258,13 +1258,14 @@ mapi_subscribe_folder(CamelStore *store, const char *folder_name, CamelException
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
 
 	CamelFolderInfo *fi;
-	CamelStoreInfo *si;
+	CamelStoreInfo *si = NULL;
 	gchar *parent_name = NULL;
 	gchar *f_name = NULL;
 	CamelURL *url;
 	/* TODO : exchange_mapi_add_to_favorites (); */
 
-	if (si = camel_store_summary_path((CamelStoreSummary *)mapi_store->summary, folder_name)) {
+	si = camel_store_summary_path((CamelStoreSummary *)mapi_store->summary, folder_name);
+	if (si != NULL) {
 		if ((si->flags & CAMEL_STORE_INFO_FOLDER_SUBSCRIBED) == 0) {
 			si->flags |= CAMEL_STORE_INFO_FOLDER_SUBSCRIBED;
 			si->flags |= CAMEL_FOLDER_SUBSCRIBED;

@@ -1,3 +1,11 @@
+2009-02-02  Suman Manjunath  <msuman@novell.com>
+
+	** Part of fix for bug #568554
+
+	* exchange-mapi-cal-tz-utils.c
+	(exchange_mapi_cal_tz_util_dump_ical_tzs): Fix for compiler warnings
+	introduced after the libical fork was dropped. 
+
 2009-01-28  Johnny Jacob  <jjohnny@novell.com>
 
 	** Fixes #569246. Patch by Jelmer Vernooij <jelmer@samba.org>

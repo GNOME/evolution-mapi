@@ -200,13 +200,13 @@ exchange_mapi_cal_tz_util_dump_ical_tzs ()
 	g_message("%s(%d): %s: ", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 	for (i = 0; i < zones->num_elements; i++) {
 		icaltimezone *zone;
-		char *tzid = NULL;
+		const char *tzid = NULL;
 
 		zone = icalarray_element_at (zones, i);
 
 		tzid = icaltimezone_get_tzid (zone);
 
-		list_items = g_list_prepend (list_items, tzid);
+		list_items = g_list_prepend (list_items, (gpointer)tzid);
 	}
 
 	list_items = g_list_sort (list_items, (GCompareFunc) g_ascii_strcasecmp);
