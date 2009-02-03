@@ -1,3 +1,28 @@
+evolution-mapi 0.25.90 2009-02-02
+---------------------------------------
+
+Bug Fixes:
+	#569270: Allow newer libmapi versions (Jelmer Vernooij)
+	#567890: Critical runtime warning fixes. (Milan Crha)
+	#541209: Adapt to the new APIs from upstream libical (Suman Manjunath)
+	#565556: Do not set a default value for content-type-encoding (Johnny Jacob)
+	#564897: crashes when didn't fill a domain and asked to authenticate. (Milan Crha)
+	#569246: Use GNU extensions. (Jelmer Vernooij)
+	#568521: Update summary after a rename. (Johnny Jacob)
+	#568663: Donot process all public folders. (Johnny Jacob)
+	#566735: No need to use summary for deleting the folder. (Johnny Jacob)
+
+Update Translations:
+       Andre Klapper (cs)
+       Andre Klapper (de)
+       A S Alam (pa)
+       Changwoo Ryu (ko)
+       Daniel Nylander (sv)
+       David Planella (ca)
+       甘露(Gan Lu) (zh_CN)
+       Gabor Kelemen (hu)
+       Jorge Gonzalez (es)
+
 evolution-mapi 0.25.5 2009-01-19
 ---------------------------------------
 
