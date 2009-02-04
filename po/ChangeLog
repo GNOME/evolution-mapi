@@ -1,7 +1,11 @@
+2009-02-04  Wouter Bolsterlee  <wbolster@svn.gnome.org>
+
+	* nl.po: Initial Dutch translation by Reinout van Schouwen.
+
 2009-02-03  Chao-Hsiung Liao  <j_h_liau@yahoo.com.tw>
 
 	* LINGUAS: Add zh_HK zh_TW
-        * zh_HK.po: Added Traditional Chinese translation(Hong Kong).
+	* zh_HK.po: Added Traditional Chinese translation(Hong Kong).
 	* zh_TW.po: Added Traditional Chinese translation(Taiwan).
 
 2009-02-01  Gil Forcada  <gforcada@gnome.org>
