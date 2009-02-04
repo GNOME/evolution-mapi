@@ -1,0 +1,267 @@
+# Dutch translation of Evolution-MAPI
+# Copyright (C) 2009 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Evolution-MAPI package.
+# Reinout van Schouwen <reinouts@gnome.org>, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Evolution-MAPI\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-02-04 16:08+0100\n"
+"PO-Revision-Date: 2009-01-23 16:02+0100\n"
+"Last-Translator: Reinout van Schouwen <reinouts@gnome.org>\n"
+"Language-Team: Dutch <vertaling@vrijschrift.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
+#, c-format
+msgid "Enter Password for %s@%s"
+msgstr "Voer wachtwoord in voor %s@%s"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+#, fuzzy
+msgid "Authentication finished successfully."
+msgstr "Aanmelding mislukt"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+#, fuzzy
+msgid "Authentication failed."
+msgstr "Aanmelding mislukt"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
+msgid "_Domain name:"
+msgstr "_Domeinnaam:"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
+msgid "_Authenticate"
+msgstr "_Controleren"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
+msgid "Personal Folders"
+msgstr "Persoonlijke mappen"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:385
+msgid "_Location:"
+msgstr "_Locatie:"
+
+#: ../src/calendar/e-cal-backend-mapi.c:115
+#: ../src/calendar/e-cal-backend-mapi.c:1051
+#: ../src/camel/camel-mapi-store.c:453
+msgid "Authentication failed"
+msgstr "Aanmelding mislukt"
+
+#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
+#: ../src/calendar/e-cal-backend-mapi.c:389
+#, c-format
+msgid "Loading items in folder %s"
+msgstr "Laden van items in map %s"
+
+#. FIXME: better string please...
+#: ../src/calendar/e-cal-backend-mapi.c:579
+#: ../src/calendar/e-cal-backend-mapi.c:590
+#: ../src/calendar/e-cal-backend-mapi.c:616
+msgid "Error fetching changes from the server. Removing the cache might help."
+msgstr ""
+"Probleem bij het ophalen van wijzigingen van de server. Het legen van de "
+"buffer zou kunnen helpen."
+
+#: ../src/calendar/e-cal-backend-mapi.c:971
+#: ../src/calendar/e-cal-backend-mapi.c:981
+#: ../src/calendar/e-cal-backend-mapi.c:1086
+#: ../src/calendar/e-cal-backend-mapi.c:1168
+msgid "Could not create cache file"
+msgstr "Kan bufferbestand niet aanmaken"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1097
+msgid "Could not create thread for populating cache"
+msgstr "Kon geen thread aanmaken voor het vullen van de buffer"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1505
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+msgstr ""
+"Ondersteuning voor het aanpassen van losse instanties van een terugkerende "
+"afspraak is nog niet geïmplementeerd. Er is geen wijziging gemaakt aan de "
+"afspraak op de server."
+
+#: ../src/camel/camel-mapi-folder.c:316 ../src/camel/camel-mapi-folder.c:650
+#, c-format
+msgid "Fetching summary information for new messages in %s"
+msgstr "Ophalen van samenvattingsinformatie van nieuwe berichten in %s"
+
+#: ../src/camel/camel-mapi-folder.c:643 ../src/camel/camel-mapi-folder.c:1202
+#: ../src/camel/camel-mapi-folder.c:1210
+msgid "This message is not available in offline mode."
+msgstr "Dit bericht is niet beschikbaar in offline modus."
+
+#: ../src/camel/camel-mapi-folder.c:660
+msgid "Fetching items failed"
+msgstr "Opvragen van items mislukt"
+
+#: ../src/camel/camel-mapi-folder.c:1166
+#, c-format
+msgid ""
+"Cannot get message: %s\n"
+"  %s"
+msgstr ""
+"Kan bericht niet verkrijgen: %s\n"
+"  %s"
+
+#: ../src/camel/camel-mapi-folder.c:1166
+msgid "No such message"
+msgstr "Een dergelijk bericht bestaat niet"
+
+#: ../src/camel/camel-mapi-folder.c:1178
+msgid "User canceled"
+msgstr "Geannuleerd door gebruiker"
+
+#: ../src/camel/camel-mapi-folder.c:1185
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "Kan bericht: %s niet verkrijgen: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1229 ../src/camel/camel-mapi-folder.c:1239
+msgid "Could not get message"
+msgstr "Kon bericht niet verkrijgen"
+
+#: ../src/camel/camel-mapi-folder.c:1592
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "Kon samenvatting voor %s niet laden"
+
+#: ../src/camel/camel-mapi-provider.c:51
+msgid "Checking for new mail"
+msgstr "Controleren op nieuwe e-mail"
+
+#: ../src/camel/camel-mapi-provider.c:53
+msgid "C_heck for new messages in all folders"
+msgstr "Op nieuwe berichten _controleren in alle mappen"
+
+#. i18n: GAL is an Outlookism, AD is a Windowsism
+#: ../src/camel/camel-mapi-provider.c:66
+msgid "Global Address List / Active Directory"
+msgstr "Algemene adreslijst / Active Directory"
+
+#. i18n: "Global Catalog" is a Windowsism, but it's a
+#. technical term and may not have translations?
+#: ../src/camel/camel-mapi-provider.c:70
+msgid "_Global Catalog server name:"
+msgstr "_Global Catalog-servernaam:"
+
+#: ../src/camel/camel-mapi-provider.c:72
+#, c-format
+msgid "_Limit number of GAL responses: %s"
+msgstr "Aantal GAL-antwoorden _beperken: %s"
+
+#: ../src/camel/camel-mapi-provider.c:75
+msgid "Options"
+msgstr "Opties"
+
+#: ../src/camel/camel-mapi-provider.c:77
+msgid "Automatically synchroni_ze account locally"
+msgstr "Account automatisch lokaal _synchroniseren"
+
+#. i18n: copy from evolution:camel-imap-provider.c
+#: ../src/camel/camel-mapi-provider.c:80
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "Filters toe_passen op alle nieuwe berichten in de inbox op deze server"
+
+#: ../src/camel/camel-mapi-provider.c:82
+msgid "Check new messages for _Junk contents"
+msgstr "Nieuwe berichten op _spam controleren"
+
+#: ../src/camel/camel-mapi-provider.c:84
+msgid "Only check for Junk messag_es in the Inbox folder"
+msgstr "All_een de INBOX op spam controleren"
+
+#: ../src/camel/camel-mapi-provider.c:96
+msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+msgstr ""
+"Voor het benaderen van Microsoft Exchange / OpenChange-server met behulp van "
+"MAPI"
+
+#: ../src/camel/camel-mapi-provider.c:111
+msgid "Password"
+msgstr "Wachtwoord"
+
+#: ../src/camel/camel-mapi-provider.c:112
+msgid ""
+"This option will connect to the Openchange server using a plaintext password."
+msgstr ""
+"Deze optie zal met de Openchange-server verbinden met behulp van een "
+"wachtwoord in platte tekst."
+
+#: ../src/camel/camel-mapi-store.c:61
+msgid "Favorites"
+msgstr "Favorieten"
+
+#: ../src/camel/camel-mapi-store.c:62
+msgid "All Public Folders"
+msgstr "Alle publieke mappen"
+
+#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:345
+#, c-format
+msgid "Exchange MAPI server %s"
+msgstr "Exchange-MAPI-server %s"
+
+#: ../src/camel/camel-mapi-store.c:264 ../src/camel/camel-mapi-transport.c:347
+#, c-format
+msgid "Exchange MAPI service for %s on %s"
+msgstr "Exchange-MAPI-dienst voor %s op %s"
+
+#: ../src/camel/camel-mapi-store.c:298
+#, c-format
+msgid "%sPlease enter the MAPI password for %s@%s"
+msgstr "%sVoer het MAPI-wachtwoord in voor %s@%s"
+
+#: ../src/camel/camel-mapi-store.c:312
+msgid "You did not enter a password."
+msgstr "U heeft geen wachtwoord ingevoerd."
+
+#: ../src/camel/camel-mapi-store.c:320
+#, c-format
+msgid "Unable to authenticate to Exchange MAPI server."
+msgstr "Niet in staat aan te melden bij de Exchange MAPI-server."
+
+#: ../src/camel/camel-mapi-store.c:437
+msgid "Cannot create MAPI folders in offline mode."
+msgstr "Kan geen MAPI-mappen in offline modus aanmaken."
+
+#: ../src/camel/camel-mapi-store.c:442
+#, c-format
+msgid "Cannot create new folder `%s'"
+msgstr "Kan geen nieuwe map ‘%s’ aanmaken"
+
+#: ../src/camel/camel-mapi-store.c:652
+#, c-format
+msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
+msgstr "Kan de MAPI-map ‘%s’ niet hernoemen omdat deze niet bestaat."
+
+#: ../src/camel/camel-mapi-store.c:661
+#, c-format
+msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
+msgstr "Kan MAPI-map ‘%s’ niet hernoemen naar ‘%s’. Standaardmap."
+
+#: ../src/camel/camel-mapi-store.c:677
+#, c-format
+msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgstr "Kan de MAPI-map ‘%s’ niet hernoemen naar ‘%s’"
+
+#: ../src/camel/camel-mapi-store.c:1097
+msgid "Folder list not available in offline mode."
+msgstr "Mappenlijst is niet beschikbaar in offline modus."
+
+#. Fixme : Set a better error message. Would be helful in troubleshooting.
+#: ../src/camel/camel-mapi-transport.c:333
+msgid "Could not send message."
+msgstr "Kon bericht niet versturen."
