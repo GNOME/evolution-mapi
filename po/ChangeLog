@@ -1,5 +1,9 @@
 2009-02-04  Wouter Bolsterlee  <wbolster@svn.gnome.org>
 
+	* nl.po: Dutch translation updated by Wouter Bolsterlee.
+
+2009-02-04  Wouter Bolsterlee  <wbolster@svn.gnome.org>
+
 	* nl.po: Initial Dutch translation by Reinout van Schouwen.
 
 2009-02-03  Chao-Hsiung Liao  <j_h_liau@yahoo.com.tw>
@@ -35,7 +39,7 @@
 
 2009-01-24  甘露(Gan Lu) <rhythm.gan@gmail.com>
 
-        * zh_CN.po: Updated Chinese Simplified translation
+	* zh_CN.po: Updated Chinese Simplified translation
 
 2009-01-24  Changwoo Ryu  <cwryu@debian.org>
 
@@ -123,10 +127,10 @@
 
 2009-01-02  甘露(Gan Lu) <rhythm.gan@gmail.com>
 
-        * LINGUAS: Added zh_CN to LINGUAS.
-        * zh_CN.po: Added Chinese Simplified translation
+	* LINGUAS: Added zh_CN to LINGUAS.
+	* zh_CN.po: Added Chinese Simplified translation
 
 2008-11-19  Suman Manjunath  <msuman@novell.com>
 
-	* Makefile.in.in: Cleanup. 
+	* Makefile.in.in: Cleanup.
 
