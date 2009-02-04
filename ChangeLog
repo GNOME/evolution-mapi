@@ -1,3 +1,13 @@
+2009-02-04  Milan Crha  <mcrha@redhat.com>
+
+	** Fix for bug #569482
+
+	* configure.in: Renamed to configure.ac.
+	* autogen.sh: Check for configure.ac.
+	* configure.ac: Added EVO_MAPI_API_VERSION_MACRO and
+	EVO_MAPI_API_VERSION variable. Copying libexchangemapi.pc.in
+	to libexchangemapi-1.0.pc directly.
+
 2009-02-03  Johnny Jacob  <jjohnny@novell.com>
 
 	* configure.in: Version bump. 0.25.91.

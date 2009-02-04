@@ -50,15 +50,9 @@ libexchangemapiinclude_HEADERS = 		\
 	exchange-mapi-cal-tz-utils.h		\
 	exchange-mapi-cal-recur-utils.h
 
-%-1.0.pc: %.pc
-	 cp $< $@
-
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libexchangemapi-1.0.pc
+pkgconfig_DATA = libexchangemapi-$(EVO_MAPI_API_VERSION).pc
 
 EXTRA_DIST = 					\
-	$(pkgconfig_DATA:-1.0.pc=.pc.in) 	\
 	$(mapidata_DATA)
-
-DISTCLEANFILES = $(pkgconfig_DATA)
 

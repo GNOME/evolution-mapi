@@ -7,7 +7,7 @@ test -z "$srcdir" && srcdir=.
 PKG_NAME="evolution-mapi"
 REQUIRED_AUTOMAKE_VERSION=1.6
 
-(test -f $srcdir/configure.in \
+(test -f $srcdir/configure.ac \
   && test -f $srcdir/ChangeLog \
   && test -d $srcdir/src/account-setup-eplugin) || {
     echo -n "**Error**: Directory "\`$srcdir\'" does not look like the"

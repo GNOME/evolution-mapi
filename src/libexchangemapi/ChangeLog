@@ -1,3 +1,10 @@
+2009-02-04  Milan Crha  <mcrha@redhat.com>
+
+	** Fix for bug #569482
+
+	* Makefile.am: Removed obsolete lines and use
+	EVO_MAPI_API_VERSION variable.
+
 2009-02-02  Suman Manjunath  <msuman@novell.com>
 
 	** Part of fix for bug #568554

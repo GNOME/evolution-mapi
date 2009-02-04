@@ -22,6 +22,13 @@ m4_define([libmapi_minimum_version], [0.8])
 AC_CONFIG_HEADER(config.h)
 
 dnl ****************************
+dnl Evolution-MAPI API version
+dnl ****************************
+m4_define([EVO_MAPI_API_VERSION_MACRO], [1.0])
+EVO_MAPI_API_VERSION=EVO_MAPI_API_VERSION_MACRO
+AC_SUBST(EVO_MAPI_API_VERSION)
+
+dnl ****************************
 dnl Initialize maintainer mode
 dnl ****************************
 AM_MAINTAINER_MODE
@@ -138,6 +145,6 @@ src/addressbook/Makefile
 src/calendar/Makefile
 src/camel/Makefile
 src/libexchangemapi/Makefile
-src/libexchangemapi/libexchangemapi.pc
+src/libexchangemapi/libexchangemapi-]EVO_MAPI_API_VERSION_MACRO[.pc:src/libexchangemapi/libexchangemapi.pc.in
 po/Makefile.in
 ])
