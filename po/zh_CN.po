@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
-"POT-Creation-Date: 2009-01-15 06:12+0000\n"
-"PO-Revision-Date: 2009-01-24 19:54+0700\n"
+"POT-Creation-Date: 2009-01-28 16:25+0000\n"
+"PO-Revision-Date: 2009-02-05 21:07+0700\n"
 "Last-Translator: 甘露(Gan Lu) <rhythm.gan@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -15,24 +15,38 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:252
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "输入 %s@%s 的密码"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:332
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
+msgid "Server, username and domain name cannot be empty. Please fill them with correct values."
+msgstr "服务器，用户名及域名不能为空。请填上正确的值。"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+#| msgid "Authentication failed"
+msgid "Authentication finished successfully."
+msgstr "验证成功完成。"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+#| msgid "Authentication failed"
+msgid "Authentication failed."
+msgstr "验证失败。"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
 msgid "_Domain name:"
 msgstr "域名(_D)："
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:342
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
 msgid "_Authenticate"
 msgstr "验证(_A)"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:444
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
 msgid "Personal Folders"
 msgstr "个人文件夹"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:506
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:385
 msgid "_Location:"
 msgstr "位置(_L)："
 
@@ -45,7 +59,6 @@ msgstr "验证失败"
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
 #: ../src/calendar/e-cal-backend-mapi.c:385
 #, c-format
-#| msgid "Loading %s items"
 msgid "Loading items in folder %s"
 msgstr "正在载入文件夹 %s 内项目"
 
@@ -84,7 +97,6 @@ msgid "This message is not available in offline mode."
 msgstr "该消息在离线模式下不可用。"
 
 #: ../src/camel/camel-mapi-folder.c:656
-#| msgid "Fetch items failed"
 msgid "Fetching items failed"
 msgstr "获取项目失败"
 
@@ -121,7 +133,6 @@ msgid "Could not load summary for %s"
 msgstr "无法载入  %s 的摘要"
 
 #: ../src/camel/camel-mapi-provider.c:51
-#| msgid "Checking for New Mail"
 msgid "Checking for new mail"
 msgstr "正在检查新邮件"
 
@@ -179,7 +190,6 @@ msgid "This option will connect to the Openchange server using a plaintext passw
 msgstr "该选项将使用一个纯文本密码连接到 Openchange 服务器。"
 
 #: ../src/camel/camel-mapi-store.c:61
-#| msgid "Favourites"
 msgid "Favorites"
 msgstr "我的最爱"
 
@@ -196,7 +206,6 @@ msgstr "Exchange MAPI 服务器 %s"
 #: ../src/camel/camel-mapi-store.c:264
 #: ../src/camel/camel-mapi-transport.c:347
 #, c-format
-#| msgid "Exchange MAPI for %s on %s"
 msgid "Exchange MAPI service for %s on %s"
 msgstr "在 %2$s 上的 %1$s Exchange MAPI"
 
@@ -211,7 +220,6 @@ msgstr "你没有输入密码"
 
 #: ../src/camel/camel-mapi-store.c:320
 #, c-format
-#| msgid "Unable to authenticate to Exchange MAPI server. "
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "无法验证到 Exchange MAPI 服务器。"
 
@@ -226,13 +234,11 @@ msgstr "无法创建新文件夹 `%s'"
 
 #: ../src/camel/camel-mapi-store.c:662
 #, c-format
-#| msgid "Cannot rename MAPI folder `%s'. Folder doesn't exist"
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "无法重命名 MAPI 文件夹 `%s'。文件夹不存在"
 
 #: ../src/camel/camel-mapi-store.c:670
 #, c-format
-#| msgid "Cannot rename Mapi folder `%s' to `%s'. Default folder."
 msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
 msgstr "无法重命名 Mapi 文件夹 `%s' 为 `%s'。默认文件夹。"
 
@@ -241,7 +247,7 @@ msgstr "无法重命名 Mapi 文件夹 `%s' 为 `%s'。默认文件夹。"
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "无法重命名 MAPI 文件夹 `%s' 为 `%s'"
 
-#: ../src/camel/camel-mapi-store.c:1092
+#: ../src/camel/camel-mapi-store.c:1093
 msgid "Folder list not available in offline mode."
 msgstr "文件夹列表在离线模式下不可用。"
 
