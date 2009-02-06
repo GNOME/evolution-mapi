@@ -1,3 +1,15 @@
+2009-02-04  Johnny Jacob  <jjohnny@novell.com>
+
+	** Fixes 569632.
+
+	* camel-mapi-folder.c (struct fetch_items_data): Added new members.
+	CamelFolder & CamelFolderChangeInfo.
+	(mapi_update_cache): Collect Message UIDs for change_info. Do not trigger
+	'folder_changed' here.
+	(mapi_item_free): Uses GFunc.
+	(fetch_items_cb): Write to summary and free memory in batches (SUMMARY_FETCH_BATCH_COUNT).
+	(mapi_refresh_folder): Trigger a 'folder_changed' event here.
+
 2009-02-02  Suman Manjunath  <msuman@novell.com>
 
 	** Part of fix for bug #568554

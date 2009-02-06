@@ -56,6 +56,7 @@
 #include "camel-mapi-summary.h"
 
 #define DEBUG_FN( ) printf("----%u %s\n", (unsigned int)pthread_self(), __FUNCTION__);
+#define SUMMARY_FETCH_BATCH_COUNT 150
 #define d(x)
 
 static CamelOfflineFolderClass *parent_class = NULL;
@@ -79,9 +80,13 @@ typedef struct {
 typedef struct {
 	GSList *items_list;
 	GTimeVal last_modification_time;
+	CamelFolder *folder;
+	CamelFolderChangeInfo *changes;
 }fetch_items_data;
 
 static CamelMimeMessage *mapi_folder_item_to_msg( CamelFolder *folder, MapiItem *item, CamelException *ex );
+static void mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **changeinfo,
+			       CamelException *ex, gboolean uid_flag);
 
 static GPtrArray *
 mapi_folder_search_by_expression (CamelFolder *folder, const char *expression, CamelException *ex)
@@ -171,8 +176,10 @@ mapi_refresh_info(CamelFolder *folder, CamelException *ex)
 
 }
 
+
+/*Using GFunc*/
 static void 
-mapi_item_free (MapiItem *item)
+mapi_item_free (MapiItem *item, gpointer data)
 {
 	g_free (item->header.subject);
 	g_free (item->header.from);
@@ -183,6 +190,7 @@ mapi_item_free (MapiItem *item)
 	exchange_mapi_util_free_attachment_list (&item->attachments);
 	exchange_mapi_util_free_stream_list (&item->generic_streams);
 }
+
 static gboolean
 fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 {
@@ -280,6 +288,14 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 	*slist = g_slist_prepend (*slist, item);
 
+	/*Write summary to db in batches of SUMMARY_FETCH_BATCH_COUNT items.*/ 
+	if ( (item_data->index % SUMMARY_FETCH_BATCH_COUNT == 0) || item_data->index == item_data->total-1) {
+		mapi_update_cache (fi_data->folder, *slist, &fi_data->changes, NULL, false);
+		g_slist_foreach (*slist, mapi_item_free, NULL);
+		g_slist_free (*slist);
+		*slist = NULL;
+	}
+
 	if (item_data->total > 0)
                camel_operation_progress (NULL, (item_data->index * 100)/item_data->total);
 
@@ -290,7 +306,8 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 }
 
 static void
-mapi_update_cache (CamelFolder *folder, GSList *list, CamelException *ex, gboolean uid_flag) 
+mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **changeinfo,
+		   CamelException *ex, gboolean uid_flag) 
 {
 	CamelMapiMessageInfo *mi = NULL;
 	CamelMessageInfo *pmi = NULL;
@@ -304,12 +321,12 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelException *ex, gboole
 	GSList *item_list = list;
 	int total_items = g_slist_length (item_list), i=0;
 
-	changes = camel_folder_change_info_new ();
+	changes = *changeinfo;
+
 	folder_id = camel_mapi_store_folder_id_lookup (mapi_store, folder->full_name);
 
 	if (!folder_id) {
 		d(printf("\nERROR - Folder id not present. Cannot refresh info\n"));
-		camel_folder_change_info_free (changes);
 		return;
 	}
 
@@ -355,7 +372,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelException *ex, gboole
 		mi->info.flags = item->header.flags;
 
 		if (!exists) {
-			mi->info.uid = g_strdup (exchange_mapi_util_mapi_ids_to_uid(item->fid, item->mid));
+			mi->info.uid = exchange_mapi_util_mapi_ids_to_uid(item->fid, item->mid);
 			mi->info.subject = camel_pstring_strdup(item->header.subject);
 			mi->info.date_sent = mi->info.date_received = item->header.recieved_time;
 			mi->info.from = camel_pstring_strdup (item->header.from);
@@ -382,9 +399,6 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelException *ex, gboole
 	camel_operation_end (NULL);
 
 	g_string_free (str, TRUE);
-	camel_object_trigger_event (folder, "folder_changed", changes);
-
-	camel_folder_change_info_free (changes);
 }
 
 static void 
@@ -609,7 +623,8 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		guint32 options = 0;
 
 		if (mapi_summary->sync_time_stamp && *mapi_summary->sync_time_stamp &&
-		    g_time_val_from_iso8601 (mapi_summary->sync_time_stamp, &fetch_data->last_modification_time)) {
+		    g_time_val_from_iso8601 (mapi_summary->sync_time_stamp, 
+					     &fetch_data->last_modification_time)) {
 			struct SPropValue sprop;
 			struct timeval t;
 
@@ -627,6 +642,10 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 			cast_mapi_SPropValue (&(res->res.resProperty.lpProp), &sprop);
 
 		} 
+
+		/*Initialize other fetch_data fields*/
+		fetch_data->changes = camel_folder_change_info_new ();
+		fetch_data->folder = folder;
 
 		/*Set sort order*/
 		sort = g_new0 (struct SSortOrderSet, 1);
@@ -667,8 +686,9 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		camel_folder_summary_touch (folder->summary);
 		mapi_sync_summary (folder, ex);
 
-		if (fetch_data->items_list)
-			mapi_update_cache (folder, fetch_data->items_list, ex, FALSE);
+		camel_object_trigger_event (folder, "folder_changed", fetch_data->changes);
+
+		camel_folder_change_info_free (fetch_data->changes);
 	}
 
 
