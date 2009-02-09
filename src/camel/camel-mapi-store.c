@@ -494,7 +494,8 @@ mapi_forget_folder (CamelMapiStore *mapi_store, const char *folder_name, CamelEx
 	storage_path = g_strdup_printf ("%s/folders", priv->storage_path);
 
 	/* Fixme Path - e_*-to_path */
-	folder_dir = g_strdup(g_strconcat (storage_path, "/", folder_name, NULL));
+	folder_dir = g_strconcat (storage_path, "/", folder_name, NULL);
+	g_free (storage_path);
 
 	if (g_access(folder_dir, F_OK) != 0) {
 		g_free(folder_dir);

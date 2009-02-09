@@ -1,3 +1,7 @@
+2009-02-07  Johnny Jacob  <jjohnny@novell.com>
+
+	* camel-mapi-store.c (mapi_forget_folder): Fix mem leak.
+
 2009-02-05  Johnny Jacob  <jjohnny@novell.com>
 
 	** Do not allow operations on Mailbox (name) folder. Partially fixes #568519.
