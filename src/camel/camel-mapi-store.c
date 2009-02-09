@@ -1003,7 +1003,10 @@ mapi_convert_to_folder_info (CamelMapiStore *store, ExchangeMAPIFolder *folder, 
 		case olFolderDeletedItems:
 			fi->flags |= CAMEL_FOLDER_TYPE_TRASH;
 			break;
-		/*TODO : case olFolderJunkMail */
+		/*Fixme : IsMailboxFolder doesn't support this yet*/
+		/* case olFolderJunkMail: */
+		/* 	fi->flags |= CAMEL_FOLDER_TYPE_JUNK; */
+		/* 	break; */
 		}
 
 		fi->flags |= CAMEL_FOLDER_SYSTEM;
@@ -1153,7 +1156,7 @@ mapi_folders_sync (CamelMapiStore *store, CamelException *ex)
 	for (;folder_list != NULL; folder_list = g_slist_next (folder_list)) {
 		ExchangeMAPIFolder *folder = (ExchangeMAPIFolder *) folder_list->data;
 		
-		if (exchange_mapi_folder_is_root ((ExchangeMAPIFolder *)(folder)))
+		if (folder->default_type == olPublicFoldersAllPublicFolders)
 			continue;
 
 		if ( folder->container_class != MAPI_FOLDER_TYPE_MAIL) 

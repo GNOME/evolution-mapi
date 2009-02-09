@@ -1,3 +1,9 @@
+2009-02-05  Johnny Jacob  <jjohnny@novell.com>
+
+	** Do not allow operations on Mailbox (name) folder. Partially fixes #568519.
+
+	* camel-mapi-store.c (mapi_folders_sync): Skip only 'All PUblic Folder'.
+
 2009-02-04  Johnny Jacob  <jjohnny@novell.com>
 
 	** Fixes 569632.
