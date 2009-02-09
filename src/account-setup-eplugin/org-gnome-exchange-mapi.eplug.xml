@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <e-plugin-list>
-	<e-plugin type="shlib" location="@PLUGINDIR@/liborg-gnome-exchange-mapi.so" load-on-startup="true" id="org.gnome.evolution.plugin.exchange-mapi" name="Exchange MAPI">
+	<e-plugin type="shlib" location="@PLUGINDIR@/liborg-gnome-exchange-mapi.so" load-on-startup="true" id="org.gnome.evolution.plugin.exchange-mapi" name="Exchange MAPI" system_plugin="true">
 
 		<author name="Srinivasa Ragavan" email="sragavan@novell.com"/>
 		<author name="Johnny Jacob" email="jjohnny@novell.com"/>
