@@ -1,3 +1,14 @@
+2009-02-09  Milan Crha  <mcrha@redhat.com>
+
+	** Fix for bug #567860
+
+	* e-cal-backend-mapi.c: (e_cal_backend_mapi_create_object),
+	(e_cal_backend_mapi_modify_object):
+	Set CREATED/LAST-MODIFIED times properly.
+
+	* e-cal-backend-mapi.c: (e_cal_backend_mapi_set_mode):
+	Do not require authentication when isn't reopening.
+
 2009-01-28  Johnny Jacob  <jjohnny@novell.com>
 
 	** Fixes #569246. Patch by Jelmer Vernooij <jelmer@samba.org>

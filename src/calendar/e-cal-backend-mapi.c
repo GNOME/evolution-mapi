@@ -1302,6 +1302,7 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, char 
 	GSList *streams = NULL;
 	struct cbdata cbdata;
 	struct Binary_r globalid;
+	struct icaltimetype current;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
@@ -1325,6 +1326,10 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, char 
 
 	comp = e_cal_component_new ();
 	e_cal_component_set_icalcomponent (comp, icalcomp);
+
+	current = icaltime_current_time_with_zone (icaltimezone_get_utc_timezone ());
+ 	e_cal_component_set_created (comp, &current);
+ 	e_cal_component_set_last_modified (comp, &current);
 
 	/* FIXME: [WIP] Add support for recurrences */
 	if (e_cal_component_has_recurrences (comp)) {
@@ -1488,7 +1493,8 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 	GSList *attachments = NULL;
 	struct cbdata cbdata;
 	gboolean no_increment = FALSE;
-	icalproperty *prop; 
+	icalproperty *prop;
+	struct icaltimetype current;
 
 	*old_object = *new_object = NULL;
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
@@ -1523,6 +1529,9 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 
 	comp = e_cal_component_new ();
 	e_cal_component_set_icalcomponent (comp, icalcomp);
+
+	current = icaltime_current_time_with_zone (icaltimezone_get_utc_timezone ());
+ 	e_cal_component_set_last_modified (comp, &current);
 
 	/* FIXME: [WIP] Add support for recurrences */
 	if (e_cal_component_has_recurrences (comp)) {
@@ -2234,6 +2243,7 @@ e_cal_backend_mapi_set_mode (ECalBackend *backend, CalMode mode)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
+	gboolean re_open = FALSE;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
@@ -2246,6 +2256,8 @@ e_cal_backend_mapi_set_mode (ECalBackend *backend, CalMode mode)
 
 	g_mutex_lock (priv->mutex);
 
+	re_open = priv->mode == CAL_MODE_LOCAL && mode == CAL_MODE_REMOTE;
+
 	priv->mode_changed = TRUE;
 	switch (mode) {
 		case CAL_MODE_REMOTE:
@@ -2254,7 +2266,7 @@ e_cal_backend_mapi_set_mode (ECalBackend *backend, CalMode mode)
 			e_cal_backend_notify_mode (backend, GNOME_Evolution_Calendar_CalListener_MODE_SET,
 					GNOME_Evolution_Calendar_MODE_REMOTE);
 			e_cal_backend_notify_readonly (backend, priv->read_only);
-			if (e_cal_backend_mapi_is_loaded (backend))
+			if (e_cal_backend_mapi_is_loaded (backend) && re_open)
 		              e_cal_backend_notify_auth_required(backend);
 			break;
 		case CAL_MODE_LOCAL:
