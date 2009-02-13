@@ -68,7 +68,7 @@
 #include <libmapi/libmapi.h>
 #include <param.h>
 
-#define d(x) printf("%s(%d):%s:%s \n", __FILE__, __LINE__, __PRETTY_FUNCTION__, x)
+#define d(x) printf("%s:%s:%s \n", G_STRLOC, G_STRFUNC, x)
 
 struct _CamelMapiStorePrivate {
 	char *user;

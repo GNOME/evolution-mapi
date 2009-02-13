@@ -532,7 +532,7 @@ exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 			type = olFolderNotes; 
 			break;
 		default: 
-			g_warning ("%s(%d): %s: Unknown ExchangeMAPIFolderType\n", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+			g_warning ("%s: %s: Unknown ExchangeMAPIFolderType\n", G_STRLOC, G_STRFUNC);
 			return;
 	}
 

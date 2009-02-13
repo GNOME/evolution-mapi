@@ -1,3 +1,11 @@
+2009-02-13  Wang Xin  <jedy.wang@sun.com>
+
+	** Fix for bug #571413. Use G_STRLOC and G_STRFUNC to replace __FILE__,
+	__LINE__ and __PRETTY_FUNCTION__.
+
+	* exchange-mapi-account-listener.c:
+	* exchange-mapi-account-setup.c:
+
 2009-02-09  Milan Crha  <mcrha@redhat.com>
 
 	** Part of fix for bug #567861

@@ -49,7 +49,7 @@ exchange_mapi_cal_tz_util_get_mapi_equivalent (const gchar *ical_tzid)
 		return NULL;
 	}
 
-	d(g_message("%s(%d): %s of '%s' ", __FILE__, __LINE__, __PRETTY_FUNCTION__, ical_tzid));
+	d(g_message("%s: %s of '%s' ", G_STRLOC, G_STRFUNC, ical_tzid));
 
 	retval = g_hash_table_lookup (ical_to_mapi, ical_tzid);
 
@@ -71,7 +71,7 @@ exchange_mapi_cal_tz_util_get_ical_equivalent (const gchar *mapi_tzid)
 		return NULL;
 	}
 
-	d(g_message("%s(%d): %s of '%s' ", __FILE__, __LINE__, __PRETTY_FUNCTION__, mapi_tzid));
+	d(g_message("%s: %s of '%s' ", G_STRLOC, G_STRFUNC, mapi_tzid));
 
 	retval = g_hash_table_lookup (mapi_to_ical, mapi_tzid);
 
@@ -197,7 +197,7 @@ exchange_mapi_cal_tz_util_dump_ical_tzs ()
 	/* Get the array of builtin timezones. */
 	zones = icaltimezone_get_builtin_timezones ();
 
-	g_message("%s(%d): %s: ", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+	g_message("%s: %s: ", G_STRLOC, G_STRFUNC);
 	for (i = 0; i < zones->num_elements; i++) {
 		icaltimezone *zone;
 		const char *tzid = NULL;
@@ -237,7 +237,7 @@ exchange_mapi_cal_tz_util_dump ()
 		return;
 	}
 
-	g_message("%s(%d): %s: ", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+	g_message("%s: %s: ", G_STRLOC, G_STRFUNC);
 
 	g_message ("Dumping #table mapi_to_ical");
 	keys = g_hash_table_get_keys (mapi_to_ical);

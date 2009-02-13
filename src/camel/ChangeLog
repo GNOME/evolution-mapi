@@ -1,3 +1,11 @@
+2009-02-13  Wang Xin  <jedy.wang@sun.com>
+
+	** Fix for bug #571413. Use G_STRLOC and G_STRFUNC to replace __FILE__,
+	__LINE__ and __PRETTY_FUNCTION__.
+
+	* camel-mapi-store.c:
+	* camel-mapi-transport.c:
+
 2009-02-07  Johnny Jacob  <jjohnny@novell.com>
 
 	* camel-mapi-store.c (mapi_forget_folder): Fix mem leak.

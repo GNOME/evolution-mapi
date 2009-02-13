@@ -33,8 +33,8 @@ static GSList *folder_list = NULL;
 /* we use a static mutex - even the same thread *may not* use the static vars concurrently */
 static GStaticMutex folder_lock = G_STATIC_MUTEX_INIT;
 
-#define LOCK() 		g_message("%s(%d): %s: lock(folder_lock)", __FILE__, __LINE__, __PRETTY_FUNCTION__);g_static_mutex_lock(&folder_lock)
-#define UNLOCK() 	g_message("%s(%d): %s: unlock(folder_lock)", __FILE__, __LINE__, __PRETTY_FUNCTION__);g_static_mutex_unlock(&folder_lock)
+#define LOCK() 		g_message("%s: %s: lock(folder_lock)", G_STRLOC, G_STRFUNC);g_static_mutex_lock(&folder_lock)
+#define UNLOCK() 	g_message("%s: %s: unlock(folder_lock)", G_STRLOC, G_STRFUNC);g_static_mutex_unlock(&folder_lock)
 #define d(x) x
 
 static ExchangeMAPIFolderType

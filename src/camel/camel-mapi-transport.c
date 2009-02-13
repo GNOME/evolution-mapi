@@ -84,7 +84,7 @@ static void
 mapi_item_debug_dump (MapiItem *item)
 {
 	printf("-----------------\n\n");
-        printf("%s(%d):%s: \n", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+        printf("%s:%s: \n", G_STRLOC, G_STRFUNC);
 	printf("item->header.from : %s\n",item->header.from);
 	//Use Recipient List
 	printf("item->header.subject : %s\n",item->header.subject);

@@ -213,7 +213,7 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 		conf_key = JOURNAL_SOURCES;
 		source_selection_key = SELECTED_JOURNALS;
 	} else {
-		g_warning ("%s(%d): %s: Unknown ExchangeMAPIFolderType\n", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+		g_warning ("%s: %s: Unknown ExchangeMAPIFolderType\n", G_STRLOC, G_STRFUNC);
 		return;
 	} 
 
@@ -323,7 +323,7 @@ remove_cal_esource (EAccount *existing_account_info, ExchangeMAPIFolderType fold
 		conf_key = JOURNAL_SOURCES;
 		source_selection_key = SELECTED_JOURNALS;
 	} else {
-		g_warning ("%s(%d): %s: Unknown ExchangeMAPIFolderType\n", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+		g_warning ("%s: %s: Unknown ExchangeMAPIFolderType\n", G_STRLOC, G_STRFUNC);
 		return;
 	} 
 

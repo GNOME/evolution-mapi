@@ -1,3 +1,12 @@
+2009-02-13  Wang Xin  <jedy.wang@sun.com>
+
+	** Fix for bug #571413. Use G_STRLOC and G_STRFUNC to replace __FILE__,
+	__LINE__ and __PRETTY_FUNCTION__.
+
+	* exchange-mapi-cal-tz-utils.c:
+	* exchange-mapi-connection.c:
+	* exchange-mapi-folder.c:
+
 2009-02-05  Johnny Jacob  <jjohnny@novell.com>
 
 	* exchange-mapi-connection.c (exchange_mapi_get_folders_list): Mark 'Mailbox (name)' as
