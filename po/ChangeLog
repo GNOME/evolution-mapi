@@ -1,3 +1,8 @@
+2009-02-14 Kenneth Nielsen <k.nielsen81@gmail.com>
+
+	* LINGUAS: Added "da" to list of laguages
+	* da.po: Added Danish translation by Per Kongstad
+
 2009-02-07  Claude Paroz  <claude@2xlibre.net>
 
 	* LINGUAS:
