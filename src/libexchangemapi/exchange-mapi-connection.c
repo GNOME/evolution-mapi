@@ -2513,21 +2513,122 @@ cleanup:
 	return result;
 }
 
+/* TODO : Find a right place for this. */
+#define PR_ADDITIONAL_REN_ENTRYIDS    PROP_TAG(PT_MV_BINARY, 0x36D8)
+
+/*NOTE : This should be called when you hold the connection lock*/
+/*NOTE : IsMailboxFolder doesn't support this yet. */
+/* Ticket : http://trac.openchange.org/ticket/134  */
+static void
+mapi_get_ren_additional_fids (const mapi_object_t *obj_store, GHashTable **folder_list)
+{
+	mapi_id_t inbox_id, fid, *default_fid;
+	mapi_object_t obj_folder_inbox;
+	struct SPropTagArray *SPropTagArray;
+	struct SPropValue *lpProps;
+	struct SRow aRow;
+	struct BinaryArray_r *entryids;
+	struct Binary_r entryid;
+	enum MAPISTATUS retval;
+
+	guint32 count, *folder_type;
+	guint i = 0;
+
+	TALLOC_CTX *mem_ctx;
+
+	/*Note : Do not change the order.*/
+	const guint32 olfolder_defaults[] = {
+		olFolderConflicts,
+		olFolderSyncIssues,
+		olFolderLocalFailures,
+		olFolderServerFailures,
+		olFolderJunk
+	};
+
+	mem_ctx = talloc_init("ExchangeMAPI_GetAdditionalFIDs");
+	mapi_object_init(&obj_folder_inbox);
+
+	/* Get Inbox FID using GetDefaultFolder. */
+	retval = GetDefaultFolder(obj_store, &inbox_id, olFolderInbox);
+	if (retval != MAPI_E_SUCCESS) {
+		mapi_errstr("GetDefaultFolder", GetLastError());
+		goto cleanup;
+	}
+
+	/* Open InboxFolder. */
+	retval = OpenFolder(obj_store, inbox_id, &obj_folder_inbox);
+	if (retval != MAPI_E_SUCCESS) {
+		mapi_errstr("OpenFolder", GetLastError());
+		goto cleanup;
+	}
+
+	/* GetProps on Inbox for PR_ADDITIONAL_REN_ENTRYIDS */
+	SPropTagArray = set_SPropTagArray(mem_ctx, 0x1, PR_ADDITIONAL_REN_ENTRYIDS);
+
+	lpProps = talloc_zero(mem_ctx, struct SPropValue);
+	retval = GetProps (&obj_folder_inbox, SPropTagArray, &lpProps, &count);
+
+	/* Build a SRow structure */
+	aRow.ulAdrEntryPad = 0;
+	aRow.cValues = count;
+	aRow.lpProps = lpProps;
+
+	entryids = (const struct BinaryArray_r *) find_SPropValue_data(&aRow, PR_ADDITIONAL_REN_ENTRYIDS);
+
+	/* Iterate through MV_BINARY */
+	if (entryids) {
+		for (i = 0; i < G_N_ELEMENTS (olfolder_defaults); i++) {
+			entryid = entryids->lpbin [i];
+			retval = GetFIDFromEntryID(entryid.cb, entryid.lpb, inbox_id, &fid);
+
+			if (fid) {
+				folder_type = g_new0 (guint32, 1);
+				*folder_type = olfolder_defaults[i];
+
+				g_hash_table_insert (*folder_list, 
+						     exchange_mapi_util_mapi_id_to_string (fid), 
+						     folder_type);
+			}
+		}
+	}
+
+cleanup:
+	mapi_object_release(&obj_folder_inbox);
+	talloc_free (mem_ctx);
+}
+
 static void 
 set_default_folders (mapi_object_t *obj_store, GSList **mapi_folders)
 {
 	GSList *folder_list = *mapi_folders;
+
+	GHashTable *default_folders = g_hash_table_new_full (g_str_hash, g_str_equal,
+							     g_free, g_free);
+
+	mapi_get_ren_additional_fids (obj_store, &default_folders);
 	
 	while (folder_list != NULL) {
 		ExchangeMAPIFolder *folder = NULL;
 		guint32 default_type = 0;
+		gchar *key_fid = NULL;
+		gpointer value = NULL;
+
 		folder = folder_list->data;
-		if (IsMailboxFolder (obj_store,folder->folder_id, &default_type )) {
+		key_fid = exchange_mapi_util_mapi_id_to_string (folder->folder_id);
+
+		if (value = g_hash_table_lookup (default_folders, key_fid))
+			default_type = *(guint32 *)value;
+		g_free (key_fid);
+
+		if (default_type != 0 || IsMailboxFolder (obj_store,folder->folder_id, &default_type)) {
 			folder->is_default = true; /* TODO : Clean up. Redundant.*/
 			folder->default_type = default_type;
 		}
+
 		folder_list = g_slist_next (folder_list); 
 	}
+
+	g_hash_table_destroy (default_folders);
 }
 
 static void 

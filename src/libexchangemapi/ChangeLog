@@ -1,3 +1,11 @@
+2009-02-16  Johnny Jacob  <jjohnny@novell.com>
+
+	** Fixes #568519 – Delete/Renaming default folders should not be allowed.
+
+	* exchange-mapi-connection.c (set_default_folders): Use PR_REN_ADDITIONAL_ENTRYIDS for
+	Junk & Sync issues folder.
+	(mapi_get_ren_additional_fids): Added. Fetch Use PR_REN_ADDITIONAL_ENTRYIDS.
+
 2009-02-13  Wang Xin  <jedy.wang@sun.com>
 
 	** Fix for bug #571413. Use G_STRLOC and G_STRFUNC to replace __FILE__,

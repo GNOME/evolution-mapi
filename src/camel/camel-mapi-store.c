@@ -1004,10 +1004,12 @@ mapi_convert_to_folder_info (CamelMapiStore *store, ExchangeMAPIFolder *folder, 
 		case olFolderDeletedItems:
 			fi->flags |= CAMEL_FOLDER_TYPE_TRASH;
 			break;
-		/*Fixme : IsMailboxFolder doesn't support this yet*/
-		/* case olFolderJunkMail: */
-		/* 	fi->flags |= CAMEL_FOLDER_TYPE_JUNK; */
-		/* 	break; */
+		case olFolderOutbox:
+			fi->flags |= CAMEL_FOLDER_TYPE_OUTBOX;
+			break;
+		case olFolderJunk:
+			fi->flags |= CAMEL_FOLDER_TYPE_JUNK;
+			break;
 		}
 
 		fi->flags |= CAMEL_FOLDER_SYSTEM;
