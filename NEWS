@@ -1,3 +1,23 @@
+evolution-mapi 0.25.91 2009-02-16
+---------------------------------
+Bug Fixes:
+	#569482: Fixes for configure warning. (Milan Crha)
+	#569632: Message list is not shown immediately after summary fetch. (Johnny Jacob)
+	#567861: Partial. MAPI account setup pluing as system plugin (Milan Crha)
+	#567860: Issues when moving items from other calendar (Milan Crha)
+	#571413: Use G_STRLOC and G_STRFUNC (Wang Xin)
+	#568519: Delete/Renaming default folders should not be allowed. (Johnny Jacob)
+
+Update Translations:
+       Reinout van Schouwen (nl)
+       Wouter Bolsterlee (nl)
+       甘露(Gan Lu) (zh_CN)
+       Clytie Siddall (vi)
+       Claude Paroz (fr)
+       Per Kongstad (da)
+       Yair Hershkovitz (he)
+       Jiri Eischmann (cs)
+
 evolution-mapi 0.25.90 2009-02-02
 ---------------------------------------
 
