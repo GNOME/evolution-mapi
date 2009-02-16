@@ -261,6 +261,8 @@ static char
 	if (brief) {
 		return g_strdup_printf(_("Exchange MAPI server %s"), service->url->host);
 	} else {
+		/*To translators : Example string : Exchange MAPI service for 
+		  _username_ on _server host name__*/
 		return g_strdup_printf(_("Exchange MAPI service for %s on %s"),
 				       service->url->user, service->url->host);
 	}
@@ -295,8 +297,11 @@ mapi_auth_loop (CamelService *service, CamelException *ex)
 		if (!service->url->passwd ){
 			char *prompt;
 			
-			prompt = g_strdup_printf (_("%sPlease enter the MAPI "
-						    "password for %s@%s"),
+			/*To translators : First %s : is the error text or the reason
+			  for prompting the user if it is available.
+			 Second %s is : Username.
+			 Third %s is : Server host name.*/
+			prompt = g_strdup_printf (_("%s Please enter the MAPI password for %s@%s"),
 						  errbuf ? errbuf : "",
 						  service->url->user,
 						  service->url->host);
@@ -649,6 +654,7 @@ mapi_rename_folder(CamelStore *store, const char *old_name, const char *new_name
 
 	folder_id = camel_mapi_store_folder_id_lookup (mapi_store, temp);
 	if (!folder_id) {
+		/*To translators : '%s' is current name of the folder */
 		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, 
 				      _("Cannot rename MAPI folder `%s'. Folder does not exist."),
 				      old_name);
@@ -658,8 +664,10 @@ mapi_rename_folder(CamelStore *store, const char *old_name, const char *new_name
 
 	/*Do not allow rename for system folders.*/
 	if (mapi_fid_is_system_folder (mapi_store, folder_id)) {
+		/*To translators : '%s to %s' is current name of the folder  and
+		 new name of the folder.*/
 		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, 
-				      _("Cannot rename MAPI folder `%s' to `%s'. Default folder."),
+				      _("Cannot rename MAPI default folder `%s' to `%s'."),
 				      old_name, new_name);
 		return;
 	}
@@ -674,6 +682,8 @@ mapi_rename_folder(CamelStore *store, const char *old_name, const char *new_name
 	
 	if (!exchange_mapi_rename_folder (fid , temp))
 	{
+		/*To translators : '%s to %s' is current name of the folder  and
+		 new name of the folder.*/
 		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, 
 				      _("Cannot rename MAPI folder `%s' to `%s'"), old_name, new_name);
 

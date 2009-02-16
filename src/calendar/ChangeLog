@@ -1,3 +1,9 @@
+2009-02-16  Johnny Jacob  <jjohnny@novell.com>
+
+	** Partially fixes #565964 : translation issues.
+
+	* e-cal-backend-mapi.c : String improvements.
+
 2009-02-09  Milan Crha  <mcrha@redhat.com>
 
 	** Fix for bug #567860

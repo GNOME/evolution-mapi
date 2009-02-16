@@ -1,5 +1,12 @@
 2009-02-16  Johnny Jacob  <jjohnny@novell.com>
 
+	** Partially fixes #565964 : translation issues.
+
+	* camel-mapi-folder.c : String improvments.
+	* camel-mapi-store.c : String improvments.
+
+2009-02-16  Johnny Jacob  <jjohnny@novell.com>
+
 	* camel-mapi-store.c (mapi_convert_to_folder_info): Mark Junk & Outbox folders.
 
 2009-02-13  Wang Xin  <jedy.wang@sun.com>

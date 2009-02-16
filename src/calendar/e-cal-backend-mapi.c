@@ -575,8 +575,8 @@ get_deltas (gpointer handle)
 						NULL, 0, NULL, NULL, 
 						mapi_cal_get_changes_cb, cbmapi, 
 						MAPI_OPTIONS_FETCH_ALL)) {
-			/* FIXME: better string please... */
-			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server. Removing the cache might help."));
+			/* FIXME: String : We need to restart evolution-data-server */
+			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
 //			e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 			g_static_mutex_unlock (&updating);
 			return FALSE;
@@ -586,8 +586,8 @@ get_deltas (gpointer handle)
 						exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind), 
 						mapi_cal_get_changes_cb, cbmapi, 
 						MAPI_OPTIONS_FETCH_ALL)) {
-		/* FIXME: better string please... */
-		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server. Removing the cache might help."));
+		/* FIXME: String : We need to restart evolution-data-server */
+		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
 //		e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 		g_static_mutex_unlock (&updating);
 		return FALSE;
@@ -612,8 +612,8 @@ get_deltas (gpointer handle)
 						NULL, NULL, 
 						handle_deleted_items_cb, cbmapi, 
 						0)) {
-		/* FIXME: better string please... */
-		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server. Removing the cache might help."));
+		/* FIXME: String : We need to restart evolution-data-server */
+		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
 		priv->cache_keys = NULL;
 		g_static_mutex_unlock (&updating);
 		return FALSE;
