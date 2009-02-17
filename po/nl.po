@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-04 16:11+0100\n"
-"PO-Revision-Date: 2009-02-04 16:09+0100\n"
+"POT-Creation-Date: 2009-02-17 01:22+0100\n"
+"PO-Revision-Date: 2009-02-17 01:22+0100\n"
 "Last-Translator: Wouter Bolsterlee <wbolster@gnome.org>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
 "MIME-Version: 1.0\n"
@@ -58,7 +58,7 @@ msgstr "_Locatie:"
 
 #: ../src/calendar/e-cal-backend-mapi.c:115
 #: ../src/calendar/e-cal-backend-mapi.c:1051
-#: ../src/camel/camel-mapi-store.c:453
+#: ../src/camel/camel-mapi-store.c:458
 msgid "Authentication failed"
 msgstr "Aanmelden mislukt"
 
@@ -68,14 +68,12 @@ msgstr "Aanmelden mislukt"
 msgid "Loading items in folder %s"
 msgstr "Laden van items in map %s"
 
-#. FIXME: better string please...
+#. FIXME: String : We need to restart evolution-data-server
 #: ../src/calendar/e-cal-backend-mapi.c:579
 #: ../src/calendar/e-cal-backend-mapi.c:590
 #: ../src/calendar/e-cal-backend-mapi.c:616
-msgid "Error fetching changes from the server. Removing the cache might help."
-msgstr ""
-"Probleem bij het ophalen van wijzigingen van de server. Het legen van de "
-"buffer zou kunnen helpen."
+msgid "Error fetching changes from the server."
+msgstr "Fout bij het ophalen van wijzigingen van de server."
 
 #: ../src/calendar/e-cal-backend-mapi.c:971
 #: ../src/calendar/e-cal-backend-mapi.c:981
@@ -88,7 +86,7 @@ msgstr "Kan bufferbestand niet aanmaken"
 msgid "Could not create thread for populating cache"
 msgstr "Kon geen thread aanmaken voor het vullen van de buffer"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1505
+#: ../src/calendar/e-cal-backend-mapi.c:1511
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -97,21 +95,21 @@ msgstr ""
 "afspraak is nog niet geïmplementeerd. Er is geen wijziging gemaakt aan de "
 "afspraak op de server."
 
-#: ../src/camel/camel-mapi-folder.c:316 ../src/camel/camel-mapi-folder.c:650
+#: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Ophalen van samenvattingsinformatie van nieuwe berichten in %s"
 
-#: ../src/camel/camel-mapi-folder.c:643 ../src/camel/camel-mapi-folder.c:1202
-#: ../src/camel/camel-mapi-folder.c:1210
+#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1222
+#: ../src/camel/camel-mapi-folder.c:1230
 msgid "This message is not available in offline mode."
 msgstr "Dit bericht is niet beschikbaar in offline modus."
 
-#: ../src/camel/camel-mapi-folder.c:660
+#: ../src/camel/camel-mapi-folder.c:679
 msgid "Fetching items failed"
 msgstr "Opvragen van items mislukt"
 
-#: ../src/camel/camel-mapi-folder.c:1166
+#: ../src/camel/camel-mapi-folder.c:1186
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -120,24 +118,24 @@ msgstr ""
 "Kan bericht niet verkrijgen: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1166
+#: ../src/camel/camel-mapi-folder.c:1186
 msgid "No such message"
 msgstr "Een dergelijk bericht bestaat niet"
 
-#: ../src/camel/camel-mapi-folder.c:1178
-msgid "User canceled"
-msgstr "Geannuleerd door gebruiker"
+#: ../src/camel/camel-mapi-folder.c:1198
+msgid "Message fetching cancelled by user."
+msgstr "Bericht ophalen geannulleerd door gebruiker."
 
-#: ../src/camel/camel-mapi-folder.c:1185
+#: ../src/camel/camel-mapi-folder.c:1205
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Kan bericht: %s niet verkrijgen: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1229 ../src/camel/camel-mapi-folder.c:1239
+#: ../src/camel/camel-mapi-folder.c:1249 ../src/camel/camel-mapi-folder.c:1259
 msgid "Could not get message"
 msgstr "Kon bericht niet verkrijgen"
 
-#: ../src/camel/camel-mapi-folder.c:1592
+#: ../src/camel/camel-mapi-folder.c:1612
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Kon samenvatting voor %s niet laden"
@@ -217,50 +215,56 @@ msgstr "Alle publieke mappen"
 msgid "Exchange MAPI server %s"
 msgstr "Exchange-MAPI-server %s"
 
-#: ../src/camel/camel-mapi-store.c:264 ../src/camel/camel-mapi-transport.c:347
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:347
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Exchange-MAPI-dienst voor %s op %s"
 
-#: ../src/camel/camel-mapi-store.c:298
+#. To translators : First %s : is the error text or the reason
+#. for prompting the user if it is available.
+#. Second %s is : Username.
+#. Third %s is : Server host name.
+#: ../src/camel/camel-mapi-store.c:304
 #, c-format
-msgid "%sPlease enter the MAPI password for %s@%s"
-msgstr "%sVoer het MAPI-wachtwoord in voor %s@%s"
+msgid "%s Please enter the MAPI password for %s@%s"
+msgstr "%s Voer het MAPI-wachtwoord in voor %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:312
+#: ../src/camel/camel-mapi-store.c:317
 msgid "You did not enter a password."
 msgstr "U heeft geen wachtwoord ingevoerd."
 
-#: ../src/camel/camel-mapi-store.c:320
+#: ../src/camel/camel-mapi-store.c:325
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Niet in staat aan te melden bij de Exchange MAPI-server."
 
-#: ../src/camel/camel-mapi-store.c:437
+#: ../src/camel/camel-mapi-store.c:442
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "Kan geen MAPI-mappen in offline modus aanmaken."
 
-#: ../src/camel/camel-mapi-store.c:442
+#: ../src/camel/camel-mapi-store.c:447
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "Kan geen nieuwe map ‘%s’ aanmaken"
 
-#: ../src/camel/camel-mapi-store.c:652
+#: ../src/camel/camel-mapi-store.c:659
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "Kan de MAPI-map ‘%s’ niet hernoemen omdat deze niet bestaat."
 
-#: ../src/camel/camel-mapi-store.c:661
+#: ../src/camel/camel-mapi-store.c:670
 #, c-format
-msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
-msgstr "Kan MAPI-map ‘%s’ niet hernoemen naar ‘%s’. Standaardmap."
+msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgstr "Kan de standaard MAPI-map ‘%s’ niet hernoemen naar ‘%s’"
 
-#: ../src/camel/camel-mapi-store.c:677
+#: ../src/camel/camel-mapi-store.c:688
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "Kan de MAPI-map ‘%s’ niet hernoemen naar ‘%s’"
 
-#: ../src/camel/camel-mapi-store.c:1097
+#: ../src/camel/camel-mapi-store.c:1113
 msgid "Folder list not available in offline mode."
 msgstr "Mappenlijst is niet beschikbaar in offline modus."
 
@@ -268,3 +272,9 @@ msgstr "Mappenlijst is niet beschikbaar in offline modus."
 #: ../src/camel/camel-mapi-transport.c:333
 msgid "Could not send message."
 msgstr "Kon bericht niet versturen."
+
+#~ msgid "User canceled"
+#~ msgstr "Geannuleerd door gebruiker"
+
+#~ msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
+#~ msgstr "Kan MAPI-map ‘%s’ niet hernoemen naar ‘%s’. Standaardmap."
