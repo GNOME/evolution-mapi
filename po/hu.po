@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi HEAD\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
-"POT-Creation-Date: 2009-01-28 16:25+0000\n"
-"PO-Revision-Date: 2009-01-30 08:25+0100\n"
+"POT-Creation-Date: 2009-02-16 09:30+0000\n"
+"PO-Revision-Date: 2009-02-17 22:03+0100\n"
 "Last-Translator: Gabor Kelemen <kelemeng@gnome.hu>\n"
 "Language-Team: Hungarian <gnome@fsf.hu>\n"
 "MIME-Version: 1.0\n"
@@ -27,15 +27,15 @@ msgstr "Adja meg %s@%s jelszavát"
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
-msgstr "A kiszolgáló, felhasználónév és tartomány nem lehet üres. Töltse ki ezeket helyes értékekkel."
+msgstr ""
+"A kiszolgáló, felhasználónév és tartomány nem lehet üres. Töltse ki ezeket "
+"helyes értékekkel."
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
-#| msgid "Authentication failed"
 msgid "Authentication finished successfully."
 msgstr "A hitelesítés sikeres."
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
-#| msgid "Authentication failed"
 msgid "Authentication failed."
 msgstr "A hitelesítés meghiúsult."
 
@@ -55,40 +55,39 @@ msgstr "Személyes mappák"
 msgid "_Location:"
 msgstr "He_ly:"
 
-#: ../src/calendar/e-cal-backend-mapi.c:111
-#: ../src/calendar/e-cal-backend-mapi.c:1047
-#: ../src/camel/camel-mapi-store.c:453
+#: ../src/calendar/e-cal-backend-mapi.c:115
+#: ../src/calendar/e-cal-backend-mapi.c:1051
+#: ../src/camel/camel-mapi-store.c:458
 msgid "Authentication failed"
 msgstr "Hitelesítés sikertelen"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:385
+#: ../src/calendar/e-cal-backend-mapi.c:389
 #, c-format
-#| msgid "Loading %s items"
 msgid "Loading items in folder %s"
 msgstr "Elemek letöltése a(z) %s mappába"
 
-#. FIXME: better string please...
-#: ../src/calendar/e-cal-backend-mapi.c:575
-#: ../src/calendar/e-cal-backend-mapi.c:586
-#: ../src/calendar/e-cal-backend-mapi.c:612
-msgid "Error fetching changes from the server. Removing the cache might help."
-msgstr ""
-"Hiba a változások letöltésekor a kiszolgálóról. A gyorsítótár törlése "
-"segíthet."
+#. FIXME: String : We need to restart evolution-data-server
+#: ../src/calendar/e-cal-backend-mapi.c:579
+#: ../src/calendar/e-cal-backend-mapi.c:590
+#: ../src/calendar/e-cal-backend-mapi.c:616
+#| msgid ""
+#| "Error fetching changes from the server. Removing the cache might help."
+msgid "Error fetching changes from the server."
+msgstr "Hiba a változások letöltésekor a kiszolgálóról."
 
-#: ../src/calendar/e-cal-backend-mapi.c:967
-#: ../src/calendar/e-cal-backend-mapi.c:977
-#: ../src/calendar/e-cal-backend-mapi.c:1082
-#: ../src/calendar/e-cal-backend-mapi.c:1164
+#: ../src/calendar/e-cal-backend-mapi.c:971
+#: ../src/calendar/e-cal-backend-mapi.c:981
+#: ../src/calendar/e-cal-backend-mapi.c:1086
+#: ../src/calendar/e-cal-backend-mapi.c:1168
 msgid "Could not create cache file"
 msgstr "Nem lehet létrehozni a gyorsítótár fájlt"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1093
+#: ../src/calendar/e-cal-backend-mapi.c:1097
 msgid "Could not create thread for populating cache"
 msgstr "Nem sikerült létrehozni szálat a gyorsítótárfájl megtöltéséhez"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1501
+#: ../src/calendar/e-cal-backend-mapi.c:1511
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -96,22 +95,21 @@ msgstr ""
 "Ismétlődő értekezlet egyedi példányainak módosítása még nem támogatott. Az "
 "értekezlet nem módosult a kiszolgálón."
 
-#: ../src/camel/camel-mapi-folder.c:312 ../src/camel/camel-mapi-folder.c:646
+#: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Összefoglaló adatok letöltése az új levelekhez ezen: %s"
 
-#: ../src/camel/camel-mapi-folder.c:639 ../src/camel/camel-mapi-folder.c:1198
-#: ../src/camel/camel-mapi-folder.c:1206
+#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1222
+#: ../src/camel/camel-mapi-folder.c:1230
 msgid "This message is not available in offline mode."
 msgstr "Ez az üzenet nem érhető el kapcsolat nélküli módban."
 
-#: ../src/camel/camel-mapi-folder.c:656
-#| msgid "Fetch items failed"
+#: ../src/camel/camel-mapi-folder.c:679
 msgid "Fetching items failed"
 msgstr "Az elemek letöltése meghiúsult"
 
-#: ../src/camel/camel-mapi-folder.c:1162
+#: ../src/camel/camel-mapi-folder.c:1186
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -120,30 +118,29 @@ msgstr ""
 "Nem sikerült betölteni a levelet: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1162
+#: ../src/camel/camel-mapi-folder.c:1186
 msgid "No such message"
 msgstr "Nincs ilyen üzenet"
 
-#: ../src/camel/camel-mapi-folder.c:1174
-msgid "User canceled"
-msgstr "Felhasználói megszakítás"
+#: ../src/camel/camel-mapi-folder.c:1198
+msgid "Message fetching cancelled by user."
+msgstr "Az üzenetek letöltését megszakította a felhasználó."
 
-#: ../src/camel/camel-mapi-folder.c:1181
+#: ../src/camel/camel-mapi-folder.c:1205
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Nem sikerült betölteni a levelet: %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1225 ../src/camel/camel-mapi-folder.c:1235
+#: ../src/camel/camel-mapi-folder.c:1249 ../src/camel/camel-mapi-folder.c:1259
 msgid "Could not get message"
 msgstr "Nem sikerült az üzenetet letölteni"
 
-#: ../src/camel/camel-mapi-folder.c:1582
+#: ../src/camel/camel-mapi-folder.c:1612
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nem sikerült betölteni %s összefoglalóját"
 
 #: ../src/camel/camel-mapi-provider.c:51
-#| msgid "Checking for New Mail"
 msgid "Checking for new mail"
 msgstr "Új levelek keresése"
 
@@ -203,7 +200,6 @@ msgstr ""
 "csatlakozik."
 
 #: ../src/camel/camel-mapi-store.c:61
-#| msgid "Favourites"
 msgid "Favorites"
 msgstr "Kedvencek"
 
@@ -216,54 +212,58 @@ msgstr "Minden nyilvános mappa"
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI kiszolgáló %s"
 
-#: ../src/camel/camel-mapi-store.c:264 ../src/camel/camel-mapi-transport.c:347
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:347
 #, c-format
-#| msgid "Exchange MAPI for %s on %s"
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Exchange MAPI szolgáltatás %s számára ezen: %s"
 
-#: ../src/camel/camel-mapi-store.c:298
+#. To translators : First %s : is the error text or the reason
+#. for prompting the user if it is available.
+#. Second %s is : Username.
+#. Third %s is : Server host name.
+#: ../src/camel/camel-mapi-store.c:304
 #, c-format
-msgid "%sPlease enter the MAPI password for %s@%s"
-msgstr "%sAdja meg %s@%s MAPI jelszavát"
+#| msgid "%sPlease enter the MAPI password for %s@%s"
+msgid "%s Please enter the MAPI password for %s@%s"
+msgstr "%s Adja meg %s@%s MAPI jelszavát"
 
-#: ../src/camel/camel-mapi-store.c:312
+#: ../src/camel/camel-mapi-store.c:317
 msgid "You did not enter a password."
 msgstr "Nem adott meg jelszót."
 
-#: ../src/camel/camel-mapi-store.c:320
+#: ../src/camel/camel-mapi-store.c:325
 #, c-format
-#| msgid "Unable to authenticate to Exchange MAPI server. "
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Nem lehet bejelentkezni az Exchange MAPI kiszolgálóra."
 
-#: ../src/camel/camel-mapi-store.c:437
+#: ../src/camel/camel-mapi-store.c:442
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "Nem lehet MAPI mappákat létrehozni offline módban."
 
-#: ../src/camel/camel-mapi-store.c:442
+#: ../src/camel/camel-mapi-store.c:447
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "Nem hozható létre az új „%s” mappa"
 
-#: ../src/camel/camel-mapi-store.c:662
+#: ../src/camel/camel-mapi-store.c:659
 #, c-format
-#| msgid "Cannot rename MAPI folder `%s'. Folder doesn't exist"
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "Nem nevezhető át a nem létező „%s” MAPI mappa."
 
 #: ../src/camel/camel-mapi-store.c:670
 #, c-format
-#| msgid "Cannot rename Mapi folder `%s' to `%s'. Default folder."
-msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
+#| msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "Nem nevezhető át az alapértelmezett „%s” MAPI mappa erre: „%s”."
 
-#: ../src/camel/camel-mapi-store.c:686
+#: ../src/camel/camel-mapi-store.c:688
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "Nem nevezhető át a(z) „%s” MAPI mappa erre: „%s”."
 
-#: ../src/camel/camel-mapi-store.c:1093
+#: ../src/camel/camel-mapi-store.c:1113
 msgid "Folder list not available in offline mode."
 msgstr "A mappalista nem érhető el kapcsolat nélküli módban."
 
