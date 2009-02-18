@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-18 13:41+0300\n"
-"PO-Revision-Date: 2009-01-18 13:50+0300\n"
+"POT-Creation-Date: 2009-02-18 19:11+0300\n"
+"PO-Revision-Date: 2009-02-18 19:20+0300\n"
 "Last-Translator: Ilkka Tuohela <hile@iki.fi>\n"
 "Language-Team: Finnish <gnome-fi-laatu@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -17,80 +17,96 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:252
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Syötä salasana käyttäjälle %s@%s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:334
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"Palvelin, käyttäjätunnus ja toimialue eivät voi olla tyhjiä. Syötä "
+"kenttiin oikeat arvot."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+msgid "Authentication finished successfully."
+msgstr "Tunnistatuminen onnistui."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+msgid "Authentication failed."
+msgstr "Tunnistatuminen epäonnistui."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
 msgid "_Domain name:"
 msgstr "_Toimialueen nimi:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:344
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
 msgid "_Authenticate"
 msgstr "_Tunnistaudu"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:446
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
 msgid "Personal Folders"
 msgstr "Omat kansiot"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:508
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:385
 msgid "_Location:"
 msgstr "_Sijainti:"
 
-#: ../src/calendar/e-cal-backend-mapi.c:111
-#: ../src/calendar/e-cal-backend-mapi.c:1047
-#: ../src/camel/camel-mapi-store.c:453
+#: ../src/calendar/e-cal-backend-mapi.c:115
+#: ../src/calendar/e-cal-backend-mapi.c:1051
+#: ../src/camel/camel-mapi-store.c:458
 msgid "Authentication failed"
 msgstr "Tunnistatuminen epäonnistui"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:385
+#: ../src/calendar/e-cal-backend-mapi.c:389
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Ladataan kansion %s kohteita"
 
-#. FIXME: better string please...
-#: ../src/calendar/e-cal-backend-mapi.c:575
-#: ../src/calendar/e-cal-backend-mapi.c:586
-#: ../src/calendar/e-cal-backend-mapi.c:612
-msgid "Error fetching changes from the server. Removing the cache might help."
-msgstr "Virhe noudettaessa muutoksia palvelimelta. Välimuistin siivoaminen saattaa auttaa."
+#. FIXME: String : We need to restart evolution-data-server
+#: ../src/calendar/e-cal-backend-mapi.c:579
+#: ../src/calendar/e-cal-backend-mapi.c:590
+#: ../src/calendar/e-cal-backend-mapi.c:616
+msgid "Error fetching changes from the server."
+msgstr "Virhe noudettaessa muutoksia palvelimelta."
 
-#: ../src/calendar/e-cal-backend-mapi.c:967
-#: ../src/calendar/e-cal-backend-mapi.c:977
-#: ../src/calendar/e-cal-backend-mapi.c:1082
-#: ../src/calendar/e-cal-backend-mapi.c:1164
+#: ../src/calendar/e-cal-backend-mapi.c:971
+#: ../src/calendar/e-cal-backend-mapi.c:981
+#: ../src/calendar/e-cal-backend-mapi.c:1086
+#: ../src/calendar/e-cal-backend-mapi.c:1168
 msgid "Could not create cache file"
 msgstr "Välimuistitiedostoa ei voitu luoda"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1093
+#: ../src/calendar/e-cal-backend-mapi.c:1097
 msgid "Could not create thread for populating cache"
 msgstr "Säiettä välimuistin alustamiseksi ei voitu luoda"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1501
+#: ../src/calendar/e-cal-backend-mapi.c:1511
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
 msgstr ""
-"Tukea toistuvien tapaamisten yksittäisen tapahtumakerran muokkaamiselle ei ole "
-"vielä toteutettu. Tapaamiseen ei tehty muutoksia palvelimella."
+"Tukea toistuvien tapaamisten yksittäisen tapahtumakerran muokkaamiselle ei "
+"ole vielä toteutettu. Tapaamiseen ei tehty muutoksia palvelimella."
 
-#: ../src/camel/camel-mapi-folder.c:312 ../src/camel/camel-mapi-folder.c:646
+#: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Noudetaan yhteenvetoa uusista viesteistä kansiossa %s"
 
-#: ../src/camel/camel-mapi-folder.c:639 ../src/camel/camel-mapi-folder.c:1198
-#: ../src/camel/camel-mapi-folder.c:1206
+#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1222
+#: ../src/camel/camel-mapi-folder.c:1230
 msgid "This message is not available in offline mode."
 msgstr "Tämä viesti ei ole saatavilla yhteydettömässä tilassa."
 
-#: ../src/camel/camel-mapi-folder.c:656
+#: ../src/camel/camel-mapi-folder.c:679
 msgid "Fetching items failed"
 msgstr "Kohteiden nouto epäonnistui"
 
-#: ../src/camel/camel-mapi-folder.c:1162
+#: ../src/camel/camel-mapi-folder.c:1186
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -99,24 +115,24 @@ msgstr ""
 "Viestiä ei saatu: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1162
+#: ../src/camel/camel-mapi-folder.c:1186
 msgid "No such message"
 msgstr "Viestiä ei ole olemassa"
 
-#: ../src/camel/camel-mapi-folder.c:1174
-msgid "User canceled"
-msgstr "Käyttäjä perui toiminnon"
+#: ../src/camel/camel-mapi-folder.c:1198
+msgid "Message fetching cancelled by user."
+msgstr "Käyttäjä keskeytti viestin noudon."
 
-#: ../src/camel/camel-mapi-folder.c:1181
+#: ../src/camel/camel-mapi-folder.c:1205
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Viestiä %s ei saatu: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1225 ../src/camel/camel-mapi-folder.c:1235
+#: ../src/camel/camel-mapi-folder.c:1249 ../src/camel/camel-mapi-folder.c:1259
 msgid "Could not get message"
 msgstr "Viestiä ei saatu"
 
-#: ../src/camel/camel-mapi-folder.c:1582
+#: ../src/camel/camel-mapi-folder.c:1612
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Yhteenvetoa kohteelle %s ei voitu ladata"
@@ -168,7 +184,8 @@ msgstr "Etsi roskaposteja vain _saapuvien viestien kansiosta"
 
 #: ../src/camel/camel-mapi-provider.c:96
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
-msgstr "Microsoft Exchange- ja OpenChange-palvelimien käyttö MAPI-protokollalla"
+msgstr ""
+"Microsoft Exchange- ja OpenChange-palvelimien käyttö MAPI-protokollalla"
 
 #: ../src/camel/camel-mapi-provider.c:111
 msgid "Password"
@@ -178,7 +195,8 @@ msgstr "Salasana"
 msgid ""
 "This option will connect to the Openchange server using a plaintext password."
 msgstr ""
-"Tämä valinta yhdistää Openchange-palvelimelle käyttäen selväkielistä salasanaa."
+"Tämä valinta yhdistää Openchange-palvelimelle käyttäen selväkielistä "
+"salasanaa."
 
 #: ../src/camel/camel-mapi-store.c:61
 msgid "Favorites"
@@ -193,50 +211,57 @@ msgstr "Kaikki julkiset kansiot"
 msgid "Exchange MAPI server %s"
 msgstr "Exchangen MAPI-palvelin %s"
 
-#: ../src/camel/camel-mapi-store.c:264 ../src/camel/camel-mapi-transport.c:347
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:347
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Exchangen MAPI-palvelu %s palvelimella %s"
 
-#: ../src/camel/camel-mapi-store.c:298
+#. To translators : First %s : is the error text or the reason
+#. for prompting the user if it is available.
+#. Second %s is : Username.
+#. Third %s is : Server host name.
+#: ../src/camel/camel-mapi-store.c:304
 #, c-format
-msgid "%sPlease enter the MAPI password for %s@%s"
-msgstr "%sSyötä %s@%s MAPI-salasana"
+msgid "%s Please enter the MAPI password for %s@%s"
+msgstr "%s Syötä palvelimen %s@%s MAPI-salasana"
 
-#: ../src/camel/camel-mapi-store.c:312
+#: ../src/camel/camel-mapi-store.c:317
 msgid "You did not enter a password."
 msgstr "Et antanut salasanaa."
 
-#: ../src/camel/camel-mapi-store.c:320
+#: ../src/camel/camel-mapi-store.c:325
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Exchangen MAPI-palvelimelle ei voitu kirjautua."
 
-#: ../src/camel/camel-mapi-store.c:437
+#: ../src/camel/camel-mapi-store.c:442
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "MAPI-kansioita ei voi luoda yhteydettömässä tilassa."
 
-#: ../src/camel/camel-mapi-store.c:442
+#: ../src/camel/camel-mapi-store.c:447
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "Uutta kansiota \"%s\" ei voi luoda"
 
-#: ../src/camel/camel-mapi-store.c:662
+#: ../src/camel/camel-mapi-store.c:659
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
-msgstr "MAPI-kansiota \"%s\" ei voi nimetä uudestaan: kansiota ei ole olemassa."
+msgstr ""
+"MAPI-kansiota \"%s\" ei voi nimetä uudestaan: kansiota ei ole olemassa."
 
 #: ../src/camel/camel-mapi-store.c:670
 #, c-format
-msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
-msgstr "MAPI-kansiota \"%s\" ei voi nimetä uudestaan nimelle \"%s\": kohde on oletuskansio."
+msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgstr "MAPI-oletuskansiota \"%s\" ei voi nimetä uudestaan nimelle \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:686
+#: ../src/camel/camel-mapi-store.c:688
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "MAPI-kansiota \"%s\" ei voi nimetä uudestaan nimelle \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:1092
+#: ../src/camel/camel-mapi-store.c:1113
 msgid "Folder list not available in offline mode."
 msgstr "Kansioluettelo ei ole saatavissa yhteydettömässä tilassa."
 
