@@ -291,7 +291,7 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 	/*Write summary to db in batches of SUMMARY_FETCH_BATCH_COUNT items.*/ 
 	if ( (item_data->index % SUMMARY_FETCH_BATCH_COUNT == 0) || item_data->index == item_data->total-1) {
 		mapi_update_cache (fi_data->folder, *slist, &fi_data->changes, NULL, false);
-		g_slist_foreach (*slist, mapi_item_free, NULL);
+		g_slist_foreach (*slist, (GFunc)mapi_item_free, NULL);
 		g_slist_free (*slist);
 		*slist = NULL;
 	}
@@ -534,7 +534,7 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	}
 	/*Remove them from cache*/
 	while (deleted_items) {
-		char* deleted_msg_uid = g_strdup_printf ("%016llX%016llX", fid, *(mapi_id_t *)deleted_items->data);
+		char* deleted_msg_uid = g_strdup_printf ("%016" G_GUINT64_FORMAT "X%016" G_GUINT64_FORMAT "X", fid, *(mapi_id_t *)deleted_items->data);
 
 		CAMEL_MAPI_FOLDER_REC_LOCK (folder, cache_lock);
 		camel_folder_summary_remove_uid (folder->summary, deleted_msg_uid);
@@ -915,14 +915,14 @@ fetch_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 	}
 
 	if (g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_PREFIX)) {
-		gchar *appointment_body_str = (gchar *) exchange_mapi_cal_util_camel_helper (item_data->properties, 
+		guint8 *appointment_body_str = (guint8 *) exchange_mapi_cal_util_camel_helper (item_data->properties, 
 											     item_data->streams, 
 											     item_data->recipients, item_data->attachments);
 
 		body = g_new0(ExchangeMAPIStream, 1);
 		body->proptag = PR_BODY;
 		body->value = g_byte_array_new ();
-		body->value = g_byte_array_append (body->value, appointment_body_str, g_utf8_strlen (appointment_body_str, -1));
+		body->value = g_byte_array_append (body->value, appointment_body_str, g_utf8_strlen ((const gchar *)appointment_body_str, -1));
 
 		item->msg.body_parts = g_slist_append (item->msg.body_parts, body);
 
@@ -1046,13 +1046,13 @@ mapi_populate_msg_body_from_item (CamelMultipart *multipart, MapiItem *item, Exc
 	
 	if (body) { 
 		if (item->is_cal)
-			camel_mime_part_set_content(part, body->value->data, body->value->len, "text/calendar");
+			camel_mime_part_set_content(part, (const char *) body->value->data, body->value->len, "text/calendar");
 		else {
 			type = (body->proptag == PR_BODY || body->proptag == PR_BODY_UNICODE) ? 
 				"text/plain" : "text/html";
 
 			/*NOTE : Last byte null mess up CRLF*. Probably needs a fix in e*fetch_items. */
-			camel_mime_part_set_content(part, body->value->data, body->value->len - 1, type );
+			camel_mime_part_set_content (part, (const char *) body->value->data, body->value->len - 1, type );
 		}
 	} else
 		camel_mime_part_set_content(part, " ", strlen(" "), "text/html");
@@ -1069,7 +1069,6 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 {
 	CamelMimeMessage *msg = NULL;
 	CamelMultipart *multipart = NULL;
-	CamelContentType *content_type = NULL;
 
 	GSList *attach_list = NULL;
 	int errno;
@@ -1134,7 +1133,7 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 			mime_type = (const char *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps, 
 												  PR_ATTACH_MIME_TAG);
 
-			camel_mime_part_set_content(part, stream->value->data, stream->value->len, mime_type);
+			camel_mime_part_set_content (part, (const char *) stream->value->data, stream->value->len, mime_type);
 
 			/*Content-ID*/
 			content_id = (const char *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps, 
@@ -1304,11 +1303,10 @@ camel_mapi_folder_finalize (CamelObject *object)
 		camel_object_unref (mapi_folder->cache);
 }
 
-
+#if 0
 static CamelMessageInfo*
 mapi_get_message_info(CamelFolder *folder, const char *uid)
 { 
-#if 0
 	CamelMessageInfo	*msg_info = NULL;
 	CamelMessageInfoBase	*mi = (CamelMessageInfoBase *)msg ;
 	int			status = 0;
@@ -1345,9 +1343,8 @@ mapi_get_message_info(CamelFolder *folder, const char *uid)
 	if (uid) mi->uid = g_strdup(uid);
 	oc_message_headers_release(&headers);
 	return (msg);
-#endif
-	return NULL;
 }
+#endif
 
 static void
 mapi_expunge (CamelFolder *folder, CamelException *ex)

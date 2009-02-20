@@ -145,6 +145,7 @@ static const struct field_element_mapping {
 
 static int maplen = G_N_ELEMENTS(mappings);
 
+#if 0
 static EDataBookView *
 find_book_view (EBookBackendMAPI *ebmapi)
 {
@@ -174,6 +175,7 @@ find_book_view (EBookBackendMAPI *ebmapi)
 	
 	return rv;
 }
+#endif
 
 static gboolean
 build_restriction_emails_contains (struct mapi_SRestriction *res, 
@@ -385,7 +387,7 @@ e_book_backend_mapi_load_source (EBookBackend *backend,
 	exchange_mapi_util_mapi_id_from_string (e_source_get_property (source, "folder-id"), &priv->fid);
 
 	tmp = e_source_get_property (source, "folder-id");
-	printf("Folder is %s %016llX\n", tmp, priv->fid);
+	printf("Folder is %s %016" G_GUINT64_FORMAT "X\n", tmp, priv->fid);
 
 	/* Once aunthentication in address book works this can be removed */
 	if (priv->mode == GNOME_Evolution_Addressbook_MODE_LOCAL) {
@@ -398,7 +400,7 @@ e_book_backend_mapi_load_source (EBookBackend *backend,
 
 
 	if (enable_debug)
-		printf("For profile %s and folder %s - %016llX\n", priv->profile, tmp, priv->fid);
+		printf("For profile %s and folder %s - %016" G_GUINT64_FORMAT "X\n", priv->profile, tmp, priv->fid);
 
 	return GNOME_Evolution_Addressbook_Success;
 }
@@ -1453,6 +1455,7 @@ build_cache (EBookBackendMAPI *ebmapi)
 	return NULL;		
 }
 
+#if 0
 static gpointer
 update_cache (EBookBackendMAPI *ebmapi)
 {
@@ -1494,6 +1497,7 @@ update_cache (EBookBackendMAPI *ebmapi)
 	
 	return NULL;
 }
+#endif
 
 static void
 e_book_backend_mapi_authenticate_user (EBookBackend *backend,

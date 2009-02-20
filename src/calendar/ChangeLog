@@ -1,3 +1,7 @@
+2009-02-20  Milan Crha  <mcrha@redhat.com>
+
+	* e-cal-backend-mapi.c: Fix for compiler warnings.
+
 2009-02-16  Johnny Jacob  <jjohnny@novell.com>
 
 	** Partially fixes #565964 : translation issues.

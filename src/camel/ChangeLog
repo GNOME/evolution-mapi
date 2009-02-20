@@ -1,3 +1,10 @@
+2009-02-20  Milan Crha  <mcrha@redhat.com>
+
+	* camel-private.h:
+	* camel-mapi-transport.c:
+	* camel-mapi-store.c:
+	* camel-mapi-folder.c: Fix for compiler warnings.
+
 2009-02-16  Johnny Jacob  <jjohnny@novell.com>
 
 	** Partially fixes #565964 : translation issues.

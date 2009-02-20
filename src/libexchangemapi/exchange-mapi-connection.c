@@ -892,7 +892,7 @@ exchange_mapi_util_check_restriction (mapi_id_t fid, struct mapi_SRestriction *r
 	uint32_t count, i;
 	GSList *mids = NULL;
 
-	d(g_print("\n%s: Entering %s: folder-id %016llX ", G_STRLOC, G_STRFUNC, fid));
+	d(g_print("\n%s: Entering %s: folder-id %016" G_GUINT64_FORMAT "X ", G_STRLOC, G_STRFUNC, fid));
 
 	LOCK();
 	LOGALL();
@@ -1007,7 +1007,7 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 	uint32_t count, i, cursor_pos = 0;
 	gboolean result = FALSE;
 
-	d(g_print("\n%s: Entering %s: folder-id %016llX ", G_STRLOC, G_STRFUNC, fid));
+	d(g_print("\n%s: Entering %s: folder-id %016" G_GUINT64_FORMAT "X ", G_STRLOC, G_STRFUNC, fid));
 
 	LOCK();
 	LOGALL();
@@ -1230,7 +1230,7 @@ cleanup:
 	LOGNONE();
 	UNLOCK();
 
-	d(g_print("\n%s: Leaving %s: folder-id %016llX ", G_STRLOC, G_STRFUNC, fid));
+	d(g_print("\n%s: Leaving %s: folder-id %016" G_GUINT64_FORMAT "X ", G_STRLOC, G_STRFUNC, fid));
 
 	return result;
 }
@@ -1254,7 +1254,7 @@ exchange_mapi_connection_fetch_item (mapi_id_t fid, mapi_id_t mid,
 	GSList *stream_list = NULL;
 	gboolean result = FALSE;
 
-	d(g_print("\n%s: Entering %s: folder-id %016llX message-id %016llX",
+	d(g_print("\n%s: Entering %s: folder-id %016" G_GUINT64_FORMAT "X message-id %016" G_GUINT64_FORMAT "X",
 				G_STRLOC, G_STRFUNC, fid, mid));
 
 	LOCK();
@@ -1476,7 +1476,7 @@ exchange_mapi_create_folder (uint32_t olFolder, mapi_id_t pfid, const char *name
 	}
 
 	fid = mapi_object_get_id (&obj_folder);
-	g_print("\nFolder %s created with id %016llX ", name, fid);
+	g_print("\nFolder %s created with id %016" G_GUINT64_FORMAT "X ", name, fid);
 
 cleanup:
 	mapi_object_release(&obj_folder);
@@ -1526,7 +1526,7 @@ exchange_mapi_empty_folder (mapi_id_t fid)
 		goto cleanup;
 	}
 
-	g_print("\nFolder with id %016llX was emptied ", fid);
+	g_print("\nFolder with id %016" G_GUINT64_FORMAT "X was emptied ", fid);
 
 	result = TRUE;
 
@@ -1587,7 +1587,7 @@ exchange_mapi_remove_folder (uint32_t olFolder, mapi_id_t fid)
 		goto cleanup;
 	}
 
-	g_print("\nFolder with id %016llX was emptied ", fid);
+	g_print("\nFolder with id %016" G_GUINT64_FORMAT "X was emptied ", fid);
 
 	/* Attempt to open the top/parent folder */
 	retval = OpenFolder(&obj_store, folder->parent_folder_id, &obj_top);
@@ -1603,7 +1603,7 @@ exchange_mapi_remove_folder (uint32_t olFolder, mapi_id_t fid)
 		goto cleanup;
 	}
 
-	g_print("\nFolder with id %016llX was deleted ", fid);
+	g_print("\nFolder with id %016" G_GUINT64_FORMAT "X was deleted ", fid);
 
 	result = TRUE;
 
@@ -2494,7 +2494,7 @@ get_child_folders(TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, m
 			class = IPF_NOTE;
 
 		newname = utf8tolinux (name);
-		g_print("\n|---+ %-15s : (Container class: %s %016llX) UnRead : %d Total : %d ", newname, class, *fid, unread ? *unread : 0, total ? *total : 0);
+		g_print("\n|---+ %-15s : (Container class: %s %016" G_GUINT64_FORMAT "X) UnRead : %d Total : %d ", newname, class, *fid, unread ? *unread : 0, total ? *total : 0);
 
 		folder = exchange_mapi_folder_new (newname, class, folder_hier, *fid, folder_id, child ? *child : 0, unread ? *unread : 0, total ? *total : 0);
 		*mapi_folders = g_slist_prepend (*mapi_folders, folder);
@@ -2520,14 +2520,14 @@ cleanup:
 /*NOTE : IsMailboxFolder doesn't support this yet. */
 /* Ticket : http://trac.openchange.org/ticket/134  */
 static void
-mapi_get_ren_additional_fids (const mapi_object_t *obj_store, GHashTable **folder_list)
+mapi_get_ren_additional_fids (mapi_object_t *obj_store, GHashTable **folder_list)
 {
-	mapi_id_t inbox_id, fid, *default_fid;
+	mapi_id_t inbox_id, fid;
 	mapi_object_t obj_folder_inbox;
 	struct SPropTagArray *SPropTagArray;
 	struct SPropValue *lpProps;
 	struct SRow aRow;
-	struct BinaryArray_r *entryids;
+	const struct BinaryArray_r *entryids;
 	struct Binary_r entryid;
 	enum MAPISTATUS retval;
 
@@ -2616,7 +2616,7 @@ set_default_folders (mapi_object_t *obj_store, GSList **mapi_folders)
 		folder = folder_list->data;
 		key_fid = exchange_mapi_util_mapi_id_to_string (folder->folder_id);
 
-		if (value = g_hash_table_lookup (default_folders, key_fid))
+		if ((value = g_hash_table_lookup (default_folders, key_fid)) != NULL)
 			default_type = *(guint32 *)value;
 		g_free (key_fid);
 

@@ -1,3 +1,7 @@
+2009-02-20  Milan Crha  <mcrha@redhat.com>
+
+	* exchange-mapi-account-setup.c: Fix for compiler warnings.
+
 2009-02-13  Wang Xin  <jedy.wang@sun.com>
 
 	** Fix for bug #571413. Use G_STRLOC and G_STRFUNC to replace __FILE__,

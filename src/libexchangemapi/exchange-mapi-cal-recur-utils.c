@@ -149,6 +149,7 @@ get_mapi_pos (int32_t pos)
 
 #define cFileTimeUnitsPerSecond 10000000
 
+#if 0
 static void
 convert_recurrence_minutes_to_date (uint32_t minutes, struct FILETIME *ft)
 {
@@ -196,6 +197,7 @@ convert_timet_to_filetime (time_t t, struct FILETIME *ft)
 	ft->dwLowDateTime = (uint32_t)((nt << 32) >> 32); 
 	ft->dwHighDateTime = (uint32_t)(nt >> 32); 
 }
+#endif
 
 static time_t
 convert_recurrence_minutes_to_timet (uint32_t minutes)

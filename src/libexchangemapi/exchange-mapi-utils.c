@@ -64,7 +64,7 @@ utf8tolinux (const char *wstring)
 inline gchar *
 exchange_mapi_util_mapi_id_to_string (mapi_id_t id)
 {
-	return g_strdup_printf ("%016llX", id);
+	return g_strdup_printf ("%016" G_GUINT64_FORMAT "X", id);
 }
 
 inline gboolean 
@@ -73,18 +73,18 @@ exchange_mapi_util_mapi_id_from_string (const char *str, mapi_id_t *id)
 	gint n = 0;
 
 	if (str && *str)
-		n = sscanf (str, "%016llX", id);
+		n = sscanf (str, "%016" G_GUINT64_FORMAT "X", id);
 
 	return (n == 1);
 }
 
 /* NOTE: We use the UID as a combination of the folder-id and the message-id. 
- * Specifically, it is in this format: ("%016llX%016llX", fid, mid).
+ * Specifically, it is in this format: ("%016" G_GUINT64_FORMAT "X%016" G_GUINT64_FORMAT "X", fid, mid).
  */
 inline gchar *
 exchange_mapi_util_mapi_ids_to_uid (mapi_id_t fid, mapi_id_t mid)
 {
-	return g_strdup_printf ("%016llX%016llX", fid, mid);
+	return g_strdup_printf ("%016" G_GUINT64_FORMAT "X%016" G_GUINT64_FORMAT "X", fid, mid);
 }
 
 inline gboolean 
@@ -93,7 +93,7 @@ exchange_mapi_util_mapi_ids_from_uid (const char *str, mapi_id_t *fid, mapi_id_t
 	gint n = 0;
 
 	if (str && *str)
-		n = sscanf (str, "%016llX%016llX", fid, mid);
+		n = sscanf (str, "%016" G_GUINT64_FORMAT "X%016" G_GUINT64_FORMAT "X", fid, mid);
 
 	return (n == 2);
 }
@@ -323,7 +323,7 @@ exchange_mapi_debug_property_dump (struct mapi_SPropValue_array *properties)
 				g_print (" (double) -  %lf", (double)lpProp->value.dbl);
 				break;
 			case PT_I8:
-				g_print (" (int) - 0x%016llX", lpProp->value.d);
+				g_print (" (int) - 0x%016" G_GUINT64_FORMAT "X", lpProp->value.d);
 				break;
 			case PT_SYSTIME: {
 					struct timeval t;

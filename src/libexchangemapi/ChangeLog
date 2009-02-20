@@ -1,3 +1,11 @@
+2009-02-20  Milan Crha  <mcrha@redhat.com>
+
+	* exchange-mapi-cal-utils.c:
+	* exchange-mapi-connection.c:
+	* exchange-mapi-utils.c:
+	* exchange-mapi-cal-recur-utils.c:
+	* exchange-mapi-folder.c: Fix for compiler warnings.
+
 2009-02-16  Johnny Jacob  <jjohnny@novell.com>
 
 	** Fixes #568519 – Delete/Renaming default folders should not be allowed.

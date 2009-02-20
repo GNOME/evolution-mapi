@@ -359,6 +359,7 @@ e_cal_backend_mapi_remove (ECalBackendSync *backend, EDataCal *cal)
 	return GNOME_Evolution_Calendar_Success;
 }
 
+#if 0
 static const char *
 get_element_type (icalcomponent_kind kind)
 {
@@ -375,6 +376,7 @@ get_element_type (icalcomponent_kind kind)
 	return type;
 
 }
+#endif
 
 static void 
 notify_progress (ECalBackendMAPI *cbmapi, guint64 index, guint64 total)

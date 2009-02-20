@@ -456,7 +456,7 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	exchange_mapi_util_mapi_id_from_string (sfid, &pfid);
 
 	fid = exchange_mapi_create_folder (olFolderContacts, pfid, e_source_peek_name (source));
-	g_print("Created %016llX\n", fid);
+	g_print("Created %016" G_GUINT64_FORMAT "X\n", fid);
 	grp = e_source_peek_group (source);
 	e_source_set_property (source, "auth", "plain/password");
 	e_source_set_property (source, "auth-domain", EXCHANGE_MAPI_PASSWORD_COMPONENT);

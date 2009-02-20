@@ -375,7 +375,6 @@ static gboolean
 mapi_disconnect(CamelService *service, gboolean clean, CamelException *ex)
 {
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
-	CamelMapiStorePrivate *priv = store->priv;
 
 	/* Close the mapi subsystem */
 	exchange_mapi_connection_close ();
@@ -472,9 +471,9 @@ mapi_create_folder(CamelStore *store, const char *parent_name, const char *folde
 		si = camel_mapi_store_summary_add_from_full(mapi_store->summary, root->full_name, '/');
 		camel_store_summary_save((CamelStoreSummary *)mapi_store->summary);
 
-		g_hash_table_insert (priv->id_hash, g_strdup_printf ("%016llX", new_folder_id), g_strdup(folder_name));
-		g_hash_table_insert (priv->name_hash, g_strdup(root->full_name), g_strdup_printf ("%016llX", new_folder_id));
-		g_hash_table_insert (priv->parent_hash, g_strdup_printf ("%016llX", new_folder_id), g_strdup(parent_id));
+		g_hash_table_insert (priv->id_hash, g_strdup_printf ("%016" G_GUINT64_FORMAT "X", new_folder_id), g_strdup(folder_name));
+		g_hash_table_insert (priv->name_hash, g_strdup(root->full_name), g_strdup_printf ("%016" G_GUINT64_FORMAT "X", new_folder_id));
+		g_hash_table_insert (priv->parent_hash, g_strdup_printf ("%016" G_GUINT64_FORMAT "X", new_folder_id), g_strdup(parent_id));
 
 		camel_object_trigger_event (CAMEL_OBJECT (store), "folder_created", root);
 	}
@@ -487,9 +486,8 @@ mapi_create_folder(CamelStore *store, const char *parent_name, const char *folde
 static void
 mapi_forget_folder (CamelMapiStore *mapi_store, const char *folder_name, CamelException *ex)
 {
-	CamelFolderSummary *summary;
 	CamelMapiStorePrivate *priv = mapi_store->priv;
-	char *summary_file, *state_file;
+	char *state_file;
 	char *folder_dir, *storage_path;
 	CamelFolderInfo *fi;
 	const char *name;
@@ -738,7 +736,7 @@ static guint32 hexnib(guint32 c)
 char *
 camel_mapi_store_summary_path_to_full(CamelMapiStoreSummary *s, const char *path, char dir_sep)
 {
-	unsigned char *full, *f;
+	char *full, *f;
 	guint32 c, v = 0;
 	const char *p;
 	int state=0;
@@ -778,7 +776,7 @@ camel_mapi_store_summary_path_to_full(CamelMapiStoreSummary *s, const char *path
 				else {
 					if (c == '/')
 						c = dir_sep;
-					camel_utf8_putc(&f, c);
+					camel_utf8_putc((unsigned char **)&f, c);
 				}
 				break;
 			case 1:
@@ -788,11 +786,11 @@ camel_mapi_store_summary_path_to_full(CamelMapiStoreSummary *s, const char *path
 			case 2:
 				state = 0;
 				v |= hexnib(c);
-				camel_utf8_putc(&f, v);
+				camel_utf8_putc((unsigned char **)&f, v);
 				break;
 		}
 	}
-	camel_utf8_putc(&f, c);
+	camel_utf8_putc((unsigned char **)&f, c);
 
 	/* merge old path part if required */
 	f = g_strdup (full);
@@ -996,7 +994,7 @@ mapi_convert_to_folder_info (CamelMapiStore *store, ExchangeMAPIFolder *folder, 
 
 	name = exchange_mapi_folder_get_name (folder);
 
-	id = g_strdup_printf ("%016llX", exchange_mapi_folder_get_fid (folder));
+	id = g_strdup_printf ("%016" G_GUINT64_FORMAT "X", exchange_mapi_folder_get_fid (folder));
 		
 	fi = g_new0 (CamelFolderInfo, 1);
 
@@ -1040,7 +1038,7 @@ mapi_convert_to_folder_info (CamelMapiStore *store, ExchangeMAPIFolder *folder, 
 	 */
 
 	mapi_id_folder = exchange_mapi_folder_get_parent_id (folder);
-	parent = g_strdup_printf ("%016llX", mapi_id_folder);
+	parent = g_strdup_printf ("%016" G_GUINT64_FORMAT "X", mapi_id_folder);
 	par_name = g_hash_table_lookup (priv->id_hash, parent);
 
 	if (par_name != NULL) {
@@ -1146,8 +1144,8 @@ mapi_folders_sync (CamelMapiStore *store, CamelException *ex)
 		gchar *fid = NULL, *parent_id = NULL;
 
 		name = exchange_mapi_folder_get_name ((ExchangeMAPIFolder *)(temp_list->data));
-		fid = g_strdup_printf ("%016llX", exchange_mapi_folder_get_fid((ExchangeMAPIFolder *)(temp_list->data)));
-		parent_id = g_strdup_printf ("%016llX", exchange_mapi_folder_get_parent_id ((ExchangeMAPIFolder *)(temp_list->data)));
+		fid = g_strdup_printf ("%016" G_GUINT64_FORMAT "X", exchange_mapi_folder_get_fid((ExchangeMAPIFolder *)(temp_list->data)));
+		parent_id = g_strdup_printf ("%016" G_GUINT64_FORMAT "X", exchange_mapi_folder_get_parent_id ((ExchangeMAPIFolder *)(temp_list->data)));
 
 		/*id_hash returns the name for a given container id*/
 		g_hash_table_insert (priv->id_hash, g_strdup (fid), g_strdup(name)); 
@@ -1228,7 +1226,7 @@ mapi_get_folder_info(CamelStore *store, const char *top, guint32 flags, CamelExc
 	} 
 
 	/*camel_exception_clear (ex);*/
-end_r:
+
 	s_count = camel_store_summary_count((CamelStoreSummary *)mapi_store->summary);
 	info = mapi_get_folder_info_offline (store, top, flags, ex);
 	return info;

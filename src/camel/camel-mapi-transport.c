@@ -80,6 +80,7 @@ mapi_item_add_recipient (const char *recipients, OlMailRecipientType type, GSLis
 static mapi_id_t
 mapi_message_item_send (MapiItem *item, GSList *attachments, GSList *recipients);
 
+#if 0
 static void
 mapi_item_debug_dump (MapiItem *item)
 {
@@ -91,6 +92,7 @@ mapi_item_debug_dump (MapiItem *item)
 	//printf("item->msg.body_stream : %s\n",item->msg.body_stream);
 	printf("-----------------\n\n");
 }
+#endif
 
 static void
 mapi_item_set_from(MapiItem *item, const char *from)
@@ -127,7 +129,7 @@ mapi_item_set_body_stream (MapiItem *item, CamelStream *body, MapiItemPartType p
 		if (read_size == -1) 
 			return;
 
-		stream->value = g_byte_array_append (stream->value, (char *) buf, read_size);
+		stream->value = g_byte_array_append (stream->value, buf, read_size);
 	}
 
 	switch (part_type) {

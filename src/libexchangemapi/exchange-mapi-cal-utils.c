@@ -219,7 +219,7 @@ exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_l
 		if (mapped_file && g_str_has_prefix (filename, uid)) {
 			ExchangeMAPIAttachment *attach_item;
 			ExchangeMAPIStream *stream; 
-			gchar *attach = g_mapped_file_get_contents (mapped_file);
+			guint8 *attach = (guint8 *) g_mapped_file_get_contents (mapped_file);
 			guint filelength = g_mapped_file_get_length (mapped_file);
 			const gchar *split_name = (filename + strlen (uid) + strlen ("-"));
 			uint32_t flag; 
