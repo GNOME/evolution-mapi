@@ -8,11 +8,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi HEAD\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-mapi\n"
-"POT-Creation-Date: 2009-02-06 05:40+0000\n"
-"PO-Revision-Date: 2009-02-07 11:10+0100\n"
-"Last-Translator: laurent coudeur <laurentc@iol.ie>\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-02-20 22:01+0100\n"
+"PO-Revision-Date: 2009-02-20 22:04+0100\n"
+"Last-Translator: Claude Paroz <claude@2xlibre.net>\n"
 "Language-Team: GNOME French Team <gnomefr@traduc.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -58,37 +57,36 @@ msgid "_Location:"
 msgstr "_Emplacement :"
 
 #: ../src/calendar/e-cal-backend-mapi.c:115
-#: ../src/calendar/e-cal-backend-mapi.c:1051
-#: ../src/camel/camel-mapi-store.c:453
+#: ../src/calendar/e-cal-backend-mapi.c:1053
+#: ../src/camel/camel-mapi-store.c:457
 msgid "Authentication failed"
 msgstr "L'authentification a échoué"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:389
+#: ../src/calendar/e-cal-backend-mapi.c:391
+#, c-format
 msgid "Loading items in folder %s"
 msgstr "Chargement d'éléments dans le dossier %s"
 
-#. FIXME: better string please...
-#: ../src/calendar/e-cal-backend-mapi.c:579
-#: ../src/calendar/e-cal-backend-mapi.c:590
-#: ../src/calendar/e-cal-backend-mapi.c:616
-msgid "Error fetching changes from the server. Removing the cache might help."
-msgstr ""
-"Erreur lors de la récupération des changements sur le serveur. Enlever le "
-"cache peut aider."
+#. FIXME: String : We need to restart evolution-data-server
+#: ../src/calendar/e-cal-backend-mapi.c:581
+#: ../src/calendar/e-cal-backend-mapi.c:592
+#: ../src/calendar/e-cal-backend-mapi.c:618
+msgid "Error fetching changes from the server."
+msgstr "Erreur lors de la récupération des changements sur le serveur."
 
-#: ../src/calendar/e-cal-backend-mapi.c:971
-#: ../src/calendar/e-cal-backend-mapi.c:981
-#: ../src/calendar/e-cal-backend-mapi.c:1086
-#: ../src/calendar/e-cal-backend-mapi.c:1168
+#: ../src/calendar/e-cal-backend-mapi.c:973
+#: ../src/calendar/e-cal-backend-mapi.c:983
+#: ../src/calendar/e-cal-backend-mapi.c:1088
+#: ../src/calendar/e-cal-backend-mapi.c:1170
 msgid "Could not create cache file"
 msgstr "Impossible de créer le fichier cache"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1097
+#: ../src/calendar/e-cal-backend-mapi.c:1099
 msgid "Could not create thread for populating cache"
 msgstr "Impossible de créer un thread pour remplir le fichier cache"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1505
+#: ../src/calendar/e-cal-backend-mapi.c:1513
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -102,8 +100,8 @@ msgstr ""
 msgid "Fetching summary information for new messages in %s"
 msgstr "Récupération des informations de résumé des nouveaux messages dans %s"
 
-#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1222
-#: ../src/camel/camel-mapi-folder.c:1230
+#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1221
+#: ../src/camel/camel-mapi-folder.c:1229
 msgid "This message is not available in offline mode."
 msgstr "Ce message n'est pas disponible en mode hors ligne."
 
@@ -111,7 +109,7 @@ msgstr "Ce message n'est pas disponible en mode hors ligne."
 msgid "Fetching items failed"
 msgstr "Échec de la récupération des objets"
 
-#: ../src/camel/camel-mapi-folder.c:1186
+#: ../src/camel/camel-mapi-folder.c:1185
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -120,26 +118,24 @@ msgstr ""
 "Impossible d'obtenir le message : %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1186
+#: ../src/camel/camel-mapi-folder.c:1185
 msgid "No such message"
 msgstr "Aucun message correspondant"
 
-# Ou "supprimé"
-# http://bugzilla.gnome.org/show_bug.cgi?id=565964
-#: ../src/camel/camel-mapi-folder.c:1198
-msgid "User canceled"
-msgstr "Utilisateur annulé"
+#: ../src/camel/camel-mapi-folder.c:1197
+msgid "Message fetching cancelled by user."
+msgstr "La récupération des messages a été annulée par l'utilisateur."
 
-#: ../src/camel/camel-mapi-folder.c:1205
+#: ../src/camel/camel-mapi-folder.c:1204
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Impossible d'obtenir le message %s : %s"
 
-#: ../src/camel/camel-mapi-folder.c:1249 ../src/camel/camel-mapi-folder.c:1259
+#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1258
 msgid "Could not get message"
 msgstr "Impossible d'obtenir le message"
 
-#: ../src/camel/camel-mapi-folder.c:1612
+#: ../src/camel/camel-mapi-folder.c:1609
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Impossible de charger le résumé pour %s"
@@ -216,59 +212,65 @@ msgstr "Favoris"
 msgid "All Public Folders"
 msgstr "Tous les dossiers publics"
 
-#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:345
+#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:347
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Serveur Exchange MAPI %s"
 
-#: ../src/camel/camel-mapi-store.c:264 ../src/camel/camel-mapi-transport.c:347
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:349
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Service Exchange MAPI pour %s sur %s"
 
-#: ../src/camel/camel-mapi-store.c:298
+#. To translators : First %s : is the error text or the reason
+#. for prompting the user if it is available.
+#. Second %s is : Username.
+#. Third %s is : Server host name.
+#: ../src/camel/camel-mapi-store.c:304
 #, c-format
-msgid "%sPlease enter the MAPI password for %s@%s"
-msgstr "%sSaisissez le mot de passe MAPI pour %s@%s"
+msgid "%s Please enter the MAPI password for %s@%s"
+msgstr "%s Saisissez le mot de passe MAPI pour %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:312
+#: ../src/camel/camel-mapi-store.c:317
 msgid "You did not enter a password."
 msgstr "Vous n'avez pas saisi de mot de passe."
 
-#: ../src/camel/camel-mapi-store.c:320
+#: ../src/camel/camel-mapi-store.c:325
+#, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Impossible de s'authentifier auprès du serveur Exchange MAPI."
 
-#: ../src/camel/camel-mapi-store.c:437
+#: ../src/camel/camel-mapi-store.c:441
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "Impossible de créer des dossiers MAPI en mode hors ligne."
 
-#: ../src/camel/camel-mapi-store.c:442
+#: ../src/camel/camel-mapi-store.c:446
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "Impossible de créer un nouveau dossier « %s »"
 
-#: ../src/camel/camel-mapi-store.c:652
+#: ../src/camel/camel-mapi-store.c:657
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "Impossible de renommer le dossier MAPI « %s ». Le dossier n'existe pas."
 
-#: ../src/camel/camel-mapi-store.c:661
+#: ../src/camel/camel-mapi-store.c:668
 #, c-format
-msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
-msgstr ""
-"Impossible de renommer le dossier MAPI « %s » en « %s ». Dossier par défaut."
+msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgstr "Impossible de renommer le dossier par défaut MAPI « %s » en « %s »."
 
-#: ../src/camel/camel-mapi-store.c:677
+#: ../src/camel/camel-mapi-store.c:686
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "Impossible de renommer le dossier MAPI « %s » en « %s »"
 
-#: ../src/camel/camel-mapi-store.c:1097
+#: ../src/camel/camel-mapi-store.c:1111
 msgid "Folder list not available in offline mode."
 msgstr "La liste des dossiers n'est pas disponible en mode hors ligne."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:333
+#: ../src/camel/camel-mapi-transport.c:335
 msgid "Could not send message."
 msgstr "Impossible d'envoyer le message."
