@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi 0.25.91\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-31 17:43+0800\n"
-"PO-Revision-Date: 2009-02-03 20:31+0800\n"
+"POT-Creation-Date: 2009-02-25 20:10+0800\n"
+"PO-Revision-Date: 2009-02-25 20:11+0800\n"
 "Last-Translator: Chao-Hsiung Liao <j_h_liau@yahoo.com.tw>\n"
 "Language-Team: Chinese (Hong Kong) <community@linuxhall.org>\n"
 "MIME-Version: 1.0\n"
@@ -21,7 +21,9 @@ msgid "Enter Password for %s@%s"
 msgstr "輸入 %s@%s 的密碼 "
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
-msgid "Server, username and domain name cannot be empty. Please fill them with correct values."
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
 msgstr "伺服器、使用者名稱和網域名稱不能為空白。請將它們填入正確的數值。"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
@@ -49,56 +51,56 @@ msgid "_Location:"
 msgstr "位置(_L):"
 
 #: ../src/calendar/e-cal-backend-mapi.c:115
-#: ../src/calendar/e-cal-backend-mapi.c:1051
-#: ../src/camel/camel-mapi-store.c:453
+#: ../src/calendar/e-cal-backend-mapi.c:1053
+#: ../src/camel/camel-mapi-store.c:457
 msgid "Authentication failed"
 msgstr "驗證失敗"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:389
+#: ../src/calendar/e-cal-backend-mapi.c:391
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "正在載入資料夾 %s 的項目"
 
-#. FIXME: better string please...
-#: ../src/calendar/e-cal-backend-mapi.c:579
-#: ../src/calendar/e-cal-backend-mapi.c:590
-#: ../src/calendar/e-cal-backend-mapi.c:616
-msgid "Error fetching changes from the server. Removing the cache might help."
-msgstr "從伺服器接收更改時發生錯誤。刪除快取可能可以改善。"
+#. FIXME: String : We need to restart evolution-data-server
+#: ../src/calendar/e-cal-backend-mapi.c:581
+#: ../src/calendar/e-cal-backend-mapi.c:592
+#: ../src/calendar/e-cal-backend-mapi.c:618
+msgid "Error fetching changes from the server."
+msgstr "從伺服器接收更改時發生錯誤。"
 
-#: ../src/calendar/e-cal-backend-mapi.c:971
-#: ../src/calendar/e-cal-backend-mapi.c:981
-#: ../src/calendar/e-cal-backend-mapi.c:1086
-#: ../src/calendar/e-cal-backend-mapi.c:1168
+#: ../src/calendar/e-cal-backend-mapi.c:973
+#: ../src/calendar/e-cal-backend-mapi.c:983
+#: ../src/calendar/e-cal-backend-mapi.c:1088
+#: ../src/calendar/e-cal-backend-mapi.c:1170
 msgid "Could not create cache file"
 msgstr "無法建立快取檔案"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1097
+#: ../src/calendar/e-cal-backend-mapi.c:1099
 msgid "Could not create thread for populating cache"
 msgstr "無法建立移植快取的執行緒"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1505
-msgid "Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server."
+#: ../src/calendar/e-cal-backend-mapi.c:1513
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
 msgstr "支援修改週期性約會的單一實體功能尚未實作。伺服器上的約會項目不會有更改。"
 
-#: ../src/camel/camel-mapi-folder.c:316
-#: ../src/camel/camel-mapi-folder.c:650
+#: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "正在接收 %s 中新郵件的摘要資訊"
 
-#: ../src/camel/camel-mapi-folder.c:643
-#: ../src/camel/camel-mapi-folder.c:1202
-#: ../src/camel/camel-mapi-folder.c:1210
+#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1221
+#: ../src/camel/camel-mapi-folder.c:1229
 msgid "This message is not available in offline mode."
 msgstr "這封郵件無法在離線模式下使用。"
 
-#: ../src/camel/camel-mapi-folder.c:660
+#: ../src/camel/camel-mapi-folder.c:679
 msgid "Fetching items failed"
 msgstr "取得項目失敗"
 
-#: ../src/camel/camel-mapi-folder.c:1166
+#: ../src/camel/camel-mapi-folder.c:1185
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -107,25 +109,24 @@ msgstr ""
 "不能取得郵件：%s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1166
+#: ../src/camel/camel-mapi-folder.c:1185
 msgid "No such message"
 msgstr "沒有這個郵件。"
 
-#: ../src/camel/camel-mapi-folder.c:1178
-msgid "User canceled"
-msgstr "使用者已取消"
+#: ../src/camel/camel-mapi-folder.c:1197
+msgid "Message fetching cancelled by user."
+msgstr "取得郵件時被使用者取消了。"
 
-#: ../src/camel/camel-mapi-folder.c:1185
+#: ../src/camel/camel-mapi-folder.c:1204
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "無法取得郵件 %s： %s"
 
-#: ../src/camel/camel-mapi-folder.c:1229
-#: ../src/camel/camel-mapi-folder.c:1239
+#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1258
 msgid "Could not get message"
 msgstr "無法取得郵件。"
 
-#: ../src/camel/camel-mapi-folder.c:1592
+#: ../src/camel/camel-mapi-folder.c:1609
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "無法載入 %s 的摘要"
@@ -184,7 +185,8 @@ msgid "Password"
 msgstr "密碼"
 
 #: ../src/camel/camel-mapi-provider.c:112
-msgid "This option will connect to the Openchange server using a plaintext password."
+msgid ""
+"This option will connect to the Openchange server using a plaintext password."
 msgstr "此選項將會連線到使用標準純文字密碼驗證的 Openchange 伺服器。"
 
 #: ../src/camel/camel-mapi-store.c:61
@@ -195,62 +197,71 @@ msgstr "喜好"
 msgid "All Public Folders"
 msgstr "所有公用資料夾"
 
-#: ../src/camel/camel-mapi-store.c:262
-#: ../src/camel/camel-mapi-transport.c:345
+#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:347
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI 伺服器 %s"
 
-#: ../src/camel/camel-mapi-store.c:264
-#: ../src/camel/camel-mapi-transport.c:347
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:349
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "%2$s 上的 %1$s Exchange MAPI 服務"
 
-#: ../src/camel/camel-mapi-store.c:298
+#. To translators : First %s : is the error text or the reason
+#. for prompting the user if it is available.
+#. Second %s is : Username.
+#. Third %s is : Server host name.
+#: ../src/camel/camel-mapi-store.c:304
 #, c-format
-msgid "%sPlease enter the MAPI password for %s@%s"
-msgstr "%s請輸入 %s@%s 的 MAPI 密碼"
+msgid "%s Please enter the MAPI password for %s@%s"
+msgstr "%s 請輸入 %s@%s 的 MAPI 密碼"
 
-#: ../src/camel/camel-mapi-store.c:312
+#: ../src/camel/camel-mapi-store.c:317
 msgid "You did not enter a password."
 msgstr "你並未輸入密碼。"
 
-#: ../src/camel/camel-mapi-store.c:320
+#: ../src/camel/camel-mapi-store.c:325
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "無法驗證進入 Exchange MAPI 伺服器。"
 
-#: ../src/camel/camel-mapi-store.c:437
+#: ../src/camel/camel-mapi-store.c:441
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "在離線模式中無法建立 MAPI 資料夾。"
 
-#: ../src/camel/camel-mapi-store.c:442
+#: ../src/camel/camel-mapi-store.c:446
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "不能建立新郵件資料夾「%s」"
 
-#: ../src/camel/camel-mapi-store.c:652
+#: ../src/camel/camel-mapi-store.c:657
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "不能重新命名資料夾「%s」。因為它不存在。"
 
-#: ../src/camel/camel-mapi-store.c:661
+#: ../src/camel/camel-mapi-store.c:668
 #, c-format
-msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
-msgstr "不能將 MAPI 資料夾「%s」重新命名為「%s」。預設資料夾。"
+msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgstr "不能將 MAPI 預設資料夾「%s」重新命名為「%s」。"
 
-#: ../src/camel/camel-mapi-store.c:677
+#: ../src/camel/camel-mapi-store.c:686
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "不能將 MAPI 資料夾「%s」重新命名為「%s」。"
 
-#: ../src/camel/camel-mapi-store.c:1097
+#: ../src/camel/camel-mapi-store.c:1111
 msgid "Folder list not available in offline mode."
 msgstr "資料夾清單在離線模式無法使用。"
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:333
+#: ../src/camel/camel-mapi-transport.c:335
 msgid "Could not send message."
 msgstr "無法送出郵件。"
 
+#~ msgid "User canceled"
+#~ msgstr "使用者已取消"
+
+#~ msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
+#~ msgstr "不能將 MAPI 資料夾「%s」重新命名為「%s」。預設資料夾。"
