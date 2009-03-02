@@ -1,0 +1,279 @@
+# evolution-mapi italian translation
+# Imported from evolution-exchange italian translation
+# Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+# This file is distributed under the same license as the evolution-mapi package.
+# Marco Ciampa <ciampix@libero.it>, 2004, 2005, 2006.
+# Luca Ferretti <elle.uca@libero.it>, 2008, 2009.
+# Sergio Durzu <sergio.durzu@ildeposito.org>, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-mapi\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-mapi\n"
+"POT-Creation-Date: 2009-03-02 16:32+0000\n"
+"PO-Revision-Date: 2009-03-02 21:28+0100\n"
+"Last-Translator: Sergio Durzu <sergio.durzu@ildeposito.org>\n"
+"Language-Team: Italian <tp@lists.linux.it>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
+#, c-format
+msgid "Enter Password for %s@%s"
+msgstr "Inserire la password per %s@%s"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"I campi server, nome utente e nome dominio non posso essere vuoti. Inserire "
+"i valori corretti."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+msgid "Authentication finished successfully."
+msgstr "Autenticazione riuscita."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+msgid "Authentication failed."
+msgstr "Autenticazione non riuscita."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
+msgid "_Domain name:"
+msgstr "Nome _dominio:"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
+msgid "_Authenticate"
+msgstr "_Autenticazione"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
+msgid "Personal Folders"
+msgstr "Cartelle personali"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:385
+msgid "_Location:"
+msgstr "_Posizione:"
+
+#: ../src/calendar/e-cal-backend-mapi.c:115
+#: ../src/calendar/e-cal-backend-mapi.c:1053
+#: ../src/camel/camel-mapi-store.c:457
+msgid "Authentication failed"
+msgstr "Autenticazione non riuscita"
+
+#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
+#: ../src/calendar/e-cal-backend-mapi.c:391
+#, c-format
+msgid "Loading items in folder %s"
+msgstr "Caricamento degli oggetti nella cartella %s"
+
+#. FIXME: String : We need to restart evolution-data-server
+#: ../src/calendar/e-cal-backend-mapi.c:581
+#: ../src/calendar/e-cal-backend-mapi.c:592
+#: ../src/calendar/e-cal-backend-mapi.c:618
+msgid "Error fetching changes from the server."
+msgstr "Errore nel recupero dei cambiamenti dal server."
+
+#: ../src/calendar/e-cal-backend-mapi.c:973
+#: ../src/calendar/e-cal-backend-mapi.c:983
+#: ../src/calendar/e-cal-backend-mapi.c:1088
+#: ../src/calendar/e-cal-backend-mapi.c:1170
+msgid "Could not create cache file"
+msgstr "Impossibile creare il file cache"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1099
+msgid "Could not create thread for populating cache"
+msgstr "Impossibile creare il thread per popolare la cache"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1513
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+msgstr ""
+"La modifica di singole istanze di un appuntamento periodico non è ancora "
+"supportata. Non è stato applicato nessun cambiamento all'appuntamento sul "
+"server."
+
+#: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
+#, c-format
+msgid "Fetching summary information for new messages in %s"
+msgstr "Recupero delle informazioni di riepilogo per i nuovi messaggi in %s"
+
+#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1221
+#: ../src/camel/camel-mapi-folder.c:1229
+msgid "This message is not available in offline mode."
+msgstr "Questo messaggio non è disponibile in modalità fuori rete."
+
+#: ../src/camel/camel-mapi-folder.c:679
+msgid "Fetching items failed"
+msgstr "Recupero degli oggetti non riuscito"
+
+#: ../src/camel/camel-mapi-folder.c:1185
+#, c-format
+msgid ""
+"Cannot get message: %s\n"
+"  %s"
+msgstr ""
+"Impossibile ricevere il messaggio: %s\n"
+"  %s"
+
+#: ../src/camel/camel-mapi-folder.c:1185
+msgid "No such message"
+msgstr "Messaggio inesistente"
+
+#: ../src/camel/camel-mapi-folder.c:1197
+msgid "Message fetching cancelled by user."
+msgstr "Recupero del messaggio annullato dall'utente."
+
+#: ../src/camel/camel-mapi-folder.c:1204
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "Impossibile ricevere il messaggio %s: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1258
+msgid "Could not get message"
+msgstr "Impossibile ricevere il messaggio"
+
+#: ../src/camel/camel-mapi-folder.c:1609
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "Impossibile caricare il riepilogo per %s"
+
+#: ../src/camel/camel-mapi-provider.c:51
+msgid "Checking for new mail"
+msgstr "Controllo per nuova posta"
+
+#: ../src/camel/camel-mapi-provider.c:53
+msgid "C_heck for new messages in all folders"
+msgstr "C_ontrollare i nuovi messaggi in tutte le cartelle"
+
+#. i18n: GAL is an Outlookism, AD is a Windowsism
+#: ../src/camel/camel-mapi-provider.c:66
+msgid "Global Address List / Active Directory"
+msgstr "Elenco indirizzi globale/Active Directory"
+
+#. i18n: "Global Catalog" is a Windowsism, but it's a
+#. technical term and may not have translations?
+#: ../src/camel/camel-mapi-provider.c:70
+msgid "_Global Catalog server name:"
+msgstr "Nome del server catalogo _globale:"
+
+#: ../src/camel/camel-mapi-provider.c:72
+#, c-format
+msgid "_Limit number of GAL responses: %s"
+msgstr "_Limitare il numero di risposte GAL: %s"
+
+#: ../src/camel/camel-mapi-provider.c:75
+msgid "Options"
+msgstr "Opzioni"
+
+#: ../src/camel/camel-mapi-provider.c:77
+msgid "Automatically synchroni_ze account locally"
+msgstr "Sincroni_zzare automaticamente l'account localmente"
+
+# GNOME-2-22
+# SYNC
+#. i18n: copy from evolution:camel-imap-provider.c
+#: ../src/camel/camel-mapi-provider.c:80
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "A_pplicare filtri ai nuovi messaggi in «In arrivo» su questo server"
+
+# GNOME-2-22
+# SYNC
+#: ../src/camel/camel-mapi-provider.c:82
+msgid "Check new messages for _Junk contents"
+msgstr "Controllare contenuti in_desiderati nei nuovi messaggi"
+
+# GNOME-2-22
+# SYNC
+#: ../src/camel/camel-mapi-provider.c:84
+msgid "Only check for Junk messag_es in the Inbox folder"
+msgstr "Controllare i messa_ggi indesiderati solo nella cartella «In arrivo»"
+
+#: ../src/camel/camel-mapi-provider.c:96
+msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+msgstr "Per accedere ai server Microsoft Exchange e OpenChange utizzando MAPI"
+
+#: ../src/camel/camel-mapi-provider.c:111
+msgid "Password"
+msgstr "Password"
+
+#: ../src/camel/camel-mapi-provider.c:112
+msgid ""
+"This option will connect to the Openchange server using a plaintext password."
+msgstr ""
+"Questa opzione consente di connettersi al server OpenChange utilizzando "
+"l'autenticazione con password non cifrata standard."
+
+#: ../src/camel/camel-mapi-store.c:61
+msgid "Favorites"
+msgstr "Preferiti"
+
+#: ../src/camel/camel-mapi-store.c:62
+msgid "All Public Folders"
+msgstr "Tutte le cartelle pubbliche"
+
+#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:347
+#, c-format
+msgid "Exchange MAPI server %s"
+msgstr "Server Exchange MAPI %s"
+
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:349
+#, c-format
+msgid "Exchange MAPI service for %s on %s"
+msgstr "Account Exchange MAPI per %s su %s"
+
+#. To translators : First %s : is the error text or the reason
+#. for prompting the user if it is available.
+#. Second %s is : Username.
+#. Third %s is : Server host name.
+#: ../src/camel/camel-mapi-store.c:304
+#, c-format
+msgid "%s Please enter the MAPI password for %s@%s"
+msgstr "%s: inserire la password MAPI per %s@%s"
+
+#: ../src/camel/camel-mapi-store.c:317
+msgid "You did not enter a password."
+msgstr "Non è stata inserita una password."
+
+#: ../src/camel/camel-mapi-store.c:325
+#, c-format
+msgid "Unable to authenticate to Exchange MAPI server."
+msgstr "Impossibile autenticarsi sul server Exchange MAPI."
+
+#: ../src/camel/camel-mapi-store.c:441
+msgid "Cannot create MAPI folders in offline mode."
+msgstr "Impossibile creare cartelle MAPI in modalità fuori rete."
+
+#: ../src/camel/camel-mapi-store.c:446
+#, c-format
+msgid "Cannot create new folder `%s'"
+msgstr "Impossibile creare la cartella «%s»"
+
+#: ../src/camel/camel-mapi-store.c:657
+#, c-format
+msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
+msgstr "Impossibile rinominare la cartella MAPI «%s». La cartella non esiste."
+
+#: ../src/camel/camel-mapi-store.c:668
+#, c-format
+msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgstr "Impossibile rinominare la cartella predefinita MAPI da «%s» a «%s»."
+
+#: ../src/camel/camel-mapi-store.c:686
+#, c-format
+msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgstr "Impossibile rinominare la cartella MAPI da «%s» a «%s»"
+
+#: ../src/camel/camel-mapi-store.c:1111
+msgid "Folder list not available in offline mode."
+msgstr "L'elenco delle cartelle non è disponibile in modalità fuori rete."
+
+#. Fixme : Set a better error message. Would be helful in troubleshooting.
+#: ../src/camel/camel-mapi-transport.c:335
+msgid "Could not send message."
+msgstr "Impossibile inviare il messaggio."
