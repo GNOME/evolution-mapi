@@ -4,7 +4,7 @@
 
 AC_PREREQ(2.57)
 AC_DEFINE(_GNU_SOURCE, 1, [Use GNU extensions])
-AC_INIT(evolution-mapi, 0.25.91, http://bugzilla.gnome.org/browse.cgi?product=evolution-mapi)
+AC_INIT(evolution-mapi, 0.25.92, http://bugzilla.gnome.org/browse.cgi?product=evolution-mapi)
 AC_CONFIG_SRCDIR(README)
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
