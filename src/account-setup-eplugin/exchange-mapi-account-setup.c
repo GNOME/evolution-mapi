@@ -361,13 +361,14 @@ exchange_mapi_create (EPlugin *epl, EConfigHookItemFactoryData *data)
 	GtkTreeStore *ts;
 	GtkTreeViewColumn *tvc;
 	const char *acc;
-	GSList *folders = exchange_mapi_account_listener_peek_folder_list ();
+	GSList *folders;
 
 	uri_text = e_source_get_uri (source);
 	if (uri_text && g_ascii_strncasecmp (uri_text, MAPI_URI_PREFIX, MAPI_PREFIX_LENGTH)) {
 		return NULL;
 	}
 
+	folders = exchange_mapi_account_listener_peek_folder_list ();
 	acc = e_source_group_peek_name (e_source_peek_group (source));
 	ts = gtk_tree_store_new (NUM_COLS, G_TYPE_STRING, G_TYPE_INT64, G_TYPE_POINTER);
 
