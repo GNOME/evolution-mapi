@@ -160,7 +160,7 @@ msgstr "שם שרת קטלוג _גלובלי:"
 #: ../src/camel/camel-mapi-provider.c:72
 #, c-format
 msgid "_Limit number of GAL responses: %s"
-msgstr ""
+msgstr "ה_גבל את מספר תגובות ה-GAL: %s"
 
 #: ../src/camel/camel-mapi-provider.c:75
 msgid "Options"
