@@ -1,3 +1,8 @@
+2009-03-08  Takeshi AIHANA <takeshi.aihana@gmail.com>
+
+	* ja.po: Added Japanese translation.
+	* LINGUAS:  Added 'ja' to the list.
+
 2009-03-07  Jonh Wendell <jwendell@gnome.org>
 
 	* pt_BR.po: Updated Brazilian Portuguese translation by Fabrício Godoy.
