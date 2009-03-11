@@ -1,3 +1,8 @@
+2009-03-11  Theppitak Karoonboonyanan  <thep@linux.thai.net>
+
+	* th.po: Added Thai translation by Akom C.
+	* LINGUAS: Added "th".
+
 2009-03-10  Žygimantas Beručka  <zygis@gnome.org>
 
 	* lt.po: Added Lithuanian translation.
