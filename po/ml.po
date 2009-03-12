@@ -1,0 +1,272 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Manilal K M <libregeek@gmail.com>, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Evolution MAPI\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-mapi\n"
+"POT-Creation-Date: 2009-03-06 17:11+0000\n"
+"PO-Revision-Date: 2009-03-05 16:48+0530\n"
+"Last-Translator: Manilal K M <libregeek@gmail.com>\n"
+"Language-Team: Swathanthra Malayalam Computing|സ്വതന്ത്ര മലയാളം കമ്പ്യൂട്ടിങ്ങ് <smc-"
+"discuss@googlegroups.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Malayalam\n"
+"X-Poedit-Country: INDIA\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
+#, c-format
+msgid "Enter Password for %s@%s"
+msgstr "%s@%s ന്റെ അടയാളവാക്കു് നല്‍കുക"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"സെര്‍വര്‍,ഉപയോക്തൃനാമം, ഡൊമൈനിന്റെ പേരു് എന്നിവ ശൂന്യമാകാന്‍ പാടില്ല. ദയവായി അവ ശരിയായ "
+"രീതിയില്‍ പൂരിപ്പിക്കുക."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+msgid "Authentication finished successfully."
+msgstr "ആധികാരികത വിജയകരമായി ഉറപ്പാക്കി"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+msgid "Authentication failed."
+msgstr "ആധികാരികത ഉറപ്പാക്കല്‍ പരാജയപ്പെട്ടു."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
+msgid "_Domain name:"
+msgstr "ഡൊമൈന്‍ നാമം"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
+msgid "_Authenticate"
+msgstr "ആധികാരികത ഉറപ്പാക്കുക"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
+msgid "Personal Folders"
+msgstr "വ്യക്തിപരമായ ഫോള്‍ഡറുകള്‍"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:386
+msgid "_Location:"
+msgstr "സ്ഥലം"
+
+#: ../src/calendar/e-cal-backend-mapi.c:115
+#: ../src/calendar/e-cal-backend-mapi.c:1053
+#: ../src/camel/camel-mapi-store.c:457
+msgid "Authentication failed"
+msgstr "ആധികാരകത ഉറപ്പാക്കല്‍ പരാജയപ്പെട്ടു"
+
+#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
+#: ../src/calendar/e-cal-backend-mapi.c:391
+#, c-format
+msgid "Loading items in folder %s"
+msgstr ""
+
+#. FIXME: String : We need to restart evolution-data-server
+#: ../src/calendar/e-cal-backend-mapi.c:581
+#: ../src/calendar/e-cal-backend-mapi.c:592
+#: ../src/calendar/e-cal-backend-mapi.c:618
+msgid "Error fetching changes from the server."
+msgstr "സെര്‍വറ്ല്‍ നിന്നും മാറ്റങ്ങള്‍ എടുക്കുന്നതില്‍ പിശകു സംഭവിച്ചു"
+
+#: ../src/calendar/e-cal-backend-mapi.c:973
+#: ../src/calendar/e-cal-backend-mapi.c:983
+#: ../src/calendar/e-cal-backend-mapi.c:1088
+#: ../src/calendar/e-cal-backend-mapi.c:1170
+msgid "Could not create cache file"
+msgstr "cache ഫയല്‍ നിര്‍മ്മിക്കുവാന്‍ സാധ്യമായില്ല"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1099
+msgid "Could not create thread for populating cache"
+msgstr "cache-നുളള ത്രെഡ് നിര്‍മ്മിക്കുവാന്‍ സാധ്യമായില്ല"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1513
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
+#, c-format
+msgid "Fetching summary information for new messages in %s"
+msgstr "പുതിയ സന്ദേശങ്ങള്‍ക്കുളള സംക്ഷിപ്ത വിവരം %s-ല്‍ നിന്നും ലഭ്യമാക്കുന്നു"
+
+#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1221
+#: ../src/camel/camel-mapi-folder.c:1229
+msgid "This message is not available in offline mode."
+msgstr "ഓഫ്‌ലൈന്‍ രീതിയില്‍ ഈ സന്ദേശം ലഭ്യമല്ല."
+
+#: ../src/camel/camel-mapi-folder.c:679
+msgid "Fetching items failed"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:1185
+#, c-format
+msgid ""
+"Cannot get message: %s\n"
+"  %s"
+msgstr ""
+"സന്ദേശം ലഭ്യമല്ല: %s\n"
+"  %s"
+
+#: ../src/camel/camel-mapi-folder.c:1185
+msgid "No such message"
+msgstr "അങ്ങനെയൊരു സന്ദേശമില്ല"
+
+#: ../src/camel/camel-mapi-folder.c:1197
+msgid "Message fetching cancelled by user."
+msgstr "സന്ദേശം എടുക്കുന്നതു ഉപയോക്താവ് റദ്ദാക്കിയിരിക്കുന്നു."
+
+#: ../src/camel/camel-mapi-folder.c:1204
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "സന്ദേശം %s ലഭ്യമായില്ല: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1258
+msgid "Could not get message"
+msgstr "സന്ദേശം ലഭ്യമായില്ല"
+
+#: ../src/camel/camel-mapi-folder.c:1609
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "%s ന്റെ സംക്ഷിപ്ത വിവരം എടുക്കുവാന്ഡ സാധിച്ചില്ല"
+
+#: ../src/camel/camel-mapi-provider.c:51
+msgid "Checking for new mail"
+msgstr "പുതിയ മെയിലിനായി പരിശോധിക്കുന്നു"
+
+#: ../src/camel/camel-mapi-provider.c:53
+msgid "C_heck for new messages in all folders"
+msgstr "എല്ലാ ഫോള്‍ഡറുകളിലും പുതിയ സന്ദേശത്തിനായി തിരയുക (_h)"
+
+#. i18n: GAL is an Outlookism, AD is a Windowsism
+#: ../src/camel/camel-mapi-provider.c:66
+msgid "Global Address List / Active Directory"
+msgstr ""
+
+#. i18n: "Global Catalog" is a Windowsism, but it's a
+#. technical term and may not have translations?
+#: ../src/camel/camel-mapi-provider.c:70
+msgid "_Global Catalog server name:"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:72
+#, c-format
+msgid "_Limit number of GAL responses: %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:75
+msgid "Options"
+msgstr "ഐച്ഛികങ്ങള്‍"
+
+#: ../src/camel/camel-mapi-provider.c:77
+msgid "Automatically synchroni_ze account locally"
+msgstr ""
+
+#. i18n: copy from evolution:camel-imap-provider.c
+#: ../src/camel/camel-mapi-provider.c:80
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:82
+msgid "Check new messages for _Junk contents"
+msgstr "പുതിയ സന്ദേശങ്ങളില്‍ അനാവശ്യമായ ഉള്ളടക്കമുണ്ടോ എന്ന് പരിശോധിക്കുക (_J)"
+
+#: ../src/camel/camel-mapi-provider.c:84
+msgid "Only check for Junk messag_es in the Inbox folder"
+msgstr "പുതിയ സന്ദേശങ്ങളില്‍ അനാവശ്യമായവ ഉണ്ടോ എന്ന് പരിശോധിക്കുക (_J)"
+
+#: ../src/camel/camel-mapi-provider.c:96
+msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+msgstr ""
+"MAPI ഉപയോഗിച്ചു മൈക്രോസോഫ്റ്റ് എക്സ്‌ചേഞ്ച് / ഓപ്പണ്‍ചേഞ്ച് സെര്‍വറുകളുമായി ബന്ധപ്പെടാന്‍ വേണ്ടി"
+
+#: ../src/camel/camel-mapi-provider.c:111
+msgid "Password"
+msgstr "അടയാളവാക്കു്"
+
+#: ../src/camel/camel-mapi-provider.c:112
+msgid ""
+"This option will connect to the Openchange server using a plaintext password."
+msgstr ""
+"ഒരു പ്ളെയിന്‍ടെക്സ്റ്റ്  അടയാളവാക്കു് ഉപയോഗിച്ച്  ഓപ്പണ്‍ചോഞ്ച് സര്‍വറിലേക്ക് ബന്ധപ്പെടാന്‍ ഈ ഉപാധി "
+"സഹായിക്കുന്നു."
+
+#: ../src/camel/camel-mapi-store.c:61
+msgid "Favorites"
+msgstr "ഇഷ്ടമുളളവ"
+
+#: ../src/camel/camel-mapi-store.c:62
+msgid "All Public Folders"
+msgstr "എല്ലാ പൊതു ഫോള്‍ഡറുകളും"
+
+#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:347
+#, c-format
+msgid "Exchange MAPI server %s"
+msgstr "എക്ല്‌ചേഞ്ച് MAPI സെര്‍വര്‍ %s"
+
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:349
+#, c-format
+msgid "Exchange MAPI service for %s on %s"
+msgstr ""
+
+#. To translators : First %s : is the error text or the reason
+#. for prompting the user if it is available.
+#. Second %s is : Username.
+#. Third %s is : Server host name.
+#: ../src/camel/camel-mapi-store.c:304
+#, c-format
+msgid "%s Please enter the MAPI password for %s@%s"
+msgstr "%s ദയവായി %s@%s  ന്റെ MAPI അടയാളനാക്കു് നല്‍കുക"
+
+#: ../src/camel/camel-mapi-store.c:317
+msgid "You did not enter a password."
+msgstr "താങ്കള്‍ അടയാളവാക്കു് നല്‍കിയില്ല"
+
+#: ../src/camel/camel-mapi-store.c:325
+#, c-format
+msgid "Unable to authenticate to Exchange MAPI server."
+msgstr "എക്സ്‌ചേഞ്ച്  MAPI സെര്‍വരുമായി ആധികാരികത ഉറപ്പാക്കാന്‍ സാധിച്ചില്ല"
+
+#: ../src/camel/camel-mapi-store.c:441
+msgid "Cannot create MAPI folders in offline mode."
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:446
+#, c-format
+msgid "Cannot create new folder `%s'"
+msgstr "ഫോള്‍ഡര്‍ `%s'  ഉണ്ടാക്കുവാന്‍ സാധ്യമല്ല:"
+
+#: ../src/camel/camel-mapi-store.c:657
+#, c-format
+msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
+msgstr "'%s' എന്ന MAPI ഫോള്‍ഡറിന്റെ പേരു മാറ്റാന്‍ സാധിച്ചില്ല. ഫോള്‍ഡര്‍ നിലവിലില്ല."
+
+#: ../src/camel/camel-mapi-store.c:668
+#, c-format
+msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgstr "സഹജമായ MAPI ഫോള്‍ഡറിന്റെ പേരു '%s' ല്‍ നിന്നും '%s' ലേക്ക് മാറ്റാന്‍ സാധിച്ചില്ല"
+
+#: ../src/camel/camel-mapi-store.c:686
+#, c-format
+msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgstr "MAPI ഫോള്‍ഡറിന്റെ പേരു '%s' ല്‍ നിന്നും '%s' ലേക്ക് മാറ്റാന്‍ സാധിച്ചില്ല"
+
+#: ../src/camel/camel-mapi-store.c:1111
+msgid "Folder list not available in offline mode."
+msgstr "ഫോള്‍ഡര്‍ പട്ടിക ഓഫ്‌ലൈനില്‍ ലഭ്യമല്ല"
+
+#. Fixme : Set a better error message. Would be helful in troubleshooting.
+#: ../src/camel/camel-mapi-transport.c:335
+msgid "Could not send message."
+msgstr "സന്ദേശം അയയ്ക്കാന്‍ സാധിച്ചില്ല"
