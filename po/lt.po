@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: evolution.HEAD\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-03-12 14:02+0200\n"
-"PO-Revision-Date: 2009-03-12 14:17+0200\n"
+"PO-Revision-Date: 2009-03-14 21:31+0200\n"
 "Last-Translator: Žygimantas Beručka <zygis@gnome.org>\n"
 "Language-Team: Lithuanian <gnome-lt@lists.akl.lt>\n"
 "MIME-Version: 1.0\n"
@@ -166,7 +166,7 @@ msgstr "Parinktys"
 
 #: ../src/camel/camel-mapi-provider.c:77
 msgid "Automatically synchroni_ze account locally"
-msgstr "Automatiškai sinchroni_zuoti abonementą šiame kompiuteryje"
+msgstr "Automatiškai sinchroni_zuoti paskyrą šiame kompiuteryje"
 
 #. i18n: copy from evolution:camel-imap-provider.c
 #: ../src/camel/camel-mapi-provider.c:80
