@@ -3,13 +3,15 @@
 # This file is distributed under the same license as the evolution-mapi package.
 # Andre Klapper <ak-47@gmx.net>, 2009.
 # Jiri Eischmann <jiri@eischmann.cz>, 2009.
+# Lucas Lommer <llommer@svn.gnome.org>, 2009.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-14 23:58+0100\n"
-"PO-Revision-Date: 2009-02-11 15:49+0100\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-mapi\n"
+"POT-Creation-Date: 2009-03-13 22:16+0000\n"
+"PO-Revision-Date: 2009-03-13 23:27+0100\n"
 "Last-Translator: Jiri Eischmann <jiri@eischmann.cz>\n"
 "Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -51,41 +53,41 @@ msgstr "_Autentizovat"
 msgid "Personal Folders"
 msgstr "Osobní složky"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:385
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:386
 msgid "_Location:"
 msgstr "_Místo:"
 
 #: ../src/calendar/e-cal-backend-mapi.c:115
-#: ../src/calendar/e-cal-backend-mapi.c:1051
-#: ../src/camel/camel-mapi-store.c:453
+#: ../src/calendar/e-cal-backend-mapi.c:1053
+#: ../src/camel/camel-mapi-store.c:457
 msgid "Authentication failed"
 msgstr "Autentizace selhala"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:389
+#: ../src/calendar/e-cal-backend-mapi.c:391
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Nahrávání položek do složky %s"
 
-#. FIXME: better string please...
-#: ../src/calendar/e-cal-backend-mapi.c:579
-#: ../src/calendar/e-cal-backend-mapi.c:590
-#: ../src/calendar/e-cal-backend-mapi.c:616
-msgid "Error fetching changes from the server. Removing the cache might help."
-msgstr "Chyba při stahování změn ze serveru. Možná pomůže odstranění cache."
+#. FIXME: String : We need to restart evolution-data-server
+#: ../src/calendar/e-cal-backend-mapi.c:581
+#: ../src/calendar/e-cal-backend-mapi.c:592
+#: ../src/calendar/e-cal-backend-mapi.c:618
+msgid "Error fetching changes from the server."
+msgstr "Chyba při stahování změn ze serveru."
 
-#: ../src/calendar/e-cal-backend-mapi.c:971
-#: ../src/calendar/e-cal-backend-mapi.c:981
-#: ../src/calendar/e-cal-backend-mapi.c:1086
-#: ../src/calendar/e-cal-backend-mapi.c:1168
+#: ../src/calendar/e-cal-backend-mapi.c:973
+#: ../src/calendar/e-cal-backend-mapi.c:983
+#: ../src/calendar/e-cal-backend-mapi.c:1088
+#: ../src/calendar/e-cal-backend-mapi.c:1170
 msgid "Could not create cache file"
-msgstr "Nemohu vytvořit soubor pro cache"
+msgstr "Nelze vytvořit soubor pro cache"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1097
+#: ../src/calendar/e-cal-backend-mapi.c:1099
 msgid "Could not create thread for populating cache"
-msgstr "Nemohu vytvořit thread pro naplnění cache"
+msgstr "Nelze vytvořit thread pro naplnění cache"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1511
+#: ../src/calendar/e-cal-backend-mapi.c:1513
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -96,10 +98,10 @@ msgstr ""
 #: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
 #, c-format
 msgid "Fetching summary information for new messages in %s"
-msgstr "Stahuji souhrnné informace pro nové zprávy v %s"
+msgstr "Stahují se souhrnné informace pro nové zprávy v %s"
 
-#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1222
-#: ../src/camel/camel-mapi-folder.c:1230
+#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1221
+#: ../src/camel/camel-mapi-folder.c:1229
 msgid "This message is not available in offline mode."
 msgstr "Tato zpráva není k dispozici v režimu off-line."
 
@@ -107,40 +109,40 @@ msgstr "Tato zpráva není k dispozici v režimu off-line."
 msgid "Fetching items failed"
 msgstr "Stahování položek selhalo"
 
-#: ../src/camel/camel-mapi-folder.c:1186
+#: ../src/camel/camel-mapi-folder.c:1185
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
 "  %s"
 msgstr ""
-"Nemohu získat zprávu: %s\n"
+"Nelze získat zprávu: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1186
+#: ../src/camel/camel-mapi-folder.c:1185
 msgid "No such message"
 msgstr "Taková zpráva neexistuje"
 
-#: ../src/camel/camel-mapi-folder.c:1198
-msgid "User canceled"
-msgstr "Uživatel zrušen"
+#: ../src/camel/camel-mapi-folder.c:1197
+msgid "Message fetching cancelled by user."
+msgstr "Stahování pošty bylo zrušeno uživatelem."
 
-#: ../src/camel/camel-mapi-folder.c:1205
+#: ../src/camel/camel-mapi-folder.c:1204
 #, c-format
 msgid "Cannot get message %s: %s"
-msgstr "Nemohu získat zprávu %s: %s"
+msgstr "Nelze získat zprávu %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1249 ../src/camel/camel-mapi-folder.c:1259
+#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1258
 msgid "Could not get message"
-msgstr "Nemohu získat zprávu"
+msgstr "Nelze získat zprávu"
 
-#: ../src/camel/camel-mapi-folder.c:1612
+#: ../src/camel/camel-mapi-folder.c:1609
 #, c-format
 msgid "Could not load summary for %s"
-msgstr "Nemohu načíst souhrn pro %s"
+msgstr "Nelze načíst souhrn pro %s"
 
 #: ../src/camel/camel-mapi-provider.c:51
 msgid "Checking for new mail"
-msgstr "Kontroluji novou poštu"
+msgstr "Kontroluje se nová pošta"
 
 #: ../src/camel/camel-mapi-provider.c:53
 msgid "C_heck for new messages in all folders"
@@ -206,59 +208,71 @@ msgstr "Oblíbené"
 msgid "All Public Folders"
 msgstr "Všechny veřejné složky"
 
-#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:345
+#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:347
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Server Exchange MAPI %s"
 
-#: ../src/camel/camel-mapi-store.c:264 ../src/camel/camel-mapi-transport.c:347
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:349
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Služba Exchange MAPI pro %s na %s"
 
-#: ../src/camel/camel-mapi-store.c:298
+#. To translators : First %s : is the error text or the reason
+#. for prompting the user if it is available.
+#. Second %s is : Username.
+#. Third %s is : Server host name.
+#: ../src/camel/camel-mapi-store.c:304
 #, c-format
-msgid "%sPlease enter the MAPI password for %s@%s"
-msgstr "%sProsím vložte heslo MAPI pro %s@%s"
+msgid "%s Please enter the MAPI password for %s@%s"
+msgstr "%s Prosím vložte heslo MAPI pro %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:312
+#: ../src/camel/camel-mapi-store.c:317
 msgid "You did not enter a password."
 msgstr "Neuvedli jste heslo."
 
-#: ../src/camel/camel-mapi-store.c:320
+#: ../src/camel/camel-mapi-store.c:325
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Nelze autentizovat server Exchange MAPI."
 
-#: ../src/camel/camel-mapi-store.c:437
+#: ../src/camel/camel-mapi-store.c:441
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "Nelze vytvořit složky MAPI v režimu off-line."
 
-#: ../src/camel/camel-mapi-store.c:442
+#: ../src/camel/camel-mapi-store.c:446
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "Nelze vytvořit novou složku `%s'"
 
-#: ../src/camel/camel-mapi-store.c:653
+#: ../src/camel/camel-mapi-store.c:657
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "Nelze přejmenovat složku MAPI `%s'. Složka neexistuje."
 
-#: ../src/camel/camel-mapi-store.c:662
+#: ../src/camel/camel-mapi-store.c:668
 #, c-format
-msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
-msgstr "Nelze přejmenovat složku MAPI `%s' na `%s'. Výchozí složka."
+msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgstr "Nelze přejmenovat složku MAPI `%s' na `%s'."
 
-#: ../src/camel/camel-mapi-store.c:678
+#: ../src/camel/camel-mapi-store.c:686
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "Nelze přejmenovat složku MAPI `%s' na `%s'"
 
-#: ../src/camel/camel-mapi-store.c:1101
+#: ../src/camel/camel-mapi-store.c:1111
 msgid "Folder list not available in offline mode."
 msgstr "Seznam složek není k dispozici v režimu off-line."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:333
+#: ../src/camel/camel-mapi-transport.c:335
 msgid "Could not send message."
-msgstr "Nemohu odeslat zprávu."
+msgstr "Nelze odeslat zprávu."
+
+#~ msgid "User canceled"
+#~ msgstr "Uživatel zrušen"
+
+#~ msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
+#~ msgstr "Nelze přejmenovat složku MAPI `%s' na `%s'. Výchozí složka."
