@@ -1,0 +1,268 @@
+# Russian translation for evolution-mapi
+# Copyright (C) 2009 Free Software Foundation Inc.
+# This file is distributed under the same license as the evolution-mapi package.
+# 
+# Nickolay V. Shmyrev <nshmyrev@yandex.ru>, 2009
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-mapi trunk\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-03-15 13:35+0300\n"
+"PO-Revision-Date: 2009-03-15 13:35+0300\n"
+"Last-Translator: Nickolay V. Shmyrev <nshmyrev@yandex.ru>\n"
+"Language-Team: Russian <gnome-cyr@gnome.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
+#, c-format
+msgid "Enter Password for %s@%s"
+msgstr "Введите пароль для %s@%s"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"Сервер, имя пользователя и домен не могут быть пустыми. Заполните "
+"эти значения."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+msgid "Authentication finished successfully."
+msgstr "Подлинность проверена."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+msgid "Authentication failed."
+msgstr "Проверка подлинности закончилась неудачей."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
+msgid "_Domain name:"
+msgstr "_Домен:"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
+msgid "_Authenticate"
+msgstr "_Проверка подлинности"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
+msgid "Personal Folders"
+msgstr "Личные каталоги"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:386
+msgid "_Location:"
+msgstr "_Положение:"
+
+#: ../src/calendar/e-cal-backend-mapi.c:115
+#: ../src/calendar/e-cal-backend-mapi.c:1053
+#: ../src/camel/camel-mapi-store.c:457
+msgid "Authentication failed"
+msgstr "Проверка подлинности окончилась неудачей"
+
+#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
+#: ../src/calendar/e-cal-backend-mapi.c:391
+#, c-format
+msgid "Loading items in folder %s"
+msgstr "Загружаются изображения в каталоге %s"
+
+#. FIXME: String : We need to restart evolution-data-server
+#: ../src/calendar/e-cal-backend-mapi.c:581
+#: ../src/calendar/e-cal-backend-mapi.c:592
+#: ../src/calendar/e-cal-backend-mapi.c:618
+msgid "Error fetching changes from the server."
+msgstr "При загрузке изменений с сервера возникла ошибка."
+
+#: ../src/calendar/e-cal-backend-mapi.c:973
+#: ../src/calendar/e-cal-backend-mapi.c:983
+#: ../src/calendar/e-cal-backend-mapi.c:1088
+#: ../src/calendar/e-cal-backend-mapi.c:1170
+msgid "Could not create cache file"
+msgstr "Не удалось создать временный файл"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1099
+msgid "Could not create thread for populating cache"
+msgstr "Не удалось создать поток для сбора данных из временного файла"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1513
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+msgstr ""
+"Поддержка правки отдельных встреч в повторяющихся по расписанию встречах ещё не реализована. "
+"Данные на сервере останутся без изменений."
+
+#: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
+#, c-format
+msgid "Fetching summary information for new messages in %s"
+msgstr "Загрузка краткой сводки о новый сообщениях на сервере %s"
+
+#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1221
+#: ../src/camel/camel-mapi-folder.c:1229
+msgid "This message is not available in offline mode."
+msgstr "Это сообщение не доступно в автономном режиме."
+
+#: ../src/camel/camel-mapi-folder.c:679
+msgid "Fetching items failed"
+msgstr "Не удалось загрузить элементы"
+
+#: ../src/camel/camel-mapi-folder.c:1185
+#, c-format
+msgid ""
+"Cannot get message: %s\n"
+"  %s"
+msgstr ""
+"Не удалось получить сообщение: %s\n"
+"  %s"
+
+#: ../src/camel/camel-mapi-folder.c:1185
+msgid "No such message"
+msgstr "Сообщение отсутствует"
+
+#: ../src/camel/camel-mapi-folder.c:1197
+msgid "Message fetching cancelled by user."
+msgstr "Загрузка сообщения прервана пользователем."
+
+#: ../src/camel/camel-mapi-folder.c:1204
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "Не удалось загрузить сообщение %s: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1258
+msgid "Could not get message"
+msgstr "Не удалось получить сообщение"
+
+#: ../src/camel/camel-mapi-folder.c:1609
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "Не удалось загрузить сводку для %s"
+
+#: ../src/camel/camel-mapi-provider.c:51
+msgid "Checking for new mail"
+msgstr "Проверка новой почты"
+
+#: ../src/camel/camel-mapi-provider.c:53
+msgid "C_heck for new messages in all folders"
+msgstr "Пр_оверить новые сообщения во всех каталогах"
+
+#. i18n: GAL is an Outlookism, AD is a Windowsism
+#: ../src/camel/camel-mapi-provider.c:66
+msgid "Global Address List / Active Directory"
+msgstr "Общий список адресов / Active Directory"
+
+#. i18n: "Global Catalog" is a Windowsism, but it's a
+#. technical term and may not have translations?
+#: ../src/camel/camel-mapi-provider.c:70
+msgid "_Global Catalog server name:"
+msgstr "Сервер _общего списка адресов:"
+
+#: ../src/camel/camel-mapi-provider.c:72
+#, c-format
+msgid "_Limit number of GAL responses: %s"
+msgstr "Огран_ичивать ответы от сервера: %s "
+
+#: ../src/camel/camel-mapi-provider.c:75
+msgid "Options"
+msgstr "Параметры"
+
+#: ../src/camel/camel-mapi-provider.c:77
+msgid "Automatically synchroni_ze account locally"
+msgstr "Автоматически загружать данные в _локальное хранилище"
+
+#. i18n: copy from evolution:camel-imap-provider.c
+#: ../src/camel/camel-mapi-provider.c:80
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "_Применять фильтры к новым сообщениям во входящей папке на сервере"
+
+#: ../src/camel/camel-mapi-provider.c:82
+msgid "Check new messages for _Junk contents"
+msgstr "Проверять новые сообщения на _спам"
+
+#: ../src/camel/camel-mapi-provider.c:84
+msgid "Only check for Junk messag_es in the Inbox folder"
+msgstr "Проверять с_пам только во входящих сообщениях"
+
+#: ../src/camel/camel-mapi-provider.c:96
+msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+msgstr "Для доступа к серверам Microsoft Exchange / OpenChange c использованием MAPI"
+
+#: ../src/camel/camel-mapi-provider.c:111
+msgid "Password"
+msgstr "Пароль"
+
+#: ../src/camel/camel-mapi-provider.c:112
+msgid ""
+"This option will connect to the Openchange server using a plaintext password."
+msgstr ""
+"Соединяться с сервером Openchange, передавая пароль открытым текстом."
+
+#: ../src/camel/camel-mapi-store.c:61
+msgid "Favorites"
+msgstr "Избранное"
+
+#: ../src/camel/camel-mapi-store.c:62
+msgid "All Public Folders"
+msgstr "Все общие каталоги"
+
+#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:347
+#, c-format
+msgid "Exchange MAPI server %s"
+msgstr "Сервер Exchange MAPI %s"
+
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:349
+#, c-format
+msgid "Exchange MAPI service for %s on %s"
+msgstr "Сервис Exchange MAPI для %s на %s"
+
+#. To translators : First %s : is the error text or the reason
+#. for prompting the user if it is available.
+#. Second %s is : Username.
+#. Third %s is : Server host name.
+#: ../src/camel/camel-mapi-store.c:304
+#, c-format
+msgid "%s Please enter the MAPI password for %s@%s"
+msgstr "%s Введите пароль для %s@%s"
+
+#: ../src/camel/camel-mapi-store.c:317
+msgid "You did not enter a password."
+msgstr "Пароль не был введён."
+
+#: ../src/camel/camel-mapi-store.c:325
+#, c-format
+msgid "Unable to authenticate to Exchange MAPI server."
+msgstr "Не удалось подтвердить подлинность на сервере Exchange MAPI."
+
+#: ../src/camel/camel-mapi-store.c:441
+msgid "Cannot create MAPI folders in offline mode."
+msgstr "Создание каталогов MAPI недоступно в автономном режиме."
+
+#: ../src/camel/camel-mapi-store.c:446
+#, c-format
+msgid "Cannot create new folder `%s'"
+msgstr "Не удалось создать новый каталог «%s»"
+
+#: ../src/camel/camel-mapi-store.c:657
+#, c-format
+msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
+msgstr "Не удалось переименовать каталог MAPI «%s». Каталог не существует."
+
+#: ../src/camel/camel-mapi-store.c:668
+#, c-format
+msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgstr "Не удалось переименовать каталог MAPI по умолчанию из «%s» в «%s»"
+
+#: ../src/camel/camel-mapi-store.c:686
+#, c-format
+msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgstr "Не удалось переименовать каталог MAPI из «%s» в «%s»"
+
+#: ../src/camel/camel-mapi-store.c:1111
+msgid "Folder list not available in offline mode."
+msgstr "Каталог не доступен в автономном режиме."
+
+#. Fixme : Set a better error message. Would be helful in troubleshooting.
+#: ../src/camel/camel-mapi-transport.c:335
+msgid "Could not send message."
+msgstr "Не удалось отправить сообщение."
