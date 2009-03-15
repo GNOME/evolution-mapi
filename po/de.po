@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-03-15 18:51+0100\n"
-"PO-Revision-Date: 2009-03-15 18:56+0100\n"
+"POT-Creation-Date: 2009-03-15 19:00+0100\n"
+"PO-Revision-Date: 2009-03-15 19:01+0100\n"
 "Last-Translator: Hendrik Richter <hendrikr@gnome.org>\n"
 "Language-Team: German <gnome-de@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -158,7 +158,7 @@ msgstr "Globale Adressliste/Active-Directory"
 #. technical term and may not have translations?
 #: ../src/camel/camel-mapi-provider.c:70
 msgid "_Global Catalog server name:"
-msgstr "_Globaler Katalog-Server-Name:"
+msgstr "Name des _globalen Katalog-Servers:"
 
 #: ../src/camel/camel-mapi-provider.c:72
 #, c-format
