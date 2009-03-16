@@ -1,3 +1,8 @@
+2009-03-16  Baris Cicek <baris@teamforce.name.tr>
+
+	* LINGUAS: Added tr (turkish)
+	* tr.po: Added Turkish translation.
+
 2009-03-16  Krishnababu K  <kkrothap@redhat.com>
 
 	* te.po: Updated Telugu Translation.
