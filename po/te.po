@@ -1,14 +1,14 @@
-# translation of evolution-mapi.HEAD.po to Telugu
+# translation of te.po to Telugu
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Krishna Babu K <kkrothap@redhat.com>, 2009.
 msgid ""
 msgstr ""
-"Project-Id-Version: evolution-mapi.HEAD\n"
+"Project-Id-Version: te\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
 "POT-Creation-Date: 2009-03-10 20:30+0000\n"
-"PO-Revision-Date: 2009-03-11 13:29+0530\n"
+"PO-Revision-Date: 2009-03-16 10:52+0530\n"
 "Last-Translator: Krishna Babu K <kkrothap@redhat.com>\n"
 "Language-Team: Telugu <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -16,22 +16,25 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.11.4\n"
 "Plural-Forms: nplurals=2; plural=(n!=1);\n\n"
+"\n"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
 #, c-format
 msgid "Enter Password for %s@%s"
-msgstr ""
+msgstr "%s@%s కొరకు సంకేతపదమును ప్రవేశపెట్టండి"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
 msgstr ""
+"సేవిక, వినియోగదారినామము మరియు డొమైన్ నామము ఖాళీగా వుండలేవు. దయచేసి వాటిని "
+"సరైన విలువలతో దిద్దుము."
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
 msgid "Authentication finished successfully."
-msgstr ""
+msgstr "ధృవీకరణ సమర్ధవంతంగా ముగించబడింది."
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
 msgid "Authentication failed."
@@ -39,7 +42,7 @@ msgstr "ప్రామాణీకరించుట విఫలమైనద�
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
 msgid "_Domain name:"
-msgstr ""
+msgstr "డొమైన్ నామము (_D):"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
 msgid "_Authenticate"
@@ -63,14 +66,14 @@ msgstr "ప్రామాణీకరణ విఫలమైంది"
 #: ../src/calendar/e-cal-backend-mapi.c:391
 #, c-format
 msgid "Loading items in folder %s"
-msgstr ""
+msgstr "ఫోల్డర్ %sనందు అంశములను లోడుచేయుచున్నది"
 
 #. FIXME: String : We need to restart evolution-data-server
 #: ../src/calendar/e-cal-backend-mapi.c:581
 #: ../src/calendar/e-cal-backend-mapi.c:592
 #: ../src/calendar/e-cal-backend-mapi.c:618
 msgid "Error fetching changes from the server."
-msgstr ""
+msgstr "సేవికనుండి మార్పులను పొందుటలో దోషము."
 
 #: ../src/calendar/e-cal-backend-mapi.c:973
 #: ../src/calendar/e-cal-backend-mapi.c:983
@@ -88,6 +91,8 @@ msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
 msgstr ""
+"పునరావృత నియామకంయొక్క వొంటరి సంభవాలను సవరించు మద్దతు యింకా రాలేదు. సేవికనందు "
+"నియామకంకు యెటువంటి మార్పు జరగలేదు."
 
 #: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
 #, c-format
@@ -101,7 +106,7 @@ msgstr "లైనువెలుపలి సంవిధానంలో ఈ స
 
 #: ../src/camel/camel-mapi-folder.c:679
 msgid "Fetching items failed"
-msgstr ""
+msgstr "అంశములను తెచ్చుట విఫలమైంది"
 
 #: ../src/camel/camel-mapi-folder.c:1185
 #, c-format
@@ -118,7 +123,7 @@ msgstr "ఏటువంటి సందేశం లేదు"
 
 #: ../src/camel/camel-mapi-folder.c:1197
 msgid "Message fetching cancelled by user."
-msgstr ""
+msgstr "సందేశం తెచ్చుట వినియోగదారిచేత రద్దుచేయబడింది."
 
 #: ../src/camel/camel-mapi-folder.c:1204
 #, c-format
@@ -181,7 +186,7 @@ msgstr "ఇన్‌బాక్స్‍ సంచయంనందు నిర�
 
 #: ../src/camel/camel-mapi-provider.c:96
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
-msgstr ""
+msgstr "MAPI వుపయోగించి Microsoft Exchange / OpenChange సేవికలను యాక్సిస్ చేయుటకు"
 
 #: ../src/camel/camel-mapi-provider.c:111
 msgid "Password"
@@ -189,7 +194,7 @@ msgstr "రహస్యపదం"
 
 #: ../src/camel/camel-mapi-provider.c:112
 msgid "This option will connect to the Openchange server using a plaintext password."
-msgstr ""
+msgstr "ఈ ఐచ్చికము సాదాపాఠపు సంకేతపదమును వుపయోగించి Openchange సేవికకు అనుసంధానించబడుతుంది."
 
 #: ../src/camel/camel-mapi-store.c:61
 msgid "Favorites"
@@ -202,14 +207,14 @@ msgstr "అన్ని పబ్లిక్ సంచయాలు"
 #: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:347
 #, c-format
 msgid "Exchange MAPI server %s"
-msgstr ""
+msgstr "MAPI సేవిక %s మార్చుము"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:349
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
-msgstr ""
+msgstr "%s కొరకు %sపైన MAPI సేవను పరస్పరం మార్చుకొనుము"
 
 #. To translators : First %s : is the error text or the reason
 #. for prompting the user if it is available.
@@ -218,7 +223,7 @@ msgstr ""
 #: ../src/camel/camel-mapi-store.c:304
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
-msgstr ""
+msgstr "%s దయచేసి %s@%s కొరకు MAPI సంకేతపదమును ప్రవేశపెట్టుము"
 
 #: ../src/camel/camel-mapi-store.c:317
 msgid "You did not enter a password."
@@ -227,38 +232,38 @@ msgstr "నీవు రహస్యపదమును ప్రవేశపె�
 #: ../src/camel/camel-mapi-store.c:325
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
-msgstr ""
+msgstr "MAPI సేవికను పరస్పరం మార్చుకొనుటకు దృవీకరించలేక పోతోంది."
 
 #: ../src/camel/camel-mapi-store.c:441
 msgid "Cannot create MAPI folders in offline mode."
-msgstr ""
+msgstr "MAPI ఫోల్డర్లను ఆఫ్‌లైన్ రీతినందు సృష్టించలేక పోయింది."
 
 #: ../src/camel/camel-mapi-store.c:446
 #, c-format
 msgid "Cannot create new folder `%s'"
-msgstr ""
+msgstr "కొత్త సంచయం `%s' సృష్టించలేక పోయింది"
 
 #: ../src/camel/camel-mapi-store.c:657
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
-msgstr ""
+msgstr "MAPI సంచయం `%s' పునఃనామకరణ చేయలేము. ఫోల్డరు లేదు."
 
 #: ../src/camel/camel-mapi-store.c:668
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
-msgstr ""
+msgstr "MAPI అప్రమేయ ఫోల్డరు `%s'ను `%s'కు పునఃనామకరణ చేయలేము."
 
 #: ../src/camel/camel-mapi-store.c:686
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
-msgstr ""
+msgstr "MAPI ఫోల్డర్ `%s'ను `%s'కు పునఃనామకరణ చేయలేము"
 
 #: ../src/camel/camel-mapi-store.c:1111
 msgid "Folder list not available in offline mode."
-msgstr ""
+msgstr "ఆఫ్‌లైను రీతినందు ఫోల్డరు అందుబాటులో లేదు."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
 #: ../src/camel/camel-mapi-transport.c:335
 msgid "Could not send message."
-msgstr ""
+msgstr "సందేశమును పంపలేక పోయింది."
 
