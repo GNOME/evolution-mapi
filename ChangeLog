@@ -1,3 +1,7 @@
+2009-03-16  Johnny Jacob  <jjohnny@novell.com>
+
+	* NEWS: Updates for 0.26.0
+
 2009-03-02  Matthew Barnes  <mbarnes@redhat.com>
 
 	* configure.ac: Post-release version bump.

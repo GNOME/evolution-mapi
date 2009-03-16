@@ -1,3 +1,33 @@
+evolution-mapi 0.26.0 2009-03-16
+---------------------------------
+Bug Fixes:
+        #574395: Do not fetch folders for different source types. (Milan Crha)
+
+New Translations:
+        Sergio Durzu (it)
+	Takeshi AIHANA (ja)
+	Runa Bhattacharjee (bn_IN)
+	Akom C (th)
+	Rajesh Ranjan (hi)
+	Krishnababu K (te)
+	Manoj Kumar Giri (or)
+	Sandeep Shedmake (mr)
+	Shankar Prasad (kn)
+	Ignacio Casal Quinteiro (gl)
+	Nickolay V. Shmyrev (ru)
+
+Updated Translations:
+	Yair Hershkovitz (he)
+	Fabrício Godoy (pt_BR)
+	Jennie Petoumenou (el)
+	Jorge Gonzalez (es)
+	Praveen Arimbrathodiyil (ml)
+	Ani Peter (ml)
+	I. Felix (ta)
+	Jiri Eischmann (cs)
+	Kostas Papadimas (el)
+	Mario Blättermann (de)
+
 evolution-mapi 0.25.92 2009-03-02
 ---------------------------------
 
