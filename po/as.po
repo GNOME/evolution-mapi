@@ -1,0 +1,287 @@
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Amitakhya Phukan <aphukan@fedoraproject.org>, 2009.
+msgid ""
+msgstr ""
+"Project-Id-Version: as\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
+"POT-Creation-Date: 2009-02-26 23:08+0000\n"
+"PO-Revision-Date: 2009-03-16 16:41+0530\n"
+"Last-Translator: Amitakhya Phukan <aphukan@fedoraproject.org>\n"
+"Language-Team: Assamese <fedora-trans-as@redhat.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Lokalize 0.3\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
+#, c-format
+msgid "Enter Password for %s@%s"
+msgstr "%s@%s-ৰ গুপ্তশব্দ লিখক"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr "সেৱক, ব্যৱহাৰকৰ্তা নাম আৰু ডোমেইনৰ নাম উল্লেখ কৰা আবশ্যক । অনুগ্ৰহ এইসমূহৰ ক্ষেত্ৰত যথাযত মান লিখক ।"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+msgid "Authentication finished successfully."
+msgstr "সাফল্যৰ সৈতে পৰিচয় প্ৰমাণ কৰা হৈছে ।"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+msgid "Authentication failed."
+msgstr "পৰিচয় প্ৰমাণ কৰিবলৈ ব্যৰ্থ ।"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
+msgid "_Domain name:"
+msgstr "ডোমেইনৰ নাম: (_D)"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
+msgid "_Authenticate"
+msgstr "অনুমোদন (_A)"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
+msgid "Personal Folders"
+msgstr "ব্যক্তিগত ফোল্ডাৰ"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:385
+#
+msgid "_Location:"
+msgstr "অবস্থান:(_L)"
+
+#: ../src/calendar/e-cal-backend-mapi.c:115
+#
+#: ../src/calendar/e-cal-backend-mapi.c:1053
+#: ../src/camel/camel-mapi-store.c:457
+msgid "Authentication failed"
+msgstr "অনুমোদন ব্যৰ্থ"
+
+#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
+#: ../src/calendar/e-cal-backend-mapi.c:391
+#, c-format
+msgid "Loading items in folder %s"
+msgstr "%s ফোল্ডাৰত অন্তৰ্ভুক্ত বস্তু লোড কৰা হৈছে"
+
+#. FIXME: String : We need to restart evolution-data-server
+#: ../src/calendar/e-cal-backend-mapi.c:581
+#: ../src/calendar/e-cal-backend-mapi.c:592
+#: ../src/calendar/e-cal-backend-mapi.c:618
+msgid "Error fetching changes from the server."
+msgstr "পৰিবৰ্তনৰ তথ্য সেৱকৰ পৰা প্ৰাপ্ত কৰিবলৈ সমস্যা ।"
+
+#: ../src/calendar/e-cal-backend-mapi.c:973
+#: ../src/calendar/e-cal-backend-mapi.c:983
+#: ../src/calendar/e-cal-backend-mapi.c:1088
+#: ../src/calendar/e-cal-backend-mapi.c:1170
+msgid "Could not create cache file"
+msgstr "কেশে ফাইল নিৰ্মাণ কৰিবলৈ ব্যৰ্থ"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1099
+#
+msgid "Could not create thread for populating cache"
+msgstr "কেশেৰ তথ্য পূৰণ কৰাৰ বাবে থ্ৰেড নিৰ্মাণ কৰিবলৈ ব্যৰ্থ"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1513
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+msgstr ""
+"পুনৰ্বাৰ ঘটিত সাক্ষাৎকাৰৰ কোনো একটি বাৰৰ তথ্য সমৰ্থনৰ ব্যবস্থা বৰ্তমানে উপলব্ধ নহয় । "
+"চিহ্নিত সাক্ষাৎকাৰ সম্বন্ধীয় তথ্য, সেৱকেত পৰিবৰ্তন কৰা হয়নি ।"
+
+#: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
+#, c-format
+msgid "Fetching summary information for new messages in %s"
+msgstr "%s-ত উপস্থিত নতুন বাৰ্তা সম্বন্ধে সংক্ষিপ্ত তথ্য প্ৰাপ্ত কৰা হচ্ছ"
+
+#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1221
+#
+#: ../src/camel/camel-mapi-folder.c:1229
+msgid "This message is not available in offline mode."
+msgstr "অফ-লাইন অবস্থায় এই বাৰ্তাটি উপলব্ধ নাই ।"
+
+#: ../src/camel/camel-mapi-folder.c:679
+msgid "Fetching items failed"
+msgstr "বস্তু প্ৰাপ্ত কৰিবলৈ বিফল"
+
+#: ../src/camel/camel-mapi-folder.c:1185
+#, c-format
+msgid ""
+"Cannot get message: %s\n"
+"  %s"
+msgstr ""
+"বাৰ্তা প্ৰাপ্ত কৰা সম্ভব নহয়: %s\n"
+"  %s"
+
+#: ../src/camel/camel-mapi-folder.c:1185
+#
+msgid "No such message"
+msgstr "এই ধৰনৰ কোনো বাৰ্তা উপস্থিত নাই"
+
+#: ../src/camel/camel-mapi-folder.c:1197
+msgid "Message fetching cancelled by user."
+msgstr "ব্যৱহাৰকৰ্তা দ্বাৰা তথ্য আহৰণেৰ কৰ্ম বাতিল কৰা হৈছে ।"
+
+#: ../src/camel/camel-mapi-folder.c:1204
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "বাৰ্তা %s প্ৰাপ্ত কৰা সম্ভব নহয়: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1258
+msgid "Could not get message"
+msgstr "বাৰ্তা প্ৰাপ্ত কৰিবলৈ ব্যৰ্থ"
+
+#: ../src/camel/camel-mapi-folder.c:1609
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "%s সম্বন্ধীয় সংক্ষিপ্ত তথ্য লোড কৰিবলৈ ব্যৰ্থ"
+
+#: ../src/camel/camel-mapi-provider.c:51
+#
+msgid "Checking for new mail"
+msgstr "নতুন বাৰ্তাৰ উপস্থিতি পৰীক্ষা কৰা হৈছে"
+
+#: ../src/camel/camel-mapi-provider.c:53
+#
+msgid "C_heck for new messages in all folders"
+msgstr "সকল ফোল্ডাৰত নতুন বাৰ্তাৰ উপস্থিতি পৰীক্ষা কৰা হৈছে (_h)"
+
+#. i18n: GAL is an Outlookism, AD is a Windowsism
+#: ../src/camel/camel-mapi-provider.c:66
+#
+msgid "Global Address List / Active Directory"
+msgstr "ঠিকানাৰ সাৰ্বজনীন তালিকা / সক্ৰিয় ডিৰেক্টৰি"
+
+#. i18n: "Global Catalog" is a Windowsism, but it's a
+#. technical term and may not have translations?
+#: ../src/camel/camel-mapi-provider.c:70
+msgid "_Global Catalog server name:"
+msgstr "Global Catalog সেৱকৰ নাম:(_G)"
+
+#: ../src/camel/camel-mapi-provider.c:72
+#, c-format
+msgid "_Limit number of GAL responses: %s"
+msgstr "GALৰ পৰা প্ৰাপ্ত প্ৰত্যুত্তোৰৰ সংখ্যা সীমিত কৰা হ'ব: %s (_L)"
+
+#: ../src/camel/camel-mapi-provider.c:75
+#
+msgid "Options"
+msgstr "বিকল্পসমূহ"
+
+#: ../src/camel/camel-mapi-provider.c:77
+#
+msgid "Automatically synchroni_ze account locally"
+msgstr "স্বয়ংক্ৰিয়ভাবে স্থানীয়ৰূপে হিচাপ সুসংগত কৰা হ'ব (_z)"
+
+#. i18n: copy from evolution:camel-imap-provider.c
+#: ../src/camel/camel-mapi-provider.c:80
+#
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr ""
+"চিহ্নিত সেৱকত উপস্থিত Inbox ফোল্ডাৰত উপস্থিত নতুন বাৰ্তাৰ ক্ষেত্ৰত "
+"ফিল্টাৰ প্ৰয়োগ কৰা হ'ব (_A)"
+
+#: ../src/camel/camel-mapi-provider.c:82
+#
+msgid "Check new messages for _Junk contents"
+msgstr "অবাঞ্ছিত সামগ্ৰী চিহ্নিত কৰাৰ উদ্দেশ্যে নতুন বাৰ্তা পৰীক্ষা কৰা হ'ব (_J)"
+
+#: ../src/camel/camel-mapi-provider.c:84
+#
+msgid "Only check for Junk messag_es in the Inbox folder"
+msgstr "অকল Inbox ফোল্ডাৰত অবাঞ্ছিত বাৰ্তা পৰীক্ষা কৰা হ'ব (_e)"
+
+#: ../src/camel/camel-mapi-provider.c:96
+msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+msgstr "MAPI প্ৰয়োগকাৰী Microsoft Exchange / OpenChange সেৱক ব্যবহাৰৰ বাবে"
+
+#: ../src/camel/camel-mapi-provider.c:111
+#
+msgid "Password"
+msgstr "গুপ্তশব্দ"
+
+#: ../src/camel/camel-mapi-provider.c:112
+msgid "This option will connect to the Openchange server using a plaintext password."
+msgstr ""
+"এই বিকল্পৰ সাহায্যে প্লেইন-টেক্সট গুপ্তশব্দ সহযোগে Openchange সেৱকৰ সৈতে "
+"সংযোগ স্থাপন কৰা হ'ব ।"
+
+#: ../src/camel/camel-mapi-store.c:61
+#
+msgid "Favorites"
+msgstr "পছন্দ"
+
+#: ../src/camel/camel-mapi-store.c:62
+#
+msgid "All Public Folders"
+msgstr "সকল সাৰ্বজনীন ফোল্ডাৰ"
+
+#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:347
+#, c-format
+msgid "Exchange MAPI server %s"
+msgstr "Exchange MAPI সেৱক %s"
+
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:349
+#, c-format
+msgid "Exchange MAPI service for %s on %s"
+msgstr "%s-ৰ বাবে Exchange MAPI পৰিসেবা, %s-ৰ উপৰ স্থাপিত"
+
+#. To translators : First %s : is the error text or the reason
+#. for prompting the user if it is available.
+#. Second %s is : Username.
+#. Third %s is : Server host name.
+#: ../src/camel/camel-mapi-store.c:304
+#, c-format
+msgid "%s Please enter the MAPI password for %s@%s"
+msgstr "%s অনুগ্ৰহ কৰে %s@%s-ৰ বাবে MAPI গুপ্তশব্দ লিখক"
+
+#: ../src/camel/camel-mapi-store.c:317
+#
+msgid "You did not enter a password."
+msgstr "কোনো গুপ্তশব্দ উল্লেখ কৰা হয়নি ।"
+
+#: ../src/camel/camel-mapi-store.c:325
+#, c-format
+msgid "Unable to authenticate to Exchange MAPI server."
+msgstr "Exchange MAPI সেৱকে পৰিআয় প্ৰমাণ কৰা সম্ভব হয়নি ।"
+
+#: ../src/camel/camel-mapi-store.c:441
+msgid "Cannot create MAPI folders in offline mode."
+msgstr "অফ-লাইন অবস্থায় MAPI ফোল্ডাৰ নিৰ্মাণ কৰা সম্ভব নহয় ।"
+
+#: ../src/camel/camel-mapi-store.c:446
+#, c-format
+msgid "Cannot create new folder `%s'"
+msgstr "নতুন ফোল্ডাৰ `%s' নিৰ্মাণ কৰা সম্ভব নহয়"
+
+#: ../src/camel/camel-mapi-store.c:657
+#, c-format
+msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
+msgstr "MAPI ফোল্ডাৰ `%s'-ৰ নাম পৰিবৰ্তন কৰা সম্ভব নহয় । ফোল্ডাৰ উপস্থিত নাই ।"
+
+#: ../src/camel/camel-mapi-store.c:668
+#, c-format
+msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgstr "MAPI ডিফল্ট ফোল্ডাৰৰ নাম `%s'ৰ পৰা `%s'-এ পৰিবৰ্তন কৰা সম্ভব নহয় ।"
+
+#: ../src/camel/camel-mapi-store.c:686
+#, c-format
+msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgstr "MAPI ফোল্ডাৰৰ নাম `%s'ৰ পৰা `%s'-এ পৰিবৰ্তন কৰা সম্ভব নহয়"
+
+#: ../src/camel/camel-mapi-store.c:1111
+msgid "Folder list not available in offline mode."
+msgstr "অফ-লাইন অবস্থায় ফোল্ডাৰৰ তালিকা উপলব্ধ হ'ব না ।"
+
+#. Fixme : Set a better error message. Would be helful in troubleshooting.
+#: ../src/camel/camel-mapi-transport.c:335
+msgid "Could not send message."
+msgstr "বাৰ্তা পাঠাতে ব্যৰ্থ ।"
+
+
