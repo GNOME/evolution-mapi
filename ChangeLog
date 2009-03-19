@@ -1,3 +1,9 @@
+2009-03-19  Johnny Jacob  <jjohnny@novell.com>
+
+	* NEWS: News updates.
+
+	* configure.ac: Version bump to 0.26.0.1
+
 2009-03-16  Johnny Jacob  <jjohnny@novell.com>
 
 	* NEWS: Updates for 0.26.0
