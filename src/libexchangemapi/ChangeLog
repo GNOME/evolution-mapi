@@ -1,3 +1,20 @@
+2009-03-19  Milan Crha  <mcrha@redhat.com>
+
+	** Fix for bug #574784
+
+	* exchange-mapi-connection.c: (exchange_mapi_util_check_restriction),
+	(exchange_mapi_connection_fetch_items), (exchange_mapi_empty_folder),
+	(exchange_mapi_connection_fetch_item), (exchange_mapi_create_folder),
+	(exchange_mapi_remove_folder), (exchange_mapi_remove_folder),
+	(get_child_folders):
+	* exchange-mapi-utils.c: (exchange_mapi_util_mapi_id_to_string),
+	(exchange_mapi_util_mapi_id_from_string),
+	(exchange_mapi_util_mapi_ids_to_uid),
+	(exchange_mapi_util_mapi_ids_from_uid),
+	(exchange_mapi_debug_property_dump):
+	* exchange-mapi-folder.c: (exchange_mapi_folder_get_folder):
+	Use proper formatting modifier for IDs.
+
 2009-02-20  Milan Crha  <mcrha@redhat.com>
 
 	* exchange-mapi-cal-utils.c:

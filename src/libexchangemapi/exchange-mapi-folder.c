@@ -152,7 +152,7 @@ exchange_mapi_folder_get_folder (mapi_id_t fid)
 	tmp = folder_list;
 	while (tmp) {
 		ExchangeMAPIFolder * folder = tmp->data;
-		g_print ("%016" G_GUINT64_FORMAT "X %016" G_GUINT64_FORMAT "X\n", folder->folder_id, fid);
+		g_print ("%016" G_GINT64_MODIFIER "X %016" G_GINT64_MODIFIER "X\n", folder->folder_id, fid);
 		if (folder->folder_id == fid)
 			return folder;
 		tmp=tmp->next;

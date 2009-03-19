@@ -1,3 +1,10 @@
+2009-03-19  Milan Crha  <mcrha@redhat.com>
+
+	** Fix for bug #574784
+
+	* e-book-backend-mapi.c: (e_book_backend_mapi_load_source):
+	Use proper formatting modifier for IDs.
+
 2009-02-20  Milan Crha  <mcrha@redhat.com>
 
 	* e-book-backend-mapi.c: Fix for compiler warnings.

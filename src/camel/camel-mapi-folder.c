@@ -534,7 +534,7 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	}
 	/*Remove them from cache*/
 	while (deleted_items) {
-		char* deleted_msg_uid = g_strdup_printf ("%016" G_GUINT64_FORMAT "X%016" G_GUINT64_FORMAT "X", fid, *(mapi_id_t *)deleted_items->data);
+		char* deleted_msg_uid = g_strdup_printf ("%016" G_GINT64_MODIFIER "X%016" G_GINT64_MODIFIER "X", fid, *(mapi_id_t *)deleted_items->data);
 
 		CAMEL_MAPI_FOLDER_REC_LOCK (folder, cache_lock);
 		camel_folder_summary_remove_uid (folder->summary, deleted_msg_uid);

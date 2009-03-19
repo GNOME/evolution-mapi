@@ -1,3 +1,12 @@
+2009-03-19  Milan Crha  <mcrha@redhat.com>
+
+	** Fix for bug #574784
+
+	* camel-mapi-store.c: (mapi_create_folder),
+	(mapi_convert_to_folder_info), (mapi_folders_sync):
+	* camel-mapi-folder.c: (mapi_sync):
+	Use proper formatting modifier for IDs.
+
 2009-02-20  Milan Crha  <mcrha@redhat.com>
 
 	* camel-private.h:

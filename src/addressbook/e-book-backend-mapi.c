@@ -387,7 +387,7 @@ e_book_backend_mapi_load_source (EBookBackend *backend,
 	exchange_mapi_util_mapi_id_from_string (e_source_get_property (source, "folder-id"), &priv->fid);
 
 	tmp = e_source_get_property (source, "folder-id");
-	printf("Folder is %s %016" G_GUINT64_FORMAT "X\n", tmp, priv->fid);
+	printf("Folder is %s %016" G_GINT64_MODIFIER "X\n", tmp, priv->fid);
 
 	/* Once aunthentication in address book works this can be removed */
 	if (priv->mode == GNOME_Evolution_Addressbook_MODE_LOCAL) {
@@ -400,7 +400,7 @@ e_book_backend_mapi_load_source (EBookBackend *backend,
 
 
 	if (enable_debug)
-		printf("For profile %s and folder %s - %016" G_GUINT64_FORMAT "X\n", priv->profile, tmp, priv->fid);
+		printf("For profile %s and folder %s - %016" G_GINT64_MODIFIER "X\n", priv->profile, tmp, priv->fid);
 
 	return GNOME_Evolution_Addressbook_Success;
 }

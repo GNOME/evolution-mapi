@@ -471,9 +471,9 @@ mapi_create_folder(CamelStore *store, const char *parent_name, const char *folde
 		si = camel_mapi_store_summary_add_from_full(mapi_store->summary, root->full_name, '/');
 		camel_store_summary_save((CamelStoreSummary *)mapi_store->summary);
 
-		g_hash_table_insert (priv->id_hash, g_strdup_printf ("%016" G_GUINT64_FORMAT "X", new_folder_id), g_strdup(folder_name));
-		g_hash_table_insert (priv->name_hash, g_strdup(root->full_name), g_strdup_printf ("%016" G_GUINT64_FORMAT "X", new_folder_id));
-		g_hash_table_insert (priv->parent_hash, g_strdup_printf ("%016" G_GUINT64_FORMAT "X", new_folder_id), g_strdup(parent_id));
+		g_hash_table_insert (priv->id_hash, g_strdup_printf ("%016" G_GINT64_MODIFIER "X", new_folder_id), g_strdup(folder_name));
+		g_hash_table_insert (priv->name_hash, g_strdup(root->full_name), g_strdup_printf ("%016" G_GINT64_MODIFIER "X", new_folder_id));
+		g_hash_table_insert (priv->parent_hash, g_strdup_printf ("%016" G_GINT64_MODIFIER "X", new_folder_id), g_strdup(parent_id));
 
 		camel_object_trigger_event (CAMEL_OBJECT (store), "folder_created", root);
 	}
@@ -994,7 +994,7 @@ mapi_convert_to_folder_info (CamelMapiStore *store, ExchangeMAPIFolder *folder, 
 
 	name = exchange_mapi_folder_get_name (folder);
 
-	id = g_strdup_printf ("%016" G_GUINT64_FORMAT "X", exchange_mapi_folder_get_fid (folder));
+	id = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", exchange_mapi_folder_get_fid (folder));
 		
 	fi = g_new0 (CamelFolderInfo, 1);
 
@@ -1038,7 +1038,7 @@ mapi_convert_to_folder_info (CamelMapiStore *store, ExchangeMAPIFolder *folder, 
 	 */
 
 	mapi_id_folder = exchange_mapi_folder_get_parent_id (folder);
-	parent = g_strdup_printf ("%016" G_GUINT64_FORMAT "X", mapi_id_folder);
+	parent = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", mapi_id_folder);
 	par_name = g_hash_table_lookup (priv->id_hash, parent);
 
 	if (par_name != NULL) {
@@ -1144,8 +1144,8 @@ mapi_folders_sync (CamelMapiStore *store, CamelException *ex)
 		gchar *fid = NULL, *parent_id = NULL;
 
 		name = exchange_mapi_folder_get_name ((ExchangeMAPIFolder *)(temp_list->data));
-		fid = g_strdup_printf ("%016" G_GUINT64_FORMAT "X", exchange_mapi_folder_get_fid((ExchangeMAPIFolder *)(temp_list->data)));
-		parent_id = g_strdup_printf ("%016" G_GUINT64_FORMAT "X", exchange_mapi_folder_get_parent_id ((ExchangeMAPIFolder *)(temp_list->data)));
+		fid = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", exchange_mapi_folder_get_fid((ExchangeMAPIFolder *)(temp_list->data)));
+		parent_id = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", exchange_mapi_folder_get_parent_id ((ExchangeMAPIFolder *)(temp_list->data)));
 
 		/*id_hash returns the name for a given container id*/
 		g_hash_table_insert (priv->id_hash, g_strdup (fid), g_strdup(name)); 

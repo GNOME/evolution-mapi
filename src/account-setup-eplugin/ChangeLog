@@ -1,3 +1,10 @@
+2009-03-19  Milan Crha  <mcrha@redhat.com>
+
+	** Fix for bug #574784
+
+	* exchange-mapi-account-setup.c: (exchange_mapi_book_commit):
+	Use proper formatting modifier for IDs.
+
 2009-03-06  Milan Crha  <mcrha@redhat.com>
 
 	** Fix for bug #574395

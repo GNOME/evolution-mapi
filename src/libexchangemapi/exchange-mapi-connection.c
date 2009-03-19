@@ -892,7 +892,7 @@ exchange_mapi_util_check_restriction (mapi_id_t fid, struct mapi_SRestriction *r
 	uint32_t count, i;
 	GSList *mids = NULL;
 
-	d(g_print("\n%s: Entering %s: folder-id %016" G_GUINT64_FORMAT "X ", G_STRLOC, G_STRFUNC, fid));
+	d(g_print("\n%s: Entering %s: folder-id %016" G_GINT64_MODIFIER "X ", G_STRLOC, G_STRFUNC, fid));
 
 	LOCK();
 	LOGALL();
@@ -1007,7 +1007,7 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 	uint32_t count, i, cursor_pos = 0;
 	gboolean result = FALSE;
 
-	d(g_print("\n%s: Entering %s: folder-id %016" G_GUINT64_FORMAT "X ", G_STRLOC, G_STRFUNC, fid));
+	d(g_print("\n%s: Entering %s: folder-id %016" G_GINT64_MODIFIER "X ", G_STRLOC, G_STRFUNC, fid));
 
 	LOCK();
 	LOGALL();
@@ -1230,7 +1230,7 @@ cleanup:
 	LOGNONE();
 	UNLOCK();
 
-	d(g_print("\n%s: Leaving %s: folder-id %016" G_GUINT64_FORMAT "X ", G_STRLOC, G_STRFUNC, fid));
+	d(g_print("\n%s: Leaving %s: folder-id %016" G_GINT64_MODIFIER "X ", G_STRLOC, G_STRFUNC, fid));
 
 	return result;
 }
@@ -1254,7 +1254,7 @@ exchange_mapi_connection_fetch_item (mapi_id_t fid, mapi_id_t mid,
 	GSList *stream_list = NULL;
 	gboolean result = FALSE;
 
-	d(g_print("\n%s: Entering %s: folder-id %016" G_GUINT64_FORMAT "X message-id %016" G_GUINT64_FORMAT "X",
+	d(g_print("\n%s: Entering %s: folder-id %016" G_GINT64_MODIFIER "X message-id %016" G_GINT64_MODIFIER "X",
 				G_STRLOC, G_STRFUNC, fid, mid));
 
 	LOCK();
@@ -1476,7 +1476,7 @@ exchange_mapi_create_folder (uint32_t olFolder, mapi_id_t pfid, const char *name
 	}
 
 	fid = mapi_object_get_id (&obj_folder);
-	g_print("\nFolder %s created with id %016" G_GUINT64_FORMAT "X ", name, fid);
+	g_print("\nFolder %s created with id %016" G_GINT64_MODIFIER "X ", name, fid);
 
 cleanup:
 	mapi_object_release(&obj_folder);
@@ -1526,7 +1526,7 @@ exchange_mapi_empty_folder (mapi_id_t fid)
 		goto cleanup;
 	}
 
-	g_print("\nFolder with id %016" G_GUINT64_FORMAT "X was emptied ", fid);
+	g_print("\nFolder with id %016" G_GINT64_MODIFIER "X was emptied ", fid);
 
 	result = TRUE;
 
@@ -1587,7 +1587,7 @@ exchange_mapi_remove_folder (uint32_t olFolder, mapi_id_t fid)
 		goto cleanup;
 	}
 
-	g_print("\nFolder with id %016" G_GUINT64_FORMAT "X was emptied ", fid);
+	g_print("\nFolder with id %016" G_GINT64_MODIFIER "X was emptied ", fid);
 
 	/* Attempt to open the top/parent folder */
 	retval = OpenFolder(&obj_store, folder->parent_folder_id, &obj_top);
@@ -1603,7 +1603,7 @@ exchange_mapi_remove_folder (uint32_t olFolder, mapi_id_t fid)
 		goto cleanup;
 	}
 
-	g_print("\nFolder with id %016" G_GUINT64_FORMAT "X was deleted ", fid);
+	g_print("\nFolder with id %016" G_GINT64_MODIFIER "X was deleted ", fid);
 
 	result = TRUE;
 
@@ -2494,7 +2494,7 @@ get_child_folders(TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, m
 			class = IPF_NOTE;
 
 		newname = utf8tolinux (name);
-		g_print("\n|---+ %-15s : (Container class: %s %016" G_GUINT64_FORMAT "X) UnRead : %d Total : %d ", newname, class, *fid, unread ? *unread : 0, total ? *total : 0);
+		g_print("\n|---+ %-15s : (Container class: %s %016" G_GINT64_MODIFIER "X) UnRead : %d Total : %d ", newname, class, *fid, unread ? *unread : 0, total ? *total : 0);
 
 		folder = exchange_mapi_folder_new (newname, class, folder_hier, *fid, folder_id, child ? *child : 0, unread ? *unread : 0, total ? *total : 0);
 		*mapi_folders = g_slist_prepend (*mapi_folders, folder);
