@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: or\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
 "POT-Creation-Date: 2009-03-10 05:53+0000\n"
-"PO-Revision-Date: 2009-03-12 00:51+0530\n"
+"PO-Revision-Date: 2009-03-23 12:36+0530\n"
 "Last-Translator: Manoj Kumar Giri <mgiri@redhat.com>\n"
 "Language-Team: Oriya <oriya-it@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
@@ -16,6 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.11.4\n"
 "Plural-Forms:  nplurals=2; plural=(n!=1);\n\n"
+"\n"
 "\n"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
@@ -91,6 +92,8 @@ msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
 msgstr ""
+"ବାରମ୍ବାର ସାକ୍ଷାତକାରର ଗୋଟିଏ ପ୍ରତିଫଳନର ପରିବର୍ତ୍ତନ କରିବାର ସମର୍ଥନକୁ ଏପର୍ଯ୍ୟନ୍ତ କାର୍ଯ୍ୟକାରୀ କରାଯାଇନାହିଁ। "
+"ସର୍ଭରରେ ସାକ୍ଷାତକାର ପାଇଁ କୌଣସି ପରିବର୍ତ୍ତନ କରାଯାଇନାହିଁ।"
 
 #: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
 #, c-format
