@@ -1,3 +1,9 @@
+2009-04-01  Julien Kerihuel <j.kerihuel@openchange.org>
+	* Add generated files to the svn ignore list
+	
+	* Fix Do not call MAPIUninitialize if whether profile store
+	creation or MAPIInitialize fails.
+	
 2009-03-19  Milan Crha  <mcrha@redhat.com>
 
 	** Fix for bug #574784
