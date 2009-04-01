@@ -93,7 +93,7 @@ mapi_profile_load (const char *profname, const char *password)
 	if (profname)
 		profile = profname;
 	else {
-		retval = GetDefaultProfile(&profile);
+		retval = GetDefaultProfile((char **)&profile);
 		if (retval != MAPI_E_SUCCESS) {
 			mapi_errstr("GetDefaultProfile", GetLastError());
 			goto cleanup;
@@ -386,15 +386,11 @@ exchange_mapi_util_read_body_stream (mapi_object_t *obj_message, GSList **stream
 static gboolean
 exchange_mapi_util_write_generic_streams (mapi_object_t *obj_message, GSList *stream_list) 
 {
-
-//	TALLOC_CTX 	*mem_ctx;
 	GSList 		*l;
 	enum MAPISTATUS	retval;
 	gboolean 	status = TRUE;
 
 	d(g_print("\n%s: Entering %s ", G_STRLOC, G_STRFUNC));
-
-//	mem_ctx = talloc_init ("ExchangeMAPI_WriteGenericStreams");
 
 	for (l = stream_list; l; l = l->next) {
 		ExchangeMAPIStream 	*stream = (ExchangeMAPIStream *) (l->data);
@@ -456,8 +452,6 @@ exchange_mapi_util_write_generic_streams (mapi_object_t *obj_message, GSList *st
 			status = FALSE;
 		mapi_object_release(&obj_stream);
 	}
-
-//	talloc_free (mem_ctx);
 
 	d(g_print("\n%s: Leaving %s ", G_STRLOC, G_STRFUNC));
 
@@ -2887,7 +2881,11 @@ exchange_mapi_create_profile (const char *username, const char *password, const 
 		retval = CreateProfileStore (profpath, LIBMAPI_LDIF_DIR); 
 		if (retval != MAPI_E_SUCCESS) {
 			manage_mapi_error ("CreateProfileStore", GetLastError(), error_msg);
-			goto cleanup;
+			g_free (profpath);
+			g_free (profname);
+			
+			UNLOCK ();
+			return FALSE;
 		}
 	}
 
@@ -2897,7 +2895,11 @@ exchange_mapi_create_profile (const char *username, const char *password, const 
 		manage_mapi_error ("MAPIInitialize", GetLastError(), error_msg); 
 	else if (retval != MAPI_E_SUCCESS) {
 		manage_mapi_error ("MAPIInitialize", GetLastError(), error_msg);
-		goto cleanup; 
+		g_free (profpath);
+		g_free (profname);
+		
+		UNLOCK ();
+		return FALSE;
 	}
 
 	/* Delete any existing profiles with the same profilename */
