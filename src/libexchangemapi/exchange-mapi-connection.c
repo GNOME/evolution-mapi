@@ -93,7 +93,7 @@ mapi_profile_load (const char *profname, const char *password)
 	if (profname)
 		profile = profname;
 	else {
-		retval = GetDefaultProfile((char **)&profile);
+		retval = GetDefaultProfile (&profile);
 		if (retval != MAPI_E_SUCCESS) {
 			mapi_errstr("GetDefaultProfile", GetLastError());
 			goto cleanup;
