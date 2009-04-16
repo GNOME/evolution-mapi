@@ -1,3 +1,11 @@
+2009-03-26  Johnny Jacob  <jjohnny@novell.com>
+
+	* camel-mapi-folder.c (mapi_msg_set_recipient_list): Use data from
+	recipient table.
+	(mapi_folder_get_message): Get recipient table.
+	(mapi_update_cache): use recipient table / ex_to_smtp.
+	(mapi_populate_details_from_item): resove EX addr to SMTP.
+
 2009-03-19  Milan Crha  <mcrha@redhat.com>
 
 	** Fix for bug #574784

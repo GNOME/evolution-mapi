@@ -183,6 +183,8 @@ mapi_item_free (MapiItem *item, gpointer data)
 {
 	g_free (item->header.subject);
 	g_free (item->header.from);
+	/* g_free (item->header.from_email); */
+	/* g_free (item->header.from_type); */
 	g_free (item->header.to);
 	g_free (item->header.cc);
 	g_free (item->header.bcc);
@@ -205,6 +207,7 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 	struct timeval fi_data_mod_time = { 0 };
 	guint32 j = 0;
 	NTTIME ntdate;
+	gchar *from_name, *from_email;
 
 	MapiItem *item = g_new0(MapiItem , 1);
 
@@ -215,6 +218,9 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 	item->fid = item_data->fid;
 	item->mid = item_data->mid;
+
+	/*Hold a reference to Recipient List*/
+	item->recipients = item_data->recipients;
 
 	for (j = 0; j < item_data->properties->cValues; j++) {
 
@@ -242,6 +248,14 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 		case PR_SENT_REPRESENTING_NAME_UNICODE:
 			item->header.from = g_strdup (prop_data);
 			break;
+		case PR_SENT_REPRESENTING_EMAIL_ADDRESS:
+		case PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE:
+			item->header.from_email = g_strdup (prop_data);
+			break;
+		case PR_SENT_REPRESENTING_ADDRTYPE:
+		case PR_SENT_REPRESENTING_ADDRTYPE_UNICODE:
+			item->header.from_type = g_strdup (prop_data);
+			break;
 		case PR_MESSAGE_SIZE:
 			item->header.size = *(glong *)prop_data;
 			break;
@@ -258,6 +272,8 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 			break;
 		}
 	}
+
+	/* item->header.from = camel_internet_address_format_address (from_name, from_email); */
 
 	if (delivery_date) {
 		ntdate = delivery_date->dwHighDateTime;
@@ -335,7 +351,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 	for ( ; item_list != NULL ; item_list = g_slist_next (item_list) ) {
 		MapiItem *temp_item ;
 		MapiItem *item;
-		gchar *msg_uid;
+		gchar *msg_uid, *to = NULL, *from = NULL;
 		guint64 id;
 
 		exists = FALSE;
@@ -372,12 +388,69 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 		mi->info.flags = item->header.flags;
 
 		if (!exists) {
+ 			GSList *l = NULL;
+ 			guint32 i =0;
+
 			mi->info.uid = exchange_mapi_util_mapi_ids_to_uid(item->fid, item->mid);
 			mi->info.subject = camel_pstring_strdup(item->header.subject);
 			mi->info.date_sent = mi->info.date_received = item->header.recieved_time;
-			mi->info.from = camel_pstring_strdup (item->header.from);
-			mi->info.to = camel_pstring_strdup (item->header.to);
 			mi->info.size = (guint32) item->header.size;
+
+ 			for (l = item->recipients; l; l=l->next) {
+ 				char *display_name, *name = NULL, *formatted_id;
+ 				uint32_t rcpt_type = MAPI_TO;
+ 				uint32_t *type = NULL; 
+ 				struct SRow aRow;
+ 				ExchangeMAPIRecipient *recip = (ExchangeMAPIRecipient *)(l->data);
+ 				
+ 				/*Can't continue when there is no email-id*/
+ 				if (!recip->email_id)
+ 					continue;
+ 				
+ 				/* Build a SRow structure */
+ 				aRow.ulAdrEntryPad = 0;
+ 				aRow.cValues = recip->out.all_cValues;
+ 				aRow.lpProps = recip->out.all_lpProps;
+ 				
+ 				type = (uint32_t *) find_SPropValue_data(&aRow, PR_RECIPIENT_TYPE);
+ 
+ 				if (*type == MAPI_TO) {
+ 					/*Name is probably available in one of these props.*/
+ 					name = (const char *) find_SPropValue_data(&aRow, PR_DISPLAY_NAME);
+ 					name = name ? name : (const char *) find_SPropValue_data(&aRow, PR_RECIPIENT_DISPLAY_NAME);
+ 					name = name ? name : (const char *) find_SPropValue_data(&aRow, 
+ 												 PR_RECIPIENT_DISPLAY_NAME_UNICODE);
+ 					name = name ? name : (const char *) find_SPropValue_data(&aRow, 
+ 												 PR_7BIT_DISPLAY_NAME_UNICODE);
+ 					display_name = name ? name : g_strdup (recip->email_id);
+ 					formatted_id = camel_internet_address_format_address(display_name, recip->email_id);
+ 
+ 					/* hmm */
+ 					if (i)
+ 						to = g_string_append (to, ", ");
+ 
+ 					g_string_append_printf (to, "%s", formatted_id);
+ 					i++;
+ 				}
+ 
+ 				/*TODO : from ? */
+ 			}
+ 			
+ 			if ((item->header.from_type != NULL) && !g_utf8_collate (item->header.from_type, "EX")) {
+ 				CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
+ 				item->header.from_email = exchange_mapi_util_ex_to_smtp (item->header.from_email);
+ 				CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
+ 			}
+ 
+ 			item->header.from_email = item->header.from_email ? 
+ 				item->header.from_email : item->header.from;
+ 
+ 			from = camel_internet_address_format_address (item->header.from, 
+ 								      item->header.from_email);
+ 			mi->info.from = camel_pstring_strdup (from);
+ 			mi->info.to = camel_pstring_strdup (to);
+
+
 		}
 
 		if (exists) {
@@ -390,6 +463,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 		}
 
 		/********************* Summary ends *************************/
+		/* FIXME : Don't use folder names for identifying */
 		if (!strcmp (folder->full_name, "Junk Mail"))
 			continue;
 
@@ -587,6 +661,8 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		PR_MESSAGE_DELIVERY_TIME,
 		PR_MESSAGE_FLAGS,
 		PR_SENT_REPRESENTING_NAME,
+		PR_SENT_REPRESENTING_EMAIL_ADDRESS,
+		PR_SENT_REPRESENTING_ADDRTYPE,
 		PR_LAST_MODIFICATION_TIME,
 		PR_DISPLAY_TO,
 		PR_DISPLAY_CC,
@@ -869,7 +945,9 @@ fetch_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 	item->fid = item_data->fid;
 	item->mid = item_data->mid;
 
-
+	/*Hold a reference to Recipient List*/
+	item->recipients = item_data->recipients;
+	
 	for (j = 0; j < item_data->properties->cValues; j++) {
 
 		gconstpointer prop_data = get_mapi_SPropValue_data(&item_data->properties->lpProps[j]);
@@ -895,6 +973,14 @@ fetch_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 		case PR_SENT_REPRESENTING_NAME:
 		case PR_SENT_REPRESENTING_NAME_UNICODE:
 			item->header.from = g_strdup (prop_data);
+			break;
+		case PR_SENT_REPRESENTING_ADDRTYPE:
+		case PR_SENT_REPRESENTING_ADDRTYPE_UNICODE:
+			item->header.from_type = g_strdup (prop_data);
+			break;
+		case PR_SENT_REPRESENTING_EMAIL_ADDRESS:
+		case PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE:
+			item->header.from_email = g_strdup (prop_data);
 			break;
 		case PR_MESSAGE_SIZE:
 			item->header.size = *(glong *)prop_data;
@@ -960,55 +1046,74 @@ fetch_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 static void
 mapi_msg_set_recipient_list (CamelMimeMessage *msg, MapiItem *item)
 {
-	CamelInternetAddress *addr = NULL;
-	{
-		char *tmp_addr = NULL;
-		int index, len;
+	g_return_if_fail (item->recipients != NULL);
+
+	GSList *l = NULL;
+	CamelInternetAddress *to_addr, *cc_addr, *bcc_addr;
+
+	to_addr = camel_internet_address_new ();
+	cc_addr = camel_internet_address_new ();
+	bcc_addr = camel_internet_address_new ();
+	
+	for (l = item->recipients; l; l=l->next) {
+		char *display_name, *name = NULL;
+		uint32_t rcpt_type = MAPI_TO;
+		uint32_t *type = NULL; 
+		struct SRow aRow;
+		ExchangeMAPIRecipient *recip = (ExchangeMAPIRecipient *)(l->data);
 		
-		addr = camel_internet_address_new();
-		for (index = 0; item->header.to[index]; index += len){
-			if (item->header.to[index] == ';')
-				index++;
-			for (len = 0; item->header.to[index + len] &&
-				     item->header.to[index + len] != ';'; len++)
-				;
-			tmp_addr = malloc(/* tmp_addr, */ len + 1);
-			memcpy(tmp_addr, item->header.to + index, len);
-			tmp_addr[len] = 0;
-			if (len) camel_internet_address_add(addr, tmp_addr, tmp_addr);
-		}
-		if (index != 0)
-			camel_mime_message_set_recipients(msg, "To", addr);
-	}
-        /* modifing cc */
-	{
-		char *tmp_addr = NULL;
-		int index, len;
+		/*Can't continue when there is no email-id*/
+		if (!recip->email_id)
+			continue;
 		
-		addr = camel_internet_address_new();
-		for (index = 0; item->header.cc[index]; index += len){
-			if (item->header.cc[index] == ';')
-				index++;
-			for (len = 0; item->header.cc[index + len] &&
-				     item->header.cc[index + len] != ';'; len++)
-				;
-			tmp_addr = malloc(/* tmp_addr, */ len + 1);
-			memcpy(tmp_addr, item->header.cc + index, len);
-			tmp_addr[len] = 0;
-			if (len) camel_internet_address_add(addr, tmp_addr, tmp_addr);
+		/* Build a SRow structure */
+		aRow.ulAdrEntryPad = 0;
+		aRow.cValues = recip->out.all_cValues;
+		aRow.lpProps = recip->out.all_lpProps;
+		
+		/*Name is probably available in one of these props.*/
+		name = (const char *) find_SPropValue_data(&aRow, PR_DISPLAY_NAME);
+		name = name ? name : (const char *) find_SPropValue_data(&aRow, PR_RECIPIENT_DISPLAY_NAME);
+		name = name ? name : (const char *) find_SPropValue_data(&aRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
+		name = name ? name : (const char *) find_SPropValue_data(&aRow, PR_7BIT_DISPLAY_NAME_UNICODE);
+
+		type = (uint32_t *) find_SPropValue_data(&aRow, PR_RECIPIENT_TYPE);
+		
+		/*Fallbacks. Not good*/
+		display_name = name ? name : g_strdup (recip->email_id);
+		rcpt_type = (type ? *type : MAPI_TO);
+		
+		switch (rcpt_type) {
+		case MAPI_TO:
+			camel_internet_address_add (to_addr, display_name, recip->email_id);
+			break;
+		case MAPI_CC:
+			camel_internet_address_add (cc_addr, display_name, recip->email_id);
+			break;
+		case MAPI_BCC:
+			camel_internet_address_add (bcc_addr, display_name, recip->email_id);
+			break;
 		}
-		if (index != 0)
-			camel_mime_message_set_recipients(msg, "Cc", addr);
+		/* g_free (display_name); */
 	}
+	
+	/*Add to message*/
+	camel_mime_message_set_recipients(msg, "To", to_addr);
+	camel_mime_message_set_recipients(msg, "Cc", cc_addr);
+	camel_mime_message_set_recipients(msg, "Bcc", bcc_addr);
+
+	/*TODO : Unref *_addr ? */
 }
 
 
 static void
-mapi_populate_details_from_item (CamelMimeMessage *msg, MapiItem *item)
+mapi_populate_details_from_item (CamelFolder *folder, CamelMimeMessage *msg, MapiItem *item)
 {
 	char *temp_str = NULL;
 	time_t recieved_time;
 	CamelInternetAddress *addr = NULL;
+	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE(folder->parent_store);
+
 	int offset = 0;
 	time_t actual_time;
 
@@ -1022,14 +1127,23 @@ mapi_populate_details_from_item (CamelMimeMessage *msg, MapiItem *item)
 	camel_mime_message_set_date (msg, actual_time, offset);
 
 	if (item->header.from) {
+		if ((item->header.from_type != NULL) && !g_utf8_collate (item->header.from_type, "EX")) {
+			CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
+			item->header.from_email = exchange_mapi_util_ex_to_smtp (item->header.from_email);
+			CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
+		}
+
+		item->header.from_email = item->header.from_email ? 
+			item->header.from_email : item->header.from;
+
 		/* add reply to */
 		addr = camel_internet_address_new();
-		camel_internet_address_add(addr, item->header.from, item->header.from);
+		camel_internet_address_add(addr, item->header.from, item->header.from_email);
 		camel_mime_message_set_reply_to(msg, addr);
 		
 		/* add from */
 		addr = camel_internet_address_new();
-		camel_internet_address_add(addr, item->header.from, item->header.from);
+		camel_internet_address_add(addr, item->header.from, item->header.from_email);
 		camel_mime_message_set_from(msg, addr);
 	}
 }
@@ -1102,7 +1216,7 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 
 	/*Set recipient details*/
 	mapi_msg_set_recipient_list (msg, item);
-	mapi_populate_details_from_item (msg, item);
+	mapi_populate_details_from_item (folder, msg, item);
 
 	if (attach_list) {
 		GSList *al = attach_list;
@@ -1231,7 +1345,9 @@ mapi_folder_get_message( CamelFolder *folder, const char *uid, CamelException *e
 		return NULL;
 	}
 
-	options = MAPI_OPTIONS_FETCH_ALL | MAPI_OPTIONS_FETCH_BODY_STREAM | MAPI_OPTIONS_GETBESTBODY ;
+	options = MAPI_OPTIONS_FETCH_ALL | MAPI_OPTIONS_FETCH_BODY_STREAM | 
+		MAPI_OPTIONS_GETBESTBODY | MAPI_OPTIONS_FETCH_RECIPIENTS ;
+
 	exchange_mapi_util_mapi_ids_from_uid (uid, &id_folder, &id_message);
 
 	if (((CamelMapiFolder *)folder)->type & CAMEL_MAPI_FOLDER_PUBLIC){

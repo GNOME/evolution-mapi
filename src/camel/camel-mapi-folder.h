@@ -62,6 +62,10 @@ typedef enum  {
 typedef struct {
 	gchar *subject;
 	gchar *from;
+	gchar *from_email;
+	gchar *from_type;
+
+	/*TODO : Obsolete this. Moved to recipient list*/
 	gchar *to;
 	gchar *cc;
 	gchar *bcc;
@@ -85,6 +89,7 @@ typedef struct  {
 
 	gboolean is_cal;
 
+	GSList *recipients;
 	GSList *attachments;
 	GSList *generic_streams;
 }MapiItem;
