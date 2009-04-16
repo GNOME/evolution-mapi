@@ -1,3 +1,11 @@
+evolution-mapi 0.26.1 2009-04-14
+--------------------------------
+Bug Fixes :
+    	  Bug 572518 – Reply-to does not work. (Johnny Jacob)
+
+Updated Translations :
+	Manoj Kumar Giri (or)	
+	  
 evolution-mapi 0.26.0.1 2009-03-19
 ----------------------------------
 Bug Fixes:
