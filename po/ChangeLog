@@ -1,3 +1,8 @@
+2009-04-17 Maxim Dziumanenko <dziumanenko@gmail.com>
+
+	* LINGUAS: Added uk for Ukrainian
+	* uk.po: Update Ukrainian translation.
+
 2009-04-15  Goran Rakic <grakic@devbase.net>
 
 	* LINGUAS: Added sr and sr@latin (Serbian)
