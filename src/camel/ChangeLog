@@ -1,3 +1,10 @@
+2009-04-24  Milan Crha  <mcrha@redhat.com>
+
+	** Part of fix for bug #563954
+
+	* camel-mapi-folder.c: (mapi_cmp_uids), (camel_mapi_folder_class_init):
+	Define its own compare function for UIDs.
+
 2009-03-26  Johnny Jacob  <jjohnny@novell.com>
 
 	* camel-mapi-folder.c (mapi_msg_set_recipient_list): Use data from

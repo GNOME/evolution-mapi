@@ -1627,6 +1627,15 @@ mapi_folder_rename (CamelFolder *folder, const char *new)
 	((CamelFolderClass *)parent_class)->rename(folder, new);
 }
 
+static gint
+mapi_cmp_uids (CamelFolder *folder, const char *uid1, const char *uid2)
+{
+	g_return_val_if_fail (uid1 != NULL, 0);
+	g_return_val_if_fail (uid2 != NULL, 0);
+
+	return strcmp (uid1, uid2);
+}
+
 static void
 camel_mapi_folder_class_init (CamelMapiFolderClass *camel_mapi_folder_class)
 {
@@ -1639,6 +1648,7 @@ camel_mapi_folder_class_init (CamelMapiFolderClass *camel_mapi_folder_class)
 	camel_folder_class->get_message = mapi_folder_get_message;
  	camel_folder_class->rename = mapi_folder_rename;
 	camel_folder_class->search_by_expression = mapi_folder_search_by_expression;
+	camel_folder_class->cmp_uids = mapi_cmp_uids;
 /* 	camel_folder_class->get_message_info = mapi_get_message_info; */
 /* 	camel_folder_class->search_by_uids = mapi_folder_search_by_uids;  */
 	camel_folder_class->search_free = mapi_folder_search_free;
