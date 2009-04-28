@@ -1,3 +1,10 @@
+2009-04-28  Milan Crha  <mcrha@redhat.com>
+
+	** Part of fix for bug #553932
+
+	* e-cal-backend-mapi.c: (e_cal_backend_mapi_set_mode):
+	Do not notify about readonly state here, we are not asked for that.
+
 2009-02-20  Milan Crha  <mcrha@redhat.com>
 
 	* e-cal-backend-mapi.c: Fix for compiler warnings.

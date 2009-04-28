@@ -2267,7 +2267,6 @@ e_cal_backend_mapi_set_mode (ECalBackend *backend, CalMode mode)
 			priv->read_only = FALSE;
 			e_cal_backend_notify_mode (backend, GNOME_Evolution_Calendar_CalListener_MODE_SET,
 					GNOME_Evolution_Calendar_MODE_REMOTE);
-			e_cal_backend_notify_readonly (backend, priv->read_only);
 			if (e_cal_backend_mapi_is_loaded (backend) && re_open)
 		              e_cal_backend_notify_auth_required(backend);
 			break;
@@ -2277,7 +2276,6 @@ e_cal_backend_mapi_set_mode (ECalBackend *backend, CalMode mode)
 			/* do we have to close the connection here ? */
 			e_cal_backend_notify_mode (backend, GNOME_Evolution_Calendar_CalListener_MODE_SET,
 					GNOME_Evolution_Calendar_MODE_REMOTE);
-			e_cal_backend_notify_readonly (backend, priv->read_only);
 			break;
 		default:
 			e_cal_backend_notify_mode (backend, GNOME_Evolution_Calendar_CalListener_MODE_NOT_SUPPORTED,
