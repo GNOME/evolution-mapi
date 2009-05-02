@@ -37,3 +37,5 @@ BUILT_SOURCES = org-gnome-exchange-mapi.eplug
 
 CLEANFILES = $(BUILT_SOURCES)
 
+
+-include $(top_srcdir)/git.mk

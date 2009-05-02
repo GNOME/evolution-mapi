@@ -37,3 +37,5 @@ libcamelmapi_la_LIBADD = 			\
         $(LIBMAPI_LIBS)
 
 EXTRA_DIST = libcamelmapi.urls
+
+-include $(top_srcdir)/git.mk

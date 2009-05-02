@@ -56,3 +56,5 @@ pkgconfig_DATA = libexchangemapi-$(EVO_MAPI_API_VERSION).pc
 EXTRA_DIST = 					\
 	$(mapidata_DATA)
 
+
+-include $(top_srcdir)/git.mk

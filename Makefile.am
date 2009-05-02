@@ -16,3 +16,5 @@ EXTRA_DIST = 			\
 CLEANFILES = 	intltool-merge	\
 		intltool-update	\
 		intltool-extract	
+
+-include $(top_srcdir)/git.mk
