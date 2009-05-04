@@ -1,3 +1,9 @@
+evolution-mapi 0.27.1 2009-05-04
+--------------------------------
+Bug Fixes :
+          Bug 563954 - Define a compare function for UIDs. (Milan Crha)
+	  Bug 553932 - Do not notify about readonly state (Milan Crha)
+
 evolution-mapi 0.26.1 2009-04-14
 --------------------------------
 Bug Fixes :

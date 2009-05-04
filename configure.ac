@@ -4,7 +4,7 @@
 
 AC_PREREQ(2.57)
 AC_DEFINE(_GNU_SOURCE, 1, [Use GNU extensions])
-AC_INIT(evolution-mapi, 0.26.1, http://bugzilla.gnome.org/browse.cgi?product=evolution-mapi)
+AC_INIT(evolution-mapi, 0.27.1, http://bugzilla.gnome.org/browse.cgi?product=evolution-mapi)
 AC_CONFIG_SRCDIR(README)
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
@@ -15,8 +15,8 @@ AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 EDS_PACKAGE=1.2
 
 # Required Packages
-m4_define([eds_minimum_version], [2.25.2])
-m4_define([evo_minimum_version], [2.25.2])
+m4_define([eds_minimum_version], [2.27.1])
+m4_define([evo_minimum_version], [2.27.1])
 m4_define([libmapi_minimum_version], [0.8])
 
 AC_CONFIG_HEADER(config.h)

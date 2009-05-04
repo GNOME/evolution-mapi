@@ -1,3 +1,10 @@
+2009-05-05  Johnny Jacob  <jjohnny@novell.com>
+
+	* NEWS: Updates for 0.27.1
+
+	* configure.ac: Bumped EDS / EVO dependancy to
+	2.27.1 because of ABI change in libcamel.
+
 2009-04-14  Johnny Jacob  <jjohnny@novell.com>
 
 	* configure.ac: Version bump to 2.26.1.
