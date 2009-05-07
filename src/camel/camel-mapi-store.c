@@ -893,11 +893,10 @@ mapi_get_folder_info_offline (CamelStore *store, const char *top,
 	GPtrArray *folders;
 	char *path, *name;
 	int i;
-	gboolean recursive, subscribed, info_fast, favourites = false;
+	gboolean subscribed, favourites , subscription_list = false;
 
-	recursive = (flags & CAMEL_STORE_FOLDER_INFO_RECURSIVE);
+	subscription_list = (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST);
 	subscribed = (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED);
-	info_fast = (flags & CAMEL_STORE_FOLDER_INFO_FAST);
 
 	folders = g_ptr_array_new ();
 
@@ -922,8 +921,8 @@ mapi_get_folder_info_offline (CamelStore *store, const char *top,
 		if (si == NULL) 
 			continue;
 
-		/* Based on exchange connector. Allow only All Public Folders heirarchy */
-		if ((!subscribed) && info_fast) 
+		/* Allow only All Public Folders heirarchy */
+		if (subscription_list)
 			if (!(si->flags & CAMEL_MAPI_FOLDER_PUBLIC)) continue;
 
 		/*Allow Mailbox and Favourites (Subscribed public folders)*/
@@ -965,8 +964,7 @@ mapi_get_folder_info_offline (CamelStore *store, const char *top,
 		camel_store_summary_info_free((CamelStoreSummary *)mapi_store->summary, si);
 	}
 
-	/*FIXME*/
-	if (!((!subscribed) && info_fast) && top[0] == '\0') {
+	if (!(subscription_list) && top[0] == '\0') {
 		fi = mapi_build_folder_info(mapi_store, NULL, DISPLAY_NAME_FAVOURITES);
 		fi->flags |= CAMEL_FOLDER_NOSELECT;
 		fi->flags |= CAMEL_FOLDER_SYSTEM;
