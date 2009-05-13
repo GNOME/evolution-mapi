@@ -15,8 +15,8 @@ AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 EDS_PACKAGE=1.2
 
 # Required Packages
-m4_define([eds_minimum_version], [2.27.1])
-m4_define([evo_minimum_version], [2.27.1])
+m4_define([eds_minimum_version], [2.27.2])
+m4_define([evo_minimum_version], [2.27.2])
 m4_define([libmapi_minimum_version], [0.8])
 
 AC_CONFIG_HEADER(config.h)
