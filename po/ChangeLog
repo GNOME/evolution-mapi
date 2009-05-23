@@ -1,3 +1,8 @@
+2009-05-23 Danishka Navin <danishka@mail.com>
+       
+        * LINGUAS: Added si for Sinhala (si)
+	* si.po: Added Sinhala (si) translation by K.P.Gayan Tharaka.
+		
 2009-04-17 Maxim Dziumanenko <dziumanenko@gmail.com>
 
 	* LINGUAS: Added uk for Ukrainian
