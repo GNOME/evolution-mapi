@@ -44,6 +44,35 @@ AC_PROG_MAKE_SET
 
 AC_DEFINE(_GNU_SOURCE, 1, [Use GNU extensions])
 
+# Compiler Warning Flags
+
+AS_COMPILER_FLAGS(WARNING_FLAGS,
+»·······"-DG_DISABLE_DEPRECATED
+	-DPANGO_DISABLE_DEPRECATED
+	-DGDK_DISABLE_DEPRECATED
+	-DGDK_PIXBUF_DISABLE_DEPRECATED
+	-DGTK_DISABLE_DEPRECATED
+	-DGNOME_DISABLE_DEPRECATED
+	-Wall -Wextra
+	-Wno-missing-field-initializers
+	-Wno-sign-compare
+	-Wno-unused-parameter
+	-Wdeclaration-after-statement
+	-Werror-implicit-function-declaration
+	-Wformat-nonliteral -Wformat-security -Winit-self
+	-Wmissing-declarations -Wmissing-include-dirs
+	-Wmissing-noreturn -Wnested-externs -Wpointer-arith
+	-Wredundant-decls -Wundef -Wwrite-strings")
+AC_SUBST(WARNING_FLAGS)
+
+# Other useful compiler warnings for test builds only.
+# These may produce warnings we have no control over.
+#
+#»······-Wmissing-format-attribute
+#»······-Wshadow
+
+CFLAGS="$CFLAGS $WARNING_FLAGS"
+
 dnl ************
 dnl i18n stuff
 dnl ************
