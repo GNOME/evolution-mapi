@@ -1,3 +1,14 @@
+evolution-mapi 0.27.2 2009-05-26
+--------------------------------
+
+          EDS / EVO minimum requirement versions to bumped to 2.27.2.
+
+Bug Fixes :
+	  Bug 581424 – Personal folder tree appears besides Public folder in subscription editor. (Johnny Jacob)
+
+New Translations:
+	   K.P.Gayan Tharaka (si)
+
 evolution-mapi 0.27.1 2009-05-04
 --------------------------------
 Bug Fixes :
