@@ -1,3 +1,24 @@
+2009-06-03  Johnny Jacob  <jjohnny@novell.com>
+
+	* camel-mapi-store.h: Updates for new util functions.
+
+	* camel-mapi-store.c (mapi_create_folder)
+	(mapi_convert_to_folder_info): Use mapi_folder_hash_* utils functions.
+	(mapi_update_folder_hash_tables, mapi_folders_update_hash_tables_from_cache)
+	(mapi_folders_hash_table_name_lookup , mapi_folders_hash_table_fid_lookup)
+	(mapi_folders_hash_table_pfid_lookup): Added. Util functions for maintaining
+	ID <-> Name mappings
+	(mapi_folders_sync): Fetch Public folders lsit only if it is from the
+	subscription editor (using CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST).
+	(camel_mapi_store_folder_id_lookup_offline): Added.
+
+	* camel-mapi-store-summary.c (store_info_load , store_info_save)
+	(store_info_free, store_info_string, store_info_set_string)
+	(camel_mapi_store_summary_add_from_full): Folder id and Parent id.
+
+	* camel-mapi-store.c (mapi_folders_sync): Do not download public folder
+	list by default.
+
 2009-04-24  Milan Crha  <mcrha@redhat.com>
 
 	** Part of fix for bug #563954

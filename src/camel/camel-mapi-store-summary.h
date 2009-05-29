@@ -42,12 +42,16 @@ typedef struct _CamelMapiStoreInfo CamelMapiStoreInfo;
 
 enum {
 	CAMEL_MAPI_STORE_INFO_FULL_NAME = CAMEL_STORE_INFO_LAST,
+	CAMEL_MAPI_STORE_INFO_FOLDER_ID,
+	CAMEL_MAPI_STORE_INFO_PARENT_ID,
 	CAMEL_MAPI_STORE_INFO_LAST,
 };
 
 struct _CamelMapiStoreInfo {
 	CamelStoreInfo info;
 	char *full_name;
+	char *folder_id;
+	char *parent_id;
 };
 
 struct _CamelMapiStoreSummary {
@@ -67,13 +71,16 @@ struct _CamelMapiStoreSummaryClass {
 CamelType                        camel_mapi_store_summary_get_type      (void);
 CamelMapiStoreSummary      *camel_mapi_store_summary_new        (void);
 CamelMapiStoreInfo *camel_mapi_store_summary_full_name(CamelMapiStoreSummary *s, const char *full_name) ;
-CamelMapiStoreInfo *camel_mapi_store_summary_add_from_full(CamelMapiStoreSummary *s, const char *full, char dir_sep) ;
+CamelMapiStoreInfo *camel_mapi_store_summary_add_from_full(CamelMapiStoreSummary *s, const char *full, char dir_sep, 
+							   char *folder_id, char *parent_id);
 
 char *camel_mapi_store_summary_full_to_path(CamelMapiStoreSummary *s, const char *full_name, char dir_sep) ;
 char *camel_mapi_store_summary_path_to_full(CamelMapiStoreSummary *s, const char *path, char dir_sep) ;
 char *camel_mapi_store_summary_full_from_path(CamelMapiStoreSummary *s, const char *path) ;
 
-#define camel_mapi_store_info_full_name(s, i) (camel_store_info_string((CamelStoreSummary *)s, (const CamelStoreInfo *)i, CAMEL_STORE_INFO_LAST))
+#define camel_mapi_store_info_full_name(s, i) (camel_store_info_string((CamelStoreSummary *)s, (const CamelStoreInfo *)i, CAMEL_MAPI_STORE_INFO_FULL_NAME))
+#define camel_mapi_store_info_folder_id(s, i) (camel_store_info_string((CamelStoreSummary *)s, (const CamelStoreInfo *)i, CAMEL_MAPI_STORE_INFO_FOLDER_ID))
+#define camel_mapi_store_info_parent_id(s, i) (camel_store_info_string((CamelStoreSummary *)s, (const CamelStoreInfo *)i, CAMEL_MAPI_STORE_INFO_PARENT_ID))
 
 G_END_DECLS
 

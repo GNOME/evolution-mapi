@@ -175,7 +175,7 @@ exchange_mapi_move_items ( mapi_id_t src_fid, mapi_id_t dest_fid, GSList *mids);
 
 
 gboolean exchange_mapi_get_folders_list (GSList **mapi_folders); 
-gboolean exchange_mapi_get_pf_folders_list (GSList **mapi_folders); 
+gboolean exchange_mapi_get_pf_folders_list (GSList **mapi_folders, mapi_id_t parent_id); 
 
 struct SPropTagArray *
 exchange_mapi_util_resolve_named_props (uint32_t olFolder, mapi_id_t fid, 

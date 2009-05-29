@@ -1,3 +1,11 @@
+2009-06-03  Johnny Jacob  <jjohnny@novell.com>
+
+	* exchange-mapi-connection.c (get_child_folders): Updated to accomodate traversal
+	depth.
+	(exchange_mapi_get_folders_list): update for get_child_folders.
+	(exchange_mapi_get_pf_folders_list): If parent_id is given, use that as
+	the start of folder tree..
+
 2009-04-07  Milan Crha  <mcrha@redhat.com>
 
 	* exchange-mapi-connection.c: (mapi_profile_load):

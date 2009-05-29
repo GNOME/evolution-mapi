@@ -95,6 +95,7 @@ const gchar* camel_mapi_store_folder_id_lookup (CamelMapiStore *mapi_store, cons
 const gchar* camel_mapi_store_folder_lookup (CamelMapiStore *mapi_store, const char *folder_id);
 const gchar* camel_mapi_store_get_profile_name (CamelMapiStore *mapi_store);
 const gchar *camel_mapi_store_system_folder_fid (CamelMapiStore *mapi_store, guint folder_type);
+const gchar *camel_mapi_store_folder_id_lookup_offline (CamelMapiStore *mapi_store, const char *folder_name);
 
 __END_DECLS
 

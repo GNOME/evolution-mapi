@@ -2421,7 +2421,8 @@ cleanup:
 }
 
 static gboolean
-get_child_folders(TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, mapi_object_t *parent, mapi_id_t folder_id, GSList **mapi_folders)
+get_child_folders(TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, mapi_object_t *parent, 
+		  mapi_id_t folder_id, GSList **mapi_folders, gint32 depth)
 {
 	enum MAPISTATUS		retval;
 	mapi_object_t		obj_folder;
@@ -2434,6 +2435,9 @@ get_child_folders(TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, m
 	/* sanity check */
 	g_return_val_if_fail (mem_ctx != NULL, FALSE);
 	g_return_val_if_fail (parent != NULL, FALSE);
+
+	/*We reached the depth we wanted.*/
+	if (!depth ) return true;
 
 	mapi_object_init(&obj_folder);
 	mapi_object_init(&obj_table);
@@ -2473,6 +2477,8 @@ get_child_folders(TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, m
 		goto cleanup;
 	}
 
+	depth--;
+
 	for (i = 0; i < rowset.cRows; i++) {
 		ExchangeMAPIFolder *folder = NULL;
 		gchar *newname = NULL;
@@ -2488,13 +2494,17 @@ get_child_folders(TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, m
 			class = IPF_NOTE;
 
 		newname = utf8tolinux (name);
-		g_print("\n|---+ %-15s : (Container class: %s %016" G_GINT64_MODIFIER "X) UnRead : %d Total : %d ", newname, class, *fid, unread ? *unread : 0, total ? *total : 0);
+		g_print("\n|---+ %-15s : (Container class: %s %016" G_GINT64_MODIFIER "X) UnRead : %d Total : %d ", 
+			newname, class, *fid, unread ? *unread : 0, total ? *total : 0);
 
-		folder = exchange_mapi_folder_new (newname, class, folder_hier, *fid, folder_id, child ? *child : 0, unread ? *unread : 0, total ? *total : 0);
+		folder = exchange_mapi_folder_new (newname, class, folder_hier, *fid, folder_id,
+						   child ? *child : 0, unread ? *unread : 0, total ? *total : 0);
+
 		*mapi_folders = g_slist_prepend (*mapi_folders, folder);
 
-		if (child && *child)
-			result = (result && get_child_folders(mem_ctx, folder_hier, &obj_folder, *fid, mapi_folders));
+		if (child && *child && (depth != 0))
+			result = (result && get_child_folders(mem_ctx, folder_hier, &obj_folder, *fid, 
+							      mapi_folders, depth));
 
 		g_free (newname);
 	}
@@ -2714,7 +2724,7 @@ exchange_mapi_get_folders_list (GSList **mapi_folders)
 	*mapi_folders = g_slist_prepend (*mapi_folders, folder);
 
 	/* FIXME: check status of get_child_folders */
-	get_child_folders (mem_ctx, MAPI_PERSONAL_FOLDER, &obj_store, mailbox_id, mapi_folders);
+	get_child_folders (mem_ctx, MAPI_PERSONAL_FOLDER, &obj_store, mailbox_id, mapi_folders, -1);
 
 	g_free(utf8_mailbox_name);
 
@@ -2738,7 +2748,7 @@ cleanup:
 }
 
 gboolean 
-exchange_mapi_get_pf_folders_list (GSList **mapi_folders)
+exchange_mapi_get_pf_folders_list (GSList **mapi_folders, mapi_id_t parent_fid)
 {
 	enum MAPISTATUS 	retval;
 	TALLOC_CTX 		*mem_ctx;
@@ -2746,6 +2756,7 @@ exchange_mapi_get_pf_folders_list (GSList **mapi_folders)
 	gboolean 		result = FALSE;
 	mapi_id_t		mailbox_id;
 	ExchangeMAPIFolder 	*folder;
+	mapi_object_t obj_parent_folder;
 
 	d(g_print("\n%s: Entering %s ", G_STRLOC, G_STRFUNC));
 
@@ -2761,13 +2772,22 @@ exchange_mapi_get_pf_folders_list (GSList **mapi_folders)
 		goto cleanup;
 	}
 
-	/* Prepare the directory listing */
-	retval = GetDefaultPublicFolder(&obj_store, &mailbox_id, olFolderPublicIPMSubtree);
-	if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("GetDefaultPublicFolder", GetLastError());
-		goto cleanup;
-	}
+	/* Open the folder if parent_fid is given. */
+	if (parent_fid) {
+		mapi_object_init(&obj_parent_folder);
 
+		retval = OpenFolder(&obj_store, parent_fid, &obj_parent_folder);
+		if (retval != MAPI_E_SUCCESS) {
+			mapi_errstr("OpenFolder", GetLastError());
+			goto cleanup;
+		}
+	} else {
+		retval = GetDefaultPublicFolder(&obj_store, &mailbox_id, olFolderPublicIPMSubtree);
+		if (retval != MAPI_E_SUCCESS) {
+			mapi_errstr("GetDefaultPublicFolder", GetLastError());
+			goto cleanup;
+		}
+	}
 	/*  TODO : Localized string */
 	folder = exchange_mapi_folder_new ("All Public Folders", IPF_NOTE, 0, 
 					   mailbox_id, 0, 0, 0 ,0);
@@ -2777,7 +2797,8 @@ exchange_mapi_get_pf_folders_list (GSList **mapi_folders)
 	*mapi_folders = g_slist_prepend (*mapi_folders, folder);
 
 	/* FIXME: check status of get_child_folders */
-	get_child_folders (mem_ctx, MAPI_FAVOURITE_FOLDER, &obj_store, mailbox_id, mapi_folders);
+	get_child_folders (mem_ctx, MAPI_FAVOURITE_FOLDER, parent_fid ? &obj_parent_folder : &obj_store,
+			   parent_fid ? parent_fid : mailbox_id, mapi_folders, 1);
 
 	result = TRUE;
 

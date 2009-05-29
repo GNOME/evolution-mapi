@@ -156,7 +156,9 @@ store_info_load(CamelStoreSummary *s, FILE *in)
 
 	si = (CamelMapiStoreInfo *)camel_mapi_store_summary_parent->store_info_load(s, in);
 	if (si) {
-		if (camel_file_util_decode_string(in, &si->full_name) == -1) {
+		if (camel_file_util_decode_string(in, &si->full_name) == -1
+		    || camel_file_util_decode_string(in, &si->folder_id) == -1
+		    || camel_file_util_decode_string(in, &si->parent_id) == -1) {
 			camel_store_summary_info_free(s, (CamelStoreInfo *)si);
 			si = NULL;
 		}
@@ -169,25 +171,25 @@ store_info_save(CamelStoreSummary *s, FILE *out, CamelStoreInfo *mi)
 {
 	CamelMapiStoreInfo *summary = (CamelMapiStoreInfo *)mi;
 	if (camel_mapi_store_summary_parent->store_info_save(s, out, mi) == -1
-	    || camel_file_util_encode_string(out, summary->full_name) == -1) 
+	    || camel_file_util_encode_string(out, summary->full_name) == -1
+	    || camel_file_util_encode_string(out, summary->folder_id) == -1
+	    || camel_file_util_encode_string(out, summary->parent_id) == -1) 
 		return -1;
 
 	return 0;
 }
-
 
 static void
 store_info_free(CamelStoreSummary *s, CamelStoreInfo *mi)
 {
 	CamelMapiStoreInfo *si = (CamelMapiStoreInfo *)mi;
 
-	g_free(si->full_name);
+	g_free (si->full_name);
+	g_free (si->folder_id);
+	g_free (si->parent_id);
+
 	camel_mapi_store_summary_parent->store_info_free(s, mi);
 }
-
-
-
-
 
 static const char *
 store_info_string(CamelStoreSummary *s, const CamelStoreInfo *mi, int type)
@@ -199,8 +201,12 @@ store_info_string(CamelStoreSummary *s, const CamelStoreInfo *mi, int type)
 	g_assert (mi != NULL);
 
 	switch (type) {
-		case CAMEL_STORE_INFO_LAST:
+		case CAMEL_MAPI_STORE_INFO_FULL_NAME:
 			return isi->full_name;
+	        case CAMEL_MAPI_STORE_INFO_FOLDER_ID:
+		        return isi->folder_id;
+	        case CAMEL_MAPI_STORE_INFO_PARENT_ID:
+		        return isi->parent_id;
 		default:
 			return camel_mapi_store_summary_parent->store_info_string(s, mi, type);
 	}
@@ -214,11 +220,25 @@ store_info_set_string(CamelStoreSummary *s, CamelStoreInfo *mi, int type, const 
 	g_assert(mi != NULL);
 
 	switch(type) {
-		case CAMEL_STORE_INFO_LAST:
+		case CAMEL_MAPI_STORE_INFO_FULL_NAME:
 			d(printf("Set full name %s -> %s\n", isi->full_name, str));
 			CAMEL_STORE_SUMMARY_LOCK(s, summary_lock);
 			g_free(isi->full_name);
 			isi->full_name = g_strdup(str);
+			CAMEL_STORE_SUMMARY_UNLOCK(s, summary_lock);
+			break;
+	        case CAMEL_MAPI_STORE_INFO_FOLDER_ID:
+			d(printf("Set folder id %s -> %s\n", isi->folder_id, str));
+			CAMEL_STORE_SUMMARY_LOCK(s, summary_lock);
+			g_free(isi->folder_id);
+			isi->folder_id = g_strdup(str);
+			CAMEL_STORE_SUMMARY_UNLOCK(s, summary_lock);
+			break;
+	        case CAMEL_MAPI_STORE_INFO_PARENT_ID:
+			d(printf("Set parent id %s -> %s\n", isi->parent_id, str));
+			CAMEL_STORE_SUMMARY_LOCK(s, summary_lock);
+			g_free(isi->parent_id);
+			isi->parent_id = g_strdup(str);
 			CAMEL_STORE_SUMMARY_UNLOCK(s, summary_lock);
 			break;
 		default:
@@ -275,7 +295,8 @@ camel_mapi_store_summary_full_to_path(CamelMapiStoreSummary *s, const char *full
 
 
 CamelMapiStoreInfo *
-camel_mapi_store_summary_add_from_full(CamelMapiStoreSummary *s, const char *full, char dir_sep)
+camel_mapi_store_summary_add_from_full(CamelMapiStoreSummary *s, const char *full, 
+				       char dir_sep, char *folder_id, char *parent_id)
 {
 	CamelMapiStoreInfo *info;
 	char *pathu8;
@@ -298,8 +319,12 @@ camel_mapi_store_summary_add_from_full(CamelMapiStoreSummary *s, const char *ful
 	}
 	pathu8 = camel_mapi_store_summary_full_to_path(s, full_name, '/');
 	info = (CamelMapiStoreInfo *)camel_store_summary_add_from_path((CamelStoreSummary *)s, pathu8);
-	if (info) 
-		camel_store_info_set_string((CamelStoreSummary *)s, (CamelStoreInfo *)info, CAMEL_STORE_INFO_LAST, full_name);
+
+	if (info) {
+		camel_store_info_set_string((CamelStoreSummary *)s, (CamelStoreInfo *)info, CAMEL_MAPI_STORE_INFO_FULL_NAME, full_name);
+		camel_store_info_set_string((CamelStoreSummary *)s, (CamelStoreInfo *)info, CAMEL_MAPI_STORE_INFO_FOLDER_ID, folder_id);
+		camel_store_info_set_string((CamelStoreSummary *)s, (CamelStoreInfo *)info, CAMEL_MAPI_STORE_INFO_PARENT_ID, parent_id);
+	}
 
 	return info;
 }
@@ -308,10 +333,6 @@ char *
 camel_mapi_store_summary_full_from_path(CamelMapiStoreSummary *s, const char *path)
 {
 	char *name = NULL;
-
-/* 	ns = camel_mapi_store_summary_namespace_find_path(s, path); */
-/* 	if (ns) */
-/* 		name = camel_mapi_store_summary_path_to_full(s, path, ns->sep); */
 
 	d(printf("looking up path %s -> %s\n", path, name?name:"not found"));
 
