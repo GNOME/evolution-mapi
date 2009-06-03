@@ -207,7 +207,6 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 	struct timeval fi_data_mod_time = { 0 };
 	guint32 j = 0;
 	NTTIME ntdate;
-	gchar *from_name, *from_email;
 
 	MapiItem *item = g_new0(MapiItem , 1);
 
@@ -333,7 +332,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 	CamelFolderChangeInfo *changes = NULL;
 	gboolean exists = FALSE;
 	GString *str = g_string_new (NULL);
-	const gchar *folder_id = NULL;
+	const gchar *from_email, *folder_id = NULL;
 	GSList *item_list = list;
 	int total_items = g_slist_length (item_list), i=0;
 
@@ -397,8 +396,8 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 			mi->info.size = (guint32) item->header.size;
 
  			for (l = item->recipients; l; l=l->next) {
- 				char *display_name, *name = NULL, *formatted_id;
- 				uint32_t rcpt_type = MAPI_TO;
+ 				char *formatted_id;
+				const char *name, *display_name;
  				uint32_t *type = NULL; 
  				struct SRow aRow;
  				ExchangeMAPIRecipient *recip = (ExchangeMAPIRecipient *)(l->data);
@@ -426,10 +425,12 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
  					formatted_id = camel_internet_address_format_address(display_name, recip->email_id);
  
  					/* hmm */
- 					if (i)
- 						to = g_string_append (to, ", ");
+ 					if (i) 
+ 						to = g_strconcat (to, ", ", NULL);
  
- 					g_string_append_printf (to, "%s", formatted_id);
+					to = g_strconcat (to, formatted_id, NULL);
+
+					g_free (formatted_id);
  					i++;
  				}
  
@@ -438,8 +439,11 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
  			
  			if ((item->header.from_type != NULL) && !g_utf8_collate (item->header.from_type, "EX")) {
  				CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
- 				item->header.from_email = exchange_mapi_util_ex_to_smtp (item->header.from_email);
+				from_email = exchange_mapi_util_ex_to_smtp (item->header.from_email);
  				CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
+
+ 				g_free (item->header.from_email);
+				item->header.from_email = g_strdup (from_email);				
  			}
  
  			item->header.from_email = item->header.from_email ? 
@@ -449,8 +453,6 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
  								      item->header.from_email);
  			mi->info.from = camel_pstring_strdup (from);
  			mi->info.to = camel_pstring_strdup (to);
-
-
 		}
 
 		if (exists) {
@@ -1046,17 +1048,18 @@ fetch_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 static void
 mapi_msg_set_recipient_list (CamelMimeMessage *msg, MapiItem *item)
 {
-	g_return_if_fail (item->recipients != NULL);
-
 	GSList *l = NULL;
 	CamelInternetAddress *to_addr, *cc_addr, *bcc_addr;
+
+	g_return_if_fail (item->recipients != NULL);
 
 	to_addr = camel_internet_address_new ();
 	cc_addr = camel_internet_address_new ();
 	bcc_addr = camel_internet_address_new ();
 	
 	for (l = item->recipients; l; l=l->next) {
-		char *display_name, *name = NULL;
+		char *display_name;
+		const char *name = NULL;
 		uint32_t rcpt_type = MAPI_TO;
 		uint32_t *type = NULL; 
 		struct SRow aRow;
@@ -1080,7 +1083,7 @@ mapi_msg_set_recipient_list (CamelMimeMessage *msg, MapiItem *item)
 		type = (uint32_t *) find_SPropValue_data(&aRow, PR_RECIPIENT_TYPE);
 		
 		/*Fallbacks. Not good*/
-		display_name = name ? name : g_strdup (recip->email_id);
+		display_name = name ? g_strdup (name) : g_strdup (recip->email_id);
 		rcpt_type = (type ? *type : MAPI_TO);
 		
 		switch (rcpt_type) {
@@ -1110,6 +1113,7 @@ static void
 mapi_populate_details_from_item (CamelFolder *folder, CamelMimeMessage *msg, MapiItem *item)
 {
 	char *temp_str = NULL;
+	const char *from_email;
 	time_t recieved_time;
 	CamelInternetAddress *addr = NULL;
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE(folder->parent_store);
@@ -1129,8 +1133,10 @@ mapi_populate_details_from_item (CamelFolder *folder, CamelMimeMessage *msg, Map
 	if (item->header.from) {
 		if ((item->header.from_type != NULL) && !g_utf8_collate (item->header.from_type, "EX")) {
 			CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
-			item->header.from_email = exchange_mapi_util_ex_to_smtp (item->header.from_email);
+			from_email = exchange_mapi_util_ex_to_smtp (item->header.from_email);
 			CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
+			g_free (item->header.from_email);
+			item->header.from_email = g_strdup (from_email);
 		}
 
 		item->header.from_email = item->header.from_email ? 
@@ -1185,7 +1191,7 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 	CamelMultipart *multipart = NULL;
 
 	GSList *attach_list = NULL;
-	int errno;
+	/* int errno; */
 	/* char *body = NULL; */
 	ExchangeMAPIStream *body = NULL;
 	GSList *body_part_list = NULL;
@@ -1284,8 +1290,6 @@ mapi_folder_get_message( CamelFolder *folder, const char *uid, CamelException *e
 	CamelMapiMessageInfo *mi = NULL;
 
 	CamelStream *stream, *cache_stream;
-	int errno;
-
 	mapi_id_t id_folder;
 	mapi_id_t id_message;
 	MapiItem *item = NULL;
