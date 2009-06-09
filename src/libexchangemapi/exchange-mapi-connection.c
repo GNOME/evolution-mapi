@@ -71,6 +71,7 @@ mapi_profile_load (const char *profname, const char *password)
 	struct mapi_session *session = NULL;
 	gchar *profpath = NULL;
 	const char *profile = NULL;
+	guint32 debug_log_level = 0;
 
 	d(g_print("\n%s: Entering %s ", G_STRLOC, G_STRFUNC));
 
@@ -88,6 +89,12 @@ mapi_profile_load (const char *profname, const char *password)
 		if (retval == MAPI_E_SESSION_LIMIT)
 			g_print("\n%s: %s: Already connected ", G_STRLOC, G_STRFUNC);
 		goto cleanup;
+	}
+
+	if (g_getenv ("MAPI_DEBUG")) {
+		debug_log_level = atoi (g_getenv ("MAPI_DEBUG"));
+		SetMAPIDumpData(TRUE);
+		SetMAPIDebugLevel(debug_log_level);
 	}
 
 	if (profname)

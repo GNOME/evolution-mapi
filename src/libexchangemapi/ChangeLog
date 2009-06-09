@@ -1,3 +1,9 @@
+2009-06-09  Johnny Jacob  <jjohnny@novell.com>
+
+	* exchange-mapi-connection.c (mapi_profile_load): Added MAPI_DEBUG.
+	Exporting MAPI_DEBUG=1 prints libmapi's logs and internal data state.
+	This would dump too much information, but helps in debugging.
+
 2009-06-03  Johnny Jacob  <jjohnny@novell.com>
 
 	* exchange-mapi-connection.c (get_child_folders): Updated to accomodate traversal
