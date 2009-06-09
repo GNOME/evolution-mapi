@@ -448,10 +448,13 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
  
  			item->header.from_email = item->header.from_email ? 
  				item->header.from_email : item->header.from;
- 
- 			from = camel_internet_address_format_address (item->header.from, 
- 								      item->header.from_email);
- 			mi->info.from = camel_pstring_strdup (from);
+
+			if (item->header.from_email) {
+				from = camel_internet_address_format_address (item->header.from, 
+ 									      item->header.from_email);
+ 				mi->info.from = camel_pstring_strdup (from);
+			} else
+				mi->info.from = NULL;
  			mi->info.to = camel_pstring_strdup (to);
 		}
 
