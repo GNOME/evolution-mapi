@@ -713,16 +713,13 @@ static gboolean
 exchange_mapi_util_get_recipients (mapi_object_t *obj_message, GSList **recip_list)
 {
 	enum MAPISTATUS		retval;
-//	TALLOC_CTX 		*mem_ctx;
 	struct SPropTagArray	proptags;
 	struct SRowSet		rows_recip;
 	uint32_t		i_row_recip;
 	gboolean 		status = TRUE;
 
 	d(g_print("\n%s: Entering %s ", G_STRLOC, G_STRFUNC));
-
-//	mem_ctx = talloc_init ("ExchangeMAPI_GetRecipients");
-
+	
 	/* fetch recipient table */
 	retval = GetRecipientTable(obj_message, &rows_recip, &proptags);
 	if (retval != MAPI_E_SUCCESS) {
@@ -733,12 +730,14 @@ exchange_mapi_util_get_recipients (mapi_object_t *obj_message, GSList **recip_li
 	for (i_row_recip = 0; i_row_recip < rows_recip.cRows; i_row_recip++) {
 		ExchangeMAPIRecipient 	*recipient = g_new0 (ExchangeMAPIRecipient, 1);
 
-		recipient->email_id = (const char *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_SMTP_ADDRESS);
+		recipient->mem_ctx = talloc_init ("ExchangeMAPI_GetRecipients");
+
+		recipient->email_id = talloc_steal (recipient->mem_ctx, (const char *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_SMTP_ADDRESS));
 		/* fallback */
 		if (!recipient->email_id) {
-			const char *addrtype = (const char *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE);
+			const char *addrtype = talloc_steal (recipient->mem_ctx, (const char *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE));
 			if (addrtype && !g_ascii_strcasecmp(addrtype, "SMTP"))
-				recipient->email_id = (const char *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_EMAIL_ADDRESS);
+				recipient->email_id = talloc_steal (recipient->mem_ctx, (const char *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_EMAIL_ADDRESS));
 		}
 		/* fail */
 		if (!recipient->email_id) {
@@ -746,7 +745,7 @@ exchange_mapi_util_get_recipients (mapi_object_t *obj_message, GSList **recip_li
 			mapidump_SRow (&(rows_recip.aRow[i_row_recip]), " ");
 		}
 
-		recipient->out.all_lpProps = rows_recip.aRow[i_row_recip].lpProps;
+		recipient->out.all_lpProps = talloc_steal ((TALLOC_CTX *)recipient->mem_ctx, rows_recip.aRow[i_row_recip].lpProps);
 		recipient->out.all_cValues = rows_recip.aRow[i_row_recip].cValues;
 
 		*recip_list = g_slist_append (*recip_list, recipient);
@@ -755,7 +754,6 @@ exchange_mapi_util_get_recipients (mapi_object_t *obj_message, GSList **recip_li
 cleanup:
 	if (retval != MAPI_E_SUCCESS)
 		status = FALSE;
-//	talloc_free (mem_ctx);
 
 	d(g_print("\n%s: Leaving %s ", G_STRLOC, G_STRFUNC));
 
@@ -1176,7 +1174,6 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 				for (k=0; k < prop_count; k++)
 					cast_mapi_SPropValue(&properties_array.lpProps[k], &lpProps[k]);
 
-				MAPIFreeBuffer(lpProps);
 			} else
 				retval = GetPropsAll (&obj_message, &properties_array);
 
@@ -1353,7 +1350,6 @@ exchange_mapi_connection_fetch_item (mapi_id_t fid, mapi_id_t mid,
 		for (k=0; k < prop_count; k++)
 			cast_mapi_SPropValue(&properties_array.lpProps[k], &lpProps[k]);
 
-		MAPIFreeBuffer(lpProps);
 	} else
 		retval = GetPropsAll (&obj_message, &properties_array);
 

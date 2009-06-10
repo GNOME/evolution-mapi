@@ -262,6 +262,8 @@ exchange_mapi_util_free_recipient_list (GSList **recip_list)
 
 	for (; l != NULL; l = l->next) {
 		ExchangeMAPIRecipient *recipient = (ExchangeMAPIRecipient *) (l->data);
+
+		talloc_free (recipient->mem_ctx);
 		if (recipient->in.ext_cValues)
 			g_free (recipient->in.ext_lpProps);
 		if (recipient->in.req_cValues)

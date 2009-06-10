@@ -743,6 +743,7 @@ create_contact_item (FetchItemsCallbackData *item_data, gpointer data)
 {
 	EContact *contact;
 	char *suid;
+	GSList *recipients = item_data->recipients;
 	
 	contact = emapidump_contact (item_data->properties);
 	suid = exchange_mapi_util_mapi_ids_to_uid (item_data->fid, item_data->mid);
@@ -752,6 +753,8 @@ create_contact_item (FetchItemsCallbackData *item_data, gpointer data)
 		e_contact_set (contact, E_CONTACT_UID, suid);
 		data = contact;
 	}
+
+	exchange_mapi_util_free_recipient_list (&recipients);
 
 	g_free (suid);
 

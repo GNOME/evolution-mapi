@@ -1375,6 +1375,8 @@ mapi_folder_get_message( CamelFolder *folder, const char *uid, CamelException *e
 
 	msg = mapi_folder_item_to_msg (folder, item, ex);
 
+	exchange_mapi_util_free_recipient_list (&item->recipients);
+
 	g_free (item);
 
 	if (!msg) {

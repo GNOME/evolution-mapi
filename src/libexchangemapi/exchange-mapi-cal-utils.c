@@ -1022,6 +1022,8 @@ fetch_server_data_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 	cbdata->comp = comp; 
 
+	exchange_mapi_util_free_recipient_list (&recipients);
+	
 	g_free (smid);
 	g_free (fileuri);
 	g_free (filename);
