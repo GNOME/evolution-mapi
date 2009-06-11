@@ -1,3 +1,10 @@
+2009-06-11  Johnny Jacob  <jjohnny@novell.com>
+
+	* camel-mapi-folder.c (mapi_refresh_folder): Switch on RecipientTable
+	fetching.
+	(mapi_update_cache): If recipient fields are not available, switch to
+	a fallback property.
+
 2009-06-03  Johnny Jacob  <jjohnny@novell.com>
 
 	* camel-mapi-store.h: Updates for new util functions.

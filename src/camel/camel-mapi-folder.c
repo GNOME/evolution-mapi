@@ -345,12 +345,12 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 		return;
 	}
 
-	camel_operation_start (NULL, _("Fetching summary information for new messages in %s"), folder->name);
+	camel_operation_start (NULL, _("Updating local summary cache for new messages in %s"), folder->name);
 
 	for ( ; item_list != NULL ; item_list = g_slist_next (item_list) ) {
 		MapiItem *temp_item ;
 		MapiItem *item;
-		gchar *msg_uid, *to = NULL, *from = NULL;
+		gchar *msg_uid, *to = NULL, *from = NULL, *cc = NULL;
 		guint64 id;
 
 		exists = FALSE;
@@ -388,7 +388,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 
 		if (!exists) {
  			GSList *l = NULL;
- 			guint32 i =0;
+ 			guint32 count_to = 0, count_cc =0;
 
 			mi->info.uid = exchange_mapi_util_mapi_ids_to_uid(item->fid, item->mid);
 			mi->info.subject = camel_pstring_strdup(item->header.subject);
@@ -396,9 +396,9 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 			mi->info.size = (guint32) item->header.size;
 
  			for (l = item->recipients; l; l=l->next) {
- 				char *formatted_id;
+ 				gchar *formatted_id = NULL;
 				const char *name, *display_name;
- 				uint32_t *type = NULL; 
+ 				guint32 *type = NULL;
  				struct SRow aRow;
  				ExchangeMAPIRecipient *recip = (ExchangeMAPIRecipient *)(l->data);
  				
@@ -410,31 +410,42 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
  				aRow.ulAdrEntryPad = 0;
  				aRow.cValues = recip->out.all_cValues;
  				aRow.lpProps = recip->out.all_lpProps;
- 				
+
  				type = (uint32_t *) find_SPropValue_data(&aRow, PR_RECIPIENT_TYPE);
- 
- 				if (*type == MAPI_TO) {
- 					/*Name is probably available in one of these props.*/
+
+				if (type) {
  					name = (const char *) find_SPropValue_data(&aRow, PR_DISPLAY_NAME);
  					name = name ? name : (const char *) find_SPropValue_data(&aRow, PR_RECIPIENT_DISPLAY_NAME);
  					name = name ? name : (const char *) find_SPropValue_data(&aRow, 
  												 PR_RECIPIENT_DISPLAY_NAME_UNICODE);
  					name = name ? name : (const char *) find_SPropValue_data(&aRow, 
  												 PR_7BIT_DISPLAY_NAME_UNICODE);
- 					display_name = name ? name : g_strdup (recip->email_id);
+ 					display_name = name ? name : recip->email_id;
  					formatted_id = camel_internet_address_format_address(display_name, recip->email_id);
- 
- 					/* hmm */
- 					if (i) 
- 						to = g_strconcat (to, ", ", NULL);
- 
-					to = g_strconcat (to, formatted_id, NULL);
 
-					g_free (formatted_id);
- 					i++;
- 				}
- 
- 				/*TODO : from ? */
+					switch (*type) {
+					case MAPI_TO:
+						if (count_to) {
+							to = g_strconcat (to, ", ", formatted_id, NULL);
+							g_free (formatted_id);
+						} else
+							to = formatted_id;
+						count_to ++;
+						break;
+
+					case MAPI_CC:
+						if (count_cc) {
+							cc = g_strconcat (cc, ", ", formatted_id, NULL);
+							g_free (formatted_id);
+						} else
+							cc = formatted_id;
+						count_cc ++;
+						break;
+
+					default:
+						continue;
+					}
+				}
  			}
  			
  			if ((item->header.from_type != NULL) && !g_utf8_collate (item->header.from_type, "EX")) {
@@ -455,7 +466,10 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
  				mi->info.from = camel_pstring_strdup (from);
 			} else
 				mi->info.from = NULL;
- 			mi->info.to = camel_pstring_strdup (to);
+
+			/* Fallback */
+ 			mi->info.to = to ? camel_pstring_strdup (to) : g_strdup (item->header.to);
+ 			mi->info.cc = to ? camel_pstring_strdup (cc) : g_strdup (item->header.cc);
 		}
 
 		if (exists) {
@@ -743,6 +757,8 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 					     _("This message is not available in offline mode."));
 			goto end2;
 		}
+
+		options |= MAPI_OPTIONS_FETCH_RECIPIENTS;
 
 		if (((CamelMapiFolder *)folder)->type & CAMEL_MAPI_FOLDER_PUBLIC)
 			options |= MAPI_OPTIONS_USE_PFSTORE;
@@ -1446,18 +1462,12 @@ mapi_get_message_info(CamelFolder *folder, const char *uid)
 	}
 	msg_info = camel_message_info_new(folder->summary);
 	mi = (CamelMessageInfoBase *)msg_info ;
-	//TODO :
-/* 	oc_message_headers_init(&headers); */
-/* 	oc_thread_connect_lock(); */
-/* 	status = oc_message_headers_get_by_id(&headers, uid); */
-/* 	oc_thread_connect_unlock(); */
 
 	if (headers.subject) mi->subject = (char *)camel_pstring_strdup(headers.subject);
 	if (headers.from) mi->from = (char *)camel_pstring_strdup(headers.from);
 	if (headers.to) mi->to = (char *)camel_pstring_strdup(headers.to);
 	if (headers.cc) mi->cc = (char *)camel_pstring_strdup(headers.cc);
 	mi->flags = headers.flags;
-
 
 	mi->user_flags = NULL;
 	mi->user_tags = NULL;
