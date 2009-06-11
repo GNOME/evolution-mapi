@@ -1,3 +1,8 @@
+2009-06-11  Johnny Jacob  <jjohnny@novell.com>
+
+	* configure.ac: libmapi minimum dependancy version
+	bumped to 0.8.2.
+
 2009-05-26  Johnny Jacob  <jjohnny@novell.com>
 
 	* configure.ac: post release version bump. 0.27.3.
