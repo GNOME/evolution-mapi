@@ -1,3 +1,9 @@
+2009-06-13  Johnny Jacob  <jjohnny@novell.com>
+
+	* configure.ac: Reverting libmapi version bump because of
+	http://trac.openchange.org/ticket/165 : Incorrect version in
+	tarball.
+
 2009-06-11  Johnny Jacob  <jjohnny@novell.com>
 
 	* configure.ac: libmapi minimum dependancy version
