@@ -40,6 +40,7 @@
 #include <camel/camel-data-wrapper.h>
 #include <camel/camel-multipart.h>
 #include <camel/camel-private.h>
+#include <camel/camel-session.h>
 #include <camel/camel-stream-buffer.h>
 #include <camel/camel-stream-mem.h>
 #include <camel/camel-debug.h>
@@ -476,9 +477,11 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 			camel_folder_change_info_change_uid (changes, mi->info.uid);
 			camel_message_info_free (pmi);
 		} else {
+			CAMEL_MAPI_FOLDER_REC_LOCK (folder, cache_lock);
 			camel_folder_summary_add (folder->summary,(CamelMessageInfo *)mi);
 			camel_folder_change_info_add_uid (changes, mi->info.uid);
 			camel_folder_change_info_recent_uid (changes, mi->info.uid);
+			CAMEL_MAPI_FOLDER_REC_UNLOCK (folder, cache_lock);
 		}
 
 		/********************* Summary ends *************************/
@@ -509,6 +512,137 @@ mapi_utils_do_flags_diff (flags_diff_t *diff, guint32 old, guint32 _new)
 	diff->bits = _new & diff->changed;
 }
 
+
+struct mapi_update_deleted_msg {
+	CamelSessionThreadMsg msg;
+
+	CamelFolder *folder;
+	mapi_id_t folder_id;
+};
+
+static gboolean
+deleted_items_sync_cb (FetchItemsCallbackData *item_data, gpointer data)
+{
+	GSList **uid_list = (GSList **) data;
+	gchar *msg_uid = exchange_mapi_util_mapi_ids_to_uid (item_data->fid, 
+							     item_data->mid);
+
+	*uid_list = g_slist_prepend (*uid_list, msg_uid);
+
+	/* Progress update */
+	if (item_data->total > 0)
+		camel_operation_progress (NULL, (item_data->index * 100)/item_data->total);
+
+	/* Check if we have to stop */
+	if (camel_operation_cancel_check(NULL))
+		return FALSE;
+
+	return TRUE;
+}
+
+static void
+mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
+{
+	struct mapi_update_deleted_msg *m = (struct mapi_update_deleted_msg *)msg;
+
+	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (m->folder->parent_store);
+	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (m->folder);
+	CamelFolderChangeInfo *changes = NULL;
+	CamelMessageInfo *info = NULL;
+
+	guint32 index, count, options = 0;
+	GSList *server_uid_list = NULL;
+	const gchar *uid = NULL;
+	gchar *tmp = NULL;
+
+	/* Currently we don't have simple wrapper over getprops.*/
+	const guint32 prop_list[] = { PR_LAST_MODIFICATION_TIME };
+	
+	if (((CamelOfflineStore *) mapi_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL ||
+			((CamelService *)mapi_store)->status == CAMEL_SERVICE_DISCONNECTED) {
+	
+		return;
+	}
+
+	camel_operation_start (NULL, _("Retriving message IDs from server for %s"), m->folder->name);
+
+	CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
+
+	/*Get the UID list from server.*/
+	exchange_mapi_connection_fetch_items  (m->folder_id, NULL, NULL,
+					       prop_list, G_N_ELEMENTS (prop_list),
+					       NULL, NULL,
+					       deleted_items_sync_cb, &server_uid_list,
+					       options);
+
+	camel_operation_end (NULL);
+
+	CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
+
+	/* Check if we have to stop */
+	if (camel_operation_cancel_check(NULL))
+		return;
+
+	changes = camel_folder_change_info_new ();
+
+	count = camel_folder_summary_count (m->folder->summary);
+	camel_operation_start (NULL, _("Removing deleted messages from cache in %s"), m->folder->name);
+
+	/* Iterate over cache and check if the UID is in server*/
+	for (index = 0; index < count; index++) {
+		/*FIXME :Any other list available ???*/
+		info = camel_folder_summary_index (m->folder->summary, index);
+		if (!info) continue; /*This is bad. *Should* not happen*/
+
+		uid = camel_message_info_uid (info);
+
+		if (server_uid_list) {
+			/* TODO : Find a better way and avoid this linear search */
+			tmp = g_slist_find_custom (server_uid_list, (const gchar *)uid, 
+						  (GCompareFunc) g_strcmp0);
+		}
+
+		/* If it is not in server list, clean our cache */
+		if (!tmp && uid) {
+			CAMEL_MAPI_FOLDER_REC_LOCK (m->folder, cache_lock);
+			camel_folder_summary_remove_uid (m->folder->summary, uid);
+			camel_data_cache_remove (mapi_folder->cache, "cache", uid, NULL);
+			camel_folder_change_info_remove_uid (changes, uid);
+			CAMEL_MAPI_FOLDER_REC_UNLOCK (m->folder, cache_lock);
+		}
+
+		/* Progress update */
+		camel_operation_progress (NULL, (index * 100)/count); /* ;-) */
+
+		/* Check if we have to stop */
+		if (camel_operation_cancel_check(NULL))
+			return;
+	}
+
+	camel_operation_end (NULL);
+
+	camel_object_trigger_event (m->folder, "folder_changed", changes);
+	camel_folder_change_info_free (changes);
+
+	/* Discard server uid list */
+	g_slist_foreach (server_uid_list, (GFunc) g_free, NULL);
+	g_slist_free (server_uid_list);
+}
+
+static void
+mapi_sync_deleted_free (CamelSession *session, CamelSessionThreadMsg *msg)
+{
+	struct mapi_update_deleted_msg *m = (struct mapi_update_deleted_msg *)msg;
+
+	camel_object_unref (m->folder);
+	/* camel_session_thread_msg_free (session, &m->msg); */
+}
+
+static CamelSessionThreadOps deleted_items_sync_ops = {
+	mapi_sync_deleted,
+	mapi_sync_deleted_free,
+};
+
 static void
 mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 {
@@ -521,7 +655,7 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	flags_diff_t diff, unset_flags;
 	const char *folder_id;
 	mapi_id_t fid, deleted_items_fid;
-	int count, i;
+	gint count, i;
 	guint32 options =0;
 
 	GSList *deleted_items, *deleted_head;
@@ -584,17 +718,14 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 						deleted_head = NULL;
 						deleted_head = deleted_items = g_slist_prepend (deleted_items, mid);
 					}
-
-					CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
-
-					}
 				}
-				
-				if (diff.bits & CAMEL_MESSAGE_SEEN) {
-					read_items = g_slist_prepend (read_items, mid);
-				} else if (unset_flags.bits & CAMEL_MESSAGE_SEEN) {
-					unread_items = g_slist_prepend (unread_items, mid);
-				}
+			}
+
+			if (diff.bits & CAMEL_MESSAGE_SEEN) {
+				read_items = g_slist_prepend (read_items, mid);
+			} else if (unset_flags.bits & CAMEL_MESSAGE_SEEN) {
+				unread_items = g_slist_prepend (unread_items, mid);
+			}
 		}
 		camel_message_info_free (info);
 	}
@@ -614,6 +745,7 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 		g_slist_free (read_items);
 	}
 
+	/* Remove messages from server*/
 	if (deleted_items) {
 		CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
 		if (mapi_folder->type & CAMEL_FOLDER_TYPE_TRASH) {
@@ -625,7 +757,8 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 	}
-	/*Remove them from cache*/
+
+	/*Remove messages from local cache*/
 	while (deleted_items) {
 		char* deleted_msg_uid = g_strdup_printf ("%016" G_GINT64_MODIFIER "X%016" G_GINT64_MODIFIER "X", fid, *(mapi_id_t *)deleted_items->data);
 
@@ -637,18 +770,13 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 		deleted_items = g_slist_next (deleted_items);
 	}
 
-
 	if (unread_items) {
-		CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
 		/* TODO */
-		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 		g_slist_free (unread_items);
 	}
 
 	if (expunge) {
-		CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
 		/* TODO */
-		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 	}
 
 	CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
@@ -664,12 +792,15 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (folder->parent_store);
 	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (folder);
 	CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (folder->summary);
+	CamelSession *session = ((CamelService *)folder->parent_store)->session;
+
 	gboolean is_proxy = folder->parent_store->flags & CAMEL_STORE_PROXY;
 	gboolean is_locked = FALSE;
 	gboolean status;
 
 	struct mapi_SRestriction *res = NULL;
 	struct SSortOrderSet *sort = NULL;
+	struct mapi_update_deleted_msg *deleted_items_op_msg;
 	fetch_items_data *fetch_data = g_new0 (fetch_items_data, 1);
 
 	const gchar *folder_id = NULL;
@@ -755,7 +886,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 			/*BUG : Fix exception string.*/
 			camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_UNAVAILABLE,
 					     _("This message is not available in offline mode."));
-			goto end2;
+			goto end1;
 		}
 
 		options |= MAPI_OPTIONS_FETCH_RECIPIENTS;
@@ -774,7 +905,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 
 		if (!status) {
 			camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_INVALID, _("Fetching items failed"));
-			goto end2;
+			goto end1;
 		}
 
 		/*Preserve last_modification_time from this fetch for later use with restrictions.*/
@@ -783,17 +914,22 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		camel_folder_summary_touch (folder->summary);
 		mapi_sync_summary (folder, ex);
 
-		camel_object_trigger_event (folder, "folder_changed", fetch_data->changes);
+		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
+		is_locked = FALSE;
 
+		/* Downsync deleted items */
+		deleted_items_op_msg = camel_session_thread_msg_new (session, &deleted_items_sync_ops, 
+							 sizeof (*deleted_items_op_msg));
+		deleted_items_op_msg->folder = folder;
+		deleted_items_op_msg->folder_id = temp_folder_id;
+		camel_object_ref (folder);
+
+		camel_session_thread_queue (session, &deleted_items_op_msg->msg, 0);
+
+		camel_object_trigger_event (folder, "folder_changed", fetch_data->changes);
 		camel_folder_change_info_free (fetch_data->changes);
 	}
 
-
-	CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
-	is_locked = FALSE;
-
-end2:
-	//TODO:
 end1:
 	if (is_locked)
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);

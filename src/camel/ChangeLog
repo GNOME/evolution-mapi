@@ -1,3 +1,13 @@
+2009-06-10  Johnny Jacob  <jjohnny@novell.com>
+
+	** Fix for BGO 583490 – evolution-mapi not removing listing of message not on server
+
+	* camel-mapi-folder.c (deleted_items_sync_cb): Added. Callback function for
+	collecting message UIDs from server.
+	(mapi_sync_deleted): Added. Downsync deleted items from server.
+	(mapi_sync_deleted_free): Added.
+	(mapi_refresh_folder): On refresh, downsync deleted items from server.
+
 2009-06-11  Johnny Jacob  <jjohnny@novell.com>
 
 	* camel-mapi-folder.c (mapi_refresh_folder): Switch on RecipientTable
