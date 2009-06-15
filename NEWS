@@ -1,3 +1,19 @@
+evolution-mapi 0.27.3 2009-06-15
+--------------------------------
+
+Bug Fixes :
+    BGO 583490 – evolution-mapi not removing listing of message not on server (Johnny Jacob)
+    BGO 580682 – Scan public folders on-demand. (Johnny Jacob)
+    BGO 584072 - Drafts folder crash. (Bharath Acharya)
+    BGO 578287 - Fix for garbled headers. (Bharath Acharya)
+    BGO 580722 – Search based on recipient doesn't seem to work (Johnny Jacob)
+    BG0 583489 - [Partial Fix] Hide/Disable GAL ui in account configuration. (Johnny Jacob)
+
+Translations :
+    Daniel Nylander (sv)
+    Jorge Gonzalez (es)
+    Marcel Telka (sk)
+
 evolution-mapi 0.27.2 2009-05-26
 --------------------------------
 
