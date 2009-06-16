@@ -1893,12 +1893,14 @@ camel_mapi_folder_new(CamelStore *store, const char *folder_name, const char *fo
 	}
 
 	/* set/load persistent state */
-	state_file = g_strdup_printf ("%s/cmeta", g_strdup_printf ("%s/%s",folder_dir, folder_name));
+	state_file = g_strdup_printf ("%s/%s/cmeta", folder_dir, folder_name);
 	camel_object_set(folder, NULL, CAMEL_OBJECT_STATE_FILE, state_file, NULL);
 	g_free(state_file);
 	camel_object_state_read(folder);
 
-	mapi_folder->cache = camel_data_cache_new (g_strdup_printf ("%s/%s",folder_dir, folder_name),0 ,ex);
+	state_file = g_strdup_printf ("%s/%s", folder_dir, folder_name);
+	mapi_folder->cache = camel_data_cache_new (state_file, 0, ex);
+	g_free (state_file);
 	if (!mapi_folder->cache) {
 		camel_object_unref (folder);
 		return NULL;
