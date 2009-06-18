@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi.gnome-2-26\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
-"POT-Creation-Date: 2009-04-17 08:21+0000\n"
-"PO-Revision-Date: 2009-06-18 13:43+0530\n"
+"POT-Creation-Date: 2009-06-18 09:19+0000\n"
+"PO-Revision-Date: 2009-06-18 14:51+0530\n"
 "Last-Translator: Rajesh Ranjan <rajesh672@gmail.com>\n"
 "Language-Team: Hindi <hindi.sf.net>\n"
 "MIME-Version: 1.0\n"
@@ -17,6 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.11.4\n"
 "Plural-Forms: nplurals=2; plural=(n!=1);\n\n"
+"\n"
 "\n"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
@@ -89,23 +90,25 @@ msgstr "कैश भरने के लिए लड़ी बना नही
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
-msgstr "किसी पुनरावृति युक्ति भेंट को एकल उदाहरण बदलने के लिए समर्थन लागू नहीं हुआ है. सर्वर पर भेंट के लिए कोई शुल्क नहीं लिया गया था."
+msgstr ""
+"किसी पुनरावृति युक्ति भेंट को एकल उदाहरण बदलने के लिए समर्थन लागू नहीं हुआ है. सर्वर पर भेंट "
+"के लिए कोई शुल्क नहीं लिया गया था."
 
-#: ../src/camel/camel-mapi-folder.c:349 ../src/camel/camel-mapi-folder.c:745
+#: ../src/camel/camel-mapi-folder.c:349 ../src/camel/camel-mapi-folder.c:748
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "%s में नए संदेश के लिए सार सूचना ले रहा है"
 
-#: ../src/camel/camel-mapi-folder.c:738 ../src/camel/camel-mapi-folder.c:1335
-#: ../src/camel/camel-mapi-folder.c:1343
+#: ../src/camel/camel-mapi-folder.c:741 ../src/camel/camel-mapi-folder.c:1338
+#: ../src/camel/camel-mapi-folder.c:1346
 msgid "This message is not available in offline mode."
 msgstr "ऑफ़लाइन मोड में यह संदेश उपलब्ध नहीं है."
 
-#: ../src/camel/camel-mapi-folder.c:755
+#: ../src/camel/camel-mapi-folder.c:758
 msgid "Fetching items failed"
 msgstr "वस्तुएँ लाना विफल"
 
-#: ../src/camel/camel-mapi-folder.c:1299
+#: ../src/camel/camel-mapi-folder.c:1302
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -114,24 +117,24 @@ msgstr ""
 "संदेश पा नहीं सकता है: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1299
+#: ../src/camel/camel-mapi-folder.c:1302
 msgid "No such message"
 msgstr "कोई ऐसा संदेश नहीं"
 
-#: ../src/camel/camel-mapi-folder.c:1311
+#: ../src/camel/camel-mapi-folder.c:1314
 msgid "Message fetching cancelled by user."
 msgstr "संदेश लाना उपयोक्ता द्वारा रद्द."
 
-#: ../src/camel/camel-mapi-folder.c:1318
+#: ../src/camel/camel-mapi-folder.c:1321
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "%s संदेश नहीं पा सकता है: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1364 ../src/camel/camel-mapi-folder.c:1374
+#: ../src/camel/camel-mapi-folder.c:1367 ../src/camel/camel-mapi-folder.c:1377
 msgid "Could not get message"
 msgstr "संदेश नहीं पा सका"
 
-#: ../src/camel/camel-mapi-folder.c:1725
+#: ../src/camel/camel-mapi-folder.c:1728
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s के लिए सार नहीं लोड कर सका"
@@ -229,7 +232,7 @@ msgstr "आपने कूटशब्द नहीं दाखिल कि�
 #: ../src/camel/camel-mapi-store.c:325
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
-msgstr ""
+msgstr "एक्सेंज MAPI सर्वर सत्यापित करने में असमर्थ."
 
 #: ../src/camel/camel-mapi-store.c:441
 msgid "Cannot create MAPI folders in offline mode."
