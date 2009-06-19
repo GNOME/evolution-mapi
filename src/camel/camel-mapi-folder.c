@@ -259,6 +259,15 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 		case PR_MESSAGE_SIZE:
 			item->header.size = *(glong *)prop_data;
 			break;
+		case PR_INTERNET_MESSAGE_ID:
+			item->header.message_id = g_strdup (prop_data);
+			break;
+		case PR_INTERNET_REFERENCES:
+			item->header.references = g_strdup (prop_data);
+			break;
+		case PR_IN_REPLY_TO_ID:
+			item->header.in_reply_to = g_strdup (prop_data);
+			break;
 		case PR_MESSAGE_DELIVERY_TIME:
 			delivery_date = (struct FILETIME *) prop_data;
 			break;
@@ -319,6 +328,80 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 		return FALSE;
 
 	return TRUE;
+}
+
+static void
+mapi_set_message_id (CamelMapiMessageInfo *mapi_mi, const gchar *message_id)
+{
+	gchar *msgid;
+	guint8 *digest;
+	gsize length;
+	CamelMessageInfoBase *mi = &mapi_mi->info;
+
+	msgid = camel_header_msgid_decode (message_id);
+	if (msgid) {
+		GChecksum *checksum;
+
+		length = g_checksum_type_get_length (G_CHECKSUM_MD5);
+		digest = g_alloca (length);
+
+		checksum = g_checksum_new (G_CHECKSUM_MD5);
+		g_checksum_update (checksum, (guchar *) msgid, -1);
+		g_checksum_get_digest (checksum, digest, &length);
+		g_checksum_free (checksum);
+
+		memcpy(mi->message_id.id.hash, digest, sizeof(mi->message_id.id.hash));
+		g_free(msgid);
+	}
+
+}
+
+static void
+mapi_set_message_references (CamelMapiMessageInfo *mapi_mi, const gchar *references, const gchar *in_reply_to)
+{
+	struct _camel_header_references *refs, *irt, *scan;
+	guint8 *digest;
+	gint count;
+	gsize length;
+	CamelMessageInfoBase *mi = &mapi_mi->info;
+
+	refs = camel_header_references_decode (references);
+	irt = camel_header_references_inreplyto_decode (in_reply_to);
+	if (refs || irt) {
+		if (irt) {
+			/* The References field is populated from the "References" and/or "In-Reply-To"
+			   headers. If both headers exist, take the first thing in the In-Reply-To header
+			   that looks like a Message-ID, and append it to the References header. */
+
+			if (refs)
+				irt->next = refs;
+
+			refs = irt;
+		}
+
+		count = camel_header_references_list_size(&refs);
+		mi->references = g_malloc(sizeof(*mi->references) + ((count-1) * sizeof(mi->references->references[0])));
+
+		length = g_checksum_type_get_length (G_CHECKSUM_MD5);
+		digest = g_alloca (length);
+
+		count = 0;
+		scan = refs;
+		while (scan) {
+			GChecksum *checksum;
+
+			checksum = g_checksum_new (G_CHECKSUM_MD5);
+			g_checksum_update (checksum, (guchar *) scan->id, -1);
+			g_checksum_get_digest (checksum, digest, &length);
+			g_checksum_free (checksum);
+
+			memcpy(mi->references->references[count].id.hash, digest, sizeof(mi->message_id.id.hash));
+			count++;
+			scan = scan->next;
+		}
+		mi->references->size = count;
+		camel_header_references_list_clear(&refs);
+	}
 }
 
 static void
@@ -396,6 +479,12 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 			mi->info.date_sent = mi->info.date_received = item->header.recieved_time;
 			mi->info.size = (guint32) item->header.size;
 
+			/*Threading related properties*/
+			mapi_set_message_id (mi, item->header.message_id);
+			if (item->header.references || item->header.in_reply_to)
+				mapi_set_message_references (mi, item->header.references, item->header.in_reply_to);
+
+			/*Recipients*/
  			for (l = item->recipients; l; l=l->next) {
  				gchar *formatted_id = NULL;
 				const char *name, *display_name;
@@ -814,6 +903,9 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		PR_SENT_REPRESENTING_EMAIL_ADDRESS,
 		PR_SENT_REPRESENTING_ADDRTYPE,
 		PR_LAST_MODIFICATION_TIME,
+		PR_INTERNET_MESSAGE_ID,
+		PR_INTERNET_REFERENCES,
+		PR_IN_REPLY_TO_ID,
 		PR_DISPLAY_TO,
 		PR_DISPLAY_CC,
 		PR_DISPLAY_BCC
@@ -956,6 +1048,11 @@ static const uint32_t camel_GetPropsList[] = {
 	PR_NORMALIZED_SUBJECT_UNICODE, 
 	PR_CONVERSATION_TOPIC, 
 	PR_CONVERSATION_TOPIC_UNICODE, 
+
+	/*Properties used for message threading.*/
+	PR_INTERNET_MESSAGE_ID,
+	PR_INTERNET_REFERENCES,
+	PR_IN_REPLY_TO_ID,
 
 	PR_BODY, 
 	PR_BODY_UNICODE, 
@@ -1141,6 +1238,15 @@ fetch_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 			break;
 		case PR_MESSAGE_SIZE:
 			item->header.size = *(glong *)prop_data;
+			break;
+		case PR_INTERNET_MESSAGE_ID:
+			item->header.message_id = g_strdup (prop_data);
+			break;
+		case PR_INTERNET_REFERENCES:
+			item->header.references = g_strdup (prop_data);
+			break;
+		case PR_IN_REPLY_TO_ID:
+			item->header.in_reply_to = g_strdup (prop_data);
 			break;
 		case PR_MESSAGE_CLASS:
 		case PR_MESSAGE_CLASS_UNICODE:
@@ -1339,8 +1445,8 @@ mapi_populate_msg_body_from_item (CamelMultipart *multipart, MapiItem *item, Exc
 
 static CamelMimeMessage *
 mapi_folder_item_to_msg( CamelFolder *folder,
-		MapiItem *item,
-		CamelException *ex )
+			 MapiItem *item,
+			 CamelException *ex )
 {
 	CamelMimeMessage *msg = NULL;
 	CamelMultipart *multipart = NULL;
@@ -1350,12 +1456,9 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 	/* char *body = NULL; */
 	ExchangeMAPIStream *body = NULL;
 	GSList *body_part_list = NULL;
-	const char *uid = NULL;
 
 	attach_list = item->attachments;
-
 	msg = camel_mime_message_new ();
-
 	multipart = camel_multipart_new ();
 
 	/*FIXME : Using set of default. Fix it during mimewriter*/
@@ -1366,7 +1469,7 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 
 	camel_multipart_set_boundary (multipart, NULL);
 
-	camel_mime_message_set_message_id (msg, uid);
+	/* Handle Multipart */
 	body_part_list = item->msg.body_parts;
 	while (body_part_list){
 	       body = body_part_list->data;
@@ -1374,11 +1477,21 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 	       body_part_list = g_slist_next (body_part_list);
 	}
 
+	/* Threading */
+	if (item->header.message_id)
+		camel_medium_add_header (CAMEL_MEDIUM (msg), "Message-Id", item->header.message_id);
+
+	if (item->header.references)
+		camel_medium_add_header (CAMEL_MEDIUM (msg), "References", item->header.references);
+
+	if (item->header.in_reply_to)
+		camel_medium_add_header (CAMEL_MEDIUM (msg), "In-Reply-To", item->header.in_reply_to);
 
 	/*Set recipient details*/
 	mapi_msg_set_recipient_list (msg, item);
 	mapi_populate_details_from_item (folder, msg, item);
 
+	/** Attachment Handling*/
 	if (attach_list) {
 		GSList *al = attach_list;
 		for (al = attach_list; al != NULL; al = al->next) {

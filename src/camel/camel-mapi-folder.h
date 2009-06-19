@@ -65,6 +65,9 @@ typedef struct {
 	gchar *from_email;
 	gchar *from_type;
 
+	gchar *references;
+	gchar *message_id;
+	gchar *in_reply_to;
 	/*TODO : Obsolete this. Moved to recipient list*/
 	gchar *to;
 	gchar *cc;

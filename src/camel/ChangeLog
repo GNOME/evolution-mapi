@@ -1,3 +1,11 @@
+2009-06-19  Johnny Jacob  <jjohnny@novell.com>
+
+	* camel-mapi-folder.c (mapi_set_message_id): Added. Sets the message id (mime message id).
+	(mapi_set_message_references): Added. Sets message references for message threading.
+	(mapi_update_cache): Add message threading information in message info.
+	(fetch_item_cb, fetch_items_cb): Collect message reference headers
+	(mapi_folder_item_to_msg): Write message references to mime message.
+
 2009-06-10  Johnny Jacob  <jjohnny@novell.com>
 
 	** Fix for BGO 583490 – evolution-mapi not removing listing of message not on server
