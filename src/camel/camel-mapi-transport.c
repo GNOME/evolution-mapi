@@ -307,6 +307,11 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 		mapi_item_set_subject(item, camel_mime_message_get_subject(message));
 	}
 
+	/*Add message threading properties */
+	item->header.references = g_strdup (camel_medium_get_header ((CamelMedium *) message, "References"));
+	item->header.in_reply_to = g_strdup (camel_medium_get_header ((CamelMedium *) message, "In-Reply-To"));
+	item->header.message_id = g_strdup (camel_medium_get_header ((CamelMedium *) message, "Message-Id"));
+
 	/* contents body */
 	multipart = (CamelMultipart *)camel_medium_get_content_object (CAMEL_MEDIUM (message));
 
@@ -401,13 +406,18 @@ mail_build_props (struct SPropValue **value, struct SPropTagArray *SPropTagArray
 	uint32_t *msgflag = g_new0 (uint32_t, 1);
 	int i=0;
 
-	props = g_new0 (struct SPropValue, 6);
+	props = g_new0 (struct SPropValue, 9);
 
 	set_SPropValue_proptag(&props[i++], PR_CONVERSATION_TOPIC_UNICODE, g_strdup (item->header.subject));
 	set_SPropValue_proptag(&props[i++], PR_NORMALIZED_SUBJECT_UNICODE, g_strdup (item->header.subject));
 
 	*msgflag = MSGFLAG_UNSENT;
 	set_SPropValue_proptag(&props[i++], PR_MESSAGE_FLAGS, (void *)msgflag);
+
+	/* Message threading information */
+	set_SPropValue_proptag(&props[i++], PR_INTERNET_REFERENCES, g_strdup (item->header.references));
+	set_SPropValue_proptag(&props[i++], PR_IN_REPLY_TO_ID, g_strdup (item->header.in_reply_to));
+	set_SPropValue_proptag(&props[i++], PR_INTERNET_MESSAGE_ID, g_strdup (item->header.message_id));
 
 	for (l = item->msg.body_parts; l; l = l->next) {
 		ExchangeMAPIStream *stream = (ExchangeMAPIStream *) (l->data);

@@ -184,11 +184,14 @@ mapi_item_free (MapiItem *item, gpointer data)
 {
 	g_free (item->header.subject);
 	g_free (item->header.from);
-	/* g_free (item->header.from_email); */
-	/* g_free (item->header.from_type); */
+
 	g_free (item->header.to);
 	g_free (item->header.cc);
 	g_free (item->header.bcc);
+
+	g_free (item->header.references);
+	g_free (item->header.message_id);
+	g_free (item->header.in_reply_to);
 
 	exchange_mapi_util_free_attachment_list (&item->attachments);
 	exchange_mapi_util_free_stream_list (&item->generic_streams);
