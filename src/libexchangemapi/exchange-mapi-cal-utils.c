@@ -253,7 +253,11 @@ exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_l
 
 			*attach_list = g_slist_append (*attach_list, attach_item);
 
+#if GLIB_CHECK_VERSION(2,21,3)
+			g_mapped_file_unref (mapped_file);
+#else
 			g_mapped_file_free (mapped_file);
+#endif
 		} else {
 			g_debug ("Could not map %s: %s \n", sfname_uri, error->message);
 			g_error_free (error);

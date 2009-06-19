@@ -143,9 +143,17 @@ exchange_mapi_cal_tz_util_populate ()
 		g_warning ("Could not map Exchange MAPI timezone files.");
 
 		if (mtoi_mf)
+#if GLIB_CHECK_VERSION(2,21,3)
+			g_mapped_file_unref (mtoi_mf);
+#else
 			g_mapped_file_free (mtoi_mf);
+#endif
 		if (itom_mf)
+#if GLIB_CHECK_VERSION(2,21,3)
+			g_mapped_file_unref (itom_mf);
+#else
 			g_mapped_file_free (itom_mf);
+#endif
 
 		g_static_rec_mutex_unlock(&mutex);
 		return FALSE;
@@ -170,15 +178,25 @@ exchange_mapi_cal_tz_util_populate ()
 
 		exchange_mapi_cal_tz_util_destroy ();
 
+#if GLIB_CHECK_VERSION(2,21,3)
+		g_mapped_file_unref (mtoi_mf);
+		g_mapped_file_unref (itom_mf);
+#else
 		g_mapped_file_free (mtoi_mf);
 		g_mapped_file_free (itom_mf);
+#endif
 
 		g_static_rec_mutex_unlock(&mutex);
 		return FALSE;
 	} 
 
+#if GLIB_CHECK_VERSION(2,21,3)
+	g_mapped_file_unref (mtoi_mf);
+	g_mapped_file_unref (itom_mf);
+#else
 	g_mapped_file_free (mtoi_mf);
 	g_mapped_file_free (itom_mf);
+#endif
 
 	d(exchange_mapi_cal_tz_util_dump ());
 
