@@ -1,3 +1,10 @@
+2009-06-22  Johnny Jacob  <jjohnny@novell.com>
+
+	** Fixes Bug 585641 – evolution-mapi stores cleartext passwords in a world readable file
+
+	* exchange-mapi-connection.c (exchange_mapi_create_profile): Do not save
+	the password in mapi-profiles.ldb.
+
 2009-06-09  Johnny Jacob  <jjohnny@novell.com>
 
 	* exchange-mapi-connection.c (mapi_profile_load): Added MAPI_DEBUG.

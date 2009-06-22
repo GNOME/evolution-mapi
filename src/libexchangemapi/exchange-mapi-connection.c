@@ -2930,7 +2930,7 @@ exchange_mapi_create_profile (const char *username, const char *password, const 
 	retval = DeleteProfile(profname); 
 	/* don't bother to check error - it would be valid if we got an error */
 
-	retval = CreateProfile(profname, username, password, 0); 
+	retval = CreateProfile(profname, username, password, OC_PROFILE_NOPASSWORD);
 	if (retval != MAPI_E_SUCCESS) {
 		manage_mapi_error ("CreateProfile", GetLastError(), error_msg);
 		goto cleanup; 
