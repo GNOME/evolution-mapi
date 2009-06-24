@@ -21,6 +21,9 @@ m4_define([libmapi_minimum_version], [0.8])
 
 AC_CONFIG_HEADER(config.h)
 
+# Automake 1.11 - Silent Build Rules
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
 dnl ****************************
 dnl Evolution-MAPI API version
 dnl ****************************
