@@ -1,3 +1,8 @@
+2009-06-24  Johnny Jacob  <jjohnny@novell.com>
+
+	* exchange-mapi-connection.c (exchange_mapi_create_profile): Added support
+	for ProcessNetworkProfile callback data.
+
 2009-07-17  Johnny Jacob  <jjohnny@novell.com>
 
 	* exchange-mapi-connection.c (exchange_mapi_get_folders_list): Get size for mailbox.

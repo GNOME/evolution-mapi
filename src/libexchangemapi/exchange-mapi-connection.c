@@ -116,8 +116,10 @@ mapi_profile_load (const char *profname, const char *password)
 	}
 
 cleanup:
-	if (retval != MAPI_E_SUCCESS && retval != MAPI_E_SESSION_LIMIT)
+	if (retval != MAPI_E_SUCCESS && retval != MAPI_E_SESSION_LIMIT &&
+	    retval != MAPI_E_LOGON_FAILED)
 		MAPIUninitialize ();
+
 	g_free (profpath);
 
 	d(g_print("\n%s: Leaving %s ", G_STRLOC, G_STRFUNC));
@@ -2971,8 +2973,11 @@ manage_mapi_error (const char *context, uint32_t error_id, char **error_msg)
 	}
 }
 
+
 gboolean
-exchange_mapi_create_profile (const char *username, const char *password, const char *domain, const char *server, char **error_msg)
+exchange_mapi_create_profile (const char *username, const char *password, const char *domain,
+			      const char *server, char **error_msg,
+			      mapi_profile_callback_t callback, gpointer data)
 {
 	enum MAPISTATUS	retval;
 	gboolean result = FALSE; 
@@ -3047,13 +3052,16 @@ exchange_mapi_create_profile (const char *username, const char *password, const 
 			manage_mapi_error ("DeleteProfile", GetLastError(), error_msg);
 		goto cleanup; 
 	}
-	d(g_print("succeeded \n"));
+	d(g_print("MapiLogonProvider : succeeded \n"));
 
-	retval = ProcessNetworkProfile(session, username, NULL, NULL); 
+	retval = ProcessNetworkProfile(session, username, callback, NULL); 
 	if (retval != MAPI_E_SUCCESS) {
 		manage_mapi_error ("ProcessNetworkProfile", GetLastError(), error_msg);
-		goto cleanup; 
+		g_debug ("Deleting profile %s ", profname); 
+		DeleteProfile(profname); 
+		goto exit; 
 	}
+	d(g_print("ProcessNetworkProfile : succeeded \n"));
 
 	/* Set it as the default profile. Is this needed? */
 	retval = SetDefaultProfile(profname); 
@@ -3069,12 +3077,14 @@ exchange_mapi_create_profile (const char *username, const char *password, const 
 	if (exchange_mapi_connection_new (profname, password)) {
 		result = TRUE;
 		exchange_mapi_peek_folder_list ();
-	}
+	} else 
+		goto exit;
 
 cleanup: 
 	if (!result)
 		MAPIUninitialize ();
 
+exit:
 	g_free (profname);
 	g_free (profpath);
 

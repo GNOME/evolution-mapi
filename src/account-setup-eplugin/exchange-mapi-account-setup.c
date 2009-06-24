@@ -1,3 +1,4 @@
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -94,6 +95,90 @@ exchange_mapi_accounts_peek_config_listener ()
 	return config_listener; 
 }
 
+enum {
+  COL_MAPI_FULL_NAME = 0,
+  COL_MAPI_ACCOUNT,
+  COL_MAPI_INDEX,
+  COLS_MAX
+};
+
+/* Callback for ProcessNetworkProfile. If we have more than one username, 
+ we need to let the user select. */
+static uint32_t
+create_profile_callback (struct SRowSet *rowset, gpointer data)
+{
+	struct SPropValue *lpProp_fullname, *lpProp_account;
+	gint response;
+	guint32	i, index = 0;
+	GtkTreeIter iter;
+	GtkListStore *store;
+	GtkCellRenderer *renderer;
+	GtkTreeSelection *selection;
+	GtkWidget *dialog, *view;
+	GtkVBox *vbox;
+
+	/* NOTE: A good way would be display the list of username entries */
+	/* using GtkEntryCompletion in the username gtkentry. But plugins */
+	/* as of now does not have access to it */
+
+	/*TODO : Fix strings*/
+	dialog = gtk_dialog_new_with_buttons (_("Select username"),
+					      NULL, GTK_DIALOG_MODAL,
+					      GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
+					      GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT,
+					      NULL);
+
+	/*Tree View */
+	view = gtk_tree_view_new ();
+	renderer = gtk_cell_renderer_text_new ();
+	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
+						     -1, _("Full name"), renderer,
+						     "text", COL_MAPI_FULL_NAME, NULL);
+
+	renderer = gtk_cell_renderer_text_new ();
+	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
+						     -1, _("User name"), renderer, 
+						     "text", COL_MAPI_ACCOUNT, NULL);
+
+	/* Model for TreeView */
+	store = gtk_list_store_new (3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
+	gtk_tree_view_set_model (GTK_TREE_VIEW (view), GTK_TREE_MODEL (store));
+
+	for (i = 0; i < rowset->cRows; i++) {
+		lpProp_fullname = get_SPropValue_SRow(&(rowset->aRow[i]), PR_DISPLAY_NAME);
+		lpProp_account = get_SPropValue_SRow(&(rowset->aRow[i]), PR_ACCOUNT);
+
+		if (lpProp_fullname && lpProp_fullname->value.lpszA &&
+		    lpProp_account && lpProp_account->value.lpszA) {
+			gtk_list_store_append (store, &iter);
+			/* Preserve the index inside the store*/
+			gtk_list_store_set (store, &iter,
+					    COL_MAPI_FULL_NAME, lpProp_fullname->value.lpszA,
+					    COL_MAPI_ACCOUNT, lpProp_account->value.lpszA,
+					    COL_MAPI_INDEX, i, -1);
+		}
+	}
+
+	/* Pack the TreeView into dialog's content area */
+	vbox = (GtkVBox *)gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+	gtk_box_pack_start (GTK_BOX (vbox), view, TRUE, TRUE, 6);
+	gtk_widget_show_all (GTK_WIDGET (vbox));
+
+	response = gtk_dialog_run (GTK_DIALOG (dialog));
+	if (response == GTK_RESPONSE_ACCEPT) {
+	       /* Get the index from the selected value */
+		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (view));
+		gtk_tree_selection_get_selected (selection, NULL, &iter);
+		gtk_tree_model_get (GTK_TREE_MODEL (store), &iter, COL_MAPI_INDEX, 
+				    &index, -1);
+	} else /* If we return a value > available, we are canceling the login.*/
+	       index = rowset->cRows + 1;
+
+	gtk_widget_destroy (dialog);
+
+	return index;
+}
+
 static void
 validate_credentials (GtkWidget *widget, EConfig *config)
 {
@@ -126,7 +211,10 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	/*Can there be a account without password ?*/
 	if (password && *password && domain_name && *domain_name && *url->user && *url->host) {
 		char *error_msg = NULL;
-		gboolean status = exchange_mapi_create_profile (url->user, password, domain_name, url->host, &error_msg);
+		gboolean status = exchange_mapi_create_profile (url->user, password, domain_name,
+								url->host, &error_msg, 
+								(mapi_profile_callback_t) create_profile_callback,
+								NULL);
 		if (status) {
 			/* Things are successful */
 			gchar *profname = NULL, *uri = NULL; 

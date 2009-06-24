@@ -199,7 +199,9 @@ uint32_t
 exchange_mapi_util_create_named_prop (uint32_t olFolder, mapi_id_t fid, 
 				      const char *named_prop_name, uint32_t ptype);
 
-gboolean exchange_mapi_create_profile (const char *username, const char *password, const char *domain, const char *server, char **error_msg);
+gboolean exchange_mapi_create_profile (const char *username, const char *password,
+				       const char *domain, const char *server,
+				       char **error_msg, mapi_profile_callback_t cb, gpointer data);
 gboolean exchange_mapi_delete_profile (const char *profile);
 
 #endif

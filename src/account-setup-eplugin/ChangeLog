@@ -1,3 +1,9 @@
+2009-06-24  Johnny Jacob  <jjohnny@novell.com>
+
+	* exchange-mapi-account-setup.c (create_profile_callback): Added. Callback for
+	e.*create_profile. If ProcessNetworkProfile finds more than one match for
+	username, a pop dialog allows the user to select the right one.
+
 2009-08-04  Johnny Jacob  <jjohnny@novell.com>
 
 	* org-gnome-exchange-mapi.eplug.xml: Removed a invalid hook definition.
