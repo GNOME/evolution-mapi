@@ -1,4 +1,4 @@
-INCLUDES =					\
+AM_CPPFLAGS =					\
 	-DG_LOG_DOMAIN=\"libecalbackendmapi\"	\
 	-I$(top_srcdir)/src/calendar		\
 	-I$(top_srcdir)/src/libexchangemapi	\

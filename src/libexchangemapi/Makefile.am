@@ -1,4 +1,4 @@
-INCLUDES =						\
+AM_CPPFLAGS =						\
 	-DG_LOG_DOMAIN=\"libexchangemapi\"		\
 	-DMAPI_DATADIR=\""$(mapidatadir)"\"		\
 	-DLIBMAPI_LDIF_DIR=\""$(libmapi_ldif_dir)"\"	\

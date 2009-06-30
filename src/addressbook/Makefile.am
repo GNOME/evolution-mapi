@@ -1,4 +1,4 @@
-INCLUDES =					\
+AM_CPPFLAGS =					\
 	-DG_LOG_DOMAIN=\"libebookbackend\"	\
 	-I$(top_srcdir)/src/addressbook		\
 	-I$(top_srcdir)/src/libexchangemapi	\

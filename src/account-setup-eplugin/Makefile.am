@@ -1,4 +1,4 @@
-INCLUDES = -I .						\
+AM_CPPFLAGS = -I .					\
 	-DEVOLUTION_GLADEDIR=\""$(gladedir)"\" 		\
 	-DCONNECTOR_GLADEDIR=\""$(gladedir)"\" 		\
 	-I$(top_srcdir)/src/libexchangemapi/		\
