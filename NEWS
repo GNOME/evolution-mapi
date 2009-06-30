@@ -1,3 +1,12 @@
+evolution-mapi 0.26.2 2009-06-30
+--------------------------------
+Bug Fixes :
+    	  Bug 584072 - Drafts folder crash. (Bharath Acharya)
+
+Updated Translations :
+	Rajesh Ranjan (hi)
+	Maxim V. Dziumanenko (uk)
+
 evolution-mapi 0.26.1 2009-04-14
 --------------------------------
 Bug Fixes :
