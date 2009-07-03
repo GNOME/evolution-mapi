@@ -27,7 +27,7 @@ liborg_gnome_exchange_mapi_la_LIBADD = 			\
 	$(LIBECAL_LIBS)					\
 	$(LIBMAPI_LIBS)
 
-liborg_gnome_exchange_mapi_la_LDFLAGS = -module -avoid-version -lmapi $(NO_UNDEFINED)
+liborg_gnome_exchange_mapi_la_LDFLAGS = -module -avoid-version $(NO_UNDEFINED)
 liborg_gnome_exchange_mapi_la_CFLAGS = -I/usr/local/samba/include/
 
 EXTRA_DIST = 						\
