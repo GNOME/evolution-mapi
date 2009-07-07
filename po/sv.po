@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-13 13:04+0200\n"
-"PO-Revision-Date: 2009-06-13 13:05+0100\n"
+"POT-Creation-Date: 2009-07-07 12:18+0200\n"
+"PO-Revision-Date: 2009-07-07 16:19+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "MIME-Version: 1.0\n"
@@ -52,7 +52,7 @@ msgstr "_Plats:"
 
 #: ../src/calendar/e-cal-backend-mapi.c:115
 #: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:463
+#: ../src/camel/camel-mapi-store.c:467
 msgid "Authentication failed"
 msgstr "Autentisering misslyckades"
 
@@ -74,7 +74,7 @@ msgstr "Fel vid hämtning av ändringar från servern."
 #: ../src/calendar/e-cal-backend-mapi.c:1088
 #: ../src/calendar/e-cal-backend-mapi.c:1170
 msgid "Could not create cache file"
-msgstr "Kunde inte skapa mellanlagringsfil"
+msgstr "Kunde inte skapa mellanlagringsfilen"
 
 #: ../src/calendar/e-cal-backend-mapi.c:1099
 msgid "Could not create thread for populating cache"
@@ -84,27 +84,37 @@ msgstr "Kunde inte skapa tråd för inmatning i mellanlager"
 msgid "Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server."
 msgstr "Stöd för ändring av enstaka instanser för ett återkommande möte har ännu inte implementerats. Ingen ändring gjordes till mötet på servern."
 
-#: ../src/camel/camel-mapi-folder.c:348
+#: ../src/camel/camel-mapi-folder.c:435
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "Uppdaterar lokal mellanlagring av sammandrag för nya meddelanden i %s"
 
-#: ../src/camel/camel-mapi-folder.c:757
-#: ../src/camel/camel-mapi-folder.c:1358
-#: ../src/camel/camel-mapi-folder.c:1366
+#: ../src/camel/camel-mapi-folder.c:659
+#, c-format
+msgid "Retriving message IDs from server for %s"
+msgstr "Hämtar meddelande-id:n från servern för %s"
+
+#: ../src/camel/camel-mapi-folder.c:681
+#, c-format
+msgid "Removing deleted messages from cache in %s"
+msgstr "Tar bort borttagna meddelanden från mellanlagring i %s"
+
+#: ../src/camel/camel-mapi-folder.c:983
+#: ../src/camel/camel-mapi-folder.c:1610
+#: ../src/camel/camel-mapi-folder.c:1618
 msgid "This message is not available in offline mode."
 msgstr "Detta meddelande är inte tillgängligt i frånkopplat läge."
 
-#: ../src/camel/camel-mapi-folder.c:766
+#: ../src/camel/camel-mapi-folder.c:992
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Hämtning av sammandragsinformation för nya meddelanden i %s"
 
-#: ../src/camel/camel-mapi-folder.c:776
+#: ../src/camel/camel-mapi-folder.c:1002
 msgid "Fetching items failed"
 msgstr "Hämtning av objekt misslyckades"
 
-#: ../src/camel/camel-mapi-folder.c:1322
+#: ../src/camel/camel-mapi-folder.c:1574
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -113,25 +123,25 @@ msgstr ""
 "Kan inte hämta meddelande: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1322
+#: ../src/camel/camel-mapi-folder.c:1574
 msgid "No such message"
 msgstr "Det finns inget sådant meddelande"
 
-#: ../src/camel/camel-mapi-folder.c:1334
+#: ../src/camel/camel-mapi-folder.c:1586
 msgid "Message fetching cancelled by user."
 msgstr "Meddelandehämtning avbröts av användaren."
 
-#: ../src/camel/camel-mapi-folder.c:1341
+#: ../src/camel/camel-mapi-folder.c:1593
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Kan inte hämta meddelandet %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1387
-#: ../src/camel/camel-mapi-folder.c:1399
+#: ../src/camel/camel-mapi-folder.c:1639
+#: ../src/camel/camel-mapi-folder.c:1651
 msgid "Could not get message"
 msgstr "Kunde inte hämta meddelandet"
 
-#: ../src/camel/camel-mapi-folder.c:1754
+#: ../src/camel/camel-mapi-folder.c:2006
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Kunde inte läsa in sammandrag för %s"
@@ -186,7 +196,7 @@ msgid "All Public Folders"
 msgstr "Alla publika mappar"
 
 #: ../src/camel/camel-mapi-store.c:268
-#: ../src/camel/camel-mapi-transport.c:347
+#: ../src/camel/camel-mapi-transport.c:352
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI-server %s"
@@ -194,7 +204,7 @@ msgstr "Exchange MAPI-server %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #: ../src/camel/camel-mapi-store.c:272
-#: ../src/camel/camel-mapi-transport.c:349
+#: ../src/camel/camel-mapi-transport.c:354
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Exchange MAPI-tjänst för %s på %s"
@@ -217,36 +227,36 @@ msgstr "Du angav inte något lösenord."
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Kunde inte autentisera mot Exchange MAPI-server. "
 
-#: ../src/camel/camel-mapi-store.c:447
+#: ../src/camel/camel-mapi-store.c:451
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "Kan inte skapa MAPI-mappar i frånkopplat läge."
 
-#: ../src/camel/camel-mapi-store.c:452
+#: ../src/camel/camel-mapi-store.c:456
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "Kan inte skapa nya mappen \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:662
+#: ../src/camel/camel-mapi-store.c:665
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "Kan inte byta namn på MAPI-mappen \"%s\". Mappen finns inte."
 
-#: ../src/camel/camel-mapi-store.c:673
+#: ../src/camel/camel-mapi-store.c:676
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "Kan inte byta namn på MAPI-standardmappen \"%s\" till \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:691
+#: ../src/camel/camel-mapi-store.c:694
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "Kan inte byta namn på MAPI-mappen \"%s\" till \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:1206
+#: ../src/camel/camel-mapi-store.c:1222
 msgid "Folder list not available in offline mode."
 msgstr "Mapplistan är inte tillgänglig i frånkopplat läge."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:335
+#: ../src/camel/camel-mapi-transport.c:340
 msgid "Could not send message."
 msgstr "Kunde inte skicka meddelande."
 
