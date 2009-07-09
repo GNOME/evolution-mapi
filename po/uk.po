@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-04-17 09:09+0300\n"
+"POT-Creation-Date: 2009-07-09 20:27+0300\n"
 "PO-Revision-Date: 2009-04-17 09:09+0300\n"
 "Last-Translator: Maxim V. Dziumanenko <dziumanenko@gmail.com>\n"
 "Language-Team: Ukrainian <uk@li.org>\n"
@@ -26,7 +26,8 @@ msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
 msgstr ""
-"Сервер, ім'я користувача та домен не можуть бути порожніми. Введіть коректні значення."
+"Сервер, ім'я користувача та домен не можуть бути порожніми. Введіть коректні "
+"значення."
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
 msgid "Authentication finished successfully."
@@ -54,7 +55,7 @@ msgstr "_Адреса:"
 
 #: ../src/calendar/e-cal-backend-mapi.c:115
 #: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:457
+#: ../src/camel/camel-mapi-store.c:467
 msgid "Authentication failed"
 msgstr "Автентифікація завершилась невдало"
 
@@ -87,23 +88,39 @@ msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
 msgstr ""
-"Зміну окремої зустрічі у серії періодичних зустрічей ще не реалізовано. Дані на сервері залишаться без змін."
+"Зміну окремої зустрічі у серії періодичних зустрічей ще не реалізовано. Дані "
+"на сервері залишаться без змін."
 
-#: ../src/camel/camel-mapi-folder.c:349 ../src/camel/camel-mapi-folder.c:745
+#: ../src/camel/camel-mapi-folder.c:435
+#, fuzzy, c-format
+msgid "Updating local summary cache for new messages in %s"
+msgstr "Отримання відомостей про нові повідомлення на %s"
+
+#: ../src/camel/camel-mapi-folder.c:659
+#, c-format
+msgid "Retrieving message IDs from server for %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:681
+#, c-format
+msgid "Removing deleted messages from cache in %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:983 ../src/camel/camel-mapi-folder.c:1610
+#: ../src/camel/camel-mapi-folder.c:1618
+msgid "This message is not available in offline mode."
+msgstr "Це повідомлення недоступне у автономному режимі."
+
+#: ../src/camel/camel-mapi-folder.c:992
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Отримання відомостей про нові повідомлення на %s"
 
-#: ../src/camel/camel-mapi-folder.c:738 ../src/camel/camel-mapi-folder.c:1335
-#: ../src/camel/camel-mapi-folder.c:1343
-msgid "This message is not available in offline mode."
-msgstr "Це повідомлення недоступне у автономному режимі."
-
-#: ../src/camel/camel-mapi-folder.c:755
+#: ../src/camel/camel-mapi-folder.c:1002
 msgid "Fetching items failed"
 msgstr "Не вдається завантажити елементи."
 
-#: ../src/camel/camel-mapi-folder.c:1299
+#: ../src/camel/camel-mapi-folder.c:1574
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -112,24 +129,24 @@ msgstr ""
 "Не вдається отримати повідомлення: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1299
+#: ../src/camel/camel-mapi-folder.c:1574
 msgid "No such message"
 msgstr "Повідомлення відсутнє"
 
-#: ../src/camel/camel-mapi-folder.c:1311
+#: ../src/camel/camel-mapi-folder.c:1586
 msgid "Message fetching cancelled by user."
 msgstr "Операція була перервана користувачем."
 
-#: ../src/camel/camel-mapi-folder.c:1318
+#: ../src/camel/camel-mapi-folder.c:1593
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Не вдається отримати повідомлення %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1364 ../src/camel/camel-mapi-folder.c:1374
+#: ../src/camel/camel-mapi-folder.c:1639 ../src/camel/camel-mapi-folder.c:1651
 msgid "Could not get message"
 msgstr "Не вдається отримати повідомлення."
 
-#: ../src/camel/camel-mapi-folder.c:1725
+#: ../src/camel/camel-mapi-folder.c:2006
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Не вдається завантажити зведення про %s"
@@ -142,53 +159,37 @@ msgstr "Перевірка нової пошти"
 msgid "C_heck for new messages in all folders"
 msgstr "П_еревіряти нову пошту в усіх теках"
 
-#. i18n: GAL is an Outlookism, AD is a Windowsism
-#: ../src/camel/camel-mapi-provider.c:66
-msgid "Global Address List / Active Directory"
-msgstr "Глобальний список адрес / Active Directory"
-
-#. i18n: "Global Catalog" is a Windowsism, but it's a
-#. technical term and may not have translations?
-#: ../src/camel/camel-mapi-provider.c:70
-msgid "_Global Catalog server name:"
-msgstr "Сервер г_лобального списку адрес:"
-
-#: ../src/camel/camel-mapi-provider.c:72
-#, c-format
-msgid "_Limit number of GAL responses: %s"
-msgstr "_Обмежувати відповіді від сервера: %s"
-
-#: ../src/camel/camel-mapi-provider.c:75
+#: ../src/camel/camel-mapi-provider.c:71
 msgid "Options"
 msgstr "Параметри"
 
-#: ../src/camel/camel-mapi-provider.c:77
+#: ../src/camel/camel-mapi-provider.c:73
 msgid "Automatically synchroni_ze account locally"
 msgstr "Автоматично син_хронізувати обліковий запис локально"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:80
+#: ../src/camel/camel-mapi-provider.c:76
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
 "Зас_тосовувати фільтри до нових повідомлень у теці \"Вхідні\" на сервері"
 
-#: ../src/camel/camel-mapi-provider.c:82
+#: ../src/camel/camel-mapi-provider.c:78
 msgid "Check new messages for _Junk contents"
 msgstr "Перевіряти нові повідомлення на _спамом"
 
-#: ../src/camel/camel-mapi-provider.c:84
+#: ../src/camel/camel-mapi-provider.c:80
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Перевіряти на \"спам\" лише _теку \"Вхідні\""
 
-#: ../src/camel/camel-mapi-provider.c:96
+#: ../src/camel/camel-mapi-provider.c:92
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
 msgstr "Для доступу до Microsoft Exchange / OpenChange використовувати MAPI"
 
-#: ../src/camel/camel-mapi-provider.c:111
+#: ../src/camel/camel-mapi-provider.c:107
 msgid "Password"
 msgstr "Пароль"
 
-#: ../src/camel/camel-mapi-provider.c:112
+#: ../src/camel/camel-mapi-provider.c:108
 msgid ""
 "This option will connect to the Openchange server using a plaintext password."
 msgstr "З'єднуватись з сервером Openchange передаючи пароль відкритим текстом."
@@ -201,14 +202,14 @@ msgstr "Улюблене"
 msgid "All Public Folders"
 msgstr "Усі спільні каталоги"
 
-#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:347
+#: ../src/camel/camel-mapi-store.c:268 ../src/camel/camel-mapi-transport.c:352
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Сервер Exchange MAPI %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:349
+#: ../src/camel/camel-mapi-store.c:272 ../src/camel/camel-mapi-transport.c:354
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Сервіс Exchange MAPI для %s на %s"
@@ -217,49 +218,58 @@ msgstr "Сервіс Exchange MAPI для %s на %s"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:304
+#: ../src/camel/camel-mapi-store.c:310
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s Введіть пароль для %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:317
+#: ../src/camel/camel-mapi-store.c:323
 msgid "You did not enter a password."
 msgstr "Ви не ввели пароль."
 
-#: ../src/camel/camel-mapi-store.c:325
+#: ../src/camel/camel-mapi-store.c:331
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Не вдається пройти актентифікацію на сервері Exchange MAPI."
 
-#: ../src/camel/camel-mapi-store.c:441
+#: ../src/camel/camel-mapi-store.c:451
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "Не можна створювати теки MAPI у автономному режимі."
 
-#: ../src/camel/camel-mapi-store.c:446
+#: ../src/camel/camel-mapi-store.c:456
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "Створити новий каталог «%s»"
 
-#: ../src/camel/camel-mapi-store.c:657
+#: ../src/camel/camel-mapi-store.c:665
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "Не вдається перейменувати каталог MAPI «%s». Каталог не існує."
 
-#: ../src/camel/camel-mapi-store.c:668
+#: ../src/camel/camel-mapi-store.c:676
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "Не вдається перейменувати типовий каталог MAPI з «%s» на «%s»"
 
-#: ../src/camel/camel-mapi-store.c:686
+#: ../src/camel/camel-mapi-store.c:694
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "Не вдається перейменувати каталог MAPI `%s' на `%s'"
 
-#: ../src/camel/camel-mapi-store.c:1111
+#: ../src/camel/camel-mapi-store.c:1222
 msgid "Folder list not available in offline mode."
 msgstr "Це повідомлення недоступне у автономному режимі."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:335
+#: ../src/camel/camel-mapi-transport.c:340
 msgid "Could not send message."
 msgstr "Не вдаєтьтся надіслати повідомлення."
+
+#~ msgid "Global Address List / Active Directory"
+#~ msgstr "Глобальний список адрес / Active Directory"
+
+#~ msgid "_Global Catalog server name:"
+#~ msgstr "Сервер г_лобального списку адрес:"
+
+#~ msgid "_Limit number of GAL responses: %s"
+#~ msgstr "_Обмежувати відповіді від сервера: %s"
