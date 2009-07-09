@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi.HEAD\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2009-06-19 05:58+0000\n"
-"PO-Revision-Date: 2009-06-21 10:51+0200\n"
+"POT-Creation-Date: 2009-07-09 15:21+0000\n"
+"PO-Revision-Date: 2009-07-09 20:56+0200\n"
 "Last-Translator: Jorge González <jorgegonz@svn.gnome.org>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -94,36 +94,37 @@ msgstr ""
 "Aún no está implementado el soporte para modificar instancias aisladas de "
 "una cita recurrente. No se realizó ningún cambio en la cita del servidor."
 
-#: ../src/camel/camel-mapi-folder.c:432
+#: ../src/camel/camel-mapi-folder.c:435
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "Actualizando la caché de resumen local para los mensajes nuevos en %s"
 
-#: ../src/camel/camel-mapi-folder.c:656
+#: ../src/camel/camel-mapi-folder.c:659
 #, c-format
-msgid "Retriving message IDs from server for %s"
-msgstr "Obteniendo los ID de mensajes del servidor para %s"
+#| msgid "Retriving message IDs from server for %s"
+msgid "Retrieving message IDs from server for %s"
+msgstr "Obteniendo los ID de los mensajes del servidor para %s"
 
-#: ../src/camel/camel-mapi-folder.c:678
+#: ../src/camel/camel-mapi-folder.c:681
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Quitando los borrados mensajes de la caché en %s"
 
-#: ../src/camel/camel-mapi-folder.c:980 ../src/camel/camel-mapi-folder.c:1607
-#: ../src/camel/camel-mapi-folder.c:1615
+#: ../src/camel/camel-mapi-folder.c:983 ../src/camel/camel-mapi-folder.c:1610
+#: ../src/camel/camel-mapi-folder.c:1618
 msgid "This message is not available in offline mode."
 msgstr "Este mensaje no está disponible en modo desconectado."
 
-#: ../src/camel/camel-mapi-folder.c:989
+#: ../src/camel/camel-mapi-folder.c:992
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Obteniendo recopilación de información sobre los mensajes nuevos en %s"
 
-#: ../src/camel/camel-mapi-folder.c:999
+#: ../src/camel/camel-mapi-folder.c:1002
 msgid "Fetching items failed"
 msgstr "Falló al obtener los elementos"
 
-#: ../src/camel/camel-mapi-folder.c:1571
+#: ../src/camel/camel-mapi-folder.c:1574
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -132,24 +133,24 @@ msgstr ""
 "No se puede obtener el mensaje: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1571
+#: ../src/camel/camel-mapi-folder.c:1574
 msgid "No such message"
 msgstr "No existe ese mensaje"
 
-#: ../src/camel/camel-mapi-folder.c:1583
+#: ../src/camel/camel-mapi-folder.c:1586
 msgid "Message fetching cancelled by user."
 msgstr "El usuario canceló la obtención de mensajes."
 
-#: ../src/camel/camel-mapi-folder.c:1590
+#: ../src/camel/camel-mapi-folder.c:1593
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "No se puede obtener el mensaje %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1636 ../src/camel/camel-mapi-folder.c:1648
+#: ../src/camel/camel-mapi-folder.c:1639 ../src/camel/camel-mapi-folder.c:1651
 msgid "Could not get message"
 msgstr "No se puede obtener el mensaje"
 
-#: ../src/camel/camel-mapi-folder.c:2003
+#: ../src/camel/camel-mapi-folder.c:2006
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No se pudo cargar el resumen para %s"
@@ -207,14 +208,14 @@ msgstr "Favoritos"
 msgid "All Public Folders"
 msgstr "Todas las carpetas públicas"
 
-#: ../src/camel/camel-mapi-store.c:268 ../src/camel/camel-mapi-transport.c:347
+#: ../src/camel/camel-mapi-store.c:268 ../src/camel/camel-mapi-transport.c:352
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Servidor MAPI Exchange %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:272 ../src/camel/camel-mapi-transport.c:349
+#: ../src/camel/camel-mapi-store.c:272 ../src/camel/camel-mapi-transport.c:354
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Servidor MAPI Exchange para %s en %s"
@@ -266,7 +267,7 @@ msgid "Folder list not available in offline mode."
 msgstr "La lista de carpetas no está disponible en modo desconectado."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:335
+#: ../src/camel/camel-mapi-transport.c:340
 msgid "Could not send message."
 msgstr "No se pudo enviar el mensaje."
 
