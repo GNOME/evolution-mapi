@@ -1,3 +1,8 @@
+2009-07-09  Johnny Jacob  <jjohnny@novell.com>
+
+	* exchange-mapi-account-settings.c (org_gnome_exchange_mapi_settings): Added. Factory
+	for creating a settings page in account editor.
+
 2009-03-19  Milan Crha  <mcrha@redhat.com>
 
 	** Fix for bug #574784

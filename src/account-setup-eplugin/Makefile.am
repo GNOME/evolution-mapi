@@ -17,6 +17,7 @@ plugin_LTLIBRARIES = liborg-gnome-exchange-mapi.la
 liborg_gnome_exchange_mapi_la_SOURCES = 		\
 	exchange-mapi-account-setup.c			\
 	exchange-mapi-account-setup.h			\
+	exchange-mapi-account-settings.c		\
 	exchange-mapi-account-listener.c		\
 	exchange-mapi-account-listener.h
 

@@ -594,4 +594,3 @@ exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 	// Update the folder list in the plugin and ExchangeMAPIFolder
 	return;
 }
-
