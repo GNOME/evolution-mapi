@@ -656,7 +656,7 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 		return;
 	}
 
-	camel_operation_start (NULL, _("Retriving message IDs from server for %s"), m->folder->name);
+	camel_operation_start (NULL, _("Retrieving message IDs from server for %s"), m->folder->name);
 
 	CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
 
