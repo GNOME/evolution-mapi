@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-09 20:27+0300\n"
+"POT-Creation-Date: 2009-07-09 20:29+0300\n"
 "PO-Revision-Date: 2009-04-17 09:09+0300\n"
 "Last-Translator: Maxim V. Dziumanenko <dziumanenko@gmail.com>\n"
 "Language-Team: Ukrainian <uk@li.org>\n"
@@ -92,19 +92,19 @@ msgstr ""
 "на сервері залишаться без змін."
 
 #: ../src/camel/camel-mapi-folder.c:435
-#, fuzzy, c-format
+#, c-format
 msgid "Updating local summary cache for new messages in %s"
-msgstr "Отримання відомостей про нові повідомлення на %s"
+msgstr "Оновлення локальних відомостей про нові повідомлення на %s"
 
 #: ../src/camel/camel-mapi-folder.c:659
 #, c-format
 msgid "Retrieving message IDs from server for %s"
-msgstr ""
+msgstr "Отримання ідентифікаторів повідомлень з сервера для %s"
 
 #: ../src/camel/camel-mapi-folder.c:681
 #, c-format
 msgid "Removing deleted messages from cache in %s"
-msgstr ""
+msgstr "Видалення з кешу позначених для видалення повідомлень у %s"
 
 #: ../src/camel/camel-mapi-folder.c:983 ../src/camel/camel-mapi-folder.c:1610
 #: ../src/camel/camel-mapi-folder.c:1618
