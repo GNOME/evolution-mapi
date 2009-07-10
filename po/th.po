@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi 0.26.0\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2009-03-10 05:53+0000\n"
-"PO-Revision-Date: 2009-03-11 16:05+0700\n"
+"POT-Creation-Date: 2009-07-09 15:21+0000\n"
+"PO-Revision-Date: 2009-07-10 16:22+0700\n"
 "Last-Translator: Akom C. <knight2000@gmail.com>\n"
 "Language-Team: Thai <thai-l10n@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
@@ -54,7 +54,7 @@ msgstr "_ตำแหน่ง:"
 
 #: ../src/calendar/e-cal-backend-mapi.c:115
 #: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:457
+#: ../src/camel/camel-mapi-store.c:467
 msgid "Authentication failed"
 msgstr "ยืนยันตัวบุคคลไม่สำเร็จ"
 
@@ -90,21 +90,36 @@ msgstr ""
 "ยังไม่รองรับการแก้ไขทุกเหตุการณ์ของนัดหมายที่มีการเวียนซ้ำ "
 "จึงไม่มีการเปลี่ยนแปลงข้อมูลนัดหมายในเซิร์ฟเวอร์"
 
-#: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
+#: ../src/camel/camel-mapi-folder.c:435
+#, c-format
+msgid "Updating local summary cache for new messages in %s"
+msgstr "กำลังปรับแคชข้อมูลสรุปในเครื่องสำหรับข้อความใหม่ใน %s"
+
+#: ../src/camel/camel-mapi-folder.c:659
+#, c-format
+msgid "Retrieving message IDs from server for %s"
+msgstr "กำลังดึง ID ข้อความจากเซิร์ฟเวอร์สำหรับ %s"
+
+#: ../src/camel/camel-mapi-folder.c:681
+#, c-format
+msgid "Removing deleted messages from cache in %s"
+msgstr "กำลังลบข้อความที่สั่งลบไว้ออกจากแคชใน %s"
+
+#: ../src/camel/camel-mapi-folder.c:983 ../src/camel/camel-mapi-folder.c:1610
+#: ../src/camel/camel-mapi-folder.c:1618
+msgid "This message is not available in offline mode."
+msgstr "ข้อความนี้ไม่สามารถใช้ได้ในโหมดออฟไลน์"
+
+#: ../src/camel/camel-mapi-folder.c:992
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "กำลังดึงข้อมูลสรุปสำหรับข้อความใหม่ใน %s"
 
-#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1221
-#: ../src/camel/camel-mapi-folder.c:1229
-msgid "This message is not available in offline mode."
-msgstr "ข้อความนี้ไม่สามารถใช้ได้ในโหมดออฟไลน์"
-
-#: ../src/camel/camel-mapi-folder.c:679
+#: ../src/camel/camel-mapi-folder.c:1002
 msgid "Fetching items failed"
 msgstr "ดึงข้อมูลรายการไม่สำเร็จ"
 
-#: ../src/camel/camel-mapi-folder.c:1185
+#: ../src/camel/camel-mapi-folder.c:1574
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -113,24 +128,24 @@ msgstr ""
 "ไม่สามารถรับข้อความ: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1185
+#: ../src/camel/camel-mapi-folder.c:1574
 msgid "No such message"
 msgstr "ไม่มีข้อความนี้"
 
-#: ../src/camel/camel-mapi-folder.c:1197
+#: ../src/camel/camel-mapi-folder.c:1586
 msgid "Message fetching cancelled by user."
 msgstr "ผู้ใช้ยกเลิกการดึงข้อความ"
 
-#: ../src/camel/camel-mapi-folder.c:1204
+#: ../src/camel/camel-mapi-folder.c:1593
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "ไม่สามารถรับข้อความ %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1258
+#: ../src/camel/camel-mapi-folder.c:1639 ../src/camel/camel-mapi-folder.c:1651
 msgid "Could not get message"
 msgstr "ไม่สามารถรับข้อความ"
 
-#: ../src/camel/camel-mapi-folder.c:1609
+#: ../src/camel/camel-mapi-folder.c:2006
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "ไม่สามารถโหลดข้อมูลสรุปสำหรับ %s"
@@ -143,52 +158,36 @@ msgstr "กำลังตรวจสอบเมลใหม่"
 msgid "C_heck for new messages in all folders"
 msgstr "_ตรวจสอบข้อความใหม่ในทุกโฟลเดอร์"
 
-#. i18n: GAL is an Outlookism, AD is a Windowsism
-#: ../src/camel/camel-mapi-provider.c:66
-msgid "Global Address List / Active Directory"
-msgstr "Global Address List / Active Directory"
-
-#. i18n: "Global Catalog" is a Windowsism, but it's a
-#. technical term and may not have translations?
-#: ../src/camel/camel-mapi-provider.c:70
-msgid "_Global Catalog server name:"
-msgstr "ชื่อเซิร์ฟเวอร์ _Global Catalog:"
-
-#: ../src/camel/camel-mapi-provider.c:72
-#, c-format
-msgid "_Limit number of GAL responses: %s"
-msgstr "_จำกัดจำนวนการตอบรับจาก GAL: %s"
-
-#: ../src/camel/camel-mapi-provider.c:75
+#: ../src/camel/camel-mapi-provider.c:71
 msgid "Options"
 msgstr "ตัวเลือก"
 
-#: ../src/camel/camel-mapi-provider.c:77
+#: ../src/camel/camel-mapi-provider.c:73
 msgid "Automatically synchroni_ze account locally"
 msgstr "ปรับข้อมูลบัญชีให้_ตรงกันโดยอัตโนมัติในเครื่อง"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:80
+#: ../src/camel/camel-mapi-provider.c:76
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "ใช้ตัว_กรองกับข้อความใหม่ในกล่องจดหมายเข้าที่เซิร์ฟเวอร์นี้"
 
-#: ../src/camel/camel-mapi-provider.c:82
+#: ../src/camel/camel-mapi-provider.c:78
 msgid "Check new messages for _Junk contents"
 msgstr "ตรวจสอบ_ขยะในข้อความใหม่"
 
-#: ../src/camel/camel-mapi-provider.c:84
+#: ../src/camel/camel-mapi-provider.c:80
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "ตรวจสอบข้อความขยะในโฟลเดอร์กล่อง_จดหมายเข้าเท่านั้น"
 
-#: ../src/camel/camel-mapi-provider.c:96
+#: ../src/camel/camel-mapi-provider.c:92
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
 msgstr "สำหรับการเข้าใช้เซิร์ฟเวอร์ Microsoft Exchange / OpenChange โดยใช้ MAPI"
 
-#: ../src/camel/camel-mapi-provider.c:111
+#: ../src/camel/camel-mapi-provider.c:107
 msgid "Password"
 msgstr "รหัสผ่าน"
 
-#: ../src/camel/camel-mapi-provider.c:112
+#: ../src/camel/camel-mapi-provider.c:108
 msgid ""
 "This option will connect to the Openchange server using a plaintext password."
 msgstr "ตัวเลือกนี้จะเชื่อมต่อไปยังเซิร์ฟเวอร์ Openchange โดยใช้รหัสผ่านแบบข้อความเปล่า"
@@ -201,14 +200,14 @@ msgstr "รายการโปรด"
 msgid "All Public Folders"
 msgstr "โฟลเดอร์สาธารณะทั้งหมด"
 
-#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:347
+#: ../src/camel/camel-mapi-store.c:268 ../src/camel/camel-mapi-transport.c:352
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "เซิร์ฟเวอร์ MAPI ของ Exchange %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:349
+#: ../src/camel/camel-mapi-store.c:272 ../src/camel/camel-mapi-transport.c:354
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "บริการ MAPI ของ Exchange สำหรับ %s ที่ %s"
@@ -217,49 +216,58 @@ msgstr "บริการ MAPI ของ Exchange สำหรับ %s ที�
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:304
+#: ../src/camel/camel-mapi-store.c:310
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s กรุณาป้อนรหัสผ่าน MAPI สำหรับ %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:317
+#: ../src/camel/camel-mapi-store.c:323
 msgid "You did not enter a password."
 msgstr "คุณไม่ได้ป้อนรหัสผ่าน"
 
-#: ../src/camel/camel-mapi-store.c:325
+#: ../src/camel/camel-mapi-store.c:331
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "ไม่สามารถยืนยันตัวบุคคลกับเซิร์ฟเวอร์ MAPI ของ Exchange"
 
-#: ../src/camel/camel-mapi-store.c:441
+#: ../src/camel/camel-mapi-store.c:451
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "ไม่สามารถสร้างโฟลเดอร์ MAPI ในโหมดออฟไลน์"
 
-#: ../src/camel/camel-mapi-store.c:446
+#: ../src/camel/camel-mapi-store.c:456
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "ไม่สามารถสร้างโฟลเดอร์ใหม่ `%s'"
 
-#: ../src/camel/camel-mapi-store.c:657
+#: ../src/camel/camel-mapi-store.c:665
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "ไม่สามารถเปลี่ยนชื่อโฟลเดอร์ MAPI `%s' ไม่มีโฟลเดอร์นี้"
 
-#: ../src/camel/camel-mapi-store.c:668
+#: ../src/camel/camel-mapi-store.c:676
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "ไม่สามารถเปลี่ยนชื่อโฟลเดอร์ MAPI ปริยาย `%s' เป็น `%s'"
 
-#: ../src/camel/camel-mapi-store.c:686
+#: ../src/camel/camel-mapi-store.c:694
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "ไม่สามารถเปลี่ยนชื่อโฟลเดอร์ MAPI `%s' เป็น `%s'"
 
-#: ../src/camel/camel-mapi-store.c:1111
+#: ../src/camel/camel-mapi-store.c:1222
 msgid "Folder list not available in offline mode."
 msgstr "ใช้รายชื่อโฟลเดอร์ในโหมดออฟไลน์ไม่ได้"
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:335
+#: ../src/camel/camel-mapi-transport.c:340
 msgid "Could not send message."
 msgstr "ไม่สามารถส่งข้อความ"
+
+#~ msgid "Global Address List / Active Directory"
+#~ msgstr "Global Address List / Active Directory"
+
+#~ msgid "_Global Catalog server name:"
+#~ msgstr "ชื่อเซิร์ฟเวอร์ _Global Catalog:"
+
+#~ msgid "_Limit number of GAL responses: %s"
+#~ msgstr "_จำกัดจำนวนการตอบรับจาก GAL: %s"
