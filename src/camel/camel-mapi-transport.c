@@ -415,9 +415,14 @@ mail_build_props (struct SPropValue **value, struct SPropTagArray *SPropTagArray
 	set_SPropValue_proptag(&props[i++], PR_MESSAGE_FLAGS, (void *)msgflag);
 
 	/* Message threading information */
-	set_SPropValue_proptag(&props[i++], PR_INTERNET_REFERENCES, g_strdup (item->header.references));
-	set_SPropValue_proptag(&props[i++], PR_IN_REPLY_TO_ID, g_strdup (item->header.in_reply_to));
-	set_SPropValue_proptag(&props[i++], PR_INTERNET_MESSAGE_ID, g_strdup (item->header.message_id));
+	if (item->header.references)
+		set_SPropValue_proptag(&props[i++], PR_INTERNET_REFERENCES, g_strdup (item->header.references));
+
+	if (item->header.in_reply_to)
+		set_SPropValue_proptag(&props[i++], PR_IN_REPLY_TO_ID, g_strdup (item->header.in_reply_to));
+
+	if (item->header.message_id)
+		set_SPropValue_proptag(&props[i++], PR_INTERNET_MESSAGE_ID, g_strdup (item->header.message_id));
 
 	for (l = item->msg.body_parts; l; l = l->next) {
 		ExchangeMAPIStream *stream = (ExchangeMAPIStream *) (l->data);
