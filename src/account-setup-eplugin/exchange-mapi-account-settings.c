@@ -37,11 +37,78 @@
 #include <libedataserver/e-account.h>
 #include <e-util/e-dialog-utils.h>
 
+#include <exchange-mapi-folder.h>
+#include <exchange-mapi-connection.h>
+#include <exchange-mapi-utils.h>
+
 #include "mail/em-config.h"
+#include "exchange-mapi-account-listener.h"
+
+enum {
+	COL_FOLDERSIZE_NAME = 0,
+	COL_FOLDERSIZE_SIZE,
+	COL_FOLDERSIZE_MAX
+};
+
+static void
+mapi_settings_run_folder_size_dialog ()
+{
+	GtkDialog *dialog; 
+	GtkBox *content_area;
+	/* TreeView */
+	GtkTreeView *view;
+	GtkCellRenderer *renderer;
+	GtkListStore *store;
+	GtkTreeIter iter;
+
+	/* TODO :This should be in a thread. If the folder list is not cached, we would be blocking UI. */
+	GSList *folder_list = exchange_mapi_account_listener_peek_folder_list ();
+	
+	dialog = (GtkDialog *)gtk_dialog_new_with_buttons (_("Folder Size"), NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
+							   GTK_STOCK_CLOSE, GTK_RESPONSE_ACCEPT, NULL);
+	content_area = gtk_dialog_get_content_area (dialog);
+
+	/*Tree View */
+	view = gtk_tree_view_new ();
+	renderer = gtk_cell_renderer_text_new ();
+	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),-1, 
+						     _("Folder"), renderer, "text", COL_FOLDERSIZE_NAME,
+						     NULL);
+
+	renderer = gtk_cell_renderer_text_new ();
+	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),-1, 
+						     _("Size"), renderer, "text", COL_FOLDERSIZE_SIZE,
+						     NULL);
+	/* Model for TreeView */
+	store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
+	gtk_tree_view_set_model (GTK_TREE_VIEW (view), GTK_TREE_MODEL (store));
+
+	while (folder_list) {
+		  ExchangeMAPIFolder *folder = (ExchangeMAPIFolder *) folder_list->data;
+		  gchar *folder_size = g_format_size_for_display (folder->size);
+
+		  gtk_list_store_append (store, &iter);
+		  gtk_list_store_set (store, &iter, 
+				      COL_FOLDERSIZE_NAME, folder->folder_name,
+				      COL_FOLDERSIZE_SIZE, folder_size,
+				      -1);
+		  folder_list = g_slist_next (folder_list);
+		  g_free (folder_size);
+	}
+
+	/* Pack the TreeView into dialog's content area */
+	gtk_box_pack_start (content_area, view, TRUE, TRUE, 6);
+
+	gtk_widget_show_all (dialog);
+
+	gtk_dialog_run (dialog);
+	gtk_widget_destroy (dialog);
+}
 
 static void
 folder_size_clicked (GtkButton *button, gpointer data)
 {
+	mapi_settings_run_folder_size_dialog ();
 }
 
 /* only used in editor */
@@ -87,18 +154,21 @@ org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data
 					     "column-spacing", 6, NULL);
 
 	/* Folder Size */
-	lbl_fsize = (GtkLabel*) g_object_new (GTK_TYPE_LABEL, "label", _("View the size of all Exchange folders"), NULL);
+	lbl_fsize = (GtkLabel*) g_object_new (GTK_TYPE_LABEL, "label",
+					      _("View the size of all Exchange folders"), NULL);
 	gtk_misc_set_alignment (GTK_MISC (lbl_fsize), 0, 0.5);
 	btn_fsize = (GtkButton*) g_object_new (GTK_TYPE_BUTTON, "label", _("Folders Size"), NULL);
 	g_signal_connect (btn_fsize, "clicked", G_CALLBACK (folder_size_clicked), NULL);
 	gtk_table_attach_defaults (tbl_misc, GTK_WIDGET (lbl_fsize), 0, 1, 0, 1);
 	gtk_table_attach (tbl_misc, GTK_WIDGET (btn_fsize), 1, 2, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_box_pack_start (GTK_BOX (vbox_misc), GTK_WIDGET (tbl_misc), FALSE, FALSE, 0);
 
+	/*Note : Reason for placing this UI is because we try to be like outlook. */
+	gtk_box_pack_start (GTK_BOX (vbox_misc), GTK_WIDGET (tbl_misc), FALSE, FALSE, 0);
 	gtk_widget_show_all (GTK_WIDGET (settings));
 
 	/*Insert the page*/
-	gtk_notebook_insert_page (GTK_NOTEBOOK (data->parent), GTK_WIDGET (settings), gtk_label_new(_("Exchange Settings")), 4);
+	gtk_notebook_insert_page (GTK_NOTEBOOK (data->parent), GTK_WIDGET (settings),
+				  gtk_label_new(_("Exchange Settings")), 4);
 
 	return GTK_WIDGET (settings);
 }
