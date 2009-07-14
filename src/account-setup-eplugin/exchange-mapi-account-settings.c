@@ -41,8 +41,12 @@
 #include <exchange-mapi-connection.h>
 #include <exchange-mapi-utils.h>
 
+#include <mail/mail-config.h>
+#include <mail/em-popup.h>
 #include "mail/em-config.h"
 #include "exchange-mapi-account-listener.h"
+
+#define FOLDERSIZE_MENU_ITEM 0
 
 enum {
 	COL_FOLDERSIZE_NAME = 0,
@@ -51,7 +55,7 @@ enum {
 };
 
 static void
-mapi_settings_run_folder_size_dialog ()
+mapi_settings_run_folder_size_dialog (GtkWidget *parent)
 {
 	GtkDialog *dialog; 
 	GtkBox *content_area;
@@ -64,8 +68,11 @@ mapi_settings_run_folder_size_dialog ()
 	/* TODO :This should be in a thread. If the folder list is not cached, we would be blocking UI. */
 	GSList *folder_list = exchange_mapi_account_listener_peek_folder_list ();
 	
-	dialog = (GtkDialog *)gtk_dialog_new_with_buttons (_("Folder Size"), NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
-							   GTK_STOCK_CLOSE, GTK_RESPONSE_ACCEPT, NULL);
+	dialog = (GtkDialog *)gtk_dialog_new_with_buttons (_("Folder Size"), NULL, 
+							   GTK_DIALOG_DESTROY_WITH_PARENT,
+							   GTK_STOCK_CLOSE, GTK_RESPONSE_ACCEPT,
+							   NULL);
+
 	content_area = gtk_dialog_get_content_area (dialog);
 
 	/*Tree View */
@@ -108,7 +115,7 @@ mapi_settings_run_folder_size_dialog ()
 static void
 folder_size_clicked (GtkButton *button, gpointer data)
 {
-	mapi_settings_run_folder_size_dialog ();
+	mapi_settings_run_folder_size_dialog (button);
 }
 
 /* only used in editor */
@@ -171,4 +178,37 @@ org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data
 				  gtk_label_new(_("Exchange Settings")), 4);
 
 	return GTK_WIDGET (settings);
+}
+
+
+static void
+popup_free (EPopup *ep, GSList *items, gpointer data)
+{
+	g_slist_free (items);
+}
+
+static EPopupItem popup_items[] = {
+	{ E_POPUP_ITEM, (gchar *) "50.emc.04", (gchar *) N_("_Folder size"),
+	  mapi_settings_run_folder_size_dialog, NULL, NULL,
+	  0, EM_POPUP_FOLDER_STORE }
+};
+
+void
+org_gnome_folder_size_display_popup (EPlugin *ep, EMPopupTargetFolder *t)
+{
+	EAccount *account;
+	GSList *menus = NULL;
+
+	account = mail_config_get_account_by_source_url (t->uri);
+
+	if (account == NULL)
+		return;
+
+	/* Show only for MAPI accounts */
+	if (g_strrstr (t->uri,"mapi://")) {
+		popup_items[FOLDERSIZE_MENU_ITEM].label =  _(popup_items [FOLDERSIZE_MENU_ITEM].label);
+		menus = g_slist_prepend (menus, &popup_items [FOLDERSIZE_MENU_ITEM]);
+	}
+
+	e_popup_add_items (t->target.popup, menus, NULL, popup_free, account);
 }

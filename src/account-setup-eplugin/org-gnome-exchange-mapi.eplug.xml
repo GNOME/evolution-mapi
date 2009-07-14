@@ -87,5 +87,12 @@
 					factory="exchange_mapi_create"/>
 			</group>
 		</hook>
+
+		<hook class="org.gnome.evolution.mail.popup:1.0">
+			<menu id="org.gnome.evolution.mail.foldertree.popup" target="folder"
+				factory="org_gnome_folder_size_display_popup">
+			</menu>
+		</hook>
+
 	</e-plugin>
 </e-plugin-list>
