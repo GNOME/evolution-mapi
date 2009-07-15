@@ -214,7 +214,7 @@ exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_l
 
 		sfname = g_filename_from_uri (sfname_uri, NULL, NULL);
 		mapped_file = g_mapped_file_new (sfname, FALSE, &error);
-		filename = g_path_get_basename (sfname);
+		filename = g_strdup (g_strrstr (sfname, uid));
 
 		if (mapped_file && g_str_has_prefix (filename, uid)) {
 			ExchangeMAPIAttachment *attach_item;
