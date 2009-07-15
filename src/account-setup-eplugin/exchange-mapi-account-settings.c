@@ -48,68 +48,153 @@
 
 #define FOLDERSIZE_MENU_ITEM 0
 
+static GMutex *folder_size_dialog_mutex = NULL;
+
+#define FOLDERSIZE_LOCK_INIT() folder_size_dialog_mutex = g_mutex_new ()
+#define FOLDERSIZE_LOCK() g_mutex_lock (folder_size_dialog_mutex)
+#define FOLDERSIZE_UNLOCK() g_mutex_unlock (folder_size_dialog_mutex)
+
 enum {
 	COL_FOLDERSIZE_NAME = 0,
 	COL_FOLDERSIZE_SIZE,
 	COL_FOLDERSIZE_MAX
 };
 
-static void
-mapi_settings_run_folder_size_dialog (GtkWidget *parent)
+static struct FolderSizeDialogData
 {
-	GtkDialog *dialog; 
-	GtkBox *content_area;
+	GtkDialog *dialog;
+	GtkProgressBar *progress;
+	GtkBox *progress_hbox;
+	gboolean processing;
+};
+
+static gboolean
+mapi_settings_pbar_update (gpointer data)
+{
+	struct FolderSizeDialogData *dialog_data = (struct FolderSizeDialogData *)data;
+
+	while (1) {
+		FOLDERSIZE_LOCK ();
+
+		if (dialog_data->processing) {
+			gtk_progress_bar_pulse (dialog_data->progress);
+			FOLDERSIZE_UNLOCK ();
+			g_usleep (500);
+			continue;
+		}
+		break;
+	}
+
+	/* NOTE: Using hide_all results in a crashed */
+	gtk_widget_hide (dialog_data->progress);
+	gtk_widget_hide (dialog_data->progress_hbox);
+
+	FOLDERSIZE_UNLOCK ();
+
+	return FALSE;
+}
+
+static gboolean
+mapi_settings_get_folder_size (gpointer data)
+{
 	/* TreeView */
 	GtkTreeView *view;
 	GtkCellRenderer *renderer;
 	GtkListStore *store;
 	GtkTreeIter iter;
+	GtkBox *content_area;
+	struct FolderSizeDialogData *dialog_data = (struct FolderSizeDialogData *)data;
 
-	/* TODO :This should be in a thread. If the folder list is not cached, we would be blocking UI. */
 	GSList *folder_list = exchange_mapi_account_listener_peek_folder_list ();
-	
-	dialog = (GtkDialog *)gtk_dialog_new_with_buttons (_("Folder Size"), NULL, 
+
+	/* Hide progress bar. Set status*/
+	FOLDERSIZE_LOCK ();
+	dialog_data->processing = FALSE;
+	FOLDERSIZE_UNLOCK ();
+
+	if (folder_list) {
+		/*Tree View */
+		view = gtk_tree_view_new ();
+		renderer = gtk_cell_renderer_text_new ();
+		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),-1, 
+							     _("Folder"), renderer, "text", COL_FOLDERSIZE_NAME,
+							     NULL);
+		
+		renderer = gtk_cell_renderer_text_new ();
+		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),-1, 
+							     _("Size"), renderer, "text", COL_FOLDERSIZE_SIZE,
+							     NULL);
+		/* Model for TreeView */
+		store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
+		gtk_tree_view_set_model (GTK_TREE_VIEW (view), GTK_TREE_MODEL (store));
+		
+		/* Populate model with data */
+		while (folder_list) {
+			ExchangeMAPIFolder *folder = (ExchangeMAPIFolder *) folder_list->data;
+			gchar *folder_size = g_format_size_for_display (folder->size);
+			
+			gtk_list_store_append (store, &iter);
+			gtk_list_store_set (store, &iter, 
+					    COL_FOLDERSIZE_NAME, folder->folder_name,
+					    COL_FOLDERSIZE_SIZE, folder_size,
+					    -1);
+			folder_list = g_slist_next (folder_list);
+			g_free (folder_size);
+		}
+	} else {
+		view = gtk_label_new (_("Unable to retrive folder size information"));
+	}
+
+	gtk_widget_show_all (view);
+
+	/* Pack into content_area */
+	FOLDERSIZE_LOCK ();
+	content_area = gtk_dialog_get_content_area (dialog_data->dialog);
+	gtk_box_pack_start (content_area, view, TRUE, TRUE, 6);	
+	FOLDERSIZE_UNLOCK ();
+
+	return FALSE;
+}
+
+static void
+mapi_settings_run_folder_size_dialog (GtkWidget *parent)
+{
+	GtkBox *content_area;
+	struct FolderSizeDialogData *dialog_data;
+	GThread *folder_list_thread, *progress_update_thread;
+
+	dialog_data = g_new0 (struct FolderSizeDialogData, 1);
+	dialog_data->processing = TRUE;
+
+	dialog_data->dialog = (GtkDialog *)gtk_dialog_new_with_buttons (_("Folder Size"), NULL, 
 							   GTK_DIALOG_DESTROY_WITH_PARENT,
 							   GTK_STOCK_CLOSE, GTK_RESPONSE_ACCEPT,
 							   NULL);
 
-	content_area = gtk_dialog_get_content_area (dialog);
+	content_area = gtk_dialog_get_content_area (dialog_data->dialog);
 
-	/*Tree View */
-	view = gtk_tree_view_new ();
-	renderer = gtk_cell_renderer_text_new ();
-	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),-1, 
-						     _("Folder"), renderer, "text", COL_FOLDERSIZE_NAME,
-						     NULL);
+	dialog_data->progress = gtk_progress_bar_new ();
+	gtk_progress_bar_set_text (dialog_data->progress, _("Fetching folder list ..."));
+	gtk_progress_bar_set_pulse_step (dialog_data->progress, 0.5);
+	
+	dialog_data->progress_hbox = gtk_hbox_new (TRUE, 6);
 
-	renderer = gtk_cell_renderer_text_new ();
-	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),-1, 
-						     _("Size"), renderer, "text", COL_FOLDERSIZE_SIZE,
-						     NULL);
-	/* Model for TreeView */
-	store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
-	gtk_tree_view_set_model (GTK_TREE_VIEW (view), GTK_TREE_MODEL (store));
-
-	while (folder_list) {
-		  ExchangeMAPIFolder *folder = (ExchangeMAPIFolder *) folder_list->data;
-		  gchar *folder_size = g_format_size_for_display (folder->size);
-
-		  gtk_list_store_append (store, &iter);
-		  gtk_list_store_set (store, &iter, 
-				      COL_FOLDERSIZE_NAME, folder->folder_name,
-				      COL_FOLDERSIZE_SIZE, folder_size,
-				      -1);
-		  folder_list = g_slist_next (folder_list);
-		  g_free (folder_size);
-	}
+	gtk_box_pack_start (dialog_data->progress_hbox, dialog_data->progress, TRUE, TRUE, 6);
 
 	/* Pack the TreeView into dialog's content area */
-	gtk_box_pack_start (content_area, view, TRUE, TRUE, 6);
+	gtk_box_pack_start (content_area, dialog_data->progress_hbox, TRUE, TRUE, 6);
+	gtk_widget_show_all (dialog_data->dialog);
 
-	gtk_widget_show_all (dialog);
+	/* Create threads : Assuming that GThread is initialised */
+	FOLDERSIZE_LOCK_INIT();
+	folder_list_thread = g_thread_create (mapi_settings_get_folder_size, dialog_data, TRUE, NULL);
+	progress_update_thread = g_thread_create (mapi_settings_pbar_update, dialog_data, TRUE, NULL);
 
-	gtk_dialog_run (dialog);
-	gtk_widget_destroy (dialog);
+	/* Start the dialog */
+	gtk_dialog_run (dialog_data->dialog);
+
+	gtk_widget_destroy (dialog_data->dialog);
+	g_free (dialog_data);
 }
 
 static void
@@ -118,7 +203,7 @@ folder_size_clicked (GtkButton *button, gpointer data)
 	mapi_settings_run_folder_size_dialog (button);
 }
 
-/* only used in editor */
+/* used only in Account Editor */
 GtkWidget *
 org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 {
