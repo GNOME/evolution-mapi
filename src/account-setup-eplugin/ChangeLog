@@ -1,3 +1,22 @@
+2009-07-16  Johnny Jacob  <jjohnny@novell.com>
+
+	* exchange-mapi-account-settings.c (mapi_settings_pbar_update): Pulse progress bar.
+
+2009-07-14  Johnny Jacob  <jjohnny@novell.com>
+
+	* exchange-mapi-account-settings.c (org_gnome_folder_size_display_popup): Added.
+	Shows a 'Folder Size' pop on a right click on the folder tree.
+
+2009-07-14  Johnny Jacob  <jjohnny@novell.com>
+
+	* exchange-mapi-account-settings.c (mapi_settings_run_folder_size_dialog): Added.
+	(org_gnome_exchange_mapi_settings): Add 'Folder size' in the account editor dialog.
+
+2009-07-09  Johnny Jacob  <jjohnny@novell.com>
+
+	* exchange-mapi-account-settings.c (org_gnome_exchange_mapi_settings): Added. Factory
+	for creating a settings page in account editor.
+
 2009-03-19  Milan Crha  <mcrha@redhat.com>
 
 	** Fix for bug #574784

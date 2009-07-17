@@ -1,5 +1,4 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -65,6 +64,7 @@ typedef struct _ExchangeMAPIFolder {
 	guint32 child_count;
 	guint32 unread_count;
 	guint32 total;
+	guint32 size;
 
 	/* reserved */
 	gpointer reserved1;

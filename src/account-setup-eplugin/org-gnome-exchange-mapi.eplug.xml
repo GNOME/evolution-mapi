@@ -41,6 +41,28 @@
 					factory="org_gnome_exchange_mapi_account_setup"/>
 			</group>
 		</hook>
+		<hook class="org.gnome.evolution.mail.config:1.0">
+      		      <group 
+			 target="account" 
+			 id="org.gnome.evolution.mail.config.accountEditor"
+			 check="org_gnome_exchange_mapi_check_options">
+			<item type="page" 
+	      		      path="40.settings"
+	      		      _label="Exchange Settings"
+	      		      factory="org_gnome_exchange_mapi_settings"/>
+      		      </group>
+		</hook>
+
+		<hook class="org.gnome.evolution.mail.config:1.0">
+		          <group id="org.gnome.evolution.mail.folderConfig" 
+			         target="folder"
+			         check= "exchange_show_folder_size_check">
+			    <item type="page" 
+				  path="10.size" 
+				  _label="Size" 
+				  factory="org_gnome_exchange_mapi_show_folder_size"/>
+			  </group>
+		</hook>
 		<hook class="org.gnome.evolution.addressbook.config:1.0">
 			<group 
 				target="source" 
@@ -64,6 +86,12 @@
 					path="00.general/10.source/40.pcalendar" 
 					factory="exchange_mapi_create"/>
 			</group>
+		</hook>
+
+		<hook class="org.gnome.evolution.mail.popup:1.0">
+			<menu id="org.gnome.evolution.mail.foldertree.popup" target="folder"
+				factory="org_gnome_folder_size_display_popup">
+			</menu>
 		</hook>
 
 	</e-plugin>
