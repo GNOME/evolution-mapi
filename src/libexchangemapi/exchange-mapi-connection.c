@@ -2673,6 +2673,7 @@ exchange_mapi_get_folders_list (GSList **mapi_folders)
 	char 			*utf8_mailbox_name = NULL;
 	const char 		*mailbox_owner_name = NULL;
 	const char 		*mailbox_user_name = NULL;
+	const uint32_t          *mailbox_size = NULL;
 
 	d(g_print("\n%s: Entering %s ", G_STRLOC, G_STRFUNC));
 
@@ -2689,9 +2690,10 @@ exchange_mapi_get_folders_list (GSList **mapi_folders)
 	}
 
 	/* Build the array of Mailbox properties we want to fetch */
-	SPropTagArray = set_SPropTagArray(mem_ctx, 0x3,
+	SPropTagArray = set_SPropTagArray(mem_ctx, 0x4,
 					  PR_DISPLAY_NAME,
 					  PR_MAILBOX_OWNER_NAME,
+					  PR_MESSAGE_SIZE,
 					  PR_USER_NAME);
 
 	lpProps = talloc_zero(mem_ctx, struct SPropValue);
@@ -2712,6 +2714,7 @@ exchange_mapi_get_folders_list (GSList **mapi_folders)
 	mailbox_name = (const char *) find_SPropValue_data(&aRow, PR_DISPLAY_NAME);
 	mailbox_owner_name = (const char *) find_SPropValue_data(&aRow, PR_MAILBOX_OWNER_NAME);
 	mailbox_user_name = (const char *) find_SPropValue_data(&aRow, PR_USER_NAME);
+	mailbox_size = (const uint32_t *)find_SPropValue_data (&aRow, PR_MESSAGE_SIZE);
 
 	/* Prepare the directory listing */
 	retval = GetDefaultFolder(&obj_store, &mailbox_id, olFolderTopInformationStore);
@@ -2727,6 +2730,7 @@ exchange_mapi_get_folders_list (GSList **mapi_folders)
 					   MAPI_PERSONAL_FOLDER, mailbox_id, 0, 0, 0 ,0); 
 	folder->is_default = true;
 	folder->default_type = olFolderTopInformationStore; /*Is this correct ?*/
+	folder->size = *mailbox_size;
 
 	*mapi_folders = g_slist_prepend (*mapi_folders, folder);
 
