@@ -6,9 +6,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 1\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
-"POT-Creation-Date: 2009-06-15 12:04+0000\n"
-"PO-Revision-Date: 2009-07-06 02:29+0200\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-mapi\n"
+"POT-Creation-Date: 2009-07-17 09:58+0000\n"
+"PO-Revision-Date: 2009-07-17 16:08+0200\n"
 "Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
 "Language-Team: he\n"
 "MIME-Version: 1.0\n"
@@ -22,8 +23,11 @@ msgid "Enter Password for %s@%s"
 msgstr "הכנס סיסמה עבור %s@‏%s"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
-msgid "Server, username and domain name cannot be empty. Please fill them with correct values."
-msgstr "שם השרת, המשתמש והמתחם לא יכולים להיות ריקים. אנא מלא אותם עם ערכים נכונים."
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"שם השרת, המשתמש והמתחם לא יכולים להיות ריקים. אנא מלא אותם עם ערכים נכונים."
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
 msgid "Authentication finished successfully."
@@ -51,7 +55,7 @@ msgstr "מי_קום:"
 
 #: ../src/calendar/e-cal-backend-mapi.c:115
 #: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:463
+#: ../src/camel/camel-mapi-store.c:467
 msgid "Authentication failed"
 msgstr "האימות נכשל"
 
@@ -80,41 +84,43 @@ msgid "Could not create thread for populating cache"
 msgstr "לא ניתן ליצור תהליכון ליצירת מטמון"
 
 #: ../src/calendar/e-cal-backend-mapi.c:1513
-msgid "Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server."
-msgstr "תמיכה בשינוי מופעים יחידים של פגישות חוזרות אינה ממומשת עדיין. לא חל שינוי על פגישות שעל השרת."
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+msgstr ""
+"תמיכה בשינוי מופעים יחידים של פגישות חוזרות אינה ממומשת עדיין. לא חל שינוי "
+"על פגישות שעל השרת."
 
-#: ../src/camel/camel-mapi-folder.c:349
+#: ../src/camel/camel-mapi-folder.c:435
 #, c-format
-#| msgid "Fetching summary information for new messages in %s"
 msgid "Updating local summary cache for new messages in %s"
 msgstr "עדכון תקציר מטמון מקומי עבור הודעות חדשות ב־%s"
 
-#: ../src/camel/camel-mapi-folder.c:567
+#: ../src/camel/camel-mapi-folder.c:659
 #, c-format
-msgid "Retriving message IDs from server for %s"
-msgstr "הורדת מספרי ההודעות מהשרת עבור %s"
+msgid "Retrieving message IDs from server for %s"
+msgstr "אחזור מספרי ההודעות מהשרת עבור %s"
 
-#: ../src/camel/camel-mapi-folder.c:589
+#: ../src/camel/camel-mapi-folder.c:681
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "הסרת ההודעות שנמחקו מהמטמון ב־%s"
 
-#: ../src/camel/camel-mapi-folder.c:888
-#: ../src/camel/camel-mapi-folder.c:1494
-#: ../src/camel/camel-mapi-folder.c:1502
+#: ../src/camel/camel-mapi-folder.c:983 ../src/camel/camel-mapi-folder.c:1610
+#: ../src/camel/camel-mapi-folder.c:1618
 msgid "This message is not available in offline mode."
 msgstr "הודעה זאת אינה זמינה במצב לא מקוון."
 
-#: ../src/camel/camel-mapi-folder.c:897
+#: ../src/camel/camel-mapi-folder.c:992
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "מקבל את נתוני הסיכום עבור הודעות חדשות תחת %s"
 
-#: ../src/camel/camel-mapi-folder.c:907
+#: ../src/camel/camel-mapi-folder.c:1002
 msgid "Fetching items failed"
 msgstr "קבלת הפריטים נכשלה"
 
-#: ../src/camel/camel-mapi-folder.c:1458
+#: ../src/camel/camel-mapi-folder.c:1574
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -123,25 +129,24 @@ msgstr ""
 "לא ניתן לקבל את ההודעה: %s‏\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1458
+#: ../src/camel/camel-mapi-folder.c:1574
 msgid "No such message"
 msgstr "אין כזאת הודעה"
 
-#: ../src/camel/camel-mapi-folder.c:1470
+#: ../src/camel/camel-mapi-folder.c:1586
 msgid "Message fetching cancelled by user."
 msgstr "קבלת ההודעות בוטלה על ידי המשתמש."
 
-#: ../src/camel/camel-mapi-folder.c:1477
+#: ../src/camel/camel-mapi-folder.c:1593
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "לא ניתן לקבל את ההודעה %s: ‏%s"
 
-#: ../src/camel/camel-mapi-folder.c:1523
-#: ../src/camel/camel-mapi-folder.c:1535
+#: ../src/camel/camel-mapi-folder.c:1639 ../src/camel/camel-mapi-folder.c:1651
 msgid "Could not get message"
 msgstr "לא ניתן לקבל הודעה"
 
-#: ../src/camel/camel-mapi-folder.c:1890
+#: ../src/camel/camel-mapi-folder.c:2006
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "לא ניתן לטעון את הסיכום עבור %s"
@@ -184,7 +189,8 @@ msgid "Password"
 msgstr "סיסמה"
 
 #: ../src/camel/camel-mapi-provider.c:108
-msgid "This option will connect to the Openchange server using a plaintext password."
+msgid ""
+"This option will connect to the Openchange server using a plaintext password."
 msgstr "אפשרות זו תתחבר לשרת ה־Openchange באמצעות סיסמה בטקסט פשוט."
 
 #: ../src/camel/camel-mapi-store.c:61
@@ -195,16 +201,14 @@ msgstr "מועדפים"
 msgid "All Public Folders"
 msgstr "כל התיקיות הציבוריות"
 
-#: ../src/camel/camel-mapi-store.c:268
-#: ../src/camel/camel-mapi-transport.c:347
+#: ../src/camel/camel-mapi-store.c:268 ../src/camel/camel-mapi-transport.c:352
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "שרת Exchange MAPI %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:272
-#: ../src/camel/camel-mapi-transport.c:349
+#: ../src/camel/camel-mapi-store.c:272 ../src/camel/camel-mapi-transport.c:354
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "שירות Exchange MAPI עבור %s על גבי %s"
@@ -227,45 +231,47 @@ msgstr "לא הכנסת סיסמה."
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "לא ניתן להזדהות מול שרת ה־Exchange MAPI."
 
-#: ../src/camel/camel-mapi-store.c:447
+#: ../src/camel/camel-mapi-store.c:451
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "לא ניתן ליצור תיקיות MAPI במצב לא מקוון."
 
-#: ../src/camel/camel-mapi-store.c:452
+#: ../src/camel/camel-mapi-store.c:456
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "לא ניתן ליצור את התיקייה החדשה '%s'"
 
-#: ../src/camel/camel-mapi-store.c:662
+#: ../src/camel/camel-mapi-store.c:665
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "לא ניתן לשנות את שם תיקיית ה־MAPI `%s'. התיקייה אינה קיימת."
 
-#: ../src/camel/camel-mapi-store.c:673
+#: ../src/camel/camel-mapi-store.c:676
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "לא ניתן לשנות את תיקיית ברירת המחדל של MAPI `%s' ל־`%s'."
 
-#: ../src/camel/camel-mapi-store.c:691
+#: ../src/camel/camel-mapi-store.c:694
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "לא ניתן לשנות את שם תיקיית ה־MAPI `%s' ל־`%s'"
 
-#: ../src/camel/camel-mapi-store.c:1206
+#: ../src/camel/camel-mapi-store.c:1222
 msgid "Folder list not available in offline mode."
 msgstr "רשימת התיקיות אינה זמינה במצב לא מקוון."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:335
+#: ../src/camel/camel-mapi-transport.c:340
 msgid "Could not send message."
 msgstr "לא ניתן לשלוח הודעה."
 
 #~ msgid "Global Address List / Active Directory"
 #~ msgstr "רשימת כתובות גלובלית / Active Directory"
+
 #~ msgid "_Global Catalog server name:"
 #~ msgstr "שם שרת קטלוג _גלובלי:"
+
 #~ msgid "_Limit number of GAL responses: %s"
 #~ msgstr "ה_גבל את מספר תגובות ה-GAL: %s"
+
 #~ msgid "User canceled"
 #~ msgstr "המשתמש ביטל"
-
