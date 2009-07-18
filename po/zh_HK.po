@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: evolution-mapi 0.25.91\n"
+"Project-Id-Version: evolution-mapi 0.27.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-25 20:10+0800\n"
-"PO-Revision-Date: 2009-02-25 20:11+0800\n"
+"POT-Creation-Date: 2009-07-18 20:42+0800\n"
+"PO-Revision-Date: 2009-07-18 20:43+0800\n"
 "Last-Translator: Chao-Hsiung Liao <j_h_liau@yahoo.com.tw>\n"
 "Language-Team: Chinese (Hong Kong) <community@linuxhall.org>\n"
 "MIME-Version: 1.0\n"
@@ -46,13 +46,13 @@ msgstr "驗證(_A)"
 msgid "Personal Folders"
 msgstr "個人資料夾"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:385
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:386
 msgid "_Location:"
 msgstr "位置(_L):"
 
 #: ../src/calendar/e-cal-backend-mapi.c:115
 #: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:457
+#: ../src/camel/camel-mapi-store.c:467
 msgid "Authentication failed"
 msgstr "驗證失敗"
 
@@ -86,21 +86,36 @@ msgid ""
 "implemented. No change was made to the appointment on the server."
 msgstr "支援修改週期性約會的單一實體功能尚未實作。伺服器上的約會項目不會有更改。"
 
-#: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
+#: ../src/camel/camel-mapi-folder.c:435
+#, c-format
+msgid "Updating local summary cache for new messages in %s"
+msgstr "正在更新 %s 中新郵件的本地端摘要快取"
+
+#: ../src/camel/camel-mapi-folder.c:659
+#, c-format
+msgid "Retrieving message IDs from server for %s"
+msgstr "正從 %s 的伺服器取回郵件 ID"
+
+#: ../src/camel/camel-mapi-folder.c:681
+#, c-format
+msgid "Removing deleted messages from cache in %s"
+msgstr "正從 %s 的快取移除已刪除的郵件"
+
+#: ../src/camel/camel-mapi-folder.c:983 ../src/camel/camel-mapi-folder.c:1610
+#: ../src/camel/camel-mapi-folder.c:1618
+msgid "This message is not available in offline mode."
+msgstr "這封郵件無法在離線模式下使用。"
+
+#: ../src/camel/camel-mapi-folder.c:992
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "正在接收 %s 中新郵件的摘要資訊"
 
-#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1221
-#: ../src/camel/camel-mapi-folder.c:1229
-msgid "This message is not available in offline mode."
-msgstr "這封郵件無法在離線模式下使用。"
-
-#: ../src/camel/camel-mapi-folder.c:679
+#: ../src/camel/camel-mapi-folder.c:1002
 msgid "Fetching items failed"
 msgstr "取得項目失敗"
 
-#: ../src/camel/camel-mapi-folder.c:1185
+#: ../src/camel/camel-mapi-folder.c:1574
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -109,24 +124,24 @@ msgstr ""
 "不能取得郵件：%s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1185
+#: ../src/camel/camel-mapi-folder.c:1574
 msgid "No such message"
 msgstr "沒有這個郵件。"
 
-#: ../src/camel/camel-mapi-folder.c:1197
+#: ../src/camel/camel-mapi-folder.c:1586
 msgid "Message fetching cancelled by user."
 msgstr "取得郵件時被使用者取消了。"
 
-#: ../src/camel/camel-mapi-folder.c:1204
+#: ../src/camel/camel-mapi-folder.c:1593
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "無法取得郵件 %s： %s"
 
-#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1258
+#: ../src/camel/camel-mapi-folder.c:1639 ../src/camel/camel-mapi-folder.c:1651
 msgid "Could not get message"
 msgstr "無法取得郵件。"
 
-#: ../src/camel/camel-mapi-folder.c:1609
+#: ../src/camel/camel-mapi-folder.c:2006
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "無法載入 %s 的摘要"
@@ -139,52 +154,36 @@ msgstr "檢查新郵件"
 msgid "C_heck for new messages in all folders"
 msgstr "檢查所有資料夾中是否有新郵件(_H)"
 
-#. i18n: GAL is an Outlookism, AD is a Windowsism
-#: ../src/camel/camel-mapi-provider.c:66
-msgid "Global Address List / Active Directory"
-msgstr "全域通訊名單 / Active Directory"
-
-#. i18n: "Global Catalog" is a Windowsism, but it's a
-#. technical term and may not have translations?
-#: ../src/camel/camel-mapi-provider.c:70
-msgid "_Global Catalog server name:"
-msgstr "全域型錄伺服器名稱(_G):"
-
-#: ../src/camel/camel-mapi-provider.c:72
-#, c-format
-msgid "_Limit number of GAL responses: %s"
-msgstr "GAL 回應數目上限(_L): %s"
-
-#: ../src/camel/camel-mapi-provider.c:75
+#: ../src/camel/camel-mapi-provider.c:71
 msgid "Options"
 msgstr "選項"
 
-#: ../src/camel/camel-mapi-provider.c:77
+#: ../src/camel/camel-mapi-provider.c:73
 msgid "Automatically synchroni_ze account locally"
 msgstr "自動同步本地端帳號(_Z)"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:80
+#: ../src/camel/camel-mapi-provider.c:76
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "將過濾條件套用至這個伺服器收件匣的新郵件(_A)"
 
-#: ../src/camel/camel-mapi-provider.c:82
+#: ../src/camel/camel-mapi-provider.c:78
 msgid "Check new messages for _Junk contents"
 msgstr "檢查新郵件中是否有垃圾郵件(_J)"
 
-#: ../src/camel/camel-mapi-provider.c:84
+#: ../src/camel/camel-mapi-provider.c:80
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "只檢查收件匣資料夾中的垃圾郵件(_B)"
 
-#: ../src/camel/camel-mapi-provider.c:96
+#: ../src/camel/camel-mapi-provider.c:92
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
 msgstr "使用 MAPI 存取 Microsoft Exchange / OpenChange 伺服器"
 
-#: ../src/camel/camel-mapi-provider.c:111
+#: ../src/camel/camel-mapi-provider.c:107
 msgid "Password"
 msgstr "密碼"
 
-#: ../src/camel/camel-mapi-provider.c:112
+#: ../src/camel/camel-mapi-provider.c:108
 msgid ""
 "This option will connect to the Openchange server using a plaintext password."
 msgstr "此選項將會連線到使用標準純文字密碼驗證的 Openchange 伺服器。"
@@ -197,14 +196,14 @@ msgstr "喜好"
 msgid "All Public Folders"
 msgstr "所有公用資料夾"
 
-#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:347
+#: ../src/camel/camel-mapi-store.c:268 ../src/camel/camel-mapi-transport.c:352
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI 伺服器 %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:349
+#: ../src/camel/camel-mapi-store.c:272 ../src/camel/camel-mapi-transport.c:354
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "%2$s 上的 %1$s Exchange MAPI 服務"
@@ -213,52 +212,61 @@ msgstr "%2$s 上的 %1$s Exchange MAPI 服務"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:304
+#: ../src/camel/camel-mapi-store.c:310
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s 請輸入 %s@%s 的 MAPI 密碼"
 
-#: ../src/camel/camel-mapi-store.c:317
+#: ../src/camel/camel-mapi-store.c:323
 msgid "You did not enter a password."
 msgstr "你並未輸入密碼。"
 
-#: ../src/camel/camel-mapi-store.c:325
+#: ../src/camel/camel-mapi-store.c:331
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "無法驗證進入 Exchange MAPI 伺服器。"
 
-#: ../src/camel/camel-mapi-store.c:441
+#: ../src/camel/camel-mapi-store.c:451
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "在離線模式中無法建立 MAPI 資料夾。"
 
-#: ../src/camel/camel-mapi-store.c:446
+#: ../src/camel/camel-mapi-store.c:456
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "不能建立新郵件資料夾「%s」"
 
-#: ../src/camel/camel-mapi-store.c:657
+#: ../src/camel/camel-mapi-store.c:665
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "不能重新命名資料夾「%s」。因為它不存在。"
 
-#: ../src/camel/camel-mapi-store.c:668
+#: ../src/camel/camel-mapi-store.c:676
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "不能將 MAPI 預設資料夾「%s」重新命名為「%s」。"
 
-#: ../src/camel/camel-mapi-store.c:686
+#: ../src/camel/camel-mapi-store.c:694
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "不能將 MAPI 資料夾「%s」重新命名為「%s」。"
 
-#: ../src/camel/camel-mapi-store.c:1111
+#: ../src/camel/camel-mapi-store.c:1222
 msgid "Folder list not available in offline mode."
 msgstr "資料夾清單在離線模式無法使用。"
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:335
+#: ../src/camel/camel-mapi-transport.c:340
 msgid "Could not send message."
 msgstr "無法送出郵件。"
+
+#~ msgid "Global Address List / Active Directory"
+#~ msgstr "全域通訊名單 / Active Directory"
+
+#~ msgid "_Global Catalog server name:"
+#~ msgstr "全域型錄伺服器名稱(_G):"
+
+#~ msgid "_Limit number of GAL responses: %s"
+#~ msgstr "GAL 回應數目上限(_L): %s"
 
 #~ msgid "User canceled"
 #~ msgstr "使用者已取消"
