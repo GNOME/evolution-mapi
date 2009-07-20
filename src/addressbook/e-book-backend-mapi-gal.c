@@ -121,6 +121,51 @@ e_book_backend_mapi_gal_get_static_capabilities (EBookBackend *backend)
 	return g_strdup ("net,bulk-removes,do-initial-query,contact-lists");
 }
 
+static gpointer
+build_cache (EBookBackendMAPIGAL *ebmapi)
+{
+	EBookBackendMAPIGALPrivate *priv = ((EBookBackendMAPIGAL *) ebmapi)->priv;
+	char *tmp;
+	GSList **gal_list = NULL;
+	
+	//FIXME: What if book view is NULL? Can it be? Check that.
+	if (!priv->cache) {
+		printf("Caching for the first time\n");
+		priv->cache = e_book_backend_cache_new (priv->uri);
+	}
+
+	if (!priv->summary) {
+		priv->summary = e_book_backend_summary_new (priv->summary_file_name, 
+							    SUMMARY_FLUSH_TIMEOUT);
+		printf("Summary file name is %s\n", priv->summary_file_name);
+	}
+	
+	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
+	
+/*	if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
+						NULL, 0, 
+						NULL, NULL, 
+						cache_contact_cb, ebmapi, 
+						MAPI_OPTIONS_FETCH_ALL)) {
+		printf("Error during caching addressbook\n");
+		e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
+		return NULL;
+	}
+*/
+	exchange_mapi_util_get_gal (&gal_list);
+
+	tmp = g_strdup_printf("%d", (int)time (NULL));
+	e_book_backend_cache_set_time (priv->cache, tmp);
+	printf("setting time  %s\n", tmp);
+	g_free (tmp);
+	e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
+	e_book_backend_summary_save (priv->summary);
+	priv->is_cache_ready = TRUE;
+	priv->is_summary_ready = TRUE;
+	return NULL;		
+}
+
+
 static void
 e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
 					    EDataBook    *book,
@@ -155,7 +200,7 @@ e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
 		} else if (priv->marked_for_offline && !priv->is_cache_ready) {
 			/* Means we dont have a cache. Lets build that first */
 			printf("Preparing to build cache\n");
-	//		g_thread_create ((GThreadFunc) build_cache, backend, FALSE, NULL);
+			g_thread_create ((GThreadFunc) build_cache, backend, FALSE, NULL);
 		} 
 		e_book_backend_set_is_writable (backend, TRUE);
 		e_data_book_respond_authenticate_user (book, opid, GNOME_Evolution_Addressbook_Success);
@@ -422,6 +467,7 @@ book_view_thread (gpointer data)
 	GList *contacts = NULL, *temp_list = NULL;
 	//Number of multiple restriction to apply
 	unsigned int res_count = 6;
+	GSList **gal_list, *l = NULL;
 	
 	if (enable_debug)
 		printf("mapi: book view\n");
@@ -434,7 +480,9 @@ book_view_thread (gpointer data)
 						
 	switch (priv->mode) {
 		case GNOME_Evolution_Addressbook_MODE_REMOTE:
-			if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
+			exchange_mapi_util_get_gal (&gal_list);
+			break;
+/*			if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
 							NULL, 0, 
 							NULL, NULL, 
 							create_gal_contact_cb, book_view, 
@@ -451,7 +499,7 @@ book_view_thread (gpointer data)
 								  GNOME_Evolution_Addressbook_Success);
 			bonobo_object_unref (book_view);
 			break;
-
+*/
 	}
 }
 

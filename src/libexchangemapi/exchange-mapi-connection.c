@@ -708,7 +708,7 @@ cleanup:
 	return status;
 }
 
-static gboolean
+gboolean
 exchange_mapi_util_get_gal (GSList **gal_list)
 {
 	struct SPropTagArray	*SPropTagArray;
@@ -1210,8 +1210,8 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 			if (options & MAPI_OPTIONS_FETCH_RECIPIENTS) 
 				exchange_mapi_util_get_recipients (&obj_message, &recip_list);
 
-			if (options & MAPI_OPTIONS_FETCH_GAL) 
-				exchange_mapi_util_get_gal (&gal_list);
+//			if (options & MAPI_OPTIONS_FETCH_GAL) 
+//				exchange_mapi_util_get_gal (&gal_list);
 
 			/* get the main body stream no matter what */
 			if (options & MAPI_OPTIONS_FETCH_BODY_STREAM)

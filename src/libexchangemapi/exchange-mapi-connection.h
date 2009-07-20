@@ -134,6 +134,9 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 					FetchCallback cb, gpointer data, 
 					guint32 options);
 
+gboolean
+exchange_mapi_util_get_gal (GSList **gal_list);
+
 mapi_id_t 
 exchange_mapi_create_folder (uint32_t olFolder, mapi_id_t pfid, const char *name);
 
