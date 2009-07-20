@@ -708,6 +708,59 @@ cleanup:
 	return status;
 }
 
+static gboolean
+exchange_mapi_util_get_gal (GSList **gal_list)
+{
+	struct SPropTagArray	*SPropTagArray;
+	struct SRowSet		*SRowSet;
+	enum MAPISTATUS		retval;
+	uint32_t		i;
+	uint32_t		count;
+	uint8_t			ulFlags;
+	TALLOC_CTX *mem_ctx;	
+
+	mem_ctx = talloc_init ("ExchangeMAPI_GetGAL");
+
+	SPropTagArray = set_SPropTagArray(mem_ctx, 0xc,
+					  PR_INSTANCE_KEY,
+					  PR_ENTRYID,
+					  PR_DISPLAY_NAME_UNICODE,
+					  PR_EMAIL_ADDRESS_UNICODE,
+					  PR_DISPLAY_TYPE,
+					  PR_OBJECT_TYPE,
+					  PR_ADDRTYPE_UNICODE,
+					  PR_OFFICE_TELEPHONE_NUMBER_UNICODE,
+					  PR_OFFICE_LOCATION_UNICODE,
+					  PR_TITLE_UNICODE,
+					  PR_COMPANY_NAME_UNICODE,
+					  PR_ACCOUNT_UNICODE);
+
+	count = 0x7;
+	ulFlags = TABLE_START;
+	do {
+		count += 0x2;
+		retval = GetGALTable(global_mapi_session, SPropTagArray, &SRowSet, count, ulFlags);
+		if ((!SRowSet) || (!(SRowSet->aRow))) {
+			return false;
+		}
+		if (SRowSet->cRows) {
+			for (i = 0; i < SRowSet->cRows; i++) {
+				mapidump_PAB_entry(&SRowSet->aRow[i]);
+			}
+		}
+		ulFlags = TABLE_CUR;
+		MAPIFreeBuffer(SRowSet);
+	} while (SRowSet->cRows == count);
+	mapi_errstr("GetPABTable", GetLastError());
+
+	MAPIFreeBuffer(SPropTagArray);
+
+	return true;
+	
+}
+
+
+
 /* Returns TRUE if all recipients were read succcesfully, else returns FALSE */
 static gboolean
 exchange_mapi_util_get_recipients (mapi_object_t *obj_message, GSList **recip_list)
@@ -1133,6 +1186,7 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 			const bool *has_attach = NULL;
 			GSList *attach_list = NULL;
 			GSList *recip_list = NULL;
+			GSList *gal_list = NULL;
 			GSList *stream_list = NULL;
 			gboolean cb_retval = false;
 
@@ -1155,6 +1209,9 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 
 			if (options & MAPI_OPTIONS_FETCH_RECIPIENTS) 
 				exchange_mapi_util_get_recipients (&obj_message, &recip_list);
+
+			if (options & MAPI_OPTIONS_FETCH_GAL) 
+				exchange_mapi_util_get_gal (&gal_list);
 
 			/* get the main body stream no matter what */
 			if (options & MAPI_OPTIONS_FETCH_BODY_STREAM)
