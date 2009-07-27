@@ -326,7 +326,6 @@ add_folders (GSList *folders, GtkTreeStore *ts)
 	gtk_tree_store_set (ts, &iter, 0, node, -1);
 	while (tmp) {
 		ExchangeMAPIFolder *folder = tmp->data;
-		g_print("%s\n", folder->folder_name);
 		add_to_store (ts, folder);
 		tmp = tmp->next;
 	}
@@ -444,8 +443,6 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	EABConfigTargetSource *t = (EABConfigTargetSource *) target;
 	ESource *source = t->source;
 	char *uri_text, *tmp;
-	const char *sfid; 
-	mapi_id_t fid, pfid;
 	ESourceGroup *grp;
 	
 	uri_text = e_source_get_uri (source);
@@ -453,11 +450,6 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 		return;
 	
 	//FIXME: Offline handling
-	sfid = e_source_get_property (source, "parent-fid");
-	exchange_mapi_util_mapi_id_from_string (sfid, &pfid);
-
-	fid = exchange_mapi_create_folder (olFolderContacts, pfid, e_source_peek_name (source));
-	g_print("Created %016" G_GINT64_MODIFIER "X\n", fid);
 	grp = e_source_peek_group (source);
 	e_source_set_property (source, "auth", "plain/password");
 	e_source_set_property (source, "auth-domain", EXCHANGE_MAPI_PASSWORD_COMPONENT);
@@ -467,9 +459,6 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	e_source_set_property(source, "domain", e_source_group_get_property (grp, "domain"));
 	e_source_set_relative_uri (source, g_strconcat (";",e_source_peek_name (source), NULL));
 
-	tmp = exchange_mapi_util_mapi_id_to_string (fid);
-	e_source_set_property(source, "folder-id", tmp);
-	g_free (tmp);
 	e_source_set_property (source, "completion", "true");
 	// Update the folder list in the plugin and ExchangeMAPIFolder
 

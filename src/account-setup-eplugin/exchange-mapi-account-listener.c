@@ -456,6 +456,30 @@ add_addressbook_sources (EAccount *account, GSList *folders)
 		g_object_unref (source);
 	}
 
+	//Add GAL
+	{
+		char *uri;
+
+		uri = g_strdup_printf("mapigal://%s@%s/;Global Address List", url->user, url->host);
+		source = e_source_new_with_absolute_uri ("Global Address List", uri);
+		// source = e_source_new ("Global Address List", g_strconcat (";","Global Address List" , NULL));
+		e_source_set_property (source, "auth", "plain/password");
+		e_source_set_property (source, "auth-domain", "MAPIGAL");
+
+		//FIXME: Offline handling
+		e_source_set_property(source, "user", url->user);
+		e_source_set_property(source, "host", camel_url_get_param (url, "ad_server"));
+		e_source_set_property(source, "view-limit", camel_url_get_param (url, "ad_limit"));
+		e_source_set_property(source, "profile", camel_url_get_param (url, "profile"));
+		e_source_set_property(source, "domain", camel_url_get_param (url, "domain"));
+		// e_source_set_property (source, "offline_sync",
+		// camel_url_get_param (url, "offline_sync") ? "1" : "0");
+		e_source_set_property(source, "offline_sync", "1");
+		e_source_set_property (source, "completion", "true");
+		e_source_group_add_source (group, source, -1);
+		g_object_unref (source);
+	}
+
 	e_source_list_add_group (list, group, -1);
 	e_source_list_sync (list, NULL);
 	g_object_unref (group);

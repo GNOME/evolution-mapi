@@ -33,16 +33,18 @@ typedef enum {
 	MAPI_OPTIONS_FETCH_ATTACHMENTS = 1<<0,
 	MAPI_OPTIONS_FETCH_RECIPIENTS = 1<<1,
 	MAPI_OPTIONS_FETCH_BODY_STREAM = 1<<2,
-	MAPI_OPTIONS_FETCH_GENERIC_STREAMS = 1<<3, 
-	MAPI_OPTIONS_DONT_SUBMIT = 1<<4, 
-	MAPI_OPTIONS_GETBESTBODY = 1<<5,
-	MAPI_OPTIONS_USE_PFSTORE = 1<<6
+	MAPI_OPTIONS_FETCH_GENERIC_STREAMS = 1<<3,
+	MAPI_OPTIONS_FETCH_GAL = 1 <<4,
+	MAPI_OPTIONS_DONT_SUBMIT = 1<<5, 
+	MAPI_OPTIONS_GETBESTBODY = 1<<6,
+	MAPI_OPTIONS_USE_PFSTORE = 1<<7
 } ExchangeMAPIOptions;
 
 #define MAPI_OPTIONS_FETCH_ALL MAPI_OPTIONS_FETCH_ATTACHMENTS | \
 	                       MAPI_OPTIONS_FETCH_RECIPIENTS | \
 	                       MAPI_OPTIONS_FETCH_BODY_STREAM | \
 	                       MAPI_OPTIONS_FETCH_GENERIC_STREAMS
+
 
 typedef struct {
 	GByteArray *value;
@@ -83,6 +85,11 @@ typedef struct {
 } ExchangeMAPIRecipient;
 
 typedef struct {
+	const char *name;
+	const char *email;
+} ExchangeMAPIGALEntry;
+
+typedef struct {
 	uint32_t cValues; 
 	struct SPropValue *lpProps; 
 	GSList *streams; 
@@ -95,6 +102,7 @@ typedef struct {
 	mapi_id_t mid;
 	GSList *attachments;
 	GSList *recipients;
+	GSList *gallist;
 	GSList *streams;
 	guint total; /*Total number of results*/
 	guint index; /*Index of this Item*/
@@ -130,6 +138,9 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 					BuildNameID build_name_id, gpointer build_name_data, 
 					FetchCallback cb, gpointer data, 
 					guint32 options);
+
+gboolean
+exchange_mapi_util_get_gal (GPtrArray *contacts_array);
 
 mapi_id_t 
 exchange_mapi_create_folder (uint32_t olFolder, mapi_id_t pfid, const char *name);
