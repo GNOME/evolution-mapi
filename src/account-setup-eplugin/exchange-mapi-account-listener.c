@@ -458,26 +458,15 @@ add_addressbook_sources (EAccount *account, GSList *folders)
 
 	//Add GAL
 	{
-		char *uri, *tmp;
-		mapi_id_t fid, pfid;
-		const char *sfid;
+		char *uri;
 
 		uri = g_strdup_printf("mapigal://%s@%s/;Global Address List", url->user, url->host);
 		source = e_source_new_with_absolute_uri ("Global Address List", uri);
 		// source = e_source_new ("Global Address List", g_strconcat (";","Global Address List" , NULL));
 		e_source_set_property (source, "auth", "plain/password");
 		e_source_set_property (source, "auth-domain", "MAPIGAL");
-		fid = exchange_mapi_get_default_folder_id (olFolderContacts);
 
 		//FIXME: Offline handling
-		sfid = e_source_get_property (source, "parent-fid");
-		exchange_mapi_util_mapi_id_from_string (sfid, &pfid);
-
-		fid = exchange_mapi_create_folder (olFolderContacts, pfid, e_source_peek_name (source));
-		tmp = exchange_mapi_util_mapi_id_to_string (fid);
-		e_source_set_property(source, "folder-id", tmp);
-		g_free (tmp);
-
 		e_source_set_property(source, "user", url->user);
 		e_source_set_property(source, "host", camel_url_get_param (url, "ad_server"));
 		e_source_set_property(source, "view-limit", camel_url_get_param (url, "ad_limit"));

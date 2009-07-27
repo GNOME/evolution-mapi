@@ -126,7 +126,8 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 {
 	EBookBackendMAPIGALPrivate *priv = ((EBookBackendMAPIGAL *) ebmapi)->priv;
 	char *tmp;
-	GSList **gal_list = NULL;
+	EContact *contact = e_contact_new ();
+	gint i = 0;
 	
 	//FIXME: What if book view is NULL? Can it be? Check that.
 	if (!priv->cache) {
@@ -142,17 +143,33 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 	
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	
-/*	if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
-						NULL, 0, 
-						NULL, NULL, 
-						cache_contact_cb, ebmapi, 
-						MAPI_OPTIONS_FETCH_ALL)) {
-		printf("Error during caching addressbook\n");
-		e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
-		return NULL;
+	GPtrArray *contacts_array = g_ptr_array_new();
+
+	exchange_mapi_util_get_gal (contacts_array);
+
+	e_book_backend_cache_add_contact (priv->cache, contact);
+	e_book_backend_summary_add_contact (priv->summary, contact);		
+	g_object_unref(contact);
+
+	for (i=0;i<contacts_array->len;i++) {
+		EContact *contact = e_contact_new ();
+		ExchangeMAPIGALEntry *gal_entry = contacts_array->pdata[i];
+		char *uid;
+		GPtrArray *contacts_array = g_ptr_array_new();
+
+		uid = g_strdup_printf ("%d", i);
+
+		e_contact_set (contact, E_CONTACT_UID, uid);
+		e_contact_set (contact, E_CONTACT_FULL_NAME, gal_entry->name);
+		e_contact_set (contact, E_CONTACT_EMAIL_1, gal_entry->email);
+
+		e_book_backend_cache_add_contact (priv->cache, contact);
+		e_book_backend_summary_add_contact (priv->summary, contact);		
+		g_object_unref(contact);
+		g_free (uid);
 	}
-*/
-	exchange_mapi_util_get_gal (&gal_list);
+
+	g_ptr_array_free(contacts_array, TRUE);
 
 	tmp = g_strdup_printf("%d", (int)time (NULL));
 	e_book_backend_cache_set_time (priv->cache, tmp);
@@ -162,7 +179,7 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 	e_book_backend_summary_save (priv->summary);
 	priv->is_cache_ready = TRUE;
 	priv->is_summary_ready = TRUE;
-	return NULL;		
+	return NULL;
 }
 
 
@@ -454,6 +471,142 @@ create_gal_contact_cb (FetchItemsCallbackData *item_data, gpointer data)
 }
 
 static void
+get_contacts_from_cache (EBookBackendMAPIGAL *ebmapi, 
+			 const char *query,
+			 GPtrArray *ids,
+			 EDataBookView *book_view, 
+			 BESearchClosure *closure)
+{
+	int i;
+
+	for (i = 0; i < ids->len; i ++) {
+		char *uid;
+		EContact *contact; 
+
+                if (!e_flag_is_set (closure->running))
+                        break;
+
+ 		uid = g_ptr_array_index (ids, i);
+		contact = e_book_backend_cache_get_contact (ebmapi->priv->cache, uid);
+		if (contact) {
+			e_data_book_view_notify_update (book_view, contact);
+			g_object_unref (contact);
+		}
+	}
+	if (e_flag_is_set (closure->running))
+		e_data_book_view_notify_complete (book_view, 
+						  GNOME_Evolution_Addressbook_Success);
+}
+
+static gboolean
+build_restriction_emails_contains (struct mapi_SRestriction *res, 
+				   const char *query)
+{
+	char *email=NULL, *tmp, *tmp1;
+
+	/* This currently supports "email foo@bar.soo" */
+	tmp = strdup (query);
+	
+	tmp = strstr (tmp, "email");
+	if (tmp ) {
+		tmp = strchr (tmp, '\"');
+		if (tmp && ++tmp) {
+			tmp = strchr (tmp, '\"');
+			if (tmp && ++tmp) {
+				tmp1 = tmp;
+				tmp1 = strchr (tmp1, '\"');
+				if (tmp1) {
+					*tmp1 = 0;
+					email = tmp;
+				}
+			}
+		}
+	}
+	
+
+	if (email==NULL || !strchr (email, '@'))
+		return FALSE;
+
+	res->rt = RES_PROPERTY;
+	res->res.resProperty.relop = RES_PROPERTY;
+	res->res.resProperty.ulPropTag = 0x801f001e; /* EMAIL */
+	res->res.resProperty.lpProp.ulPropTag = 0x801f001e; /* EMAIL*/
+	res->res.resProperty.lpProp.value.lpszA = email;
+
+	return TRUE;
+}
+
+static gboolean
+build_multiple_restriction_emails_contains (struct mapi_SRestriction *res, 
+				            struct mapi_SRestriction_or *or_res, 
+					    const char *query)
+{
+	char *email=NULL, *tmp, *tmp1;
+	//Number of restriction to apply
+	unsigned int res_count = 6;
+
+	/* This currently supports "email foo@bar.soo" */
+	tmp = strdup (query);
+	
+	tmp = strstr (tmp, "email");
+	if (tmp ) {
+		tmp = strchr (tmp, '\"');
+		if (tmp && ++tmp) {
+			tmp = strchr (tmp, '\"');
+			if (tmp && ++tmp) {
+				tmp1 = tmp;
+				tmp1 = strchr (tmp1, '\"');
+				if (tmp1) {
+					*tmp1 = 0;
+					email = tmp;
+				}
+			}
+		}
+	}
+
+	if (email==NULL || !strchr (email, '@'))
+		return FALSE;
+
+	or_res[0].rt = RES_CONTENT;
+	or_res[0].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
+	or_res[0].res.resContent.ulPropTag = PR_EMS_AB_MANAGER_T;
+	or_res[0].res.resContent.lpProp.value.lpszA = email;
+
+	or_res[1].rt = RES_CONTENT;
+	or_res[1].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
+	or_res[1].res.resContent.ulPropTag = PR_DISPLAY_NAME;
+	or_res[1].res.resContent.lpProp.value.lpszA = email;
+
+	or_res[2].rt = RES_CONTENT;
+	or_res[2].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
+	or_res[2].res.resContent.ulPropTag = PR_GIVEN_NAME;
+	or_res[2].res.resContent.lpProp.value.lpszA = email;
+
+	or_res[3].rt = RES_CONTENT;
+	or_res[3].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
+	or_res[3].res.resContent.ulPropTag = 0x8084001e;
+	or_res[3].res.resContent.lpProp.value.lpszA = email;
+
+	or_res[4].rt = RES_CONTENT;
+	or_res[4].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
+	or_res[4].res.resContent.ulPropTag = 0x8094001e;
+	or_res[4].res.resContent.lpProp.value.lpszA = email;
+
+	or_res[5].rt = RES_CONTENT;
+	or_res[5].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
+	or_res[5].res.resContent.ulPropTag = 0x80a4001e;
+	or_res[5].res.resContent.lpProp.value.lpszA = email;
+
+	res = g_new0 (struct mapi_SRestriction, 1);
+
+	res->rt = RES_OR;
+	res->res.resOr.cRes = res_count;
+	res->res.resOr.res = or_res;
+
+	return TRUE;
+}
+
+static void
 book_view_thread (gpointer data)
 {
 	struct mapi_SRestriction res;
@@ -468,6 +621,7 @@ book_view_thread (gpointer data)
 	//Number of multiple restriction to apply
 	unsigned int res_count = 6;
 	GSList **gal_list, *l = NULL;
+	GPtrArray *contacts_array = g_ptr_array_new();
 	
 	if (enable_debug)
 		printf("mapi: book view\n");
@@ -480,26 +634,70 @@ book_view_thread (gpointer data)
 						
 	switch (priv->mode) {
 		case GNOME_Evolution_Addressbook_MODE_REMOTE:
-			exchange_mapi_util_get_gal (&gal_list);
-			break;
-/*			if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
-							NULL, 0, 
-							NULL, NULL, 
-							create_gal_contact_cb, book_view, 
-							MAPI_OPTIONS_FETCH_GAL)) {
-				if (e_flag_is_set (closure->running))
-					e_data_book_view_notify_complete (book_view, 
-									  GNOME_Evolution_Addressbook_OtherError);      
+			exchange_mapi_util_get_gal (contacts_array);
+			if (!exchange_mapi_connection_exists ()) {
+				e_book_backend_notify_auth_required (E_BOOK_BACKEND (backend));
+				e_data_book_view_notify_complete (book_view,
+							GNOME_Evolution_Addressbook_AuthenticationRequired);
 				bonobo_object_unref (book_view);
 				return;
 			}
 		
+
+			if (priv->marked_for_offline && priv->cache && priv->is_cache_ready) {
+				if (priv->is_summary_ready && 
+				    e_book_backend_summary_is_summary_query (priv->summary, query)) {
+					if (enable_debug)
+						printf ("reading the contacts from summary \n");
+					ids = e_book_backend_summary_search (priv->summary, query);
+					if (ids && ids->len > 0) {
+						get_contacts_from_cache (backend, query, ids, book_view, closure);
+						g_ptr_array_free (ids, TRUE);
+					}
+					bonobo_object_unref (book_view);
+					return;
+				}
+			
+				printf("Summary seems to be not there or not a summary query, lets fetch from cache directly\n");
+			
+				/* We are already cached. Lets return from there. */
+				contacts = e_book_backend_cache_get_contacts (priv->cache, 
+								      query);
+				temp_list = contacts;
+				for (; contacts != NULL; contacts = g_list_next(contacts)) {
+					if (!e_flag_is_set (closure->running)) {
+						for (;contacts != NULL; contacts = g_list_next (contacts))
+							g_object_unref (contacts->data);
+						break;
+					}							
+					e_data_book_view_notify_update (book_view, 
+									E_CONTACT(contacts->data));
+					g_object_unref (contacts->data);
+				}
+				if (e_flag_is_set (closure->running))
+					e_data_book_view_notify_complete (book_view, 
+									  GNOME_Evolution_Addressbook_Success);
+				if (temp_list)
+					 g_list_free (temp_list);
+				bonobo_object_unref (book_view);
+				return;
+			}
+		
+			if (e_book_backend_summary_is_summary_query (priv->summary, query)) {
+				or_res = g_new (struct mapi_SRestriction_or, res_count);
+		
+				if (!build_multiple_restriction_emails_contains (&res, or_res, query)) {
+					e_data_book_view_notify_complete (book_view, 
+								  GNOME_Evolution_Addressbook_OtherError);
+					return ;
+				} 
+
 			if (e_flag_is_set (closure->running))
 				e_data_book_view_notify_complete (book_view,
 								  GNOME_Evolution_Addressbook_Success);
 			bonobo_object_unref (book_view);
 			break;
-*/
+		}
 	}
 }
 

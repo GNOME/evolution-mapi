@@ -708,8 +708,33 @@ cleanup:
 	return status;
 }
 
+
+
+static ExchangeMAPIGALEntry * 
+mapidump_PAB_gal_entry (struct SRow *aRow)
+{
+	const char	*addrtype;
+	const char	*name;
+	const char	*email;
+	const char	*account;
+
+	addrtype = (const char *)find_SPropValue_data(aRow, PR_ADDRTYPE_UNICODE);
+	name = (const char *)find_SPropValue_data(aRow, PR_DISPLAY_NAME_UNICODE);
+	email = (const char *)find_SPropValue_data(aRow, PR_EMAIL_ADDRESS_UNICODE);
+	account = (const char *)find_SPropValue_data(aRow, PR_ACCOUNT_UNICODE);
+
+	printf("[%s] %s:\n\tName: %-25s\n\tEmail: %-25s\n", 
+	       addrtype, account, name, email);
+
+	ExchangeMAPIGALEntry *gal_entry = g_new0 (ExchangeMAPIGALEntry, 1);
+	gal_entry->name = g_strdup (name);
+	gal_entry->email = g_strdup (email);
+
+	return gal_entry;
+}
+
 gboolean
-exchange_mapi_util_get_gal (GSList **gal_list)
+exchange_mapi_util_get_gal (GPtrArray *contacts_array)
 {
 	struct SPropTagArray	*SPropTagArray;
 	struct SRowSet		*SRowSet;
@@ -717,8 +742,8 @@ exchange_mapi_util_get_gal (GSList **gal_list)
 	uint32_t		i;
 	uint32_t		count;
 	uint8_t			ulFlags;
-	TALLOC_CTX *mem_ctx;	
-
+	TALLOC_CTX *mem_ctx;
+	
 	mem_ctx = talloc_init ("ExchangeMAPI_GetGAL");
 
 	SPropTagArray = set_SPropTagArray(mem_ctx, 0xc,
@@ -745,7 +770,9 @@ exchange_mapi_util_get_gal (GSList **gal_list)
 		}
 		if (SRowSet->cRows) {
 			for (i = 0; i < SRowSet->cRows; i++) {
-				mapidump_PAB_entry(&SRowSet->aRow[i]);
+				ExchangeMAPIGALEntry *gal_entry = g_new0 (ExchangeMAPIGALEntry, 1);
+				gal_entry = mapidump_PAB_gal_entry(&SRowSet->aRow[i]);
+				g_ptr_array_add(contacts_array, gal_entry);
 			}
 		}
 		ulFlags = TABLE_CUR;
@@ -1210,8 +1237,7 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 			if (options & MAPI_OPTIONS_FETCH_RECIPIENTS) 
 				exchange_mapi_util_get_recipients (&obj_message, &recip_list);
 
-//			if (options & MAPI_OPTIONS_FETCH_GAL) 
-//				exchange_mapi_util_get_gal (&gal_list);
+//			exchange_mapi_util_get_gal (contacts_array);
 
 			/* get the main body stream no matter what */
 			if (options & MAPI_OPTIONS_FETCH_BODY_STREAM)
