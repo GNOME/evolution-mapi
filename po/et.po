@@ -12,7 +12,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
 "POT-Creation-Date: 2009-07-22 21:06+0000\n"
-"PO-Revision-Date: 2009-07-27 08:21+0300\n"
+"PO-Revision-Date: 2009-07-27 15:53+0300\n"
 "Last-Translator: Ivar Smolin <okul@linux.ee>\n"
 "Language-Team: Estonian <et@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -52,14 +52,14 @@ msgstr "Tõrge autentimisel"
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
 #, c-format
 msgid "Loading items in folder %s"
-msgstr ""
+msgstr "Kausta \"%s\" kirjete laadimine"
 
 #. FIXME: String : We need to restart evolution-data-server
 msgid "Error fetching changes from the server."
-msgstr ""
+msgstr "Viga serverist muudatuste hankimisel."
 
 msgid "Could not create cache file"
-msgstr ""
+msgstr "Puhverfaili pole võimalik luua."
 
 msgid "Could not create thread for populating cache"
 msgstr ""
@@ -139,7 +139,7 @@ msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr ""
 
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
-msgstr ""
+msgstr "MAPI kaudu Microsoft Exchange / OpenChange serveritele ligipääsuks"
 
 msgid "Password"
 msgstr "Parool"
@@ -162,7 +162,7 @@ msgstr "Exchange MAPI server %s"
 #. _username_ on _server host name__
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
-msgstr ""
+msgstr "Exchange MAPI-teenus kasutajale %s hostil %s"
 
 #. To translators : First %s : is the error text or the reason
 #. for prompting the user if it is available.
@@ -170,7 +170,7 @@ msgstr ""
 #. Third %s is : Server host name.
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
-msgstr ""
+msgstr "%s Palun sisesta konto %s@%s MAPI-parool"
 
 msgid "You did not enter a password."
 msgstr "Sa ei sisestanud parooli."
@@ -199,7 +199,7 @@ msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr ""
 
 msgid "Folder list not available in offline mode."
-msgstr ""
+msgstr "Kaustade nimekiri pole võrguvabas režiimis saadaval."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
 msgid "Could not send message."
