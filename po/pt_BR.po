@@ -4,14 +4,14 @@
 # Taylon Silmer <taylonsilva@gmail.com>, 2009.
 # Fabrício Godoy <skarllot@gmail.com>, 2009.
 # Djavan Fagundes <dnoway@gmail.com>, 2009.
+# André Gondim <andregondim@ubuntu.com>, 2009.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-mapi\n"
-"POT-Creation-Date: 2009-07-09 15:21+0000\n"
-"PO-Revision-Date: 2009-06-15 14:57-0300\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-08-01 15:21-0400\n"
+"PO-Revision-Date: 2009-07-29 11:03-0300\n"
 "Last-Translator: Djavan Fagundes <dnoway@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -21,7 +21,7 @@ msgstr ""
 "X-Poedit-Language: Portuguese\n"
 "X-Poedit-Country: BRAZIL\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
 #, c-format
 msgid "Enter Password for %s@%s"
@@ -32,7 +32,7 @@ msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
 msgstr ""
-"Servidor, nome do usuário e nome do domínio não podem estar vazios. Por "
+"Servidor, nome de usuário e nome do domínio não podem estar vazios. Por "
 "favor, preencha-os com os valores corretos."
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
@@ -55,9 +55,52 @@ msgstr "_Autenticar"
 msgid "Personal Folders"
 msgstr "Pastas pessoais"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:386
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:385
 msgid "_Location:"
 msgstr "_Localização:"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:120
+msgid "Folder"
+msgstr "Pasta"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:125
+#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:2
+msgid "Size"
+msgstr "Tamanho"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:145
+msgid "Unable to retrive folder size information"
+msgstr "Não é possível recuperar as informações de tamanho da pasta"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:169
+msgid "Folder Size"
+msgstr "Tamanho da pasta"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:177
+msgid "Fetching folder list ..."
+msgstr "Obtendo lista de pastas ..."
+
+#. Miscelleneous settings
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:237
+msgid "Miscelleneous"
+msgstr "Diversos"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
+msgid "View the size of all Exchange folders"
+msgstr "Ver o tamanho de todas as pastas do Exchange"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:252
+msgid "Folders Size"
+msgstr "Tamanho das pastas"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
+#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
+msgid "Exchange Settings"
+msgstr "Configurações do Exchange"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
+msgid "_Folder size"
+msgstr "_Tamanho da pasta"
 
 #: ../src/calendar/e-cal-backend-mapi.c:115
 #: ../src/calendar/e-cal-backend-mapi.c:1053
@@ -104,8 +147,7 @@ msgid "Updating local summary cache for new messages in %s"
 msgstr "Atualizando resumo de informações locais para as novas mensagens em %s"
 
 #: ../src/camel/camel-mapi-folder.c:659
-#, fuzzy, c-format
-#| msgid "Retriving message IDs from server for %s"
+#, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Recuperando IDs das mensagens do servidor para %s"
 
@@ -167,36 +209,52 @@ msgstr "Verificando por novas mensagens"
 msgid "C_heck for new messages in all folders"
 msgstr "_Verificar por novas mensagens em todas as pastas"
 
-#: ../src/camel/camel-mapi-provider.c:71
+#. i18n: GAL is an Outlookism, AD is a Windowsism
+#: ../src/camel/camel-mapi-provider.c:66
+msgid "Global Address List / Active Directory"
+msgstr "Lista Global de Endereços (GAL) / Active Directory"
+
+#. i18n: "Global Catalog" is a Windowsism, but it's a
+#. technical term and may not have translations?
+#: ../src/camel/camel-mapi-provider.c:70
+msgid "_Global Catalog server name:"
+msgstr "Nome do servidor de Catálogo _Global:"
+
+#: ../src/camel/camel-mapi-provider.c:72
+#, c-format
+msgid "_Limit number of GAL responses: %s"
+msgstr "_Limitar número de respostas do GAL: %s"
+
+#: ../src/camel/camel-mapi-provider.c:75
 msgid "Options"
 msgstr "Opções"
 
-#: ../src/camel/camel-mapi-provider.c:73
+#: ../src/camel/camel-mapi-provider.c:77
 msgid "Automatically synchroni_ze account locally"
 msgstr "Sincroni_zar automaticamente a conta localmente"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:76
+#: ../src/camel/camel-mapi-provider.c:80
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Aplicar filtros às novas mensagens na caixa de entrada deste servidor"
 
-#: ../src/camel/camel-mapi-provider.c:78
+#: ../src/camel/camel-mapi-provider.c:82
 msgid "Check new messages for _Junk contents"
 msgstr "Verificar se as novas mensagens contém _spam"
 
-#: ../src/camel/camel-mapi-provider.c:80
+#: ../src/camel/camel-mapi-provider.c:84
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Verificar na caixa de entrada se as mensag_ens contém spam"
 
-#: ../src/camel/camel-mapi-provider.c:92
+#: ../src/camel/camel-mapi-provider.c:96
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
 msgstr "Para acessar servidores Microsoft Exchange / OpenChange usando MAPI"
 
-#: ../src/camel/camel-mapi-provider.c:107
+#: ../src/camel/camel-mapi-provider.c:111
 msgid "Password"
 msgstr "Senha"
 
-#: ../src/camel/camel-mapi-provider.c:108
+#: ../src/camel/camel-mapi-provider.c:112
 msgid ""
 "This option will connect to the Openchange server using a plaintext password."
 msgstr ""
@@ -273,12 +331,3 @@ msgstr "Lista de pastas não disponível no modo offline."
 #: ../src/camel/camel-mapi-transport.c:340
 msgid "Could not send message."
 msgstr "Não foi possível enviar a mensagem."
-
-#~ msgid "Global Address List / Active Directory"
-#~ msgstr "Lista Global de Endereços (GAL) / Active Directory"
-
-#~ msgid "_Global Catalog server name:"
-#~ msgstr "Nome do servidor de Catálogo _Global:"
-
-#~ msgid "_Limit number of GAL responses: %s"
-#~ msgstr "_Limitar número de respostas do GAL: %s"
