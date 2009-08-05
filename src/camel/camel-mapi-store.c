@@ -248,6 +248,11 @@ static void mapi_construct(CamelService *service, CamelSession *session,
 						       CAMEL_URL_HIDE_PARAMS   |
 						       CAMEL_URL_HIDE_AUTH)  );
 
+
+	/*filter*/
+	if (camel_url_get_param (url, "filter"))
+		store->flags |= CAMEL_STORE_FILTER_INBOX;
+
 	/*Hash Table*/	
 	priv->id_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 	priv->name_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);

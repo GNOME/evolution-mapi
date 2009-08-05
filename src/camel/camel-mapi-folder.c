@@ -2030,10 +2030,8 @@ camel_mapi_folder_new(CamelStore *store, const char *folder_name, const char *fo
 /* 		return NULL; */
 /* 	} */
 
-	if (!strcmp (folder_name, "Mailbox")) {
-		if (camel_url_get_param (((CamelService *) store)->url, "filter"))
-			folder->folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
-	}
+	if (camel_url_get_param (((CamelService *) store)->url, "filter"))
+		folder->folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
 
 	mapi_folder->search = camel_folder_search_new ();
 	if (!mapi_folder->search) {
