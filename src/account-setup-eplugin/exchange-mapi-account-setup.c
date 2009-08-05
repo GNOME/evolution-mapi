@@ -530,7 +530,7 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 {
 	EABConfigTargetSource *t = (EABConfigTargetSource *) target;
 	ESource *source = t->source;
-	char *uri_text, *tmp;
+	char *uri_text;
 	ESourceGroup *grp;
 	
 	uri_text = e_source_get_uri (source);
