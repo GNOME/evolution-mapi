@@ -55,6 +55,7 @@
 #include "camel-mapi-folder.h"
 #include "camel-mapi-private.h"
 #include "camel-mapi-summary.h"
+#include "camel-mapi-utils.h"
 
 #define DEBUG_FN( ) printf("----%u %s\n", (unsigned int)pthread_self(), __FUNCTION__);
 #define SUMMARY_FETCH_BATCH_COUNT 150
@@ -1908,6 +1909,57 @@ mapi_cmp_uids (CamelFolder *folder, const char *uid1, const char *uid2)
 }
 
 static void
+mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
+		const CamelMessageInfo *info, gchar **appended_uid,
+		CamelException *ex)
+{
+	CamelMapiStore *mapi_store= CAMEL_MAPI_STORE(folder->parent_store);
+	CamelOfflineStore *offline = (CamelOfflineStore *) folder->parent_store;
+	CamelAddress *from = NULL, *recipients = NULL;
+	CamelStoreInfo *si;
+
+	MapiItem *item = NULL;
+	mapi_id_t fid = 0, mid = 0;
+	const gchar *folder_id;
+
+	/*Reject outbox / sent & trash*/
+	si = camel_store_summary_path ((CamelStoreSummary *)mapi_store->summary,
+				       folder->full_name);
+
+	if (si->flags & CAMEL_FOLDER_TYPE_TRASH ||
+	    si->flags & CAMEL_FOLDER_TYPE_OUTBOX) {
+		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, 
+				      _("Cannot append message to folder '%s'"),
+				      folder->full_name);
+		return;
+	}
+
+	if (offline->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL) {
+		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, 
+				      _("Offline. '%s'"));
+		return;
+	}
+
+	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store,
+							folder->full_name);
+
+	exchange_mapi_util_mapi_id_from_string (folder_id, &fid);
+
+	/* Convert MIME to Item */
+	from = (CamelAddress *) camel_mime_message_get_from (message);
+	recipients = (CamelAddress *) camel_mime_message_get_recipients (message, "to");
+
+	item = camel_mapi_utils_mime_to_item (message, from, recipients, ex);
+
+	mid = exchange_mapi_create_item (olFolderOutbox, fid, NULL, NULL, 
+					 camel_mapi_utils_create_item_build_props, item,
+					 item->recipients, item->attachments,
+					 item->generic_streams, 0);
+
+	*appended_uid = exchange_mapi_util_mapi_ids_to_uid(fid, mid);
+}
+
+static void
 camel_mapi_folder_class_init (CamelMapiFolderClass *camel_mapi_folder_class)
 {
 	CamelFolderClass *camel_folder_class = CAMEL_FOLDER_CLASS (camel_mapi_folder_class);
@@ -1923,7 +1975,7 @@ camel_mapi_folder_class_init (CamelMapiFolderClass *camel_mapi_folder_class)
 /* 	camel_folder_class->get_message_info = mapi_get_message_info; */
 /* 	camel_folder_class->search_by_uids = mapi_folder_search_by_uids;  */
 	camel_folder_class->search_free = mapi_folder_search_free;
-/* 	camel_folder_class->append_message = mapi_append_message; */
+	camel_folder_class->append_message = mapi_append_message;
 	camel_folder_class->refresh_info = mapi_refresh_info;
 	camel_folder_class->sync = mapi_sync;
 	camel_folder_class->expunge = mapi_expunge;
@@ -1974,7 +2026,8 @@ camel_mapi_folder_get_type (void)
 }
 
 CamelFolder *
-camel_mapi_folder_new(CamelStore *store, const char *folder_name, const char *folder_dir, guint32 flags, CamelException *ex)
+camel_mapi_folder_new (CamelStore *store, const char *folder_name, const char *folder_dir,
+		      guint32 flags, CamelException *ex)
 {
 
 	CamelFolder	*folder = NULL;

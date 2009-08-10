@@ -346,7 +346,6 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 		}
 	}
 
-	item->attachments = attach_list;
 	item->recipients = recipient_list;
 	
 	return item;

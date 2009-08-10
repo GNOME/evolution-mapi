@@ -1,3 +1,7 @@
+2009-08-06  Johnny Jacob  <jjohnny@novell.com>
+
+	* camel-mapi-folder.c (mapi_append_message): Added.
+
 2009-08-05  Johnny Jacob  <jjohnny@novell.com>
 
 	Bug 590242 – apply filter automatically to new message doesn't work.
