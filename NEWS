@@ -1,3 +1,17 @@
+evolution-mapi 0.27.90 2009-08-10
+---------------------------------
+Bug Fixes :
+    Bug 585615 – Exchange MAPI account setup gets wrong userid in database (Johnny Jacob)
+    Bug 590242 – apply filter automatically to new message doesn't work. (Johnny Jacob)
+    Bug 585851 – Invalid calendar attachments due to truncation. (Mattias Eriksson)
+
+Translations :
+    Daniel Nylander (sv)
+    Chao-Hsiung Liao (zh_HK)
+    André Gondim (pt_BR)
+    Kjartan Maraas (nb)
+    Jorge González (es)
+
 evolution-mapi 0.27.5 2009-07-27
 --------------------------------
 
