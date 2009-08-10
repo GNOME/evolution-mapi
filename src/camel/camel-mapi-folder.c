@@ -1275,7 +1275,7 @@ fetch_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 		body = g_new0(ExchangeMAPIStream, 1);
 		body->proptag = PR_BODY;
 		body->value = g_byte_array_new ();
-		body->value = g_byte_array_append (body->value, appointment_body_str, g_utf8_strlen ((const gchar *)appointment_body_str, -1));
+		body->value = g_byte_array_append (body->value, appointment_body_str, strlen ((const char *)appointment_body_str));
 
 		item->msg.body_parts = g_slist_append (item->msg.body_parts, body);
 
