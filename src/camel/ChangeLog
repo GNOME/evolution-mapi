@@ -1,3 +1,8 @@
+2009-08-10  Johnny Jacob  <jjohnny@novell.com>
+
+	* camel-mapi-provider.c (mapi_conf_entries): Removed UI entries for
+	GAL.
+
 2009-08-06  Johnny Jacob  <jjohnny@novell.com>
 
 	* camel-mapi-folder.c (mapi_append_message): Added.

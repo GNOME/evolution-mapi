@@ -53,24 +53,6 @@ static CamelProviderConfEntry mapi_conf_entries[] = {
 	  N_("C_heck for new messages in all folders"), "1" },
 	{ CAMEL_PROVIDER_CONF_SECTION_END },
 
-/* 	/\* override the labels/defaults of the standard settings *\/ */
-/* 	{ CAMEL_PROVIDER_CONF_LABEL, "username", NULL, */
-/* 	  /\* i18n: the '_' should appear before the same letter it */
-/* 	     does in the evolution:mail-config.glade "User_name" */
-/* 	     translation (or not at all) *\/ */
-/* 	  N_("Windows User_name:") }, */
-
-	/* extra Exchange configuration settings */
-	{ CAMEL_PROVIDER_CONF_SECTION_START, "activedirectory", NULL,
-	  /* i18n: GAL is an Outlookism, AD is a Windowsism */
-	  N_("Global Address List / Active Directory") },
-	{ CAMEL_PROVIDER_CONF_ENTRY, "ad_server", NULL,
-	  /* i18n: "Global Catalog" is a Windowsism, but it's a
-	     technical term and may not have translations? */
-	  N_("_Global Catalog server name:") },
-	{ CAMEL_PROVIDER_CONF_CHECKSPIN, "ad_limit", NULL,
-	  N_("_Limit number of GAL responses: %s"), "y:1:500:10000" },
-	{ CAMEL_PROVIDER_CONF_SECTION_END },
 	{ CAMEL_PROVIDER_CONF_SECTION_START, "generals", NULL,
 	  N_("Options") },
 	{ CAMEL_PROVIDER_CONF_CHECKBOX, "sync_offline", NULL,
