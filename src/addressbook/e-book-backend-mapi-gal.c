@@ -88,7 +88,7 @@ static const struct field_element_mapping {
 //		{ E_CONTACT_CATEGORIES, },		
 	};
 
-static int maplen = G_N_ELEMENTS(mappings);
+/* static int maplen = G_N_ELEMENTS(mappings); */
 
 struct _EBookBackendMAPIGALPrivate
 {
@@ -127,6 +127,7 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 	EBookBackendMAPIGALPrivate *priv = ((EBookBackendMAPIGAL *) ebmapi)->priv;
 	char *tmp;
 	EContact *contact = e_contact_new ();
+	GPtrArray *contacts_array = g_ptr_array_new();
 	gint i = 0;
 	
 	//FIXME: What if book view is NULL? Can it be? Check that.
@@ -143,7 +144,6 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 	
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	
-	GPtrArray *contacts_array = g_ptr_array_new();
 
 	exchange_mapi_util_get_gal (contacts_array);
 
@@ -155,7 +155,6 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 		EContact *contact = e_contact_new ();
 		ExchangeMAPIGALEntry *gal_entry = contacts_array->pdata[i];
 		char *uid;
-		GPtrArray *contacts_array = g_ptr_array_new();
 
 		uid = g_strdup_printf ("%d", i);
 
@@ -399,6 +398,7 @@ get_closure (EDataBookView *book_view)
 	return g_object_get_data (G_OBJECT (book_view), "closure");
 }
 
+#if 0
 static EContact *
 emapidump_gal (struct SRow *gal_entry)
 {
@@ -426,8 +426,9 @@ emapidump_gal (struct SRow *gal_entry)
 				nt |= t->dwLowDateTime;
 				time = nt_time_to_unix (nt);
 				e_contact_set (contact, mappings[i].field_id, ctime_r (&time, buff));
-			} else
+			} else {
 				printf("Nothing is printed\n");
+			}
 		}
 	}
 }
@@ -469,6 +470,7 @@ create_gal_contact_cb (FetchItemsCallbackData *item_data, gpointer data)
 	g_print ("\n The counter for the above data is %d\n", counter);
 	return TRUE;
 }
+#endif
 
 static void
 get_contacts_from_cache (EBookBackendMAPIGAL *ebmapi, 
@@ -497,7 +499,7 @@ get_contacts_from_cache (EBookBackendMAPIGAL *ebmapi,
 		e_data_book_view_notify_complete (book_view, 
 						  GNOME_Evolution_Addressbook_Success);
 }
-
+#if 0
 static gboolean
 build_restriction_emails_contains (struct mapi_SRestriction *res, 
 				   const char *query)
@@ -535,6 +537,7 @@ build_restriction_emails_contains (struct mapi_SRestriction *res,
 
 	return TRUE;
 }
+#endif
 
 static gboolean
 build_multiple_restriction_emails_contains (struct mapi_SRestriction *res, 
@@ -620,7 +623,6 @@ book_view_thread (gpointer data)
 	GList *contacts = NULL, *temp_list = NULL;
 	//Number of multiple restriction to apply
 	unsigned int res_count = 6;
-	GSList **gal_list, *l = NULL;
 	GPtrArray *contacts_array = g_ptr_array_new();
 	
 	if (enable_debug)

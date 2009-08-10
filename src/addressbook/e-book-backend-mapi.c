@@ -144,6 +144,10 @@ static const struct field_element_mapping {
 	};
 
 static int maplen = G_N_ELEMENTS(mappings);
+gboolean mapi_book_build_name_id (struct mapi_nameid *nameid, gpointer data);
+int mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropTagArray, gpointer data);
+gboolean mapi_book_build_name_id_for_getprops (struct mapi_nameid *nameid, gpointer data);
+
 
 #if 0
 static EDataBookView *
