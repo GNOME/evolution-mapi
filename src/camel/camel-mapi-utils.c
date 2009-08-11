@@ -362,8 +362,9 @@ camel_mapi_utils_create_item_build_props (struct SPropValue **value, struct SPro
 	uint32_t *msgflag = g_new0 (uint32_t, 1);
 	int i=0;
 
-	props = g_new0 (struct SPropValue, 9);
+	props = g_new0 (struct SPropValue, 10);
 
+	set_SPropValue_proptag(&props[i++], PR_SUBJECT_UNICODE, g_strdup (item->header.subject));
 	set_SPropValue_proptag(&props[i++], PR_CONVERSATION_TOPIC_UNICODE, g_strdup (item->header.subject));
 	set_SPropValue_proptag(&props[i++], PR_NORMALIZED_SUBJECT_UNICODE, g_strdup (item->header.subject));
 
