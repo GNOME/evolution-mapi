@@ -1,3 +1,7 @@
+2009-08-12  Johnny Jacob  <jjohnny@novell.com>
+
+	* configure.ac: Post release version bump. 0.27.91
+
 2009-08-10  Johnny Jacob  <jjohnny@novell.com>
 
 	* configure.ac: Version bump.
