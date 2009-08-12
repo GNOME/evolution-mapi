@@ -1,37 +1,53 @@
-# translation of evolution-mapi.po to Galego
-# This file is distributed under the same license as the Evolution-mapi package.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
-#
+# translation of evolution-mapi.master.po to Galician
 # Ignacio Casal Quinteiro <icq@cvs.gnome.org>, 2007, 2008.
 # Fran Diéguez <fran.dieguez@mabishu.com>, 2009.
 # Mancomún - Centro de Referencia e Servizos de Software Libre <g11n@mancomun.org>, 2009.
-#, fuzzy
+# Antón Méixome <meixome@mancomun.org>, 2009.
+# This file is distributed under the same license as the Evolution-mapi package.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 msgid ""
 msgstr ""
-"Project-Id-Version: gl\n"
+"Project-Id-Version: evolution-mapi.master\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-03-13 23:15+0100\n"
-"PO-Revision-Date: 2009-03-10 20:17+0000\n"
-"Last-Translator: Suso Baleato <suso.baleato@xunta.es>\n"
-"Language-Team: Galego <proxecto@trasno.net>\n"
+"POT-Creation-Date: 2009-08-12 13:22+0200\n"
+"PO-Revision-Date: 2009-08-11 10:31+0200\n"
+"Last-Translator: Antón Méixome <meixome@mancomun.org>\n"
+"Language-Team: Galician <gnome@mancomun.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: gl\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: KBabel 1.11.4\n"
 
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Introduza o contrasinal para %s@%s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
+#. NOTE: A good way would be display the list of username entries
+#. using GtkEntryCompletion in the username gtkentry. But plugins
+#. as of now does not have access to it
+#. TODO : Fix strings
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
+msgid "Select username"
+msgstr "Seleccionar o nome de usuario"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+msgid "Full name"
+msgstr "Nome completo"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
+msgid "User name"
+msgstr "Nome de usuario"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -39,33 +55,75 @@ msgstr ""
 "O servidor, o nome de usuario e o dominio non poden estar baleiros. Énchaos "
 "cos valores apropiados."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
 msgid "Authentication finished successfully."
 msgstr "A autenticación terminou correctamente."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
 msgid "Authentication failed."
 msgstr "Fallou a autenticación."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
 msgid "_Domain name:"
 msgstr "Nome do _dominio:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
 msgid "_Authenticate"
 msgstr "_Autenticar"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
 msgid "Personal Folders"
 msgstr "Cartafoles persoais"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:386
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
 msgid "_Location:"
 msgstr "_Localización:"
 
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
+msgid "_Folder size"
+msgstr "Tamaño de carta_fol"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
+msgid "Folder"
+msgstr "Cartafol"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
+msgid "Size"
+msgstr "Tamaño"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
+msgid "Unable to retrive folder size information"
+msgstr "Incapaz de recuperar información sobre o tamaño do cartafol "
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
+msgid "Folder Size"
+msgstr "Tamaño do cartafol"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
+msgid "Fetching folder list ..."
+msgstr "Recuperando a lista de cartafoles..."
+
+#. Miscelleneous settings
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
+msgid "Miscelleneous"
+msgstr "Miscelánea"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
+msgid "View the size of all Exchange folders"
+msgstr "Ver o tamaño de todos os cartafoles de intercambio"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
+msgid "Folders Size"
+msgstr "Tamaño dos cartafoles"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
+#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
+msgid "Exchange Settings"
+msgstr "Configuracións de intercambio"
+
 #: ../src/calendar/e-cal-backend-mapi.c:115
 #: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:457
+#: ../src/camel/camel-mapi-store.c:472
 msgid "Authentication failed"
 msgstr "Fallou a autenticación"
 
@@ -101,21 +159,36 @@ msgstr ""
 "O soporte para modificar as instancias únicas dunha cita recorrente aínda "
 "non está implementado. Non se realizou ningún cambio na cita do servidor."
 
-#: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
+#: ../src/camel/camel-mapi-folder.c:436
+#, c-format
+msgid "Updating local summary cache for new messages in %s"
+msgstr "Obtendo a información de resumo para as mensaxes novas en %s"
+
+#: ../src/camel/camel-mapi-folder.c:660
+#, c-format
+msgid "Retrieving message IDs from server for %s"
+msgstr "Recuperando os ID da mensaxe do servidor para %s"
+
+#: ../src/camel/camel-mapi-folder.c:682
+#, c-format
+msgid "Removing deleted messages from cache in %s"
+msgstr "Eliminando as mensaxes borradas da caché en %s"
+
+#: ../src/camel/camel-mapi-folder.c:984 ../src/camel/camel-mapi-folder.c:1611
+#: ../src/camel/camel-mapi-folder.c:1619
+msgid "This message is not available in offline mode."
+msgstr "Esta mensaxe non está dispoñíbel no modo sen conexión."
+
+#: ../src/camel/camel-mapi-folder.c:993
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Obtendo a información de resumo para as mensaxes novas en %s"
 
-#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1221
-#: ../src/camel/camel-mapi-folder.c:1229
-msgid "This message is not available in offline mode."
-msgstr "Esta mensaxe non está dispoñíbel no modo sen conexión."
-
-#: ../src/camel/camel-mapi-folder.c:679
+#: ../src/camel/camel-mapi-folder.c:1003
 msgid "Fetching items failed"
 msgstr "Fallou a obtención de elementos"
 
-#: ../src/camel/camel-mapi-folder.c:1185
+#: ../src/camel/camel-mapi-folder.c:1575
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -124,24 +197,34 @@ msgstr ""
 "Non é posíbel obter a mensaxe: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1185
+#: ../src/camel/camel-mapi-folder.c:1575
 msgid "No such message"
 msgstr "Non existe esta mensaxe"
 
-#: ../src/camel/camel-mapi-folder.c:1197
+#: ../src/camel/camel-mapi-folder.c:1587
 msgid "Message fetching cancelled by user."
 msgstr "A obtención da mensaxe foi cancelada polo usuario."
 
-#: ../src/camel/camel-mapi-folder.c:1204
+#: ../src/camel/camel-mapi-folder.c:1594
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Non é posíbel obter a mensaxe: %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1258
+#: ../src/camel/camel-mapi-folder.c:1640 ../src/camel/camel-mapi-folder.c:1652
 msgid "Could not get message"
 msgstr "Non foi posíbel obter a mensaxe"
 
-#: ../src/camel/camel-mapi-folder.c:1609
+#: ../src/camel/camel-mapi-folder.c:1932
+#, c-format
+msgid "Cannot append message to folder '%s'"
+msgstr "Non é posíbel engadir unha mensaxe ao cartafol `%s'"
+
+#: ../src/camel/camel-mapi-folder.c:1939
+#, c-format
+msgid "Offline. '%s'"
+msgstr "En desconexión. '%s'"
+
+#: ../src/camel/camel-mapi-folder.c:2059
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Non foi posíbel cargar o resumo de %s"
@@ -154,53 +237,37 @@ msgstr "Comprobando se hai correo novo"
 msgid "C_heck for new messages in all folders"
 msgstr "C_omprobar en todos os cartafoles se hai mensaxes novas"
 
-#. i18n: GAL is an Outlookism, AD is a Windowsism
-#: ../src/camel/camel-mapi-provider.c:66
-msgid "Global Address List / Active Directory"
-msgstr "Lista de enderezos global (GAL)/Active Directory"
-
-#. i18n: "Global Catalog" is a Windowsism, but it's a
-#. technical term and may not have translations?
-#: ../src/camel/camel-mapi-provider.c:70
-msgid "_Global Catalog server name:"
-msgstr "Nome do servidor de Catálogo glo_bal:"
-
-#: ../src/camel/camel-mapi-provider.c:72
-#, c-format
-msgid "_Limit number of GAL responses: %s"
-msgstr "Número _límite das respostas GAL: %s"
-
-#: ../src/camel/camel-mapi-provider.c:75
+#: ../src/camel/camel-mapi-provider.c:57
 msgid "Options"
 msgstr "Opcións"
 
-#: ../src/camel/camel-mapi-provider.c:77
+#: ../src/camel/camel-mapi-provider.c:59
 msgid "Automatically synchroni_ze account locally"
 msgstr "Sincroni_zar automaticamente a conta de modo local"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:80
+#: ../src/camel/camel-mapi-provider.c:62
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Aplicar filtros ás mensaxes novas da caixa de entrada neste servidor"
 
-#: ../src/camel/camel-mapi-provider.c:82
+#: ../src/camel/camel-mapi-provider.c:64
 msgid "Check new messages for _Junk contents"
 msgstr "Comprobar se nas mensaxes novas hai contidos _non desexados"
 
-#: ../src/camel/camel-mapi-provider.c:84
+#: ../src/camel/camel-mapi-provider.c:66
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Comprobar só o corr_eo non desexado no cartafol da caixa de entrada"
 
-#: ../src/camel/camel-mapi-provider.c:96
+#: ../src/camel/camel-mapi-provider.c:78
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
 msgstr ""
 "Para acceder aos servidores Microsoft Exchange / OpenChange usando MAPI"
 
-#: ../src/camel/camel-mapi-provider.c:111
+#: ../src/camel/camel-mapi-provider.c:93
 msgid "Password"
 msgstr "Contrasinal"
 
-#: ../src/camel/camel-mapi-provider.c:112
+#: ../src/camel/camel-mapi-provider.c:94
 msgid ""
 "This option will connect to the Openchange server using a plaintext password."
 msgstr ""
@@ -215,14 +282,14 @@ msgstr "Preferidos"
 msgid "All Public Folders"
 msgstr "Todos os cartafoles públicos"
 
-#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:347
+#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Servidor Exchange MAPI %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:349
+#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Servizo Exchange MAPI para %s en %s"
@@ -231,66 +298,49 @@ msgstr "Servizo Exchange MAPI para %s en %s"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:304
+#: ../src/camel/camel-mapi-store.c:315
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s Introduza o contrasinal MAPI para %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:317
+#: ../src/camel/camel-mapi-store.c:328
 msgid "You did not enter a password."
 msgstr "Non introduciu un contrasinal."
 
-#: ../src/camel/camel-mapi-store.c:325
+#: ../src/camel/camel-mapi-store.c:336
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Non foi posíbel autenticar no servidor Exchange MAPI."
 
-#: ../src/camel/camel-mapi-store.c:441
+#: ../src/camel/camel-mapi-store.c:456
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "Non é posíbel crear cartafoles MAPI no modo sen conexión."
 
-#: ../src/camel/camel-mapi-store.c:446
+#: ../src/camel/camel-mapi-store.c:461
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "Non é posíbel crear un cartafol novo `%s'"
 
-#: ../src/camel/camel-mapi-store.c:657
+#: ../src/camel/camel-mapi-store.c:670
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "Non é posíbel renomear o cartafol MAPI `%s'. O cartafol non existe."
 
-#: ../src/camel/camel-mapi-store.c:668
+#: ../src/camel/camel-mapi-store.c:681
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "Non é posíbel renomear o cartafol predeterminado MAPI de `%s' a `%s'."
 
-#: ../src/camel/camel-mapi-store.c:686
+#: ../src/camel/camel-mapi-store.c:699
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "Non é posíbel renomear o cartafol MAPI de `%s' a `%s'"
 
-#: ../src/camel/camel-mapi-store.c:1111
+#: ../src/camel/camel-mapi-store.c:1227
 msgid "Folder list not available in offline mode."
 msgstr "A lista de cartafoles non está dispoñíbel no modo sen conexión."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:335
+#: ../src/camel/camel-mapi-transport.c:116
 msgid "Could not send message."
 msgstr "Non foi posíbel enviar a mensaxe."
-
-#~ msgid ""
-#~ "Error fetching changes from the server. Removing the cache might help."
-#~ msgstr ""
-#~ "Houbo un erro ao obter os cambios desde o servidor. Quizais se solucione "
-#~ "eliminando a caché."
-
-#~ msgid "User canceled"
-#~ msgstr "Usuario cancelado"
-
-#~ msgid "%sPlease enter the MAPI password for %s@%s"
-#~ msgstr "%sIntroduza o contrasinal MAPI para %s@%s"
-
-#~ msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
-#~ msgstr ""
-#~ "Non é posíbel renomear o cartafol MAPI de `%s' a `%s'. Cartafol "
-#~ "predeterminado."
