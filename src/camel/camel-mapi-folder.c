@@ -1431,13 +1431,14 @@ mapi_populate_msg_body_from_item (CamelMultipart *multipart, MapiItem *item, Exc
 	
 	if (body) { 
 		if (item->is_cal)
-			camel_mime_part_set_content(part, (const char *) body->value->data, body->value->len, "text/calendar");
+			camel_mime_part_set_content(part, (const char *) body->value->data,
+						    body->value->len, "text/calendar");
 		else {
 			type = (body->proptag == PR_BODY || body->proptag == PR_BODY_UNICODE) ? 
 				"text/plain" : "text/html";
 
-			/*NOTE : Last byte null mess up CRLF*. Probably needs a fix in e*fetch_items. */
-			camel_mime_part_set_content (part, (const char *) body->value->data, body->value->len - 1, type );
+			camel_mime_part_set_content (part, (const char *) body->value->data,
+						     body->value->len, type );
 		}
 	} else
 		camel_mime_part_set_content(part, " ", strlen(" "), "text/html");
