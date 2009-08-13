@@ -55,6 +55,8 @@ utf8tolinux (const char *wstring)
 
 	if (g_utf8_validate (newstr, -1, NULL)) 
 		retval = g_strdup (newstr);
+	else
+		retval = g_strdup (wstring);
 
 	talloc_free (mem_ctx);
 

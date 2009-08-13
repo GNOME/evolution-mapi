@@ -199,6 +199,84 @@ mapi_item_free (MapiItem *item, gpointer data)
 }
 
 static gboolean
+read_item_common (MapiItem *item, uint32_t ulPropTag, gconstpointer prop_data)
+{
+	gboolean found = TRUE;
+
+	#define sv(_x,_y) G_STMT_START { g_free (_x); _x = _y; } G_STMT_END
+
+	switch (ulPropTag) {
+	case PR_INTERNET_CPID: {
+		const uint32_t *ui32 = (const uint32_t *) prop_data;
+		if (ui32)
+			item->header.cpid = *ui32;
+		} break;
+	/* FIXME : Instead of duping. Use talloc_steal to reuse the memory */
+	case PR_SUBJECT:
+		sv (item->header.subject, utf8tolinux (prop_data));
+		break;
+	case PR_SUBJECT_UNICODE :
+		sv (item->header.subject, g_strdup (prop_data));
+		break;
+	case PR_DISPLAY_TO :
+		sv (item->header.to, utf8tolinux (prop_data));
+		break;
+	case PR_DISPLAY_TO_UNICODE :
+		sv (item->header.to, g_strdup (prop_data));
+		break;
+	case PR_DISPLAY_CC:
+		sv (item->header.cc, utf8tolinux (prop_data));
+		break;
+	case PR_DISPLAY_CC_UNICODE:
+		sv (item->header.cc, g_strdup (prop_data));
+		break;
+	case PR_DISPLAY_BCC:
+		sv (item->header.bcc, utf8tolinux (prop_data));
+		break;
+	case PR_DISPLAY_BCC_UNICODE:
+		sv (item->header.bcc, g_strdup (prop_data));
+		break;
+	case PR_SENT_REPRESENTING_NAME:
+		sv (item->header.from, utf8tolinux (prop_data));
+		break;
+	case PR_SENT_REPRESENTING_NAME_UNICODE:
+		sv (item->header.from, g_strdup (prop_data));
+		break;
+	case PR_SENT_REPRESENTING_EMAIL_ADDRESS:
+		sv (item->header.from_email, utf8tolinux (prop_data));
+		break;
+	case PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE:
+		sv (item->header.from_email, g_strdup (prop_data));
+		break;
+	case PR_SENT_REPRESENTING_ADDRTYPE:
+		sv (item->header.from_type, utf8tolinux (prop_data));
+		break;
+	case PR_SENT_REPRESENTING_ADDRTYPE_UNICODE:
+		sv (item->header.from_type, g_strdup (prop_data));
+		break;
+	case PR_MESSAGE_SIZE:
+		item->header.size = *(glong *)prop_data;
+		break;
+	case PR_INTERNET_MESSAGE_ID:
+		item->header.message_id = g_strdup (prop_data);
+		break;
+	case PR_INTERNET_REFERENCES:
+		item->header.references = g_strdup (prop_data);
+		break;
+	case PR_IN_REPLY_TO_ID:
+		item->header.in_reply_to = g_strdup (prop_data);
+		break;
+	default:
+		found = FALSE;
+		break;
+	}
+
+	#undef sv
+
+	return found;
+}
+
+static gboolean
 fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 {
 	fetch_items_data *fi_data = (fetch_items_data *)data;
@@ -227,51 +305,12 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 	item->recipients = item_data->recipients;
 
 	for (j = 0; j < item_data->properties->cValues; j++) {
-
 		gconstpointer prop_data = get_mapi_SPropValue_data(&item_data->properties->lpProps[j]);
 
+		if (read_item_common (item, item_data->properties->lpProps[j].ulPropTag, prop_data))
+			continue;
+
 		switch (item_data->properties->lpProps[j].ulPropTag) {
-		/* FIXME : Instead of duping. Use talloc_steal to reuse the memory */
-		case PR_NORMALIZED_SUBJECT:
-		case PR_NORMALIZED_SUBJECT_UNICODE :
-			item->header.subject = g_strdup (prop_data);
-			break;
-		case PR_DISPLAY_TO :
-		case PR_DISPLAY_TO_UNICODE :
-			item->header.to = g_strdup (prop_data);
-			break;
-		case PR_DISPLAY_CC:
-		case PR_DISPLAY_CC_UNICODE:
-			item->header.cc = g_strdup (prop_data);
-			break;
-		case PR_DISPLAY_BCC:
-		case PR_DISPLAY_BCC_UNICODE:
-			item->header.bcc = g_strdup (prop_data);
-			break;
-		case PR_SENT_REPRESENTING_NAME:
-		case PR_SENT_REPRESENTING_NAME_UNICODE:
-			item->header.from = g_strdup (prop_data);
-			break;
-		case PR_SENT_REPRESENTING_EMAIL_ADDRESS:
-		case PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE:
-			item->header.from_email = g_strdup (prop_data);
-			break;
-		case PR_SENT_REPRESENTING_ADDRTYPE:
-		case PR_SENT_REPRESENTING_ADDRTYPE_UNICODE:
-			item->header.from_type = g_strdup (prop_data);
-			break;
-		case PR_MESSAGE_SIZE:
-			item->header.size = *(glong *)prop_data;
-			break;
-		case PR_INTERNET_MESSAGE_ID:
-			item->header.message_id = g_strdup (prop_data);
-			break;
-		case PR_INTERNET_REFERENCES:
-			item->header.references = g_strdup (prop_data);
-			break;
-		case PR_IN_REPLY_TO_ID:
-			item->header.in_reply_to = g_strdup (prop_data);
-			break;
 		case PR_MESSAGE_DELIVERY_TIME:
 			delivery_date = (struct FILETIME *) prop_data;
 			break;
@@ -899,7 +938,9 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 	const gchar *folder_id = NULL;
 
 	const guint32 summary_prop_list[] = {
-		PR_NORMALIZED_SUBJECT,
+		PR_INTERNET_CPID,
+		PR_SUBJECT,
+		PR_SUBJECT_UNICODE,
 		PR_MESSAGE_SIZE,
 		PR_MESSAGE_DELIVERY_TIME,
 		PR_MESSAGE_FLAGS,
@@ -1038,6 +1079,7 @@ end1:
 static const uint32_t camel_GetPropsList[] = {
 	PR_FID, 
 	PR_MID, 
+	PR_INTERNET_CPID,
 
 	PR_MESSAGE_CLASS, 
 	PR_MESSAGE_CLASS_UNICODE, 
@@ -1048,8 +1090,6 @@ static const uint32_t camel_GetPropsList[] = {
 
 	PR_SUBJECT, 
 	PR_SUBJECT_UNICODE, 
-	PR_NORMALIZED_SUBJECT, 
-	PR_NORMALIZED_SUBJECT_UNICODE, 
 	PR_CONVERSATION_TOPIC, 
 	PR_CONVERSATION_TOPIC_UNICODE, 
 
@@ -1210,48 +1250,10 @@ fetch_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 		gconstpointer prop_data = get_mapi_SPropValue_data(&item_data->properties->lpProps[j]);
 
+		if (read_item_common (item, item_data->properties->lpProps[j].ulPropTag, prop_data))
+			continue;
+
 		switch (item_data->properties->lpProps[j].ulPropTag) {
-		/*FIXME : Instead of duping. Use talloc_steal to reuse the memory*/
-		case PR_NORMALIZED_SUBJECT:
-		case PR_NORMALIZED_SUBJECT_UNICODE :
-			item->header.subject = g_strdup (prop_data);
-			break;
-		case PR_DISPLAY_TO :
-		case PR_DISPLAY_TO_UNICODE :
-			item->header.to = g_strdup (prop_data);
-			break;
-		case PR_DISPLAY_CC:
-		case PR_DISPLAY_CC_UNICODE:
-			item->header.cc = g_strdup (prop_data);
-			break;
-		case PR_DISPLAY_BCC:
-		case PR_DISPLAY_BCC_UNICODE:
-			item->header.bcc = g_strdup (prop_data);
-			break;
-		case PR_SENT_REPRESENTING_NAME:
-		case PR_SENT_REPRESENTING_NAME_UNICODE:
-			item->header.from = g_strdup (prop_data);
-			break;
-		case PR_SENT_REPRESENTING_ADDRTYPE:
-		case PR_SENT_REPRESENTING_ADDRTYPE_UNICODE:
-			item->header.from_type = g_strdup (prop_data);
-			break;
-		case PR_SENT_REPRESENTING_EMAIL_ADDRESS:
-		case PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE:
-			item->header.from_email = g_strdup (prop_data);
-			break;
-		case PR_MESSAGE_SIZE:
-			item->header.size = *(glong *)prop_data;
-			break;
-		case PR_INTERNET_MESSAGE_ID:
-			item->header.message_id = g_strdup (prop_data);
-			break;
-		case PR_INTERNET_REFERENCES:
-			item->header.references = g_strdup (prop_data);
-			break;
-		case PR_IN_REPLY_TO_ID:
-			item->header.in_reply_to = g_strdup (prop_data);
-			break;
 		case PR_MESSAGE_CLASS:
 		case PR_MESSAGE_CLASS_UNICODE:
 			msg_class = (const char *) prop_data;
@@ -1429,17 +1431,27 @@ mapi_populate_msg_body_from_item (CamelMultipart *multipart, MapiItem *item, Exc
 	part = camel_mime_part_new ();
 	camel_mime_part_set_encoding(part, CAMEL_TRANSFER_ENCODING_8BIT);
 	
-	if (body) { 
+	if (body) {
+		gchar *buff = NULL;
+
 		if (item->is_cal)
-			camel_mime_part_set_content(part, (const char *) body->value->data,
-						    body->value->len, "text/calendar");
-		else {
+			type = "text/calendar";
+		else
 			type = (body->proptag == PR_BODY || body->proptag == PR_BODY_UNICODE) ? 
 				"text/plain" : "text/html";
 
-			camel_mime_part_set_content (part, (const char *) body->value->data,
-						     body->value->len, type );
+		if (item->header.cpid) {
+			if (item->header.cpid == 65001)
+				buff = g_strdup_printf ("%s; charset=\"UTF-8\"", type);
+			else
+				buff = g_strdup_printf ("%s; charset=\"CP%d\"", type, item->header.cpid);
+			type = buff;
 		}
+
+		camel_mime_part_set_content (part, (const char *) body->value->data, body->value->len, type);
+
+		g_free (buff);
+		type = NULL;
 	} else
 		camel_mime_part_set_content(part, " ", strlen(" "), "text/html");
 

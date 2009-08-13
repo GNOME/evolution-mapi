@@ -77,6 +77,7 @@ typedef struct {
 	glong size;
 	time_t recieved_time;
 	time_t send_time;
+	guint cpid; /* codepage id */
 } MapiItemHeader;
 
 typedef struct {
