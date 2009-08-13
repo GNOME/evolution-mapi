@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-28 01:59+0200\n"
-"PO-Revision-Date: 2009-07-28 02:01+0100\n"
+"POT-Creation-Date: 2009-08-13 09:51+0200\n"
+"PO-Revision-Date: 2009-08-13 09:52+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "MIME-Version: 1.0\n"
@@ -17,85 +17,100 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Ange lösenordet för %s@%s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
+#. NOTE: A good way would be display the list of username entries
+#. using GtkEntryCompletion in the username gtkentry. But plugins
+#. as of now does not have access to it
+#. TODO : Fix strings
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
+msgid "Select username"
+msgstr "Välj användarnamn"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+msgid "Full name"
+msgstr "Fullständigt namn"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
+msgid "User name"
+msgstr "Användarnamn"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
 msgid "Server, username and domain name cannot be empty. Please fill them with correct values."
 msgstr "Server, användarnamn och domännamn får inte vara tomma. Fyll i dem med korrekta värden."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
 msgid "Authentication finished successfully."
 msgstr "Autentiseringen lyckades."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
 msgid "Authentication failed."
 msgstr "Autentiseringen misslyckades."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
 msgid "_Domain name:"
 msgstr "_Domännamn:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
 msgid "_Authenticate"
 msgstr "_Autentisera"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
 msgid "Personal Folders"
 msgstr "Personliga mappar"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:385
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
 msgid "_Location:"
 msgstr "_Plats:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:120
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
+msgid "_Folder size"
+msgstr "Ma_ppstorlek"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
 msgid "Folder"
 msgstr "Mapp"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:125
-#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:2
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
 msgid "Size"
 msgstr "Storlek"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:145
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
 msgid "Unable to retrive folder size information"
 msgstr "Kunde inte hämta information om mappstorlek"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:169
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
 msgid "Folder Size"
 msgstr "Mappstorlek"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:177
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
 msgid "Fetching folder list ..."
 msgstr "Hämtar mapplista ..."
 
 #. Miscelleneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:237
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
 msgid "Miscelleneous"
 msgstr "Diverse"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
 msgid "View the size of all Exchange folders"
 msgstr "Visa storleken för alla Exchange-mappar"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:252
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
 msgid "Folders Size"
 msgstr "Storlek för mappar"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
 msgstr "Inställningar för Exchange"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
-msgid "_Folder size"
-msgstr "Ma_ppstorlek"
-
 #: ../src/calendar/e-cal-backend-mapi.c:115
 #: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:467
+#: ../src/camel/camel-mapi-store.c:472
 msgid "Authentication failed"
 msgstr "Autentisering misslyckades"
 
@@ -127,37 +142,37 @@ msgstr "Kunde inte skapa tråd för inmatning i mellanlager"
 msgid "Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server."
 msgstr "Stöd för ändring av enstaka instanser för ett återkommande möte har ännu inte implementerats. Ingen ändring gjordes till mötet på servern."
 
-#: ../src/camel/camel-mapi-folder.c:435
+#: ../src/camel/camel-mapi-folder.c:436
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "Uppdaterar lokal mellanlagring av sammandrag för nya meddelanden i %s"
 
-#: ../src/camel/camel-mapi-folder.c:659
+#: ../src/camel/camel-mapi-folder.c:660
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Hämtar meddelande-id:n från servern för %s"
 
-#: ../src/camel/camel-mapi-folder.c:681
+#: ../src/camel/camel-mapi-folder.c:682
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Tar bort borttagna meddelanden från mellanlagring i %s"
 
-#: ../src/camel/camel-mapi-folder.c:983
-#: ../src/camel/camel-mapi-folder.c:1610
-#: ../src/camel/camel-mapi-folder.c:1618
+#: ../src/camel/camel-mapi-folder.c:984
+#: ../src/camel/camel-mapi-folder.c:1612
+#: ../src/camel/camel-mapi-folder.c:1620
 msgid "This message is not available in offline mode."
 msgstr "Detta meddelande är inte tillgängligt i frånkopplat läge."
 
-#: ../src/camel/camel-mapi-folder.c:992
+#: ../src/camel/camel-mapi-folder.c:993
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Hämtning av sammandragsinformation för nya meddelanden i %s"
 
-#: ../src/camel/camel-mapi-folder.c:1002
+#: ../src/camel/camel-mapi-folder.c:1003
 msgid "Fetching items failed"
 msgstr "Hämtning av objekt misslyckades"
 
-#: ../src/camel/camel-mapi-folder.c:1574
+#: ../src/camel/camel-mapi-folder.c:1576
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -166,25 +181,35 @@ msgstr ""
 "Kan inte hämta meddelande: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1574
+#: ../src/camel/camel-mapi-folder.c:1576
 msgid "No such message"
 msgstr "Det finns inget sådant meddelande"
 
-#: ../src/camel/camel-mapi-folder.c:1586
+#: ../src/camel/camel-mapi-folder.c:1588
 msgid "Message fetching cancelled by user."
 msgstr "Meddelandehämtning avbröts av användaren."
 
-#: ../src/camel/camel-mapi-folder.c:1593
+#: ../src/camel/camel-mapi-folder.c:1595
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Kan inte hämta meddelandet %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1639
-#: ../src/camel/camel-mapi-folder.c:1651
+#: ../src/camel/camel-mapi-folder.c:1641
+#: ../src/camel/camel-mapi-folder.c:1653
 msgid "Could not get message"
 msgstr "Kunde inte hämta meddelandet"
 
-#: ../src/camel/camel-mapi-folder.c:2006
+#: ../src/camel/camel-mapi-folder.c:1933
+#, c-format
+msgid "Cannot append message to folder '%s'"
+msgstr "Kan inte lägga till meddelandet till mappen \"%s\""
+
+#: ../src/camel/camel-mapi-folder.c:1940
+#, c-format
+msgid "Offline. '%s'"
+msgstr "Frånkopplad. \"%s\""
+
+#: ../src/camel/camel-mapi-folder.c:2060
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Kunde inte läsa in sammandrag för %s"
@@ -197,52 +222,36 @@ msgstr "Letar efter ny e-post"
 msgid "C_heck for new messages in all folders"
 msgstr "L_eta efter nya meddelanden i alla mappar"
 
-#. i18n: GAL is an Outlookism, AD is a Windowsism
-#: ../src/camel/camel-mapi-provider.c:66
-msgid "Global Address List / Active Directory"
-msgstr "Global Address List / Active Directory"
-
-#. i18n: "Global Catalog" is a Windowsism, but it's a
-#. technical term and may not have translations?
-#: ../src/camel/camel-mapi-provider.c:70
-msgid "_Global Catalog server name:"
-msgstr "Servernamn för _global katalog:"
-
-#: ../src/camel/camel-mapi-provider.c:72
-#, c-format
-msgid "_Limit number of GAL responses: %s"
-msgstr "_Begränsa antalet GAL-svar: %s"
-
-#: ../src/camel/camel-mapi-provider.c:75
+#: ../src/camel/camel-mapi-provider.c:57
 msgid "Options"
 msgstr "Alternativ"
 
-#: ../src/camel/camel-mapi-provider.c:77
+#: ../src/camel/camel-mapi-provider.c:59
 msgid "Automatically synchroni_ze account locally"
 msgstr "Syn_kronisera automatiskt kontot lokalt"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:80
+#: ../src/camel/camel-mapi-provider.c:62
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Tillämpa filter på nya meddelanden i Inbox på denna server"
 
-#: ../src/camel/camel-mapi-provider.c:82
+#: ../src/camel/camel-mapi-provider.c:64
 msgid "Check new messages for _Junk contents"
 msgstr "Kontrollera nya meddelanden efter _skräppost"
 
-#: ../src/camel/camel-mapi-provider.c:84
+#: ../src/camel/camel-mapi-provider.c:66
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Kontrollera endast meddelanden i _Inbox-mappen efter skräppost"
 
-#: ../src/camel/camel-mapi-provider.c:96
+#: ../src/camel/camel-mapi-provider.c:78
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
 msgstr "För åtkomst till Microsoft Exchange / OpenChange-servrar med MAPI"
 
-#: ../src/camel/camel-mapi-provider.c:111
+#: ../src/camel/camel-mapi-provider.c:93
 msgid "Password"
 msgstr "Lösenord"
 
-#: ../src/camel/camel-mapi-provider.c:112
+#: ../src/camel/camel-mapi-provider.c:94
 msgid "This option will connect to the Openchange server using a plaintext password."
 msgstr "Detta alternativ kommer att ansluta till Openchange-servern med ett klartextlösenord."
 
@@ -254,16 +263,16 @@ msgstr "Favoriter"
 msgid "All Public Folders"
 msgstr "Alla publika mappar"
 
-#: ../src/camel/camel-mapi-store.c:268
-#: ../src/camel/camel-mapi-transport.c:352
+#: ../src/camel/camel-mapi-store.c:273
+#: ../src/camel/camel-mapi-transport.c:128
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI-server %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:272
-#: ../src/camel/camel-mapi-transport.c:354
+#: ../src/camel/camel-mapi-store.c:277
+#: ../src/camel/camel-mapi-transport.c:130
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Exchange MAPI-tjänst för %s på %s"
@@ -272,55 +281,59 @@ msgstr "Exchange MAPI-tjänst för %s på %s"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:310
+#: ../src/camel/camel-mapi-store.c:315
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s Ange MAPI-lösenordet för %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:323
+#: ../src/camel/camel-mapi-store.c:328
 msgid "You did not enter a password."
 msgstr "Du angav inte något lösenord."
 
-#: ../src/camel/camel-mapi-store.c:331
+#: ../src/camel/camel-mapi-store.c:336
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Kunde inte autentisera mot Exchange MAPI-server. "
 
-#: ../src/camel/camel-mapi-store.c:451
+#: ../src/camel/camel-mapi-store.c:456
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "Kan inte skapa MAPI-mappar i frånkopplat läge."
 
-#: ../src/camel/camel-mapi-store.c:456
+#: ../src/camel/camel-mapi-store.c:461
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "Kan inte skapa nya mappen \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:665
+#: ../src/camel/camel-mapi-store.c:670
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "Kan inte byta namn på MAPI-mappen \"%s\". Mappen finns inte."
 
-#: ../src/camel/camel-mapi-store.c:676
+#: ../src/camel/camel-mapi-store.c:681
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "Kan inte byta namn på MAPI-standardmappen \"%s\" till \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:694
+#: ../src/camel/camel-mapi-store.c:699
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "Kan inte byta namn på MAPI-mappen \"%s\" till \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:1222
+#: ../src/camel/camel-mapi-store.c:1227
 msgid "Folder list not available in offline mode."
 msgstr "Mapplistan är inte tillgänglig i frånkopplat läge."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:340
+#: ../src/camel/camel-mapi-transport.c:116
 msgid "Could not send message."
 msgstr "Kunde inte skicka meddelande."
 
-#~ msgid "User canceled"
-#~ msgstr "Användaren avbröt"
+#~ msgid "Global Address List / Active Directory"
+#~ msgstr "Global Address List / Active Directory"
+#~ msgid "_Global Catalog server name:"
+#~ msgstr "Servernamn för _global katalog:"
+#~ msgid "_Limit number of GAL responses: %s"
+#~ msgstr "_Begränsa antalet GAL-svar: %s"
 #~ msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
 #~ msgstr "Kan inte byta namn på MAPI-mappen \"%s\" till \"%s\". Standardmapp."
 #~ msgid "MAPI server %s"
