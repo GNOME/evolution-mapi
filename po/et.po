@@ -11,8 +11,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2009-07-22 21:06+0000\n"
-"PO-Revision-Date: 2009-07-27 15:53+0300\n"
+"POT-Creation-Date: 2009-08-10 09:12+0000\n"
+"PO-Revision-Date: 2009-08-13 10:27+0300\n"
 "Last-Translator: Ivar Smolin <okul@linux.ee>\n"
 "Language-Team: Estonian <et@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -22,6 +22,19 @@ msgstr ""
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Sisesta %s@%s parool"
+
+#. NOTE: A good way would be display the list of username entries
+#. using GtkEntryCompletion in the username gtkentry. But plugins
+#. as of now does not have access to it
+#. TODO : Fix strings
+msgid "Select username"
+msgstr ""
+
+msgid "Full name"
+msgstr "Täisnimi"
+
+msgid "User name"
+msgstr "Kasutajanimi"
 
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
@@ -45,6 +58,37 @@ msgstr "Isiklikud kaustad"
 
 msgid "_Location:"
 msgstr "_Asukoht:"
+
+msgid "_Folder size"
+msgstr "Kausta _suurus"
+
+msgid "Folder"
+msgstr "Kaust"
+
+msgid "Size"
+msgstr "Suurus"
+
+msgid "Unable to retrive folder size information"
+msgstr "Kasuta suuruse andmeid pole võimalik vastu võtta"
+
+msgid "Folder Size"
+msgstr "Kausta suurus"
+
+msgid "Fetching folder list ..."
+msgstr "Kaustade nimekirja vastuvõtmine..."
+
+#. Miscelleneous settings
+msgid "Miscelleneous"
+msgstr ""
+
+msgid "View the size of all Exchange folders"
+msgstr "Kõigi Exchange kaustade suuruste vaatamine"
+
+msgid "Folders Size"
+msgstr "Kausta suurus"
+
+msgid "Exchange Settings"
+msgstr "Exchange sätted"
 
 msgid "Authentication failed"
 msgstr "Tõrge autentimisel"
@@ -71,7 +115,7 @@ msgstr ""
 
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
-msgstr ""
+msgstr "Kausta %s uute sõnumite andmete lisamine kohalikku kokkuvõttepuhvrisse"
 
 #, c-format
 msgid "Retrieving message IDs from server for %s"
@@ -79,7 +123,7 @@ msgstr ""
 
 #, c-format
 msgid "Removing deleted messages from cache in %s"
-msgstr ""
+msgstr "Kaustast %s kustutatud sõnumite andmete eemaldamine puhvrist"
 
 msgid "This message is not available in offline mode."
 msgstr "See sõnum pole võrguvabas režiimis saadaval."
@@ -111,6 +155,14 @@ msgstr "Sõnumit %s pole võimalik hankida: %s"
 
 msgid "Could not get message"
 msgstr "Sõnumit pole võimalik hankida"
+
+#, c-format
+msgid "Cannot append message to folder '%s'"
+msgstr "Sõnumit pole võimalik kausta `%s' lisada"
+
+#, c-format
+msgid "Offline. '%s'"
+msgstr ""
 
 #, c-format
 msgid "Could not load summary for %s"
