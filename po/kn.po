@@ -1,14 +1,14 @@
-# translation of evolution-mapi.HEAD.po to Kannada
+# translation of evolution-mapi.master.kn.po to Kannada
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Shankar Prasad <svenkate@redhat.com>, 2009.
 msgid ""
 msgstr ""
-"Project-Id-Version: evolution-mapi.HEAD\n"
+"Project-Id-Version: evolution-mapi.master.kn\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
-"POT-Creation-Date: 2009-03-02 20:31+0000\n"
-"PO-Revision-Date: 2009-03-14 16:39+0530\n"
+"POT-Creation-Date: 2009-08-10 09:12+0000\n"
+"PO-Revision-Date: 2009-08-13 12:07+0530\n"
 "Last-Translator: Shankar Prasad <svenkate@redhat.com>\n"
 "Language-Team: Kannada <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -17,45 +17,105 @@ msgstr ""
 "X-Generator: KBabel 1.11.4\n"
 "Plural-Forms:  nplurals=2; plural=(n != 1);\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "%s@%s ಗಾಗಿ ಗುಪ್ತಪದವನ್ನು ನಮೂದಿಸಿ"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
+#. NOTE: A good way would be display the list of username entries
+#. using GtkEntryCompletion in the username gtkentry. But plugins
+#. as of now does not have access to it
+#. TODO : Fix strings
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
+msgid "Select username"
+msgstr "ಬಳಕೆದಾರ ಹೆಸರನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+msgid "Full name"
+msgstr "ಪೂರ್ಣ ಹೆಸರು"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
+msgid "User name"
+msgstr "ಬಳಕೆದಾರ ಹೆಸರು"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
-msgstr "ಪರಿಚಾರಕ, ಬಳಕೆದಾರ ಹೆಸರು ಹಾಗು ಡೊಮೈನಿನ ಹೆಸರುಗಳು ಖಾಲಿ ಇರುವಂತಿಲ್ಲ. ದಯವಿಟ್ಟು ಅವನ್ನು ಸೂಕ್ತ ಮೌಲ್ಯಗಳಿಂದ ತುಂಬಿಸಿ."
+msgstr ""
+"ಪರಿಚಾರಕ, ಬಳಕೆದಾರ ಹೆಸರು ಹಾಗು ಡೊಮೈನಿನ ಹೆಸರುಗಳು ಖಾಲಿ ಇರುವಂತಿಲ್ಲ. ದಯವಿಟ್ಟು ಅವನ್ನು "
+"ಸೂಕ್ತ ಮೌಲ್ಯಗಳಿಂದ ತುಂಬಿಸಿ."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
 msgid "Authentication finished successfully."
 msgstr "ದೃಢೀಕರಣವು ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
 msgid "Authentication failed."
 msgstr "ದೃಢೀಕರಣವು ವಿಫಲಗೊಂಡಿದೆ."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
 msgid "_Domain name:"
 msgstr "ಡೊಮೈನಿನ ಹೆಸರು(_D):"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
 msgid "_Authenticate"
 msgstr "ದೃಢೀಕರಿಸು(_A)"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
 msgid "Personal Folders"
 msgstr "ವೈಯಕ್ತಿಕ ಫೋಲ್ಡರುಗಳು"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:385
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
 msgid "_Location:"
 msgstr "ಸ್ಥಳ(_L):"
 
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
+msgid "_Folder size"
+msgstr "ಫೋಲ್ಡರ್ ಗಾತ್ರ(_F)"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
+msgid "Folder"
+msgstr "ಫೋಲ್ಡರ್"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
+msgid "Size"
+msgstr "ಗಾತ್ರ"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
+msgid "Unable to retrive folder size information"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
+msgid "Folder Size"
+msgstr "ಫೋಲ್ಡರ್ ಗಾತ್ರ"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
+msgid "Fetching folder list ..."
+msgstr ""
+
+#. Miscelleneous settings
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
+msgid "Miscelleneous"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
+msgid "View the size of all Exchange folders"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
+msgid "Folders Size"
+msgstr "ಫೋಲ್ಡರ್ ಗಾತ್ರ"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
+#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
+msgid "Exchange Settings"
+msgstr ""
+
 #: ../src/calendar/e-cal-backend-mapi.c:115
 #: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:457
+#: ../src/camel/camel-mapi-store.c:472
 msgid "Authentication failed"
 msgstr "ದೃಢೀಕರಣವು ವಿಫಲಗೊಂಡಿದೆ"
 
@@ -87,23 +147,41 @@ msgstr "ಕ್ಯಾಶೆಯನ್ನು ನಿಬಿಡಗೊಳಿಸಲು �
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
-msgstr "ಪುನರಾವರ್ತಿತಗೊಳ್ಳುವ ಅಪಾಯಿಂಟ್‌ಮೆಂಟಿನ ಒಂದು ಘಟನೆಯನ್ನು ಬದಲಾಯಿಸುವುದನ್ನು ಇನ್ನೂ ಸಹ ಕಾರ್ಯರೂಪಕ್ಕೆ ತಂದಿಲ್ಲ. ಪರಿಚಾರಕದ ಅಪಾಯಿಂಟ್‌ಮೆಂಟಿಗೆ ಯಾವುದೆ ಬದಲಾವಣೆಯನ್ನು ಮಾಡಲಾಗಿಲ್ಲ."
+msgstr ""
+"ಪುನರಾವರ್ತಿತಗೊಳ್ಳುವ ಅಪಾಯಿಂಟ್‌ಮೆಂಟಿನ ಒಂದು ಘಟನೆಯನ್ನು ಬದಲಾಯಿಸುವುದನ್ನು ಇನ್ನೂ ಸಹ "
+"ಕಾರ್ಯರೂಪಕ್ಕೆ ತಂದಿಲ್ಲ. ಪರಿಚಾರಕದ ಅಪಾಯಿಂಟ್‌ಮೆಂಟಿಗೆ ಯಾವುದೆ ಬದಲಾವಣೆಯನ್ನು ಮಾಡಲಾಗಿಲ್ಲ."
 
-#: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
+#: ../src/camel/camel-mapi-folder.c:436
+#, fuzzy, c-format
+#| msgid "Fetching summary information for new messages in %s"
+msgid "Updating local summary cache for new messages in %s"
+msgstr "%s ನಲ್ಲಿನ ಹೊಸ ಸಂದೇಶಗಳಿಗಾಗಿ ಮಾಹಿತಿಗಳನ್ನು ಪಡೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ"
+
+#: ../src/camel/camel-mapi-folder.c:660
+#, c-format
+msgid "Retrieving message IDs from server for %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:682
+#, c-format
+msgid "Removing deleted messages from cache in %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:984 ../src/camel/camel-mapi-folder.c:1611
+#: ../src/camel/camel-mapi-folder.c:1619
+msgid "This message is not available in offline mode."
+msgstr "ಈ ಸಂದೇಶವು ಆಫ್‌ಲೈನ್‌ ಸ್ಥಿತಿಯಲ್ಲಿ ಲಭ್ಯವಿರುವುದಿಲ್ಲ."
+
+#: ../src/camel/camel-mapi-folder.c:993
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "%s ನಲ್ಲಿನ ಹೊಸ ಸಂದೇಶಗಳಿಗಾಗಿ ಮಾಹಿತಿಗಳನ್ನು ಪಡೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ"
 
-#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1221
-#: ../src/camel/camel-mapi-folder.c:1229
-msgid "This message is not available in offline mode."
-msgstr "ಈ ಸಂದೇಶವು ಆಫ್‌ಲೈನ್‌ ಸ್ಥಿತಿಯಲ್ಲಿ ಲಭ್ಯವಿರುವುದಿಲ್ಲ."
-
-#: ../src/camel/camel-mapi-folder.c:679
+#: ../src/camel/camel-mapi-folder.c:1003
 msgid "Fetching items failed"
 msgstr "ಅಂಶಗಳನ್ನು ಪಡೆಯುವಲ್ಲಿ ವಿಫಲತೆ"
 
-#: ../src/camel/camel-mapi-folder.c:1185
+#: ../src/camel/camel-mapi-folder.c:1575
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -112,24 +190,35 @@ msgstr ""
 "ಸಂದೇಶವನ್ನು ಪಡೆಯಲಾಗಲಿಲ್ಲ: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1185
+#: ../src/camel/camel-mapi-folder.c:1575
 msgid "No such message"
 msgstr "ಅಂತಹ ಯಾವುದೆ ಸಂದೇಶವಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-folder.c:1197
+#: ../src/camel/camel-mapi-folder.c:1587
 msgid "Message fetching cancelled by user."
 msgstr "ಸಂದೇಶ ಪಡೆಯುವಿಕೆಯನ್ನು ಬಳಕೆದಾರರಿಂದ ರದ್ದು ಮಾಡಲಾಗಿದೆ."
 
-#: ../src/camel/camel-mapi-folder.c:1204
+#: ../src/camel/camel-mapi-folder.c:1594
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "%s ಸಂದೇಶವನ್ನು ಪಡೆದುಕೊಳ್ಳಲಾಗಲಿಲ್ಲ: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1258
+#: ../src/camel/camel-mapi-folder.c:1640 ../src/camel/camel-mapi-folder.c:1652
 msgid "Could not get message"
 msgstr "ಸಂದೇಶವನ್ನು ಪಡೆದುಕೊಳ್ಳಲಾಗಲಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-folder.c:1609
+#: ../src/camel/camel-mapi-folder.c:1932
+#, fuzzy, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot append message to folder '%s'"
+msgstr "ಹೊಸ ಫೋಲ್ಡರ್ `%s' ಅನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
+
+#: ../src/camel/camel-mapi-folder.c:1939
+#, c-format
+msgid "Offline. '%s'"
+msgstr "ಆಫ್‌ಲೈನ್. '%s'"
+
+#: ../src/camel/camel-mapi-folder.c:2059
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s ಗಾಗಿ ಸಾರಾಂಶವನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
@@ -142,54 +231,42 @@ msgstr "ಹೊಸ ಮೈಲ್‌ಗಾಗಿ ಪರಿಶೀಲಿಸಲಾಗ�
 msgid "C_heck for new messages in all folders"
 msgstr "ಹೊಸ ಸಂದೇಶಕ್ಕಾಗಿ ಎಲ್ಲಾ ಫೋಲ್ಡರಿನಲ್ಲೂ ಹುಡುಕು(_h)"
 
-#. i18n: GAL is an Outlookism, AD is a Windowsism
-#: ../src/camel/camel-mapi-provider.c:66
-msgid "Global Address List / Active Directory"
-msgstr "ಜಾಗತಿಕ ವಿಳಾಸ ಪಟ್ಟಿ / ಸಕ್ರಿಯ ಕೋಶ"
-
-#. i18n: "Global Catalog" is a Windowsism, but it's a
-#. technical term and may not have translations?
-#: ../src/camel/camel-mapi-provider.c:70
-msgid "_Global Catalog server name:"
-msgstr "ಜಾಗತಿಕ ಕೆಟಲಾಗ್ ಪರಿಚಾರಕದ ಹೆಸರು(_G):"
-
-#: ../src/camel/camel-mapi-provider.c:72
-#, c-format
-msgid "_Limit number of GAL responses: %s"
-msgstr "GA_L ಪ್ರತ್ಯುತ್ತರಗಳ ಸಂಖ್ಯೆಯ ಮಿತಿ: %s"
-
-#: ../src/camel/camel-mapi-provider.c:75
+#: ../src/camel/camel-mapi-provider.c:57
 msgid "Options"
 msgstr "ಆಯ್ಕೆಗಳು"
 
-#: ../src/camel/camel-mapi-provider.c:77
+#: ../src/camel/camel-mapi-provider.c:59
 msgid "Automatically synchroni_ze account locally"
 msgstr "ಸ್ಥಳೀಯವಾಗಿ ಖಾತೆಯನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮೇಳೈಸು(_z)"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:80
+#: ../src/camel/camel-mapi-provider.c:62
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "ಈ ಪರಿಚಾರಕದಲ್ಲಿನ INBOX ನಲ್ಲಿನ ಹೊಸ ಸಂದೇಶಗಳಿಗೆ ಫಿಲ್ಟರುಗಳನ್ನು ಅನ್ವಯಿಸು(_A)"
 
-#: ../src/camel/camel-mapi-provider.c:82
+#: ../src/camel/camel-mapi-provider.c:64
 msgid "Check new messages for _Junk contents"
 msgstr "ರದ್ದಿ ವಿಷಯಗಳನ್ನು ಹೊಂದಿರುವ ಹೊಸ ಸಂದೇಶಗಳನ್ನು ಪರಿಶೀಲಿಸು(_J)"
 
-#: ../src/camel/camel-mapi-provider.c:84
+#: ../src/camel/camel-mapi-provider.c:66
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "ಕೇವಲ ಇನ್‌ಬಾಕ್ಸಿನ ಫೋಲ್ಡರಿನಲ್ಲಿ ಮಾತ್ರವೆ ರದ್ದಿ ಸಂದೇಶಕ್ಕಾಗಿ ನೋಡು (_e)"
 
-#: ../src/camel/camel-mapi-provider.c:96
+#: ../src/camel/camel-mapi-provider.c:78
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
-msgstr "Microsoft Exchange / OpenChange ಪರಿಚಾರಕಗಳನ್ನು MAPI ಅನ್ನು ಬಳಸಿಕೊಂಡು ನಿಲುಕಿಸಿಕೊಳ್ಳಲು"
+msgstr ""
+"Microsoft Exchange / OpenChange ಪರಿಚಾರಕಗಳನ್ನು MAPI ಅನ್ನು ಬಳಸಿಕೊಂಡು "
+"ನಿಲುಕಿಸಿಕೊಳ್ಳಲು"
 
-#: ../src/camel/camel-mapi-provider.c:111
+#: ../src/camel/camel-mapi-provider.c:93
 msgid "Password"
 msgstr "ಗುಪ್ತಪದ"
 
-#: ../src/camel/camel-mapi-provider.c:112
+#: ../src/camel/camel-mapi-provider.c:94
 msgid "This option will connect to the Openchange server using a plaintext password."
-msgstr "ಈ ಆಯ್ಕೆಯು ಒಂದು ಸರಳಪಠ್ಯ ಗುಪ್ತಪದವನ್ನು ಬಳಸಿಕೊಂಡು Openchange ಪರಿಚಾರಕಕದೊಂದಿಗೆ ಸಂಪರ್ಕ ಜೋಡಿಸುತ್ತದೆ."
+msgstr ""
+"ಈ ಆಯ್ಕೆಯು ಒಂದು ಸರಳಪಠ್ಯ ಗುಪ್ತಪದವನ್ನು ಬಳಸಿಕೊಂಡು Openchange ಪರಿಚಾರಕಕದೊಂದಿಗೆ ಸಂಪರ್ಕ "
+"ಜೋಡಿಸುತ್ತದೆ."
 
 #: ../src/camel/camel-mapi-store.c:61
 msgid "Favorites"
@@ -199,14 +276,14 @@ msgstr "ಅಚ್ಚುಮೆಚ್ಚಿನವುಗಳು"
 msgid "All Public Folders"
 msgstr "ಎಲ್ಲಾ ಸಾರ್ವಜನಿಕ ಫೋಲ್ಡರುಗಳು"
 
-#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:347
+#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI ಪರಿಚಾರಕ %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:349
+#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "%s %s ನಲ್ಲಿನ Exchange MAPI ಸೇವೆ"
@@ -215,50 +292,50 @@ msgstr "%s %s ನಲ್ಲಿನ Exchange MAPI ಸೇವೆ"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:304
+#: ../src/camel/camel-mapi-store.c:315
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s ದಯವಿಟ್ಟು %s@%s ಗಾಗಿ MAPI ಗುಪ್ತಪದವನ್ನು ನಮೂದಿಸಿ"
 
-#: ../src/camel/camel-mapi-store.c:317
+#: ../src/camel/camel-mapi-store.c:328
 msgid "You did not enter a password."
 msgstr "ನೀವು ಒಂದು ಗುಪ್ತಪದವನ್ನು ನಮೂದಿಸಿಲ್ಲ."
 
-#: ../src/camel/camel-mapi-store.c:325
+#: ../src/camel/camel-mapi-store.c:336
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Exchange MAPI ಪರಿಚಾರಕವನ್ನು ದೃಢೀಕರಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ."
 
-#: ../src/camel/camel-mapi-store.c:441
+#: ../src/camel/camel-mapi-store.c:456
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "ಆಫ್‌ಲೈನಿನ ಸ್ಥಿತಿಯಲ್ಲಿ MAPI ಫೋಲ್ಡರುಗಳನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ."
 
-#: ../src/camel/camel-mapi-store.c:446
+#: ../src/camel/camel-mapi-store.c:461
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "ಹೊಸ ಫೋಲ್ಡರ್ `%s' ಅನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-store.c:657
+#: ../src/camel/camel-mapi-store.c:670
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "MAPI ಫೋಲ್ಡರ್ `%s' ನ ಹೆಸರನ್ನು ಬದಲಾಯಿಸಲಾಗಲಿಲ್ಲ. ಫೋಲ್ಡರ್ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ."
 
-#: ../src/camel/camel-mapi-store.c:668
+#: ../src/camel/camel-mapi-store.c:681
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "MAPI ಯ ಪೂರ್ವನಿಯೋಜಿತ ಫೋಲ್ಡರಿನ ಹೆಸರಾದ`%s' ಅನ್ನು `%s' ಗೆ ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ."
 
-#: ../src/camel/camel-mapi-store.c:686
+#: ../src/camel/camel-mapi-store.c:699
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "MAPI ಯ ಫೋಲ್ಡರಿನ ಹೆಸರಾದ`%s' ಅನ್ನು `%s' ಗೆ ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-store.c:1111
+#: ../src/camel/camel-mapi-store.c:1227
 msgid "Folder list not available in offline mode."
 msgstr "ಫೋಲ್ಡರಿನ ಪಟ್ಟಿಯು ಆಫ್‌ಲೈನಿನ ಸ್ಥಿತಿಯಲ್ಲಿ ಲಭ್ಯವಿಲ್ಲ."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:335
+#: ../src/camel/camel-mapi-transport.c:116
 msgid "Could not send message."
 msgstr "ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ."
 
