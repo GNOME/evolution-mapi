@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-23 15:23+0100\n"
-"PO-Revision-Date: 2009-02-22 15:10+0100\n"
+"POT-Creation-Date: 2009-08-14 18:43+0200\n"
+"PO-Revision-Date: 2009-08-14 18:44+0200\n"
 "Last-Translator: David Planella <david.planella@gmail.com>\n"
 "Language-Team: Catalan <tradgnome@softcatala.org>\n"
 "MIME-Version: 1.0\n"
@@ -50,7 +50,7 @@ msgstr "_Autentica"
 msgid "Personal Folders"
 msgstr "Carpetes personals"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:385
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:386
 msgid "_Location:"
 msgstr "_Ubicació:"
 
@@ -93,21 +93,21 @@ msgstr ""
 "individuals d'una cita periòdica. No s'ha fet cap canvi a la cita al "
 "servidor."
 
-#: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
+#: ../src/camel/camel-mapi-folder.c:349 ../src/camel/camel-mapi-folder.c:748
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "S'està recollint la informació de resum per als missatges nous a %s"
 
-#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1221
-#: ../src/camel/camel-mapi-folder.c:1229
+#: ../src/camel/camel-mapi-folder.c:741 ../src/camel/camel-mapi-folder.c:1338
+#: ../src/camel/camel-mapi-folder.c:1346
 msgid "This message is not available in offline mode."
 msgstr "Aquest missatge no està disponible en mode fora de línia."
 
-#: ../src/camel/camel-mapi-folder.c:679
+#: ../src/camel/camel-mapi-folder.c:758
 msgid "Fetching items failed"
 msgstr "Ha fallat la recol·lecció d'elements"
 
-#: ../src/camel/camel-mapi-folder.c:1185
+#: ../src/camel/camel-mapi-folder.c:1302
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -116,24 +116,24 @@ msgstr ""
 "No s'ha pogut obtenir el missatge: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1185
+#: ../src/camel/camel-mapi-folder.c:1302
 msgid "No such message"
 msgstr "No hi ha tal missatge"
 
-#: ../src/camel/camel-mapi-folder.c:1197
+#: ../src/camel/camel-mapi-folder.c:1314
 msgid "Message fetching cancelled by user."
 msgstr "L'usuari ha cancel·lat la recollida del missatge."
 
-#: ../src/camel/camel-mapi-folder.c:1204
+#: ../src/camel/camel-mapi-folder.c:1321
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "No s'ha pogut obtenir el missatge %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1258
+#: ../src/camel/camel-mapi-folder.c:1367 ../src/camel/camel-mapi-folder.c:1377
 msgid "Could not get message"
 msgstr "No s'ha pogut obtenir el missatge"
 
-#: ../src/camel/camel-mapi-folder.c:1609
+#: ../src/camel/camel-mapi-folder.c:1728
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No s'ha pogut carregar el resum per a %s"
@@ -160,7 +160,7 @@ msgstr "Nom del servidor del _Global Catalog"
 #: ../src/camel/camel-mapi-provider.c:72
 #, c-format
 msgid "_Limit number of GAL responses: %s"
-msgstr "_Limita el nobre de respostes de la GAL: %s"
+msgstr "_Limita el nombre de respostes de la GAL: %s"
 
 #: ../src/camel/camel-mapi-provider.c:75
 msgid "Options"
