@@ -155,7 +155,7 @@ mapi_settings_get_folder_size (gpointer data)
 			g_free (folder_size);
 		}
 	} else {
-		view = gtk_label_new (_("Unable to retrive folder size information"));
+		view = gtk_label_new (_("Unable to retrieve folder size information"));
 	}
 
 	gtk_widget_show_all (view);
@@ -246,8 +246,8 @@ org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data
 	settings = (GtkVBox*) g_object_new (GTK_TYPE_VBOX, "homogeneous", FALSE, "spacing", 6, NULL);
 	gtk_container_set_border_width (GTK_CONTAINER (settings), 12);
 
-	/* Miscelleneous settings */
-	frm_misc = (GtkFrame*) g_object_new (GTK_TYPE_FRAME, "label", _("Miscelleneous"), NULL);
+	/* Miscellaneous settings */
+	frm_misc = (GtkFrame*) g_object_new (GTK_TYPE_FRAME, "label", _("Miscellaneous"), NULL);
 	gtk_box_pack_start (GTK_BOX (settings), GTK_WIDGET (frm_misc), FALSE, FALSE, 0);
 
 	vbox_misc = (GtkVBox*) g_object_new (GTK_TYPE_VBOX, "homogeneous", FALSE, "spacing", 6, NULL);
