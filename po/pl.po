@@ -8,15 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-18 16:36+0200\n"
-"PO-Revision-Date: 2009-08-18 16:24+0200\n"
-"Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
+"POT-Creation-Date: 2009-08-20 12:01+0200\n"
+"PO-Revision-Date: 2009-08-20 12:01+0100\n"
+"Last-Translator: Tomasz Dominikowski <dominikowski@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
-"|| n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Poedit-Language: Polish\n"
 "X-Poedit-Country: Poland\n"
 
@@ -43,12 +42,8 @@ msgid "User name"
 msgstr "Nazwa użytkownika"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
-msgid ""
-"Server, username and domain name cannot be empty. Please fill them with "
-"correct values."
-msgstr ""
-"Nazwy serwera, użytkownika i domeny nie mogą być puste. Proszę wprowadzić "
-"poprawne wartości."
+msgid "Server, username and domain name cannot be empty. Please fill them with correct values."
+msgstr "Nazwy serwera, użytkownika i domeny nie mogą być puste. Proszę wprowadzić poprawne wartości."
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
 msgid "Authentication finished successfully."
@@ -87,7 +82,7 @@ msgid "Size"
 msgstr "Rozmiar"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
-msgid "Unable to retrive folder size information"
+msgid "Unable to retrieve folder size information"
 msgstr "Nie można pobrać informacji o rozmiarze katalogu"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
@@ -98,9 +93,9 @@ msgstr "Rozmiar katalogu"
 msgid "Fetching folder list ..."
 msgstr "Pobieranie listy katalogów..."
 
-#. Miscelleneous settings
+#. Miscellaneous settings
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
-msgid "Miscelleneous"
+msgid "Miscellaneous"
 msgstr "Różne"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
@@ -147,19 +142,13 @@ msgid "Could not create thread for populating cache"
 msgstr "Nie można utworzyć wątku do zapełnienia pamięci podręcznej"
 
 #: ../src/calendar/e-cal-backend-mapi.c:1513
-msgid ""
-"Support for modifying single instances of a recurring appointment is not yet "
-"implemented. No change was made to the appointment on the server."
-msgstr ""
-"Obsługa modyfikowania pojedynczych instancji powtarzającego się spotkania "
-"nie jest zaimplementowana. Nie dokonano żadnych zmian spotkania na serwerze."
+msgid "Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server."
+msgstr "Obsługa modyfikowania pojedynczych instancji powtarzającego się spotkania nie jest zaimplementowana. Nie dokonano żadnych zmian spotkania na serwerze."
 
 #: ../src/camel/camel-mapi-folder.c:475
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
-msgstr ""
-"Aktualizowanie lokalnej pamięci podręcznej podsumowania nowych wiadomości w %"
-"s"
+msgstr "Aktualizowanie lokalnej pamięci podręcznej podsumowania nowych wiadomości w %s"
 
 #: ../src/camel/camel-mapi-folder.c:699
 #, c-format
@@ -171,7 +160,8 @@ msgstr "Pobieranie identyfikatorów wiadomości z serwera dla %s"
 msgid "Removing deleted messages from cache in %s"
 msgstr "Usuwanie wiadomości oznaczonych do usunięcia z pamięci podręcznej w %s"
 
-#: ../src/camel/camel-mapi-folder.c:1025 ../src/camel/camel-mapi-folder.c:1624
+#: ../src/camel/camel-mapi-folder.c:1025
+#: ../src/camel/camel-mapi-folder.c:1624
 #: ../src/camel/camel-mapi-folder.c:1632
 msgid "This message is not available in offline mode."
 msgstr "Ta wiadomość nie jest dostępna w trybie offline."
@@ -207,7 +197,8 @@ msgstr "Pobieranie wiadomości zostało anulowane przez użytkownika."
 msgid "Cannot get message %s: %s"
 msgstr "Nie można pobrać wiadomości %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1653 ../src/camel/camel-mapi-folder.c:1665
+#: ../src/camel/camel-mapi-folder.c:1653
+#: ../src/camel/camel-mapi-folder.c:1665
 msgid "Could not get message"
 msgstr "Nie można pobrać wiadomości"
 
@@ -264,11 +255,8 @@ msgid "Password"
 msgstr "Hasło"
 
 #: ../src/camel/camel-mapi-provider.c:94
-msgid ""
-"This option will connect to the Openchange server using a plaintext password."
-msgstr ""
-"Ta opcja umożliwia połączenie z serwerem OpenChange używając nieszyfrowanego "
-"hasła."
+msgid "This option will connect to the Openchange server using a plaintext password."
+msgstr "Ta opcja umożliwia połączenie z serwerem OpenChange używając nieszyfrowanego hasła."
 
 #: ../src/camel/camel-mapi-store.c:61
 msgid "Favorites"
@@ -278,14 +266,16 @@ msgstr "Ulubione"
 msgid "All Public Folders"
 msgstr "Wszystkie katalogi publiczne"
 
-#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
+#: ../src/camel/camel-mapi-store.c:273
+#: ../src/camel/camel-mapi-transport.c:128
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Serwer Exchange MAPI %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
+#: ../src/camel/camel-mapi-store.c:277
+#: ../src/camel/camel-mapi-transport.c:130
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Usługa Exchange MAPI dla %s na serwerze %s"
@@ -340,3 +330,4 @@ msgstr "Lista katalogów nie jest dostępna w trybie offline."
 #: ../src/camel/camel-mapi-transport.c:116
 msgid "Could not send message."
 msgstr "Nie można wysłać wiadomości."
+
