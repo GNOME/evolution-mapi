@@ -8,53 +8,111 @@ msgstr ""
 "Project-Id-Version: evolution-mapi 0.26.0\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2009-07-09 15:21+0000\n"
-"PO-Revision-Date: 2009-07-10 16:22+0700\n"
+"POT-Creation-Date: 2009-08-19 18:22+0000\n"
+"PO-Revision-Date: 2009-08-20 13:29+0700\n"
 "Last-Translator: Akom C. <knight2000@gmail.com>\n"
 "Language-Team: Thai <thai-l10n@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "ป้อนรหัสผ่านสำหรับ %s@%s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
+#. NOTE: A good way would be display the list of username entries
+#. using GtkEntryCompletion in the username gtkentry. But plugins
+#. as of now does not have access to it
+#. TODO : Fix strings
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
+msgid "Select username"
+msgstr "ตั้งชื่อผู้ใช้"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+msgid "Full name"
+msgstr "ชื่อเต็ม"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
+msgid "User name"
+msgstr "ชื่อผู้ใช้"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
 msgstr "เซิร์ฟเวอร์ ชื่อผู้ใช้ และชื่อโดเมน จะต้องไม่ว่างเปล่า กรุณากรอกข้อมูลให้ถูกต้อง"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
 msgid "Authentication finished successfully."
 msgstr "ยืนยันตัวบุคคลสำเร็จแล้ว"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
 msgid "Authentication failed."
 msgstr "ยืนยันตัวบุคคลไม่สำเร็จ"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
 msgid "_Domain name:"
 msgstr "_ชื่อโดเมน:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
 msgid "_Authenticate"
 msgstr "_ยืนยันตัวบุคคล"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
 msgid "Personal Folders"
 msgstr "โฟลเดอร์ส่วนบุคคล"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:386
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
 msgid "_Location:"
 msgstr "_ตำแหน่ง:"
 
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
+msgid "_Folder size"
+msgstr "ขนาดโ_ฟลเดอร์"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
+msgid "Folder"
+msgstr "โฟลเดอร์"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
+msgid "Size"
+msgstr "ขนาด"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
+msgid "Unable to retrieve folder size information"
+msgstr "ไม่สามารถดึงข้อมูลขนาดของโฟลเดอร์ได้"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
+msgid "Folder Size"
+msgstr "ขนาดโฟลเดอร์"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
+msgid "Fetching folder list ..."
+msgstr "กำลังดึงรายชื่อโฟลเดอร์ ..."
+
+#. Miscellaneous settings
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
+msgid "Miscellaneous"
+msgstr "อื่นๆ"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
+msgid "View the size of all Exchange folders"
+msgstr "ดูขนาดของโฟลเดอร์ Exchange ทั้งหมด"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
+msgid "Folders Size"
+msgstr "ขนาดโฟลเดอร์"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
+#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
+msgid "Exchange Settings"
+msgstr "ค่าตั้ง Exchange"
+
 #: ../src/calendar/e-cal-backend-mapi.c:115
 #: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:467
+#: ../src/camel/camel-mapi-store.c:472
 msgid "Authentication failed"
 msgstr "ยืนยันตัวบุคคลไม่สำเร็จ"
 
@@ -90,36 +148,36 @@ msgstr ""
 "ยังไม่รองรับการแก้ไขทุกเหตุการณ์ของนัดหมายที่มีการเวียนซ้ำ "
 "จึงไม่มีการเปลี่ยนแปลงข้อมูลนัดหมายในเซิร์ฟเวอร์"
 
-#: ../src/camel/camel-mapi-folder.c:435
+#: ../src/camel/camel-mapi-folder.c:475
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "กำลังปรับแคชข้อมูลสรุปในเครื่องสำหรับข้อความใหม่ใน %s"
 
-#: ../src/camel/camel-mapi-folder.c:659
+#: ../src/camel/camel-mapi-folder.c:699
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "กำลังดึง ID ข้อความจากเซิร์ฟเวอร์สำหรับ %s"
 
-#: ../src/camel/camel-mapi-folder.c:681
+#: ../src/camel/camel-mapi-folder.c:721
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "กำลังลบข้อความที่สั่งลบไว้ออกจากแคชใน %s"
 
-#: ../src/camel/camel-mapi-folder.c:983 ../src/camel/camel-mapi-folder.c:1610
-#: ../src/camel/camel-mapi-folder.c:1618
+#: ../src/camel/camel-mapi-folder.c:1025 ../src/camel/camel-mapi-folder.c:1624
+#: ../src/camel/camel-mapi-folder.c:1632
 msgid "This message is not available in offline mode."
 msgstr "ข้อความนี้ไม่สามารถใช้ได้ในโหมดออฟไลน์"
 
-#: ../src/camel/camel-mapi-folder.c:992
+#: ../src/camel/camel-mapi-folder.c:1034
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "กำลังดึงข้อมูลสรุปสำหรับข้อความใหม่ใน %s"
 
-#: ../src/camel/camel-mapi-folder.c:1002
+#: ../src/camel/camel-mapi-folder.c:1044
 msgid "Fetching items failed"
 msgstr "ดึงข้อมูลรายการไม่สำเร็จ"
 
-#: ../src/camel/camel-mapi-folder.c:1574
+#: ../src/camel/camel-mapi-folder.c:1588
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -128,24 +186,34 @@ msgstr ""
 "ไม่สามารถรับข้อความ: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1574
+#: ../src/camel/camel-mapi-folder.c:1588
 msgid "No such message"
 msgstr "ไม่มีข้อความนี้"
 
-#: ../src/camel/camel-mapi-folder.c:1586
+#: ../src/camel/camel-mapi-folder.c:1600
 msgid "Message fetching cancelled by user."
 msgstr "ผู้ใช้ยกเลิกการดึงข้อความ"
 
-#: ../src/camel/camel-mapi-folder.c:1593
+#: ../src/camel/camel-mapi-folder.c:1607
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "ไม่สามารถรับข้อความ %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1639 ../src/camel/camel-mapi-folder.c:1651
+#: ../src/camel/camel-mapi-folder.c:1653 ../src/camel/camel-mapi-folder.c:1665
 msgid "Could not get message"
 msgstr "ไม่สามารถรับข้อความ"
 
-#: ../src/camel/camel-mapi-folder.c:2006
+#: ../src/camel/camel-mapi-folder.c:1945
+#, c-format
+msgid "Cannot append message to folder '%s'"
+msgstr "ไม่สามารถเพิ่มข้อความต่อท้ายโฟลเดอร์ '%s'"
+
+#: ../src/camel/camel-mapi-folder.c:1952
+#, c-format
+msgid "Offline. '%s'"
+msgstr "ออฟไลน์ '%s'"
+
+#: ../src/camel/camel-mapi-folder.c:2072
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "ไม่สามารถโหลดข้อมูลสรุปสำหรับ %s"
@@ -158,36 +226,36 @@ msgstr "กำลังตรวจสอบเมลใหม่"
 msgid "C_heck for new messages in all folders"
 msgstr "_ตรวจสอบข้อความใหม่ในทุกโฟลเดอร์"
 
-#: ../src/camel/camel-mapi-provider.c:71
+#: ../src/camel/camel-mapi-provider.c:57
 msgid "Options"
 msgstr "ตัวเลือก"
 
-#: ../src/camel/camel-mapi-provider.c:73
+#: ../src/camel/camel-mapi-provider.c:59
 msgid "Automatically synchroni_ze account locally"
 msgstr "ปรับข้อมูลบัญชีให้_ตรงกันโดยอัตโนมัติในเครื่อง"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:76
+#: ../src/camel/camel-mapi-provider.c:62
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "ใช้ตัว_กรองกับข้อความใหม่ในกล่องจดหมายเข้าที่เซิร์ฟเวอร์นี้"
 
-#: ../src/camel/camel-mapi-provider.c:78
+#: ../src/camel/camel-mapi-provider.c:64
 msgid "Check new messages for _Junk contents"
 msgstr "ตรวจสอบ_ขยะในข้อความใหม่"
 
-#: ../src/camel/camel-mapi-provider.c:80
+#: ../src/camel/camel-mapi-provider.c:66
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "ตรวจสอบข้อความขยะในโฟลเดอร์กล่อง_จดหมายเข้าเท่านั้น"
 
-#: ../src/camel/camel-mapi-provider.c:92
+#: ../src/camel/camel-mapi-provider.c:78
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
 msgstr "สำหรับการเข้าใช้เซิร์ฟเวอร์ Microsoft Exchange / OpenChange โดยใช้ MAPI"
 
-#: ../src/camel/camel-mapi-provider.c:107
+#: ../src/camel/camel-mapi-provider.c:93
 msgid "Password"
 msgstr "รหัสผ่าน"
 
-#: ../src/camel/camel-mapi-provider.c:108
+#: ../src/camel/camel-mapi-provider.c:94
 msgid ""
 "This option will connect to the Openchange server using a plaintext password."
 msgstr "ตัวเลือกนี้จะเชื่อมต่อไปยังเซิร์ฟเวอร์ Openchange โดยใช้รหัสผ่านแบบข้อความเปล่า"
@@ -200,14 +268,14 @@ msgstr "รายการโปรด"
 msgid "All Public Folders"
 msgstr "โฟลเดอร์สาธารณะทั้งหมด"
 
-#: ../src/camel/camel-mapi-store.c:268 ../src/camel/camel-mapi-transport.c:352
+#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "เซิร์ฟเวอร์ MAPI ของ Exchange %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:272 ../src/camel/camel-mapi-transport.c:354
+#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "บริการ MAPI ของ Exchange สำหรับ %s ที่ %s"
@@ -216,50 +284,50 @@ msgstr "บริการ MAPI ของ Exchange สำหรับ %s ที�
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:310
+#: ../src/camel/camel-mapi-store.c:315
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s กรุณาป้อนรหัสผ่าน MAPI สำหรับ %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:323
+#: ../src/camel/camel-mapi-store.c:328
 msgid "You did not enter a password."
 msgstr "คุณไม่ได้ป้อนรหัสผ่าน"
 
-#: ../src/camel/camel-mapi-store.c:331
+#: ../src/camel/camel-mapi-store.c:336
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "ไม่สามารถยืนยันตัวบุคคลกับเซิร์ฟเวอร์ MAPI ของ Exchange"
 
-#: ../src/camel/camel-mapi-store.c:451
+#: ../src/camel/camel-mapi-store.c:456
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "ไม่สามารถสร้างโฟลเดอร์ MAPI ในโหมดออฟไลน์"
 
-#: ../src/camel/camel-mapi-store.c:456
+#: ../src/camel/camel-mapi-store.c:461
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "ไม่สามารถสร้างโฟลเดอร์ใหม่ `%s'"
 
-#: ../src/camel/camel-mapi-store.c:665
+#: ../src/camel/camel-mapi-store.c:670
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "ไม่สามารถเปลี่ยนชื่อโฟลเดอร์ MAPI `%s' ไม่มีโฟลเดอร์นี้"
 
-#: ../src/camel/camel-mapi-store.c:676
+#: ../src/camel/camel-mapi-store.c:681
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "ไม่สามารถเปลี่ยนชื่อโฟลเดอร์ MAPI ปริยาย `%s' เป็น `%s'"
 
-#: ../src/camel/camel-mapi-store.c:694
+#: ../src/camel/camel-mapi-store.c:699
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "ไม่สามารถเปลี่ยนชื่อโฟลเดอร์ MAPI `%s' เป็น `%s'"
 
-#: ../src/camel/camel-mapi-store.c:1222
+#: ../src/camel/camel-mapi-store.c:1227
 msgid "Folder list not available in offline mode."
 msgstr "ใช้รายชื่อโฟลเดอร์ในโหมดออฟไลน์ไม่ได้"
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:340
+#: ../src/camel/camel-mapi-transport.c:116
 msgid "Could not send message."
 msgstr "ไม่สามารถส่งข้อความ"
 
