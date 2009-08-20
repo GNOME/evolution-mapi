@@ -1,4 +1,4 @@
-# translation of evolution-mapi.master.po to Galician
+# translation of evolution-mapi-master-po-gl-77000.po to Galician
 # Ignacio Casal Quinteiro <icq@cvs.gnome.org>, 2007, 2008.
 # Fran Diéguez <fran.dieguez@mabishu.com>, 2009.
 # Mancomún - Centro de Referencia e Servizos de Software Libre <g11n@mancomun.org>, 2009.
@@ -7,10 +7,10 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 msgid ""
 msgstr ""
-"Project-Id-Version: evolution-mapi.master\n"
+"Project-Id-Version: evolution-mapi-master-po-gl-77000\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-12 13:22+0200\n"
-"PO-Revision-Date: 2009-08-11 10:31+0200\n"
+"POT-Creation-Date: 2009-08-20 09:38+0200\n"
+"PO-Revision-Date: 2009-08-20 08:42+0200\n"
 "Last-Translator: Antón Méixome <meixome@mancomun.org>\n"
 "Language-Team: Galician <gnome@mancomun.org>\n"
 "MIME-Version: 1.0\n"
@@ -92,8 +92,8 @@ msgid "Size"
 msgstr "Tamaño"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
-msgid "Unable to retrive folder size information"
-msgstr "Incapaz de recuperar información sobre o tamaño do cartafol "
+msgid "Unable to retrieve folder size information"
+msgstr "Non se puido recuperar información sobre o tamaño do cartafol "
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
 msgid "Folder Size"
@@ -103,10 +103,10 @@ msgstr "Tamaño do cartafol"
 msgid "Fetching folder list ..."
 msgstr "Recuperando a lista de cartafoles..."
 
-#. Miscelleneous settings
+#. Miscellaneous settings
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
-msgid "Miscelleneous"
-msgstr "Miscelánea"
+msgid "Miscellaneous"
+msgstr "Misceláneo"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
 msgid "View the size of all Exchange folders"
@@ -156,39 +156,40 @@ msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
 msgstr ""
-"O soporte para modificar as instancias únicas dunha cita recorrente aínda "
-"non está implementado. Non se realizou ningún cambio na cita do servidor."
+"A capacidade para modificar as instancias únicas dunha cita recorrente aínda "
+"non está implementada. Non se realizou ningún cambio na cita do servidor."
 
-#: ../src/camel/camel-mapi-folder.c:436
+#: ../src/camel/camel-mapi-folder.c:475
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
-msgstr "Obtendo a información de resumo para as mensaxes novas en %s"
+msgstr ""
+"Actualizando a información local da caché de resumo nas mensaxes novas en %s"
 
-#: ../src/camel/camel-mapi-folder.c:660
+#: ../src/camel/camel-mapi-folder.c:699
 #, c-format
 msgid "Retrieving message IDs from server for %s"
-msgstr "Recuperando os ID da mensaxe do servidor para %s"
+msgstr "Recuperando os ID das mensaxes desde o servidor para %s"
 
-#: ../src/camel/camel-mapi-folder.c:682
+#: ../src/camel/camel-mapi-folder.c:721
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Eliminando as mensaxes borradas da caché en %s"
 
-#: ../src/camel/camel-mapi-folder.c:984 ../src/camel/camel-mapi-folder.c:1611
-#: ../src/camel/camel-mapi-folder.c:1619
+#: ../src/camel/camel-mapi-folder.c:1025 ../src/camel/camel-mapi-folder.c:1624
+#: ../src/camel/camel-mapi-folder.c:1632
 msgid "This message is not available in offline mode."
 msgstr "Esta mensaxe non está dispoñíbel no modo sen conexión."
 
-#: ../src/camel/camel-mapi-folder.c:993
+#: ../src/camel/camel-mapi-folder.c:1034
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Obtendo a información de resumo para as mensaxes novas en %s"
 
-#: ../src/camel/camel-mapi-folder.c:1003
+#: ../src/camel/camel-mapi-folder.c:1044
 msgid "Fetching items failed"
 msgstr "Fallou a obtención de elementos"
 
-#: ../src/camel/camel-mapi-folder.c:1575
+#: ../src/camel/camel-mapi-folder.c:1588
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -197,34 +198,34 @@ msgstr ""
 "Non é posíbel obter a mensaxe: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1575
+#: ../src/camel/camel-mapi-folder.c:1588
 msgid "No such message"
 msgstr "Non existe esta mensaxe"
 
-#: ../src/camel/camel-mapi-folder.c:1587
+#: ../src/camel/camel-mapi-folder.c:1600
 msgid "Message fetching cancelled by user."
 msgstr "A obtención da mensaxe foi cancelada polo usuario."
 
-#: ../src/camel/camel-mapi-folder.c:1594
+#: ../src/camel/camel-mapi-folder.c:1607
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Non é posíbel obter a mensaxe: %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1640 ../src/camel/camel-mapi-folder.c:1652
+#: ../src/camel/camel-mapi-folder.c:1653 ../src/camel/camel-mapi-folder.c:1665
 msgid "Could not get message"
 msgstr "Non foi posíbel obter a mensaxe"
 
-#: ../src/camel/camel-mapi-folder.c:1932
+#: ../src/camel/camel-mapi-folder.c:1945
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Non é posíbel engadir unha mensaxe ao cartafol `%s'"
 
-#: ../src/camel/camel-mapi-folder.c:1939
+#: ../src/camel/camel-mapi-folder.c:1952
 #, c-format
 msgid "Offline. '%s'"
 msgstr "En desconexión. '%s'"
 
-#: ../src/camel/camel-mapi-folder.c:2059
+#: ../src/camel/camel-mapi-folder.c:2072
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Non foi posíbel cargar o resumo de %s"
