@@ -23,6 +23,7 @@
 
 static EBookBackendClass *e_book_backend_mapi_gal_parent_class;
 static gboolean enable_debug = TRUE;
+static GList *supported_fields;
 
 #define ELEMENT_TYPE_SIMPLE 0x01
 #define ELEMENT_TYPE_COMPLEX 0x02
@@ -88,7 +89,7 @@ static const struct field_element_mapping {
 //		{ E_CONTACT_CATEGORIES, },		
 	};
 
-/* static int maplen = G_N_ELEMENTS(mappings); */
+static int maplen = G_N_ELEMENTS(mappings);
 
 struct _EBookBackendMAPIGALPrivate
 {
@@ -181,6 +182,32 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 	return NULL;
 }
 
+static void
+e_book_backend_mapi_gal_get_supported_fields (EBookBackend *backend,
+		      EDataBook    *book,
+		      guint32	    opid)
+
+{
+	e_data_book_respond_get_supported_fields (book,
+						  opid,
+						  GNOME_Evolution_Addressbook_Success,
+						  supported_fields);
+}
+
+static void
+e_book_backend_mapi_gal_get_required_fields (EBookBackend *backend,
+		     EDataBook *book,
+		     guint32 opid)
+{
+	GList *fields = NULL;
+
+	fields = g_list_append (fields, (gchar *) e_contact_field_name (E_CONTACT_FILE_AS));
+	e_data_book_respond_get_required_fields (book,
+						  opid,
+						  GNOME_Evolution_Addressbook_Success,
+						  fields);
+	g_list_free (fields);
+}
 
 static void
 e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
@@ -200,6 +227,7 @@ e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
 	switch (priv->mode) {
 	case GNOME_Evolution_Addressbook_MODE_LOCAL:
 		e_book_backend_notify_writable (backend, FALSE);
+		e_book_backend_set_is_writable (E_BOOK_BACKEND(backend), FALSE);
 		e_book_backend_notify_connection_status (backend, FALSE); 
 		e_data_book_respond_authenticate_user (book, opid, GNOME_Evolution_Addressbook_Success); 
 		return;
@@ -218,7 +246,7 @@ e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
 			printf("Preparing to build cache\n");
 			g_thread_create ((GThreadFunc) build_cache, backend, FALSE, NULL);
 		} 
-		e_book_backend_set_is_writable (backend, TRUE);
+		e_book_backend_set_is_writable (backend, FALSE);
 		e_data_book_respond_authenticate_user (book, opid, GNOME_Evolution_Addressbook_Success);
 		return;
 		
@@ -251,6 +279,39 @@ get_filename_from_uri (const char *uri, const char *file)
 	g_free (mangled_uri);
 
 	return filename;
+}
+
+static void
+e_book_backend_mapi_gal_create_contact (EBookBackend *backend,
+		EDataBook    *book,
+		guint32       opid,
+		const gchar   *vcard)
+{
+	e_data_book_respond_create (book, opid,
+				    GNOME_Evolution_Addressbook_PermissionDenied,
+				    NULL);
+}
+
+static void
+e_book_backend_mapi_gal_remove_contacts (EBookBackend *backend,
+		 EDataBook    *book,
+		 guint32       opid,
+		 GList        *ids)
+{
+	e_data_book_respond_remove_contacts (book, opid,
+					     GNOME_Evolution_Addressbook_PermissionDenied,
+					     NULL);
+}
+
+static void
+e_book_backend_mapi_gal_modify_contact (EBookBackend *backend,
+		EDataBook    *book,
+		guint32       opid,
+		const gchar   *vcard)
+{
+	e_data_book_respond_modify (book, opid,
+				    GNOME_Evolution_Addressbook_PermissionDenied,
+				    NULL);
 }
 
 static GNOME_Evolution_Addressbook_CallStatus
@@ -312,7 +373,7 @@ e_book_backend_mapi_gal_load_source (EBookBackend *backend,
 
 	g_free (uri);
 	e_book_backend_set_is_loaded (E_BOOK_BACKEND (backend), TRUE);
-	e_book_backend_set_is_writable (backend, TRUE);	
+	e_book_backend_set_is_writable (backend, FALSE);	
 	if (priv->mode ==  GNOME_Evolution_Addressbook_MODE_LOCAL) {
 		e_book_backend_set_is_writable (backend, FALSE);
 		e_book_backend_notify_writable (backend, FALSE);
@@ -358,11 +419,13 @@ e_book_backend_mapi_gal_set_mode (EBookBackend *backend, int mode)
 	if (e_book_backend_is_loaded (backend)) {
 		if (mode == GNOME_Evolution_Addressbook_MODE_LOCAL) {
 			e_book_backend_notify_writable (backend, FALSE);
+			e_book_backend_set_is_writable (backend, FALSE);
 			e_book_backend_notify_connection_status (backend, FALSE);
 			/* FIXME: Uninitialize mapi here. may be.*/
 		}
 		else if (mode == GNOME_Evolution_Addressbook_MODE_REMOTE) {
-			e_book_backend_notify_writable (backend, TRUE);
+			e_book_backend_notify_writable (backend, FALSE);
+			e_book_backend_set_is_writable (backend, FALSE);
 			e_book_backend_notify_connection_status (backend, TRUE);
 //			e_book_backend_notify_auth_required (backend); //FIXME: WTH is this required.
 		}
@@ -725,6 +788,23 @@ init_closure (EDataBookView *book_view, EBookBackendMAPIGAL *bg)
 	return closure;
 }
 
+static void
+e_book_backend_mapi_gal_get_contact_list (EBookBackend *backend,
+					    EDataBook    *book,
+					    guint32       opid,
+					    const char   *query )
+{
+	EBookBackendMAPIGALPrivate *priv = ((EBookBackendMAPIGAL *) backend)->priv;
+
+	if(enable_debug)
+		printf("mapi: get contact list %s\n", query);
+
+	e_data_book_respond_get_contact_list (book, opid, GNOME_Evolution_Addressbook_RepositoryOffline,
+						      NULL);
+
+	return;
+}
+
 
 static void
 e_book_backend_mapi_gal_start_book_view (EBookBackend  *backend,
@@ -753,20 +833,35 @@ static void e_book_backend_mapi_gal_class_init (EBookBackendMAPIGALClass *klass)
 {
 	GObjectClass  *object_class = G_OBJECT_CLASS (klass);
 	EBookBackendClass *parent_class;
+	gint i;
 	
 	e_book_backend_mapi_gal_parent_class = g_type_class_peek_parent (klass);
 	
 	parent_class = E_BOOK_BACKEND_CLASS (klass);
 
 	/* Set the virtual methods. */
+	parent_class->create_contact		 = e_book_backend_mapi_gal_create_contact;
+	parent_class->remove_contacts		 = e_book_backend_mapi_gal_remove_contacts;
+	parent_class->modify_contact		 = e_book_backend_mapi_gal_modify_contact;
 	parent_class->load_source		 = e_book_backend_mapi_gal_load_source;
 	parent_class->get_static_capabilities    = e_book_backend_mapi_gal_get_static_capabilities;
 
+	parent_class->get_contact_list           = e_book_backend_mapi_gal_get_contact_list;
 	parent_class->start_book_view            = e_book_backend_mapi_gal_start_book_view;
 	parent_class->stop_book_view             = e_book_backend_mapi_gal_stop_book_view;
 	parent_class->authenticate_user          = e_book_backend_mapi_gal_authenticate_user;
+	parent_class->get_supported_fields	 = e_book_backend_mapi_gal_get_supported_fields;
+	parent_class->get_required_fields	 = e_book_backend_mapi_gal_get_required_fields;
 	parent_class->set_mode                   = e_book_backend_mapi_gal_set_mode;
 	object_class->dispose                    = e_book_backend_mapi_gal_dispose;
+
+
+	supported_fields = NULL;
+	for (i = 0; i < maplen; i++) {
+		supported_fields = g_list_append (supported_fields,
+						  (gchar *)e_contact_field_name (mappings[i].mapi_id));
+	}
+	supported_fields = g_list_append (supported_fields, (gpointer) "file_as");
 }
 
 /**
