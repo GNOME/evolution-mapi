@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-18 14:05+0300\n"
-"PO-Revision-Date: 2009-08-18 14:05+0300\n"
+"POT-Creation-Date: 2009-08-22 19:00+0300\n"
+"PO-Revision-Date: 2009-08-22 19:00+0300\n"
 "Last-Translator: Alexander Shopov <ash@contact.bg>\n"
 "Language-Team: Bulgarian <dict@fsa-bg.org>\n"
 "MIME-Version: 1.0\n"
@@ -82,7 +82,7 @@ msgid "Size"
 msgstr "Размер"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
-msgid "Unable to retrive folder size information"
+msgid "Unable to retrieve folder size information"
 msgstr "Размерът на папката не може да бъде получен"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
@@ -93,9 +93,9 @@ msgstr "Размер на папката"
 msgid "Fetching folder list ..."
 msgstr "Изтегляне на списъка с папки…"
 
-#. Miscelleneous settings
+#. Miscellaneous settings
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
-msgid "Miscelleneous"
+msgid "Miscellaneous"
 msgstr "Разни"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
