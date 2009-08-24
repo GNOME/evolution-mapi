@@ -1,3 +1,29 @@
+evolution-mapi 0.27.91 2009-08-24
+---------------------------------
+Bug Fixes :
+    Bug 585851 – Invalid calendar attachments due to truncation.(Mattias Eriksson)
+    Bug #561791 - The 'Fwd'/'Re' tags are removed for the recieved mails (Milan Crha)
+    Bug #569321 - Mail is in the wrong encoding (Milan Crha)
+    Bug #589999: EDS crashed:clicked on new contact (Bharath Acharya)
+    Typo fixes in user-visible strings (Claude Paroz)
+
+Translations :
+    Jorge González (es)
+    Antón Méixome (gl)
+    Shankar Prasad (kn)
+    Daniel Nylander (sv)
+    Rajesh Ranjan (hi)
+    Carles Ferrando (ca@valencia)
+    Djavan Fagundes (pt_BR)
+    Alexander Shopov (bg)
+    Piotr Drąg (pl)
+    Tomasz Dominikowski (pl)
+    Claude Paroz (fr)
+    Akom C (th)
+    Kjartan Maraas (nb)
+    A S Alam (pa)
+    Chao-Hsiung Liao (zh_HK)
+
 evolution-mapi 0.27.90 2009-08-10
 ---------------------------------
 Bug Fixes :
