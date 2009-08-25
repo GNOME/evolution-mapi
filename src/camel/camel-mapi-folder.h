@@ -78,6 +78,7 @@ typedef struct {
 	time_t recieved_time;
 	time_t send_time;
 	guint cpid; /* codepage id */
+	gchar *transport_headers;
 } MapiItemHeader;
 
 typedef struct {
