@@ -88,7 +88,6 @@ msgid "Size"
 msgstr "Tamanho"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
-#, fuzzy
 msgid "Unable to retrieve folder size information"
 msgstr "Não foi possível recuperar as informações de tamanho da pasta"
 
@@ -102,7 +101,6 @@ msgstr "Obtendo lista de pastas ..."
 
 #. Miscellaneous settings
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
-#, fuzzy
 msgid "Miscellaneous"
 msgstr "Diversos"
 
