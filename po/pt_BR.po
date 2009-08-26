@@ -9,9 +9,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-mapi\n"
-"POT-Creation-Date: 2009-08-14 16:48+0000\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-08-25 20:33-0400\n"
 "PO-Revision-Date: 2009-08-14 22:54-0300\n"
 "Last-Translator: Djavan Fagundes <dnoway@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
@@ -89,8 +88,9 @@ msgid "Size"
 msgstr "Tamanho"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
-msgid "Unable to retrive folder size information"
-msgstr "Não é possível recuperar as informações de tamanho da pasta"
+#, fuzzy
+msgid "Unable to retrieve folder size information"
+msgstr "Não foi possível recuperar as informações de tamanho da pasta"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
 msgid "Folder Size"
@@ -100,9 +100,10 @@ msgstr "Tamanho da pasta"
 msgid "Fetching folder list ..."
 msgstr "Obtendo lista de pastas ..."
 
-#. Miscelleneous settings
+#. Miscellaneous settings
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
-msgid "Miscelleneous"
+#, fuzzy
+msgid "Miscellaneous"
 msgstr "Diversos"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
