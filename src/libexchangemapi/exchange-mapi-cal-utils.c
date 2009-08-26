@@ -1238,9 +1238,9 @@ check_server_for_object (struct mapi_SPropValue_array *properties, mapi_id_t *mi
 	if (ids && g_slist_length(ids) == 1) {
 		struct id_list *idlist = (struct id_list *)(ids->data);
 		*mid = idlist->id;
-	} else 
+	} else  {
 	/* FIXME: what to do here? */
-	;
+	}
 
 	for (l = ids; l; l = l->next)
 		g_free(l->data);

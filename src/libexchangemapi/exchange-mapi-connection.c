@@ -70,6 +70,7 @@ mapi_profile_load (const char *profname, const char *password)
 	enum MAPISTATUS	retval = MAPI_E_SUCCESS;
 	struct mapi_session *session = NULL;
 	gchar *profpath = NULL;
+	gchar *default_profile_name = NULL;
 	const char *profile = NULL;
 	guint32 debug_log_level = 0;
 
@@ -100,13 +101,13 @@ mapi_profile_load (const char *profname, const char *password)
 	if (profname)
 		profile = profname;
 	else {
-		retval = GetDefaultProfile (&profile);
+		retval = GetDefaultProfile (&default_profile_name);
 		if (retval != MAPI_E_SUCCESS) {
 			mapi_errstr("GetDefaultProfile", GetLastError());
 			goto cleanup;
 		}
 	}
-
+	profile = default_profile_name;
 	g_print("\nLoading profile %s ", profile);
 
 	retval = MapiLogonEx(&session, profile, password);
@@ -719,6 +720,7 @@ mapidump_PAB_gal_entry (struct SRow *aRow)
 	const char	*name;
 	const char	*email;
 	const char	*account;
+	ExchangeMAPIGALEntry *gal_entry;
 
 	addrtype = (const char *)find_SPropValue_data(aRow, PR_ADDRTYPE_UNICODE);
 	name = (const char *)find_SPropValue_data(aRow, PR_DISPLAY_NAME_UNICODE);
@@ -728,7 +730,7 @@ mapidump_PAB_gal_entry (struct SRow *aRow)
 	printf("[%s] %s:\n\tName: %-25s\n\tEmail: %-25s\n", 
 	       addrtype, account, name, email);
 
-	ExchangeMAPIGALEntry *gal_entry = g_new0 (ExchangeMAPIGALEntry, 1);
+	gal_entry = g_new0 (ExchangeMAPIGALEntry, 1);
 	gal_entry->name = g_strdup (name);
 	gal_entry->email = g_strdup (email);
 
@@ -1215,7 +1217,6 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 			const bool *has_attach = NULL;
 			GSList *attach_list = NULL;
 			GSList *recip_list = NULL;
-			GSList *gal_list = NULL;
 			GSList *stream_list = NULL;
 			gboolean cb_retval = false;
 

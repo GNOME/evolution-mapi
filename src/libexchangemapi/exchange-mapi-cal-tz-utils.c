@@ -230,7 +230,7 @@ exchange_mapi_cal_tz_util_dump_ical_tzs ()
 	list_items = g_list_sort (list_items, (GCompareFunc) g_ascii_strcasecmp);
 
 	/* Put the "UTC" entry at the top of the combo's list. */
-	list_items = g_list_prepend (list_items, "UTC");
+	list_items = g_list_prepend (list_items, (gpointer)"UTC");
 
 	for (l = list_items, i = 0; l != NULL; l = l->next, ++i) 
 		g_print ("[%3d]\t%s\n", (i+1), (gchar *)(l->data));
