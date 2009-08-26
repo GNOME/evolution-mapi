@@ -1347,7 +1347,8 @@ mapi_get_folder_info(CamelStore *store, const char *top, guint32 flags, CamelExc
 		}
 	}
 
-	if (check_for_connection((CamelService *)store, ex)) {
+	if (check_for_connection((CamelService *)store, ex) || 
+	    ((CamelService *)store)->status == CAMEL_SERVICE_CONNECTING) {
 		mapi_folders_sync (mapi_store, top, flags, ex);
 
 		if (camel_exception_is_set (ex)) {
