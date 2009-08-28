@@ -46,7 +46,7 @@
 #include <libedata-book/e-book-backend-cache.h>
 #include <libedata-book/e-book-backend-summary.h>
 #include "e-book-backend-mapi.h"
-
+#include "bonobo/bonobo-object.h"
 
 static EBookBackendClass *e_book_backend_mapi_parent_class;
 static gboolean enable_debug = TRUE;
