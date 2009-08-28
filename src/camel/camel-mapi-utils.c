@@ -358,7 +358,7 @@ camel_mapi_utils_create_item_build_props (struct SPropValue **value, struct SPro
 	MapiItem *item = (MapiItem *) data;
 	struct SPropValue *props;
 	GSList *l;
-
+	bool *send_rich_info = g_new0 (bool, 1);
 	uint32_t *msgflag = g_new0 (uint32_t, 1);
 	int i=0;
 
@@ -367,6 +367,9 @@ camel_mapi_utils_create_item_build_props (struct SPropValue **value, struct SPro
 	set_SPropValue_proptag(&props[i++], PR_SUBJECT_UNICODE, g_strdup (item->header.subject));
 	set_SPropValue_proptag(&props[i++], PR_CONVERSATION_TOPIC_UNICODE, g_strdup (item->header.subject));
 	set_SPropValue_proptag(&props[i++], PR_NORMALIZED_SUBJECT_UNICODE, g_strdup (item->header.subject));
+
+	*send_rich_info = false;
+	set_SPropValue_proptag(&props[i++], PR_SEND_RICH_INFO, (const void *) send_rich_info);
 
 	*msgflag = MSGFLAG_UNSENT;
 	set_SPropValue_proptag(&props[i++], PR_MESSAGE_FLAGS, (void *)msgflag);
