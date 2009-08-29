@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-20 12:01+0200\n"
-"PO-Revision-Date: 2009-08-20 12:01+0100\n"
+"POT-Creation-Date: 2009-08-29 13:46+0200\n"
+"PO-Revision-Date: 2009-08-29 13:46+0100\n"
 "Last-Translator: Tomasz Dominikowski <dominikowski@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "MIME-Version: 1.0\n"
@@ -145,37 +145,37 @@ msgstr "Nie można utworzyć wątku do zapełnienia pamięci podręcznej"
 msgid "Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server."
 msgstr "Obsługa modyfikowania pojedynczych instancji powtarzającego się spotkania nie jest zaimplementowana. Nie dokonano żadnych zmian spotkania na serwerze."
 
-#: ../src/camel/camel-mapi-folder.c:475
+#: ../src/camel/camel-mapi-folder.c:478
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "Aktualizowanie lokalnej pamięci podręcznej podsumowania nowych wiadomości w %s"
 
-#: ../src/camel/camel-mapi-folder.c:699
+#: ../src/camel/camel-mapi-folder.c:702
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Pobieranie identyfikatorów wiadomości z serwera dla %s"
 
-#: ../src/camel/camel-mapi-folder.c:721
+#: ../src/camel/camel-mapi-folder.c:724
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Usuwanie wiadomości oznaczonych do usunięcia z pamięci podręcznej w %s"
 
-#: ../src/camel/camel-mapi-folder.c:1025
-#: ../src/camel/camel-mapi-folder.c:1624
-#: ../src/camel/camel-mapi-folder.c:1632
+#: ../src/camel/camel-mapi-folder.c:1029
+#: ../src/camel/camel-mapi-folder.c:1643
+#: ../src/camel/camel-mapi-folder.c:1651
 msgid "This message is not available in offline mode."
 msgstr "Ta wiadomość nie jest dostępna w trybie offline."
 
-#: ../src/camel/camel-mapi-folder.c:1034
+#: ../src/camel/camel-mapi-folder.c:1038
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Pobieranie podsumowania nowych wiadomości w %s"
 
-#: ../src/camel/camel-mapi-folder.c:1044
+#: ../src/camel/camel-mapi-folder.c:1048
 msgid "Fetching items failed"
 msgstr "Pobranie elementów nie powiodło się"
 
-#: ../src/camel/camel-mapi-folder.c:1588
+#: ../src/camel/camel-mapi-folder.c:1607
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -184,35 +184,34 @@ msgstr ""
 "Nie można pobrać wiadomości: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1588
+#: ../src/camel/camel-mapi-folder.c:1607
 msgid "No such message"
 msgstr "Nie ma takiej wiadomości"
 
-#: ../src/camel/camel-mapi-folder.c:1600
+#: ../src/camel/camel-mapi-folder.c:1619
 msgid "Message fetching cancelled by user."
 msgstr "Pobieranie wiadomości zostało anulowane przez użytkownika."
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1626
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Nie można pobrać wiadomości %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1653
-#: ../src/camel/camel-mapi-folder.c:1665
+#: ../src/camel/camel-mapi-folder.c:1672
+#: ../src/camel/camel-mapi-folder.c:1684
 msgid "Could not get message"
 msgstr "Nie można pobrać wiadomości"
 
-#: ../src/camel/camel-mapi-folder.c:1945
+#: ../src/camel/camel-mapi-folder.c:1964
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Nie można dodać wiadomości do katalogu \"%s\""
 
-#: ../src/camel/camel-mapi-folder.c:1952
-#, c-format
-msgid "Offline. '%s'"
-msgstr "Offline. \"%s\""
+#: ../src/camel/camel-mapi-folder.c:1971
+msgid "Offline."
+msgstr "Offline."
 
-#: ../src/camel/camel-mapi-folder.c:2072
+#: ../src/camel/camel-mapi-folder.c:2091
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nie można wczytać podsumowania dla %s"
