@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi.HEAD\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2009-08-19 18:22+0000\n"
-"PO-Revision-Date: 2009-08-22 11:48+0200\n"
+"POT-Creation-Date: 2009-08-28 04:13+0000\n"
+"PO-Revision-Date: 2009-08-29 14:41+0200\n"
 "Last-Translator: Jorge González <jorgegonz@svn.gnome.org>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -85,7 +85,6 @@ msgid "Size"
 msgstr "Tamaño"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
-#| msgid "Unable to retrive folder size information"
 msgid "Unable to retrieve folder size information"
 msgstr "No se pudo obtener la información del tamaño de la carpeta"
 
@@ -99,7 +98,6 @@ msgstr "Obteniendo la lista de carpetas…"
 
 #. Miscellaneous settings
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
-#| msgid "Miscelleneous"
 msgid "Miscellaneous"
 msgstr "Misceláneo"
 
@@ -154,36 +152,36 @@ msgstr ""
 "Aún no está implementado el soporte para modificar instancias aisladas de "
 "una cita recurrente. No se realizó ningún cambio en la cita del servidor."
 
-#: ../src/camel/camel-mapi-folder.c:475
+#: ../src/camel/camel-mapi-folder.c:478
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "Actualizando la caché de resumen local para los mensajes nuevos en %s"
 
-#: ../src/camel/camel-mapi-folder.c:699
+#: ../src/camel/camel-mapi-folder.c:702
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Obteniendo los ID de los mensajes del servidor para %s"
 
-#: ../src/camel/camel-mapi-folder.c:721
+#: ../src/camel/camel-mapi-folder.c:724
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Quitando los borrados mensajes de la caché en %s"
 
-#: ../src/camel/camel-mapi-folder.c:1025 ../src/camel/camel-mapi-folder.c:1624
-#: ../src/camel/camel-mapi-folder.c:1632
+#: ../src/camel/camel-mapi-folder.c:1029 ../src/camel/camel-mapi-folder.c:1643
+#: ../src/camel/camel-mapi-folder.c:1651
 msgid "This message is not available in offline mode."
 msgstr "Este mensaje no está disponible en modo desconectado."
 
-#: ../src/camel/camel-mapi-folder.c:1034
+#: ../src/camel/camel-mapi-folder.c:1038
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Obteniendo recopilación de información sobre los mensajes nuevos en %s"
 
-#: ../src/camel/camel-mapi-folder.c:1044
+#: ../src/camel/camel-mapi-folder.c:1048
 msgid "Fetching items failed"
 msgstr "Falló al obtener los elementos"
 
-#: ../src/camel/camel-mapi-folder.c:1588
+#: ../src/camel/camel-mapi-folder.c:1607
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -192,34 +190,34 @@ msgstr ""
 "No se puede obtener el mensaje: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1588
+#: ../src/camel/camel-mapi-folder.c:1607
 msgid "No such message"
 msgstr "No existe ese mensaje"
 
-#: ../src/camel/camel-mapi-folder.c:1600
+#: ../src/camel/camel-mapi-folder.c:1619
 msgid "Message fetching cancelled by user."
 msgstr "El usuario canceló la obtención de mensajes."
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1626
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "No se puede obtener el mensaje %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1653 ../src/camel/camel-mapi-folder.c:1665
+#: ../src/camel/camel-mapi-folder.c:1672 ../src/camel/camel-mapi-folder.c:1684
 msgid "Could not get message"
 msgstr "No se puede obtener el mensaje"
 
-#: ../src/camel/camel-mapi-folder.c:1945
+#: ../src/camel/camel-mapi-folder.c:1964
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "No se pude anexar el mensaje a la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-folder.c:1952
-#, c-format
-msgid "Offline. '%s'"
-msgstr "Desconectado. «%s»"
+#: ../src/camel/camel-mapi-folder.c:1971
+#| msgid "Offline. '%s'"
+msgid "Offline."
+msgstr "Desconectado."
 
-#: ../src/camel/camel-mapi-folder.c:2072
+#: ../src/camel/camel-mapi-folder.c:2091
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No se pudo cargar el resumen para %s"
