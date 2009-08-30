@@ -11,8 +11,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2009-08-10 09:12+0000\n"
-"PO-Revision-Date: 2009-08-13 10:27+0300\n"
+"POT-Creation-Date: 2009-08-28 04:13+0000\n"
+"PO-Revision-Date: 2009-08-30 17:37+0300\n"
 "Last-Translator: Ivar Smolin <okul@linux.ee>\n"
 "Language-Team: Estonian <et@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -28,7 +28,7 @@ msgstr "Sisesta %s@%s parool"
 #. as of now does not have access to it
 #. TODO : Fix strings
 msgid "Select username"
-msgstr ""
+msgstr "Kasutajanime valimine"
 
 msgid "Full name"
 msgstr "Täisnimi"
@@ -40,6 +40,8 @@ msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
 msgstr ""
+"Server, kasutajanimi ja domeeni nimi ei tohi olla tühjad. Palun sisesta "
+"neile sobilikud väärtused."
 
 msgid "Authentication finished successfully."
 msgstr "Autentimine lõppes edukalt."
@@ -68,8 +70,8 @@ msgstr "Kaust"
 msgid "Size"
 msgstr "Suurus"
 
-msgid "Unable to retrive folder size information"
-msgstr "Kasuta suuruse andmeid pole võimalik vastu võtta"
+msgid "Unable to retrieve folder size information"
+msgstr "Kausta suuruse andmeid pole võimalik vastu võtta"
 
 msgid "Folder Size"
 msgstr "Kausta suurus"
@@ -77,8 +79,8 @@ msgstr "Kausta suurus"
 msgid "Fetching folder list ..."
 msgstr "Kaustade nimekirja vastuvõtmine..."
 
-#. Miscelleneous settings
-msgid "Miscelleneous"
+#. Miscellaneous settings
+msgid "Miscellaneous"
 msgstr ""
 
 msgid "View the size of all Exchange folders"
@@ -130,7 +132,7 @@ msgstr "See sõnum pole võrguvabas režiimis saadaval."
 
 #, c-format
 msgid "Fetching summary information for new messages in %s"
-msgstr ""
+msgstr "Kaustas %s olevate uute sõnumite kohta andmete hankimine"
 
 msgid "Fetching items failed"
 msgstr "Tõrge kirjete hankimisel"
@@ -160,13 +162,12 @@ msgstr "Sõnumit pole võimalik hankida"
 msgid "Cannot append message to folder '%s'"
 msgstr "Sõnumit pole võimalik kausta `%s' lisada"
 
-#, c-format
-msgid "Offline. '%s'"
-msgstr ""
+msgid "Offline."
+msgstr "Ühendamata."
 
 #, c-format
 msgid "Could not load summary for %s"
-msgstr ""
+msgstr "Kokkuvõttefaili pole %s jaoks võimalik laadida"
 
 msgid "Checking for new mail"
 msgstr "Uute sõnumite kontrollimine"
@@ -199,6 +200,7 @@ msgstr "Parool"
 msgid ""
 "This option will connect to the Openchange server using a plaintext password."
 msgstr ""
+"See valik ühendab Openchange serveriga, kasutades avatekstilist parooli."
 
 msgid "Favorites"
 msgstr "Lemmikud"
@@ -244,11 +246,11 @@ msgstr "MAPI-kausta `%s' nime pole võimalik muuta. Kausta pole olemas."
 
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
-msgstr ""
+msgstr "Vaikimisi MAPI-kaustale `%s' pole võimalik uut nime `%s' määrata"
 
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
-msgstr ""
+msgstr "MAPI-kaustale `%s' pole võimalik uut nime `%s' määrata"
 
 msgid "Folder list not available in offline mode."
 msgstr "Kaustade nimekiri pole võrguvabas režiimis saadaval."
