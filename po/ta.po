@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi.master.ta\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
-"POT-Creation-Date: 2009-08-19 18:22+0000\n"
-"PO-Revision-Date: 2009-08-25 16:32+0530\n"
+"POT-Creation-Date: 2009-08-28 04:13+0000\n"
+"PO-Revision-Date: 2009-08-31 00:57+0530\n"
 "Last-Translator: I. Felix <ifelix@redhat.com>\n"
 "Language-Team: Tamil <fedora-trans-ta@redhat.com>\n"
 "MIME-Version: 1.0\n"
@@ -18,6 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.11.4\n"
 "Plural-Forms: nplurals=2; plural=(n!=1);\\n\n"
+"\n"
 "\n"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
@@ -154,37 +155,36 @@ msgstr ""
 "மீள் நிகழ் நிகழ்வுகளின் ஒரு தனியனை மாற்றும் வசதிக்கு  ஆதரவை இன்னும் செயலாக்கவில்லை. "
 "சேவையகத்தில் மாறுதல் ஏதும் செய்யப்படவில்லை."
 
-#: ../src/camel/camel-mapi-folder.c:475
+#: ../src/camel/camel-mapi-folder.c:478
 #, c-format
-#| msgid "Fetching summary information for new messages in %s"
 msgid "Updating local summary cache for new messages in %s"
 msgstr "%s இல் உள்ள புதிய செய்திகளுக்கு சுருக்க தகவலை மேம்படுத்துகிறது"
 
-#: ../src/camel/camel-mapi-folder.c:699
+#: ../src/camel/camel-mapi-folder.c:702
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "செய்தி IDகளை சேவையகத்திலிருந்து %sக்கு எடுக்கிறது"
 
-#: ../src/camel/camel-mapi-folder.c:721
+#: ../src/camel/camel-mapi-folder.c:724
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "%sஇல் அழிக்கப்பட்ட செய்திகளுக்கு கேஷிலிருந்து நீக்குகிறது"
 
-#: ../src/camel/camel-mapi-folder.c:1025 ../src/camel/camel-mapi-folder.c:1624
-#: ../src/camel/camel-mapi-folder.c:1632
+#: ../src/camel/camel-mapi-folder.c:1029 ../src/camel/camel-mapi-folder.c:1643
+#: ../src/camel/camel-mapi-folder.c:1651
 msgid "This message is not available in offline mode."
 msgstr "இணையத் தொடர்பு விலகிய முறையில் இந்த செய்தி கிடைக்காது."
 
-#: ../src/camel/camel-mapi-folder.c:1034
+#: ../src/camel/camel-mapi-folder.c:1038
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "%s இல் உள்ள புதிய செய்திகளுக்கு சுருக்க தகவலை கொண்டு வருகிறது"
 
-#: ../src/camel/camel-mapi-folder.c:1044
+#: ../src/camel/camel-mapi-folder.c:1048
 msgid "Fetching items failed"
 msgstr "உருப்படிகளை கொண்டு வருதல் தோல்வியுற்றது"
 
-#: ../src/camel/camel-mapi-folder.c:1588
+#: ../src/camel/camel-mapi-folder.c:1607
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -193,35 +193,34 @@ msgstr ""
 "செய்தியை பெற முடியவில்லை: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1588
+#: ../src/camel/camel-mapi-folder.c:1607
 msgid "No such message"
 msgstr "இது போன்ற செய்தி இல்லை"
 
-#: ../src/camel/camel-mapi-folder.c:1600
+#: ../src/camel/camel-mapi-folder.c:1619
 msgid "Message fetching cancelled by user."
 msgstr "செய்தி கொண்டு வருதல் பயனரால் இரத்து செய்யப்பட்டது."
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1626
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "%s செய்தியை பெற முடியவில்லை: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1653 ../src/camel/camel-mapi-folder.c:1665
+#: ../src/camel/camel-mapi-folder.c:1672 ../src/camel/camel-mapi-folder.c:1684
 msgid "Could not get message"
 msgstr "செய்தியை பெற முடியவில்லை"
 
-#: ../src/camel/camel-mapi-folder.c:1945
+#: ../src/camel/camel-mapi-folder.c:1964
 #, c-format
-#| msgid "Cannot create new folder `%s'"
 msgid "Cannot append message to folder '%s'"
 msgstr "கோப்புறை `%s' இல் செய்தியை சேர்க்க முடியவில்லை"
 
-#: ../src/camel/camel-mapi-folder.c:1952
-#, c-format
-msgid "Offline. '%s'"
-msgstr "ஆஃப்லைன். '%s'"
+#: ../src/camel/camel-mapi-folder.c:1971
+#| msgid "Offline. '%s'"
+msgid "Offline."
+msgstr "ஆஃப்லைன்"
 
-#: ../src/camel/camel-mapi-folder.c:2072
+#: ../src/camel/camel-mapi-folder.c:2091
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s க்கான சுருக்கத்தை ஏற்ற முடியவில்லை"
