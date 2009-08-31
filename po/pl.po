@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-29 13:46+0200\n"
-"PO-Revision-Date: 2009-08-29 13:46+0100\n"
+"POT-Creation-Date: 2009-08-31 14:58+0200\n"
+"PO-Revision-Date: 2009-08-31 14:58+0100\n"
 "Last-Translator: Tomasz Dominikowski <dominikowski@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "MIME-Version: 1.0\n"
@@ -208,8 +208,9 @@ msgid "Cannot append message to folder '%s'"
 msgstr "Nie można dodać wiadomości do katalogu \"%s\""
 
 #: ../src/camel/camel-mapi-folder.c:1971
-msgid "Offline."
-msgstr "Offline."
+#, c-format
+msgid "Offline. '%s'"
+msgstr "Offline. \"%s\""
 
 #: ../src/camel/camel-mapi-folder.c:2091
 #, c-format
