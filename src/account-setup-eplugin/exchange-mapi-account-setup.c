@@ -50,7 +50,7 @@
 
 #define d(x) x
 
-int e_plugin_lib_enable (EPluginLib *ep, int enable);
+int e_plugin_lib_enable (EPlugin *ep, int enable);
 
 /* Account Setup */
 GtkWidget *org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData *data);
@@ -77,7 +77,7 @@ free_mapi_listener ( void )
 }
 
 int
-e_plugin_lib_enable (EPluginLib *ep, int enable)
+e_plugin_lib_enable (EPlugin *ep, int enable)
 {
 	g_debug ("Loading Exchange MAPI Plugin \n");
 
