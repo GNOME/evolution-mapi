@@ -1968,7 +1968,7 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 
 	if (offline->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL) {
 		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, 
-				      _("Offline."));
+				 _("Offline. '%s'"));
 		return;
 	}
 
