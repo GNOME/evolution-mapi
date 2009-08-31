@@ -8,13 +8,13 @@ msgstr ""
 "Project-Id-Version: evolution-mapi.HEAD\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2009-08-28 04:13+0000\n"
-"PO-Revision-Date: 2009-08-29 14:41+0200\n"
+"POT-Creation-Date: 2009-08-31 09:55+0000\n"
+"PO-Revision-Date: 2009-08-31 20:36+0200\n"
 "Last-Translator: Jorge González <jorgegonz@svn.gnome.org>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"Content-Transfer-Encoding: UTF-8\n"
 "X-Generator: KBabel 1.11.4\n"
 "Plural-Forms:  nplurals=2; plural=(n != 1);\n"
 
@@ -213,9 +213,10 @@ msgid "Cannot append message to folder '%s'"
 msgstr "No se pude anexar el mensaje a la carpeta «%s»"
 
 #: ../src/camel/camel-mapi-folder.c:1971
-#| msgid "Offline. '%s'"
-msgid "Offline."
-msgstr "Desconectado."
+#, c-format
+#| msgid "Offline."
+msgid "Offline. '%s'"
+msgstr "Desconectado. «%s»"
 
 #: ../src/camel/camel-mapi-folder.c:2091
 #, c-format
