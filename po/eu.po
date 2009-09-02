@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: eu\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-29 09:41+0200\n"
-"PO-Revision-Date: 2009-08-29 09:42+0200\n"
+"POT-Creation-Date: 2009-09-02 18:31+0200\n"
+"PO-Revision-Date: 2009-09-02 18:31+0200\n"
 "Last-Translator: Iñaki Larrañaga Murgoitio <dooteo@euskalgnu.org>\n"
 "Language-Team: Basque <itzulpena@euskalgnu.org>\n"
 "MIME-Version: 1.0\n"
@@ -212,8 +212,9 @@ msgid "Cannot append message to folder '%s'"
 msgstr "Ezin zaio mezua '%s' karpetari erantsi"
 
 #: ../src/camel/camel-mapi-folder.c:1971
-msgid "Offline."
-msgstr "Lineaz kanpo."
+#, c-format
+msgid "Offline. '%s'"
+msgstr "Lineaz kanpo: '%s'"
 
 #: ../src/camel/camel-mapi-folder.c:2091
 #, c-format
