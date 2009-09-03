@@ -11,9 +11,9 @@ msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2009-08-29 23:30+0000\n"
-"PO-Revision-Date: 2009-08-30 11:42+0200\n"
-"Last-Translator: Christian Kirbach <Christian.Kirbach@googlemail.com>\n"
+"POT-Creation-Date: 2009-08-31 09:55+0000\n"
+"PO-Revision-Date: 2009-09-03 18:19+0200\n"
+"Last-Translator: Mario Blättermann <mariobl@gnome.org>\n"
 "Language-Team: German <gnome-de@gnome.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -221,8 +221,9 @@ msgid "Cannot append message to folder '%s'"
 msgstr "Nachricht konnte nicht an Ordner »%s« angehängt werden"
 
 #: ../src/camel/camel-mapi-folder.c:1971
-msgid "Offline."
-msgstr "Offline."
+#, c-format
+msgid "Offline. '%s'"
+msgstr "Offline. »%s«"
 
 #: ../src/camel/camel-mapi-folder.c:2091
 #, c-format
