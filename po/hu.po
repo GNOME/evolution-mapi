@@ -242,7 +242,7 @@ msgstr "_A felhasználói fiók automatikus szinkronizálása helyileg"
 #: ../src/camel/camel-mapi-provider.c:62
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
-"_Szűrők alkalmazása az új levelekre ezen kiszolgáló Érkezett mappájában"
+"_Szűrők alkalmazása az új levelekre ezen kiszolgáló Beérkezett üzenetek mappájában"
 
 #: ../src/camel/camel-mapi-provider.c:64
 msgid "Check new messages for _Junk contents"
@@ -250,7 +250,7 @@ msgstr "_Levélszemét keresése az új levelek között"
 
 #: ../src/camel/camel-mapi-provider.c:66
 msgid "Only check for Junk messag_es in the Inbox folder"
-msgstr "Levélszemét keresése _csak az Érkezett mappában"
+msgstr "Levélszemét keresése _csak a Beérkezett üzenetek mappában"
 
 #: ../src/camel/camel-mapi-provider.c:78
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
