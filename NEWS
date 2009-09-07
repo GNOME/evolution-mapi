@@ -1,3 +1,31 @@
+evolution-mapi 0.27.92 2009-09-07
+---------------------------------
+Bug Fixes :
+    Bug #590000 - GAL doesn't fetch email ids properly (Bharath Acharya)
+    Bug #590002 - folder tree doesn't show up after removing cache (Johnny Jacob)
+    Bug #591655 - Contact details are not displayed (Bharath Acharya)
+    Bug #592057 - Headers missing, Date: header corrupt (Johnny Jacob)
+    Bug #593076 - Fixes for build system. (H.Habighorst)
+    Bug #593176 - winmail.dat sent in outgoing plaintext mail (Johnny Jacob)
+    Bug #593611 - Fixed build break (Bharath Acharya)
+    Bug #593637 - Get rid of Bonobo in MAPI (Bharath Acharya)
+    Bug #594345 - Cannot create a new account. (Bharath Acharya)
+
+Translations :
+   Changwoo Ryu (ko)
+   Djavan Fagundes (pt_BR)
+   Duarte Loreto (pt)
+   Gabor Kelemen (hu)
+   I. Felix (ta)
+   Inaki Larranaga Murgoitio (eu)
+   Ivar Smolin (et)
+   Jiri Eischmann (cs)
+   Jorge González (es)
+   Mario Blättermann (de)
+   Petr Kovar (Pe)
+   Runa Bhattacharjee (bn_IN)
+   Tomasz Dominikowski (pl)
+
 evolution-mapi 0.27.91 2009-08-24
 ---------------------------------
 Bug Fixes :
