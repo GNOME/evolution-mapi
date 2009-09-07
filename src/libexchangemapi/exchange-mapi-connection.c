@@ -106,8 +106,8 @@ mapi_profile_load (const char *profname, const char *password)
 			mapi_errstr("GetDefaultProfile", GetLastError());
 			goto cleanup;
 		}
+		profile = default_profile_name;
 	}
-	profile = default_profile_name;
 	g_print("\nLoading profile %s ", profile);
 
 	retval = MapiLogonEx(&session, profile, password);
