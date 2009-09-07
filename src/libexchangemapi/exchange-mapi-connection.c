@@ -724,7 +724,7 @@ mapidump_PAB_gal_entry (struct SRow *aRow)
 
 	addrtype = (const char *)find_SPropValue_data(aRow, PR_ADDRTYPE_UNICODE);
 	name = (const char *)find_SPropValue_data(aRow, PR_DISPLAY_NAME_UNICODE);
-	email = (const char *)find_SPropValue_data(aRow, PR_EMAIL_ADDRESS_UNICODE);
+	email = (const char *)find_SPropValue_data(aRow, PR_SMTP_ADDRESS_UNICODE);
 	account = (const char *)find_SPropValue_data(aRow, PR_ACCOUNT_UNICODE);
 
 	printf("[%s] %s:\n\tName: %-25s\n\tEmail: %-25s\n", 
@@ -754,7 +754,7 @@ exchange_mapi_util_get_gal (GPtrArray *contacts_array)
 					  PR_INSTANCE_KEY,
 					  PR_ENTRYID,
 					  PR_DISPLAY_NAME_UNICODE,
-					  PR_EMAIL_ADDRESS_UNICODE,
+					  PR_SMTP_ADDRESS_UNICODE,
 					  PR_DISPLAY_TYPE,
 					  PR_OBJECT_TYPE,
 					  PR_ADDRTYPE_UNICODE,
