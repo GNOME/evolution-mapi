@@ -1,5 +1,3 @@
-AUTOMAKE_OPTIONS = 1.6
-
 SUBDIRS = src po
 DIST_SUBDIRS= src po
 

@@ -1,28 +1,12 @@
-# Simple configuration script for openchange evolution plugin
-# Written by Julien Kerihuel <j.kerihuel@openchange.org>
-# Modified for GNOME Evolution MAPI Provider by Johnny Jacob <jjohnny@novell.com>
+dnl Simple configuration script for openchange evolution plugin
+dnl Written by Julien Kerihuel <j.kerihuel@openchange.org>
+dnl Modified for GNOME Evolution MAPI Provider by Johnny Jacob <jjohnny@novell.com>
 
-AC_PREREQ(2.57)
-AC_DEFINE(_GNU_SOURCE, 1, [Use GNU extensions])
-AC_INIT(evolution-mapi, 0.27.92, http://bugzilla.gnome.org/browse.cgi?product=evolution-mapi)
+AC_PREREQ(2.58)
+AC_INIT([evolution-mapi], [0.27.92], [http://bugzilla.gnome.org/browse.cgi?product=evolution-mapi])
+AM_INIT_AUTOMAKE([gnu 1.9])
 AC_CONFIG_SRCDIR(README)
-
-AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
-
-# Some requirements have versioned package names
-# XXX In the spirit of getting rid of versioned
-#     files, can we please drop these suffixes?
-EDS_PACKAGE=1.2
-
-# Required Packages
-m4_define([eds_minimum_version], [2.27.2])
-m4_define([evo_minimum_version], [2.27.2])
-m4_define([libmapi_minimum_version], [0.8])
-
-AC_CONFIG_HEADER(config.h)
-
-# Automake 1.11 - Silent Build Rules
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+AC_CONFIG_HEADERS(config.h)
 
 dnl ****************************
 dnl Evolution-MAPI API version
@@ -31,26 +15,40 @@ m4_define([EVO_MAPI_API_VERSION_MACRO], [1.0])
 EVO_MAPI_API_VERSION=EVO_MAPI_API_VERSION_MACRO
 AC_SUBST(EVO_MAPI_API_VERSION)
 
+dnl Some requirements have versioned package names
+dnl XXX In the spirit of getting rid of versioned
+dnl     files, can we please drop these suffixes?
+EDS_PACKAGE=1.2
+
+dnl *******************
+dnl Required Packages
+dnl *******************
+m4_define([eds_minimum_version], [2.27.2])
+m4_define([evo_minimum_version], [2.27.2])
+m4_define([libmapi_minimum_version], [0.8])
+
+dnl ***********************************
+dnl Automake 1.11 - Silent Build Rules
+dnl ***********************************
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
 dnl ****************************
 dnl Initialize maintainer mode
 dnl ****************************
 AM_MAINTAINER_MODE
 
-AC_ISC_POSIX
 AC_PROG_CC
 AC_PROG_CPP
 AC_C_INLINE
-AC_STDC_HEADERS
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
-AC_DEFINE(_GNU_SOURCE, 1, [Use GNU extensions])
-
-# Compiler Warning Flags
-
+dnl ***********************
+dnl Compiler Warning Flags
+dnl ***********************
 AS_COMPILER_FLAGS(WARNING_FLAGS,
-»·······"-DG_DISABLE_DEPRECATED
+	"-DG_DISABLE_DEPRECATED
 	-DPANGO_DISABLE_DEPRECATED
 	-DGDK_DISABLE_DEPRECATED
 	-DGDK_PIXBUF_DISABLE_DEPRECATED
@@ -68,11 +66,11 @@ AS_COMPILER_FLAGS(WARNING_FLAGS,
 	-Wredundant-decls -Wundef -Wwrite-strings")
 AC_SUBST(WARNING_FLAGS)
 
-# Other useful compiler warnings for test builds only.
-# These may produce warnings we have no control over.
-#
-#»······-Wmissing-format-attribute
-#»······-Wshadow
+dnl Other useful compiler warnings for test builds only.
+dnl These may produce warnings we have no control over.
+dnl
+dnl	-Wmissing-format-attribute
+dnl	-Wshadow
 
 CFLAGS="$CFLAGS $WARNING_FLAGS"
 
@@ -115,9 +113,15 @@ dnl ****************************
 PKG_CHECK_MODULES(EVOLUTION_PLUGIN, evolution-plugin >= evo_minimum_version)
 
 dnl ****************************
-dnl Check for LibMAPI 
+dnl Check for LibMAPI
 dnl ****************************
-PKG_CHECK_MODULES(LIBMAPI, libmapi >= libmapi_minimum_version)
+
+dnl libmapi requires SAMBA, it has got samba's cflags in it's own CFLAGS!
+PKG_CHECK_MODULES(LIBMAPI, 
+	libmapi >= libmapi_minimum_version,,
+	[AC_MSG_ERROR([libmapi wasn't found! Please install at least libmapi-libmapi_minimum_version!])])
+AC_SUBST(LIBMAPI_CFLAGS)
+AC_SUBST(LIBMAPI_LIBS)
 
 dnl ****************************
 dnl Expose version information
@@ -169,7 +173,7 @@ GTK_DOC_CHECK(1.9)
 dnl **************************
 dnl Makefiles, generated .pc's
 dnl **************************
-AC_OUTPUT([
+AC_CONFIG_FILES([
 Makefile 
 src/Makefile
 src/account-setup-eplugin/Makefile
@@ -180,3 +184,4 @@ src/libexchangemapi/Makefile
 src/libexchangemapi/libexchangemapi-]EVO_MAPI_API_VERSION_MACRO[.pc:src/libexchangemapi/libexchangemapi.pc.in
 po/Makefile.in
 ])
+AC_OUTPUT
