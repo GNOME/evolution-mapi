@@ -20,7 +20,6 @@
 #include <libedata-book/e-book-backend-cache.h>
 #include <libedata-book/e-book-backend-summary.h>
 #include "e-book-backend-mapi-gal.h"
-#include "bonobo/bonobo-object.h"
 
 static EBookBackendClass *e_book_backend_mapi_gal_parent_class;
 static gboolean enable_debug = TRUE;
@@ -692,7 +691,7 @@ book_view_thread (gpointer data)
 	if (enable_debug)
 		printf("mapi: book view\n");
 	
-	bonobo_object_ref (book_view);
+	g_object_ref (book_view);
 	e_flag_set (closure->running);
 						
 	e_data_book_view_notify_status_message (book_view, "Searching...");
@@ -705,7 +704,7 @@ book_view_thread (gpointer data)
 				e_book_backend_notify_auth_required (E_BOOK_BACKEND (backend));
 				e_data_book_view_notify_complete (book_view,
 							GNOME_Evolution_Addressbook_AuthenticationRequired);
-				bonobo_object_unref (book_view);
+				g_object_unref (book_view);
 				return;
 			}
 		
@@ -720,7 +719,7 @@ book_view_thread (gpointer data)
 						get_contacts_from_cache (backend, query, ids, book_view, closure);
 						g_ptr_array_free (ids, TRUE);
 					}
-					bonobo_object_unref (book_view);
+					g_object_unref (book_view);
 					return;
 				}
 			
@@ -745,7 +744,7 @@ book_view_thread (gpointer data)
 									  GNOME_Evolution_Addressbook_Success);
 				if (temp_list)
 					 g_list_free (temp_list);
-				bonobo_object_unref (book_view);
+				g_object_unref (book_view);
 				return;
 			}
 		
@@ -761,7 +760,7 @@ book_view_thread (gpointer data)
 			if (e_flag_is_set (closure->running))
 				e_data_book_view_notify_complete (book_view,
 								  GNOME_Evolution_Addressbook_Success);
-			bonobo_object_unref (book_view);
+			g_object_unref (book_view);
 			break;
 		}
 	}
