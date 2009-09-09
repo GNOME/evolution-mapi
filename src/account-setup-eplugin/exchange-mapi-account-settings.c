@@ -35,19 +35,27 @@
 #include <libedataserver/e-xml-hash-utils.h>
 #include <libedataserverui/e-passwords.h>
 #include <libedataserver/e-account.h>
+#include <e-util/e-util.h>
 #include <e-util/e-dialog-utils.h>
+#include <e-util/e-plugin-ui.h>
 
 #include <exchange-mapi-folder.h>
 #include <exchange-mapi-connection.h>
 #include <exchange-mapi-utils.h>
 
+#include <shell/e-shell-sidebar.h>
+#include <shell/e-shell-view.h>
+#include <shell/e-shell-window.h>
+
 #include <mail/mail-config.h>
-#include <mail/em-popup.h>
-#include <mail/em-menu.h>
-#include "mail/em-config.h"
+#include <mail/em-config.h>
+#include <mail/em-folder-tree.h>
 #include "exchange-mapi-account-listener.h"
 
 #define FOLDERSIZE_MENU_ITEM 0
+
+gboolean  e_plugin_ui_init (GtkUIManager *ui_manager,
+			    EShellView *shell_view);
 
 static GMutex *folder_size_dialog_mutex = NULL;
 
@@ -55,9 +63,8 @@ static GMutex *folder_size_dialog_mutex = NULL;
 #define FOLDERSIZE_LOCK() g_mutex_lock (folder_size_dialog_mutex)
 #define FOLDERSIZE_UNLOCK() g_mutex_unlock (folder_size_dialog_mutex)
 
-void org_gnome_folder_size_display_popup (EPlugin *ep, EMPopupTargetFolder *t);
 GtkWidget *org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data);
-void mapi_settings_run_folder_size_dialog (EPopup *ep, EPopupItem *p, gpointer data);
+void mapi_settings_run_folder_size_dialog (gpointer data);
 
 enum {
 	COL_FOLDERSIZE_NAME = 0,
@@ -72,14 +79,6 @@ typedef struct
 	GtkBox *progress_hbox;
 	gboolean processing;
 } FolderSizeDialogData;
-
-static EPopupItem popup_items[] = {
-	{ E_POPUP_ITEM, (gchar *) "50.emc.04",
-	  (gchar *) N_("_Folder size"),
-	  mapi_settings_run_folder_size_dialog,
-	  NULL, NULL,
-	  0, EM_POPUP_FOLDER_STORE }
-};
 
 static gboolean
 mapi_settings_pbar_update (gpointer data)
@@ -170,7 +169,7 @@ mapi_settings_get_folder_size (gpointer data)
 }
 
 void
-mapi_settings_run_folder_size_dialog (EPopup *ep, EPopupItem *p, gpointer data)
+mapi_settings_run_folder_size_dialog (gpointer data)
 {
 	GtkBox *content_area;
 	FolderSizeDialogData *dialog_data;
@@ -213,7 +212,63 @@ mapi_settings_run_folder_size_dialog (EPopup *ep, EPopupItem *p, gpointer data)
 static void
 folder_size_clicked (GtkButton *button, gpointer data)
 {
-	mapi_settings_run_folder_size_dialog (NULL, NULL, (gpointer) button);
+	mapi_settings_run_folder_size_dialog (NULL);
+}
+
+static void
+action_folder_size_cb (GtkAction *action,
+		       EShellView *shell_view)
+{
+	EShellSidebar *shell_sidebar;
+	EMFolderTree *folder_tree;
+	const gchar *folder_uri;
+
+	/* Get hold of Folder Tree */
+	shell_sidebar = e_shell_view_get_shell_sidebar (shell_view);
+	g_object_get (shell_sidebar, "folder-tree", &folder_tree, NULL);
+	folder_uri = em_folder_tree_get_selected_uri (folder_tree);
+	g_object_unref (folder_tree);
+	g_return_if_fail (folder_uri != NULL);
+
+	if (g_str_has_prefix (folder_uri, "mapi://"))
+		mapi_settings_run_folder_size_dialog (NULL);
+}
+
+static void
+folder_size_actions_update_cb (EShellView *shell_view)
+{
+	EShellContent *shell_content;
+	EShellWindow *shell_window;
+	GtkActionGroup *action_group;
+	GtkUIManager *ui_manager;
+	GtkAction *folder_size_action;
+
+	EShellSidebar *shell_sidebar;
+	EMFolderTree *folder_tree;
+	const gchar *folder_uri;
+
+	shell_sidebar = e_shell_view_get_shell_sidebar (shell_view);
+	g_object_get (shell_sidebar, "folder-tree", &folder_tree, NULL);
+	folder_uri = em_folder_tree_get_selected_uri (folder_tree);
+	g_object_unref (folder_tree);
+	g_return_if_fail (folder_uri != NULL);
+
+	shell_content = e_shell_view_get_shell_content (shell_view);
+	shell_window = e_shell_view_get_shell_window (shell_view);
+
+	ui_manager = e_shell_window_get_ui_manager (shell_window);
+	action_group = e_lookup_action_group (ui_manager, "mail");
+		
+	folder_size_action = gtk_action_group_get_action (action_group, 
+							  "mail-mapi-folder-size");
+
+	/* Enable / disable action entry */
+	/* TODO : Instead we should not show the action entry at all! */
+	if (g_str_has_prefix (folder_uri, "mapi://"))
+		gtk_action_set_sensitive (folder_size_action , TRUE);
+	else 
+		gtk_action_set_sensitive (folder_size_action , FALSE);		
+
 }
 
 /* used only in Account Editor */
@@ -278,29 +333,37 @@ org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data
 	return GTK_WIDGET (settings);
 }
 
+static GtkActionEntry folder_size_entries[] = {
 
-static void
-popup_free (EPopup *ep, GSList *items, gpointer data)
+	{ "mail-mapi-folder-size",
+	  NULL,
+	  N_("Folder size"),
+	  NULL,
+	  NULL,  /* XXX Add a tooltip! */
+	  action_folder_size_cb }
+};
+
+gboolean
+e_plugin_ui_init (GtkUIManager *ui_manager,
+                  EShellView *shell_view)
 {
-	g_slist_free (items);
-}
+	EShellWindow *shell_window;
+	GtkActionGroup *action_group;
 
-void
-org_gnome_folder_size_display_popup (EPlugin *ep, EMPopupTargetFolder *t)
-{
-	EAccount *account;
-	GSList *menus = NULL;
+	shell_window = e_shell_view_get_shell_window (shell_view);
+	action_group = e_shell_window_get_action_group (shell_window, "mail");
 
-	account = mail_config_get_account_by_source_url (t->uri);
+	/* Add actions to the "mail" action group. */
+	gtk_action_group_add_actions (action_group, folder_size_entries,
+				      G_N_ELEMENTS (folder_size_entries),
+				      shell_view);
 
-	if (account == NULL)
-		return;
+	/* Decide whether we want this option to be enabled or not */
+	g_signal_connect (shell_view, "update-actions",
+			  G_CALLBACK (folder_size_actions_update_cb),
+			  shell_view);
 
-	/* Show only for MAPI accounts */
-	if (g_strrstr (t->uri,"mapi://")) {
-		popup_items[FOLDERSIZE_MENU_ITEM].label =  _(popup_items [FOLDERSIZE_MENU_ITEM].label);
-		menus = g_slist_prepend (menus, &popup_items [FOLDERSIZE_MENU_ITEM]);
-	}
+	g_object_unref (action_group);
 
-	e_popup_add_items (t->target.popup, menus, NULL, popup_free, account);
+	return TRUE;
 }

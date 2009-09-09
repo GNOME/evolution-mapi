@@ -66,6 +66,16 @@
 			</group>
 		</hook>
 
+		<hook class="org.gnome.evolution.ui:1.0">
+		  <ui-manager id="org.gnome.evolution.mail">
+		    <popup name="mail-folder-popup">
+		      <placeholder name="mail-folder-popup-actions">
+			<menuitem action="mail-mapi-folder-size"/>
+		      </placeholder>
+		    </popup>
+		  </ui-manager>
+		</hook>
+
 		<hook class="org.gnome.evolution.mail.popup:1.0">
 			<menu id="org.gnome.evolution.mail.foldertree.popup" target="folder"
 				factory="org_gnome_folder_size_display_popup">
