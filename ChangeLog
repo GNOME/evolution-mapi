@@ -1,3 +1,8 @@
+2009-09-11  Johnny Jacob  <jjohnny@novell.com>
+
+	* configure.ac (EVO_MAPI_API_VERSION): Requirement bumped to
+	2.29.1 because of changes in plugins (Removal of EMPopup).
+
 2009-09-07  Johnny Jacob  <jjohnny@novell.com>
 
 	* NEWS : Updates for 0.27.92.
