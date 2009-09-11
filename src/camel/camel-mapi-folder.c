@@ -267,7 +267,10 @@ read_item_common (MapiItem *item, uint32_t ulPropTag, gconstpointer prop_data)
 		item->header.in_reply_to = g_strdup (prop_data);
 		break;
 	case PR_TRANSPORT_MESSAGE_HEADERS:
-		item->header.transport_headers = utf8tolinux (prop_data);
+		sv (item->header.transport_headers, utf8tolinux (prop_data));
+		break;
+	case PR_TRANSPORT_MESSAGE_HEADERS_UNICODE:
+		sv (item->header.transport_headers, g_strdup (prop_data));
 		break;
 	default:
 		found = FALSE;
@@ -957,7 +960,8 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		PR_DISPLAY_TO,
 		PR_DISPLAY_CC,
 		PR_DISPLAY_BCC,
-		PR_TRANSPORT_MESSAGE_HEADERS
+		PR_TRANSPORT_MESSAGE_HEADERS,
+		PR_TRANSPORT_MESSAGE_HEADERS_UNICODE
 	};
 
 	if (((CamelOfflineStore *) mapi_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL)
@@ -1086,6 +1090,7 @@ static const uint32_t camel_GetPropsList[] = {
 	PR_INTERNET_CPID,
 
 	PR_TRANSPORT_MESSAGE_HEADERS,
+	PR_TRANSPORT_MESSAGE_HEADERS_UNICODE,
 	PR_MESSAGE_CLASS, 
 	PR_MESSAGE_CLASS_UNICODE, 
 	PR_MESSAGE_SIZE, 
@@ -1389,21 +1394,23 @@ mapi_populate_details_from_item (CamelFolder *folder, CamelMimeMessage *msg, Map
 	time_t recieved_time;
 	CamelInternetAddress *addr = NULL;
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE(folder->parent_store);
-	struct _camel_header_raw *headers = NULL;
-	gchar **header_list = NULL;
 	int offset = 0;
 	guint i;
 	time_t actual_time;
 
 	/* Setting headers from PR_TRANSPORT_MESSAGE_HEADERS */
-	
-	header_list = g_strsplit (item->header.transport_headers, "\n", i);
-	for (i = 0; header_list [i]; i++)
-		camel_header_raw_append_parse (&headers, header_list[i], -1);
+	if (item->header.transport_headers) {
+		struct _camel_header_raw *headers;
+		gchar **header_list;
 
-	while (headers->next) {
-		camel_medium_add_header (CAMEL_MEDIUM (msg), headers->name, headers->value);
-		headers = headers->next ;
+		header_list = g_strsplit (item->header.transport_headers, "\n", -1);
+		for (i = 0; header_list && header_list [i]; i++)
+			camel_header_raw_append_parse (&headers, header_list[i], -1);
+
+		while (headers->next) {
+			camel_medium_add_header (CAMEL_MEDIUM (msg), headers->name, headers->value);
+			headers = headers->next ;
+		}
 	}
 
 	/* Overwrite headers if we have specific properties available*/
