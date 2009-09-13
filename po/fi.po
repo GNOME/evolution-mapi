@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-18 19:11+0300\n"
-"PO-Revision-Date: 2009-02-18 19:20+0300\n"
+"POT-Creation-Date: 2009-09-13 06:57+0300\n"
+"PO-Revision-Date: 2009-09-13 07:15+0300\n"
 "Last-Translator: Ilkka Tuohela <hile@iki.fi>\n"
 "Language-Team: Finnish <gnome-fi-laatu@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -16,75 +16,133 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Syötä salasana käyttäjälle %s@%s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
+#. NOTE: A good way would be display the list of username entries
+#. using GtkEntryCompletion in the username gtkentry. But plugins
+#. as of now does not have access to it
+#. TODO : Fix strings
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
+msgid "Select username"
+msgstr "Valitse käyttäjätunnus"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+msgid "Full name"
+msgstr "Koko nimi"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
+msgid "User name"
+msgstr "Käyttäjätunnus"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
 msgstr ""
-"Palvelin, käyttäjätunnus ja toimialue eivät voi olla tyhjiä. Syötä "
-"kenttiin oikeat arvot."
+"Palvelin, käyttäjätunnus ja toimialue eivät voi olla tyhjiä. Syötä kenttiin "
+"oikeat arvot."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
 msgid "Authentication finished successfully."
 msgstr "Tunnistatuminen onnistui."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
 msgid "Authentication failed."
 msgstr "Tunnistatuminen epäonnistui."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
 msgid "_Domain name:"
 msgstr "_Toimialueen nimi:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
 msgid "_Authenticate"
 msgstr "_Tunnistaudu"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
 msgid "Personal Folders"
 msgstr "Omat kansiot"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:385
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
 msgid "_Location:"
 msgstr "_Sijainti:"
 
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
+msgid "_Folder size"
+msgstr "_Kansion koko"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
+msgid "Folder"
+msgstr "Kansio"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
+msgid "Size"
+msgstr "Koko"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
+msgid "Unable to retrieve folder size information"
+msgstr "Kansion kokotietoja ei voitu noutaa"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
+msgid "Folder Size"
+msgstr "Kansion koko"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
+msgid "Fetching folder list ..."
+msgstr "Noudetaan kansioluetteloa..."
+
+#. Miscellaneous settings
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
+msgid "Miscellaneous"
+msgstr "Lisäasetukset"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
+msgid "View the size of all Exchange folders"
+msgstr "Näytä kaikkien Exchange-kansioiden koko"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
+msgid "Folders Size"
+msgstr "Kansioiden koot"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
+#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
+msgid "Exchange Settings"
+msgstr "Exchange-asetukset"
+
 #: ../src/calendar/e-cal-backend-mapi.c:115
-#: ../src/calendar/e-cal-backend-mapi.c:1051
-#: ../src/camel/camel-mapi-store.c:458
+#: ../src/calendar/e-cal-backend-mapi.c:1053
+#: ../src/camel/camel-mapi-store.c:472
 msgid "Authentication failed"
 msgstr "Tunnistatuminen epäonnistui"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:389
+#: ../src/calendar/e-cal-backend-mapi.c:391
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Ladataan kansion %s kohteita"
 
 #. FIXME: String : We need to restart evolution-data-server
-#: ../src/calendar/e-cal-backend-mapi.c:579
-#: ../src/calendar/e-cal-backend-mapi.c:590
-#: ../src/calendar/e-cal-backend-mapi.c:616
+#: ../src/calendar/e-cal-backend-mapi.c:581
+#: ../src/calendar/e-cal-backend-mapi.c:592
+#: ../src/calendar/e-cal-backend-mapi.c:618
 msgid "Error fetching changes from the server."
 msgstr "Virhe noudettaessa muutoksia palvelimelta."
 
-#: ../src/calendar/e-cal-backend-mapi.c:971
-#: ../src/calendar/e-cal-backend-mapi.c:981
-#: ../src/calendar/e-cal-backend-mapi.c:1086
-#: ../src/calendar/e-cal-backend-mapi.c:1168
+#: ../src/calendar/e-cal-backend-mapi.c:973
+#: ../src/calendar/e-cal-backend-mapi.c:983
+#: ../src/calendar/e-cal-backend-mapi.c:1088
+#: ../src/calendar/e-cal-backend-mapi.c:1170
 msgid "Could not create cache file"
 msgstr "Välimuistitiedostoa ei voitu luoda"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1097
+#: ../src/calendar/e-cal-backend-mapi.c:1099
 msgid "Could not create thread for populating cache"
 msgstr "Säiettä välimuistin alustamiseksi ei voitu luoda"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1511
+#: ../src/calendar/e-cal-backend-mapi.c:1513
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -92,21 +150,36 @@ msgstr ""
 "Tukea toistuvien tapaamisten yksittäisen tapahtumakerran muokkaamiselle ei "
 "ole vielä toteutettu. Tapaamiseen ei tehty muutoksia palvelimella."
 
-#: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
+#: ../src/camel/camel-mapi-folder.c:478
+#, c-format
+msgid "Updating local summary cache for new messages in %s"
+msgstr "Päivitetään yhteenvetoa uusista viesteistä kansiossa %s"
+
+#: ../src/camel/camel-mapi-folder.c:702
+#, c-format
+msgid "Retrieving message IDs from server for %s"
+msgstr "Noudetaan viestitunnisteita palvelimelta kansiolle %s"
+
+#: ../src/camel/camel-mapi-folder.c:724
+#, c-format
+msgid "Removing deleted messages from cache in %s"
+msgstr "Poistetaan poistettuja viestejä välimuistista kansiossa %s"
+
+#: ../src/camel/camel-mapi-folder.c:1029 ../src/camel/camel-mapi-folder.c:1643
+#: ../src/camel/camel-mapi-folder.c:1651
+msgid "This message is not available in offline mode."
+msgstr "Tämä viesti ei ole saatavilla yhteydettömässä tilassa."
+
+#: ../src/camel/camel-mapi-folder.c:1038
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Noudetaan yhteenvetoa uusista viesteistä kansiossa %s"
 
-#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1222
-#: ../src/camel/camel-mapi-folder.c:1230
-msgid "This message is not available in offline mode."
-msgstr "Tämä viesti ei ole saatavilla yhteydettömässä tilassa."
-
-#: ../src/camel/camel-mapi-folder.c:679
+#: ../src/camel/camel-mapi-folder.c:1048
 msgid "Fetching items failed"
 msgstr "Kohteiden nouto epäonnistui"
 
-#: ../src/camel/camel-mapi-folder.c:1186
+#: ../src/camel/camel-mapi-folder.c:1607
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -115,24 +188,33 @@ msgstr ""
 "Viestiä ei saatu: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1186
+#: ../src/camel/camel-mapi-folder.c:1607
 msgid "No such message"
 msgstr "Viestiä ei ole olemassa"
 
-#: ../src/camel/camel-mapi-folder.c:1198
+#: ../src/camel/camel-mapi-folder.c:1619
 msgid "Message fetching cancelled by user."
 msgstr "Käyttäjä keskeytti viestin noudon."
 
-#: ../src/camel/camel-mapi-folder.c:1205
+#: ../src/camel/camel-mapi-folder.c:1626
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Viestiä %s ei saatu: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1249 ../src/camel/camel-mapi-folder.c:1259
+#: ../src/camel/camel-mapi-folder.c:1672 ../src/camel/camel-mapi-folder.c:1684
 msgid "Could not get message"
 msgstr "Viestiä ei saatu"
 
-#: ../src/camel/camel-mapi-folder.c:1612
+#: ../src/camel/camel-mapi-folder.c:1964
+#, c-format
+msgid "Cannot append message to folder '%s'"
+msgstr "Viestiä ei voi lisätä kansioon \"%s\""
+
+#: ../src/camel/camel-mapi-folder.c:1971
+msgid "Offline."
+msgstr "Yhteydetön tila."
+
+#: ../src/camel/camel-mapi-folder.c:2091
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Yhteenvetoa kohteelle %s ei voitu ladata"
@@ -145,53 +227,37 @@ msgstr "Etsitään uusia sähköpostiviestejä"
 msgid "C_heck for new messages in all folders"
 msgstr "_Etsi uusia viestejä kaikista kansioista"
 
-#. i18n: GAL is an Outlookism, AD is a Windowsism
-#: ../src/camel/camel-mapi-provider.c:66
-msgid "Global Address List / Active Directory"
-msgstr "Jaettu osoitekirja / Active Directory"
-
-#. i18n: "Global Catalog" is a Windowsism, but it's a
-#. technical term and may not have translations?
-#: ../src/camel/camel-mapi-provider.c:70
-msgid "_Global Catalog server name:"
-msgstr "_Yhteisen luettelopalvelimen nimi:"
-
-#: ../src/camel/camel-mapi-provider.c:72
-#, c-format
-msgid "_Limit number of GAL responses: %s"
-msgstr "_Rajoita GAL-vastausten lukumäärää: %s"
-
-#: ../src/camel/camel-mapi-provider.c:75
+#: ../src/camel/camel-mapi-provider.c:57
 msgid "Options"
 msgstr "Valinnat"
 
-#: ../src/camel/camel-mapi-provider.c:77
+#: ../src/camel/camel-mapi-provider.c:59
 msgid "Automatically synchroni_ze account locally"
 msgstr "Synkronoi automaattisesti paikallisesti"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:80
+#: ../src/camel/camel-mapi-provider.c:62
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Käytä suodattimia tämän palvelimen saapuvien viestien kansiossa"
 
-#: ../src/camel/camel-mapi-provider.c:82
+#: ../src/camel/camel-mapi-provider.c:64
 msgid "Check new messages for _Junk contents"
 msgstr "Etsi viesteistä _roskaposteja"
 
-#: ../src/camel/camel-mapi-provider.c:84
+#: ../src/camel/camel-mapi-provider.c:66
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Etsi roskaposteja vain _saapuvien viestien kansiosta"
 
-#: ../src/camel/camel-mapi-provider.c:96
+#: ../src/camel/camel-mapi-provider.c:78
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
 msgstr ""
 "Microsoft Exchange- ja OpenChange-palvelimien käyttö MAPI-protokollalla"
 
-#: ../src/camel/camel-mapi-provider.c:111
+#: ../src/camel/camel-mapi-provider.c:93
 msgid "Password"
 msgstr "Salasana"
 
-#: ../src/camel/camel-mapi-provider.c:112
+#: ../src/camel/camel-mapi-provider.c:94
 msgid ""
 "This option will connect to the Openchange server using a plaintext password."
 msgstr ""
@@ -206,14 +272,14 @@ msgstr "Suosikit"
 msgid "All Public Folders"
 msgstr "Kaikki julkiset kansiot"
 
-#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:345
+#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchangen MAPI-palvelin %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:347
+#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Exchangen MAPI-palvelu %s palvelimella %s"
@@ -222,51 +288,59 @@ msgstr "Exchangen MAPI-palvelu %s palvelimella %s"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:304
+#: ../src/camel/camel-mapi-store.c:315
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s Syötä palvelimen %s@%s MAPI-salasana"
 
-#: ../src/camel/camel-mapi-store.c:317
+#: ../src/camel/camel-mapi-store.c:328
 msgid "You did not enter a password."
 msgstr "Et antanut salasanaa."
 
-#: ../src/camel/camel-mapi-store.c:325
+#: ../src/camel/camel-mapi-store.c:336
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Exchangen MAPI-palvelimelle ei voitu kirjautua."
 
-#: ../src/camel/camel-mapi-store.c:442
+#: ../src/camel/camel-mapi-store.c:456
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "MAPI-kansioita ei voi luoda yhteydettömässä tilassa."
 
-#: ../src/camel/camel-mapi-store.c:447
+#: ../src/camel/camel-mapi-store.c:461
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "Uutta kansiota \"%s\" ei voi luoda"
 
-#: ../src/camel/camel-mapi-store.c:659
+#: ../src/camel/camel-mapi-store.c:670
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr ""
 "MAPI-kansiota \"%s\" ei voi nimetä uudestaan: kansiota ei ole olemassa."
 
-#: ../src/camel/camel-mapi-store.c:670
+#: ../src/camel/camel-mapi-store.c:681
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "MAPI-oletuskansiota \"%s\" ei voi nimetä uudestaan nimelle \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:688
+#: ../src/camel/camel-mapi-store.c:699
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "MAPI-kansiota \"%s\" ei voi nimetä uudestaan nimelle \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:1113
+#: ../src/camel/camel-mapi-store.c:1227
 msgid "Folder list not available in offline mode."
 msgstr "Kansioluettelo ei ole saatavissa yhteydettömässä tilassa."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:333
+#: ../src/camel/camel-mapi-transport.c:116
 msgid "Could not send message."
 msgstr "Viestiä ei voitu lähettää."
 
+#~ msgid "Global Address List / Active Directory"
+#~ msgstr "Jaettu osoitekirja / Active Directory"
+
+#~ msgid "_Global Catalog server name:"
+#~ msgstr "_Yhteisen luettelopalvelimen nimi:"
+
+#~ msgid "_Limit number of GAL responses: %s"
+#~ msgstr "_Rajoita GAL-vastausten lukumäärää: %s"
