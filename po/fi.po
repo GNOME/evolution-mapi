@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-09-13 06:57+0300\n"
+"POT-Creation-Date: 2009-09-13 07:18+0300\n"
 "PO-Revision-Date: 2009-09-13 07:15+0300\n"
 "Last-Translator: Ilkka Tuohela <hile@iki.fi>\n"
 "Language-Team: Finnish <gnome-fi-laatu@lists.sourceforge.net>\n"
@@ -150,36 +150,36 @@ msgstr ""
 "Tukea toistuvien tapaamisten yksittäisen tapahtumakerran muokkaamiselle ei "
 "ole vielä toteutettu. Tapaamiseen ei tehty muutoksia palvelimella."
 
-#: ../src/camel/camel-mapi-folder.c:478
+#: ../src/camel/camel-mapi-folder.c:481
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "Päivitetään yhteenvetoa uusista viesteistä kansiossa %s"
 
-#: ../src/camel/camel-mapi-folder.c:702
+#: ../src/camel/camel-mapi-folder.c:705
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Noudetaan viestitunnisteita palvelimelta kansiolle %s"
 
-#: ../src/camel/camel-mapi-folder.c:724
+#: ../src/camel/camel-mapi-folder.c:727
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Poistetaan poistettuja viestejä välimuistista kansiossa %s"
 
-#: ../src/camel/camel-mapi-folder.c:1029 ../src/camel/camel-mapi-folder.c:1643
-#: ../src/camel/camel-mapi-folder.c:1651
+#: ../src/camel/camel-mapi-folder.c:1033 ../src/camel/camel-mapi-folder.c:1650
+#: ../src/camel/camel-mapi-folder.c:1658
 msgid "This message is not available in offline mode."
 msgstr "Tämä viesti ei ole saatavilla yhteydettömässä tilassa."
 
-#: ../src/camel/camel-mapi-folder.c:1038
+#: ../src/camel/camel-mapi-folder.c:1042
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Noudetaan yhteenvetoa uusista viesteistä kansiossa %s"
 
-#: ../src/camel/camel-mapi-folder.c:1048
+#: ../src/camel/camel-mapi-folder.c:1052
 msgid "Fetching items failed"
 msgstr "Kohteiden nouto epäonnistui"
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1614
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -188,33 +188,33 @@ msgstr ""
 "Viestiä ei saatu: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1614
 msgid "No such message"
 msgstr "Viestiä ei ole olemassa"
 
-#: ../src/camel/camel-mapi-folder.c:1619
+#: ../src/camel/camel-mapi-folder.c:1626
 msgid "Message fetching cancelled by user."
 msgstr "Käyttäjä keskeytti viestin noudon."
 
-#: ../src/camel/camel-mapi-folder.c:1626
+#: ../src/camel/camel-mapi-folder.c:1633
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Viestiä %s ei saatu: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1672 ../src/camel/camel-mapi-folder.c:1684
+#: ../src/camel/camel-mapi-folder.c:1679 ../src/camel/camel-mapi-folder.c:1691
 msgid "Could not get message"
 msgstr "Viestiä ei saatu"
 
-#: ../src/camel/camel-mapi-folder.c:1964
+#: ../src/camel/camel-mapi-folder.c:1971
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Viestiä ei voi lisätä kansioon \"%s\""
 
-#: ../src/camel/camel-mapi-folder.c:1971
+#: ../src/camel/camel-mapi-folder.c:1978
 msgid "Offline."
 msgstr "Yhteydetön tila."
 
-#: ../src/camel/camel-mapi-folder.c:2091
+#: ../src/camel/camel-mapi-folder.c:2098
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Yhteenvetoa kohteelle %s ei voitu ladata"
