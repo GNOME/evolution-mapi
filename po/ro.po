@@ -4,102 +4,184 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
-"POT-Creation-Date: 2009-02-19 20:27+0000\n"
-"PO-Revision-Date: 2009-02-20 17:57+0200\n"
+"Project-Id-Version: 1\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-mapi\n"
+"POT-Creation-Date: 2009-09-11 17:03+0000\n"
+"PO-Revision-Date: 2009-09-06 22:41+0200\n"
 "Last-Translator: Adi Roiban <adi@roiban.ro>\n"
 "Language-Team: Gnome Romanian Team <gnomero-list@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n == 1 ? 0: (((n % 100 > 19) || ((n % 100 == 0) && (n != 0))) ? 2: 1));\n"
+"Plural-Forms: nplurals=3; plural=(n == 1 ? 0: (((n % 100 > 19) || ((n % 100 "
+"== 0) && (n != 0))) ? 2: 1));\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Introduceți parola pentru %s@%s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
-msgid "Server, username and domain name cannot be empty. Please fill them with correct values."
-msgstr "Câmpurile server, nume utilizator și nume domeniu nu pot fi goale. Vă rog să introduceți valori corecte."
+#. NOTE: A good way would be display the list of username entries
+#. using GtkEntryCompletion in the username gtkentry. But plugins
+#. as of now does not have access to it
+#. TODO : Fix strings
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
+msgid "Select username"
+msgstr "Alegere nume utilizator"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+msgid "Full name"
+msgstr "Nume complet"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
+msgid "User name"
+msgstr "Nume utilizator"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"Câmpurile server, nume utilizator și nume domeniu nu pot fi goale. "
+"Introduceți valori corecte."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
 msgid "Authentication finished successfully."
-msgstr "Autentificarea s-a sfârșit cu succes"
+msgstr "Autentificarea s-a finalizat cu succes."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
 msgid "Authentication failed."
 msgstr "Autentificare eșuată."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
 msgid "_Domain name:"
 msgstr "Nume _domeniu:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
 msgid "_Authenticate"
 msgstr "_Autentifică"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
 msgid "Personal Folders"
-msgstr "Dosar personal"
+msgstr "Dosare personale"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:385
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
 msgid "_Location:"
 msgstr "_Locație:"
 
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
+msgid "_Folder size"
+msgstr "Mărime _dosar"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
+msgid "Folder"
+msgstr "Dosar"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
+msgid "Size"
+msgstr "Mărime"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
+msgid "Unable to retrieve folder size information"
+msgstr "Nu s-a putut obține informațiile despre mărirea dosarului"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
+msgid "Folder Size"
+msgstr "Mărime dosar"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
+msgid "Fetching folder list ..."
+msgstr "Se obține lista dosar..."
+
+#. Miscellaneous settings
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
+msgid "Miscellaneous"
+msgstr "Diverse"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
+msgid "View the size of all Exchange folders"
+msgstr "Vizualizare mărime pentru toate dosarele Exchange"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
+msgid "Folders Size"
+msgstr "Mărime dosare"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
+#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
+msgid "Exchange Settings"
+msgstr "Configurări Exchange"
+
 #: ../src/calendar/e-cal-backend-mapi.c:115
-#: ../src/calendar/e-cal-backend-mapi.c:1051
-#: ../src/camel/camel-mapi-store.c:458
+#: ../src/calendar/e-cal-backend-mapi.c:1053
+#: ../src/camel/camel-mapi-store.c:472
 msgid "Authentication failed"
 msgstr "Autentificare eșuată"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:389
+#: ../src/calendar/e-cal-backend-mapi.c:391
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Se încarcă elementele din dosarul %s"
 
 #. FIXME: String : We need to restart evolution-data-server
-#: ../src/calendar/e-cal-backend-mapi.c:579
-#: ../src/calendar/e-cal-backend-mapi.c:590
-#: ../src/calendar/e-cal-backend-mapi.c:616
+#: ../src/calendar/e-cal-backend-mapi.c:581
+#: ../src/calendar/e-cal-backend-mapi.c:592
+#: ../src/calendar/e-cal-backend-mapi.c:618
 msgid "Error fetching changes from the server."
 msgstr "Eroare la obținerea modificările de pe server."
 
-#: ../src/calendar/e-cal-backend-mapi.c:971
-#: ../src/calendar/e-cal-backend-mapi.c:981
-#: ../src/calendar/e-cal-backend-mapi.c:1086
-#: ../src/calendar/e-cal-backend-mapi.c:1168
+#: ../src/calendar/e-cal-backend-mapi.c:973
+#: ../src/calendar/e-cal-backend-mapi.c:983
+#: ../src/calendar/e-cal-backend-mapi.c:1088
+#: ../src/calendar/e-cal-backend-mapi.c:1170
 msgid "Could not create cache file"
 msgstr "Nu s-a putut crea fișierul cache"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1097
+#: ../src/calendar/e-cal-backend-mapi.c:1099
 msgid "Could not create thread for populating cache"
 msgstr "Nu s-a putut crea firul de execuție pentru popularea cache-ului"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1511
-msgid "Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server."
-msgstr "Nu este încă implementat suportul pentru modificarea unei singure instanțe a unui eveniment recurent. Nu s-a făcut nici o modificare a întâlnirii pe server."
+#: ../src/calendar/e-cal-backend-mapi.c:1513
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+msgstr ""
+"Nu este încă implementat suportul pentru modificarea unei singure instanțe a "
+"unui eveniment recurent. Nu s-a făcut nici o modificare a întâlnirii pe "
+"server."
 
-#: ../src/camel/camel-mapi-folder.c:333
-#: ../src/camel/camel-mapi-folder.c:669
+#: ../src/camel/camel-mapi-folder.c:481
+#, c-format
+msgid "Updating local summary cache for new messages in %s"
+msgstr "Se actualizează rezumatul cacheului local pentru noile mesaje din %s"
+
+#: ../src/camel/camel-mapi-folder.c:705
+#, c-format
+msgid "Retrieving message IDs from server for %s"
+msgstr "Se obțin identificatoarele mesajelor de la serverul %s"
+
+#: ../src/camel/camel-mapi-folder.c:727
+#, c-format
+msgid "Removing deleted messages from cache in %s"
+msgstr "Se elimină mesajele șterse din cache din %s"
+
+#: ../src/camel/camel-mapi-folder.c:1033 ../src/camel/camel-mapi-folder.c:1650
+#: ../src/camel/camel-mapi-folder.c:1658
+msgid "This message is not available in offline mode."
+msgstr "Aceste mesaj nu este disponibil pentru modul deconectat."
+
+#: ../src/camel/camel-mapi-folder.c:1042
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Se obține rezumatul pentru noile mesaje din %s"
 
-#: ../src/camel/camel-mapi-folder.c:662
-#: ../src/camel/camel-mapi-folder.c:1222
-#: ../src/camel/camel-mapi-folder.c:1230
-msgid "This message is not available in offline mode."
-msgstr "Aceste mesaj nu este disponibil pentru modul deconectat."
-
-#: ../src/camel/camel-mapi-folder.c:679
+#: ../src/camel/camel-mapi-folder.c:1052
 msgid "Fetching items failed"
 msgstr "Obținerea elementelor a eșuat"
 
-#: ../src/camel/camel-mapi-folder.c:1186
+#: ../src/camel/camel-mapi-folder.c:1614
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -108,85 +190,82 @@ msgstr ""
 "Nu s-a putut obține mesajul: %s\n"
 " %s"
 
-#: ../src/camel/camel-mapi-folder.c:1186
+#: ../src/camel/camel-mapi-folder.c:1614
 msgid "No such message"
 msgstr "Nu există un astfel de mesaj"
 
-#: ../src/camel/camel-mapi-folder.c:1198
+#: ../src/camel/camel-mapi-folder.c:1626
 msgid "Message fetching cancelled by user."
 msgstr "Obținerea mesajului anulată de utilizator"
 
-#: ../src/camel/camel-mapi-folder.c:1205
+#: ../src/camel/camel-mapi-folder.c:1633
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Nu s-a putut obține mesajul %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1249
-#: ../src/camel/camel-mapi-folder.c:1259
+#: ../src/camel/camel-mapi-folder.c:1679 ../src/camel/camel-mapi-folder.c:1691
 msgid "Could not get message"
 msgstr "Nu s-a putut obține mesajul"
 
-#: ../src/camel/camel-mapi-folder.c:1612
+#: ../src/camel/camel-mapi-folder.c:1971
+#, c-format
+msgid "Cannot append message to folder '%s'"
+msgstr "Nu s-a putut adăuga mesajul dosarului „%s”"
+
+#: ../src/camel/camel-mapi-folder.c:1978
+#, c-format
+msgid "Offline. '%s'"
+msgstr "Deconectat. „%s”"
+
+#: ../src/camel/camel-mapi-folder.c:2098
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nu s-a putut încărca rezumatul pentru %s"
 
 #: ../src/camel/camel-mapi-provider.c:51
 msgid "Checking for new mail"
-msgstr "Se verifică pentru mesaje noi"
+msgstr "Se verifică mesajele noi"
 
 #: ../src/camel/camel-mapi-provider.c:53
 msgid "C_heck for new messages in all folders"
 msgstr "_Verifică mesajele noi în toate dosarele"
 
-#. i18n: GAL is an Outlookism, AD is a Windowsism
-#: ../src/camel/camel-mapi-provider.c:66
-msgid "Global Address List / Active Directory"
-msgstr "Agendă globală / Active Directory"
-
-#. i18n: "Global Catalog" is a Windowsism, but it's a
-#. technical term and may not have translations?
-#: ../src/camel/camel-mapi-provider.c:70
-msgid "_Global Catalog server name:"
-msgstr "Nume server catalog _global:"
-
-#: ../src/camel/camel-mapi-provider.c:72
-#, c-format
-msgid "_Limit number of GAL responses: %s"
-msgstr "_Limitează numărul de răspunsuri GAL: %s"
-
-#: ../src/camel/camel-mapi-provider.c:75
+#: ../src/camel/camel-mapi-provider.c:57
 msgid "Options"
 msgstr "Opțiuni"
 
-#: ../src/camel/camel-mapi-provider.c:77
+#: ../src/camel/camel-mapi-provider.c:59
 msgid "Automatically synchroni_ze account locally"
 msgstr "Sincroni_zează automat local contul"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:80
+#: ../src/camel/camel-mapi-provider.c:62
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Aplică filtre pentru noile mesaje din Inbox de pe acest server"
 
-#: ../src/camel/camel-mapi-provider.c:82
+#: ../src/camel/camel-mapi-provider.c:64
 msgid "Check new messages for _Junk contents"
 msgstr "Verifică mesajele noi de conținut _spam"
 
-#: ../src/camel/camel-mapi-provider.c:84
+#: ../src/camel/camel-mapi-provider.c:66
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Verifică me_saje spam doar în dosarul Inbox "
 
-#: ../src/camel/camel-mapi-provider.c:96
+#: ../src/camel/camel-mapi-provider.c:78
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
-msgstr "Pentru accesarea serverelor Microsoft Exchange / OpenChange folosind MAPI"
+msgstr ""
+"Pentru accesarea serverelor Microsoft Exchange / OpenChange folosind MAPI"
 
-#: ../src/camel/camel-mapi-provider.c:111
+#: ../src/camel/camel-mapi-provider.c:93
 msgid "Password"
 msgstr "Parolă"
 
-#: ../src/camel/camel-mapi-provider.c:112
-msgid "This option will connect to the Openchange server using a plaintext password."
-msgstr "Această opțiunea va conecta la un server Openchange folosind o parolă în clar."
+#: ../src/camel/camel-mapi-provider.c:94
+msgid ""
+"This option will connect to the Openchange server using a plaintext password."
+msgstr ""
+"Această opțiunea va face conexiunea la un server Openchange folosind o "
+"parolă în clar."
 
 #: ../src/camel/camel-mapi-store.c:61
 msgid "Favorites"
@@ -196,16 +275,14 @@ msgstr "Favorite"
 msgid "All Public Folders"
 msgstr "Toate dosarele publice"
 
-#: ../src/camel/camel-mapi-store.c:262
-#: ../src/camel/camel-mapi-transport.c:345
+#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Server Exchange MAPI %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:266
-#: ../src/camel/camel-mapi-transport.c:347
+#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Serviciu Exchange MAPI pentru %s pe %s"
@@ -214,50 +291,58 @@ msgstr "Serviciu Exchange MAPI pentru %s pe %s"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:304
+#: ../src/camel/camel-mapi-store.c:315
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s Introduceți parola MAPI pentru %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:317
+#: ../src/camel/camel-mapi-store.c:328
 msgid "You did not enter a password."
 msgstr "Nu ați introdus o parolă."
 
-#: ../src/camel/camel-mapi-store.c:325
+#: ../src/camel/camel-mapi-store.c:336
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Nu s-a putut autentifica la serverul Exchange MAPI."
 
-#: ../src/camel/camel-mapi-store.c:442
+#: ../src/camel/camel-mapi-store.c:456
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "Nu se pot crea dosare MAPI în modul deconectat."
 
-#: ../src/camel/camel-mapi-store.c:447
+#: ../src/camel/camel-mapi-store.c:461
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "Nu s-a putut crea dosar nou „%s”"
 
-#: ../src/camel/camel-mapi-store.c:659
+#: ../src/camel/camel-mapi-store.c:670
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "Nu se poate redenimii dosarul MAPI „%s”. Dosarul nu există."
 
-#: ../src/camel/camel-mapi-store.c:670
+#: ../src/camel/camel-mapi-store.c:681
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "Nu se poate redenimi dosarul implicit MAPI „%s” la „%s”."
 
-#: ../src/camel/camel-mapi-store.c:688
+#: ../src/camel/camel-mapi-store.c:699
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
-msgstr "Nu se poate redenimi dosarul MAPI „%s” la „%s”"
+msgstr "Nu se poate redenumi dosarul MAPI „%s” la „%s”"
 
-#: ../src/camel/camel-mapi-store.c:1113
+#: ../src/camel/camel-mapi-store.c:1227
 msgid "Folder list not available in offline mode."
 msgstr "Lista de dosare nu este disponibilă în modul deconectat."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:333
+#: ../src/camel/camel-mapi-transport.c:116
 msgid "Could not send message."
 msgstr "Nu s-a putut trimite mesajul."
 
+#~ msgid "Global Address List / Active Directory"
+#~ msgstr "Agendă globală / Active Directory"
+
+#~ msgid "_Global Catalog server name:"
+#~ msgstr "Nume server catalog _global:"
+
+#~ msgid "_Limit number of GAL responses: %s"
+#~ msgstr "_Limitează numărul de răspunsuri GAL: %s"
