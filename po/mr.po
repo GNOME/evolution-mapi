@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: mr\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
 "POT-Creation-Date: 2009-09-08 06:24+0000\n"
-"PO-Revision-Date: 2009-09-14 10:55+0530\n"
+"PO-Revision-Date: 2009-09-14 11:01+0530\n"
 "Last-Translator: Sandeep Shedmake <sshedmak@redhat.com>\n"
 "Language-Team: Marathi <fedora-trans-mr@redhat.com>\n"
 "MIME-Version: 1.0\n"
@@ -22,7 +22,7 @@ msgstr ""
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
 #, c-format
 msgid "Enter Password for %s@%s"
-msgstr "%s@%s करीता पासवर्ड प्रविष्ट कर"
+msgstr "%s@%s करीता पासवर्ड प्रविष्ट करा"
 
 #. NOTE: A good way would be display the list of username entries
 #. using GtkEntryCompletion in the username gtkentry. But plugins
