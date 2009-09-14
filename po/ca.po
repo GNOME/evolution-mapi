@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-14 18:43+0200\n"
-"PO-Revision-Date: 2009-08-14 18:43+0200\n"
+"POT-Creation-Date: 2009-09-14 23:39+0200\n"
+"PO-Revision-Date: 2009-09-13 22:56+0200\n"
 "Last-Translator: David Planella <david.planella@gmail.com>\n"
 "Language-Team: Catalan <tradgnome@softcatala.org>\n"
 "MIME-Version: 1.0\n"
@@ -28,16 +28,15 @@ msgstr "Introduïu la contrasenya per a %s@%s"
 #. TODO : Fix strings
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
 msgid "Select username"
-msgstr ""
+msgstr "Seleccioneu el nom d'usuari"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
 msgid "Full name"
-msgstr ""
+msgstr "Nom complet"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
-#, fuzzy
 msgid "User name"
-msgstr "Cancel·lat per l'usuari"
+msgstr "Nom d'usuari"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
 msgid ""
@@ -73,45 +72,45 @@ msgstr "_Ubicació:"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
 msgid "_Folder size"
-msgstr ""
+msgstr "_Mida de la carpeta"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
 msgid "Folder"
-msgstr ""
+msgstr "Carpeta"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
 msgid "Size"
-msgstr ""
+msgstr "Mida"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
-msgid "Unable to retrive folder size information"
-msgstr ""
+msgid "Unable to retrieve folder size information"
+msgstr "No s'ha pogut obtenir la informació sobre la mida de la carpeta"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
 msgid "Folder Size"
-msgstr ""
+msgstr "Mida de la carpeta"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
 msgid "Fetching folder list ..."
-msgstr ""
+msgstr "S'està recollint la llista de carpetes..."
 
-#. Miscelleneous settings
+#. Miscellaneous settings
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
-msgid "Miscelleneous"
-msgstr ""
+msgid "Miscellaneous"
+msgstr "Miscel·lània"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
 msgid "View the size of all Exchange folders"
-msgstr ""
+msgstr "Mostra la mida de totes les carpetes Exchange"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
 msgid "Folders Size"
-msgstr ""
+msgstr "Mida de les carpetes"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
-msgstr ""
+msgstr "Paràmetres de l'Exchange"
 
 #: ../src/calendar/e-cal-backend-mapi.c:115
 #: ../src/calendar/e-cal-backend-mapi.c:1053
@@ -152,36 +151,38 @@ msgstr ""
 "individuals d'una cita periòdica. No s'ha fet cap canvi a la cita al "
 "servidor."
 
-#: ../src/camel/camel-mapi-folder.c:475
-#, fuzzy, c-format
+#: ../src/camel/camel-mapi-folder.c:481
+#, c-format
 msgid "Updating local summary cache for new messages in %s"
-msgstr "S'està recollint la informació de resum per als missatges nous a %s"
+msgstr ""
+"S'està actualitzant la memòria cau del resum local per als missatges nous a %"
+"s"
 
-#: ../src/camel/camel-mapi-folder.c:699
+#: ../src/camel/camel-mapi-folder.c:705
 #, c-format
 msgid "Retrieving message IDs from server for %s"
-msgstr ""
+msgstr "S'estan recollint els identificadors de missatge del servidor per a %s"
 
-#: ../src/camel/camel-mapi-folder.c:721
+#: ../src/camel/camel-mapi-folder.c:727
 #, c-format
 msgid "Removing deleted messages from cache in %s"
-msgstr ""
+msgstr "S'estan suprimint els missatges suprimits de la memòria cau a %s"
 
-#: ../src/camel/camel-mapi-folder.c:1025 ../src/camel/camel-mapi-folder.c:1624
-#: ../src/camel/camel-mapi-folder.c:1632
+#: ../src/camel/camel-mapi-folder.c:1033 ../src/camel/camel-mapi-folder.c:1650
+#: ../src/camel/camel-mapi-folder.c:1658
 msgid "This message is not available in offline mode."
 msgstr "Aquest missatge no està disponible en mode fora de línia."
 
-#: ../src/camel/camel-mapi-folder.c:1034
+#: ../src/camel/camel-mapi-folder.c:1042
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "S'està recollint la informació de resum per als missatges nous a %s"
 
-#: ../src/camel/camel-mapi-folder.c:1044
+#: ../src/camel/camel-mapi-folder.c:1052
 msgid "Fetching items failed"
 msgstr "Ha fallat la recol·lecció d'elements"
 
-#: ../src/camel/camel-mapi-folder.c:1588
+#: ../src/camel/camel-mapi-folder.c:1614
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -190,34 +191,34 @@ msgstr ""
 "No s'ha pogut obtenir el missatge: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1588
+#: ../src/camel/camel-mapi-folder.c:1614
 msgid "No such message"
 msgstr "No hi ha tal missatge"
 
-#: ../src/camel/camel-mapi-folder.c:1600
+#: ../src/camel/camel-mapi-folder.c:1626
 msgid "Message fetching cancelled by user."
 msgstr "L'usuari ha cancel·lat la recollida del missatge."
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1633
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "No s'ha pogut obtenir el missatge %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1653 ../src/camel/camel-mapi-folder.c:1665
+#: ../src/camel/camel-mapi-folder.c:1679 ../src/camel/camel-mapi-folder.c:1691
 msgid "Could not get message"
 msgstr "No s'ha pogut obtenir el missatge"
 
-#: ../src/camel/camel-mapi-folder.c:1945
-#, fuzzy, c-format
+#: ../src/camel/camel-mapi-folder.c:1971
+#, c-format
 msgid "Cannot append message to folder '%s'"
-msgstr "No s'ha pogut crear la carpeta nova «%s»"
+msgstr "No s'ha pogut afegir el missatge a la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-folder.c:1952
+#: ../src/camel/camel-mapi-folder.c:1978
 #, c-format
 msgid "Offline. '%s'"
-msgstr ""
+msgstr "Fora de línia. «%s»"
 
-#: ../src/camel/camel-mapi-folder.c:2072
+#: ../src/camel/camel-mapi-folder.c:2098
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No s'ha pogut carregar el resum per a %s"
