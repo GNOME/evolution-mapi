@@ -1,14 +1,14 @@
-# translation of evolution-mapi.master.kn.po to Kannada
+# translation of evolution-mapi.gnome-2-28.kn.po to Kannada
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Shankar Prasad <svenkate@redhat.com>, 2009.
 msgid ""
 msgstr ""
-"Project-Id-Version: evolution-mapi.master.kn\n"
+"Project-Id-Version: evolution-mapi.gnome-2-28.kn\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
-"POT-Creation-Date: 2009-08-10 09:12+0000\n"
-"PO-Revision-Date: 2009-08-13 12:07+0530\n"
+"POT-Creation-Date: 2009-09-08 06:24+0000\n"
+"PO-Revision-Date: 2009-09-15 12:34+0530\n"
 "Last-Translator: Shankar Prasad <svenkate@redhat.com>\n"
 "Language-Team: Kannada <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -84,8 +84,8 @@ msgid "Size"
 msgstr "ಗಾತ್ರ"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
-msgid "Unable to retrive folder size information"
-msgstr ""
+msgid "Unable to retrieve folder size information"
+msgstr "ಕಡತಕೋಶದ ಗಾತ್ರವನ್ನು ಮರಳಿ ಪಡೆಯಲಾಗಿಲ್ಲ"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
 msgid "Folder Size"
@@ -93,16 +93,16 @@ msgstr "ಫೋಲ್ಡರ್ ಗಾತ್ರ"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
 msgid "Fetching folder list ..."
-msgstr ""
+msgstr "ಕಡತಕೋಶದ ಪಟ್ಟಿಯನ್ನು ಪಡೆಯಲಾಗುತ್ತಿದೆ ..."
 
-#. Miscelleneous settings
+#. Miscellaneous settings
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
-msgid "Miscelleneous"
-msgstr ""
+msgid "Miscellaneous"
+msgstr "ಇತರೆ"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
 msgid "View the size of all Exchange folders"
-msgstr ""
+msgstr "ಎಲ್ಲಾ ಎಕ್ಸ್‌ಚೇಂಜ್ ಫೋಲ್ಡರುಗಳ ಗಾತ್ರವನ್ನು ನೋಡಿ"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
 msgid "Folders Size"
@@ -111,7 +111,7 @@ msgstr "ಫೋಲ್ಡರ್ ಗಾತ್ರ"
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
-msgstr ""
+msgstr "ಎಕ್ಸ್‌ಚೇಂಜ್‌ ಸಿದ್ಧತೆಗಳು"
 
 #: ../src/calendar/e-cal-backend-mapi.c:115
 #: ../src/calendar/e-cal-backend-mapi.c:1053
@@ -151,37 +151,37 @@ msgstr ""
 "ಪುನರಾವರ್ತಿತಗೊಳ್ಳುವ ಅಪಾಯಿಂಟ್‌ಮೆಂಟಿನ ಒಂದು ಘಟನೆಯನ್ನು ಬದಲಾಯಿಸುವುದನ್ನು ಇನ್ನೂ ಸಹ "
 "ಕಾರ್ಯರೂಪಕ್ಕೆ ತಂದಿಲ್ಲ. ಪರಿಚಾರಕದ ಅಪಾಯಿಂಟ್‌ಮೆಂಟಿಗೆ ಯಾವುದೆ ಬದಲಾವಣೆಯನ್ನು ಮಾಡಲಾಗಿಲ್ಲ."
 
-#: ../src/camel/camel-mapi-folder.c:436
-#, fuzzy, c-format
+#: ../src/camel/camel-mapi-folder.c:478
+#, c-format
 #| msgid "Fetching summary information for new messages in %s"
 msgid "Updating local summary cache for new messages in %s"
-msgstr "%s ನಲ್ಲಿನ ಹೊಸ ಸಂದೇಶಗಳಿಗಾಗಿ ಮಾಹಿತಿಗಳನ್ನು ಪಡೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ"
+msgstr "%s ನಲ್ಲಿನ ಹೊಸ ಸಂದೇಶಗಳಿಗಾಗಿ ಸ್ಥಳೀಯ ಸಾರಾಂಶ ಕ್ಯಾಶೆಯನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"
 
-#: ../src/camel/camel-mapi-folder.c:660
+#: ../src/camel/camel-mapi-folder.c:702
 #, c-format
 msgid "Retrieving message IDs from server for %s"
-msgstr ""
+msgstr "ಸಂದೇಶ IDಗಳನ್ನು %s ಕ್ಕಾಗಿ ಪರಿಚಾರಕದಿಂದ ಮರಳಿ ಪಡೆಯಲಾಗುತ್ತಿದೆ"
 
-#: ../src/camel/camel-mapi-folder.c:682
+#: ../src/camel/camel-mapi-folder.c:724
 #, c-format
 msgid "Removing deleted messages from cache in %s"
-msgstr ""
+msgstr "%s ನಲ್ಲಿನ ಕ್ಯಾಶೆಯಿಂದ ಅಳಿಸಲಾದ ಸಂದೇಶಗಳನ್ನು ತೆಗೆದು ಹಾಕಲಾಗುತ್ತಿದೆ"
 
-#: ../src/camel/camel-mapi-folder.c:984 ../src/camel/camel-mapi-folder.c:1611
-#: ../src/camel/camel-mapi-folder.c:1619
+#: ../src/camel/camel-mapi-folder.c:1029 ../src/camel/camel-mapi-folder.c:1643
+#: ../src/camel/camel-mapi-folder.c:1651
 msgid "This message is not available in offline mode."
 msgstr "ಈ ಸಂದೇಶವು ಆಫ್‌ಲೈನ್‌ ಸ್ಥಿತಿಯಲ್ಲಿ ಲಭ್ಯವಿರುವುದಿಲ್ಲ."
 
-#: ../src/camel/camel-mapi-folder.c:993
+#: ../src/camel/camel-mapi-folder.c:1038
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "%s ನಲ್ಲಿನ ಹೊಸ ಸಂದೇಶಗಳಿಗಾಗಿ ಮಾಹಿತಿಗಳನ್ನು ಪಡೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ"
 
-#: ../src/camel/camel-mapi-folder.c:1003
+#: ../src/camel/camel-mapi-folder.c:1048
 msgid "Fetching items failed"
 msgstr "ಅಂಶಗಳನ್ನು ಪಡೆಯುವಲ್ಲಿ ವಿಫಲತೆ"
 
-#: ../src/camel/camel-mapi-folder.c:1575
+#: ../src/camel/camel-mapi-folder.c:1607
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -190,35 +190,35 @@ msgstr ""
 "ಸಂದೇಶವನ್ನು ಪಡೆಯಲಾಗಲಿಲ್ಲ: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1575
+#: ../src/camel/camel-mapi-folder.c:1607
 msgid "No such message"
 msgstr "ಅಂತಹ ಯಾವುದೆ ಸಂದೇಶವಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-folder.c:1587
+#: ../src/camel/camel-mapi-folder.c:1619
 msgid "Message fetching cancelled by user."
 msgstr "ಸಂದೇಶ ಪಡೆಯುವಿಕೆಯನ್ನು ಬಳಕೆದಾರರಿಂದ ರದ್ದು ಮಾಡಲಾಗಿದೆ."
 
-#: ../src/camel/camel-mapi-folder.c:1594
+#: ../src/camel/camel-mapi-folder.c:1626
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "%s ಸಂದೇಶವನ್ನು ಪಡೆದುಕೊಳ್ಳಲಾಗಲಿಲ್ಲ: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1640 ../src/camel/camel-mapi-folder.c:1652
+#: ../src/camel/camel-mapi-folder.c:1672 ../src/camel/camel-mapi-folder.c:1684
 msgid "Could not get message"
 msgstr "ಸಂದೇಶವನ್ನು ಪಡೆದುಕೊಳ್ಳಲಾಗಲಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-folder.c:1932
-#, fuzzy, c-format
+#: ../src/camel/camel-mapi-folder.c:1964
+#, c-format
 #| msgid "Cannot create new folder `%s'"
 msgid "Cannot append message to folder '%s'"
-msgstr "ಹೊಸ ಫೋಲ್ಡರ್ `%s' ಅನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
+msgstr "ಫೋಲ್ಡರ್ `%s' ಗೆ ಸಂದೇಶವನ್ನು ಸೇರಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-folder.c:1939
+#: ../src/camel/camel-mapi-folder.c:1971
 #, c-format
 msgid "Offline. '%s'"
 msgstr "ಆಫ್‌ಲೈನ್. '%s'"
 
-#: ../src/camel/camel-mapi-folder.c:2059
+#: ../src/camel/camel-mapi-folder.c:2091
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s ಗಾಗಿ ಸಾರಾಂಶವನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
