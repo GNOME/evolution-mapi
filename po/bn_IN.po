@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bn_IN\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
-"POT-Creation-Date: 2009-08-28 04:13+0000\n"
-"PO-Revision-Date: 2009-08-31 14:41+0530\n"
+"POT-Creation-Date: 2009-09-08 06:24+0000\n"
+"PO-Revision-Date: 2009-09-16 11:10+0530\n"
 "Last-Translator: Runa Bhattacharjee <runab@redhat.com>\n"
 "Language-Team: Bengali INDIA <anubad@lists.ankur.org.in>\n"
 "MIME-Version: 1.0\n"
@@ -153,7 +153,6 @@ msgstr ""
 
 #: ../src/camel/camel-mapi-folder.c:478
 #, c-format
-#| msgid "Fetching summary information for new messages in %s"
 msgid "Updating local summary cache for new messages in %s"
 msgstr "%s-র মধ্যে উপস্থিত নতুন বার্তা সম্বন্ধে সংক্ষিপ্ত তথ্যের ক্যাশে আপডেট করা হচ্ছ"
 
@@ -209,13 +208,14 @@ msgstr "বার্তা প্রাপ্ত করতে ব্যর্থ
 
 #: ../src/camel/camel-mapi-folder.c:1964
 #, c-format
-#| msgid "Cannot create new folder `%s'"
 msgid "Cannot append message to folder '%s'"
 msgstr "'%s' ফোল্ডারের মধ্যে বার্তা সংযোজন করতে ব্যর্থ"
 
 #: ../src/camel/camel-mapi-folder.c:1971
-msgid "Offline."
-msgstr "অফ-লাইন।"
+#, c-format
+#| msgid "Offline."
+msgid "Offline. '%s'"
+msgstr "অফ-লাইন। '%s'"
 
 #: ../src/camel/camel-mapi-folder.c:2091
 #, c-format
