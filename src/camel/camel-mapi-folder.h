@@ -99,6 +99,7 @@ typedef struct  {
 	GSList *generic_streams;
 }MapiItem;
 
+void mapi_item_free (MapiItem *item);
 
 typedef struct  _CamelMapiFolder CamelMapiFolder;
 typedef struct  _CamelMapiFolderClass CamelMapiFolderClass;

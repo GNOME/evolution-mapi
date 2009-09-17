@@ -340,7 +340,7 @@ static GtkActionEntry folder_size_entries[] = {
 	  N_("Folder size"),
 	  NULL,
 	  NULL,  /* XXX Add a tooltip! */
-	  action_folder_size_cb }
+	  G_CALLBACK (action_folder_size_cb) }
 };
 
 gboolean

@@ -250,8 +250,8 @@ exchange_mapi_util_free_attachment_list (GSList **attach_list)
 		g_free (attachment);
 		attachment = NULL;
 	}
-	g_slist_free (l);
-	l = NULL;
+	g_slist_free (*attach_list);
+	*attach_list = NULL;
 }
 
 void 
@@ -274,8 +274,8 @@ exchange_mapi_util_free_recipient_list (GSList **recip_list)
 			g_free (recipient->out.all_lpProps);
 */		g_free (recipient);
 	}
-	g_slist_free (l);
-	l = NULL;
+	g_slist_free (*recip_list);
+	*recip_list = NULL;
 }
 
 void 
@@ -293,8 +293,8 @@ exchange_mapi_util_free_stream_list (GSList **stream_list)
 		g_free (stream);
 		stream = NULL;
 	}
-	g_slist_free (l);
-	l = NULL;
+	g_slist_free (*stream_list);
+	*stream_list = NULL;
 }
 
 

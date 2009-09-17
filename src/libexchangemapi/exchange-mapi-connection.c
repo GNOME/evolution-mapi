@@ -1291,6 +1291,10 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 				cb_retval = cb (item_data, data);
 
 				g_free (item_data);
+			} else {
+				exchange_mapi_util_free_stream_list (&stream_list);
+				exchange_mapi_util_free_recipient_list (&recip_list);
+				exchange_mapi_util_free_attachment_list (&attach_list);
 			}
 
 			if (GetPropsTagArray->cValues) 
@@ -1468,6 +1472,10 @@ exchange_mapi_connection_fetch_item (mapi_id_t fid, mapi_id_t mid,
 		cb (item_data, data);
 
 		g_free (item_data);
+	} else {
+		exchange_mapi_util_free_stream_list (&stream_list);
+		exchange_mapi_util_free_recipient_list (&recip_list);
+		exchange_mapi_util_free_attachment_list (&attach_list);
 	}
 
 //	if (GetPropsTagArray->cValues) 
@@ -2675,10 +2683,11 @@ mapi_get_ren_additional_fids (mapi_object_t *obj_store, GHashTable **folder_list
 	/* Iterate through MV_BINARY */
 	if (entryids) {
 		for (i = 0; i < G_N_ELEMENTS (olfolder_defaults); i++) {
+			fid = 0;
 			entryid = entryids->lpbin [i];
 			retval = GetFIDFromEntryID(entryid.cb, entryid.lpb, inbox_id, &fid);
 
-			if (fid) {
+			if (retval == MAPI_E_SUCCESS && fid) {
 				folder_type = g_new0 (guint32, 1);
 				*folder_type = olfolder_defaults[i];
 

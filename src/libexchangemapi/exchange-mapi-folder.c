@@ -80,6 +80,15 @@ exchange_mapi_folder_new (const char *folder_name, const char *container_class, 
 	return folder;
 }
 
+void
+exchange_mapi_folder_free (ExchangeMAPIFolder *folder)
+{
+	if (folder) {
+		g_free (folder->folder_name);
+		g_free (folder);
+	}
+}
+
 ExchangeMAPIFolderType
 exchange_mapi_container_class (char *type)
 {
@@ -129,7 +138,7 @@ exchange_mapi_folder_get_total_count (ExchangeMAPIFolder *folder)
 }
 
 GSList *
-exchange_mapi_peek_folder_list ()
+exchange_mapi_peek_folder_list (void)
 {
 	LOCK ();
 	if (!folder_list)
@@ -162,22 +171,16 @@ exchange_mapi_folder_get_folder (mapi_id_t fid)
 }
 
 void
-exchange_mapi_folder_list_free ()
+exchange_mapi_folder_list_free (void)
 {
-	GSList *tmp = folder_list;
 	LOCK ();
-	while (tmp) {
-		ExchangeMAPIFolder *data = tmp->data;
-		g_free (data);
-		data = NULL;
-		tmp = tmp->next;
-	}
+	g_slist_foreach (folder_list, (GFunc) exchange_mapi_folder_free, NULL);
 	g_slist_free (folder_list);
+
 	folder_list = NULL;
 	UNLOCK ();
 
 	d(g_print("Folder list freed\n"));
-	return;
 }
 
 void

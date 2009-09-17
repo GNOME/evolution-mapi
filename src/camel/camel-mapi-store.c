@@ -1308,6 +1308,8 @@ mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelE
 
 			mapi_si = camel_mapi_store_summary_add_from_full (store->summary, info->full_name, '/', fid, pfid);
 
+			g_free (fid);
+			g_free (pfid);
 			if (mapi_si == NULL) {
 				continue;
 			}
@@ -1321,7 +1323,10 @@ mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelE
 	camel_store_summary_touch ((CamelStoreSummary *)store->summary);
 	camel_store_summary_save ((CamelStoreSummary *)store->summary);
 
-	g_free ((char *)url);
+	g_free (url);
+
+	g_slist_foreach (list, (GFunc) exchange_mapi_folder_free, NULL);
+	g_slist_free (list);
 
 	//	g_hash_table_foreach (present, get_folders_free, NULL);
 	//	g_hash_table_destroy (present);

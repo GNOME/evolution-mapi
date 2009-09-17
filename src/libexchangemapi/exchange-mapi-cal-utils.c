@@ -1057,7 +1057,7 @@ update_attendee_status (struct mapi_SPropValue_array *properties, mapi_id_t mid)
 	const gchar *att, *att_sentby, *addrtype;
 	icalparameter_partstat partstat = ICAL_PARTSTAT_NONE;
 	const gchar *state = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_MESSAGE_CLASS);
-	struct cbdata cbdata; 
+	struct cbdata cbdata = { 0 };
 	gchar *matt, *matt_sentby;
 	uint32_t cur_seq;
 	const uint32_t *ui32;
@@ -1133,6 +1133,7 @@ update_attendee_status (struct mapi_SPropValue_array *properties, mapi_id_t mid)
 		/* remove the other attendees so not to confuse itip-formatter */
 		remove_other_attendees (cbdata.comp, matt);
 	} else { 
+		g_free (cbdata.props);
 		g_object_unref (cbdata.comp);
 		cbdata.comp = NULL;
 	}
@@ -1157,7 +1158,7 @@ update_server_object (struct mapi_SPropValue_array *properties, GSList *attachme
 	cur_seq = ui32 ? *ui32 : 0;
 
 	if (*mid) {
-		struct cbdata server_cbd;
+		struct cbdata server_cbd = {0};
 		fetch_server_data (*mid, &server_cbd);
 
 		if (cur_seq > server_cbd.appt_seq) {
@@ -1171,10 +1172,14 @@ update_server_object (struct mapi_SPropValue_array *properties, GSList *attachme
 			g_slist_free (ids);
 		} else 
 			create_new = FALSE;
+
+		if (server_cbd.comp)
+			g_object_unref (server_cbd.comp);
+		g_free (server_cbd.props);
 	}
 
 	if (create_new) {
-		struct cbdata cbdata;
+		struct cbdata cbdata = { 0 };
 		GSList *myrecipients = NULL;
 		GSList *myattachments = NULL;
 		icalcomponent_kind kind = icalcomponent_isa (e_cal_component_get_icalcomponent(comp));
@@ -1239,7 +1244,7 @@ check_server_for_object (struct mapi_SPropValue_array *properties, mapi_id_t *mi
 		struct id_list *idlist = (struct id_list *)(ids->data);
 		*mid = idlist->id;
 	} else  {
-	/* FIXME: what to do here? */
+		/* FIXME: what to do here? */
 	}
 
 	for (l = ids; l; l = l->next)
@@ -1285,10 +1290,12 @@ exchange_mapi_cal_util_camel_helper (struct mapi_SPropValue_array *properties,
 		} 
 	} else if (method == ICAL_METHOD_CANCEL) {
 		if (mid) {
-			struct cbdata server_cbd; 
+			struct cbdata server_cbd = { 0 };
 			fetch_server_data (mid, &server_cbd);
 			comp = server_cbd.comp;
 			set_attachments_to_cal_component (comp, attachments, fileuri);
+
+			g_free (server_cbd.props);
 		}
 	} else if (method == ICAL_METHOD_REQUEST) { 
 		if (mid)

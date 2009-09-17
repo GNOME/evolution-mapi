@@ -55,7 +55,7 @@ static int mapi_content_info_to_db (CamelFolderSummary *s, CamelMessageContentIn
 
 static void camel_mapi_summary_class_init (CamelMapiSummaryClass *klass);
 static void camel_mapi_summary_init       (CamelMapiSummary *obj);
-
+static void camel_mapi_summary_finalize   (CamelObject *obj);
 
 /*End of Prototypes*/
 
@@ -76,7 +76,7 @@ camel_mapi_summary_get_type (void)
 				(CamelObjectClassInitFunc) camel_mapi_summary_class_init,
 				NULL,
 				(CamelObjectInitFunc) camel_mapi_summary_init,
-				NULL);
+				(CamelObjectFinalizeFunc) camel_mapi_summary_finalize);
 	}
 
 	return type;
@@ -128,6 +128,13 @@ camel_mapi_summary_init (CamelMapiSummary *obj)
 	s->meta_summary->uid_len = 2048;
 }
 
+static void
+camel_mapi_summary_finalize (CamelObject *obj)
+{
+	CamelMapiSummary *s = (CamelMapiSummary *)obj;
+
+	g_free (s->sync_time_stamp);
+}
 
 /**
  * camel_mapi_summary_new:
@@ -179,6 +186,7 @@ mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
 		MS_EXTRACT_FIRST_DIGIT(mapi_summary->version);
 
 	if (part && part++) {
+		g_free (mapi_summary->sync_time_stamp);
 		mapi_summary->sync_time_stamp = g_strdup (part);
 	}
 

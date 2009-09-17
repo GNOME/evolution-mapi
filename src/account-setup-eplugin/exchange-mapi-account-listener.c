@@ -462,6 +462,7 @@ add_addressbook_sources (EAccount *account, GSList *folders)
 
 		uri = g_strdup_printf("mapigal://%s@%s/;Global Address List", url->user, url->host);
 		source = e_source_new_with_absolute_uri ("Global Address List", uri);
+		g_free (uri);
 		// source = e_source_new ("Global Address List", g_strconcat (";","Global Address List" , NULL));
 		e_source_set_property (source, "auth", "plain/password");
 		e_source_set_property (source, "auth-domain", "MAPIGAL");

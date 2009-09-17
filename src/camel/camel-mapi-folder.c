@@ -178,10 +178,8 @@ mapi_refresh_info(CamelFolder *folder, CamelException *ex)
 
 }
 
-
-/*Using GFunc*/
-static void 
-mapi_item_free (MapiItem *item, gpointer data)
+void 
+mapi_item_free (MapiItem *item)
 {
 	g_free (item->header.subject);
 	g_free (item->header.from);
@@ -196,6 +194,9 @@ mapi_item_free (MapiItem *item, gpointer data)
 
 	exchange_mapi_util_free_attachment_list (&item->attachments);
 	exchange_mapi_util_free_stream_list (&item->generic_streams);
+	exchange_mapi_util_free_recipient_list (&item->recipients);
+
+	g_free (item);
 }
 
 static gboolean
@@ -351,8 +352,8 @@ fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 	fi_data_mod_time.tv_usec = fi_data->last_modification_time.tv_usec;
 
 	if (timeval_compare (&item_modification_time, &fi_data_mod_time) == 1) {
-			fi_data->last_modification_time.tv_sec = item_modification_time.tv_sec;
-			fi_data->last_modification_time.tv_usec = item_modification_time.tv_usec;
+		fi_data->last_modification_time.tv_sec = item_modification_time.tv_sec;
+		fi_data->last_modification_time.tv_usec = item_modification_time.tv_usec;
 	}
 
 	if ((*flags & MSGFLAG_READ) != 0)
@@ -483,7 +484,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 	for ( ; item_list != NULL ; item_list = g_slist_next (item_list) ) {
 		MapiItem *temp_item ;
 		MapiItem *item;
-		gchar *msg_uid, *to = NULL, *from = NULL, *cc = NULL;
+		gchar *msg_uid;
 		guint64 id;
 
 		exists = FALSE;
@@ -522,6 +523,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 		if (!exists) {
  			GSList *l = NULL;
  			guint32 count_to = 0, count_cc =0;
+			gchar *to = NULL, *cc = NULL;
 
 			mi->info.uid = exchange_mapi_util_mapi_ids_to_uid(item->fid, item->mid);
 			mi->info.subject = camel_pstring_strdup(item->header.subject);
@@ -565,8 +567,10 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 					switch (*type) {
 					case MAPI_TO:
 						if (count_to) {
+							gchar *tmp = to;
 							to = g_strconcat (to, ", ", formatted_id, NULL);
 							g_free (formatted_id);
+							g_free (tmp);
 						} else
 							to = formatted_id;
 						count_to ++;
@@ -574,8 +578,10 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 
 					case MAPI_CC:
 						if (count_cc) {
+							gchar *tmp = cc;
 							cc = g_strconcat (cc, ", ", formatted_id, NULL);
 							g_free (formatted_id);
+							g_free (tmp);
 						} else
 							cc = formatted_id;
 						count_cc ++;
@@ -600,15 +606,20 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
  				item->header.from_email : item->header.from;
 
 			if (item->header.from_email) {
-				from = camel_internet_address_format_address (item->header.from, 
- 									      item->header.from_email);
+				gchar *from = camel_internet_address_format_address (item->header.from, 
+										     item->header.from_email);
  				mi->info.from = camel_pstring_strdup (from);
+
+				g_free (from);
 			} else
 				mi->info.from = NULL;
 
 			/* Fallback */
- 			mi->info.to = to ? camel_pstring_strdup (to) : g_strdup (item->header.to);
- 			mi->info.cc = to ? camel_pstring_strdup (cc) : g_strdup (item->header.cc);
+ 			mi->info.to = to ? camel_pstring_strdup (to) : camel_pstring_strdup (item->header.to);
+ 			mi->info.cc = cc ? camel_pstring_strdup (cc) : camel_pstring_strdup (item->header.cc);
+
+			g_free (to);
+			g_free (cc);
 		}
 
 		if (exists) {
@@ -789,7 +800,7 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	CamelMessageInfo *info = NULL;
 	CamelMapiMessageInfo *mapi_info = NULL;
 
-	GSList *read_items = NULL, *unread_items = NULL;
+	GSList *read_items = NULL, *unread_items = NULL, *to_free = NULL;
 	flags_diff_t diff, unset_flags;
 	const char *folder_id;
 	mapi_id_t fid, deleted_items_fid;
@@ -830,40 +841,55 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 			mapi_id_t *mid = g_new0 (mapi_id_t, 1); /* FIXME : */
 			mapi_id_t temp_fid;
 			guint32 flags;
+			gboolean used = FALSE;
 
 			uid = camel_message_info_uid (info);
 			flags= camel_message_info_flags (info);
 
 			/* Why are we getting so much noise here :-/ */
-			if (!exchange_mapi_util_mapi_ids_from_uid (uid, &temp_fid, mid))
+			if (!exchange_mapi_util_mapi_ids_from_uid (uid, &temp_fid, mid)) {
+				g_free (mid);
 				continue;
+			}
 
 			mapi_utils_do_flags_diff (&diff, mapi_info->server_flags, mapi_info->info.flags);
 			mapi_utils_do_flags_diff (&unset_flags, flags, mapi_info->server_flags);
 
 			diff.changed &= folder->permanent_flags;
 			if (!diff.changed) {
-				camel_message_info_free(info);
+				camel_message_info_free (info);
+				g_free (mid);
 				continue;
 			} else {
 				if (diff.bits & CAMEL_MESSAGE_DELETED) {
-					if (diff.bits & CAMEL_MESSAGE_SEEN) 
+					if (diff.bits & CAMEL_MESSAGE_SEEN) {
 						read_items = g_slist_prepend (read_items, mid);
-					if (deleted_items)
+						used = TRUE;
+					}
+					if (deleted_items) {
 						deleted_items = g_slist_prepend (deleted_items, mid);
-					else {
+						used = TRUE;
+					} else {
 						g_slist_free (deleted_head);
 						deleted_head = NULL;
 						deleted_head = deleted_items = g_slist_prepend (deleted_items, mid);
+						used = TRUE;
 					}
 				}
 			}
 
 			if (diff.bits & CAMEL_MESSAGE_SEEN) {
 				read_items = g_slist_prepend (read_items, mid);
+				used = TRUE;
 			} else if (unset_flags.bits & CAMEL_MESSAGE_SEEN) {
 				unread_items = g_slist_prepend (unread_items, mid);
+				used = TRUE;
 			}
+
+			if (used)
+				to_free = g_slist_prepend (to_free, mid);
+			else
+				g_free (mid);
 		}
 		camel_message_info_free (info);
 	}
@@ -908,10 +934,11 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 		deleted_items = g_slist_next (deleted_items);
 	}
 
-	if (unread_items) {
-		/* TODO */
-		g_slist_free (unread_items);
-	}
+	g_slist_free (unread_items);
+	g_slist_free (deleted_head);
+
+	g_slist_foreach (to_free, (GFunc) g_free, NULL);
+	g_slist_free (to_free);
 
 	if (expunge) {
 		/* TODO */
@@ -1054,6 +1081,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		}
 
 		/*Preserve last_modification_time from this fetch for later use with restrictions.*/
+		g_free (mapi_summary->sync_time_stamp);
 		mapi_summary->sync_time_stamp = g_time_val_to_iso8601 (&fetch_data->last_modification_time);
 
 		camel_folder_summary_touch (folder->summary);
@@ -1292,6 +1320,8 @@ fetch_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 		item->msg.body_parts = g_slist_append (item->msg.body_parts, body);
 
 		item->is_cal = TRUE;
+
+		g_free (appointment_body_str);
 	} else { 
 		if (!((body = exchange_mapi_util_find_stream (item_data->streams, PR_HTML)) || 
 		      (body = exchange_mapi_util_find_stream (item_data->streams, PR_BODY))))
@@ -1374,7 +1404,8 @@ mapi_msg_set_recipient_list (CamelMimeMessage *msg, MapiItem *item)
 			camel_internet_address_add (bcc_addr, display_name, recip->email_id);
 			break;
 		}
-		/* g_free (display_name); */
+
+		g_free (display_name);
 	}
 	
 	/*Add to message*/
@@ -1579,7 +1610,6 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 			camel_object_unref (part);
 			
 		}
-		exchange_mapi_util_free_attachment_list (&attach_list);
 	}
 
 	camel_medium_set_content_object(CAMEL_MEDIUM (msg), CAMEL_DATA_WRAPPER(multipart));
@@ -1682,10 +1712,7 @@ mapi_folder_get_message( CamelFolder *folder, const char *uid, CamelException *e
 	}
 
 	msg = mapi_folder_item_to_msg (folder, item, ex);
-
-	exchange_mapi_util_free_recipient_list (&item->recipients);
-
-	g_free (item);
+	mapi_item_free (item);
 
 	if (!msg) {
 		camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_INVALID, _("Could not get message"));

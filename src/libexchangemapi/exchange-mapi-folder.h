@@ -77,6 +77,7 @@ exchange_mapi_folder_new (const char *folder_name, const char *container_class,
 			  ExchangeMAPIFolderCategory catgory, 
 			  mapi_id_t folder_id, mapi_id_t parent_folder_id, 
 			  uint32_t child_count, uint32_t unread_count, uint32_t total);
+void exchange_mapi_folder_free (ExchangeMAPIFolder *folder);
 ExchangeMAPIFolderType exchange_mapi_container_class (char *type);
 
 const gchar* exchange_mapi_folder_get_name (ExchangeMAPIFolder *folder);
