@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-09 20:29+0300\n"
+"POT-Creation-Date: 2009-09-18 13:54+0300\n"
 "PO-Revision-Date: 2009-04-17 09:09+0300\n"
 "Last-Translator: Maxim V. Dziumanenko <dziumanenko@gmail.com>\n"
 "Language-Team: Ukrainian <uk@li.org>\n"
@@ -15,13 +15,29 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Введіть пароль для %s@%s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
+#. NOTE: A good way would be display the list of username entries
+#. using GtkEntryCompletion in the username gtkentry. But plugins
+#. as of now does not have access to it
+#. TODO : Fix strings
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
+msgid "Select username"
+msgstr "Виберіть ім'я користувача"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+msgid "Full name"
+msgstr "Повне ім'я"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
+msgid "User name"
+msgstr "Ім'я користувача"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -29,33 +45,75 @@ msgstr ""
 "Сервер, ім'я користувача та домен не можуть бути порожніми. Введіть коректні "
 "значення."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
 msgid "Authentication finished successfully."
 msgstr "Автентифікацію успішно завершено."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
 msgid "Authentication failed."
 msgstr "Помилка аутентифікації."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
 msgid "_Domain name:"
 msgstr "_Доменна назва:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
 msgid "_Authenticate"
 msgstr "_Автентифікація"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
 msgid "Personal Folders"
 msgstr "Персональні теки"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:386
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
 msgid "_Location:"
 msgstr "_Адреса:"
 
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
+msgid "_Folder size"
+msgstr "_Розмір теки"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
+msgid "Folder"
+msgstr "Тека"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
+msgid "Size"
+msgstr "Розмір"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
+msgid "Unable to retrieve folder size information"
+msgstr "Не вдається отримати інформацію про розмір теки"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
+msgid "Folder Size"
+msgstr "Розмір теки"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
+msgid "Fetching folder list ..."
+msgstr "Отримання списку тек..."
+
+#. Miscellaneous settings
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
+msgid "Miscellaneous"
+msgstr "Різне"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
+msgid "View the size of all Exchange folders"
+msgstr "Переглянути розмір усіх тек Exchange"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
+msgid "Folders Size"
+msgstr "Розмір тек"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
+#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
+msgid "Exchange Settings"
+msgstr "Параметри Exchange"
+
 #: ../src/calendar/e-cal-backend-mapi.c:115
 #: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:467
+#: ../src/camel/camel-mapi-store.c:472
 msgid "Authentication failed"
 msgstr "Автентифікація завершилась невдало"
 
@@ -91,36 +149,36 @@ msgstr ""
 "Зміну окремої зустрічі у серії періодичних зустрічей ще не реалізовано. Дані "
 "на сервері залишаться без змін."
 
-#: ../src/camel/camel-mapi-folder.c:435
+#: ../src/camel/camel-mapi-folder.c:481
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "Оновлення локальних відомостей про нові повідомлення на %s"
 
-#: ../src/camel/camel-mapi-folder.c:659
+#: ../src/camel/camel-mapi-folder.c:705
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Отримання ідентифікаторів повідомлень з сервера для %s"
 
-#: ../src/camel/camel-mapi-folder.c:681
+#: ../src/camel/camel-mapi-folder.c:727
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Видалення з кешу позначених для видалення повідомлень у %s"
 
-#: ../src/camel/camel-mapi-folder.c:983 ../src/camel/camel-mapi-folder.c:1610
-#: ../src/camel/camel-mapi-folder.c:1618
+#: ../src/camel/camel-mapi-folder.c:1033 ../src/camel/camel-mapi-folder.c:1650
+#: ../src/camel/camel-mapi-folder.c:1658
 msgid "This message is not available in offline mode."
 msgstr "Це повідомлення недоступне у автономному режимі."
 
-#: ../src/camel/camel-mapi-folder.c:992
+#: ../src/camel/camel-mapi-folder.c:1042
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Отримання відомостей про нові повідомлення на %s"
 
-#: ../src/camel/camel-mapi-folder.c:1002
+#: ../src/camel/camel-mapi-folder.c:1052
 msgid "Fetching items failed"
 msgstr "Не вдається завантажити елементи."
 
-#: ../src/camel/camel-mapi-folder.c:1574
+#: ../src/camel/camel-mapi-folder.c:1614
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -129,24 +187,34 @@ msgstr ""
 "Не вдається отримати повідомлення: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1574
+#: ../src/camel/camel-mapi-folder.c:1614
 msgid "No such message"
 msgstr "Повідомлення відсутнє"
 
-#: ../src/camel/camel-mapi-folder.c:1586
+#: ../src/camel/camel-mapi-folder.c:1626
 msgid "Message fetching cancelled by user."
 msgstr "Операція була перервана користувачем."
 
-#: ../src/camel/camel-mapi-folder.c:1593
+#: ../src/camel/camel-mapi-folder.c:1633
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Не вдається отримати повідомлення %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1639 ../src/camel/camel-mapi-folder.c:1651
+#: ../src/camel/camel-mapi-folder.c:1679 ../src/camel/camel-mapi-folder.c:1691
 msgid "Could not get message"
 msgstr "Не вдається отримати повідомлення."
 
-#: ../src/camel/camel-mapi-folder.c:2006
+#: ../src/camel/camel-mapi-folder.c:1971
+#, c-format
+msgid "Cannot append message to folder '%s'"
+msgstr "Не вдається додати повідолення до теки «%s»"
+
+#: ../src/camel/camel-mapi-folder.c:1978
+#, c-format
+msgid "Offline. '%s'"
+msgstr "Автономно. '%s'"
+
+#: ../src/camel/camel-mapi-folder.c:2098
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Не вдається завантажити зведення про %s"
@@ -159,37 +227,37 @@ msgstr "Перевірка нової пошти"
 msgid "C_heck for new messages in all folders"
 msgstr "П_еревіряти нову пошту в усіх теках"
 
-#: ../src/camel/camel-mapi-provider.c:71
+#: ../src/camel/camel-mapi-provider.c:57
 msgid "Options"
 msgstr "Параметри"
 
-#: ../src/camel/camel-mapi-provider.c:73
+#: ../src/camel/camel-mapi-provider.c:59
 msgid "Automatically synchroni_ze account locally"
 msgstr "Автоматично син_хронізувати обліковий запис локально"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:76
+#: ../src/camel/camel-mapi-provider.c:62
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
 "Зас_тосовувати фільтри до нових повідомлень у теці \"Вхідні\" на сервері"
 
-#: ../src/camel/camel-mapi-provider.c:78
+#: ../src/camel/camel-mapi-provider.c:64
 msgid "Check new messages for _Junk contents"
 msgstr "Перевіряти нові повідомлення на _спамом"
 
-#: ../src/camel/camel-mapi-provider.c:80
+#: ../src/camel/camel-mapi-provider.c:66
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Перевіряти на \"спам\" лише _теку \"Вхідні\""
 
-#: ../src/camel/camel-mapi-provider.c:92
+#: ../src/camel/camel-mapi-provider.c:78
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
 msgstr "Для доступу до Microsoft Exchange / OpenChange використовувати MAPI"
 
-#: ../src/camel/camel-mapi-provider.c:107
+#: ../src/camel/camel-mapi-provider.c:93
 msgid "Password"
 msgstr "Пароль"
 
-#: ../src/camel/camel-mapi-provider.c:108
+#: ../src/camel/camel-mapi-provider.c:94
 msgid ""
 "This option will connect to the Openchange server using a plaintext password."
 msgstr "З'єднуватись з сервером Openchange передаючи пароль відкритим текстом."
@@ -202,14 +270,14 @@ msgstr "Улюблене"
 msgid "All Public Folders"
 msgstr "Усі спільні каталоги"
 
-#: ../src/camel/camel-mapi-store.c:268 ../src/camel/camel-mapi-transport.c:352
+#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Сервер Exchange MAPI %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:272 ../src/camel/camel-mapi-transport.c:354
+#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Сервіс Exchange MAPI для %s на %s"
@@ -218,50 +286,50 @@ msgstr "Сервіс Exchange MAPI для %s на %s"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:310
+#: ../src/camel/camel-mapi-store.c:315
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s Введіть пароль для %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:323
+#: ../src/camel/camel-mapi-store.c:328
 msgid "You did not enter a password."
 msgstr "Ви не ввели пароль."
 
-#: ../src/camel/camel-mapi-store.c:331
+#: ../src/camel/camel-mapi-store.c:336
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Не вдається пройти актентифікацію на сервері Exchange MAPI."
 
-#: ../src/camel/camel-mapi-store.c:451
+#: ../src/camel/camel-mapi-store.c:456
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "Не можна створювати теки MAPI у автономному режимі."
 
-#: ../src/camel/camel-mapi-store.c:456
+#: ../src/camel/camel-mapi-store.c:461
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "Створити новий каталог «%s»"
 
-#: ../src/camel/camel-mapi-store.c:665
+#: ../src/camel/camel-mapi-store.c:670
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "Не вдається перейменувати каталог MAPI «%s». Каталог не існує."
 
-#: ../src/camel/camel-mapi-store.c:676
+#: ../src/camel/camel-mapi-store.c:681
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "Не вдається перейменувати типовий каталог MAPI з «%s» на «%s»"
 
-#: ../src/camel/camel-mapi-store.c:694
+#: ../src/camel/camel-mapi-store.c:699
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "Не вдається перейменувати каталог MAPI `%s' на `%s'"
 
-#: ../src/camel/camel-mapi-store.c:1222
+#: ../src/camel/camel-mapi-store.c:1227
 msgid "Folder list not available in offline mode."
 msgstr "Це повідомлення недоступне у автономному режимі."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:340
+#: ../src/camel/camel-mapi-transport.c:116
 msgid "Could not send message."
 msgstr "Не вдаєтьтся надіслати повідомлення."
 
