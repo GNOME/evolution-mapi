@@ -1,0 +1,329 @@
+# translation of evolution-mapi.gnome-2-28.po to Maithili
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Sangeeta Kumari <sangeeta09@gmail.com>, 2009.
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-mapi.gnome-2-28\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
+"POT-Creation-Date: 2009-09-11 11:28+0000\n"
+"PO-Revision-Date: 2009-09-11 20:34+0530\n"
+"Last-Translator: Sangeeta Kumari <sangeeta09@gmail.com>\n"
+"Language-Team: Maithili <maithili.sf.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.4\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n\n"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
+#, c-format
+msgid "Enter Password for %s@%s"
+msgstr ""
+
+#. NOTE: A good way would be display the list of username entries
+#. using GtkEntryCompletion in the username gtkentry. But plugins
+#. as of now does not have access to it
+#. TODO : Fix strings
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
+msgid "Select username"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+msgid "Full name"
+msgstr "पूरा नाम"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
+msgid "User name"
+msgstr "प्रयोक्ता नाम"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
+msgid "Authentication finished successfully."
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
+msgid "Authentication failed."
+msgstr "सत्यापन असफल"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
+msgid "_Domain name:"
+msgstr "डोमेन नाम (_D):"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
+msgid "_Authenticate"
+msgstr "सत्यापित कएल (_A)"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
+msgid "Personal Folders"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
+msgid "_Location:"
+msgstr "स्थान (_L):"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
+msgid "_Folder size"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
+msgid "Folder"
+msgstr "फोल्डर"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
+msgid "Size"
+msgstr "आकार"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
+msgid "Unable to retrieve folder size information"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
+msgid "Folder Size"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
+msgid "Fetching folder list ..."
+msgstr ""
+
+#. Miscellaneous settings
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
+msgid "Miscellaneous"
+msgstr "विविध"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
+msgid "View the size of all Exchange folders"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
+msgid "Folders Size"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
+#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
+msgid "Exchange Settings"
+msgstr ""
+
+#: ../src/calendar/e-cal-backend-mapi.c:115
+#: ../src/calendar/e-cal-backend-mapi.c:1053
+#: ../src/camel/camel-mapi-store.c:472
+msgid "Authentication failed"
+msgstr "सत्यापन असफल"
+
+#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
+#: ../src/calendar/e-cal-backend-mapi.c:391
+#, c-format
+msgid "Loading items in folder %s"
+msgstr ""
+
+#. FIXME: String : We need to restart evolution-data-server
+#: ../src/calendar/e-cal-backend-mapi.c:581
+#: ../src/calendar/e-cal-backend-mapi.c:592
+#: ../src/calendar/e-cal-backend-mapi.c:618
+msgid "Error fetching changes from the server."
+msgstr ""
+
+#: ../src/calendar/e-cal-backend-mapi.c:973
+#: ../src/calendar/e-cal-backend-mapi.c:983
+#: ../src/calendar/e-cal-backend-mapi.c:1088
+#: ../src/calendar/e-cal-backend-mapi.c:1170
+msgid "Could not create cache file"
+msgstr ""
+
+#: ../src/calendar/e-cal-backend-mapi.c:1099
+msgid "Could not create thread for populating cache"
+msgstr ""
+
+#: ../src/calendar/e-cal-backend-mapi.c:1513
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:478
+#, c-format
+msgid "Updating local summary cache for new messages in %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:702
+#, c-format
+msgid "Retrieving message IDs from server for %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:724
+#, c-format
+msgid "Removing deleted messages from cache in %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:1029 ../src/camel/camel-mapi-folder.c:1643
+#: ../src/camel/camel-mapi-folder.c:1651
+msgid "This message is not available in offline mode."
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:1038
+#, c-format
+msgid "Fetching summary information for new messages in %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:1048
+msgid "Fetching items failed"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:1607
+#, c-format
+msgid ""
+"Cannot get message: %s\n"
+"  %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:1607
+msgid "No such message"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:1619
+msgid "Message fetching cancelled by user."
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:1626
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:1672 ../src/camel/camel-mapi-folder.c:1684
+msgid "Could not get message"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:1964
+#, c-format
+msgid "Cannot append message to folder '%s'"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:1971
+#, c-format
+msgid "Offline. '%s'"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:2091
+#, c-format
+msgid "Could not load summary for %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:51
+msgid "Checking for new mail"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:53
+msgid "C_heck for new messages in all folders"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:57
+msgid "Options"
+msgstr "विकल्प"
+
+#: ../src/camel/camel-mapi-provider.c:59
+msgid "Automatically synchroni_ze account locally"
+msgstr ""
+
+#. i18n: copy from evolution:camel-imap-provider.c
+#: ../src/camel/camel-mapi-provider.c:62
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:64
+msgid "Check new messages for _Junk contents"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:66
+msgid "Only check for Junk messag_es in the Inbox folder"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:78
+msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:93
+msgid "Password"
+msgstr "कूटशब्द"
+
+#: ../src/camel/camel-mapi-provider.c:94
+msgid "This option will connect to the Openchange server using a plaintext password."
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:61
+msgid "Favorites"
+msgstr "प्रिय"
+
+#: ../src/camel/camel-mapi-store.c:62
+msgid "All Public Folders"
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
+#, c-format
+msgid "Exchange MAPI server %s"
+msgstr ""
+
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
+#, c-format
+msgid "Exchange MAPI service for %s on %s"
+msgstr ""
+
+#. To translators : First %s : is the error text or the reason
+#. for prompting the user if it is available.
+#. Second %s is : Username.
+#. Third %s is : Server host name.
+#: ../src/camel/camel-mapi-store.c:315
+#, c-format
+msgid "%s Please enter the MAPI password for %s@%s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:328
+msgid "You did not enter a password."
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:336
+#, c-format
+msgid "Unable to authenticate to Exchange MAPI server."
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:456
+msgid "Cannot create MAPI folders in offline mode."
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:461
+#, c-format
+msgid "Cannot create new folder `%s'"
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:670
+#, c-format
+msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:681
+#, c-format
+msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:699
+#, c-format
+msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:1227
+msgid "Folder list not available in offline mode."
+msgstr ""
+
+#. Fixme : Set a better error message. Would be helful in troubleshooting.
+#: ../src/camel/camel-mapi-transport.c:116
+msgid "Could not send message."
+msgstr ""
+
