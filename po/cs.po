@@ -9,9 +9,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-29 23:47+0200\n"
-"PO-Revision-Date: 2009-08-28 18:09-0500\n"
-"Last-Translator: Jiri Eischmann <jiri@eischmann.cz>\n"
+"POT-Creation-Date: 2009-09-20 22:42+0200\n"
+"PO-Revision-Date: 2009-09-20 22:42+0200\n"
+"Last-Translator: Andre Klapper <ak-47@gmx.net>\n"
 "Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -152,36 +152,36 @@ msgstr ""
 "Podpora pro úpravu jednotlivých výskytů opakujících se událostí není dosud "
 "implementována. Změna události na serveru nebyla provedena."
 
-#: ../src/camel/camel-mapi-folder.c:478
+#: ../src/camel/camel-mapi-folder.c:481
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "Aktualizace místní souhrnné cache pro nové zprávy v %s"
 
-#: ../src/camel/camel-mapi-folder.c:702
+#: ../src/camel/camel-mapi-folder.c:705
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Probíhá stahování ID zprávy ze serveru pro %s"
 
-#: ../src/camel/camel-mapi-folder.c:724
+#: ../src/camel/camel-mapi-folder.c:727
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Probíhá odstraňování smazaných zpráv z cache v %s"
 
-#: ../src/camel/camel-mapi-folder.c:1029 ../src/camel/camel-mapi-folder.c:1643
-#: ../src/camel/camel-mapi-folder.c:1651
+#: ../src/camel/camel-mapi-folder.c:1033 ../src/camel/camel-mapi-folder.c:1650
+#: ../src/camel/camel-mapi-folder.c:1658
 msgid "This message is not available in offline mode."
 msgstr "Tato zpráva není k dispozici v režimu off-line."
 
-#: ../src/camel/camel-mapi-folder.c:1038
+#: ../src/camel/camel-mapi-folder.c:1042
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Stahují se souhrnné informace pro nové zprávy v %s"
 
-#: ../src/camel/camel-mapi-folder.c:1048
+#: ../src/camel/camel-mapi-folder.c:1052
 msgid "Fetching items failed"
 msgstr "Stahování položek selhalo"
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1614
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -190,33 +190,34 @@ msgstr ""
 "Nelze získat zprávu: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1614
 msgid "No such message"
 msgstr "Taková zpráva neexistuje"
 
-#: ../src/camel/camel-mapi-folder.c:1619
+#: ../src/camel/camel-mapi-folder.c:1626
 msgid "Message fetching cancelled by user."
 msgstr "Stahování pošty bylo zrušeno uživatelem."
 
-#: ../src/camel/camel-mapi-folder.c:1626
+#: ../src/camel/camel-mapi-folder.c:1633
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Nelze získat zprávu %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1672 ../src/camel/camel-mapi-folder.c:1684
+#: ../src/camel/camel-mapi-folder.c:1679 ../src/camel/camel-mapi-folder.c:1691
 msgid "Could not get message"
 msgstr "Nelze získat zprávu"
 
-#: ../src/camel/camel-mapi-folder.c:1964
+#: ../src/camel/camel-mapi-folder.c:1971
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Zprávu nelze připojit ke složce `%s'"
 
-#: ../src/camel/camel-mapi-folder.c:1971
-msgid "Offline."
-msgstr "Offline."
+#: ../src/camel/camel-mapi-folder.c:1978
+#, c-format
+msgid "Offline. '%s'"
+msgstr "Offline. `%s'"
 
-#: ../src/camel/camel-mapi-folder.c:2091
+#: ../src/camel/camel-mapi-folder.c:2098
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nelze načíst souhrn pro %s"
