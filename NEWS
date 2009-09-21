@@ -1,3 +1,30 @@
+evolution-mapi 0.28.0 2009-09-22
+---------------------------------
+Bug Fixes :
+    Bug #592057 - Not all messages have Transport Headers property. (Milan Crha)
+
+Translations :
+    Adi Roiban (ro)
+    Amitakhya Phukan (as)
+    Andre Klapper (cs)
+    Ani <peter (ml)
+    Ask H. Larsen (da)
+    Branko Kokanović (sr)
+    David Planela (ca)
+    Felix (ta)
+    Ilkka Tuohela (fi)
+    Manoj Kumar Giri (or)
+    Maxim V. Dziumanenko (uk)
+    Milo Casagrande (it)
+    Philip Withnall (GB)
+    Rajesh Ranjan (hi)
+    Runa Bhattacharjee (bn_IN)
+    Sandeep Shedmake (mr)
+    Shankar Prasad (kn)
+    Sweta Kothari (gu)
+    krishnababu k (te)
+    Žygimantas Beručka (lt)
+
 evolution-mapi 0.27.92 2009-09-07
 ---------------------------------
 Bug Fixes :
