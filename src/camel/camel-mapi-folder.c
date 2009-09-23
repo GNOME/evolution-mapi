@@ -691,7 +691,6 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 	guint32 index, count, options = 0;
 	GSList *server_uid_list = NULL;
 	const gchar *uid = NULL;
-	GSList *tmp_list_item = NULL;
 
 	/* Currently we don't have simple wrapper over getprops.*/
 	const guint32 prop_list[] = { PR_LAST_MODIFICATION_TIME };
@@ -728,6 +727,8 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 
 	/* Iterate over cache and check if the UID is in server*/
 	for (index = 0; index < count; index++) {
+		GSList *tmp_list_item = NULL;
+
 		/*FIXME :Any other list available ???*/
 		info = camel_folder_summary_index (m->folder->summary, index);
 		if (!info) continue; /*This is bad. *Should* not happen*/
@@ -741,7 +742,7 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 		}
 
 		/* If it is not in server list, clean our cache */
-		if (!tmp_list_item->data && uid) {
+		if ((!tmp_list_item || !tmp_list_item->data) && uid) {
 			CAMEL_MAPI_FOLDER_REC_LOCK (m->folder, cache_lock);
 			camel_folder_summary_remove_uid (m->folder->summary, uid);
 			camel_data_cache_remove (mapi_folder->cache, "cache", uid, NULL);
