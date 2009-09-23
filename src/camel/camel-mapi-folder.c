@@ -1396,22 +1396,35 @@ mapi_populate_details_from_item (CamelFolder *folder, CamelMimeMessage *msg, Map
 	CamelInternetAddress *addr = NULL;
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE(folder->parent_store);
 	int offset = 0;
-	guint i;
 	time_t actual_time;
 
 	/* Setting headers from PR_TRANSPORT_MESSAGE_HEADERS */
 	if (item->header.transport_headers) {
-		struct _camel_header_raw *headers;
-		gchar **header_list;
+		CamelMimePart *part = camel_mime_part_new ();
+		CamelStream *stream;
+		CamelMimeParser *parser;
 
-		header_list = g_strsplit (item->header.transport_headers, "\n", -1);
-		for (i = 0; header_list && header_list [i]; i++)
-			camel_header_raw_append_parse (&headers, header_list[i], -1);
+		stream = camel_stream_mem_new_with_buffer (item->header.transport_headers, strlen (item->header.transport_headers));
+		parser = camel_mime_parser_new ();
+		camel_mime_parser_init_with_stream (parser, stream);
+		camel_mime_parser_scan_from (parser, FALSE);
+		camel_object_unref (stream);
 
-		while (headers->next) {
-			camel_medium_add_header (CAMEL_MEDIUM (msg), headers->name, headers->value);
-			headers = headers->next ;
+		if (camel_mime_part_construct_from_parser (part, parser) != -1) {
+			struct _camel_header_raw *h;
+
+			for (h = part->headers; h; h = h->next) {
+				const gchar *value = h->value;
+
+				while (value && camel_mime_is_lwsp (*value))
+					value++;
+
+				camel_medium_add_header (CAMEL_MEDIUM (msg), h->name, value);
+			}
 		}
+
+		camel_object_unref (parser);
+		camel_object_unref (part);
 	}
 
 	/* Overwrite headers if we have specific properties available*/
