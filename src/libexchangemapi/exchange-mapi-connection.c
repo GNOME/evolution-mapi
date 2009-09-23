@@ -1211,7 +1211,7 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 
 		for (i = 0; i < SRowSet.cRows; i++) {
 			mapi_object_t obj_message;
-			struct mapi_SPropValue_array properties_array;
+			struct mapi_SPropValue_array properties_array = {0};
 			const mapi_id_t *pfid;
 			const mapi_id_t	*pmid;
 			const bool *has_attach = NULL;
@@ -1227,6 +1227,9 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 
 			has_attach = (const bool *) get_SPropValue_SRow_data(&SRowSet.aRow[i], PR_HASATTACH);
 
+			if (options & MAPI_OPTIONS_DONT_OPEN_MESSAGE)
+				goto relax;
+				
 			retval = OpenMessage(&obj_folder, *pfid, *pmid, &obj_message, 0);
 			if (retval != MAPI_E_SUCCESS) {
 				mapi_errstr("OpenMessage", GetLastError());
@@ -1262,19 +1265,21 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 
 			} else
 				retval = GetPropsAll (&obj_message, &properties_array);
-
+ relax:
 			if (retval == MAPI_E_SUCCESS) {
 				FetchItemsCallbackData *item_data;
 				uint32_t z;
 
-				/* just to get all the other streams */
-				for (z=0; z < properties_array.cValues; z++) {
-					if ((properties_array.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY && 
-					    (options & MAPI_OPTIONS_FETCH_GENERIC_STREAMS)) 
-					exchange_mapi_util_read_generic_stream (&obj_message, properties_array.lpProps[z].ulPropTag, &stream_list);
-				}
+				if ((options & MAPI_OPTIONS_DONT_OPEN_MESSAGE) == 0) {
+					/* just to get all the other streams */
+					for (z=0; z < properties_array.cValues; z++) {
+						if ((properties_array.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY && 
+						    (options & MAPI_OPTIONS_FETCH_GENERIC_STREAMS)) 
+						exchange_mapi_util_read_generic_stream (&obj_message, properties_array.lpProps[z].ulPropTag, &stream_list);
+					}
 
-				mapi_SPropValue_array_named(&obj_message, &properties_array);
+					mapi_SPropValue_array_named(&obj_message, &properties_array);
+				}
 
 				/* NOTE: stream_list, recipient_list and attach_list
 				   should be freed by the callback */
@@ -1297,7 +1302,8 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 				talloc_free (properties_array.lpProps);
 
 		loop_cleanup:
-			mapi_object_release(&obj_message);
+			if ((options & MAPI_OPTIONS_DONT_OPEN_MESSAGE) == 0)
+				mapi_object_release (&obj_message);
 
 			if (!cb_retval) break;
 		}

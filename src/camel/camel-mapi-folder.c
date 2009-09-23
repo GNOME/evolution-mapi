@@ -711,7 +711,7 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 					       prop_list, G_N_ELEMENTS (prop_list),
 					       NULL, NULL,
 					       deleted_items_sync_cb, &server_uid_list,
-					       options);
+					       options | MAPI_OPTIONS_DONT_OPEN_MESSAGE);
 
 	camel_operation_end (NULL);
 
