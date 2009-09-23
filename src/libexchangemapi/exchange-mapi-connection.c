@@ -750,6 +750,8 @@ exchange_mapi_util_get_gal (GPtrArray *contacts_array)
 	
 	mem_ctx = talloc_init ("ExchangeMAPI_GetGAL");
 
+	LOCK ();
+
 	SPropTagArray = set_SPropTagArray(mem_ctx, 0xc,
 					  PR_INSTANCE_KEY,
 					  PR_ENTRYID,
@@ -770,7 +772,9 @@ exchange_mapi_util_get_gal (GPtrArray *contacts_array)
 		count += 0x2;
 		retval = GetGALTable(global_mapi_session, SPropTagArray, &SRowSet, count, ulFlags);
 		if ((!SRowSet) || (!(SRowSet->aRow))) {
-			return false;
+			UNLOCK ();
+			MAPIFreeBuffer (SPropTagArray);
+			return FALSE;
 		}
 		if (SRowSet->cRows) {
 			for (i = 0; i < SRowSet->cRows; i++) {
@@ -786,7 +790,9 @@ exchange_mapi_util_get_gal (GPtrArray *contacts_array)
 
 	MAPIFreeBuffer(SPropTagArray);
 
-	return true;
+	UNLOCK ();
+
+	return TRUE;
 	
 }
 
@@ -908,7 +914,9 @@ exchange_mapi_util_modify_recipients (TALLOC_CTX *mem_ctx, mapi_object_t *obj_me
 	}
 
 	/* Attempt to resolve names from the server */
+	LOCK ();
 	retval = ResolveNames (global_mapi_session, users, SPropTagArray, &SRowSet, &FlagList, 0);
+	UNLOCK ();
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("ResolveNames", GetLastError());
 		goto cleanup;
