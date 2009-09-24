@@ -324,7 +324,7 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 	/*Add message threading properties */
 	item->header.references = g_strdup (camel_medium_get_header ((CamelMedium *) message, "References"));
 	item->header.in_reply_to = g_strdup (camel_medium_get_header ((CamelMedium *) message, "In-Reply-To"));
-	item->header.message_id = g_strdup (camel_medium_get_header ((CamelMedium *) message, "Message-Id"));
+	item->header.message_id = g_strdup (camel_medium_get_header ((CamelMedium *) message, "Message-ID"));
 
 	/* contents body */
 	multipart = (CamelMultipart *)camel_medium_get_content_object (CAMEL_MEDIUM (message));

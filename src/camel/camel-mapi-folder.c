@@ -1536,7 +1536,7 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 
 	/* Threading */
 	if (item->header.message_id)
-		camel_medium_add_header (CAMEL_MEDIUM (msg), "Message-Id", item->header.message_id);
+		camel_medium_add_header (CAMEL_MEDIUM (msg), "Message-ID", item->header.message_id);
 
 	if (item->header.references)
 		camel_medium_add_header (CAMEL_MEDIUM (msg), "References", item->header.references);
