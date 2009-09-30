@@ -235,7 +235,7 @@ action_folder_size_cb (GtkAction *action,
 }
 
 static void
-folder_size_actions_update_cb (EShellView *shell_view)
+folder_size_actions_update_cb (EShellView *shell_view, GtkActionEntry *entries)
 {
 	EShellContent *shell_content;
 	EShellWindow *shell_window;
@@ -245,13 +245,14 @@ folder_size_actions_update_cb (EShellView *shell_view)
 
 	EShellSidebar *shell_sidebar;
 	EMFolderTree *folder_tree;
-	const gchar *folder_uri;
+	const gchar *folder_uri = NULL;
 
 	shell_sidebar = e_shell_view_get_shell_sidebar (shell_view);
 	g_object_get (shell_sidebar, "folder-tree", &folder_tree, NULL);
 	folder_uri = em_folder_tree_get_selected_uri (folder_tree);
 	g_object_unref (folder_tree);
-	g_return_if_fail (folder_uri != NULL);
+	if (!(folder_uri && *folder_uri))
+		return;
 
 	shell_content = e_shell_view_get_shell_content (shell_view);
 	shell_window = e_shell_view_get_shell_window (shell_view);
@@ -262,12 +263,11 @@ folder_size_actions_update_cb (EShellView *shell_view)
 	folder_size_action = gtk_action_group_get_action (action_group, 
 							  "mail-mapi-folder-size");
 
-	/* Enable / disable action entry */
-	/* TODO : Instead we should not show the action entry at all! */
+	/* Show / Hide action entry */
 	if (g_str_has_prefix (folder_uri, "mapi://"))
-		gtk_action_set_sensitive (folder_size_action , TRUE);
+		gtk_action_set_visible (folder_size_action , TRUE);
 	else 
-		gtk_action_set_sensitive (folder_size_action , FALSE);		
+		gtk_action_set_visible (folder_size_action , FALSE);
 
 }
 
@@ -358,7 +358,7 @@ e_plugin_ui_init (GtkUIManager *ui_manager,
 				      G_N_ELEMENTS (folder_size_entries),
 				      shell_view);
 
-	/* Decide whether we want this option to be enabled or not */
+	/* Decide whether we want this option to be visible or not */
 	g_signal_connect (shell_view, "update-actions",
 			  G_CALLBACK (folder_size_actions_update_cb),
 			  shell_view);
