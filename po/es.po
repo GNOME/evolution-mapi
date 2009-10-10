@@ -8,13 +8,13 @@ msgstr ""
 "Project-Id-Version: evolution-mapi.HEAD\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2009-08-31 09:55+0000\n"
-"PO-Revision-Date: 2009-08-31 20:36+0200\n"
+"POT-Creation-Date: 2009-09-14 15:03+0000\n"
+"PO-Revision-Date: 2009-10-10 11:48+0200\n"
 "Last-Translator: Jorge González <jorgegonz@svn.gnome.org>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.11.4\n"
 "Plural-Forms:  nplurals=2; plural=(n != 1);\n"
 
@@ -72,47 +72,48 @@ msgstr "Carpetas personales"
 msgid "_Location:"
 msgstr "_Lugar:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
-msgid "_Folder size"
-msgstr "Tamaño de la _carpeta"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:132
 msgid "Folder"
 msgstr "Carpeta"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:137
 msgid "Size"
 msgstr "Tamaño"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:157
 msgid "Unable to retrieve folder size information"
 msgstr "No se pudo obtener la información del tamaño de la carpeta"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:181
 msgid "Folder Size"
 msgstr "Tamaño de la carpeta"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:189
 msgid "Fetching folder list ..."
 msgstr "Obteniendo la lista de carpetas…"
 
 #. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:305
 msgid "Miscellaneous"
 msgstr "Misceláneo"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:318
 msgid "View the size of all Exchange folders"
 msgstr "Ver el tamaño de todas las carpetas Exchange"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:320
 msgid "Folders Size"
 msgstr "Tamaño de las carpetas"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:331
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
 msgstr "Configuración de Exchange"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:340
+#| msgid "_Folder size"
+msgid "Folder size"
+msgstr "Tamaño de la carpeta"
 
 #: ../src/calendar/e-cal-backend-mapi.c:115
 #: ../src/calendar/e-cal-backend-mapi.c:1053
@@ -152,36 +153,36 @@ msgstr ""
 "Aún no está implementado el soporte para modificar instancias aisladas de "
 "una cita recurrente. No se realizó ningún cambio en la cita del servidor."
 
-#: ../src/camel/camel-mapi-folder.c:478
+#: ../src/camel/camel-mapi-folder.c:481
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "Actualizando la caché de resumen local para los mensajes nuevos en %s"
 
-#: ../src/camel/camel-mapi-folder.c:702
+#: ../src/camel/camel-mapi-folder.c:705
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Obteniendo los ID de los mensajes del servidor para %s"
 
-#: ../src/camel/camel-mapi-folder.c:724
+#: ../src/camel/camel-mapi-folder.c:727
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Quitando los borrados mensajes de la caché en %s"
 
-#: ../src/camel/camel-mapi-folder.c:1029 ../src/camel/camel-mapi-folder.c:1643
-#: ../src/camel/camel-mapi-folder.c:1651
+#: ../src/camel/camel-mapi-folder.c:1033 ../src/camel/camel-mapi-folder.c:1650
+#: ../src/camel/camel-mapi-folder.c:1658
 msgid "This message is not available in offline mode."
 msgstr "Este mensaje no está disponible en modo desconectado."
 
-#: ../src/camel/camel-mapi-folder.c:1038
+#: ../src/camel/camel-mapi-folder.c:1042
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Obteniendo recopilación de información sobre los mensajes nuevos en %s"
 
-#: ../src/camel/camel-mapi-folder.c:1048
+#: ../src/camel/camel-mapi-folder.c:1052
 msgid "Fetching items failed"
 msgstr "Falló al obtener los elementos"
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1614
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -190,35 +191,34 @@ msgstr ""
 "No se puede obtener el mensaje: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1614
 msgid "No such message"
 msgstr "No existe ese mensaje"
 
-#: ../src/camel/camel-mapi-folder.c:1619
+#: ../src/camel/camel-mapi-folder.c:1626
 msgid "Message fetching cancelled by user."
 msgstr "El usuario canceló la obtención de mensajes."
 
-#: ../src/camel/camel-mapi-folder.c:1626
+#: ../src/camel/camel-mapi-folder.c:1633
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "No se puede obtener el mensaje %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1672 ../src/camel/camel-mapi-folder.c:1684
+#: ../src/camel/camel-mapi-folder.c:1679 ../src/camel/camel-mapi-folder.c:1691
 msgid "Could not get message"
 msgstr "No se puede obtener el mensaje"
 
-#: ../src/camel/camel-mapi-folder.c:1964
+#: ../src/camel/camel-mapi-folder.c:1971
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "No se pude anexar el mensaje a la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-folder.c:1971
-#, c-format
-#| msgid "Offline."
-msgid "Offline. '%s'"
-msgstr "Desconectado. «%s»"
+#: ../src/camel/camel-mapi-folder.c:1978
+#| msgid "Offline. '%s'"
+msgid "Offline."
+msgstr "Desconectado."
 
-#: ../src/camel/camel-mapi-folder.c:2091
+#: ../src/camel/camel-mapi-folder.c:2098
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No se pudo cargar el resumen para %s"
