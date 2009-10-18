@@ -1,3 +1,16 @@
+evolution-mapi 0.28.1 2009-10-19
+---------------------------------
+
+Bug Fixes :
+	Bug #596157 - Use "Message-ID" instead of "Message-Id". (Matthew Barnes)
+	Bug #595480 - Crash on GAL retrieval. (Milan Crha)
+	Bug #595355 - Crash on header parsing. (Milan Crha)
+	Bug #595260 - crash in mapi_sync_deleted. (Milan Crha)
+	Bug #588453 - Slow retrieval of message IDs. (Milan Crha)
+Translations:
+	Matej Urbančič (sl)
+	Leonid Kanter (ru)
+
 evolution-mapi 0.28.0 2009-09-22
 ---------------------------------
 Bug Fixes :
