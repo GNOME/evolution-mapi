@@ -1214,6 +1214,8 @@ mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelE
 	gboolean subscription_list = FALSE;
 	CamelFolderInfo *info = NULL;
 	CamelMapiStoreInfo *mapi_si = NULL;
+	guint32 count, i;
+	CamelStoreInfo *si = NULL;
 
 	if (((CamelOfflineStore *) store)->state == CAMEL_OFFLINE_STORE_NETWORK_AVAIL) {
 		if (((CamelService *)store)->status == CAMEL_SERVICE_DISCONNECTED){
@@ -1319,6 +1321,22 @@ mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelE
 		mapi_si->info.total = info->total;
 		mapi_si->info.unread = info->unread;
 	}
+
+	/* Weed out deleted folders*/
+	count = camel_store_summary_count ((CamelStoreSummary *)store->summary);
+	for (i=0;i<count;i++) {
+		si = camel_store_summary_index ((CamelStoreSummary *)store->summary, i);
+		if (si == NULL)
+			continue;
+
+		info = g_hash_table_lookup (priv->name_hash, camel_store_info_path (store->summary, si));
+		if (!info) {
+			camel_store_summary_remove ((CamelStoreSummary *)store->summary, si);
+		}
+
+		camel_store_summary_info_free ((CamelStoreSummary *)store->summary, si);
+	}
+
 
 	camel_store_summary_touch ((CamelStoreSummary *)store->summary);
 	camel_store_summary_save ((CamelStoreSummary *)store->summary);
