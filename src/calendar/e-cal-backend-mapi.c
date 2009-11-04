@@ -1398,7 +1398,10 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, char 
 
 			tmp = exchange_mapi_util_mapi_id_to_string (mid);
 			e_cal_component_set_uid (comp, tmp);
-			g_free (tmp);
+			if (uid)
+				*uid = tmp;
+			else
+				g_free (tmp);
 
 			e_cal_component_commit_sequence (comp);
 			e_cal_backend_cache_put_component (priv->cache, comp);
