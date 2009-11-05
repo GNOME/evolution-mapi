@@ -913,7 +913,7 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	/* Remove messages from server*/
 	if (deleted_items) {
 		CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
-		if (mapi_folder->type & CAMEL_FOLDER_TYPE_TRASH) {
+		if ((mapi_folder->type & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH) {
 			exchange_mapi_remove_items (0, fid, deleted_items);
 		} else {
 			exchange_mapi_util_mapi_id_from_string (camel_mapi_store_system_folder_fid (mapi_store, olFolderDeletedItems), &deleted_items_fid);
@@ -1837,7 +1837,7 @@ mapi_expunge (CamelFolder *folder, CamelException *ex)
 	folder_id =  g_strdup (camel_mapi_store_folder_id_lookup (mapi_store, folder->full_name)) ;
 	exchange_mapi_util_mapi_id_from_string (folder_id, &fid);
 
-	if (mapi_folder->type & CAMEL_FOLDER_TYPE_TRASH) {
+	if ((mapi_folder->type & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH) {
 		CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
 		status = exchange_mapi_empty_folder (fid);
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
@@ -2006,8 +2006,8 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 	si = camel_store_summary_path ((CamelStoreSummary *)mapi_store->summary,
 				       folder->full_name);
 
-	if (si->flags & CAMEL_FOLDER_TYPE_TRASH ||
-	    si->flags & CAMEL_FOLDER_TYPE_OUTBOX) {
+	if (((si->flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH) ||
+	    ((si->flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_OUTBOX)) {
 		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, 
 				      _("Cannot append message to folder '%s'"),
 				      folder->full_name);
