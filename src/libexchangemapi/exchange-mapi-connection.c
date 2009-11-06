@@ -3007,6 +3007,66 @@ exchange_mapi_util_ex_to_smtp (const gchar *ex_address)
 	return smtp_addr;
 }
 
+gboolean
+exchange_mapi_events_init ()
+{
+	enum MAPISTATUS retval;
+
+	retval = RegisterNotification(0);
+
+	return (retval == MAPI_E_SUCCESS);
+}
+
+gboolean
+exchange_mapi_events_subscribe (mapi_id_t *obj_id, guint32 options,
+				guint16 event_mask, guint32 *connection,
+				mapi_notify_callback_t callback, gpointer data)
+{
+	enum MAPISTATUS	retval;
+	mapi_object_t obj_target;
+	gboolean use_store = ((options & MAPI_EVENTS_USE_STORE) ||
+			      (options & MAPI_EVENTS_USE_PF_STORE));
+
+	mapi_object_init(&obj_target);
+
+	if (options & MAPI_EVENTS_USE_STORE) {
+		retval = OpenMsgStore(global_mapi_session, &obj_target);
+		if (retval != MAPI_E_SUCCESS) {
+			mapi_errstr("OpenMsgStore", GetLastError());
+			return false;
+		}
+	} else if (options & MAPI_EVENTS_USE_PF_STORE) {
+		/* TODO */
+	} else if (options & MAPI_EVENTS_FOLDER) {
+		/* TODO */
+	}
+
+	retval = Subscribe(&obj_target, connection, event_mask, use_store,
+			   (mapi_notify_callback_t) callback, data);
+
+	return (retval == MAPI_E_SUCCESS);
+}
+
+gboolean exchange_mapi_events_unsubscribe (mapi_object_t *obj, guint32 connection)
+{
+	enum MAPISTATUS	retval;
+
+	retval = Unsubscribe(mapi_object_get_session(obj), connection);
+
+	return (retval == MAPI_E_SUCCESS);
+}
+
+/* Note : Blocking infinite loop. */
+gboolean exchange_mapi_events_monitor (gpointer data)
+{
+	enum MAPISTATUS	retval;
+
+	/*Fixme : If we do multiple sessions. Fix this */
+	retval = MonitorNotification(global_mapi_session, (void *)data);
+
+	return (retval == MAPI_E_SUCCESS);
+}
+
 /* Shows error message on the console, and, if error_msg is not NULL, then
    sets it to the similar error message as well. */
 static void

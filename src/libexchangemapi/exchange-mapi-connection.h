@@ -42,11 +42,17 @@ typedef enum {
 	MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE = 1<<9
 } ExchangeMAPIOptions;
 
+/* Flags for push notification APIs*/
+typedef enum {
+	MAPI_EVENTS_USE_STORE = 1<<0,
+	MAPI_EVENTS_USE_PF_STORE = 1<<1,
+	MAPI_EVENTS_FOLDER = 1<<2,
+} ExchangeMAPIEventsOptions;
+
 #define MAPI_OPTIONS_FETCH_ALL MAPI_OPTIONS_FETCH_ATTACHMENTS | \
 	                       MAPI_OPTIONS_FETCH_RECIPIENTS | \
 	                       MAPI_OPTIONS_FETCH_BODY_STREAM | \
 	                       MAPI_OPTIONS_FETCH_GENERIC_STREAMS
-
 
 typedef struct {
 	GByteArray *value;
@@ -206,4 +212,21 @@ gboolean exchange_mapi_create_profile (const char *username, const char *passwor
 				       char **error_msg, mapi_profile_callback_t cb, gpointer data);
 gboolean exchange_mapi_delete_profile (const char *profile);
 
+
+/* Push notifications APIs */
+gboolean exchange_mapi_events_init ();
+
+gboolean exchange_mapi_events_monitor (gpointer data);
+
+gboolean exchange_mapi_events_subscribe (mapi_id_t *obj_id, guint32 options,
+					 guint16 event_mask, guint32 *connection,
+					 mapi_notify_callback_t callback, gpointer data);
+
+gboolean exchange_mapi_events_unsubscribe (mapi_object_t *obj, guint32 connection);
+
+gboolean
+exchange_mapi_events_subscribe_and_monitor (mapi_id_t *obj_id, guint32 options,
+					    guint16 event_mask, guint32 *connection,
+					    gboolean use_store, mapi_notify_callback_t callback,
+					    gpointer data);
 #endif
