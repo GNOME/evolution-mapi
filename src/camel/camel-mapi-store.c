@@ -54,6 +54,7 @@
 
 #include <exchange-mapi-utils.h>
 //#define d(x) x
+#define d_notifications(x) x
 
 /* This definition should be in-sync with those in exchange-mapi-account-setup.c and exchange-account-listener.c */
 #define E_PASSWORD_COMPONENT "ExchangeMAPI"
@@ -1210,10 +1211,53 @@ mapi_folders_hash_table_pfid_lookup (CamelMapiStore *store, const gchar *fid,
 }
 
 static gint
-notifications_callback (uint16_t NotificationType, void *NotificationData, 
-			void *private_data)
+notifications_filter (guint16 type, void *data, 
+		      void *private_data)
 {
-	printf ("Notifications Triggered\n");
+	switch(type) {
+	/* -- Folder Events -- */
+	case fnevObjectCreated:
+		d_notifications(printf ("Event : Folder Created\n"));
+		d_notifications(mapidump_foldercreated (data, "\t"));
+		break;
+	case fnevObjectDeleted:
+		d_notifications(printf ("Event : Folder Deleted\n"));
+		d_notifications(mapidump_folderdeleted (data, "\t"));
+		break;
+	case fnevObjectMoved:
+		d_notifications(printf ("Event : Folder Moved\n"));
+		d_notifications(mapidump_foldermoved (data, "\t"));
+		break;
+	case fnevObjectCopied:
+		d_notifications(printf ("Event : Folder Copied\n"));
+		d_notifications(mapidump_foldercopied (data, "\t"));
+		break;
+	/* -- Message Events -- */
+	case fnevNewMail:
+	case fnevNewMail|fnevMbit:
+		d_notifications(printf ("Event : New mail\n"));
+		d_notifications(mapidump_newmail (data, "\t"));
+		break;
+	case fnevMbit|fnevObjectCreated:
+		d_notifications(printf ("Event : Message created\n"));
+		d_notifications(mapidump_messagecreated (data, "\t"));
+		break;
+	case fnevMbit|fnevObjectDeleted:
+		d_notifications(printf ("Event : Message deleted\n"));
+		d_notifications(mapidump_messagedeleted (data, "\t"));
+	case fnevMbit|fnevObjectModified:
+		d_notifications(printf ("Event : Message modified\n"));
+		d_notifications(mapidump_messagemodified (data, "\t"));
+	case fnevMbit|fnevObjectMoved:
+		d_notifications(printf ("Event : Message moved\n"));
+		d_notifications(mapidump_messagemoved (data, "\t"));
+	case fnevMbit|fnevObjectCopied:
+		d_notifications(printf ("Event : Message copied\n"));
+		d_notifications(mapidump_messagecopied (data, "\t"));
+	default:
+		/* Unsupported  */
+		break;
+	}
 	return 0;
 }
 
@@ -1240,7 +1284,7 @@ mapi_push_notification_listener (CamelSession *session, CamelSessionThreadMsg *m
 	if (exchange_mapi_events_init ()) {
 		exchange_mapi_events_subscribe (0, m->event_options, m->event_mask,
 						&m->connection,
-						notifications_callback, m->event_data);
+						notifications_filter, m->event_data);
 
 		exchange_mapi_events_monitor (NULL);
 	}
