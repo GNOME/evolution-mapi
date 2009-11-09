@@ -829,6 +829,12 @@ e_book_backend_mapi_gal_stop_book_view (EBookBackend  *backend,
 	/* FIXME : provide implmentation */
 }
 
+static void
+e_book_backend_mapi_gal_remove (EBookBackend *backend, EDataBook *book, guint32 opid)
+{
+	e_data_book_respond_remove (book, opid, GNOME_Evolution_Addressbook_PermissionDenied);
+}
+
 static void e_book_backend_mapi_gal_class_init (EBookBackendMAPIGALClass *klass)
 {
 	GObjectClass  *object_class = G_OBJECT_CLASS (klass);
@@ -853,6 +859,7 @@ static void e_book_backend_mapi_gal_class_init (EBookBackendMAPIGALClass *klass)
 	parent_class->get_supported_fields	 = e_book_backend_mapi_gal_get_supported_fields;
 	parent_class->get_required_fields	 = e_book_backend_mapi_gal_get_required_fields;
 	parent_class->set_mode                   = e_book_backend_mapi_gal_set_mode;
+	parent_class->remove			 = e_book_backend_mapi_gal_remove;
 	object_class->dispose                    = e_book_backend_mapi_gal_dispose;
 
 
