@@ -118,6 +118,11 @@ static const gchar* mapi_folders_hash_table_pfid_lookup (CamelMapiStore *store, 
 static const gchar* mapi_folders_hash_table_fid_lookup (CamelMapiStore *store, const gchar *name, gboolean use_cache);
 #endif
 
+static void
+mapi_push_notification_listener (CamelSession *session, CamelSessionThreadMsg *msg);
+static void
+mapi_push_notification_listener_close (CamelSession *session, CamelSessionThreadMsg *msg);
+
 static guint
 mapi_hash_folder_name(gconstpointer key)
 {
@@ -1204,6 +1209,50 @@ mapi_folders_hash_table_pfid_lookup (CamelMapiStore *store, const gchar *fid,
 	return pfid;
 }
 
+static gint
+notifications_callback (uint16_t NotificationType, void *NotificationData, 
+			void *private_data)
+{
+	printf ("Notifications Triggered\n");
+	return 0;
+}
+
+/* For push notification listener*/
+struct mapi_push_notification_msg {
+	CamelSessionThreadMsg msg;
+
+	guint16 event_mask;
+	guint32 *connection; 
+	guint32 event_options;
+	gpointer event_data;
+};
+
+static CamelSessionThreadOps mapi_push_notification_ops = {
+	mapi_push_notification_listener,
+	mapi_push_notification_listener_close,
+};
+
+static void
+mapi_push_notification_listener (CamelSession *session, CamelSessionThreadMsg *msg)
+{
+	struct mapi_push_notification_msg *m = (struct mapi_push_notification_msg *)msg;
+
+	if (exchange_mapi_events_init ()) {
+		exchange_mapi_events_subscribe (0, m->event_options, m->event_mask,
+						&m->connection,
+						notifications_callback, m->event_data);
+
+		exchange_mapi_events_monitor (NULL);
+	}
+
+}
+
+static void
+mapi_push_notification_listener_close (CamelSession *session, CamelSessionThreadMsg *msg)
+{
+	/*TODO*/
+}
+
 static void
 mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelException *ex)
 {
@@ -1216,6 +1265,8 @@ mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelE
 	CamelMapiStoreInfo *mapi_si = NULL;
 	guint32 count, i;
 	CamelStoreInfo *si = NULL;
+	CamelSession *session = ((CamelService *)store)->session;
+	struct mapi_push_notification_msg *mapi_push_notification_msg_op;
 
 	if (((CamelOfflineStore *) store)->state == CAMEL_OFFLINE_STORE_NETWORK_AVAIL) {
 		if (((CamelService *)store)->status == CAMEL_SERVICE_DISCONNECTED){
@@ -1349,6 +1400,18 @@ mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelE
 	//	g_hash_table_foreach (present, get_folders_free, NULL);
 	//	g_hash_table_destroy (present);
 
+	/* Start Push Notification listener */
+	mapi_push_notification_msg_op =
+		camel_session_thread_msg_new (session, 
+					      &mapi_push_notification_ops, 
+					      sizeof (*mapi_push_notification_msg_op));
+
+	mapi_push_notification_msg_op->event_options = MAPI_EVENTS_USE_STORE;
+	mapi_push_notification_msg_op->event_mask = fnevNewMail | fnevObjectCreated |
+		                                 fnevObjectDeleted | fnevObjectModified |
+		                                 fnevObjectMoved | fnevObjectCopied;
+
+	camel_session_thread_queue (session, &mapi_push_notification_msg_op->msg, 0);
 }
 
 static CamelFolderInfo*
