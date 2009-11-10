@@ -51,10 +51,11 @@
 #include "camel-mapi-folder.h"
 #include "camel-mapi-store-summary.h"
 #include "camel-mapi-summary.h"
+#include "camel-mapi-notifications.h"
 
 #include <exchange-mapi-utils.h>
 //#define d(x) x
-#define d_notifications(x) x
+
 
 /* This definition should be in-sync with those in exchange-mapi-account-setup.c and exchange-account-listener.c */
 #define E_PASSWORD_COMPONENT "ExchangeMAPI"
@@ -119,10 +120,6 @@ static const gchar* mapi_folders_hash_table_pfid_lookup (CamelMapiStore *store, 
 static const gchar* mapi_folders_hash_table_fid_lookup (CamelMapiStore *store, const gchar *name, gboolean use_cache);
 #endif
 
-static void
-mapi_push_notification_listener (CamelSession *session, CamelSessionThreadMsg *msg);
-static void
-mapi_push_notification_listener_close (CamelSession *session, CamelSessionThreadMsg *msg);
 
 static guint
 mapi_hash_folder_name(gconstpointer key)
@@ -1210,93 +1207,6 @@ mapi_folders_hash_table_pfid_lookup (CamelMapiStore *store, const gchar *fid,
 	return pfid;
 }
 
-static gint
-notifications_filter (guint16 type, void *data, 
-		      void *private_data)
-{
-	switch(type) {
-	/* -- Folder Events -- */
-	case fnevObjectCreated:
-		d_notifications(printf ("Event : Folder Created\n"));
-		d_notifications(mapidump_foldercreated (data, "\t"));
-		break;
-	case fnevObjectDeleted:
-		d_notifications(printf ("Event : Folder Deleted\n"));
-		d_notifications(mapidump_folderdeleted (data, "\t"));
-		break;
-	case fnevObjectMoved:
-		d_notifications(printf ("Event : Folder Moved\n"));
-		d_notifications(mapidump_foldermoved (data, "\t"));
-		break;
-	case fnevObjectCopied:
-		d_notifications(printf ("Event : Folder Copied\n"));
-		d_notifications(mapidump_foldercopied (data, "\t"));
-		break;
-	/* -- Message Events -- */
-	case fnevNewMail:
-	case fnevNewMail|fnevMbit:
-		d_notifications(printf ("Event : New mail\n"));
-		d_notifications(mapidump_newmail (data, "\t"));
-		break;
-	case fnevMbit|fnevObjectCreated:
-		d_notifications(printf ("Event : Message created\n"));
-		d_notifications(mapidump_messagecreated (data, "\t"));
-		break;
-	case fnevMbit|fnevObjectDeleted:
-		d_notifications(printf ("Event : Message deleted\n"));
-		d_notifications(mapidump_messagedeleted (data, "\t"));
-	case fnevMbit|fnevObjectModified:
-		d_notifications(printf ("Event : Message modified\n"));
-		d_notifications(mapidump_messagemodified (data, "\t"));
-	case fnevMbit|fnevObjectMoved:
-		d_notifications(printf ("Event : Message moved\n"));
-		d_notifications(mapidump_messagemoved (data, "\t"));
-	case fnevMbit|fnevObjectCopied:
-		d_notifications(printf ("Event : Message copied\n"));
-		d_notifications(mapidump_messagecopied (data, "\t"));
-	default:
-		/* Unsupported  */
-		break;
-	}
-	return 0;
-}
-
-/* For push notification listener*/
-struct mapi_push_notification_msg {
-	CamelSessionThreadMsg msg;
-
-	guint16 event_mask;
-	guint32 *connection; 
-	guint32 event_options;
-	gpointer event_data;
-};
-
-static CamelSessionThreadOps mapi_push_notification_ops = {
-	mapi_push_notification_listener,
-	mapi_push_notification_listener_close,
-};
-
-static void
-mapi_push_notification_listener (CamelSession *session, CamelSessionThreadMsg *msg)
-{
-	struct mapi_push_notification_msg *m = (struct mapi_push_notification_msg *)msg;
-
-	if (exchange_mapi_events_init ()) {
-		exchange_mapi_events_subscribe (0, m->event_options, m->event_mask,
-						&m->connection,
-						notifications_filter, m->event_data);
-
-		exchange_mapi_events_monitor (NULL);
-	}
-
-}
-
-static void
-mapi_push_notification_listener_close (CamelSession *session, CamelSessionThreadMsg *msg)
-{
-	/*TODO*/
-}
-
 static void
 mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelException *ex)
 {
@@ -1310,7 +1220,7 @@ mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelE
 	guint32 count, i;
 	CamelStoreInfo *si = NULL;
 	CamelSession *session = ((CamelService *)store)->session;
-	struct mapi_push_notification_msg *mapi_push_notification_msg_op;
+	guint16 event_mask = 0;
 
 	if (((CamelOfflineStore *) store)->state == CAMEL_OFFLINE_STORE_NETWORK_AVAIL) {
 		if (((CamelService *)store)->status == CAMEL_SERVICE_DISCONNECTED){
@@ -1444,19 +1354,14 @@ mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelE
 	//	g_hash_table_foreach (present, get_folders_free, NULL);
 	//	g_hash_table_destroy (present);
 
+	/* FIXME : This place is not right! */
 	/* Start Push Notification listener */
-	mapi_push_notification_msg_op =
-		camel_session_thread_msg_new (session, 
-					      &mapi_push_notification_ops, 
-					      sizeof (*mapi_push_notification_msg_op));
+	event_mask = fnevNewMail | fnevObjectCreated | fnevObjectDeleted |
+		fnevObjectModified | fnevObjectMoved | fnevObjectCopied;
 
-	mapi_push_notification_msg_op->event_options = MAPI_EVENTS_USE_STORE;
-	mapi_push_notification_msg_op->event_mask = fnevNewMail | fnevObjectCreated |
-		                                 fnevObjectDeleted | fnevObjectModified |
-		                                 fnevObjectMoved | fnevObjectCopied;
-
-	camel_session_thread_queue (session, &mapi_push_notification_msg_op->msg, 0);
+	camel_mapi_notfication_listener_start (store, event_mask, MAPI_EVENTS_USE_STORE);
 }
+
 
 static CamelFolderInfo*
 mapi_get_folder_info(CamelStore *store, const char *top, guint32 flags, CamelException *ex)
