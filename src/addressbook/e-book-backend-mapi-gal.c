@@ -686,7 +686,6 @@ book_view_thread (gpointer data)
 	GList *contacts = NULL, *temp_list = NULL;
 	//Number of multiple restriction to apply
 	unsigned int res_count = 6;
-	GPtrArray *contacts_array = g_ptr_array_new();
 	
 	if (enable_debug)
 		printf("mapi: book view\n");
@@ -699,7 +698,6 @@ book_view_thread (gpointer data)
 						
 	switch (priv->mode) {
 		case GNOME_Evolution_Addressbook_MODE_REMOTE:
-			exchange_mapi_util_get_gal (contacts_array);
 			if (!exchange_mapi_connection_exists ()) {
 				e_book_backend_notify_auth_required (E_BOOK_BACKEND (backend));
 				e_data_book_view_notify_complete (book_view,
