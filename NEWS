@@ -1,3 +1,19 @@
+evolution-mapi 0.29.2 2009-11-17
+--------------------------------
+
+Bug Fixes:
+    Bug #573736 - Expunge Folder in MAPI INBOX deletes all email messages (Johnny Jacob)
+    Bug #595480 - Stop fetching GAL every time (Bharath Acharya)
+    Bug #596208 - Doesn't remove folders that were deleted/moved on the exchange-server (Johnny Jacob)
+    Bug #600394 - Return also UID when creating a new event (Milan Crha)
+    Bug #601212 - eds crashes when try to delete mapi GAL (Milan Crha)
+
+Translations:
+    David Planella (ca)
+    Matej Urbančič (sl)
+    Thomas Thurman (en@shaw)
+    drtvasudevan (ta)
+
 evolution-mapi 0.29.1 2009-10-26
 ---------------------------------
 
