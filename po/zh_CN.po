@@ -1,106 +1,181 @@
 # Simplified Chinese translation.
-# Copyright (C) 2008 THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the gbrainy package.
+# Copyright (C) 2008, 2009 Free Software Foundation, Inc. 
+# This file is distributed under the same license as the evolution-mapi package.
 # 甘露(Gan Lu) <rhythm.gan@gmail.com>, 2009
+# Tao Wei <weitao1979@gmail.com>, 2009.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
-"POT-Creation-Date: 2009-01-28 16:25+0000\n"
-"PO-Revision-Date: 2009-02-05 21:07+0700\n"
-"Last-Translator: 甘露(Gan Lu) <rhythm.gan@gmail.com>\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-11-17 12:28+0800\n"
+"PO-Revision-Date: 2009-11-17 12:26+0800\n"
+"Last-Translator: Tao Wei <weitao1979@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "输入 %s@%s 的密码"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
-msgid "Server, username and domain name cannot be empty. Please fill them with correct values."
+#. NOTE: A good way would be display the list of username entries
+#. using GtkEntryCompletion in the username gtkentry. But plugins
+#. as of now does not have access to it
+#. TODO : Fix strings
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
+msgid "Select username"
+msgstr "选择用户名"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+msgid "Full name"
+msgstr "全名"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
+msgid "User name"
+msgstr "用户名称"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
 msgstr "服务器，用户名及域名不能为空。请填上正确的值。"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
-#| msgid "Authentication failed"
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
 msgid "Authentication finished successfully."
 msgstr "验证成功完成。"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
-#| msgid "Authentication failed"
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
 msgid "Authentication failed."
 msgstr "验证失败。"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
 msgid "_Domain name:"
 msgstr "域名(_D)："
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
 msgid "_Authenticate"
 msgstr "验证(_A)"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
 msgid "Personal Folders"
 msgstr "个人文件夹"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:385
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
 msgid "_Location:"
 msgstr "位置(_L)："
 
-#: ../src/calendar/e-cal-backend-mapi.c:111
-#: ../src/calendar/e-cal-backend-mapi.c:1047
-#: ../src/camel/camel-mapi-store.c:453
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
+#, fuzzy
+msgid "_Folder size"
+msgstr "文件夹大小"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
+msgid "Folder"
+msgstr "文件夹"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
+msgid "Size"
+msgstr "大小"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
+msgid "Unable to retrieve folder size information"
+msgstr "无法检索文件夹的大小信息"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
+msgid "Folder Size"
+msgstr "文件夹大小"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
+msgid "Fetching folder list ..."
+msgstr "正在获取文件夹列表..."
+
+#. Miscellaneous settings
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
+msgid "Miscellaneous"
+msgstr "杂项"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
+msgid "View the size of all Exchange folders"
+msgstr "查看所有 Exchange 文件夹的大小"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
+msgid "Folders Size"
+msgstr "文件夹大小"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
+#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
+msgid "Exchange Settings"
+msgstr "Exchange 设置"
+
+#: ../src/calendar/e-cal-backend-mapi.c:115
+#: ../src/calendar/e-cal-backend-mapi.c:1053
+#: ../src/camel/camel-mapi-store.c:472
 msgid "Authentication failed"
 msgstr "验证失败"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:385
+#: ../src/calendar/e-cal-backend-mapi.c:391
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "正在载入文件夹 %s 内项目"
 
-#. FIXME: better string please...
-#: ../src/calendar/e-cal-backend-mapi.c:575
-#: ../src/calendar/e-cal-backend-mapi.c:586
-#: ../src/calendar/e-cal-backend-mapi.c:612
-msgid "Error fetching changes from the server. Removing the cache might help."
-msgstr "从服务器中获取变化出错。删除缓存也许有所帮助。"
+#. FIXME: String : We need to restart evolution-data-server
+#: ../src/calendar/e-cal-backend-mapi.c:581
+#: ../src/calendar/e-cal-backend-mapi.c:592
+#: ../src/calendar/e-cal-backend-mapi.c:618
+msgid "Error fetching changes from the server."
+msgstr "从服务器中获取变化出错。"
 
-#: ../src/calendar/e-cal-backend-mapi.c:967
-#: ../src/calendar/e-cal-backend-mapi.c:977
-#: ../src/calendar/e-cal-backend-mapi.c:1082
-#: ../src/calendar/e-cal-backend-mapi.c:1164
+#: ../src/calendar/e-cal-backend-mapi.c:973
+#: ../src/calendar/e-cal-backend-mapi.c:983
+#: ../src/calendar/e-cal-backend-mapi.c:1088
+#: ../src/calendar/e-cal-backend-mapi.c:1170
 msgid "Could not create cache file"
 msgstr "无法创建缓存文件"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1093
+#: ../src/calendar/e-cal-backend-mapi.c:1099
 msgid "Could not create thread for populating cache"
 msgstr "无法为填充缓存创建线程"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1501
-msgid "Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server."
+#: ../src/calendar/e-cal-backend-mapi.c:1516
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
 msgstr "对于修改循环预约中单个实例的支持尚未实现。没有改变服务器上的预约。"
 
-#: ../src/camel/camel-mapi-folder.c:312
-#: ../src/camel/camel-mapi-folder.c:646
+#: ../src/camel/camel-mapi-folder.c:481
+#, c-format
+msgid "Updating local summary cache for new messages in %s"
+msgstr "为 %s 中的新信息上载本地摘要缓存"
+
+#: ../src/camel/camel-mapi-folder.c:704
+#, c-format
+msgid "Retrieving message IDs from server for %s"
+msgstr "从 %s 服务器中检索信息 ID"
+
+#: ../src/camel/camel-mapi-folder.c:726
+#, c-format
+msgid "Removing deleted messages from cache in %s"
+msgstr "从 %s 的缓存中移除删除的信息"
+
+#: ../src/camel/camel-mapi-folder.c:1034 ../src/camel/camel-mapi-folder.c:1664
+#: ../src/camel/camel-mapi-folder.c:1672
+msgid "This message is not available in offline mode."
+msgstr "该消息在离线模式下不可用。"
+
+#: ../src/camel/camel-mapi-folder.c:1043
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "正在为在 %s 中的新消息获取摘要信息"
 
-#: ../src/camel/camel-mapi-folder.c:639
-#: ../src/camel/camel-mapi-folder.c:1198
-#: ../src/camel/camel-mapi-folder.c:1206
-msgid "This message is not available in offline mode."
-msgstr "该消息在离线模式下不可用。"
-
-#: ../src/camel/camel-mapi-folder.c:656
+#: ../src/camel/camel-mapi-folder.c:1053
 msgid "Fetching items failed"
 msgstr "获取项目失败"
 
-#: ../src/camel/camel-mapi-folder.c:1162
+#: ../src/camel/camel-mapi-folder.c:1628
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -109,25 +184,34 @@ msgstr ""
 "无法得到消息：%s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1162
+#: ../src/camel/camel-mapi-folder.c:1628
 msgid "No such message"
 msgstr "没有此类消息"
 
-#: ../src/camel/camel-mapi-folder.c:1174
-msgid "User canceled"
-msgstr "用户已取消"
+#: ../src/camel/camel-mapi-folder.c:1640
+msgid "Message fetching cancelled by user."
+msgstr "获取信息被用户取消。"
 
-#: ../src/camel/camel-mapi-folder.c:1181
+#: ../src/camel/camel-mapi-folder.c:1647
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "无法得到消息 %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1225
-#: ../src/camel/camel-mapi-folder.c:1235
+#: ../src/camel/camel-mapi-folder.c:1693 ../src/camel/camel-mapi-folder.c:1705
 msgid "Could not get message"
 msgstr "无法得到消息"
 
-#: ../src/camel/camel-mapi-folder.c:1582
+#: ../src/camel/camel-mapi-folder.c:1985
+#, c-format
+msgid "Cannot append message to folder '%s'"
+msgstr "无法添加信息到文件夹 `%s'"
+
+#: ../src/camel/camel-mapi-folder.c:1992
+#, fuzzy, c-format
+msgid "Offline. '%s'"
+msgstr "离线。"
+
+#: ../src/camel/camel-mapi-folder.c:2112
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "无法载入  %s 的摘要"
@@ -140,53 +224,38 @@ msgstr "正在检查新邮件"
 msgid "C_heck for new messages in all folders"
 msgstr "在所有文件夹中检查新消息"
 
-#. i18n: GAL is an Outlookism, AD is a Windowsism
-#: ../src/camel/camel-mapi-provider.c:66
-msgid "Global Address List / Active Directory"
-msgstr "全局地址清单 / 活动目录"
-
-#. i18n: "Global Catalog" is a Windowsism, but it's a
-#. technical term and may not have translations?
-#: ../src/camel/camel-mapi-provider.c:70
-msgid "_Global Catalog server name:"
-msgstr "全局目录服务器名称(_G)："
-
-#: ../src/camel/camel-mapi-provider.c:72
-#, c-format
-msgid "_Limit number of GAL responses: %s"
-msgstr "限制 GAL 回应次数(_L)：%s"
-
-#: ../src/camel/camel-mapi-provider.c:75
+#: ../src/camel/camel-mapi-provider.c:57
 msgid "Options"
 msgstr "选项"
 
-#: ../src/camel/camel-mapi-provider.c:77
+#: ../src/camel/camel-mapi-provider.c:59
 msgid "Automatically synchroni_ze account locally"
 msgstr "自动同步本地账户(_z)"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:80
+#: ../src/camel/camel-mapi-provider.c:62
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "在该服务器中的收件箱应用新消息过滤(_A)"
 
-#: ../src/camel/camel-mapi-provider.c:82
+#: ../src/camel/camel-mapi-provider.c:64
 msgid "Check new messages for _Junk contents"
 msgstr "检查新消息是否为垃圾内容(_J)"
 
-#: ../src/camel/camel-mapi-provider.c:84
+#: ../src/camel/camel-mapi-provider.c:66
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "仅在收件箱文件夹检查垃圾消息(_e)"
 
-#: ../src/camel/camel-mapi-provider.c:96
+#: ../src/camel/camel-mapi-provider.c:78
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
 msgstr "为使用 MAPI 方式访问微软 Exchange / OpenChange 服务器"
 
-#: ../src/camel/camel-mapi-provider.c:111
+#: ../src/camel/camel-mapi-provider.c:93
 msgid "Password"
 msgstr "密码"
 
-#: ../src/camel/camel-mapi-provider.c:112
-msgid "This option will connect to the Openchange server using a plaintext password."
+#: ../src/camel/camel-mapi-provider.c:94
+msgid ""
+"This option will connect to the Openchange server using a plaintext password."
 msgstr "该选项将使用一个纯文本密码连接到 Openchange 服务器。"
 
 #: ../src/camel/camel-mapi-store.c:61
@@ -197,67 +266,83 @@ msgstr "我的最爱"
 msgid "All Public Folders"
 msgstr "所有公共文件夹"
 
-#: ../src/camel/camel-mapi-store.c:262
-#: ../src/camel/camel-mapi-transport.c:345
+#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI 服务器 %s"
 
-#: ../src/camel/camel-mapi-store.c:264
-#: ../src/camel/camel-mapi-transport.c:347
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "在 %2$s 上的 %1$s Exchange MAPI"
 
-#: ../src/camel/camel-mapi-store.c:298
+#. To translators : First %s : is the error text or the reason
+#. for prompting the user if it is available.
+#. Second %s is : Username.
+#. Third %s is : Server host name.
+#: ../src/camel/camel-mapi-store.c:315
 #, c-format
-msgid "%sPlease enter the MAPI password for %s@%s"
-msgstr "%s请输入 %s@%s 的 MAPI 密码"
+msgid "%s Please enter the MAPI password for %s@%s"
+msgstr "%s 请输入 %s@%s 的 MAPI 密码"
 
-#: ../src/camel/camel-mapi-store.c:312
+#: ../src/camel/camel-mapi-store.c:328
 msgid "You did not enter a password."
 msgstr "你没有输入密码"
 
-#: ../src/camel/camel-mapi-store.c:320
+#: ../src/camel/camel-mapi-store.c:336
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "无法验证到 Exchange MAPI 服务器。"
 
-#: ../src/camel/camel-mapi-store.c:437
+#: ../src/camel/camel-mapi-store.c:456
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "无法在离线模式下创建 MAPI 文件夹。"
 
-#: ../src/camel/camel-mapi-store.c:442
+#: ../src/camel/camel-mapi-store.c:461
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "无法创建新文件夹 `%s'"
 
-#: ../src/camel/camel-mapi-store.c:662
+#: ../src/camel/camel-mapi-store.c:670
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "无法重命名 MAPI 文件夹 `%s'。文件夹不存在"
 
-#: ../src/camel/camel-mapi-store.c:670
+#: ../src/camel/camel-mapi-store.c:681
 #, c-format
-msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
-msgstr "无法重命名 Mapi 文件夹 `%s' 为 `%s'。默认文件夹。"
+msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgstr "无法重命名 MAPI 默认文件夹 `%s' 为 `%s'"
 
-#: ../src/camel/camel-mapi-store.c:686
+#: ../src/camel/camel-mapi-store.c:699
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "无法重命名 MAPI 文件夹 `%s' 为 `%s'"
 
-#: ../src/camel/camel-mapi-store.c:1093
+#: ../src/camel/camel-mapi-store.c:1227
 msgid "Folder list not available in offline mode."
 msgstr "文件夹列表在离线模式下不可用。"
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:333
+#: ../src/camel/camel-mapi-transport.c:116
 msgid "Could not send message."
 msgstr "无法发送消息。"
 
+#~ msgid "Global Address List / Active Directory"
+#~ msgstr "全局地址清单 / 活动目录"
+
+#~ msgid "_Global Catalog server name:"
+#~ msgstr "全局目录服务器名称(_G)："
+
+#~ msgid "_Limit number of GAL responses: %s"
+#~ msgstr "限制 GAL 回应次数(_L)：%s"
+
+#~ msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
+#~ msgstr "无法重命名 Mapi 文件夹 `%s' 为 `%s'。默认文件夹。"
+
 #~ msgid "MAPI server %s"
 #~ msgstr "MAPI 服务器 %s"
+
 #~ msgid "MAPI service for %s on %s"
 #~ msgstr "在 %2$s 上的 %1$s MAPI 服务"
-
