@@ -33,6 +33,9 @@
 #include "exchange-mapi-cal-tz-utils.h"
 #include "exchange-mapi-cal-recur-utils.h"
 
+/* the old TZID prefix used in previous versions of evolution-mapi */
+#define OLD_TZID_PREFIX "/softwarestudio.org/Tzfile/"
+
 G_BEGIN_DECLS
 
 typedef enum {
@@ -68,6 +71,10 @@ struct cbdata {
 	const char *ownername;
 	const char *owneridtype;
 	const char *ownerid;
+
+	/* custom callback to get timezone from a backend */
+	gpointer get_tz_data;
+	icaltimezone * (*get_timezone)(gpointer get_tz_data, const gchar *tzid);
 };
 
 void

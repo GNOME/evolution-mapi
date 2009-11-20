@@ -37,11 +37,11 @@ static GHashTable *mapi_to_ical = NULL;
 static GHashTable *ical_to_mapi = NULL;
 
 const gchar *
-exchange_mapi_cal_tz_util_get_mapi_equivalent (const gchar *ical_tzid)
+exchange_mapi_cal_tz_util_get_mapi_equivalent (const gchar *ical_tz_location)
 {
 	const gchar *retval = NULL;
 
-	g_return_val_if_fail ((ical_tzid && *ical_tzid), NULL);
+	g_return_val_if_fail ((ical_tz_location && *ical_tz_location), NULL);
 
 	g_static_rec_mutex_lock(&mutex);
 	if (!exchange_mapi_cal_tz_util_populate()) {
@@ -49,9 +49,9 @@ exchange_mapi_cal_tz_util_get_mapi_equivalent (const gchar *ical_tzid)
 		return NULL;
 	}
 
-	d(g_message("%s: %s of '%s' ", G_STRLOC, G_STRFUNC, ical_tzid));
+	d(g_message("%s: %s of '%s' ", G_STRLOC, G_STRFUNC, ical_tz_location));
 
-	retval = g_hash_table_lookup (ical_to_mapi, ical_tzid);
+	retval = g_hash_table_lookup (ical_to_mapi, ical_tz_location);
 
 	g_static_rec_mutex_unlock(&mutex);
 
@@ -59,11 +59,11 @@ exchange_mapi_cal_tz_util_get_mapi_equivalent (const gchar *ical_tzid)
 }
 
 const gchar *
-exchange_mapi_cal_tz_util_get_ical_equivalent (const gchar *mapi_tzid)
+exchange_mapi_cal_tz_util_get_ical_equivalent (const gchar *mapi_tz_location)
 {
 	const gchar *retval = NULL;
 
-	g_return_val_if_fail ((mapi_tzid && *mapi_tzid), NULL);
+	g_return_val_if_fail ((mapi_tz_location && *mapi_tz_location), NULL);
 
 	g_static_rec_mutex_lock(&mutex);
 	if (!exchange_mapi_cal_tz_util_populate()) {
@@ -71,9 +71,9 @@ exchange_mapi_cal_tz_util_get_ical_equivalent (const gchar *mapi_tzid)
 		return NULL;
 	}
 
-	d(g_message("%s: %s of '%s' ", G_STRLOC, G_STRFUNC, mapi_tzid));
+	d(g_message("%s: %s of '%s' ", G_STRLOC, G_STRFUNC, mapi_tz_location));
 
-	retval = g_hash_table_lookup (mapi_to_ical, mapi_tzid);
+	retval = g_hash_table_lookup (mapi_to_ical, mapi_tz_location);
 
 	g_static_rec_mutex_unlock(&mutex);
 

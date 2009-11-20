@@ -1288,6 +1288,8 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cbdata *cb
 					MAPI_OPTIONS_FETCH_GENERIC_STREAMS);
 }
 
+static icaltimezone *e_cal_backend_mapi_internal_get_timezone (ECalBackend *backend, const char *tzid);
+
 static ECalBackendSyncStatus 
 e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, char **calobj, char **uid)
 {
@@ -1364,6 +1366,8 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, char 
 	cbdata.ownername = e_cal_backend_mapi_get_owner_name (cbmapi);
 	cbdata.owneridtype = "SMTP";
 	cbdata.ownerid = e_cal_backend_mapi_get_owner_email (cbmapi);
+	cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) e_cal_backend_mapi_internal_get_timezone;
+	cbdata.get_tz_data = cbmapi;
 
 	/* Check if object exists */
 	switch (priv->mode) {
@@ -1561,6 +1565,9 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 
 	e_cal_component_get_uid (comp, &uid);
 //	rid = e_cal_component_get_recurid_as_string (comp);
+
+	cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) e_cal_backend_mapi_internal_get_timezone;
+	cbdata.get_tz_data = cbmapi;
 
 	switch (priv->mode) {
 	case CAL_MODE_ANY :
@@ -1840,6 +1847,8 @@ e_cal_backend_mapi_send_objects (ECalBackendSync *backend, EDataCal *cal, const 
 			cbdata.ownername = e_cal_backend_mapi_get_owner_name (cbmapi);
 			cbdata.owneridtype = "SMTP";
 			cbdata.ownerid = e_cal_backend_mapi_get_owner_email (cbmapi);
+			cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) e_cal_backend_mapi_internal_get_timezone;
+			cbdata.get_tz_data = cbmapi;
 
 			mid = exchange_mapi_create_item (olFolderOutbox, 0, 
 							exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind), 
@@ -1987,6 +1996,10 @@ e_cal_backend_mapi_get_timezone (ECalBackendSync *backend, EDataCal *cal, const 
 		zone = icaltimezone_get_utc_timezone ();
 	} else {
 		zone = icaltimezone_get_builtin_timezone_from_tzid (tzid);
+
+		if (!zone && g_str_has_prefix (tzid, OLD_TZID_PREFIX))
+			zone = icaltimezone_get_builtin_timezone (tzid + strlen (OLD_TZID_PREFIX));
+
 		if (!zone)
 			return GNOME_Evolution_Calendar_ObjectNotFound;
 	}
@@ -2305,7 +2318,13 @@ e_cal_backend_mapi_internal_get_timezone (ECalBackend *backend, const char *tzid
 {
 	icaltimezone *zone;
 
+	g_return_val_if_fail (tzid != NULL, NULL);
+	g_return_val_if_fail (backend != NULL, NULL);
+
 	zone = icaltimezone_get_builtin_timezone_from_tzid (tzid);
+
+	if (!zone && g_str_has_prefix (tzid, OLD_TZID_PREFIX))
+		zone = icaltimezone_get_builtin_timezone (tzid + strlen (OLD_TZID_PREFIX));
 
 	if (!zone && E_CAL_BACKEND_CLASS (parent_class)->internal_get_timezone)
 		zone = E_CAL_BACKEND_CLASS (parent_class)->internal_get_timezone (backend, tzid);

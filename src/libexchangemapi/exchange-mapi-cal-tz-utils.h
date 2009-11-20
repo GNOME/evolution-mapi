@@ -31,10 +31,10 @@
 G_BEGIN_DECLS
 
 const gchar *
-exchange_mapi_cal_tz_util_get_mapi_equivalent (const gchar *ical_tzid);
+exchange_mapi_cal_tz_util_get_mapi_equivalent (const gchar *ical_tz_location);
 
 const gchar *
-exchange_mapi_cal_tz_util_get_ical_equivalent (const gchar *mapi_tzid);
+exchange_mapi_cal_tz_util_get_ical_equivalent (const gchar *mapi_tz_location);
 
 gboolean
 exchange_mapi_cal_tz_util_populate (void);
