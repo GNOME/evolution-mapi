@@ -727,7 +727,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (icalcomponent_kind kind, const gchar 
 
 	if (icalcomponent_isa (ical_comp) == ICAL_VEVENT_COMPONENT) {
 		const char *location = NULL;
-		const gchar *dtstart_tz = NULL, *dtend_tz = NULL;
+		const gchar *dtstart_tz_location = NULL, *dtend_tz_location = NULL;
 		ExchangeMAPIStream *stream;
 
 		/* CleanGlobalObjectId */
@@ -769,29 +769,33 @@ exchange_mapi_cal_util_mapi_props_to_comp (icalcomponent_kind kind, const gchar 
 		stream = exchange_mapi_util_find_stream (streams, PROP_TAG(PT_BINARY, 0x825E));
 		if (stream) {
 			gchar *buf = exchange_mapi_cal_util_bin_to_mapi_tz (stream->value);
-			dtstart_tz = exchange_mapi_cal_tz_util_get_ical_equivalent (buf);
+			dtstart_tz_location = exchange_mapi_cal_tz_util_get_ical_equivalent (buf);
 			g_free (buf);
 		}
 
 		if (get_mapi_SPropValue_array_date_timeval (&t, properties, PROP_TAG(PT_SYSTIME, 0x820D)) == MAPI_E_SUCCESS) {
-			icaltimezone *zone = dtstart_tz ? icaltimezone_get_builtin_timezone_from_tzid (dtstart_tz) : (icaltimezone *)default_zone;
+			icaltimezone *zone = dtstart_tz_location ? icaltimezone_get_builtin_timezone (dtstart_tz_location) : (icaltimezone *)default_zone;
 			prop = icalproperty_new_dtstart (icaltime_from_timet_with_zone (t.tv_sec, (b && *b), zone));
-			icalproperty_add_parameter (prop, icalparameter_new_tzid(dtstart_tz));
-			icalcomponent_add_property (ical_comp, prop);
+			if (zone && icaltimezone_get_tzid (zone)) {
+				icalproperty_add_parameter (prop, icalparameter_new_tzid (icaltimezone_get_tzid (zone)));
+				icalcomponent_add_property (ical_comp, prop);
+			}
 		}
 
 		stream = exchange_mapi_util_find_stream (streams, PROP_TAG(PT_BINARY, 0x825F));
 		if (stream) {
 			gchar *buf = exchange_mapi_cal_util_bin_to_mapi_tz (stream->value);
-			dtend_tz = exchange_mapi_cal_tz_util_get_ical_equivalent (buf);
+			dtend_tz_location = exchange_mapi_cal_tz_util_get_ical_equivalent (buf);
 			g_free (buf);
 		}
 
 		if (get_mapi_SPropValue_array_date_timeval (&t, properties, PROP_TAG(PT_SYSTIME, 0x820E)) == MAPI_E_SUCCESS) {
-			icaltimezone *zone = dtend_tz ? icaltimezone_get_builtin_timezone_from_tzid (dtend_tz) : (icaltimezone *)default_zone;
+			icaltimezone *zone = dtend_tz_location ? icaltimezone_get_builtin_timezone (dtend_tz_location) : (icaltimezone *)default_zone;
 			prop = icalproperty_new_dtend (icaltime_from_timet_with_zone (t.tv_sec, (b && *b), zone));
-			icalproperty_add_parameter (prop, icalparameter_new_tzid(dtend_tz));
-			icalcomponent_add_property (ical_comp, prop);
+			if (zone && icaltimezone_get_tzid (zone)) {
+				icalproperty_add_parameter (prop, icalparameter_new_tzid (icaltimezone_get_tzid (zone)));
+				icalcomponent_add_property (ical_comp, prop);
+			}
 		}
 
 		ui32 = (const uint32_t *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_LONG, 0x8205));
@@ -1117,6 +1121,8 @@ update_attendee_status (struct mapi_SPropValue_array *properties, mapi_id_t mid)
 		cbdata.is_modify = TRUE;
 		cbdata.cleanglobalid = (const struct SBinary *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0023));
 		cbdata.globalid = (const struct SBinary *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0003));
+		cbdata.get_timezone = NULL;
+		cbdata.get_tz_data = NULL;
 
 		status = exchange_mapi_modify_item (olFolderCalendar, fid, mid, 
 				exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER (kind), 
@@ -1199,6 +1205,8 @@ update_server_object (struct mapi_SPropValue_array *properties, GSList *attachme
 		cbdata.appt_id = (*(const uint32_t *)find_mapi_SPropValue_data(properties, PR_OWNER_APPT_ID));
 		cbdata.globalid = (const struct Binary_r *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0003));
 		cbdata.cleanglobalid = (const struct Binary_r *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0023));
+		cbdata.get_timezone = NULL;
+		cbdata.get_tz_data = NULL;
 
 		exchange_mapi_cal_util_fetch_recipients (comp, &myrecipients);
 		myattachments = attachments;
@@ -1554,6 +1562,32 @@ note_build_name_id (struct mapi_nameid *nameid)
 	mapi_nameid_lid_add(nameid, 0x8B03, PSETID_Note); 	// PT_LONG - Height
 }
 
+/* retrieves timezone location from a timezone ID */
+static const gchar *
+get_tzid_location (const gchar *tzid, struct cbdata *cbdata)
+{
+	icaltimezone *zone;
+
+	if (!tzid || !*tzid || g_str_equal (tzid, "UTC"))
+		return NULL;
+
+	zone = icaltimezone_get_builtin_timezone_from_tzid (tzid);
+
+	if (!zone && g_str_has_prefix (tzid, OLD_TZID_PREFIX))
+		zone = icaltimezone_get_builtin_timezone (tzid + strlen (OLD_TZID_PREFIX));
+
+	if (!zone) {
+		/* it is not a buildin time zone, try ask backend for it */
+		if (cbdata && cbdata->get_timezone)
+			zone = cbdata->get_timezone (cbdata->get_tz_data, tzid);
+	}
+
+	if (!zone)
+		return NULL;
+
+	return icaltimezone_get_location (zone);
+}
+
 #define MINUTES_IN_HOUR 60
 #define SECS_IN_MINUTE 60
 
@@ -1577,7 +1611,7 @@ exchange_mapi_cal_util_build_props (struct SPropValue **value, struct SPropTagAr
 	icalproperty *prop;
 	struct icaltimetype dtstart, dtend, utc_dtstart, utc_dtend;
 	const icaltimezone *utc_zone;
-	const char *dtstart_tzid, *dtend_tzid, *text = NULL;
+	const char *dtstart_tz_location, *dtend_tz_location, *text = NULL;
 	struct timeval t;
 
 	flag32 = REGULAR_PROPS_N + COMMON_NAMED_PROPS_N;
@@ -1613,8 +1647,8 @@ exchange_mapi_cal_util_build_props (struct SPropValue **value, struct SPropTagAr
 	else 
 		dtend = icalcomponent_get_dtstart (ical_comp);
 
-	dtstart_tzid = icaltime_get_tzid (dtstart);
-	dtend_tzid = icaltime_get_tzid (dtend);
+	dtstart_tz_location = get_tzid_location (icaltime_get_tzid (dtstart), cbdata);
+	dtend_tz_location = get_tzid_location (icaltime_get_tzid (dtend), cbdata);
 
 	utc_dtstart = icaltime_convert_to_zone (dtstart, (icaltimezone *)utc_zone);
 	utc_dtend = icaltime_convert_to_zone (dtend, (icaltimezone *)utc_zone);
@@ -1785,7 +1819,7 @@ exchange_mapi_cal_util_build_props (struct SPropValue **value, struct SPropTagAr
 		set_SPropValue_proptag_date_timeval(&props[i++], proptag_array->aulPropTag[I_APPT_CLIPSTART], &t);
 
 		/* Start TZ */
-		mapi_tzid = exchange_mapi_cal_tz_util_get_mapi_equivalent ((dtstart_tzid && *dtstart_tzid) ? dtstart_tzid : "UTC");
+		mapi_tzid = exchange_mapi_cal_tz_util_get_mapi_equivalent ((dtstart_tz_location && *dtstart_tz_location) ? dtstart_tz_location : "UTC");
 		if (mapi_tzid && *mapi_tzid) {
 			exchange_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &start_tz);
 			set_SPropValue_proptag(&props[i++], proptag_array->aulPropTag[I_APPT_STARTTZBLOB], (const void *) &start_tz);
@@ -1799,7 +1833,7 @@ exchange_mapi_cal_util_build_props (struct SPropValue **value, struct SPropTagAr
 		set_SPropValue_proptag_date_timeval(&props[i++], proptag_array->aulPropTag[I_APPT_CLIPEND], &t);
 
 		/* End TZ */
-		mapi_tzid = exchange_mapi_cal_tz_util_get_mapi_equivalent ((dtend_tzid && *dtend_tzid) ? dtend_tzid : "UTC");
+		mapi_tzid = exchange_mapi_cal_tz_util_get_mapi_equivalent ((dtend_tz_location && *dtend_tz_location) ? dtend_tz_location : "UTC");
 		if (mapi_tzid && *mapi_tzid) {
 			exchange_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &end_tz);
 			set_SPropValue_proptag(&props[i++], proptag_array->aulPropTag[I_APPT_ENDTZBLOB], (const void *) &end_tz);
