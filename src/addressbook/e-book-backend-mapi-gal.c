@@ -97,6 +97,8 @@ struct _EBookBackendMAPIGALPrivate
 	mapi_id_t fid;
 	int mode;
 	gboolean marked_for_offline;
+	GThread *build_cache_thread;
+	gboolean kill_cache_build;
 	gboolean is_cache_ready;
 	gboolean is_summary_ready;
 	gboolean is_writable;
@@ -152,7 +154,7 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 	e_book_backend_summary_add_contact (priv->summary, contact);		
 	g_object_unref(contact);
 
-	for (i=0;i<contacts_array->len;i++) {
+	for (i = 0; i < contacts_array->len && !priv->kill_cache_build; i++) {
 		EContact *contact = e_contact_new ();
 		ExchangeMAPIGALEntry *gal_entry = contacts_array->pdata[i];
 		char *uid;
@@ -169,16 +171,16 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 		g_free (uid);
 	}
 
-	g_ptr_array_free(contacts_array, TRUE);
+	g_ptr_array_free (contacts_array, TRUE);
 
-	tmp = g_strdup_printf("%d", (int)time (NULL));
+	tmp = g_strdup_printf("%d", priv->kill_cache_build ? 0 : (int)time (NULL));
 	e_book_backend_cache_set_time (priv->cache, tmp);
 	printf("setting time  %s\n", tmp);
 	g_free (tmp);
 	e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 	e_book_backend_summary_save (priv->summary);
-	priv->is_cache_ready = TRUE;
-	priv->is_summary_ready = TRUE;
+	priv->is_cache_ready = !priv->kill_cache_build;
+	priv->is_summary_ready = !priv->kill_cache_build;
 	return NULL;
 }
 
@@ -242,9 +244,12 @@ e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
 //			g_thread_create ((GThreadFunc) update_cache, 
 	//					  backend, FALSE, backend);
 		} else if (priv->marked_for_offline && !priv->is_cache_ready) {
-			/* Means we dont have a cache. Lets build that first */
-			printf("Preparing to build cache\n");
-			g_thread_create ((GThreadFunc) build_cache, backend, FALSE, NULL);
+			if (!priv->build_cache_thread) {
+				/* Means we dont have a cache. Lets build that first */
+				printf("Preparing to build cache\n");
+				priv->kill_cache_build = FALSE;
+				priv->build_cache_thread = g_thread_create ((GThreadFunc) build_cache, backend, TRUE, NULL);
+			}
 		} 
 		e_book_backend_set_is_writable (backend, FALSE);
 		e_data_book_respond_authenticate_user (book, opid, GNOME_Evolution_Addressbook_Success);
@@ -362,9 +367,14 @@ e_book_backend_mapi_gal_load_source (EBookBackend *backend,
 
 		/* Load the cache as well.*/
 		if (e_book_backend_cache_exists (priv->uri)) {
+			gchar *last_time;
+
 			printf("Loading the cache\n");
 			priv->cache = e_book_backend_cache_new (priv->uri);
-			priv->is_cache_ready = TRUE;
+
+			last_time = e_book_backend_cache_get_time (priv->cache);
+			priv->is_cache_ready = last_time && !g_str_equal (last_time, "0");
+			g_free (last_time);
 		}
 		//FIXME: We may have to do a time based reload. Or deltas should upload.
 	} else {
@@ -446,7 +456,12 @@ e_book_backend_mapi_gal_dispose (GObject *object)
 		g_free (priv->uri);
 		priv->uri = NULL;
 	}
-	
+
+	if (priv->build_cache_thread) {
+		priv->kill_cache_build = TRUE;
+		g_thread_join (priv->build_cache_thread);
+		priv->build_cache_thread = NULL;
+	}
 }
 
 typedef struct {
@@ -892,6 +907,8 @@ static void	e_book_backend_mapi_gal_init (EBookBackendMAPIGAL *backend)
 	priv= g_new0 (EBookBackendMAPIGALPrivate, 1);
 	/* Priv Struct init */
 	backend->priv = priv;
+
+	priv->build_cache_thread = NULL;
 
 /*	priv->marked_for_offline = FALSE;
 	priv->uri = NULL;
