@@ -770,6 +770,7 @@ exchange_mapi_util_get_gal (GPtrArray *contacts_array)
 	ulFlags = TABLE_START;
 	do {
 		count += 0x2;
+		SRowSet = NULL;
 		retval = GetGALTable(global_mapi_session, SPropTagArray, &SRowSet, count, ulFlags);
 		if ((!SRowSet) || (!(SRowSet->aRow)) || retval != MAPI_E_SUCCESS) {
 			UNLOCK ();
