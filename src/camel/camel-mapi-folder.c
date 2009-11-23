@@ -374,7 +374,8 @@ fetch_items_summary_cb (FetchItemsCallbackData *item_data, gpointer data)
 	*slist = g_slist_prepend (*slist, item);
 
 	/*Write summary to db in batches of SUMMARY_FETCH_BATCH_COUNT items.*/ 
-	if ( (item_data->index % SUMMARY_FETCH_BATCH_COUNT == 0) || item_data->index == item_data->total-1) {
+	if ((item_data->index % SUMMARY_FETCH_BATCH_COUNT == 0) ||
+	     item_data->index == item_data->total-1) {
 		mapi_update_cache (fi_data->folder, *slist, &fi_data->changes, NULL, false);
 		g_slist_foreach (*slist, (GFunc)mapi_item_free, NULL);
 		g_slist_free (*slist);
@@ -781,7 +782,7 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 
 	camel_operation_end (NULL);
 
-	camel_object_trigger_event (m->folder, "folder_changed", changes);
+	/* camel_object_trigger_event (m->folder, "folder_changed", changes); */
 	camel_folder_change_info_free (changes);
 
 	/* Discard server uid list */
@@ -965,7 +966,7 @@ camel_mapi_folder_fetch_summary (CamelStore *store, const mapi_id_t fid, struct 
 				 struct SSortOrderSet *sort, fetch_items_data *fetch_data, guint32 options)
 {
 	gboolean status;
-	const gchar *folder_name;
+	CamelMapiStore *mapi_store = (CamelMapiStore *) store;
 
 	const guint32 summary_prop_list[] = {
 		PR_INTERNET_CPID,
@@ -998,13 +999,14 @@ camel_mapi_folder_fetch_summary (CamelStore *store, const mapi_id_t fid, struct 
 
 	camel_operation_start (NULL, _("Fetching summary information for new messages in")); /* %s"), folder->name); */
 
+	CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
+
 	status = exchange_mapi_connection_fetch_items  (fid, res, sort, summary_prop_list,
 							G_N_ELEMENTS (summary_prop_list), 
 							NULL, NULL, fetch_items_summary_cb,
 							fetch_data, options);
 
-	if (!status)
-		camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_INVALID, _("Fetching items failed"));
+	CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 
 	camel_operation_end (NULL);
 
@@ -1106,7 +1108,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		if (((CamelMapiFolder *)folder)->type & CAMEL_MAPI_FOLDER_PUBLIC)
 			options |= MAPI_OPTIONS_USE_PFSTORE;
 
-		status = camel_mapi_folder_fetch_summary (mapi_store, temp_folder_id, res, sort,
+		status = camel_mapi_folder_fetch_summary ((CamelStore *)mapi_store, temp_folder_id, res, sort,
 							  fetch_data, options);
 
 		if (!status) {
@@ -2222,5 +2224,3 @@ camel_mapi_folder_new (CamelStore *store, const char *folder_name, const char *f
 	}
 	return folder;
 }
-
-

@@ -51,26 +51,48 @@
 
 static void mapi_push_notification_listener (CamelSession *session, CamelSessionThreadMsg *msg);
 static void mapi_push_notification_listener_close (CamelSession *session, CamelSessionThreadMsg *msg);
-static void mapi_new_mail_handler (struct NewMailNotification *event, gpointer *data);
 
+extern gint camel_application_is_exiting;
+
+/* TODO Doc : What is this message for?*/
 struct mapi_push_notification_msg {
 	CamelSessionThreadMsg msg;
 
 	guint16 event_mask;
-	guint32 *connection; 
+	guint32 connection; 
 	guint32 event_options;
 	gpointer event_data;
 };
 
+/*Used for spawning threads for event actions
+  like new_mail, folder_created*/
+struct mapi_push_event_action_msg {
+	CamelSessionThreadMsg msg;
+
+	gpointer event;
+	gpointer data;
+};
+
 static void
-mapi_new_mail_handler (struct NewMailNotification *event, gpointer *data)
+mapi_new_mail_free (CamelSession *session, CamelSessionThreadMsg *msg)
 {
+	/*TODO*/
+}
+static void
+mapi_new_mail_fetch (CamelSession *session, CamelSessionThreadMsg *msg)
+{
+	struct mapi_push_event_action_msg *m = (struct mapi_push_event_action_msg *) msg;
+	struct NewMailNotification *event = m->event;
+
 	struct mapi_SRestriction *res = NULL;
-	struct SPropValue sprop;
 	guint32 options = 0;
-	CamelMapiStore *store = (CamelMapiStore *)data;
+
+	CamelMapiStore *store = (CamelMapiStore *)m->data;
 	fetch_items_data *fetch_data = g_new0 (fetch_items_data, 1);
 	CamelFolder *folder = NULL;
+	gint info_count = -1;
+	CamelStoreInfo *info;
+	CamelMapiStoreInfo *mapi_info;
 	const gchar *folder_id = exchange_mapi_util_mapi_id_to_string (event->FID);
 	const gchar *folder_name = NULL;
 	
@@ -87,19 +109,32 @@ mapi_new_mail_handler (struct NewMailNotification *event, gpointer *data)
 	res->res.resProperty.lpProp.ulPropTag = PR_MID;
 	res->res.resProperty.lpProp.value.dbl = event->MID;
 
-	/* set_SPropValue_proptag (&sprop, PR_MID, &event->MID); */
-	/* cast_mapi_SPropValue (&(res->res.resProperty.lpProp), &sprop); */
-
 	/* Get the folder object */
-	folder_name = camel_mapi_store_folder_lookup (store,folder_id);
-	folder = camel_store_get_folder (store, folder_name, 0, NULL);
-	if (!folder) g_print("%s %s : WARNING - FOLDER OBJECTI S INVLAUDes \n", G_STRLOC, G_STRFUNC);
-	/* FIXME : Abort on failure*/
+
+	/*Note : using store info to retrive full_name*/
+	info_count = camel_store_summary_count ((CamelStoreSummary *)store->summary) - 1;
+	while (info_count >= 0) {
+		info = camel_store_summary_index ((CamelStoreSummary *)store->summary, info_count);
+		mapi_info = (CamelMapiStoreInfo *)info;
+		if (!g_strcmp0 (mapi_info->folder_id, folder_id)){
+			folder_name = mapi_info->full_name;
+		}
+		info_count--;
+	}
+
+	folder = camel_store_get_folder ((CamelStore *)store, folder_name, 0, NULL);
+
+	/* Abort on failure*/
+	if (!folder)
+		return;
+
 	fetch_data->changes = camel_folder_change_info_new ();
 	fetch_data->folder = folder;
 
-	camel_mapi_folder_fetch_summary (store, event->FID, res, NULL, fetch_data, options);
-
+	CAMEL_SERVICE_REC_LOCK (store, connect_lock);
+	camel_mapi_folder_fetch_summary ((CamelStore *)store, event->FID, res, NULL, fetch_data, options);
+	CAMEL_SERVICE_REC_UNLOCK (store, connect_lock);
+	
 	camel_folder_summary_touch (folder->summary);
 	/* mapi_sync_summary */
 	camel_folder_summary_save_to_db (folder->summary, NULL);
@@ -107,14 +142,24 @@ mapi_new_mail_handler (struct NewMailNotification *event, gpointer *data)
 	camel_store_summary_save ((CamelStoreSummary *)((CamelMapiStore *)folder->parent_store)->summary);
 
 	camel_object_trigger_event (folder, "folder_changed", fetch_data->changes);
+
 	camel_folder_change_info_free (fetch_data->changes);
 	g_free (res);
-	g_free (folder_id);
 }
 
+static CamelSessionThreadOps mapi_new_mail_ops = {
+	mapi_new_mail_fetch,
+	mapi_new_mail_free,
+};
+
+
 static gint
-mapi_notifications_filter (guint16 type, void *event, void *private_data)
+mapi_notifications_filter (guint16 type, void *event, void *data)
 {
+	CamelMapiStore *store = (CamelMapiStore *)data;
+	CamelSession *session = ((CamelService *)store)->session;
+	struct mapi_push_event_action_msg *new_mail_ops_msg ;
+
 	switch(type) {
 	/* -- Folder Events -- */
 	case fnevObjectCreated:
@@ -137,7 +182,15 @@ mapi_notifications_filter (guint16 type, void *event, void *private_data)
 	case fnevNewMail:
 	case fnevNewMail|fnevMbit:
 		d_notifications(printf ("Event : New mail\n"));
-		mapi_new_mail_handler (event, private_data);
+		d_notifications(mapidump_newmail (event, "\t"));
+		/*Note : Use Thread Pool ?*/
+		new_mail_ops_msg = camel_session_thread_msg_new (session, &mapi_new_mail_ops,
+								 sizeof (*new_mail_ops_msg));
+
+		new_mail_ops_msg->event = event;
+		new_mail_ops_msg->data = data;
+		mapi_new_mail_fetch (session, (CamelSessionThreadMsg *)new_mail_ops_msg);
+		return -1;
 		break;
 	case fnevMbit|fnevObjectCreated:
 		d_notifications(printf ("Event : Message created\n"));
@@ -168,19 +221,32 @@ static CamelSessionThreadOps mapi_push_notification_ops = {
 	mapi_push_notification_listener_close,
 };
 
+static gint
+mapi_notifications_continue_check (void)
+{
+	if (camel_operation_cancel_check(NULL) || (camel_application_is_exiting == TRUE))
+		return 1;
+
+	return 0;
+}
+
 static void
 mapi_push_notification_listener (CamelSession *session, CamelSessionThreadMsg *msg)
 {
 	struct mapi_push_notification_msg *m = (struct mapi_push_notification_msg *)msg;
+	CamelMapiStore *mapi_store = (CamelMapiStore *) m->event_data;
 
+	CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
 	if (exchange_mapi_events_init ()) {
 		exchange_mapi_events_subscribe (0, m->event_options, m->event_mask,
 						&m->connection,	mapi_notifications_filter,
 						m->event_data);
 
+		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 		/* Need a better API for canceling this operation*/
-		exchange_mapi_events_monitor (NULL);
-	}
+		exchange_mapi_events_monitor (mapi_notifications_continue_check);
+	} else 
+		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 
 }
 

@@ -214,9 +214,13 @@ gboolean exchange_mapi_delete_profile (const char *profile);
 
 
 /* Push notifications APIs */
+typedef gboolean (*exchange_check_continue) (void);
+
 gboolean exchange_mapi_events_init ();
 
-gboolean exchange_mapi_events_monitor (gpointer data);
+gboolean exchange_mapi_events_monitor (exchange_check_continue check);
+
+void exchange_mapi_events_monitor_close ();
 
 gboolean exchange_mapi_events_subscribe (mapi_id_t *obj_id, guint32 options,
 					 guint16 event_mask, guint32 *connection,
@@ -229,4 +233,5 @@ exchange_mapi_events_subscribe_and_monitor (mapi_id_t *obj_id, guint32 options,
 					    guint16 event_mask, guint32 *connection,
 					    gboolean use_store, mapi_notify_callback_t callback,
 					    gpointer data);
+
 #endif

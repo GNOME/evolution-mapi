@@ -114,7 +114,7 @@ static void mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 f
 static gboolean mapi_fid_is_system_folder (CamelMapiStore *mapi_store, const char *fid);
 
 static void mapi_update_folder_hash_tables (CamelMapiStore *store, const gchar *name, const gchar *fid, const gchar *parent_id);
-static const gchar* mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid, gboolean use_cache);
+/* static const gchar* mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid, gboolean use_cache); */
 static const gchar* mapi_folders_hash_table_pfid_lookup (CamelMapiStore *store, const gchar *fid, gboolean use_cache);
 #if 0
 static const gchar* mapi_folders_hash_table_fid_lookup (CamelMapiStore *store, const gchar *name, gboolean use_cache);
@@ -352,6 +352,7 @@ mapi_connect(CamelService *service, CamelException *ex)
 {
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
 	CamelMapiStorePrivate *priv = store->priv;
+	guint16 event_mask = 0;
 
 	if (service->status == CAMEL_SERVICE_DISCONNECTED) {
 		return FALSE;
@@ -378,6 +379,12 @@ mapi_connect(CamelService *service, CamelException *ex)
 	service->status = CAMEL_SERVICE_CONNECTED;
 	((CamelOfflineStore *) store)->state = CAMEL_OFFLINE_STORE_NETWORK_AVAIL;
 
+	/* Start event monitor */
+	event_mask = fnevNewMail | fnevObjectCreated | fnevObjectDeleted |
+		fnevObjectModified | fnevObjectMoved | fnevObjectCopied;
+
+	camel_mapi_notfication_listener_start (store, event_mask, MAPI_EVENTS_USE_STORE);
+
 	camel_store_summary_save ((CamelStoreSummary *) store->summary);
 
 	CAMEL_SERVICE_REC_UNLOCK (service, connect_lock);
@@ -390,9 +397,12 @@ mapi_disconnect(CamelService *service, gboolean clean, CamelException *ex)
 {
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
 
+	/* Disconnect from event monitor */
+	exchange_mapi_events_monitor_close ();
+
 	/* Close the mapi subsystem */
 	exchange_mapi_connection_close ();
-
+	
 	((CamelOfflineStore *) store)->state = CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL;
 	service->status = CAMEL_SERVICE_DISCONNECTED;
 
@@ -436,9 +446,17 @@ mapi_get_folder(CamelStore *store, const char *folder_name, guint32 flags, Camel
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
 	CamelMapiStorePrivate *priv = mapi_store->priv;
 	CamelFolder *folder;
-	char *storage_path = NULL;
+	gchar *folder_dir, *storage_path = NULL;
 
 	storage_path = g_strdup_printf("%s/folders", priv->storage_path);
+	folder_dir = g_strdup_printf("%s/folders/%s", storage_path, folder_name);
+
+	if (!folder_dir || g_access (folder_dir, F_OK) != 0) {
+		g_free (folder_dir);
+		/* camel_exception_setv (ex, CAMEL_EXCEPTION_STORE_NO_FOLDER, */
+		/* 		_("No such folder %s"), folder_name); */
+		/* return NULL; */
+	}
 
 	folder = camel_mapi_folder_new (store, folder_name, storage_path, flags, ex);
 	g_free (storage_path);
@@ -1157,7 +1175,8 @@ mapi_folders_update_hash_tables_from_cache (CamelMapiStore *store)
 	}
 }
 
-static const gchar*
+/* static const gchar* */
+const gchar*
 mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid,
 				     gboolean use_cache)
 {
@@ -1219,8 +1238,6 @@ mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelE
 	CamelMapiStoreInfo *mapi_si = NULL;
 	guint32 count, i;
 	CamelStoreInfo *si = NULL;
-	CamelSession *session = ((CamelService *)store)->session;
-	guint16 event_mask = 0;
 
 	if (((CamelOfflineStore *) store)->state == CAMEL_OFFLINE_STORE_NETWORK_AVAIL) {
 		if (((CamelService *)store)->status == CAMEL_SERVICE_DISCONNECTED){
@@ -1356,10 +1373,10 @@ mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelE
 
 	/* FIXME : This place is not right! */
 	/* Start Push Notification listener */
-	event_mask = fnevNewMail | fnevObjectCreated | fnevObjectDeleted |
-		fnevObjectModified | fnevObjectMoved | fnevObjectCopied;
+	/* event_mask = fnevNewMail | fnevObjectCreated | fnevObjectDeleted | */
+	/* 	fnevObjectModified | fnevObjectMoved | fnevObjectCopied; */
 
-	camel_mapi_notfication_listener_start (store, event_mask, MAPI_EVENTS_USE_STORE);
+	/* camel_mapi_notfication_listener_start (store, event_mask, MAPI_EVENTS_USE_STORE); */
 }
 
 

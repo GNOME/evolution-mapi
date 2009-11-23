@@ -3047,7 +3047,8 @@ exchange_mapi_events_subscribe (mapi_id_t *obj_id, guint32 options,
 	return (retval == MAPI_E_SUCCESS);
 }
 
-gboolean exchange_mapi_events_unsubscribe (mapi_object_t *obj, guint32 connection)
+gboolean
+exchange_mapi_events_unsubscribe (mapi_object_t *obj, guint32 connection)
 {
 	enum MAPISTATUS	retval;
 
@@ -3057,14 +3058,22 @@ gboolean exchange_mapi_events_unsubscribe (mapi_object_t *obj, guint32 connectio
 }
 
 /* Note : Blocking infinite loop. */
-gboolean exchange_mapi_events_monitor (gpointer data)
+gboolean
+exchange_mapi_events_monitor (mapi_notify_continue_callback_t check)
 {
 	enum MAPISTATUS	retval;
+	retval = MonitorNotification (global_mapi_session, NULL, check);
+	return retval;
+}
 
-	/*Fixme : If we do multiple sessions. Fix this */
-	retval = MonitorNotification(global_mapi_session, (void *)data);
-
-	return (retval == MAPI_E_SUCCESS);
+void
+exchange_mapi_events_monitor_close ()
+{
+	struct mapi_notify_ctx	*notify_ctx;
+	if (global_mapi_session) {
+		notify_ctx = global_mapi_session->notify_ctx;
+		close (notify_ctx->fd);
+	}
 }
 
 /* Shows error message on the console, and, if error_msg is not NULL, then
