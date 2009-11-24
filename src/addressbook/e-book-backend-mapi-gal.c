@@ -236,7 +236,7 @@ e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
 		
 	case GNOME_Evolution_Addressbook_MODE_REMOTE:
 		
-		if (!exchange_mapi_connection_new (priv->profile, NULL))
+		if (!exchange_mapi_connection_new (priv->profile, passwd))
 			return e_data_book_respond_authenticate_user (book, opid,GNOME_Evolution_Addressbook_OtherError);
 
 		if (priv->cache && priv->is_cache_ready) {
