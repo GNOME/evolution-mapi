@@ -2004,7 +2004,7 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 
 	item = camel_mapi_utils_mime_to_item (message, from, recipients, ex);
 
-	mid = exchange_mapi_create_item (olFolderOutbox, fid, NULL, NULL, 
+	mid = exchange_mapi_create_item (-1, fid, NULL, NULL, 
 					 camel_mapi_utils_create_item_build_props, item,
 					 item->recipients, item->attachments,
 					 item->generic_streams, 0);

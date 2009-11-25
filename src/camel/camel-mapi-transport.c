@@ -84,10 +84,10 @@ mapi_message_item_send (MapiItem *item)
 	guint64 fid = 0;
 	mapi_id_t mid = 0;
 
-	mid = exchange_mapi_create_item (olFolderOutbox, fid, NULL, NULL, 
+	mid = exchange_mapi_create_item (olFolderSentMail, fid, NULL, NULL, 
 					 camel_mapi_utils_create_item_build_props,
 					 item, item->recipients,
-					 item->attachments, item->generic_streams, 0);
+					 item->attachments, item->generic_streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE);
 
 	return mid;
 }
