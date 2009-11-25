@@ -1850,10 +1850,10 @@ e_cal_backend_mapi_send_objects (ECalBackendSync *backend, EDataCal *cal, const 
 			cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) e_cal_backend_mapi_internal_get_timezone;
 			cbdata.get_tz_data = cbmapi;
 
-			mid = exchange_mapi_create_item (olFolderOutbox, 0, 
+			mid = exchange_mapi_create_item (olFolderSentMail, 0,
 							exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind), 
 							exchange_mapi_cal_util_build_props, &cbdata, 
-							recipients, attachments, streams, 0);
+							recipients, attachments, streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE);
 			g_free (cbdata.props);
 			if (!mid) {
 				g_object_unref (comp);

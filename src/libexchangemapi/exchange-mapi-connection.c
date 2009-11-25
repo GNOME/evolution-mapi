@@ -2156,6 +2156,22 @@ exchange_mapi_create_item (uint32_t olFolder, mapi_id_t fid,
 		retval = SubmitMessage(&obj_message);
 		if (retval != MAPI_E_SUCCESS) {
 			mapi_errstr("SubmitMessage", GetLastError());
+
+			if ((options & MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE) != 0) {
+				mid = mapi_object_get_id (&obj_message);
+				mapi_object_release(&obj_message);
+				/* to not release a message object twice */
+				mapi_object_init (&obj_message);
+
+				retval = DeleteMessage (&obj_folder, &mid, 1);
+				if (retval != MAPI_E_SUCCESS) {
+					mapi_errstr ("DeleteMessage", GetLastError ());
+				}
+
+				/* do not forget to set it back to 0, as the function failed */
+				mid = 0;
+			}
+
 			goto cleanup;
 		}
 	}
