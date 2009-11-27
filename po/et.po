@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2009-08-31 09:55+0000\n"
+"POT-Creation-Date: 2009-09-14 15:03+0000\n"
 "PO-Revision-Date: 2009-09-01 13:18+0300\n"
 "Last-Translator: Ivar Smolin <okul@linux.ee>\n"
 "Language-Team: Estonian <et@li.org>\n"
@@ -61,9 +61,6 @@ msgstr "Isiklikud kaustad"
 msgid "_Location:"
 msgstr "_Asukoht:"
 
-msgid "_Folder size"
-msgstr "Kausta _suurus"
-
 msgid "Folder"
 msgstr "Kaust"
 
@@ -91,6 +88,9 @@ msgstr "Kausta suurus"
 
 msgid "Exchange Settings"
 msgstr "Exchange sätted"
+
+msgid "Folder size"
+msgstr "Kausta suurus"
 
 msgid "Authentication failed"
 msgstr "Tõrge autentimisel"
@@ -162,9 +162,8 @@ msgstr "Sõnumit pole võimalik hankida"
 msgid "Cannot append message to folder '%s'"
 msgstr "Sõnumit pole võimalik kausta `%s' lisada"
 
-#, c-format
-msgid "Offline. '%s'"
-msgstr "Ühendamata. '%s'"
+msgid "Offline."
+msgstr "Ühendamata."
 
 #, c-format
 msgid "Could not load summary for %s"
