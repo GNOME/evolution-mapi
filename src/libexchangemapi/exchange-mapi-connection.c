@@ -2160,6 +2160,14 @@ exchange_mapi_create_item (uint32_t olFolder, mapi_id_t fid,
 		if (retval != MAPI_E_SUCCESS) {
 			mapi_errstr("SubmitMessage", GetLastError());
 
+			/*
+			The code is storing message right to Sent items instead of Outbox,
+			because fetching PR_ENTRYID or PR_IPM_SENTMAIL_ENTRYID didn't seem
+			to work in time of doing this change.
+
+			For more information and other possible (correct) approaches see:
+			https://bugzilla.gnome.org/show_bug.cgi?id=561794
+			*/
 			if ((options & MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE) != 0) {
 				mid = mapi_object_get_id (&obj_message);
 				mapi_object_release(&obj_message);
