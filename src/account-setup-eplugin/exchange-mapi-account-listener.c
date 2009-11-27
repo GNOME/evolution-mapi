@@ -452,6 +452,8 @@ add_addressbook_sources (EAccount *account, GSList *folders)
 		e_source_set_property (source, "offline_sync", 
 					       camel_url_get_param (url, "offline_sync") ? "1" : "0");
 		e_source_set_property (source, "completion", "true");
+		if (folder->is_default) 
+			e_source_set_property (source, "delete", "no");
 		e_source_group_add_source (group, source, -1);
 		g_object_unref (source);
 	}
@@ -477,6 +479,7 @@ add_addressbook_sources (EAccount *account, GSList *folders)
 		// camel_url_get_param (url, "offline_sync") ? "1" : "0");
 		e_source_set_property(source, "offline_sync", "1");
 		e_source_set_property (source, "completion", "true");
+		e_source_set_property (source, "delete", "no");
 		e_source_group_add_source (group, source, -1);
 		g_object_unref (source);
 	}
