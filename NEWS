@@ -1,3 +1,17 @@
+evolution-mapi 0.29.3 2009-11-29
+--------------------------------
+
+Bug Fixes:
+    Bug #561794 - Store sent messages in Sent Items, not Outbox (Milan Crha)
+    Bug #568763 - Sending mail fails for cluster setup (Bharath Acharya)
+    Bug #586203 - Meeting timings are shown in UTC (Milan Crha)
+    Bug #592297 - Contacts don't get downloaded. (Bharath Acharya)
+    Bug #595480 - 100% CPU usage fix. (Milan Crha)
+    Bug #601202 - Evo deletes system addressbook (Bharath Acharya)
+
+Translations:
+	Ivar Smolin (et)
+
 evolution-mapi 0.29.2 2009-11-17
 --------------------------------
 
