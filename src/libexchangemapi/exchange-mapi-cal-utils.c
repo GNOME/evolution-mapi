@@ -1571,16 +1571,20 @@ get_tzid_location (const gchar *tzid, struct cbdata *cbdata)
 	if (!tzid || !*tzid || g_str_equal (tzid, "UTC"))
 		return NULL;
 
-	zone = icaltimezone_get_builtin_timezone_from_tzid (tzid);
+	/* ask backend first, if any */
+	if (cbdata && cbdata->get_timezone)
+		zone = cbdata->get_timezone (cbdata->get_tz_data, tzid);
+
+	if (!zone)
+		zone = icaltimezone_get_builtin_timezone_from_tzid (tzid);
+
+	/* the old TZID prefix used in previous versions of evolution-mapi */
+	#define OLD_TZID_PREFIX "/softwarestudio.org/Tzfile/"
 
 	if (!zone && g_str_has_prefix (tzid, OLD_TZID_PREFIX))
 		zone = icaltimezone_get_builtin_timezone (tzid + strlen (OLD_TZID_PREFIX));
 
-	if (!zone) {
-		/* it is not a buildin time zone, try ask backend for it */
-		if (cbdata && cbdata->get_timezone)
-			zone = cbdata->get_timezone (cbdata->get_tz_data, tzid);
-	}
+	#undef OLD_TZID_PREFIX
 
 	if (!zone)
 		return NULL;

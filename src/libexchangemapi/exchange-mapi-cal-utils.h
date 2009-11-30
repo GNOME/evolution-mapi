@@ -33,9 +33,6 @@
 #include "exchange-mapi-cal-tz-utils.h"
 #include "exchange-mapi-cal-recur-utils.h"
 
-/* the old TZID prefix used in previous versions of evolution-mapi */
-#define OLD_TZID_PREFIX "/softwarestudio.org/Tzfile/"
-
 G_BEGIN_DECLS
 
 typedef enum {

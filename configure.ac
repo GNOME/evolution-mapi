@@ -23,8 +23,8 @@ EDS_PACKAGE=1.2
 dnl *******************
 dnl Required Packages
 dnl *******************
-m4_define([eds_minimum_version], [2.29.1])
-m4_define([evo_minimum_version], [2.29.1])
+m4_define([eds_minimum_version], [2.29.4])
+m4_define([evo_minimum_version], [2.29.4])
 m4_define([libmapi_minimum_version], [0.8])
 
 dnl ***********************************

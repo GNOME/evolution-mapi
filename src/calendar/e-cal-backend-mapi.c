@@ -1977,42 +1977,6 @@ e_cal_backend_mapi_receive_objects (ECalBackendSync *backend, EDataCal *cal, con
 	return status;
 }
 
-
-static ECalBackendSyncStatus 
-e_cal_backend_mapi_get_timezone (ECalBackendSync *backend, EDataCal *cal, const char *tzid, char **object)
-{
-	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
-
-	icaltimezone *zone;
-	icalcomponent *icalcomp;
-
-	cbmapi = E_CAL_BACKEND_MAPI (backend);
-	priv = cbmapi->priv;
-
-	g_return_val_if_fail (tzid != NULL, GNOME_Evolution_Calendar_ObjectNotFound);
-
-	if (!strcmp (tzid, "UTC")) {
-		zone = icaltimezone_get_utc_timezone ();
-	} else {
-		zone = icaltimezone_get_builtin_timezone_from_tzid (tzid);
-
-		if (!zone && g_str_has_prefix (tzid, OLD_TZID_PREFIX))
-			zone = icaltimezone_get_builtin_timezone (tzid + strlen (OLD_TZID_PREFIX));
-
-		if (!zone)
-			return GNOME_Evolution_Calendar_ObjectNotFound;
-	}
-
-	icalcomp = icaltimezone_get_component (zone);
-	if (!icalcomp)
-		return GNOME_Evolution_Calendar_InvalidObject;
-
-	*object = icalcomponent_as_ical_string_r (icalcomp);
-
-	return GNOME_Evolution_Calendar_Success;
-}
-
 static ECalBackendSyncStatus 
 e_cal_backend_mapi_add_timezone (ECalBackendSync *backend, EDataCal *cal, const char *tzobj)
 {
@@ -2316,21 +2280,19 @@ e_cal_backend_mapi_internal_get_default_timezone (ECalBackend *backend)
 static icaltimezone *
 e_cal_backend_mapi_internal_get_timezone (ECalBackend *backend, const char *tzid)
 {
+	ECalBackendMAPI *cbmapi;
 	icaltimezone *zone;
 
+	cbmapi = E_CAL_BACKEND_MAPI (backend);
+
+	g_return_val_if_fail (cbmapi != NULL, NULL);
+	g_return_val_if_fail (cbmapi->priv != NULL, NULL);
 	g_return_val_if_fail (tzid != NULL, NULL);
-	g_return_val_if_fail (backend != NULL, NULL);
 
-	zone = icaltimezone_get_builtin_timezone_from_tzid (tzid);
-
-	if (!zone && g_str_has_prefix (tzid, OLD_TZID_PREFIX))
-		zone = icaltimezone_get_builtin_timezone (tzid + strlen (OLD_TZID_PREFIX));
+	zone = (icaltimezone *) e_cal_backend_cache_get_timezone (cbmapi->priv->cache, tzid);
 
 	if (!zone && E_CAL_BACKEND_CLASS (parent_class)->internal_get_timezone)
 		zone = E_CAL_BACKEND_CLASS (parent_class)->internal_get_timezone (backend, tzid);
-
-	if (!zone)
-		return icaltimezone_get_utc_timezone ();
 
 	return zone;
 }
@@ -2370,7 +2332,6 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 	sync_class->discard_alarm_sync = e_cal_backend_mapi_discard_alarm;
 	sync_class->receive_objects_sync = e_cal_backend_mapi_receive_objects;
 	sync_class->send_objects_sync = e_cal_backend_mapi_send_objects;
-	sync_class->get_timezone_sync = e_cal_backend_mapi_get_timezone;
 	sync_class->add_timezone_sync = e_cal_backend_mapi_add_timezone;
 	sync_class->set_default_zone_sync = e_cal_backend_mapi_set_default_zone;
 	sync_class->get_freebusy_sync = e_cal_backend_mapi_get_free_busy;
