@@ -30,7 +30,6 @@
 #include <string.h>
 #include <camel/camel-i18n.h>
 #include <libedataserverui/e-passwords.h>
-#include "e-util/e-error.h"
 #include <libedataserver/e-account.h>
 #include <libecal/e-cal.h>
 #include <libedataserver/e-account-list.h>
