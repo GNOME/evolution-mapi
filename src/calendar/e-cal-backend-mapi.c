@@ -87,7 +87,6 @@ struct _ECalBackendMAPIPrivate {
 	guint 			timeout_id;
 	GThread 		*dthread;
 	SyncDelta 		*dlock;
-	GSList 			*cache_keys;
 };
 
 #define PARENT_TYPE E_TYPE_CAL_BACKEND_SYNC
@@ -490,19 +489,60 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 	return TRUE;
 }
 
+struct deleted_items_data {
+	ECalBackendMAPI *cbmapi;
+	GSList *cache_keys;
+	GSList *unknown_mids; /* MIDs of items not in the cache */
+};
+
 static gboolean
 handle_deleted_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 {
-	const mapi_id_t mid = item_data->mid; 
-	ECalBackendMAPI *cbmapi	= data;
-	ECalBackendMAPIPrivate *priv = cbmapi->priv;
+	const mapi_id_t mid = item_data->mid;
+	struct deleted_items_data *did = data;
 	gchar *tmp = NULL;
 	GSList *cache_comp_uid = NULL;
+	gboolean need_refetch = FALSE;
+
+	g_return_val_if_fail (did != NULL, FALSE);
 
 	tmp = exchange_mapi_util_mapi_id_to_string (mid);
-	cache_comp_uid = g_slist_find_custom (priv->cache_keys, tmp, (GCompareFunc) (g_ascii_strcasecmp));
-	if (cache_comp_uid != NULL)
-		priv->cache_keys = g_slist_remove_link (priv->cache_keys, cache_comp_uid);
+	cache_comp_uid = g_slist_find_custom (did->cache_keys, tmp, (GCompareFunc) (g_ascii_strcasecmp));
+	if (cache_comp_uid != NULL) {
+		ECalBackendMAPIPrivate *priv = did->cbmapi->priv;
+		ECalComponent *comp;
+
+		comp = e_cal_backend_cache_get_component (priv->cache, cache_comp_uid->data, NULL);
+		if (comp) {
+			struct icaltimetype *last_mod = NULL;
+			struct timeval t;
+
+			e_cal_component_get_last_modified (comp, &last_mod);
+			if (!last_mod) {
+				need_refetch = TRUE;
+			} else if (get_mapi_SPropValue_array_date_timeval (&t, item_data->properties, PR_LAST_MODIFICATION_TIME) == MAPI_E_SUCCESS
+			    && icaltime_compare (icaltime_from_timet_with_zone (t.tv_sec, 0, icaltimezone_get_utc_timezone ()), *last_mod) != 0) {
+				need_refetch = TRUE;
+			}
+
+			if (last_mod)
+				e_cal_component_free_icaltimetype (last_mod);
+
+			g_object_unref (comp);
+		}
+
+		did->cache_keys = g_slist_remove_link (did->cache_keys, cache_comp_uid);
+	} else {
+		/* fetch it, as it is not in the cache */
+		need_refetch = TRUE;
+	}
+
+	if (need_refetch) {
+		mapi_id_t *nmid = g_new (mapi_id_t, 1);
+
+		*nmid = mid;
+		did->unknown_mids = g_slist_prepend (did->unknown_mids, nmid);
+	}
 
 	g_free (tmp);
 	return TRUE;
@@ -531,6 +571,7 @@ get_deltas (gpointer handle)
 	struct mapi_SRestriction res;
 	gboolean use_restriction = FALSE;
 	GSList *ls = NULL;
+	struct deleted_items_data did;
 
 	if (!handle)
 		return FALSE;
@@ -547,6 +588,7 @@ get_deltas (gpointer handle)
 	serv_time = e_cal_backend_cache_get_server_utc_time (priv->cache);
 	if (serv_time)
 		itt_cache = icaltime_from_string (serv_time); 
+
 	if (!icaltime_is_null_time (itt_cache)) {
 		struct SPropValue sprop;
 		struct timeval t;
@@ -560,8 +602,7 @@ get_deltas (gpointer handle)
 		t.tv_usec = 0;
 		set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
 		cast_mapi_SPropValue (&(res.res.resProperty.lpProp), &sprop);
-	} else
-		g_warning ("Cache time-stamp not found."); 
+	}
 
 	itt_current = icaltime_current_time_with_zone (icaltimezone_get_utc_timezone ());
 	current_time = icaltime_as_timet_with_zone (itt_current, icaltimezone_get_utc_timezone ());
@@ -608,21 +649,23 @@ get_deltas (gpointer handle)
 	/* e_cal_backend_cache_get_keys returns a list of all the keys. 
 	 * The items in the list are pointers to internal data, 
 	 * so should not be freed, only the list should. */
-	priv->cache_keys = e_cal_backend_cache_get_keys (priv->cache);
+	did.cbmapi = cbmapi;
+	did.cache_keys = e_cal_backend_cache_get_keys (priv->cache);
+	did.unknown_mids = NULL;
 	if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
 						cal_IDList, G_N_ELEMENTS (cal_IDList), 
 						NULL, NULL, 
-						handle_deleted_items_cb, cbmapi, 
+						handle_deleted_items_cb, &did, 
 						0)) {
 		/* FIXME: String : We need to restart evolution-data-server */
 		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
-		priv->cache_keys = NULL;
+		g_slist_free (did.cache_keys);
 		g_static_mutex_unlock (&updating);
 		return FALSE;
 	}
 
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
-	for (ls = priv->cache_keys; ls ; ls = g_slist_next (ls)) {
+	for (ls = did.cache_keys; ls ; ls = g_slist_next (ls)) {
 		ECalComponent *comp = NULL;
 		icalcomponent *icalcomp = NULL;
 
@@ -648,11 +691,56 @@ get_deltas (gpointer handle)
 	}
 	e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 
-//	g_slist_free (priv->cache_keys); 
-	priv->cache_keys = NULL;
+	g_slist_free (did.cache_keys);
+
+	if (did.unknown_mids) {
+		gint i;
+		struct mapi_SRestriction_or *or_res = g_new0 (struct mapi_SRestriction_or, g_slist_length (did.unknown_mids));
+
+		for (i = 0, ls = did.unknown_mids; ls; i++, ls = ls->next) {
+			mapi_id_t *pmid = ls->data;
+
+			or_res[i].rt = RES_PROPERTY;
+			or_res[i].res.resProperty.relop = RELOP_EQ;
+			or_res[i].res.resProperty.ulPropTag = PR_MID;
+			or_res[i].res.resProperty.lpProp.ulPropTag = PR_MID;
+			or_res[i].res.resProperty.lpProp.value.dbl = *pmid;
+		}
+
+		memset (&res, 0, sizeof (struct mapi_SRestriction));
+		res.rt = RES_OR;
+		res.res.resOr.cRes = g_slist_length (did.unknown_mids);
+		res.res.resOr.res = or_res;
+
+		g_slist_foreach (did.unknown_mids, (GFunc) g_free, NULL);
+		g_slist_free (did.unknown_mids);
+
+		if (kind == ICAL_VTODO_COMPONENT) {
+			if (!exchange_mapi_connection_fetch_items (priv->fid, &res, NULL,
+						NULL, 0, NULL, NULL,
+						mapi_cal_get_changes_cb, cbmapi,
+						MAPI_OPTIONS_FETCH_ALL)) {
+				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
+				g_static_mutex_unlock (&updating);
+				g_free (or_res);
+				return FALSE;
+			}
+		} else if (!exchange_mapi_connection_fetch_items (priv->fid, &res, NULL,
+						cal_GetPropsList, G_N_ELEMENTS (cal_GetPropsList),
+						exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind),
+						mapi_cal_get_changes_cb, cbmapi,
+						MAPI_OPTIONS_FETCH_ALL)) {
+			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
+			g_free (or_res);
+			g_static_mutex_unlock (&updating);
+			return FALSE;
+		}
+
+		g_free (or_res);
+	}
 
 	g_static_mutex_unlock (&updating);
-	return TRUE;        
+	return TRUE;
 }
 
 static ECalBackendSyncStatus
