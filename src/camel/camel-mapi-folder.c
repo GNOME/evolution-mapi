@@ -104,6 +104,22 @@ mapi_folder_search_by_expression (CamelFolder *folder, const char *expression, C
 	return matches;
 }
 
+static GPtrArray *
+mapi_folder_search_by_uids (CamelFolder *folder, const gchar *expression, GPtrArray *uids, CamelException *ex)
+{
+	GPtrArray *matches;
+	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (folder);
+
+	if (uids->len == 0)
+		return g_ptr_array_new ();
+
+	CAMEL_MAPI_FOLDER_LOCK (mapi_folder, search_lock);
+	camel_folder_search_set_folder (mapi_folder->search, folder);
+	matches = camel_folder_search_search (mapi_folder->search, expression, uids, ex);
+	CAMEL_MAPI_FOLDER_UNLOCK (mapi_folder, search_lock);
+
+	return matches;
+}
 
 static int
 mapi_getv (CamelObject *object, CamelException *ex, CamelArgGetV *args)
@@ -2053,7 +2069,7 @@ camel_mapi_folder_class_init (CamelMapiFolderClass *camel_mapi_folder_class)
 	camel_folder_class->search_by_expression = mapi_folder_search_by_expression;
 	camel_folder_class->cmp_uids = mapi_cmp_uids;
 /* 	camel_folder_class->get_message_info = mapi_get_message_info; */
-/* 	camel_folder_class->search_by_uids = mapi_folder_search_by_uids;  */
+	camel_folder_class->search_by_uids = mapi_folder_search_by_uids;
 	camel_folder_class->search_free = mapi_folder_search_free;
 	camel_folder_class->append_message = mapi_append_message;
 	camel_folder_class->refresh_info = mapi_refresh_info;
