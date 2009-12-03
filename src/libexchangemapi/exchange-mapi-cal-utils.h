@@ -149,7 +149,8 @@ static const uint32_t cal_GetPropsList[] = {
 
 static const uint32_t cal_IDList[] = {
 	PR_FID, 
-	PR_MID
+	PR_MID,
+	PR_LAST_MODIFICATION_TIME
 };
 
 G_END_DECLS
