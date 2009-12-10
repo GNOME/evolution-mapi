@@ -50,18 +50,14 @@
 #include <mail/mail-config.h>
 #include <mail/em-config.h>
 #include <mail/em-folder-tree.h>
+#include <misc/e-spinner.h>
+
 #include "exchange-mapi-account-listener.h"
 
 #define FOLDERSIZE_MENU_ITEM 0
 
 gboolean  e_plugin_ui_init (GtkUIManager *ui_manager,
 			    EShellView *shell_view);
-
-static GMutex *folder_size_dialog_mutex = NULL;
-
-#define FOLDERSIZE_LOCK_INIT() folder_size_dialog_mutex = g_mutex_new ()
-#define FOLDERSIZE_LOCK() g_mutex_lock (folder_size_dialog_mutex)
-#define FOLDERSIZE_UNLOCK() g_mutex_unlock (folder_size_dialog_mutex)
 
 GtkWidget *org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data);
 void mapi_settings_run_folder_size_dialog (gpointer data);
@@ -75,36 +71,10 @@ enum {
 typedef struct
 {
 	GtkDialog *dialog;
-	GtkProgressBar *progress;
-	GtkBox *progress_hbox;
-	gboolean processing;
+	GtkWidget *spinner;
+	GtkWidget *spinner_label;
+	GtkBox *spinner_hbox;
 } FolderSizeDialogData;
-
-static gboolean
-mapi_settings_pbar_update (gpointer data)
-{
-	FolderSizeDialogData *dialog_data = (FolderSizeDialogData *)data;
-
-	while (1) {
-		FOLDERSIZE_LOCK ();
-
-		if (dialog_data->processing) {
-			gtk_progress_bar_pulse (dialog_data->progress);
-			FOLDERSIZE_UNLOCK ();
-			g_usleep (500);
-			continue;
-		}
-		break;
-	}
-
-	/* NOTE: Using hide_all results in a crashed */
-	gtk_widget_hide (GTK_WIDGET (dialog_data->progress));
-	gtk_widget_hide (GTK_WIDGET (dialog_data->progress_hbox));
-
-	FOLDERSIZE_UNLOCK ();
-
-	return FALSE;
-}
 
 static gboolean
 mapi_settings_get_folder_size (gpointer data)
@@ -120,9 +90,8 @@ mapi_settings_get_folder_size (gpointer data)
 	GSList *folder_list = exchange_mapi_account_listener_peek_folder_list ();
 
 	/* Hide progress bar. Set status*/
-	FOLDERSIZE_LOCK ();
-	dialog_data->processing = FALSE;
-	FOLDERSIZE_UNLOCK ();
+	gtk_widget_destroy (dialog_data->spinner_label);
+	gtk_widget_destroy (dialog_data->spinner);
 
 	if (folder_list) {
 		/*Tree View */
@@ -160,10 +129,8 @@ mapi_settings_get_folder_size (gpointer data)
 	gtk_widget_show_all (view);
 
 	/* Pack into content_area */
-	FOLDERSIZE_LOCK ();
 	content_area = (GtkBox*) gtk_dialog_get_content_area (dialog_data->dialog);
 	gtk_box_pack_start (content_area, view, TRUE, TRUE, 6);	
-	FOLDERSIZE_UNLOCK ();
 
 	return FALSE;
 }
@@ -173,10 +140,9 @@ mapi_settings_run_folder_size_dialog (gpointer data)
 {
 	GtkBox *content_area;
 	FolderSizeDialogData *dialog_data;
-	GThread *folder_list_thread, *progress_update_thread;
+	GThread *folder_list_thread;
 
 	dialog_data = g_new0 (FolderSizeDialogData, 1);
-	dialog_data->processing = TRUE;
 
 	dialog_data->dialog = (GtkDialog *)gtk_dialog_new_with_buttons (_("Folder Size"), NULL, 
 							   GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -185,22 +151,21 @@ mapi_settings_run_folder_size_dialog (gpointer data)
 
 	content_area = (GtkBox *)gtk_dialog_get_content_area (dialog_data->dialog);
 
-	dialog_data->progress = (GtkProgressBar *) gtk_progress_bar_new ();
-	gtk_progress_bar_set_text (dialog_data->progress, _("Fetching folder list ..."));
-	gtk_progress_bar_set_pulse_step (dialog_data->progress, 0.5);
-	
-	dialog_data->progress_hbox = (GtkBox *) gtk_hbox_new (TRUE, 6);
+	/* dialog_data->spinner = g_object_new (E_TYPE_SPINNER, NULL); */
+	dialog_data->spinner = e_spinner_new_spinning_small_shown ();
+	dialog_data->spinner_label = gtk_label_new (_("Fetching folder list ..."));
 
-	gtk_box_pack_start (dialog_data->progress_hbox, GTK_WIDGET (dialog_data->progress), TRUE, TRUE, 6);
+	dialog_data->spinner_hbox = (GtkBox *) gtk_hbox_new (TRUE, 6);
+
+	gtk_box_pack_start (dialog_data->spinner_hbox, GTK_WIDGET (dialog_data->spinner), TRUE, TRUE, 6);
+	gtk_box_pack_start (dialog_data->spinner_hbox, GTK_WIDGET (dialog_data->spinner_label), TRUE, TRUE, 6);
 
 	/* Pack the TreeView into dialog's content area */
-	gtk_box_pack_start (content_area, GTK_WIDGET (dialog_data->progress_hbox), TRUE, TRUE, 6);
+	gtk_box_pack_start (content_area, GTK_WIDGET (dialog_data->spinner_hbox), TRUE, TRUE, 6);
 	gtk_widget_show_all (GTK_WIDGET (dialog_data->dialog));
 
-	/* Create threads : Assuming that GThread is initialised */
-	FOLDERSIZE_LOCK_INIT();
+	/* Fetch folder list and size information in a thread */
 	folder_list_thread = g_thread_create ((GThreadFunc)mapi_settings_get_folder_size, dialog_data, TRUE, NULL);
-	progress_update_thread = g_thread_create ((GThreadFunc)mapi_settings_pbar_update, dialog_data, TRUE, NULL);
 
 	/* Start the dialog */
 	gtk_dialog_run (dialog_data->dialog);
