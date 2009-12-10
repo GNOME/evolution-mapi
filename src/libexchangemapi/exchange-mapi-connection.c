@@ -3106,8 +3106,8 @@ exchange_mapi_create_profile (const char *username, const char *password, const 
 	}
 	d(g_print("MapiLogonProvider : succeeded \n"));
 
-	retval = ProcessNetworkProfile(session, username, callback, NULL); 
-	if (retval != MAPI_E_SUCCESS) {
+	retval = ProcessNetworkProfile(session, username, callback, data); 
+	If (retval != MAPI_E_SUCCESS) {
 		manage_mapi_error ("ProcessNetworkProfile", GetLastError(), error_msg);
 		g_debug ("Deleting profile %s ", profname); 
 		DeleteProfile(profname); 

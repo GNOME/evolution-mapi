@@ -116,6 +116,16 @@ create_profile_callback (struct SRowSet *rowset, gpointer data)
 	GtkTreeSelection *selection;
 	GtkWidget *dialog, *view;
 	GtkVBox *vbox;
+	const gchar *username = (const gchar *)data;
+
+	/* If we can find the exact username, then find & return its index. */
+	for (i = 0; i < rowset->cRows; i++) {
+		lpProp_account = get_SPropValue_SRow(&(rowset->aRow[i]), PR_ACCOUNT);
+
+		if (lpProp_account && lpProp_account->value.lpszA &&
+		    !g_strcmp0 (username, lpProp_account->value.lpszA))
+			return i;
+	}
 
 	/* NOTE: A good way would be display the list of username entries */
 	/* using GtkEntryCompletion in the username gtkentry. But plugins */
@@ -214,7 +224,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 		gboolean status = exchange_mapi_create_profile (url->user, password, domain_name,
 								url->host, &error_msg, 
 								(mapi_profile_callback_t) create_profile_callback,
-								NULL);
+								url->user);
 		if (status) {
 			/* Things are successful */
 			gchar *profname = NULL, *uri = NULL; 
