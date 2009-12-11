@@ -79,12 +79,6 @@ typedef struct {
 } flags_diff_t;
 
 /*For collecting summary info from server*/
-typedef struct {
-	GSList *items_list;
-	GTimeVal last_modification_time;
-	CamelFolder *folder;
-	CamelFolderChangeInfo *changes;
-}fetch_items_data;
 
 static CamelMimeMessage *mapi_folder_item_to_msg( CamelFolder *folder, MapiItem *item, CamelException *ex );
 static void mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **changeinfo,
@@ -300,7 +294,7 @@ read_item_common (MapiItem *item, uint32_t ulPropTag, gconstpointer prop_data)
 }
 
 static gboolean
-fetch_items_cb (FetchItemsCallbackData *item_data, gpointer data)
+fetch_items_summary_cb (FetchItemsCallbackData *item_data, gpointer data)
 {
 	fetch_items_data *fi_data = (fetch_items_data *)data;
 	
@@ -966,26 +960,12 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 }
 
-
-void
-mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
+gboolean
+camel_mapi_folder_fetch_summary (CamelStore *store, const mapi_id_t fid, struct mapi_SRestriction *res,
+				 struct SSortOrderSet *sort, fetch_items_data *fetch_data, guint32 options)
 {
-
-	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (folder->parent_store);
-	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (folder);
-	CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (folder->summary);
-	CamelSession *session = ((CamelService *)folder->parent_store)->session;
-
-	gboolean is_proxy = folder->parent_store->flags & CAMEL_STORE_PROXY;
-	gboolean is_locked = FALSE;
 	gboolean status;
-
-	struct mapi_SRestriction *res = NULL;
-	struct SSortOrderSet *sort = NULL;
-	struct mapi_update_deleted_msg *deleted_items_op_msg;
-	fetch_items_data *fetch_data = g_new0 (fetch_items_data, 1);
-
-	const gchar *folder_id = NULL;
+	const gchar *folder_name;
 
 	const guint32 summary_prop_list[] = {
 		PR_INTERNET_CPID,
@@ -1013,6 +993,43 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		PR_TRANSPORT_MESSAGE_HEADERS,
 		PR_TRANSPORT_MESSAGE_HEADERS_UNICODE
 	};
+
+	/*TODO : Check for online state*/
+
+	camel_operation_start (NULL, _("Fetching summary information for new messages in")); /* %s"), folder->name); */
+
+	status = exchange_mapi_connection_fetch_items  (fid, res, sort, summary_prop_list,
+							G_N_ELEMENTS (summary_prop_list), 
+							NULL, NULL, fetch_items_summary_cb,
+							fetch_data, options);
+
+	if (!status)
+		camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_INVALID, _("Fetching items failed"));
+
+	camel_operation_end (NULL);
+
+	return status;
+}
+
+void
+mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
+{
+
+	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (folder->parent_store);
+	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (folder);
+	CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (folder->summary);
+	CamelSession *session = ((CamelService *)folder->parent_store)->session;
+
+	gboolean is_proxy = folder->parent_store->flags & CAMEL_STORE_PROXY;
+	gboolean is_locked = FALSE;
+	gboolean status;
+
+	struct mapi_SRestriction *res = NULL;
+	struct SSortOrderSet *sort = NULL;
+	struct mapi_update_deleted_msg *deleted_items_op_msg;
+	fetch_items_data *fetch_data = g_new0 (fetch_items_data, 1);
+
+	const gchar *folder_id = NULL;
 
 	if (((CamelOfflineStore *) mapi_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL)
 		goto end1;
@@ -1089,14 +1106,8 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		if (((CamelMapiFolder *)folder)->type & CAMEL_MAPI_FOLDER_PUBLIC)
 			options |= MAPI_OPTIONS_USE_PFSTORE;
 
-		camel_operation_start (NULL, _("Fetching summary information for new messages in %s"), folder->name);
-
-		status = exchange_mapi_connection_fetch_items  (temp_folder_id, res, sort,
-								summary_prop_list, G_N_ELEMENTS (summary_prop_list), 
-								NULL, NULL, 
-								fetch_items_cb, fetch_data, 
-								options);
-		camel_operation_end (NULL);
+		status = camel_mapi_folder_fetch_summary (mapi_store, temp_folder_id, res, sort,
+							  fetch_data, options);
 
 		if (!status) {
 			camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_INVALID, _("Fetching items failed"));
@@ -1139,6 +1150,7 @@ static const uint32_t camel_GetPropsList[] = {
 	PR_FID, 
 	PR_MID, 
 	PR_INTERNET_CPID,
+
 
 	PR_TRANSPORT_MESSAGE_HEADERS,
 	PR_TRANSPORT_MESSAGE_HEADERS_UNICODE,
@@ -1815,6 +1827,8 @@ mapi_get_message_info(CamelFolder *folder, const char *uid)
 		mi = (CamelMessageInfoBase *)msg_info ;
 		return (msg_info);
 	}
+	/* Go online and fetch message summary. */
+
 	msg_info = camel_message_info_new(folder->summary);
 	mi = (CamelMessageInfoBase *)msg_info ;
 

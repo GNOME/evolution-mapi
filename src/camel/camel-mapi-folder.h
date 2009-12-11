@@ -128,6 +128,12 @@ struct _CamelMapiFolderClass {
 	
 } ;
 
+typedef struct {
+	GSList *items_list;
+	GTimeVal last_modification_time;
+	CamelFolder *folder;
+	CamelFolderChangeInfo *changes;
+}fetch_items_data;
 
 /* Standard Camel function */
 CamelType camel_mapi_folder_get_type (void);
@@ -138,6 +144,8 @@ camel_mapi_folder_new(CamelStore *store, const char *folder_name, const char *fo
 
 void mapi_update_summary ( CamelFolder *folder, GList *item_list,CamelException *ex) ;
 void mapi_refresh_folder(CamelFolder *folder, CamelException *ex);
+gboolean camel_mapi_folder_fetch_summary (CamelStore *store, const mapi_id_t fid, struct mapi_SRestriction *res,
+					  struct SSortOrderSet *sort, fetch_items_data *fetch_data, guint32 options);
 
 G_END_DECLS
 
