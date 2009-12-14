@@ -1,3 +1,22 @@
+evolution-mapi 0.28.2 2009-12-14
+---------------------------------
+
+Bug Fixes:
+	Bug #600560 - Calendar information only up to yesterday (Milan Crha)
+	Bug #568763 - Sending mail fails for cluster setup (Bharath Acharya)
+	Bug #601202 - Evo deletes system addressbook (Bharath Acharya)
+	Bug #573736 - Expunge Folder in MAPI INBOX deletes all email messages
+	(Johnny Jacob)
+	Bug #561794 - Store sent messages in Sent Items, not Outbox (Milan Crha)
+	Bug #595480 - 100% CPU usage fix (Milan Crha)
+	Bug #586203 - Meeting timings are shown in UTC (Milan Crha)
+	Bug #595480 - Stop fetching GAL every time (Bharath Acharya)
+	Bug #601212 - eds crashes when try to delete mapi GAL (Milan Crha)
+	Bug #600394 - Return also UID when creating a new event (Milan Crha)
+
+Translations:
+	Tao Wei (zh_CN)
+
 evolution-mapi 0.28.1 2009-10-19
 ---------------------------------
 
