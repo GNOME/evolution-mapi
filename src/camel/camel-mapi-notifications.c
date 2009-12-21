@@ -221,8 +221,9 @@ static CamelSessionThreadOps mapi_push_notification_ops = {
 	mapi_push_notification_listener_close,
 };
 
+/*Of type mapi_notify_continue_callback_t*/
 static gint
-mapi_notifications_continue_check (void)
+mapi_notifications_continue_check (gpointer data)
 {
 	if (camel_operation_cancel_check(NULL) || (camel_application_is_exiting == TRUE))
 		return 1;
@@ -235,19 +236,29 @@ mapi_push_notification_listener (CamelSession *session, CamelSessionThreadMsg *m
 {
 	struct mapi_push_notification_msg *m = (struct mapi_push_notification_msg *)msg;
 	CamelMapiStore *mapi_store = (CamelMapiStore *) m->event_data;
+	struct mapi_notify_continue_callback_data *cb_data = g_new0 (struct mapi_notify_continue_callback_data, 1);
+
+	/* Timeout for select in MonitorNotification*/
+	cb_data->tv.tv_sec = 2;
+	cb_data->tv.tv_usec = 0;
+
+	/* API would consult us if we want to continue with processing events*/
+	cb_data->callback = mapi_notifications_continue_check;
+	cb_data->data = NULL;
 
 	CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
+
 	if (exchange_mapi_events_init ()) {
 		exchange_mapi_events_subscribe (0, m->event_options, m->event_mask,
 						&m->connection,	mapi_notifications_filter,
 						m->event_data);
 
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
-		/* Need a better API for canceling this operation*/
-		exchange_mapi_events_monitor (mapi_notifications_continue_check);
+		exchange_mapi_events_monitor (cb_data); /*Blocking call. Don't hold locks here*/
 	} else 
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 
+	g_free (cb_data);
 }
 
 static void

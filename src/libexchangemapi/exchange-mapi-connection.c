@@ -3059,10 +3059,10 @@ exchange_mapi_events_unsubscribe (mapi_object_t *obj, guint32 connection)
 
 /* Note : Blocking infinite loop. */
 gboolean
-exchange_mapi_events_monitor (mapi_notify_continue_callback_t check)
+exchange_mapi_events_monitor (struct mapi_notify_continue_callback_data *cb_data)
 {
 	enum MAPISTATUS	retval;
-	retval = MonitorNotification (global_mapi_session, NULL, check);
+	retval = MonitorNotification (global_mapi_session, NULL, cb_data);
 	return retval;
 }
 

@@ -218,7 +218,7 @@ typedef gboolean (*exchange_check_continue) (void);
 
 gboolean exchange_mapi_events_init ();
 
-gboolean exchange_mapi_events_monitor (exchange_check_continue check);
+gboolean exchange_mapi_events_monitor (struct mapi_notify_continue_callback_data *cb_data);
 
 void exchange_mapi_events_monitor_close ();
 
