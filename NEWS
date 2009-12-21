@@ -1,3 +1,19 @@
+evolution-mapi 0.29.4 2009-12-21
+--------------------------------
+Bug Fixes:
+        Bug #602945 - Avoid code duplication with timezone fetching from backends (Milan Crha)
+        Bug #600560 - Calendar information only up to yesterday (Milan Crha)
+
+Other Fixes:
+        Account Setup : If we can find the username in the list of possible matches, return the index. (Johnny Jacob)
+        Implement mapi_folder_search_by_uids used with search folders (Milan Crha)
+        Remove unnecessary e-error.h include (Jonathon Jongsma)
+        Folder Size EPlugin : Removed nasty progress bar code and replaced it with e-spinner. (Johnny Jacob)
+
+Translations:
+	Kjartan Maraas (nb)
+	Lucian Adrian Grijincu (ro)
+
 evolution-mapi 0.29.3 2009-11-29
 --------------------------------
 
