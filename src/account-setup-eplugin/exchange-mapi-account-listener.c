@@ -453,6 +453,11 @@ add_addressbook_sources (EAccount *account, GSList *folders)
 		e_source_set_property (source, "completion", "true");
 		if (folder->is_default) 
 			e_source_set_property (source, "delete", "no");
+		if (folder->parent_folder_id) {
+			gchar *tmp = exchange_mapi_util_mapi_id_to_string (folder->parent_folder_id);
+			e_source_set_property (source, "parent-fid", tmp);
+			g_free (tmp);
+		}
 		e_source_group_add_source (group, source, -1);
 		g_object_unref (source);
 	}
