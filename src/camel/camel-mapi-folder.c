@@ -2009,7 +2009,8 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 					 item->recipients, item->attachments,
 					 item->generic_streams, 0);
 
-	*appended_uid = exchange_mapi_util_mapi_ids_to_uid(fid, mid);
+	if (appended_uid)
+		*appended_uid = exchange_mapi_util_mapi_ids_to_uid(fid, mid);
 }
 
 static void
