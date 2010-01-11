@@ -1,3 +1,9 @@
+evolution-mapi 0.29.5 2010-01-11
+--------------------------------
+Bug Fixes:
+	Bug #590001 - can't mark book for offline usage. (Bharath Acharya)
+	Bug #606338 - Do not dereference NULL pointer in mapi_append_message. (Milan Crha)
+
 evolution-mapi 0.29.4 2009-12-21
 --------------------------------
 Bug Fixes:
