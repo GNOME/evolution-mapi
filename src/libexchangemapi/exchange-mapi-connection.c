@@ -897,14 +897,17 @@ exchange_mapi_util_modify_recipients (TALLOC_CTX *mem_ctx, mapi_object_t *obj_me
 
 	d(g_print("\n%s: Entering %s ", G_STRLOC, G_STRFUNC));
 
-	SPropTagArray = set_SPropTagArray(mem_ctx, 0x6,
+	SPropTagArray = set_SPropTagArray(mem_ctx, 0xA,
+					  PR_ENTRYID,
+					  PR_DISPLAY_NAME_UNICODE,
 					  PR_OBJECT_TYPE,
 					  PR_DISPLAY_TYPE,
-					  PR_7BIT_DISPLAY_NAME,
-					  PR_DISPLAY_NAME,
-					  PR_SMTP_ADDRESS,
-					  PR_GIVEN_NAME);
-
+					  PR_TRANSMITTABLE_DISPLAY_NAME_UNICODE,
+					  PR_EMAIL_ADDRESS_UNICODE,
+					  PR_ADDRTYPE_UNICODE,
+					  PR_SEND_RICH_INFO,
+					  PR_7BIT_DISPLAY_NAME_UNICODE,
+					  PR_SMTP_ADDRESS_UNICODE);
 
 	count = g_slist_length (recipients);
 	users = g_new0 (const char *, count + 1);
@@ -916,7 +919,7 @@ exchange_mapi_util_modify_recipients (TALLOC_CTX *mem_ctx, mapi_object_t *obj_me
 
 	/* Attempt to resolve names from the server */
 	LOCK ();
-	retval = ResolveNames (global_mapi_session, users, SPropTagArray, &SRowSet, &FlagList, 0);
+	retval = ResolveNames (global_mapi_session, users, SPropTagArray, &SRowSet, &FlagList, MAPI_UNICODE);
 	UNLOCK ();
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("ResolveNames", GetLastError());
@@ -945,10 +948,7 @@ exchange_mapi_util_modify_recipients (TALLOC_CTX *mem_ctx, mapi_object_t *obj_me
 			set_recipient_properties(mem_ctx, &SRowSet->aRow[last], recipient, TRUE);
 			SRowSet->cRows += 1;
 		} else if (FlagList->aulPropTag[i] == MAPI_RESOLVED) {
-			/* FIXME: Even though some recipients are resolved, their mailboxes need not reside 
-			on the same server in case of cluster setups. So lets set ext_lpProps for all recipients.
-			Lets have this fix until we have openchange handling this case better. */
-			set_recipient_properties (mem_ctx, &SRowSet->aRow[j], recipient, TRUE);
+			set_recipient_properties (mem_ctx, &SRowSet->aRow[j], recipient, FALSE);
 			j += 1;
 		}
 	}
