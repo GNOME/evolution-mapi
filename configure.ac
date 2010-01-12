@@ -25,7 +25,7 @@ dnl Required Packages
 dnl *******************
 m4_define([eds_minimum_version], [2.29.4])
 m4_define([evo_minimum_version], [2.29.4])
-m4_define([libmapi_minimum_version], [0.8])
+m4_define([libmapi_minimum_version], [0.9])
 
 dnl ***********************************
 dnl Automake 1.11 - Silent Build Rules
