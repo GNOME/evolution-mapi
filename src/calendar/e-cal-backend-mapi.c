@@ -1873,6 +1873,8 @@ e_cal_backend_mapi_send_objects (ECalBackendSync *backend, EDataCal *cal, const 
 			GSList *recipients = NULL;
 			GSList *attachments = NULL;
 			GSList *streams = NULL;
+			const gchar *compuid;
+			struct Binary_r globalid;
 
 			e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
 
@@ -1937,6 +1939,11 @@ e_cal_backend_mapi_send_objects (ECalBackendSync *backend, EDataCal *cal, const 
 			cbdata.ownerid = e_cal_backend_mapi_get_owner_email (cbmapi);
 			cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) e_cal_backend_mapi_internal_get_timezone;
 			cbdata.get_tz_data = cbmapi;
+
+			e_cal_component_get_uid (comp, &compuid);
+			exchange_mapi_cal_util_generate_globalobjectid (TRUE, compuid, &globalid);
+			cbdata.globalid = &globalid;
+			cbdata.cleanglobalid = &globalid;
 
 			mid = exchange_mapi_create_item (olFolderSentMail, 0,
 							exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind), 
