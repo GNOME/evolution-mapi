@@ -1,22 +1,23 @@
-# Bulgarian translation for evolution-mapi po-file.
+# Bulgarian translation of evolution-mapi po-file.
 # Copyright (C) 2009 Free Software Foundation, Inc.
 # Alexander Shopov <ash@contact.bg>, 2009.
+# Krasimir Chonov <mk2616@abv.bg>, 2010.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-22 19:00+0300\n"
-"PO-Revision-Date: 2009-08-22 19:00+0300\n"
-"Last-Translator: Alexander Shopov <ash@contact.bg>\n"
+"POT-Creation-Date: 2010-01-15 20:52+0200\n"
+"PO-Revision-Date: 2010-01-13 16:55+0200\n"
+"Last-Translator: Krasimir Chonov <mk2616@abv.bg>\n"
 "Language-Team: Bulgarian <dict@fsa-bg.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:624
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:214
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Въведете паролата на %s@%s"
@@ -25,19 +26,19 @@ msgstr "Въведете паролата на %s@%s"
 #. using GtkEntryCompletion in the username gtkentry. But plugins
 #. as of now does not have access to it
 #. TODO : Fix strings
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
 msgid "Select username"
 msgstr "Изберете име на потребител"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:145
 msgid "Full name"
 msgstr "Цяло име"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:150
 msgid "User name"
 msgstr "Име на потребител"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -45,103 +46,105 @@ msgstr ""
 "Имената на сървъра, потребителя и домейна не могат да са празни. Въведете "
 "правилни стойности."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:241
 msgid "Authentication finished successfully."
 msgstr "Идентификацията мина успешно."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:247
 msgid "Authentication failed."
 msgstr "Неуспешна идентификация."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
 msgid "_Domain name:"
 msgstr "_Име на домейна"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:319
 msgid "_Authenticate"
 msgstr "_Идентификация"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:421
 msgid "Personal Folders"
 msgstr "Лични папки"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:483
 msgid "_Location:"
 msgstr "_Местоположение:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
-msgid "_Folder size"
-msgstr "_Размер на папка"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:101
 msgid "Folder"
 msgstr "Папка"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:106
 msgid "Size"
 msgstr "Размер"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:126
 msgid "Unable to retrieve folder size information"
 msgstr "Размерът на папката не може да бъде получен"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:147
 msgid "Folder Size"
 msgstr "Размер на папката"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:156
 msgid "Fetching folder list ..."
 msgstr "Изтегляне на списъка с папки…"
 
 #. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:270
 msgid "Miscellaneous"
 msgstr "Разни"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:283
 msgid "View the size of all Exchange folders"
 msgstr "Разглеждане на размера на всички папки в Ексчейндж"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:285
 msgid "Folders Size"
 msgstr "Размер на папките"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:296
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
 msgstr "Настройки на Ексчейндж"
 
-#: ../src/calendar/e-cal-backend-mapi.c:115
-#: ../src/calendar/e-cal-backend-mapi.c:1053
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:305
+msgid "Folder size"
+msgstr "Размер на папка"
+
+#: ../src/calendar/e-cal-backend-mapi.c:114
+#: ../src/calendar/e-cal-backend-mapi.c:1141
 #: ../src/camel/camel-mapi-store.c:472
 msgid "Authentication failed"
 msgstr "Неуспешна идентификация"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:391
+#: ../src/calendar/e-cal-backend-mapi.c:390
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Зареждане на обектите в папка %s"
 
 #. FIXME: String : We need to restart evolution-data-server
-#: ../src/calendar/e-cal-backend-mapi.c:581
-#: ../src/calendar/e-cal-backend-mapi.c:592
-#: ../src/calendar/e-cal-backend-mapi.c:618
+#: ../src/calendar/e-cal-backend-mapi.c:622
+#: ../src/calendar/e-cal-backend-mapi.c:633
+#: ../src/calendar/e-cal-backend-mapi.c:661
+#: ../src/calendar/e-cal-backend-mapi.c:723
+#: ../src/calendar/e-cal-backend-mapi.c:733
 msgid "Error fetching changes from the server."
 msgstr "Грешка при изтеглянето на промените от сървъра."
 
-#: ../src/calendar/e-cal-backend-mapi.c:973
-#: ../src/calendar/e-cal-backend-mapi.c:983
-#: ../src/calendar/e-cal-backend-mapi.c:1088
-#: ../src/calendar/e-cal-backend-mapi.c:1170
+#: ../src/calendar/e-cal-backend-mapi.c:1061
+#: ../src/calendar/e-cal-backend-mapi.c:1071
+#: ../src/calendar/e-cal-backend-mapi.c:1176
+#: ../src/calendar/e-cal-backend-mapi.c:1258
 msgid "Could not create cache file"
 msgstr "Временният файл не може да бъде създаден"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1099
+#: ../src/calendar/e-cal-backend-mapi.c:1187
 msgid "Could not create thread for populating cache"
 msgstr "Нишката за попълването на временния файл не може да бъде създадена"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1513
+#: ../src/calendar/e-cal-backend-mapi.c:1608
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -149,37 +152,37 @@ msgstr ""
 "Поддръжката на промяната на едно събитие от поредица от повтарящи се срещи "
 "все още не е реализирана. При сървъра не са направени промени."
 
-#: ../src/camel/camel-mapi-folder.c:475
+#: ../src/camel/camel-mapi-folder.c:498
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr ""
 "Обновяване на временния файл с обобщената информация за новите писма в %s"
 
-#: ../src/camel/camel-mapi-folder.c:699
+#: ../src/camel/camel-mapi-folder.c:731
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Изтегляне на идентификаторите на изображенията от сървъра към %s"
 
-#: ../src/camel/camel-mapi-folder.c:721
+#: ../src/camel/camel-mapi-folder.c:753
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Премахване на изтритите съобщения от временния файл към %s"
 
-#: ../src/camel/camel-mapi-folder.c:1025 ../src/camel/camel-mapi-folder.c:1624
-#: ../src/camel/camel-mapi-folder.c:1632
+#: ../src/camel/camel-mapi-folder.c:1083 ../src/camel/camel-mapi-folder.c:1716
+#: ../src/camel/camel-mapi-folder.c:1724
 msgid "This message is not available in offline mode."
 msgstr "Това писмо е недостъпно в режим „Изключен“."
 
-#: ../src/camel/camel-mapi-folder.c:1034
+#: ../src/camel/camel-mapi-folder.c:1092
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Изтегляне на обобщената информация за новите писма в %s"
 
-#: ../src/camel/camel-mapi-folder.c:1044
+#: ../src/camel/camel-mapi-folder.c:1102
 msgid "Fetching items failed"
 msgstr "Неуспешно изтегляне на обекти"
 
-#: ../src/camel/camel-mapi-folder.c:1588
+#: ../src/camel/camel-mapi-folder.c:1680
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -188,34 +191,33 @@ msgstr ""
 "Съобщението не може да бъде получено: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1588
+#: ../src/camel/camel-mapi-folder.c:1680
 msgid "No such message"
 msgstr "Няма такова съобщение"
 
-#: ../src/camel/camel-mapi-folder.c:1600
+#: ../src/camel/camel-mapi-folder.c:1692
 msgid "Message fetching cancelled by user."
 msgstr "Изтеглянето на съобщения е преустановено от потребителя."
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1699
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Съобщението не може да бъде получено: %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1653 ../src/camel/camel-mapi-folder.c:1665
+#: ../src/camel/camel-mapi-folder.c:1745 ../src/camel/camel-mapi-folder.c:1754
 msgid "Could not get message"
 msgstr "Съобщението не може да бъде получено"
 
-#: ../src/camel/camel-mapi-folder.c:1945
+#: ../src/camel/camel-mapi-folder.c:2034
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Съобщението не може да бъде добавено към папката „%s“"
 
-#: ../src/camel/camel-mapi-folder.c:1952
-#, c-format
-msgid "Offline. '%s'"
-msgstr "Изключен. „%s“"
+#: ../src/camel/camel-mapi-folder.c:2041
+msgid "Offline."
+msgstr "Изключен."
 
-#: ../src/camel/camel-mapi-folder.c:2072
+#: ../src/camel/camel-mapi-folder.c:2162
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Обобщената информация за „%s“ не може да бъде заредена"
@@ -328,7 +330,7 @@ msgstr "Стандартната папка по MAPI „%s“ не може д�
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "Папката по MAPI „%s“ не може да бъде преименувана на „%s“."
 
-#: ../src/camel/camel-mapi-store.c:1227
+#: ../src/camel/camel-mapi-store.c:1229
 msgid "Folder list not available in offline mode."
 msgstr "Списъкът с папки е недостъпен в режим „Изключен“."
 
