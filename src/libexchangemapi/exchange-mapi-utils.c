@@ -46,8 +46,25 @@ utf8tolinux (const char *wstring)
 {
 	TALLOC_CTX 	*mem_ctx;
 	gchar		*newstr, *retval = NULL;
+	gint i;
+	gboolean all_ok = TRUE;
 
 	g_return_val_if_fail (wstring != NULL, NULL);
+
+	/* If all letters are with code <128 then there is nothing
+	   to be converted, thus return the original string copy.
+	   It's not working always, but should be fine for now.
+
+	   This is a temporary hack before the windows_to_utf8 will
+	   be fixed to not drop some letters.
+	*/
+	for (i = 0; all_ok && wstring[i]; i++) {
+		/* signed char, thus '> 128' means '< 0' */
+		all_ok = wstring[i] > 0;
+	}
+
+	if (all_ok)
+		return g_strdup (wstring);
 
 	mem_ctx = talloc_init ("ExchangeMAPI_utf8tolinux");
 

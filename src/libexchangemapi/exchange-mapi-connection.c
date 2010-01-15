@@ -1127,7 +1127,7 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 	}
 
 	/* Get a handle on the container */
-	retval = GetContentsTable(&obj_folder, &obj_table, 0, NULL);
+	retval = GetContentsTable(&obj_folder, &obj_table, TableFlags_UseUnicode, NULL);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("GetContentsTable", GetLastError());
 		goto cleanup;
