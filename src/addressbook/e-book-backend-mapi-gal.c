@@ -418,7 +418,7 @@ e_book_backend_mapi_gal_load_source (EBookBackend *backend,
 }
 
 static void 
-e_book_backend_mapi_gal_set_mode (EBookBackend *backend, int mode)
+e_book_backend_mapi_gal_set_mode (EBookBackend *backend, GNOME_Evolution_Addressbook_BookMode mode)
 {
 	EBookBackendMAPIGALPrivate *priv = ((EBookBackendMAPIGAL *) backend)->priv;
 
@@ -802,12 +802,24 @@ init_closure (EDataBookView *book_view, EBookBackendMAPIGAL *bg)
 }
 
 static void
+e_book_backend_mapi_gal_get_contact (EBookBackend *backend,
+				     EDataBook    *book,
+				     guint32       opid,
+				     const char   *id)
+{
+	if (enable_debug)
+		printf ("mapi: get contact %s\n", id);
+
+	e_data_book_respond_get_contact (book, opid, GNOME_Evolution_Addressbook_RepositoryOffline, NULL);
+}
+
+static void
 e_book_backend_mapi_gal_get_contact_list (EBookBackend *backend,
 					    EDataBook    *book,
 					    guint32       opid,
 					    const char   *query )
 {
-	EBookBackendMAPIGALPrivate *priv = ((EBookBackendMAPIGAL *) backend)->priv;
+	/*EBookBackendMAPIGALPrivate *priv = ((EBookBackendMAPIGAL *) backend)->priv;*/
 
 	if(enable_debug)
 		printf("mapi: get contact list %s\n", query);
@@ -817,7 +829,6 @@ e_book_backend_mapi_gal_get_contact_list (EBookBackend *backend,
 
 	return;
 }
-
 
 static void
 e_book_backend_mapi_gal_start_book_view (EBookBackend  *backend,
@@ -843,6 +854,42 @@ e_book_backend_mapi_gal_stop_book_view (EBookBackend  *backend,
 }
 
 static void
+e_book_backend_mapi_gal_get_changes (EBookBackend *backend, EDataBook *book, guint32 opid, const char *change_id)
+{
+	if (enable_debug)
+		printf ("mapi: get changes\n");
+
+	e_data_book_respond_get_changes (book, opid, GNOME_Evolution_Addressbook_RepositoryOffline, NULL);
+}
+
+static void 
+e_book_backend_mapi_gal_get_supported_auth_methods (EBookBackend *backend, EDataBook *book, guint32 opid)
+{
+	GList *auth_methods = NULL;
+	char *auth_method;
+	
+	if (enable_debug)
+		printf ("mapi get_supported_auth_methods...\n");
+
+	auth_method =  g_strdup_printf ("plain/password");
+	auth_methods = g_list_append (auth_methods, auth_method);
+	e_data_book_respond_get_supported_auth_methods (book,
+							opid,
+							GNOME_Evolution_Addressbook_Success,
+							auth_methods);  
+	g_free (auth_method);
+	g_list_free (auth_methods);	
+}
+
+static GNOME_Evolution_Addressbook_CallStatus
+e_book_backend_mapi_gal_cancel_operation (EBookBackend *backend, EDataBook *book)
+{
+	if (enable_debug)
+		printf ("mapi cancel_operation...\n");
+	return GNOME_Evolution_Addressbook_CouldNotCancel;
+}
+
+static void
 e_book_backend_mapi_gal_remove (EBookBackend *backend, EDataBook *book, guint32 opid)
 {
 	e_data_book_respond_remove (book, opid, GNOME_Evolution_Addressbook_PermissionDenied);
@@ -865,12 +912,16 @@ static void e_book_backend_mapi_gal_class_init (EBookBackendMAPIGALClass *klass)
 	parent_class->load_source		 = e_book_backend_mapi_gal_load_source;
 	parent_class->get_static_capabilities    = e_book_backend_mapi_gal_get_static_capabilities;
 
+	parent_class->get_contact                = e_book_backend_mapi_gal_get_contact;
 	parent_class->get_contact_list           = e_book_backend_mapi_gal_get_contact_list;
 	parent_class->start_book_view            = e_book_backend_mapi_gal_start_book_view;
 	parent_class->stop_book_view             = e_book_backend_mapi_gal_stop_book_view;
+	parent_class->get_changes                = e_book_backend_mapi_gal_get_changes;
 	parent_class->authenticate_user          = e_book_backend_mapi_gal_authenticate_user;
 	parent_class->get_supported_fields	 = e_book_backend_mapi_gal_get_supported_fields;
 	parent_class->get_required_fields	 = e_book_backend_mapi_gal_get_required_fields;
+	parent_class->get_supported_auth_methods = e_book_backend_mapi_gal_get_supported_auth_methods;
+	parent_class->cancel_operation		 = e_book_backend_mapi_gal_cancel_operation;
 	parent_class->set_mode                   = e_book_backend_mapi_gal_set_mode;
 	parent_class->remove			 = e_book_backend_mapi_gal_remove;
 	object_class->dispose                    = e_book_backend_mapi_gal_dispose;
