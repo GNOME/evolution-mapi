@@ -1395,6 +1395,7 @@ e_book_backend_mapi_get_changes (EBookBackend *backend,
 	if(enable_debug)
 		printf("mapi: get changes\n");	
 	/* FIXME : provide implmentation */
+	e_data_book_respond_get_changes (book, opid, GNOME_Evolution_Addressbook_RepositoryOffline, NULL);
 }
 
 static gboolean 
