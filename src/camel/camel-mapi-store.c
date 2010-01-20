@@ -383,7 +383,11 @@ mapi_connect(CamelService *service, CamelException *ex)
 	event_mask = fnevNewMail | fnevObjectCreated | fnevObjectDeleted |
 		fnevObjectModified | fnevObjectMoved | fnevObjectCopied;
 
+	CAMEL_SERVICE_REC_LOCK (store, connect_lock);
+
 	camel_mapi_notfication_listener_start (store, event_mask, MAPI_EVENTS_USE_STORE);
+
+	CAMEL_SERVICE_REC_UNLOCK (store, connect_lock);
 
 	camel_store_summary_save ((CamelStoreSummary *) store->summary);
 
@@ -1252,7 +1256,12 @@ mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelE
 		return;
 	}
 
+	CAMEL_SERVICE_REC_LOCK (store, connect_lock);
+
 	status = exchange_mapi_get_folders_list (&folder_list);
+
+	CAMEL_SERVICE_REC_UNLOCK (store, connect_lock);
+
 	if (!status) {
 		g_warning ("Could not get folder list..\n");
 		return;
