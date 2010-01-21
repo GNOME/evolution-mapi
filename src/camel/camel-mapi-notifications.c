@@ -228,6 +228,11 @@ mapi_notifications_continue_check (gpointer data)
 	if (camel_operation_cancel_check(NULL) || (camel_application_is_exiting == TRUE))
 		return 1;
 
+	/* HACK ALERT : This is a BAD idea. But ;-), A bug in MonitorNotification */
+	/* makes select() return immediately. We are introducing a artificial delay here */
+	/* to avoid high CPU usage. Remove this when libmapi 0.9.1 is out */
+	g_usleep (G_USEC_PER_SEC * 2);
+
 	return 0;
 }
 
