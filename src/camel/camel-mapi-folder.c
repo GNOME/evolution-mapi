@@ -1974,12 +1974,12 @@ mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store, source->full_name) ;
 	exchange_mapi_util_mapi_id_from_string (folder_id, &src_fid);
 
-	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store, destination->full_name) ;
+	folder_id = camel_mapi_store_folder_id_lookup (mapi_store, destination->full_name);
 	exchange_mapi_util_mapi_id_from_string (folder_id, &dest_fid);
 
 	for (i=0; i < uids->len; i++) {
 		mapi_id_t *mid = g_new0 (mapi_id_t, 1); /* FIXME : */
-		if (!exchange_mapi_util_mapi_ids_from_uid (g_ptr_array_index (uids, i), &src_fid, mid)) 
+		if (!exchange_mapi_util_mapi_ids_from_uid (g_ptr_array_index (uids, i), &src_fid, mid))
 			continue;
 
 		src_msg_ids = g_slist_prepend (src_msg_ids, mid);
