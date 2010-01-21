@@ -432,10 +432,38 @@ mapi_get_folder(CamelStore *store, const char *folder_name, guint32 flags, Camel
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
 	CamelMapiStorePrivate *priv = mapi_store->priv;
+	CamelMapiStoreInfo *si;
 	CamelFolder *folder;
-	char *storage_path = NULL;
+	gchar *storage_path = NULL;
 
-	storage_path = g_strdup_printf("%s/folders", priv->storage_path);
+	si = camel_mapi_store_summary_full_name (mapi_store->summary, folder_name);
+	if (!si && (flags & CAMEL_STORE_FOLDER_CREATE) == CAMEL_STORE_FOLDER_CREATE) {
+		gchar *name, *tmp;
+		const gchar *parent;
+		CamelFolderInfo *folder_info;
+
+		tmp = g_strdup (folder_name);
+		if (!(name = strrchr (tmp, '/'))) {
+			name = tmp;
+			parent = "";
+		} else {
+			*name++ = '\0';
+			parent = tmp;
+		}
+
+		folder_info = mapi_create_folder (store, parent, name, ex);
+		g_free (tmp);
+
+		if (!folder_info)
+			return NULL;
+
+		camel_store_free_folder_info (store, folder_info);
+	}
+
+	if (si)
+		camel_store_summary_info_free ((CamelStoreSummary *)mapi_store->summary, (CamelStoreInfo *)si);
+
+	storage_path = g_strdup_printf ("%s/folders", priv->storage_path);
 
 	folder = camel_mapi_folder_new (store, folder_name, storage_path, flags, ex);
 	g_free (storage_path);
@@ -462,7 +490,7 @@ mapi_create_folder(CamelStore *store, const char *parent_name, const char *folde
 				      folder_name);
 		return NULL;
 	}
-	
+
 	if (parent_name && (strlen(parent_name) > 0) )
 		parent_id = g_strdup (g_hash_table_lookup (priv->name_hash, parent_name));
 	else
@@ -486,7 +514,7 @@ mapi_create_folder(CamelStore *store, const char *parent_name, const char *folde
 		si = camel_mapi_store_summary_add_from_full(mapi_store->summary, root->full_name, '/', fid, parent_id);
 		camel_store_summary_save((CamelStoreSummary *)mapi_store->summary);
 
-		mapi_update_folder_hash_tables (mapi_store, folder_name, fid, parent_id);
+		mapi_update_folder_hash_tables (mapi_store, root->full_name, fid, parent_id);
 
 		camel_object_trigger_event (CAMEL_OBJECT (store), "folder_created", root);
 	}
@@ -1142,15 +1170,10 @@ mapi_folders_update_hash_tables_from_cache (CamelMapiStore *store)
 
 	for (i = 0; i < summary_count; i++) {
 		CamelMapiStoreInfo *si = (CamelMapiStoreInfo *) camel_store_summary_index(summary, i);
-		gchar *name;
 		
 		if (si == NULL) continue;
 
-		name = g_strrstr(si->full_name, "/");
-		name ? ++name : si->full_name;
-
-		mapi_update_folder_hash_tables (store, name, si->folder_id, si->parent_id);
-		
+		mapi_update_folder_hash_tables (store, si->full_name, si->folder_id, si->parent_id);
 	}
 }
 
@@ -1268,14 +1291,14 @@ mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelE
 	
 	/*populate the hash table for finding the mapping from container id <-> folder name*/
 	for (;temp_list != NULL ; temp_list = g_slist_next (temp_list) ) {
-		const char *name;
+		const char *full_name;
 		gchar *fid = NULL, *parent_id = NULL;
 
-		name = exchange_mapi_folder_get_name ((ExchangeMAPIFolder *)(temp_list->data));
+		full_name = exchange_mapi_folder_get_name ((ExchangeMAPIFolder *)(temp_list->data));
 		fid = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", exchange_mapi_folder_get_fid((ExchangeMAPIFolder *)(temp_list->data)));
 		parent_id = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", exchange_mapi_folder_get_parent_id ((ExchangeMAPIFolder *)(temp_list->data)));
 
-		mapi_update_folder_hash_tables (store, name, fid, parent_id);
+		mapi_update_folder_hash_tables (store, full_name, fid, parent_id);
 
 		if (((ExchangeMAPIFolder *)(temp_list->data))->is_default) {
 			guint *type = g_new0 (guint, 1);
@@ -1418,7 +1441,6 @@ mapi_subscribe_folder(CamelStore *store, const char *folder_name, CamelException
 	CamelStoreInfo *si = NULL;
 	gchar *parent_name = NULL;
 	gchar *f_name = NULL;
-	CamelURL *url;
 	/* TODO : exchange_mapi_add_to_favorites (); */
 
 	si = camel_store_summary_path((CamelStoreSummary *)mapi_store->summary, folder_name);
@@ -1441,18 +1463,14 @@ mapi_subscribe_folder(CamelStore *store, const char *folder_name, CamelException
 			return;
 	}
 
-	fi = mapi_build_folder_info(mapi_store, parent_name, g_strdup (folder_name)); /* FIXME */
-
-	url = camel_url_new(mapi_store->priv->base_url,NULL);
-	url->path = g_strdup_printf("/%s", camel_store_info_path((CamelStoreSummary *)mapi_store->summary, si));
-	g_free (fi->uri);
-	fi->uri = camel_url_to_string(url,CAMEL_URL_HIDE_ALL);
+	fi = mapi_build_folder_info (mapi_store, parent_name, folder_name);
 
 	fi->flags |= CAMEL_FOLDER_SUBSCRIBED;
 	fi->flags |= CAMEL_FOLDER_NOCHILDREN;
 	fi->flags |= CAMEL_STORE_INFO_FOLDER_SUBSCRIBED;
 
 	camel_object_trigger_event (CAMEL_OBJECT (store), "folder_subscribed", fi);
+	camel_folder_info_free (fi);
 }
 
 static gboolean
@@ -1477,7 +1495,6 @@ mapi_unsubscribe_folder(CamelStore *store, const char *folder_name, CamelExcepti
 	CamelStoreInfo *si;
 	gchar *parent_name = NULL;
 	gchar *f_name = NULL;
-	CamelURL *url;
 
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
 
@@ -1501,14 +1518,10 @@ mapi_unsubscribe_folder(CamelStore *store, const char *folder_name, CamelExcepti
 			return;
 	}
 
-	fi = mapi_build_folder_info(mapi_store, parent_name, g_strdup (folder_name)); /* FIXME */
-
-	url = camel_url_new(mapi_store->priv->base_url,NULL);
-	url->path = g_strdup_printf("/%s", camel_store_info_path((CamelStoreSummary *)mapi_store->summary, si));
-	g_free (fi->uri);
-	fi->uri = camel_url_to_string(url,CAMEL_URL_HIDE_ALL);
+	fi = mapi_build_folder_info (mapi_store, parent_name, folder_name);
 
 	camel_object_trigger_event (CAMEL_OBJECT (store), "folder_unsubscribed", fi);
+	camel_folder_info_free (fi);
 }
 
 static void
