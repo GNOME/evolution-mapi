@@ -457,7 +457,7 @@ mapi_get_folder(CamelStore *store, const char *folder_name, guint32 flags, Camel
 		if (!folder_info)
 			return NULL;
 
-		camel_store_free_folder_info (store, folder_info);
+		camel_folder_info_free (folder_info);
 	}
 
 	if (si)
@@ -893,7 +893,7 @@ mapi_build_folder_info(CamelMapiStore *mapi_store, const char *parent_name, cons
 	CamelFolderInfo *fi;
 	CamelMapiStorePrivate *priv = mapi_store->priv;
 
-	fi = g_malloc0(sizeof(*fi));
+	fi = camel_folder_info_new ();
 	
 	fi->unread = -1;
 	fi->total = -1;
@@ -1036,7 +1036,7 @@ mapi_convert_to_folder_info (CamelMapiStore *store, ExchangeMAPIFolder *folder, 
 
 	id = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", exchange_mapi_folder_get_fid (folder));
 		
-	fi = g_new0 (CamelFolderInfo, 1);
+	fi = camel_folder_info_new ();
 
 	if (folder->is_default) {
 		switch (folder->default_type) {
