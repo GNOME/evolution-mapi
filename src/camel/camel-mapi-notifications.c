@@ -116,9 +116,11 @@ mapi_new_mail_fetch (CamelSession *session, CamelSessionThreadMsg *msg)
 	while (info_count >= 0) {
 		info = camel_store_summary_index ((CamelStoreSummary *)store->summary, info_count);
 		mapi_info = (CamelMapiStoreInfo *)info;
-		if (!g_strcmp0 (mapi_info->folder_id, folder_id)){
+		if (info && !g_strcmp0 (mapi_info->folder_id, folder_id)){
 			folder_name = mapi_info->full_name;
 		}
+		if (info)
+			camel_store_summary_info_free ((CamelStoreSummary *)store->summary, info);
 		info_count--;
 	}
 

@@ -2039,13 +2039,17 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 	MapiItem *item = NULL;
 	mapi_id_t fid = 0, mid = 0;
 	const gchar *folder_id;
+	guint32 folder_flags = 0;
 
 	/*Reject outbox / sent & trash*/
-	si = camel_store_summary_path ((CamelStoreSummary *)mapi_store->summary,
-				       folder->full_name);
+	si = camel_store_summary_path ((CamelStoreSummary *)mapi_store->summary, folder->full_name);
+	if (si) {
+		folder_flags = si->flags;
+		camel_store_summary_info_free ((CamelStoreSummary *)mapi_store->summary, si);
+	}
 
-	if (((si->flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH) ||
-	    ((si->flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_OUTBOX)) {
+	if (((folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH) ||
+	    ((folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_OUTBOX)) {
 		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, 
 				      _("Cannot append message to folder '%s'"),
 				      folder->full_name);

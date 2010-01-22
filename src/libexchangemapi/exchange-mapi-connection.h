@@ -162,6 +162,9 @@ exchange_mapi_empty_folder (mapi_id_t fid);
 gboolean 
 exchange_mapi_rename_folder (mapi_id_t fid, const char *new_name);
 
+gboolean
+exchange_mapi_move_folder (mapi_id_t src_fid, mapi_id_t src_parent_fid, mapi_id_t des_fid, const char *new_name);
+
 GSList *
 exchange_mapi_util_check_restriction (mapi_id_t fid, struct mapi_SRestriction *res);
 

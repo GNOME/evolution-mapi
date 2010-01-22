@@ -1803,6 +1803,74 @@ cleanup:
 	return result;
 }
 
+/* moves folder 'src_fid' to folder 'des_fid' under name 'new_name' (no path in a new_name),
+   'src_parent_fid' is folder ID of a parent of the src_fid */
+gboolean
+exchange_mapi_move_folder (mapi_id_t src_fid, mapi_id_t src_parent_fid, mapi_id_t des_fid, const char *new_name)
+{
+	enum MAPISTATUS retval;
+	mapi_object_t obj_store;
+	mapi_object_t obj_src, obj_src_parent, obj_des;
+	gboolean result = FALSE;
+
+	g_return_val_if_fail (src_fid != 0, FALSE);
+	g_return_val_if_fail (src_parent_fid != 0, FALSE);
+	g_return_val_if_fail (des_fid != 0, FALSE);
+	g_return_val_if_fail (new_name != NULL, FALSE);
+	g_return_val_if_fail (strchr (new_name, '/') == NULL, FALSE);
+
+	LOCK ();
+	LOGALL ();
+
+	mapi_object_init (&obj_store);
+	mapi_object_init (&obj_src);
+	mapi_object_init (&obj_src_parent);
+	mapi_object_init (&obj_des);
+
+	retval = OpenMsgStore (global_mapi_session, &obj_store);
+	if (retval != MAPI_E_SUCCESS) {
+		mapi_errstr ("OpenMsgStore", GetLastError());
+		goto cleanup;
+	}
+
+	retval = OpenFolder (&obj_store, src_fid, &obj_src);
+	if (retval != MAPI_E_SUCCESS) {
+		mapi_errstr ("OpenFolder src_fid", GetLastError());
+		goto cleanup;
+	}
+
+	retval = OpenFolder (&obj_store, src_parent_fid, &obj_src_parent);
+	if (retval != MAPI_E_SUCCESS) {
+		mapi_errstr ("OpenFolder src_parent_fid", GetLastError());
+		goto cleanup;
+	}
+
+	retval = OpenFolder (&obj_store, des_fid, &obj_des);
+	if (retval != MAPI_E_SUCCESS) {
+		mapi_errstr ("OpenFolder des_fid", GetLastError());
+		goto cleanup;
+	}
+
+	retval = MoveFolder (&obj_src, &obj_src_parent, &obj_des, (char *)new_name, TRUE);
+	if (retval != MAPI_E_SUCCESS) {
+		mapi_errstr ("MoveFolder", GetLastError());
+		goto cleanup;
+	}
+
+	result = TRUE;
+
+cleanup:
+	mapi_object_release (&obj_des);
+	mapi_object_release (&obj_src_parent);
+	mapi_object_release (&obj_src);
+	mapi_object_release (&obj_store);
+
+	LOGNONE ();
+	UNLOCK ();
+
+	return result;
+}
+
 struct SPropTagArray *
 exchange_mapi_util_resolve_named_props (uint32_t olFolder, mapi_id_t fid, 
 					BuildNameID build_name_id, gpointer ni_data)
