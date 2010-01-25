@@ -1,3 +1,22 @@
+evolution-mapi 0.29.6 2010-01-25
+--------------------------------
+Bug Fixes:
+	Bug #568419 - Crash on "Delete folder"/"Copy to Folder" (Milan Crha)
+	Bug #569321 - Message list strings are missing some symbols. (Milan Crha)
+	Bug #606866 - Initialize 'globalid' in send_objects (Milan Crha)
+	Bug #607429 - Crash on "Move Folder to" within MAPI hierarchy (Milan Crha)
+	Bug #607527 - 100% CPU usage after push notification changes. (Johnny Jacob)
+	Bug #607790 - Crash due to GSlice memory error (Milan Crha)
+
+Misc:
+       Minimum libmapi requirement bumped to version 0.9 
+       Push Notifications integration (Johnny Jacob)
+
+Translations:
+	Kjartan Maraas (nb)
+	Jorge González (es)
+	Krasimir Chonov (bg)
+
 evolution-mapi 0.29.5 2010-01-11
 --------------------------------
 Bug Fixes:
