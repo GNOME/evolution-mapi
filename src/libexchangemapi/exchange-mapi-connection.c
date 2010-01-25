@@ -87,13 +87,6 @@ mapi_profile_load (const char *profname, const char *password)
 	const char *profile = NULL;
 	guint32 debug_log_level = 0;
 
-	/* Initialize libmapi logger*/
-	if (g_getenv ("LIBMAPI_DEBUG")) {
-		debug_log_level = atoi (g_getenv ("MAPI_DEBUG"));
-		SetMAPIDumpData(TRUE);
-		SetMAPIDebugLevel(debug_log_level);
-	}
-
 	/* Initialize libexchangemapi logger*/
 	if (g_getenv ("EXCHANGEMAPI_DEBUG")) {
 		g_log_set_handler (G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, mapi_debug_logger, NULL);
@@ -116,6 +109,13 @@ mapi_profile_load (const char *profname, const char *password)
 		if (retval == MAPI_E_SESSION_LIMIT)
 			g_debug("%s: %s: Already connected ", G_STRLOC, G_STRFUNC);
 		goto cleanup;
+	}
+
+	/* Initialize libmapi logger*/
+	if (g_getenv ("LIBMAPI_DEBUG")) {
+		debug_log_level = atoi (g_getenv ("MAPI_DEBUG"));
+		SetMAPIDumpData(TRUE);
+		SetMAPIDebugLevel(debug_log_level);
 	}
 
 
