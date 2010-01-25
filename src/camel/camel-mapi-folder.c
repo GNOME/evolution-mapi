@@ -1749,11 +1749,13 @@ mapi_folder_get_message( CamelFolder *folder, const char *uid, CamelException *e
 		options |= MAPI_OPTIONS_USE_PFSTORE;
 	} 
 
+	CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
 	exchange_mapi_connection_fetch_item (id_folder, id_message, 
 					camel_GetPropsList, G_N_ELEMENTS (camel_GetPropsList), 
 					camel_build_name_id, NULL, 
 					fetch_item_cb, &item, 
 					options);
+	CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 
 	if (item == NULL) {
 		camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_INVALID, _("Could not get message"));
