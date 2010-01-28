@@ -131,8 +131,9 @@ static void
 mapi_item_set_body_stream (MapiItem *item, CamelStream *body, MapiItemPartType part_type)
 {
 	guint8 *buf = g_new0 (guint8 , STREAM_SIZE);
-	guint32	read_size = 0;
+	guint32	read_size = 0, i;
 	ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
+	gboolean contains_only_7bit = TRUE;
 
 	camel_seekable_stream_seek((CamelSeekableStream *)body, 0, CAMEL_STREAM_SET);
 
@@ -143,7 +144,13 @@ mapi_item_set_body_stream (MapiItem *item, CamelStream *body, MapiItemPartType p
 			return;
 
 		stream->value = g_byte_array_append (stream->value, buf, read_size);
+
+		for (i = 0; i < read_size && contains_only_7bit; i++) {
+			contains_only_7bit = buf[i] < 128;
+		}
 	}
+
+	g_free (buf);
 
 	switch (part_type) {
 	case PART_TYPE_TEXT_HTML :
@@ -154,10 +161,22 @@ mapi_item_set_body_stream (MapiItem *item, CamelStream *body, MapiItemPartType p
 		break;
 	}
 
-	if (stream->value->len < MAX_READ_SIZE)
+	if (stream->value->len < MAX_READ_SIZE && contains_only_7bit) {
 		item->msg.body_parts = g_slist_append (item->msg.body_parts, stream);
-	else
+	} else {
+		gsize written = 0;
+		gchar *in_unicode;
+
+		/* convert to unicode, because stream is supposed to be in it */
+		in_unicode = g_convert ((const gchar *)stream->value->data, stream->value->len, "UTF-16", "UTF-8", NULL, &written, NULL);
+		if (in_unicode && written > 0) {
+			g_byte_array_set_size (stream->value, 0);
+			g_byte_array_append (stream->value, (const guint8 *) in_unicode, written);
+		}
+		g_free (in_unicode);
+
 		item->generic_streams = g_slist_append (item->generic_streams, stream);
+	}
 
 }
 
@@ -339,7 +358,7 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 			content_type = camel_content_type_simple (type);
 
 			content_stream = (CamelStream *)camel_stream_mem_new();
-			content_size = camel_data_wrapper_write_to_stream(dw, (CamelStream *)content_stream);
+			content_size = camel_data_wrapper_decode_to_stream(dw, (CamelStream *)content_stream);
 			camel_stream_write ((CamelStream *) content_stream, "", 1);
 
 			mapi_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT);
@@ -360,10 +379,13 @@ camel_mapi_utils_create_item_build_props (struct SPropValue **value, struct SPro
 	GSList *l;
 	bool *send_rich_info = g_new0 (bool, 1);
 	uint32_t *msgflag = g_new0 (uint32_t, 1);
+	uint32_t *cpid = g_new0 (uint32_t, 1);
 	int i=0;
 
-	props = g_new0 (struct SPropValue, 10);
+	props = g_new0 (struct SPropValue, 11);
 
+	*cpid = 65001; /* UTF8 */
+	set_SPropValue_proptag(&props[i++], PR_INTERNET_CPID, cpid);
 	set_SPropValue_proptag(&props[i++], PR_SUBJECT_UNICODE, g_strdup (item->header.subject));
 	set_SPropValue_proptag(&props[i++], PR_CONVERSATION_TOPIC_UNICODE, g_strdup (item->header.subject));
 	set_SPropValue_proptag(&props[i++], PR_NORMALIZED_SUBJECT_UNICODE, g_strdup (item->header.subject));
