@@ -1,5 +1,6 @@
 # Bulgarian translation of evolution-mapi po-file.
 # Copyright (C) 2009 Free Software Foundation, Inc.
+# Copyright (C) 2010 Krasimir Chonov <mk2616@abv.bg>.
 # Alexander Shopov <ash@contact.bg>, 2009.
 # Krasimir Chonov <mk2616@abv.bg>, 2010.
 #
@@ -7,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-01-15 20:52+0200\n"
-"PO-Revision-Date: 2010-01-13 16:55+0200\n"
+"POT-Creation-Date: 2010-01-28 05:12+0200\n"
+"PO-Revision-Date: 2010-01-28 05:12+0200\n"
 "Last-Translator: Krasimir Chonov <mk2616@abv.bg>\n"
 "Language-Team: Bulgarian <dict@fsa-bg.org>\n"
 "MIME-Version: 1.0\n"
@@ -114,7 +115,7 @@ msgstr "Размер на папка"
 
 #: ../src/calendar/e-cal-backend-mapi.c:114
 #: ../src/calendar/e-cal-backend-mapi.c:1141
-#: ../src/camel/camel-mapi-store.c:472
+#: ../src/camel/camel-mapi-store.c:548
 msgid "Authentication failed"
 msgstr "Неуспешна идентификация"
 
@@ -152,37 +153,37 @@ msgstr ""
 "Поддръжката на промяната на едно събитие от поредица от повтарящи се срещи "
 "все още не е реализирана. При сървъра не са направени промени."
 
-#: ../src/camel/camel-mapi-folder.c:498
+#: ../src/camel/camel-mapi-folder.c:493
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr ""
 "Обновяване на временния файл с обобщената информация за новите писма в %s"
 
-#: ../src/camel/camel-mapi-folder.c:731
+#: ../src/camel/camel-mapi-folder.c:726
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Изтегляне на идентификаторите на изображенията от сървъра към %s"
 
-#: ../src/camel/camel-mapi-folder.c:753
+#: ../src/camel/camel-mapi-folder.c:748
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Премахване на изтритите съобщения от временния файл към %s"
 
-#: ../src/camel/camel-mapi-folder.c:1083 ../src/camel/camel-mapi-folder.c:1716
-#: ../src/camel/camel-mapi-folder.c:1724
+#. TODO : Check for online state
+#: ../src/camel/camel-mapi-folder.c:1000
+msgid "Fetching summary information for new messages in"
+msgstr "Изтегляне на обобщената информация за новите писма в"
+
+#: ../src/camel/camel-mapi-folder.c:1102 ../src/camel/camel-mapi-folder.c:1730
+#: ../src/camel/camel-mapi-folder.c:1738
 msgid "This message is not available in offline mode."
 msgstr "Това писмо е недостъпно в режим „Изключен“."
 
-#: ../src/camel/camel-mapi-folder.c:1092
-#, c-format
-msgid "Fetching summary information for new messages in %s"
-msgstr "Изтегляне на обобщената информация за новите писма в %s"
-
-#: ../src/camel/camel-mapi-folder.c:1102
+#: ../src/camel/camel-mapi-folder.c:1115
 msgid "Fetching items failed"
 msgstr "Неуспешно изтегляне на обекти"
 
-#: ../src/camel/camel-mapi-folder.c:1680
+#: ../src/camel/camel-mapi-folder.c:1694
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -191,33 +192,33 @@ msgstr ""
 "Съобщението не може да бъде получено: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1680
+#: ../src/camel/camel-mapi-folder.c:1694
 msgid "No such message"
 msgstr "Няма такова съобщение"
 
-#: ../src/camel/camel-mapi-folder.c:1692
+#: ../src/camel/camel-mapi-folder.c:1706
 msgid "Message fetching cancelled by user."
 msgstr "Изтеглянето на съобщения е преустановено от потребителя."
 
-#: ../src/camel/camel-mapi-folder.c:1699
+#: ../src/camel/camel-mapi-folder.c:1713
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Съобщението не може да бъде получено: %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1745 ../src/camel/camel-mapi-folder.c:1754
+#: ../src/camel/camel-mapi-folder.c:1761 ../src/camel/camel-mapi-folder.c:1770
 msgid "Could not get message"
 msgstr "Съобщението не може да бъде получено"
 
-#: ../src/camel/camel-mapi-folder.c:2034
+#: ../src/camel/camel-mapi-folder.c:2056
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Съобщението не може да бъде добавено към папката „%s“"
 
-#: ../src/camel/camel-mapi-folder.c:2041
+#: ../src/camel/camel-mapi-folder.c:2063
 msgid "Offline."
 msgstr "Изключен."
 
-#: ../src/camel/camel-mapi-folder.c:2162
+#: ../src/camel/camel-mapi-folder.c:2184
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Обобщената информация за „%s“ не може да бъде заредена"
@@ -267,22 +268,22 @@ msgstr ""
 "Тази настройка ви позволява да се свържете съм сървър за ОупънЕксчейндж с "
 "парола в пряк текст."
 
-#: ../src/camel/camel-mapi-store.c:61
+#: ../src/camel/camel-mapi-store.c:63
 msgid "Favorites"
 msgstr "Любими"
 
-#: ../src/camel/camel-mapi-store.c:62
+#: ../src/camel/camel-mapi-store.c:64
 msgid "All Public Folders"
 msgstr "Всички публични папки"
 
-#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
+#: ../src/camel/camel-mapi-store.c:308 ../src/camel/camel-mapi-transport.c:128
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Сървър Ексчейндж за MAPI %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
+#: ../src/camel/camel-mapi-store.c:312 ../src/camel/camel-mapi-transport.c:130
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Услуга за MAPI на Ексчейндж за %s на %s"
@@ -291,46 +292,47 @@ msgstr "Услуга за MAPI на Ексчейндж за %s на %s"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:315
+#: ../src/camel/camel-mapi-store.c:350
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s: въведете паролата за MAPI за %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:328
+#: ../src/camel/camel-mapi-store.c:363
 msgid "You did not enter a password."
 msgstr "Не сте въвели парола."
 
-#: ../src/camel/camel-mapi-store.c:336
+#: ../src/camel/camel-mapi-store.c:371
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Идентификацията пред сървъра за MAPI на Ексчейндж е невъзможна."
 
-#: ../src/camel/camel-mapi-store.c:456
+#: ../src/camel/camel-mapi-store.c:532
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "В режим „Изключен“ не могат да се създават папки по MAPI."
 
-#: ../src/camel/camel-mapi-store.c:461
+#: ../src/camel/camel-mapi-store.c:537
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "Новата папка „%s“ не може да бъде създадена"
 
-#: ../src/camel/camel-mapi-store.c:670
+#: ../src/camel/camel-mapi-store.c:672
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr ""
 "Папката по MAPI „%s“ не може да бъде преименувана — папката не съществува."
 
-#: ../src/camel/camel-mapi-store.c:681
+#: ../src/camel/camel-mapi-store.c:683
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "Стандартната папка по MAPI „%s“ не може да бъде преименувана на „%s“."
 
-#: ../src/camel/camel-mapi-store.c:699
+#: ../src/camel/camel-mapi-store.c:707 ../src/camel/camel-mapi-store.c:722
+#: ../src/camel/camel-mapi-store.c:771
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "Папката по MAPI „%s“ не може да бъде преименувана на „%s“."
 
-#: ../src/camel/camel-mapi-store.c:1229
+#: ../src/camel/camel-mapi-store.c:1329
 msgid "Folder list not available in offline mode."
 msgstr "Списъкът с папки е недостъпен в режим „Изключен“."
 
