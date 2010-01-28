@@ -1105,6 +1105,19 @@ cleanup:
 	return mids;
 }
 
+static struct SPropTagArray*
+copy_tag_array (TALLOC_CTX *mem_ctx, struct SPropTagArray *array)
+{
+	struct SPropTagArray *tags_copy = NULL;
+	if (array->cValues) {
+		tags_copy = talloc_zero(mem_ctx, struct SPropTagArray);
+		tags_copy->aulPropTag = talloc_memdup(mem_ctx, array->aulPropTag,
+						      sizeof (array->aulPropTag[0]) * array->cValues);
+		tags_copy->cValues = array->cValues;
+	}
+	return tags_copy;
+}
+
 gboolean
 exchange_mapi_connection_fetch_items   (mapi_id_t fid, 
 					struct mapi_SRestriction *res, struct SSortOrderSet *sort_order,
@@ -1286,8 +1299,12 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 			if (GetPropsTagArray->cValues) {
 				struct SPropValue *lpProps;
 				uint32_t prop_count = 0, k;
-
-				retval = GetProps (&obj_message, GetPropsTagArray, &lpProps, &prop_count);
+				// create a copy of the props tag for every
+				// request because it might be modified by
+				// GetProps() and cause later calls to fail
+				struct SPropTagArray *tags = copy_tag_array (mem_ctx, GetPropsTagArray);
+				retval = GetProps (&obj_message, tags, &lpProps, &prop_count);
+				MAPIFreeBuffer (tags);
 
 				/* Conversion from SPropValue to mapi_SPropValue. (no padding here) */
 				properties_array.cValues = prop_count;
