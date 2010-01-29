@@ -191,7 +191,7 @@ mapi_notifications_filter (guint16 type, void *event, void *data)
 
 		new_mail_ops_msg->event = event;
 		new_mail_ops_msg->data = data;
-		mapi_new_mail_fetch (session, (CamelSessionThreadMsg *)new_mail_ops_msg);
+		camel_session_thread_queue (session, &new_mail_ops_msg->msg, 0);
 		return -1;
 		break;
 	case fnevMbit|fnevObjectCreated:
