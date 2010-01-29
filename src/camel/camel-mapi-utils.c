@@ -166,12 +166,18 @@ mapi_item_set_body_stream (MapiItem *item, CamelStream *body, MapiItemPartType p
 	} else {
 		gsize written = 0;
 		gchar *in_unicode;
+		guint8 byte = 0;
 
+		while (stream->value->len > 0 && !stream->value->data [stream->value->len - 1]) {
+			stream->value->len--;
+		}
 		/* convert to unicode, because stream is supposed to be in it */
 		in_unicode = g_convert ((const gchar *)stream->value->data, stream->value->len, "UTF-16", "UTF-8", NULL, &written, NULL);
 		if (in_unicode && written > 0) {
 			g_byte_array_set_size (stream->value, 0);
 			g_byte_array_append (stream->value, (const guint8 *) in_unicode, written);
+			g_byte_array_append (stream->value, &byte, 1);
+			g_byte_array_append (stream->value, &byte, 1);
 		}
 		g_free (in_unicode);
 
