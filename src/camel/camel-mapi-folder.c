@@ -1359,10 +1359,11 @@ fetch_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 		item->is_cal = TRUE;
 
 		g_free (appointment_body_str);
-	} else { 
-		if (!((body = exchange_mapi_util_find_stream (item_data->streams, PR_HTML)) || 
+	} else {
+		/* always prefer unicode version, as that can be properly read */
+		if (!((body = exchange_mapi_util_find_stream (item_data->streams, PR_BODY_UNICODE)) || 
 		      (body = exchange_mapi_util_find_stream (item_data->streams, PR_BODY))))
-			body = exchange_mapi_util_find_stream (item_data->streams, PR_BODY_UNICODE);
+			body = exchange_mapi_util_find_stream (item_data->streams, PR_HTML);
 
 		item->msg.body_parts = g_slist_append (item->msg.body_parts, body);
 
@@ -1483,6 +1484,11 @@ mapi_populate_details_from_item (CamelFolder *folder, CamelMimeMessage *msg, Map
 			for (h = part->headers; h; h = h->next) {
 				const gchar *value = h->value;
 
+				/* skip all headers describing content of a message,
+				   because it's overwritten on message decomposition */
+				if (g_ascii_strncasecmp (h->name, "Content", 7) == 0)
+					continue;
+
 				while (value && camel_mime_is_lwsp (*value))
 					value++;
 
@@ -1530,15 +1536,12 @@ mapi_populate_details_from_item (CamelFolder *folder, CamelMimeMessage *msg, Map
 
 
 static void
-mapi_populate_msg_body_from_item (CamelMultipart *multipart, MapiItem *item, ExchangeMAPIStream *body)
+mapi_populate_msg_body_from_item (CamelMimePart *part, MapiItem *item, ExchangeMAPIStream *body)
 {
-	CamelMimePart *part;
-	const char* type = NULL;
-
-	part = camel_mime_part_new ();
-	camel_mime_part_set_encoding(part, CAMEL_TRANSFER_ENCODING_8BIT);
+	camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_8BIT);
 	
 	if (body) {
+		const gchar* type = NULL;
 		gchar *buff = NULL;
 
 		if (item->is_cal)
@@ -1558,14 +1561,36 @@ mapi_populate_msg_body_from_item (CamelMultipart *multipart, MapiItem *item, Exc
 		camel_mime_part_set_content (part, (const char *) body->value->data, body->value->len, type);
 
 		g_free (buff);
-		type = NULL;
 	} else
-		camel_mime_part_set_content(part, " ", strlen(" "), "text/html");
-
-	camel_multipart_add_part (multipart, part);
-	camel_object_unref (part);
+		camel_mime_part_set_content (part, "", strlen (""), "text/plain");
 }
 
+static gint
+sort_bodies_cb (gconstpointer a, gconstpointer b)
+{
+	static const gint desired_order[] = { PR_BODY, PR_BODY_UNICODE, PR_HTML };
+	const ExchangeMAPIStream *stream_a = a, *stream_b = b;
+	gint aidx, bidx;
+
+	if (a == b)
+		return 0;
+	if (!a)
+		return -1;
+	if (!b)
+		return 1;
+
+	for (aidx = 0; aidx < G_N_ELEMENTS (desired_order); aidx++) {
+		if (desired_order[aidx] == stream_a->proptag)
+			break;
+	}
+
+	for (bidx = 0; bidx < G_N_ELEMENTS (desired_order); bidx++) {
+		if (desired_order[bidx] == stream_b->proptag)
+			break;
+	}
+
+	return aidx - bidx;
+}
 
 static CamelMimeMessage *
 mapi_folder_item_to_msg( CamelFolder *folder,
@@ -1574,32 +1599,14 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 {
 	CamelMimeMessage *msg = NULL;
 	CamelMultipart *multipart = NULL;
+	CamelMimePart *part = NULL;
+	CamelDataWrapper *msg_content = NULL;
 
 	GSList *attach_list = NULL;
-	/* int errno; */
-	/* char *body = NULL; */
-	ExchangeMAPIStream *body = NULL;
 	GSList *body_part_list = NULL;
 
 	attach_list = item->attachments;
 	msg = camel_mime_message_new ();
-	multipart = camel_multipart_new ();
-
-	/*FIXME : Using set of default. Fix it during mimewriter*/
-	camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (multipart),
-					  "multipart/related");
-	camel_content_type_set_param(CAMEL_DATA_WRAPPER (multipart)->mime_type, 
-				     "type", "multipart/alternative");
-
-	camel_multipart_set_boundary (multipart, NULL);
-
-	/* Handle Multipart */
-	body_part_list = item->msg.body_parts;
-	while (body_part_list){
-	       body = body_part_list->data;
-	       mapi_populate_msg_body_from_item (multipart, item, body);	       
-	       body_part_list = g_slist_next (body_part_list);
-	}
 
 	/* Threading */
 	if (item->header.message_id)
@@ -1611,18 +1618,69 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 	if (item->header.in_reply_to)
 		camel_medium_add_header (CAMEL_MEDIUM (msg), "In-Reply-To", item->header.in_reply_to);
 
-	/*Set recipient details*/
+	/* Set recipient details */
 	mapi_msg_set_recipient_list (msg, item);
 	mapi_populate_details_from_item (folder, msg, item);
 
-	/** Attachment Handling*/
+	if (g_slist_length (attach_list) > 0) {
+		multipart = camel_multipart_new ();
+		camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (multipart), "multipart/mixed");
+		camel_multipart_set_boundary (multipart, NULL);
+
+		msg_content = CAMEL_DATA_WRAPPER (multipart);
+	}
+
+	if (g_slist_length (item->msg.body_parts) > 1) {
+		multipart = camel_multipart_new ();
+		camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (multipart), "multipart/alternative");
+		camel_multipart_set_boundary (multipart, NULL);
+
+		item->msg.body_parts = g_slist_sort (item->msg.body_parts, sort_bodies_cb);
+
+		/* Handle Multipart */
+		for (body_part_list = item->msg.body_parts; body_part_list; body_part_list = g_slist_next (body_part_list)) {
+			part = camel_mime_part_new ();
+
+			mapi_populate_msg_body_from_item (part, item, body_part_list->data);
+
+			camel_multipart_add_part (CAMEL_MULTIPART (msg_content), part);
+			camel_object_unref (part);
+		}
+
+		if (msg_content) {
+			part = camel_mime_part_new ();
+			camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (part), "multipart/alternative");
+			camel_medium_set_content_object (CAMEL_MEDIUM (part), CAMEL_DATA_WRAPPER (multipart));
+			camel_object_unref (multipart);
+
+			camel_multipart_add_part (CAMEL_MULTIPART (msg_content), part);
+			camel_object_unref (part);
+		} else {
+			msg_content = CAMEL_DATA_WRAPPER (multipart);
+		}
+	} else {
+		if (msg_content) {
+			part = camel_mime_part_new ();
+			mapi_populate_msg_body_from_item (part, item, item->msg.body_parts ? item->msg.body_parts->data : NULL);
+			camel_multipart_add_part (CAMEL_MULTIPART (msg_content), part);
+			camel_object_unref (part);
+		} else {
+			msg_content = CAMEL_DATA_WRAPPER (msg);
+			mapi_populate_msg_body_from_item (CAMEL_MIME_PART (msg), item, item->msg.body_parts ? item->msg.body_parts->data : NULL);
+		}
+	}
+
+	/* Attachment Handling */
 	if (attach_list) {
-		GSList *al = attach_list;
+		GSList *al;
+
+		multipart = CAMEL_MULTIPART (msg_content);
+
 		for (al = attach_list; al != NULL; al = al->next) {
 			ExchangeMAPIAttachment *attach = (ExchangeMAPIAttachment *)al->data;
 			ExchangeMAPIStream *stream = NULL;
 			const char *filename, *mime_type, *content_id = NULL; 
-			CamelMimePart *part;
+			CamelContentType *content_type;
 
 			stream = exchange_mapi_util_find_stream (attach->streams, PR_ATTACH_DATA_BIN);
 
@@ -1642,8 +1700,9 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 			camel_content_type_set_param (((CamelDataWrapper *) part)->mime_type, "name", filename);
 
 			/*Content-Type*/
-			mime_type = (const char *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps, 
-												  PR_ATTACH_MIME_TAG);
+			mime_type = (const char *) exchange_mapi_util_find_SPropVal_array_propval (attach->lpProps, PR_ATTACH_MIME_TAG);
+			if (!mime_type)
+				mime_type = "application/octet-stream";
 
 			camel_mime_part_set_content (part, (const char *) stream->value->data, stream->value->len, mime_type);
 
@@ -1653,8 +1712,11 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 
 			camel_mime_part_set_content_id (part, content_id);
 
-			/*FIXME : Mime Reader / Writer work*/
-			//camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
+			content_type = camel_mime_part_get_content_type (part);
+			if (content_type && camel_content_type_is (content_type, "text", "*"))
+				camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_QUOTEDPRINTABLE);
+			else
+				camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
 
 			camel_multipart_add_part (multipart, part);
 			camel_object_unref (part);
@@ -1662,15 +1724,13 @@ mapi_folder_item_to_msg( CamelFolder *folder,
 		}
 	}
 
-	camel_medium_set_content_object(CAMEL_MEDIUM (msg), CAMEL_DATA_WRAPPER(multipart));
-	camel_object_unref (multipart);
-
-	if (body)
-		g_free (body);
+	if (msg_content != CAMEL_DATA_WRAPPER (msg)) {
+		camel_medium_set_content_object (CAMEL_MEDIUM (msg), msg_content);
+		camel_object_unref (msg_content);
+	}
 
 	return msg;
 }
-
 
 static CamelMimeMessage *
 mapi_folder_get_message( CamelFolder *folder, const char *uid, CamelException *ex )
