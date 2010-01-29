@@ -133,17 +133,16 @@ mapi_item_set_body_stream (MapiItem *item, CamelStream *body, MapiItemPartType p
 	guint8 *buf = g_new0 (guint8 , STREAM_SIZE);
 	guint32	read_size = 0, i;
 	ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
-	gboolean contains_only_7bit = TRUE;
+	gboolean contains_only_7bit = TRUE, is_null_terminated = FALSE;
 
 	camel_seekable_stream_seek((CamelSeekableStream *)body, 0, CAMEL_STREAM_SET);
 
 	stream->value = g_byte_array_new ();
 
-	while((read_size = camel_stream_read(body, (char *)buf, STREAM_SIZE))){
-		if (read_size == -1) 
-			return;
-
+	while (read_size = camel_stream_read (body, (char *)buf, STREAM_SIZE), read_size > 0){
 		stream->value = g_byte_array_append (stream->value, buf, read_size);
+
+		is_null_terminated = buf [read_size - 1] == 0;
 
 		for (i = 0; i < read_size && contains_only_7bit; i++) {
 			contains_only_7bit = buf[i] < 128;
@@ -162,22 +161,26 @@ mapi_item_set_body_stream (MapiItem *item, CamelStream *body, MapiItemPartType p
 	}
 
 	if (stream->value->len < MAX_READ_SIZE && contains_only_7bit) {
+		if (!is_null_terminated)
+			g_byte_array_append (stream->value, (const guint8 *)"", 1);
+
 		item->msg.body_parts = g_slist_append (item->msg.body_parts, stream);
 	} else {
 		gsize written = 0;
 		gchar *in_unicode;
-		guint8 byte = 0;
 
-		while (stream->value->len > 0 && !stream->value->data [stream->value->len - 1]) {
+		if (is_null_terminated)
 			stream->value->len--;
-		}
+
 		/* convert to unicode, because stream is supposed to be in it */
 		in_unicode = g_convert ((const gchar *)stream->value->data, stream->value->len, "UTF-16", "UTF-8", NULL, &written, NULL);
 		if (in_unicode && written > 0) {
 			g_byte_array_set_size (stream->value, 0);
 			g_byte_array_append (stream->value, (const guint8 *) in_unicode, written);
-			g_byte_array_append (stream->value, &byte, 1);
-			g_byte_array_append (stream->value, &byte, 1);
+
+			/* null-terminated unicode string */
+			g_byte_array_append (stream->value, (const guint8 *)"", 1);
+			g_byte_array_append (stream->value, (const guint8 *)"", 1);
 		}
 		g_free (in_unicode);
 
@@ -192,6 +195,7 @@ mapi_item_add_attach (MapiItem *item, CamelMimePart *part, CamelStream *content_
 	guint8 *buf = g_new0 (guint8 , STREAM_SIZE);
 	const gchar *content_id = NULL;
 	guint32	read_size, flag, i = 0;
+	CamelContentType *content_type;
 
 	ExchangeMAPIAttachment *item_attach;
 	ExchangeMAPIStream *stream; 
@@ -200,7 +204,7 @@ mapi_item_add_attach (MapiItem *item, CamelMimePart *part, CamelStream *content_
 	
 	item_attach = g_new0 (ExchangeMAPIAttachment, 1);
 
-	item_attach->lpProps = g_new0 (struct SPropValue, 5);
+	item_attach->lpProps = g_new0 (struct SPropValue, 6);
 
 	flag = ATTACH_BY_VALUE; 
 	set_SPropValue_proptag(&(item_attach->lpProps[i++]), PR_ATTACH_METHOD, (const void *) (&flag));
@@ -231,6 +235,16 @@ mapi_item_add_attach (MapiItem *item, CamelMimePart *part, CamelStream *content_
 				       (const void *) g_strdup(content_id));
 	}
 
+	content_type  = camel_mime_part_get_content_type (part);
+	if (content_type) {
+		gchar *ct = camel_content_type_simple (content_type);
+		if (ct) {
+			set_SPropValue_proptag (&(item_attach->lpProps[i++]), 
+					PR_ATTACH_MIME_TAG,
+					(const void *) ct);
+		}
+	}
+
 	item_attach->cValues = i;
 
 	stream = g_new0 (ExchangeMAPIStream, 1);
@@ -238,7 +252,7 @@ mapi_item_add_attach (MapiItem *item, CamelMimePart *part, CamelStream *content_
 	stream->value = g_byte_array_new ();
 
 	camel_seekable_stream_seek((CamelSeekableStream *)content_stream, 0, CAMEL_STREAM_SET);
-	while((read_size = camel_stream_read(content_stream, (char *)buf, STREAM_SIZE))){
+	while (read_size = camel_stream_read(content_stream, (char *)buf, STREAM_SIZE), read_size > 0) {
 		stream->value = g_byte_array_append (stream->value, buf, read_size);
 	}
 
@@ -249,7 +263,7 @@ mapi_item_add_attach (MapiItem *item, CamelMimePart *part, CamelStream *content_
 }
 
 static gboolean 
-mapi_do_multipart(CamelMultipart *mp, MapiItem *item)
+mapi_do_multipart (CamelMultipart *mp, MapiItem *item, gboolean *is_first)
 {
 	CamelDataWrapper *dw;
 	CamelStream *content_stream;
@@ -261,6 +275,8 @@ mapi_do_multipart(CamelMultipart *mp, MapiItem *item)
 	const gchar *content_id;
 	gint content_size;
 
+	g_return_val_if_fail (is_first != NULL, FALSE);
+
 	n_part = camel_multipart_get_number(mp);
 	for (i_part = 0; i_part < n_part; i_part++) {
 		/* getting part */
@@ -268,7 +284,7 @@ mapi_do_multipart(CamelMultipart *mp, MapiItem *item)
 		dw = camel_medium_get_content_object (CAMEL_MEDIUM (part));
 		if (CAMEL_IS_MULTIPART(dw)) {
 			/* recursive */
-			if (!mapi_do_multipart(CAMEL_MULTIPART(dw), item))
+			if (!mapi_do_multipart (CAMEL_MULTIPART (dw), item, is_first))
 				return FALSE;
 			continue ;
 		}
@@ -277,7 +293,6 @@ mapi_do_multipart(CamelMultipart *mp, MapiItem *item)
 
 		content_stream = camel_stream_mem_new();
 		content_size = camel_data_wrapper_decode_to_stream (dw, (CamelStream *) content_stream);
-		camel_stream_write ((CamelStream *) content_stream, "", 1);
 
 		camel_seekable_stream_seek((CamelSeekableStream *)content_stream, 0, CAMEL_STREAM_SET);
 
@@ -286,8 +301,9 @@ mapi_do_multipart(CamelMultipart *mp, MapiItem *item)
 		
 		type = camel_mime_part_get_content_type(part);
 
-		if (i_part == 0 && camel_content_type_is (type, "text", "plain")) {
+		if (i_part == 0 && (*is_first) && camel_content_type_is (type, "text", "plain")) {
 			mapi_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT);
+			*is_first = FALSE;
 		} else if (camel_content_type_is (type, "text", "html")) {
 			mapi_item_set_body_stream (item, content_stream, PART_TYPE_TEXT_HTML);
 		} else {
@@ -355,7 +371,8 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 	multipart = (CamelMultipart *)camel_medium_get_content_object (CAMEL_MEDIUM (message));
 
 	if (CAMEL_IS_MULTIPART(multipart)) {
-		if (mapi_do_multipart(CAMEL_MULTIPART(multipart), item))
+		gboolean is_first = TRUE;
+		if (!mapi_do_multipart (CAMEL_MULTIPART(multipart), item, &is_first))
 			printf("camel message multi part error\n"); 
 	} else {
 		dw = camel_medium_get_content_object (CAMEL_MEDIUM (message));
@@ -365,7 +382,6 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 
 			content_stream = (CamelStream *)camel_stream_mem_new();
 			content_size = camel_data_wrapper_decode_to_stream(dw, (CamelStream *)content_stream);
-			camel_stream_write ((CamelStream *) content_stream, "", 1);
 
 			mapi_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT);
 		}
