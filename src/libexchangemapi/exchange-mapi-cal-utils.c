@@ -214,15 +214,21 @@ exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_l
 
 		sfname = g_filename_from_uri (sfname_uri, NULL, NULL);
 		mapped_file = g_mapped_file_new (sfname, FALSE, &error);
-		filename = g_strdup (g_strrstr (sfname, uid));
+		filename = g_path_get_basename (sfname);
 
-		if (mapped_file && g_str_has_prefix (filename, uid)) {
+		if (mapped_file) {
 			ExchangeMAPIAttachment *attach_item;
 			ExchangeMAPIStream *stream; 
 			guint8 *attach = (guint8 *) g_mapped_file_get_contents (mapped_file);
 			guint filelength = g_mapped_file_get_length (mapped_file);
-			const gchar *split_name = (filename + strlen (uid) + strlen ("-"));
+			const gchar *split_name;
 			uint32_t flag; 
+
+			if (g_str_has_prefix (filename, uid)) {
+				split_name = (filename + strlen (uid) + strlen ("-"));
+			} else {
+				split_name = filename;
+			}
 
 			new_attach_list = g_slist_append (new_attach_list, g_strdup (sfname_uri));
 
@@ -258,7 +264,7 @@ exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_l
 #else
 			g_mapped_file_free (mapped_file);
 #endif
-		} else {
+		} else if (error) {
 			g_debug ("Could not map %s: %s \n", sfname_uri, error->message);
 			g_error_free (error);
 		}
