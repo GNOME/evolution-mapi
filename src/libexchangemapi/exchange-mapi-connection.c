@@ -1105,19 +1105,6 @@ cleanup:
 	return mids;
 }
 
-static struct SPropTagArray*
-copy_tag_array (TALLOC_CTX *mem_ctx, struct SPropTagArray *array)
-{
-	struct SPropTagArray *tags_copy = NULL;
-	if (array->cValues) {
-		tags_copy = talloc_zero(mem_ctx, struct SPropTagArray);
-		tags_copy->aulPropTag = talloc_memdup(mem_ctx, array->aulPropTag,
-						      sizeof (array->aulPropTag[0]) * array->cValues);
-		tags_copy->cValues = array->cValues;
-	}
-	return tags_copy;
-}
-
 gboolean
 exchange_mapi_connection_fetch_items   (mapi_id_t fid, 
 					struct mapi_SRestriction *res, struct SSortOrderSet *sort_order,
@@ -1167,8 +1154,7 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 		goto cleanup;
 	}
 
-	GetPropsTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
-	GetPropsTagArray->cValues = 0;
+	GetPropsTagArray = set_SPropTagArray (mem_ctx, 0);
 
 	SPropTagArray = set_SPropTagArray(mem_ctx, 0x4,
 					  PR_FID,
@@ -1219,13 +1205,11 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 
 		if ((GetPropsList && (cn_props > 0)) || build_name_id) {
 			struct SPropTagArray *NamedPropsTagArray;
-			uint32_t m, n=0;
+			uint32_t m;
 			struct mapi_nameid *nameid;
 
 			nameid = mapi_nameid_new(mem_ctx);
-			NamedPropsTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
-
-			NamedPropsTagArray->cValues = 0;
+			NamedPropsTagArray = set_SPropTagArray (mem_ctx, 0);
 			/* Add named props using callback */
 			if (build_name_id) {
 				if (!build_name_id (nameid, build_name_data)) {
@@ -1241,14 +1225,13 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 				}
 			}
 
-			GetPropsTagArray->cValues = (cn_props + NamedPropsTagArray->cValues);
-			GetPropsTagArray->aulPropTag = talloc_array(mem_ctx, uint32_t, (cn_props + NamedPropsTagArray->cValues));
+			for (m = 0; m < NamedPropsTagArray->cValues; m++)
+				SPropTagArray_add (mem_ctx, GetPropsTagArray,
+						   NamedPropsTagArray->aulPropTag[m]);
 
-			for (m = 0; m < NamedPropsTagArray->cValues; m++, n++)
-				GetPropsTagArray->aulPropTag[n] = NamedPropsTagArray->aulPropTag[m];
-
-			for (m = 0; m < cn_props; m++, n++)
-				GetPropsTagArray->aulPropTag[n] = GetPropsList[m];
+			for (m = 0; m < cn_props; m++)
+				SPropTagArray_add (mem_ctx, GetPropsTagArray,
+						   GetPropsList[m]);
 
 		GetProps_cleanup:
 			MAPIFreeBuffer (NamedPropsTagArray);
@@ -1299,15 +1282,7 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 			if (GetPropsTagArray->cValues) {
 				struct SPropValue *lpProps;
 				uint32_t prop_count = 0, k;
-				// create a copy of the props tag for every
-				// request because it might be modified by
-				// GetProps() and cause later calls to fail
-				struct SPropTagArray *tags = copy_tag_array (mem_ctx, GetPropsTagArray);
-				retval = GetProps (&obj_message, tags, &lpProps, &prop_count);
-				MAPIFreeBuffer (tags);
-
-				/* Conversion from SPropValue to mapi_SPropValue. (no padding here) */
-				properties_array.cValues = prop_count;
+				retval = GetProps (&obj_message, GetPropsTagArray, &lpProps, &prop_count);
 				properties_array.lpProps = talloc_array (mem_ctx, struct mapi_SPropValue, 
 									 prop_count);
 				for (k=0; k < prop_count; k++)
@@ -1367,6 +1342,7 @@ exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 	result = TRUE;
 
 cleanup:
+	MAPIFreeBuffer (GetPropsTagArray);
 	mapi_object_release(&obj_folder);
 	mapi_object_release(&obj_table);
 	mapi_object_release(&obj_store);
