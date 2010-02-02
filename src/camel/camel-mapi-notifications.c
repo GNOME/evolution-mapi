@@ -69,20 +69,23 @@ struct mapi_push_notification_msg {
 struct mapi_push_event_action_msg {
 	CamelSessionThreadMsg msg;
 
-	gpointer event;
+	uint64_t fid;
+	uint64_t mid;
 	gpointer data;
 };
 
 static void
 mapi_new_mail_free (CamelSession *session, CamelSessionThreadMsg *msg)
 {
-	/*TODO*/
+	struct mapi_push_event_action_msg *m = (struct mapi_push_event_action_msg *) msg;
+
+	camel_object_unref (m->data);
 }
+
 static void
 mapi_new_mail_fetch (CamelSession *session, CamelSessionThreadMsg *msg)
 {
 	struct mapi_push_event_action_msg *m = (struct mapi_push_event_action_msg *) msg;
-	struct NewMailNotification *event = m->event;
 
 	struct mapi_SRestriction *res = NULL;
 	guint32 options = 0;
@@ -93,10 +96,9 @@ mapi_new_mail_fetch (CamelSession *session, CamelSessionThreadMsg *msg)
 	gint info_count = -1;
 	CamelStoreInfo *info;
 	CamelMapiStoreInfo *mapi_info;
-	const gchar *folder_id = exchange_mapi_util_mapi_id_to_string (event->FID);
+	const gchar *folder_id = exchange_mapi_util_mapi_id_to_string (m->fid);
 	const gchar *folder_name = NULL;
 	
-	/* d_notifications(mapidump_newmail (event, "\t")); */
 	/* FIXME : Continue only if we are handling a mail object.*/
 	if (0) return;
 	
@@ -107,7 +109,7 @@ mapi_new_mail_fetch (CamelSession *session, CamelSessionThreadMsg *msg)
 	res->res.resProperty.relop = RES_PROPERTY;
 	res->res.resProperty.ulPropTag = PR_MID;
 	res->res.resProperty.lpProp.ulPropTag = PR_MID;
-	res->res.resProperty.lpProp.value.dbl = event->MID;
+	res->res.resProperty.lpProp.value.dbl = m->mid;
 
 	/* Get the folder object */
 
@@ -134,7 +136,7 @@ mapi_new_mail_fetch (CamelSession *session, CamelSessionThreadMsg *msg)
 	fetch_data->folder = folder;
 
 	CAMEL_SERVICE_REC_LOCK (store, connect_lock);
-	camel_mapi_folder_fetch_summary ((CamelStore *)store, event->FID, res, NULL, fetch_data, options);
+	camel_mapi_folder_fetch_summary ((CamelStore *)store, m->fid, res, NULL, fetch_data, options);
 	CAMEL_SERVICE_REC_UNLOCK (store, connect_lock);
 	
 	camel_folder_summary_touch (folder->summary);
@@ -161,6 +163,7 @@ mapi_notifications_filter (guint16 type, void *event, void *data)
 	CamelMapiStore *store = (CamelMapiStore *)data;
 	CamelSession *session = ((CamelService *)store)->session;
 	struct mapi_push_event_action_msg *new_mail_ops_msg ;
+	const struct NewMailNotification *new_mail_event;
 
 	switch(type) {
 	/* -- Folder Events -- */
@@ -185,11 +188,17 @@ mapi_notifications_filter (guint16 type, void *event, void *data)
 	case fnevNewMail|fnevMbit:
 		d_notifications(printf ("Event : New mail\n"));
 		d_notifications(mapidump_newmail (event, "\t"));
-		/*Note : Use Thread Pool ?*/
+
 		new_mail_ops_msg = camel_session_thread_msg_new (session, &mapi_new_mail_ops,
 								 sizeof (*new_mail_ops_msg));
 
-		new_mail_ops_msg->event = event;
+		new_mail_event = event;
+		/* copy properties from the event, because it will be processes
+	           in a separate thread, some time later */
+		new_mail_ops_msg->fid = new_mail_event->FID;
+		new_mail_ops_msg->mid = new_mail_event->MID;
+
+		camel_object_ref (data);
 		new_mail_ops_msg->data = data;
 		camel_session_thread_queue (session, &new_mail_ops_msg->msg, 0);
 		return -1;

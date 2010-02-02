@@ -698,7 +698,7 @@ exchange_mapi_util_get_attachments (mapi_object_t *obj_message, GSList **attach_
 
 		attachment = g_new0 (ExchangeMAPIAttachment, 1);
 		attachment->cValues = properties.cValues; 
-		attachment->lpProps = g_new0 (struct SPropValue, attachment->cValues);
+		attachment->lpProps = g_new0 (struct SPropValue, attachment->cValues + 1);
 		for (z=0; z < properties.cValues; z++) 
 			cast_SPropValue (&properties.lpProps[z], &(attachment->lpProps[z]));
 
