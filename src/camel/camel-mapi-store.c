@@ -82,6 +82,8 @@ struct _CamelMapiStorePrivate {
 	GHashTable *name_hash;/*get ids from names*/
 	GHashTable *parent_hash;
 	GHashTable *default_folders; /*Default Type : Folder ID*/
+
+	gboolean folders_synced; /* whether were synced folder list already */
 };
 
 static CamelOfflineStoreClass *parent_class = NULL;
@@ -230,6 +232,7 @@ static void camel_mapi_store_init(CamelMapiStore *store, CamelMapiStoreClass *kl
 
 	priv->storage_path = NULL;
 	priv->base_url = NULL;
+	priv->folders_synced = FALSE;
 
 	mapi_store->priv = priv;
 
@@ -439,6 +442,8 @@ mapi_disconnect(CamelService *service, gboolean clean, CamelException *ex)
 	/* Close the mapi subsystem */
 	exchange_mapi_connection_close ();
 	
+	store->priv->folders_synced = FALSE;
+
 	((CamelOfflineStore *) store)->state = CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL;
 	service->status = CAMEL_SERVICE_DISCONNECTED;
 
@@ -1177,6 +1182,8 @@ mapi_convert_to_folder_info (CamelMapiStore *store, ExchangeMAPIFolder *folder, 
 	mapi_id_folder = exchange_mapi_folder_get_parent_id (folder);
 	parent = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", mapi_id_folder);
 
+	fi->name =  g_strdup (name);
+
 	par_name = mapi_folders_hash_table_name_lookup (store, parent, TRUE);
 	if (par_name != NULL) {
 		gchar *str = g_strconcat (par_name, "/", name, NULL);
@@ -1184,7 +1191,6 @@ mapi_convert_to_folder_info (CamelMapiStore *store, ExchangeMAPIFolder *folder, 
 		fi->full_name = str; /* takes ownership of the string */
 		fi->uri = g_strconcat (url, str, NULL);
 	} else {
-		fi->name =  g_strdup (name);
 		fi->full_name = g_strdup (name);
 		fi->uri = g_strconcat (url, "", name, NULL);
 	}
@@ -1289,6 +1295,7 @@ static void
 remove_path_from_store_summary (const gchar *path, gpointer value, CamelMapiStore *mstore)
 {
 	const gchar *folder_id;
+	CamelStoreInfo *si;
 
 	g_return_if_fail (path != NULL);
 	g_return_if_fail (mstore != NULL);
@@ -1298,6 +1305,29 @@ remove_path_from_store_summary (const gchar *path, gpointer value, CamelMapiStor
 		/* name_hash as the second, because folder_id is from there */
 		g_hash_table_remove (mstore->priv->id_hash, folder_id);
 		g_hash_table_remove (mstore->priv->name_hash, path);
+	}
+
+	si = camel_store_summary_path ((CamelStoreSummary *)mstore->summary, path);
+	if (si) {
+		CamelFolderInfo *fi;
+	
+		fi = camel_folder_info_new ();
+		fi->unread = -1;
+		fi->total = -1;
+		fi->uri = g_strdup (camel_store_info_uri (mstore->summary, si));
+		fi->name = g_strdup (camel_store_info_name (mstore->summary, si));
+		fi->full_name = g_strdup (camel_mapi_store_info_full_name (mstore->summary, si));
+		if (!fi->name && fi->full_name) {
+			fi->name = strrchr (fi->full_name, '/');
+			if (fi->name)
+				fi->name = g_strdup (fi->name + 1);
+		}
+
+		camel_object_trigger_event (CAMEL_OBJECT (mstore), "folder_unsubscribed", fi);
+		camel_object_trigger_event (CAMEL_OBJECT (mstore), "folder_deleted", fi);
+		camel_folder_info_free (fi);
+
+		camel_store_summary_info_free ((CamelStoreSummary *)mstore->summary, si);
 	}
 
 	camel_store_summary_remove_path ((CamelStoreSummary *)mstore->summary, path);
@@ -1317,24 +1347,13 @@ mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelE
 	CamelStoreInfo *si = NULL;
 	GHashTable *old_cache_folders;
 
-	if (((CamelOfflineStore *) store)->state == CAMEL_OFFLINE_STORE_NETWORK_AVAIL) {
-		if (((CamelService *)store)->status == CAMEL_SERVICE_DISCONNECTED){
-			((CamelService *)store)->status = CAMEL_SERVICE_CONNECTING;
-			mapi_connect ((CamelService *)store, ex);
-		}
-	}
-
 	if (!camel_mapi_store_connected (store, ex)) {
 		camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_UNAVAILABLE,
 				_("Folder list not available in offline mode."));
 		return;
 	}
 
-	CAMEL_SERVICE_REC_LOCK (store, connect_lock);
-
 	status = exchange_mapi_get_folders_list (&folder_list);
-
-	CAMEL_SERVICE_REC_UNLOCK (store, connect_lock);
 
 	if (!status) {
 		g_warning ("Could not get folder list..\n");
@@ -1449,6 +1468,11 @@ mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelE
 			}
 
 			camel_store_summary_info_ref ((CamelStoreSummary *)store->summary, (CamelStoreInfo *)mapi_si);
+
+			if (!subscription_list) {
+				camel_object_trigger_event (CAMEL_OBJECT (store), "folder_created", info);
+				camel_object_trigger_event (CAMEL_OBJECT (store), "folder_subscribed", info);
+			}
 		}
 
 		mapi_si->info.flags |= info->flags;
@@ -1470,6 +1494,8 @@ mapi_folders_sync (CamelMapiStore *store, const char *top, guint32 flags, CamelE
 
 	g_slist_foreach (list, (GFunc) exchange_mapi_folder_free, NULL);
 	g_slist_free (list);
+
+	priv->folders_synced = TRUE;
 
 	//	g_hash_table_foreach (present, get_folders_free, NULL);
 	//	g_hash_table_destroy (present);
@@ -1495,6 +1521,8 @@ mapi_get_folder_info(CamelStore *store, const char *top, guint32 flags, CamelExc
 	 * is used as is here.
 	 */
 
+	CAMEL_SERVICE_REC_LOCK (store, connect_lock);
+
 	if (((CamelOfflineStore *) store)->state == CAMEL_OFFLINE_STORE_NETWORK_AVAIL) {
 		if (((CamelService *)store)->status == CAMEL_SERVICE_DISCONNECTED){
 			((CamelService *)store)->status = CAMEL_SERVICE_CONNECTING;
@@ -1505,8 +1533,11 @@ mapi_get_folder_info(CamelStore *store, const char *top, guint32 flags, CamelExc
 	/* update folders from the server only when asking for the top most or the 'top' is not known;
 	   otherwise believe the local cache, because folders sync is pretty slow operation to be done
 	   one every single question on the folder info */
-	if ((!top || !*top || !camel_mapi_store_folder_id_lookup (mapi_store, top)) &&
-	    (check_for_connection((CamelService *)store, ex) || ((CamelService *)store)->status == CAMEL_SERVICE_CONNECTING)) {
+	if (((flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST) != 0 ||
+	     (!(flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED)) ||
+	     (!mapi_store->priv->folders_synced) ||
+	     (top && *top && !camel_mapi_store_folder_id_lookup (mapi_store, top))) &&
+	    (check_for_connection ((CamelService *)store, ex) || ((CamelService *)store)->status == CAMEL_SERVICE_CONNECTING)) {
 		mapi_folders_sync (mapi_store, top, flags, ex);
 
 		if (camel_exception_is_set (ex)) {
@@ -1515,9 +1546,9 @@ mapi_get_folder_info(CamelStore *store, const char *top, guint32 flags, CamelExc
 		}
 		camel_store_summary_touch ((CamelStoreSummary *)mapi_store->summary);
 		camel_store_summary_save ((CamelStoreSummary *)mapi_store->summary);
-	} 
+	}
 
-	/*camel_exception_clear (ex);*/
+	CAMEL_SERVICE_REC_UNLOCK (store, connect_lock);
 
 	s_count = camel_store_summary_count((CamelStoreSummary *)mapi_store->summary);
 	info = mapi_get_folder_info_offline (store, top, flags, ex);
