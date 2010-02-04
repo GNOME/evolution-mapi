@@ -2384,6 +2384,8 @@ exchange_mapi_modify_item (uint32_t olFolder, mapi_id_t fid, mapi_id_t mid,
 	/* Set attachments if any */
 	if (attachments) {
 		exchange_mapi_util_set_attachments (&obj_message, attachments, TRUE);
+	} else {
+		exchange_mapi_util_delete_attachments (&obj_message);
 	}
 
 	/* Set recipients if any */
