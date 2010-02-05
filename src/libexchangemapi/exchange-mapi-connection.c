@@ -3109,7 +3109,7 @@ exchange_mapi_events_init ()
 }
 
 gboolean
-exchange_mapi_events_subscribe (mapi_id_t *obj_id, guint32 options,
+exchange_mapi_events_subscribe (guint32 options,
 				guint16 event_mask, guint32 *connection,
 				mapi_notify_callback_t callback, gpointer data)
 {
@@ -3139,11 +3139,14 @@ exchange_mapi_events_subscribe (mapi_id_t *obj_id, guint32 options,
 }
 
 gboolean
-exchange_mapi_events_unsubscribe (mapi_object_t *obj, guint32 connection)
+exchange_mapi_events_unsubscribe (guint32 connection)
 {
 	enum MAPISTATUS	retval;
 
-	retval = Unsubscribe(mapi_object_get_session(obj), connection);
+	if (!global_mapi_session)
+		return FALSE;
+
+	retval = Unsubscribe (global_mapi_session, connection);
 
 	return (retval == MAPI_E_SUCCESS);
 }
@@ -3155,16 +3158,6 @@ exchange_mapi_events_monitor (struct mapi_notify_continue_callback_data *cb_data
 	enum MAPISTATUS	retval;
 	retval = MonitorNotification (global_mapi_session, NULL, cb_data);
 	return retval;
-}
-
-void
-exchange_mapi_events_monitor_close ()
-{
-	struct mapi_notify_ctx	*notify_ctx;
-	if (global_mapi_session) {
-		notify_ctx = global_mapi_session->notify_ctx;
-		close (notify_ctx->fd);
-	}
 }
 
 /* Shows error message on the console, and, if error_msg is not NULL, then

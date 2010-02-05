@@ -223,13 +223,11 @@ gboolean exchange_mapi_events_init ();
 
 gboolean exchange_mapi_events_monitor (struct mapi_notify_continue_callback_data *cb_data);
 
-void exchange_mapi_events_monitor_close ();
-
-gboolean exchange_mapi_events_subscribe (mapi_id_t *obj_id, guint32 options,
+gboolean exchange_mapi_events_subscribe (guint32 options,
 					 guint16 event_mask, guint32 *connection,
 					 mapi_notify_callback_t callback, gpointer data);
 
-gboolean exchange_mapi_events_unsubscribe (mapi_object_t *obj, guint32 connection);
+gboolean exchange_mapi_events_unsubscribe (guint32 connection);
 
 gboolean
 exchange_mapi_events_subscribe_and_monitor (mapi_id_t *obj_id, guint32 options,

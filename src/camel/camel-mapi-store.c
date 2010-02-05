@@ -84,6 +84,7 @@ struct _CamelMapiStorePrivate {
 	GHashTable *default_folders; /*Default Type : Folder ID*/
 
 	gboolean folders_synced; /* whether were synced folder list already */
+	gpointer notification_data; /* pointer to a notification data; can be only one */
 };
 
 static CamelOfflineStoreClass *parent_class = NULL;
@@ -233,6 +234,7 @@ static void camel_mapi_store_init(CamelMapiStore *store, CamelMapiStoreClass *kl
 	priv->storage_path = NULL;
 	priv->base_url = NULL;
 	priv->folders_synced = FALSE;
+	priv->notification_data = NULL;
 
 	mapi_store->priv = priv;
 
@@ -420,7 +422,8 @@ mapi_connect(CamelService *service, CamelException *ex)
 
 	CAMEL_SERVICE_REC_LOCK (store, connect_lock);
 
-	camel_mapi_notfication_listener_start (store, event_mask, MAPI_EVENTS_USE_STORE);
+	if (!store->priv->notification_data)
+		store->priv->notification_data = camel_mapi_notification_listener_start (store, event_mask, MAPI_EVENTS_USE_STORE);
 
 	CAMEL_SERVICE_REC_UNLOCK (store, connect_lock);
 
@@ -437,11 +440,14 @@ mapi_disconnect(CamelService *service, gboolean clean, CamelException *ex)
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
 
 	/* Disconnect from event monitor */
-	exchange_mapi_events_monitor_close ();
+	if (store->priv->notification_data) {
+		camel_mapi_notification_listener_stop (store, store->priv->notification_data);
+		store->priv->notification_data = NULL;
+	}
 
 	/* Close the mapi subsystem */
 	exchange_mapi_connection_close ();
-	
+
 	store->priv->folders_synced = FALSE;
 
 	((CamelOfflineStore *) store)->state = CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL;

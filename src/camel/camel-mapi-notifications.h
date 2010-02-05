@@ -28,9 +28,9 @@
 
 G_BEGIN_DECLS
 
-void
-camel_mapi_notfication_listener_start (CamelMapiStore *store, guint16 mask, 
-				       guint32 options);
+gpointer camel_mapi_notification_listener_start (CamelMapiStore *store, guint16 mask, guint32 options);
+void camel_mapi_notification_listener_stop (CamelMapiStore *store, gpointer start_value);
+
 G_END_DECLS
 
 #endif 
