@@ -44,6 +44,11 @@
 gchar *
 utf8tolinux (const char *wstring)
 {
+	#ifndef HAVE_WINDOWS_TO_UTF8
+	/* newer Openchange (0.10+) doesn't provide windows_to_utf8 function,
+	   it does all the necessary decoding to utf8 transparently */
+	return g_strdup (wstring);
+	#else
 	TALLOC_CTX 	*mem_ctx;
 	gchar		*newstr, *retval = NULL;
 	gint i;
@@ -78,6 +83,7 @@ utf8tolinux (const char *wstring)
 	talloc_free (mem_ctx);
 
 	return retval;
+	#endif
 }
 
 inline gchar *
