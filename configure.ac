@@ -63,7 +63,7 @@ AS_COMPILER_FLAGS(WARNING_FLAGS,
 	-Wformat-nonliteral -Wformat-security -Winit-self
 	-Wmissing-declarations -Wmissing-include-dirs
 	-Wmissing-noreturn -Wnested-externs -Wpointer-arith
-	-Wredundant-decls -Wundef -Wwrite-strings")
+	-Wundef -Wwrite-strings")
 AC_SUBST(WARNING_FLAGS)
 
 dnl Other useful compiler warnings for test builds only.
@@ -71,6 +71,7 @@ dnl These may produce warnings we have no control over.
 dnl
 dnl	-Wmissing-format-attribute
 dnl	-Wshadow
+dnl	-Wredundant-decls
 
 CFLAGS="$CFLAGS $WARNING_FLAGS"
 
