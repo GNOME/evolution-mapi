@@ -1,3 +1,27 @@
+evolution-mapi 0.29.90 2010-02-08
+--------------------------------
+Bug Fixes:
+	Bug #586093 - Text Body larger than 4KB received broken (Milan Crha)
+	Bug #601375 - Fetches folder list more than once (Milan Crha)
+	Bug #603675 - Crash when trying to send a meeting with attachment (Milan Crha)
+	Bug #607744 - Crash on MAPI notification close (Milan Crha)
+	Bug #608320 - Also close Unicode string with \0\0 in a stream (Milan Crha)
+	Bug #608320 - Decode message body from camel stream as expected (Milan Crha)
+	Bug #608662 - multipart/related items are not getting rendered. (Johnny Jacob)
+	Bug #608771 - Crash on new mail notification and disabling mapi account (Milan Crha)
+	Bug #608792 - Push mail notification doesn't seem to work (Part 1) (Johnny Jacob)
+	Bug #608862 - Remove attachments when none specified on item modify (Milan Crha)
+	Bug #609078 - Crash in mapidump_tags at libmapi/mapidump.c (Johnny Jacob)
+
+Others:
+	Fixed for fetching mails and summary  with exchange 2010 (Jonathon Jongsma)
+
+Translations:
+	Jamil Ahmed (bn)
+	Krasimir Chonov (bg)
+	Matej Urbančič (sl)
+	Milan Skočić (sr)
+
 evolution-mapi 0.29.6 2010-01-25
 --------------------------------
 Bug Fixes:
