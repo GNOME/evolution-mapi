@@ -38,6 +38,7 @@
 #include <camel/camel-store-summary.h>
 #include <camel/camel-i18n.h>
 #include <camel/camel-net-utils.h>
+#include <camel/camel-debug.h>
 
 #include "camel-mapi-store.h"
 #include "camel-mapi-folder.h"
@@ -47,7 +48,7 @@
 
 #include <exchange-mapi-utils.h>
 
-#define d_notifications(x) x
+#define d_notifications(x) (camel_debug ("mapi:notifications") ? (x) : 0)
 
 static void mapi_push_notification_listener (CamelSession *session, CamelSessionThreadMsg *msg);
 static void mapi_push_notification_listener_close (CamelSession *session, CamelSessionThreadMsg *msg);
