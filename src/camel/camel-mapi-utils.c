@@ -68,6 +68,7 @@ mapi_item_add_recipient (const char *recipients, OlMailRecipientType type, GSLis
 {
 	ExchangeMAPIRecipient *recipient;
 	uint32_t val = 0;
+	uint8_t bVal;
 	const char *str = NULL;
 
 	if (!recipients)
@@ -88,8 +89,8 @@ mapi_item_add_recipient (const char *recipients, OlMailRecipientType type, GSLis
 	set_SPropValue_proptag (&(recipient->in.req_lpProps[1]), PR_SEND_INTERNET_ENCODING, (const void *)&val);
 
 	/* External recipient properties - set them only when the recipient is unresolved */
-	recipient->in.ext_lpProps = g_new0 (struct SPropValue, 7);
-	recipient->in.ext_cValues = 7;
+	recipient->in.ext_lpProps = g_new0 (struct SPropValue, 8);
+	recipient->in.ext_cValues = 8;
 
 	val = DT_MAILUSER;
 	set_SPropValue_proptag (&(recipient->in.ext_lpProps[0]), PR_DISPLAY_TYPE, (const void *)&val);
@@ -103,6 +104,9 @@ mapi_item_add_recipient (const char *recipients, OlMailRecipientType type, GSLis
 	set_SPropValue_proptag (&(recipient->in.ext_lpProps[4]), PR_GIVEN_NAME, (const void *)(str));
 	set_SPropValue_proptag (&(recipient->in.ext_lpProps[5]), PR_DISPLAY_NAME, (const void *)(str));
 	set_SPropValue_proptag (&(recipient->in.ext_lpProps[6]), PR_7BIT_DISPLAY_NAME, (const void *)(str));
+
+	bVal = FALSE;
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[7]), PR_SEND_RICH_INFO, &bVal);
 
 	*recipient_list = g_slist_append (*recipient_list, recipient);
 }
