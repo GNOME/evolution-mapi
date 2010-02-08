@@ -3179,9 +3179,7 @@ gboolean
 exchange_mapi_events_monitor (struct mapi_notify_continue_callback_data *cb_data)
 {
 	enum MAPISTATUS	retval;
-	LOCK ();
 	retval = MonitorNotification (global_mapi_session, NULL, cb_data);
-	UNLOCK ();
 	return retval;
 }
 
