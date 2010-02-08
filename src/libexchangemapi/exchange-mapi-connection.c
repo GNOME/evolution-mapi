@@ -3133,11 +3133,14 @@ exchange_mapi_events_subscribe (guint32 options,
 
 	mapi_object_init(&obj_target);
 
+	LOCK ();
+
 	if (options & MAPI_EVENTS_USE_STORE) {
 		retval = OpenMsgStore(global_mapi_session, &obj_target);
 		if (retval != MAPI_E_SUCCESS) {
 			mapi_errstr("OpenMsgStore", GetLastError());
-			return false;
+			UNLOCK ();
+			return FALSE;
 		}
 	} else if (options & MAPI_EVENTS_USE_PF_STORE) {
 		/* TODO */
@@ -3148,6 +3151,8 @@ exchange_mapi_events_subscribe (guint32 options,
 	retval = Subscribe(&obj_target, connection, event_mask, use_store,
 			   (mapi_notify_callback_t) callback, data);
 
+	UNLOCK ();
+
 	return (retval == MAPI_E_SUCCESS);
 }
 
@@ -3156,10 +3161,15 @@ exchange_mapi_events_unsubscribe (guint32 connection)
 {
 	enum MAPISTATUS	retval;
 
-	if (!global_mapi_session)
+	LOCK ();
+	if (!global_mapi_session) {
+		UNLOCK ();
 		return FALSE;
+	}
 
 	retval = Unsubscribe (global_mapi_session, connection);
+
+	UNLOCK ();
 
 	return (retval == MAPI_E_SUCCESS);
 }
@@ -3169,7 +3179,9 @@ gboolean
 exchange_mapi_events_monitor (struct mapi_notify_continue_callback_data *cb_data)
 {
 	enum MAPISTATUS	retval;
+	LOCK ();
 	retval = MonitorNotification (global_mapi_session, NULL, cb_data);
+	UNLOCK ();
 	return retval;
 }
 
