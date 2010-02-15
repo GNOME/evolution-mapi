@@ -112,7 +112,7 @@ mapi_profile_load (const char *profname, const char *password)
 	}
 
 	/* Initialize libmapi logger*/
-	if (g_getenv ("LIBMAPI_DEBUG")) {
+	if (g_getenv ("MAPI_DEBUG")) {
 		debug_log_level = atoi (g_getenv ("MAPI_DEBUG"));
 		SetMAPIDumpData(TRUE);
 		SetMAPIDebugLevel(debug_log_level);

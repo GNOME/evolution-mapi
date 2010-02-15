@@ -1868,7 +1868,7 @@ e_cal_backend_mapi_send_objects (ECalBackendSync *backend, EDataCal *cal, const 
 		icalcomponent *subcomp = icalcomponent_get_first_component (icalcomp, kind);
 		while (subcomp) {
 			ECalComponent *comp = e_cal_component_new ();
-			struct cbdata cbdata;
+			struct cbdata cbdata = { 0 };
 			mapi_id_t mid = 0;
 			GSList *recipients = NULL;
 			GSList *attachments = NULL;
@@ -2022,8 +2022,19 @@ e_cal_backend_mapi_receive_objects (ECalBackendSync *backend, EDataCal *cal, con
 
 			switch (method) {
 			case ICAL_METHOD_REQUEST :
-				comp_str = e_cal_component_get_as_string (comp);
-				status = e_cal_backend_mapi_modify_object (backend, cal, comp_str, CALOBJ_MOD_THIS, &old_object, &new_object);
+				comp_str = NULL;
+				status = e_cal_backend_mapi_get_object (backend, cal, uid, NULL, &comp_str);
+				if (status != GNOME_Evolution_Calendar_Success) {
+					comp_str = e_cal_component_get_as_string (comp);
+					new_object = comp_str;
+					status = e_cal_backend_mapi_create_object (backend, cal, &new_object, NULL);
+					if (new_object == comp_str)
+						new_object = NULL;
+				} else {
+					g_free (comp_str);
+					comp_str = e_cal_component_get_as_string (comp);
+					status = e_cal_backend_mapi_modify_object (backend, cal, comp_str, CALOBJ_MOD_ALL, &old_object, &new_object);
+				}
 				g_free (comp_str);
 				g_free (old_object);
 				g_free (new_object);
