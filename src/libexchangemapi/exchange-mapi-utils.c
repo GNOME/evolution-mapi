@@ -287,8 +287,8 @@ exchange_mapi_util_free_recipient_list (GSList **recip_list)
 			g_free (recipient->in.ext_lpProps);
 		if (recipient->in.req_cValues)
 			g_free (recipient->in.req_lpProps);
-/*		if (recipient->out.all_cValues)
-			g_free (recipient->out.all_lpProps);
+/*		if (recipient->out_SRow.cValues)
+			g_free (recipient->out_SRow.lpProps);
 */		g_free (recipient);
 	}
 	g_slist_free (l);

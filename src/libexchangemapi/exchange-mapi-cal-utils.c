@@ -235,7 +235,7 @@ exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_l
 			attach_item = g_new0 (ExchangeMAPIAttachment, 1);
 
 			attach_item->cValues = 4; 
-			attach_item->lpProps = g_new0 (struct SPropValue, 4); 
+			attach_item->lpProps = g_new0 (struct SPropValue, attach_item->cValues + 1);
 
 			flag = ATTACH_BY_VALUE; 
 			set_SPropValue_proptag(&(attach_item->lpProps[0]), PR_ATTACH_METHOD, (const void *) (&flag));
@@ -305,8 +305,8 @@ exchange_mapi_cal_util_fetch_organizer (ECalComponent *comp, GSList **recip_list
 			recipient->email_id = (org);
 
 		/* Required properties - set them always */
-		recipient->in.req_lpProps = g_new0 (struct SPropValue, 5);
 		recipient->in.req_cValues = 5;
+		recipient->in.req_lpProps = g_new0 (struct SPropValue, recipient->in.req_cValues + 1);
 
 		val = 0;
 		set_SPropValue_proptag (&(recipient->in.req_lpProps[0]), PR_SEND_INTERNET_ENCODING, (const void *)&val);
@@ -327,8 +327,8 @@ exchange_mapi_cal_util_fetch_organizer (ECalComponent *comp, GSList **recip_list
 		set_SPropValue_proptag (&(recipient->in.req_lpProps[4]), PR_RECIPIENT_DISPLAY_NAME, (const void *)(str));
 
 		/* External recipient properties - set them only when the recipient is unresolved */
-		recipient->in.ext_lpProps = g_new0 (struct SPropValue, 5);
 		recipient->in.ext_cValues = 5;
+		recipient->in.ext_lpProps = g_new0 (struct SPropValue, recipient->in.ext_cValues + 1);
 
 		val = DT_MAILUSER;
 		set_SPropValue_proptag (&(recipient->in.ext_lpProps[0]), PR_DISPLAY_TYPE, (const void *)&val);
@@ -377,8 +377,8 @@ exchange_mapi_cal_util_fetch_recipients (ECalComponent *comp, GSList **recip_lis
 			recipient->email_id = (str);
 
 		/* Required properties - set them always */
-		recipient->in.req_lpProps = g_new0 (struct SPropValue, 5);
 		recipient->in.req_cValues = 5;
+		recipient->in.req_lpProps = g_new0 (struct SPropValue, recipient->in.req_cValues + 1);
 
 		val = 0;
 		set_SPropValue_proptag (&(recipient->in.req_lpProps[0]), PR_SEND_INTERNET_ENCODING, (const void *)&val);
@@ -400,8 +400,8 @@ exchange_mapi_cal_util_fetch_recipients (ECalComponent *comp, GSList **recip_lis
 		set_SPropValue_proptag (&(recipient->in.req_lpProps[4]), PR_RECIPIENT_DISPLAY_NAME, (const void *)(str));
 
 		/* External recipient properties - set them only when the recipient is unresolved */
-		recipient->in.ext_lpProps = g_new0 (struct SPropValue, 7);
 		recipient->in.ext_cValues = 7;
+		recipient->in.ext_lpProps = g_new0 (struct SPropValue, recipient->in.ext_cValues + 1);
 
 		val = DT_MAILUSER;
 		set_SPropValue_proptag (&(recipient->in.ext_lpProps[0]), PR_DISPLAY_TYPE, (const void *)&val);
@@ -493,15 +493,15 @@ ical_attendees_from_props (icalcomponent *ical_comp, GSList *recipients, gboolea
 		else 
 			continue;
 
-		flags = (const uint32_t *) get_SPropValue(recip->out.all_lpProps, PR_RECIPIENTS_FLAGS);
+		flags = (const uint32_t *) get_SPropValue_SRow_data (&recip->out_SRow, PR_RECIPIENTS_FLAGS);
 
 		if (flags && (*flags & RECIP_ORGANIZER)) {
 			prop = icalproperty_new_organizer (val);
 
 			/* CN */
-			str = (const char *) exchange_mapi_util_find_SPropVal_array_propval(recip->out.all_lpProps, PR_RECIPIENT_DISPLAY_NAME);
+			str = (const char *) exchange_mapi_util_find_row_propval (&recip->out_SRow, PR_RECIPIENT_DISPLAY_NAME);
 			if (!str)
-				str = (const char *) exchange_mapi_util_find_SPropVal_array_propval(recip->out.all_lpProps, PR_DISPLAY_NAME);
+				str = (const char *) exchange_mapi_util_find_row_propval (&recip->out_SRow, PR_DISPLAY_NAME);
 			if (str) {
 				param = icalparameter_new_cn (str);
 				icalproperty_add_parameter (prop, param);
@@ -510,9 +510,9 @@ ical_attendees_from_props (icalcomponent *ical_comp, GSList *recipients, gboolea
 			prop = icalproperty_new_attendee (val);
 
 			/* CN */
-			str = (const char *) exchange_mapi_util_find_SPropVal_array_propval(recip->out.all_lpProps, PR_RECIPIENT_DISPLAY_NAME);
+			str = (const char *) exchange_mapi_util_find_row_propval (&recip->out_SRow, PR_RECIPIENT_DISPLAY_NAME);
 			if (!str)
-				str = (const char *) exchange_mapi_util_find_SPropVal_array_propval(recip->out.all_lpProps, PR_DISPLAY_NAME);
+				str = (const char *) exchange_mapi_util_find_row_propval (&recip->out_SRow, PR_DISPLAY_NAME);
 			if (str) {
 				param = icalparameter_new_cn (str);
 				icalproperty_add_parameter (prop, param);
@@ -521,11 +521,11 @@ ical_attendees_from_props (icalcomponent *ical_comp, GSList *recipients, gboolea
 			param = icalparameter_new_rsvp (rsvp ? ICAL_RSVP_TRUE : ICAL_RSVP_FALSE);
 			icalproperty_add_parameter (prop, param);
 			/* PARTSTAT */
-			ui32 = (const uint32_t *) get_SPropValue(recip->out.all_lpProps, PR_RECIPIENT_TRACKSTATUS);
+			ui32 = (const uint32_t *) get_SPropValue_SRow_data (&recip->out_SRow, PR_RECIPIENT_TRACKSTATUS);
 			param = icalparameter_new_partstat (get_partstat_from_trackstatus (ui32 ? *ui32 : olResponseNone));
 			icalproperty_add_parameter (prop, param);
 			/* ROLE */
-			ui32 = (const uint32_t *) get_SPropValue(recip->out.all_lpProps, PR_RECIPIENT_TYPE);
+			ui32 = (const uint32_t *) get_SPropValue_SRow_data (&recip->out_SRow, PR_RECIPIENT_TYPE);
 			param = icalparameter_new_role (get_role_from_type (ui32 ? *ui32 : olTo));
 			icalproperty_add_parameter (prop, param);
 #if 0
@@ -1629,7 +1629,7 @@ exchange_mapi_cal_util_build_props (struct SPropValue **value, struct SPropTagAr
 	} 
 
 	d(g_debug ("Allocating space for %d props ", flag32));
-	props = g_new0 (struct SPropValue, flag32);
+	props = g_new0 (struct SPropValue, flag32 + 1);
 
 	/* PR_MESSAGE_CLASS needs to be set appropriately */					/* propcount++ */
 

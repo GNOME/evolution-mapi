@@ -458,7 +458,7 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 	for (i=0; i<13; i++)
 		printf("hex %x\n", SPropTagArray->aulPropTag[i]);
 	i=0;
-	props = g_new (struct SPropValue, 50); //FIXME: Correct value tbd
+	props = g_new0 (struct SPropValue, 50); //FIXME: Correct value tbd
 	set_str_value ( E_CONTACT_FILE_AS, SPropTagArray->aulPropTag[0]);
 
 	set_str_value (E_CONTACT_FULL_NAME, PR_DISPLAY_NAME);

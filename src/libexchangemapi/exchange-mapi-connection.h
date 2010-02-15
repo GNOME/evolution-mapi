@@ -78,12 +78,9 @@ typedef struct {
 		struct SPropValue *ext_lpProps;
 	} in; 
 
-	struct {
-		/* These are properties which would be set on the 
-		 * recipients after GetRecipientTable() */
-		uint32_t all_cValues; 
-		struct SPropValue *all_lpProps;
-	} out; 
+	/* These are properties which would be set on the 
+	 * recipients after GetRecipientTable() */
+	struct SRow out_SRow;
 } ExchangeMAPIRecipient;
 
 typedef struct {

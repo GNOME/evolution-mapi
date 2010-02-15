@@ -538,7 +538,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
  				gchar *formatted_id = NULL;
 				const char *name, *display_name;
  				guint32 *type = NULL;
- 				struct SRow aRow;
+ 				struct SRow *aRow;
  				ExchangeMAPIRecipient *recip = (ExchangeMAPIRecipient *)(l->data);
  				
  				/*Can't continue when there is no email-id*/
@@ -546,18 +546,16 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
  					continue;
  				
  				/* Build a SRow structure */
- 				aRow.ulAdrEntryPad = 0;
- 				aRow.cValues = recip->out.all_cValues;
- 				aRow.lpProps = recip->out.all_lpProps;
+ 				aRow = &recip->out_SRow;
 
- 				type = (uint32_t *) find_SPropValue_data(&aRow, PR_RECIPIENT_TYPE);
+ 				type = (uint32_t *) find_SPropValue_data (aRow, PR_RECIPIENT_TYPE);
 
 				if (type) {
- 					name = (const char *) find_SPropValue_data(&aRow, PR_DISPLAY_NAME);
- 					name = name ? name : (const char *) find_SPropValue_data(&aRow, PR_RECIPIENT_DISPLAY_NAME);
- 					name = name ? name : (const char *) find_SPropValue_data(&aRow, 
+ 					name = (const char *) find_SPropValue_data (aRow, PR_DISPLAY_NAME);
+ 					name = name ? name : (const char *) find_SPropValue_data (aRow, PR_RECIPIENT_DISPLAY_NAME);
+ 					name = name ? name : (const char *) find_SPropValue_data (aRow, 
  												 PR_RECIPIENT_DISPLAY_NAME_UNICODE);
- 					name = name ? name : (const char *) find_SPropValue_data(&aRow, 
+ 					name = name ? name : (const char *) find_SPropValue_data (aRow, 
  												 PR_7BIT_DISPLAY_NAME_UNICODE);
  					display_name = name ? name : recip->email_id;
  					formatted_id = camel_internet_address_format_address(display_name, recip->email_id);
@@ -1349,7 +1347,7 @@ mapi_msg_set_recipient_list (CamelMimeMessage *msg, MapiItem *item)
 		const char *name = NULL;
 		uint32_t rcpt_type = MAPI_TO;
 		uint32_t *type = NULL; 
-		struct SRow aRow;
+		struct SRow *aRow;
 		ExchangeMAPIRecipient *recip = (ExchangeMAPIRecipient *)(l->data);
 		
 		/*Can't continue when there is no email-id*/
@@ -1357,17 +1355,15 @@ mapi_msg_set_recipient_list (CamelMimeMessage *msg, MapiItem *item)
 			continue;
 		
 		/* Build a SRow structure */
-		aRow.ulAdrEntryPad = 0;
-		aRow.cValues = recip->out.all_cValues;
-		aRow.lpProps = recip->out.all_lpProps;
+		aRow = &recip->out_SRow;
 		
 		/*Name is probably available in one of these props.*/
-		name = (const char *) find_SPropValue_data(&aRow, PR_DISPLAY_NAME);
-		name = name ? name : (const char *) find_SPropValue_data(&aRow, PR_RECIPIENT_DISPLAY_NAME);
-		name = name ? name : (const char *) find_SPropValue_data(&aRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
-		name = name ? name : (const char *) find_SPropValue_data(&aRow, PR_7BIT_DISPLAY_NAME_UNICODE);
+		name = (const char *) find_SPropValue_data (aRow, PR_DISPLAY_NAME);
+		name = name ? name : (const char *) find_SPropValue_data (aRow, PR_RECIPIENT_DISPLAY_NAME);
+		name = name ? name : (const char *) find_SPropValue_data (aRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
+		name = name ? name : (const char *) find_SPropValue_data (aRow, PR_7BIT_DISPLAY_NAME_UNICODE);
 
-		type = (uint32_t *) find_SPropValue_data(&aRow, PR_RECIPIENT_TYPE);
+		type = (uint32_t *) find_SPropValue_data (aRow, PR_RECIPIENT_TYPE);
 		
 		/*Fallbacks. Not good*/
 		display_name = name ? g_strdup (name) : g_strdup (recip->email_id);
