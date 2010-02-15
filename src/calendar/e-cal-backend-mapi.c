@@ -1606,7 +1606,7 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 
 	if (mod != CALOBJ_MOD_ALL) {
 		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server.")); 
-		return GNOME_Evolution_Calendar_Success;
+		return GNOME_Evolution_Calendar_OtherError;
 	}
 
 	/* check the component for validity */
