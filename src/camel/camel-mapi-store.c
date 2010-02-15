@@ -434,6 +434,15 @@ mapi_connect(CamelService *service, CamelException *ex)
 	return TRUE;
 }
 
+void
+camel_mapi_store_unset_notification_data (CamelMapiStore *mstore)
+{
+	g_return_if_fail (mstore != NULL);
+	g_return_if_fail (CAMEL_IS_MAPI_STORE (mstore));
+
+	mstore->priv->notification_data = NULL;
+}
+
 static gboolean 
 mapi_disconnect(CamelService *service, gboolean clean, CamelException *ex)
 {

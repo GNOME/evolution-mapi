@@ -245,6 +245,14 @@ mapi_push_notification_listener (CamelSession *session, CamelSessionThreadMsg *m
 static void
 mapi_push_notification_listener_close (CamelSession *session, CamelSessionThreadMsg *msg)
 {
+	struct mapi_push_notification_msg *m = (struct mapi_push_notification_msg *)msg;
+	CamelMapiStore *mstore = (CamelMapiStore *) m->event_data;
+
+	camel_object_ref (mstore);
+	CAMEL_SERVICE_REC_LOCK (mstore, connect_lock);
+	camel_mapi_store_unset_notification_data (mstore);
+	CAMEL_SERVICE_REC_UNLOCK (mstore, connect_lock);
+	camel_object_unref (mstore);
 }
 
 gpointer

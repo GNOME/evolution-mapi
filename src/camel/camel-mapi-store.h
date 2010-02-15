@@ -98,6 +98,8 @@ const gchar *camel_mapi_store_system_folder_fid (CamelMapiStore *mapi_store, gui
 const gchar *camel_mapi_store_folder_id_lookup_offline (CamelMapiStore *mapi_store, const char *folder_name);
 const gchar* mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid, gboolean use_cache);
 
+void camel_mapi_store_unset_notification_data (CamelMapiStore *mstore);
+
 __END_DECLS
 
 #endif /* __CAMEL_OPENCHANGE_STORE_H__ */
