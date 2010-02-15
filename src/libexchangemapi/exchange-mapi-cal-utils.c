@@ -1572,7 +1572,7 @@ note_build_name_id (struct mapi_nameid *nameid)
 static const gchar *
 get_tzid_location (const gchar *tzid, struct cbdata *cbdata)
 {
-	icaltimezone *zone;
+	icaltimezone *zone = NULL;
 
 	if (!tzid || !*tzid || g_str_equal (tzid, "UTC"))
 		return NULL;
