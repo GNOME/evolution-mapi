@@ -80,8 +80,8 @@ mapi_item_add_recipient (const char *recipients, OlMailRecipientType type, GSLis
 
 	/* this memory should be freed somewhere, perhaps in the existing
 	 * exchange_mapi_util_free_recipient_list() */
-	recipient->in.req_lpProps = g_new0 (struct SPropValue, 2);
 	recipient->in.req_cValues = 2;
+	recipient->in.req_lpProps = g_new0 (struct SPropValue, recipient->in.req_cValues + 1);
 
 	set_SPropValue_proptag (&(recipient->in.req_lpProps[0]), PR_RECIPIENT_TYPE, (const void *) &type);
 
@@ -89,8 +89,8 @@ mapi_item_add_recipient (const char *recipients, OlMailRecipientType type, GSLis
 	set_SPropValue_proptag (&(recipient->in.req_lpProps[1]), PR_SEND_INTERNET_ENCODING, (const void *)&val);
 
 	/* External recipient properties - set them only when the recipient is unresolved */
-	recipient->in.ext_lpProps = g_new0 (struct SPropValue, 8);
 	recipient->in.ext_cValues = 8;
+	recipient->in.ext_lpProps = g_new0 (struct SPropValue, recipient->in.ext_cValues + 1);
 
 	val = DT_MAILUSER;
 	set_SPropValue_proptag (&(recipient->in.ext_lpProps[0]), PR_DISPLAY_TYPE, (const void *)&val);
@@ -208,7 +208,7 @@ mapi_item_add_attach (MapiItem *item, CamelMimePart *part, CamelStream *content_
 	
 	item_attach = g_new0 (ExchangeMAPIAttachment, 1);
 
-	item_attach->lpProps = g_new0 (struct SPropValue, 6);
+	item_attach->lpProps = g_new0 (struct SPropValue, 6 + 1);
 
 	flag = ATTACH_BY_VALUE; 
 	set_SPropValue_proptag(&(item_attach->lpProps[i++]), PR_ATTACH_METHOD, (const void *) (&flag));
@@ -408,7 +408,7 @@ camel_mapi_utils_create_item_build_props (struct SPropValue **value, struct SPro
 	uint32_t *cpid = g_new0 (uint32_t, 1);
 	int i=0;
 
-	props = g_new0 (struct SPropValue, 11);
+	props = g_new0 (struct SPropValue, 11 + 1);
 
 	*cpid = 65001; /* UTF8 */
 	set_SPropValue_proptag(&props[i++], PR_INTERNET_CPID, cpid);

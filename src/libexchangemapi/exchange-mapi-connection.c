@@ -252,7 +252,7 @@ exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, uint32_t pro
 
 		/* Build a mapi_SPropValue_array structure */
 		properties_array.cValues = 1; 
-		properties_array.lpProps = talloc_array (mem_ctx, struct mapi_SPropValue, properties_array.cValues);
+		properties_array.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, properties_array.cValues + 1);
 		properties_array.lpProps[0].ulPropTag = proptag; 
 		/* This call is needed in case the read stream was a named prop. */
 		mapi_SPropValue_array_named (obj_message, &properties_array);
@@ -857,8 +857,9 @@ exchange_mapi_util_get_recipients (mapi_object_t *obj_message, GSList **recip_li
 			mapidump_SRow (&(rows_recip.aRow[i_row_recip]), " ");
 		}
 
-		recipient->out.all_lpProps = talloc_steal ((TALLOC_CTX *)recipient->mem_ctx, rows_recip.aRow[i_row_recip].lpProps);
-		recipient->out.all_cValues = rows_recip.aRow[i_row_recip].cValues;
+		recipient->out_SRow.ulAdrEntryPad = rows_recip.aRow[i_row_recip].ulAdrEntryPad;
+		recipient->out_SRow.cValues = rows_recip.aRow[i_row_recip].cValues;
+		recipient->out_SRow.lpProps = talloc_steal ((TALLOC_CTX *)recipient->mem_ctx, rows_recip.aRow[i_row_recip].lpProps);
 
 		*recip_list = g_slist_append (*recip_list, recipient);
 	}
@@ -1301,8 +1302,8 @@ GetProps_cleanup:
 					SPropTagArray_add (mem_ctx, tags, GetPropsTagArray->aulPropTag[k]);
 				retval = GetProps (&obj_message, tags, &lpProps, &prop_count);
 				MAPIFreeBuffer (tags);
-				properties_array.lpProps = talloc_array (mem_ctx, struct mapi_SPropValue, 
-									 prop_count);
+				properties_array.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, 
+									 prop_count + 1);
 				properties_array.cValues = prop_count;
 				for (k=0; k < prop_count; k++)
 					cast_mapi_SPropValue(&properties_array.lpProps[k], &lpProps[k]);
@@ -1488,7 +1489,7 @@ exchange_mapi_connection_fetch_item (mapi_id_t fid, mapi_id_t mid,
 
 		/* Conversion from SPropValue to mapi_SPropValue. (no padding here) */
 		properties_array.cValues = prop_count;
-		properties_array.lpProps = talloc_array (mem_ctx, struct mapi_SPropValue, prop_count);
+		properties_array.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, prop_count + 1);
 		for (k=0; k < prop_count; k++)
 			cast_mapi_SPropValue(&properties_array.lpProps[k], &lpProps[k]);
 
