@@ -930,7 +930,7 @@ static void e_book_backend_mapi_gal_class_init (EBookBackendMAPIGALClass *klass)
 	supported_fields = NULL;
 	for (i = 0; i < maplen; i++) {
 		supported_fields = g_list_append (supported_fields,
-						  (gchar *)e_contact_field_name (mappings[i].mapi_id));
+						  (gchar *)e_contact_field_name (mappings[i].field_id));
 	}
 	supported_fields = g_list_append (supported_fields, (gpointer) "file_as");
 }
