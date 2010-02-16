@@ -1449,7 +1449,11 @@ mapi_mime_set_recipient_list (CamelMimeMessage *msg, MapiItem *item)
 	}
 	
 	/*Add to message*/
-	/*Note : To field is added from PR_TRANSPORT_MESSAGE_HEADERS*/
+	/*Note : To field is added from PR_TRANSPORT_MESSAGE_HEADERS
+	  But, in sent_items folder we don't get TRANSPORT_MESSAGE_HEADERS */
+	if (!item->header.transport_headers)
+		camel_mime_message_set_recipients(msg, "To", to_addr);
+
 	camel_mime_message_set_recipients(msg, "Cc", cc_addr);
 	camel_mime_message_set_recipients(msg, "Bcc", bcc_addr);
 
