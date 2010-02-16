@@ -262,7 +262,6 @@ mapi_summary_clear (CamelFolderSummary *summary, gboolean uncache)
 {
 	CamelFolderChangeInfo *changes;
 	CamelMessageInfo *info;
-	CamelException ex;
 	int i, count;
 	const char *uid;
 
@@ -278,10 +277,7 @@ mapi_summary_clear (CamelFolderSummary *summary, gboolean uncache)
 		camel_message_info_free(info);
 	}
 
-	camel_folder_summary_clear (summary);
-	camel_exception_init (&ex);
-	/*TODO : Test exception */
-	camel_folder_summary_save_to_db (summary, &ex);
+	camel_folder_summary_clear_db (summary);
 
 	if (uncache)
 		camel_data_cache_clear (((CamelMapiFolder *) summary->folder)->cache, "cache", NULL);
