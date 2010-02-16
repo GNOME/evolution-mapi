@@ -106,7 +106,7 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 	}
 
 	/* Convert MIME to MAPIItem, attacment lists and recipient list.*/
-	item = camel_mapi_utils_mime_to_item (message, from, recipients, ex);
+	item = camel_mapi_utils_mime_to_item (message, from, ex);
 
 	/* send */
 	st = mapi_message_item_send(item);

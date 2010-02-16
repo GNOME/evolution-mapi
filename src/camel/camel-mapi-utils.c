@@ -114,19 +114,19 @@ mapi_item_add_recipient (const char *recipients, OlMailRecipientType type, GSLis
 static void
 mapi_item_set_from(MapiItem *item, const char *from)
 {
-	if (item->header.from) { 
-		free(item->header.from);
-	}
-	item->header.from = strdup(from);
+	if (item->header.from)
+		g_free (item->header.from);
+
+	item->header.from = g_strdup (from);
 }
 
 static void
 mapi_item_set_subject(MapiItem *item, const char *subject)
 {
 	if (item->header.subject)
-		free(item->header.subject);
+		g_free (item->header.subject);
 
-	item->header.subject = g_strdup(subject);
+	item->header.subject = g_strdup (subject);
 }
 
 #define MAX_READ_SIZE 0x1000
@@ -320,8 +320,7 @@ mapi_do_multipart (CamelMultipart *mp, MapiItem *item, gboolean *is_first)
 
 
 MapiItem *
-camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, CamelAddress *recipients,
-			       CamelException *ex)
+camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, CamelException *ex)
 {
 	CamelDataWrapper *dw = NULL;
 	CamelContentType *type;
@@ -339,26 +338,31 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 
 	/* headers */
 
-	if (!camel_internet_address_get((const CamelInternetAddress *)from, 0, &namep, &addressp)) {
-		printf("index\n");
-		return (FALSE);
+	if (from) {
+		if (!camel_internet_address_get ((const CamelInternetAddress *)from, 0, &namep, &addressp)) {
+			g_warning ("%s: Invalid 'from' passed in", G_STRFUNC);
+			g_free (item);
+			return NULL;
+		}
+	} else {
+		/* though invalid, then possible, to pass in a message without any 'from' */
+		namep = NULL;
 	}
 
-	/** WARNING: double check **/
 	mapi_item_set_from (item, namep);
 
 	to = camel_mime_message_get_recipients(message, CAMEL_RECIPIENT_TYPE_TO);
-	for (i = 0; camel_internet_address_get(to, i, &namep, &addressp); i++){
+	for (i = 0; to && camel_internet_address_get (to, i, &namep, &addressp); i++){
 		mapi_item_add_recipient (addressp, olTo, &recipient_list);
 	}
 
 	cc = camel_mime_message_get_recipients(message, CAMEL_RECIPIENT_TYPE_CC);
-	for (i = 0; camel_internet_address_get(cc, i, &namep, &addressp); i++) {
+	for (i = 0; cc && camel_internet_address_get (cc, i, &namep, &addressp); i++) {
 		mapi_item_add_recipient (addressp, olCC, &recipient_list);
 	}
 
 	bcc = camel_mime_message_get_recipients(message, CAMEL_RECIPIENT_TYPE_BCC);
-	for (i = 0; camel_internet_address_get(bcc, i, &namep, &addressp); i++) {
+	for (i = 0; bcc && camel_internet_address_get (bcc, i, &namep, &addressp); i++) {
 		mapi_item_add_recipient (addressp, olBCC, &recipient_list);
 	}
 	

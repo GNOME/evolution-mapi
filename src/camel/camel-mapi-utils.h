@@ -27,8 +27,7 @@
 G_BEGIN_DECLS
 
 MapiItem *
-camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, 
-			       CamelAddress *recipients, CamelException *ex);
+camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, CamelException *ex);
 
 gint
 camel_mapi_utils_create_item_build_props (struct SPropValue **value, 

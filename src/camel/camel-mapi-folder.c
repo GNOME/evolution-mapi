@@ -2158,7 +2158,7 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 {
 	CamelMapiStore *mapi_store= CAMEL_MAPI_STORE(folder->parent_store);
 	CamelOfflineStore *offline = (CamelOfflineStore *) folder->parent_store;
-	CamelAddress *from = NULL, *recipients = NULL;
+	CamelAddress *from = NULL;
 	CamelStoreInfo *si;
 
 	MapiItem *item = NULL;
@@ -2194,9 +2194,8 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 
 	/* Convert MIME to Item */
 	from = (CamelAddress *) camel_mime_message_get_from (message);
-	recipients = (CamelAddress *) camel_mime_message_get_recipients (message, "to");
 
-	item = camel_mapi_utils_mime_to_item (message, from, recipients, ex);
+	item = camel_mapi_utils_mime_to_item (message, from, ex);
 
 	mid = exchange_mapi_create_item (-1, fid, NULL, NULL, 
 					 camel_mapi_utils_create_item_build_props, item,
