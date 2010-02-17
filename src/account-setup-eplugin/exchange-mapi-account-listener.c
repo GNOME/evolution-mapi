@@ -49,6 +49,8 @@ LIMBAPI_CFLAGS or something is going wrong */
 
 #define d(x) x
 
+G_DEFINE_TYPE (ExchangeMAPIAccountListener, exchange_mapi_account_listener, G_TYPE_OBJECT)
+
 struct _ExchangeMAPIAccountListenerPrivate {
 	GConfClient *gconf_client;
 	/* we get notification about mail account changes from this object */
@@ -67,8 +69,6 @@ struct _ExchangeMAPIAccountInfo {
 
 /* list of ExchangeMAPIAccountInfo structures */
 static 	GList *mapi_accounts = NULL;
-
-#define PARENT_TYPE G_TYPE_OBJECT
 
 static GObjectClass *parent_class = NULL;
 
@@ -113,7 +113,7 @@ exchange_mapi_account_listener_class_init (ExchangeMAPIAccountListenerClass *cla
 {
 	GObjectClass *object_class;
 	
-	parent_class = g_type_class_ref (PARENT_TYPE);
+	parent_class = g_type_class_ref (G_TYPE_OBJECT);
 	object_class = G_OBJECT_CLASS (class);
 	
 	/* virtual method override */
@@ -122,7 +122,7 @@ exchange_mapi_account_listener_class_init (ExchangeMAPIAccountListenerClass *cla
 }
 
 static void 
-exchange_mapi_account_listener_init (ExchangeMAPIAccountListener *config_listener, ExchangeMAPIAccountListenerClass *class)
+exchange_mapi_account_listener_init (ExchangeMAPIAccountListener *config_listener)
 {
 	config_listener->priv = g_new0 (ExchangeMAPIAccountListenerPrivate, 1);
 }
@@ -770,30 +770,8 @@ exchange_mapi_account_listener_construct (ExchangeMAPIAccountListener *config_li
 	g_signal_connect (config_listener->priv->account_list, "account_removed", G_CALLBACK (mapi_account_removed), NULL);
 }
 
-GType
-exchange_mapi_account_listener_get_type (void)
-{
-	static GType exchange_mapi_account_listener_type = 0;
-
-	if (!exchange_mapi_account_listener_type) {
-		static GTypeInfo info = {
-			sizeof (ExchangeMAPIAccountListenerClass),
-			(GBaseInitFunc) NULL,
-			(GBaseFinalizeFunc) NULL,
-			(GClassInitFunc) exchange_mapi_account_listener_class_init,
-			NULL, NULL,
-			sizeof (ExchangeMAPIAccountListener),
-			0,
-			(GInstanceInitFunc) exchange_mapi_account_listener_init
-		};
-		exchange_mapi_account_listener_type = g_type_register_static (PARENT_TYPE, "ExchangeMAPIAccountListener", &info, 0);
-	}
-
-	return exchange_mapi_account_listener_type;
-}
-
 ExchangeMAPIAccountListener *
-exchange_mapi_account_listener_new ()
+exchange_mapi_account_listener_new (void)
 {
 	ExchangeMAPIAccountListener *config_listener;
 

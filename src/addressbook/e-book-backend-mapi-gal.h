@@ -41,10 +41,10 @@ typedef struct {
 	EBookBackendClass parent_class;
 } EBookBackendMAPIGALClass;
 
-EBookBackend *e_book_backend_mapigal_new      (void);
-GType       e_book_backend_mapigal_get_type (void);
+EBookBackend *e_book_backend_mapi_gal_new      (void);
+GType       e_book_backend_mapi_gal_get_type (void);
 
-#define E_TYPE_BOOK_BACKEND_MAPIGAL        (e_book_backend_mapigal_get_type ())
+#define E_TYPE_BOOK_BACKEND_MAPIGAL        (e_book_backend_mapi_gal_get_type ())
 #define E_BOOK_BACKEND_MAPIGAL(o)          (G_TYPE_CHECK_INSTANCE_CAST ((o), E_TYPE_BOOK_BACKEND_MAPIGAL, EBookBackendMAPIGAL))
 #define E_BOOK_BACKEND_MAPIGAL_CLASS(k)    (G_TYPE_CHECK_CLASS_CAST ((k), E_TYPE_BOOK_BACKEND_MAPIGAL, EBookBackendMAPIGALClass))
 #define E_IS_BOOK_BACKEND_MAPIGAL(o)       (G_TYPE_CHECK_INSTANCE_TYPE ((o), E_TYPE_BOOK_BACKEND_MAPIGAL))

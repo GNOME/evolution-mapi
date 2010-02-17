@@ -21,7 +21,8 @@
 #include <libedata-book/e-book-backend-summary.h>
 #include "e-book-backend-mapi-gal.h"
 
-static EBookBackendClass *e_book_backend_mapi_gal_parent_class;
+G_DEFINE_TYPE (EBookBackendMAPIGAL, e_book_backend_mapi_gal, E_TYPE_BOOK_BACKEND)
+
 static gboolean enable_debug = TRUE;
 static GList *supported_fields;
 
@@ -936,15 +937,15 @@ static void e_book_backend_mapi_gal_class_init (EBookBackendMAPIGALClass *klass)
 }
 
 /**
- * e_book_backend_mapigal_new:
+ * e_book_backend_mapi_gal_new:
  */
 EBookBackend *
-e_book_backend_mapigal_new (void)
+e_book_backend_mapi_gal_new (void)
 {
 	EBookBackendMAPIGAL *backend;
 
 //	if (enable_debug)
-		printf ("\ne_book_backend_mapigal_new...\n");
+		printf ("\ne_book_backend_mapi_gal_new...\n");
 
 	backend = g_object_new (E_TYPE_BOOK_BACKEND_MAPIGAL, NULL);
 
@@ -971,27 +972,4 @@ static void	e_book_backend_mapi_gal_init (EBookBackendMAPIGAL *backend)
 		enable_debug = TRUE;
 	else
 		enable_debug = FALSE;	
-}
-
-GType	e_book_backend_mapigal_get_type (void)
-{
-	static GType type = 0;
-	
-	if (! type) {
-		GTypeInfo info = {
-			sizeof (EBookBackendMAPIGALClass),
-			NULL, /* base_class_init */
-			NULL, /* base_class_finalize */
-			(GClassInitFunc)  e_book_backend_mapi_gal_class_init,
-			NULL, /* class_finalize */
-			NULL, /* class_data */
-			sizeof (EBookBackendMAPIGAL),
-			0,    /* n_preallocs */
-			(GInstanceInitFunc) e_book_backend_mapi_gal_init
-		};
-		
-		type = g_type_register_static (E_TYPE_BOOK_BACKEND, "EBookBackendMAPIGAL", &info, 0);
-	}
-	
-	return type;
 }

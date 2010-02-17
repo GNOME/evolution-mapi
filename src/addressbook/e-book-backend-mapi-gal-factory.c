@@ -28,7 +28,7 @@
 #include <libedata-book/e-book-backend-factory.h>
 #include "e-book-backend-mapi-gal.h"
 
-E_BOOK_BACKEND_FACTORY_SIMPLE (mapigal, MAPIGAL, e_book_backend_mapigal_new)
+E_BOOK_BACKEND_FACTORY_SIMPLE (mapigal, MAPIGAL, e_book_backend_mapi_gal_new)
 
 static GType  mapigal_type;
 

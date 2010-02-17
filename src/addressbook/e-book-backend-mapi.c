@@ -47,7 +47,8 @@
 #include <libedata-book/e-book-backend-summary.h>
 #include "e-book-backend-mapi.h"
 
-static EBookBackendClass *e_book_backend_mapi_parent_class;
+G_DEFINE_TYPE (EBookBackendMAPI, e_book_backend_mapi, E_TYPE_BOOK_BACKEND)
+
 static gboolean enable_debug = TRUE;
 
 struct _EBookBackendMAPIPrivate
@@ -1789,28 +1790,4 @@ static void	e_book_backend_mapi_init (EBookBackendMAPI *backend)
 		enable_debug = FALSE;
 	
 	
-}
-
-
-GType	e_book_backend_mapi_get_type (void)
-{
-	static GType type = 0;
-	
-	if (! type) {
-		GTypeInfo info = {
-			sizeof (EBookBackendMAPIClass),
-			NULL, /* base_class_init */
-			NULL, /* base_class_finalize */
-			(GClassInitFunc)  e_book_backend_mapi_class_init,
-			NULL, /* class_finalize */
-			NULL, /* class_data */
-			sizeof (EBookBackendMAPI),
-			0,    /* n_preallocs */
-			(GInstanceInitFunc) e_book_backend_mapi_init
-		};
-		
-		type = g_type_register_static (E_TYPE_BOOK_BACKEND, "EBookBackendMAPI", &info, 0);
-	}
-	
-	return type;
 }

@@ -49,6 +49,8 @@
 #define gmtime_r(tp,tmp) (gmtime(tp)?(*(tmp)=*gmtime(tp),(tmp)):0)
 #endif
 
+G_DEFINE_TYPE (ECalBackendMAPI, e_cal_backend_mapi, E_TYPE_CAL_BACKEND_SYNC)
+
 typedef struct {
 	GCond *cond;
 	GMutex *mutex;
@@ -2453,7 +2455,7 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 
 
 static void
-e_cal_backend_mapi_init (ECalBackendMAPI *cbmapi, ECalBackendMAPIClass *class)
+e_cal_backend_mapi_init (ECalBackendMAPI *cbmapi)
 {
 	ECalBackendMAPIPrivate *priv;
 	
@@ -2469,30 +2471,6 @@ e_cal_backend_mapi_init (ECalBackendMAPI *cbmapi, ECalBackendMAPIClass *class)
 
 	e_cal_backend_sync_set_lock (E_CAL_BACKEND_SYNC (cbmapi), TRUE);
 }
-
-GType
-e_cal_backend_mapi_get_type (void)
-{
-	static GType e_cal_backend_mapi_type = 0;
-
-	if (!e_cal_backend_mapi_type) {
-		static GTypeInfo info = {
-                        sizeof (ECalBackendMAPIClass),
-                        (GBaseInitFunc) NULL,
-                        (GBaseFinalizeFunc) NULL,
-                        (GClassInitFunc) e_cal_backend_mapi_class_init,
-                        NULL, NULL,
-                        sizeof (ECalBackendMAPI),
-                        0,
-                        (GInstanceInitFunc) e_cal_backend_mapi_init
-                };
-		e_cal_backend_mapi_type = g_type_register_static (E_TYPE_CAL_BACKEND_SYNC,
-								  "ECalBackendMAPI", &info, 0);
-	}
-
-	return e_cal_backend_mapi_type;
-}
-
 
 /***** UTILITY FUNCTIONS *****/
 const char *	
