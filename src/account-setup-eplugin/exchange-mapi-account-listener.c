@@ -607,7 +607,7 @@ mapi_account_removed (EAccountList *account_listener, EAccount *account)
 }
 
 static gboolean
-create_profile_entry (CamelURL *url)
+create_profile_entry (CamelURL *url, EAccount *account)
 {
 	gboolean status = FALSE;
 	guint8 attempts = 0; 
@@ -618,7 +618,7 @@ create_profile_entry (CamelURL *url)
 		key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
 		password = e_passwords_get_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
 		if (!password) {
-			gboolean remember = FALSE;
+			gboolean remember = account && e_account_get_bool (account, E_ACCOUNT_SOURCE_SAVE_PASSWD);
 			gchar *title;
 
 			title = g_strdup_printf (_("Enter Password for %s@%s"), url->user, url->host);
@@ -681,7 +681,7 @@ mapi_account_changed (EAccountList *account_listener, EAccount *account)
 
 	if (existing_account_info == NULL && isa_mapi_account) {
 		/* some account of other type is changed to MAPI */
-		if (create_profile_entry (new_url)) {
+		if (create_profile_entry (new_url, account)) {
 			/* Things are successful */
 			gchar *profname = NULL, *uri = NULL; 
 			ExchangeMAPIAccountListener *config_listener = exchange_mapi_accounts_peek_config_listener();
@@ -714,7 +714,7 @@ mapi_account_changed (EAccountList *account_listener, EAccount *account)
 		} else if (!mapi_camel_url_equal (old_url, new_url) || (existing_account_info->enabled != account->enabled)) {
 		/* Some or all of the account info changed OR the account has been moved from a disabled state to enabled state */
 			mapi_account_removed (account_listener, account);
-			if (create_profile_entry (new_url)) {
+			if (create_profile_entry (new_url, account)) {
 				/* Things are successful */
 				gchar *profname = NULL, *uri = NULL; 
 				ExchangeMAPIAccountListener *config_listener = exchange_mapi_accounts_peek_config_listener();

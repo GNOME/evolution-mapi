@@ -1342,30 +1342,36 @@ fetch_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 		}
 	}
 
+	item->is_cal = FALSE;
 	if (g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_PREFIX)) {
 		guint8 *appointment_body_str = (guint8 *) exchange_mapi_cal_util_camel_helper (item_data->properties, 
 											     item_data->streams, 
 											     item_data->recipients, item_data->attachments);
 
-		body = g_new0(ExchangeMAPIStream, 1);
-		body->proptag = PR_BODY;
-		body->value = g_byte_array_new ();
-		body->value = g_byte_array_append (body->value, appointment_body_str, strlen ((const char *)appointment_body_str));
+		if (appointment_body_str && *appointment_body_str) {
+			body = g_new0(ExchangeMAPIStream, 1);
+			body->proptag = PR_BODY;
+			body->value = g_byte_array_new ();
+			body->value = g_byte_array_append (body->value, appointment_body_str, strlen ((const char *)appointment_body_str));
 
-		item->msg.body_parts = g_slist_append (item->msg.body_parts, body);
-
-		item->is_cal = TRUE;
+			item->msg.body_parts = g_slist_append (item->msg.body_parts, body);
+			item->is_cal = TRUE;
+		}
 
 		g_free (appointment_body_str);
-	} else {
+	}
+
+	if (!item->is_cal) {
 		/* always prefer unicode version, as that can be properly read */
-		if (!((body = exchange_mapi_util_find_stream (item_data->streams, PR_BODY_UNICODE)) || 
-		      (body = exchange_mapi_util_find_stream (item_data->streams, PR_BODY))))
-			body = exchange_mapi_util_find_stream (item_data->streams, PR_HTML);
+		if (!(body = exchange_mapi_util_find_stream (item_data->streams, PR_BODY_UNICODE)))
+			body = exchange_mapi_util_find_stream (item_data->streams, PR_BODY);
 
-		item->msg.body_parts = g_slist_append (item->msg.body_parts, body);
+		if (body)
+			item->msg.body_parts = g_slist_append (item->msg.body_parts, body);
 
-		item->is_cal = FALSE;
+		body = exchange_mapi_util_find_stream (item_data->streams, PR_HTML);
+		if (body)
+			item->msg.body_parts = g_slist_append (item->msg.body_parts, body);
 	}
 
 	if (delivery_date) {
@@ -1548,7 +1554,7 @@ mapi_mime_msg_body (MapiItem *item, const ExchangeMAPIStream *body)
 	CamelMimePart *part = camel_mime_part_new ();
 	camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_8BIT);
 	
-	if (body) {
+	if (body && body->value && body->value->len > 0) {
 		const gchar* type = NULL;
 		gchar *buff = NULL;
 
@@ -1570,7 +1576,7 @@ mapi_mime_msg_body (MapiItem *item, const ExchangeMAPIStream *body)
 
 		g_free (buff);
 	} else
-		camel_mime_part_set_content (part, "", strlen (""), "text/plain");
+		camel_mime_part_set_content (part, " ", strlen (" "), "text/plain");
 
 	return part;
 }
@@ -1779,7 +1785,7 @@ mapi_folder_item_to_msg( CamelFolder *folder, MapiItem *item, CamelException *ex
 		camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (multipart_body),
 						  "multipart/mixed");
 		camel_multipart_set_boundary (multipart_body, NULL);
-		part = mapi_mime_msg_body (item, item->msg.body_parts->data);
+		part = mapi_mime_msg_body (item, item->msg.body_parts ? item->msg.body_parts->data : NULL);
 		camel_multipart_add_part (multipart_body, part);
 		camel_object_unref (part);
 	}

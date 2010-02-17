@@ -208,7 +208,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
 	password = e_passwords_get_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
 	if (!password) {
-		gboolean remember = FALSE;
+		gboolean remember = e_account_get_bool (target_account->account, E_ACCOUNT_SOURCE_SAVE_PASSWD);
 		gchar *title;
 
 		title = g_strdup_printf (_("Enter Password for %s@%s"), url->user, url->host);
