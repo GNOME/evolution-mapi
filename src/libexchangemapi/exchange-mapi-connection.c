@@ -77,12 +77,59 @@ void mapi_debug_logger_muted (const gchar* domain, GLogLevelFlags level,
 	/*Nothing here. Just a dummy function*/
 }
 
+static gboolean
+ensure_mapi_init_called (void)
+{
+	static gboolean called = FALSE;
+	gchar *profpath;
+	enum MAPISTATUS status;
+
+	LOCK ();
+	if (called) {
+		UNLOCK ();
+		return TRUE;
+	}
+
+	profpath = g_build_filename (g_get_home_dir (), DEFAULT_PROF_PATH, NULL);
+
+	if (!g_file_test (profpath, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR)) {
+		/* Create a ProfileStore */
+		status = CreateProfileStore (profpath, LIBMAPI_LDIF_DIR);
+		if (status != MAPI_E_SUCCESS && (status != MAPI_E_NO_ACCESS || !g_file_test (profpath, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))) {
+			mapi_errstr ("CreateProfileStore", GetLastError());
+			g_free (profpath);
+
+			UNLOCK ();
+			return FALSE;
+		}
+	}
+
+	status = MAPIInitialize (profpath);
+	if (status == MAPI_E_SESSION_LIMIT) {
+		/* do nothing, the profile store is already initialized */
+		/* but this shouldn't happen */
+		mapi_errstr ("MAPIInitialize", GetLastError());
+	} else if (status != MAPI_E_SUCCESS) {
+		mapi_errstr ("MAPIInitialize", GetLastError());
+		g_free (profpath);
+
+		UNLOCK ();
+		return FALSE;
+	}
+
+	g_free (profpath);
+
+	called = TRUE;
+	UNLOCK ();
+
+	return TRUE;
+}
+
 static struct mapi_session *
 mapi_profile_load (const char *profname, const char *password)
 {
 	enum MAPISTATUS	retval = MAPI_E_SUCCESS;
 	struct mapi_session *session = NULL;
-	gchar *profpath = NULL;
 	gchar *default_profile_name = NULL;
 	const char *profile = NULL;
 	guint32 debug_log_level = 0;
@@ -95,21 +142,8 @@ mapi_profile_load (const char *profname, const char *password)
 
 	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
-	profpath = g_build_filename (g_get_home_dir(), DEFAULT_PROF_PATH, NULL);
-	if (!g_file_test (profpath, G_FILE_TEST_EXISTS)) {
-		g_debug ("MAPI profile database @ %s not found ", profpath);
+	if (!ensure_mapi_init_called ())
 		goto cleanup;
-	}
-
-	MAPIUninitialize ();
-
-	retval = MAPIInitialize(profpath);
-	if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("MAPIInitialize", GetLastError());
-		if (retval == MAPI_E_SESSION_LIMIT)
-			g_debug("%s: %s: Already connected ", G_STRLOC, G_STRFUNC);
-		goto cleanup;
-	}
 
 	/* Initialize libmapi logger*/
 	if (g_getenv ("MAPI_DEBUG")) {
@@ -138,12 +172,6 @@ mapi_profile_load (const char *profname, const char *password)
 	}
 
 cleanup:
-	if (retval != MAPI_E_SUCCESS && retval != MAPI_E_SESSION_LIMIT &&
-	    retval != MAPI_E_LOGON_FAILED)
-		MAPIUninitialize ();
-
-	g_free (profpath);
-
 	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return session;
@@ -172,13 +200,27 @@ exchange_mapi_connection_new (const char *profile, const char *password)
 }
 
 void
-exchange_mapi_connection_close ()
+exchange_mapi_connection_close (void)
 {
 	LOCK();
+
+	if (global_mapi_session) {
+		mapi_object_t obj_store;
+		enum MAPISTATUS status;
+
+		mapi_object_init (&obj_store);
+
+		/* Open the message store */
+		status = OpenMsgStore (global_mapi_session, &obj_store);
+		if (status != MAPI_E_SUCCESS) {
+			mapi_errstr ("OpenMsgStore", GetLastError());
+		} else {
+			Logoff (&obj_store);
+		}
+	}
 	global_mapi_session = NULL;
-	MAPIUninitialize ();	
+
 	UNLOCK();
-	/* TODO :  Return status. get last error ? */
 }
 
 static gboolean 
@@ -3211,7 +3253,7 @@ exchange_mapi_create_profile (const char *username, const char *password, const 
 	enum MAPISTATUS	retval;
 	gboolean result = FALSE; 
 	const gchar *workstation = "localhost";
-	gchar *profname = NULL, *profpath = NULL;
+	gchar *profname = NULL;
 	struct mapi_session *session = NULL;
 
 	/*We need all the params before proceeding.*/
@@ -3222,31 +3264,9 @@ exchange_mapi_create_profile (const char *username, const char *password, const 
 
 	LOCK ();
 
-	profpath = g_build_filename (g_get_home_dir(), DEFAULT_PROF_PATH, NULL);
 	profname = g_strdup_printf("%s@%s", username, domain);
 
-	if (!g_file_test (profpath, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR)) {
-		/* Create a ProfileStore */
-		retval = CreateProfileStore (profpath, LIBMAPI_LDIF_DIR); 
-		if (retval != MAPI_E_SUCCESS) {
-			manage_mapi_error ("CreateProfileStore", GetLastError(), error_msg);
-			g_free (profpath);
-			g_free (profname);
-			
-			UNLOCK ();
-			return FALSE;
-		}
-	}
-
-	retval = MAPIInitialize(profpath); 
-	if (retval == MAPI_E_SESSION_LIMIT)
-	/* do nothing, the profile store is already initialized */
-		manage_mapi_error ("MAPIInitialize", GetLastError(), error_msg); 
-	else if (retval != MAPI_E_SUCCESS) {
-		manage_mapi_error ("MAPIInitialize", GetLastError(), error_msg);
-		g_free (profpath);
-		g_free (profname);
-		
+	if (!ensure_mapi_init_called ()) {
 		UNLOCK ();
 		return FALSE;
 	}
@@ -3309,13 +3329,9 @@ exchange_mapi_create_profile (const char *username, const char *password, const 
 	} else 
 		goto exit;
 
-cleanup: 
-	if (!result)
-		MAPIUninitialize ();
-
-exit:
+ cleanup: 
+ exit:
 	g_free (profname);
-	g_free (profpath);
 
 	UNLOCK ();
 
@@ -3327,23 +3343,10 @@ exchange_mapi_delete_profile (const char *profile)
 {
 	enum MAPISTATUS	retval;
 	gboolean result = FALSE; 
-	gchar *profpath = NULL;
 
 	LOCK ();
 
-	profpath = g_build_filename (g_get_home_dir(), DEFAULT_PROF_PATH, NULL);
-	if (!g_file_test (profpath, G_FILE_TEST_EXISTS)) {
-		g_debug ("No need to delete profile. DB itself is missing \n");
-		result = TRUE;
-		goto cleanup; 
-	}
-
-	retval = MAPIInitialize(profpath); 
-	if (retval == MAPI_E_SESSION_LIMIT)
-	/* do nothing, the profile store is already initialized */
-		; 
-	else if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("MAPIInitialize", GetLastError());
+	if (!ensure_mapi_init_called ()) {
 		goto cleanup; 
 	}
 
@@ -3358,8 +3361,6 @@ exchange_mapi_delete_profile (const char *profile)
 	result = TRUE; 
 
 cleanup: 
-	g_free(profpath);
-
 	UNLOCK ();
 
 	return result;
