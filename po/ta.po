@@ -6,14 +6,15 @@
 # Dr.T.vasudevan <agnihot3@gmail.com>, 2009.
 # I. Felix <ifelix@redhat.com>, 2009.
 # Dr.T.Vasudevan <agnihot3@gmail.com>, 2009.
+# Dr,T,Vasudevan <agnihot3@gmail.com>, 2010.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi.master.ta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-28 05:31+0530\n"
-"PO-Revision-Date: 2009-10-28 05:32+0530\n"
-"Last-Translator: Dr.T.Vasudevan <agnihot3@gmail.com>\n"
-"Language-Team: Tamil <Ubuntu-l10n-tam@lists.ubuntu.com>\n"
+"POT-Creation-Date: 2010-02-18 08:53+0530\n"
+"PO-Revision-Date: 2010-02-18 08:53+0530\n"
+"Last-Translator: Dr,T,Vasudevan <agnihot3@gmail.com>\n"
+"Language-Team: Tamil <Ubuntu-l10n-tam@lists.ubuntu.com>>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -23,8 +24,8 @@ msgstr ""
 "\n"
 "\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:617
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:624
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:214
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "%s@%s க்கு கடவுச்சொல் உள்ளிடுக"
@@ -33,19 +34,19 @@ msgstr "%s@%s க்கு கடவுச்சொல் உள்ளிடு�
 #. using GtkEntryCompletion in the username gtkentry. But plugins
 #. as of now does not have access to it
 #. TODO : Fix strings
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
 msgid "Select username"
 msgstr "பயனர்பெயரை தேர்ந்தெடு"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:145
 msgid "Full name"
 msgstr "முழுப்பெயர்"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:150
 msgid "User name"
 msgstr "பயனர் பெயர்"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -53,103 +54,105 @@ msgstr ""
 "சேவையகம் பயனர் பெயர் மற்றும் களப் பெயர் வெற்றாக இருக்கலாகாது. தயவு செய்து சரியான "
 "மதிப்புகளால் அவற்றை நிரப்புக"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:241
 msgid "Authentication finished successfully."
 msgstr "அங்கீகாரம் வெற்றிகரமாக முடிந்தது"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:247
 msgid "Authentication failed."
 msgstr "அங்கீகாரம் மறுக்கப்பட்டது"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
 msgid "_Domain name:"
 msgstr "_D களம் பெயர்:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:319
 msgid "_Authenticate"
 msgstr "அங்கீகரித்தல் (_A)"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:421
 msgid "Personal Folders"
 msgstr "தனிப்பட்ட அடைவுகள்"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:483
 msgid "_Location:"
 msgstr "இடம் (_L):"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:132
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:101
 msgid "Folder"
 msgstr "கோப்புறை"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:137
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:106
 msgid "Size"
 msgstr "அளவு"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:157
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:126
 msgid "Unable to retrieve folder size information"
 msgstr "கோப்புறை அளவு தகவலை எடுக்க முடியவில்லை"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:181
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:147
 msgid "Folder Size"
 msgstr "கோப்புறை அளவு"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:189
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:156
 msgid "Fetching folder list ..."
 msgstr "கோப்புறை பட்டியலை எடுக்கிறது..."
 
 #. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:305
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:270
 msgid "Miscellaneous"
 msgstr "இதரவை"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:318
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:283
 msgid "View the size of all Exchange folders"
 msgstr "அனைத்து பரிமாற்று கோப்புறைகளின் அளவை பார்க்கவும்"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:320
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:285
 msgid "Folders Size"
 msgstr "கோப்புறைகள் அளவு"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:331
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:296
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
 msgstr "பரிமாற்று அமைவுகள்"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:340
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:305
 msgid "Folder size"
 msgstr "அடைவின் அளவு"
 
-#: ../src/calendar/e-cal-backend-mapi.c:115
-#: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:472
+#: ../src/calendar/e-cal-backend-mapi.c:116
+#: ../src/calendar/e-cal-backend-mapi.c:1143
+#: ../src/camel/camel-mapi-store.c:568
 msgid "Authentication failed"
 msgstr "அங்கீகாரம் மறுக்கப்பட்டது "
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:391
+#: ../src/calendar/e-cal-backend-mapi.c:392
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "அடைவு %s இல் உள்ள உருப்படிகளை ஏற்றுகிறது"
 
 #. FIXME: String : We need to restart evolution-data-server
-#: ../src/calendar/e-cal-backend-mapi.c:581
-#: ../src/calendar/e-cal-backend-mapi.c:592
-#: ../src/calendar/e-cal-backend-mapi.c:618
+#: ../src/calendar/e-cal-backend-mapi.c:624
+#: ../src/calendar/e-cal-backend-mapi.c:635
+#: ../src/calendar/e-cal-backend-mapi.c:663
+#: ../src/calendar/e-cal-backend-mapi.c:725
+#: ../src/calendar/e-cal-backend-mapi.c:735
 msgid "Error fetching changes from the server."
 msgstr "சேவையகத்தில் இருந்து மாற்றங்களை கொண்டு வருவதில்பிழை."
 
-#: ../src/calendar/e-cal-backend-mapi.c:973
-#: ../src/calendar/e-cal-backend-mapi.c:983
-#: ../src/calendar/e-cal-backend-mapi.c:1088
-#: ../src/calendar/e-cal-backend-mapi.c:1170
+#: ../src/calendar/e-cal-backend-mapi.c:1063
+#: ../src/calendar/e-cal-backend-mapi.c:1073
+#: ../src/calendar/e-cal-backend-mapi.c:1178
+#: ../src/calendar/e-cal-backend-mapi.c:1260
 msgid "Could not create cache file"
 msgstr "தற்காலிக கோப்பை உருவாக்க முடியவில்லை"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1099
+#: ../src/calendar/e-cal-backend-mapi.c:1189
 msgid "Could not create thread for populating cache"
 msgstr "இடமாற்றினை பரப்ப இழையை உருவாக்க முடியாது"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1513
+#: ../src/calendar/e-cal-backend-mapi.c:1610
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -157,36 +160,36 @@ msgstr ""
 "மீள் நிகழ் நிகழ்வுகளின் ஒரு தனியனை மாற்றும் வசதிக்கு  ஆதரவை இன்னும் செயலாக்கவில்லை. "
 "சேவையகத்தில் மாறுதல் ஏதும் செய்யப்படவில்லை."
 
-#: ../src/camel/camel-mapi-folder.c:482
+#: ../src/camel/camel-mapi-folder.c:493
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "%s இல் உள்ள புதிய செய்திகளுக்கு சுருக்க தகவலை மேம்படுத்துகிறது"
 
-#: ../src/camel/camel-mapi-folder.c:715
+#: ../src/camel/camel-mapi-folder.c:724
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "செய்தி IDகளை சேவையகத்திலிருந்து %sக்கு எடுக்கிறது"
 
-#: ../src/camel/camel-mapi-folder.c:737
+#: ../src/camel/camel-mapi-folder.c:746
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "%sஇல் அழிக்கப்பட்ட செய்திகளுக்கு கேஷிலிருந்து நீக்குகிறது"
 
-#: ../src/camel/camel-mapi-folder.c:1061 ../src/camel/camel-mapi-folder.c:1694
-#: ../src/camel/camel-mapi-folder.c:1702
+#. TODO : Check for online state
+#: ../src/camel/camel-mapi-folder.c:998
+msgid "Fetching summary information for new messages in"
+msgstr "புதிய செய்திகளுக்கு சுருக்க தகவலை கொண்டு வருகிறது"
+
+#: ../src/camel/camel-mapi-folder.c:1100 ../src/camel/camel-mapi-folder.c:1859
+#: ../src/camel/camel-mapi-folder.c:1867
 msgid "This message is not available in offline mode."
 msgstr "இணையத் தொடர்பு விலகிய முறையில் இந்த செய்தி கிடைக்காது."
 
-#: ../src/camel/camel-mapi-folder.c:1070
-#, c-format
-msgid "Fetching summary information for new messages in %s"
-msgstr "%s இல் உள்ள புதிய செய்திகளுக்கு சுருக்க தகவலை கொண்டு வருகிறது"
-
-#: ../src/camel/camel-mapi-folder.c:1080
+#: ../src/camel/camel-mapi-folder.c:1113
 msgid "Fetching items failed"
 msgstr "உருப்படிகளை கொண்டு வருதல் தோல்வியுற்றது"
 
-#: ../src/camel/camel-mapi-folder.c:1658
+#: ../src/camel/camel-mapi-folder.c:1823
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -195,33 +198,33 @@ msgstr ""
 "செய்தியை பெற முடியவில்லை: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1658
+#: ../src/camel/camel-mapi-folder.c:1823
 msgid "No such message"
 msgstr "இது போன்ற செய்தி இல்லை"
 
-#: ../src/camel/camel-mapi-folder.c:1670
+#: ../src/camel/camel-mapi-folder.c:1835
 msgid "Message fetching cancelled by user."
 msgstr "செய்தி கொண்டு வருதல் பயனரால் இரத்து செய்யப்பட்டது."
 
-#: ../src/camel/camel-mapi-folder.c:1677
+#: ../src/camel/camel-mapi-folder.c:1842
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "%s செய்தியை பெற முடியவில்லை: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1723 ../src/camel/camel-mapi-folder.c:1732
+#: ../src/camel/camel-mapi-folder.c:1890 ../src/camel/camel-mapi-folder.c:1899
 msgid "Could not get message"
 msgstr "செய்தியை பெற முடியவில்லை"
 
-#: ../src/camel/camel-mapi-folder.c:2012
+#: ../src/camel/camel-mapi-folder.c:2185
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "கோப்புறை `%s' இல் செய்தியை சேர்க்க முடியவில்லை"
 
-#: ../src/camel/camel-mapi-folder.c:2019
+#: ../src/camel/camel-mapi-folder.c:2192
 msgid "Offline."
 msgstr "ஆஃப்லைன்"
 
-#: ../src/camel/camel-mapi-folder.c:2139
+#: ../src/camel/camel-mapi-folder.c:2312
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s க்கான சுருக்கத்தை ஏற்ற முடியவில்லை"
@@ -269,22 +272,22 @@ msgstr "கடவுச்சொல்"
 msgid "This option will connect to the Openchange server using a plaintext password."
 msgstr "இந்த தேர்வு ஓபன்சேஞ்ச் சேவையகத்துக்கு வெற்று உரை  கடவுச்சொல்லை பயன்படுத்தி இணைக்கும்"
 
-#: ../src/camel/camel-mapi-store.c:61
+#: ../src/camel/camel-mapi-store.c:63
 msgid "Favorites"
 msgstr "விருப்பங்கள்"
 
-#: ../src/camel/camel-mapi-store.c:62
+#: ../src/camel/camel-mapi-store.c:64
 msgid "All Public Folders"
 msgstr "அனைத்து பொது அடைவுகள்"
 
-#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
+#: ../src/camel/camel-mapi-store.c:313 ../src/camel/camel-mapi-transport.c:128
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "எக்ஸ்சேஞ்ச் எம்ஏபிஐ சேவையகம் %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
+#: ../src/camel/camel-mapi-store.c:317 ../src/camel/camel-mapi-transport.c:130
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "%s க்கு %s இல் எக்ஸ்சேஞ்ச்  எம்ஏபிஐ சேவை"
@@ -293,45 +296,46 @@ msgstr "%s க்கு %s இல் எக்ஸ்சேஞ்ச்  எம�
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:315
+#: ../src/camel/camel-mapi-store.c:355
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s  %s@%s க்கு தயவு செய்து எம்ஏபிஐ கடவுச்சொல்லை உள்ளிடுக."
 
-#: ../src/camel/camel-mapi-store.c:328
+#: ../src/camel/camel-mapi-store.c:368
 msgid "You did not enter a password."
 msgstr "நீங்கள் கடவுச்சொல்லை உள்ளிடவில்லை"
 
-#: ../src/camel/camel-mapi-store.c:336
+#: ../src/camel/camel-mapi-store.c:376
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "எக்ஸ்சேஞ்ச்  எம்ஏபிஐ சேவையகத்துக்கு அங்கீகாரப்படுத்த முடியவில்லை."
 
-#: ../src/camel/camel-mapi-store.c:456
+#: ../src/camel/camel-mapi-store.c:552
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "எம்ஏபிஐ அடைவுகளை இணைப்பு விலகி உருவாக்க முடியாது"
 
-#: ../src/camel/camel-mapi-store.c:461
+#: ../src/camel/camel-mapi-store.c:557
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "புதிய அடைவு `%s' ஐ உருவாக்க முடியாது"
 
-#: ../src/camel/camel-mapi-store.c:670
+#: ../src/camel/camel-mapi-store.c:692
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "எம்ஏபிஐ  அடைவு `%s' ஐ மாற்றுப்பெயர் இட முடியாது. அடைவு இருப்பில் இல்லை"
 
-#: ../src/camel/camel-mapi-store.c:681
+#: ../src/camel/camel-mapi-store.c:703
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "எம்ஏபிஐ முன்னிருப்பு அடைவு `%s' ஐ `%s'ஆக மாற்றுப்பெயர் இட முடியாது."
 
-#: ../src/camel/camel-mapi-store.c:699
+#: ../src/camel/camel-mapi-store.c:727 ../src/camel/camel-mapi-store.c:742
+#: ../src/camel/camel-mapi-store.c:791
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "எம்ஏபிஐ அடைவு `%s' ஐ `%s'ஆக மாற்றுப்பெயர் இட முடியாது."
 
-#: ../src/camel/camel-mapi-store.c:1227
+#: ../src/camel/camel-mapi-store.c:1367
 msgid "Folder list not available in offline mode."
 msgstr "அடைவு பட்டியல் இணைப்பு விலகிய பாங்கில் கிடைக்காது"
 
