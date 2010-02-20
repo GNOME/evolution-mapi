@@ -10,10 +10,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi-master-po-gl-77000\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-02-15 14:59+0100\n"
-"PO-Revision-Date: 2010-01-17 18:59+0100\n"
+"POT-Creation-Date: 2010-02-20 22:23+0100\n"
+"PO-Revision-Date: 2010-02-15 16:22+0100\n"
 "Last-Translator: Fran Diéguez <frandieguez@ubuntu.com>\n"
-"Language-Team: Galician <proxecto@trasno.net>\n"
+"Language-Team: Gallician <proxecto@trasno.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -122,39 +122,39 @@ msgstr "Configuracións de intercambio"
 msgid "Folder size"
 msgstr "Tamaño do cartafol"
 
-#: ../src/calendar/e-cal-backend-mapi.c:114
-#: ../src/calendar/e-cal-backend-mapi.c:1141
+#: ../src/calendar/e-cal-backend-mapi.c:116
+#: ../src/calendar/e-cal-backend-mapi.c:1143
 #: ../src/camel/camel-mapi-store.c:568
 msgid "Authentication failed"
 msgstr "Fallou a autenticación"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:390
+#: ../src/calendar/e-cal-backend-mapi.c:392
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Cargando os elementos no cartafol %s"
 
 #. FIXME: String : We need to restart evolution-data-server
-#: ../src/calendar/e-cal-backend-mapi.c:622
-#: ../src/calendar/e-cal-backend-mapi.c:633
-#: ../src/calendar/e-cal-backend-mapi.c:661
-#: ../src/calendar/e-cal-backend-mapi.c:723
-#: ../src/calendar/e-cal-backend-mapi.c:733
+#: ../src/calendar/e-cal-backend-mapi.c:624
+#: ../src/calendar/e-cal-backend-mapi.c:635
+#: ../src/calendar/e-cal-backend-mapi.c:663
+#: ../src/calendar/e-cal-backend-mapi.c:725
+#: ../src/calendar/e-cal-backend-mapi.c:735
 msgid "Error fetching changes from the server."
 msgstr "Produciuse un erro ao obter os cambios do servidor."
 
-#: ../src/calendar/e-cal-backend-mapi.c:1061
-#: ../src/calendar/e-cal-backend-mapi.c:1071
-#: ../src/calendar/e-cal-backend-mapi.c:1176
-#: ../src/calendar/e-cal-backend-mapi.c:1258
+#: ../src/calendar/e-cal-backend-mapi.c:1063
+#: ../src/calendar/e-cal-backend-mapi.c:1073
+#: ../src/calendar/e-cal-backend-mapi.c:1178
+#: ../src/calendar/e-cal-backend-mapi.c:1260
 msgid "Could not create cache file"
 msgstr "Non foi posíbel crear o ficheiro da caché"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1187
+#: ../src/calendar/e-cal-backend-mapi.c:1189
 msgid "Could not create thread for populating cache"
 msgstr "Non foi posíbel crear o fío de execución para encher a caché"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1608
+#: ../src/calendar/e-cal-backend-mapi.c:1610
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -168,32 +168,31 @@ msgid "Updating local summary cache for new messages in %s"
 msgstr ""
 "Actualizando a información local da caché de resumo nas mensaxes novas en %s"
 
-#: ../src/camel/camel-mapi-folder.c:726
+#: ../src/camel/camel-mapi-folder.c:724
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Recuperando os ID das mensaxes desde o servidor para %s"
 
-#: ../src/camel/camel-mapi-folder.c:748
+#: ../src/camel/camel-mapi-folder.c:746
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Eliminando as mensaxes borradas da caché en %s"
 
 #. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:1000
-#, fuzzy
+#: ../src/camel/camel-mapi-folder.c:998
 msgid "Fetching summary information for new messages in"
-msgstr "Obtendo a información de resumo para as mensaxes novas en %s"
+msgstr "Obtendo a información de resumo para as mensaxes novas en"
 
-#: ../src/camel/camel-mapi-folder.c:1102 ../src/camel/camel-mapi-folder.c:1857
-#: ../src/camel/camel-mapi-folder.c:1865
+#: ../src/camel/camel-mapi-folder.c:1100 ../src/camel/camel-mapi-folder.c:1863
+#: ../src/camel/camel-mapi-folder.c:1871
 msgid "This message is not available in offline mode."
 msgstr "Esta mensaxe non está dispoñíbel no modo sen conexión."
 
-#: ../src/camel/camel-mapi-folder.c:1115
+#: ../src/camel/camel-mapi-folder.c:1113
 msgid "Fetching items failed"
 msgstr "Fallou a obtención de elementos"
 
-#: ../src/camel/camel-mapi-folder.c:1821
+#: ../src/camel/camel-mapi-folder.c:1827
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -202,33 +201,33 @@ msgstr ""
 "Non foi posíbel obter a mensaxe: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1821
+#: ../src/camel/camel-mapi-folder.c:1827
 msgid "No such message"
 msgstr "Non existe esta mensaxe"
 
-#: ../src/camel/camel-mapi-folder.c:1833
+#: ../src/camel/camel-mapi-folder.c:1839
 msgid "Message fetching cancelled by user."
 msgstr "A obtención da mensaxe foi cancelada polo usuario."
 
-#: ../src/camel/camel-mapi-folder.c:1840
+#: ../src/camel/camel-mapi-folder.c:1846
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Non foi posíbel obter a mensaxe: %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1888 ../src/camel/camel-mapi-folder.c:1897
+#: ../src/camel/camel-mapi-folder.c:1894 ../src/camel/camel-mapi-folder.c:1903
 msgid "Could not get message"
 msgstr "Non foi posíbel obter a mensaxe"
 
-#: ../src/camel/camel-mapi-folder.c:2183
+#: ../src/camel/camel-mapi-folder.c:2189
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Non foi posíbel engadir unha mensaxe ao cartafol `%s'"
 
-#: ../src/camel/camel-mapi-folder.c:2190
+#: ../src/camel/camel-mapi-folder.c:2196
 msgid "Offline."
 msgstr "Desconectado."
 
-#: ../src/camel/camel-mapi-folder.c:2311
+#: ../src/camel/camel-mapi-folder.c:2316
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Non foi posíbel cargar o resumo de %s"
