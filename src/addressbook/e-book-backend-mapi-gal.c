@@ -7,6 +7,7 @@
 #include <string.h>
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <glib/gi18n.h>
 
 #include <sys/time.h>
 
@@ -125,14 +126,56 @@ e_book_backend_mapi_gal_get_static_capabilities (EBookBackend *backend)
 	return g_strdup ("net,bulk-removes,do-initial-query,contact-lists");
 }
 
+static EDataBookView *
+find_book_view (EBookBackendMAPIGAL *ebmapi)
+{
+	EList *views = e_book_backend_get_book_views (E_BOOK_BACKEND (ebmapi));
+	EIterator *iter;
+	EDataBookView *rv = NULL;
+	gint test;
+
+	if (!views)
+		return NULL;
+
+	test = e_list_length (views);
+
+	iter = e_list_get_iterator (views);
+
+	if (!iter) {
+		g_object_unref (views);
+		return NULL;
+	}
+
+	if (e_iterator_is_valid (iter)) {
+		/* just always use the first book view */
+		EDataBookView *v = (EDataBookView*)e_iterator_get(iter);
+		if (v)
+			rv = v;
+	}
+
+	g_object_unref (iter);
+	g_object_unref (views);
+
+	return rv;
+}
+
+static void
+book_view_notify_status (EDataBookView *view, const gchar *status)
+{
+	if (!view)
+		return;
+	e_data_book_view_notify_status_message (view, status);
+}
+
 static gpointer
 build_cache (EBookBackendMAPIGAL *ebmapi)
 {
 	EBookBackendMAPIGALPrivate *priv = ((EBookBackendMAPIGAL *) ebmapi)->priv;
 	char *tmp;
-	EContact *contact = e_contact_new ();
 	GPtrArray *contacts_array = g_ptr_array_new();
 	gint i = 0;
+	gchar *status_msg;
+	EDataBookView *book_view;
 	
 	//FIXME: What if book view is NULL? Can it be? Check that.
 	if (!priv->cache) {
@@ -145,15 +188,16 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 							    SUMMARY_FLUSH_TIMEOUT);
 		printf("Summary file name is %s\n", priv->summary_file_name);
 	}
-	
-	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
-	
 
 	exchange_mapi_util_get_gal (contacts_array);
+	
+	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 
-	e_book_backend_cache_add_contact (priv->cache, contact);
-	e_book_backend_summary_add_contact (priv->summary, contact);		
-	g_object_unref(contact);
+	book_view = find_book_view (ebmapi);
+
+	if (book_view)
+		e_data_book_view_notify_complete (book_view, 
+						  GNOME_Evolution_Addressbook_Success);
 
 	for (i = 0; i < contacts_array->len && !priv->kill_cache_build; i++) {
 		EContact *contact = e_contact_new ();
@@ -167,11 +211,31 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 		e_contact_set (contact, E_CONTACT_EMAIL_1, gal_entry->email);
 
 		e_book_backend_cache_add_contact (priv->cache, contact);
-		e_book_backend_summary_add_contact (priv->summary, contact);		
+		e_book_backend_summary_add_contact (priv->summary, contact);
+
+		if (book_view && (i % 200 == 0)) {
+			/* To translators : This is used to cache the downloaded contacts from GAL.
+			   First %d : Number of contacts cached till now.
+			   Second %d : Total number of contacts which need to be cached.
+			   So (%d/%d) displays the progress.
+			   Example: Caching the GAL entries (1200/50000)...
+			*/
+			status_msg = g_strdup_printf (_("Caching the GAL entries (%d/%d)... "),
+							 i, contacts_array->len);
+			book_view_notify_status (book_view, status_msg);
+			g_free (status_msg);
+		}
+
 		g_object_unref(contact);
 		g_free (uid);
 	}
 
+	if (book_view) {
+		e_data_book_view_notify_complete (book_view,
+						  GNOME_Evolution_Addressbook_Success);
+		e_data_book_view_unref (book_view);
+	}
+	
 	g_ptr_array_free (contacts_array, TRUE);
 
 	tmp = g_strdup_printf("%d", priv->kill_cache_build ? 0 : (int)time (NULL));
@@ -220,7 +284,8 @@ e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
 					    const char *passwd,
 					    const char *auth_method)
 {
-	EBookBackendMAPIGALPrivate *priv = ((EBookBackendMAPIGAL *) backend)->priv;
+	EBookBackendMAPIGAL *ebmapi = (EBookBackendMAPIGAL *) backend;
+	EBookBackendMAPIGALPrivate *priv = ebmapi->priv;
 	
 	if (enable_debug) {
 		printf ("mapi: authenticate user\n");
@@ -249,7 +314,7 @@ e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
 				/* Means we dont have a cache. Lets build that first */
 				printf("Preparing to build cache\n");
 				priv->kill_cache_build = FALSE;
-				priv->build_cache_thread = g_thread_create ((GThreadFunc) build_cache, backend, TRUE, NULL);
+				priv->build_cache_thread = g_thread_create ((GThreadFunc) build_cache, ebmapi, TRUE, NULL);
 			}
 		} 
 		e_book_backend_set_is_writable (backend, FALSE);
@@ -709,8 +774,11 @@ book_view_thread (gpointer data)
 	g_object_ref (book_view);
 	e_flag_set (closure->running);
 						
-	e_data_book_view_notify_status_message (book_view, "Searching...");
+	book_view_notify_status (book_view, "Searching...");
 	query = e_data_book_view_get_card_query (book_view);
+
+	if (!find_book_view (backend))
+		e_book_backend_add_book_view (E_BOOK_BACKEND (backend), book_view);
 						
 	switch (priv->mode) {
 		case GNOME_Evolution_Addressbook_MODE_REMOTE:
@@ -722,6 +790,11 @@ book_view_thread (gpointer data)
 				return;
 			}
 		
+			if (priv->marked_for_offline && !priv->is_cache_ready) {
+				/* To translators : Here Evolution MAPI downloads the entries from the GAL server */
+				book_view_notify_status (book_view, _("Downloading GAL entries from server..."));
+				return;
+			}
 
 			if (priv->marked_for_offline && priv->cache && priv->is_cache_ready) {
 				if (priv->is_summary_ready && 
@@ -734,7 +807,7 @@ book_view_thread (gpointer data)
 						g_ptr_array_free (ids, TRUE);
 					}
 					g_object_unref (book_view);
-					return;
+					break;
 				}
 			
 				printf("Summary seems to be not there or not a summary query, lets fetch from cache directly\n");
@@ -759,7 +832,7 @@ book_view_thread (gpointer data)
 				if (temp_list)
 					 g_list_free (temp_list);
 				g_object_unref (book_view);
-				return;
+				break;
 			}
 		
 			if (e_book_backend_summary_is_summary_query (priv->summary, query)) {
@@ -778,6 +851,11 @@ book_view_thread (gpointer data)
 			break;
 		}
 	}
+	
+	if (book_view)
+		e_data_book_view_notify_complete (book_view, 
+						  GNOME_Evolution_Addressbook_Success);
+	return;
 }
 
 static void
