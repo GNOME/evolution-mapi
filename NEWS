@@ -1,3 +1,32 @@
+evolution-mapi 0.29.91 2010-02-22
+--------------------------------
+Bug Fixes:
+       Bug #571579 - Evolution Core Dumps when creating a MAPI account (Milan Crha)
+       Bug #593176 - winmail.dat sent in outgoing plaintext mail (Milan Crha)
+       Bug #601484 - Cannot accept a meeting request (Milan Crha)
+       Bug #602895 - To field is not shown in sent item folder (Johnny Jacob)
+       Bug #602896 - CC field is shown twice in message (Johnny Jacob)
+       Bug #607422 - Crash while importing a message without From header (Milan Crha)
+       Bug #607637 - empty trash doesn't refresh folder view (Johnny Jacob)
+       Bug #607651 - Crashed with SIGSEGV in get_SPropValue (Milan Crha)
+       Bug #607744 - Crash on MAPI notification close (Milan Crha)
+       Bug #608379 - Re-Fix mail fetching with exchange 2010 (Jonathon Jongsma)
+       Bug #608648 - Do not use uninitialized memory (Milan Crha)
+       Bug #609967 - Crash in camel_mapi_notification_listener_stop (Milan Crha)
+       Bug #610224 - Crash on a meeting forward notification mail (Milan Crha)
+
+Translations
+	Chao-Hsiung Liao (zh_HK)
+	Daniel Nylander (sv)
+	David Planella (ca)
+	Fran Diéguez (gl)
+	Lucian Adrian Grijincu (ro)
+	Mario Blättermann (de)
+	Petr Kovar (cs)
+	Piotr Drąg (pl)
+	Theppitak Karoonboonyanan (th)
+	Vasudeven (ta)
+
 evolution-mapi 0.29.90 2010-02-08
 --------------------------------
 Bug Fixes:
