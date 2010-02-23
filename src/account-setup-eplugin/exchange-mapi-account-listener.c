@@ -686,7 +686,7 @@ mapi_account_changed (EAccountList *account_listener, EAccount *account)
 			gchar *profname = NULL, *uri = NULL; 
 			ExchangeMAPIAccountListener *config_listener = exchange_mapi_accounts_peek_config_listener();
 
-			profname = g_strdup_printf("%s@%s", new_url->user, camel_url_get_param (new_url, "domain"));
+			profname = exchange_mapi_util_profile_name (new_url->user, camel_url_get_param (new_url, "domain"));
 			camel_url_set_param(new_url, "profile", profname);
 			g_free (profname);
 
@@ -719,7 +719,7 @@ mapi_account_changed (EAccountList *account_listener, EAccount *account)
 				gchar *profname = NULL, *uri = NULL; 
 				ExchangeMAPIAccountListener *config_listener = exchange_mapi_accounts_peek_config_listener();
 
-				profname = g_strdup_printf("%s@%s", new_url->user, camel_url_get_param (new_url, "domain"));
+				profname = exchange_mapi_util_profile_name (new_url->user, camel_url_get_param (new_url, "domain"));
 				camel_url_set_param(new_url, "profile", profname);
 				g_free (profname);
 

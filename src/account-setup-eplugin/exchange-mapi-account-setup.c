@@ -200,6 +200,17 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	url = camel_url_new (e_account_get_string (target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
 	domain_name = camel_url_get_param (url, "domain");
 
+	/* Silently remove domain part from a user name when user enters it as such.
+	   This change will be visible in the UI on new edit open. */
+	if (url->user && strchr (url->user, '\\')) {
+		gchar *tmp, *at;
+
+		at = strrchr (url->user, '\\') + 1;
+		tmp = g_strdup (at);
+		camel_url_set_user (url, tmp);
+		g_free (tmp);
+	}
+
 	if (!url->user || !*url->user || !url->host || !*url->host || !domain_name || !*domain_name) {
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Server, username and domain name cannot be empty. Please fill them with correct values."));
 		return;
@@ -229,7 +240,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 			/* Things are successful */
 			gchar *profname = NULL, *uri = NULL; 
 
-			profname = g_strdup_printf("%s@%s", url->user, domain_name);
+			profname = exchange_mapi_util_profile_name (url->user, domain_name);
 			camel_url_set_param(url, "profile", profname);
 			g_free (profname);
 

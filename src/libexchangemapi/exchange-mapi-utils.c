@@ -599,3 +599,20 @@ exchange_crlf_to_lf (const char *in)
 	return out;
 }
 
+/**
+ * exchange_mapi_util_profile_name:
+ * @username: User name of the profile
+ * @domain: Domain name of the profile
+ *
+ * Constructs profile name from given @username and @domain and
+ * returns it as a newly allocated string.
+ **/
+gchar *
+exchange_mapi_util_profile_name (const gchar *username, const gchar *domain)
+{
+	gchar *res;
+
+	res = g_strdup_printf ("%s@%s", username, domain);
+
+	return g_strcanon (res, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@", '_');
+}
