@@ -30,12 +30,11 @@
 #include <ctype.h>
 #include <errno.h>
 
+#include <glib.h>
 #include <glib/gstdio.h>
+#include <gio/gio.h>
 
 #include <camel/camel-private.h>
-#include <camel/camel-session.h>
-#include <camel/camel-service.h>
-#include <camel/camel-store-summary.h>
 #include <camel/camel-i18n.h>
 #include <camel/camel-net-utils.h>
 #include <camel/camel-debug.h>
@@ -50,21 +49,16 @@
 
 #define d_notifications(x) (camel_debug ("mapi:notifications") ? (x) : 0)
 
-static void mapi_push_notification_listener (CamelSession *session, CamelSessionThreadMsg *msg);
-static void mapi_push_notification_listener_close (CamelSession *session, CamelSessionThreadMsg *msg);
-
 extern gint camel_application_is_exiting;
 
-/* TODO Doc : What is this message for?*/
-struct mapi_push_notification_msg {
-	CamelSessionThreadMsg msg;
-
+struct mapi_push_notification_data {
 	guint16 event_mask;
 	guint32 connection; 
 	guint32 event_options;
 	gpointer event_data;
 
-	gint op_id;
+	GCancellable *cancellable;
+	GThread *thread;
 };
 
 static void
@@ -192,16 +186,15 @@ mapi_notifications_filter (guint16 type, void *event, void *store)
 }
 
 
-static CamelSessionThreadOps mapi_push_notification_ops = {
-	mapi_push_notification_listener,
-	mapi_push_notification_listener_close,
-};
-
 /*Of type mapi_notify_continue_callback_t*/
 static gint
 mapi_notifications_continue_check (gpointer data)
 {
-	if (camel_operation_cancel_check(NULL) || (camel_application_is_exiting == TRUE))
+	struct mapi_push_notification_data *thread_data = data;
+
+	g_return_val_if_fail (data != NULL, 1);
+
+	if (g_cancellable_is_cancelled (thread_data->cancellable) || (camel_application_is_exiting == TRUE))
 		return 1;
 
 	/* HACK ALERT : This is a BAD idea. But ;-), A bug in MonitorNotification */
@@ -212,12 +205,14 @@ mapi_notifications_continue_check (gpointer data)
 	return 0;
 }
 
-static void
-mapi_push_notification_listener (CamelSession *session, CamelSessionThreadMsg *msg)
+static gpointer
+mapi_push_notification_listener_thread (gpointer data)
 {
-	struct mapi_push_notification_msg *m = (struct mapi_push_notification_msg *)msg;
-	CamelMapiStore *mapi_store = (CamelMapiStore *) m->event_data;
+	struct mapi_push_notification_data *thread_data = data;
+	CamelMapiStore *mapi_store = (CamelMapiStore *) thread_data->event_data;
 	struct mapi_notify_continue_callback_data *cb_data = g_new0 (struct mapi_notify_continue_callback_data, 1);
+
+	g_return_val_if_fail (data != NULL, NULL);
 
 	/* Timeout for select in MonitorNotification*/
 	cb_data->tv.tv_sec = 2;
@@ -225,69 +220,68 @@ mapi_push_notification_listener (CamelSession *session, CamelSessionThreadMsg *m
 
 	/* API would consult us if we want to continue with processing events*/
 	cb_data->callback = mapi_notifications_continue_check;
-	cb_data->data = NULL;
+	cb_data->data = thread_data;
 
 	CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
 
 	if (exchange_mapi_events_init ()) {
-		exchange_mapi_events_subscribe (m->event_options, m->event_mask,
-						&m->connection,	mapi_notifications_filter,
-						m->event_data);
+		exchange_mapi_events_subscribe (thread_data->event_options, thread_data->event_mask,
+						&thread_data->connection, mapi_notifications_filter,
+						thread_data->event_data);
 
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 		exchange_mapi_events_monitor (cb_data); /*Blocking call. Don't hold locks here*/
-		exchange_mapi_events_unsubscribe (m->connection);
+		exchange_mapi_events_unsubscribe (thread_data->connection);
 	} else 
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 
 	g_free (cb_data);
+
+	return NULL;
 }
 
-static void
-mapi_push_notification_listener_close (CamelSession *session, CamelSessionThreadMsg *msg)
+gpointer
+camel_mapi_notification_listener_start (CamelMapiStore *store, guint16 mask, guint32 options)
 {
-	struct mapi_push_notification_msg *m = (struct mapi_push_notification_msg *)msg;
-	CamelMapiStore *mstore = (CamelMapiStore *) m->event_data;
+	struct mapi_push_notification_data *thread_data;
+	GError *error = NULL;
+
+	thread_data = g_new0 (struct mapi_push_notification_data, 1);
+	thread_data->event_options = options;
+	thread_data->event_mask = mask;
+	thread_data->event_data = store;
+	thread_data->cancellable = g_cancellable_new ();
+	thread_data->thread = g_thread_create (mapi_push_notification_listener_thread, thread_data, TRUE, &error);
+	if (error) {
+		g_warning ("%s: Failed to start thread, %s", G_STRFUNC, error->message ? error->message : "Unknown error");
+		g_object_unref (thread_data->cancellable);
+		g_free (thread_data);
+		return NULL;
+	}
+
+	return thread_data;
+}
+
+/* start_value is a pointer returned from the start function */
+void
+camel_mapi_notification_listener_stop (CamelMapiStore *mstore, gpointer start_value)
+{
+	struct mapi_push_notification_data *thread_data;
+
+	g_return_if_fail (mstore != NULL);
+	g_return_if_fail (start_value != NULL);
+
+	thread_data = start_value;
+
+	g_cancellable_cancel (thread_data->cancellable);
+	g_thread_join (thread_data->thread);
+
+	g_object_unref (thread_data->cancellable);
+	g_free (thread_data);
 
 	camel_object_ref (mstore);
 	CAMEL_SERVICE_REC_LOCK (mstore, connect_lock);
 	camel_mapi_store_unset_notification_data (mstore);
 	CAMEL_SERVICE_REC_UNLOCK (mstore, connect_lock);
 	camel_object_unref (mstore);
-}
-
-gpointer
-camel_mapi_notification_listener_start (CamelMapiStore *store, guint16 mask, guint32 options)
-{
-	CamelSession *session = ((CamelService *)store)->session;
-	struct mapi_push_notification_msg *mapi_push_notification_msg_op;
-
-	mapi_push_notification_msg_op =
-		camel_session_thread_msg_new (session, &mapi_push_notification_ops, 
-					      sizeof (*mapi_push_notification_msg_op));
-
-	mapi_push_notification_msg_op->event_options = options;
-	mapi_push_notification_msg_op->event_mask = mask;
-	mapi_push_notification_msg_op->event_data = store;
-
-	mapi_push_notification_msg_op->op_id = camel_session_thread_queue (session, &mapi_push_notification_msg_op->msg, 0);
-
-	return mapi_push_notification_msg_op;
-}
-
-/* start_value is a pointer returned from the start function */
-void
-camel_mapi_notification_listener_stop (CamelMapiStore *store, gpointer start_value)
-{
-	struct mapi_push_notification_msg *msg_op;
-	gint op_id;
-
-	g_return_if_fail (store != NULL);
-	g_return_if_fail (start_value != NULL);
-
-	msg_op = start_value;
-	op_id = msg_op->op_id;
-	camel_operation_cancel (msg_op->msg.op);
-
-	camel_session_thread_wait (((CamelService *)store)->session, op_id);
 }
