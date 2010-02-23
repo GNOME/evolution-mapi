@@ -218,10 +218,11 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 
 	key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
 	password = e_passwords_get_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
-	if (!password) {
+	if (!password || !*password) {
 		gboolean remember = e_account_get_bool (target_account->account, E_ACCOUNT_SOURCE_SAVE_PASSWD);
 		gchar *title;
 
+		g_free (password);
 		title = g_strdup_printf (_("Enter Password for %s@%s"), url->user, url->host);
 		password = e_passwords_ask_password (title, EXCHANGE_MAPI_PASSWORD_COMPONENT, key, title,
 						     E_PASSWORDS_REMEMBER_FOREVER|E_PASSWORDS_SECRET,
@@ -263,6 +264,9 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 		}
 
 		g_free (error_msg);
+	} else {
+		e_passwords_forget_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
+		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Authentication failed."));
 	}
 
 	g_free (password);
