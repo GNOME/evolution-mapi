@@ -72,5 +72,7 @@ exchange_lf_to_crlf (const char *in);
 char *
 exchange_crlf_to_lf (const char *in);
 
+gchar *exchange_mapi_util_profile_name (const gchar *username, const gchar *domain);
+
 #endif
 

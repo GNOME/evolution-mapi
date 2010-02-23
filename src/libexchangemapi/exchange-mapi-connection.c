@@ -3073,7 +3073,7 @@ exchange_mapi_create_profile (const char *username, const char *password, const 
 
 	LOCK ();
 
-	profname = g_strdup_printf("%s@%s", username, domain);
+	profname = exchange_mapi_util_profile_name (username, domain);
 
 	if (!ensure_mapi_init_called ()) {
 		UNLOCK ();
