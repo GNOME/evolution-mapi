@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-02-19 11:37+0100\n"
-"PO-Revision-Date: 2010-02-18 22:50+0100\n"
+"POT-Creation-Date: 2010-02-24 23:20+0100\n"
+"PO-Revision-Date: 2010-02-24 23:14+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "MIME-Version: 1.0\n"
@@ -21,7 +21,7 @@ msgstr ""
 "X-Poedit-Country: Poland\n"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:624
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:214
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:226
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Proszę wprowadzić hasło dla %s@%s"
@@ -42,7 +42,7 @@ msgstr "Imię i nazwisko"
 msgid "User name"
 msgstr "Nazwa użytkownika"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:215
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -50,27 +50,28 @@ msgstr ""
 "Nazwy serwera, użytkownika i domeny nie mogą być puste. Proszę wprowadzić "
 "poprawne wartości."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:241
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:253
 msgid "Authentication finished successfully."
 msgstr "Uwierzytelnianie zakończone powodzeniem."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:247
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:259
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:269
 msgid "Authentication failed."
-msgstr "Uwierzytelnianie zakończone niepowodzeniem."
+msgstr "Uwierzytelnianie się nie powiodło."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:324
 msgid "_Domain name:"
 msgstr "_Nazwa domeny:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:319
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:334
 msgid "_Authenticate"
 msgstr "_Uwierzytelnij"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:421
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:436
 msgid "Personal Folders"
 msgstr "Katalogi osobiste"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:483
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:498
 msgid "_Location:"
 msgstr "_Położenie:"
 
@@ -116,11 +117,27 @@ msgstr "Ustawienia programu Exchange"
 msgid "Folder size"
 msgstr "Rozmiar katalogu"
 
+#. To translators : This is used to cache the downloaded contacts from GAL.
+#. First %d : Number of contacts cached till now.
+#. Second %d : Total number of contacts which need to be cached.
+#. So (%d/%d) displays the progress.
+#. Example: Caching the GAL entries (1200/50000)...
+#.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:223
+#, c-format
+msgid "Caching the GAL entries (%d/%d)... "
+msgstr "Zapisywanie wpisów GAL w pamięci podręcznej (%d/%d)... "
+
+#. To translators : Here Evolution MAPI downloads the entries from the GAL server
+#: ../src/addressbook/e-book-backend-mapi-gal.c:795
+msgid "Downloading GAL entries from server..."
+msgstr "Pobieranie wpisów GAL z serwera..."
+
 #: ../src/calendar/e-cal-backend-mapi.c:116
 #: ../src/calendar/e-cal-backend-mapi.c:1143
 #: ../src/camel/camel-mapi-store.c:568
 msgid "Authentication failed"
-msgstr "Uwierzytelnianie zakończone niepowodzeniem"
+msgstr "Uwierzytelnianie się nie powiodło"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
 #: ../src/calendar/e-cal-backend-mapi.c:392
@@ -185,7 +202,7 @@ msgstr "Ta wiadomość nie jest dostępna w trybie offline."
 
 #: ../src/camel/camel-mapi-folder.c:1113
 msgid "Fetching items failed"
-msgstr "Pobranie elementów nie powiodło się"
+msgstr "Pobranie elementów się nie powiodło"
 
 #: ../src/camel/camel-mapi-folder.c:1827
 #, c-format
