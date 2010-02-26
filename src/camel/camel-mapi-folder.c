@@ -654,6 +654,7 @@ struct mapi_update_deleted_msg {
 
 	CamelFolder *folder;
 	mapi_id_t folder_id;
+	gboolean need_refresh;
 };
 
 static gboolean
@@ -727,8 +728,8 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 	for (index = 0; index < count; index++) {
 		GSList *tmp_list_item = NULL;
 
-		/*FIXME :Any other list available ???*/
-		info = camel_folder_summary_index (m->folder->summary, index);
+		/* Iterate in a reverse order, thus removal will not hurt */
+		info = camel_folder_summary_index (m->folder->summary, count - index - 1);
 		if (!info) continue; /*This is bad. *Should* not happen*/
 
 		uid = camel_message_info_uid (info);
@@ -761,6 +762,8 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 	camel_object_trigger_event (m->folder, "folder_changed", changes);
 	camel_folder_change_info_free (changes);
 
+	m->need_refresh = camel_folder_summary_count (m->folder->summary) != g_slist_length (server_uid_list);
+
 	/* Discard server uid list */
 	g_slist_foreach (server_uid_list, (GFunc) g_free, NULL);
 	g_slist_free (server_uid_list);
@@ -771,8 +774,25 @@ mapi_sync_deleted_free (CamelSession *session, CamelSessionThreadMsg *msg)
 {
 	struct mapi_update_deleted_msg *m = (struct mapi_update_deleted_msg *)msg;
 
+	if (m->need_refresh) {
+		CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (m->folder->summary);
+		if (mapi_summary) {
+			CamelException ex = CAMEL_EXCEPTION_INITIALISER;
+
+			CAMEL_SERVICE_REC_LOCK (m->folder->parent_store, connect_lock);
+			g_free (mapi_summary->sync_time_stamp);
+			mapi_summary->sync_time_stamp = NULL;
+			CAMEL_SERVICE_REC_UNLOCK (m->folder->parent_store, connect_lock);
+
+			mapi_refresh_folder (m->folder, &ex);
+
+			if (camel_exception_is_set (&ex))
+				g_warning ("%s: %s", G_STRFUNC, ex.desc);
+			camel_exception_clear (&ex);
+		}
+	}
+
 	camel_object_unref (m->folder);
-	/* camel_session_thread_msg_free (session, &m->msg); */
 }
 
 static CamelSessionThreadOps deleted_items_sync_ops = {
@@ -1072,6 +1092,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 							 sizeof (*deleted_items_op_msg));
 		deleted_items_op_msg->folder = folder;
 		deleted_items_op_msg->folder_id = temp_folder_id;
+		deleted_items_op_msg->need_refresh = FALSE;
 		camel_object_ref (folder);
 
 		camel_session_thread_queue (session, &deleted_items_op_msg->msg, 0);
