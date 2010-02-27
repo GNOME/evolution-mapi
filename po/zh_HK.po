@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: evolution-mapi 0.29.90\n"
+"Project-Id-Version: evolution-mapi 0.29.92\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-02-16 18:54+0800\n"
-"PO-Revision-Date: 2010-02-16 18:55+0800\n"
+"POT-Creation-Date: 2010-02-27 20:30+0800\n"
+"PO-Revision-Date: 2010-02-27 20:31+0800\n"
 "Last-Translator: Chao-Hsiung Liao <j_h_liau@yahoo.com.tw>\n"
 "Language-Team: Chinese (Hong Kong) <community@linuxhall.org>\n"
 "MIME-Version: 1.0\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:624
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:214
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:226
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "輸入 %s@%s 的密碼 "
@@ -36,33 +36,34 @@ msgstr "全名"
 msgid "User name"
 msgstr "使用者名稱"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:215
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
 msgstr "伺服器、使用者名稱和網域名稱不能為空白。請將它們填入正確的數值。"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:241
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:253
 msgid "Authentication finished successfully."
 msgstr "驗證已成功。"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:247
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:259
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:269
 msgid "Authentication failed."
 msgstr "驗証失敗。"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:324
 msgid "_Domain name:"
 msgstr "網域名稱(_D):"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:319
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:334
 msgid "_Authenticate"
 msgstr "驗證(_A)"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:421
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:436
 msgid "Personal Folders"
 msgstr "個人資料夾"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:483
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:498
 msgid "_Location:"
 msgstr "位置(_L):"
 
@@ -108,39 +109,55 @@ msgstr "Exchange 設定值"
 msgid "Folder size"
 msgstr "資料夾大小"
 
-#: ../src/calendar/e-cal-backend-mapi.c:114
-#: ../src/calendar/e-cal-backend-mapi.c:1141
+#. To translators : This is used to cache the downloaded contacts from GAL.
+#. First %d : Number of contacts cached till now.
+#. Second %d : Total number of contacts which need to be cached.
+#. So (%d/%d) displays the progress.
+#. Example: Caching the GAL entries (1200/50000)...
+#.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:223
+#, c-format
+msgid "Caching the GAL entries (%d/%d)... "
+msgstr "正在快取 GAL 項目 (%d/%d)... "
+
+#. To translators : Here Evolution MAPI downloads the entries from the GAL server
+#: ../src/addressbook/e-book-backend-mapi-gal.c:795
+msgid "Downloading GAL entries from server..."
+msgstr "正在從伺服器下載 GAL 項目..."
+
+#: ../src/calendar/e-cal-backend-mapi.c:116
+#: ../src/calendar/e-cal-backend-mapi.c:1143
 #: ../src/camel/camel-mapi-store.c:568
 msgid "Authentication failed"
 msgstr "驗證失敗"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:390
+#: ../src/calendar/e-cal-backend-mapi.c:392
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "正在載入資料夾 %s 的項目"
 
 #. FIXME: String : We need to restart evolution-data-server
-#: ../src/calendar/e-cal-backend-mapi.c:622
-#: ../src/calendar/e-cal-backend-mapi.c:633
-#: ../src/calendar/e-cal-backend-mapi.c:661
-#: ../src/calendar/e-cal-backend-mapi.c:723
-#: ../src/calendar/e-cal-backend-mapi.c:733
+#: ../src/calendar/e-cal-backend-mapi.c:624
+#: ../src/calendar/e-cal-backend-mapi.c:635
+#: ../src/calendar/e-cal-backend-mapi.c:663
+#: ../src/calendar/e-cal-backend-mapi.c:725
+#: ../src/calendar/e-cal-backend-mapi.c:735
 msgid "Error fetching changes from the server."
 msgstr "從伺服器接收更改時發生錯誤。"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1061
-#: ../src/calendar/e-cal-backend-mapi.c:1071
-#: ../src/calendar/e-cal-backend-mapi.c:1176
-#: ../src/calendar/e-cal-backend-mapi.c:1258
+#: ../src/calendar/e-cal-backend-mapi.c:1063
+#: ../src/calendar/e-cal-backend-mapi.c:1073
+#: ../src/calendar/e-cal-backend-mapi.c:1178
+#: ../src/calendar/e-cal-backend-mapi.c:1260
 msgid "Could not create cache file"
 msgstr "無法建立快取檔案"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1187
+#: ../src/calendar/e-cal-backend-mapi.c:1189
 msgid "Could not create thread for populating cache"
 msgstr "無法建立移植快取的執行緒"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1608
+#: ../src/calendar/e-cal-backend-mapi.c:1610
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -151,31 +168,31 @@ msgstr "支援修改週期性約會的單一實體功能尚未實作。伺服器
 msgid "Updating local summary cache for new messages in %s"
 msgstr "正在更新 %s 中新郵件的本地端摘要快取"
 
-#: ../src/camel/camel-mapi-folder.c:724
+#: ../src/camel/camel-mapi-folder.c:725
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "正從 %s 的伺服器取回郵件 ID"
 
-#: ../src/camel/camel-mapi-folder.c:746
+#: ../src/camel/camel-mapi-folder.c:747
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "正從 %s 的快取移除已刪除的郵件"
 
 #. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:998
+#: ../src/camel/camel-mapi-folder.c:1018
 msgid "Fetching summary information for new messages in"
 msgstr "正取得新郵件的摘要資訊"
 
-#: ../src/camel/camel-mapi-folder.c:1100 ../src/camel/camel-mapi-folder.c:1853
-#: ../src/camel/camel-mapi-folder.c:1861
+#: ../src/camel/camel-mapi-folder.c:1120 ../src/camel/camel-mapi-folder.c:1884
+#: ../src/camel/camel-mapi-folder.c:1892
 msgid "This message is not available in offline mode."
 msgstr "這封郵件無法在離線模式下使用。"
 
-#: ../src/camel/camel-mapi-folder.c:1113
+#: ../src/camel/camel-mapi-folder.c:1133
 msgid "Fetching items failed"
 msgstr "取得項目失敗"
 
-#: ../src/camel/camel-mapi-folder.c:1817
+#: ../src/camel/camel-mapi-folder.c:1848
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -184,33 +201,33 @@ msgstr ""
 "不能取得郵件：%s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1817
+#: ../src/camel/camel-mapi-folder.c:1848
 msgid "No such message"
 msgstr "沒有這個郵件。"
 
-#: ../src/camel/camel-mapi-folder.c:1829
+#: ../src/camel/camel-mapi-folder.c:1860
 msgid "Message fetching cancelled by user."
 msgstr "取得郵件時被使用者取消了。"
 
-#: ../src/camel/camel-mapi-folder.c:1836
+#: ../src/camel/camel-mapi-folder.c:1867
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "無法取得郵件 %s： %s"
 
-#: ../src/camel/camel-mapi-folder.c:1884 ../src/camel/camel-mapi-folder.c:1893
+#: ../src/camel/camel-mapi-folder.c:1915 ../src/camel/camel-mapi-folder.c:1924
 msgid "Could not get message"
 msgstr "無法取得郵件。"
 
-#: ../src/camel/camel-mapi-folder.c:2179
+#: ../src/camel/camel-mapi-folder.c:2210
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "不能將郵件加入至資料夾「%s」"
 
-#: ../src/camel/camel-mapi-folder.c:2186
+#: ../src/camel/camel-mapi-folder.c:2217
 msgid "Offline."
 msgstr "離線。"
 
-#: ../src/camel/camel-mapi-folder.c:2307
+#: ../src/camel/camel-mapi-folder.c:2337
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "無法載入 %s 的摘要"
