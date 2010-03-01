@@ -1,3 +1,35 @@
+evolution-mapi 0.28.3 2010-03-01
+---------------------------------
+
+Bug Fixes:
+	Bug #604755 - Only shows a small part of all available messages
+		      (Milan Crha)
+	Bug #576738 - Crash on Authenticate with backslash in user name 
+	              (Milan Crha)
+	Bug #592297 - Contacts don't get downloaded. (Bharath Acharya)
+	Bug #571579 - Evolution Core Dumps when creating a MAPI account
+	              (Milan Crha)
+	Bug #607651 - Crashed with SIGSEGV in get_SPropValue (Milan Crha)
+	Bug #608862 - Remove attachments when none specified on item modify
+	              (Milan Crha)
+	Bug #603675 - Crash when trying to send a meeting with attachment
+	              (Milan Crha)
+	Bug #586093 - Text Body larger than 4KB received broken (Milan Crha)
+	Bug #608320 - Also close Unicode string with \0\0 in a stream 
+	              (Milan Crha)
+	Bug #608320 - Decode message body from camel stream as expected 
+	              (Milan Crha)
+	Bug #607790 - Crash due to GSlice memory error (Milan Crha)
+	Bug #568419 - Crash on "Delete folder"/"Copy to Folder" (Milan Crha)
+	Bug #569321 - Message list strings are missing some symbols (Milan Crha)
+	Bug #606338 - Do not dereference NULL pointer in mapi_append_message
+	              (Milan Crha)
+	Bug #590001 - can't mark book for offline usage. (Bharath Acharya)
+
+Other Changes:
+	Empty password is like no password, notify user about it (Milan Crha)
+	Add stubs for some missing EBookBackend virtual methods (Milan Crha)
+
 evolution-mapi 0.28.2 2009-12-14
 ---------------------------------
 
@@ -26,12 +58,14 @@ Bug Fixes :
 	Bug #595355 - Crash on header parsing. (Milan Crha)
 	Bug #595260 - crash in mapi_sync_deleted. (Milan Crha)
 	Bug #588453 - Slow retrieval of message IDs. (Milan Crha)
+
 Translations:
 	Matej Urbančič (sl)
 	Leonid Kanter (ru)
 
 evolution-mapi 0.28.0 2009-09-22
 ---------------------------------
+
 Bug Fixes :
     Bug #592057 - Not all messages have Transport Headers property. (Milan Crha)
 
@@ -59,6 +93,7 @@ Translations :
 
 evolution-mapi 0.27.92 2009-09-07
 ---------------------------------
+
 Bug Fixes :
     Bug #590000 - GAL doesn't fetch email ids properly (Bharath Acharya)
     Bug #590002 - folder tree doesn't show up after removing cache (Johnny Jacob)
