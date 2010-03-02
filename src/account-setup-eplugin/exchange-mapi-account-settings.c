@@ -46,7 +46,6 @@
 #include <mail/mail-config.h>
 #include <mail/em-config.h>
 #include <mail/em-folder-tree.h>
-#include <misc/e-spinner.h>
 
 #include "exchange-mapi-account-listener.h"
 
@@ -147,8 +146,8 @@ mapi_settings_run_folder_size_dialog (gpointer data)
 
 	content_area = (GtkBox *)gtk_dialog_get_content_area (dialog_data->dialog);
 
-	/* dialog_data->spinner = g_object_new (E_TYPE_SPINNER, NULL); */
-	dialog_data->spinner = e_spinner_new_spinning_small_shown ();
+	dialog_data->spinner = gtk_spinner_new ();
+	gtk_spinner_start (GTK_SPINNER (dialog_data->spinner));
 	dialog_data->spinner_label = gtk_label_new (_("Fetching folder list ..."));
 
 	dialog_data->spinner_hbox = (GtkBox *) gtk_hbox_new (TRUE, 6);
