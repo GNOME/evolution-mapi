@@ -1,24 +1,25 @@
-# translation of evolution-mapi-master-po-gl-77000.po to Galician
+# translation of evolution-mapi-master-po-gl-77000.merged.po to Galician
 # Ignacio Casal Quinteiro <icq@cvs.gnome.org>, 2007, 2008.
-# Fran Diéguez <fran.dieguez@mabishu.com>, 2009.
 # Mancomún - Centro de Referencia e Servizos de Software Libre <g11n@mancomun.org>, 2009.
 # Antón Méixome <meixome@mancomun.org>, 2009.
+# Fran Diéguez <frandieguez@ubuntu.com>, 2009, 2010.
+# Antón Méixome <meixome@certima.net>, 2010.
 # This file is distributed under the same license as the Evolution-mapi package.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
-# Fran Diéguez <frandieguez@ubuntu.com>, 2010.
 msgid ""
 msgstr ""
-"Project-Id-Version: evolution-mapi-master-po-gl-77000\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-02-20 22:23+0100\n"
-"PO-Revision-Date: 2010-02-15 16:22+0100\n"
-"Last-Translator: Fran Diéguez <frandieguez@ubuntu.com>\n"
-"Language-Team: Gallician <proxecto@trasno.net>\n"
+"Project-Id-Version: evolution-mapi-master-po-gl-77000.merged\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-mapi\n"
+"POT-Creation-Date: 2010-03-02 19:55+0000\n"
+"PO-Revision-Date: 2010-03-03 01:13+0100\n"
+"Last-Translator: Antón Méixome <meixome@certima.net>\n"
+"Language-Team: Galician <proxecto@trasno.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: gl\n"
-"Plural-Forms: Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "X-Generator: KBabel 1.11.4\n"
 
 # SOME DESCRIPTIVE TITLE.
@@ -27,7 +28,7 @@ msgstr ""
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:624
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:214
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:226
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Introduza o contrasinal para %s@%s"
@@ -48,7 +49,7 @@ msgstr "Nome completo"
 msgid "User name"
 msgstr "Nome de usuario"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:215
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -56,27 +57,28 @@ msgstr ""
 "O servidor, o nome de usuario e o dominio non poden estar baleiros. "
 "Compléteos cos valores apropiados."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:241
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:253
 msgid "Authentication finished successfully."
 msgstr "A autenticación terminou correctamente."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:247
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:259
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:269
 msgid "Authentication failed."
 msgstr "Fallou a autenticación."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:324
 msgid "_Domain name:"
 msgstr "Nome do _dominio:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:319
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:334
 msgid "_Authenticate"
 msgstr "_Autenticar"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:421
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:436
 msgid "Personal Folders"
 msgstr "Cartafoles persoais"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:483
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:498
 msgid "_Location:"
 msgstr "_Localización:"
 
@@ -90,7 +92,7 @@ msgstr "Tamaño"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:126
 msgid "Unable to retrieve folder size information"
-msgstr "Non foi posibel recuperar información sobre o tamaño do cartafol "
+msgstr "Non foi posíbel recuperar información sobre o tamaño do cartafol "
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:147
 msgid "Folder Size"
@@ -121,6 +123,22 @@ msgstr "Configuracións de intercambio"
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:305
 msgid "Folder size"
 msgstr "Tamaño do cartafol"
+
+#. To translators : This is used to cache the downloaded contacts from GAL.
+#. First %d : Number of contacts cached till now.
+#. Second %d : Total number of contacts which need to be cached.
+#. So (%d/%d) displays the progress.
+#. Example: Caching the GAL entries (1200/50000)...
+#.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:223
+#, c-format
+msgid "Caching the GAL entries (%d/%d)... "
+msgstr "Gardando na caché as entradas da GAL (%d/%d)... "
+
+#. To translators : Here Evolution MAPI downloads the entries from the GAL server
+#: ../src/addressbook/e-book-backend-mapi-gal.c:795
+msgid "Downloading GAL entries from server..."
+msgstr "Descargando as entradas da GAL desde o servidor..."
 
 #: ../src/calendar/e-cal-backend-mapi.c:116
 #: ../src/calendar/e-cal-backend-mapi.c:1143
@@ -168,31 +186,31 @@ msgid "Updating local summary cache for new messages in %s"
 msgstr ""
 "Actualizando a información local da caché de resumo nas mensaxes novas en %s"
 
-#: ../src/camel/camel-mapi-folder.c:724
+#: ../src/camel/camel-mapi-folder.c:725
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Recuperando os ID das mensaxes desde o servidor para %s"
 
-#: ../src/camel/camel-mapi-folder.c:746
+#: ../src/camel/camel-mapi-folder.c:747
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Eliminando as mensaxes borradas da caché en %s"
 
 #. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:998
+#: ../src/camel/camel-mapi-folder.c:1018
 msgid "Fetching summary information for new messages in"
 msgstr "Obtendo a información de resumo para as mensaxes novas en"
 
-#: ../src/camel/camel-mapi-folder.c:1100 ../src/camel/camel-mapi-folder.c:1863
-#: ../src/camel/camel-mapi-folder.c:1871
+#: ../src/camel/camel-mapi-folder.c:1120 ../src/camel/camel-mapi-folder.c:1884
+#: ../src/camel/camel-mapi-folder.c:1892
 msgid "This message is not available in offline mode."
 msgstr "Esta mensaxe non está dispoñíbel no modo sen conexión."
 
-#: ../src/camel/camel-mapi-folder.c:1113
+#: ../src/camel/camel-mapi-folder.c:1133
 msgid "Fetching items failed"
 msgstr "Fallou a obtención de elementos"
 
-#: ../src/camel/camel-mapi-folder.c:1827
+#: ../src/camel/camel-mapi-folder.c:1848
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -201,33 +219,33 @@ msgstr ""
 "Non foi posíbel obter a mensaxe: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1827
+#: ../src/camel/camel-mapi-folder.c:1848
 msgid "No such message"
 msgstr "Non existe esta mensaxe"
 
-#: ../src/camel/camel-mapi-folder.c:1839
+#: ../src/camel/camel-mapi-folder.c:1860
 msgid "Message fetching cancelled by user."
 msgstr "A obtención da mensaxe foi cancelada polo usuario."
 
-#: ../src/camel/camel-mapi-folder.c:1846
+#: ../src/camel/camel-mapi-folder.c:1867
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Non foi posíbel obter a mensaxe: %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1894 ../src/camel/camel-mapi-folder.c:1903
+#: ../src/camel/camel-mapi-folder.c:1915 ../src/camel/camel-mapi-folder.c:1924
 msgid "Could not get message"
 msgstr "Non foi posíbel obter a mensaxe"
 
-#: ../src/camel/camel-mapi-folder.c:2189
+#: ../src/camel/camel-mapi-folder.c:2210
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Non foi posíbel engadir unha mensaxe ao cartafol `%s'"
 
-#: ../src/camel/camel-mapi-folder.c:2196
+#: ../src/camel/camel-mapi-folder.c:2217
 msgid "Offline."
 msgstr "Desconectado."
 
-#: ../src/camel/camel-mapi-folder.c:2316
+#: ../src/camel/camel-mapi-folder.c:2337
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Non foi posíbel cargar o resumo de %s"
@@ -348,3 +366,4 @@ msgstr "A lista de cartafoles non está dispoñíbel no modo sen conexión."
 #: ../src/camel/camel-mapi-transport.c:116
 msgid "Could not send message."
 msgstr "Non foi posíbel enviar a mensaxe."
+
