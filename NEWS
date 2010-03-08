@@ -1,3 +1,29 @@
+evolution-mapi 0.29.92 2010-03-08
+--------------------------------
+Bug Fixes:
+	Bug #576738 - Crash on Authenticate with backslash in user name (Milan Crha)
+    	Bug #604755 - Only shows a small part of all available messages (Milan Crha)
+        Bug #610803 - Do not use session's thread queue for change notifications (Milan Crha)
+
+Translations:
+	Alexander Shopov (bg)
+	Antonio Fernandes C. Neto (pt_BR)
+	Bruce Cowan (en_GB)
+	Chao-Hsiung Liao (zh_HK)
+	Claude Paroz (fr)
+	Daniel Nylander (sv)
+	Duarte Loreto (pt)
+	Fran Diéguez (gl)
+	Gabor Kelemen (hu)
+	Inaki Larranaga Murgoitio (eu)
+	Jorge González (es)
+	Kjartan Maraas (nb)
+	Leonid Kanter (ru)
+	Mario Blättermann (de)
+	Matej Urbančič (sl)
+	Piotr Drąg (pl)
+	Theppitak Karoonboonyanan (th)
+
 evolution-mapi 0.29.91 2010-02-22
 --------------------------------
 Bug Fixes:
