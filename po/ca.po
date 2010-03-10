@@ -2,14 +2,14 @@
 # Traduccions al català del paquet «evolution-mapi».
 # Copyright (C) 2009 THE evolution-mapi'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-mapi package.
-# David Planella <david.planella@gmail.com>, 2009.
+# David Planella <david.planella@gmail.com>, 2009, 2010.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-02-19 23:12+0100\n"
-"PO-Revision-Date: 2010-02-14 22:12+0100\n"
+"POT-Creation-Date: 2010-03-10 08:54+0100\n"
+"PO-Revision-Date: 2010-02-28 20:25+0100\n"
 "Last-Translator: David Planella <david.planella@gmail.com>\n"
 "Language-Team: Catalan <tradgnome@softcatala.org>\n"
 "MIME-Version: 1.0\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:624
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:214
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:226
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Introduïu la contrasenya per a %s@%s"
@@ -38,7 +38,7 @@ msgstr "Nom complet"
 msgid "User name"
 msgstr "Nom d'usuari"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:215
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -46,27 +46,28 @@ msgstr ""
 "El servidor, el nom d'usuari i el nom del domini no poden ser buits. Hauríeu "
 "d'escriure-hi valors correctes."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:241
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:253
 msgid "Authentication finished successfully."
 msgstr "Ha finalitzat satisfactòriament l'autenticació."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:247
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:259
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:269
 msgid "Authentication failed."
 msgstr "Ha fallat l'autenticació."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:324
 msgid "_Domain name:"
 msgstr "Nom del _domini:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:319
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:334
 msgid "_Authenticate"
 msgstr "_Autentica"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:421
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:436
 msgid "Personal Folders"
 msgstr "Carpetes personals"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:483
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:498
 msgid "_Location:"
 msgstr "_Ubicació:"
 
@@ -111,6 +112,26 @@ msgstr "Paràmetres de l'Exchange"
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:305
 msgid "Folder size"
 msgstr "Mida de la carpeta"
+
+#. To translators : This is used to cache the downloaded contacts from GAL.
+#. First %d : Number of contacts cached till now.
+#. Second %d : Total number of contacts which need to be cached.
+#. So (%d/%d) displays the progress.
+#. Example: Caching the GAL entries (1200/50000)...
+#.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:223
+#, c-format
+msgid "Caching the GAL entries (%d/%d)... "
+msgstr ""
+"S'estan carregant les entrades de la llista d'adreces global (GAL) a la "
+"memòria cau (%d de %d)..."
+
+#. To translators : Here Evolution MAPI downloads the entries from the GAL server
+#: ../src/addressbook/e-book-backend-mapi-gal.c:795
+msgid "Downloading GAL entries from server..."
+msgstr ""
+"S'estan baixant les entrades de la llista d'adreces global (GAL) del "
+"servidor..."
 
 #: ../src/calendar/e-cal-backend-mapi.c:116
 #: ../src/calendar/e-cal-backend-mapi.c:1143
@@ -159,32 +180,32 @@ msgid "Updating local summary cache for new messages in %s"
 msgstr ""
 "S'està actualitzant la memòria cau del resum local dels missatges nous a %s"
 
-#: ../src/camel/camel-mapi-folder.c:724
+#: ../src/camel/camel-mapi-folder.c:725
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr ""
 "S'estan obtenint els identificadors dels missatges del servidor per a %s"
 
-#: ../src/camel/camel-mapi-folder.c:746
+#: ../src/camel/camel-mapi-folder.c:747
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "S'estan eliminant els missatges suprimits de la memòria cau a %s"
 
 #. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:998
+#: ../src/camel/camel-mapi-folder.c:1018
 msgid "Fetching summary information for new messages in"
 msgstr "S'està recollint la informació de resum dels missatges nous a"
 
-#: ../src/camel/camel-mapi-folder.c:1100 ../src/camel/camel-mapi-folder.c:1863
-#: ../src/camel/camel-mapi-folder.c:1871
+#: ../src/camel/camel-mapi-folder.c:1120 ../src/camel/camel-mapi-folder.c:1884
+#: ../src/camel/camel-mapi-folder.c:1892
 msgid "This message is not available in offline mode."
 msgstr "Aquest missatge no està disponible en mode fora de línia."
 
-#: ../src/camel/camel-mapi-folder.c:1113
+#: ../src/camel/camel-mapi-folder.c:1133
 msgid "Fetching items failed"
 msgstr "Ha fallat la recol·lecció d'elements"
 
-#: ../src/camel/camel-mapi-folder.c:1827
+#: ../src/camel/camel-mapi-folder.c:1848
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -193,33 +214,33 @@ msgstr ""
 "No s'ha pogut obtenir el missatge: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1827
+#: ../src/camel/camel-mapi-folder.c:1848
 msgid "No such message"
 msgstr "No hi ha tal missatge"
 
-#: ../src/camel/camel-mapi-folder.c:1839
+#: ../src/camel/camel-mapi-folder.c:1860
 msgid "Message fetching cancelled by user."
 msgstr "L'usuari ha cancel·lat la recollida del missatge."
 
-#: ../src/camel/camel-mapi-folder.c:1846
+#: ../src/camel/camel-mapi-folder.c:1867
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "No s'ha pogut obtenir el missatge %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1894 ../src/camel/camel-mapi-folder.c:1903
+#: ../src/camel/camel-mapi-folder.c:1915 ../src/camel/camel-mapi-folder.c:1924
 msgid "Could not get message"
 msgstr "No s'ha pogut obtenir el missatge"
 
-#: ../src/camel/camel-mapi-folder.c:2189
+#: ../src/camel/camel-mapi-folder.c:2210
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "No es pot afegir el missatge a la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-folder.c:2196
+#: ../src/camel/camel-mapi-folder.c:2217
 msgid "Offline."
 msgstr "Fora de línia."
 
-#: ../src/camel/camel-mapi-folder.c:2316
+#: ../src/camel/camel-mapi-folder.c:2337
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No s'ha pogut carregar el resum per a %s"
