@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the evolution-mapi package.
 #
 # Based on evolution-exchange:
-# Changwoo Ryu <cwryu@debian.org>, 2004-2006, 2007, 2008, 2009.
+# Changwoo Ryu <cwryu@debian.org>, 2004-2006, 2007, 2008, 2009, 2010.
 #
 # 참고:
 # - "Evolution"은 "에볼루션"으로 음역.
@@ -13,17 +13,17 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-30 08:24+0900\n"
-"PO-Revision-Date: 2009-08-30 08:29+0900\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
+"POT-Creation-Date: 2010-03-13 20:49+0900\n"
+"PO-Revision-Date: 2010-03-13 20:51+0900\n"
 "Last-Translator: Changwoo Ryu <cwryu@debian.org>\n"
-"Language-Team: GNOME Korea <gnome-kr-hackers@lists.kldp.net>\n"
+"Language-Team: GNOME Korea <gnome-kr@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:624
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:226
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "암호를 입력하십시오 (%s@%s)"
@@ -32,19 +32,19 @@ msgstr "암호를 입력하십시오 (%s@%s)"
 #. using GtkEntryCompletion in the username gtkentry. But plugins
 #. as of now does not have access to it
 #. TODO : Fix strings
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
 msgid "Select username"
 msgstr "사용자 이름 선택"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:145
 msgid "Full name"
 msgstr "전체 이름"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:150
 msgid "User name"
 msgstr "사용자 이름"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:215
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -52,103 +52,122 @@ msgstr ""
 "서버, 사용자 이름, 도메인 이름은 비워둘 수 없습니다. 올바른 값을 입력하십시"
 "오."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:253
 msgid "Authentication finished successfully."
 msgstr "인증을 성공적으로 마쳤습니다."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:259
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:269
 msgid "Authentication failed."
 msgstr "인증 실패."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:324
 msgid "_Domain name:"
 msgstr "도메인 이름(_D):"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:334
 msgid "_Authenticate"
 msgstr "인증(_A)"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:436
 msgid "Personal Folders"
 msgstr "개인 폴더"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:498
 msgid "_Location:"
 msgstr "위치(_L):"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
-msgid "_Folder size"
-msgstr "폴더 크기(_F)"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:101
 msgid "Folder"
 msgstr "폴더"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:106
 msgid "Size"
 msgstr "크기"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:126
 msgid "Unable to retrieve folder size information"
 msgstr "폴더 크기 정보를 가져올 수 없습니다"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:147
 msgid "Folder Size"
 msgstr "폴더 크기"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:156
 msgid "Fetching folder list ..."
 msgstr "폴더 목록을 가져오는 중입니다..."
 
 #. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:270
 msgid "Miscellaneous"
 msgstr "기타"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:283
 msgid "View the size of all Exchange folders"
 msgstr "모든 익스체인지 폴더의 크기를 봅니다"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:285
 msgid "Folders Size"
 msgstr "폴더 크기"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:296
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
 msgstr "익스체인지 설정"
 
-#: ../src/calendar/e-cal-backend-mapi.c:115
-#: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:472
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:305
+msgid "Folder size"
+msgstr "폴더 크기"
+
+#. To translators : This is used to cache the downloaded contacts from GAL.
+#. First %d : Number of contacts cached till now.
+#. Second %d : Total number of contacts which need to be cached.
+#. So (%d/%d) displays the progress.
+#. Example: Caching the GAL entries (1200/50000)...
+#.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:223
+#, c-format
+msgid "Caching the GAL entries (%d/%d)... "
+msgstr "전체 주소 목록을 캐시에 저장하는 중입니다 (%d/%d)... "
+
+#. To translators : Here Evolution MAPI downloads the entries from the GAL server
+#: ../src/addressbook/e-book-backend-mapi-gal.c:795
+msgid "Downloading GAL entries from server..."
+msgstr "서버에서 전체 주소 목록을 다운로드하는 중입니다..."
+
+#: ../src/calendar/e-cal-backend-mapi.c:116
+#: ../src/calendar/e-cal-backend-mapi.c:1143
+#: ../src/camel/camel-mapi-store.c:568
 msgid "Authentication failed"
 msgstr "인증 실패"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:391
+#: ../src/calendar/e-cal-backend-mapi.c:392
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "%s 폴더의 항목을 읽어들입니다"
 
 #. FIXME: String : We need to restart evolution-data-server
-#: ../src/calendar/e-cal-backend-mapi.c:581
-#: ../src/calendar/e-cal-backend-mapi.c:592
-#: ../src/calendar/e-cal-backend-mapi.c:618
+#: ../src/calendar/e-cal-backend-mapi.c:624
+#: ../src/calendar/e-cal-backend-mapi.c:635
+#: ../src/calendar/e-cal-backend-mapi.c:663
+#: ../src/calendar/e-cal-backend-mapi.c:725
+#: ../src/calendar/e-cal-backend-mapi.c:735
 msgid "Error fetching changes from the server."
 msgstr "서버에서 바뀐 사항을 가져오는 데 오류가 발생했습니다."
 
-#: ../src/calendar/e-cal-backend-mapi.c:973
-#: ../src/calendar/e-cal-backend-mapi.c:983
-#: ../src/calendar/e-cal-backend-mapi.c:1088
-#: ../src/calendar/e-cal-backend-mapi.c:1170
+#: ../src/calendar/e-cal-backend-mapi.c:1063
+#: ../src/calendar/e-cal-backend-mapi.c:1073
+#: ../src/calendar/e-cal-backend-mapi.c:1178
+#: ../src/calendar/e-cal-backend-mapi.c:1260
 msgid "Could not create cache file"
 msgstr "캐시 파일을 만들 수 없습니다"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1099
+#: ../src/calendar/e-cal-backend-mapi.c:1189
 msgid "Could not create thread for populating cache"
 msgstr "사용할 캐시에 대한 스레드를 만들 수 없습니다"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1513
+#: ../src/calendar/e-cal-backend-mapi.c:1610
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -156,36 +175,36 @@ msgstr ""
 "반복하는 약속의 한 인스턴스를 수정하는 기능은 아직 구현하지 않았습니다. 서버"
 "에 들어 있는 약속은 바뀌지 않았습니다."
 
-#: ../src/camel/camel-mapi-folder.c:478
+#: ../src/camel/camel-mapi-folder.c:493
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "%s의 새 메시지의 로컬 요약 캐시를 업데이트하는 중입니다"
 
-#: ../src/camel/camel-mapi-folder.c:702
+#: ../src/camel/camel-mapi-folder.c:725
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "서버에서 %s에 대한 메시지 ID를 가져오는 중입니다"
 
-#: ../src/camel/camel-mapi-folder.c:724
+#: ../src/camel/camel-mapi-folder.c:747
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "캐시에서 %s 안에 삭제한 메시지를 제거하는 중입니다"
 
-#: ../src/camel/camel-mapi-folder.c:1029 ../src/camel/camel-mapi-folder.c:1643
-#: ../src/camel/camel-mapi-folder.c:1651
+#. TODO : Check for online state
+#: ../src/camel/camel-mapi-folder.c:1018
+msgid "Fetching summary information for new messages in"
+msgstr "들어 있는 새 메시지의 요약 정보를 가져오는 중입니다"
+
+#: ../src/camel/camel-mapi-folder.c:1120 ../src/camel/camel-mapi-folder.c:1884
+#: ../src/camel/camel-mapi-folder.c:1892
 msgid "This message is not available in offline mode."
-msgstr "이 메시지는 오프라인 모드에서는 볼 수 없습니다."
+msgstr "이 메시지는 연결 중지 상태에서는 볼 수 없습니다."
 
-#: ../src/camel/camel-mapi-folder.c:1038
-#, c-format
-msgid "Fetching summary information for new messages in %s"
-msgstr "%s의 새 메시지의 요약 정보를 가져오는 중입니다"
-
-#: ../src/camel/camel-mapi-folder.c:1048
+#: ../src/camel/camel-mapi-folder.c:1133
 msgid "Fetching items failed"
 msgstr "항목 가져오기가 실패했습니다"
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1848
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -194,33 +213,33 @@ msgstr ""
 "메시지를 가져올 수 없습니다: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1848
 msgid "No such message"
 msgstr "그런 메시지가 없습니다"
 
-#: ../src/camel/camel-mapi-folder.c:1619
+#: ../src/camel/camel-mapi-folder.c:1860
 msgid "Message fetching cancelled by user."
 msgstr "사용자가 메시지 가져오기를 취소했습니다."
 
-#: ../src/camel/camel-mapi-folder.c:1626
+#: ../src/camel/camel-mapi-folder.c:1867
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "%s 메시지를 가져올 수 없습니다: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1672 ../src/camel/camel-mapi-folder.c:1684
+#: ../src/camel/camel-mapi-folder.c:1915 ../src/camel/camel-mapi-folder.c:1924
 msgid "Could not get message"
 msgstr "메시지를 가져올 수 없습니다"
 
-#: ../src/camel/camel-mapi-folder.c:1964
+#: ../src/camel/camel-mapi-folder.c:2210
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "메시지를 '%s' 폴더에 추가할 수 없습니다"
 
-#: ../src/camel/camel-mapi-folder.c:1971
+#: ../src/camel/camel-mapi-folder.c:2217
 msgid "Offline."
 msgstr "연결 안 됨."
 
-#: ../src/camel/camel-mapi-folder.c:2091
+#: ../src/camel/camel-mapi-folder.c:2337
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s에 요약을 읽어들일 수 없습니다"
@@ -269,22 +288,22 @@ msgstr ""
 "이 옵션을 켜면 보통 일반 텍스트 암호 인증을 통해 오픈익스체인지 서버에 연결합"
 "니다."
 
-#: ../src/camel/camel-mapi-store.c:61
+#: ../src/camel/camel-mapi-store.c:63
 msgid "Favorites"
 msgstr "즐겨 찾기"
 
-#: ../src/camel/camel-mapi-store.c:62
+#: ../src/camel/camel-mapi-store.c:64
 msgid "All Public Folders"
 msgstr "전체 공용 폴더"
 
-#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
+#: ../src/camel/camel-mapi-store.c:313 ../src/camel/camel-mapi-transport.c:128
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "익스체인지 MAPI 서버 %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
+#: ../src/camel/camel-mapi-store.c:317 ../src/camel/camel-mapi-transport.c:130
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "익스체인지 MAPI 서비스 (이름 %s, 서버 %s)"
@@ -293,47 +312,48 @@ msgstr "익스체인지 MAPI 서비스 (이름 %s, 서버 %s)"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:315
+#: ../src/camel/camel-mapi-store.c:355
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s MAPI 암호를 입력하십시오 (%s@%s)"
 
-#: ../src/camel/camel-mapi-store.c:328
+#: ../src/camel/camel-mapi-store.c:368
 msgid "You did not enter a password."
 msgstr "암호를 입력하지 않았습니다."
 
-#: ../src/camel/camel-mapi-store.c:336
+#: ../src/camel/camel-mapi-store.c:376
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "익스체인지 MAPI 서버에 인증할 수 없습니다."
 
-#: ../src/camel/camel-mapi-store.c:456
+#: ../src/camel/camel-mapi-store.c:552
 msgid "Cannot create MAPI folders in offline mode."
-msgstr "오프라인 모드에서는 MAPI 폴더를 만들 수 없습니다."
+msgstr "연결 중지 상태에서는 MAPI 폴더를 만들 수 없습니다."
 
-#: ../src/camel/camel-mapi-store.c:461
+#: ../src/camel/camel-mapi-store.c:557
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "`%s' 폴더를 새로 만들 수 없습니다"
 
-#: ../src/camel/camel-mapi-store.c:670
+#: ../src/camel/camel-mapi-store.c:692
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "MAPI 폴더 이름을 `%s'에서 바꿀 수 없습니다. 그 폴더가 없습니다."
 
-#: ../src/camel/camel-mapi-store.c:681
+#: ../src/camel/camel-mapi-store.c:703
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "MAPI 기본 폴더의 이름을 `%s'에서 `%s'(으)로 바꿀 수 없습니다."
 
-#: ../src/camel/camel-mapi-store.c:699
+#: ../src/camel/camel-mapi-store.c:727 ../src/camel/camel-mapi-store.c:742
+#: ../src/camel/camel-mapi-store.c:791
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "MAPI 폴더 이름을 `%s'에서 `%s'(으)로 바꿀 수 없습니다"
 
-#: ../src/camel/camel-mapi-store.c:1227
+#: ../src/camel/camel-mapi-store.c:1367
 msgid "Folder list not available in offline mode."
-msgstr "폴더 목록은 오프라인 모드에서는 사용할 수 없습니다."
+msgstr "폴더 목록은 연결 중지 상태에서는 사용할 수 없습니다."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
 #: ../src/camel/camel-mapi-transport.c:116
