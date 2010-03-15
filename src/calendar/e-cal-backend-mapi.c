@@ -1394,7 +1394,7 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, char 
 	GSList *recipients = NULL;
 	GSList *attachments = NULL;
 	GSList *streams = NULL;
-	struct cbdata cbdata;
+	struct cbdata cbdata = { 0 };
 	struct Binary_r globalid;
 	struct icaltimetype current;
 
@@ -1590,7 +1590,7 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 	GSList *recipients = NULL;
 	GSList *streams = NULL;
 	GSList *attachments = NULL;
-	struct cbdata cbdata;
+	struct cbdata cbdata = { 0 };
 	gboolean no_increment = FALSE;
 	icalproperty *prop;
 	struct icaltimetype current;
