@@ -5,22 +5,20 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 1\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-mapi\n"
-"POT-Creation-Date: 2010-02-08 16:38+0000\n"
-"PO-Revision-Date: 2010-02-12 15:14+0300\n"
-"Last-Translator: Lucian Adrian Grijincu <lucian.grijincu@gmail.com>\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
+"POT-Creation-Date: 2010-03-17 15:22+0000\n"
+"PO-Revision-Date: 2010-03-22 14:44+0200\n"
+"Last-Translator: Adi Roiban <adi@roiban.ro>\n"
 "Language-Team: Romanian GNOME Team <gnomero-list@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: ro\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
-"20)) ? 1 : 2);;\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2);;\n"
 "X-Generator: Virtaal 0.5.2\n"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:624
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:214
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:226
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Introduceți parola pentru %s@%s"
@@ -41,35 +39,32 @@ msgstr "Nume complet"
 msgid "User name"
 msgstr "Nume utilizator"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
-msgid ""
-"Server, username and domain name cannot be empty. Please fill them with "
-"correct values."
-msgstr ""
-"Câmpurile server, nume utilizator și nume domeniu nu pot fi goale. "
-"Introduceți valori corecte."
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:215
+msgid "Server, username and domain name cannot be empty. Please fill them with correct values."
+msgstr "Câmpurile server, nume utilizator și nume domeniu nu pot fi goale. Introduceți valori corecte."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:241
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:253
 msgid "Authentication finished successfully."
 msgstr "Autentificarea s-a finalizat cu succes."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:247
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:259
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:269
 msgid "Authentication failed."
 msgstr "Autentificare eșuată."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:324
 msgid "_Domain name:"
 msgstr "Nume _domeniu:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:319
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:334
 msgid "_Authenticate"
 msgstr "_Autentifică"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:421
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:436
 msgid "Personal Folders"
 msgstr "Dosare personale"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:483
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:498
 msgid "_Location:"
 msgstr "_Locație:"
 
@@ -115,77 +110,89 @@ msgstr "Configurări Exchange"
 msgid "Folder size"
 msgstr "Mărime dosar"
 
-#: ../src/calendar/e-cal-backend-mapi.c:114
-#: ../src/calendar/e-cal-backend-mapi.c:1141
-#: ../src/camel/camel-mapi-store.c:559
+#. To translators : This is used to cache the downloaded contacts from GAL.
+#. First %d : Number of contacts cached till now.
+#. Second %d : Total number of contacts which need to be cached.
+#. So (%d/%d) displays the progress.
+#. Example: Caching the GAL entries (1200/50000)...
+#.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:223
+#, c-format
+msgid "Caching the GAL entries (%d/%d)... "
+msgstr "Se adaugă în cache intrările GAL (%d/%d)..."
+
+#. To translators : Here Evolution MAPI downloads the entries from the GAL server
+#: ../src/addressbook/e-book-backend-mapi-gal.c:795
+msgid "Downloading GAL entries from server..."
+msgstr "Se descară intrările GAL de pe server..."
+
+#: ../src/calendar/e-cal-backend-mapi.c:116
+#: ../src/calendar/e-cal-backend-mapi.c:1143
+#: ../src/camel/camel-mapi-store.c:568
 msgid "Authentication failed"
 msgstr "Autentificare eșuată"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:390
+#: ../src/calendar/e-cal-backend-mapi.c:392
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Se încarcă elementele din dosarul %s"
 
 #. FIXME: String : We need to restart evolution-data-server
-#: ../src/calendar/e-cal-backend-mapi.c:622
-#: ../src/calendar/e-cal-backend-mapi.c:633
-#: ../src/calendar/e-cal-backend-mapi.c:661
-#: ../src/calendar/e-cal-backend-mapi.c:723
-#: ../src/calendar/e-cal-backend-mapi.c:733
+#: ../src/calendar/e-cal-backend-mapi.c:624
+#: ../src/calendar/e-cal-backend-mapi.c:635
+#: ../src/calendar/e-cal-backend-mapi.c:663
+#: ../src/calendar/e-cal-backend-mapi.c:725
+#: ../src/calendar/e-cal-backend-mapi.c:735
 msgid "Error fetching changes from the server."
 msgstr "Eroare la obținerea modificărilor de pe server."
 
-#: ../src/calendar/e-cal-backend-mapi.c:1061
-#: ../src/calendar/e-cal-backend-mapi.c:1071
-#: ../src/calendar/e-cal-backend-mapi.c:1176
-#: ../src/calendar/e-cal-backend-mapi.c:1258
+#: ../src/calendar/e-cal-backend-mapi.c:1063
+#: ../src/calendar/e-cal-backend-mapi.c:1073
+#: ../src/calendar/e-cal-backend-mapi.c:1178
+#: ../src/calendar/e-cal-backend-mapi.c:1260
 msgid "Could not create cache file"
 msgstr "Nu s-a putut crea fișierul cache"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1187
+#: ../src/calendar/e-cal-backend-mapi.c:1189
 msgid "Could not create thread for populating cache"
 msgstr "Nu s-a putut crea firul de execuție pentru popularea cache-ului"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1608
-msgid ""
-"Support for modifying single instances of a recurring appointment is not yet "
-"implemented. No change was made to the appointment on the server."
-msgstr ""
-"Nu este încă implementat suportul pentru modificarea unei singure instanțe a "
-"unui eveniment recurent. Nu s-a făcut nici o modificare a întâlnirii pe "
-"server."
+#: ../src/calendar/e-cal-backend-mapi.c:1610
+msgid "Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server."
+msgstr "Nu este încă implementat suportul pentru modificarea unei singure instanțe a unui eveniment recurent. Nu s-a făcut nici o modificare a întâlnirii pe server."
 
 #: ../src/camel/camel-mapi-folder.c:493
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "Se actualizează cache-ul local cu rezumatele noilor mesaje din %s"
 
-#: ../src/camel/camel-mapi-folder.c:726
+#: ../src/camel/camel-mapi-folder.c:725
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Se obțin identificatoarele mesajelor de la serverul %s"
 
-#: ../src/camel/camel-mapi-folder.c:748
+#: ../src/camel/camel-mapi-folder.c:747
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Se elimină mesajele șterse din cache din %s"
 
 #. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:1000
+#: ../src/camel/camel-mapi-folder.c:1018
 msgid "Fetching summary information for new messages in"
 msgstr "Se obțin rezumatele noilor mesaje din"
 
-#: ../src/camel/camel-mapi-folder.c:1102 ../src/camel/camel-mapi-folder.c:1857
-#: ../src/camel/camel-mapi-folder.c:1865
+#: ../src/camel/camel-mapi-folder.c:1120
+#: ../src/camel/camel-mapi-folder.c:1884
+#: ../src/camel/camel-mapi-folder.c:1892
 msgid "This message is not available in offline mode."
 msgstr "Aceste mesaj nu este disponibil în modul deconectat."
 
-#: ../src/camel/camel-mapi-folder.c:1115
+#: ../src/camel/camel-mapi-folder.c:1133
 msgid "Fetching items failed"
 msgstr "Obținerea elementelor a eșuat"
 
-#: ../src/camel/camel-mapi-folder.c:1821
+#: ../src/camel/camel-mapi-folder.c:1848
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -194,33 +201,34 @@ msgstr ""
 "Nu s-a putut obține mesajul: %s\n"
 " %s"
 
-#: ../src/camel/camel-mapi-folder.c:1821
+#: ../src/camel/camel-mapi-folder.c:1848
 msgid "No such message"
 msgstr "Nu există un astfel de mesaj"
 
-#: ../src/camel/camel-mapi-folder.c:1833
+#: ../src/camel/camel-mapi-folder.c:1860
 msgid "Message fetching cancelled by user."
 msgstr "Obținerea mesajului a fost anulată de utilizator."
 
-#: ../src/camel/camel-mapi-folder.c:1840
+#: ../src/camel/camel-mapi-folder.c:1867
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Nu s-a putut obține mesajul %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1888 ../src/camel/camel-mapi-folder.c:1897
+#: ../src/camel/camel-mapi-folder.c:1915
+#: ../src/camel/camel-mapi-folder.c:1924
 msgid "Could not get message"
 msgstr "Nu s-a putut obține mesajul"
 
-#: ../src/camel/camel-mapi-folder.c:2183
+#: ../src/camel/camel-mapi-folder.c:2210
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Nu s-a putut adăuga mesajul în dosarul „%s”"
 
-#: ../src/camel/camel-mapi-folder.c:2190
+#: ../src/camel/camel-mapi-folder.c:2217
 msgid "Offline."
 msgstr "Deconectat."
 
-#: ../src/camel/camel-mapi-folder.c:2311
+#: ../src/camel/camel-mapi-folder.c:2337
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nu s-a putut încărca rezumatul pentru %s"
@@ -256,19 +264,15 @@ msgstr "Identifică m_esajele spam doar din dosarul Inbox "
 
 #: ../src/camel/camel-mapi-provider.c:78
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
-msgstr ""
-"Pentru accesarea serverelor Microsoft Exchange / OpenChange folosind MAPI"
+msgstr "Pentru accesarea serverelor Microsoft Exchange / OpenChange folosind MAPI"
 
 #: ../src/camel/camel-mapi-provider.c:93
 msgid "Password"
 msgstr "Parolă"
 
 #: ../src/camel/camel-mapi-provider.c:94
-msgid ""
-"This option will connect to the Openchange server using a plaintext password."
-msgstr ""
-"Această opțiune va face conexiunea la un server Openchange folosind o parolă "
-"în clar."
+msgid "This option will connect to the Openchange server using a plaintext password."
+msgstr "Această opțiune va face conexiunea la un server Openchange folosind o parolă în clar."
 
 #: ../src/camel/camel-mapi-store.c:63
 msgid "Favorites"
@@ -278,14 +282,16 @@ msgstr "Favorite"
 msgid "All Public Folders"
 msgstr "Toate dosarele publice"
 
-#: ../src/camel/camel-mapi-store.c:313 ../src/camel/camel-mapi-transport.c:128
+#: ../src/camel/camel-mapi-store.c:313
+#: ../src/camel/camel-mapi-transport.c:128
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Server Exchange MAPI %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:317 ../src/camel/camel-mapi-transport.c:130
+#: ../src/camel/camel-mapi-store.c:317
+#: ../src/camel/camel-mapi-transport.c:130
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Serviciu Exchange MAPI pentru %s pe %s"
@@ -308,32 +314,33 @@ msgstr "Nu ați introdus o parolă."
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Nu s-a putut autentifica la serverul Exchange MAPI."
 
-#: ../src/camel/camel-mapi-store.c:543
+#: ../src/camel/camel-mapi-store.c:552
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "Nu se pot crea dosare MAPI în modul deconectat."
 
-#: ../src/camel/camel-mapi-store.c:548
+#: ../src/camel/camel-mapi-store.c:557
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "Nu s-a putut crea dosarul nou „%s”"
 
-#: ../src/camel/camel-mapi-store.c:683
+#: ../src/camel/camel-mapi-store.c:692
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "Nu se poate redenumi dosarul MAPI „%s”. Dosarul nu există."
 
-#: ../src/camel/camel-mapi-store.c:694
+#: ../src/camel/camel-mapi-store.c:703
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "Nu se poate redenumi dosarul implicit MAPI „%s” la „%s”."
 
-#: ../src/camel/camel-mapi-store.c:718 ../src/camel/camel-mapi-store.c:733
-#: ../src/camel/camel-mapi-store.c:782
+#: ../src/camel/camel-mapi-store.c:727
+#: ../src/camel/camel-mapi-store.c:742
+#: ../src/camel/camel-mapi-store.c:791
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "Nu se poate redenumi dosarul MAPI „%s” la „%s”"
 
-#: ../src/camel/camel-mapi-store.c:1358
+#: ../src/camel/camel-mapi-store.c:1367
 msgid "Folder list not available in offline mode."
 msgstr "Lista de dosare nu este disponibilă în modul deconectat."
 
@@ -344,9 +351,8 @@ msgstr "Nu s-a putut trimite mesajul."
 
 #~ msgid "Global Address List / Active Directory"
 #~ msgstr "Agendă globală / Active Directory"
-
 #~ msgid "_Global Catalog server name:"
 #~ msgstr "Nume server catalog _global:"
-
 #~ msgid "_Limit number of GAL responses: %s"
 #~ msgstr "_Limitează numărul de răspunsuri GAL: %s"
+
