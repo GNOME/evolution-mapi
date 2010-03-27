@@ -8,10 +8,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: evolution-mapi master\n"
+"Project-Id-Version: evolution-mapi 2.30\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2009-09-14 15:03+0000\n"
+"POT-Creation-Date: 2010-03-17 15:22+0000\n"
 "PO-Revision-Date: 2009-09-01 13:18+0300\n"
 "Last-Translator: Ivar Smolin <okul@linux.ee>\n"
 "Language-Team: Estonian <et@li.org>\n"
@@ -92,6 +92,20 @@ msgstr "Exchange sätted"
 msgid "Folder size"
 msgstr "Kausta suurus"
 
+#. To translators : This is used to cache the downloaded contacts from GAL.
+#. First %d : Number of contacts cached till now.
+#. Second %d : Total number of contacts which need to be cached.
+#. So (%d/%d) displays the progress.
+#. Example: Caching the GAL entries (1200/50000)...
+#.
+#, c-format
+msgid "Caching the GAL entries (%d/%d)... "
+msgstr ""
+
+#. To translators : Here Evolution MAPI downloads the entries from the GAL server
+msgid "Downloading GAL entries from server..."
+msgstr ""
+
 msgid "Authentication failed"
 msgstr "Tõrge autentimisel"
 
@@ -127,12 +141,14 @@ msgstr ""
 msgid "Removing deleted messages from cache in %s"
 msgstr "Kaustast %s kustutatud sõnumite andmete eemaldamine puhvrist"
 
+#. TODO : Check for online state
+#, fuzzy
+#| msgid "Fetching summary information for new messages in %s"
+msgid "Fetching summary information for new messages in"
+msgstr "Kaustas %s olevate uute sõnumite kohta andmete hankimine"
+
 msgid "This message is not available in offline mode."
 msgstr "See sõnum pole võrguvabas režiimis saadaval."
-
-#, c-format
-msgid "Fetching summary information for new messages in %s"
-msgstr "Kaustas %s olevate uute sõnumite kohta andmete hankimine"
 
 msgid "Fetching items failed"
 msgstr "Tõrge kirjete hankimisel"
