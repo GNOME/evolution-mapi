@@ -1,0 +1,359 @@
+# Latvian translation for evolution-mapi.
+# Copyright (C) 2010 evolution-mapi's COPYRIGHT HOLDER
+# This file is distributed under the same license as the evolution-mapi package.
+#
+# Peteris Krisjanis <pecisk@gmail.com>, 2010.
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-mapi master\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug."
+"cgi?product=evolution-mapi\n"
+"POT-Creation-Date: 2010-03-08 09:21+0000\n"
+"PO-Revision-Date: 2010-03-28 21:24+0300\n"
+"Last-Translator: Peteris Krisjanis <pecisk@gmail.com>\n"
+"Language-Team: Latviešu <lata-l10n@googlegroups.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);\n"
+"X-Generator: Lokalize 1.0\n"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:624
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:226
+#, c-format
+msgid "Enter Password for %s@%s"
+msgstr "Ievadiet %s@%s paroli"
+
+#. NOTE: A good way would be display the list of username entries
+#. using GtkEntryCompletion in the username gtkentry. But plugins
+#. as of now does not have access to it
+#. TODO : Fix strings
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+msgid "Select username"
+msgstr "Izvēlieties lietotājvārdu"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:145
+msgid "Full name"
+msgstr "Pilnais vārds"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:150
+msgid "User name"
+msgstr "Lietotāja vārds"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:215
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"Serveris, lietotājvārds un domēna nosaukums nedrīkst būt tukšs. Lūdzu, "
+"aizpildiet "
+"tos ar korektām vērtībām."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:253
+msgid "Authentication finished successfully."
+msgstr "Autentifikācija pabeigta veiksmīgi."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:259
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:269
+msgid "Authentication failed."
+msgstr "Autentifikācija neizdevās."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:324
+msgid "_Domain name:"
+msgstr "_Domēna nosaukums:"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:334
+msgid "_Authenticate"
+msgstr "_Autentificēt"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:436
+msgid "Personal Folders"
+msgstr "Personiskās mapes"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:498
+msgid "_Location:"
+msgstr "_Atrašanās vieta:"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:101
+msgid "Folder"
+msgstr "Mape"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:106
+msgid "Size"
+msgstr "Izmērs"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:126
+msgid "Unable to retrieve folder size information"
+msgstr "Neizdevās iegūt informāciju par mapes izmēru"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:147
+msgid "Folder Size"
+msgstr "Mapes izmērs"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:156
+msgid "Fetching folder list ..."
+msgstr "Iegūst mapju sarakstu ..."
+
+#. Miscellaneous settings
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:270
+msgid "Miscellaneous"
+msgstr "Dažādi"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:283
+msgid "View the size of all Exchange folders"
+msgstr "Rādīt visu Exchange mapju izmērus"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:285
+msgid "Folders Size"
+msgstr "Mapju izmēri"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:296
+#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
+msgid "Exchange Settings"
+msgstr "Exchange iestatījumi"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:305
+msgid "Folder size"
+msgstr "Mapes izmērs"
+
+#. To translators : This is used to cache the downloaded contacts from GAL.
+#. First %d : Number of contacts cached till now.
+#. Second %d : Total number of contacts which need to be cached.
+#. So (%d/%d) displays the progress.
+#. Example: Caching the GAL entries (1200/50000)...
+#.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:223
+#, c-format
+msgid "Caching the GAL entries (%d/%d)... "
+msgstr "Atceras GAL ierakstus (%d/%d)... "
+
+#. To translators : Here Evolution MAPI downloads the entries from the GAL server
+#: ../src/addressbook/e-book-backend-mapi-gal.c:795
+msgid "Downloading GAL entries from server..."
+msgstr "Lejupielādē GAL ierakstus no servera..."
+
+#: ../src/calendar/e-cal-backend-mapi.c:116
+#: ../src/calendar/e-cal-backend-mapi.c:1143
+#: ../src/camel/camel-mapi-store.c:568
+msgid "Authentication failed"
+msgstr "Autentifikācija neizdevās"
+
+#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
+#: ../src/calendar/e-cal-backend-mapi.c:392
+#, c-format
+msgid "Loading items in folder %s"
+msgstr "Ielādē mapes %s vienības"
+
+#. FIXME: String : We need to restart evolution-data-server
+#: ../src/calendar/e-cal-backend-mapi.c:624
+#: ../src/calendar/e-cal-backend-mapi.c:635
+#: ../src/calendar/e-cal-backend-mapi.c:663
+#: ../src/calendar/e-cal-backend-mapi.c:725
+#: ../src/calendar/e-cal-backend-mapi.c:735
+msgid "Error fetching changes from the server."
+msgstr "Kļūda iegūstot izmaiņas no servera."
+
+#: ../src/calendar/e-cal-backend-mapi.c:1063
+#: ../src/calendar/e-cal-backend-mapi.c:1073
+#: ../src/calendar/e-cal-backend-mapi.c:1178
+#: ../src/calendar/e-cal-backend-mapi.c:1260
+msgid "Could not create cache file"
+msgstr "Neizdevās izveidot keša failu"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1189
+msgid "Could not create thread for populating cache"
+msgstr "Neizdevās izveidot pavedienu keša veidošanai"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1610
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+msgstr ""
+"Atkārtojošās tikšanās atsevišķu instanču mainīšanas atbalsts nav vēl "
+"pilnībā ieviests. "
+
+#: ../src/camel/camel-mapi-folder.c:493
+#, c-format
+msgid "Updating local summary cache for new messages in %s"
+msgstr "Atjaunina lokālo kopsavilkuma kešu %s jaunajām vēstulēm"
+
+#: ../src/camel/camel-mapi-folder.c:725
+#, c-format
+msgid "Retrieving message IDs from server for %s"
+msgstr "Iegūst vēstuļu ID no %s servera"
+
+#: ../src/camel/camel-mapi-folder.c:747
+#, c-format
+msgid "Removing deleted messages from cache in %s"
+msgstr "Izņem dzēstās vēstules no %s keša"
+
+#. TODO : Check for online state
+#: ../src/camel/camel-mapi-folder.c:1018
+msgid "Fetching summary information for new messages in"
+msgstr "Iegūst jauno vēstuļu kopsavilkuma informāciju"
+
+#: ../src/camel/camel-mapi-folder.c:1120 ../src/camel/camel-mapi-folder.c:1884
+#: ../src/camel/camel-mapi-folder.c:1892
+msgid "This message is not available in offline mode."
+msgstr "Šī vēstule nav pieejama nesaistes režīmā."
+
+#: ../src/camel/camel-mapi-folder.c:1133
+msgid "Fetching items failed"
+msgstr "Vienību iegūšana neizdevās"
+
+#: ../src/camel/camel-mapi-folder.c:1848
+#, c-format
+msgid ""
+"Cannot get message: %s\n"
+"  %s"
+msgstr ""
+"Neizdodas iegūt vēstuli: %s\n"
+"  %s"
+
+#: ../src/camel/camel-mapi-folder.c:1848
+msgid "No such message"
+msgstr "Nav tādas vēstules"
+
+#: ../src/camel/camel-mapi-folder.c:1860
+msgid "Message fetching cancelled by user."
+msgstr "Vēstuļu iegūšanu atsauca lietotājs."
+
+#: ../src/camel/camel-mapi-folder.c:1867
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "Neizdodas iegūt vēstuli %s: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1915 ../src/camel/camel-mapi-folder.c:1924
+msgid "Could not get message"
+msgstr "Neizdevās iegūt vēstuli"
+
+#: ../src/camel/camel-mapi-folder.c:2210
+#, c-format
+msgid "Cannot append message to folder '%s'"
+msgstr "Neizdodas ievietot vēstuli mapē '%s'"
+
+#: ../src/camel/camel-mapi-folder.c:2217
+msgid "Offline."
+msgstr "Nesaiste."
+
+#: ../src/camel/camel-mapi-folder.c:2337
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "Neizdevās ielādēt kopsavilkumu %s"
+
+#: ../src/camel/camel-mapi-provider.c:51
+msgid "Checking for new mail"
+msgstr "Pārbaudīt jauno pastu"
+
+#: ../src/camel/camel-mapi-provider.c:53
+msgid "C_heck for new messages in all folders"
+msgstr "Visās mapēs pārbaudīt, vai nav jaunu vēstuļu"
+
+#: ../src/camel/camel-mapi-provider.c:57
+msgid "Options"
+msgstr "Opcijas"
+
+#: ../src/camel/camel-mapi-provider.c:59
+msgid "Automatically synchroni_ze account locally"
+msgstr "Automātiski sinhroni_zē kontu lokāli"
+
+#. i18n: copy from evolution:camel-imap-provider.c
+#: ../src/camel/camel-mapi-provider.c:62
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "_Attiecināt filtrus uz jaunajām vēstulēm iesūtnē šajā serverī"
+
+#: ../src/camel/camel-mapi-provider.c:64
+msgid "Check new messages for _Junk contents"
+msgstr "Pārbaudīt, vai jaunās vēstules nav _mēstules"
+
+#: ../src/camel/camel-mapi-provider.c:66
+msgid "Only check for Junk messag_es in the Inbox folder"
+msgstr "Pārbaudīt mēstul_es tikai iesūtnes mapē"
+
+#: ../src/camel/camel-mapi-provider.c:78
+msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+msgstr "Piekļuvei Microsoft Exchange / OpenChange serveriem izmantojot MAPI"
+
+#: ../src/camel/camel-mapi-provider.c:93
+msgid "Password"
+msgstr "Parole"
+
+#: ../src/camel/camel-mapi-provider.c:94
+msgid ""
+"This option will connect to the Openchange server using a plaintext password."
+msgstr ""
+"Šī opcija savienos ar Openchange serveri izmantojot vienkārša teksta paroli."
+
+#: ../src/camel/camel-mapi-store.c:63
+msgid "Favorites"
+msgstr "Izlase"
+
+#: ../src/camel/camel-mapi-store.c:64
+msgid "All Public Folders"
+msgstr "Visas publiskās mapes"
+
+#: ../src/camel/camel-mapi-store.c:313 ../src/camel/camel-mapi-transport.c:128
+#, c-format
+msgid "Exchange MAPI server %s"
+msgstr "Exchange MAPI serveris %s"
+
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#: ../src/camel/camel-mapi-store.c:317 ../src/camel/camel-mapi-transport.c:130
+#, c-format
+msgid "Exchange MAPI service for %s on %s"
+msgstr "%s Exchange MAPI serviss %s"
+
+#. To translators : First %s : is the error text or the reason
+#. for prompting the user if it is available.
+#. Second %s is : Username.
+#. Third %s is : Server host name.
+#: ../src/camel/camel-mapi-store.c:355
+#, c-format
+msgid "%s Please enter the MAPI password for %s@%s"
+msgstr "%s Lūdzu, ievadiet %s@%s MAPI paroli"
+
+#: ../src/camel/camel-mapi-store.c:368
+msgid "You did not enter a password."
+msgstr "Jūs neievadījāt paroli."
+
+#: ../src/camel/camel-mapi-store.c:376
+#, c-format
+msgid "Unable to authenticate to Exchange MAPI server."
+msgstr "Neizdevās autentificēties Exchenge MAPI serverī."
+
+#: ../src/camel/camel-mapi-store.c:552
+msgid "Cannot create MAPI folders in offline mode."
+msgstr "Neizdodas izveidot MAPI mapes nesaistes režīmā."
+
+#: ../src/camel/camel-mapi-store.c:557
+#, c-format
+msgid "Cannot create new folder `%s'"
+msgstr "Neizdodas izveidot jaunu mapi '%s'."
+
+#: ../src/camel/camel-mapi-store.c:692
+#, c-format
+msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
+msgstr "Neizdodas pārsaukt MAPI mapi '%s'. Mape neeksistē."
+
+#: ../src/camel/camel-mapi-store.c:703
+#, c-format
+msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgstr "Neizdodas pārsaukt MAPI noklusēto mapi '%s' uz '%s'."
+
+#: ../src/camel/camel-mapi-store.c:727 ../src/camel/camel-mapi-store.c:742
+#: ../src/camel/camel-mapi-store.c:791
+#, c-format
+msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgstr "Neizdodas pārsaukt MAPI mapi '%s' uz '%s'"
+
+#: ../src/camel/camel-mapi-store.c:1367
+msgid "Folder list not available in offline mode."
+msgstr "Mapju saraksts nav pieejams nesaistes režīmā."
+
+#. Fixme : Set a better error message. Would be helful in troubleshooting.
+#: ../src/camel/camel-mapi-transport.c:116
+msgid "Could not send message."
+msgstr "Neizdevās nosūtīt vēstuli."
+
+
