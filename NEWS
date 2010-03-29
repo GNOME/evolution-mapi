@@ -1,3 +1,24 @@
+evolution-mapi 0.30.0 2010-03-29
+--------------------------------
+Bug Fixes:
+	Bug #581434 - Double free or corruption in evolution-mapi calendar (Milan Crha)
+
+Translations :
+	A S Alam (pa)
+	Adi Roiban (ro)
+	Changwoo Ryu (ko)
+	David Planella (ca)
+	Ivar Smolin (et)
+	Jamil Ahmed (bn)
+	Kenneth Nielsen (da)
+	Maxim V. Dziumanenko (uk)
+	Milo Casagrande (it)
+	Miloš Popović (sr)
+	Nikos Bakaoukas (el)
+	Peteris Krisjanis (lv)
+	Petr Kovar (cs)
+	Žygimantas Beručka (lt)
+
 evolution-mapi 0.29.92 2010-03-08
 --------------------------------
 Bug Fixes:
