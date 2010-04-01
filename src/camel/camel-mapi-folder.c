@@ -1590,7 +1590,15 @@ mapi_mime_msg_body (MapiItem *item, const ExchangeMAPIStream *body)
 				"text/plain" : "text/html";
 
 		if (item->header.cpid) {
-			if (item->header.cpid == 65001)
+			if (item->header.cpid >= 28591 && item->header.cpid <= 28599)
+				buff = g_strdup_printf ("%s; charset=\"ISO-8859-%d\"", type, item->header.cpid % 10);
+			else if (item->header.cpid == 28603)
+				buff = g_strdup_printf ("%s; charset=\"ISO-8859-13\"", type);
+			else if (item->header.cpid == 28605)
+				buff = g_strdup_printf ("%s; charset=\"ISO-8859-15\"", type);
+			else if (item->header.cpid == 65000)
+				buff = g_strdup_printf ("%s; charset=\"UTF-7\"", type);
+			else if (item->header.cpid == 65001)
 				buff = g_strdup_printf ("%s; charset=\"UTF-8\"", type);
 			else
 				buff = g_strdup_printf ("%s; charset=\"CP%d\"", type, item->header.cpid);
