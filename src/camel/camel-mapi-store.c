@@ -30,6 +30,7 @@
 #include <ctype.h>
 #include <errno.h>
 
+#include <glib/gi18n.h>
 #include <glib/gstdio.h>
 
 #include <camel/camel-sasl.h>
@@ -44,7 +45,6 @@
 #include <camel/camel-session.h>
 #include <camel/camel-service.h>
 #include <camel/camel-store-summary.h>
-#include <camel/camel-i18n.h>
 #include <camel/camel-net-utils.h>
 
 #include "camel-mapi-store.h"

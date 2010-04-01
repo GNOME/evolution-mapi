@@ -28,6 +28,8 @@
 #include <ctype.h>
 #include <errno.h>
 
+#include <glib/gi18n.h>
+
 #include <libmapi/libmapi.h>
 #include <gen_ndr/exchange.h>
 
@@ -41,7 +43,6 @@
 #include <camel/camel-stream-mem.h>
 
 #include <camel/camel-private.h>
-#include <camel/camel-i18n.h>
 #include <camel/camel-net-utils.h>
 #include <camel/camel-seekable-stream.h>
 #include <camel/camel-sasl.h>

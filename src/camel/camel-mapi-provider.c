@@ -27,6 +27,7 @@
 
 #include <sys/types.h>
 #include <string.h>
+#include <glib/gi18n.h>
 
 #include <gmodule.h>
 
@@ -34,7 +35,6 @@
 #include <camel/camel-session.h>
 #include <camel/camel-url.h>
 #include <camel/camel-sasl.h>
-#include <camel/camel-i18n.h>
 
 #include "camel-mapi-store.h"
 #include "camel-mapi-transport.h"

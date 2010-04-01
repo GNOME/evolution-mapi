@@ -27,6 +27,8 @@
 
 #include <string.h>
 
+#include <glib/gi18n.h>
+
 #include <libmapi/libmapi.h>
 #include <gen_ndr/exchange.h>
 
@@ -57,7 +59,6 @@
 
 
 #include <camel/camel-private.h>
-#include <camel/camel-i18n.h>
 #include <camel/camel-net-utils.h>
 #include "camel-mapi-store.h"
 #include "camel-mapi-folder.h"

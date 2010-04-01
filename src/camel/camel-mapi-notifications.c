@@ -31,11 +31,11 @@
 #include <errno.h>
 
 #include <glib.h>
+#include <glib/gi18n.h>
 #include <glib/gstdio.h>
 #include <gio/gio.h>
 
 #include <camel/camel-private.h>
-#include <camel/camel-i18n.h>
 #include <camel/camel-net-utils.h>
 #include <camel/camel-debug.h>
 

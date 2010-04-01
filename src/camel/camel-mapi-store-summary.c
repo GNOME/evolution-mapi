@@ -33,7 +33,6 @@
 #include <glib.h>
 
 #include <libedataserver/e-memory.h>
-#include <libedataserver/md5-utils.h>
 
 #include <camel/camel-file-utils.h>
 #include <camel/camel-utf8.h>

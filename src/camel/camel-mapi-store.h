@@ -24,11 +24,12 @@
 #ifndef __CAMEL_MAPI_STORE_H__
 #define __CAMEL_MAPI_STORE_H__
 
+#include <glib/gi18n.h>
+
 #include <camel/camel-store.h>
 #include <camel/camel-offline-store.h>
 #include <camel-mapi-store-summary.h>
 #include <camel/camel-net-utils.h>
-#include <camel/camel-i18n.h>
 
 #include <exchange-mapi-folder.h>
 
