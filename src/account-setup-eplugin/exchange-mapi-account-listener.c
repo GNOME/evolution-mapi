@@ -29,13 +29,13 @@
 #include "exchange-mapi-account-setup.h"
 #include <string.h>
 #include <glib/gi18n.h>
+#include <camel/camel.h>
 #include <libedataserverui/e-passwords.h>
 #include <libedataserver/e-account.h>
 #include <libecal/e-cal.h>
 #include <libedataserver/e-account-list.h>
 #include <libedataserver/e-source.h>
 #include <libedataserver/e-source-list.h>
-#include <camel/camel-url.h>
 
 #include <libmapi/libmapi.h>
 

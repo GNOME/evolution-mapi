@@ -25,11 +25,7 @@
 #define __MAPI_FOLDER_H__
 
 
-#include <camel/camel-folder.h>
-#include <camel/camel-offline-folder.h>
-#include <camel/camel-data-cache.h>
-#include <camel/camel-offline-folder.h>
-#include <camel/camel-offline-journal.h>
+#include <camel/camel.h>
 #include <libmapi/libmapi.h>
 #include <exchange-mapi-connection.h>
 

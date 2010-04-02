@@ -24,8 +24,8 @@
 #ifndef CAMEL_MAPI_TRANSPORT_H
 #define CAMEL_MAPI_TRANSPORT_H 1
 
+#include <camel/camel.h>
 #include <libmapi/libmapi.h>
-#include <camel/camel-transport.h>
 #include <exchange-mapi-connection.h>
 
 #define CAMEL_MAPI_TRANSPORT_TYPE     (camel_mapi_transport_get_type ())

@@ -24,8 +24,7 @@
 #ifndef _CAMEL_MAPI_STORE_SUMMARY_H
 #define _CAMEL_MAPI_STORE_SUMMARY_H
 
-#include <camel/camel-object.h>
-#include <camel/camel-store-summary.h>
+#include <camel/camel.h>
 
 #define CAMEL_MAPI_STORE_SUMMARY_VERSION (0)
 

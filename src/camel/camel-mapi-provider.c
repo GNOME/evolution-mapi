@@ -31,11 +31,6 @@
 
 #include <gmodule.h>
 
-#include <camel/camel-provider.h>
-#include <camel/camel-session.h>
-#include <camel/camel-url.h>
-#include <camel/camel-sasl.h>
-
 #include "camel-mapi-store.h"
 #include "camel-mapi-transport.h"
 

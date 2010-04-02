@@ -30,10 +30,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <camel/camel-db.h>
-#include <camel/camel-data-cache.h>
-#include <camel/camel-file-utils.h>
-#include <camel/camel-folder.h>
 
 #include "camel-mapi-folder.h"
 #include "camel-mapi-summary.h"

@@ -31,27 +31,16 @@
 
 #include <glib.h>
 
-#include <camel/camel-folder-search.h>
-#include <camel/camel-mime-part.h>
-#include <camel/camel-mime-utils.h>
-#include <camel/camel-string-utils.h>
-#include <camel/camel-object.h>
-#include <camel/camel-mime-message.h>
-#include <camel/camel-data-wrapper.h>
-#include <camel/camel-multipart.h>
-#include <camel/camel-private.h>
-#include <camel/camel-session.h>
-#include <camel/camel-stream-buffer.h>
-#include <camel/camel-stream-mem.h>
-#include <camel/camel-debug.h>
-
 #include <libmapi/libmapi.h>
 #include <exchange-mapi-defs.h>
 #include <exchange-mapi-utils.h>
 #include <exchange-mapi-folder.h>
 #include <exchange-mapi-cal-utils.h>
 
+#include <camel/camel-private.h>
+
 #include "camel-mapi-store.h"
+#include "camel-mapi-store-summary.h"
 #include "camel-mapi-folder.h"
 #include "camel-mapi-private.h"
 #include "camel-mapi-summary.h"

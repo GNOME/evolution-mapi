@@ -28,10 +28,6 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
-#include <camel/camel-provider.h>
-#include <camel/camel-url.h>
-#include <camel/camel-service.h>
-#include <camel/camel-folder.h>
 #include <libedataserver/e-xml-hash-utils.h>
 #include <libedataserverui/e-passwords.h>
 #include <libedataserver/e-account.h>

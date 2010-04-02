@@ -24,9 +24,7 @@
 #ifndef _CAMEL_MAPI_SUMMARY_H
 #define _CAMEL_MAPI_SUMMARY_H
 
-#include <camel/camel-folder-summary.h>
-#include <camel/camel-exception.h>
-#include <camel/camel-store.h>
+#include <camel/camel.h>
 
 #define CAMEL_MAPI_SUMMARY(obj)         CAMEL_CHECK_CAST (obj, camel_mapi_summary_get_type (), CamelMapiSummary)
 #define CAMEL_MAPI_SUMMARY_CLASS(klass) CAMEL_CHECK_CLASS_CAST (klass, camel_mapi_summary_get_type (), CamelMapiSummaryClass)

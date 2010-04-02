@@ -33,19 +33,7 @@
 #include <glib/gi18n.h>
 #include <glib/gstdio.h>
 
-#include <camel/camel-sasl.h>
-#include <camel/camel-utf8.h>
-#include <camel/camel-tcp-stream-raw.h>
-
-#ifdef HAVE_SSL
-#include <camel/camel-tcp-stream-ssl.h>
-#endif
-
 #include <camel/camel-private.h>
-#include <camel/camel-session.h>
-#include <camel/camel-service.h>
-#include <camel/camel-store-summary.h>
-#include <camel/camel-net-utils.h>
 
 #include "camel-mapi-store.h"
 #include "camel-mapi-folder.h"

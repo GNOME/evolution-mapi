@@ -32,16 +32,6 @@
 #include <libmapi/libmapi.h>
 #include <gen_ndr/exchange.h>
 
-#include <camel/camel-data-wrapper.h>
-#include <camel/camel-exception.h>
-#include <camel/camel-mime-filter-crlf.h>
-#include <camel/camel-mime-message.h>
-#include <camel/camel-multipart.h>
-#include <camel/camel-session.h>
-#include <camel/camel-stream-filter.h>
-#include <camel/camel-stream-mem.h>
-
-
 #include "camel-mapi-transport.h"
 
 #include <stdio.h>
@@ -49,26 +39,12 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include <camel/camel-sasl.h>
-#include <camel/camel-utf8.h>
-#include <camel/camel-tcp-stream-raw.h>
-
-#ifdef HAVE_SSL
-#include <camel/camel-tcp-stream-ssl.h>
-#endif
-
-
-#include <camel/camel-private.h>
-#include <camel/camel-net-utils.h>
 #include "camel-mapi-store.h"
 #include "camel-mapi-folder.h"
 #include "camel-mapi-store-summary.h"
 #include "camel-mapi-utils.h"
-#include <camel/camel-session.h>
-#include <camel/camel-store-summary.h>
 #define d(x) x
 
-#include <camel/camel-seekable-stream.h>
 #include <exchange-mapi-defs.h>
 
 #define STREAM_SIZE 4000

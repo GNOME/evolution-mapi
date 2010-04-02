@@ -32,12 +32,9 @@
 #include <unistd.h>
 #include <glib.h>
 
+#include <camel/camel-private.h>
 #include <libedataserver/e-memory.h>
 
-#include <camel/camel-file-utils.h>
-#include <camel/camel-utf8.h>
-
-#include "camel-private.h"
 #include "camel-mapi-store.h"
 #include "camel-mapi-store-summary.h"
 
