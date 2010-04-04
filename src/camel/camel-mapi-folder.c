@@ -1685,8 +1685,8 @@ mapi_mime_build_multipart_alternative (MapiItem *item, GSList *body_parts, GSLis
 			CamelMultipart *m_related;
 			m_related = mapi_mime_build_multipart_related (item, stream,
 								       inline_attachs);
-			camel_medium_set_content_object (CAMEL_MEDIUM (part),
-							 CAMEL_DATA_WRAPPER (m_related));
+			camel_medium_set_content (CAMEL_MEDIUM (part),
+						  CAMEL_DATA_WRAPPER (m_related));
 			camel_object_unref (m_related);
 		} else
 			part = mapi_mime_msg_body (item, stream);
@@ -1707,7 +1707,7 @@ mapi_mime_build_multipart_mixed (CamelMultipart *content, GSList *attachs)
 					  "multipart/mixed");
 	camel_multipart_set_boundary (m_mixed, NULL);
 
-	camel_medium_set_content_object (CAMEL_MEDIUM (part), CAMEL_DATA_WRAPPER (content));
+	camel_medium_set_content (CAMEL_MEDIUM (part), CAMEL_DATA_WRAPPER (content));
 	camel_multipart_add_part (m_mixed, part);
 
 	if (attachs)
@@ -1817,7 +1817,7 @@ mapi_folder_item_to_msg( CamelFolder *folder, MapiItem *item, CamelException *ex
 								  noninline_attachs);
 	}
 
-	camel_medium_set_content_object(CAMEL_MEDIUM (msg), CAMEL_DATA_WRAPPER(multipart_body));
+	camel_medium_set_content (CAMEL_MEDIUM (msg), CAMEL_DATA_WRAPPER(multipart_body));
 	camel_object_unref (multipart_body);
 
 	return msg;
@@ -2343,7 +2343,7 @@ camel_mapi_folder_new (CamelStore *store, const char *folder_name, const char *f
 	camel_object_state_read(folder);
 
 	state_file = g_strdup_printf ("%s/%s", folder_dir, folder_name);
-	mapi_folder->cache = camel_data_cache_new (state_file, 0, ex);
+	mapi_folder->cache = camel_data_cache_new (state_file, ex);
 	g_free (state_file);
 	if (!mapi_folder->cache) {
 		camel_object_unref (folder);

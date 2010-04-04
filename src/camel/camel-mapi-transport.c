@@ -78,7 +78,7 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 	const char *addressp;
 	mapi_id_t st = 0;
 
-	if (!camel_internet_address_get((const CamelInternetAddress *)from, 0, &namep, &addressp)) {
+	if (!camel_internet_address_get((CamelInternetAddress *)from, 0, &namep, &addressp)) {
 		return (FALSE);
 	}
 

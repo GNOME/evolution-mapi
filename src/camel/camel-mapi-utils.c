@@ -266,7 +266,7 @@ mapi_do_multipart (CamelMultipart *mp, MapiItem *item, gboolean *is_first)
 	for (i_part = 0; i_part < n_part; i_part++) {
 		/* getting part */
 		part = camel_multipart_get_part(mp, i_part);
-		dw = camel_medium_get_content_object (CAMEL_MEDIUM (part));
+		dw = camel_medium_get_content (CAMEL_MEDIUM (part));
 		if (CAMEL_IS_MULTIPART(dw)) {
 			/* recursive */
 			if (!mapi_do_multipart (CAMEL_MULTIPART (dw), item, is_first))
@@ -307,7 +307,7 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 	CamelContentType *type;
 	CamelStream *content_stream;
 	CamelMultipart *multipart;
-	const CamelInternetAddress *to, *cc, *bcc;
+	CamelInternetAddress *to, *cc, *bcc;
 	MapiItem *item = g_new0 (MapiItem, 1);
 	const char *namep;
 	const char *addressp;
@@ -320,7 +320,7 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 	/* headers */
 
 	if (from) {
-		if (!camel_internet_address_get ((const CamelInternetAddress *)from, 0, &namep, &addressp)) {
+		if (!camel_internet_address_get ((CamelInternetAddress *)from, 0, &namep, &addressp)) {
 			g_warning ("%s: Invalid 'from' passed in", G_STRFUNC);
 			g_free (item);
 			return NULL;
@@ -357,14 +357,14 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 	item->header.message_id = g_strdup (camel_medium_get_header ((CamelMedium *) message, "Message-ID"));
 
 	/* contents body */
-	multipart = (CamelMultipart *)camel_medium_get_content_object (CAMEL_MEDIUM (message));
+	multipart = (CamelMultipart *)camel_medium_get_content (CAMEL_MEDIUM (message));
 
 	if (CAMEL_IS_MULTIPART(multipart)) {
 		gboolean is_first = TRUE;
 		if (!mapi_do_multipart (CAMEL_MULTIPART(multipart), item, &is_first))
 			printf("camel message multi part error\n"); 
 	} else {
-		dw = camel_medium_get_content_object (CAMEL_MEDIUM (message));
+		dw = camel_medium_get_content (CAMEL_MEDIUM (message));
 		if (dw) {
 			type = camel_mime_part_get_content_type((CamelMimePart *)message);
 			content_type = camel_content_type_simple (type);
