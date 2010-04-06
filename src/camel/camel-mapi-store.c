@@ -298,6 +298,7 @@ static char
 *mapi_get_name(CamelService *service, gboolean brief)
 {
 	if (brief) {
+		/* Translators: The %s is replaced with a server's host name */
 		return g_strdup_printf(_("Exchange MAPI server %s"), service->url->host);
 	} else {
 		/*To translators : Example string : Exchange MAPI service for 

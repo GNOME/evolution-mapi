@@ -1841,8 +1841,10 @@ mapi_folder_get_message( CamelFolder *folder, const char *uid, CamelException *e
 
 	mi = (CamelMapiMessageInfo *) camel_folder_summary_uid (folder->summary, uid);
 	if (mi == NULL) {
+		/* Translators: The first %s is replaced with a message ID,
+		   the second %s is replaced with a detailed error string */
 		camel_exception_setv(ex, CAMEL_EXCEPTION_FOLDER_INVALID_UID,
-				_("Cannot get message: %s\n  %s"), uid, _("No such message"));
+				_("Cannot get message %s: %s"), uid, _("No such message"));
 		return NULL;
 	}
 	cache_stream  = camel_data_cache_get (mapi_folder->cache, "cache", uid, ex);
@@ -1861,6 +1863,8 @@ mapi_folder_get_message( CamelFolder *folder, const char *uid, CamelException *e
 				camel_message_info_free (&mi->info);
 				return NULL;
 			} else {
+				/* Translators: The first %s is replaced with a message ID,
+				   the second %s is replaced with a detailed error string */
 				camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot get message %s: %s"),
 						uid, g_strerror (errno));
 				camel_object_unref (msg);

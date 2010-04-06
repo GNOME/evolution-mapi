@@ -102,8 +102,10 @@ static char*
 mapi_transport_get_name(CamelService *service, gboolean brief)
 {
 	if (brief) {
+		/* Translators: The %s is replaced with a server's host name */
 		return g_strdup_printf (_("Exchange MAPI server %s"), service->url->host);
 	} else {
+		/* Translators: The first %s is replaced with a user name, the second with a server's host name */
 		return g_strdup_printf (_("Exchange MAPI service for %s on %s"),
 					service->url->user, service->url->host);
 	}
