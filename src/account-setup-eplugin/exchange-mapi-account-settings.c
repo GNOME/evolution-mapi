@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -93,25 +93,25 @@ mapi_settings_get_folder_size (gpointer data)
 		/*Tree View */
 		view =  gtk_tree_view_new ();
 		renderer = gtk_cell_renderer_text_new ();
-		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),-1, 
+		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),-1,
 							     _("Folder"), renderer, "text", COL_FOLDERSIZE_NAME,
 							     NULL);
-		
+
 		renderer = gtk_cell_renderer_text_new ();
-		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),-1, 
+		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),-1,
 							     _("Size"), renderer, "text", COL_FOLDERSIZE_SIZE,
 							     NULL);
 		/* Model for TreeView */
 		store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
 		gtk_tree_view_set_model (GTK_TREE_VIEW (view), GTK_TREE_MODEL (store));
-		
+
 		/* Populate model with data */
 		while (folder_list) {
 			ExchangeMAPIFolder *folder = (ExchangeMAPIFolder *) folder_list->data;
 			gchar *folder_size = g_format_size_for_display (folder->size);
-			
+
 			gtk_list_store_append (store, &iter);
-			gtk_list_store_set (store, &iter, 
+			gtk_list_store_set (store, &iter,
 					    COL_FOLDERSIZE_NAME, folder->folder_name,
 					    COL_FOLDERSIZE_SIZE, folder_size,
 					    -1);
@@ -126,7 +126,7 @@ mapi_settings_get_folder_size (gpointer data)
 
 	/* Pack into content_area */
 	content_area = (GtkBox*) gtk_dialog_get_content_area (dialog_data->dialog);
-	gtk_box_pack_start (content_area, view, TRUE, TRUE, 6);	
+	gtk_box_pack_start (content_area, view, TRUE, TRUE, 6);
 
 	return FALSE;
 }
@@ -140,7 +140,7 @@ mapi_settings_run_folder_size_dialog (gpointer data)
 
 	dialog_data = g_new0 (FolderSizeDialogData, 1);
 
-	dialog_data->dialog = (GtkDialog *)gtk_dialog_new_with_buttons (_("Folder Size"), NULL, 
+	dialog_data->dialog = (GtkDialog *)gtk_dialog_new_with_buttons (_("Folder Size"), NULL,
 							   GTK_DIALOG_DESTROY_WITH_PARENT,
 							   GTK_STOCK_CLOSE, GTK_RESPONSE_ACCEPT,
 							   NULL);
@@ -220,14 +220,14 @@ folder_size_actions_update_cb (EShellView *shell_view, GtkActionEntry *entries)
 
 	ui_manager = e_shell_window_get_ui_manager (shell_window);
 	action_group = e_lookup_action_group (ui_manager, "mail");
-		
-	folder_size_action = gtk_action_group_get_action (action_group, 
+
+	folder_size_action = gtk_action_group_get_action (action_group,
 							  "mail-mapi-folder-size");
 
 	/* Show / Hide action entry */
 	if (g_str_has_prefix (folder_uri, "mapi://"))
 		gtk_action_set_visible (folder_size_action , TRUE);
-	else 
+	else
 		gtk_action_set_visible (folder_size_action , FALSE);
 
 }
@@ -270,7 +270,7 @@ org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data
 	gtk_container_set_border_width (GTK_CONTAINER (vbox_misc), 6);
 	gtk_container_add (GTK_CONTAINER (frm_misc), GTK_WIDGET (vbox_misc));
 
-	tbl_misc = (GtkTable*) g_object_new (GTK_TYPE_TABLE, "n-rows", 1, "n-columns", 1, 
+	tbl_misc = (GtkTable*) g_object_new (GTK_TYPE_TABLE, "n-rows", 1, "n-columns", 1,
 					     "homogeneous", FALSE, "row-spacing", 6,
 					     "column-spacing", 6, NULL);
 

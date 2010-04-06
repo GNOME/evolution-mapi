@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -73,14 +73,14 @@ typedef struct _ExchangeMAPIFolder {
 } ExchangeMAPIFolder;
 
 ExchangeMAPIFolder *
-exchange_mapi_folder_new (const char *folder_name, const char *container_class, 
-			  ExchangeMAPIFolderCategory catgory, 
-			  mapi_id_t folder_id, mapi_id_t parent_folder_id, 
+exchange_mapi_folder_new (const gchar *folder_name, const gchar *container_class,
+			  ExchangeMAPIFolderCategory catgory,
+			  mapi_id_t folder_id, mapi_id_t parent_folder_id,
 			  uint32_t child_count, uint32_t unread_count, uint32_t total);
 void exchange_mapi_folder_free (ExchangeMAPIFolder *folder);
-ExchangeMAPIFolderType exchange_mapi_container_class (char *type);
+ExchangeMAPIFolderType exchange_mapi_container_class (gchar *type);
 
-const gchar* exchange_mapi_folder_get_name (ExchangeMAPIFolder *folder);
+const gchar * exchange_mapi_folder_get_name (ExchangeMAPIFolder *folder);
 guint64 exchange_mapi_folder_get_fid (ExchangeMAPIFolder *folder);
 guint64 exchange_mapi_folder_get_parent_id (ExchangeMAPIFolder *folder);
 ExchangeMAPIFolderType exchange_mapi_folder_get_type (ExchangeMAPIFolder *folder);

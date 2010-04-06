@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -39,7 +39,7 @@ e_cal_backend_mapi_factory_instance_init (ECalBackendMAPIFactory *factory)
 {
 }
 
-static const char *
+static const gchar *
 _get_protocol (ECalBackendFactory *factory)
 {
 	return "mapi";
@@ -206,7 +206,7 @@ eds_module_shutdown   (void)
 }
 
 void
-eds_module_list_types (const GType **types, int *num_types)
+eds_module_list_types (const GType **types, gint *num_types)
 {
 	*types = mapi_types;
 	*num_types = 3;

@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -33,4 +33,4 @@ void camel_mapi_notification_listener_stop (CamelMapiStore *store, gpointer star
 
 G_END_DECLS
 
-#endif 
+#endif

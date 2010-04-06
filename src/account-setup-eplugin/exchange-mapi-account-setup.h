@@ -10,7 +10,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -20,7 +20,6 @@
  * Copyright (C) 1999-2008 Novell, Inc. (www.novell.com)
  *
  */
-
 
 #ifndef EXCHANGE_MAPI_ACCOUNT_SETUP_H
 #define EXCHANGE_MAPI_ACCOUNT_SETUP_H
@@ -36,6 +35,6 @@
 #define MAPI_PREFIX_LENGTH 7
 
 ExchangeMAPIAccountListener *
-exchange_mapi_accounts_peek_config_listener (void); 
+exchange_mapi_accounts_peek_config_listener (void);
 
 #endif /* EXCHANGE_MAPI_ACCOUNT_SETUP_H */

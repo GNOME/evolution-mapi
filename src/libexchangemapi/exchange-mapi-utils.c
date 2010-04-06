@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -42,14 +42,14 @@
  * allocated string using g_free()
  */
 gchar *
-utf8tolinux (const char *wstring)
+utf8tolinux (const gchar *wstring)
 {
 	#ifndef HAVE_WINDOWS_TO_UTF8
 	/* newer Openchange (0.10+) doesn't provide windows_to_utf8 function,
 	   it does all the necessary decoding to utf8 transparently */
 	return g_strdup (wstring);
 	#else
-	TALLOC_CTX 	*mem_ctx;
+	TALLOC_CTX	*mem_ctx;
 	gchar		*newstr, *retval = NULL;
 	gint i;
 	gboolean all_ok = TRUE;
@@ -75,7 +75,7 @@ utf8tolinux (const char *wstring)
 
 	newstr = windows_to_utf8(mem_ctx, wstring);
 
-	if (g_utf8_validate (newstr, -1, NULL)) 
+	if (g_utf8_validate (newstr, -1, NULL))
 		retval = g_strdup (newstr);
 	else
 		retval = g_strdup (wstring);
@@ -92,8 +92,8 @@ exchange_mapi_util_mapi_id_to_string (mapi_id_t id)
 	return g_strdup_printf ("%016" G_GINT64_MODIFIER "X", id);
 }
 
-inline gboolean 
-exchange_mapi_util_mapi_id_from_string (const char *str, mapi_id_t *id)
+inline gboolean
+exchange_mapi_util_mapi_id_from_string (const gchar *str, mapi_id_t *id)
 {
 	gint n = 0;
 
@@ -103,7 +103,7 @@ exchange_mapi_util_mapi_id_from_string (const char *str, mapi_id_t *id)
 	return (n == 1);
 }
 
-/* NOTE: We use the UID as a combination of the folder-id and the message-id. 
+/* NOTE: We use the UID as a combination of the folder-id and the message-id.
  * Specifically, it is in this format: ("%016" G_GINT64_MODIFIER "X%016" G_GINT64_MODIFIER "X", fid, mid).
  */
 inline gchar *
@@ -112,8 +112,8 @@ exchange_mapi_util_mapi_ids_to_uid (mapi_id_t fid, mapi_id_t mid)
 	return g_strdup_printf ("%016" G_GINT64_MODIFIER "X%016" G_GINT64_MODIFIER "X", fid, mid);
 }
 
-inline gboolean 
-exchange_mapi_util_mapi_ids_from_uid (const char *str, mapi_id_t *fid, mapi_id_t *mid)
+inline gboolean
+exchange_mapi_util_mapi_ids_from_uid (const gchar *str, mapi_id_t *fid, mapi_id_t *mid)
 {
 	gint n = 0;
 
@@ -124,7 +124,7 @@ exchange_mapi_util_mapi_ids_from_uid (const char *str, mapi_id_t *fid, mapi_id_t
 }
 
 /*
- * Retrieve the property value for a given SPropValue and property tag.  
+ * Retrieve the property value for a given SPropValue and property tag.
  *
  * If the property type is a string: fetch PT_STRING8 then PT_UNICODE
  * in case the desired property is not available in first choice.
@@ -132,11 +132,11 @@ exchange_mapi_util_mapi_ids_from_uid (const char *str, mapi_id_t *fid, mapi_id_t
  * Fetch property normally for any others properties
  */
 /* NOTE: For now, since this function has special significance only for
- * 'string' type properties, callers should (preferably) use it for fetching 
- * such properties alone. If callers are sure that proptag would, for instance, 
+ * 'string' type properties, callers should (preferably) use it for fetching
+ * such properties alone. If callers are sure that proptag would, for instance,
  * return an 'int' or a 'systime', they should prefer get_SPropValue.
  */
-const void *
+gconstpointer
 exchange_mapi_util_find_SPropVal_array_propval (struct SPropValue *values, uint32_t proptag)
 {
 	if (((proptag & 0xFFFF) == PT_STRING8) ||
@@ -154,17 +154,17 @@ exchange_mapi_util_find_SPropVal_array_propval (struct SPropValue *values, uint3
 			return str;
 
 		return NULL;
-	} 
+	}
 
-	/* NOTE: Similar generalizations (if any) for other property types 
-	 * can be made here. 
+	/* NOTE: Similar generalizations (if any) for other property types
+	 * can be made here.
 	 */
 
 	return (get_SPropValue(values, proptag));
 }
 
 /*
- * Retrieve the property value for a given SRow and property tag.  
+ * Retrieve the property value for a given SRow and property tag.
  *
  * If the property type is a string: fetch PT_STRING8 then PT_UNICODE
  * in case the desired property is not available in first choice.
@@ -172,11 +172,11 @@ exchange_mapi_util_find_SPropVal_array_propval (struct SPropValue *values, uint3
  * Fetch property normally for any others properties
  */
 /* NOTE: For now, since this function has special significance only for
- * 'string' type properties, callers should (preferably) use it for fetching 
- * such properties alone. If callers are sure that proptag would, for instance, 
+ * 'string' type properties, callers should (preferably) use it for fetching
+ * such properties alone. If callers are sure that proptag would, for instance,
  * return an 'int' or a 'systime', they should prefer find_SPropValue_data.
  */
-const void *
+gconstpointer
 exchange_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag)
 {
 	if (((proptag & 0xFFFF) == PT_STRING8) ||
@@ -194,17 +194,17 @@ exchange_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag)
 			return str;
 
 		return NULL;
-	} 
+	}
 
-	/* NOTE: Similar generalizations (if any) for other property types 
-	 * can be made here. 
+	/* NOTE: Similar generalizations (if any) for other property types
+	 * can be made here.
 	 */
 
 	return (find_SPropValue_data(aRow, proptag));
 }
 
 /*
- * Retrieve the property value for a given mapi_SPropValue_array and property tag.  
+ * Retrieve the property value for a given mapi_SPropValue_array and property tag.
  *
  * If the property type is a string: fetch PT_STRING8 then PT_UNICODE
  * in case the desired property is not available in first choice.
@@ -212,11 +212,11 @@ exchange_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag)
  * Fetch property normally for any others properties
  */
 /* NOTE: For now, since this function has special significance only for
- * 'string' type properties, callers should (preferably) use it for fetching 
- * such properties alone. If callers are sure that proptag would, for instance, 
+ * 'string' type properties, callers should (preferably) use it for fetching
+ * such properties alone. If callers are sure that proptag would, for instance,
  * return an 'int' or a 'systime', they should prefer find_mapi_SPropValue_data.
  */
-const void *
+gconstpointer
 exchange_mapi_util_find_array_propval (struct mapi_SPropValue_array *properties, uint32_t proptag)
 {
 	if (((proptag & 0xFFFF) == PT_STRING8) ||
@@ -234,10 +234,10 @@ exchange_mapi_util_find_array_propval (struct mapi_SPropValue_array *properties,
 			return str;
 
 		return NULL;
-	} 
+	}
 
-	/* NOTE: Similar generalizations (if any) for other property types 
-	 * can be made here. 
+	/* NOTE: Similar generalizations (if any) for other property types
+	 * can be made here.
 	 */
 
 	return (find_mapi_SPropValue_data(properties, proptag));
@@ -257,19 +257,19 @@ exchange_mapi_util_find_stream (GSList *stream_list, uint32_t proptag)
 	return NULL;
 }
 
-void 
+void
 exchange_mapi_util_free_attachment_list (GSList **attach_list)
 {
 	GSList *l = *attach_list;
 
-	if(!l)
+	if (!l)
 		return;
 
 	for (; l != NULL; l = l->next) {
 		ExchangeMAPIAttachment *attachment = (ExchangeMAPIAttachment *) (l->data);
 		/* FIXME: more stuff here */
 		g_free (attachment->lpProps);
-		exchange_mapi_util_free_stream_list (&(attachment->streams)); 
+		exchange_mapi_util_free_stream_list (&(attachment->streams));
 		g_free (attachment);
 		attachment = NULL;
 	}
@@ -277,12 +277,12 @@ exchange_mapi_util_free_attachment_list (GSList **attach_list)
 	*attach_list = NULL;
 }
 
-void 
+void
 exchange_mapi_util_free_recipient_list (GSList **recip_list)
 {
 	GSList *l = *recip_list;
 
-	if(!l)
+	if (!l)
 		return;
 
 	for (; l != NULL; l = l->next) {
@@ -301,12 +301,12 @@ exchange_mapi_util_free_recipient_list (GSList **recip_list)
 	*recip_list = NULL;
 }
 
-void 
+void
 exchange_mapi_util_free_stream_list (GSList **stream_list)
 {
 	GSList *l = *stream_list;
 
-	if(!l)
+	if (!l)
 		return;
 
 	for (; l != NULL; l = l->next) {
@@ -320,23 +320,22 @@ exchange_mapi_util_free_stream_list (GSList **stream_list)
 	*stream_list = NULL;
 }
 
-
 void
 exchange_mapi_debug_property_dump (struct mapi_SPropValue_array *properties)
 {
 	gint i = 0;
 
-	for (i = 0; i < properties->cValues; i++) { 
+	for (i = 0; i < properties->cValues; i++) {
 		for (i = 0; i < properties->cValues; i++) {
 			struct mapi_SPropValue *lpProp = &properties->lpProps[i];
-			const char *tmp =  get_proptag_name (lpProp->ulPropTag);
-			char t_str[26];
+			const gchar *tmp =  get_proptag_name (lpProp->ulPropTag);
+			gchar t_str[26];
 			gint j = 0;
 			if (tmp && *tmp)
 				g_print("\n%s \t",tmp);
 			else
 				g_print("\n0x%08X \t", lpProp->ulPropTag);
-			switch(lpProp->ulPropTag & 0xFFFF) {
+			switch (lpProp->ulPropTag & 0xFFFF) {
 			case PT_BOOLEAN:
 				g_print(" (bool) - %d", (bool) lpProp->value.b);
 				break;
@@ -350,7 +349,7 @@ exchange_mapi_debug_property_dump (struct mapi_SPropValue_array *properties)
 				g_print (" (double) -  %lf", (double)lpProp->value.dbl);
 				break;
 			case PT_I8:
-				g_print (" (int) - 0x%016" G_GINT64_MODIFIER "X", lpProp->value.d);
+				g_print (" (gint) - 0x%016" G_GINT64_MODIFIER "X", lpProp->value.d);
 				break;
 			case PT_SYSTIME: {
 					struct timeval t;
@@ -378,7 +377,7 @@ exchange_mapi_debug_property_dump (struct mapi_SPropValue_array *properties)
 					g_print("0x%02X ", lpProp->value.bin.lpb[j]);
 				break;
 			case PT_MV_STRING8:
- 				g_print(" (struct mapi_SLPSTRArray *) - %p", &lpProp->value.MVszA);
+				g_print(" (struct mapi_SLPSTRArray *) - %p", &lpProp->value.MVszA);
 				break;
 			default:
 				g_print(" - NONE NULL");
@@ -387,10 +386,9 @@ exchange_mapi_debug_property_dump (struct mapi_SPropValue_array *properties)
 	}
 }
 
+/* Attention: Devs at work;-) */
 
-/* Attention: Devs at work ;-) */
-
-static void 
+static void
 exchange_mapi_util_bin_append_uint16 (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const uint16_t val)
 {
 	uint8_t *ptr = NULL;
@@ -404,7 +402,7 @@ exchange_mapi_util_bin_append_uint16 (TALLOC_CTX *mem_ctx, struct Binary_r *bin,
 	*ptr++ = ((val >>  8) & 0xFF);
 }
 
-static void 
+static void
 exchange_mapi_util_bin_append_uint32 (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const uint32_t val)
 {
 	uint8_t *ptr = NULL;
@@ -420,28 +418,28 @@ exchange_mapi_util_bin_append_uint32 (TALLOC_CTX *mem_ctx, struct Binary_r *bin,
 	*ptr++ = ((val >> 24) & 0xFF);
 }
 
-static void 
-exchange_mapi_util_bin_append_string (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const char *val)
+static void
+exchange_mapi_util_bin_append_string (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const gchar *val)
 {
-	size_t len = strlen (val);
-	char *ptr = NULL;
+	gsize len = strlen (val);
+	gchar *ptr = NULL;
 
 	bin->lpb = talloc_realloc (mem_ctx, bin->lpb, uint8_t, bin->cb + (len + 1));
 	bin->cb += (len + 1);
 
-	ptr = (char *) bin->lpb + bin->cb - (len + 1);
+	ptr = (gchar *) bin->lpb + bin->cb - (len + 1);
 
 	strcpy (ptr, val);
 }
 
-static void 
-exchange_mapi_util_bin_append_unicode (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const char *val)
+static void
+exchange_mapi_util_bin_append_unicode (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const gchar *val)
 {
 	/* WRITE ME */
 }
 
-static void 
-exchange_mapi_util_bin_append_val (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const uint8_t *val, size_t len)
+static void
+exchange_mapi_util_bin_append_val (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const uint8_t *val, gsize len)
 {
 	uint8_t *ptr = NULL;
 
@@ -476,7 +474,7 @@ static const uint8_t MAPI_ONE_OFF_UID[] = {
  * Return value: the recipient ENTRYID
  **/
 struct Binary_r *
-exchange_mapi_util_entryid_generate_oneoff (TALLOC_CTX *mem_ctx, const char *display_name, const char *email, gboolean unicode)
+exchange_mapi_util_entryid_generate_oneoff (TALLOC_CTX *mem_ctx, const gchar *display_name, const gchar *email, gboolean unicode)
 {
 	struct Binary_r *entryid;
 
@@ -519,7 +517,7 @@ static const uint8_t MAPI_LOCAL_UID[] = {
  * Return value: the recipient ENTRYID
  **/
 struct Binary_r *
-exchange_mapi_util_entryid_generate_local (TALLOC_CTX *mem_ctx, const char *exchange_dn)
+exchange_mapi_util_entryid_generate_local (TALLOC_CTX *mem_ctx, const gchar *exchange_dn)
 {
 	struct Binary_r *entryid;
 
@@ -542,12 +540,12 @@ exchange_mapi_util_entryid_generate_local (TALLOC_CTX *mem_ctx, const char *exch
  *
  * Return value: the converted text, which the caller must free.
  **/
-char *
-exchange_lf_to_crlf (const char *in)
+gchar *
+exchange_lf_to_crlf (const gchar *in)
 {
-	int len;
-	const char *s;
-	char *out, *d;
+	gint len;
+	const gchar *s;
+	gchar *out, *d;
 
 	g_return_val_if_fail (in != NULL, NULL);
 
@@ -575,12 +573,12 @@ exchange_lf_to_crlf (const char *in)
  *
  * Return value: the converted text, which the caller must free.
  **/
-char *
-exchange_crlf_to_lf (const char *in)
+gchar *
+exchange_crlf_to_lf (const gchar *in)
 {
-	int len;
-	const char *s;
-	char *out;
+	gint len;
+	const gchar *s;
+	gchar *out;
 	GString *str;
 
 	g_return_val_if_fail (in != NULL, NULL);

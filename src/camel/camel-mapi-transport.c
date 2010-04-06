@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -53,7 +53,6 @@ CamelStore *get_store(void);
 
 void	set_store(CamelStore *);
 
-
 /*CreateItem would return the MID of the new message or '0' if we fail.*/
 static mapi_id_t
 mapi_message_item_send (MapiItem *item)
@@ -61,7 +60,7 @@ mapi_message_item_send (MapiItem *item)
 	guint64 fid = 0;
 	mapi_id_t mid = 0;
 
-	mid = exchange_mapi_create_item (olFolderSentMail, fid, NULL, NULL, 
+	mid = exchange_mapi_create_item (olFolderSentMail, fid, NULL, NULL,
 					 camel_mapi_utils_create_item_build_props,
 					 item, item->recipients,
 					 item->attachments, item->generic_streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE);
@@ -74,8 +73,8 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 	      CamelAddress *from, CamelAddress *recipients, CamelException *ex)
 {
 	MapiItem *item = NULL;
-	const char *namep;
-	const char *addressp;
+	const gchar *namep;
+	const gchar *addressp;
 	mapi_id_t st = 0;
 
 	if (!camel_internet_address_get((CamelInternetAddress *)from, 0, &namep, &addressp)) {
@@ -93,12 +92,11 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 		camel_exception_setv (ex, CAMEL_EXCEPTION_SERVICE_UNAVAILABLE,_("Could not send message."));
 		return FALSE;
 	}
-	
+
 	return TRUE;
 }
 
-
-static char*
+static gchar *
 mapi_transport_get_name(CamelService *service, gboolean brief)
 {
 	if (brief) {
@@ -111,7 +109,6 @@ mapi_transport_get_name(CamelService *service, gboolean brief)
 	}
 }
 
-
 static void
 camel_mapi_transport_class_init(CamelMapiTransportClass *camel_mapi_transport_class)
 {
@@ -119,7 +116,7 @@ camel_mapi_transport_class_init(CamelMapiTransportClass *camel_mapi_transport_cl
 		CAMEL_TRANSPORT_CLASS (camel_mapi_transport_class);
 	CamelServiceClass *camel_service_class =
 		CAMEL_SERVICE_CLASS (camel_mapi_transport_class);
-  
+
 	camel_service_class->get_name = mapi_transport_get_name;
 	camel_transport_class->send_to = mapi_send_to;
 }
@@ -134,7 +131,7 @@ CamelType
 camel_mapi_transport_get_type (void)
 {
 	static CamelType camel_mapi_transport_type = CAMEL_INVALID_TYPE;
-  
+
 	if (camel_mapi_transport_type == CAMEL_INVALID_TYPE) {
 		camel_mapi_transport_type =
 			camel_type_register (CAMEL_TRANSPORT_TYPE,

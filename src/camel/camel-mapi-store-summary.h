@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -48,9 +48,9 @@ enum {
 
 struct _CamelMapiStoreInfo {
 	CamelStoreInfo info;
-	char *full_name;
-	char *folder_id;
-	char *parent_id;
+	gchar *full_name;
+	gchar *folder_id;
+	gchar *parent_id;
 };
 
 struct _CamelMapiStoreSummary {
@@ -69,13 +69,13 @@ struct _CamelMapiStoreSummaryClass {
 
 CamelType                        camel_mapi_store_summary_get_type      (void);
 CamelMapiStoreSummary      *camel_mapi_store_summary_new        (void);
-CamelMapiStoreInfo *camel_mapi_store_summary_full_name(CamelMapiStoreSummary *s, const char *full_name) ;
-CamelMapiStoreInfo *camel_mapi_store_summary_add_from_full(CamelMapiStoreSummary *s, const char *full, char dir_sep, 
-							   char *folder_id, char *parent_id);
+CamelMapiStoreInfo *camel_mapi_store_summary_full_name(CamelMapiStoreSummary *s, const gchar *full_name);
+CamelMapiStoreInfo *camel_mapi_store_summary_add_from_full(CamelMapiStoreSummary *s, const gchar *full, gchar dir_sep,
+							   gchar *folder_id, gchar *parent_id);
 
-char *camel_mapi_store_summary_full_to_path(CamelMapiStoreSummary *s, const char *full_name, char dir_sep) ;
-char *camel_mapi_store_summary_path_to_full(CamelMapiStoreSummary *s, const char *path, char dir_sep) ;
-char *camel_mapi_store_summary_full_from_path(CamelMapiStoreSummary *s, const char *path) ;
+gchar *camel_mapi_store_summary_full_to_path(CamelMapiStoreSummary *s, const gchar *full_name, gchar dir_sep);
+gchar *camel_mapi_store_summary_path_to_full(CamelMapiStoreSummary *s, const gchar *path, gchar dir_sep);
+gchar *camel_mapi_store_summary_full_from_path(CamelMapiStoreSummary *s, const gchar *path);
 
 #define camel_mapi_store_info_full_name(s, i) (camel_store_info_string((CamelStoreSummary *)s, (const CamelStoreInfo *)i, CAMEL_MAPI_STORE_INFO_FULL_NAME))
 #define camel_mapi_store_info_folder_id(s, i) (camel_store_info_string((CamelStoreSummary *)s, (const CamelStoreInfo *)i, CAMEL_MAPI_STORE_INFO_FOLDER_ID))
@@ -83,4 +83,4 @@ char *camel_mapi_store_summary_full_from_path(CamelMapiStoreSummary *s, const ch
 
 G_END_DECLS
 
-#endif /* ! _CAMEL_MAPI_STORE_SUMMARY_H */
+#endif /* _CAMEL_MAPI_STORE_SUMMARY_H */

@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -23,7 +23,6 @@
 
 #ifndef __MAPI_FOLDER_H__
 #define __MAPI_FOLDER_H__
-
 
 #include <camel/camel.h>
 #include <libmapi/libmapi.h>
@@ -69,7 +68,7 @@ typedef struct {
 	gchar *cc;
 	gchar *bcc;
 
-	int flags;
+	gint flags;
 	glong size;
 	time_t recieved_time;
 	time_t send_time;
@@ -112,16 +111,16 @@ struct _CamelMapiFolder {
 
 	guint32 type;
 
-	unsigned int need_rescan:1;
-	unsigned int need_refresh:1;
-	unsigned int read_only:1;
+	guint need_rescan:1;
+	guint need_refresh:1;
+	guint read_only:1;
 };
 
 struct _CamelMapiFolderClass {
 	CamelOfflineFolderClass parent_class;
 
-	/* Virtual methods */	
-	
+	/* Virtual methods */
+
 } ;
 
 typedef struct {
@@ -136,9 +135,9 @@ CamelType camel_mapi_folder_get_type (void);
 
 /* implemented */
 CamelFolder *
-camel_mapi_folder_new(CamelStore *store, const char *folder_name, const char *folder_dir, guint32 flags, CamelException *ex);
+camel_mapi_folder_new(CamelStore *store, const gchar *folder_name, const gchar *folder_dir, guint32 flags, CamelException *ex);
 
-void mapi_update_summary ( CamelFolder *folder, GList *item_list,CamelException *ex) ;
+void mapi_update_summary ( CamelFolder *folder, GList *item_list,CamelException *ex);
 void mapi_refresh_folder(CamelFolder *folder, CamelException *ex);
 gboolean camel_mapi_folder_fetch_summary (CamelStore *store, const mapi_id_t fid, struct mapi_SRestriction *res,
 					  struct SSortOrderSet *sort, fetch_items_data *fetch_data, guint32 options);

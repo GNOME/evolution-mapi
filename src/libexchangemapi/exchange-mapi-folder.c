@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -33,16 +33,16 @@ static GSList *folder_list = NULL;
 /* we use a static mutex - even the same thread *may not* use the static vars concurrently */
 static GStaticMutex folder_lock = G_STATIC_MUTEX_INIT;
 
-#define LOCK() 		g_message("%s: %s: lock(folder_lock)", G_STRLOC, G_STRFUNC);g_static_mutex_lock(&folder_lock)
-#define UNLOCK() 	g_message("%s: %s: unlock(folder_lock)", G_STRLOC, G_STRFUNC);g_static_mutex_unlock(&folder_lock)
+#define LOCK()		g_message("%s: %s: lock(folder_lock)", G_STRLOC, G_STRFUNC);g_static_mutex_lock(&folder_lock)
+#define UNLOCK()	g_message("%s: %s: unlock(folder_lock)", G_STRLOC, G_STRFUNC);g_static_mutex_unlock(&folder_lock)
 #define d(x) x
 
 static ExchangeMAPIFolderType
-container_class_to_type (const char *type)
+container_class_to_type (const gchar *type)
 {
 	ExchangeMAPIFolderType folder_type = MAPI_FOLDER_TYPE_UNKNOWN;;
 
-	if (!strcmp (type, IPF_APPOINTMENT)) 
+	if (!strcmp (type, IPF_APPOINTMENT))
 		folder_type = MAPI_FOLDER_TYPE_APPOINTMENT;
 	else if (!strcmp (type, IPF_CONTACT))
 		folder_type = MAPI_FOLDER_TYPE_CONTACT;
@@ -62,7 +62,7 @@ container_class_to_type (const char *type)
 }
 
 ExchangeMAPIFolder *
-exchange_mapi_folder_new (const char *folder_name, const char *container_class, ExchangeMAPIFolderCategory category, mapi_id_t folder_id, mapi_id_t parent_folder_id, uint32_t child_count, uint32_t unread_count, uint32_t total)
+exchange_mapi_folder_new (const gchar *folder_name, const gchar *container_class, ExchangeMAPIFolderCategory category, mapi_id_t folder_id, mapi_id_t parent_folder_id, uint32_t child_count, uint32_t unread_count, uint32_t total)
 {
 	ExchangeMAPIFolder *folder;
 
@@ -90,12 +90,12 @@ exchange_mapi_folder_free (ExchangeMAPIFolder *folder)
 }
 
 ExchangeMAPIFolderType
-exchange_mapi_container_class (char *type)
+exchange_mapi_container_class (gchar *type)
 {
 	return container_class_to_type (type);
 }
 
-const gchar*
+const gchar *
 exchange_mapi_folder_get_name (ExchangeMAPIFolder *folder)
 {
 	return folder->folder_name;
@@ -142,7 +142,7 @@ exchange_mapi_peek_folder_list (void)
 {
 	LOCK ();
 	if (!folder_list)
-		exchange_mapi_get_folders_list (&folder_list); 
+		exchange_mapi_get_folders_list (&folder_list);
 	if (!folder_list)
 		g_warning ("Get folders list call failed \n");
 	UNLOCK ();
@@ -157,7 +157,7 @@ exchange_mapi_folder_get_folder (mapi_id_t fid)
 
 	if (!folder_list)
 		exchange_mapi_peek_folder_list ();
-	
+
 	tmp = folder_list;
 	while (tmp) {
 		ExchangeMAPIFolder * folder = tmp->data;

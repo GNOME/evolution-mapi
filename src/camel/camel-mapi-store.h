@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -50,25 +50,21 @@ typedef struct _CamelMapiStoreClass CamelMapiStoreClass;
 typedef struct _CamelMapiStorePrivate CamelMapiStorePrivate;
 
 struct _CamelMapiStore{
-	CamelOfflineStore parent_object;	
+	CamelOfflineStore parent_object;
 
 	struct _CamelMapiStoreSummary *summary;
 	CamelMapiStorePrivate *priv;
-/* 	char			*base_url; */
-/* 	CamelURL		*camel_url; */
-/* 	CamelFolderInfo		*fi; */
-/* 	GHashTable		*folders; */
-/* 	GMutex			*folders_lock; */
-/* 	GMutex			*connect_lock; */
+/*	gchar			*base_url; */
+/*	CamelURL		*camel_url; */
+/*	CamelFolderInfo		*fi; */
+/*	GHashTable		*folders; */
+/*	GMutex			*folders_lock; */
+/*	GMutex			*connect_lock; */
 };
-
-
-
 
 struct _CamelMapiStoreClass {
 	CamelOfflineStoreClass		parent_class;
 };
-
 
 /**
  * PROTOTYPES
@@ -89,12 +85,12 @@ __BEGIN_DECLS
 CamelType camel_mapi_store_get_type(void);
 gboolean camel_mapi_store_connected(CamelMapiStore *, CamelException *);
 
-const gchar* camel_mapi_store_folder_id_lookup (CamelMapiStore *mapi_store, const char *folder_name);
-const gchar* camel_mapi_store_folder_lookup (CamelMapiStore *mapi_store, const char *folder_id);
-const gchar* camel_mapi_store_get_profile_name (CamelMapiStore *mapi_store);
+const gchar * camel_mapi_store_folder_id_lookup (CamelMapiStore *mapi_store, const gchar *folder_name);
+const gchar * camel_mapi_store_folder_lookup (CamelMapiStore *mapi_store, const gchar *folder_id);
+const gchar * camel_mapi_store_get_profile_name (CamelMapiStore *mapi_store);
 const gchar *camel_mapi_store_system_folder_fid (CamelMapiStore *mapi_store, guint folder_type);
-const gchar *camel_mapi_store_folder_id_lookup_offline (CamelMapiStore *mapi_store, const char *folder_name);
-const gchar* mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid, gboolean use_cache);
+const gchar *camel_mapi_store_folder_id_lookup_offline (CamelMapiStore *mapi_store, const gchar *folder_name);
+const gchar * mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid, gboolean use_cache);
 
 void camel_mapi_store_unset_notification_data (CamelMapiStore *mstore);
 

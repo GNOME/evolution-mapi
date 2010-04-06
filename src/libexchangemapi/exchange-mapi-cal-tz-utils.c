@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -99,8 +99,8 @@ exchange_mapi_cal_tz_util_destroy ()
 	g_static_rec_mutex_unlock(&mutex);
 }
 
-static void 
-file_contents_to_hashtable (const char *contents, GHashTable *table) 
+static void
+file_contents_to_hashtable (const gchar *contents, GHashTable *table)
 {
 	gchar **array = NULL;
 	guint len = 0, i;
@@ -110,7 +110,7 @@ file_contents_to_hashtable (const char *contents, GHashTable *table)
 
 	for (i=0; i < len-1; ++i) {
 		gchar **mapping = g_strsplit (array[i], MAPPING_SEPARATOR, -1);
-		if (g_strv_length (mapping) == 2) 
+		if (g_strv_length (mapping) == 2)
 			g_hash_table_insert (table, g_strdup (mapping[0]), g_strdup (mapping[1]));
 		g_strfreev (mapping);
 	}
@@ -159,16 +159,16 @@ exchange_mapi_cal_tz_util_populate ()
 		return FALSE;
 	}
 
-	mapi_to_ical = g_hash_table_new_full   ((GHashFunc) g_str_hash, 
-						(GEqualFunc) g_str_equal, 
-						(GDestroyNotify) g_free, 
+	mapi_to_ical = g_hash_table_new_full   ((GHashFunc) g_str_hash,
+						(GEqualFunc) g_str_equal,
+						(GDestroyNotify) g_free,
 						(GDestroyNotify) g_free);
 
 	file_contents_to_hashtable (g_mapped_file_get_contents (mtoi_mf), mapi_to_ical);
 
-	ical_to_mapi = g_hash_table_new_full   ((GHashFunc) g_str_hash, 
-						(GEqualFunc) g_str_equal, 
-						(GDestroyNotify) g_free, 
+	ical_to_mapi = g_hash_table_new_full   ((GHashFunc) g_str_hash,
+						(GEqualFunc) g_str_equal,
+						(GDestroyNotify) g_free,
 						(GDestroyNotify) g_free);
 
 	file_contents_to_hashtable (g_mapped_file_get_contents (itom_mf), ical_to_mapi);
@@ -188,7 +188,7 @@ exchange_mapi_cal_tz_util_populate ()
 
 		g_static_rec_mutex_unlock(&mutex);
 		return FALSE;
-	} 
+	}
 
 #if GLIB_CHECK_VERSION(2,21,3)
 	g_mapped_file_unref (mtoi_mf);
@@ -205,20 +205,20 @@ exchange_mapi_cal_tz_util_populate ()
 	return TRUE;
 }
 
-static void 
+static void
 exchange_mapi_cal_tz_util_dump_ical_tzs ()
 {
 	guint i;
 	icalarray *zones;
 	GList *l, *list_items = NULL;
-	
+
 	/* Get the array of builtin timezones. */
 	zones = icaltimezone_get_builtin_timezones ();
 
 	g_message("%s: %s: ", G_STRLOC, G_STRFUNC);
 	for (i = 0; i < zones->num_elements; i++) {
 		icaltimezone *zone;
-		const char *tzid = NULL;
+		const gchar *tzid = NULL;
 
 		zone = icalarray_element_at (zones, i);
 
@@ -232,7 +232,7 @@ exchange_mapi_cal_tz_util_dump_ical_tzs ()
 	/* Put the "UTC" entry at the top of the combo's list. */
 	list_items = g_list_prepend (list_items, (gpointer)"UTC");
 
-	for (l = list_items, i = 0; l != NULL; l = l->next, ++i) 
+	for (l = list_items, i = 0; l != NULL; l = l->next, ++i)
 		g_print ("[%3d]\t%s\n", (i+1), (gchar *)(l->data));
 
 //	icaltimezone_free_builtin_timezones ();
@@ -358,44 +358,44 @@ TZDEFINITION* BinToTZDEFINITION(ULONG cbDef, LPBYTE lpbDef)
 
         LPBYTE lpNextRule = lpPtr;
         BOOL bRuleOK = false;
-		
+
         for (i = 0;i < tzDef.cRules;i++)
         {
             bRuleOK = false;
             lpPtr = lpNextRule;
-			
-            if (lpbDef + cbDef - lpPtr < 
+
+            if (lpbDef + cbDef - lpPtr <
                 2*sizeof(BYTE) + 2*sizeof(WORD) + 3*sizeof(long) + 2*sizeof(SYSTEMTIME)) return NULL;
             bRuleOK = true;
             BYTE bRuleMajorVersion = *((BYTE*)lpPtr);
             lpPtr += sizeof(BYTE);
             BYTE bRuleMinorVersion = *((BYTE*)lpPtr);
             lpPtr += sizeof(BYTE);
-			
+
             // We only understand TZ_BIN_VERSION_MAJOR
             if (TZ_BIN_VERSION_MAJOR != bRuleMajorVersion) return NULL;
-			
+
             // We only understand if >= TZ_BIN_VERSION_MINOR
             if (TZ_BIN_VERSION_MINOR > bRuleMinorVersion) return NULL;
-			
+
             WORD cbRule = *((WORD*)lpPtr);
             lpPtr += sizeof(WORD);
-			
+
             lpNextRule = lpPtr + cbRule;
-			
+
             lpRules[i].wFlags = *((WORD*)lpPtr);
             lpPtr += sizeof(WORD);
-			
+
             lpRules[i].stStart = *((SYSTEMTIME*)lpPtr);
             lpPtr += sizeof(SYSTEMTIME);
-			
+
             lpRules[i].TZReg.lBias = *((long*)lpPtr);
             lpPtr += sizeof(long);
             lpRules[i].TZReg.lStandardBias = *((long*)lpPtr);
             lpPtr += sizeof(long);
             lpRules[i].TZReg.lDaylightBias = *((long*)lpPtr);
             lpPtr += sizeof(long);
-			
+
             lpRules[i].TZReg.stStandardDate = *((SYSTEMTIME*)lpPtr);
             lpPtr += sizeof(SYSTEMTIME);
             lpRules[i].TZReg.stDaylightDate = *((SYSTEMTIME*)lpPtr);
@@ -404,17 +404,17 @@ TZDEFINITION* BinToTZDEFINITION(ULONG cbDef, LPBYTE lpbDef)
         if (!bRuleOK)
         {
             delete[] lpRules;
-            return NULL;			
+            return NULL;
         }
     }
-#endif 
+#endif
     // Now we've read everything - allocate a structure and copy it in
-    size_t cbTZDef = sizeof(TZDEFINITION) +
+    gsize cbTZDef = sizeof(TZDEFINITION) +
         sizeof(WCHAR)*(cchKeyName+1) +
         sizeof(TZRULE)*tzDef.cRules;
 
     TZDEFINITION* ptzDef = (TZDEFINITION*) malloc (cbTZDef);
-    
+
     if (ptzDef)
     {
         // Copy main struct over
@@ -455,7 +455,7 @@ TZDEFINITION* BinToTZDEFINITION(ULONG cbDef, LPBYTE lpbDef)
 #define TZ_BIN_VERSION_MINOR  0x01 
 
 void
-exchange_mapi_cal_util_mapi_tz_to_bin (const char *mapi_tzid, struct Binary_r *sb)
+exchange_mapi_cal_util_mapi_tz_to_bin (const gchar *mapi_tzid, struct Binary_r *sb)
 {
 	GByteArray *ba;
 	guint8 flag8;
@@ -499,7 +499,7 @@ exchange_mapi_cal_util_mapi_tz_to_bin (const char *mapi_tzid, struct Binary_r *s
 	sb->cb = ba->len;
 
 	d(g_message ("New timezone stream.. Length: %d bytes.. Hex-data follows:", ba->len));
-	d(for (i = 0; i < ba->len; i++) 
+	d(for (i = 0; i < ba->len; i++)
 		g_print("0x%.2X ", ba->data[i]));
 
 	g_byte_array_free (ba, FALSE);

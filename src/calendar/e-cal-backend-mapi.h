@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -53,17 +53,17 @@ struct _ECalBackendMAPIClass {
 
 GType	e_cal_backend_mapi_get_type(void);
 
-const char *	
+const gchar *
 e_cal_backend_mapi_get_local_attachments_store (ECalBackendMAPI *cbmapi);
 
-const char *	
+const gchar *
 e_cal_backend_mapi_get_owner_name (ECalBackendMAPI *cbmapi);
-const char *	
+const gchar *
 e_cal_backend_mapi_get_owner_email (ECalBackendMAPI *cbmapi);
 
-const char *	
+const gchar *
 e_cal_backend_mapi_get_user_name (ECalBackendMAPI *cbmapi);
-const char *	
+const gchar *
 e_cal_backend_mapi_get_user_email (ECalBackendMAPI *cbmapi);
 
 G_END_DECLS

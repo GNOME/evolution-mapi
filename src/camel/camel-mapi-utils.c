@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -20,7 +20,6 @@
  * Copyright (C) 1999-2009 Novell, Inc. (www.novell.com)
  *
  */
-
 
 /* -- Generate MIME to ITEM -- */
 
@@ -45,15 +44,15 @@
 #define STREAM_SIZE 4000
 
 static void
-mapi_item_add_recipient (const char *recipients, OlMailRecipientType type, GSList **recipient_list)
+mapi_item_add_recipient (const gchar *recipients, OlMailRecipientType type, GSList **recipient_list)
 {
 	ExchangeMAPIRecipient *recipient;
 	uint32_t val = 0;
 	uint8_t bVal;
-	const char *str = NULL;
+	const gchar *str = NULL;
 
 	if (!recipients)
-		return ;
+		return;
 
 	recipient = g_new0 (ExchangeMAPIRecipient, 1);
 
@@ -64,27 +63,27 @@ mapi_item_add_recipient (const char *recipients, OlMailRecipientType type, GSLis
 	recipient->in.req_cValues = 2;
 	recipient->in.req_lpProps = g_new0 (struct SPropValue, recipient->in.req_cValues + 1);
 
-	set_SPropValue_proptag (&(recipient->in.req_lpProps[0]), PR_RECIPIENT_TYPE, (const void *) &type);
+	set_SPropValue_proptag (&(recipient->in.req_lpProps[0]), PR_RECIPIENT_TYPE, (gconstpointer ) &type);
 
 	val = 0;
-	set_SPropValue_proptag (&(recipient->in.req_lpProps[1]), PR_SEND_INTERNET_ENCODING, (const void *)&val);
+	set_SPropValue_proptag (&(recipient->in.req_lpProps[1]), PR_SEND_INTERNET_ENCODING, (gconstpointer )&val);
 
 	/* External recipient properties - set them only when the recipient is unresolved */
 	recipient->in.ext_cValues = 8;
 	recipient->in.ext_lpProps = g_new0 (struct SPropValue, recipient->in.ext_cValues + 1);
 
 	val = DT_MAILUSER;
-	set_SPropValue_proptag (&(recipient->in.ext_lpProps[0]), PR_DISPLAY_TYPE, (const void *)&val);
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[0]), PR_DISPLAY_TYPE, (gconstpointer )&val);
 	val = MAPI_MAILUSER;
-	set_SPropValue_proptag (&(recipient->in.ext_lpProps[1]), PR_OBJECT_TYPE, (const void *)&val);
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[1]), PR_OBJECT_TYPE, (gconstpointer )&val);
 	str = "SMTP";
-	set_SPropValue_proptag (&(recipient->in.ext_lpProps[2]), PR_ADDRTYPE, (const void *)(str));
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[2]), PR_ADDRTYPE, (gconstpointer )(str));
 	str = recipient->email_id;
-	set_SPropValue_proptag (&(recipient->in.ext_lpProps[3]), PR_SMTP_ADDRESS, (const void *)(str));
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[3]), PR_SMTP_ADDRESS, (gconstpointer )(str));
 	/* FIXME: Please add the correct names here instead of the e-mail ID */
-	set_SPropValue_proptag (&(recipient->in.ext_lpProps[4]), PR_GIVEN_NAME, (const void *)(str));
-	set_SPropValue_proptag (&(recipient->in.ext_lpProps[5]), PR_DISPLAY_NAME, (const void *)(str));
-	set_SPropValue_proptag (&(recipient->in.ext_lpProps[6]), PR_7BIT_DISPLAY_NAME, (const void *)(str));
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[4]), PR_GIVEN_NAME, (gconstpointer )(str));
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[5]), PR_DISPLAY_NAME, (gconstpointer )(str));
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[6]), PR_7BIT_DISPLAY_NAME, (gconstpointer )(str));
 
 	bVal = FALSE;
 	set_SPropValue_proptag (&(recipient->in.ext_lpProps[7]), PR_SEND_RICH_INFO, &bVal);
@@ -93,7 +92,7 @@ mapi_item_add_recipient (const char *recipients, OlMailRecipientType type, GSLis
 }
 
 static void
-mapi_item_set_from(MapiItem *item, const char *from)
+mapi_item_set_from(MapiItem *item, const gchar *from)
 {
 	if (item->header.from)
 		g_free (item->header.from);
@@ -102,7 +101,7 @@ mapi_item_set_from(MapiItem *item, const char *from)
 }
 
 static void
-mapi_item_set_subject(MapiItem *item, const char *subject)
+mapi_item_set_subject(MapiItem *item, const gchar *subject)
 {
 	if (item->header.subject)
 		g_free (item->header.subject);
@@ -124,7 +123,7 @@ mapi_item_set_body_stream (MapiItem *item, CamelStream *body, MapiItemPartType p
 
 	stream->value = g_byte_array_new ();
 
-	while (read_size = camel_stream_read (body, (char *)buf, STREAM_SIZE), read_size > 0){
+	while (read_size = camel_stream_read (body, (gchar *)buf, STREAM_SIZE), read_size > 0) {
 		stream->value = g_byte_array_append (stream->value, buf, read_size);
 
 		is_null_terminated = buf [read_size - 1] == 0;
@@ -183,71 +182,71 @@ mapi_item_add_attach (MapiItem *item, CamelMimePart *part, CamelStream *content_
 	CamelContentType *content_type;
 
 	ExchangeMAPIAttachment *item_attach;
-	ExchangeMAPIStream *stream; 
+	ExchangeMAPIStream *stream;
 
 	const gchar *filename = camel_mime_part_get_filename (part);
-	
+
 	item_attach = g_new0 (ExchangeMAPIAttachment, 1);
 
 	item_attach->lpProps = g_new0 (struct SPropValue, 6 + 1);
 
-	flag = ATTACH_BY_VALUE; 
-	set_SPropValue_proptag(&(item_attach->lpProps[i++]), PR_ATTACH_METHOD, (const void *) (&flag));
+	flag = ATTACH_BY_VALUE;
+	set_SPropValue_proptag(&(item_attach->lpProps[i++]), PR_ATTACH_METHOD, (gconstpointer ) (&flag));
 
-	/* MSDN Documentation: When the supplied offset is -1 (0xFFFFFFFF), the 
-	 * attachment is not rendered using the PR_RENDERING_POSITION property. 
-	 * All values other than -1 indicate the position within PR_BODY at which 
-	 * the attachment is to be rendered. 
+	/* MSDN Documentation: When the supplied offset is -1 (0xFFFFFFFF), the
+	 * attachment is not rendered using the PR_RENDERING_POSITION property.
+	 * All values other than -1 indicate the position within PR_BODY at which
+	 * the attachment is to be rendered.
 	 */
 	flag = 0xFFFFFFFF;
-	set_SPropValue_proptag(&(item_attach->lpProps[i++]), PR_RENDERING_POSITION, (const void *) (&flag));
+	set_SPropValue_proptag(&(item_attach->lpProps[i++]), PR_RENDERING_POSITION, (gconstpointer ) (&flag));
 
 	if (filename) {
-		set_SPropValue_proptag(&(item_attach->lpProps[i++]), 
+		set_SPropValue_proptag(&(item_attach->lpProps[i++]),
 				       PR_ATTACH_FILENAME,
-				       (const void *) g_strdup(filename));
+				       (gconstpointer ) g_strdup(filename));
 
-		set_SPropValue_proptag(&(item_attach->lpProps[i++]), 
-				       PR_ATTACH_LONG_FILENAME, 
-				       (const void *) g_strdup(filename));
+		set_SPropValue_proptag(&(item_attach->lpProps[i++]),
+				       PR_ATTACH_LONG_FILENAME,
+				       (gconstpointer ) g_strdup(filename));
 	}
 
 	/* mime type : multipart/related */
 	content_id = camel_mime_part_get_content_id (part);
 	if (content_id) {
-		set_SPropValue_proptag(&(item_attach->lpProps[i++]), 
+		set_SPropValue_proptag(&(item_attach->lpProps[i++]),
 				       PR_ATTACH_CONTENT_ID,
-				       (const void *) g_strdup(content_id));
+				       (gconstpointer ) g_strdup(content_id));
 	}
 
 	content_type  = camel_mime_part_get_content_type (part);
 	if (content_type) {
 		gchar *ct = camel_content_type_simple (content_type);
 		if (ct) {
-			set_SPropValue_proptag (&(item_attach->lpProps[i++]), 
+			set_SPropValue_proptag (&(item_attach->lpProps[i++]),
 					PR_ATTACH_MIME_TAG,
-					(const void *) ct);
+					(gconstpointer ) ct);
 		}
 	}
 
 	item_attach->cValues = i;
 
 	stream = g_new0 (ExchangeMAPIStream, 1);
-	stream->proptag = PR_ATTACH_DATA_BIN; 
+	stream->proptag = PR_ATTACH_DATA_BIN;
 	stream->value = g_byte_array_new ();
 
 	camel_seekable_stream_seek((CamelSeekableStream *)content_stream, 0, CAMEL_STREAM_SET);
-	while (read_size = camel_stream_read(content_stream, (char *)buf, STREAM_SIZE), read_size > 0) {
+	while (read_size = camel_stream_read(content_stream, (gchar *)buf, STREAM_SIZE), read_size > 0) {
 		stream->value = g_byte_array_append (stream->value, buf, read_size);
 	}
 
-	item_attach->streams = g_slist_append (item_attach->streams, stream); 
+	item_attach->streams = g_slist_append (item_attach->streams, stream);
 	item->attachments = g_slist_append(item->attachments, item_attach);
 
 	return TRUE;
 }
 
-static gboolean 
+static gboolean
 mapi_do_multipart (CamelMultipart *mp, MapiItem *item, gboolean *is_first)
 {
 	CamelDataWrapper *dw;
@@ -271,7 +270,7 @@ mapi_do_multipart (CamelMultipart *mp, MapiItem *item, gboolean *is_first)
 			/* recursive */
 			if (!mapi_do_multipart (CAMEL_MULTIPART (dw), item, is_first))
 				return FALSE;
-			continue ;
+			continue;
 		}
 		/* filename */
 		filename = camel_mime_part_get_filename(part);
@@ -283,7 +282,7 @@ mapi_do_multipart (CamelMultipart *mp, MapiItem *item, gboolean *is_first)
 
 		description = camel_mime_part_get_description(part);
 		content_id = camel_mime_part_get_content_id(part);
-		
+
 		type = camel_mime_part_get_content_type(part);
 
 		if (i_part == 0 && (*is_first) && camel_content_type_is (type, "text", "plain")) {
@@ -299,7 +298,6 @@ mapi_do_multipart (CamelMultipart *mp, MapiItem *item, gboolean *is_first)
 	return TRUE;
 }
 
-
 MapiItem *
 camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, CamelException *ex)
 {
@@ -309,11 +307,11 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 	CamelMultipart *multipart;
 	CamelInternetAddress *to, *cc, *bcc;
 	MapiItem *item = g_new0 (MapiItem, 1);
-	const char *namep;
-	const char *addressp;
-	const char *content_type;		
+	const gchar *namep;
+	const gchar *addressp;
+	const gchar *content_type;
 
-	ssize_t	content_size;
+	gssize	content_size;
 	GSList *recipient_list = NULL;
 	gint i = 0;
 
@@ -333,7 +331,7 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 	mapi_item_set_from (item, namep);
 
 	to = camel_mime_message_get_recipients(message, CAMEL_RECIPIENT_TYPE_TO);
-	for (i = 0; to && camel_internet_address_get (to, i, &namep, &addressp); i++){
+	for (i = 0; to && camel_internet_address_get (to, i, &namep, &addressp); i++) {
 		mapi_item_add_recipient (addressp, olTo, &recipient_list);
 	}
 
@@ -346,7 +344,7 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 	for (i = 0; bcc && camel_internet_address_get (bcc, i, &namep, &addressp); i++) {
 		mapi_item_add_recipient (addressp, olBCC, &recipient_list);
 	}
-	
+
 	if (camel_mime_message_get_subject(message)) {
 		mapi_item_set_subject(item, camel_mime_message_get_subject(message));
 	}
@@ -362,7 +360,7 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 	if (CAMEL_IS_MULTIPART(multipart)) {
 		gboolean is_first = TRUE;
 		if (!mapi_do_multipart (CAMEL_MULTIPART(multipart), item, &is_first))
-			printf("camel message multi part error\n"); 
+			printf("camel message multi part error\n");
 	} else {
 		dw = camel_medium_get_content (CAMEL_MEDIUM (message));
 		if (dw) {
@@ -377,7 +375,7 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 	}
 
 	item->recipients = recipient_list;
-	
+
 	return item;
 }
 
@@ -391,7 +389,7 @@ camel_mapi_utils_create_item_build_props (struct SPropValue **value, struct SPro
 	bool *send_rich_info = g_new0 (bool, 1);
 	uint32_t *msgflag = g_new0 (uint32_t, 1);
 	uint32_t *cpid = g_new0 (uint32_t, 1);
-	int i=0;
+	gint i=0;
 
 	props = g_new0 (struct SPropValue, 11 + 1);
 
@@ -402,10 +400,10 @@ camel_mapi_utils_create_item_build_props (struct SPropValue **value, struct SPro
 	set_SPropValue_proptag(&props[i++], PR_NORMALIZED_SUBJECT_UNICODE, g_strdup (item->header.subject));
 
 	*send_rich_info = false;
-	set_SPropValue_proptag(&props[i++], PR_SEND_RICH_INFO, (const void *) send_rich_info);
+	set_SPropValue_proptag(&props[i++], PR_SEND_RICH_INFO, (gconstpointer ) send_rich_info);
 
 	*msgflag = MSGFLAG_UNSENT;
-	set_SPropValue_proptag(&props[i++], PR_MESSAGE_FLAGS, (void *)msgflag);
+	set_SPropValue_proptag(&props[i++], PR_MESSAGE_FLAGS, (gpointer)msgflag);
 
 	/* Message threading information */
 	if (item->header.references)
@@ -424,14 +422,14 @@ camel_mapi_utils_create_item_build_props (struct SPropValue **value, struct SPro
 		bin->cb = stream->value->len;
 		bin->lpb = (uint8_t *)stream->value->data;
 		if (stream->proptag == PR_HTML)
-			set_SPropValue_proptag(&props[i++], stream->proptag, (void *)bin);
+			set_SPropValue_proptag(&props[i++], stream->proptag, (gpointer)bin);
 		else if (stream->proptag == PR_BODY_UNICODE)
-			set_SPropValue_proptag(&props[i++], stream->proptag, (void *)stream->value->data);
+			set_SPropValue_proptag(&props[i++], stream->proptag, (gpointer)stream->value->data);
 	}
 
 	/*  FIXME : */
 	/* editor = EDITOR_FORMAT_PLAINTEXT; */
-	/* set_SPropValue_proptag(&props[i++], PR_MSG_EDITOR_FORMAT, (const void *)editor); */
+	/* set_SPropValue_proptag(&props[i++], PR_MSG_EDITOR_FORMAT, (gconstpointer )editor); */
 
 	*value = props;
 	return i;

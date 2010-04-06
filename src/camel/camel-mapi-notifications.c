@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -51,7 +51,7 @@ extern gint camel_application_is_exiting;
 
 struct mapi_push_notification_data {
 	guint16 event_mask;
-	guint32 connection; 
+	guint32 connection;
 	guint32 event_options;
 	gpointer event_data;
 
@@ -88,7 +88,7 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 	while (info_count >= 0) {
 		info = camel_store_summary_index ((CamelStoreSummary *)store->summary, info_count);
 		mapi_info = (CamelMapiStoreInfo *)info;
-		if (info && !g_strcmp0 (mapi_info->folder_id, folder_id)){
+		if (info && !g_strcmp0 (mapi_info->folder_id, folder_id)) {
 			folder_name = mapi_info->full_name;
 		}
 		if (info)
@@ -118,7 +118,7 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 	CAMEL_SERVICE_REC_LOCK (store, connect_lock);
 	camel_mapi_folder_fetch_summary ((CamelStore *)store, new_mail_notif->FID, res, NULL, fetch_data, options);
 	CAMEL_SERVICE_REC_UNLOCK (store, connect_lock);
-	
+
 	camel_folder_summary_touch (folder->summary);
 	/* mapi_sync_summary */
 	camel_folder_summary_save_to_db (folder->summary, NULL);
@@ -132,9 +132,9 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 }
 
 static gint
-mapi_notifications_filter (guint16 type, void *event, void *store)
+mapi_notifications_filter (guint16 type, gpointer event, gpointer store)
 {
-	switch(type) {
+	switch (type) {
 	/* -- Folder Events -- */
 	case fnevObjectCreated:
 		d_notifications(printf ("Event : Folder Created\n"));
@@ -183,7 +183,6 @@ mapi_notifications_filter (guint16 type, void *event, void *store)
 	return 0;
 }
 
-
 /*Of type mapi_notify_continue_callback_t*/
 static gint
 mapi_notifications_continue_check (gpointer data)
@@ -195,7 +194,7 @@ mapi_notifications_continue_check (gpointer data)
 	if (g_cancellable_is_cancelled (thread_data->cancellable) || (camel_application_is_exiting == TRUE))
 		return 1;
 
-	/* HACK ALERT : This is a BAD idea. But ;-), A bug in MonitorNotification */
+	/* HACK ALERT : This is a BAD idea. But;-), A bug in MonitorNotification */
 	/* makes select() return immediately. We are introducing a artificial delay here */
 	/* to avoid high CPU usage. Remove this when libmapi 0.9.1 is out */
 	g_usleep (G_USEC_PER_SEC * 2);
@@ -230,7 +229,7 @@ mapi_push_notification_listener_thread (gpointer data)
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 		exchange_mapi_events_monitor (cb_data); /*Blocking call. Don't hold locks here*/
 		exchange_mapi_events_unsubscribe (thread_data->connection);
-	} else 
+	} else
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 
 	g_free (cb_data);

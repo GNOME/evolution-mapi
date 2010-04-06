@@ -10,7 +10,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/> 
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -44,7 +44,7 @@ eds_module_shutdown   (void)
 }
 
 void
-eds_module_list_types (const GType **types, int *num_types)
+eds_module_list_types (const GType **types, gint *num_types)
 {
 	*types = & mapigal_type;
 	*num_types = 1;

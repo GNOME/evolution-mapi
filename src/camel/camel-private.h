@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -39,7 +39,7 @@ struct _CamelFolderPrivate {
 	GStaticRecMutex lock;
 	GStaticMutex change_lock;
 	/* must require the 'change_lock' to access this */
-	int frozen;
+	gint frozen;
 	struct _CamelFolderChangeInfo *changed_frozen; /* queues changed events */
 };
 
@@ -52,7 +52,6 @@ struct _CamelFolderPrivate {
 #define CAMEL_FOLDER_REC_UNLOCK(f, l) \
 	(g_static_rec_mutex_unlock(&((CamelFolder *)f)->priv->l))
 
-
 struct _CamelStorePrivate {
 	GStaticRecMutex folder_lock;	/* for locking folder operations */
 };
@@ -62,14 +61,12 @@ struct _CamelStorePrivate {
 #define CAMEL_STORE_UNLOCK(f, l) \
 	(g_static_rec_mutex_unlock(&((CamelStore *)f)->priv->l))
 
-
 struct _CamelTransportPrivate {
 	GMutex *send_lock;   /* for locking send operations */
 };
 
 #define CAMEL_TRANSPORT_LOCK(f, l) (g_mutex_lock(((CamelTransport *)f)->priv->l))
 #define CAMEL_TRANSPORT_UNLOCK(f, l) (g_mutex_unlock(((CamelTransport *)f)->priv->l))
-
 
 struct _CamelServicePrivate {
 	GStaticRecMutex connect_lock;	/* for locking connection operations */
@@ -85,12 +82,11 @@ struct _CamelServicePrivate {
 #define CAMEL_SERVICE_REC_UNLOCK(f, l) \
 	(g_static_rec_mutex_unlock(&((CamelService *)f)->priv->l))
 
-
 struct _CamelSessionPrivate {
 	GMutex *lock;		/* for locking everything basically */
 	GMutex *thread_lock;	/* locking threads */
 
-	int thread_id;
+	gint thread_id;
 	GHashTable *thread_active;
 	GThreadPool *thread_pool;
 
@@ -99,7 +95,6 @@ struct _CamelSessionPrivate {
 
 #define CAMEL_SESSION_LOCK(f, l) (g_mutex_lock(((CamelSession *)f)->priv->l))
 #define CAMEL_SESSION_UNLOCK(f, l) (g_mutex_unlock(((CamelSession *)f)->priv->l))
-
 
 /* most of this stuff really is private, but the lock can be used by subordinate classes */
 struct _CamelFolderSummaryPrivate {
@@ -115,7 +110,7 @@ struct _CamelFolderSummaryPrivate {
 	struct _CamelStreamFilter *filter_stream;
 
 	struct _CamelIndex *index;
-	
+
 	GMutex *summary_lock;	/* for the summary hashtable/array */
 	GMutex *io_lock;	/* load/save lock, for access to saved_count, etc */
 	GMutex *filter_lock;	/* for accessing any of the filtering/indexing stuff, since we share them */
@@ -125,7 +120,6 @@ struct _CamelFolderSummaryPrivate {
 
 #define CAMEL_SUMMARY_LOCK(f, l) (g_mutex_lock(((CamelFolderSummary *)f)->priv->l))
 #define CAMEL_SUMMARY_UNLOCK(f, l) (g_mutex_unlock(((CamelFolderSummary *)f)->priv->l))
-
 
 struct _CamelStoreSummaryPrivate {
 	GMutex *summary_lock;	/* for the summary hashtable/array */
@@ -137,11 +131,10 @@ struct _CamelStoreSummaryPrivate {
 #define CAMEL_STORE_SUMMARY_LOCK(f, l) (g_mutex_lock(((CamelStoreSummary *)f)->priv->l))
 #define CAMEL_STORE_SUMMARY_UNLOCK(f, l) (g_mutex_unlock(((CamelStoreSummary *)f)->priv->l))
 
-
 struct _CamelVeeFolderPrivate {
 	GList *folders;			/* lock using subfolder_lock before changing/accessing */
 	GList *folders_changed;		/* for list of folders that have changed between updates */
-	
+
 	GMutex *summary_lock;		/* for locking vfolder summary */
 	GMutex *subfolder_lock;		/* for locking the subfolder list */
 	GMutex *changed_lock;		/* for locking the folders-changed list */
@@ -150,14 +143,12 @@ struct _CamelVeeFolderPrivate {
 #define CAMEL_VEE_FOLDER_LOCK(f, l) (g_mutex_lock(((CamelVeeFolder *)f)->priv->l))
 #define CAMEL_VEE_FOLDER_UNLOCK(f, l) (g_mutex_unlock(((CamelVeeFolder *)f)->priv->l))
 
-
 struct _CamelDataWrapperPrivate {
 	pthread_mutex_t stream_lock;
 };
 
 #define CAMEL_DATA_WRAPPER_LOCK(dw, l)   (pthread_mutex_lock(&((CamelDataWrapper *)dw)->priv->l))
 #define CAMEL_DATA_WRAPPER_UNLOCK(dw, l) (pthread_mutex_unlock(&((CamelDataWrapper *)dw)->priv->l))
-
 
 /* most of this stuff really is private, but the lock can be used by subordinate classes */
 struct _CamelCertDBPrivate {
@@ -171,11 +162,11 @@ struct _CamelCertDBPrivate {
 #define CAMEL_CERTDB_UNLOCK(db, l) (g_mutex_unlock (((CamelCertDB *) db)->priv->l))
 
 #ifdef G_OS_WIN32
-int fsync (int fd);
+gint fsync (gint fd);
 
-const char *_camel_get_localedir (void) G_GNUC_CONST;
-const char *_camel_get_libexecdir (void) G_GNUC_CONST;
-const char *_camel_get_providerdir (void) G_GNUC_CONST;
+const gchar *_camel_get_localedir (void) G_GNUC_CONST;
+const gchar *_camel_get_libexecdir (void) G_GNUC_CONST;
+const gchar *_camel_get_providerdir (void) G_GNUC_CONST;
 
 #undef EVOLUTION_LOCALEDIR
 #define EVOLUTION_LOCALEDIR _camel_get_localedir ()

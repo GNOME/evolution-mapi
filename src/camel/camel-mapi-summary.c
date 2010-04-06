@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -41,13 +41,13 @@
 
 /*Prototypes*/
 static CamelFIRecord* mapi_summary_header_to_db (CamelFolderSummary *, CamelException *ex);
-static int mapi_summary_header_from_db (CamelFolderSummary *, CamelFIRecord *fir);
+static gint mapi_summary_header_from_db (CamelFolderSummary *, CamelFIRecord *fir);
 
-static CamelMessageInfo *mapi_message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir) ;
-static CamelMIRecord *mapi_message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info) ;
+static CamelMessageInfo *mapi_message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir);
+static CamelMIRecord *mapi_message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info);
 
-static CamelMessageContentInfo * mapi_content_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir) ;
-static int mapi_content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, CamelMIRecord *mir) ;
+static CamelMessageContentInfo * mapi_content_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir);
+static gint mapi_content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, CamelMIRecord *mir);
 
 static void camel_mapi_summary_class_init (CamelMapiSummaryClass *klass);
 static void camel_mapi_summary_init       (CamelMapiSummary *obj);
@@ -55,9 +55,7 @@ static void camel_mapi_summary_finalize   (CamelObject *obj);
 
 /*End of Prototypes*/
 
-
-static CamelFolderSummaryClass *camel_mapi_summary_parent ;
-
+static CamelFolderSummaryClass *camel_mapi_summary_parent;
 
 CamelType
 camel_mapi_summary_get_type (void)
@@ -100,7 +98,7 @@ camel_mapi_summary_class_init (CamelMapiSummaryClass *klass)
 
 	camel_mapi_summary_parent = CAMEL_FOLDER_SUMMARY_CLASS (camel_type_get_global_classfuncs (camel_folder_summary_get_type()));
 
-	cfs_class->message_info_clone = mapi_message_info_clone ;
+	cfs_class->message_info_clone = mapi_message_info_clone;
 
 	cfs_class->summary_header_to_db = mapi_summary_header_to_db;
 	cfs_class->summary_header_from_db = mapi_summary_header_from_db;
@@ -110,7 +108,6 @@ camel_mapi_summary_class_init (CamelMapiSummaryClass *klass)
 	cfs_class->content_info_from_db = mapi_content_info_from_db;
 }
 
-
 static void
 camel_mapi_summary_init (CamelMapiSummary *obj)
 {
@@ -119,7 +116,7 @@ camel_mapi_summary_init (CamelMapiSummary *obj)
 	/* subclasses need to set the right instance data sizes */
 	s->message_info_size = sizeof(CamelMapiMessageInfo);
 	s->content_info_size = sizeof(CamelMapiMessageContentInfo);
-	
+
 	/* Meta-summary - Overriding UID len */
 	s->meta_summary->uid_len = 2048;
 }
@@ -142,7 +139,7 @@ camel_mapi_summary_finalize (CamelObject *obj)
  * Return value: A new CamelMapiSummary object.
  **/
 CamelFolderSummary *
-camel_mapi_summary_new (struct _CamelFolder *folder, const char *filename)
+camel_mapi_summary_new (struct _CamelFolder *folder, const gchar *filename)
 {
 	CamelException ex;
 
@@ -150,8 +147,8 @@ camel_mapi_summary_new (struct _CamelFolder *folder, const char *filename)
 			camel_object_new (camel_mapi_summary_get_type ()));
 
 	camel_exception_init (&ex);
-	
-	summary->folder = folder ;
+
+	summary->folder = folder;
 	camel_folder_summary_set_build_content (summary, TRUE);
 	camel_folder_summary_set_filename (summary, filename);
 
@@ -167,14 +164,14 @@ camel_mapi_summary_new (struct _CamelFolder *folder, const char *filename)
 	return summary;
 }
 
-static int
-mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir) 
+static gint
+mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
 {
 	CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (summary);
 	gchar *part;
 
 	if (camel_mapi_summary_parent->summary_header_from_db (summary, fir) == -1)
-		return -1 ;
+		return -1;
 
 	part = fir->bdata;
 
@@ -189,14 +186,14 @@ mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
 	return 0;
 }
 static CamelFIRecord *
-mapi_summary_header_to_db (CamelFolderSummary *summary, CamelException *ex) 
+mapi_summary_header_to_db (CamelFolderSummary *summary, CamelException *ex)
 {
 	CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY(summary);
 	struct _CamelFIRecord *fir;
 
 	fir = camel_mapi_summary_parent->summary_header_to_db (summary, ex);
 
-	if(!fir)
+	if (!fir)
 		return NULL;
 
 	fir->bdata = g_strdup_printf ("%d %s", CAMEL_MAPI_SUMMARY_VERSION, mapi_summary->sync_time_stamp);
@@ -205,17 +202,17 @@ mapi_summary_header_to_db (CamelFolderSummary *summary, CamelException *ex)
 }
 
 static CamelMessageInfo*
-mapi_message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir) 
+mapi_message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 {
-	CamelMessageInfo *info ;
+	CamelMessageInfo *info;
 
-	info = camel_mapi_summary_parent->message_info_from_db (s, mir) ;
+	info = camel_mapi_summary_parent->message_info_from_db (s, mir);
 
-	return info ;
+	return info;
 }
 
 static CamelMIRecord *
-mapi_message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info) 
+mapi_message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info)
 {
 	struct _CamelMIRecord *mir;
 
@@ -224,13 +221,13 @@ mapi_message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info)
 	return mir;
 }
 
-static CamelMessageContentInfo* 
-mapi_content_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir) 
+static CamelMessageContentInfo*
+mapi_content_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 {
-	char *part = mir->cinfo;
+	gchar *part = mir->cinfo;
 	guint32 type=0;
-	
-	if (part) 
+
+	if (part)
 		MS_EXTRACT_FIRST_DIGIT (type);
 
 	mir->cinfo = part;
@@ -241,7 +238,7 @@ mapi_content_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 		return camel_folder_summary_content_info_new (s);
 }
 
-static int
+static gint
 mapi_content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, CamelMIRecord *mir)
 {
 	if (info->type) {
@@ -258,8 +255,8 @@ mapi_summary_clear (CamelFolderSummary *summary, gboolean uncache)
 {
 	CamelFolderChangeInfo *changes;
 	CamelMessageInfo *info;
-	int i, count;
-	const char *uid;
+	gint i, count;
+	const gchar *uid;
 
 	changes = camel_folder_change_info_new ();
 	count = camel_folder_summary_count (summary);

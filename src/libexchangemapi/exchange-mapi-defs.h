@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -22,7 +22,8 @@
  */
 
 /* Someday, all these definitions should be pushed in libmapi/mapidefs.h */
-/* NOTE: Some of the enumerations are commented out since they conflict with libmapi/mapidefs.h */
+/* NOTE: Some of the enumerations are commented out since they conflict
+ *       with libmapi/mapidefs.h */
 
 #ifndef EXCHANGE_MAPI_DEFS_H
 #define EXCHANGE_MAPI_DEFS_H
@@ -63,14 +64,14 @@ typedef enum {
 typedef enum {
     SingleAppt = 0x0400 ,
     RecurAppt = 0x0401 ,
-    SingleMeet = 0x0402 , 
+    SingleMeet = 0x0402 ,
     RecurMeet = 0x0403 ,
     MeetReq = 0x0404 ,
     RespAccept = 0x0405 ,
     RespDecline = 0x0406 ,
     RespTentAccept = 0x0407 ,
     MeetCancel = 0x0408 ,
-    MeetInfoUpdate = 0x0409 
+    MeetInfoUpdate = 0x0409
 } IconIndex;
 
 #if 0
@@ -110,7 +111,6 @@ typedef enum {
 #define	olFolderPublicIPMSubtree	26
 #endif
 
-
 /* APPOINTMENTS */
 typedef enum {
     olFree = 0,
@@ -142,12 +142,12 @@ typedef enum {
 } OlResponseStatus;
 
 typedef enum {
-    mtgEmpty = 		0x00000000,
-    mtgRequest = 	0x00000001,
-    mtgFull = 		0x00010000,
-    mtgInfo = 		0x00020000,
-    mtgOutOfDate = 	0x00080000,
-    mtgDelegatorCopy = 	0x00100000
+    mtgEmpty =		0x00000000,
+    mtgRequest =	0x00000001,
+    mtgFull =		0x00010000,
+    mtgInfo =		0x00020000,
+    mtgOutOfDate =	0x00080000,
+    mtgDelegatorCopy =	0x00100000
 } MeetingType;
 
 typedef enum {
@@ -169,7 +169,6 @@ typedef enum {
     olNetShow = 1,
     olChat = 2
 } OlNetMeetingType;
-
 
 /* TASKS */
 typedef enum {
@@ -207,7 +206,6 @@ typedef enum {
 } OlTaskStatus;
 #endif
 
-
 /* NOTES */
 #if 0
 typedef enum {
@@ -219,9 +217,8 @@ typedef enum {
 } OlNoteColor;
 #endif
 
-
 /* RECURRENCE (APPOINTMENTS/MEETINGS/TASKS) */
-typedef enum { 
+typedef enum {
     rectypeNone = 0,
     rectypeDaily = 1,
     rectypeWeekly = 2,
@@ -245,21 +242,19 @@ typedef enum {
     olRecursYearly = 5,
     olRecursYearNth = 6
 } OlRecurrencePatternType;
-#endif 
+#endif
 
-
-#define IPM_CONTACT 				"IPM.Contact"
-#define IPM_APPOINTMENT 			"IPM.Appointment"
-#define IPM_SCHEDULE_MEETING_PREFIX 		"IPM.Schedule.Meeting."
-#define IPM_SCHEDULE_MEETING_REQUEST 		"IPM.Schedule.Meeting.Request"
-#define IPM_SCHEDULE_MEETING_CANCELED 		"IPM.Schedule.Meeting.Canceled"
-#define IPM_SCHEDULE_MEETING_RESP_PREFIX 	"IPM.Schedule.Meeting.Resp."
-#define IPM_SCHEDULE_MEETING_RESP_POS 		"IPM.Schedule.Meeting.Resp.Pos"
-#define IPM_SCHEDULE_MEETING_RESP_TENT 		"IPM.Schedule.Meeting.Resp.Tent"
-#define IPM_SCHEDULE_MEETING_RESP_NEG 		"IPM.Schedule.Meeting.Resp.Neg"
-#define IPM_TASK 				"IPM.Task"
-#define IPM_STICKYNOTE 				"IPM.StickyNote"
-
+#define IPM_CONTACT				"IPM.Contact"
+#define IPM_APPOINTMENT				"IPM.Appointment"
+#define IPM_SCHEDULE_MEETING_PREFIX		"IPM.Schedule.Meeting."
+#define IPM_SCHEDULE_MEETING_REQUEST		"IPM.Schedule.Meeting.Request"
+#define IPM_SCHEDULE_MEETING_CANCELED		"IPM.Schedule.Meeting.Canceled"
+#define IPM_SCHEDULE_MEETING_RESP_PREFIX	"IPM.Schedule.Meeting.Resp."
+#define IPM_SCHEDULE_MEETING_RESP_POS		"IPM.Schedule.Meeting.Resp.Pos"
+#define IPM_SCHEDULE_MEETING_RESP_TENT		"IPM.Schedule.Meeting.Resp.Tent"
+#define IPM_SCHEDULE_MEETING_RESP_NEG		"IPM.Schedule.Meeting.Resp.Neg"
+#define IPM_TASK				"IPM.Task"
+#define IPM_STICKYNOTE				"IPM.StickyNote"
 
 G_END_DECLS
 

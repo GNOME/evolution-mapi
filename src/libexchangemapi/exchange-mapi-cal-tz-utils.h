@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -46,7 +46,7 @@ void
 exchange_mapi_cal_tz_util_dump (void);
 
 void
-exchange_mapi_cal_util_mapi_tz_to_bin (const char *mapi_tzid, struct Binary_r *sb);
+exchange_mapi_cal_util_mapi_tz_to_bin (const gchar *mapi_tzid, struct Binary_r *sb);
 
 gchar *
 exchange_mapi_cal_util_bin_to_mapi_tz (GByteArray *ba);
@@ -60,8 +60,8 @@ typedef uint32_t GUID;
 typedef uint64_t ULONG;
 typedef time_t SYSTEMTIME;
 typedef uint8_t* LPBYTE;
-typedef char* LPWSTR;
-typedef char WCHAR;
+typedef gchar * LPWSTR;
+typedef gchar WCHAR;
 
 // TZREG
 // =====================
@@ -82,9 +82,9 @@ typedef struct RenTimeZone
 
 // TZRULE
 // =====================
-//   This structure represents both a description when a daylight. 
+//   This structure represents both a description when a daylight.
 //   saving shift occurs, and in addition, the year in which that
-//   timezone rule came into effect. 
+//   timezone rule came into effect.
 //
 typedef struct
 {

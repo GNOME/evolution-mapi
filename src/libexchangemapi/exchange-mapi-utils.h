@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -27,33 +27,33 @@
 #include "exchange-mapi-connection.h"
 
 gchar *
-utf8tolinux (const char *wstring);
+utf8tolinux (const gchar *wstring);
 
 gchar *
 exchange_mapi_util_mapi_id_to_string (mapi_id_t id);
-gboolean 
-exchange_mapi_util_mapi_id_from_string (const char *str, mapi_id_t *id);
+gboolean
+exchange_mapi_util_mapi_id_from_string (const gchar *str, mapi_id_t *id);
 
 gchar *
 exchange_mapi_util_mapi_ids_to_uid (mapi_id_t fid, mapi_id_t mid);
-gboolean 
-exchange_mapi_util_mapi_ids_from_uid (const char *str, mapi_id_t *fid, mapi_id_t *mid);
+gboolean
+exchange_mapi_util_mapi_ids_from_uid (const gchar *str, mapi_id_t *fid, mapi_id_t *mid);
 
-const void *
+gconstpointer
 exchange_mapi_util_find_SPropVal_array_propval (struct SPropValue *values, uint32_t proptag);
-const void *
+gconstpointer
 exchange_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag);
-const void *
+gconstpointer
 exchange_mapi_util_find_array_propval (struct mapi_SPropValue_array *properties, uint32_t proptag);
 
 ExchangeMAPIStream *
 exchange_mapi_util_find_stream (GSList *stream_list, uint32_t proptag);
 
-void 
+void
 exchange_mapi_util_free_attachment_list (GSList **attach_list);
-void 
+void
 exchange_mapi_util_free_recipient_list (GSList **recip_list);
-void 
+void
 exchange_mapi_util_free_stream_list (GSList **stream_list);
 
 const gchar *
@@ -63,14 +63,14 @@ void
 exchange_mapi_debug_property_dump (struct mapi_SPropValue_array *properties);
 
 struct Binary_r *
-exchange_mapi_util_entryid_generate_oneoff (TALLOC_CTX *mem_ctx, const char *display_name, const char *email, gboolean unicode);
+exchange_mapi_util_entryid_generate_oneoff (TALLOC_CTX *mem_ctx, const gchar *display_name, const gchar *email, gboolean unicode);
 struct Binary_r *
-exchange_mapi_util_entryid_generate_local (TALLOC_CTX *mem_ctx, const char *exchange_dn);
+exchange_mapi_util_entryid_generate_local (TALLOC_CTX *mem_ctx, const gchar *exchange_dn);
 
-char *
-exchange_lf_to_crlf (const char *in);
-char *
-exchange_crlf_to_lf (const char *in);
+gchar *
+exchange_lf_to_crlf (const gchar *in);
+gchar *
+exchange_crlf_to_lf (const gchar *in);
 
 gchar *exchange_mapi_util_profile_name (const gchar *username, const gchar *domain);
 

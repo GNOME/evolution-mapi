@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -36,9 +36,9 @@
 
 #define d(x) x
 
-static void add_hash (guint *, char *);
+static void add_hash (guint *, gchar *);
 static guint mapi_url_hash (gconstpointer);
-static gint check_equal (char *, char *);
+static gint check_equal (gchar *, gchar *);
 static gint mapi_url_equal (gconstpointer, gconstpointer);
 
 static CamelProviderConfEntry mapi_conf_entries[] = {
@@ -60,22 +60,21 @@ static CamelProviderConfEntry mapi_conf_entries[] = {
 	{ CAMEL_PROVIDER_CONF_CHECKBOX, "filter_junk_inbox", "filter_junk",
 	  N_("Only check for Junk messag_es in the Inbox folder"), "0" },
 
-	 	
 	{ CAMEL_PROVIDER_CONF_SECTION_END },
 	{ CAMEL_PROVIDER_CONF_END }
 };
 
 static CamelProvider mapi_provider = {
-	"mapi",	
+	"mapi",
 
-	"Exchange MAPI", 
+	"Exchange MAPI",
 
-	N_("For accessing Microsoft Exchange / OpenChange servers using MAPI"),	
+	N_("For accessing Microsoft Exchange / OpenChange servers using MAPI"),
 
-	"mail",	
+	"mail",
 
 	CAMEL_PROVIDER_IS_REMOTE | CAMEL_PROVIDER_IS_SOURCE |
-	CAMEL_PROVIDER_IS_STORAGE | CAMEL_PROVIDER_DISABLE_SENT_FOLDER | CAMEL_PROVIDER_IS_EXTERNAL, 
+	CAMEL_PROVIDER_IS_STORAGE | CAMEL_PROVIDER_DISABLE_SENT_FOLDER | CAMEL_PROVIDER_IS_EXTERNAL,
 
 	CAMEL_URL_NEED_USER | CAMEL_URL_NEED_HOST,
 
@@ -91,7 +90,7 @@ CamelServiceAuthType camel_mapi_password_authtype = {
 	TRUE
 };
 
-static int 
+static gint
 mapi_auto_detect_cb(CamelURL *url, GHashTable **auto_detected, CamelException *ex)
 {
         d (printf("mapi_auto_detect_cb\n"));
@@ -116,7 +115,7 @@ camel_provider_module_init(void)
 }
 
 static void
-add_hash(guint *hash, char *s)
+add_hash(guint *hash, gchar *s)
 {
 	if (s) {
 		*hash ^= g_str_hash(s);
@@ -138,7 +137,7 @@ mapi_url_hash(gconstpointer key)
 }
 
 static gint
-check_equal(char *s1, char *s2)
+check_equal(gchar *s1, gchar *s2)
 {
 	if (s1 == NULL) {
 		if (s2 == NULL) {
@@ -159,7 +158,7 @@ mapi_url_equal (gconstpointer a, gconstpointer b)
 {
 	const CamelURL	*u1 = a;
 	const CamelURL	*u2 = b;
-  
+
 	return check_equal (u1->protocol, u2->protocol)
 		&& check_equal (u1->user, u2->user)
 		&& check_equal (u1->authmech, u2->authmech)

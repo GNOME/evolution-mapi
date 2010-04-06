@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -31,7 +31,6 @@
 #include "exchange-mapi-utils.h"
 
 /* #include "db.h" */
-
 
 #define E_TYPE_BOOK_BACKEND_MAPI         (e_book_backend_mapi_get_type ())
 #define E_BOOK_BACKEND_MAPI(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), E_TYPE_BOOK_BACKEND_MAPI, EBookBackendMAPI))
@@ -56,5 +55,5 @@ typedef struct
 EBookBackend *e_book_backend_mapi_new      (void);
 GType         e_book_backend_mapi_get_type (void);
 
-#endif /* ! __E_BOOK_BACKEND_MAPI_H__ */
+#endif /* __E_BOOK_BACKEND_MAPI_H__ */
 

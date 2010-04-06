@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -35,7 +35,7 @@ typedef enum {
 	MAPI_OPTIONS_FETCH_BODY_STREAM = 1<<2,
 	MAPI_OPTIONS_FETCH_GENERIC_STREAMS = 1<<3,
 	MAPI_OPTIONS_FETCH_GAL = 1 <<4,
-	MAPI_OPTIONS_DONT_SUBMIT = 1<<5, 
+	MAPI_OPTIONS_DONT_SUBMIT = 1<<5,
 	MAPI_OPTIONS_GETBESTBODY = 1<<6,
 	MAPI_OPTIONS_USE_PFSTORE = 1<<7,
 	MAPI_OPTIONS_DONT_OPEN_MESSAGE = 1<<8,
@@ -50,9 +50,9 @@ typedef enum {
 } ExchangeMAPIEventsOptions;
 
 #define MAPI_OPTIONS_FETCH_ALL MAPI_OPTIONS_FETCH_ATTACHMENTS | \
-	                       MAPI_OPTIONS_FETCH_RECIPIENTS | \
-	                       MAPI_OPTIONS_FETCH_BODY_STREAM | \
-	                       MAPI_OPTIONS_FETCH_GENERIC_STREAMS
+			       MAPI_OPTIONS_FETCH_RECIPIENTS | \
+			       MAPI_OPTIONS_FETCH_BODY_STREAM | \
+			       MAPI_OPTIONS_FETCH_GENERIC_STREAMS
 
 typedef struct {
 	GByteArray *value;
@@ -67,38 +67,38 @@ typedef struct {
 
 typedef struct {
 	/* MANDATORY */
-	const char *email_id;
+	const gchar *email_id;
 	TALLOC_CTX *mem_ctx;
 
-	/* It is ideal to set all these properties on all recipients 
-	 * as we never know if a recipient would be resolved or not. */ 
+	/* It is ideal to set all these properties on all recipients
+	 * as we never know if a recipient would be resolved or not. */
 	struct {
-		/* These are properties which would be set on the 
+		/* These are properties which would be set on the
 		 * recipients regardless if the recipient is resolved or not */
-		uint32_t req_cValues; 
+		uint32_t req_cValues;
 		struct SPropValue *req_lpProps;
 
-		/* These are properties which would be set on the 
+		/* These are properties which would be set on the
 		 * recipients only if the recipient is MAPI_UNRESOLVED */
-		uint32_t ext_cValues; 
+		uint32_t ext_cValues;
 		struct SPropValue *ext_lpProps;
-	} in; 
+	} in;
 
-	/* These are properties which would be set on the 
+	/* These are properties which would be set on the
 	 * recipients after GetRecipientTable() */
 	struct SRow out_SRow;
 } ExchangeMAPIRecipient;
 
 typedef struct {
-	const char *name;
-	const char *email;
+	const gchar *name;
+	const gchar *email;
 } ExchangeMAPIGALEntry;
 
 typedef struct {
-	uint32_t cValues; 
-	struct SPropValue *lpProps; 
-	GSList *streams; 
-	GSList *objects; 
+	uint32_t cValues;
+	struct SPropValue *lpProps;
+	GSList *streams;
+	GSList *objects;
 } ExchangeMAPIAttachment;
 
 typedef struct {
@@ -117,12 +117,12 @@ struct id_list {
 	mapi_id_t id;
 };
 
-typedef gboolean (*FetchCallback) 	(FetchItemsCallbackData *item_data, gpointer data);
-typedef gboolean (*BuildNameID) 	(struct mapi_nameid *nameid, gpointer data);
-typedef int 	 (*BuildProps) 		(struct SPropValue **, struct SPropTagArray *, gpointer data);
+typedef gboolean (*FetchCallback)	(FetchItemsCallbackData *item_data, gpointer data);
+typedef gboolean (*BuildNameID)	(struct mapi_nameid *nameid, gpointer data);
+typedef gint	 (*BuildProps)		(struct SPropValue **, struct SPropTagArray *, gpointer data);
 
-gboolean 
-exchange_mapi_connection_new (const char *profile, const char *password);
+gboolean
+exchange_mapi_connection_new (const gchar *profile, const gchar *password);
 
 void
 exchange_mapi_connection_close (void);
@@ -131,36 +131,36 @@ gboolean
 exchange_mapi_connection_exists (void);
 
 gboolean
-exchange_mapi_connection_fetch_item (mapi_id_t fid, mapi_id_t mid, 
-				     const uint32_t *GetPropsList, const uint16_t cn_props, 
-				     BuildNameID build_name_id, gpointer build_name_data, 
-				     FetchCallback cb, gpointer data, 
+exchange_mapi_connection_fetch_item (mapi_id_t fid, mapi_id_t mid,
+				     const uint32_t *GetPropsList, const uint16_t cn_props,
+				     BuildNameID build_name_id, gpointer build_name_data,
+				     FetchCallback cb, gpointer data,
 				     guint32 options);
 gboolean
-exchange_mapi_connection_fetch_items   (mapi_id_t fid, 
+exchange_mapi_connection_fetch_items   (mapi_id_t fid,
 					struct mapi_SRestriction *res,struct SSortOrderSet *sort_order,
-					const uint32_t *GetPropsList, const uint16_t cn_props, 
-					BuildNameID build_name_id, gpointer build_name_data, 
-					FetchCallback cb, gpointer data, 
+					const uint32_t *GetPropsList, const uint16_t cn_props,
+					BuildNameID build_name_id, gpointer build_name_data,
+					FetchCallback cb, gpointer data,
 					guint32 options);
 
 gboolean
 exchange_mapi_util_get_gal (GPtrArray *contacts_array);
 
-mapi_id_t 
-exchange_mapi_create_folder (uint32_t olFolder, mapi_id_t pfid, const char *name);
+mapi_id_t
+exchange_mapi_create_folder (uint32_t olFolder, mapi_id_t pfid, const gchar *name);
 
-gboolean 
+gboolean
 exchange_mapi_remove_folder (uint32_t olFolder, mapi_id_t fid);
 
 gboolean
 exchange_mapi_empty_folder (mapi_id_t fid);
 
-gboolean 
-exchange_mapi_rename_folder (mapi_id_t fid, const char *new_name);
+gboolean
+exchange_mapi_rename_folder (mapi_id_t fid, const gchar *new_name);
 
 gboolean
-exchange_mapi_move_folder (mapi_id_t src_fid, mapi_id_t src_parent_fid, mapi_id_t des_fid, const char *new_name);
+exchange_mapi_move_folder (mapi_id_t src_fid, mapi_id_t src_parent_fid, mapi_id_t des_fid, const gchar *new_name);
 
 GSList *
 exchange_mapi_util_check_restriction (mapi_id_t fid, struct mapi_SRestriction *res);
@@ -169,14 +169,14 @@ mapi_id_t
 exchange_mapi_get_default_folder_id (uint32_t olFolder);
 
 mapi_id_t
-exchange_mapi_create_item (uint32_t olFolder, mapi_id_t fid, 
-			   BuildNameID build_name_id, gpointer ni_data, 
-			   BuildProps build_props, gpointer p_data, 
+exchange_mapi_create_item (uint32_t olFolder, mapi_id_t fid,
+			   BuildNameID build_name_id, gpointer ni_data,
+			   BuildProps build_props, gpointer p_data,
 			   GSList *recipients, GSList *attachments, GSList *generic_streams,
 			   uint32_t options);
 gboolean
-exchange_mapi_modify_item (uint32_t olFolder, mapi_id_t fid, mapi_id_t mid, 
-			   BuildNameID build_name_id, gpointer ni_data, 
+exchange_mapi_modify_item (uint32_t olFolder, mapi_id_t fid, mapi_id_t mid,
+			   BuildNameID build_name_id, gpointer ni_data,
 			   BuildProps build_props, gpointer p_data,
 			   GSList *recipients, GSList *attachments, GSList *generic_streams,
 			   uint32_t options);
@@ -193,25 +193,23 @@ exchange_mapi_copy_items ( mapi_id_t src_fid, mapi_id_t dest_fid, GSList *mids);
 gboolean
 exchange_mapi_move_items ( mapi_id_t src_fid, mapi_id_t dest_fid, GSList *mids);
 
-
-gboolean exchange_mapi_get_folders_list (GSList **mapi_folders); 
-gboolean exchange_mapi_get_pf_folders_list (GSList **mapi_folders, mapi_id_t parent_id); 
+gboolean exchange_mapi_get_folders_list (GSList **mapi_folders);
+gboolean exchange_mapi_get_pf_folders_list (GSList **mapi_folders, mapi_id_t parent_id);
 
 struct SPropTagArray *
-exchange_mapi_util_resolve_named_props (uint32_t olFolder, mapi_id_t fid, 
+exchange_mapi_util_resolve_named_props (uint32_t olFolder, mapi_id_t fid,
 				   BuildNameID build_name_id, gpointer ni_data);
 struct SPropTagArray *
-exchange_mapi_util_resolve_named_prop (uint32_t olFolder, mapi_id_t fid, 
-				       uint16_t lid, const char *OLEGUID);
+exchange_mapi_util_resolve_named_prop (uint32_t olFolder, mapi_id_t fid,
+				       uint16_t lid, const gchar *OLEGUID);
 uint32_t
-exchange_mapi_util_create_named_prop (uint32_t olFolder, mapi_id_t fid, 
-				      const char *named_prop_name, uint32_t ptype);
+exchange_mapi_util_create_named_prop (uint32_t olFolder, mapi_id_t fid,
+				      const gchar *named_prop_name, uint32_t ptype);
 
-gboolean exchange_mapi_create_profile (const char *username, const char *password,
-				       const char *domain, const char *server,
-				       char **error_msg, mapi_profile_callback_t cb, gpointer data);
-gboolean exchange_mapi_delete_profile (const char *profile);
-
+gboolean exchange_mapi_create_profile (const gchar *username, const gchar *password,
+				       const gchar *domain, const gchar *server,
+				       gchar **error_msg, mapi_profile_callback_t cb, gpointer data);
+gboolean exchange_mapi_delete_profile (const gchar *profile);
 
 /* Push notifications APIs */
 typedef gboolean (*exchange_check_continue) (void);

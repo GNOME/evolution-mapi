@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -50,5 +50,5 @@ GType       e_book_backend_mapi_gal_get_type (void);
 #define E_IS_BOOK_BACKEND_MAPIGAL(o)       (G_TYPE_CHECK_INSTANCE_TYPE ((o), E_TYPE_BOOK_BACKEND_MAPIGAL))
 #define E_IS_BOOK_BACKEND_MAPIGAL_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), E_TYPE_BOOK_BACKEND_MAPIGAL))
 
-#endif /* ! __E_BOOK_BACKEND_MAPIGAL_H__ */
+#endif /* __E_BOOK_BACKEND_MAPIGAL_H__ */
 

@@ -11,7 +11,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with the program; if not, see <http://www.gnu.org/licenses/>  
+ * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
  * Authors:
@@ -32,10 +32,10 @@
 
 G_BEGIN_DECLS
 
-typedef struct _CamelMapiSummary CamelMapiSummary ;
-typedef struct _CamelMapiSummaryClass CamelMapiSummaryClass ;
-typedef struct _CamelMapiMessageInfo CamelMapiMessageInfo ;
-typedef struct _CamelMapiMessageContentInfo CamelMapiMessageContentInfo ;
+typedef struct _CamelMapiSummary CamelMapiSummary;
+typedef struct _CamelMapiSummaryClass CamelMapiSummaryClass;
+typedef struct _CamelMapiMessageInfo CamelMapiMessageInfo;
+typedef struct _CamelMapiMessageContentInfo CamelMapiMessageContentInfo;
 
 /* extra summary flags*/
 enum {
@@ -49,29 +49,25 @@ struct _CamelMapiMessageInfo {
 	guint32 server_flags;
 } ;
 
-
 struct _CamelMapiMessageContentInfo {
-	CamelMessageContentInfo info ;
-} ; 
-
+	CamelMessageContentInfo info;
+} ;
 
 struct _CamelMapiSummary {
-	CamelFolderSummary parent ;
+	CamelFolderSummary parent;
 
 	gchar *sync_time_stamp;
-	guint32 version ;
-	guint32 validity ;
+	guint32 version;
+	guint32 validity;
 } ;
-
 
 struct _CamelMapiSummaryClass {
-	CamelFolderSummaryClass parent_class ;
+	CamelFolderSummaryClass parent_class;
 } ;
 
+CamelType camel_mapi_summary_get_type (void);
 
-CamelType camel_mapi_summary_get_type (void) ;
-
-CamelFolderSummary *camel_mapi_summary_new (struct _CamelFolder *folder, const char *filename) ;
+CamelFolderSummary *camel_mapi_summary_new (struct _CamelFolder *folder, const gchar *filename);
 
 void mapi_summary_clear (CamelFolderSummary *summary, gboolean uncache);
 
