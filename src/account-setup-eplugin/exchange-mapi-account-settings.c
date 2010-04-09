@@ -55,7 +55,6 @@ gboolean  e_plugin_ui_init (GtkUIManager *ui_manager,
 			    EShellView *shell_view);
 
 GtkWidget *org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data);
-void mapi_settings_run_folder_size_dialog (gpointer data);
 
 enum {
 	COL_FOLDERSIZE_NAME = 0,
@@ -69,6 +68,8 @@ typedef struct
 	GtkWidget *spinner;
 	GtkWidget *spinner_label;
 	GtkBox *spinner_hbox;
+
+	gchar *profile;
 } FolderSizeDialogData;
 
 static gboolean
@@ -81,8 +82,13 @@ mapi_settings_get_folder_size (gpointer data)
 	GtkTreeIter iter;
 	GtkBox *content_area;
 	FolderSizeDialogData *dialog_data = (FolderSizeDialogData *)data;
+	GSList *folder_list;
+	ExchangeMapiConnection *conn;
 
-	GSList *folder_list = exchange_mapi_account_listener_peek_folder_list ();
+	folder_list = NULL;
+	conn = exchange_mapi_connection_find (dialog_data->profile);
+	if (conn && exchange_mapi_connection_connected (conn))
+		folder_list = exchange_mapi_connection_peek_folders_list (conn);
 
 	/* Hide progress bar. Set status*/
 	gtk_widget_destroy (dialog_data->spinner_label);
@@ -127,11 +133,14 @@ mapi_settings_get_folder_size (gpointer data)
 	content_area = (GtkBox*) gtk_dialog_get_content_area (dialog_data->dialog);
 	gtk_box_pack_start (content_area, view, TRUE, TRUE, 6);
 
+	if (conn)
+		g_object_unref (conn);
+
 	return FALSE;
 }
 
-void
-mapi_settings_run_folder_size_dialog (gpointer data)
+static void
+mapi_settings_run_folder_size_dialog (const gchar *profile, gpointer data)
 {
 	GtkBox *content_area;
 	FolderSizeDialogData *dialog_data;
@@ -159,6 +168,8 @@ mapi_settings_run_folder_size_dialog (gpointer data)
 	gtk_box_pack_start (content_area, GTK_WIDGET (dialog_data->spinner_hbox), TRUE, TRUE, 6);
 	gtk_widget_show_all (GTK_WIDGET (dialog_data->dialog));
 
+	dialog_data->profile = g_strdup (profile);
+
 	/* Fetch folder list and size information in a thread */
 	folder_list_thread = g_thread_create ((GThreadFunc)mapi_settings_get_folder_size, dialog_data, TRUE, NULL);
 
@@ -166,13 +177,26 @@ mapi_settings_run_folder_size_dialog (gpointer data)
 	gtk_dialog_run (dialog_data->dialog);
 
 	gtk_widget_destroy (GTK_WIDGET (dialog_data->dialog));
+
+	g_free (dialog_data->profile);
 	g_free (dialog_data);
 }
 
 static void
-folder_size_clicked (GtkButton *button, gpointer data)
+folder_size_clicked (GtkButton *button, EAccount *account)
 {
-	mapi_settings_run_folder_size_dialog (NULL);
+	CamelURL *url;
+
+	g_return_if_fail (account != NULL);
+	g_return_if_fail (E_IS_ACCOUNT (account));
+
+	
+	url = camel_url_new (e_account_get_string (account,  E_ACCOUNT_SOURCE_URL), NULL);
+	g_return_if_fail (url != NULL);
+
+	mapi_settings_run_folder_size_dialog (camel_url_get_param (url, "profile"), NULL);
+
+	camel_url_free (url);
 }
 
 static void
@@ -182,16 +206,50 @@ action_folder_size_cb (GtkAction *action,
 	EShellSidebar *shell_sidebar;
 	EMFolderTree *folder_tree;
 	const gchar *folder_uri;
+	GtkTreeSelection *selection;
+	gchar *profile = NULL;
 
 	/* Get hold of Folder Tree */
 	shell_sidebar = e_shell_view_get_shell_sidebar (shell_view);
 	g_object_get (shell_sidebar, "folder-tree", &folder_tree, NULL);
 	folder_uri = em_folder_tree_get_selected_uri (folder_tree);
+	selection = em_folder_tree_model_get_selection (EM_FOLDER_TREE_MODEL (gtk_tree_view_get_model (GTK_TREE_VIEW (folder_tree))));
+	if (selection) {
+		GtkTreeIter iter;
+		GtkTreeModel *model = NULL;
+
+		if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
+			gboolean is_folder = FALSE;
+			CamelStore *store = NULL;
+
+			gtk_tree_model_get (model, &iter,
+				COL_BOOL_IS_FOLDER, &is_folder,
+				COL_POINTER_CAMEL_STORE, &store,
+				-1);
+
+			if (is_folder && !store) {
+				CamelFolder *folder = em_folder_tree_get_selected_folder (folder_tree);
+
+				if (folder)
+					store = camel_folder_get_parent_store (folder);
+			}
+
+			if (store && CAMEL_IS_SERVICE (store)) {
+				CamelService *service = CAMEL_SERVICE (store);
+
+				if (service->url)
+					profile = g_strdup (camel_url_get_param (service->url, "profile"));
+			}
+		}
+	}
+
 	g_object_unref (folder_tree);
 	g_return_if_fail (folder_uri != NULL);
 
 	if (g_str_has_prefix (folder_uri, "mapi://"))
-		mapi_settings_run_folder_size_dialog (NULL);
+		mapi_settings_run_folder_size_dialog (profile, NULL);
+
+	g_free (profile);
 }
 
 static void
@@ -278,7 +336,7 @@ org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data
 					      _("View the size of all Exchange folders"), NULL);
 	gtk_misc_set_alignment (GTK_MISC (lbl_fsize), 0, 0.5);
 	btn_fsize = (GtkButton*) g_object_new (GTK_TYPE_BUTTON, "label", _("Folders Size"), NULL);
-	g_signal_connect (btn_fsize, "clicked", G_CALLBACK (folder_size_clicked), NULL);
+	g_signal_connect (btn_fsize, "clicked", G_CALLBACK (folder_size_clicked), target_account->account);
 	gtk_table_attach_defaults (tbl_misc, GTK_WIDGET (lbl_fsize), 0, 1, 0, 1);
 	gtk_table_attach (tbl_misc, GTK_WIDGET (btn_fsize), 1, 2, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
 

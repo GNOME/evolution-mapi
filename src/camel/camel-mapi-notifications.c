@@ -208,6 +208,7 @@ mapi_push_notification_listener_thread (gpointer data)
 	struct mapi_push_notification_data *thread_data = data;
 	CamelMapiStore *mapi_store = (CamelMapiStore *) thread_data->event_data;
 	struct mapi_notify_continue_callback_data *cb_data = g_new0 (struct mapi_notify_continue_callback_data, 1);
+	ExchangeMapiConnection *conn;
 
 	g_return_val_if_fail (data != NULL, NULL);
 
@@ -221,18 +222,27 @@ mapi_push_notification_listener_thread (gpointer data)
 
 	CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
 
-	if (exchange_mapi_events_init ()) {
-		exchange_mapi_events_subscribe (thread_data->event_options, thread_data->event_mask,
+	conn = camel_mapi_store_get_exchange_connection (mapi_store);
+	if (!conn) {
+		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
+		g_return_val_if_reached (NULL);
+	}
+
+	g_object_ref (conn);
+
+	if (exchange_mapi_connection_events_init (camel_mapi_store_get_exchange_connection (mapi_store))) {
+		exchange_mapi_connection_events_subscribe (conn, thread_data->event_options, thread_data->event_mask,
 						&thread_data->connection, mapi_notifications_filter,
 						thread_data->event_data);
 
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
-		exchange_mapi_events_monitor (cb_data); /*Blocking call. Don't hold locks here*/
-		exchange_mapi_events_unsubscribe (thread_data->connection);
+		exchange_mapi_connection_events_monitor (conn, cb_data); /*Blocking call. Don't hold locks here*/
+		exchange_mapi_connection_events_unsubscribe (conn, thread_data->connection);
 	} else
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 
 	g_free (cb_data);
+	g_object_unref (conn);
 
 	return NULL;
 }

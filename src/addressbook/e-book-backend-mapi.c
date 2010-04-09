@@ -54,6 +54,8 @@ static gboolean enable_debug = TRUE;
 struct _EBookBackendMAPIPrivate
 {
 	gchar *profile;
+	ExchangeMapiConnection *conn;
+
 	mapi_id_t fid;
 	gint mode;
 	gboolean marked_for_offline;
@@ -596,7 +598,7 @@ e_book_backend_mapi_create_contact (EBookBackend *backend,
 
 	case  GNOME_Evolution_Addressbook_MODE_REMOTE :
 		contact = e_contact_new_from_vcard(vcard);
-		status = exchange_mapi_create_item (olFolderContacts, priv->fid, mapi_book_build_name_id, contact, mapi_book_build_props, contact, NULL, NULL, NULL, 0);
+		status = exchange_mapi_connection_create_item (priv->conn, olFolderContacts, priv->fid, mapi_book_build_name_id, contact, mapi_book_build_props, contact, NULL, NULL, NULL, 0);
 		if (!status) {
 			e_data_book_respond_create(book, opid, GNOME_Evolution_Addressbook_OtherError, NULL);
 			return;
@@ -652,7 +654,7 @@ e_book_backend_mapi_remove_contacts (EBookBackend *backend,
 			tmp = tmp->next;
 		}
 
-		exchange_mapi_remove_items (olFolderContacts, priv->fid, list);
+		exchange_mapi_connection_remove_items (priv->conn, olFolderContacts, priv->fid, list);
 		if (priv->marked_for_offline && priv->is_cache_ready) {
 			tmp = id_list;
 			while (tmp) {
@@ -704,7 +706,7 @@ e_book_backend_mapi_modify_contact (EBookBackend *backend,
 		exchange_mapi_util_mapi_ids_from_uid (tmp, &fid, &mid);
 		printf("modify id %s\n", tmp);
 
-		status = exchange_mapi_modify_item (olFolderContacts, priv->fid, mid, mapi_book_build_name_id, contact, mapi_book_build_props, contact, NULL, NULL, NULL, 0);
+		status = exchange_mapi_connection_modify_item (priv->conn, olFolderContacts, priv->fid, mid, mapi_book_build_name_id, contact, mapi_book_build_props, contact, NULL, NULL, NULL, 0);
 		printf("getting %d\n", status);
 		if (!status) {
 			e_data_book_respond_modify(book, opid, GNOME_Evolution_Addressbook_OtherError, NULL);
@@ -813,7 +815,7 @@ e_book_backend_mapi_get_contact (EBookBackend *backend,
 			mapi_id_t fid, mid;
 
 			exchange_mapi_util_mapi_ids_from_uid (id, &fid, &mid);
-			exchange_mapi_connection_fetch_item (priv->fid, mid,
+			exchange_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
 							NULL, 0,
 							NULL, NULL,
 							create_contact_item, contact,
@@ -970,7 +972,7 @@ e_book_backend_mapi_get_contact_list (EBookBackend *backend,
 				return;
 			}
 
-			if (!exchange_mapi_connection_fetch_items (priv->fid, &res, NULL,
+			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 								GetPropsList, n_GetPropsList,
 								mapi_book_build_name_id_for_getprops, NULL,
 								create_contact_list_cb, &vcard_str,
@@ -1249,7 +1251,7 @@ book_view_thread (gpointer data)
 
 	case GNOME_Evolution_Addressbook_MODE_REMOTE:
 
-		if (!exchange_mapi_connection_exists ()) {
+		if (!priv->conn || !exchange_mapi_connection_connected (priv->conn)) {
 			e_book_backend_notify_auth_required (E_BOOK_BACKEND (backend));
 			e_data_book_view_notify_complete (book_view,
 						GNOME_Evolution_Addressbook_AuthenticationRequired);
@@ -1306,7 +1308,7 @@ book_view_thread (gpointer data)
 			}
 
 			//FIXME: We need to fetch only the query from the server live and not everything.
-			if (!exchange_mapi_connection_fetch_items (priv->fid, &res, NULL,
+			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 							   GetPropsList, n_GetPropsList,
 							   mapi_book_build_name_id_for_getprops, NULL,
 							   create_contact_cb, book_view,
@@ -1322,7 +1324,7 @@ book_view_thread (gpointer data)
 				return;
 			}
 		} else {
-			if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
+			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 							NULL, 0,
 							NULL, NULL,
 							create_contact_cb, book_view,
@@ -1429,7 +1431,7 @@ build_cache (EBookBackendMAPI *ebmapi)
 
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 
-	if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
+	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 						NULL, 0,
 						NULL, NULL,
 						cache_contact_cb, ebmapi,
@@ -1474,7 +1476,7 @@ update_cache (EBookBackendMAPI *ebmapi)
 
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 
-	if (!exchange_mapi_connection_fetch_items ( priv->fid, &res, NULL,
+	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 						NULL, 0,
 						NULL, NULL,
 						cache_contact_cb, ebmapi,
@@ -1516,7 +1518,14 @@ e_book_backend_mapi_authenticate_user (EBookBackend *backend,
 
 	case GNOME_Evolution_Addressbook_MODE_REMOTE:
 
-		if (!exchange_mapi_connection_new (priv->profile, passwd))
+		priv->conn = exchange_mapi_connection_new (priv->profile, passwd);
+		if (!priv->conn) {
+			priv->conn = exchange_mapi_connection_find (priv->profile);
+			if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
+				exchange_mapi_connection_reconnect (priv->conn, passwd);
+		}
+
+		if (!priv->conn)
 			return e_data_book_respond_authenticate_user (book, opid,GNOME_Evolution_Addressbook_OtherError);
 
 		if (priv->cache && priv->is_cache_ready) {
@@ -1625,7 +1634,7 @@ e_book_backend_mapi_remove (EBookBackend *backend,
 
 	case GNOME_Evolution_Addressbook_MODE_REMOTE:
 
-		status = exchange_mapi_remove_folder (olFolderContacts, priv->fid);
+		status = exchange_mapi_connection_remove_folder (priv->conn, priv->fid);
 		if (!status) {
 			e_data_book_respond_remove (book, opid, GNOME_Evolution_Addressbook_OtherError);
 			return;
@@ -1700,6 +1709,10 @@ e_book_backend_mapi_dispose (GObject *object)
 	if (priv->profile) {
 		g_free (priv->profile);
 		priv->profile = NULL;
+	}
+	if (priv->conn) {
+		g_object_unref (priv->conn);
+		priv->conn = NULL;
 	}
 	if (priv->uri) {
 		g_free (priv->uri);

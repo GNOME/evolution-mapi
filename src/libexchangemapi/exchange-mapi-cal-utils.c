@@ -669,7 +669,7 @@ id_to_string (GByteArray *ba)
 }
 
 ECalComponent *
-exchange_mapi_cal_util_mapi_props_to_comp (icalcomponent_kind kind, const gchar *mid, struct mapi_SPropValue_array *properties,
+exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcomponent_kind kind, const gchar *mid, struct mapi_SPropValue_array *properties,
 					   GSList *streams, GSList *recipients, GSList *attachments,
 					   const gchar *local_store_uri, const icaltimezone *default_zone)
 {
@@ -823,9 +823,9 @@ exchange_mapi_cal_util_mapi_props_to_comp (icalcomponent_kind kind, const gchar 
 				const gchar *sent_email = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS);
 
 				if (!g_utf8_collate (sender_email_type, "EX"))
-					sender_email = exchange_mapi_util_ex_to_smtp (sender_email);
+					sender_email = exchange_mapi_connection_ex_to_smtp (conn, sender_email);
 				if (!g_utf8_collate (sent_email_type, "EX"))
-					sent_email = exchange_mapi_util_ex_to_smtp (sent_email);
+					sent_email = exchange_mapi_connection_ex_to_smtp (conn, sent_email);
 
 				val = g_strdup_printf ("MAILTO:%s", sent_email);
 				prop = icalproperty_new_organizer (val);
@@ -1019,7 +1019,7 @@ fetch_server_data_cb (FetchItemsCallbackData *item_data, gpointer data)
 	gchar *filename = g_build_filename (g_get_home_dir (), TEMP_ATTACH_STORE, NULL);
 	gchar *fileuri = g_filename_to_uri (filename, NULL, NULL);
 	gchar *smid = exchange_mapi_util_mapi_id_to_string (mid);
-	ECalComponent *comp = exchange_mapi_cal_util_mapi_props_to_comp (kind, smid, properties, streams, recipients, attachments, fileuri, NULL);
+	ECalComponent *comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, smid, properties, streams, recipients, attachments, fileuri, NULL);
 	struct cbdata *cbdata = (struct cbdata *)(data);
 	const uint32_t *ui32;
 
@@ -1046,14 +1046,14 @@ fetch_server_data_cb (FetchItemsCallbackData *item_data, gpointer data)
 }
 
 static void
-fetch_server_data (mapi_id_t mid, struct cbdata *cbd)
+fetch_server_data (ExchangeMapiConnection *conn, mapi_id_t mid, struct cbdata *cbd)
 {
 	icalcomponent_kind kind = ICAL_VEVENT_COMPONENT;
 	mapi_id_t fid;
 
-	fid = exchange_mapi_get_default_folder_id (olFolderCalendar);
+	fid = exchange_mapi_connection_get_default_folder_id (conn, olFolderCalendar);
 
-	exchange_mapi_connection_fetch_item (fid, mid,
+	exchange_mapi_connection_fetch_item (conn, fid, mid,
 					cal_GetPropsList, G_N_ELEMENTS (cal_GetPropsList),
 					exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER (kind),
 					fetch_server_data_cb, cbd,
@@ -1062,7 +1062,7 @@ fetch_server_data (mapi_id_t mid, struct cbdata *cbd)
 }
 
 static ECalComponent *
-update_attendee_status (struct mapi_SPropValue_array *properties, mapi_id_t mid)
+update_attendee_status (ExchangeMapiConnection *conn, struct mapi_SPropValue_array *properties, mapi_id_t mid)
 {
 	const gchar *att, *att_sentby, *addrtype;
 	icalparameter_partstat partstat = ICAL_PARTSTAT_NONE;
@@ -1084,17 +1084,17 @@ update_attendee_status (struct mapi_SPropValue_array *properties, mapi_id_t mid)
 	else
 		return NULL;
 
-	fetch_server_data (mid, &cbdata);
+	fetch_server_data (conn, mid, &cbdata);
 
 	att = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS);
 	addrtype = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE);
 	if (addrtype && !g_ascii_strcasecmp (addrtype, "EX"))
-		att = exchange_mapi_util_ex_to_smtp (att);
+		att = exchange_mapi_connection_ex_to_smtp (conn, att);
 
 	att_sentby = exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS);
 	addrtype = exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE);
 	if (addrtype && !g_ascii_strcasecmp (addrtype, "EX"))
-		att_sentby = exchange_mapi_util_ex_to_smtp (att_sentby);
+		att_sentby = exchange_mapi_connection_ex_to_smtp (conn, att_sentby);
 
 	matt = g_strdup_printf ("MAILTO:%s", att);
 	matt_sentby = g_strdup_printf ("MAILTO:%s", att_sentby);
@@ -1130,7 +1130,7 @@ update_attendee_status (struct mapi_SPropValue_array *properties, mapi_id_t mid)
 		cbdata.get_timezone = NULL;
 		cbdata.get_tz_data = NULL;
 
-		status = exchange_mapi_modify_item (olFolderCalendar, fid, mid,
+		status = exchange_mapi_modify_item (conn, olFolderCalendar, fid, mid,
 				exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER (kind),
 				exchange_mapi_cal_util_build_props, &cbdata,
 				recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT);
@@ -1157,21 +1157,21 @@ update_attendee_status (struct mapi_SPropValue_array *properties, mapi_id_t mid)
 }
 
 static void
-update_server_object (struct mapi_SPropValue_array *properties, GSList *attachments, ECalComponent *comp, mapi_id_t *mid)
+update_server_object (ExchangeMapiConnection *conn, struct mapi_SPropValue_array *properties, GSList *attachments, ECalComponent *comp, mapi_id_t *mid)
 {
 	const uint32_t *ui32 = NULL;
 	uint32_t cur_seq;
 	mapi_id_t fid;
 	gboolean create_new = TRUE;
 
-	fid = exchange_mapi_get_default_folder_id (olFolderCalendar);
+	fid = exchange_mapi_connection_get_default_folder_id (conn, olFolderCalendar);
 
 	ui32 = (const uint32_t *) find_mapi_SPropValue_data(properties, PROP_TAG(PT_LONG, 0x8201));
 	cur_seq = ui32 ? *ui32 : 0;
 
 	if (*mid) {
 		struct cbdata server_cbd = {0};
-		fetch_server_data (*mid, &server_cbd);
+		fetch_server_data (conn, *mid, &server_cbd);
 
 		if (cur_seq > server_cbd.appt_seq) {
 			struct id_list idlist;
@@ -1180,7 +1180,7 @@ update_server_object (struct mapi_SPropValue_array *properties, GSList *attachme
 			idlist.id = *mid;
 			ids = g_slist_append (ids, &idlist);
 
-			exchange_mapi_remove_items (olFolderCalendar, fid, ids);
+			exchange_mapi_connection_remove_items (conn, olFolderCalendar, fid, ids);
 			g_slist_free (ids);
 		} else
 			create_new = FALSE;
@@ -1216,7 +1216,7 @@ update_server_object (struct mapi_SPropValue_array *properties, GSList *attachme
 
 		exchange_mapi_cal_util_fetch_recipients (comp, &myrecipients);
 		myattachments = attachments;
-		*mid = exchange_mapi_create_item (olFolderCalendar, 0,
+		*mid = exchange_mapi_connection_create_item (conn, olFolderCalendar, 0,
 					exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind),
 					exchange_mapi_cal_util_build_props, &cbdata,
 					myrecipients, myattachments, NULL, MAPI_OPTIONS_DONT_SUBMIT);
@@ -1226,7 +1226,7 @@ update_server_object (struct mapi_SPropValue_array *properties, GSList *attachme
 }
 
 static void
-check_server_for_object (struct mapi_SPropValue_array *properties, mapi_id_t *mid)
+check_server_for_object (ExchangeMapiConnection *conn, struct mapi_SPropValue_array *properties, mapi_id_t *mid)
 {
 	struct mapi_SRestriction res;
 	struct SPropValue sprop;
@@ -1238,9 +1238,9 @@ check_server_for_object (struct mapi_SPropValue_array *properties, mapi_id_t *mi
 
 	*mid = 0;
 
-	fid = exchange_mapi_get_default_folder_id (olFolderCalendar);
+	fid = exchange_mapi_connection_get_default_folder_id (conn, olFolderCalendar);
 
-	array = exchange_mapi_util_resolve_named_prop (olFolderCalendar, fid, 0x0023, PSETID_Meeting);
+	array = exchange_mapi_connection_resolve_named_prop (conn, olFolderCalendar, fid, 0x0023, PSETID_Meeting);
 	proptag = array->aulPropTag[0];
 
 	res.rt = RES_PROPERTY;
@@ -1252,7 +1252,7 @@ check_server_for_object (struct mapi_SPropValue_array *properties, mapi_id_t *mi
 	set_SPropValue_proptag (&sprop, proptag, (gconstpointer ) sb);
 	cast_mapi_SPropValue (&(res.res.resProperty.lpProp), &sprop);
 
-	ids = exchange_mapi_util_check_restriction (fid, &res);
+	ids = exchange_mapi_connection_check_restriction (conn, fid, &res);
 
 	if (ids && g_slist_length(ids) == 1) {
 		struct id_list *idlist = (struct id_list *)(ids->data);
@@ -1267,7 +1267,7 @@ check_server_for_object (struct mapi_SPropValue_array *properties, mapi_id_t *mi
 }
 
 gchar *
-exchange_mapi_cal_util_camel_helper (struct mapi_SPropValue_array *properties,
+exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, struct mapi_SPropValue_array *properties,
 				   GSList *streams, GSList *recipients, GSList *attachments)
 {
 	ECalComponent *comp = NULL;
@@ -1295,17 +1295,17 @@ exchange_mapi_cal_util_camel_helper (struct mapi_SPropValue_array *properties,
 	filename = g_build_filename (g_get_home_dir (), TEMP_ATTACH_STORE, NULL);
 	fileuri = g_filename_to_uri (filename, NULL, NULL);
 
-	check_server_for_object (properties, &mid);
+	check_server_for_object (conn, properties, &mid);
 
 	if (method == ICAL_METHOD_REPLY) {
 		if (mid) {
-			comp = update_attendee_status (properties, mid);
+			comp = update_attendee_status (conn, properties, mid);
 			set_attachments_to_cal_component (comp, attachments, fileuri);
 		}
 	} else if (method == ICAL_METHOD_CANCEL) {
 		if (mid) {
 			struct cbdata server_cbd = { 0 };
-			fetch_server_data (mid, &server_cbd);
+			fetch_server_data (conn, mid, &server_cbd);
 			comp = server_cbd.comp;
 			set_attachments_to_cal_component (comp, attachments, fileuri);
 
@@ -1317,12 +1317,12 @@ exchange_mapi_cal_util_camel_helper (struct mapi_SPropValue_array *properties,
 		else
 			smid = e_cal_component_gen_uid();
 
-		comp = exchange_mapi_cal_util_mapi_props_to_comp (kind, smid,
+		comp = exchange_mapi_cal_util_mapi_props_to_comp (conn, kind, smid,
 							properties, streams, recipients,
 							NULL, NULL, NULL);
 		set_attachments_to_cal_component (comp, attachments, fileuri);
 
-		update_server_object (properties, attachments, comp, &mid);
+		update_server_object (conn, properties, attachments, comp, &mid);
 
 		tmp = exchange_mapi_util_mapi_id_to_string (mid);
 		e_cal_component_set_uid (comp, tmp);
@@ -2142,7 +2142,7 @@ exchange_mapi_cal_util_build_props (struct SPropValue **value, struct SPropTagAr
 }
 
 uint32_t
-exchange_mapi_cal_util_get_new_appt_id (mapi_id_t fid)
+exchange_mapi_cal_util_get_new_appt_id (ExchangeMapiConnection *conn, mapi_id_t fid)
 {
 	struct mapi_SRestriction res;
 	struct SPropValue sprop;
@@ -2159,7 +2159,7 @@ exchange_mapi_cal_util_get_new_appt_id (mapi_id_t fid)
 			GSList *ids = NULL;
 			set_SPropValue_proptag (&sprop, PR_OWNER_APPT_ID, (gconstpointer ) &id);
 			cast_mapi_SPropValue (&(res.res.resProperty.lpProp), &sprop);
-			ids = exchange_mapi_util_check_restriction (fid, &res);
+			ids = exchange_mapi_connection_check_restriction (conn, fid, &res);
 			if (ids) {
 				GSList *l;
 				for (l = ids; l; l = l->next)

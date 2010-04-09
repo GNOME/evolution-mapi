@@ -49,9 +49,6 @@ struct _ExchangeMAPIAccountListenerClass {
 
 GType				exchange_mapi_account_listener_get_type (void);
 ExchangeMAPIAccountListener *	exchange_mapi_account_listener_new (void);
-GSList *			exchange_mapi_account_listener_peek_folder_list (void);
-void				exchange_mapi_account_listener_get_folder_list (void);
-void				exchange_mapi_account_listener_free_folder_list (void);
 
 G_END_DECLS
 

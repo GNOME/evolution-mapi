@@ -26,8 +26,22 @@
 #define EXCHANGE_MAPI_CONNECTION_H 
 
 #include <glib.h>
+#include <glib-object.h>
 
 #include <libmapi/libmapi.h>
+
+/* Standard GObject macros */
+#define EXCHANGE_TYPE_MAPI_CONNECTION (exchange_mapi_connection_get_type ())
+#define EXCHANGE_MAPI_CONNECTION(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), EXCHANGE_TYPE_MAPI_CONNECTION, ExchangeMapiConnection))
+#define EXCHANGE_MAPI_CONNECTION_CLASS(cls) (G_TYPE_CHECK_CLASS_CAST ((cls), EXCHANGE_TYPE_MAPI_CONNECTION, ExchangeMapiConnectionClass))
+#define EXCHANGE_IS_MAPI_CONNECTION(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), EXCHANGE_TYPE_MAPI_CONNECTION))
+#define EXCHANGE_IS_MAPI_CONNECTION_CLASS(cls) (G_TYPE_CHECK_CLASS_TYPE ((cls), EXCHANGE_TYPE_MAPI_CONNECTION))
+#define EXCHANGE_MAPI_CONNECTION_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), EXCHANGE_TYPE_MAPI_CONNECTION, ExchangeMapiConnectionClass))
+
+G_BEGIN_DECLS
+
+typedef struct _ExchangeMapiConnection ExchangeMapiConnection;
+typedef struct _ExchangeMapiConnectionClass ExchangeMapiConnectionClass;
 
 typedef enum {
 	MAPI_OPTIONS_FETCH_ATTACHMENTS = 1<<0,
@@ -102,6 +116,7 @@ typedef struct {
 } ExchangeMAPIAttachment;
 
 typedef struct {
+	ExchangeMapiConnection *conn;
 	struct mapi_SPropValue_array *properties;
 	mapi_id_t fid;
 	mapi_id_t mid;
@@ -121,113 +136,99 @@ typedef gboolean (*FetchCallback)	(FetchItemsCallbackData *item_data, gpointer d
 typedef gboolean (*BuildNameID)	(struct mapi_nameid *nameid, gpointer data);
 typedef gint	 (*BuildProps)		(struct SPropValue **, struct SPropTagArray *, gpointer data);
 
-gboolean
-exchange_mapi_connection_new (const gchar *profile, const gchar *password);
 
-void
-exchange_mapi_connection_close (void);
+struct _ExchangeMapiConnection {
+	GObject parent;
+};
 
-gboolean
-exchange_mapi_connection_exists (void);
+struct _ExchangeMapiConnectionClass {
+	GObjectClass parent_class;
 
-gboolean
-exchange_mapi_connection_fetch_item (mapi_id_t fid, mapi_id_t mid,
-				     const uint32_t *GetPropsList, const uint16_t cn_props,
-				     BuildNameID build_name_id, gpointer build_name_data,
-				     FetchCallback cb, gpointer data,
-				     guint32 options);
-gboolean
-exchange_mapi_connection_fetch_items   (mapi_id_t fid,
+	/* signals */
+};
+
+GType			exchange_mapi_connection_get_type (void);
+ExchangeMapiConnection *exchange_mapi_connection_new (const gchar *profile, const gchar *password);
+ExchangeMapiConnection *exchange_mapi_connection_find (const gchar *profile);
+gboolean		exchange_mapi_connection_reconnect (ExchangeMapiConnection *conn, const gchar *password);
+gboolean		exchange_mapi_connection_close (ExchangeMapiConnection *conn);
+gboolean		exchange_mapi_connection_connected (ExchangeMapiConnection *conn);
+gboolean		exchange_mapi_connection_fetch_item (ExchangeMapiConnection *conn, mapi_id_t fid, mapi_id_t mid,
+					const uint32_t *GetPropsList, const uint16_t cn_props,
+					BuildNameID build_name_id, gpointer build_name_data,
+					FetchCallback cb, gpointer data,
+					guint32 options);
+
+gboolean		exchange_mapi_connection_fetch_items (ExchangeMapiConnection *conn, mapi_id_t fid,
 					struct mapi_SRestriction *res,struct SSortOrderSet *sort_order,
 					const uint32_t *GetPropsList, const uint16_t cn_props,
 					BuildNameID build_name_id, gpointer build_name_data,
 					FetchCallback cb, gpointer data,
 					guint32 options);
 
-gboolean
-exchange_mapi_util_get_gal (GPtrArray *contacts_array);
+gboolean		exchange_mapi_connection_get_gal (ExchangeMapiConnection *conn, GPtrArray *contacts_array);
+mapi_id_t		exchange_mapi_connection_create_folder (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t pfid, const gchar *name);
+gboolean		exchange_mapi_connection_remove_folder (ExchangeMapiConnection *conn, mapi_id_t fid);
+gboolean		exchange_mapi_connection_empty_folder (ExchangeMapiConnection *conn, mapi_id_t fid);
+gboolean		exchange_mapi_connection_rename_folder (ExchangeMapiConnection *conn, mapi_id_t fid, const gchar *new_name);
+gboolean		exchange_mapi_connection_move_folder (ExchangeMapiConnection *conn, mapi_id_t src_fid, mapi_id_t src_parent_fid, mapi_id_t des_fid, const gchar *new_name);
+GSList *		exchange_mapi_connection_check_restriction (ExchangeMapiConnection *conn, mapi_id_t fid, struct mapi_SRestriction *res);
+mapi_id_t		exchange_mapi_connection_get_default_folder_id (ExchangeMapiConnection *conn, uint32_t olFolder);
+mapi_id_t		exchange_mapi_connection_create_item (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid,
+					BuildNameID build_name_id, gpointer ni_data,
+					BuildProps build_props, gpointer p_data,
+					GSList *recipients, GSList *attachments, GSList *generic_streams,
+					uint32_t options);
 
-mapi_id_t
-exchange_mapi_create_folder (uint32_t olFolder, mapi_id_t pfid, const gchar *name);
+gboolean		exchange_mapi_connection_modify_item (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, mapi_id_t mid,
+					BuildNameID build_name_id, gpointer ni_data,
+					BuildProps build_props, gpointer p_data,
+					GSList *recipients, GSList *attachments, GSList *generic_streams,
+					uint32_t options);
 
-gboolean
-exchange_mapi_remove_folder (uint32_t olFolder, mapi_id_t fid);
+gboolean		exchange_mapi_connection_set_flags (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, GSList *mid_list, uint32_t flag, guint32 options);
+gboolean		exchange_mapi_connection_remove_items (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, GSList *mids);
+gboolean		exchange_mapi_connection_copy_items (ExchangeMapiConnection *conn, mapi_id_t src_fid, mapi_id_t dest_fid, GSList *mids);
+gboolean		exchange_mapi_connection_move_items (ExchangeMapiConnection *conn, mapi_id_t src_fid, mapi_id_t dest_fid, GSList *mids);
+gboolean 		exchange_mapi_connection_get_folders_list (ExchangeMapiConnection *conn, GSList **mapi_folders);
+gboolean		exchange_mapi_connection_get_pf_folders_list (ExchangeMapiConnection *conn, GSList **mapi_folders, mapi_id_t parent_id);
+GSList *		exchange_mapi_connection_peek_folders_list (ExchangeMapiConnection *conn);
+struct SPropTagArray *	exchange_mapi_connection_resolve_named_props (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid,
+					BuildNameID build_name_id, gpointer ni_data);
 
-gboolean
-exchange_mapi_empty_folder (mapi_id_t fid);
+struct SPropTagArray *	exchange_mapi_connection_resolve_named_prop (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid,
+					uint16_t lid, const gchar *OLEGUID);
 
-gboolean
-exchange_mapi_rename_folder (mapi_id_t fid, const gchar *new_name);
+uint32_t		exchange_mapi_connection_create_named_prop (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid,
+					const gchar *named_prop_name, uint32_t ptype);
 
-gboolean
-exchange_mapi_move_folder (mapi_id_t src_fid, mapi_id_t src_parent_fid, mapi_id_t des_fid, const gchar *new_name);
-
-GSList *
-exchange_mapi_util_check_restriction (mapi_id_t fid, struct mapi_SRestriction *res);
-
-mapi_id_t
-exchange_mapi_get_default_folder_id (uint32_t olFolder);
-
-mapi_id_t
-exchange_mapi_create_item (uint32_t olFolder, mapi_id_t fid,
-			   BuildNameID build_name_id, gpointer ni_data,
-			   BuildProps build_props, gpointer p_data,
-			   GSList *recipients, GSList *attachments, GSList *generic_streams,
-			   uint32_t options);
-gboolean
-exchange_mapi_modify_item (uint32_t olFolder, mapi_id_t fid, mapi_id_t mid,
-			   BuildNameID build_name_id, gpointer ni_data,
-			   BuildProps build_props, gpointer p_data,
-			   GSList *recipients, GSList *attachments, GSList *generic_streams,
-			   uint32_t options);
-
-gboolean
-exchange_mapi_set_flags (uint32_t olFolder, mapi_id_t fid, GSList *mid_list, uint32_t flag, guint32 options);
-
-gboolean
-exchange_mapi_remove_items (uint32_t olFolder, mapi_id_t fid, GSList *mids);
-
-gboolean
-exchange_mapi_copy_items ( mapi_id_t src_fid, mapi_id_t dest_fid, GSList *mids);
-
-gboolean
-exchange_mapi_move_items ( mapi_id_t src_fid, mapi_id_t dest_fid, GSList *mids);
-
-gboolean exchange_mapi_get_folders_list (GSList **mapi_folders);
-gboolean exchange_mapi_get_pf_folders_list (GSList **mapi_folders, mapi_id_t parent_id);
-
-struct SPropTagArray *
-exchange_mapi_util_resolve_named_props (uint32_t olFolder, mapi_id_t fid,
-				   BuildNameID build_name_id, gpointer ni_data);
-struct SPropTagArray *
-exchange_mapi_util_resolve_named_prop (uint32_t olFolder, mapi_id_t fid,
-				       uint16_t lid, const gchar *OLEGUID);
-uint32_t
-exchange_mapi_util_create_named_prop (uint32_t olFolder, mapi_id_t fid,
-				      const gchar *named_prop_name, uint32_t ptype);
-
-gboolean exchange_mapi_create_profile (const gchar *username, const gchar *password,
-				       const gchar *domain, const gchar *server,
-				       gchar **error_msg, mapi_profile_callback_t cb, gpointer data);
-gboolean exchange_mapi_delete_profile (const gchar *profile);
+const gchar *		exchange_mapi_connection_ex_to_smtp (ExchangeMapiConnection *conn, const gchar *ex_address);
 
 /* Push notifications APIs */
 typedef gboolean (*exchange_check_continue) (void);
 
-gboolean exchange_mapi_events_init ();
+gboolean		exchange_mapi_connection_events_init (ExchangeMapiConnection *conn);
+gboolean		exchange_mapi_connection_events_monitor (ExchangeMapiConnection *conn, struct mapi_notify_continue_callback_data *cb_data);
 
-gboolean exchange_mapi_events_monitor (struct mapi_notify_continue_callback_data *cb_data);
+gboolean		exchange_mapi_connection_events_subscribe (ExchangeMapiConnection *conn, guint32 options,
+					guint16 event_mask, guint32 *events_conn_id,
+					mapi_notify_callback_t callback, gpointer data);
 
-gboolean exchange_mapi_events_subscribe (guint32 options,
-					 guint16 event_mask, guint32 *connection,
-					 mapi_notify_callback_t callback, gpointer data);
+gboolean		exchange_mapi_connection_events_subscribe_and_monitor (ExchangeMapiConnection *conn, mapi_id_t *obj_id, guint32 options,
+					guint16 event_mask, guint32 *events_conn_id,
+					gboolean use_store, mapi_notify_callback_t callback,
+					gpointer data);
 
-gboolean exchange_mapi_events_unsubscribe (guint32 connection);
+gboolean		exchange_mapi_connection_events_unsubscribe (ExchangeMapiConnection *conn, guint32 events_conn_id);
 
-gboolean
-exchange_mapi_events_subscribe_and_monitor (mapi_id_t *obj_id, guint32 options,
-					    guint16 event_mask, guint32 *connection,
-					    gboolean use_store, mapi_notify_callback_t callback,
-					    gpointer data);
+/* profile functions */
+
+gboolean		exchange_mapi_create_profile (const gchar *username, const gchar *password,
+				       const gchar *domain, const gchar *server,
+				       gchar **error_msg, mapi_profile_callback_t cb, gpointer data);
+
+gboolean		exchange_mapi_delete_profile (const gchar *profile);
+
+G_END_DECLS
 
 #endif

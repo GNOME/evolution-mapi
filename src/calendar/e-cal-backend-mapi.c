@@ -62,6 +62,7 @@ struct _ECalBackendMAPIPrivate {
 	mapi_id_t		fid;
 	uint32_t		olFolder;
 	gchar			*profile;
+	ExchangeMapiConnection  *conn;
 
 	/* These fields are entirely for access rights */
 	gchar			*owner_name;
@@ -96,7 +97,6 @@ static ECalBackendClass *parent_class = NULL;
 
 #define CACHE_REFRESH_INTERVAL 600000
 
-static gboolean authenticated = FALSE;
 static GStaticMutex auth_mutex = G_STATIC_MUTEX_INIT;
 
 static ECalBackendSyncStatus
@@ -108,11 +108,19 @@ e_cal_backend_mapi_authenticate (ECalBackend *backend)
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
-	if (authenticated || exchange_mapi_connection_exists () || exchange_mapi_connection_new (priv->profile, priv->password)) {
-		authenticated = TRUE;
+	if (priv->conn)
+		g_object_unref (priv->conn);
+
+	priv->conn = exchange_mapi_connection_new (priv->profile, priv->password);
+	if (!priv->conn) {
+		priv->conn = exchange_mapi_connection_find (priv->profile);
+		if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
+			exchange_mapi_connection_reconnect (priv->conn, priv->password);
+	}
+
+	if (priv->conn && exchange_mapi_connection_connected (priv->conn)) {
 		return GNOME_Evolution_Calendar_Success;
 	} else {
-		authenticated = FALSE;
 		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Authentication failed"));
 		return GNOME_Evolution_Calendar_AuthenticationFailed;
 	}
@@ -226,6 +234,11 @@ e_cal_backend_mapi_finalize (GObject *object)
 		priv->default_zone = NULL;
 	}
 
+	if (priv->conn) {
+		g_object_unref (priv->conn);
+		priv->conn = NULL;
+	}
+
 	g_free (priv);
 	cbmapi->priv = NULL;
 
@@ -329,20 +342,10 @@ e_cal_backend_mapi_remove (ECalBackendSync *backend, EDataCal *cal)
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
-	if (priv->mode == CAL_MODE_LOCAL)
+	if (priv->mode == CAL_MODE_LOCAL || !priv->conn || !exchange_mapi_connection_connected (priv->conn))
 		return GNOME_Evolution_Calendar_RepositoryOffline;
 
-	/* FIXME: check for return status and respond */
-	if (!authenticated) {
-		g_static_mutex_lock (&auth_mutex);
-		e_cal_backend_mapi_authenticate (E_CAL_BACKEND (cbmapi));
-		g_static_mutex_unlock (&auth_mutex);
-	}
-
-	if (!authenticated)
-		return GNOME_Evolution_Calendar_AuthenticationFailed;
-
-	status = exchange_mapi_remove_folder (priv->olFolder, priv->fid);
+	status = exchange_mapi_connection_remove_folder (priv->conn, priv->fid);
 	if (!status)
 		return GNOME_Evolution_Calendar_OtherError;
 
@@ -428,7 +431,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 	cache_comp = e_cal_backend_cache_get_component (priv->cache, tmp, NULL);
 
 	if (cache_comp == NULL) {
-		ECalComponent *comp = exchange_mapi_cal_util_mapi_props_to_comp (kind, tmp, array,
+		ECalComponent *comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, array,
 									streams, recipients, attachments,
 									priv->local_attachments_store, priv->default_zone);
 
@@ -461,7 +464,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 				e_cal_component_commit_sequence (cache_comp);
 				cache_comp_str = e_cal_component_get_as_string (cache_comp);
 
-				comp = exchange_mapi_cal_util_mapi_props_to_comp (kind, tmp, array,
+				comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, array,
 									streams, recipients, attachments,
 									priv->local_attachments_store, priv->default_zone);
 
@@ -615,7 +618,7 @@ get_deltas (gpointer handle)
 //	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	/* FIXME: GetProps does not seem to work for tasks :-( */
 	if (kind == ICAL_VTODO_COMPONENT) {
-		if (!exchange_mapi_connection_fetch_items (priv->fid, use_restriction ? &res : NULL, NULL,
+		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
 						NULL, 0, NULL, NULL,
 						mapi_cal_get_changes_cb, cbmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
@@ -625,7 +628,7 @@ get_deltas (gpointer handle)
 			g_static_mutex_unlock (&updating);
 			return FALSE;
 		}
-	} else if (!exchange_mapi_connection_fetch_items (priv->fid, use_restriction ? &res : NULL, NULL,
+	} else if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
 						cal_GetPropsList, G_N_ELEMENTS (cal_GetPropsList),
 						exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind),
 						mapi_cal_get_changes_cb, cbmapi,
@@ -653,7 +656,7 @@ get_deltas (gpointer handle)
 	did.cbmapi = cbmapi;
 	did.cache_keys = e_cal_backend_cache_get_keys (priv->cache);
 	did.unknown_mids = NULL;
-	if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
+	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 						cal_IDList, G_N_ELEMENTS (cal_IDList),
 						NULL, NULL,
 						handle_deleted_items_cb, &did,
@@ -717,7 +720,7 @@ get_deltas (gpointer handle)
 		g_slist_free (did.unknown_mids);
 
 		if (kind == ICAL_VTODO_COMPONENT) {
-			if (!exchange_mapi_connection_fetch_items (priv->fid, &res, NULL,
+			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 						NULL, 0, NULL, NULL,
 						mapi_cal_get_changes_cb, cbmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
@@ -726,7 +729,7 @@ get_deltas (gpointer handle)
 				g_free (or_res);
 				return FALSE;
 			}
-		} else if (!exchange_mapi_connection_fetch_items (priv->fid, &res, NULL,
+		} else if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 						cal_GetPropsList, G_N_ELEMENTS (cal_GetPropsList),
 						exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind),
 						mapi_cal_get_changes_cb, cbmapi,
@@ -1002,7 +1005,7 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 	}
 
 	tmp = exchange_mapi_util_mapi_id_to_string (mid);
-	comp = exchange_mapi_cal_util_mapi_props_to_comp (kind, tmp, properties,
+	comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, properties,
 							streams, recipients, attachments,
 							priv->local_attachments_store, priv->default_zone);
 	g_free (tmp);
@@ -1054,7 +1057,7 @@ populate_cache (ECalBackendMAPI *cbmapi)
 //	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	/* FIXME: GetProps does not seem to work for tasks :-( */
 	if (kind == ICAL_VTODO_COMPONENT) {
-		if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
+		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 						NULL, 0, NULL, NULL,
 						mapi_cal_cache_create_cb, cbmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
@@ -1063,7 +1066,7 @@ populate_cache (ECalBackendMAPI *cbmapi)
 			g_mutex_unlock (priv->mutex);
 			return GNOME_Evolution_Calendar_OtherError;
 		}
-	} else if (!exchange_mapi_connection_fetch_items (priv->fid, NULL, NULL,
+	} else if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 						cal_GetPropsList, G_N_ELEMENTS (cal_GetPropsList),
 						exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind),
 						mapi_cal_cache_create_cb, cbmapi,
@@ -1137,7 +1140,7 @@ e_cal_backend_mapi_connect (ECalBackendMAPI *cbmapi)
 
 	source = e_cal_backend_get_source (E_CAL_BACKEND (cbmapi));
 
-	if (!authenticated) {
+	if (!priv->conn || !exchange_mapi_connection_connected (priv->conn)) {
 		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Authentication failed"));
 		return GNOME_Evolution_Calendar_AuthenticationFailed;
 	}
@@ -1349,7 +1352,7 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cbdata *cb
 
 	uid = icalcomponent_get_uid (comp);
 	exchange_mapi_util_mapi_id_from_string (uid, &mid);
-	if (exchange_mapi_connection_fetch_item (priv->fid, mid,
+	if (exchange_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
 					NULL, 0,
 					NULL, NULL,
 					capture_req_props, cbdata,
@@ -1357,7 +1360,7 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cbdata *cb
 
 		return;
 
-	array = exchange_mapi_util_resolve_named_prop (priv->olFolder, priv->fid, 0x0023, PSETID_Meeting);
+	array = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->olFolder, priv->fid, 0x0023, PSETID_Meeting);
 	proptag = array->aulPropTag[0];
 
 	res.rt = RES_PROPERTY;
@@ -1369,7 +1372,7 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cbdata *cb
 	set_SPropValue_proptag (&sprop, proptag, (gconstpointer ) &sb);
 	cast_mapi_SPropValue (&(res.res.resProperty.lpProp), &sprop);
 
-	exchange_mapi_connection_fetch_items (priv->fid, &res, NULL,
+	exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 					NULL, 0,
 					NULL, NULL,
 					capture_req_props, cbdata,
@@ -1430,7 +1433,7 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, gchar
 			struct SPropTagArray *tag_array;
 			ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 			stream->value = ba;
-			tag_array = exchange_mapi_util_resolve_named_prop (priv->olFolder, priv->fid, 0x8216, PSETID_Appointment);
+			tag_array = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->olFolder, priv->fid, 0x8216, PSETID_Appointment);
 			if (tag_array) {
 				stream->proptag = tag_array->aulPropTag[0];
 				streams = g_slist_append (streams, stream);
@@ -1467,14 +1470,14 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, gchar
 			cbdata.msgflags = MSGFLAG_READ;
 			cbdata.meeting_type = (recipients != NULL) ? MEETING_OBJECT : NOT_A_MEETING;
 			cbdata.resp = (recipients != NULL) ? olResponseOrganized : olResponseNone;
-			cbdata.appt_id = exchange_mapi_cal_util_get_new_appt_id (priv->fid);
+			cbdata.appt_id = exchange_mapi_cal_util_get_new_appt_id (priv->conn, priv->fid);
 			cbdata.appt_seq = 0;
 			e_cal_component_get_uid (comp, &compuid);
 			exchange_mapi_cal_util_generate_globalobjectid (TRUE, compuid, &globalid);
 			cbdata.globalid = &globalid;
 			cbdata.cleanglobalid = &globalid;
 
-			mid = exchange_mapi_create_item (priv->olFolder, priv->fid,
+			mid = exchange_mapi_connection_create_item (priv->conn, priv->olFolder, priv->fid,
 							exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind),
 							exchange_mapi_cal_util_build_props, &cbdata,
 							recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT);
@@ -1637,7 +1640,7 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 			struct SPropTagArray *tag_array;
 			ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 			stream->value = ba;
-			tag_array = exchange_mapi_util_resolve_named_prop (priv->olFolder, priv->fid, 0x8216, PSETID_Appointment);
+			tag_array = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->olFolder, priv->fid, 0x8216, PSETID_Appointment);
 			if (tag_array) {
 				stream->proptag = tag_array->aulPropTag[0];
 				streams = g_slist_append (streams, stream);
@@ -1698,7 +1701,7 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 			cbdata.meeting_type = (recipients != NULL) ? MEETING_OBJECT_RCVD : NOT_A_MEETING;
 		}
 
-		status = exchange_mapi_modify_item (priv->olFolder, priv->fid, mid,
+		status = exchange_mapi_connection_modify_item (priv->conn, priv->olFolder, priv->fid, mid,
 						exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind),
 						exchange_mapi_cal_util_build_props, &cbdata,
 						recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT);
@@ -1796,7 +1799,7 @@ e_cal_backend_mapi_remove_object (ECalBackendSync *backend, EDataCal *cal,
 				list = g_slist_prepend (list, (gpointer) data);
 //			}
 
-			if (exchange_mapi_remove_items (priv->olFolder, priv->fid, list)) {
+			if (exchange_mapi_connection_remove_items (priv->conn, priv->olFolder, priv->fid, list)) {
 				for (l = comp_list; l; l = l->next) {
 					ECalComponent *comp = E_CAL_COMPONENT (l->data);
 					ECalComponentId *id = e_cal_component_get_id (comp);
@@ -1885,7 +1888,7 @@ e_cal_backend_mapi_send_objects (ECalBackendSync *backend, EDataCal *cal, const 
 					struct SPropTagArray *tag_array;
 					ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 					stream->value = ba;
-					tag_array = exchange_mapi_util_resolve_named_prop (priv->olFolder, priv->fid, 0x8216, PSETID_Appointment);
+					tag_array = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->olFolder, priv->fid, 0x8216, PSETID_Appointment);
 					if (tag_array) {
 						stream->proptag = tag_array->aulPropTag[0];
 						streams = g_slist_append (streams, stream);
@@ -1945,7 +1948,7 @@ e_cal_backend_mapi_send_objects (ECalBackendSync *backend, EDataCal *cal, const 
 			cbdata.globalid = &globalid;
 			cbdata.cleanglobalid = &globalid;
 
-			mid = exchange_mapi_create_item (olFolderSentMail, 0,
+			mid = exchange_mapi_connection_create_item (priv->conn, olFolderSentMail, 0,
 							exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind),
 							exchange_mapi_cal_util_build_props, &cbdata,
 							recipients, attachments, streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE);

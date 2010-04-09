@@ -233,11 +233,28 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 								(mapi_profile_callback_t) create_profile_callback,
 								url->user);
 		if (status) {
+			/* profile was created, try to connect to the server */
+			ExchangeMapiConnection *conn;
+			gchar *profname;
+
+			status = FALSE;
+			profname = exchange_mapi_util_profile_name (url->user, domain_name, url->host, FALSE);
+
+			conn = exchange_mapi_connection_new (profname, password);
+			if (conn) {
+				status = exchange_mapi_connection_connected (conn);
+				g_object_unref (conn);
+			}
+
+			g_free (profname);
+		}
+
+		if (status) {
 			/* Things are successful */
 			gchar *profname = NULL, *uri = NULL;
 
-			profname = exchange_mapi_util_profile_name (url->user, domain_name);
-			camel_url_set_param(url, "profile", profname);
+			profname = exchange_mapi_util_profile_name (url->user, domain_name, url->host, FALSE);
+			camel_url_set_param (url, "profile", profname);
 			g_free (profname);
 
 			uri = camel_url_to_string(url, 0);
@@ -468,17 +485,25 @@ exchange_mapi_create (EPlugin *epl, EConfigHookItemFactoryData *data)
 	GtkTreeViewColumn *tvc;
 	const gchar *acc;
 	GSList *folders;
+	ExchangeMapiConnection *conn;
 
 	uri_text = e_source_get_uri (source);
 	if (uri_text && g_ascii_strncasecmp (uri_text, MAPI_URI_PREFIX, MAPI_PREFIX_LENGTH)) {
 		return NULL;
 	}
 
-	folders = exchange_mapi_account_listener_peek_folder_list ();
+	folders = NULL;
+	conn = exchange_mapi_connection_find (e_source_get_property (source, "profile"));
+	if (conn && exchange_mapi_connection_connected (conn))
+		folders = exchange_mapi_connection_peek_folders_list (conn);
+
 	acc = e_source_group_peek_name (e_source_peek_group (source));
 	ts = gtk_tree_store_new (NUM_COLS, G_TYPE_STRING, G_TYPE_INT64, G_TYPE_POINTER);
 
 	add_folders (folders, ts);
+
+	if (conn)
+		g_object_unref (conn);
 
 	vbox = gtk_vbox_new (FALSE, 6);
 
@@ -605,6 +630,7 @@ exchange_mapi_cal_check (EPlugin *epl, EConfigHookPageCheckData *data)
 void
 exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 {
+	ExchangeMapiConnection *conn;
 	ECalConfigTargetSource *t = (ECalConfigTargetSource *) target;
 	ESourceGroup *group;
 	ESource *source = t->source;
@@ -636,7 +662,12 @@ exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 
 	exchange_mapi_util_mapi_id_from_string (e_source_get_property (source, "parent-fid"), &pfid);
 
-	fid = exchange_mapi_create_folder (type, pfid, e_source_peek_name (source));
+	/* the profile should be already connected */
+	conn = exchange_mapi_connection_find (e_source_get_property (source, "profile"));
+	g_return_if_fail (conn != NULL);
+
+	fid = exchange_mapi_connection_create_folder (conn, type, pfid, e_source_peek_name (source));
+	g_object_unref (conn);
 
 	sfid = exchange_mapi_util_mapi_id_to_string (fid);
 	tmp = g_strconcat (";", sfid, NULL);

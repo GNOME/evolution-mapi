@@ -95,6 +95,8 @@ static gint maplen = G_N_ELEMENTS(mappings);
 struct _EBookBackendMAPIGALPrivate
 {
 	gchar *profile;
+	ExchangeMapiConnection *conn;
+
 	mapi_id_t fid;
 	gint mode;
 	gboolean marked_for_offline;
@@ -188,7 +190,7 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 		printf("Summary file name is %s\n", priv->summary_file_name);
 	}
 
-	exchange_mapi_util_get_gal (contacts_array);
+	exchange_mapi_connection_get_gal (priv->conn, contacts_array);
 
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 
@@ -300,7 +302,13 @@ e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
 
 	case GNOME_Evolution_Addressbook_MODE_REMOTE:
 
-		if (!exchange_mapi_connection_new (priv->profile, passwd))
+		priv->conn = exchange_mapi_connection_new (priv->profile, passwd);
+		if (!priv->conn) {
+			priv->conn = exchange_mapi_connection_find (priv->profile);
+			if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
+				exchange_mapi_connection_reconnect (priv->conn, passwd);
+		}
+		if (!priv->conn)
 			return e_data_book_respond_authenticate_user (book, opid,GNOME_Evolution_Addressbook_OtherError);
 
 		if (priv->cache && priv->is_cache_ready) {
@@ -512,6 +520,10 @@ e_book_backend_mapi_gal_dispose (GObject *object)
 	if (priv->profile) {
 		g_free (priv->profile);
 		priv->profile = NULL;
+	}
+	if (priv->conn) {
+		g_object_unref (priv->conn);
+		priv->conn = NULL;
 	}
 	if (priv->uri) {
 		g_free (priv->uri);
@@ -776,7 +788,7 @@ book_view_thread (gpointer data)
 
 	switch (priv->mode) {
 		case GNOME_Evolution_Addressbook_MODE_REMOTE:
-			if (!exchange_mapi_connection_exists ()) {
+			if (!priv->conn) {
 				e_book_backend_notify_auth_required (E_BOOK_BACKEND (backend));
 				e_data_book_view_notify_complete (book_view,
 							GNOME_Evolution_Addressbook_AuthenticationRequired);

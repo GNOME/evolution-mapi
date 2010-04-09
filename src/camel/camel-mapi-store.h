@@ -28,6 +28,7 @@
 
 #include <camel/camel.h>
 
+#include <exchange-mapi-connection.h>
 #include <exchange-mapi-folder.h>
 
 #define CAMEL_MAPI_STORE_TYPE     (camel_mapi_store_get_type ())
@@ -93,6 +94,8 @@ const gchar *camel_mapi_store_folder_id_lookup_offline (CamelMapiStore *mapi_sto
 const gchar * mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid, gboolean use_cache);
 
 void camel_mapi_store_unset_notification_data (CamelMapiStore *mstore);
+
+ExchangeMapiConnection *camel_mapi_store_get_exchange_connection (CamelMapiStore *mapi_store);
 
 __END_DECLS
 

@@ -60,8 +60,9 @@
 #define d(x) printf("%s:%s:%s \n", G_STRLOC, G_STRFUNC, x)
 
 struct _CamelMapiStorePrivate {
-	gchar *user;
-	const gchar *profile;
+	gchar *profile;
+	ExchangeMapiConnection *conn;
+
 	gchar *base_url;
 	gchar *storage_path;
 
@@ -218,6 +219,7 @@ static void camel_mapi_store_init(CamelMapiStore *store, CamelMapiStoreClass *kl
 
 	mapi_store->summary = NULL;
 
+	priv->conn = NULL;
 	priv->storage_path = NULL;
 	priv->base_url = NULL;
 	priv->folders_synced = FALSE;
@@ -229,6 +231,41 @@ static void camel_mapi_store_init(CamelMapiStore *store, CamelMapiStoreClass *kl
 
 static void camel_mapi_store_finalize(CamelObject *object)
 {
+	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (object);
+
+	if (mapi_store && mapi_store->priv) {
+		CamelMapiStorePrivate *priv = mapi_store->priv;
+
+		#define freeStr(x)		\
+			if (x) {		\
+				g_free (x);	\
+				x = NULL;	\
+			}
+		#define destroyHash(h)				\
+			if (h) {				\
+				g_hash_table_destroy (h);	\
+				h = NULL;			\
+			}
+
+		freeStr (priv->profile);
+		freeStr (priv->storage_path);
+		freeStr (priv->base_url);
+		destroyHash (priv->id_hash);
+		destroyHash (priv->name_hash);
+		destroyHash (priv->parent_hash);
+		destroyHash (priv->default_folders);
+
+		if (priv->conn) {
+			g_object_unref (priv->conn);
+			priv->conn = NULL;
+		}
+
+		#undef freeStr
+		#undef destroyHash
+
+		g_free (mapi_store->priv);
+		mapi_store->priv = NULL;
+	}
 }
 
 /* service methods */
@@ -267,7 +304,6 @@ static void mapi_construct(CamelService *service, CamelSession *session,
 	camel_store_summary_load ((CamelStoreSummary *) mapi_store->summary);
 
 	/*user and profile*/
-	priv->user = g_strdup (url->user);
 	priv->profile = g_strdup (camel_url_get_param(url, "profile"));
 
 	/*base url*/
@@ -309,14 +345,15 @@ static char
 static gboolean
 check_for_connection (CamelService *service, CamelException *ex)
 {
-	/*Fixme : What happens when the network connection drops.
-	  will mapi subsystem handle that ?*/
-	return exchange_mapi_connection_exists ();
+	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
+
+	return store && store->priv->conn && exchange_mapi_connection_connected (store->priv->conn);
 }
 
 static gboolean
 mapi_auth_loop (CamelService *service, CamelException *ex)
 {
+	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
 	CamelSession *session = camel_service_get_session (service);
 
 	gchar *errbuf = NULL;
@@ -357,9 +394,8 @@ mapi_auth_loop (CamelService *service, CamelException *ex)
 			}
 		}
 
-		exchange_mapi_connection_new (NULL,service->url->passwd);
-
-		if (!exchange_mapi_connection_exists ()) {
+		store->priv->conn = exchange_mapi_connection_new (store->priv->profile, service->url->passwd);
+		if (!store->priv->conn || !exchange_mapi_connection_connected (store->priv->conn)) {
 			errbuf = g_strdup_printf (_("Unable to authenticate to Exchange MAPI server."));
 
 			camel_exception_clear (ex);
@@ -440,8 +476,11 @@ mapi_disconnect(CamelService *service, gboolean clean, CamelException *ex)
 		store->priv->notification_data = NULL;
 	}
 
-	/* Close the mapi subsystem */
-	exchange_mapi_connection_close ();
+	if (store->priv->conn) {
+		/* Close the mapi subsystem */
+		g_object_unref (store->priv->conn);
+		store->priv->conn = NULL;
+	}
 
 	store->priv->folders_synced = FALSE;
 
@@ -557,7 +596,7 @@ mapi_create_folder(CamelStore *store, const gchar *parent_name, const gchar *fol
 	CAMEL_SERVICE_REC_LOCK (store, connect_lock);
 
 	exchange_mapi_util_mapi_id_from_string (parent_id, &parent_fid);
-	new_folder_id = exchange_mapi_create_folder(olFolderInbox, parent_fid, folder_name);
+	new_folder_id = exchange_mapi_connection_create_folder (priv->conn, olFolderInbox, parent_fid, folder_name);
 	if (new_folder_id != 0) {
 		CamelMapiStoreInfo *si;
 		gchar *fid = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", new_folder_id);
@@ -633,7 +672,7 @@ mapi_delete_folder(CamelStore *store, const gchar *folder_name, CamelException *
 
 	folder_id = g_hash_table_lookup (priv->name_hash, folder_name);
 	exchange_mapi_util_mapi_id_from_string (folder_id, &folder_fid);
-	status = exchange_mapi_remove_folder (0, folder_fid);
+	status = exchange_mapi_connection_remove_folder (priv->conn, folder_fid);
 
 	if (status) {
 		/* Fixme ??  */
@@ -720,7 +759,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 		gchar *folder_id;
 
 		/* renaming in the same folder, thus no MoveFolder necessary */
-		if (!exchange_mapi_rename_folder (old_fid, tmp ? tmp : new_name)) {
+		if (!exchange_mapi_connection_rename_folder (priv->conn, old_fid, tmp ? tmp : new_name)) {
 			/*To translators : '%s to %s' is current name of the folder  and
 			new name of the folder.*/
 			camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM,
@@ -771,7 +810,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 		} else if (!old_parent_fid_str || !new_parent_fid_str ||
 			   !exchange_mapi_util_mapi_id_from_string (old_parent_fid_str, &old_parent_fid) ||
 			   !exchange_mapi_util_mapi_id_from_string (new_parent_fid_str, &new_parent_fid) ||
-			   !exchange_mapi_move_folder (old_fid, old_parent_fid, new_parent_fid, tmp)) {
+			   !exchange_mapi_connection_move_folder (priv->conn, old_fid, old_parent_fid, new_parent_fid, tmp)) {
 			CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 			camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename MAPI folder `%s' to `%s'"), old_name, new_name);
 			g_free (old_parent);
@@ -1351,7 +1390,7 @@ mapi_folders_sync (CamelMapiStore *store, const gchar *top, guint32 flags, Camel
 		return;
 	}
 
-	status = exchange_mapi_get_folders_list (&folder_list);
+	status = exchange_mapi_connection_get_folders_list (priv->conn, &folder_list);
 
 	if (!status) {
 		g_warning ("Could not get folder list..\n");
@@ -1380,7 +1419,7 @@ mapi_folders_sync (CamelMapiStore *store, const gchar *top, guint32 flags, Camel
 		parent_id = (top) ? g_strdup (camel_mapi_store_folder_id_lookup_offline (store, top)) : NULL;
 		exchange_mapi_util_mapi_id_from_string (parent_id, &pid);
 
-		status = exchange_mapi_get_pf_folders_list (&folder_list, pid);
+		status = exchange_mapi_connection_get_pf_folders_list (priv->conn, &folder_list, pid);
 
 		if (!status)
 			g_warning ("Could not get Public folder list..\n");
@@ -1700,3 +1739,12 @@ mapi_noop(CamelStore *store, CamelException *ex)
 
 }
 
+ExchangeMapiConnection *
+camel_mapi_store_get_exchange_connection (CamelMapiStore *mapi_store)
+{
+	g_return_val_if_fail (mapi_store != NULL, NULL);
+	g_return_val_if_fail (CAMEL_IS_MAPI_STORE (mapi_store), NULL);
+	g_return_val_if_fail (mapi_store->priv != NULL, NULL);
+
+	return mapi_store->priv->conn;
+}

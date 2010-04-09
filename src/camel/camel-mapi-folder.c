@@ -593,7 +593,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 
 			if ((item->header.from_type != NULL) && !g_utf8_collate (item->header.from_type, "EX")) {
 				CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
-				from_email = exchange_mapi_util_ex_to_smtp (item->header.from_email);
+				from_email = exchange_mapi_connection_ex_to_smtp (camel_mapi_store_get_exchange_connection (mapi_store), item->header.from_email);
 				CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 
 				g_free (item->header.from_email);
@@ -715,7 +715,7 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 	CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
 
 	/*Get the UID list from server.*/
-	exchange_mapi_connection_fetch_items  (m->folder_id, NULL, NULL,
+	exchange_mapi_connection_fetch_items  (camel_mapi_store_get_exchange_connection (mapi_store), m->folder_id, NULL, NULL,
 					       prop_list, G_N_ELEMENTS (prop_list),
 					       NULL, NULL,
 					       deleted_items_sync_cb, &server_uid_list,
@@ -922,7 +922,7 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 
 	if (read_items) {
 		CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
-		exchange_mapi_set_flags (0, fid, read_items, 0, options);
+		exchange_mapi_connection_set_flags (camel_mapi_store_get_exchange_connection (mapi_store), 0, fid, read_items, 0, options);
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 		g_slist_free (read_items);
 	}
@@ -931,10 +931,10 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	if (deleted_items) {
 		CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
 		if ((mapi_folder->type & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH) {
-			exchange_mapi_remove_items (0, fid, deleted_items);
+			exchange_mapi_connection_remove_items (camel_mapi_store_get_exchange_connection (mapi_store), 0, fid, deleted_items);
 		} else {
 			exchange_mapi_util_mapi_id_from_string (camel_mapi_store_system_folder_fid (mapi_store, olFolderDeletedItems), &deleted_items_fid);
-			exchange_mapi_move_items(fid, deleted_items_fid, deleted_items);
+			exchange_mapi_connection_move_items (camel_mapi_store_get_exchange_connection (mapi_store), fid, deleted_items_fid, deleted_items);
 		}
 
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
@@ -1007,7 +1007,7 @@ camel_mapi_folder_fetch_summary (CamelStore *store, const mapi_id_t fid, struct 
 
 	CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
 
-	status = exchange_mapi_connection_fetch_items  (fid, res, sort, summary_prop_list,
+	status = exchange_mapi_connection_fetch_items  (camel_mapi_store_get_exchange_connection (mapi_store), fid, res, sort, summary_prop_list,
 							G_N_ELEMENTS (summary_prop_list),
 							NULL, NULL, fetch_items_summary_cb,
 							fetch_data, options);
@@ -1352,7 +1352,7 @@ fetch_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 	item->is_cal = FALSE;
 	if (g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_PREFIX)) {
-		guint8 *appointment_body_str = (guint8 *) exchange_mapi_cal_util_camel_helper (item_data->properties,
+		guint8 *appointment_body_str = (guint8 *) exchange_mapi_cal_util_camel_helper (item_data->conn, item_data->properties,
 											     item_data->streams,
 											     item_data->recipients, item_data->attachments);
 
@@ -1525,7 +1525,7 @@ mapi_mime_set_msg_headers (CamelFolder *folder, CamelMimeMessage *msg, MapiItem 
 	if (item->header.from) {
 		if ((item->header.from_type != NULL) && !g_utf8_collate (item->header.from_type, "EX")) {
 			CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
-			from_email = exchange_mapi_util_ex_to_smtp (item->header.from_email);
+			from_email = exchange_mapi_connection_ex_to_smtp (camel_mapi_store_get_exchange_connection (mapi_store), item->header.from_email);
 			CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 			g_free (item->header.from_email);
 			item->header.from_email = g_strdup (from_email);
@@ -1899,7 +1899,7 @@ mapi_folder_get_message( CamelFolder *folder, const gchar *uid, CamelException *
 	}
 
 	CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
-	exchange_mapi_connection_fetch_item (id_folder, id_message,
+	exchange_mapi_connection_fetch_item (camel_mapi_store_get_exchange_connection (mapi_store), id_folder, id_message,
 					camel_GetPropsList, G_N_ELEMENTS (camel_GetPropsList),
 					camel_build_name_id, NULL,
 					fetch_item_cb, &item,
@@ -2028,7 +2028,7 @@ mapi_expunge (CamelFolder *folder, CamelException *ex)
 
 	if ((mapi_folder->type & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH) {
 		CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
-		status = exchange_mapi_empty_folder (fid);
+		status = exchange_mapi_connection_empty_folder (camel_mapi_store_get_exchange_connection (mapi_store), fid);
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 
 		if (status) {
@@ -2072,7 +2072,7 @@ mapi_expunge (CamelFolder *folder, CamelException *ex)
 	if (deleted_items) {
 		CAMEL_SERVICE_REC_LOCK (mapi_store, connect_lock);
 
-		status = exchange_mapi_remove_items(0, fid, deleted_items);
+		status = exchange_mapi_connection_remove_items (camel_mapi_store_get_exchange_connection (mapi_store), 0, fid, deleted_items);
 
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 
@@ -2136,7 +2136,7 @@ mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 	}
 
 	if (delete_originals) {
-		if (!exchange_mapi_move_items (src_fid, dest_fid, src_msg_ids)) {
+		if (!exchange_mapi_connection_move_items (camel_mapi_store_get_exchange_connection (mapi_store), src_fid, dest_fid, src_msg_ids)) {
 			//TODO : Set exception.
 		} else {
 			changes = camel_folder_change_info_new ();
@@ -2150,7 +2150,7 @@ mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 
 		}
 	} else {
-		if (!exchange_mapi_copy_items (src_fid, dest_fid, src_msg_ids)) {
+		if (!exchange_mapi_connection_copy_items (camel_mapi_store_get_exchange_connection (mapi_store), src_fid, dest_fid, src_msg_ids)) {
 			//TODO : Set exception.
 		}
 	}
@@ -2222,7 +2222,7 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 
 	item = camel_mapi_utils_mime_to_item (message, from, ex);
 
-	mid = exchange_mapi_create_item (-1, fid, NULL, NULL,
+	mid = exchange_mapi_connection_create_item (camel_mapi_store_get_exchange_connection (mapi_store), -1, fid, NULL, NULL,
 					 camel_mapi_utils_create_item_build_props, item,
 					 item->recipients, item->attachments,
 					 item->generic_streams, 0);

@@ -82,7 +82,7 @@ void
 exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_list, const gchar *local_store_uri);
 
 ECalComponent *
-exchange_mapi_cal_util_mapi_props_to_comp (icalcomponent_kind kind, const gchar *mid, struct mapi_SPropValue_array *properties,
+exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcomponent_kind kind, const gchar *mid, struct mapi_SPropValue_array *properties,
 					   GSList *streams, GSList *recipients, GSList *attachments,
 					   const gchar *local_store_uri, const icaltimezone *default_zone);
 gboolean
@@ -95,11 +95,11 @@ void
 exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *uid, struct Binary_r *sb);
 
 gchar *
-exchange_mapi_cal_util_camel_helper (struct mapi_SPropValue_array *properties,
+exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, struct mapi_SPropValue_array *properties,
 				   GSList *streams, GSList *recipients, GSList *attachments);
 
 uint32_t
-exchange_mapi_cal_util_get_new_appt_id (mapi_id_t fid);
+exchange_mapi_cal_util_get_new_appt_id (ExchangeMapiConnection *conn, mapi_id_t fid);
 
 static const uint32_t cal_GetPropsList[] = {
 	PR_FID,

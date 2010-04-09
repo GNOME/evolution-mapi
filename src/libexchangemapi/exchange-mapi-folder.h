@@ -86,11 +86,8 @@ guint64 exchange_mapi_folder_get_parent_id (ExchangeMAPIFolder *folder);
 ExchangeMAPIFolderType exchange_mapi_folder_get_type (ExchangeMAPIFolder *folder);
 guint32 exchange_mapi_folder_get_unread_count (ExchangeMAPIFolder *folder);
 guint32 exchange_mapi_folder_get_total_count (ExchangeMAPIFolder *folder);
-
 gboolean exchange_mapi_folder_is_root (ExchangeMAPIFolder *folder);
-GSList * exchange_mapi_peek_folder_list (void);
-void exchange_mapi_folder_list_free (void);
-ExchangeMAPIFolder * exchange_mapi_folder_get_folder (mapi_id_t fid);
-void exchange_mapi_folder_list_add (ExchangeMAPIFolder *folder);
+
+void exchange_mapi_folder_free_list (GSList *folder_list);
 
 #endif

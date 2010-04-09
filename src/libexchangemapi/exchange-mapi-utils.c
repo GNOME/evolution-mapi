@@ -601,16 +601,32 @@ exchange_crlf_to_lf (const gchar *in)
  * exchange_mapi_util_profile_name:
  * @username: User name of the profile
  * @domain: Domain name of the profile
+ * @hostname: Server host name
+ * @migrate: whether migrate old profile name to a new one
  *
- * Constructs profile name from given @username and @domain and
- * returns it as a newly allocated string.
+ * Constructs profile name from given parameters and
+ * returns it as a newly allocated string. It can also
+ * rename old profile name string to a new name, if requested. 
  **/
 gchar *
-exchange_mapi_util_profile_name (const gchar *username, const gchar *domain)
+exchange_mapi_util_profile_name (const gchar *username, const gchar *domain, const gchar *hostname, gboolean migrate)
 {
 	gchar *res;
 
-	res = g_strdup_printf ("%s@%s", username, domain);
+	res = g_strdup_printf ("%s@%s@%s", username, domain, hostname);
+	res = g_strcanon (res, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@.-", '_');
 
-	return g_strcanon (res, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@", '_');
+	if (migrate) {
+		/* expects MAPIInitialize already called! */
+		gchar *old_name;
+
+		old_name = g_strdup_printf ("%s@%s", username, domain);
+		old_name = g_strcanon (old_name, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@", '_');
+
+		RenameProfile (old_name, res);
+
+		g_free (old_name);
+	}
+
+	return res;
 }

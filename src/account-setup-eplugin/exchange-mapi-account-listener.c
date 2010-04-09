@@ -126,34 +126,6 @@ exchange_mapi_account_listener_init (ExchangeMAPIAccountListener *config_listene
 	config_listener->priv = g_new0 (ExchangeMAPIAccountListenerPrivate, 1);
 }
 
-/* This is a list of folders returned by e-d-s. */
-static	GSList *folders_list = NULL;
-
-GSList *
-exchange_mapi_account_listener_peek_folder_list (void)
-{
-	if (!folders_list)
-		folders_list = exchange_mapi_peek_folder_list ();
-
-	return folders_list;
-}
-
-void
-exchange_mapi_account_listener_get_folder_list (void)
-{
-	if (folders_list)
-		return;
-
-	folders_list = exchange_mapi_peek_folder_list ();
-}
-
-void
-exchange_mapi_account_listener_free_folder_list (void)
-{
-	exchange_mapi_folder_list_free ();
-	folders_list = NULL;
-}
-
 /*determines whehter the passed in account is exchange or not by looking at source url */
 
 static gboolean
@@ -553,12 +525,25 @@ mapi_account_added (EAccountList *account_listener, EAccount *account)
 	mapi_accounts = g_list_append (mapi_accounts, info);
 
 	if (account->enabled) {
-		/* Fetch the folders into a global list for future use.*/
-		exchange_mapi_account_listener_get_folder_list ();
+		GSList *folders_list;
+		CamelURL *url;
+		ExchangeMapiConnection *conn;
+
+		url = camel_url_new (info->source_url, NULL);
+		g_return_if_fail (url != NULL);
+
+		conn = exchange_mapi_connection_find (camel_url_get_param (url, "profile"));
+		camel_url_free (url);
+		g_return_if_fail (conn != NULL);
+
+		folders_list = exchange_mapi_connection_peek_folders_list (conn);
+
+		printf ("%s: %d\n", __FUNCTION__, g_slist_length (folders_list));
 
 		add_addressbook_sources (account, folders_list);
 		add_calendar_sources (account, folders_list);
-		/*FIXME: Maybe the folders_list above should be freed */
+
+		g_object_unref (conn);
 	}
 }
 
@@ -627,8 +612,25 @@ create_profile_entry (CamelURL *url, EAccount *account)
 		}
 		g_free (key);
 
-		if (password)
-		  status = exchange_mapi_create_profile (url->user, password, camel_url_get_param (url, "domain"), url->host, NULL, NULL, NULL);
+		if (password) {
+			status = exchange_mapi_create_profile (url->user, password, camel_url_get_param (url, "domain"), url->host, NULL, NULL, NULL);
+			if (status) {
+				/* profile was created, try to connect to the server */
+				ExchangeMapiConnection *conn;
+				gchar *profname;
+
+				status = FALSE;
+				profname = exchange_mapi_util_profile_name (url->user, camel_url_get_param (url, "domain"), url->host, FALSE);
+
+				conn = exchange_mapi_connection_new (profname, password);
+				if (conn) {
+					status = exchange_mapi_connection_connected (conn);
+					g_object_unref (conn);
+				}
+
+				g_free (profname);
+			}
+		}
 
 		++attempts;
 	}
@@ -684,7 +686,7 @@ mapi_account_changed (EAccountList *account_listener, EAccount *account)
 			gchar *profname = NULL, *uri = NULL;
 			ExchangeMAPIAccountListener *config_listener = exchange_mapi_accounts_peek_config_listener();
 
-			profname = exchange_mapi_util_profile_name (new_url->user, camel_url_get_param (new_url, "domain"));
+			profname = exchange_mapi_util_profile_name (new_url->user, camel_url_get_param (new_url, "domain"), new_url->host, FALSE);
 			camel_url_set_param(new_url, "profile", profname);
 			g_free (profname);
 
@@ -717,7 +719,7 @@ mapi_account_changed (EAccountList *account_listener, EAccount *account)
 				gchar *profname = NULL, *uri = NULL;
 				ExchangeMAPIAccountListener *config_listener = exchange_mapi_accounts_peek_config_listener();
 
-				profname = exchange_mapi_util_profile_name (new_url->user, camel_url_get_param (new_url, "domain"));
+				profname = exchange_mapi_util_profile_name (new_url->user, camel_url_get_param (new_url, "domain"), new_url->host, FALSE);
 				camel_url_set_param(new_url, "profile", profname);
 				g_free (profname);
 

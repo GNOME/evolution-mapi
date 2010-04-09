@@ -55,12 +55,12 @@ void	set_store(CamelStore *);
 
 /*CreateItem would return the MID of the new message or '0' if we fail.*/
 static mapi_id_t
-mapi_message_item_send (MapiItem *item)
+mapi_message_item_send (ExchangeMapiConnection *conn, MapiItem *item)
 {
 	guint64 fid = 0;
 	mapi_id_t mid = 0;
 
-	mid = exchange_mapi_create_item (olFolderSentMail, fid, NULL, NULL,
+	mid = exchange_mapi_connection_create_item (conn, olFolderSentMail, fid, NULL, NULL,
 					 camel_mapi_utils_create_item_build_props,
 					 item, item->recipients,
 					 item->attachments, item->generic_streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE);
@@ -72,20 +72,35 @@ static gboolean
 mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 	      CamelAddress *from, CamelAddress *recipients, CamelException *ex)
 {
+	ExchangeMapiConnection *conn;
 	MapiItem *item = NULL;
 	const gchar *namep;
 	const gchar *addressp;
 	mapi_id_t st = 0;
+	CamelURL *url;
 
 	if (!camel_internet_address_get((CamelInternetAddress *)from, 0, &namep, &addressp)) {
 		return (FALSE);
+	}
+
+	g_return_val_if_fail (CAMEL_IS_SERVICE (transport), FALSE);
+
+	url = CAMEL_SERVICE (transport)->url;
+	g_return_val_if_fail (url != NULL, FALSE);
+
+	conn = exchange_mapi_connection_find (camel_url_get_param (url, "profile"));
+	if (!conn) {
+		camel_exception_setv (ex, CAMEL_EXCEPTION_SERVICE_UNAVAILABLE, _("Could not send message."));
+		return FALSE;
 	}
 
 	/* Convert MIME to MAPIItem, attacment lists and recipient list.*/
 	item = camel_mapi_utils_mime_to_item (message, from, ex);
 
 	/* send */
-	st = mapi_message_item_send(item);
+	st = mapi_message_item_send (conn, item);
+
+	g_object_unref (conn);
 
 	if (st == 0) {
 		/*Fixme : Set a better error message. Would be helful in troubleshooting. */
