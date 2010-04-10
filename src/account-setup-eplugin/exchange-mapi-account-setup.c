@@ -316,6 +316,7 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 	EMConfigTargetAccount *target_account;
 	CamelURL *url;
 	GtkWidget *hbox = NULL;
+	gint row;
 
 	target_account = (EMConfigTargetAccount *)data->config->target;
 	url = camel_url_new(e_account_get_string(target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
@@ -329,7 +330,7 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 		GtkWidget *domain_name;
 		GtkWidget *auth_button;
 		const gchar *domain_value = camel_url_get_param (url, "domain");
-		gint row = ((GtkTable *)data->parent)->nrows;
+		g_object_get (data->parent, "n-rows", &row, NULL);
 
 		/* Domain name & Authenticate Button */
 		hbox = gtk_hbox_new (FALSE, 6);
@@ -480,6 +481,7 @@ exchange_mapi_create (EPlugin *epl, EConfigHookItemFactoryData *data)
 	EABConfigTargetSource *t = (EABConfigTargetSource *) data->target;
 	ESource *source = t->source;
 	gchar *uri_text;
+	gint row;
 	GtkCellRenderer *rcell;
 	GtkTreeStore *ts;
 	GtkTreeViewColumn *tvc;
@@ -508,7 +510,7 @@ exchange_mapi_create (EPlugin *epl, EConfigHookItemFactoryData *data)
 	vbox = gtk_vbox_new (FALSE, 6);
 
 	if (!strcmp (data->config->id, "org.gnome.evolution.calendar.calendarProperties")) {
-		gint row = ((GtkTable*) data->parent)->nrows;
+		g_object_get (data->parent, "n-rows", &row, NULL);
 		gtk_table_attach (GTK_TABLE (data->parent), vbox, 0, 2, row+1, row+2, GTK_FILL|GTK_EXPAND, 0, 0, 0);
 	} else if (!strcmp (data->config->id, "com.novell.evolution.addressbook.config.accountEditor")) {
 		gtk_container_add (GTK_CONTAINER (data->parent), vbox);
