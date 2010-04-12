@@ -220,7 +220,11 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 	gconf_client_set_bool (client, ITIP_MESSAGE_HANDLING, TRUE, NULL);
 	source_list = e_source_list_new_for_gconf (client, conf_key);
 	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, url->user, url->host);
-	group = e_source_group_new (account->name, base_uri);
+	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
+	if (group)
+		e_source_group_set_name (group, account->name);
+	else
+		group = e_source_group_new (account->name, base_uri);
 	g_free (base_uri);
 	e_source_group_set_property (group, "create_source", "yes");
 	e_source_group_set_property (group, "username", url->user);
@@ -426,7 +430,11 @@ add_addressbook_sources (EAccount *account, GSList *folders)
 	base_uri = g_strdup_printf ("mapi://%s@%s/", url->user, url->host);
 	client = gconf_client_get_default ();
 	list = e_source_list_new_for_gconf (client, "/apps/evolution/addressbook/sources" );
-	group = e_source_group_new (account->name, base_uri);
+	group = e_source_list_peek_group_by_base_uri (list, base_uri);
+	if (group)
+		e_source_group_set_name (group, account->name);
+	else
+		group = e_source_group_new (account->name, base_uri);
 	e_source_group_set_property (group, "user", url->user);
 	e_source_group_set_property (group, "host", url->host);
 	e_source_group_set_property (group, "profile", camel_url_get_param (url, "profile"));
