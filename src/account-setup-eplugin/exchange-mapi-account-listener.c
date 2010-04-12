@@ -37,11 +37,6 @@
 #include <libedataserver/e-source.h>
 #include <libedataserver/e-source-list.h>
 
-#include <libmapi/libmapi.h>
-
-/* FIXME: The mapi should not be needed in the include statement.
-LIMBAPI_CFLAGS or something is going wrong */
-
 #include <exchange-mapi-folder.h>
 #include <exchange-mapi-connection.h>
 #include <exchange-mapi-utils.h>
@@ -49,6 +44,8 @@ LIMBAPI_CFLAGS or something is going wrong */
 #define d(x) x
 
 G_DEFINE_TYPE (ExchangeMAPIAccountListener, exchange_mapi_account_listener, G_TYPE_OBJECT)
+
+static gboolean create_profile_entry (CamelURL *url, EAccount *account);
 
 struct _ExchangeMAPIAccountListenerPrivate {
 	GConfClient *gconf_client;
@@ -533,12 +530,19 @@ mapi_account_added (EAccountList *account_listener, EAccount *account)
 		g_return_if_fail (url != NULL);
 
 		conn = exchange_mapi_connection_find (camel_url_get_param (url, "profile"));
+		if (!conn) {
+			/* connect to the server when not connected yet */
+			if (!create_profile_entry (url, account)) {
+				camel_url_free (url);
+				return;
+			}
+
+			conn = exchange_mapi_connection_find (camel_url_get_param (url, "profile"));
+		}
 		camel_url_free (url);
 		g_return_if_fail (conn != NULL);
 
 		folders_list = exchange_mapi_connection_peek_folders_list (conn);
-
-		printf ("%s: %d\n", __FUNCTION__, g_slist_length (folders_list));
 
 		add_addressbook_sources (account, folders_list);
 		add_calendar_sources (account, folders_list);

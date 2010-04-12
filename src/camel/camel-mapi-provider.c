@@ -34,8 +34,6 @@
 #include "camel-mapi-store.h"
 #include "camel-mapi-transport.h"
 
-#define d(x) x
-
 static void add_hash (guint *, gchar *);
 static guint mapi_url_hash (gconstpointer);
 static gint check_equal (gchar *, gchar *);
@@ -93,7 +91,6 @@ CamelServiceAuthType camel_mapi_password_authtype = {
 static gint
 mapi_auto_detect_cb(CamelURL *url, GHashTable **auto_detected, CamelException *ex)
 {
-        d (printf("mapi_auto_detect_cb\n"));
 	*auto_detected = g_hash_table_new (g_str_hash, g_str_equal);
 	g_hash_table_insert (*auto_detected, g_strdup ("poa"), g_strdup (url->host));
 
