@@ -3159,7 +3159,9 @@ exchange_mapi_events_init ()
 {
 	enum MAPISTATUS retval;
 
+	LOCK();
 	retval = RegisterNotification(0);
+	UNLOCK();
 
 	return (retval == MAPI_E_SUCCESS);
 }
