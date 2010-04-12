@@ -53,7 +53,8 @@ GtkWidget *org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemF
 gboolean org_gnome_exchange_mapi_check_options(EPlugin *epl, EConfigHookPageCheckData *data);
 
 /* New Addressbook/CAL */
-GtkWidget *exchange_mapi_create (EPlugin *epl, EConfigHookItemFactoryData *data);
+GtkWidget *exchange_mapi_create_addressbook (EPlugin *epl, EConfigHookItemFactoryData *data);
+GtkWidget *exchange_mapi_create_calendar (EPlugin *epl, EConfigHookItemFactoryData *data);
 
 /* New Addressbook */
 gboolean exchange_mapi_book_check (EPlugin *epl, EConfigHookPageCheckData *data);
@@ -386,14 +387,14 @@ org_gnome_exchange_mapi_check_options(EPlugin *epl, EConfigHookPageCheckData *da
 }
 
 enum {
-	CONTACTSNAME_COL,
-	CONTACTSFID_COL,
-	CONTACTSFOLDER_COL,
+	NAME_COL,
+	FID_COL,
+	FOLDER_COL,
 	NUM_COLS
 };
 
 static gboolean
-check_node (GtkTreeStore *ts, ExchangeMAPIFolder *folder, GtkTreeIter *iter)
+check_node (GtkTreeStore *ts, ExchangeMAPIFolder *folder, GtkTreeIter iter)
 {
 	GtkTreeModel *ts_model;
 	mapi_id_t fid;
@@ -401,22 +402,22 @@ check_node (GtkTreeStore *ts, ExchangeMAPIFolder *folder, GtkTreeIter *iter)
 
 	ts_model = GTK_TREE_MODEL (ts);
 
-	gtk_tree_model_get (ts_model, iter, 1, &fid, -1);
+	gtk_tree_model_get (ts_model, &iter, 1, &fid, -1);
 	if (fid && folder->parent_folder_id == fid) {
 		/* Do something */
 		GtkTreeIter node;
-		gtk_tree_store_append (ts, &node, iter);
-		gtk_tree_store_set (ts, &node, 0, folder->folder_name, 1, folder->folder_id, 2, folder,-1);
+		gtk_tree_store_append (ts, &node, &iter);
+		gtk_tree_store_set (ts, &node, NAME_COL, folder->folder_name, FID_COL, folder->folder_id, FOLDER_COL, folder,-1);
 		return TRUE;
 	}
 
-	if (gtk_tree_model_iter_has_child (ts_model, iter)) {
+	if (gtk_tree_model_iter_has_child (ts_model, &iter)) {
 		GtkTreeIter child;
-		gtk_tree_model_iter_children (ts_model, &child, iter);
-		status = check_node (ts, folder, &child);
+		gtk_tree_model_iter_children (ts_model, &child, &iter);
+		status = check_node (ts, folder, child);
 	}
 
-	while (gtk_tree_model_iter_next (ts_model, iter) && !status) {
+	while (gtk_tree_model_iter_next (ts_model, &iter) && !status) {
 		status = check_node (ts, folder, iter);
 	}
 
@@ -432,27 +433,121 @@ add_to_store (GtkTreeStore *ts, ExchangeMAPIFolder *folder)
 	ts_model = GTK_TREE_MODEL (ts);
 
 	gtk_tree_model_get_iter_first (ts_model, &iter);
-	if (!check_node (ts, folder, &iter)) {
+	if (!check_node (ts, folder, iter)) {
 		GtkTreeIter node;
 		gtk_tree_store_append (ts, &node, &iter);
-		gtk_tree_store_set (ts, &node, 0, folder->folder_name, 1, folder->folder_id, -1);
-
+		gtk_tree_store_set (ts, &node, NAME_COL, folder->folder_name, FID_COL, folder->folder_id, FOLDER_COL, folder, -1);
 	}
 }
 
 static void
-add_folders (GSList *folders, GtkTreeStore *ts)
+traverse_tree (GtkTreeModel *model, GtkTreeIter iter, ExchangeMAPIFolderType folder_type, gboolean *pany_sub_used)
+{
+	gboolean any_sub_used = FALSE;
+	gboolean has_next = TRUE;
+
+	do {
+		gboolean sub_used = FALSE;
+		GtkTreeIter next = iter;
+		ExchangeMAPIFolder *folder = NULL;
+
+		has_next = gtk_tree_model_iter_next (model, &next);
+
+		if (gtk_tree_model_iter_has_child (model, &iter)) {
+			GtkTreeIter child;
+
+			gtk_tree_model_iter_children (model, &child, &iter);
+			traverse_tree (model, child, folder_type, &sub_used);
+		}
+
+		gtk_tree_model_get (model, &iter, FOLDER_COL, &folder, -1);
+		if (folder && (exchange_mapi_folder_get_type (folder) == folder_type || (folder_type == MAPI_FOLDER_TYPE_MEMO && exchange_mapi_folder_get_type (folder) == MAPI_FOLDER_TYPE_JOURNAL))) {
+			sub_used = TRUE;
+		}
+
+		if (sub_used)
+			any_sub_used = TRUE;
+		else if (pany_sub_used && folder)
+			gtk_tree_store_remove (GTK_TREE_STORE (model), &iter);
+
+		iter = next;
+	} while (has_next);
+
+	if (pany_sub_used && any_sub_used)
+		*pany_sub_used = TRUE;
+}
+
+static void
+add_folders (GSList *folders, GtkTreeStore *ts, ExchangeMAPIFolderType folder_type)
 {
 	GSList *tmp = folders;
 	GtkTreeIter iter;
 	gchar *node = _("Personal Folders");
 
+	/* add all... */
 	gtk_tree_store_append (ts, &iter, NULL);
-	gtk_tree_store_set (ts, &iter, 0, node, -1);
+	gtk_tree_store_set (ts, &iter, NAME_COL, node, -1);
 	while (tmp) {
 		ExchangeMAPIFolder *folder = tmp->data;
 		add_to_store (ts, folder);
 		tmp = tmp->next;
+	}
+
+	/* ... then remove those which don't belong to folder_type */
+	if (gtk_tree_model_get_iter_first ((GtkTreeModel *)ts, &iter)) {
+		traverse_tree ((GtkTreeModel *)ts, iter, folder_type, NULL);
+	}
+}
+
+static void
+select_folder (GtkTreeModel *model, mapi_id_t fid, GtkWidget *tree_view)
+{
+	GtkTreeIter iter, next;
+	gboolean found = FALSE, can = TRUE;
+
+	g_return_if_fail (model != NULL);
+	g_return_if_fail (tree_view != NULL);
+
+	if (!gtk_tree_model_get_iter_first (model, &iter))
+		return;
+
+	while (!found && can) {
+		ExchangeMAPIFolder *folder = NULL;
+
+		gtk_tree_model_get (model, &iter, FOLDER_COL, &folder, -1);
+
+		if (folder && exchange_mapi_folder_get_fid (folder) == fid) {
+			gtk_tree_selection_select_iter (gtk_tree_view_get_selection (GTK_TREE_VIEW (tree_view)), &iter);
+			found = TRUE;
+			break;
+		}
+
+		can = FALSE;
+		if (gtk_tree_model_iter_children (model, &next, &iter)) {
+			iter = next;
+			can = TRUE;
+		}
+
+		next = iter;
+		if (!can && gtk_tree_model_iter_next (model, &next)) {
+			iter = next;
+			can = TRUE;
+		}
+
+		if (!can && gtk_tree_model_iter_parent (model, &next, &iter)) {
+			while (!can) {
+				iter = next;
+
+				if (gtk_tree_model_iter_next (model, &iter)) {
+					can = TRUE;
+					break;
+				}
+
+				iter = next;
+				if (!gtk_tree_model_iter_parent (model, &next, &iter))
+					break;
+			}
+		}
 	}
 }
 
@@ -468,18 +563,16 @@ exchange_mapi_cursor_change (GtkTreeView *treeview, ESource *source)
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
 	gtk_tree_selection_get_selected(selection, &model, &iter);
 
-	gtk_tree_model_get (model, &iter, CONTACTSFID_COL, &pfid, -1);
+	gtk_tree_model_get (model, &iter, FID_COL, &pfid, -1);
 	sfid = exchange_mapi_util_mapi_id_to_string (pfid);
 	e_source_set_property (source, "parent-fid", sfid);
 	g_free (sfid);
 }
 
-GtkWidget *
-exchange_mapi_create (EPlugin *epl, EConfigHookItemFactoryData *data)
+static GtkWidget *
+exchange_mapi_create (GtkWidget *parent, ESource *source, ExchangeMAPIFolderType folder_type)
 {
 	GtkWidget *vbox, *label, *scroll, *tv;
-	EABConfigTargetSource *t = (EABConfigTargetSource *) data->target;
-	ESource *source = t->source;
 	gchar *uri_text;
 	gint row;
 	GtkCellRenderer *rcell;
@@ -488,6 +581,7 @@ exchange_mapi_create (EPlugin *epl, EConfigHookItemFactoryData *data)
 	const gchar *acc;
 	GSList *folders;
 	ExchangeMapiConnection *conn;
+	mapi_id_t fid = 0;
 
 	uri_text = e_source_get_uri (source);
 	if (uri_text && g_ascii_strncasecmp (uri_text, MAPI_URI_PREFIX, MAPI_PREFIX_LENGTH)) {
@@ -502,18 +596,18 @@ exchange_mapi_create (EPlugin *epl, EConfigHookItemFactoryData *data)
 	acc = e_source_group_peek_name (e_source_peek_group (source));
 	ts = gtk_tree_store_new (NUM_COLS, G_TYPE_STRING, G_TYPE_INT64, G_TYPE_POINTER);
 
-	add_folders (folders, ts);
+	add_folders (folders, ts, folder_type);
 
 	if (conn)
 		g_object_unref (conn);
 
 	vbox = gtk_vbox_new (FALSE, 6);
 
-	if (!strcmp (data->config->id, "org.gnome.evolution.calendar.calendarProperties")) {
-		g_object_get (data->parent, "n-rows", &row, NULL);
-		gtk_table_attach (GTK_TABLE (data->parent), vbox, 0, 2, row+1, row+2, GTK_FILL|GTK_EXPAND, 0, 0, 0);
-	} else if (!strcmp (data->config->id, "com.novell.evolution.addressbook.config.accountEditor")) {
-		gtk_container_add (GTK_CONTAINER (data->parent), vbox);
+	if (folder_type == MAPI_FOLDER_TYPE_CONTACT) {
+		gtk_container_add (GTK_CONTAINER (parent), vbox);
+	} else {
+		g_object_get (parent, "n-rows", &row, NULL);
+		gtk_table_attach (GTK_TABLE (parent), vbox, 0, 2, row+1, row+2, GTK_FILL|GTK_EXPAND, 0, 0, 0);
 	}
 
 	label = gtk_label_new_with_mnemonic (_("_Location:"));
@@ -522,11 +616,16 @@ exchange_mapi_create (EPlugin *epl, EConfigHookItemFactoryData *data)
 	gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
 
 	rcell = gtk_cell_renderer_text_new ();
-	tvc = gtk_tree_view_column_new_with_attributes (acc, rcell, "text", CONTACTSNAME_COL, NULL);
+	tvc = gtk_tree_view_column_new_with_attributes (acc, rcell, "text", NAME_COL, NULL);
 	tv = gtk_tree_view_new_with_model (GTK_TREE_MODEL (ts));
 	gtk_tree_view_append_column (GTK_TREE_VIEW (tv), tvc);
 	g_object_set (tv,"expander-column", tvc, "headers-visible", TRUE, NULL);
 	gtk_tree_view_expand_all (GTK_TREE_VIEW (tv));
+
+	if (e_source_get_property (source, "folder-id")) {
+		exchange_mapi_util_mapi_id_from_string (e_source_get_property (source, "folder-id"), &fid);
+		select_folder (GTK_TREE_MODEL (ts), fid, tv);
+	}
 
 	scroll = gtk_scrolled_window_new (NULL, NULL);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -534,13 +633,44 @@ exchange_mapi_create (EPlugin *epl, EConfigHookItemFactoryData *data)
 	g_object_set (scroll, "height-request", 150, NULL);
 	gtk_container_add (GTK_CONTAINER (scroll), tv);
 	gtk_label_set_mnemonic_widget (GTK_LABEL (label), tv);
-	g_signal_connect (G_OBJECT (tv), "cursor-changed", G_CALLBACK (exchange_mapi_cursor_change), t->source);
+	g_signal_connect (G_OBJECT (tv), "cursor-changed", G_CALLBACK (exchange_mapi_cursor_change), source);
 	gtk_widget_show_all (scroll);
 
 	gtk_box_pack_start (GTK_BOX (vbox), scroll, FALSE, FALSE, 0);
 
 	gtk_widget_show_all (vbox);
 	return vbox;
+}
+
+GtkWidget *
+exchange_mapi_create_addressbook (EPlugin *epl, EConfigHookItemFactoryData *data)
+{
+	EABConfigTargetSource *t = (EABConfigTargetSource *) data->target;
+
+	return exchange_mapi_create (data->parent, t->source, MAPI_FOLDER_TYPE_CONTACT);
+}
+
+GtkWidget *
+exchange_mapi_create_calendar (EPlugin *epl, EConfigHookItemFactoryData *data)
+{
+	ECalConfigTargetSource *t = (ECalConfigTargetSource *) data->target;
+	ExchangeMAPIFolderType folder_type;
+
+	switch (t->source_type) {
+	case E_CAL_SOURCE_TYPE_EVENT:
+		folder_type = MAPI_FOLDER_TYPE_APPOINTMENT;
+		break;
+	case E_CAL_SOURCE_TYPE_TODO:
+		folder_type = MAPI_FOLDER_TYPE_TASK;
+		break;
+	case E_CAL_SOURCE_TYPE_JOURNAL:
+		folder_type = MAPI_FOLDER_TYPE_MEMO;
+		break;
+	default:
+		g_return_val_if_reached (NULL);
+	}
+
+	return exchange_mapi_create (data->parent, t->source, folder_type);
 }
 
 gboolean
