@@ -382,7 +382,7 @@ get_element_type (icalcomponent_kind kind)
 static void 
 notify_progress (ECalBackendMAPI *cbmapi, guint64 index, guint64 total)
 {
-	guint percent = ((float)index/total) * 100 ;
+	guint percent = ((float) index/total) * 100 ;
 	gchar *progress_string;
 
 	if (percent > 100)
@@ -390,7 +390,7 @@ notify_progress (ECalBackendMAPI *cbmapi, guint64 index, guint64 total)
 
 	/* To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server. */
 	progress_string = g_strdup_printf (_("Loading items in folder %s"), 
-				e_source_get_property (e_cal_backend_get_source (E_CAL_BACKEND (cbmapi)), "name")); 
+				e_source_peek_name (e_cal_backend_get_source (E_CAL_BACKEND (cbmapi))));
 
 	e_cal_backend_notify_view_progress (E_CAL_BACKEND (cbmapi), progress_string, percent);
 
