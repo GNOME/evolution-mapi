@@ -2745,7 +2745,7 @@ get_child_folders(TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, m
 	SPropTagArray = set_SPropTagArray(mem_ctx, 0x7,
 					  PR_FID,
 					  PR_CONTAINER_CLASS,
-					  PR_DISPLAY_NAME,
+					  PR_DISPLAY_NAME_UNICODE,
 					  PR_CONTENT_UNREAD,
 					  PR_CONTENT_COUNT,
 					  PR_MESSAGE_SIZE,
@@ -2772,7 +2772,7 @@ get_child_folders(TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, m
 
 		const mapi_id_t *fid = (const mapi_id_t *)find_SPropValue_data(&rowset.aRow[i], PR_FID);
 		const char *class = (const char *)find_SPropValue_data(&rowset.aRow[i], PR_CONTAINER_CLASS);
-		const char *name = (const char *)find_SPropValue_data(&rowset.aRow[i], PR_DISPLAY_NAME);
+		const char *name = (const char *)find_SPropValue_data(&rowset.aRow[i], PR_DISPLAY_NAME_UNICODE);
 		const uint32_t *unread = (const uint32_t *)find_SPropValue_data(&rowset.aRow[i], PR_CONTENT_UNREAD);
 		const uint32_t *total = (const uint32_t *)find_SPropValue_data(&rowset.aRow[i], PR_CONTENT_COUNT);
 		const uint32_t *child = (const uint32_t *)find_SPropValue_data(&rowset.aRow[i], PR_FOLDER_CHILD_COUNT);
@@ -2975,10 +2975,10 @@ exchange_mapi_get_folders_list (GSList **mapi_folders)
 
 	/* Build the array of Mailbox properties we want to fetch */
 	SPropTagArray = set_SPropTagArray(mem_ctx, 0x4,
-					  PR_DISPLAY_NAME,
-					  PR_MAILBOX_OWNER_NAME,
+					  PR_DISPLAY_NAME_UNICODE,
+					  PR_MAILBOX_OWNER_NAME_UNICODE,
 					  PR_MESSAGE_SIZE,
-					  PR_USER_NAME);
+					  PR_USER_NAME_UNICODE);
 
 	lpProps = talloc_zero(mem_ctx, struct SPropValue);
 	retval = GetProps (&obj_store, SPropTagArray, &lpProps, &count);
@@ -2995,9 +2995,9 @@ exchange_mapi_get_folders_list (GSList **mapi_folders)
 	aRow.lpProps = lpProps;
 
 	/* betting that these will never fail */
-	mailbox_name = (const char *) find_SPropValue_data(&aRow, PR_DISPLAY_NAME);
-	mailbox_owner_name = (const char *) find_SPropValue_data(&aRow, PR_MAILBOX_OWNER_NAME);
-	mailbox_user_name = (const char *) find_SPropValue_data(&aRow, PR_USER_NAME);
+	mailbox_name = (const char *) find_SPropValue_data(&aRow, PR_DISPLAY_NAME_UNICODE);
+	mailbox_owner_name = (const char *) find_SPropValue_data(&aRow, PR_MAILBOX_OWNER_NAME_UNICODE);
+	mailbox_user_name = (const char *) find_SPropValue_data(&aRow, PR_USER_NAME_UNICODE);
 	mailbox_size = (const uint32_t *)find_SPropValue_data (&aRow, PR_MESSAGE_SIZE);
 
 	/* Prepare the directory listing */
