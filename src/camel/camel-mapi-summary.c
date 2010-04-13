@@ -98,6 +98,9 @@ camel_mapi_summary_class_init (CamelMapiSummaryClass *klass)
 
 	camel_mapi_summary_parent = CAMEL_FOLDER_SUMMARY_CLASS (camel_type_get_global_classfuncs (camel_folder_summary_get_type()));
 
+	cfs_class->message_info_size = sizeof(CamelMapiMessageInfo);
+	cfs_class->content_info_size = sizeof(CamelMapiMessageContentInfo);
+
 	cfs_class->message_info_clone = mapi_message_info_clone;
 
 	cfs_class->summary_header_to_db = mapi_summary_header_to_db;
@@ -112,10 +115,6 @@ static void
 camel_mapi_summary_init (CamelMapiSummary *obj)
 {
 	CamelFolderSummary *s = (CamelFolderSummary *)obj;
-
-	/* subclasses need to set the right instance data sizes */
-	s->message_info_size = sizeof(CamelMapiMessageInfo);
-	s->content_info_size = sizeof(CamelMapiMessageContentInfo);
 
 	/* Meta-summary - Overriding UID len */
 	s->meta_summary->uid_len = 2048;
