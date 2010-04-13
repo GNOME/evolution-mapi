@@ -2764,7 +2764,7 @@ get_child_folders(TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, m
 	SPropTagArray = set_SPropTagArray(mem_ctx, 0x7,
 					  PR_FID,
 					  PR_CONTAINER_CLASS,
-					  PR_DISPLAY_NAME,
+					  PR_DISPLAY_NAME_UNICODE,
 					  PR_CONTENT_UNREAD,
 					  PR_CONTENT_COUNT,
 					  PR_MESSAGE_SIZE,
@@ -2791,7 +2791,7 @@ get_child_folders(TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, m
 
 		const mapi_id_t *fid = (const mapi_id_t *)find_SPropValue_data(&rowset.aRow[i], PR_FID);
 		const gchar *class = (const gchar *)find_SPropValue_data(&rowset.aRow[i], PR_CONTAINER_CLASS);
-		const gchar *name = (const gchar *)find_SPropValue_data(&rowset.aRow[i], PR_DISPLAY_NAME);
+		const gchar *name = (const gchar *)find_SPropValue_data(&rowset.aRow[i], PR_DISPLAY_NAME_UNICODE);
 		const uint32_t *unread = (const uint32_t *)find_SPropValue_data(&rowset.aRow[i], PR_CONTENT_UNREAD);
 		const uint32_t *total = (const uint32_t *)find_SPropValue_data(&rowset.aRow[i], PR_CONTENT_COUNT);
 		const uint32_t *child = (const uint32_t *)find_SPropValue_data(&rowset.aRow[i], PR_FOLDER_CHILD_COUNT);
