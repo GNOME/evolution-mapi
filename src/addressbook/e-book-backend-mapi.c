@@ -75,6 +75,69 @@ struct _EBookBackendMAPIPrivate
 #define LOCK() g_mutex_lock (priv->lock)
 #define UNLOCK() g_mutex_unlock (priv->lock)
 
+/* this is a list of all known book MAPI tag IDs;
+   if you add new add it here too, otherwise it may not be fetched */
+static uint32_t known_book_mapi_ids[] = {
+	PR_ASSISTANT_TELEPHONE_NUMBER_UNICODE,
+	PR_ASSISTANT_UNICODE,
+	PR_BIRTHDAY,
+	PR_BODY,
+	PR_BODY_UNICODE,
+	PR_BUSINESS_FAX_NUMBER_UNICODE,
+	PR_COMPANY_MAIN_PHONE_NUMBER_UNICODE,
+	PR_COMPANY_NAME_UNICODE,
+	PR_COUNTRY_UNICODE,
+	PR_DEPARTMENT_NAME_UNICODE,
+	PR_DISPLAY_NAME_UNICODE,
+	PR_EMS_AB_MANAGER_T_UNICODE,
+	PR_FID,
+	PR_GIVEN_NAME_UNICODE,
+	PR_HASATTACH,
+	PR_HOME_ADDRESS_CITY_UNICODE,
+	PR_HOME_ADDRESS_COUNTRY_UNICODE,
+	PR_HOME_ADDRESS_POSTAL_CODE_UNICODE,
+	PR_HOME_ADDRESS_POST_OFFICE_BOX_UNICODE,
+	PR_HOME_ADDRESS_STATE_OR_PROVINCE_UNICODE,
+	PR_HOME_FAX_NUMBER_UNICODE,
+	PR_HOME_TELEPHONE_NUMBER_UNICODE,
+	PR_INSTANCE_NUM,
+	PR_INST_ID,
+	PR_LAST_MODIFICATION_TIME,
+	PR_LOCALITY_UNICODE,
+	PR_MANAGER_NAME_UNICODE,
+	PR_MESSAGE_CLASS,
+	PR_MID,
+	PR_MOBILE_TELEPHONE_NUMBER_UNICODE,
+	PR_NICKNAME_UNICODE,
+	PR_NORMALIZED_SUBJECT_UNICODE,
+	PR_OFFICE_LOCATION_UNICODE,
+	PR_OFFICE_TELEPHONE_NUMBER_UNICODE,
+	PR_PAGER_TELEPHONE_NUMBER_UNICODE,
+	PR_POSTAL_CODE_UNICODE,
+	PR_POST_OFFICE_BOX_UNICODE,
+	PR_PROFESSION_UNICODE,
+	PR_RULE_MSG_NAME,
+	PR_RULE_MSG_PROVIDER,
+	PR_SPOUSE_NAME_UNICODE,
+	PR_STATE_OR_PROVINCE_UNICODE,
+	PR_SUBJECT_UNICODE,
+	PR_SURNAME_UNICODE,
+	PR_TITLE_UNICODE,
+	PR_WEDDING_ANNIVERSARY,
+	PROP_TAG(PT_UNICODE, 0x801a),
+	PROP_TAG(PT_UNICODE, 0x801c),
+	PROP_TAG(PT_UNICODE, 0x801f),
+	PROP_TAG(PT_UNICODE, 0x802b),
+	PROP_TAG(PT_UNICODE, 0x8062),
+	PROP_TAG(PT_UNICODE, 0x8084),
+	PROP_TAG(PT_UNICODE, 0x8093),
+	PROP_TAG(PT_UNICODE, 0x8094),
+	PROP_TAG(PT_UNICODE, 0x80a3),
+	PROP_TAG(PT_UNICODE, 0x80a4),
+	PROP_TAG(PT_UNICODE, 0x80d8),
+	PROP_TAG(PT_UNICODE, 0x812c)
+};
+
 #define ELEMENT_TYPE_SIMPLE 0x01
 #define ELEMENT_TYPE_COMPLEX 0x02 /* fields which require explicit functions to set values into EContact and EGwItem */
 
@@ -96,51 +159,50 @@ static const struct field_element_mapping {
 
 	} mappings [] = {
 
-	{ E_CONTACT_UID, PT_STRING8, 0, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_UID, PT_UNICODE, 0, ELEMENT_TYPE_SIMPLE},
 	{ E_CONTACT_REV, PT_SYSTIME, PR_LAST_MODIFICATION_TIME, ELEMENT_TYPE_SIMPLE},
 
-	{ E_CONTACT_FILE_AS, PT_STRING8, PR_EMS_AB_MANAGER_T, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_FULL_NAME, PT_STRING8, PR_DISPLAY_NAME, ELEMENT_TYPE_SIMPLE },
-	{ E_CONTACT_GIVEN_NAME, PT_STRING8, PR_GIVEN_NAME, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_FAMILY_NAME, PT_STRING8, PR_SURNAME , ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_NICKNAME, PT_STRING8, PR_NICKNAME, ELEMENT_TYPE_SIMPLE },
+	{ E_CONTACT_FILE_AS, PT_UNICODE, PR_EMS_AB_MANAGER_T_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_FULL_NAME, PT_UNICODE, PR_DISPLAY_NAME_UNICODE, ELEMENT_TYPE_SIMPLE },
+	{ E_CONTACT_GIVEN_NAME, PT_UNICODE, PR_GIVEN_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_FAMILY_NAME, PT_UNICODE, PR_SURNAME_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_NICKNAME, PT_UNICODE, PR_NICKNAME_UNICODE, ELEMENT_TYPE_SIMPLE },
 
-	{ E_CONTACT_EMAIL_1, PT_STRING8, PROP_TAG(PT_STRING8, 0x8084), ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_EMAIL_2, PT_STRING8, PROP_TAG(PT_STRING8, 0x8093), ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_EMAIL_3, PT_STRING8, PROP_TAG(PT_STRING8, 0x80a3), ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_IM_AIM,  PT_STRING8, PROP_TAG(PT_UNICODE, 0x8062), ELEMENT_TYPE_COMPLEX},
+	{ E_CONTACT_EMAIL_1, PT_UNICODE, PROP_TAG(PT_UNICODE, 0x8084), ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_EMAIL_2, PT_UNICODE, PROP_TAG(PT_UNICODE, 0x8093), ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_EMAIL_3, PT_UNICODE, PROP_TAG(PT_UNICODE, 0x80a3), ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_IM_AIM,  PT_UNICODE, PROP_TAG(PT_UNICODE, 0x8062), ELEMENT_TYPE_COMPLEX},
 
-	{ E_CONTACT_PHONE_BUSINESS, PT_STRING8, PR_OFFICE_TELEPHONE_NUMBER, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_HOME, PT_STRING8, PR_HOME_TELEPHONE_NUMBER, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_MOBILE, PT_STRING8, PR_MOBILE_TELEPHONE_NUMBER, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_HOME_FAX, PT_STRING8, PR_HOME_FAX_NUMBER ,ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_BUSINESS_FAX, PT_STRING8, PR_BUSINESS_FAX_NUMBER,ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_PAGER, PT_STRING8, PR_PAGER_TELEPHONE_NUMBER,ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_ASSISTANT, PT_STRING8, PR_ASSISTANT_TELEPHONE_NUMBER ,ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_COMPANY, PT_STRING8, PR_COMPANY_MAIN_PHONE_NUMBER ,ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_PHONE_BUSINESS, PT_UNICODE, PR_OFFICE_TELEPHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_PHONE_HOME, PT_UNICODE, PR_HOME_TELEPHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_PHONE_MOBILE, PT_UNICODE, PR_MOBILE_TELEPHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_PHONE_HOME_FAX, PT_UNICODE, PR_HOME_FAX_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_PHONE_BUSINESS_FAX, PT_UNICODE, PR_BUSINESS_FAX_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_PHONE_PAGER, PT_UNICODE, PR_PAGER_TELEPHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_PHONE_ASSISTANT, PT_UNICODE, PR_ASSISTANT_TELEPHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_PHONE_COMPANY, PT_UNICODE, PR_COMPANY_MAIN_PHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
 
-	{ E_CONTACT_HOMEPAGE_URL, PT_STRING8, 0x802b001e, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_FREEBUSY_URL, PT_STRING8, 0x80d8001e, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_HOMEPAGE_URL, PT_UNICODE, PROP_TAG(PT_UNICODE, 0x802b), ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_FREEBUSY_URL, PT_UNICODE, PROP_TAG(PT_UNICODE, 0x80d8), ELEMENT_TYPE_SIMPLE},
 
-	{ E_CONTACT_ROLE, PT_STRING8, PR_PROFESSION, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_TITLE, PT_STRING8, PR_TITLE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_ORG, PT_STRING8, PR_COMPANY_NAME, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_ORG_UNIT, PT_STRING8, PR_DEPARTMENT_NAME,ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_MANAGER, PT_STRING8, PR_MANAGER_NAME, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_ASSISTANT, PT_STRING8, PR_ASSISTANT, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_ROLE, PT_UNICODE, PR_PROFESSION_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_TITLE, PT_UNICODE, PR_TITLE_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_ORG, PT_UNICODE, PR_COMPANY_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_ORG_UNIT, PT_UNICODE, PR_DEPARTMENT_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_MANAGER, PT_UNICODE, PR_MANAGER_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_ASSISTANT, PT_UNICODE, PR_ASSISTANT_UNICODE, ELEMENT_TYPE_SIMPLE},
 
-	{ E_CONTACT_OFFICE, PT_STRING8, PR_OFFICE_LOCATION, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_SPOUSE, PT_STRING8, PR_SPOUSE_NAME, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_OFFICE, PT_UNICODE, PR_OFFICE_LOCATION_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_SPOUSE, PT_UNICODE, PR_SPOUSE_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
 
 	{ E_CONTACT_BIRTH_DATE,  PT_SYSTIME, PR_BIRTHDAY, ELEMENT_TYPE_COMPLEX},
 	{ E_CONTACT_ANNIVERSARY, PT_SYSTIME, PR_WEDDING_ANNIVERSARY, ELEMENT_TYPE_COMPLEX},
 
-	{ E_CONTACT_NOTE, PT_STRING8, PR_BODY, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_NOTE, PT_UNICODE, PR_BODY_UNICODE, ELEMENT_TYPE_SIMPLE},
 
-	{ E_CONTACT_ADDRESS_HOME, PT_STRING8, 0x801a001e, ELEMENT_TYPE_COMPLEX},
-	{ E_CONTACT_ADDRESS_WORK, PT_STRING8, 0x801c001e, ELEMENT_TYPE_COMPLEX},
+	{ E_CONTACT_ADDRESS_HOME, PT_UNICODE, PROP_TAG(PT_UNICODE, 0x801a), ELEMENT_TYPE_COMPLEX},
+	{ E_CONTACT_ADDRESS_WORK, PT_UNICODE, PROP_TAG(PT_UNICODE, 0x801c), ELEMENT_TYPE_COMPLEX},
 //		{ E_CONTACT_BOOK_URI, ELEMENT_TYPE_SIMPLE, "book_uri"}
-//		{ E_CONTACT_EMAIL, PT_STRING8, 0x8084001e},
 //		{ E_CONTACT_CATEGORIES, },
 	};
 
@@ -211,8 +273,8 @@ build_restriction_emails_contains (struct mapi_SRestriction *res,
 
 	res->rt = RES_PROPERTY;
 	res->res.resProperty.relop = RES_PROPERTY;
-	res->res.resProperty.ulPropTag = 0x801f001e; /* EMAIL */
-	res->res.resProperty.lpProp.ulPropTag = 0x801f001e; /* EMAIL*/
+	res->res.resProperty.ulPropTag = PROP_TAG(PT_UNICODE, 0x801f); /* EMAIL */
+	res->res.resProperty.lpProp.ulPropTag = PROP_TAG(PT_UNICODE, 0x801f); /* EMAIL*/
 	res->res.resProperty.lpProp.value.lpszA = email;
 
 	return TRUE;
@@ -251,32 +313,32 @@ build_multiple_restriction_emails_contains (struct mapi_SRestriction *res,
 
 	or_res[0].rt = RES_CONTENT;
 	or_res[0].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[0].res.resContent.ulPropTag = PR_EMS_AB_MANAGER_T;
+	or_res[0].res.resContent.ulPropTag = PR_EMS_AB_MANAGER_T_UNICODE;
 	or_res[0].res.resContent.lpProp.value.lpszA = email;
 
 	or_res[1].rt = RES_CONTENT;
 	or_res[1].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[1].res.resContent.ulPropTag = PR_DISPLAY_NAME;
+	or_res[1].res.resContent.ulPropTag = PR_DISPLAY_NAME_UNICODE;
 	or_res[1].res.resContent.lpProp.value.lpszA = email;
 
 	or_res[2].rt = RES_CONTENT;
 	or_res[2].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[2].res.resContent.ulPropTag = PR_GIVEN_NAME;
+	or_res[2].res.resContent.ulPropTag = PR_GIVEN_NAME_UNICODE;
 	or_res[2].res.resContent.lpProp.value.lpszA = email;
 
 	or_res[3].rt = RES_CONTENT;
 	or_res[3].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[3].res.resContent.ulPropTag = 0x8084001e;
+	or_res[3].res.resContent.ulPropTag = PROP_TAG(PT_UNICODE, 0x8084);
 	or_res[3].res.resContent.lpProp.value.lpszA = email;
 
 	or_res[4].rt = RES_CONTENT;
 	or_res[4].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[4].res.resContent.ulPropTag = 0x8094001e;
+	or_res[4].res.resContent.ulPropTag = PROP_TAG(PT_UNICODE, 0x8094);
 	or_res[4].res.resContent.lpProp.value.lpszA = email;
 
 	or_res[5].rt = RES_CONTENT;
 	or_res[5].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[5].res.resContent.ulPropTag = 0x80a4001e;
+	or_res[5].res.resContent.ulPropTag = PROP_TAG(PT_UNICODE, 0x80a4);
 	or_res[5].res.resContent.lpProp.value.lpszA = email;
 
 	res = g_new0 (struct mapi_SRestriction, 1);
@@ -458,9 +520,9 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 	props = g_new0 (struct SPropValue, 50); //FIXME: Correct value tbd
 	set_str_value ( E_CONTACT_FILE_AS, SPropTagArray->aulPropTag[0]);
 
-	set_str_value (E_CONTACT_FULL_NAME, PR_DISPLAY_NAME);
+	set_str_value (E_CONTACT_FULL_NAME, PR_DISPLAY_NAME_UNICODE);
 	set_SPropValue_proptag(&props[i++], PR_MESSAGE_CLASS, (gconstpointer )IPM_CONTACT);
-	set_str_value (E_CONTACT_FILE_AS, PR_NORMALIZED_SUBJECT);
+	set_str_value (E_CONTACT_FILE_AS, PR_NORMALIZED_SUBJECT_UNICODE);
 	set_str_value (E_CONTACT_EMAIL_1,  SPropTagArray->aulPropTag[1]);
 //	set_str_value (E_CONTACT_EMAIL_1,  SPropTagArray->aulPropTag[2]);
 	set_str_value (E_CONTACT_FILE_AS,  SPropTagArray->aulPropTag[5]);
@@ -473,28 +535,28 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 //	set_str_value ( E_CONTACT_EMAIL_3, SPropTagArray->aulPropTag[12]);
 
 	set_str_value (E_CONTACT_HOMEPAGE_URL, SPropTagArray->aulPropTag[6]);
-	set_str_value (E_CONTACT_FREEBUSY_URL, 0x812C001E);
+	set_str_value (E_CONTACT_FREEBUSY_URL, PROP_TAG(PT_UNICODE, 0x812c));
 
-	set_str_value ( E_CONTACT_PHONE_BUSINESS, PR_OFFICE_TELEPHONE_NUMBER);
-	set_str_value ( E_CONTACT_PHONE_HOME, PR_HOME_TELEPHONE_NUMBER);
-	set_str_value ( E_CONTACT_PHONE_MOBILE, PR_MOBILE_TELEPHONE_NUMBER);
-	set_str_value ( E_CONTACT_PHONE_HOME_FAX, PR_HOME_FAX_NUMBER);
-	set_str_value ( E_CONTACT_PHONE_BUSINESS_FAX, PR_BUSINESS_FAX_NUMBER);
-	set_str_value ( E_CONTACT_PHONE_PAGER, PR_PAGER_TELEPHONE_NUMBER);
-	set_str_value ( E_CONTACT_PHONE_ASSISTANT, PR_ASSISTANT_TELEPHONE_NUMBER);
-	set_str_value ( E_CONTACT_PHONE_COMPANY, PR_COMPANY_MAIN_PHONE_NUMBER);
+	set_str_value ( E_CONTACT_PHONE_BUSINESS, PR_OFFICE_TELEPHONE_NUMBER_UNICODE);
+	set_str_value ( E_CONTACT_PHONE_HOME, PR_HOME_TELEPHONE_NUMBER_UNICODE);
+	set_str_value ( E_CONTACT_PHONE_MOBILE, PR_MOBILE_TELEPHONE_NUMBER_UNICODE);
+	set_str_value ( E_CONTACT_PHONE_HOME_FAX, PR_HOME_FAX_NUMBER_UNICODE);
+	set_str_value ( E_CONTACT_PHONE_BUSINESS_FAX, PR_BUSINESS_FAX_NUMBER_UNICODE);
+	set_str_value ( E_CONTACT_PHONE_PAGER, PR_PAGER_TELEPHONE_NUMBER_UNICODE);
+	set_str_value ( E_CONTACT_PHONE_ASSISTANT, PR_ASSISTANT_TELEPHONE_NUMBER_UNICODE);
+	set_str_value ( E_CONTACT_PHONE_COMPANY, PR_COMPANY_MAIN_PHONE_NUMBER_UNICODE);
 
-	set_str_value (E_CONTACT_MANAGER, PR_MANAGER_NAME);
-	set_str_value (E_CONTACT_ASSISTANT, PR_ASSISTANT);
-	set_str_value (E_CONTACT_ORG, PR_COMPANY_NAME);
-	set_str_value (E_CONTACT_ORG_UNIT, PR_DEPARTMENT_NAME);
-	set_str_value (E_CONTACT_ROLE, PR_PROFESSION);
-	set_str_value (E_CONTACT_TITLE, PR_TITLE);
+	set_str_value (E_CONTACT_MANAGER, PR_MANAGER_NAME_UNICODE);
+	set_str_value (E_CONTACT_ASSISTANT, PR_ASSISTANT_UNICODE);
+	set_str_value (E_CONTACT_ORG, PR_COMPANY_NAME_UNICODE);
+	set_str_value (E_CONTACT_ORG_UNIT, PR_DEPARTMENT_NAME_UNICODE);
+	set_str_value (E_CONTACT_ROLE, PR_PROFESSION_UNICODE);
+	set_str_value (E_CONTACT_TITLE, PR_TITLE_UNICODE);
 
-	set_str_value (E_CONTACT_OFFICE, PR_OFFICE_LOCATION);
-	set_str_value (E_CONTACT_SPOUSE, PR_SPOUSE_NAME);
+	set_str_value (E_CONTACT_OFFICE, PR_OFFICE_LOCATION_UNICODE);
+	set_str_value (E_CONTACT_SPOUSE, PR_SPOUSE_NAME_UNICODE);
 
-	set_str_value (E_CONTACT_NOTE, PR_BODY);
+	set_str_value (E_CONTACT_NOTE, PR_BODY_UNICODE);
 
 	//BDAY AND ANNV
 	if (e_contact_get (contact, E_CONTACT_BIRTH_DATE)) {
@@ -540,11 +602,11 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 
 		contact_addr = e_contact_get (contact, E_CONTACT_ADDRESS_HOME);
 		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[8], contact_addr->street);
-		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_POST_OFFICE_BOX, contact_addr->ext);
-		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_CITY, contact_addr->locality);
-		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_STATE_OR_PROVINCE, contact_addr->region);
-		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_POSTAL_CODE, contact_addr->code);
-		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_COUNTRY, contact_addr->country);
+		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_POST_OFFICE_BOX_UNICODE, contact_addr->ext);
+		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_CITY_UNICODE, contact_addr->locality);
+		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_STATE_OR_PROVINCE_UNICODE, contact_addr->region);
+		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_POSTAL_CODE_UNICODE, contact_addr->code);
+		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_COUNTRY_UNICODE, contact_addr->country);
 	}
 
 	if (e_contact_get (contact, E_CONTACT_ADDRESS_WORK)) {
@@ -552,11 +614,11 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 
 		contact_addr = e_contact_get (contact, E_CONTACT_ADDRESS_WORK);
 		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[9], contact_addr->street);
-		set_SPropValue_proptag (&props[i++], PR_POST_OFFICE_BOX, contact_addr->ext);
-		set_SPropValue_proptag (&props[i++], PR_LOCALITY, contact_addr->locality);
-		set_SPropValue_proptag (&props[i++], PR_STATE_OR_PROVINCE, contact_addr->region);
-		set_SPropValue_proptag (&props[i++], PR_POSTAL_CODE, contact_addr->code);
-		set_SPropValue_proptag (&props[i++], PR_COUNTRY, contact_addr->country);
+		set_SPropValue_proptag (&props[i++], PR_POST_OFFICE_BOX_UNICODE, contact_addr->ext);
+		set_SPropValue_proptag (&props[i++], PR_LOCALITY_UNICODE, contact_addr->locality);
+		set_SPropValue_proptag (&props[i++], PR_STATE_OR_PROVINCE_UNICODE, contact_addr->region);
+		set_SPropValue_proptag (&props[i++], PR_POSTAL_CODE_UNICODE, contact_addr->code);
+		set_SPropValue_proptag (&props[i++], PR_COUNTRY_UNICODE, contact_addr->country);
 	}
 
 //	set_str_value (E_CONTACT_NICKNAME, SPropTagArray->aulPropTag[10]);
@@ -816,7 +878,7 @@ e_book_backend_mapi_get_contact (EBookBackend *backend,
 
 			exchange_mapi_util_mapi_ids_from_uid (id, &fid, &mid);
 			exchange_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
-							NULL, 0,
+							known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids),
 							NULL, NULL,
 							create_contact_item, contact,
 							MAPI_OPTIONS_FETCH_ALL);
@@ -883,7 +945,7 @@ static const uint32_t GetPropsList[] = {
 	PR_MID,
 	PR_INST_ID,
 	PR_INSTANCE_NUM,
-	PR_SUBJECT,
+	PR_SUBJECT_UNICODE,
 	PR_MESSAGE_CLASS,
 	PR_HASATTACH,
 /* FIXME: is this tag fit to check if a recipient table exists or not ? */
@@ -896,7 +958,7 @@ static const uint16_t n_GetPropsList = G_N_ELEMENTS (GetPropsList);
 gboolean
 mapi_book_build_name_id_for_getprops (struct mapi_nameid *nameid, gpointer data)
 {
-	mapi_nameid_lid_add(nameid, 0x8084, PSETID_Address); /* PT_STRING8 - EmailOriginalDisplayName */
+	mapi_nameid_lid_add(nameid, 0x8084, PSETID_Address); /* PT_UNICODE - EmailOriginalDisplayName */
 //	mapi_nameid_lid_add(nameid, 0x8020, PSETID_Address);
 //	mapi_nameid_lid_add(nameid, 0x8021, PSETID_Address);
 	mapi_nameid_lid_add(nameid, 0x8094, PSETID_Address);
@@ -1034,8 +1096,8 @@ emapidump_contact(struct mapi_SPropValue_array *properties)
 		gpointer value;
 
 		/* can cast it, no writing to the value; and it'll be freed not before the end of this function */
-		value = (gpointer) find_mapi_SPropValue_data (properties, mappings[i].mapi_id);
-		if (mappings[i].element_type == PT_STRING8 && mappings[i].contact_type == ELEMENT_TYPE_SIMPLE) {
+		value = (gpointer) exchange_mapi_util_find_array_propval (properties, mappings[i].mapi_id);
+		if (mappings[i].element_type == PT_UNICODE && mappings[i].contact_type == ELEMENT_TYPE_SIMPLE) {
 			if (value)
 				e_contact_set (contact, mappings[i].field_id, value);
 		} else if (mappings[i].contact_type == ELEMENT_TYPE_SIMPLE) {
@@ -1088,20 +1150,20 @@ emapidump_contact(struct mapi_SPropValue_array *properties)
 					contact_addr.address_format = NULL;
 					contact_addr.po = NULL;
 					contact_addr.street = (gchar *)value;
-					contact_addr.ext = (gchar *)find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_POST_OFFICE_BOX);
-					contact_addr.locality = (gchar *)find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_CITY);
-					contact_addr.region = (gchar *)find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_STATE_OR_PROVINCE);
-					contact_addr.code = (gchar *)find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_POSTAL_CODE);
-					contact_addr.country = (gchar *)find_mapi_SPropValue_data (properties, PR_HOME_ADDRESS_COUNTRY);
+					contact_addr.ext = (gchar *)exchange_mapi_util_find_array_propval (properties, PR_HOME_ADDRESS_POST_OFFICE_BOX_UNICODE);
+					contact_addr.locality = (gchar *)exchange_mapi_util_find_array_propval (properties, PR_HOME_ADDRESS_CITY_UNICODE);
+					contact_addr.region = (gchar *)exchange_mapi_util_find_array_propval (properties, PR_HOME_ADDRESS_STATE_OR_PROVINCE_UNICODE);
+					contact_addr.code = (gchar *)exchange_mapi_util_find_array_propval (properties, PR_HOME_ADDRESS_POSTAL_CODE_UNICODE);
+					contact_addr.country = (gchar *)exchange_mapi_util_find_array_propval (properties, PR_HOME_ADDRESS_COUNTRY_UNICODE);
 				} else {
 					contact_addr.address_format = NULL;
 					contact_addr.po = NULL;
 					contact_addr.street = (gchar *)value;
-					contact_addr.ext = (gchar *)find_mapi_SPropValue_data (properties, PR_POST_OFFICE_BOX);
-					contact_addr.locality = (gchar *)find_mapi_SPropValue_data (properties, PR_LOCALITY);
-					contact_addr.region = (gchar *)find_mapi_SPropValue_data (properties, PR_STATE_OR_PROVINCE);
-					contact_addr.code = (gchar *)find_mapi_SPropValue_data (properties, PR_POSTAL_CODE);
-					contact_addr.country = (gchar *)find_mapi_SPropValue_data (properties, PR_COUNTRY);
+					contact_addr.ext = (gchar *)exchange_mapi_util_find_array_propval (properties, PR_POST_OFFICE_BOX_UNICODE);
+					contact_addr.locality = (gchar *)exchange_mapi_util_find_array_propval (properties, PR_LOCALITY_UNICODE);
+					contact_addr.region = (gchar *)exchange_mapi_util_find_array_propval (properties, PR_STATE_OR_PROVINCE_UNICODE);
+					contact_addr.code = (gchar *)exchange_mapi_util_find_array_propval (properties, PR_POSTAL_CODE_UNICODE);
+					contact_addr.country = (gchar *)exchange_mapi_util_find_array_propval (properties, PR_COUNTRY_UNICODE);
 				}
 				e_contact_set (contact, mappings[i].field_id, &contact_addr);
 			}
@@ -1325,7 +1387,7 @@ book_view_thread (gpointer data)
 			}
 		} else {
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
-							NULL, 0,
+							known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids),
 							NULL, NULL,
 							create_contact_cb, book_view,
 							MAPI_OPTIONS_FETCH_ALL)) {
@@ -1432,7 +1494,7 @@ build_cache (EBookBackendMAPI *ebmapi)
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 
 	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
-						NULL, 0,
+						known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids),
 						NULL, NULL,
 						cache_contact_cb, ebmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
@@ -1477,7 +1539,7 @@ update_cache (EBookBackendMAPI *ebmapi)
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 
 	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
-						NULL, 0,
+						known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids),
 						NULL, NULL,
 						cache_contact_cb, ebmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {

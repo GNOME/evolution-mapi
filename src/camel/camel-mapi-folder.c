@@ -550,14 +550,12 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 				/* Build a SRow structure */
 				aRow = &recip->out_SRow;
 
-				type = (uint32_t *) find_SPropValue_data (aRow, PR_RECIPIENT_TYPE);
+				type = (uint32_t *) exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_TYPE);
 
 				if (type) {
-					name = (const gchar *) find_SPropValue_data (aRow, PR_DISPLAY_NAME);
-					name = name ? name : (const gchar *) find_SPropValue_data (aRow, PR_RECIPIENT_DISPLAY_NAME);
-					name = name ? name : (const gchar *) find_SPropValue_data (aRow,
-												 PR_RECIPIENT_DISPLAY_NAME_UNICODE);
-					name = name ? name : (const gchar *) find_SPropValue_data (aRow,
+					name = (const gchar *) exchange_mapi_util_find_row_propval (aRow, PR_DISPLAY_NAME_UNICODE);
+					name = name ? name : (const gchar *) exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
+					name = name ? name : (const gchar *) exchange_mapi_util_find_row_propval (aRow,
 												 PR_7BIT_DISPLAY_NAME_UNICODE);
 					display_name = name ? name : recip->email_id;
 					formatted_id = camel_internet_address_format_address(display_name, recip->email_id);
@@ -976,28 +974,20 @@ camel_mapi_folder_fetch_summary (CamelStore *store, const mapi_id_t fid, struct 
 
 	const guint32 summary_prop_list[] = {
 		PR_INTERNET_CPID,
-		PR_SUBJECT,
 		PR_SUBJECT_UNICODE,
 		PR_MESSAGE_SIZE,
 		PR_MESSAGE_DELIVERY_TIME,
 		PR_MESSAGE_FLAGS,
-		PR_SENT_REPRESENTING_NAME,
 		PR_SENT_REPRESENTING_NAME_UNICODE,
-		PR_SENT_REPRESENTING_EMAIL_ADDRESS,
 		PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
 		PR_SENT_REPRESENTING_ADDRTYPE,
-		PR_SENT_REPRESENTING_ADDRTYPE_UNICODE,
 		PR_LAST_MODIFICATION_TIME,
 		PR_INTERNET_MESSAGE_ID,
 		PR_INTERNET_REFERENCES,
 		PR_IN_REPLY_TO_ID,
-		PR_DISPLAY_TO,
 		PR_DISPLAY_TO_UNICODE,
-		PR_DISPLAY_CC,
 		PR_DISPLAY_CC_UNICODE,
-		PR_DISPLAY_BCC,
 		PR_DISPLAY_BCC_UNICODE,
-		PR_TRANSPORT_MESSAGE_HEADERS,
 		PR_TRANSPORT_MESSAGE_HEADERS_UNICODE
 	};
 
@@ -1160,18 +1150,14 @@ static const uint32_t camel_GetPropsList[] = {
 	PR_MID,
 	PR_INTERNET_CPID,
 
-	PR_TRANSPORT_MESSAGE_HEADERS,
 	PR_TRANSPORT_MESSAGE_HEADERS_UNICODE,
 	PR_MESSAGE_CLASS,
-	PR_MESSAGE_CLASS_UNICODE,
 	PR_MESSAGE_SIZE,
 	PR_MESSAGE_FLAGS,
 	PR_MESSAGE_DELIVERY_TIME,
 	PR_MSG_EDITOR_FORMAT,
 
-	PR_SUBJECT,
 	PR_SUBJECT_UNICODE,
-	PR_CONVERSATION_TOPIC,
 	PR_CONVERSATION_TOPIC_UNICODE,
 
 	/*Properties used for message threading.*/
@@ -1186,11 +1172,8 @@ static const uint32_t camel_GetPropsList[] = {
 	/*PR_BODY_HTML, */
 	/*PR_BODY_HTML_UNICODE, */
 
-	PR_DISPLAY_TO,
 	PR_DISPLAY_TO_UNICODE,
-	PR_DISPLAY_CC,
 	PR_DISPLAY_CC_UNICODE,
-	PR_DISPLAY_BCC,
 	PR_DISPLAY_BCC_UNICODE,
 
 	PR_CREATION_TIME,
@@ -1203,25 +1186,16 @@ static const uint32_t camel_GetPropsList[] = {
 	PR_OWNER_APPT_ID,
 	PR_PROCESSED,
 
-	PR_SENT_REPRESENTING_NAME,
 	PR_SENT_REPRESENTING_NAME_UNICODE,
 	PR_SENT_REPRESENTING_ADDRTYPE,
-	PR_SENT_REPRESENTING_ADDRTYPE_UNICODE,
-	PR_SENT_REPRESENTING_EMAIL_ADDRESS,
 	PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
 
-	PR_SENDER_NAME,
 	PR_SENDER_NAME_UNICODE,
 	PR_SENDER_ADDRTYPE,
-	PR_SENDER_ADDRTYPE_UNICODE,
-	PR_SENDER_EMAIL_ADDRESS,
 	PR_SENDER_EMAIL_ADDRESS_UNICODE,
 
-	PR_RCVD_REPRESENTING_NAME,
 	PR_RCVD_REPRESENTING_NAME_UNICODE,
 	PR_RCVD_REPRESENTING_ADDRTYPE,
-	PR_RCVD_REPRESENTING_ADDRTYPE_UNICODE,
-	PR_RCVD_REPRESENTING_EMAIL_ADDRESS,
 	PR_RCVD_REPRESENTING_EMAIL_ADDRESS_UNICODE
 };
 
@@ -1358,7 +1332,7 @@ fetch_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 		if (appointment_body_str && *appointment_body_str) {
 			body = g_new0(ExchangeMAPIStream, 1);
-			body->proptag = PR_BODY;
+			body->proptag = PR_BODY_UNICODE;
 			body->value = g_byte_array_new ();
 			body->value = g_byte_array_append (body->value, appointment_body_str, strlen ((const gchar *)appointment_body_str));
 
@@ -1429,12 +1403,11 @@ mapi_mime_set_recipient_list (CamelMimeMessage *msg, MapiItem *item)
 		aRow = &recip->out_SRow;
 
 		/*Name is probably available in one of these props.*/
-		name = (const gchar *) find_SPropValue_data (aRow, PR_DISPLAY_NAME);
-		name = name ? name : (const gchar *) find_SPropValue_data (aRow, PR_RECIPIENT_DISPLAY_NAME);
-		name = name ? name : (const gchar *) find_SPropValue_data (aRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
-		name = name ? name : (const gchar *) find_SPropValue_data (aRow, PR_7BIT_DISPLAY_NAME_UNICODE);
+		name = (const gchar *) exchange_mapi_util_find_row_propval (aRow, PR_DISPLAY_NAME_UNICODE);
+		name = name ? name : (const gchar *) exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
+		name = name ? name : (const gchar *) exchange_mapi_util_find_row_propval (aRow, PR_7BIT_DISPLAY_NAME_UNICODE);
 
-		type = (uint32_t *) find_SPropValue_data (aRow, PR_RECIPIENT_TYPE);
+		type = (uint32_t *) exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_TYPE);
 
 		/*Fallbacks. Not good*/
 		display_name = name ? g_strdup (name) : g_strdup (recip->email_id);
@@ -1732,11 +1705,11 @@ mapi_mime_classify_attachments (GSList *attachments, GSList **inline_attachs, GS
 		part = camel_mime_part_new ();
 
 		filename = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps,
-											 PR_ATTACH_LONG_FILENAME);
+											 PR_ATTACH_LONG_FILENAME_UNICODE);
 
 		if (!(filename && *filename))
 			filename = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps,
-												 PR_ATTACH_FILENAME);
+												 PR_ATTACH_FILENAME_UNICODE);
 		camel_mime_part_set_filename(part, g_strdup(filename));
 		camel_content_type_set_param (((CamelDataWrapper *) part)->mime_type, "name", filename);
 

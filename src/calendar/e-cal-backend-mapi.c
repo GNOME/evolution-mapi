@@ -92,6 +92,81 @@ struct _ECalBackendMAPIPrivate {
 	SyncDelta		*dlock;
 };
 
+/* this is a list of all known calendar MAPI tag IDs;
+   if you add new add it here too, otherwise it may not be fetched */
+static uint32_t known_cal_mapi_ids[] = {
+	PR_7BIT_DISPLAY_NAME_UNICODE,
+	PR_ADDRTYPE,
+	PR_ATTACH_DATA_BIN,
+	PR_ATTACH_FILENAME_UNICODE,
+	PR_ATTACH_LONG_FILENAME_UNICODE,
+	PR_ATTACH_METHOD,
+	PR_BODY,
+	PR_BODY_UNICODE,
+	PR_CONVERSATION_TOPIC_UNICODE,
+	PR_CREATION_TIME,
+	PR_DISPLAY_NAME_UNICODE,
+	PR_DISPLAY_TYPE,
+	PR_END_DATE,
+	PR_FID,
+	PR_GIVEN_NAME_UNICODE,
+	PR_HTML,
+	PR_ICON_INDEX,
+	PR_IMPORTANCE,
+	PR_LAST_MODIFICATION_TIME,
+	PR_MESSAGE_CLASS,
+	PR_MESSAGE_FLAGS,
+	PR_MID,
+	PR_MSG_EDITOR_FORMAT,
+	PR_NORMALIZED_SUBJECT_UNICODE,
+	PR_OBJECT_TYPE,
+	PR_OWNER_APPT_ID,
+	PR_PRIORITY,
+	PR_PROCESSED,
+	PR_RCVD_REPRESENTING_ADDRTYPE,
+	PR_RCVD_REPRESENTING_EMAIL_ADDRESS_UNICODE,
+	PR_RCVD_REPRESENTING_NAME_UNICODE,
+	PR_RECIPIENT_DISPLAY_NAME_UNICODE,
+	PR_RECIPIENTS_FLAGS,
+	PR_RECIPIENT_TRACKSTATUS,
+	PR_RECIPIENT_TYPE,
+	PR_RENDERING_POSITION,
+	PR_RESPONSE_REQUESTED,
+	PR_RTF_IN_SYNC,
+	PR_SENDER_ADDRTYPE,
+	PR_SENDER_EMAIL_ADDRESS_UNICODE,
+	PR_SENDER_NAME_UNICODE,
+	PR_SEND_INTERNET_ENCODING,
+	PR_SENSITIVITY,
+	PR_SENT_REPRESENTING_ADDRTYPE,
+	PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
+	PR_SENT_REPRESENTING_NAME_UNICODE,
+	PR_SMTP_ADDRESS_UNICODE,
+	PR_START_DATE,
+	PR_SUBJECT_UNICODE,
+	PROP_TAG(PT_BINARY, 0x0003),
+	PROP_TAG(PT_BINARY, 0x0023),
+	PROP_TAG(PT_BINARY, 0x8216),
+	PROP_TAG(PT_BINARY, 0x825E),
+	PROP_TAG(PT_BINARY, 0x825F),
+	PROP_TAG(PT_BOOLEAN, 0x8126),
+	PROP_TAG(PT_BOOLEAN, 0x8215),
+	PROP_TAG(PT_BOOLEAN, 0x8223),
+	PROP_TAG(PT_BOOLEAN, 0x8503),
+	PROP_TAG(PT_DOUBLE, 0x8102),
+	PROP_TAG(PT_LONG, 0x8101),
+	PROP_TAG(PT_LONG, 0x8201),
+	PROP_TAG(PT_LONG, 0x8205),
+	PROP_TAG(PT_STRING8, 0x8208),
+	PROP_TAG(PT_SYSTIME, 0x8104),
+	PROP_TAG(PT_SYSTIME, 0x8105),
+	PROP_TAG(PT_SYSTIME, 0x810F),
+	PROP_TAG(PT_SYSTIME, 0x820D),
+	PROP_TAG(PT_SYSTIME, 0x820E),
+	PROP_TAG(PT_SYSTIME, 0x8502),
+	PROP_TAG(PT_SYSTIME, 0x8560)
+};
+
 #define PARENT_TYPE E_TYPE_CAL_BACKEND_SYNC
 static ECalBackendClass *parent_class = NULL;
 
@@ -619,7 +694,7 @@ get_deltas (gpointer handle)
 	/* FIXME: GetProps does not seem to work for tasks :-( */
 	if (kind == ICAL_VTODO_COMPONENT) {
 		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
-						NULL, 0, NULL, NULL,
+						known_cal_mapi_ids, G_N_ELEMENTS (known_cal_mapi_ids), NULL, NULL,
 						mapi_cal_get_changes_cb, cbmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
 			/* FIXME: String : We need to restart evolution-data-server */
@@ -721,7 +796,7 @@ get_deltas (gpointer handle)
 
 		if (kind == ICAL_VTODO_COMPONENT) {
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
-						NULL, 0, NULL, NULL,
+						known_cal_mapi_ids, G_N_ELEMENTS (known_cal_mapi_ids), NULL, NULL,
 						mapi_cal_get_changes_cb, cbmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
 				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
@@ -1058,7 +1133,7 @@ populate_cache (ECalBackendMAPI *cbmapi)
 	/* FIXME: GetProps does not seem to work for tasks :-( */
 	if (kind == ICAL_VTODO_COMPONENT) {
 		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
-						NULL, 0, NULL, NULL,
+						known_cal_mapi_ids, G_N_ELEMENTS (known_cal_mapi_ids), NULL, NULL,
 						mapi_cal_cache_create_cb, cbmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
 			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Could not create cache file"));
@@ -1313,6 +1388,19 @@ e_cal_backend_mapi_open (ECalBackendSync *backend, EDataCal *cal, gboolean only_
 		return status;
 }
 
+static uint32_t req_props_list[] = {
+	PR_OWNER_APPT_ID,
+	PROP_TAG(PT_LONG, 0x8201),
+	PROP_TAG(PT_BINARY, 0x0023),
+	PROP_TAG(PT_BINARY, 0x0003),
+	PR_SENT_REPRESENTING_NAME_UNICODE,
+	PR_SENT_REPRESENTING_ADDRTYPE,
+	PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
+	PR_SENDER_NAME_UNICODE,
+	PR_SENDER_ADDRTYPE,
+	PR_SENDER_EMAIL_ADDRESS_UNICODE
+};	
+
 static gboolean
 capture_req_props (FetchItemsCallbackData *item_data, gpointer data)
 {
@@ -1328,12 +1416,12 @@ capture_req_props (FetchItemsCallbackData *item_data, gpointer data)
 		cbdata->appt_seq = *ui32;
 	cbdata->cleanglobalid = (const struct Binary_r *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0023));
 	cbdata->globalid = (const struct Binary_r *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0003));
-	cbdata->username = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME);
+	cbdata->username = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE);
 	cbdata->useridtype = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE);
-	cbdata->userid = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS);
-	cbdata->ownername = exchange_mapi_util_find_array_propval (properties, PR_SENDER_NAME);
+	cbdata->userid = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
+	cbdata->ownername = exchange_mapi_util_find_array_propval (properties, PR_SENDER_NAME_UNICODE);
 	cbdata->owneridtype = exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE);
-	cbdata->ownerid = exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS);
+	cbdata->ownerid = exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE);
 
 	return TRUE;
 }
@@ -1353,7 +1441,7 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cbdata *cb
 	uid = icalcomponent_get_uid (comp);
 	exchange_mapi_util_mapi_id_from_string (uid, &mid);
 	if (exchange_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
-					NULL, 0,
+					req_props_list, G_N_ELEMENTS (req_props_list),
 					NULL, NULL,
 					capture_req_props, cbdata,
 					MAPI_OPTIONS_FETCH_GENERIC_STREAMS))
@@ -1373,7 +1461,7 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cbdata *cb
 	cast_mapi_SPropValue (&(res.res.resProperty.lpProp), &sprop);
 
 	exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
-					NULL, 0,
+					req_props_list, G_N_ELEMENTS (req_props_list),
 					NULL, NULL,
 					capture_req_props, cbdata,
 					MAPI_OPTIONS_FETCH_GENERIC_STREAMS);

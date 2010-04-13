@@ -79,11 +79,11 @@ mapi_item_add_recipient (const gchar *recipients, OlMailRecipientType type, GSLi
 	str = "SMTP";
 	set_SPropValue_proptag (&(recipient->in.ext_lpProps[2]), PR_ADDRTYPE, (gconstpointer )(str));
 	str = recipient->email_id;
-	set_SPropValue_proptag (&(recipient->in.ext_lpProps[3]), PR_SMTP_ADDRESS, (gconstpointer )(str));
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[3]), PR_SMTP_ADDRESS_UNICODE, (gconstpointer )(str));
 	/* FIXME: Please add the correct names here instead of the e-mail ID */
-	set_SPropValue_proptag (&(recipient->in.ext_lpProps[4]), PR_GIVEN_NAME, (gconstpointer )(str));
-	set_SPropValue_proptag (&(recipient->in.ext_lpProps[5]), PR_DISPLAY_NAME, (gconstpointer )(str));
-	set_SPropValue_proptag (&(recipient->in.ext_lpProps[6]), PR_7BIT_DISPLAY_NAME, (gconstpointer )(str));
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[4]), PR_GIVEN_NAME_UNICODE, (gconstpointer )(str));
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[5]), PR_DISPLAY_NAME_UNICODE, (gconstpointer )(str));
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[6]), PR_7BIT_DISPLAY_NAME_UNICODE, (gconstpointer )(str));
 
 	bVal = FALSE;
 	set_SPropValue_proptag (&(recipient->in.ext_lpProps[7]), PR_SEND_RICH_INFO, &bVal);
@@ -203,11 +203,11 @@ mapi_item_add_attach (MapiItem *item, CamelMimePart *part, CamelStream *content_
 
 	if (filename) {
 		set_SPropValue_proptag(&(item_attach->lpProps[i++]),
-				       PR_ATTACH_FILENAME,
+				       PR_ATTACH_FILENAME_UNICODE,
 				       (gconstpointer ) g_strdup(filename));
 
 		set_SPropValue_proptag(&(item_attach->lpProps[i++]),
-				       PR_ATTACH_LONG_FILENAME,
+				       PR_ATTACH_LONG_FILENAME_UNICODE,
 				       (gconstpointer ) g_strdup(filename));
 	}
 

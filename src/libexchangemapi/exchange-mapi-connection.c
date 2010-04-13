@@ -493,7 +493,7 @@ exchange_mapi_util_read_body_stream (mapi_object_t *obj_message, GSList **stream
 		if (editor != olEditorText && editor != olEditorHTML)
 			editor = olEditorHTML;
 	} else {
-		const uint32_t *ui32 = (const uint32_t *) get_SPropValue(lpProps, PR_MSG_EDITOR_FORMAT);
+		const uint32_t *ui32 = (const uint32_t *) exchange_mapi_util_find_SPropVal_array_propval(lpProps, PR_MSG_EDITOR_FORMAT);
 		/* if PR_MSG_EDITOR_FORMAT doesn't exist, set it to PLAINTEXT */
 		editor = ui32 ? *ui32 : olEditorText;
 	}
@@ -505,9 +505,9 @@ exchange_mapi_util_read_body_stream (mapi_object_t *obj_message, GSList **stream
 	retval = -1;
 	switch (editor) {
 		case olEditorText:
-			if ((data = (const gchar *) get_SPropValue (lpProps, PR_BODY_UNICODE)) != NULL)
+			if ((data = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (lpProps, PR_BODY_UNICODE)) != NULL)
 				proptag = PR_BODY_UNICODE;
-			else if ((data = (const gchar *) get_SPropValue (lpProps, PR_BODY)) != NULL)
+			else if ((data = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (lpProps, PR_BODY)) != NULL)
 				proptag = PR_BODY;
 			if (data) {
 				gsize size = strlen(data)+1;
@@ -518,9 +518,9 @@ exchange_mapi_util_read_body_stream (mapi_object_t *obj_message, GSList **stream
 			break;
 		case olEditorHTML:
 			/* Fixme : */
-			/*if ((data = (const gchar *) get_SPropValue (lpProps, PR_BODY_HTML_UNICODE)) != NULL) */
+			/*if ((data = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (lpProps, PR_BODY_HTML_UNICODE)) != NULL) */
 			/*	proptag = PR_BODY_HTML_UNICODE; */
-			if ((data = (const gchar *) get_SPropValue (lpProps, PR_BODY_HTML)) != NULL)
+			if ((data = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (lpProps, PR_BODY_HTML)) != NULL)
 				proptag = PR_BODY_HTML;
 
 			if (data) {
@@ -533,7 +533,7 @@ exchange_mapi_util_read_body_stream (mapi_object_t *obj_message, GSList **stream
 			}
 			break;
 		case olEditorRTF:
-			rtf_in_sync = (const bool *) get_SPropValue (lpProps, PR_RTF_IN_SYNC);
+			rtf_in_sync = (const bool *) exchange_mapi_util_find_SPropVal_array_propval (lpProps, PR_RTF_IN_SYNC);
 //			if (!(rtf_in_sync && *rtf_in_sync))
 			{
 				mapi_object_t obj_stream;
@@ -909,10 +909,10 @@ mapidump_PAB_gal_entry (struct SRow *aRow)
 	const gchar	*account;
 	ExchangeMAPIGALEntry *gal_entry;
 
-	addrtype = (const gchar *)find_SPropValue_data(aRow, PR_ADDRTYPE_UNICODE);
-	name = (const gchar *)find_SPropValue_data(aRow, PR_DISPLAY_NAME_UNICODE);
-	email = (const gchar *)find_SPropValue_data(aRow, PR_SMTP_ADDRESS_UNICODE);
-	account = (const gchar *)find_SPropValue_data(aRow, PR_ACCOUNT_UNICODE);
+	addrtype = (const gchar *)exchange_mapi_util_find_row_propval (aRow, PR_ADDRTYPE);
+	name = (const gchar *)exchange_mapi_util_find_row_propval (aRow, PR_DISPLAY_NAME_UNICODE);
+	email = (const gchar *)exchange_mapi_util_find_row_propval (aRow, PR_SMTP_ADDRESS_UNICODE);
+	account = (const gchar *)exchange_mapi_util_find_row_propval (aRow, PR_ACCOUNT_UNICODE);
 
 	printf("[%s] %s:\n\tName: %-25s\n\tEmail: %-25s\n",
 	       addrtype, account, name, email);
@@ -948,7 +948,7 @@ exchange_mapi_connection_get_gal (ExchangeMapiConnection *conn, GPtrArray *conta
 					  PR_SMTP_ADDRESS_UNICODE,
 					  PR_DISPLAY_TYPE,
 					  PR_OBJECT_TYPE,
-					  PR_ADDRTYPE_UNICODE,
+					  PR_ADDRTYPE,
 					  PR_OFFICE_TELEPHONE_NUMBER_UNICODE,
 					  PR_OFFICE_LOCATION_UNICODE,
 					  PR_TITLE_UNICODE,
@@ -1010,12 +1010,12 @@ exchange_mapi_util_get_recipients (mapi_object_t *obj_message, GSList **recip_li
 
 		recipient->mem_ctx = talloc_init ("ExchangeMAPI_GetRecipients");
 
-		recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_SMTP_ADDRESS));
+		recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_SMTP_ADDRESS_UNICODE));
 		/* fallback */
 		if (!recipient->email_id) {
 			const gchar *addrtype = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE));
 			if (addrtype && !g_ascii_strcasecmp(addrtype, "SMTP"))
-				recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_EMAIL_ADDRESS));
+				recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_EMAIL_ADDRESS_UNICODE));
 		}
 		/* fail */
 		if (!recipient->email_id) {
@@ -1052,9 +1052,9 @@ set_recipient_properties (TALLOC_CTX *mem_ctx, struct SRow *aRow, ExchangeMAPIRe
 		struct SPropValue sprop;
 		const gchar *dn = NULL, *email = NULL;
 
-		dn = (const gchar *) get_SPropValue (recipient->in.ext_lpProps, PR_DISPLAY_NAME);
+		dn = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (recipient->in.ext_lpProps, PR_DISPLAY_NAME_UNICODE);
 		dn = (dn) ? dn : "";
-		email = (const gchar *) get_SPropValue (recipient->in.ext_lpProps, PR_SMTP_ADDRESS);
+		email = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (recipient->in.ext_lpProps, PR_SMTP_ADDRESS_UNICODE);
 		email = (email) ? email : "";
 		oneoff_eid = exchange_mapi_util_entryid_generate_oneoff (mem_ctx, dn, email, FALSE);
 		set_SPropValue_proptag (&sprop, PR_ENTRYID, (gconstpointer )(oneoff_eid));
@@ -1095,7 +1095,7 @@ exchange_mapi_util_modify_recipients (ExchangeMapiConnection *conn, TALLOC_CTX *
 					  PR_DISPLAY_TYPE,
 					  PR_TRANSMITTABLE_DISPLAY_NAME_UNICODE,
 					  PR_EMAIL_ADDRESS_UNICODE,
-					  PR_ADDRTYPE_UNICODE,
+					  PR_ADDRTYPE,
 					  PR_SEND_RICH_INFO,
 					  PR_7BIT_DISPLAY_NAME_UNICODE,
 					  PR_SMTP_ADDRESS_UNICODE);
@@ -1213,7 +1213,7 @@ exchange_mapi_connection_check_restriction (ExchangeMapiConnection *conn, mapi_i
 					  PR_MID,
 					  PR_INST_ID,
 					  PR_INSTANCE_NUM,
-					  PR_SUBJECT,
+					  PR_SUBJECT_UNICODE,
 					  PR_MESSAGE_CLASS,
 					  PR_LAST_MODIFICATION_TIME,
 					  PR_HASATTACH,
@@ -1928,7 +1928,7 @@ exchange_mapi_connection_rename_folder (ExchangeMapiConnection *conn, mapi_id_t 
 	}
 
 	props = talloc_zero(mem_ctx, struct SPropValue);
-	set_SPropValue_proptag (props, PR_DISPLAY_NAME, new_name);
+	set_SPropValue_proptag (props, PR_DISPLAY_NAME_UNICODE, new_name);
 
 	retval = SetProps(&obj_folder, props, 1);
 	if (retval != MAPI_E_SUCCESS) {
@@ -2789,13 +2789,13 @@ get_child_folders(TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, m
 		ExchangeMAPIFolder *folder = NULL;
 		gchar *newname = NULL;
 
-		const mapi_id_t *fid = (const mapi_id_t *)find_SPropValue_data(&rowset.aRow[i], PR_FID);
-		const gchar *class = (const gchar *)find_SPropValue_data(&rowset.aRow[i], PR_CONTAINER_CLASS);
-		const gchar *name = (const gchar *)find_SPropValue_data(&rowset.aRow[i], PR_DISPLAY_NAME_UNICODE);
-		const uint32_t *unread = (const uint32_t *)find_SPropValue_data(&rowset.aRow[i], PR_CONTENT_UNREAD);
-		const uint32_t *total = (const uint32_t *)find_SPropValue_data(&rowset.aRow[i], PR_CONTENT_COUNT);
-		const uint32_t *child = (const uint32_t *)find_SPropValue_data(&rowset.aRow[i], PR_FOLDER_CHILD_COUNT);
-		const uint32_t *folder_size = (const uint32_t *)find_SPropValue_data(&rowset.aRow[i], PR_MESSAGE_SIZE);
+		const mapi_id_t *fid = (const mapi_id_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_FID);
+		const gchar *class = (const gchar *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_CONTAINER_CLASS);
+		const gchar *name = (const gchar *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_DISPLAY_NAME_UNICODE);
+		const uint32_t *unread = (const uint32_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_CONTENT_UNREAD);
+		const uint32_t *total = (const uint32_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_CONTENT_COUNT);
+		const uint32_t *child = (const uint32_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_FOLDER_CHILD_COUNT);
+		const uint32_t *folder_size = (const uint32_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_MESSAGE_SIZE);
 
 		if (!class)
 			class = IPF_NOTE;
@@ -2886,7 +2886,7 @@ mapi_get_ren_additional_fids (mapi_object_t *obj_store, GHashTable **folder_list
 	aRow.cValues = count;
 	aRow.lpProps = lpProps;
 
-	entryids = (const struct BinaryArray_r *) find_SPropValue_data(&aRow, PR_ADDITIONAL_REN_ENTRYIDS);
+	entryids = (const struct BinaryArray_r *) exchange_mapi_util_find_row_propval (&aRow, PR_ADDITIONAL_REN_ENTRYIDS);
 
 	/* Iterate through MV_BINARY */
 	if (entryids) {
@@ -3008,10 +3008,10 @@ exchange_mapi_connection_get_folders_list (ExchangeMapiConnection *conn, GSList 
 	aRow.lpProps = lpProps;
 
 	/* betting that these will never fail */
-	mailbox_name = (const gchar *) find_SPropValue_data(&aRow, PR_DISPLAY_NAME_UNICODE);
-	mailbox_owner_name = (const gchar *) find_SPropValue_data(&aRow, PR_MAILBOX_OWNER_NAME_UNICODE);
-	mailbox_user_name = (const gchar *) find_SPropValue_data(&aRow, PR_USER_NAME_UNICODE);
-	mailbox_size = (const uint32_t *)find_SPropValue_data (&aRow, PR_MESSAGE_SIZE);
+	mailbox_name = (const gchar *) exchange_mapi_util_find_row_propval (&aRow, PR_DISPLAY_NAME_UNICODE);
+	mailbox_owner_name = (const gchar *) exchange_mapi_util_find_row_propval (&aRow, PR_MAILBOX_OWNER_NAME_UNICODE);
+	mailbox_user_name = (const gchar *) exchange_mapi_util_find_row_propval (&aRow, PR_USER_NAME_UNICODE);
+	mailbox_size = (const uint32_t *)exchange_mapi_util_find_row_propval  (&aRow, PR_MESSAGE_SIZE);
 
 	/* Prepare the directory listing */
 	retval = GetDefaultFolder(&priv->msg_store, &mailbox_id, olFolderTopInformationStore);
@@ -3152,8 +3152,7 @@ exchange_mapi_connection_ex_to_smtp (ExchangeMapiConnection *conn, const gchar *
 
 	LOCK ();
 
-	SPropTagArray = set_SPropTagArray(mem_ctx, 0x2,
-					  PR_SMTP_ADDRESS,
+	SPropTagArray = set_SPropTagArray(mem_ctx, 0x1,
 					  PR_SMTP_ADDRESS_UNICODE);
 
 	retval = ResolveNames (priv->session, (const gchar **)str_array, SPropTagArray, &SRowSet, &flaglist, 0);
@@ -3161,9 +3160,7 @@ exchange_mapi_connection_ex_to_smtp (ExchangeMapiConnection *conn, const gchar *
 		retval = ResolveNames (priv->session, (const gchar **)str_array, SPropTagArray, &SRowSet, &flaglist, MAPI_UNICODE);
 
 	if (retval == MAPI_E_SUCCESS && SRowSet && SRowSet->cRows == 1) {
-		smtp_addr = (const gchar *) find_SPropValue_data(SRowSet->aRow, PR_SMTP_ADDRESS);
-		if (!smtp_addr)
-			smtp_addr = (const gchar *) find_SPropValue_data(SRowSet->aRow, PR_SMTP_ADDRESS_UNICODE);
+		smtp_addr = (const gchar *) exchange_mapi_util_find_row_propval (SRowSet->aRow, PR_SMTP_ADDRESS_UNICODE);
 	}
 
 	talloc_free (mem_ctx);
