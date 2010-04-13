@@ -211,6 +211,8 @@ folder_size_actions_update_cb (EShellView *shell_view, GtkActionEntry *entries)
 	EShellSidebar *shell_sidebar;
 	EMFolderTree *folder_tree;
 	const gchar *folder_uri = NULL;
+	CamelURL *url = NULL;
+	gboolean show_menu_entry = FALSE;
 
 	shell_sidebar = e_shell_view_get_shell_sidebar (shell_view);
 	g_object_get (shell_sidebar, "folder-tree", &folder_tree, NULL);
@@ -227,13 +229,16 @@ folder_size_actions_update_cb (EShellView *shell_view, GtkActionEntry *entries)
 		
 	folder_size_action = gtk_action_group_get_action (action_group, 
 							  "mail-mapi-folder-size");
-
 	/* Show / Hide action entry */
-	if (g_str_has_prefix (folder_uri, "mapi://"))
-		gtk_action_set_visible (folder_size_action , TRUE);
-	else 
-		gtk_action_set_visible (folder_size_action , FALSE);
+	if (g_str_has_prefix (folder_uri, "mapi://")) {
+		show_menu_entry = TRUE;
+		url = camel_url_new (folder_uri, NULL);
+		if (url && *url->path && strlen (url->path) > 1)
+			show_menu_entry = FALSE;
+		camel_url_free (url);
+	}
 
+	gtk_action_set_visible (folder_size_action, show_menu_entry);
 }
 
 /* used only in Account Editor */
