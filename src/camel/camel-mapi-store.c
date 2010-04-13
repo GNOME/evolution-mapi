@@ -691,6 +691,55 @@ mapi_delete_folder(CamelStore *store, const gchar *folder_name, CamelException *
 }
 
 static void
+mapi_rename_folder_infos (CamelMapiStore *mapi_store, const gchar *old_name, const gchar *new_name)
+{
+	gint sz, i, olen;
+	CamelStoreInfo *si = NULL;
+
+	g_return_if_fail (mapi_store != NULL);
+	g_return_if_fail (old_name != NULL);
+	g_return_if_fail (new_name != NULL);
+
+	olen = strlen (old_name);
+	sz = camel_store_summary_count ((CamelStoreSummary*) mapi_store->summary);
+	for (i = 0; i < sz; i++) {
+		const gchar *full_name;
+
+		si = camel_store_summary_index ((CamelStoreSummary *) mapi_store->summary, i);
+		if (!si)
+			continue;
+
+		full_name = camel_mapi_store_info_full_name (mapi_store->summary, si);
+		if (full_name && g_str_has_prefix (full_name, old_name) && !g_str_equal (full_name, old_name) &&
+		    full_name [olen] == '/' && full_name [olen + 1] != '\0') {
+			/* it's a subfolder of old_name */
+			const gchar *fid = camel_mapi_store_info_folder_id (mapi_store->summary, si);
+
+			if (fid) {
+				gchar *new_full_name;
+
+				/* do not remove it from name_hash yet, because this function
+				   will be called for it again */
+				/* g_hash_table_remove (mapi_store->priv->name_hash, full_name); */
+				g_hash_table_remove (mapi_store->priv->id_hash, fid);
+
+				/* parent is still the same, only the path changed */
+				new_full_name = g_strconcat (new_name, full_name + olen + (g_str_has_suffix (new_name, "/") ? 1 : 0), NULL);
+
+				mapi_update_folder_hash_tables (mapi_store, new_full_name, fid, NULL);
+
+				camel_store_info_set_string ((CamelStoreSummary *)mapi_store->summary, si, CAMEL_STORE_INFO_PATH, new_full_name);
+				camel_store_info_set_string ((CamelStoreSummary *)mapi_store->summary, si, CAMEL_MAPI_STORE_INFO_FULL_NAME, new_full_name);
+				camel_store_summary_touch ((CamelStoreSummary *)mapi_store->summary);
+
+				g_free (new_full_name);
+			}
+		}
+		camel_store_summary_info_free ((CamelStoreSummary *)mapi_store->summary, si);
+	}
+}
+
+static void
 mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_name, CamelException *ex)
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
@@ -771,6 +820,8 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 			return;
 		}
 
+		mapi_rename_folder_infos (mapi_store, old_name, new_name);
+
 		folder_id = g_strdup (old_fid_str);
 
 		/* this frees old_fid_str */
@@ -819,44 +870,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 		} else {
 			/* folder was moved, update all subfolders immediately, thus
 			   the next get_folder_info call will know about them */
-			gint sz, i;
-
-			sz = camel_store_summary_count ((CamelStoreSummary*) mapi_store->summary);
-			for (i = 0; i < sz; i++) {
-				const gchar *full_name;
-
-				si = camel_store_summary_index ((CamelStoreSummary *) mapi_store->summary, i);
-				if (!si)
-					continue;
-
-				full_name = camel_mapi_store_info_full_name (mapi_store->summary, si);
-				if (full_name && g_str_has_prefix (full_name, old_name) && !g_str_equal (full_name, old_name) &&
-				    full_name [strlen (old_name)] == '/' && full_name [strlen (old_name) + 1] != '\0') {
-					/* it's a subfolder of old_name */
-					const gchar *fid = camel_mapi_store_info_folder_id (mapi_store->summary, si);
-
-					if (fid) {
-						gchar *new_full_name;
-
-						/* do not remove it from name_hash yet, because this function
-						   will be called for it again */
-						/* g_hash_table_remove (priv->name_hash, full_name); */
-						g_hash_table_remove (priv->id_hash, fid);
-
-						/* parent is still the same, only the path changed */
-						new_full_name = g_strconcat (new_name, full_name + strlen (old_name) + (g_str_has_suffix (new_name, "/") ? 1 : 0), NULL);
-
-						mapi_update_folder_hash_tables (mapi_store, new_full_name, fid, NULL);
-
-						camel_store_info_set_string ((CamelStoreSummary *)mapi_store->summary, si, CAMEL_STORE_INFO_PATH, new_full_name);
-						camel_store_info_set_string ((CamelStoreSummary *)mapi_store->summary, si, CAMEL_MAPI_STORE_INFO_FULL_NAME, new_full_name);
-						camel_store_summary_touch ((CamelStoreSummary *)mapi_store->summary);
-
-						g_free (new_full_name);
-					}
-				}
-				camel_store_summary_info_free ((CamelStoreSummary *)mapi_store->summary, si);
-			}
+			mapi_rename_folder_infos (mapi_store, old_name, new_name);
 		}
 
 		folder_id = g_strdup (old_fid_str);
