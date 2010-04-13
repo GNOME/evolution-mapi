@@ -121,7 +121,9 @@ create_profile_callback (struct SRowSet *rowset, gpointer data)
 
 	/* If we can find the exact username, then find & return its index. */
 	for (i = 0; i < rowset->cRows; i++) {
-		lpProp_account = get_SPropValue_SRow(&(rowset->aRow[i]), PR_ACCOUNT);
+		lpProp_account = get_SPropValue_SRow(&(rowset->aRow[i]), PR_ACCOUNT_UNICODE);
+		if (!lpProp_account)
+			lpProp_account = get_SPropValue_SRow(&(rowset->aRow[i]), PR_ACCOUNT);
 
 		if (lpProp_account && lpProp_account->value.lpszA &&
 		    !g_strcmp0 (username, lpProp_account->value.lpszA))
@@ -156,8 +158,12 @@ create_profile_callback (struct SRowSet *rowset, gpointer data)
 	gtk_tree_view_set_model (GTK_TREE_VIEW (view), GTK_TREE_MODEL (store));
 
 	for (i = 0; i < rowset->cRows; i++) {
-		lpProp_fullname = get_SPropValue_SRow(&(rowset->aRow[i]), PR_DISPLAY_NAME);
-		lpProp_account = get_SPropValue_SRow(&(rowset->aRow[i]), PR_ACCOUNT);
+		lpProp_fullname = get_SPropValue_SRow(&(rowset->aRow[i]), PR_DISPLAY_NAME_UNICODE);
+		if (!lpProp_fullname)
+			lpProp_fullname = get_SPropValue_SRow(&(rowset->aRow[i]), PR_DISPLAY_NAME);
+		lpProp_account = get_SPropValue_SRow(&(rowset->aRow[i]), PR_ACCOUNT_UNICODE);
+		if (!lpProp_account)
+			lpProp_account = get_SPropValue_SRow(&(rowset->aRow[i]), PR_ACCOUNT);
 
 		if (lpProp_fullname && lpProp_fullname->value.lpszA &&
 		    lpProp_account && lpProp_account->value.lpszA) {
