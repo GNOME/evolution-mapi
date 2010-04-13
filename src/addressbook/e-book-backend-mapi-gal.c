@@ -218,9 +218,9 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 			   First %d : Number of contacts cached till now.
 			   Second %d : Total number of contacts which need to be cached.
 			   So (%d/%d) displays the progress.
-			   Example: Caching the GAL entries (1200/50000)...
+			   Example: Caching the GAL entries (1200/50000)…
 			*/
-			status_msg = g_strdup_printf (_("Caching the GAL entries (%d/%d)... "),
+			status_msg = g_strdup_printf (_("Caching the GAL entries (%d/%d)… "),
 							 i, contacts_array->len);
 			book_view_notify_status (book_view, status_msg);
 			g_free (status_msg);
@@ -779,7 +779,7 @@ book_view_thread (gpointer data)
 	g_object_ref (book_view);
 	e_flag_set (closure->running);
 
-	book_view_notify_status (book_view, "Searching...");
+	book_view_notify_status (book_view, "Searching…");
 	query = e_data_book_view_get_card_query (book_view);
 
 	if (!find_book_view (backend))
@@ -797,7 +797,7 @@ book_view_thread (gpointer data)
 
 			if (priv->marked_for_offline && !priv->is_cache_ready) {
 				/* To translators : Here Evolution MAPI downloads the entries from the GAL server */
-				book_view_notify_status (book_view, _("Downloading GAL entries from server..."));
+				book_view_notify_status (book_view, _("Downloading GAL entries from server…"));
 				return;
 			}
 

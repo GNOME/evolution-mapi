@@ -157,7 +157,7 @@ mapi_settings_run_folder_size_dialog (const gchar *profile, gpointer data)
 
 	dialog_data->spinner = gtk_spinner_new ();
 	gtk_spinner_start (GTK_SPINNER (dialog_data->spinner));
-	dialog_data->spinner_label = gtk_label_new (_("Fetching folder list ..."));
+	dialog_data->spinner_label = gtk_label_new (_("Fetching folder list…"));
 
 	dialog_data->spinner_hbox = (GtkBox *) gtk_hbox_new (TRUE, 6);
 
@@ -341,7 +341,7 @@ org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data
 	lbl_fsize = (GtkLabel*) g_object_new (GTK_TYPE_LABEL, "label",
 					      _("View the size of all Exchange folders"), NULL);
 	gtk_misc_set_alignment (GTK_MISC (lbl_fsize), 0, 0.5);
-	btn_fsize = (GtkButton*) g_object_new (GTK_TYPE_BUTTON, "label", _("Folders Size"), NULL);
+	btn_fsize = (GtkButton*) g_object_new (GTK_TYPE_BUTTON, "label", _("Folder Size"), NULL);
 	g_signal_connect (btn_fsize, "clicked", G_CALLBACK (folder_size_clicked), target_account->account);
 	gtk_table_attach_defaults (tbl_misc, GTK_WIDGET (lbl_fsize), 0, 1, 0, 1);
 	gtk_table_attach (tbl_misc, GTK_WIDGET (btn_fsize), 1, 2, 0, 1, GTK_FILL, GTK_FILL, 0, 0);

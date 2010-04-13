@@ -578,7 +578,7 @@ mapi_create_folder(CamelStore *store, const gchar *parent_name, const gchar *fol
 	}
 
 	if (mapi_fid_is_system_folder (mapi_store, camel_mapi_store_folder_id_lookup (mapi_store, folder_name))) {
-		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot create new folder `%s'"),
+		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot create new folder '%s'"),
 				      folder_name);
 		return NULL;
 	}
@@ -762,7 +762,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 	if (!old_fid_str) {
 		/*To translators : '%s' is current name of the folder */
 		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM,
-				      _("Cannot rename MAPI folder `%s'. Folder does not exist."),
+				      _("Cannot rename MAPI folder '%s'. Folder does not exist."),
 				      old_name);
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 		return;
@@ -773,7 +773,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 		/*To translators : '%s to %s' is current name of the folder  and
 		 new name of the folder.*/
 		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM,
-				      _("Cannot rename MAPI default folder `%s' to `%s'."),
+				      _("Cannot rename MAPI default folder '%s' to '%s'."),
 				      old_name, new_name);
 		return;
 	}
@@ -797,7 +797,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 	}
 
 	if (!exchange_mapi_util_mapi_id_from_string (old_fid_str, &old_fid)) {
-		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename MAPI folder `%s' to `%s'"), old_name, new_name);
+		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename MAPI folder '%s' to '%s'"), old_name, new_name);
 		CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 		g_free (old_parent);
 		g_free (new_parent);
@@ -812,7 +812,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 			/*To translators : '%s to %s' is current name of the folder  and
 			new name of the folder.*/
 			camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM,
-						  _("Cannot rename MAPI folder `%s' to `%s'"), old_name, new_name);
+						  _("Cannot rename MAPI folder '%s' to '%s'"), old_name, new_name);
 
 			CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
 			g_free (old_parent);
@@ -863,7 +863,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 			   !exchange_mapi_util_mapi_id_from_string (new_parent_fid_str, &new_parent_fid) ||
 			   !exchange_mapi_connection_move_folder (priv->conn, old_fid, old_parent_fid, new_parent_fid, tmp)) {
 			CAMEL_SERVICE_REC_UNLOCK (mapi_store, connect_lock);
-			camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename MAPI folder `%s' to `%s'"), old_name, new_name);
+			camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename MAPI folder '%s' to '%s'"), old_name, new_name);
 			g_free (old_parent);
 			g_free (new_parent);
 			return;

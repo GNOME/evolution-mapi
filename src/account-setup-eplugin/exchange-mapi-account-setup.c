@@ -145,7 +145,7 @@ create_profile_callback (struct SRowSet *rowset, gpointer data)
 
 	renderer = gtk_cell_renderer_text_new ();
 	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
-						     -1, _("User name"), renderer,
+						     -1, _("Username"), renderer,
 						     "text", COL_MAPI_ACCOUNT, NULL);
 
 	/* Model for TreeView */
@@ -202,7 +202,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	url = camel_url_new (e_account_get_string (target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
 	domain_name = camel_url_get_param (url, "domain");
 
-	/* Silently remove domain part from a user name when user enters it as such.
+	/* Silently remove domain part from a username when user enters it as such.
 	   This change will be visible in the UI on new edit open. */
 	if (url->user && strchr (url->user, '\\')) {
 		gchar *tmp, *at;

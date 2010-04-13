@@ -67,7 +67,7 @@ static CamelProvider mapi_provider = {
 
 	"Exchange MAPI",
 
-	N_("For accessing Microsoft Exchange / OpenChange servers using MAPI"),
+	N_("For accessing Microsoft Exchange/OpenChange servers using MAPI"),
 
 	"mail",
 
@@ -83,7 +83,7 @@ static CamelProvider mapi_provider = {
 
 CamelServiceAuthType camel_mapi_password_authtype = {
 	N_("Password"),
-	N_("This option will connect to the Openchange server using a plaintext password."),
+	N_("This option will connect to the OpenChange server using a plaintext password."),
 	"",
 	TRUE
 };
