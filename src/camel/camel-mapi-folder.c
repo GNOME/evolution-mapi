@@ -25,7 +25,6 @@
 #include <config.h>
 #endif
 
-#include <pthread.h>
 #include <string.h>
 #include <time.h>
 
@@ -46,7 +45,7 @@
 #include "camel-mapi-summary.h"
 #include "camel-mapi-utils.h"
 
-#define DEBUG_FN( ) printf("----%u %s\n", (unsigned int)pthread_self(), __FUNCTION__);
+#define DEBUG_FN( ) printf("----%p %s\n", g_thread_self(), G_STRFUNC);
 #define SUMMARY_FETCH_BATCH_COUNT 150
 #define d(x)
 
