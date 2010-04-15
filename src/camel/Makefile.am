@@ -30,8 +30,7 @@ noinst_HEADERS =         			\
 	camel-mapi-transport.h			\
 	camel-mapi-utils.h			\
 	camel-mapi-notifications.h		\
-	camel-mapi-private.h			\
-	camel-private.h				
+	camel-mapi-private.h
 
 libcamelmapi_la_LDFLAGS = -avoid-version -module $(NO_UNDEFINED)
 libcamelmapi_la_LIBADD = 			\

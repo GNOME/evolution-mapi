@@ -32,7 +32,6 @@
 #include <unistd.h>
 #include <glib.h>
 
-#include <camel/camel-private.h>
 #include <libedataserver/e-memory.h>
 
 #include "camel-mapi-store.h"
@@ -211,24 +210,24 @@ store_info_set_string(CamelStoreSummary *s, CamelStoreInfo *mi, gint type, const
 	switch (type) {
 		case CAMEL_MAPI_STORE_INFO_FULL_NAME:
 			d(printf("Set full name %s -> %s\n", isi->full_name, str));
-			CAMEL_STORE_SUMMARY_LOCK(s, summary_lock);
+			camel_store_summary_lock (s, CSS_SUMMARY_LOCK);
 			g_free(isi->full_name);
 			isi->full_name = g_strdup(str);
-			CAMEL_STORE_SUMMARY_UNLOCK(s, summary_lock);
+			camel_store_summary_unlock (s, CSS_SUMMARY_LOCK);
 			break;
 		case CAMEL_MAPI_STORE_INFO_FOLDER_ID:
 			d(printf("Set folder id %s -> %s\n", isi->folder_id, str));
-			CAMEL_STORE_SUMMARY_LOCK(s, summary_lock);
+			camel_store_summary_lock (s, CSS_SUMMARY_LOCK);
 			g_free(isi->folder_id);
 			isi->folder_id = g_strdup(str);
-			CAMEL_STORE_SUMMARY_UNLOCK(s, summary_lock);
+			camel_store_summary_unlock (s, CSS_SUMMARY_LOCK);
 			break;
 		case CAMEL_MAPI_STORE_INFO_PARENT_ID:
 			d(printf("Set parent id %s -> %s\n", isi->parent_id, str));
-			CAMEL_STORE_SUMMARY_LOCK(s, summary_lock);
+			camel_store_summary_lock (s, CSS_SUMMARY_LOCK);
 			g_free(isi->parent_id);
 			isi->parent_id = g_strdup(str);
-			CAMEL_STORE_SUMMARY_UNLOCK(s, summary_lock);
+			camel_store_summary_unlock (s, CSS_SUMMARY_LOCK);
 			break;
 		default:
 			camel_mapi_store_summary_parent->store_info_set_string(s, mi, type, str);
