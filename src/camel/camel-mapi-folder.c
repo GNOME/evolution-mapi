@@ -773,13 +773,18 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 		camel_operation_progress (NULL, (index * 100)/count); /* ;-) */
 
 		/* Check if we have to stop */
-		if (camel_operation_cancel_check(NULL))
+		if (camel_operation_cancel_check(NULL)) {
+			if (camel_folder_change_info_changed (changes))
+				camel_object_trigger_event (m->folder, "folder_changed", changes);
+			camel_folder_change_info_free (changes);
 			return;
+		}
 	}
 
 	camel_operation_end (NULL);
 
-	/* camel_object_trigger_event (m->folder, "folder_changed", changes); */
+	if (camel_folder_change_info_changed (changes))
+		camel_object_trigger_event (m->folder, "folder_changed", changes);
 	camel_folder_change_info_free (changes);
 
 	m->need_refresh = camel_folder_summary_count (m->folder->summary) != g_slist_length (server_uid_list);
