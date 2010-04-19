@@ -180,6 +180,7 @@ camel_mapi_store_class_init(CamelMapiStoreClass *klass)
 	store_class->delete_folder = mapi_delete_folder;
 	store_class->rename_folder = mapi_rename_folder;
 	store_class->get_folder_info = mapi_get_folder_info;
+	store_class->free_folder_info = camel_store_free_folder_info_full;
 	store_class->subscribe_folder = mapi_subscribe_folder;
 	store_class->folder_subscribed = mapi_folder_subscribed;
 	store_class->unsubscribe_folder = mapi_unsubscribe_folder;
