@@ -39,6 +39,7 @@
 #include <libedataserver/e-sexp.h>
 #include "libedataserver/e-flag.h"
 #include <libebook/e-contact.h>
+#include <camel/camel.h>
 
 #include <libedata-book/e-book-backend-sexp.h>
 #include <libedata-book/e-data-book.h>
@@ -46,6 +47,10 @@
 #include <libedata-book/e-book-backend-cache.h>
 #include <libedata-book/e-book-backend-summary.h>
 #include "e-book-backend-mapi.h"
+
+/* vCard parameter name in contact list */
+#define EMA_X_MEMBERID "X-EMA-MEMBER-ID"
+#define EMA_X_MEMBERVALUE "X-EMA-MEMBER-VALUE"
 
 G_DEFINE_TYPE (EBookBackendMAPI, e_book_backend_mapi, E_TYPE_BOOK_BACKEND)
 
@@ -145,7 +150,7 @@ static uint32_t known_book_mapi_ids[] = {
 #define ELEMENT_TYPE_SIMPLE 0x01
 #define ELEMENT_TYPE_COMPLEX 0x02
 
-static EContact * emapidump_contact(struct mapi_SPropValue_array *properties);
+static EContact * emapidump_contact (ExchangeMapiConnection *conn, mapi_id_t fid, struct mapi_SPropValue_array *properties);
 
 static const struct field_element_mapping {
 		EContactField field_id;
@@ -429,6 +434,7 @@ e_book_backend_mapi_load_source (EBookBackend *backend,
 		//FIXME: We may have to do a time based reload. Or deltas should upload.
 	} else {
 		priv->summary = e_book_backend_summary_new (NULL,SUMMARY_FLUSH_TIMEOUT);
+		priv->cache = e_book_backend_cache_new (priv->uri);
 	}
 
 	g_free (uri);
@@ -477,10 +483,84 @@ e_book_backend_mapi_get_static_capabilities (EBookBackend *backend)
 	return g_strdup ("net,bulk-removes,do-initial-query,contact-lists");
 }
 
+static gchar *
+bin_to_string (const uint8_t *lpb, uint32_t cb)
+{
+	gchar *res, *p;
+	uint32_t i;
+
+	g_return_val_if_fail (lpb != NULL, NULL);
+	g_return_val_if_fail (cb > 0, NULL);
+
+	res = g_new0 (gchar, cb * 2 + 1);
+	for (i = 0, p = res; i < cb; i++, p += 2) {
+		sprintf (p, "%02x", lpb[i] & 0xFF);
+	}
+
+	return res;
+}
+
+static uint32_t
+string_to_bin (TALLOC_CTX *mem_ctx, const gchar *str, uint8_t **lpb)
+{
+	uint32_t len, i;
+
+	g_return_val_if_fail (str != NULL, 0);
+	g_return_val_if_fail (lpb != NULL, 0);
+
+	len = strlen (str);
+	g_return_val_if_fail ((len & 1) == 0, 0);
+
+	len = len / 2;
+	*lpb = talloc_zero_array (mem_ctx, uint8_t, len);
+
+	i = 0;
+	while (*str && i < len) {
+		gchar c1 = str[0], c2 = str[1];
+		str += 2;
+
+		g_return_val_if_fail ((c1 >= '0' && c1 <= '9') || (c1 >= 'a' && c1 <= 'f') || (c1 >= 'A' && c1 <= 'F'), 0);
+		g_return_val_if_fail ((c2 >= '0' && c2 <= '9') || (c2 >= 'a' && c2 <= 'f') || (c2 >= 'A' && c2 <= 'F'), 0);
+
+		#define deHex(x) (((x) >= '0' && (x) <= '9') ? ((x) - '0') : (((x) >= 'a' && (x) <= 'f') ? (x) - 'a' + 10 : (x) - 'A' + 10))
+		(*lpb)[i] = (deHex (c1) << 4) | (deHex (c2));
+		#undef deHex
+		i++;
+	}
+
+	return len;
+}
+
+static gint
+cmp_member_id (gconstpointer a, gconstpointer b, gpointer ht)
+{
+	gchar *va, *vb;
+	gint res;
+
+	if (!a)
+		return b ? -1 : 0;
+	if (!b)
+		return 1;
+
+	va = e_vcard_attribute_get_value ((EVCardAttribute *) a);
+	vb = e_vcard_attribute_get_value ((EVCardAttribute *) b);
+
+	res = GPOINTER_TO_INT (g_hash_table_lookup (ht, va)) - GPOINTER_TO_INT (g_hash_table_lookup (ht, vb));
+
+	g_free (va);
+	g_free (vb);
+
+	return res;
+}
+
 gboolean
 mapi_book_build_name_id (struct mapi_nameid *nameid, gpointer data)
 {
 //	EContact *contact = data;
+
+	mapi_nameid_lid_add (nameid, 0x8053, PSETID_Address); /* PidLidDistributionListName */
+	mapi_nameid_lid_add (nameid, 0x8054, PSETID_Address); /* PidLidDistributionListOneOffMembers */
+	mapi_nameid_lid_add (nameid, 0x8055, PSETID_Address); /* PidLidDistributionListMembers */
 
 	mapi_nameid_lid_add(nameid, 0x8005, PSETID_Address);
 	mapi_nameid_lid_add(nameid, 0x8084, PSETID_Address);
@@ -505,36 +585,159 @@ mapi_book_build_name_id (struct mapi_nameid *nameid, gpointer data)
 	return TRUE;
 }
 
-#define set_str_value(field_id, hex) if (e_contact_get (contact, field_id)) set_SPropValue_proptag (&props[i++], hex, e_contact_get (contact, field_id));
+#define set_str_value(field_id, hex) if (e_contact_get (mcd->contact, field_id)) set_SPropValue_proptag (&props[i++], hex, e_contact_get (mcd->contact, field_id));
+
+typedef struct {
+	EContact *contact;
+	EBookBackendCache *cache;
+	TALLOC_CTX *mem_ctx;
+} MapiCreateitemData;
 
 gint
 mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropTagArray, gpointer data)
 {
-	EContact *contact = data;
+	MapiCreateitemData *mcd = data;
 	struct SPropValue *props;
-	gint i=0;
+	gint i;
 
-	for (i=0; i<13; i++)
-		printf("hex %x\n", SPropTagArray->aulPropTag[i]);
-	i=0;
+	g_return_val_if_fail (mcd != NULL, 0);
+	g_return_val_if_fail (mcd->contact != NULL, 0);
+	g_return_val_if_fail (mcd->mem_ctx != NULL, 0);
+
+	if (GPOINTER_TO_INT (e_contact_get (mcd->contact, E_CONTACT_IS_LIST))) {
+		EContact *old_contact;
+		GList *local, *l;
+		struct BinaryArray_r *members, *oneoff_members;
+		uint32_t list_size = 0;
+		GHashTable *member_values = NULL, *member_ids = NULL;
+
+		old_contact = e_book_backend_cache_get_contact (mcd->cache, e_contact_get (mcd->contact, E_CONTACT_UID));
+		if (old_contact) {
+			member_values = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+			member_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
+			local = e_contact_get_attributes (old_contact, E_CONTACT_EMAIL);
+			for (l = local; l; l = l->next) {
+				EVCardAttribute *attr = l->data;
+				GList *param;
+
+				if (!attr)
+					continue;
+
+				param = e_vcard_attribute_get_param (attr, EMA_X_MEMBERVALUE);
+				if (param && param->data && !param->next) {
+					g_hash_table_insert (member_values, e_vcard_attribute_get_value (attr), g_strdup (param->data));
+				}
+
+				param = e_vcard_attribute_get_param (attr, EMA_X_MEMBERID);
+				if (param && param->data && !param->next) {
+					g_hash_table_insert (member_ids, e_vcard_attribute_get_value (attr), GINT_TO_POINTER (atoi (param->data)));
+				}
+			}
+
+			g_object_unref (old_contact);
+			g_list_foreach (local, (GFunc)e_vcard_attribute_free, NULL);
+			g_list_free (local);
+		}
+
+		i = 0;
+		props = g_new0 (struct SPropValue, 6);
+
+		set_SPropValue_proptag (&props[i++], PR_MESSAGE_CLASS, IPM_DISTLIST);
+		set_str_value (E_CONTACT_FILE_AS, SPropTagArray->aulPropTag[3]);
+		set_str_value (E_CONTACT_FILE_AS, SPropTagArray->aulPropTag[0]); /* PidLidDistributionListName */
+
+		local = g_list_sort_with_data (e_contact_get_attributes (mcd->contact, E_CONTACT_EMAIL), cmp_member_id, member_ids);
+
+		members = talloc_zero (mcd->mem_ctx, struct BinaryArray_r);
+		members->cValues = 0;
+		members->lpbin = talloc_zero_array (mcd->mem_ctx, struct Binary_r, g_list_length (local));
+
+		oneoff_members = talloc_zero (mcd->mem_ctx, struct BinaryArray_r);
+		oneoff_members->cValues = 0;
+		oneoff_members->lpbin = talloc_zero_array (mcd->mem_ctx, struct Binary_r, g_list_length (local));
+
+		for (l = local; l; l = l->next) {
+			EVCardAttribute *attr = (EVCardAttribute *) l->data;
+			gchar *raw;
+			CamelInternetAddress *addr;
+
+			if (!attr)
+				continue;
+
+			raw = e_vcard_attribute_get_value (attr);
+			if (!raw)
+				continue;
+
+			addr = camel_internet_address_new ();
+			if (camel_address_decode (CAMEL_ADDRESS (addr), raw) > 0) {
+				const gchar *nm = NULL, *eml = NULL;
+
+				camel_internet_address_get (addr, 0, &nm, &eml);
+				if (eml) {
+					/* keep both lists in sync */
+					if (member_values && g_hash_table_lookup (member_values, raw)) {
+						/* stored ListMembers values when contact's value didn't change */
+						members->lpbin[members->cValues].cb = string_to_bin (mcd->mem_ctx, g_hash_table_lookup (member_values, raw), &members->lpbin[members->cValues].lpb);
+						members->cValues++;
+					} else {
+						exchange_mapi_util_entryid_generate_oneoff (mcd->mem_ctx, &members->lpbin[members->cValues], nm ? nm : "", eml);
+						members->cValues++;
+					}
+
+					exchange_mapi_util_entryid_generate_oneoff (mcd->mem_ctx, &oneoff_members->lpbin[oneoff_members->cValues], nm ? nm : "", eml);
+					oneoff_members->cValues++;
+
+					list_size += MAX (oneoff_members->lpbin[oneoff_members->cValues - 1].cb, members->lpbin[members->cValues - 1].cb);
+				}
+			}
+
+			camel_object_unref (addr);
+			g_free (raw);
+		}
+
+		if (member_values)
+			g_hash_table_destroy (member_values);
+		if (member_ids)
+			g_hash_table_destroy (member_ids);
+		g_list_foreach (local, (GFunc)e_vcard_attribute_free, NULL);
+		g_list_free (local);
+
+		/* PidLidDistributionListOneOffMembers */
+		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[1], oneoff_members);
+		/* PidLidDistributionListMembers */
+		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[2], members);
+
+		/* list_size shouldn't exceed 15000 bytes */
+		if (list_size > 15000) {
+			g_free (props);
+			props = NULL;
+			i = 0;
+		}
+
+		*value = props;
+		return i;
+	}
+
+	i = 0;
 	props = g_new0 (struct SPropValue, 50); //FIXME: Correct value tbd
-	set_str_value ( E_CONTACT_FILE_AS, SPropTagArray->aulPropTag[0]);
+	set_str_value ( E_CONTACT_FILE_AS, SPropTagArray->aulPropTag[3]);
 
 	set_str_value (E_CONTACT_FULL_NAME, PR_DISPLAY_NAME_UNICODE);
 	set_SPropValue_proptag(&props[i++], PR_MESSAGE_CLASS, (gconstpointer )IPM_CONTACT);
 	set_str_value (E_CONTACT_FILE_AS, PR_NORMALIZED_SUBJECT_UNICODE);
-	set_str_value (E_CONTACT_EMAIL_1,  SPropTagArray->aulPropTag[1]);
-//	set_str_value (E_CONTACT_EMAIL_1,  SPropTagArray->aulPropTag[2]);
-	set_str_value (E_CONTACT_FILE_AS,  SPropTagArray->aulPropTag[5]);
+	set_str_value (E_CONTACT_EMAIL_1,  SPropTagArray->aulPropTag[4]);
+//	set_str_value (E_CONTACT_EMAIL_1,  SPropTagArray->aulPropTag[5]);
+	set_str_value (E_CONTACT_FILE_AS,  SPropTagArray->aulPropTag[8]);
 
 //	set_str_value ( E_CONTACT_EMAIL_1, 0x8083001e);
-	set_str_value ( E_CONTACT_EMAIL_2, SPropTagArray->aulPropTag[3]);
-//	set_str_value ( E_CONTACT_EMAIL_2, SPropTagArray->aulPropTag[11]);
+	set_str_value ( E_CONTACT_EMAIL_2, SPropTagArray->aulPropTag[6]);
+//	set_str_value ( E_CONTACT_EMAIL_2, SPropTagArray->aulPropTag[14]);
 
-	set_str_value ( E_CONTACT_EMAIL_3, SPropTagArray->aulPropTag[4]);
-//	set_str_value ( E_CONTACT_EMAIL_3, SPropTagArray->aulPropTag[12]);
+	set_str_value ( E_CONTACT_EMAIL_3, SPropTagArray->aulPropTag[7]);
+//	set_str_value ( E_CONTACT_EMAIL_3, SPropTagArray->aulPropTag[15]);
 
-	set_str_value (E_CONTACT_HOMEPAGE_URL, SPropTagArray->aulPropTag[6]);
+	set_str_value (E_CONTACT_HOMEPAGE_URL, SPropTagArray->aulPropTag[9]);
 	set_str_value (E_CONTACT_FREEBUSY_URL, PROP_TAG(PT_UNICODE, 0x812c));
 
 	set_str_value ( E_CONTACT_PHONE_BUSINESS, PR_OFFICE_TELEPHONE_NUMBER_UNICODE);
@@ -559,8 +762,8 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 	set_str_value (E_CONTACT_NOTE, PR_BODY_UNICODE);
 
 	//BDAY AND ANNV
-	if (e_contact_get (contact, E_CONTACT_BIRTH_DATE)) {
-		EContactDate *date = e_contact_get (contact, E_CONTACT_BIRTH_DATE);
+	if (e_contact_get (mcd->contact, E_CONTACT_BIRTH_DATE)) {
+		EContactDate *date = e_contact_get (mcd->contact, E_CONTACT_BIRTH_DATE);
 		struct tm tmtime;
 		time_t lt;
 		NTTIME nt;
@@ -578,8 +781,8 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 		set_SPropValue_proptag (&props[i++], PR_BIRTHDAY, &t);
 	}
 
-	if (e_contact_get (contact, E_CONTACT_ANNIVERSARY)) {
-		EContactDate *date = e_contact_get (contact, E_CONTACT_ANNIVERSARY);
+	if (e_contact_get (mcd->contact, E_CONTACT_ANNIVERSARY)) {
+		EContactDate *date = e_contact_get (mcd->contact, E_CONTACT_ANNIVERSARY);
 		struct tm tmtime;
 		time_t lt;
 		NTTIME nt;
@@ -597,11 +800,11 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 		set_SPropValue_proptag (&props[i++], PR_WEDDING_ANNIVERSARY, &t);
 	}
 	//Home and Office address
-	if (e_contact_get (contact, E_CONTACT_ADDRESS_HOME)) {
+	if (e_contact_get (mcd->contact, E_CONTACT_ADDRESS_HOME)) {
 		EContactAddress *contact_addr;
 
-		contact_addr = e_contact_get (contact, E_CONTACT_ADDRESS_HOME);
-		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[8], contact_addr->street);
+		contact_addr = e_contact_get (mcd->contact, E_CONTACT_ADDRESS_HOME);
+		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[11], contact_addr->street);
 		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_POST_OFFICE_BOX_UNICODE, contact_addr->ext);
 		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_CITY_UNICODE, contact_addr->locality);
 		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_STATE_OR_PROVINCE_UNICODE, contact_addr->region);
@@ -609,11 +812,11 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_COUNTRY_UNICODE, contact_addr->country);
 	}
 
-	if (e_contact_get (contact, E_CONTACT_ADDRESS_WORK)) {
+	if (e_contact_get (mcd->contact, E_CONTACT_ADDRESS_WORK)) {
 		EContactAddress *contact_addr;
 
-		contact_addr = e_contact_get (contact, E_CONTACT_ADDRESS_WORK);
-		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[9], contact_addr->street);
+		contact_addr = e_contact_get (mcd->contact, E_CONTACT_ADDRESS_WORK);
+		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[12], contact_addr->street);
 		set_SPropValue_proptag (&props[i++], PR_POST_OFFICE_BOX_UNICODE, contact_addr->ext);
 		set_SPropValue_proptag (&props[i++], PR_LOCALITY_UNICODE, contact_addr->locality);
 		set_SPropValue_proptag (&props[i++], PR_STATE_OR_PROVINCE_UNICODE, contact_addr->region);
@@ -621,16 +824,16 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 		set_SPropValue_proptag (&props[i++], PR_COUNTRY_UNICODE, contact_addr->country);
 	}
 
-//	set_str_value (E_CONTACT_NICKNAME, SPropTagArray->aulPropTag[10]);
-	if (e_contact_get (contact, E_CONTACT_IM_AIM)) {
-		GList *l = e_contact_get (contact, E_CONTACT_IM_AIM);
-		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[7], l->data);
+//	set_str_value (E_CONTACT_NICKNAME, SPropTagArray->aulPropTag[12]);
+	if (e_contact_get (mcd->contact, E_CONTACT_IM_AIM)) {
+		GList *l = e_contact_get (mcd->contact, E_CONTACT_IM_AIM);
+		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[10], l->data);
 	}
 
-	if (e_contact_get (contact, E_CONTACT_NICKNAME)) {
-		gchar *nick  = e_contact_get (contact, E_CONTACT_NICKNAME);
-//		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[10], nick);
-		printf("nickname %s %x\n", nick,  SPropTagArray->aulPropTag[10]);
+	if (e_contact_get (mcd->contact, E_CONTACT_NICKNAME)) {
+		gchar *nick  = e_contact_get (mcd->contact, E_CONTACT_NICKNAME);
+//		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[13], nick);
+		printf("nickname %s %x\n", nick,  SPropTagArray->aulPropTag[13]);
 	}
 
 	*value =props;
@@ -647,6 +850,7 @@ e_book_backend_mapi_create_contact (EBookBackend *backend,
 	EContact *contact;
 	gchar *id;
 	mapi_id_t status;
+	MapiCreateitemData mcd;
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
 
 	if (enable_debug)
@@ -660,7 +864,11 @@ e_book_backend_mapi_create_contact (EBookBackend *backend,
 
 	case  GNOME_Evolution_Addressbook_MODE_REMOTE :
 		contact = e_contact_new_from_vcard(vcard);
-		status = exchange_mapi_connection_create_item (priv->conn, olFolderContacts, priv->fid, mapi_book_build_name_id, contact, mapi_book_build_props, contact, NULL, NULL, NULL, 0);
+		mcd.contact = contact;
+		mcd.cache = priv->cache;
+		mcd.mem_ctx = talloc_init ("ExchangeMAPI_MCD");
+		status = exchange_mapi_connection_create_item (priv->conn, olFolderContacts, priv->fid, mapi_book_build_name_id, contact, mapi_book_build_props, &mcd, NULL, NULL, NULL, 0);
+		talloc_free (mcd.mem_ctx);
 		if (!status) {
 			e_data_book_respond_create(book, opid, GNOME_Evolution_Addressbook_OtherError, NULL);
 			return;
@@ -749,6 +957,7 @@ e_book_backend_mapi_modify_contact (EBookBackend *backend,
 					  const gchar   *vcard)
 {
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
+	MapiCreateitemData mcd;
 	EContact *contact;
 	mapi_id_t fid, mid;
 	gboolean status;
@@ -768,7 +977,11 @@ e_book_backend_mapi_modify_contact (EBookBackend *backend,
 		exchange_mapi_util_mapi_ids_from_uid (tmp, &fid, &mid);
 		printf("modify id %s\n", tmp);
 
-		status = exchange_mapi_connection_modify_item (priv->conn, olFolderContacts, priv->fid, mid, mapi_book_build_name_id, contact, mapi_book_build_props, contact, NULL, NULL, NULL, 0);
+		mcd.contact = contact;
+		mcd.cache = priv->cache;
+		mcd.mem_ctx = talloc_init ("ExchangeMAPI_MCD");
+		status = exchange_mapi_connection_modify_item (priv->conn, olFolderContacts, priv->fid, mid, mapi_book_build_name_id, contact, mapi_book_build_props, &mcd, NULL, NULL, NULL, 0);
+		talloc_free (mcd.mem_ctx);
 		printf("getting %d\n", status);
 		if (!status) {
 			e_data_book_respond_modify(book, opid, GNOME_Evolution_Addressbook_OtherError, NULL);
@@ -800,9 +1013,8 @@ create_contact_item (FetchItemsCallbackData *item_data, gpointer data)
 {
 	EContact *contact;
 	gchar *suid;
-	GSList *recipients = item_data->recipients;
 
-	contact = emapidump_contact (item_data->properties);
+	contact = emapidump_contact (item_data->conn, item_data->fid, item_data->properties);
 	suid = exchange_mapi_util_mapi_ids_to_uid (item_data->fid, item_data->mid);
 	printf("got contact %s\n", suid);
 	if (contact) {
@@ -810,8 +1022,6 @@ create_contact_item (FetchItemsCallbackData *item_data, gpointer data)
 		e_contact_set (contact, E_CONTACT_UID, suid);
 		data = contact;
 	}
-
-	exchange_mapi_util_free_recipient_list (&recipients);
 
 	g_free (suid);
 
@@ -879,7 +1089,7 @@ e_book_backend_mapi_get_contact (EBookBackend *backend,
 			exchange_mapi_util_mapi_ids_from_uid (id, &fid, &mid);
 			exchange_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
 							known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids),
-							NULL, NULL,
+							mapi_book_build_name_id_for_getprops, NULL,
 							create_contact_item, contact,
 							MAPI_OPTIONS_FETCH_ALL);
 
@@ -920,7 +1130,7 @@ create_contact_list_cb (FetchItemsCallbackData *item_data, gpointer data)
 	EContact *contact;
 	gchar *suid;
 
-	contact = emapidump_contact (array);
+	contact = emapidump_contact (item_data->conn, fid, array);
 	suid = exchange_mapi_util_mapi_ids_to_uid (fid, mid);
 
 	if (contact) {
@@ -958,9 +1168,15 @@ static const uint16_t n_GetPropsList = G_N_ELEMENTS (GetPropsList);
 gboolean
 mapi_book_build_name_id_for_getprops (struct mapi_nameid *nameid, gpointer data)
 {
+	/* Fix indexes in emapidump_contact when adding/removing from here */
+
+	mapi_nameid_lid_add (nameid, 0x8053, PSETID_Address); /* PidLidDistributionListName */
+	mapi_nameid_lid_add (nameid, 0x8054, PSETID_Address); /* PidLidDistributionListOneOffMembers */
+	mapi_nameid_lid_add (nameid, 0x8055, PSETID_Address); /* PidLidDistributionListMembers */
+
 	mapi_nameid_lid_add(nameid, 0x8084, PSETID_Address); /* PT_UNICODE - EmailOriginalDisplayName */
-//	mapi_nameid_lid_add(nameid, 0x8020, PSETID_Address);
-//	mapi_nameid_lid_add(nameid, 0x8021, PSETID_Address);
+	/*mapi_nameid_lid_add(nameid, 0x8020, PSETID_Address);
+	mapi_nameid_lid_add(nameid, 0x8021, PSETID_Address);*/
 	mapi_nameid_lid_add(nameid, 0x8094, PSETID_Address);
 	mapi_nameid_lid_add(nameid, 0x80a4, PSETID_Address);
 
@@ -1086,10 +1302,89 @@ get_closure (EDataBookView *book_view)
 
 //FIXME: Be more clever in dumping contacts. Can we have a callback mechanism for each types?
 static EContact *
-emapidump_contact(struct mapi_SPropValue_array *properties)
+emapidump_contact (ExchangeMapiConnection *conn, mapi_id_t fid, struct mapi_SPropValue_array *properties)
 {
 	EContact *contact = e_contact_new ();
 	gint i;
+
+	if (g_str_equal (exchange_mapi_util_find_array_propval (properties, PR_MESSAGE_CLASS), IPM_DISTLIST)) {
+		const struct mapi_SBinaryArray *members, *members_dlist;
+		GSList *attrs = NULL, *a;
+
+		/* it's a contact list/distribution list, fetch members and return it */
+		e_contact_set (contact, E_CONTACT_IS_LIST, GINT_TO_POINTER (TRUE));
+		/* we do not support this option, same as GroupWise */
+		e_contact_set (contact, E_CONTACT_LIST_SHOW_ADDRESSES, GINT_TO_POINTER (TRUE));
+
+		/* PidLidDistributionListName */
+		e_contact_set (contact, E_CONTACT_FILE_AS, exchange_mapi_util_find_array_propval (properties, properties->lpProps[0].ulPropTag));
+		/* PidLidDistributionListOneOffMembers */
+		members = exchange_mapi_util_find_array_propval (properties, properties->lpProps[1].ulPropTag);
+		/* PidLidDistributionListMembers */
+		members_dlist = exchange_mapi_util_find_array_propval (properties, properties->lpProps[2].ulPropTag);
+
+		g_return_val_if_fail (members != NULL, NULL);
+		g_return_val_if_fail (members_dlist != NULL, NULL);
+
+		/* these two list should be in sync */
+		g_return_val_if_fail (members_dlist->cValues == members->cValues, NULL);
+
+		for (i = 0; i < members->cValues; i++) {
+			struct Binary_r br;
+			gchar *display_name = NULL, *email = NULL;
+			gchar *str;
+
+			br.lpb = members->bin[i].lpb;
+			br.cb = members->bin[i].cb;
+			if (exchange_mapi_util_entryid_decode_oneoff (&br, &display_name, &email)) {
+				EVCardAttribute *attr;
+				gchar *value;
+				CamelInternetAddress *addr;
+
+				addr = camel_internet_address_new ();
+				attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
+
+				camel_internet_address_add (addr, display_name, email);
+
+				value = camel_address_encode (CAMEL_ADDRESS (addr));
+
+				if (value)
+					e_vcard_attribute_add_value (attr, value);
+
+				g_free (value);
+				camel_object_unref (addr);
+
+				str = g_strdup_printf ("%d", i + 1);
+				e_vcard_attribute_add_param_with_value (attr,
+						e_vcard_attribute_param_new (EMA_X_MEMBERID),
+						str);
+				g_free (str);
+
+				/* keep the value from ListMembers with the email, to not need to generate it on list changes;
+				   new values added in evolution-mapi will be always SMTP addresses anyway */
+				str = bin_to_string (members_dlist->bin[i].lpb, members_dlist->bin[i].cb);
+				if (str) {
+					e_vcard_attribute_add_param_with_value (attr,
+						e_vcard_attribute_param_new (EMA_X_MEMBERVALUE),
+						str);
+					g_free (str);
+				}
+
+				attrs = g_slist_prepend (attrs, attr);
+			}
+
+			g_free (display_name);
+			g_free (email);
+		}
+
+		for (a = attrs; a; a = a->next) {
+			e_vcard_add_attribute (E_VCARD (contact), a->data);
+		}
+
+		g_slist_free (attrs);
+
+		return contact;
+	}
 
 //	exchange_mapi_debug_property_dump (properties);
 	for (i=1; i<maplen; i++) {
@@ -1218,13 +1513,15 @@ create_contact_cb (FetchItemsCallbackData *item_data, gpointer data)
 		return FALSE;
 	}
 
-	contact = emapidump_contact (item_data->properties);
+	contact = emapidump_contact (item_data->conn, item_data->fid, item_data->properties);
 	suid = exchange_mapi_util_mapi_ids_to_uid (item_data->fid, item_data->mid);
 
 	if (contact) {
 		/* UID of the contact is nothing but the concatenated string of hex id of folder and the message.*/
 		e_contact_set (contact, E_CONTACT_UID, suid);
 		e_contact_set (contact, E_CONTACT_BOOK_URI, priv->uri);
+		if (priv->cache)
+			e_book_backend_cache_add_contact (priv->cache, contact);
 		e_data_book_view_notify_update (book_view, contact);
 		g_object_unref(contact);
 	}
@@ -1388,7 +1685,7 @@ book_view_thread (gpointer data)
 		} else {
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 							known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids),
-							NULL, NULL,
+							mapi_book_build_name_id_for_getprops, NULL,
 							create_contact_cb, book_view,
 							MAPI_OPTIONS_FETCH_ALL)) {
 				if (e_flag_is_set (closure->running))
@@ -1457,7 +1754,7 @@ cache_contact_cb (FetchItemsCallbackData *item_data, gpointer data)
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) be)->priv;
 	gchar *suid;
 
-	contact = emapidump_contact (item_data->properties);
+	contact = emapidump_contact (item_data->conn, item_data->fid, item_data->properties);
 	suid = exchange_mapi_util_mapi_ids_to_uid (item_data->fid, item_data->mid);
 
 	if (contact) {
@@ -1495,7 +1792,7 @@ build_cache (EBookBackendMAPI *ebmapi)
 
 	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 						known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids),
-						NULL, NULL,
+						mapi_book_build_name_id_for_getprops, NULL,
 						cache_contact_cb, ebmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
 		printf("Error during caching addressbook\n");
@@ -1540,7 +1837,7 @@ update_cache (EBookBackendMAPI *ebmapi)
 
 	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 						known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids),
-						NULL, NULL,
+						mapi_book_build_name_id_for_getprops, NULL,
 						cache_contact_cb, ebmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
 		printf("Error during caching addressbook\n");

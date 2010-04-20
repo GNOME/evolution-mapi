@@ -1048,7 +1048,7 @@ set_recipient_properties (TALLOC_CTX *mem_ctx, struct SRow *aRow, ExchangeMAPIRe
 	/* FIXME: Setting PR_ENTRYID property seems to create problems for now. We should take
 	 * another look at this after the CreateOneoffEntryId API is provided by LibMAPI. */
 #if 0
-		struct Binary_r *oneoff_eid;
+		struct Binary_r oneoff_eid;
 		struct SPropValue sprop;
 		const gchar *dn = NULL, *email = NULL;
 
@@ -1056,7 +1056,7 @@ set_recipient_properties (TALLOC_CTX *mem_ctx, struct SRow *aRow, ExchangeMAPIRe
 		dn = (dn) ? dn : "";
 		email = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (recipient->in.ext_lpProps, PR_SMTP_ADDRESS_UNICODE);
 		email = (email) ? email : "";
-		oneoff_eid = exchange_mapi_util_entryid_generate_oneoff (mem_ctx, dn, email, FALSE);
+		exchange_mapi_util_entryid_generate_oneoff (mem_ctx, &oneoff_eid, dn, email);
 		set_SPropValue_proptag (&sprop, PR_ENTRYID, (gconstpointer )(oneoff_eid));
 		SRow_addprop (aRow, sprop);
 #endif
@@ -1458,13 +1458,26 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 				for (k = 1; k < GetPropsTagArray->cValues; k++)
 					SPropTagArray_add (mem_ctx, tags, GetPropsTagArray->aulPropTag[k]);
 				retval = GetProps (&obj_message, tags, &lpProps, &prop_count);
+
 				MAPIFreeBuffer (tags);
 				properties_array.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue,
 									 prop_count + 1);
 				properties_array.cValues = prop_count;
-				for (k=0; k < prop_count; k++)
-					cast_mapi_SPropValue(&properties_array.lpProps[k], &lpProps[k]);
+				for (k=0; k < prop_count; k++) {
+					if ((lpProps[k].ulPropTag & 0xFFFF) == PT_MV_BINARY) {
+						uint32_t ci;
 
+						properties_array.lpProps[k].ulPropTag = lpProps[k].ulPropTag;
+						properties_array.lpProps[k].value.MVbin.cValues = lpProps[k].value.MVbin.cValues;
+						properties_array.lpProps[k].value.MVbin.bin = (struct SBinary_short *) talloc_array (mem_ctx, struct Binary_r, properties_array.lpProps[k].value.MVbin.cValues);
+						for (ci = 0; ci < properties_array.lpProps[k].value.MVbin.cValues; ci++) {
+							properties_array.lpProps[k].value.MVbin.bin[ci].cb = lpProps[k].value.MVbin.lpbin[ci].cb;
+							properties_array.lpProps[k].value.MVbin.bin[ci].lpb = lpProps[k].value.MVbin.lpbin[ci].lpb;
+						}
+					} else {
+						cast_mapi_SPropValue (&properties_array.lpProps[k], &lpProps[k]);
+					}
+				}
 			} else
 				retval = GetPropsAll (&obj_message, &properties_array);
  relax:
@@ -3155,9 +3168,9 @@ exchange_mapi_connection_ex_to_smtp (ExchangeMapiConnection *conn, const gchar *
 	SPropTagArray = set_SPropTagArray(mem_ctx, 0x1,
 					  PR_SMTP_ADDRESS_UNICODE);
 
-	retval = ResolveNames (priv->session, (const gchar **)str_array, SPropTagArray, &SRowSet, &flaglist, 0);
+	retval = ResolveNames (priv->session, (const gchar **)str_array, SPropTagArray, &SRowSet, &flaglist, MAPI_UNICODE);
 	if (retval != MAPI_E_SUCCESS)
-		retval = ResolveNames (priv->session, (const gchar **)str_array, SPropTagArray, &SRowSet, &flaglist, MAPI_UNICODE);
+		retval = ResolveNames (priv->session, (const gchar **)str_array, SPropTagArray, &SRowSet, &flaglist, 0);
 
 	if (retval == MAPI_E_SUCCESS && SRowSet && SRowSet->cRows == 1) {
 		smtp_addr = (const gchar *) exchange_mapi_util_find_row_propval (SRowSet->aRow, PR_SMTP_ADDRESS_UNICODE);

@@ -320,6 +320,65 @@ exchange_mapi_util_free_stream_list (GSList **stream_list)
 	*stream_list = NULL;
 }
 
+static void
+dump_bin (const uint8_t *bin, uint32_t bin_sz, const gchar *line_prefix)
+{
+	gint k, l, last;
+
+	if (!bin) {
+		g_print ("NULL");
+		return;
+	}
+
+	g_print ("%s", line_prefix);
+
+	last = 0;
+	for (k = 0; k < bin_sz; k++) {
+		if ((k > 0 && (k % 16) == 0)) {
+			g_print ("  ");
+			for (l = last; l < k; l++) {
+				uint8_t u8 = bin[l];
+
+				if ((l % 8) == 0)
+					g_print (" ");
+				if (u8 <= 32 || u8 >= 128)
+					g_print (".");
+				else
+					g_print ("%c", u8);
+			}
+
+			last = l;
+			g_print ("\n%s", line_prefix);
+		} else if (k > 0 && (k % 8) == 0) {
+			g_print ("  ");
+		}
+		g_print (" %02X", bin[k]);
+	}
+
+	if (last < k) {
+		l = k;
+
+		while ((l % 16) != 0) {
+			g_print ("   ");
+			if (l > 0 && (l % 8) == 0)
+				g_print ("  ");
+			l++;
+		}
+
+		g_print ("  ");
+		for (l = last; l < k; l++) {
+			uint8_t u8 = bin[l];
+
+			if ((l % 8) == 0)
+				g_print (" ");
+			if (u8 <= 32 || u8 >= 128)
+				g_print (".");
+			else
+				g_print ("%c", u8);
+		}
+	}
+}
+
 void
 exchange_mapi_debug_property_dump (struct mapi_SPropValue_array *properties)
 {
@@ -336,6 +395,12 @@ exchange_mapi_debug_property_dump (struct mapi_SPropValue_array *properties)
 			else
 				g_print("\n0x%08X \t", lpProp->ulPropTag);
 			switch (lpProp->ulPropTag & 0xFFFF) {
+			case PT_UNSPECIFIED:
+				g_print (" PT_UNSPECIFIED");
+				break;
+			case PT_NULL:
+				g_print (" PT_NULL");
+				break;
 			case PT_BOOLEAN:
 				g_print(" (bool) - %d", (bool) lpProp->value.b);
 				break;
@@ -345,9 +410,17 @@ exchange_mapi_debug_property_dump (struct mapi_SPropValue_array *properties)
 			case PT_LONG:
 				g_print(" (long) - %u", lpProp->value.l);
 				break;
+			case PT_FLOAT:
+				g_print (" PT_FLOAT");
+				break;
 			case PT_DOUBLE:
 				g_print (" (double) -  %lf", (double)lpProp->value.dbl);
 				break;
+			case PT_CURRENCY:
+				g_print (" PT_CURRENCY");
+				break;
+			case PT_APPTIME:
+				g_print (" PT_APPTIME");
 			case PT_I8:
 				g_print (" (gint) - 0x%016" G_GINT64_MODIFIER "X", lpProp->value.d);
 				break;
@@ -371,19 +444,78 @@ exchange_mapi_debug_property_dump (struct mapi_SPropValue_array *properties)
 				if (lpProp)
 					g_print(" (unicodestring) - %s", lpProp->value.lpszW ? lpProp->value.lpszW : lpProp->value.lpszA ? lpProp->value.lpszA : "null");
 				break;
+			case PT_OBJECT:
+				g_print (" PT_OBJECT");
+				break;
+			case PT_CLSID:
+				g_print (" PT_CLSID");
+				break;
+			case PT_SVREID:
+				g_print (" PT_SVREID");
+				break;
+			case PT_SRESTRICT:
+				g_print (" PT_SRESTRICT");
+				break;
+			case PT_ACTIONS:
+				g_print (" PT_ACTIONS");
+				break;
 			case PT_BINARY:
-				g_print(" (struct SBinary_short *) - %p Binary data follows: \n", &lpProp->value.bin);
-				for (j = 0; j < lpProp->value.bin.cb; j++)
-					g_print("0x%02X ", lpProp->value.bin.lpb[j]);
+				g_print(" (struct SBinary_short *) - %p Binary data follows (size %d): \n", &lpProp->value.bin, lpProp->value.bin.cb);
+				dump_bin (lpProp->value.bin.lpb, lpProp->value.bin.cb, "     ");
 				break;
 			case PT_MV_STRING8:
-				g_print(" (struct mapi_SLPSTRArray *) - %p", &lpProp->value.MVszA);
+				g_print(" (struct mapi_SLPSTRArray *) (%d items)", lpProp->value.MVszA.cValues);
+				for (j = 0; j < lpProp->value.MVszA.cValues; j++) {
+					g_print ("\n   item[%d] = '%s'", j, lpProp->value.MVszA.strings[j].lppszA ? lpProp->value.MVszA.strings[j].lppszA : "[NULL]");
+				}
+				break;
+			case PT_MV_SHORT:
+				g_print (" PT_MV_SHORT");
+				break;
+			case PT_MV_LONG:
+				g_print (" PT_MV_LONG");
+				break;
+			case PT_MV_FLOAT:
+				g_print (" PT_MV_FLOAT");
+				break;
+			case PT_MV_DOUBLE:
+				g_print (" PT_MV_DOUBLE");
+				break;
+			case PT_MV_CURRENCY:
+				g_print (" PT_MV_CURRENCY");
+				break;
+			case PT_MV_APPTIME:
+				g_print (" PT_MV_APPTIME");
+				break;
+			case PT_MV_I8:
+				g_print (" PT_MV_I8");
+				break;
+			case PT_MV_UNICODE:
+				g_print (" PT_MV_UNICODE (%d items)", lpProp->value.MVszW.cValues);
+				for (j = 0; j < lpProp->value.MVszW.cValues; j++) {
+					g_print ("\n   item[%d] = '%s'", j, lpProp->value.MVszW.strings[j].lppszW ? lpProp->value.MVszW.strings[j].lppszW : "[NULL]");
+				}
+				break;
+			case PT_MV_SYSTIME:
+				g_print (" PT_MV_SYSTIME");
+				break;
+			case PT_MV_CLSID:
+				g_print (" PT_MV_CLSID");
+				break;
+			case PT_MV_BINARY:
+				g_print (" PT_MV_BINARY (%d items)", lpProp->value.MVbin.cValues);
+				for (j = 0; j < lpProp->value.MVbin.cValues; j++) {
+					g_print ("\n   item[%d] (size %d)\n", j, lpProp->value.MVbin.bin[j].cb);
+					dump_bin (lpProp->value.MVbin.bin[j].lpb, lpProp->value.MVbin.bin[j].cb, "     ");
+				}
+				g_print ("\n---");
 				break;
 			default:
-				g_print(" - NONE NULL");
+				g_print (" - Unknown type 0x%04X", lpProp->ulPropTag & 0xFFFF);
 			}
 		}
 	}
+	g_print ("\n");
 }
 
 /* Attention: Devs at work;-) */
@@ -418,6 +550,66 @@ exchange_mapi_util_bin_append_uint32 (TALLOC_CTX *mem_ctx, struct Binary_r *bin,
 	*ptr++ = ((val >> 24) & 0xFF);
 }
 
+/* returns how many bytes read, 0 means an error */
+static uint32_t
+bin_decode_uint16 (const uint8_t *ptr, uint32_t ptr_cb, uint16_t *res)
+{
+	g_return_val_if_fail (res != NULL, 0);
+	g_return_val_if_fail (ptr != NULL, 0);
+
+	if (ptr_cb < 2)
+		return 0;
+
+	*res = ((ptr[0] & 0xFF)     ) |
+	       ((ptr[1] & 0xFF) << 8);
+
+	return 2;
+}
+
+/* returns how many bytes read, 0 means an error */
+static uint32_t
+bin_decode_uint32 (const uint8_t *ptr, uint32_t ptr_cb, uint32_t *res)
+{
+	g_return_val_if_fail (res != NULL, 0);
+	g_return_val_if_fail (ptr != NULL, 0);
+
+	if (ptr_cb < 4)
+		return 0;
+
+	*res = ((ptr[0] & 0xFF)      ) |
+	       ((ptr[1] & 0xFF) <<  8) |
+	       ((ptr[2] & 0xFF) << 16) |
+	       ((ptr[3] & 0xFF) << 24);
+
+	return 4;
+}
+
+static uint32_t
+bin_decode_string (const uint8_t *ptr, uint32_t sz, gchar **str, gboolean is_unicode)
+{
+	uint32_t len;
+
+	g_return_val_if_fail (ptr != NULL, 0);
+	g_return_val_if_fail (str != NULL, 0);
+
+	for (len = 0; len < sz; len += (is_unicode ? 2 : 1)) {
+		if (ptr[len] == 0x00 && (!is_unicode || (len + 1 < sz && ptr[len + 1] == 0x00)))
+			break;
+	}
+
+	if (len >= sz || ptr[len] != 0x00 || (is_unicode && len + 1 >= sz && ptr[len + 1] != 0x00))
+		return 0;
+
+	if (is_unicode) {
+		*str = g_utf16_to_utf8 ((const gunichar2 *) ptr, len / 2, NULL, NULL, NULL);
+	} else {
+		*str = g_malloc0 (sizeof(gchar) * (1 + len));
+		strncpy (*str, (const gchar *) ptr, len - 1);
+	}
+
+	return len + 1 + (is_unicode ? 1 : 0);
+}
+
 static void
 exchange_mapi_util_bin_append_string (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const gchar *val)
 {
@@ -433,12 +625,6 @@ exchange_mapi_util_bin_append_string (TALLOC_CTX *mem_ctx, struct Binary_r *bin,
 }
 
 static void
-exchange_mapi_util_bin_append_unicode (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const gchar *val)
-{
-	/* WRITE ME */
-}
-
-static void
 exchange_mapi_util_bin_append_val (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const uint8_t *val, gsize len)
 {
 	uint8_t *ptr = NULL;
@@ -449,6 +635,20 @@ exchange_mapi_util_bin_append_val (TALLOC_CTX *mem_ctx, struct Binary_r *bin, co
 	ptr = bin->lpb + bin->cb - len;
 
 	memcpy (ptr, val, len);
+}
+
+static void
+exchange_mapi_util_bin_append_unicode (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const gchar *val)
+{
+	gunichar2 *utf16;
+	glong written = 0;
+
+	utf16 = g_utf8_to_utf16 (val, -1, NULL, &written, NULL);
+	g_return_if_fail (utf16 != NULL);
+
+	exchange_mapi_util_bin_append_val (mem_ctx, bin, (uint8_t *)utf16, (written + 1) * 2);
+
+	g_free (utf16);
 }
 
 static const uint8_t MAPI_ONE_OFF_UID[] = {
@@ -462,10 +662,9 @@ static const uint8_t MAPI_ONE_OFF_UID[] = {
 
 /**
  * e2k_entryid_generate_oneoff:
+ * @entryid: entry ID to be filled
  * @display_name: the display name of the user
  * @email: the email address
- * @unicode: %TRUE to generate a Unicode ENTRYID (in which case
- * @display_name should be UTF-8), %FALSE for an ASCII ENTRYID.
  *
  * Constructs a "one-off" ENTRYID value that can be used as a MAPI
  * recipient (eg, for a message forwarding server-side rule),
@@ -473,32 +672,100 @@ static const uint8_t MAPI_ONE_OFF_UID[] = {
  *
  * Return value: the recipient ENTRYID
  **/
-struct Binary_r *
-exchange_mapi_util_entryid_generate_oneoff (TALLOC_CTX *mem_ctx, const gchar *display_name, const gchar *email, gboolean unicode)
+void
+exchange_mapi_util_entryid_generate_oneoff (TALLOC_CTX *mem_ctx, struct Binary_r *entryid, const gchar *display_name, const gchar *email)
 {
-	struct Binary_r *entryid;
-
-	entryid = talloc_zero (mem_ctx, struct Binary_r);
+	g_return_if_fail (entryid != NULL);
 
 	exchange_mapi_util_bin_append_uint32 (mem_ctx, entryid, 0);
 	exchange_mapi_util_bin_append_val (mem_ctx, entryid, MAPI_ONE_OFF_UID, sizeof(MAPI_ONE_OFF_UID));
 	exchange_mapi_util_bin_append_uint16 (mem_ctx, entryid, 0);
-	exchange_mapi_util_bin_append_uint16 (mem_ctx, entryid,
-		MAPI_ONE_OFF_NO_RICH_INFO |
-		MAPI_ONE_OFF_MYSTERY_FLAG |
-		(unicode ? MAPI_ONE_OFF_UNICODE : 0));
+	exchange_mapi_util_bin_append_uint16 (mem_ctx, entryid, MAPI_ONE_OFF_NO_RICH_INFO | MAPI_ONE_OFF_MYSTERY_FLAG | MAPI_ONE_OFF_UNICODE);
+	exchange_mapi_util_bin_append_unicode (mem_ctx, entryid, display_name);
+	exchange_mapi_util_bin_append_unicode (mem_ctx, entryid, "SMTP");
+	exchange_mapi_util_bin_append_unicode (mem_ctx, entryid, email);
+}
 
-	if (unicode) {
-		exchange_mapi_util_bin_append_unicode (mem_ctx, entryid, display_name);
-		exchange_mapi_util_bin_append_unicode (mem_ctx, entryid, "SMTP");
-		exchange_mapi_util_bin_append_unicode (mem_ctx, entryid, email);
-	} else {
-		exchange_mapi_util_bin_append_string (mem_ctx, entryid, display_name);
-		exchange_mapi_util_bin_append_string (mem_ctx, entryid, "SMTP");
-		exchange_mapi_util_bin_append_string (mem_ctx, entryid, email);
+gboolean
+exchange_mapi_util_entryid_decode_oneoff (const struct Binary_r *entryid, gchar **display_name, gchar **email)
+{
+	uint32_t u32, sz, r;
+	uint16_t u16, flags;
+	uint8_t *ptr;
+	gchar *smtp;
+
+	g_return_val_if_fail (entryid != NULL, FALSE);
+	g_return_val_if_fail (entryid->lpb != NULL, FALSE);
+	g_return_val_if_fail (display_name != NULL, FALSE);
+	g_return_val_if_fail (email != NULL, FALSE);
+
+	*display_name = NULL;
+	*email = NULL;
+
+	ptr = entryid->lpb;
+	sz = entryid->cb;
+
+	u32 = 1;
+	r = bin_decode_uint32 (ptr, sz, &u32);
+	if (!r || u32 != 0)
+		return FALSE;
+
+	ptr += r;
+	sz -= r;
+
+	for (r = 0; r < G_N_ELEMENTS (MAPI_ONE_OFF_UID) && r < sz; r++) {
+		if (ptr[r] != MAPI_ONE_OFF_UID[r])
+			return FALSE;
 	}
 
-	return entryid;
+	if (r != G_N_ELEMENTS (MAPI_ONE_OFF_UID))
+		return FALSE;
+
+	ptr += r;
+	sz -= r;
+
+	u16 = 1;
+	r = bin_decode_uint16 (ptr, sz, &u16);
+	if (!r || u16 != 0)
+		return FALSE;
+	ptr += r;
+	sz -= r;
+
+	flags = 0;
+	r = bin_decode_uint16 (ptr, sz, &flags);
+	if (!r)
+		return FALSE;
+	ptr += r;
+	sz -= r;
+
+	r = bin_decode_string (ptr, sz, display_name, (flags & MAPI_ONE_OFF_UNICODE) != 0);
+	if (!r || !*display_name)
+		return FALSE;
+	ptr += r;
+	sz -= r;
+
+	smtp = NULL;
+	r = bin_decode_string (ptr, sz, &smtp, (flags & MAPI_ONE_OFF_UNICODE) != 0);
+	if (!r || !smtp || !g_str_equal (smtp, "SMTP")) {
+		g_free (smtp);
+		g_free (*display_name);
+		*display_name = NULL;
+
+		return FALSE;
+	}
+	g_free (smtp);
+	ptr += r;
+	sz -= r;
+
+	r = bin_decode_string (ptr, sz, email, (flags & MAPI_ONE_OFF_UNICODE) != 0);
+	if (!r || !*email) {
+		g_free (*display_name);
+		*display_name = NULL;
+
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 static const uint8_t MAPI_LOCAL_UID[] = {

@@ -245,6 +245,7 @@ typedef enum {
 #endif
 
 #define IPM_CONTACT				"IPM.Contact"
+#define IPM_DISTLIST				"IPM.DistList"
 #define IPM_APPOINTMENT				"IPM.Appointment"
 #define IPM_SCHEDULE_MEETING_PREFIX		"IPM.Schedule.Meeting."
 #define IPM_SCHEDULE_MEETING_REQUEST		"IPM.Schedule.Meeting.Request"
