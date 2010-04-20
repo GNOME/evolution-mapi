@@ -1613,7 +1613,7 @@ exchange_mapi_connection_fetch_item (ExchangeMapiConnection *conn, mapi_id_t fid
 		}
 
 		GetPropsTagArray->cValues = (uint32_t) (cn_props + NamedPropsTagArray->cValues);
-		GetPropsTagArray->aulPropTag = talloc_zero_array (mem_ctx, uint32_t, GetPropsTagArray->cValues + 1);
+		GetPropsTagArray->aulPropTag = (enum MAPITAGS *) talloc_zero_array (mem_ctx, uint32_t, GetPropsTagArray->cValues + 1);
 
 		for (m = 0; m < NamedPropsTagArray->cValues; m++, n++)
 			GetPropsTagArray->aulPropTag[n] = NamedPropsTagArray->aulPropTag[m];
@@ -3192,8 +3192,11 @@ exchange_mapi_connection_events_init (ExchangeMapiConnection *conn)
 	g_return_val_if_fail (priv->session != NULL, FALSE);
 
 	LOCK ();
-	/* TODO: This requires a context, like session, from OpenChange, thus disabling until added */
-	retval = FALSE /*RegisterNotification(0) == MAPI_E_SUCCESS */;
+	#ifdef HAVE_CORRECT_REGISTERNOTIFICATION
+	retval = RegisterNotification (priv->session, 0) == MAPI_E_SUCCESS;
+	#else
+	retval = FALSE;
+	#endif
 	UNLOCK ();
 
 	return retval;
