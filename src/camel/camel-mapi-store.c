@@ -80,7 +80,7 @@ static void	camel_mapi_store_init(CamelMapiStore *, CamelMapiStoreClass *);
 static void	camel_mapi_store_finalize(CamelObject *);
 
 /* service methods */
-static void	mapi_construct(CamelService *, CamelSession *,
+static gboolean	mapi_construct(CamelService *, CamelSession *,
 				     CamelProvider *, CamelURL *,
 				     CamelException *);
 static gchar	*mapi_get_name(CamelService *, gboolean );
@@ -91,13 +91,13 @@ static GList	*mapi_query_auth_types(CamelService *, CamelException *);
 /* store methods */
 static CamelFolder	*mapi_get_folder(CamelStore *, const gchar *, guint32, CamelException *);
 static CamelFolderInfo	*mapi_create_folder(CamelStore *, const gchar *, const gchar *, CamelException *);
-static void		mapi_delete_folder(CamelStore *, const gchar *, CamelException *);
-static void		mapi_rename_folder(CamelStore *, const gchar *, const gchar *, CamelException *);
+static gboolean		mapi_delete_folder(CamelStore *, const gchar *, CamelException *);
+static gboolean		mapi_rename_folder(CamelStore *, const gchar *, const gchar *, CamelException *);
 static CamelFolderInfo	*mapi_get_folder_info(CamelStore *, const gchar *, guint32, CamelException *);
-static void		mapi_subscribe_folder(CamelStore *, const gchar *, CamelException *);
+static gboolean		mapi_subscribe_folder(CamelStore *, const gchar *, CamelException *);
 static gboolean mapi_folder_subscribed (CamelStore *store, const gchar *folder_name);
-static void		mapi_unsubscribe_folder(CamelStore *, const gchar *, CamelException *);
-static void		mapi_noop(CamelStore *, CamelException *);
+static gboolean		mapi_unsubscribe_folder(CamelStore *, const gchar *, CamelException *);
+static gboolean		mapi_noop(CamelStore *, CamelException *);
 static CamelFolderInfo * mapi_build_folder_info(CamelMapiStore *mapi_store, const gchar *parent_name, const gchar *folder_name);
 static gboolean mapi_fid_is_system_folder (CamelMapiStore *mapi_store, const gchar *fid);
 
@@ -268,7 +268,7 @@ static void camel_mapi_store_finalize(CamelObject *object)
 }
 
 /* service methods */
-static void mapi_construct(CamelService *service, CamelSession *session,
+static gboolean mapi_construct(CamelService *service, CamelSession *session,
 				 CamelProvider *provider, CamelURL *url,
 				 CamelException *ex)
 {
@@ -277,10 +277,8 @@ static void mapi_construct(CamelService *service, CamelSession *session,
 	CamelMapiStorePrivate *priv = mapi_store->priv;
 	gchar *path = NULL;
 
-	CAMEL_SERVICE_CLASS (parent_class)->construct (service, session, provider, url, ex);
-
-	if (camel_exception_is_set (ex))
-		return;
+	if (!CAMEL_SERVICE_CLASS (parent_class)->construct (service, session, provider, url, ex))
+		return FALSE;
 
 /*	if (!(url->host || url->user)) { */
 /*		camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_INVALID, */
@@ -290,7 +288,7 @@ static void mapi_construct(CamelService *service, CamelSession *session,
 	/*storage path*/
 	priv->storage_path = camel_session_get_storage_path (session, service, ex);
 	if (!priv->storage_path)
-		return;
+		return FALSE;
 
 	/*store summary*/
 	path = g_alloca (strlen (priv->storage_path) + 32);
@@ -325,6 +323,7 @@ static void mapi_construct(CamelService *service, CamelSession *session,
 
 	store->flags |= CAMEL_STORE_SUBSCRIPTIONS;
 
+	return TRUE;
 }
 
 static char
@@ -648,7 +647,7 @@ mapi_forget_folder (CamelMapiStore *mapi_store, const gchar *folder_name, CamelE
 	camel_folder_info_free (fi);
 }
 
-static void
+static gboolean
 mapi_delete_folder(CamelStore *store, const gchar *folder_name, CamelException *ex)
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
@@ -662,7 +661,7 @@ mapi_delete_folder(CamelStore *store, const gchar *folder_name, CamelException *
 
 	if (!camel_mapi_store_connected ((CamelMapiStore *)store, ex)) {
 		camel_service_unlock (CAMEL_SERVICE (store), CS_REC_CONNECT_LOCK);
-		return;
+		return !camel_exception_is_set (ex);
 	}
 
 	folder_id = g_hash_table_lookup (priv->name_hash, folder_name);
@@ -682,6 +681,8 @@ mapi_delete_folder(CamelStore *store, const gchar *folder_name, CamelException *
 	}
 
 	camel_service_unlock (CAMEL_SERVICE (store), CS_REC_CONNECT_LOCK);
+
+	return !camel_exception_is_set (ex);
 }
 
 static void
@@ -733,7 +734,7 @@ mapi_rename_folder_infos (CamelMapiStore *mapi_store, const gchar *old_name, con
 	}
 }
 
-static void
+static gboolean
 mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_name, CamelException *ex)
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
@@ -748,7 +749,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 
 	if (!camel_mapi_store_connected ((CamelMapiStore *)store, ex)) {
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
-		return;
+		return !camel_exception_is_set (ex);
 	}
 
 	/* Need a full name of a folder */
@@ -759,7 +760,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 				      _("Cannot rename MAPI folder '%s'. Folder does not exist."),
 				      old_name);
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
-		return;
+		return FALSE;
 	}
 
 	/*Do not allow rename for system folders.*/
@@ -770,7 +771,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 				      _("Cannot rename MAPI default folder '%s' to '%s'."),
 				      old_name, new_name);
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
-		return;
+		return FALSE;
 	}
 
 	old_parent = g_strdup (old_name);
@@ -796,7 +797,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
 		g_free (old_parent);
 		g_free (new_parent);
-		return;
+		return FALSE;
 	}
 
 	if (tmp == NULL || g_str_equal (old_parent, new_parent)) {
@@ -812,7 +813,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 			camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
 			g_free (old_parent);
 			g_free (new_parent);
-			return;
+			return FALSE;
 		}
 
 		mapi_rename_folder_infos (mapi_store, old_name, new_name);
@@ -861,7 +862,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 			camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename MAPI folder '%s' to '%s'"), old_name, new_name);
 			g_free (old_parent);
 			g_free (new_parent);
-			return;
+			return FALSE;
 		} else {
 			/* folder was moved, update all subfolders immediately, thus
 			   the next get_folder_info call will know about them */
@@ -909,6 +910,8 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 
 	g_free (old_parent);
 	g_free (new_parent);
+
+	return TRUE;
 }
 
 static guint32 hexnib(guint32 c)
@@ -1650,7 +1653,7 @@ camel_mapi_store_get_profile_name (CamelMapiStore *mapi_store)
 	return priv->profile;
 }
 
-static void
+static gboolean
 mapi_subscribe_folder(CamelStore *store, const gchar *folder_name, CamelException *ex)
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
@@ -1678,7 +1681,7 @@ mapi_subscribe_folder(CamelStore *store, const gchar *folder_name, CamelExceptio
 		if (f_name != NULL)
 			folder_name = ++f_name;
 		else  //Don't process All Public Folder.
-			return;
+			return TRUE;
 	}
 
 	fi = mapi_build_folder_info (mapi_store, parent_name, folder_name);
@@ -1689,6 +1692,8 @@ mapi_subscribe_folder(CamelStore *store, const gchar *folder_name, CamelExceptio
 
 	camel_object_trigger_event (CAMEL_OBJECT (store), "folder_subscribed", fi);
 	camel_folder_info_free (fi);
+
+	return TRUE;
 }
 
 static gboolean
@@ -1706,7 +1711,7 @@ mapi_folder_subscribed (CamelStore *store, const gchar *folder_name)
 	return truth;
 }
 
-static void
+static gboolean
 mapi_unsubscribe_folder(CamelStore *store, const gchar *folder_name, CamelException *ex)
 {
 	CamelFolderInfo *fi;
@@ -1733,19 +1738,21 @@ mapi_unsubscribe_folder(CamelStore *store, const gchar *folder_name, CamelExcept
 		if (f_name != NULL)
 			folder_name = ++f_name;
 		else //Don't process All Public Folder.
-			return;
+			return TRUE;
 	}
 
 	fi = mapi_build_folder_info (mapi_store, parent_name, folder_name);
 
 	camel_object_trigger_event (CAMEL_OBJECT (store), "folder_unsubscribed", fi);
 	camel_folder_info_free (fi);
+
+	return TRUE;
 }
 
-static void
+static gboolean
 mapi_noop(CamelStore *store, CamelException *ex)
 {
-
+	return TRUE;
 }
 
 ExchangeMapiConnection *

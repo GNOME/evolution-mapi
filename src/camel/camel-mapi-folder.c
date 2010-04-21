@@ -138,7 +138,7 @@ mapi_getv (CamelObject *object, CamelException *ex, CamelArgGetV *args)
 
 }
 
-static void
+static gboolean
 mapi_refresh_info(CamelFolder *folder, CamelException *ex)
 {
 	CamelStoreInfo *si;
@@ -172,6 +172,7 @@ mapi_refresh_info(CamelFolder *folder, CamelException *ex)
 	}
 	//#endif
 
+	return !camel_exception_is_set (ex);
 }
 
 void
@@ -810,7 +811,7 @@ static CamelSessionThreadOps deleted_items_sync_ops = {
 	mapi_sync_deleted_free,
 };
 
-static void
+static gboolean
 mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (folder->parent_store);
@@ -831,7 +832,7 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	if (((CamelOfflineStore *) mapi_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL ||
 			((CamelService *)mapi_store)->status == CAMEL_SERVICE_DISCONNECTED) {
 		mapi_sync_summary (folder, ex);
-		return;
+		return !camel_exception_is_set (ex);
 	}
 
 	if (((CamelMapiFolder *)folder)->type & CAMEL_MAPI_FOLDER_PUBLIC)
@@ -844,7 +845,7 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	if (!camel_mapi_store_connected (mapi_store, ex)) {
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
 		camel_exception_clear (ex);
-		return;
+		return TRUE;
 	}
 	camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
 
@@ -965,6 +966,8 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	camel_service_lock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
 	mapi_sync_summary (folder, ex);
 	camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
+
+	return !camel_exception_is_set (ex);
 }
 
 gboolean
@@ -1978,7 +1981,7 @@ mapi_get_message_info(CamelFolder *folder, const gchar *uid)
 }
 #endif
 
-static void
+static gboolean
 mapi_expunge (CamelFolder *folder, CamelException *ex)
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE(folder->parent_store);
@@ -2013,7 +2016,7 @@ mapi_expunge (CamelFolder *folder, CamelException *ex)
 		} else
 			g_warning ("Could not Empty Trash\n");
 
-		return;
+		return TRUE;
 	}
 
 	changes = camel_folder_change_info_new ();
@@ -2074,9 +2077,11 @@ mapi_expunge (CamelFolder *folder, CamelException *ex)
 
 	g_free (folder_id);
 	camel_folder_change_info_free (changes);
+
+	return TRUE;
 }
 
-static void
+static gboolean
 mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 		CamelFolder *destination, GPtrArray **transferred_uids,
 		gboolean delete_originals, CamelException *ex)
@@ -2094,7 +2099,7 @@ mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 
 	/* check for offline operation */
 	if (offline->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL)
-		return;
+		return TRUE;
 
 	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store, source->full_name);
 	exchange_mapi_util_mapi_id_from_string (folder_id, &src_fid);
@@ -2133,7 +2138,7 @@ mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 	g_slist_foreach (src_msg_ids, (GFunc) g_free, NULL);
 	g_slist_free (src_msg_ids);
 
-	return;
+	return !camel_exception_is_set (ex);
 }
 
 static void
@@ -2151,7 +2156,7 @@ mapi_cmp_uids (CamelFolder *folder, const gchar *uid1, const gchar *uid2)
 	return strcmp (uid1, uid2);
 }
 
-static void
+static gboolean
 mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 		const CamelMessageInfo *info, gchar **appended_uid,
 		CamelException *ex)
@@ -2178,13 +2183,13 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM,
 				      _("Cannot append message to folder '%s'"),
 				      folder->full_name);
-		return;
+		return FALSE;
 	}
 
 	if (offline->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL) {
 		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM,
 				      _("Offline."));
-		return;
+		return FALSE;
 	}
 
 	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store,
@@ -2204,6 +2209,8 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 
 	if (appended_uid)
 		*appended_uid = exchange_mapi_util_mapi_ids_to_uid(fid, mid);
+
+	return !camel_exception_is_set (ex);
 }
 
 static void
