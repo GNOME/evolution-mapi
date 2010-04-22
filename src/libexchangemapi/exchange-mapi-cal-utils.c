@@ -1244,7 +1244,9 @@ check_server_for_object (ExchangeMapiConnection *conn, struct mapi_SPropValue_ar
 	res.res.resProperty.relop = RELOP_EQ;
 	res.res.resProperty.ulPropTag = proptag;
 
-	sb = (const struct SBinary *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0023));
+	sb = (const struct SBinary *)find_mapi_SPropValue_data(properties, proptag);
+	if (!sb)
+		sb = find_mapi_SPropValue_data(properties, PidLidCleanGlobalObjectId);
 
 	set_SPropValue_proptag (&sprop, proptag, (gconstpointer ) sb);
 	cast_mapi_SPropValue (&(res.res.resProperty.lpProp), &sprop);
@@ -1263,63 +1265,55 @@ check_server_for_object (ExchangeMapiConnection *conn, struct mapi_SPropValue_ar
 	g_slist_free(l);
 }
 
-gchar *
-exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, struct mapi_SPropValue_array *properties,
-				   GSList *streams, GSList *recipients, GSList *attachments)
+struct fetch_camel_cal_data {
+	icalcomponent_kind kind;
+	icalproperty_method method;
+	gchar *result_data;
+};
+
+static gboolean
+fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 {
+	struct fetch_camel_cal_data *fccd = data;
 	ECalComponent *comp = NULL;
-	icalcomponent_kind kind = ICAL_NO_COMPONENT;
-	icalproperty_method method = ICAL_METHOD_NONE;
-	const gchar *msg_class = NULL;
 	mapi_id_t mid = 0;
 	icalcomponent *icalcomp = NULL;
 	gchar *str = NULL, *smid = NULL, *tmp, *filename, *fileuri;
 
-	msg_class = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_MESSAGE_CLASS);
-	g_return_val_if_fail (msg_class && *msg_class, NULL);
-	if (!g_ascii_strcasecmp (msg_class, IPM_SCHEDULE_MEETING_REQUEST)) {
-		method = ICAL_METHOD_REQUEST;
-		kind = ICAL_VEVENT_COMPONENT;
-	} else if (!g_ascii_strcasecmp (msg_class, IPM_SCHEDULE_MEETING_CANCELED)) {
-		method = ICAL_METHOD_CANCEL;
-		kind = ICAL_VEVENT_COMPONENT;
-	} else if (g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_RESP_PREFIX)) {
-		method = ICAL_METHOD_REPLY;
-		kind = ICAL_VEVENT_COMPONENT;
-	} else
-		return (g_strdup (""));
+	g_return_val_if_fail (item_data != NULL, FALSE);
+	g_return_val_if_fail (fccd != NULL, FALSE);
 
 	filename = g_build_filename (g_get_home_dir (), TEMP_ATTACH_STORE, NULL);
 	fileuri = g_filename_to_uri (filename, NULL, NULL);
 
-	check_server_for_object (conn, properties, &mid);
+	check_server_for_object (item_data->conn, item_data->properties, &mid);
 
-	if (method == ICAL_METHOD_REPLY) {
+	if (fccd->method == ICAL_METHOD_REPLY) {
 		if (mid) {
-			comp = update_attendee_status (conn, properties, mid);
-			set_attachments_to_cal_component (comp, attachments, fileuri);
+			comp = update_attendee_status (item_data->conn, item_data->properties, mid);
+			set_attachments_to_cal_component (comp, item_data->attachments, fileuri);
 		}
-	} else if (method == ICAL_METHOD_CANCEL) {
+	} else if (fccd->method == ICAL_METHOD_CANCEL) {
 		if (mid) {
 			struct cal_cbdata server_cbd = { 0 };
-			fetch_server_data (conn, mid, &server_cbd);
+			fetch_server_data (item_data->conn, mid, &server_cbd);
 			comp = server_cbd.comp;
-			set_attachments_to_cal_component (comp, attachments, fileuri);
+			set_attachments_to_cal_component (comp, item_data->attachments, fileuri);
 
 			g_free (server_cbd.props);
 		}
-	} else if (method == ICAL_METHOD_REQUEST) {
+	} else if (fccd->method == ICAL_METHOD_REQUEST) {
 		if (mid)
 			smid = exchange_mapi_util_mapi_id_to_string (mid);
 		else
 			smid = e_cal_component_gen_uid();
 
-		comp = exchange_mapi_cal_util_mapi_props_to_comp (conn, kind, smid,
-							properties, streams, recipients,
+		comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, fccd->kind, smid,
+							item_data->properties, item_data->streams, item_data->recipients,
 							NULL, NULL, NULL);
-		set_attachments_to_cal_component (comp, attachments, fileuri);
+		set_attachments_to_cal_component (comp, item_data->attachments, fileuri);
 
-		update_server_object (conn, properties, attachments, comp, &mid);
+		update_server_object (item_data->conn, item_data->properties, item_data->attachments, comp, &mid);
 
 		tmp = exchange_mapi_util_mapi_id_to_string (mid);
 		e_cal_component_set_uid (comp, tmp);
@@ -1331,7 +1325,7 @@ exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, struct mapi_S
 	g_free (filename);
 
 	icalcomp = e_cal_util_new_top_level ();
-	icalcomponent_set_method (icalcomp, method);
+	icalcomponent_set_method (icalcomp, fccd->method);
 	if (comp)
 		icalcomponent_add_component (icalcomp,
 			icalcomponent_new_clone(e_cal_component_get_icalcomponent(comp)));
@@ -1340,7 +1334,45 @@ exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, struct mapi_S
 	if (comp)
 		g_object_unref (comp);
 
-	return str;
+	exchange_mapi_util_free_stream_list (&item_data->streams);
+	exchange_mapi_util_free_recipient_list (&item_data->recipients);
+	exchange_mapi_util_free_attachment_list (&item_data->attachments);
+
+	fccd->result_data = str;
+
+	return TRUE;
+}
+
+gchar *
+exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, mapi_id_t orig_fid, mapi_id_t orig_mid, const gchar *msg_class,
+				   GSList *streams, GSList *recipients, GSList *attachments)
+{
+	struct fetch_camel_cal_data fccd = { 0 };
+
+	fccd.kind = ICAL_NO_COMPONENT;
+	fccd.method = ICAL_METHOD_NONE;
+
+	g_return_val_if_fail (msg_class && *msg_class, NULL);
+	g_return_val_if_fail (conn != NULL, NULL);
+
+	if (!g_ascii_strcasecmp (msg_class, IPM_SCHEDULE_MEETING_REQUEST)) {
+		fccd.method = ICAL_METHOD_REQUEST;
+		fccd.kind = ICAL_VEVENT_COMPONENT;
+	} else if (!g_ascii_strcasecmp (msg_class, IPM_SCHEDULE_MEETING_CANCELED)) {
+		fccd.method = ICAL_METHOD_CANCEL;
+		fccd.kind = ICAL_VEVENT_COMPONENT;
+	} else if (g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_RESP_PREFIX)) {
+		fccd.method = ICAL_METHOD_REPLY;
+		fccd.kind = ICAL_VEVENT_COMPONENT;
+	} else
+		return NULL;
+
+	exchange_mapi_connection_fetch_item (conn, orig_fid, orig_mid,
+					exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (fccd.kind),
+					fetch_camel_cal_comp_cb, &fccd,
+					MAPI_OPTIONS_FETCH_ALL);
+
+	return fccd.result_data;
 }
 
 /* call with props = NULL to fetch named ids into the connection cache */

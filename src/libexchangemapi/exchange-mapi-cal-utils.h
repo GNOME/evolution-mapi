@@ -91,7 +91,7 @@ void
 exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *uid, struct Binary_r *sb);
 
 gchar *
-exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, struct mapi_SPropValue_array *properties,
+exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, mapi_id_t fid, mapi_id_t mid, const gchar *msg_class,
 				   GSList *streams, GSList *recipients, GSList *attachments);
 
 uint32_t

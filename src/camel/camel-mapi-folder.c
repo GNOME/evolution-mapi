@@ -1223,71 +1223,9 @@ mapi_camel_get_item_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALL
 		PR_RCVD_REPRESENTING_EMAIL_ADDRESS_UNICODE
 	};
 
-	/* do not make this array static, the below function modifies it */
-	ResolveNamedIDsData nids[] = {
-		{ PidLidReminderDelta, 0 },
-		{ PidLidReminderTime, 0 },
-		{ PidLidReminderSet, 0 },
-		{ PidLidPrivate, 0 },
-		{ PidLidSideEffects, 0 },
-		{ PidLidCommonStart, 0 },
-		{ PidLidCommonEnd, 0 },
-		{ PidLidReminderSignalTime, 0 },
-
-		{ PidLidAppointmentSequence, 0 },
-		{ PidLidBusyStatus, 0 },
-		{ PidLidLocation, 0 },
-		{ PidLidAppointmentStartWhole, 0 },
-		{ PidLidAppointmentEndWhole, 0 },
-		{ PidLidAppointmentDuration, 0 },
-		{ PidLidAppointmentSubType, 0 },
-		{ PidLidAppointmentRecur, 0 },
-		{ PidLidAppointmentStateFlags, 0 },
-		{ PidLidResponseStatus, 0 },
-		{ PidLidRecurring, 0 },
-		{ PidLidIntendedBusyStatus, 0 },
-		{ PidLidExceptionReplaceTime, 0 },
-		{ PidLidFInvited, 0 },
-		{ PidLidRecurrenceType, 0 },
-		{ PidLidRecurrencePattern, 0 },
-		{ PidLidClipStart, 0 },
-		{ PidLidClipEnd, 0 },
-		{ PidLidAutoFillLocation, 0 },
-		{ PidLidConferencingCheck, 0 },
-		{ PidLidAppointmentCounterProposal, 0 },
-		{ PidLidAppointmentTimeZoneDefinitionStartDisplay, 0 },
-		{ PidLidAppointmentTimeZoneDefinitionEndDisplay, 0 },
-
-		{ PidLidWhere, 0 },
-		{ PidLidGlobalObjectId, 0 },
-		{ PidLidIsRecurring, 0 },
-		{ PidLidIsException, 0 },
-		{ PidLidCleanGlobalObjectId, 0 },
-		{ PidLidAppointmentMessageClass, 0 },
-		{ PidLidMeetingType, 0 },
-
-		{ PidLidTaskStatus, 0 },
-		{ PidLidPercentComplete, 0 },
-		{ PidLidTeamTask, 0 },
-		{ PidLidTaskStartDate, 0 },
-		{ PidLidTaskDueDate, 0 },
-		{ PidLidTaskDateCompleted, 0 },
-		/* { PidLidTaskRecurrence, 0 }, */
-		{ PidLidTaskComplete, 0 },
-		{ PidLidTaskOwner, 0 },
-		{ PidLidTaskAssigner, 0 },
-		{ PidLidTaskFRecurring, 0 },
-		{ PidLidTaskRole, 0 },
-		{ PidLidTaskOwnership, 0 },
-		{ PidLidAcceptanceState, 0 }
-	};
-
 	g_return_val_if_fail (props != NULL, FALSE);
 
-	if (!exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, item_props, G_N_ELEMENTS (item_props)))
-		return FALSE;
-
-	return exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
+	return exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, item_props, G_N_ELEMENTS (item_props));
 }
 
 static gboolean
@@ -1339,9 +1277,8 @@ fetch_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 	item->is_cal = FALSE;
 	if (g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_PREFIX)) {
-		guint8 *appointment_body_str = (guint8 *) exchange_mapi_cal_util_camel_helper (item_data->conn, item_data->properties,
-											     item_data->streams,
-											     item_data->recipients, item_data->attachments);
+		guint8 *appointment_body_str = (guint8 *) exchange_mapi_cal_util_camel_helper (item_data->conn, item_data->fid, item_data->mid, msg_class,
+												item_data->streams, item_data->recipients, item_data->attachments);
 
 		if (appointment_body_str && *appointment_body_str) {
 			body = g_new0(ExchangeMAPIStream, 1);
