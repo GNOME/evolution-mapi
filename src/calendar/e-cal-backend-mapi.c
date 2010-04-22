@@ -92,81 +92,6 @@ struct _ECalBackendMAPIPrivate {
 	SyncDelta		*dlock;
 };
 
-/* this is a list of all known calendar MAPI tag IDs;
-   if you add new add it here too, otherwise it may not be fetched */
-static uint32_t known_cal_mapi_ids[] = {
-	PR_7BIT_DISPLAY_NAME_UNICODE,
-	PR_ADDRTYPE,
-	PR_ATTACH_DATA_BIN,
-	PR_ATTACH_FILENAME_UNICODE,
-	PR_ATTACH_LONG_FILENAME_UNICODE,
-	PR_ATTACH_METHOD,
-	PR_BODY,
-	PR_BODY_UNICODE,
-	PR_CONVERSATION_TOPIC_UNICODE,
-	PR_CREATION_TIME,
-	PR_DISPLAY_NAME_UNICODE,
-	PR_DISPLAY_TYPE,
-	PR_END_DATE,
-	PR_FID,
-	PR_GIVEN_NAME_UNICODE,
-	PR_HTML,
-	PR_ICON_INDEX,
-	PR_IMPORTANCE,
-	PR_LAST_MODIFICATION_TIME,
-	PR_MESSAGE_CLASS,
-	PR_MESSAGE_FLAGS,
-	PR_MID,
-	PR_MSG_EDITOR_FORMAT,
-	PR_NORMALIZED_SUBJECT_UNICODE,
-	PR_OBJECT_TYPE,
-	PR_OWNER_APPT_ID,
-	PR_PRIORITY,
-	PR_PROCESSED,
-	PR_RCVD_REPRESENTING_ADDRTYPE,
-	PR_RCVD_REPRESENTING_EMAIL_ADDRESS_UNICODE,
-	PR_RCVD_REPRESENTING_NAME_UNICODE,
-	PR_RECIPIENT_DISPLAY_NAME_UNICODE,
-	PR_RECIPIENTS_FLAGS,
-	PR_RECIPIENT_TRACKSTATUS,
-	PR_RECIPIENT_TYPE,
-	PR_RENDERING_POSITION,
-	PR_RESPONSE_REQUESTED,
-	PR_RTF_IN_SYNC,
-	PR_SENDER_ADDRTYPE,
-	PR_SENDER_EMAIL_ADDRESS_UNICODE,
-	PR_SENDER_NAME_UNICODE,
-	PR_SEND_INTERNET_ENCODING,
-	PR_SENSITIVITY,
-	PR_SENT_REPRESENTING_ADDRTYPE,
-	PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
-	PR_SENT_REPRESENTING_NAME_UNICODE,
-	PR_SMTP_ADDRESS_UNICODE,
-	PR_START_DATE,
-	PR_SUBJECT_UNICODE,
-	PROP_TAG(PT_BINARY, 0x0003),
-	PROP_TAG(PT_BINARY, 0x0023),
-	PROP_TAG(PT_BINARY, 0x8216),
-	PROP_TAG(PT_BINARY, 0x825E),
-	PROP_TAG(PT_BINARY, 0x825F),
-	PROP_TAG(PT_BOOLEAN, 0x8126),
-	PROP_TAG(PT_BOOLEAN, 0x8215),
-	PROP_TAG(PT_BOOLEAN, 0x8223),
-	PROP_TAG(PT_BOOLEAN, 0x8503),
-	PROP_TAG(PT_DOUBLE, 0x8102),
-	PROP_TAG(PT_LONG, 0x8101),
-	PROP_TAG(PT_LONG, 0x8201),
-	PROP_TAG(PT_LONG, 0x8205),
-	PROP_TAG(PT_STRING8, 0x8208),
-	PROP_TAG(PT_SYSTIME, 0x8104),
-	PROP_TAG(PT_SYSTIME, 0x8105),
-	PROP_TAG(PT_SYSTIME, 0x810F),
-	PROP_TAG(PT_SYSTIME, 0x820D),
-	PROP_TAG(PT_SYSTIME, 0x820E),
-	PROP_TAG(PT_SYSTIME, 0x8502),
-	PROP_TAG(PT_SYSTIME, 0x8560)
-};
-
 #define PARENT_TYPE E_TYPE_CAL_BACKEND_SYNC
 static ECalBackendClass *parent_class = NULL;
 
@@ -627,6 +552,103 @@ handle_deleted_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 	return TRUE;
 }
 
+static gboolean
+mapi_cal_get_known_ids (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
+{
+	/* this is a list of all known calendar MAPI tag IDs;
+	   if you add new add it here too, otherwise it may not be fetched */
+	static uint32_t known_cal_mapi_ids[] = {
+		PR_7BIT_DISPLAY_NAME_UNICODE,
+		PR_ADDRTYPE,
+		PR_ATTACH_DATA_BIN,
+		PR_ATTACH_FILENAME_UNICODE,
+		PR_ATTACH_LONG_FILENAME_UNICODE,
+		PR_ATTACH_METHOD,
+		PR_BODY,
+		PR_BODY_UNICODE,
+		PR_CONVERSATION_TOPIC_UNICODE,
+		PR_CREATION_TIME,
+		PR_DISPLAY_NAME_UNICODE,
+		PR_DISPLAY_TYPE,
+		PR_END_DATE,
+		PR_FID,
+		PR_GIVEN_NAME_UNICODE,
+		PR_HTML,
+		PR_ICON_INDEX,
+		PR_IMPORTANCE,
+		PR_LAST_MODIFICATION_TIME,
+		PR_MESSAGE_CLASS,
+		PR_MESSAGE_FLAGS,
+		PR_MID,
+		PR_MSG_EDITOR_FORMAT,
+		PR_NORMALIZED_SUBJECT_UNICODE,
+		PR_OBJECT_TYPE,
+		PR_OWNER_APPT_ID,
+		PR_PRIORITY,
+		PR_PROCESSED,
+		PR_RCVD_REPRESENTING_ADDRTYPE,
+		PR_RCVD_REPRESENTING_EMAIL_ADDRESS_UNICODE,
+		PR_RCVD_REPRESENTING_NAME_UNICODE,
+		PR_RECIPIENT_DISPLAY_NAME_UNICODE,
+		PR_RECIPIENTS_FLAGS,
+		PR_RECIPIENT_TRACKSTATUS,
+		PR_RECIPIENT_TYPE,
+		PR_RENDERING_POSITION,
+		PR_RESPONSE_REQUESTED,
+		PR_RTF_IN_SYNC,
+		PR_SENDER_ADDRTYPE,
+		PR_SENDER_EMAIL_ADDRESS_UNICODE,
+		PR_SENDER_NAME_UNICODE,
+		PR_SEND_INTERNET_ENCODING,
+		PR_SENSITIVITY,
+		PR_SENT_REPRESENTING_ADDRTYPE,
+		PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
+		PR_SENT_REPRESENTING_NAME_UNICODE,
+		PR_SMTP_ADDRESS_UNICODE,
+		PR_START_DATE,
+		PR_SUBJECT_UNICODE,
+		PROP_TAG(PT_BINARY, 0x0003),
+		PROP_TAG(PT_BINARY, 0x0023),
+		PROP_TAG(PT_BINARY, 0x8216),
+		PROP_TAG(PT_BINARY, 0x825E),
+		PROP_TAG(PT_BINARY, 0x825F),
+		PROP_TAG(PT_BOOLEAN, 0x8126),
+		PROP_TAG(PT_BOOLEAN, 0x8215),
+		PROP_TAG(PT_BOOLEAN, 0x8223),
+		PROP_TAG(PT_BOOLEAN, 0x8503),
+		PROP_TAG(PT_DOUBLE, 0x8102),
+		PROP_TAG(PT_LONG, 0x8101),
+		PROP_TAG(PT_LONG, 0x8201),
+		PROP_TAG(PT_LONG, 0x8205),
+		PROP_TAG(PT_STRING8, 0x8208),
+		PROP_TAG(PT_SYSTIME, 0x8104),
+		PROP_TAG(PT_SYSTIME, 0x8105),
+		PROP_TAG(PT_SYSTIME, 0x810F),
+		PROP_TAG(PT_SYSTIME, 0x820D),
+		PROP_TAG(PT_SYSTIME, 0x820E),
+		PROP_TAG(PT_SYSTIME, 0x8502),
+		PROP_TAG(PT_SYSTIME, 0x8560)
+	};
+
+	g_return_val_if_fail (props != NULL, FALSE);
+
+	return exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, known_cal_mapi_ids, G_N_ELEMENTS (known_cal_mapi_ids));
+}
+
+static gboolean
+mapi_cal_get_idlist (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
+{
+	static const uint32_t cal_IDList[] = {
+		PR_FID,
+		PR_MID,
+		PR_LAST_MODIFICATION_TIME
+	};
+
+	g_return_val_if_fail (props != NULL, FALSE);
+
+	return exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, cal_IDList, G_N_ELEMENTS (cal_IDList));
+}
+
 /* Simple workflow for fetching deltas:
  * Poke cache for server_utc_time -> if exists, fetch all items modified after that time,
  * note current time before fetching and update cache with the same after fetching.
@@ -694,7 +716,7 @@ get_deltas (gpointer handle)
 	/* FIXME: GetProps does not seem to work for tasks :-( */
 	if (kind == ICAL_VTODO_COMPONENT) {
 		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
-						known_cal_mapi_ids, G_N_ELEMENTS (known_cal_mapi_ids), NULL, NULL,
+						mapi_cal_get_known_ids, NULL,
 						mapi_cal_get_changes_cb, cbmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
 			/* FIXME: String : We need to restart evolution-data-server */
@@ -704,8 +726,7 @@ get_deltas (gpointer handle)
 			return FALSE;
 		}
 	} else if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
-						cal_GetPropsList, G_N_ELEMENTS (cal_GetPropsList),
-						exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind),
+						exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 						mapi_cal_get_changes_cb, cbmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
 		/* FIXME: String : We need to restart evolution-data-server */
@@ -732,8 +753,7 @@ get_deltas (gpointer handle)
 	did.cache_keys = e_cal_backend_cache_get_keys (priv->cache);
 	did.unknown_mids = NULL;
 	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
-						cal_IDList, G_N_ELEMENTS (cal_IDList),
-						NULL, NULL,
+						mapi_cal_get_idlist, NULL,
 						handle_deleted_items_cb, &did,
 						0)) {
 		/* FIXME: String : We need to restart evolution-data-server */
@@ -796,7 +816,7 @@ get_deltas (gpointer handle)
 
 		if (kind == ICAL_VTODO_COMPONENT) {
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
-						known_cal_mapi_ids, G_N_ELEMENTS (known_cal_mapi_ids), NULL, NULL,
+						mapi_cal_get_known_ids, NULL,
 						mapi_cal_get_changes_cb, cbmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
 				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
@@ -805,8 +825,7 @@ get_deltas (gpointer handle)
 				return FALSE;
 			}
 		} else if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
-						cal_GetPropsList, G_N_ELEMENTS (cal_GetPropsList),
-						exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind),
+						exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 						mapi_cal_get_changes_cb, cbmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
 			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
@@ -1133,7 +1152,7 @@ populate_cache (ECalBackendMAPI *cbmapi)
 	/* FIXME: GetProps does not seem to work for tasks :-( */
 	if (kind == ICAL_VTODO_COMPONENT) {
 		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
-						known_cal_mapi_ids, G_N_ELEMENTS (known_cal_mapi_ids), NULL, NULL,
+						mapi_cal_get_known_ids, NULL,
 						mapi_cal_cache_create_cb, cbmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
 			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Could not create cache file"));
@@ -1142,8 +1161,7 @@ populate_cache (ECalBackendMAPI *cbmapi)
 			return GNOME_Evolution_Calendar_OtherError;
 		}
 	} else if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
-						cal_GetPropsList, G_N_ELEMENTS (cal_GetPropsList),
-						exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind),
+						exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 						mapi_cal_cache_create_cb, cbmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
 		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Could not create cache file"));
@@ -1388,24 +1406,32 @@ e_cal_backend_mapi_open (ECalBackendSync *backend, EDataCal *cal, gboolean only_
 		return status;
 }
 
-static uint32_t req_props_list[] = {
-	PR_OWNER_APPT_ID,
-	PROP_TAG(PT_LONG, 0x8201),
-	PROP_TAG(PT_BINARY, 0x0023),
-	PROP_TAG(PT_BINARY, 0x0003),
-	PR_SENT_REPRESENTING_NAME_UNICODE,
-	PR_SENT_REPRESENTING_ADDRTYPE,
-	PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
-	PR_SENDER_NAME_UNICODE,
-	PR_SENDER_ADDRTYPE,
-	PR_SENDER_EMAIL_ADDRESS_UNICODE
-};	
+static gboolean
+mapi_cal_get_required_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
+{
+	static uint32_t req_props_list[] = {
+		PR_OWNER_APPT_ID,
+		PROP_TAG(PT_LONG, 0x8201),
+		PROP_TAG(PT_BINARY, 0x0023),
+		PROP_TAG(PT_BINARY, 0x0003),
+		PR_SENT_REPRESENTING_NAME_UNICODE,
+		PR_SENT_REPRESENTING_ADDRTYPE,
+		PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
+		PR_SENDER_NAME_UNICODE,
+		PR_SENDER_ADDRTYPE,
+		PR_SENDER_EMAIL_ADDRESS_UNICODE
+	};	
+
+	g_return_val_if_fail (props != NULL, FALSE);
+
+	return exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, req_props_list, G_N_ELEMENTS (req_props_list));
+}
 
 static gboolean
 capture_req_props (FetchItemsCallbackData *item_data, gpointer data)
 {
 	struct mapi_SPropValue_array *properties = item_data->properties;
-	struct cbdata *cbdata = (struct cbdata *) data;
+	struct cal_cbdata *cbdata = (struct cal_cbdata *) data;
 	const uint32_t *ui32;
 
 	ui32 = (const uint32_t *)find_mapi_SPropValue_data(properties, PR_OWNER_APPT_ID);
@@ -1427,7 +1453,7 @@ capture_req_props (FetchItemsCallbackData *item_data, gpointer data)
 }
 
 static void
-get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cbdata *cbdata)
+get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cal_cbdata *cbdata)
 {
 	ECalBackendMAPIPrivate *priv = cbmapi->priv;
 	const gchar *uid;
@@ -1436,20 +1462,17 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cbdata *cb
 	struct SPropValue sprop;
 	struct Binary_r sb;
 	uint32_t proptag = 0x0;
-	struct SPropTagArray *array;
 
 	uid = icalcomponent_get_uid (comp);
 	exchange_mapi_util_mapi_id_from_string (uid, &mid);
 	if (exchange_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
-					req_props_list, G_N_ELEMENTS (req_props_list),
-					NULL, NULL,
+					mapi_cal_get_required_props, NULL,
 					capture_req_props, cbdata,
 					MAPI_OPTIONS_FETCH_GENERIC_STREAMS))
 
 		return;
 
-	array = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->olFolder, priv->fid, 0x0023, PSETID_Meeting);
-	proptag = array->aulPropTag[0];
+	proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidCleanGlobalObjectId);
 
 	res.rt = RES_PROPERTY;
 	res.res.resProperty.relop = RELOP_EQ;
@@ -1461,8 +1484,7 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cbdata *cb
 	cast_mapi_SPropValue (&(res.res.resProperty.lpProp), &sprop);
 
 	exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
-					req_props_list, G_N_ELEMENTS (req_props_list),
-					NULL, NULL,
+					mapi_cal_get_required_props, NULL,
 					capture_req_props, cbdata,
 					MAPI_OPTIONS_FETCH_GENERIC_STREAMS);
 }
@@ -1483,7 +1505,7 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, gchar
 	GSList *recipients = NULL;
 	GSList *attachments = NULL;
 	GSList *streams = NULL;
-	struct cbdata cbdata = { 0 };
+	struct cal_cbdata cbdata = { 0 };
 	struct Binary_r globalid;
 	struct icaltimetype current;
 
@@ -1518,17 +1540,11 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, gchar
 	if (e_cal_component_has_recurrences (comp)) {
 		GByteArray *ba = exchange_mapi_cal_util_rrule_to_bin (comp, NULL);
 		if (ba) {
-			struct SPropTagArray *tag_array;
 			ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 			stream->value = ba;
-			tag_array = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->olFolder, priv->fid, 0x8216, PSETID_Appointment);
-			if (tag_array) {
-				stream->proptag = tag_array->aulPropTag[0];
+			stream->proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur);
+			if (stream->proptag != MAPI_E_RESERVED)
 				streams = g_slist_append (streams, stream);
-
-				g_free (tag_array->aulPropTag);
-				g_free (tag_array);
-			}
 		}
 	}
 
@@ -1539,6 +1555,7 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, gchar
 	if (e_cal_component_has_attachments (comp))
 		exchange_mapi_cal_util_fetch_attachments (comp, &attachments, priv->local_attachments_store);
 
+	cbdata.kind = kind;
 	cbdata.username = e_cal_backend_mapi_get_user_name (cbmapi);
 	cbdata.useridtype = "SMTP";
 	cbdata.userid = e_cal_backend_mapi_get_user_email (cbmapi);
@@ -1566,8 +1583,7 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, gchar
 			cbdata.cleanglobalid = &globalid;
 
 			mid = exchange_mapi_connection_create_item (priv->conn, priv->olFolder, priv->fid,
-							exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind),
-							exchange_mapi_cal_util_build_props, &cbdata,
+							exchange_mapi_cal_utils_write_props_cb, &cbdata,
 							recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT);
 			g_free (cbdata.props);
 //			g_free (globalid.lpb);
@@ -1679,7 +1695,7 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 	GSList *recipients = NULL;
 	GSList *streams = NULL;
 	GSList *attachments = NULL;
-	struct cbdata cbdata = { 0 };
+	struct cal_cbdata cbdata = { 0 };
 	gboolean no_increment = FALSE;
 	icalproperty *prop;
 	struct icaltimetype current;
@@ -1725,14 +1741,11 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 	if (e_cal_component_has_recurrences (comp)) {
 		GByteArray *ba = exchange_mapi_cal_util_rrule_to_bin (comp, NULL);
 		if (ba) {
-			struct SPropTagArray *tag_array;
 			ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 			stream->value = ba;
-			tag_array = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->olFolder, priv->fid, 0x8216, PSETID_Appointment);
-			if (tag_array) {
-				stream->proptag = tag_array->aulPropTag[0];
+			stream->proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur);
+			if (stream->proptag != MAPI_E_RESERVED)
 				streams = g_slist_append (streams, stream);
-			}
 		}
 	}
 
@@ -1745,6 +1758,7 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 	e_cal_component_get_uid (comp, &uid);
 //	rid = e_cal_component_get_recurid_as_string (comp);
 
+	cbdata.kind = kind;
 	cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) e_cal_backend_mapi_internal_get_timezone;
 	cbdata.get_tz_data = cbmapi;
 
@@ -1790,8 +1804,7 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 		}
 
 		status = exchange_mapi_connection_modify_item (priv->conn, priv->olFolder, priv->fid, mid,
-						exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind),
-						exchange_mapi_cal_util_build_props, &cbdata,
+						exchange_mapi_cal_utils_write_props_cb, &cbdata,
 						recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT);
 		g_free (cbdata.props);
 		if (!status) {
@@ -1959,7 +1972,7 @@ e_cal_backend_mapi_send_objects (ECalBackendSync *backend, EDataCal *cal, const 
 		icalcomponent *subcomp = icalcomponent_get_first_component (icalcomp, kind);
 		while (subcomp) {
 			ECalComponent *comp = e_cal_component_new ();
-			struct cbdata cbdata = { 0 };
+			struct cal_cbdata cbdata = { 0 };
 			mapi_id_t mid = 0;
 			GSList *recipients = NULL;
 			GSList *attachments = NULL;
@@ -1973,23 +1986,18 @@ e_cal_backend_mapi_send_objects (ECalBackendSync *backend, EDataCal *cal, const 
 			if (e_cal_component_has_recurrences (comp)) {
 				GByteArray *ba = exchange_mapi_cal_util_rrule_to_bin (comp, NULL);
 				if (ba) {
-					struct SPropTagArray *tag_array;
 					ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 					stream->value = ba;
-					tag_array = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->olFolder, priv->fid, 0x8216, PSETID_Appointment);
-					if (tag_array) {
-						stream->proptag = tag_array->aulPropTag[0];
+					stream->proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur);
+					if (stream->proptag != MAPI_E_RESERVED)
 						streams = g_slist_append (streams, stream);
-
-						g_free (tag_array->aulPropTag);
-						g_free (tag_array);
-					}
 				}
 			}
 
 			if (e_cal_component_has_attachments (comp))
 				exchange_mapi_cal_util_fetch_attachments (comp, &attachments, priv->local_attachments_store);
 
+			cbdata.kind = kind;
 			cbdata.comp = comp;
 			cbdata.is_modify = TRUE;
 			cbdata.msgflags = MSGFLAG_READ | MSGFLAG_SUBMIT | MSGFLAG_UNSENT;
@@ -2037,8 +2045,7 @@ e_cal_backend_mapi_send_objects (ECalBackendSync *backend, EDataCal *cal, const 
 			cbdata.cleanglobalid = &globalid;
 
 			mid = exchange_mapi_connection_create_item (priv->conn, olFolderSentMail, 0,
-							exchange_mapi_cal_util_build_name_id, GINT_TO_POINTER(kind),
-							exchange_mapi_cal_util_build_props, &cbdata,
+							exchange_mapi_cal_utils_write_props_cb, &cbdata,
 							recipients, attachments, streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE);
 			g_free (cbdata.props);
 			if (!mid) {

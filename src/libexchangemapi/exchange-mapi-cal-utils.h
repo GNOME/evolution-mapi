@@ -48,7 +48,8 @@ typedef enum {
 	MEETING_CANCEL_RCVD	= (1 << 9)
 } MAPIMeetingOptions;
 
-struct cbdata {
+struct cal_cbdata {
+	gint kind;
 	ECalComponent *comp;
 	struct SPropValue *props;
 	gboolean is_modify;
@@ -85,11 +86,6 @@ ECalComponent *
 exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcomponent_kind kind, const gchar *mid, struct mapi_SPropValue_array *properties,
 					   GSList *streams, GSList *recipients, GSList *attachments,
 					   const gchar *local_store_uri, const icaltimezone *default_zone);
-gboolean
-exchange_mapi_cal_util_build_name_id (struct mapi_nameid *nameid, gpointer data);
-
-gint
-exchange_mapi_cal_util_build_props (struct SPropValue **value, struct SPropTagArray *proptag_array, gpointer data);
 
 void
 exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *uid, struct Binary_r *sb);
@@ -101,45 +97,9 @@ exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, struct mapi_S
 uint32_t
 exchange_mapi_cal_util_get_new_appt_id (ExchangeMapiConnection *conn, mapi_id_t fid);
 
-static const uint32_t cal_GetPropsList[] = {
-	PR_FID,
-	PR_MID,
-
-	PR_SUBJECT_UNICODE,
-	PR_NORMALIZED_SUBJECT_UNICODE,
-	PR_CONVERSATION_TOPIC_UNICODE,
-	PR_BODY,
-	PR_BODY_UNICODE,
-
-	PR_CREATION_TIME,
-	PR_LAST_MODIFICATION_TIME,
-	PR_PRIORITY,
-	PR_SENSITIVITY,
-	PR_START_DATE,
-	PR_END_DATE,
-	PR_RESPONSE_REQUESTED,
-	PR_OWNER_APPT_ID,
-	PR_PROCESSED,
-	PR_MSG_EDITOR_FORMAT,
-
-	PR_SENT_REPRESENTING_NAME_UNICODE,
-	PR_SENT_REPRESENTING_ADDRTYPE,
-	PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
-
-	PR_SENDER_NAME_UNICODE,
-	PR_SENDER_ADDRTYPE,
-	PR_SENDER_EMAIL_ADDRESS_UNICODE,
-
-	PR_RCVD_REPRESENTING_NAME_UNICODE,
-	PR_RCVD_REPRESENTING_ADDRTYPE,
-	PR_RCVD_REPRESENTING_EMAIL_ADDRESS_UNICODE
-};
-
-static const uint32_t cal_IDList[] = {
-	PR_FID,
-	PR_MID,
-	PR_LAST_MODIFICATION_TIME
-};
+gboolean exchange_mapi_cal_utils_add_named_ids (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gint pkind);
+gboolean exchange_mapi_cal_utils_get_props_cb (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
+gboolean exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data);
 
 G_END_DECLS
 

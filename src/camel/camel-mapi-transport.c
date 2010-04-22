@@ -60,10 +60,9 @@ mapi_message_item_send (ExchangeMapiConnection *conn, MapiItem *item)
 	guint64 fid = 0;
 	mapi_id_t mid = 0;
 
-	mid = exchange_mapi_connection_create_item (conn, olFolderSentMail, fid, NULL, NULL,
-					 camel_mapi_utils_create_item_build_props,
-					 item, item->recipients,
-					 item->attachments, item->generic_streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE);
+	mid = exchange_mapi_connection_create_item (conn, olFolderSentMail, fid,
+					 camel_mapi_utils_create_item_build_props, item,
+					 item->recipients, item->attachments, item->generic_streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE);
 
 	return mid;
 }

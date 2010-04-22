@@ -33,6 +33,7 @@
 #include <gen_ndr/exchange.h>
 
 #include <exchange-mapi-defs.h>
+#include "exchange-mapi-utils.h"
 
 #include "camel-mapi-store.h"
 #include "camel-mapi-folder.h"
@@ -379,41 +380,42 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 	return item;
 }
 
-gint
-camel_mapi_utils_create_item_build_props (struct SPropValue **value, struct SPropTagArray *SPropTagArray, gpointer data)
+gboolean
+camel_mapi_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data)
 {
 
 	MapiItem *item = (MapiItem *) data;
-	struct SPropValue *props;
 	GSList *l;
-	bool *send_rich_info = g_new0 (bool, 1);
-	uint32_t *msgflag = g_new0 (uint32_t, 1);
-	uint32_t *cpid = g_new0 (uint32_t, 1);
-	gint i=0;
+	bool send_rich_info;
+	uint32_t msgflag;
+	uint32_t cpid;
 
-	props = g_new0 (struct SPropValue, 11 + 1);
+	#define set_value(hex, val) G_STMT_START { \
+		if (!exchange_mapi_utils_add_spropvalue (mem_ctx, values, n_values, hex, val)) \
+			return FALSE;	\
+		} G_STMT_END
 
-	*cpid = 65001; /* UTF8 */
-	set_SPropValue_proptag(&props[i++], PR_INTERNET_CPID, cpid);
-	set_SPropValue_proptag(&props[i++], PR_SUBJECT_UNICODE, g_strdup (item->header.subject));
-	set_SPropValue_proptag(&props[i++], PR_CONVERSATION_TOPIC_UNICODE, g_strdup (item->header.subject));
-	set_SPropValue_proptag(&props[i++], PR_NORMALIZED_SUBJECT_UNICODE, g_strdup (item->header.subject));
+	cpid = 65001; /* UTF8 */
+	set_value (PR_INTERNET_CPID, &cpid);
+	set_value (PR_SUBJECT_UNICODE, item->header.subject);
+	set_value (PR_CONVERSATION_TOPIC_UNICODE, item->header.subject);
+	set_value (PR_NORMALIZED_SUBJECT_UNICODE, item->header.subject);
 
-	*send_rich_info = false;
-	set_SPropValue_proptag(&props[i++], PR_SEND_RICH_INFO, (gconstpointer ) send_rich_info);
+	send_rich_info = false;
+	set_value (PR_SEND_RICH_INFO, &send_rich_info);
 
-	*msgflag = MSGFLAG_UNSENT;
-	set_SPropValue_proptag(&props[i++], PR_MESSAGE_FLAGS, (gpointer)msgflag);
+	msgflag = MSGFLAG_UNSENT;
+	set_value (PR_MESSAGE_FLAGS, &msgflag);
 
 	/* Message threading information */
 	if (item->header.references)
-		set_SPropValue_proptag(&props[i++], PR_INTERNET_REFERENCES, g_strdup (item->header.references));
+		set_value (PR_INTERNET_REFERENCES, item->header.references);
 
 	if (item->header.in_reply_to)
-		set_SPropValue_proptag(&props[i++], PR_IN_REPLY_TO_ID, g_strdup (item->header.in_reply_to));
+		set_value (PR_IN_REPLY_TO_ID, item->header.in_reply_to);
 
 	if (item->header.message_id)
-		set_SPropValue_proptag(&props[i++], PR_INTERNET_MESSAGE_ID, g_strdup (item->header.message_id));
+		set_value (PR_INTERNET_MESSAGE_ID, item->header.message_id);
 
 	for (l = item->msg.body_parts; l; l = l->next) {
 		ExchangeMAPIStream *stream = (ExchangeMAPIStream *) (l->data);
@@ -422,17 +424,16 @@ camel_mapi_utils_create_item_build_props (struct SPropValue **value, struct SPro
 		bin->cb = stream->value->len;
 		bin->lpb = (uint8_t *)stream->value->data;
 		if (stream->proptag == PR_HTML)
-			set_SPropValue_proptag(&props[i++], stream->proptag, (gpointer)bin);
+			set_value (stream->proptag, bin);
 		else if (stream->proptag == PR_BODY_UNICODE)
-			set_SPropValue_proptag(&props[i++], stream->proptag, (gpointer)stream->value->data);
+			set_value (stream->proptag, stream->value->data);
 	}
 
 	/*  FIXME : */
 	/* editor = EDITOR_FORMAT_PLAINTEXT; */
-	/* set_SPropValue_proptag(&props[i++], PR_MSG_EDITOR_FORMAT, (gconstpointer )editor); */
+	/* set_value (PR_MSG_EDITOR_FORMAT, &editor); */
 
-	*value = props;
-	return i;
+	return TRUE;
 }
 
 /* -- Generate MIME to ITEM -- */

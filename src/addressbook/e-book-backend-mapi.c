@@ -80,68 +80,112 @@ struct _EBookBackendMAPIPrivate
 #define LOCK() g_mutex_lock (priv->lock)
 #define UNLOCK() g_mutex_unlock (priv->lock)
 
-/* this is a list of all known book MAPI tag IDs;
-   if you add new add it here too, otherwise it may not be fetched */
-static uint32_t known_book_mapi_ids[] = {
-	PR_ASSISTANT_TELEPHONE_NUMBER_UNICODE,
-	PR_ASSISTANT_UNICODE,
-	PR_BIRTHDAY,
-	PR_BODY,
-	PR_BODY_UNICODE,
-	PR_BUSINESS_FAX_NUMBER_UNICODE,
-	PR_COMPANY_MAIN_PHONE_NUMBER_UNICODE,
-	PR_COMPANY_NAME_UNICODE,
-	PR_COUNTRY_UNICODE,
-	PR_DEPARTMENT_NAME_UNICODE,
-	PR_DISPLAY_NAME_UNICODE,
-	PR_EMS_AB_MANAGER_T_UNICODE,
-	PR_FID,
-	PR_GIVEN_NAME_UNICODE,
-	PR_HASATTACH,
-	PR_HOME_ADDRESS_CITY_UNICODE,
-	PR_HOME_ADDRESS_COUNTRY_UNICODE,
-	PR_HOME_ADDRESS_POSTAL_CODE_UNICODE,
-	PR_HOME_ADDRESS_POST_OFFICE_BOX_UNICODE,
-	PR_HOME_ADDRESS_STATE_OR_PROVINCE_UNICODE,
-	PR_HOME_FAX_NUMBER_UNICODE,
-	PR_HOME_TELEPHONE_NUMBER_UNICODE,
-	PR_INSTANCE_NUM,
-	PR_INST_ID,
-	PR_LAST_MODIFICATION_TIME,
-	PR_LOCALITY_UNICODE,
-	PR_MANAGER_NAME_UNICODE,
-	PR_MESSAGE_CLASS,
-	PR_MID,
-	PR_MOBILE_TELEPHONE_NUMBER_UNICODE,
-	PR_NICKNAME_UNICODE,
-	PR_NORMALIZED_SUBJECT_UNICODE,
-	PR_OFFICE_LOCATION_UNICODE,
-	PR_OFFICE_TELEPHONE_NUMBER_UNICODE,
-	PR_PAGER_TELEPHONE_NUMBER_UNICODE,
-	PR_POSTAL_CODE_UNICODE,
-	PR_POST_OFFICE_BOX_UNICODE,
-	PR_PROFESSION_UNICODE,
-	PR_RULE_MSG_NAME,
-	PR_RULE_MSG_PROVIDER,
-	PR_SPOUSE_NAME_UNICODE,
-	PR_STATE_OR_PROVINCE_UNICODE,
-	PR_SUBJECT_UNICODE,
-	PR_SURNAME_UNICODE,
-	PR_TITLE_UNICODE,
-	PR_WEDDING_ANNIVERSARY,
-	PROP_TAG(PT_UNICODE, 0x801a),
-	PROP_TAG(PT_UNICODE, 0x801c),
-	PROP_TAG(PT_UNICODE, 0x801f),
-	PROP_TAG(PT_UNICODE, 0x802b),
-	PROP_TAG(PT_UNICODE, 0x8062),
-	PROP_TAG(PT_UNICODE, 0x8084),
-	PROP_TAG(PT_UNICODE, 0x8093),
-	PROP_TAG(PT_UNICODE, 0x8094),
-	PROP_TAG(PT_UNICODE, 0x80a3),
-	PROP_TAG(PT_UNICODE, 0x80a4),
-	PROP_TAG(PT_UNICODE, 0x80d8),
-	PROP_TAG(PT_UNICODE, 0x812c)
-};
+#define GET_ALL_KNOWN_IDS (GINT_TO_POINTER(1))
+#define GET_SHORT_SUMMARY (GINT_TO_POINTER(2))
+
+/* 'data' is one of GET_ALL_KNOWN_IDS or GET_SHORT_SUMMARY */
+static gboolean
+mapi_book_get_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
+{
+	/* this is a list of all known book MAPI tag IDs;
+	   if you add new add it here too, otherwise it may not be fetched */
+	static uint32_t known_book_mapi_ids[] = {
+		PR_ASSISTANT_TELEPHONE_NUMBER_UNICODE,
+		PR_ASSISTANT_UNICODE,
+		PR_BIRTHDAY,
+		PR_BODY,
+		PR_BODY_UNICODE,
+		PR_BUSINESS_FAX_NUMBER_UNICODE,
+		PR_COMPANY_MAIN_PHONE_NUMBER_UNICODE,
+		PR_COMPANY_NAME_UNICODE,
+		PR_COUNTRY_UNICODE,
+		PR_DEPARTMENT_NAME_UNICODE,
+		PR_DISPLAY_NAME_UNICODE,
+		PR_EMS_AB_MANAGER_T_UNICODE,
+		PR_FID,
+		PR_GIVEN_NAME_UNICODE,
+		PR_HASATTACH,
+		PR_HOME_ADDRESS_CITY_UNICODE,
+		PR_HOME_ADDRESS_COUNTRY_UNICODE,
+		PR_HOME_ADDRESS_POSTAL_CODE_UNICODE,
+		PR_HOME_ADDRESS_POST_OFFICE_BOX_UNICODE,
+		PR_HOME_ADDRESS_STATE_OR_PROVINCE_UNICODE,
+		PR_HOME_FAX_NUMBER_UNICODE,
+		PR_HOME_TELEPHONE_NUMBER_UNICODE,
+		PR_INSTANCE_NUM,
+		PR_INST_ID,
+		PR_LAST_MODIFICATION_TIME,
+		PR_LOCALITY_UNICODE,
+		PR_MANAGER_NAME_UNICODE,
+		PR_MESSAGE_CLASS,
+		PR_MID,
+		PR_MOBILE_TELEPHONE_NUMBER_UNICODE,
+		PR_NICKNAME_UNICODE,
+		PR_NORMALIZED_SUBJECT_UNICODE,
+		PR_OFFICE_LOCATION_UNICODE,
+		PR_OFFICE_TELEPHONE_NUMBER_UNICODE,
+		PR_PAGER_TELEPHONE_NUMBER_UNICODE,
+		PR_POSTAL_CODE_UNICODE,
+		PR_POST_OFFICE_BOX_UNICODE,
+		PR_PROFESSION_UNICODE,
+		PR_RULE_MSG_NAME,
+		PR_RULE_MSG_PROVIDER,
+		PR_SPOUSE_NAME_UNICODE,
+		PR_STATE_OR_PROVINCE_UNICODE,
+		PR_SUBJECT_UNICODE,
+		PR_SURNAME_UNICODE,
+		PR_TITLE_UNICODE,
+		PR_WEDDING_ANNIVERSARY,
+		PROP_TAG(PT_UNICODE, 0x801a),
+		PROP_TAG(PT_UNICODE, 0x801c),
+		PROP_TAG(PT_UNICODE, 0x801f),
+		PROP_TAG(PT_UNICODE, 0x802b),
+		PROP_TAG(PT_UNICODE, 0x8062),
+		PROP_TAG(PT_UNICODE, 0x8084),
+		PROP_TAG(PT_UNICODE, 0x8093),
+		PROP_TAG(PT_UNICODE, 0x8094),
+		PROP_TAG(PT_UNICODE, 0x80a3),
+		PROP_TAG(PT_UNICODE, 0x80a4),
+		PROP_TAG(PT_UNICODE, 0x80d8),
+		PROP_TAG(PT_UNICODE, 0x812c)
+	};
+
+	static uint32_t short_summary_ids[] = {
+		PR_FID,
+		PR_MID,
+		PR_INST_ID,
+		PR_INSTANCE_NUM,
+		PR_SUBJECT_UNICODE,
+		PR_MESSAGE_CLASS,
+		PR_HASATTACH,
+		/* FIXME: is this tag fit to check if a recipient table exists or not? */
+		/* PR_DISCLOSURE_OF_RECIPIENTS, */
+		PR_RULE_MSG_PROVIDER,
+		PR_RULE_MSG_NAME
+	};
+	
+	/* do not make this array static, the function modifies it on run */
+	ResolveNamedIDsData nids[] = {
+		{ PidLidDistributionListName, 0 },
+		{ PidLidDistributionListOneOffMembers, 0 },
+		{ PidLidDistributionListMembers, 0 },
+		{ PidLidDistributionListChecksum, 0 },
+
+		{ PidLidEmail1OriginalDisplayName, 0 },
+		{ PidLidEmail2OriginalDisplayName, 0 },
+		{ PidLidEmail3OriginalDisplayName, 0 }
+	};
+
+	g_return_val_if_fail (props != NULL, FALSE);
+
+	if (data == GET_ALL_KNOWN_IDS && !exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids)))
+		return FALSE;
+
+	if (data == GET_SHORT_SUMMARY && !exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, short_summary_ids, G_N_ELEMENTS (short_summary_ids)))
+		return FALSE;
+
+	return exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
+}
 
 #define ELEMENT_TYPE_SIMPLE 0x01
 #define ELEMENT_TYPE_COMPLEX 0x02 /* fields which require explicit functions to set values into EContact and EGwItem */
@@ -212,9 +256,6 @@ static const struct field_element_mapping {
 	};
 
 static gint maplen = G_N_ELEMENTS(mappings);
-gboolean mapi_book_build_name_id (struct mapi_nameid *nameid, gpointer data);
-gint mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropTagArray, gpointer data);
-gboolean mapi_book_build_name_id_for_getprops (struct mapi_nameid *nameid, gpointer data);
 
 #if 0
 static EDataBookView *
@@ -553,65 +594,75 @@ cmp_member_id (gconstpointer a, gconstpointer b, gpointer ht)
 	return res;
 }
 
-gboolean
-mapi_book_build_name_id (struct mapi_nameid *nameid, gpointer data)
-{
-//	EContact *contact = data;
-
-	mapi_nameid_lid_add (nameid, 0x8053, PSETID_Address); /* PidLidDistributionListName */
-	mapi_nameid_lid_add (nameid, 0x8054, PSETID_Address); /* PidLidDistributionListOneOffMembers */
-	mapi_nameid_lid_add (nameid, 0x8055, PSETID_Address); /* PidLidDistributionListMembers */
-
-	mapi_nameid_lid_add(nameid, 0x8005, PSETID_Address);
-	mapi_nameid_lid_add(nameid, 0x8084, PSETID_Address);
-	mapi_nameid_lid_add(nameid, 0x8083, PSETID_Address);
-
-	mapi_nameid_lid_add(nameid, 0x8093, PSETID_Address);
-	mapi_nameid_lid_add(nameid, 0x80A3, PSETID_Address);
-
-	mapi_nameid_string_add(nameid, "urn:schemas:contacts:fileas", PS_PUBLIC_STRINGS);
-
-	mapi_nameid_lid_add(nameid, 0x802B, PSETID_Address);
-	mapi_nameid_lid_add(nameid, 0x8062, PSETID_Address);
-
-	mapi_nameid_lid_add(nameid, 0x801A, PSETID_Address);
-	mapi_nameid_lid_add(nameid, 0x801B, PSETID_Address);
-
-	mapi_nameid_lid_add(nameid, 0x3A4F, PS_MAPI);
-
-	mapi_nameid_lid_add(nameid, 0x8094, PSETID_Address);
-	mapi_nameid_lid_add(nameid, 0x80A4, PSETID_Address);
-
-	return TRUE;
-}
-
-#define set_str_value(field_id, hex) if (e_contact_get (mcd->contact, field_id)) set_SPropValue_proptag (&props[i++], hex, e_contact_get (mcd->contact, field_id));
-
 typedef struct {
 	EContact *contact;
 	EBookBackendCache *cache;
-	TALLOC_CTX *mem_ctx;
 } MapiCreateitemData;
 
-gint
-mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropTagArray, gpointer data)
+static gboolean
+mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data)
 {
-	MapiCreateitemData *mcd = data;
-	struct SPropValue *props;
-	gint i;
+	/* Do not make this array static, below function modifies it.
+	   The array is used to just ensure named ids are known later. */
+	ResolveNamedIDsData nids[] = {
+		{ PidLidDistributionListName, 0 },
+		{ PidLidDistributionListOneOffMembers, 0 },
+		{ PidLidDistributionListMembers, 0 },
+		{ PidLidDistributionListChecksum, 0 },
+		{ PidLidFileUnder, 0 },
+		{ PidLidFileUnderId, 0 },
+		{ PidLidEmail1OriginalDisplayName, 0 },
+		{ PidLidEmail1EmailAddress, 0 },
+		{ PidLidEmail2EmailAddress, 0 },
+		{ PidLidEmail3EmailAddress, 0 },
+		{ PidLidHtml, 0 },
+		{ PidLidInstantMessagingAddress, 0 },
+		{ PidLidHomeAddress, 0 },
+		{ PidLidWorkAddress, 0 },
+		{ PidLidEmail2OriginalDisplayName, 0 },
+		{ PidLidEmail3OriginalDisplayName, 0 }
+	};
 
-	g_return_val_if_fail (mcd != NULL, 0);
-	g_return_val_if_fail (mcd->contact != NULL, 0);
-	g_return_val_if_fail (mcd->mem_ctx != NULL, 0);
+	MapiCreateitemData *mcd = data;
+
+	#define set_str_value(hex, val) G_STMT_START { \
+		if (!exchange_mapi_utils_add_spropvalue (mem_ctx, values, n_values, hex, val ? val : "")) \
+			return FALSE;	\
+		} G_STMT_END
+
+	#define set_str_named_value(named_id, val) G_STMT_START { \
+		if (!exchange_mapi_utils_add_spropvalue_named_id (conn, fid, mem_ctx, values, n_values, named_id, val ? val : "")) \
+			return FALSE;	\
+		} G_STMT_END
+
+	#define set_str_con_value(hex, field_id) G_STMT_START { \
+		if (e_contact_get (mcd->contact, field_id)) { \
+			set_str_value (hex, e_contact_get (mcd->contact, field_id)); \
+		} } G_STMT_END
+
+	#define set_str_named_con_value(named_id, field_id) G_STMT_START { \
+		if (e_contact_get (mcd->contact, field_id)) { \
+			set_str_named_value (named_id, e_contact_get (mcd->contact, field_id)); \
+		} } G_STMT_END
+
+	g_return_val_if_fail (mcd != NULL, FALSE);
+	g_return_val_if_fail (mcd->contact != NULL, FALSE);
+	g_return_val_if_fail (conn != NULL, FALSE);
+	g_return_val_if_fail (mem_ctx != NULL, FALSE);
+	g_return_val_if_fail (values != NULL, FALSE);
+	g_return_val_if_fail (n_values != NULL, FALSE);
+
+	if (!exchange_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids)))
+		return FALSE;
 
 	if (GPOINTER_TO_INT (e_contact_get (mcd->contact, E_CONTACT_IS_LIST))) {
 		EContact *old_contact;
 		GList *local, *l;
 		struct BinaryArray_r *members, *oneoff_members;
-		uint32_t list_size = 0;
+		uint32_t list_size = 0, u32, crc32 = 0;
 		GHashTable *member_values = NULL, *member_ids = NULL;
 
-		old_contact = e_book_backend_cache_get_contact (mcd->cache, e_contact_get (mcd->contact, E_CONTACT_UID));
+		old_contact = e_contact_get (mcd->contact, E_CONTACT_UID) ? e_book_backend_cache_get_contact (mcd->cache, e_contact_get (mcd->contact, E_CONTACT_UID)) : NULL;
 		if (old_contact) {
 			member_values = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 			member_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
@@ -640,22 +691,27 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 			g_list_free (local);
 		}
 
-		i = 0;
-		props = g_new0 (struct SPropValue, 6);
+		set_str_value (PR_MESSAGE_CLASS, IPM_DISTLIST);
+		u32 = 0xFFFFFFFF;
+		if (!exchange_mapi_utils_add_spropvalue_named_id (conn, fid, mem_ctx, values, n_values, PidLidFileUnderId, &u32))
+			return FALSE;
+		set_str_named_con_value (PidLidFileUnder, E_CONTACT_FILE_AS);
+		set_str_named_con_value (PidLidDistributionListName, E_CONTACT_FILE_AS);
+		set_str_con_value (PR_DISPLAY_NAME_UNICODE, E_CONTACT_FILE_AS);
+		set_str_con_value (PR_NORMALIZED_SUBJECT_UNICODE, E_CONTACT_FILE_AS);
 
-		set_SPropValue_proptag (&props[i++], PR_MESSAGE_CLASS, IPM_DISTLIST);
-		set_str_value (E_CONTACT_FILE_AS, SPropTagArray->aulPropTag[3]);
-		set_str_value (E_CONTACT_FILE_AS, SPropTagArray->aulPropTag[0]); /* PidLidDistributionListName */
 
-		local = g_list_sort_with_data (e_contact_get_attributes (mcd->contact, E_CONTACT_EMAIL), cmp_member_id, member_ids);
+		local = e_contact_get_attributes (mcd->contact, E_CONTACT_EMAIL);
+		if (member_ids)
+			local = g_list_sort_with_data (local, cmp_member_id, member_ids);
 
-		members = talloc_zero (mcd->mem_ctx, struct BinaryArray_r);
+		members = talloc_zero (mem_ctx, struct BinaryArray_r);
 		members->cValues = 0;
-		members->lpbin = talloc_zero_array (mcd->mem_ctx, struct Binary_r, g_list_length (local));
+		members->lpbin = talloc_zero_array (mem_ctx, struct Binary_r, g_list_length (local));
 
-		oneoff_members = talloc_zero (mcd->mem_ctx, struct BinaryArray_r);
+		oneoff_members = talloc_zero (mem_ctx, struct BinaryArray_r);
 		oneoff_members->cValues = 0;
-		oneoff_members->lpbin = talloc_zero_array (mcd->mem_ctx, struct Binary_r, g_list_length (local));
+		oneoff_members->lpbin = talloc_zero_array (mem_ctx, struct Binary_r, g_list_length (local));
 
 		for (l = local; l; l = l->next) {
 			EVCardAttribute *attr = (EVCardAttribute *) l->data;
@@ -678,17 +734,18 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 					/* keep both lists in sync */
 					if (member_values && g_hash_table_lookup (member_values, raw)) {
 						/* stored ListMembers values when contact's value didn't change */
-						members->lpbin[members->cValues].cb = string_to_bin (mcd->mem_ctx, g_hash_table_lookup (member_values, raw), &members->lpbin[members->cValues].lpb);
+						members->lpbin[members->cValues].cb = string_to_bin (mem_ctx, g_hash_table_lookup (member_values, raw), &members->lpbin[members->cValues].lpb);
 						members->cValues++;
 					} else {
-						exchange_mapi_util_entryid_generate_oneoff (mcd->mem_ctx, &members->lpbin[members->cValues], nm ? nm : "", eml);
+						exchange_mapi_util_entryid_generate_oneoff (mem_ctx, &members->lpbin[members->cValues], nm ? nm : "", eml);
 						members->cValues++;
 					}
 
-					exchange_mapi_util_entryid_generate_oneoff (mcd->mem_ctx, &oneoff_members->lpbin[oneoff_members->cValues], nm ? nm : "", eml);
+					exchange_mapi_util_entryid_generate_oneoff (mem_ctx, &oneoff_members->lpbin[oneoff_members->cValues], nm ? nm : "", eml);
 					oneoff_members->cValues++;
 
 					list_size += MAX (oneoff_members->lpbin[oneoff_members->cValues - 1].cb, members->lpbin[members->cValues - 1].cb);
+					crc32 = exchange_mapi_utils_push_crc32 (crc32, members->lpbin[members->cValues - 1].lpb, members->lpbin[members->cValues - 1].cb);
 				}
 			}
 
@@ -703,65 +760,65 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 		g_list_foreach (local, (GFunc)e_vcard_attribute_free, NULL);
 		g_list_free (local);
 
-		/* PidLidDistributionListOneOffMembers */
-		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[1], oneoff_members);
-		/* PidLidDistributionListMembers */
-		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[2], members);
+		if (!exchange_mapi_utils_add_spropvalue_named_id (conn, fid, mem_ctx, values, n_values,
+			PidLidDistributionListOneOffMembers, oneoff_members))
+			return FALSE;
 
-		/* list_size shouldn't exceed 15000 bytes */
-		if (list_size > 15000) {
-			g_free (props);
-			props = NULL;
-			i = 0;
-		}
+		if (!exchange_mapi_utils_add_spropvalue_named_id (conn, fid, mem_ctx, values, n_values,
+			PidLidDistributionListMembers, members))
+			return FALSE;
 
-		*value = props;
-		return i;
+		if (!exchange_mapi_utils_add_spropvalue_named_id (conn, fid, mem_ctx, values, n_values,
+			PidLidDistributionListChecksum, &crc32))
+			return FALSE;
+
+		/* list_size shouldn't exceed 15000 bytes, is so, use a stream instead of those properties above, but for now... */
+		if (list_size > 15000)
+			return FALSE;
+
+		return TRUE;
 	}
 
-	i = 0;
-	props = g_new0 (struct SPropValue, 50); //FIXME: Correct value tbd
-	set_str_value ( E_CONTACT_FILE_AS, SPropTagArray->aulPropTag[3]);
+	set_str_value (PR_MESSAGE_CLASS, IPM_CONTACT);
+	set_str_named_con_value (PidLidFileUnder, E_CONTACT_FILE_AS);
 
-	set_str_value (E_CONTACT_FULL_NAME, PR_DISPLAY_NAME_UNICODE);
-	set_SPropValue_proptag(&props[i++], PR_MESSAGE_CLASS, (gconstpointer )IPM_CONTACT);
-	set_str_value (E_CONTACT_FILE_AS, PR_NORMALIZED_SUBJECT_UNICODE);
-	set_str_value (E_CONTACT_EMAIL_1,  SPropTagArray->aulPropTag[4]);
-//	set_str_value (E_CONTACT_EMAIL_1,  SPropTagArray->aulPropTag[5]);
-	set_str_value (E_CONTACT_FILE_AS,  SPropTagArray->aulPropTag[8]);
+	set_str_con_value (PR_DISPLAY_NAME_UNICODE, E_CONTACT_FULL_NAME);
+	set_str_con_value (PR_NORMALIZED_SUBJECT_UNICODE, E_CONTACT_FILE_AS);
+	set_str_named_con_value (PidLidEmail1OriginalDisplayName, E_CONTACT_EMAIL_1);
+	/*set_str_named_con_value (PidLidEmail1EmailAddress, E_CONTACT_EMAIL_1);*/
 
-//	set_str_value ( E_CONTACT_EMAIL_1, 0x8083001e);
-	set_str_value ( E_CONTACT_EMAIL_2, SPropTagArray->aulPropTag[6]);
-//	set_str_value ( E_CONTACT_EMAIL_2, SPropTagArray->aulPropTag[14]);
+	/*set_str_con_value (0x8083001e, E_CONTACT_EMAIL_1);*/
+	set_str_named_con_value (PidLidEmail2EmailAddress, E_CONTACT_EMAIL_2);
 
-	set_str_value ( E_CONTACT_EMAIL_3, SPropTagArray->aulPropTag[7]);
-//	set_str_value ( E_CONTACT_EMAIL_3, SPropTagArray->aulPropTag[15]);
+	set_str_named_con_value (PidLidEmail3EmailAddress, E_CONTACT_EMAIL_3);
+	/*set_str_named_con_value (PidLidEmail3OriginalDisplayName, E_CONTACT_EMAIL_3);*/
 
-	set_str_value (E_CONTACT_HOMEPAGE_URL, SPropTagArray->aulPropTag[9]);
-	set_str_value (E_CONTACT_FREEBUSY_URL, PROP_TAG(PT_UNICODE, 0x812c));
+	set_str_named_con_value (PidLidHtml, E_CONTACT_HOMEPAGE_URL);
+	set_str_con_value (PROP_TAG(PT_UNICODE, 0x812c), E_CONTACT_FREEBUSY_URL);
 
-	set_str_value ( E_CONTACT_PHONE_BUSINESS, PR_OFFICE_TELEPHONE_NUMBER_UNICODE);
-	set_str_value ( E_CONTACT_PHONE_HOME, PR_HOME_TELEPHONE_NUMBER_UNICODE);
-	set_str_value ( E_CONTACT_PHONE_MOBILE, PR_MOBILE_TELEPHONE_NUMBER_UNICODE);
-	set_str_value ( E_CONTACT_PHONE_HOME_FAX, PR_HOME_FAX_NUMBER_UNICODE);
-	set_str_value ( E_CONTACT_PHONE_BUSINESS_FAX, PR_BUSINESS_FAX_NUMBER_UNICODE);
-	set_str_value ( E_CONTACT_PHONE_PAGER, PR_PAGER_TELEPHONE_NUMBER_UNICODE);
-	set_str_value ( E_CONTACT_PHONE_ASSISTANT, PR_ASSISTANT_TELEPHONE_NUMBER_UNICODE);
-	set_str_value ( E_CONTACT_PHONE_COMPANY, PR_COMPANY_MAIN_PHONE_NUMBER_UNICODE);
+	set_str_con_value (PR_OFFICE_TELEPHONE_NUMBER_UNICODE, E_CONTACT_PHONE_BUSINESS);
+	set_str_con_value (PR_HOME_TELEPHONE_NUMBER_UNICODE, E_CONTACT_PHONE_HOME);
+	set_str_con_value (PR_MOBILE_TELEPHONE_NUMBER_UNICODE, E_CONTACT_PHONE_MOBILE);
+	set_str_con_value (PR_HOME_FAX_NUMBER_UNICODE, E_CONTACT_PHONE_HOME_FAX);
+	set_str_con_value (PR_BUSINESS_FAX_NUMBER_UNICODE, E_CONTACT_PHONE_BUSINESS_FAX);
+	set_str_con_value (PR_PAGER_TELEPHONE_NUMBER_UNICODE, E_CONTACT_PHONE_PAGER);
+	set_str_con_value (PR_ASSISTANT_TELEPHONE_NUMBER_UNICODE, E_CONTACT_PHONE_ASSISTANT);
+	set_str_con_value (PR_COMPANY_MAIN_PHONE_NUMBER_UNICODE, E_CONTACT_PHONE_COMPANY);
 
-	set_str_value (E_CONTACT_MANAGER, PR_MANAGER_NAME_UNICODE);
-	set_str_value (E_CONTACT_ASSISTANT, PR_ASSISTANT_UNICODE);
-	set_str_value (E_CONTACT_ORG, PR_COMPANY_NAME_UNICODE);
-	set_str_value (E_CONTACT_ORG_UNIT, PR_DEPARTMENT_NAME_UNICODE);
-	set_str_value (E_CONTACT_ROLE, PR_PROFESSION_UNICODE);
-	set_str_value (E_CONTACT_TITLE, PR_TITLE_UNICODE);
+	set_str_con_value (PR_MANAGER_NAME_UNICODE, E_CONTACT_MANAGER);
+	set_str_con_value (PR_ASSISTANT_UNICODE, E_CONTACT_ASSISTANT);
+	set_str_con_value (PR_COMPANY_NAME_UNICODE, E_CONTACT_ORG);
+	set_str_con_value (PR_DEPARTMENT_NAME_UNICODE, E_CONTACT_ORG_UNIT);
+	set_str_con_value (PR_PROFESSION_UNICODE, E_CONTACT_ROLE);
+	set_str_con_value (PR_TITLE_UNICODE, E_CONTACT_TITLE);
 
-	set_str_value (E_CONTACT_OFFICE, PR_OFFICE_LOCATION_UNICODE);
-	set_str_value (E_CONTACT_SPOUSE, PR_SPOUSE_NAME_UNICODE);
+	set_str_con_value (PR_OFFICE_LOCATION_UNICODE, E_CONTACT_OFFICE);
+	set_str_con_value (PR_SPOUSE_NAME_UNICODE, E_CONTACT_SPOUSE);
 
-	set_str_value (E_CONTACT_NOTE, PR_BODY_UNICODE);
+	set_str_con_value (PR_BODY_UNICODE, E_CONTACT_NOTE);
+	set_str_con_value (PR_NICKNAME_UNICODE, E_CONTACT_NICKNAME);
 
-	//BDAY AND ANNV
+	/* BDAY AND ANNV */
 	if (e_contact_get (mcd->contact, E_CONTACT_BIRTH_DATE)) {
 		EContactDate *date = e_contact_get (mcd->contact, E_CONTACT_BIRTH_DATE);
 		struct tm tmtime;
@@ -777,8 +834,9 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 		unix_to_nt_time (&nt, lt);
 		t.dwLowDateTime = (nt << 32) >> 32;
 		t.dwHighDateTime = (nt >> 32);
-		printf("sending bday\n");
-		set_SPropValue_proptag (&props[i++], PR_BIRTHDAY, &t);
+
+		if (!exchange_mapi_utils_add_spropvalue (mem_ctx, values, n_values, PR_BIRTHDAY, &t))
+			return FALSE;
 	}
 
 	if (e_contact_get (mcd->contact, E_CONTACT_ANNIVERSARY)) {
@@ -796,49 +854,40 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 		unix_to_nt_time (&nt, lt);
 		t.dwLowDateTime = (nt << 32) >> 32;
 		t.dwHighDateTime = (nt >> 32);
-		printf("sending wed\n");
-		set_SPropValue_proptag (&props[i++], PR_WEDDING_ANNIVERSARY, &t);
-	}
-	//Home and Office address
-	if (e_contact_get (mcd->contact, E_CONTACT_ADDRESS_HOME)) {
-		EContactAddress *contact_addr;
 
-		contact_addr = e_contact_get (mcd->contact, E_CONTACT_ADDRESS_HOME);
-		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[11], contact_addr->street);
-		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_POST_OFFICE_BOX_UNICODE, contact_addr->ext);
-		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_CITY_UNICODE, contact_addr->locality);
-		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_STATE_OR_PROVINCE_UNICODE, contact_addr->region);
-		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_POSTAL_CODE_UNICODE, contact_addr->code);
-		set_SPropValue_proptag (&props[i++], PR_HOME_ADDRESS_COUNTRY_UNICODE, contact_addr->country);
+		if (!exchange_mapi_utils_add_spropvalue (mem_ctx, values, n_values, PR_WEDDING_ANNIVERSARY, &t))
+			return FALSE;
+	}
+
+	/* Home and Office address */
+	if (e_contact_get (mcd->contact, E_CONTACT_ADDRESS_HOME)) {
+		EContactAddress *contact_addr = e_contact_get (mcd->contact, E_CONTACT_ADDRESS_HOME);
+
+		set_str_named_value (PidLidHomeAddress, contact_addr->street);
+		set_str_value (PR_HOME_ADDRESS_POST_OFFICE_BOX_UNICODE, contact_addr->ext);
+		set_str_value (PR_HOME_ADDRESS_CITY_UNICODE, contact_addr->locality);
+		set_str_value (PR_HOME_ADDRESS_STATE_OR_PROVINCE_UNICODE, contact_addr->region);
+		set_str_value (PR_HOME_ADDRESS_POSTAL_CODE_UNICODE, contact_addr->code);
+		set_str_value (PR_HOME_ADDRESS_COUNTRY_UNICODE, contact_addr->country);
 	}
 
 	if (e_contact_get (mcd->contact, E_CONTACT_ADDRESS_WORK)) {
-		EContactAddress *contact_addr;
+		EContactAddress *contact_addr = e_contact_get (mcd->contact, E_CONTACT_ADDRESS_WORK);
 
-		contact_addr = e_contact_get (mcd->contact, E_CONTACT_ADDRESS_WORK);
-		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[12], contact_addr->street);
-		set_SPropValue_proptag (&props[i++], PR_POST_OFFICE_BOX_UNICODE, contact_addr->ext);
-		set_SPropValue_proptag (&props[i++], PR_LOCALITY_UNICODE, contact_addr->locality);
-		set_SPropValue_proptag (&props[i++], PR_STATE_OR_PROVINCE_UNICODE, contact_addr->region);
-		set_SPropValue_proptag (&props[i++], PR_POSTAL_CODE_UNICODE, contact_addr->code);
-		set_SPropValue_proptag (&props[i++], PR_COUNTRY_UNICODE, contact_addr->country);
+		set_str_named_value (PidLidWorkAddress, contact_addr->street);
+		set_str_value (PR_POST_OFFICE_BOX_UNICODE, contact_addr->ext);
+		set_str_value (PR_LOCALITY_UNICODE, contact_addr->locality);
+		set_str_value (PR_STATE_OR_PROVINCE_UNICODE, contact_addr->region);
+		set_str_value (PR_POSTAL_CODE_UNICODE, contact_addr->code);
+		set_str_value (PR_COUNTRY_UNICODE, contact_addr->country);
 	}
 
-//	set_str_value (E_CONTACT_NICKNAME, SPropTagArray->aulPropTag[12]);
 	if (e_contact_get (mcd->contact, E_CONTACT_IM_AIM)) {
 		GList *l = e_contact_get (mcd->contact, E_CONTACT_IM_AIM);
-		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[10], l->data);
+		set_str_named_value (PidLidInstantMessagingAddress, l->data);
 	}
 
-	if (e_contact_get (mcd->contact, E_CONTACT_NICKNAME)) {
-		gchar *nick  = e_contact_get (mcd->contact, E_CONTACT_NICKNAME);
-//		set_SPropValue_proptag (&props[i++], SPropTagArray->aulPropTag[13], nick);
-		printf("nickname %s %x\n", nick,  SPropTagArray->aulPropTag[13]);
-	}
-
-	*value =props;
-	printf("Sending %d \n", i);
-	return i;
+	return TRUE;
 }
 
 static void
@@ -866,9 +915,9 @@ e_book_backend_mapi_create_contact (EBookBackend *backend,
 		contact = e_contact_new_from_vcard(vcard);
 		mcd.contact = contact;
 		mcd.cache = priv->cache;
-		mcd.mem_ctx = talloc_init ("ExchangeMAPI_MCD");
-		status = exchange_mapi_connection_create_item (priv->conn, olFolderContacts, priv->fid, mapi_book_build_name_id, contact, mapi_book_build_props, &mcd, NULL, NULL, NULL, 0);
-		talloc_free (mcd.mem_ctx);
+		status = exchange_mapi_connection_create_item (priv->conn, olFolderContacts, priv->fid,
+				mapi_book_write_props, &mcd,
+				NULL, NULL, NULL, 0);
 		if (!status) {
 			e_data_book_respond_create(book, opid, GNOME_Evolution_Addressbook_OtherError, NULL);
 			return;
@@ -979,9 +1028,9 @@ e_book_backend_mapi_modify_contact (EBookBackend *backend,
 
 		mcd.contact = contact;
 		mcd.cache = priv->cache;
-		mcd.mem_ctx = talloc_init ("ExchangeMAPI_MCD");
-		status = exchange_mapi_connection_modify_item (priv->conn, olFolderContacts, priv->fid, mid, mapi_book_build_name_id, contact, mapi_book_build_props, &mcd, NULL, NULL, NULL, 0);
-		talloc_free (mcd.mem_ctx);
+		status = exchange_mapi_connection_modify_item (priv->conn, olFolderContacts, priv->fid, mid,
+				mapi_book_write_props, &mcd,
+				NULL, NULL, NULL, 0);
 		printf("getting %d\n", status);
 		if (!status) {
 			e_data_book_respond_modify(book, opid, GNOME_Evolution_Addressbook_OtherError, NULL);
@@ -1088,8 +1137,7 @@ e_book_backend_mapi_get_contact (EBookBackend *backend,
 
 			exchange_mapi_util_mapi_ids_from_uid (id, &fid, &mid);
 			exchange_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
-							known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids),
-							mapi_book_build_name_id_for_getprops, NULL,
+							mapi_book_get_prop_list, GET_ALL_KNOWN_IDS,
 							create_contact_item, contact,
 							MAPI_OPTIONS_FETCH_ALL);
 
@@ -1147,39 +1195,6 @@ create_contact_list_cb (FetchItemsCallbackData *item_data, gpointer data)
 	}
 
 	g_free (suid);
-	return TRUE;
-}
-
-static const uint32_t GetPropsList[] = {
-	PR_FID,
-	PR_MID,
-	PR_INST_ID,
-	PR_INSTANCE_NUM,
-	PR_SUBJECT_UNICODE,
-	PR_MESSAGE_CLASS,
-	PR_HASATTACH,
-/* FIXME: is this tag fit to check if a recipient table exists or not ? */
-//	PR_DISCLOSURE_OF_RECIPIENTS,
-	PR_RULE_MSG_PROVIDER,
-	PR_RULE_MSG_NAME
-};
-static const uint16_t n_GetPropsList = G_N_ELEMENTS (GetPropsList);
-
-gboolean
-mapi_book_build_name_id_for_getprops (struct mapi_nameid *nameid, gpointer data)
-{
-	/* Fix indexes in emapidump_contact when adding/removing from here */
-
-	mapi_nameid_lid_add (nameid, 0x8053, PSETID_Address); /* PidLidDistributionListName */
-	mapi_nameid_lid_add (nameid, 0x8054, PSETID_Address); /* PidLidDistributionListOneOffMembers */
-	mapi_nameid_lid_add (nameid, 0x8055, PSETID_Address); /* PidLidDistributionListMembers */
-
-	mapi_nameid_lid_add(nameid, 0x8084, PSETID_Address); /* PT_UNICODE - EmailOriginalDisplayName */
-	/*mapi_nameid_lid_add(nameid, 0x8020, PSETID_Address);
-	mapi_nameid_lid_add(nameid, 0x8021, PSETID_Address);*/
-	mapi_nameid_lid_add(nameid, 0x8094, PSETID_Address);
-	mapi_nameid_lid_add(nameid, 0x80a4, PSETID_Address);
-
 	return TRUE;
 }
 
@@ -1251,8 +1266,7 @@ e_book_backend_mapi_get_contact_list (EBookBackend *backend,
 			}
 
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
-								GetPropsList, n_GetPropsList,
-								mapi_book_build_name_id_for_getprops, NULL,
+								mapi_book_get_prop_list, GET_SHORT_SUMMARY,
 								create_contact_list_cb, &vcard_str,
 								MAPI_OPTIONS_FETCH_ALL)) {
 				e_data_book_respond_get_contact_list (book, opid, GNOME_Evolution_Addressbook_OtherError, NULL);
@@ -1310,23 +1324,22 @@ emapidump_contact (ExchangeMapiConnection *conn, mapi_id_t fid, struct mapi_SPro
 	if (g_str_equal (exchange_mapi_util_find_array_propval (properties, PR_MESSAGE_CLASS), IPM_DISTLIST)) {
 		const struct mapi_SBinaryArray *members, *members_dlist;
 		GSList *attrs = NULL, *a;
+		gint i;
 
 		/* it's a contact list/distribution list, fetch members and return it */
 		e_contact_set (contact, E_CONTACT_IS_LIST, GINT_TO_POINTER (TRUE));
 		/* we do not support this option, same as GroupWise */
 		e_contact_set (contact, E_CONTACT_LIST_SHOW_ADDRESSES, GINT_TO_POINTER (TRUE));
 
-		/* PidLidDistributionListName */
-		e_contact_set (contact, E_CONTACT_FILE_AS, exchange_mapi_util_find_array_propval (properties, properties->lpProps[0].ulPropTag));
-		/* PidLidDistributionListOneOffMembers */
-		members = exchange_mapi_util_find_array_propval (properties, properties->lpProps[1].ulPropTag);
-		/* PidLidDistributionListMembers */
-		members_dlist = exchange_mapi_util_find_array_propval (properties, properties->lpProps[2].ulPropTag);
+		e_contact_set (contact, E_CONTACT_FILE_AS, exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidDistributionListName));
+
+		members = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidDistributionListOneOffMembers);
+		members_dlist = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidDistributionListMembers);
 
 		g_return_val_if_fail (members != NULL, NULL);
 		g_return_val_if_fail (members_dlist != NULL, NULL);
 
-		/* these two list should be in sync */
+		/* these two lists should be in sync */
 		g_return_val_if_fail (members_dlist->cValues == members->cValues, NULL);
 
 		for (i = 0; i < members->cValues; i++) {
@@ -1387,7 +1400,7 @@ emapidump_contact (ExchangeMapiConnection *conn, mapi_id_t fid, struct mapi_SPro
 	}
 
 //	exchange_mapi_debug_property_dump (properties);
-	for (i=1; i<maplen; i++) {
+	for (i = 1; i < maplen; i++) {
 		gpointer value;
 
 		/* can cast it, no writing to the value; and it'll be freed not before the end of this function */
@@ -1668,8 +1681,7 @@ book_view_thread (gpointer data)
 
 			//FIXME: We need to fetch only the query from the server live and not everything.
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
-							   GetPropsList, n_GetPropsList,
-							   mapi_book_build_name_id_for_getprops, NULL,
+							   mapi_book_get_prop_list, GET_SHORT_SUMMARY,
 							   create_contact_cb, book_view,
 							   MAPI_OPTIONS_FETCH_ALL)) {
 			if (e_flag_is_set (closure->running))
@@ -1684,8 +1696,7 @@ book_view_thread (gpointer data)
 			}
 		} else {
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
-							known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids),
-							mapi_book_build_name_id_for_getprops, NULL,
+							mapi_book_get_prop_list, GET_ALL_KNOWN_IDS,
 							create_contact_cb, book_view,
 							MAPI_OPTIONS_FETCH_ALL)) {
 				if (e_flag_is_set (closure->running))
@@ -1791,8 +1802,7 @@ build_cache (EBookBackendMAPI *ebmapi)
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 
 	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
-						known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids),
-						mapi_book_build_name_id_for_getprops, NULL,
+						mapi_book_get_prop_list, GET_ALL_KNOWN_IDS,
 						cache_contact_cb, ebmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
 		printf("Error during caching addressbook\n");
@@ -1836,8 +1846,7 @@ update_cache (EBookBackendMAPI *ebmapi)
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 
 	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
-						known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids),
-						mapi_book_build_name_id_for_getprops, NULL,
+						mapi_book_get_prop_list, GET_ALL_KNOWN_IDS,
 						cache_contact_cb, ebmapi,
 						MAPI_OPTIONS_FETCH_ALL)) {
 		printf("Error during caching addressbook\n");

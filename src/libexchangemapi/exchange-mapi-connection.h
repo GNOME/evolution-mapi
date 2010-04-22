@@ -132,10 +132,14 @@ struct id_list {
 	mapi_id_t id;
 };
 
-typedef gboolean (*FetchCallback)	(FetchItemsCallbackData *item_data, gpointer data);
-typedef gboolean (*BuildNameID)	(struct mapi_nameid *nameid, gpointer data);
-typedef gint	 (*BuildProps)		(struct SPropValue **, struct SPropTagArray *, gpointer data);
+typedef struct {
+	uint32_t pidlid_propid; /* PidLid or PidName legacy property named ID to resolve */
+	uint32_t propid;	/* resolved prop ID; equals to MAPI_E_RESERVED when not found or other error */
+} ResolveNamedIDsData;
 
+typedef gboolean (*FetchCallback)	(FetchItemsCallbackData *item_data, gpointer data);
+typedef gboolean (*BuildWritePropsCB)	(ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data);
+typedef gboolean (*BuildReadPropsCB)	(ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
 
 struct _ExchangeMapiConnection {
 	GObject parent;
@@ -154,15 +158,13 @@ gboolean		exchange_mapi_connection_reconnect (ExchangeMapiConnection *conn, cons
 gboolean		exchange_mapi_connection_close (ExchangeMapiConnection *conn);
 gboolean		exchange_mapi_connection_connected (ExchangeMapiConnection *conn);
 gboolean		exchange_mapi_connection_fetch_item (ExchangeMapiConnection *conn, mapi_id_t fid, mapi_id_t mid,
-					const uint32_t *GetPropsList, const uint16_t cn_props,
-					BuildNameID build_name_id, gpointer build_name_data,
+					BuildReadPropsCB build_props, gpointer brp_data,
 					FetchCallback cb, gpointer data,
 					guint32 options);
 
 gboolean		exchange_mapi_connection_fetch_items (ExchangeMapiConnection *conn, mapi_id_t fid,
 					struct mapi_SRestriction *res,struct SSortOrderSet *sort_order,
-					const uint32_t *GetPropsList, const uint16_t cn_props,
-					BuildNameID build_name_id, gpointer build_name_data,
+					BuildReadPropsCB build_props, gpointer brp_data,
 					FetchCallback cb, gpointer data,
 					guint32 options);
 
@@ -175,14 +177,12 @@ gboolean		exchange_mapi_connection_move_folder (ExchangeMapiConnection *conn, ma
 GSList *		exchange_mapi_connection_check_restriction (ExchangeMapiConnection *conn, mapi_id_t fid, struct mapi_SRestriction *res);
 mapi_id_t		exchange_mapi_connection_get_default_folder_id (ExchangeMapiConnection *conn, uint32_t olFolder);
 mapi_id_t		exchange_mapi_connection_create_item (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid,
-					BuildNameID build_name_id, gpointer ni_data,
-					BuildProps build_props, gpointer p_data,
+					BuildWritePropsCB build_props, gpointer bwp_data,
 					GSList *recipients, GSList *attachments, GSList *generic_streams,
 					uint32_t options);
 
 gboolean		exchange_mapi_connection_modify_item (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, mapi_id_t mid,
-					BuildNameID build_name_id, gpointer ni_data,
-					BuildProps build_props, gpointer p_data,
+					BuildWritePropsCB build_props, gpointer bwp_data,
 					GSList *recipients, GSList *attachments, GSList *generic_streams,
 					uint32_t options);
 
@@ -193,14 +193,9 @@ gboolean		exchange_mapi_connection_move_items (ExchangeMapiConnection *conn, map
 gboolean 		exchange_mapi_connection_get_folders_list (ExchangeMapiConnection *conn, GSList **mapi_folders);
 gboolean		exchange_mapi_connection_get_pf_folders_list (ExchangeMapiConnection *conn, GSList **mapi_folders, mapi_id_t parent_id);
 GSList *		exchange_mapi_connection_peek_folders_list (ExchangeMapiConnection *conn);
-struct SPropTagArray *	exchange_mapi_connection_resolve_named_props (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid,
-					BuildNameID build_name_id, gpointer ni_data);
 
-struct SPropTagArray *	exchange_mapi_connection_resolve_named_prop (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid,
-					uint16_t lid, const gchar *OLEGUID);
-
-uint32_t		exchange_mapi_connection_create_named_prop (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid,
-					const gchar *named_prop_name, uint32_t ptype);
+gboolean		exchange_mapi_connection_resolve_named_props (ExchangeMapiConnection *conn, mapi_id_t fid, ResolveNamedIDsData *named_ids_list, guint named_ids_n_elems);
+uint32_t		exchange_mapi_connection_resolve_named_prop (ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t pidlid_propid);
 
 const gchar *		exchange_mapi_connection_ex_to_smtp (ExchangeMapiConnection *conn, const gchar *ex_address);
 

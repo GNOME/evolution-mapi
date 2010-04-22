@@ -60,6 +60,9 @@ struct _ExchangeMapiConnectionPrivate {
 	mapi_object_t public_store;
 
 	GSList *folders;		/* list of ExchangeMapiFolder pointers */
+
+	GHashTable *named_ids;		/* cache of named ids; key is a folder ID, value is a hash table
+					   of named_id to prop_id in that respective folder */
 };
 
 /* should have session_lock locked already, when calling this function */
@@ -78,6 +81,9 @@ disconnect (ExchangeMapiConnectionPrivate *priv)
 		mapi_object_release (&priv->public_store);
 	Logoff (&priv->msg_store);
 	mapi_object_release (&priv->msg_store);
+
+	if (priv->named_ids)
+		g_hash_table_remove_all (priv->named_ids);
 
 	priv->session = NULL;
 	priv->has_public_store = FALSE;
@@ -121,6 +127,10 @@ exchange_mapi_connection_finalize (GObject *object)
 		g_free (priv->profile);
 		priv->profile = NULL;
 
+		if (priv->named_ids)
+			g_hash_table_destroy (priv->named_ids);
+		priv->named_ids = NULL;
+
 		UNLOCK ();
 		g_static_rec_mutex_free (&priv->session_lock);
 	}
@@ -151,6 +161,9 @@ exchange_mapi_connection_init (ExchangeMapiConnection *conn)
 	priv->session = NULL;
 	priv->profile = NULL;
 	priv->has_public_store = FALSE;
+	priv->folders = NULL;
+
+	priv->named_ids = g_hash_table_new_full (g_int64_hash, g_int64_equal, g_free, (GDestroyNotify) g_hash_table_destroy);
 
 	register_connection (conn);
 }
@@ -1271,8 +1284,7 @@ cleanup:
 gboolean
 exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t fid,
 					struct mapi_SRestriction *res, struct SSortOrderSet *sort_order,
-					const uint32_t *GetPropsList, const uint16_t cn_props,
-					BuildNameID build_name_id, gpointer build_name_data,
+					BuildReadPropsCB build_props, gpointer brp_data,
 					FetchCallback cb, gpointer data,
 					guint32 options)
 {
@@ -1280,7 +1292,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 	TALLOC_CTX *mem_ctx;
 	mapi_object_t obj_folder;
 	mapi_object_t obj_table;
-	struct SPropTagArray *SPropTagArray, *GetPropsTagArray = NULL;
+	struct SPropTagArray *SPropTagArray, *propsTagArray = NULL;
 	struct SRowSet SRowSet;
 	uint32_t count, i, cursor_pos = 0;
 	gboolean result = FALSE;
@@ -1344,51 +1356,12 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 		}
 	}
 
-	if ((GetPropsList && (cn_props > 0)) || build_name_id) {
-		struct SPropTagArray *NamedPropsTagArray;
-		uint32_t m;
-		struct mapi_nameid *nameid;
-
-		nameid = mapi_nameid_new(mem_ctx);
-		NamedPropsTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
-
-		NamedPropsTagArray->cValues = 0;
-		/* Add named props using callback */
-		if (build_name_id) {
-			if (!build_name_id (nameid, build_name_data)) {
-				g_debug ("%s: (%s): Could not build named props ",
-					 G_STRLOC, G_STRFUNC);
-				goto GetProps_cleanup;
-			}
-
-			retval = mapi_nameid_GetIDsFromNames(nameid, &obj_folder, NamedPropsTagArray);
-			if (retval != MAPI_E_SUCCESS) {
-				mapi_errstr("mapi_nameid_GetIDsFromNames", GetLastError());
-				goto GetProps_cleanup;
-			}
+	if (build_props) {
+		propsTagArray = set_SPropTagArray (mem_ctx, 0x1, PR_MESSAGE_CLASS);
+		if (!build_props (conn, fid, mem_ctx, propsTagArray, brp_data)) {
+			mapi_errstr ("build_props", GetLastError ());
+			goto cleanup;
 		}
-
- GetProps_cleanup:
-		for (m = 0; m < NamedPropsTagArray->cValues; m++) {
-			if (G_UNLIKELY (!GetPropsTagArray))
-				GetPropsTagArray = set_SPropTagArray (mem_ctx, 0x1,
-								      NamedPropsTagArray->aulPropTag[m]);
-			else
-				SPropTagArray_add (mem_ctx, GetPropsTagArray,
-						   NamedPropsTagArray->aulPropTag[m]);
-		}
-
-		for (m = 0; m < cn_props; m++) {
-			if (G_UNLIKELY (!GetPropsTagArray))
-				GetPropsTagArray = set_SPropTagArray (mem_ctx, 0x1,
-								      GetPropsList[m]);
-			else
-				SPropTagArray_add (mem_ctx, GetPropsTagArray,
-						   GetPropsList[m]);
-		}
-
-		MAPIFreeBuffer (NamedPropsTagArray);
-		talloc_free (nameid);
 	}
 
 	/* Note : We maintain a cursor position. count parameter in QueryRows */
@@ -1447,16 +1420,16 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 				exchange_mapi_util_read_body_stream (&obj_message, &stream_list,
 								     options & MAPI_OPTIONS_GETBESTBODY);
 
-			if (GetPropsTagArray && GetPropsTagArray->cValues) {
+			if (propsTagArray && propsTagArray->cValues) {
 				struct SPropValue *lpProps;
 				struct SPropTagArray *tags;
 				uint32_t prop_count = 0, k;
 				/* we need to make a local copy of the tag array
 				 * since GetProps will modify the array on any
 				 * errors */
-				tags = set_SPropTagArray (mem_ctx, 0x1, GetPropsTagArray->aulPropTag[0]);
-				for (k = 1; k < GetPropsTagArray->cValues; k++)
-					SPropTagArray_add (mem_ctx, tags, GetPropsTagArray->aulPropTag[k]);
+				tags = set_SPropTagArray (mem_ctx, 0x1, propsTagArray->aulPropTag[0]);
+				for (k = 1; k < propsTagArray->cValues; k++)
+					SPropTagArray_add (mem_ctx, tags, propsTagArray->aulPropTag[k]);
 				retval = GetProps (&obj_message, tags, &lpProps, &prop_count);
 
 				MAPIFreeBuffer (tags);
@@ -1518,7 +1491,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 				exchange_mapi_util_free_attachment_list (&attach_list);
 			}
 
-			if (GetPropsTagArray && GetPropsTagArray->cValues)
+			if (propsTagArray && propsTagArray->cValues)
 				talloc_free (properties_array.lpProps);
 
 		loop_cleanup:
@@ -1533,8 +1506,8 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 	result = TRUE;
 
  cleanup:
-	if (GetPropsTagArray)
-		MAPIFreeBuffer (GetPropsTagArray);
+	if (propsTagArray)
+		MAPIFreeBuffer (propsTagArray);
 	mapi_object_release(&obj_folder);
 	mapi_object_release(&obj_table);
 	talloc_free (mem_ctx);
@@ -1547,8 +1520,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 
 gboolean
 exchange_mapi_connection_fetch_item (ExchangeMapiConnection *conn, mapi_id_t fid, mapi_id_t mid,
-				     const uint32_t *GetPropsList, const uint16_t cn_props,
-				     BuildNameID build_name_id, gpointer build_name_data,
+				     BuildReadPropsCB build_props, gpointer brp_data,
 				     FetchCallback cb, gpointer data,
 				     guint32 options)
 {
@@ -1557,7 +1529,7 @@ exchange_mapi_connection_fetch_item (ExchangeMapiConnection *conn, mapi_id_t fid
 	mapi_object_t obj_folder;
 	mapi_object_t obj_message;
 	struct mapi_SPropValue_array properties_array;
-	struct SPropTagArray *GetPropsTagArray;
+	struct SPropTagArray *propsTagArray;
 	GSList *attach_list = NULL;
 	GSList *recip_list = NULL;
 	GSList *stream_list = NULL;
@@ -1586,44 +1558,12 @@ exchange_mapi_connection_fetch_item (ExchangeMapiConnection *conn, mapi_id_t fid
 		goto cleanup;
 	}
 
-	GetPropsTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
-	GetPropsTagArray->cValues = 0;
-
-	if ((GetPropsList && (cn_props > 0)) || build_name_id) {
-		struct SPropTagArray *NamedPropsTagArray;
-		uint32_t m, n=0;
-		struct mapi_nameid *nameid;
-
-		nameid = mapi_nameid_new(mem_ctx);
-		NamedPropsTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
-
-		NamedPropsTagArray->cValues = 0;
-		/* Add named props using callback */
-		if (build_name_id) {
-			if (!build_name_id (nameid, build_name_data)) {
-				g_debug ("%s: (%s): Could not build named props ", G_STRLOC, G_STRFUNC);
-				goto GetProps_cleanup;
-			}
-
-			retval = mapi_nameid_GetIDsFromNames(nameid, &obj_folder, NamedPropsTagArray);
-			if (retval != MAPI_E_SUCCESS) {
-				mapi_errstr("mapi_nameid_GetIDsFromNames", GetLastError());
-				goto GetProps_cleanup;
-			}
+	if (build_props) {
+		propsTagArray = set_SPropTagArray (mem_ctx, 0x1, PR_MESSAGE_CLASS);
+		if (!build_props (conn, fid, mem_ctx, propsTagArray, brp_data)) {
+			mapi_errstr ("build_props", GetLastError ());
+			goto cleanup;
 		}
-
-		GetPropsTagArray->cValues = (uint32_t) (cn_props + NamedPropsTagArray->cValues);
-		GetPropsTagArray->aulPropTag = (enum MAPITAGS *) talloc_zero_array (mem_ctx, uint32_t, GetPropsTagArray->cValues + 1);
-
-		for (m = 0; m < NamedPropsTagArray->cValues; m++, n++)
-			GetPropsTagArray->aulPropTag[n] = NamedPropsTagArray->aulPropTag[m];
-
-		for (m = 0; m < cn_props; m++, n++)
-			GetPropsTagArray->aulPropTag[n] = GetPropsList[m];
-
-	GetProps_cleanup:
-			MAPIFreeBuffer (NamedPropsTagArray);
-			talloc_free (nameid);
 	}
 
 	/* Open the item */
@@ -1646,12 +1586,12 @@ exchange_mapi_connection_fetch_item (ExchangeMapiConnection *conn, mapi_id_t fid
 		exchange_mapi_util_read_body_stream (&obj_message, &stream_list,
 			options & MAPI_OPTIONS_GETBESTBODY);
 
-	if (GetPropsTagArray->cValues) {
+	if (propsTagArray && propsTagArray->cValues) {
 		struct SPropValue *lpProps;
 		uint32_t prop_count = 0, k;
 
 		lpProps = talloc_zero(mem_ctx, struct SPropValue);
-		retval = GetProps (&obj_message, GetPropsTagArray, &lpProps, &prop_count);
+		retval = GetProps (&obj_message, propsTagArray, &lpProps, &prop_count);
 
 		/* Conversion from SPropValue to mapi_SPropValue. (no padding here) */
 		properties_array.cValues = prop_count;
@@ -1697,7 +1637,7 @@ exchange_mapi_connection_fetch_item (ExchangeMapiConnection *conn, mapi_id_t fid
 		exchange_mapi_util_free_attachment_list (&attach_list);
 	}
 
-//	if (GetPropsTagArray->cValues)
+//	if (propsTagArray->cValues)
 //		talloc_free (properties_array.lpProps);
 
 	result = TRUE;
@@ -2021,37 +1961,59 @@ cleanup:
 	return result;
 }
 
-struct SPropTagArray *
-exchange_mapi_connection_resolve_named_props (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid,
-					BuildNameID build_name_id, gpointer ni_data)
+/* named_ids_list contains pointers to ResolveNamedIDsData structure */
+gboolean
+exchange_mapi_connection_resolve_named_props (ExchangeMapiConnection *conn, mapi_id_t fid, ResolveNamedIDsData *named_ids_list, guint named_ids_n_elems)
 {
 	enum MAPISTATUS retval;
 	TALLOC_CTX *mem_ctx;
 	mapi_object_t obj_folder;
 	struct mapi_nameid *nameid;
-	struct SPropTagArray *SPropTagArray, *ret_array = NULL;
-	uint32_t i;
+	struct SPropTagArray *SPropTagArray;
+	guint i, j;
+	GPtrArray *todo = NULL;
+	gboolean res = FALSE;
 
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, NULL);
-	g_return_val_if_fail (priv->session != NULL, NULL);
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	g_return_val_if_fail (named_ids_list != NULL, FALSE);
+	g_return_val_if_fail (named_ids_n_elems > 0, FALSE);
+	g_return_val_if_fail (priv->session != NULL, FALSE);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	g_debug ("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
-	mem_ctx = talloc_init("ExchangeMAPI_ResolveNamedProps");
-	mapi_object_init(&obj_folder);
+	if (priv->named_ids) {
+		gint64 i64 = fid;
+		GHashTable *ids = g_hash_table_lookup (priv->named_ids, &i64);
 
-	nameid = mapi_nameid_new(mem_ctx);
-	SPropTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
+		if (ids) {
+			for (i = 0; i < named_ids_n_elems; i++) {
+				ResolveNamedIDsData *data = &named_ids_list[i];
+				uint32_t propid;
 
-	/* If fid not present then we'll use olFolder. Document this in API doc. */
-	if (fid == 0) {
-		retval = GetDefaultFolder (&priv->msg_store, &fid, olFolder);
-		if (retval != MAPI_E_SUCCESS) {
-			mapi_errstr("GetDefaultFolder", GetLastError());
-			goto cleanup;
+				propid = GPOINTER_TO_INT (g_hash_table_lookup (ids, GINT_TO_POINTER (data->pidlid_propid)));
+				if (propid) {
+					data->propid = propid;
+				} else {
+					if (!todo)
+						todo = g_ptr_array_new ();
+					g_ptr_array_add (todo, data);
+				}
+			}
+
+			if (!todo) {
+				UNLOCK ();
+				g_debug ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+				return TRUE;
+			}
 		}
 	}
+
+	mem_ctx = talloc_init ("ExchangeMAPI_ResolveNamedProps");
+	mapi_object_init (&obj_folder);
+
+	nameid = mapi_nameid_new (mem_ctx);
+	SPropTagArray = talloc_zero (mem_ctx, struct SPropTagArray);
 
 	/* Attempt to open the folder */
 	retval = OpenFolder (&priv->msg_store, fid, &obj_folder);
@@ -2060,53 +2022,112 @@ exchange_mapi_connection_resolve_named_props (ExchangeMapiConnection *conn, uint
 		goto cleanup;
 	}
 
-	/* Add named props using callback */
-	if (build_name_id) {
-		if (!build_name_id (nameid, ni_data)) {
-			g_debug ("%s: (%s): Could not build named props ", G_STRLOC, G_STRFUNC);
-			goto cleanup;
-		}
-
-		retval = mapi_nameid_GetIDsFromNames(nameid, &obj_folder, SPropTagArray);
-		if (retval != MAPI_E_SUCCESS) {
-			mapi_errstr("mapi_nameid_GetIDsFromNames", GetLastError());
-			goto cleanup;
+	if (!todo) {
+		todo = g_ptr_array_new ();
+		for (i = 0; i < named_ids_n_elems; i++) {
+			g_ptr_array_add (todo, &named_ids_list[i]);
 		}
 	}
 
-	ret_array = g_new0 (struct SPropTagArray, 1);
-	ret_array->aulPropTag = g_new0 (enum MAPITAGS, SPropTagArray->cValues);
-	ret_array->cValues = SPropTagArray->cValues;
-	for (i = 0; i < SPropTagArray->cValues; ++i)
-		ret_array->aulPropTag[i] = SPropTagArray->aulPropTag[i];
+	for (i = 0; i < todo->len; i++) {
+		ResolveNamedIDsData *data = todo->pdata[i];
 
-cleanup:
-	mapi_object_release(&obj_folder);
-	talloc_free(mem_ctx);
+		if (mapi_nameid_canonical_add (nameid, data->pidlid_propid) != MAPI_E_SUCCESS)
+			data->propid = MAPI_E_RESERVED;
+		else
+			data->propid = 0;
+	}
+
+	retval = mapi_nameid_GetIDsFromNames (nameid, &obj_folder, SPropTagArray);
+	if (retval != MAPI_E_SUCCESS) {
+		mapi_errstr ("mapi_nameid_GetIDsFromNames", GetLastError());
+		goto cleanup;
+	}
+
+	for (i = 0, j = 0; i < SPropTagArray->cValues && j < todo->len; i++) {
+		while (j < todo->len) {
+			ResolveNamedIDsData *data = todo->pdata[j];
+			if (data && data->propid == 0) {
+				if ((SPropTagArray->aulPropTag[i] & 0xFFFF) == PT_ERROR)
+					data->propid = MAPI_E_RESERVED;
+				else
+					data->propid = SPropTagArray->aulPropTag[i];
+				break;
+			}
+
+			j++;
+		}
+	}
+
+	if (priv->named_ids) {
+		gint64 i64 = fid;
+		GHashTable *ids = g_hash_table_lookup (priv->named_ids, &i64);
+
+		if (!ids) {
+			gint64 *i64ptr = g_malloc (sizeof (gint64));
+
+			*i64ptr = fid;
+			ids = g_hash_table_new (g_direct_hash, g_direct_equal);
+
+			g_hash_table_insert (priv->named_ids, i64ptr, ids);
+		}
+
+		for (i = 0; i < todo->len; i++) {
+			ResolveNamedIDsData *data = todo->pdata[i];
+
+			g_hash_table_insert (ids, GINT_TO_POINTER (data->pidlid_propid), GINT_TO_POINTER (data->propid));
+		}
+	}
+
+	res = TRUE;
+
+ cleanup:
+	if (todo)
+		g_ptr_array_free (todo, TRUE);
+	mapi_object_release (&obj_folder);
+	talloc_free (mem_ctx);
 
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	g_debug ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
-	return ret_array;
+	return res;
 }
 
-struct SPropTagArray *
-exchange_mapi_connection_resolve_named_prop (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, uint16_t lid, const gchar *OLEGUID)
+/* returns MAPI_E_RESERVED on any error */
+uint32_t
+exchange_mapi_connection_resolve_named_prop (ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t pidlid_propid)
 {
 	enum MAPISTATUS retval;
 	TALLOC_CTX *mem_ctx;
 	mapi_object_t obj_folder;
 	struct mapi_nameid *nameid;
-	struct SPropTagArray *SPropTagArray, *ret_array = NULL;
-	uint32_t i;
+	struct SPropTagArray *SPropTagArray;
+	uint32_t res = MAPI_E_RESERVED;
 
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, NULL);
-	g_return_val_if_fail (priv->session != NULL, NULL);
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, res);
+	g_return_val_if_fail (priv->session != NULL, res);
 
 	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
+
+	if (priv->named_ids) {
+		gint64 i64 = fid;
+		GHashTable *ids = g_hash_table_lookup (priv->named_ids, &i64);
+
+		if (ids) {
+			res = GPOINTER_TO_INT (g_hash_table_lookup (ids, GINT_TO_POINTER (pidlid_propid)));
+			if (res != 0) {
+				UNLOCK ();
+				g_debug ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+
+				return res;
+			}
+
+			res = MAPI_E_RESERVED;
+		}
+	}
 
 	mem_ctx = talloc_init("ExchangeMAPI_ResolveNamedProp");
 	mapi_object_init(&obj_folder);
@@ -2114,15 +2135,6 @@ exchange_mapi_connection_resolve_named_prop (ExchangeMapiConnection *conn, uint3
 	nameid = mapi_nameid_new(mem_ctx);
 	SPropTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
 
-	/* If fid not present then we'll use olFolder. Document this in API doc. */
-	if (fid == 0) {
-		retval = GetDefaultFolder (&priv->msg_store, &fid, olFolder);
-		if (retval != MAPI_E_SUCCESS) {
-			mapi_errstr("GetDefaultFolder", GetLastError());
-			goto cleanup;
-		}
-	}
-
 	/* Attempt to open the folder */
 	retval = OpenFolder (&priv->msg_store, fid, &obj_folder);
 	if (retval != MAPI_E_SUCCESS) {
@@ -2130,7 +2142,7 @@ exchange_mapi_connection_resolve_named_prop (ExchangeMapiConnection *conn, uint3
 		goto cleanup;
 	}
 
-	mapi_nameid_lid_add (nameid, lid, OLEGUID);
+	mapi_nameid_canonical_add (nameid, pidlid_propid);
 
 	retval = mapi_nameid_GetIDsFromNames(nameid, &obj_folder, SPropTagArray);
 	if (retval != MAPI_E_SUCCESS) {
@@ -2138,77 +2150,25 @@ exchange_mapi_connection_resolve_named_prop (ExchangeMapiConnection *conn, uint3
 		goto cleanup;
 	}
 
-	ret_array = g_new0 (struct SPropTagArray, 1);
-	ret_array->aulPropTag = g_new0 (enum MAPITAGS, SPropTagArray->cValues);
-	ret_array->cValues = SPropTagArray->cValues;
-	for (i = 0; i < SPropTagArray->cValues; ++i)
-		ret_array->aulPropTag[i] = SPropTagArray->aulPropTag[i];
+	res = SPropTagArray->aulPropTag[0];
+	if ((res & 0xFFFF) == PT_ERROR)
+		res = MAPI_E_RESERVED;
 
-cleanup:
-	mapi_object_release(&obj_folder);
-	talloc_free(mem_ctx);
+	if (priv->named_ids) {
+		gint64 i64 = fid;
+		GHashTable *ids = g_hash_table_lookup (priv->named_ids, &i64);
 
-	UNLOCK ();
+		if (!ids) {
+			gint64 *i64ptr = g_malloc (sizeof (gint64));
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+			*i64ptr = fid;
+			ids = g_hash_table_new (g_direct_hash, g_direct_equal);
 
-	return ret_array;
-}
-
-uint32_t
-exchange_mapi_connection_create_named_prop (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid,
-				      const gchar *named_prop_name, uint32_t ptype)
-{
-	enum MAPISTATUS retval;
-	TALLOC_CTX *mem_ctx;
-	mapi_object_t obj_folder;
-	struct GUID guid;
-	struct MAPINAMEID *nameid;
-	struct SPropTagArray *SPropTagArray;
-	uint32_t propID = 0x00000000;
-
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, propID);
-	g_return_val_if_fail (priv->session != NULL, propID);
-
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-
-	LOCK ();
-
-	mem_ctx = talloc_init("ExchangeMAPI_CreateNamedProp");
-	mapi_object_init(&obj_folder);
-
-	GUID_from_string(PS_INTERNET_HEADERS, &guid);
-	nameid = talloc_zero(mem_ctx, struct MAPINAMEID);
-	SPropTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
-
-	nameid[0].lpguid = guid;
-	nameid[0].ulKind = MNID_STRING;
-	nameid[0].kind.lpwstr.Name = named_prop_name;
-
-	/* If fid not present then we'll use olFolder. Document this in API doc. */
-	if (fid == 0) {
-		retval = GetDefaultFolder (&priv->msg_store, &fid, olFolder);
-		if (retval != MAPI_E_SUCCESS) {
-			mapi_errstr("GetDefaultFolder", GetLastError());
-			goto cleanup;
+			g_hash_table_insert (priv->named_ids, i64ptr, ids);
 		}
-	}
 
-	/* Attempt to open the folder */
-	retval = OpenFolder (&priv->msg_store, fid, &obj_folder);
-	if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("OpenFolder", GetLastError());
-		goto cleanup;
+		g_hash_table_insert (ids, GINT_TO_POINTER (pidlid_propid), GINT_TO_POINTER (res));
 	}
-
-	/* Fetch an ID from the server */
-	retval = GetIDsFromNames(&obj_folder, 1, &nameid[0], MAPI_CREATE, &SPropTagArray);
-	if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("GetIDsFromNames", GetLastError());
-		goto cleanup;
-	}
-
-	propID = SPropTagArray->aulPropTag[0] | ptype;
 
 cleanup:
 	mapi_object_release(&obj_folder);
@@ -2218,7 +2178,7 @@ cleanup:
 
 	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
-	return propID;
+	return res;
 }
 
 mapi_id_t
@@ -2250,8 +2210,7 @@ cleanup:
 
 mapi_id_t
 exchange_mapi_connection_create_item (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid,
-			   BuildNameID build_name_id, gpointer ni_data,
-			   BuildProps build_props, gpointer p_data,
+			   BuildWritePropsCB build_props, gpointer bwp_data,
 			   GSList *recipients, GSList *attachments, GSList *generic_streams,
 			   uint32_t options)
 {
@@ -2259,10 +2218,8 @@ exchange_mapi_connection_create_item (ExchangeMapiConnection *conn, uint32_t olF
 	TALLOC_CTX *mem_ctx;
 	mapi_object_t obj_folder;
 	mapi_object_t obj_message;
-	struct mapi_nameid *nameid;
-	struct SPropTagArray *SPropTagArray;
 	struct SPropValue *props = NULL;
-	gint propslen = 0;
+	uint32_t propslen = 0;
 	mapi_id_t mid = 0;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, 0);
@@ -2275,9 +2232,6 @@ exchange_mapi_connection_create_item (ExchangeMapiConnection *conn, uint32_t olF
 	mem_ctx = talloc_init("ExchangeMAPI_CreateItem");
 	mapi_object_init(&obj_folder);
 	mapi_object_init(&obj_message);
-
-	nameid = mapi_nameid_new(mem_ctx);
-	SPropTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
 
 	/* If fid not present then we'll use olFolder. Document this in API doc. */
 	if (fid == 0) {
@@ -2304,27 +2258,10 @@ exchange_mapi_connection_create_item (ExchangeMapiConnection *conn, uint32_t olF
 
 //	d(mapi_object_debug (&obj_message));
 
-	/* Add named props using callback */
-	if (build_name_id) {
-		if (!build_name_id (nameid, ni_data)) {
-			g_debug ("%s: (%s): Could not build named props ", G_STRLOC, G_STRFUNC);
-			goto cleanup;
-		}
-
-		retval = mapi_nameid_GetIDsFromNames(nameid, &obj_folder, SPropTagArray);
-		if (retval != MAPI_E_SUCCESS) {
-			mapi_errstr("mapi_nameid_GetIDsFromNames", GetLastError());
-			goto cleanup;
-		}
-	}
-
 	/* Add regular props using callback */
-	if (build_props) {
-		propslen = build_props (&props, SPropTagArray, p_data);
-		if (propslen < 1) {
-			g_debug ("%s: (%s): build_props failed! propslen = %d ", G_STRLOC, G_STRFUNC, propslen);
-			goto cleanup;
-		}
+	if (build_props && !build_props (conn, fid, mem_ctx, &props, &propslen, bwp_data)) {
+		g_debug ("%s: (%s): build_props failed! propslen = %d ", G_STRLOC, G_STRFUNC, propslen);
+		goto cleanup;
 	}
 
 	/* set properties for the item */
@@ -2404,8 +2341,7 @@ cleanup:
 
 gboolean
 exchange_mapi_connection_modify_item (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, mapi_id_t mid,
-			   BuildNameID build_name_id, gpointer ni_data,
-			   BuildProps build_props, gpointer p_data,
+			   BuildWritePropsCB build_props, gpointer bwp_data,
 			   GSList *recipients, GSList *attachments, GSList *generic_streams,
 			   uint32_t options)
 {
@@ -2413,10 +2349,8 @@ exchange_mapi_connection_modify_item (ExchangeMapiConnection *conn, uint32_t olF
 	TALLOC_CTX *mem_ctx;
 	mapi_object_t obj_folder;
 	mapi_object_t obj_message;
-	struct mapi_nameid *nameid;
-	struct SPropTagArray *SPropTagArray;
 	struct SPropValue *props = NULL;
-	gint propslen = 0;
+	uint32_t propslen = 0;
 	gboolean result = FALSE;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
@@ -2429,9 +2363,6 @@ exchange_mapi_connection_modify_item (ExchangeMapiConnection *conn, uint32_t olF
 	mem_ctx = talloc_init("ExchangeMAPI_ModifyItem");
 	mapi_object_init(&obj_folder);
 	mapi_object_init(&obj_message);
-
-	nameid = mapi_nameid_new(mem_ctx);
-	SPropTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
 
 	/* If fid not present then we'll use olFolder. Document this in API doc. */
 	if (fid == 0) {
@@ -2458,28 +2389,10 @@ exchange_mapi_connection_modify_item (ExchangeMapiConnection *conn, uint32_t olF
 
 //	d(mapi_object_debug (&obj_message));
 
-	/* Add named props using callback */
-	if (build_name_id) {
-		if (!build_name_id (nameid, ni_data)) {
-			g_debug ("%s: (%s): Could not build named props ", G_STRLOC, G_STRFUNC);
-			goto cleanup;
-		}
-
-		retval = mapi_nameid_GetIDsFromNames(nameid, &obj_folder, SPropTagArray);
-		if (retval != MAPI_E_SUCCESS) {
-			mapi_errstr("mapi_nameid_GetIDsFromNames", GetLastError());
-			goto cleanup;
-		}
-	}
-
 	/* Add regular props using callback */
-	if (build_props) {
-		propslen = build_props (&props, SPropTagArray, p_data);
-		if (propslen < 1) {
-			g_debug ("%s: (%s): Could not build props ",
-					G_STRLOC, G_STRFUNC);
-			goto cleanup;
-		}
+	if (build_props && !build_props (conn, fid, mem_ctx, &props, &propslen, bwp_data)) {
+		g_debug ("%s: (%s): Could not build props ", G_STRLOC, G_STRFUNC);
+		goto cleanup;
 	}
 
 	/* set properties for the item */

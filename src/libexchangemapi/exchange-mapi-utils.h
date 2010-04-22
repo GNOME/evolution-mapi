@@ -45,6 +45,7 @@ gconstpointer
 exchange_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag);
 gconstpointer
 exchange_mapi_util_find_array_propval (struct mapi_SPropValue_array *properties, uint32_t proptag);
+gconstpointer exchange_mapi_util_find_array_namedid (struct mapi_SPropValue_array *properties, ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t namedid);
 
 ExchangeMAPIStream *
 exchange_mapi_util_find_stream (GSList *stream_list, uint32_t proptag);
@@ -71,6 +72,14 @@ gchar *
 exchange_crlf_to_lf (const gchar *in);
 
 gchar *exchange_mapi_util_profile_name (const gchar *username, const gchar *domain, const gchar *hostname, gboolean migrate);
+
+gboolean exchange_mapi_utils_add_props_to_props_array (TALLOC_CTX *mem_ctx, struct SPropTagArray *props, const uint32_t *prop_ids, guint prop_ids_n_elems);
+gboolean exchange_mapi_utils_add_named_ids_to_props_array (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, ResolveNamedIDsData *named_ids_list, guint named_ids_n_elems);
+
+gboolean exchange_mapi_utils_add_spropvalue (TALLOC_CTX *mem_ctx, struct SPropValue **values_array, uint32_t *n_values, uint32_t prop_tag, gconstpointer prop_value);
+gboolean exchange_mapi_utils_add_spropvalue_named_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values_array, uint32_t *n_values, uint32_t named_id, gconstpointer prop_value);
+
+uint32_t exchange_mapi_utils_push_crc32 (uint32_t crc32, uint8_t *bytes, uint32_t n_bytes);
 
 #endif
 

@@ -228,7 +228,7 @@ mapi_push_notification_listener_thread (gpointer data)
 
 	g_object_ref (conn);
 
-	if (exchange_mapi_connection_events_init (camel_mapi_store_get_exchange_connection (mapi_store))) {
+	if (exchange_mapi_connection_events_init (conn)) {
 		exchange_mapi_connection_events_subscribe (conn, thread_data->event_options, thread_data->event_mask,
 						&thread_data->connection, mapi_notifications_filter,
 						thread_data->event_data);
