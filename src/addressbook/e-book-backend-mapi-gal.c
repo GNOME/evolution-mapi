@@ -20,76 +20,13 @@
 #include <libedata-book/e-data-book-view.h>
 #include <libedata-book/e-book-backend-cache.h>
 #include <libedata-book/e-book-backend-summary.h>
+
+#include "e-book-backend-mapi.h"
 #include "e-book-backend-mapi-gal.h"
 
 G_DEFINE_TYPE (EBookBackendMAPIGAL, e_book_backend_mapi_gal, E_TYPE_BOOK_BACKEND)
 
 static gboolean enable_debug = TRUE;
-static GList *supported_fields;
-
-#define ELEMENT_TYPE_SIMPLE 0x01
-#define ELEMENT_TYPE_COMPLEX 0x02
-
-static const struct field_element_mapping {
-		EContactField field_id;
-		gint element_type;
-		gint mapi_id;
-		gint contact_type;
-//		gchar *element_name;
-//		void (*populate_contact_func)(EContact *contact,    gpointer data);
-//		void (*set_value_in_gw_item) (EGwItem *item, gpointer data);
-//		void (*set_changes) (EGwItem *new_item, EGwItem *old_item);
-
-	} mappings [] = {
-
-	{ E_CONTACT_UID, PT_UNICODE, 0, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_REV, PT_SYSTIME, PR_LAST_MODIFICATION_TIME, ELEMENT_TYPE_SIMPLE},
-
-	{ E_CONTACT_FILE_AS, PT_UNICODE, PR_EMS_AB_MANAGER_T_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_FULL_NAME, PT_UNICODE, PR_DISPLAY_NAME_UNICODE, ELEMENT_TYPE_SIMPLE },
-	{ E_CONTACT_GIVEN_NAME, PT_UNICODE, PR_GIVEN_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_FAMILY_NAME, PT_UNICODE, PR_SURNAME_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_NICKNAME, PT_UNICODE, PR_NICKNAME_UNICODE, ELEMENT_TYPE_SIMPLE },
-
-	{ E_CONTACT_EMAIL_1, PT_UNICODE, PROP_TAG(PT_UNICODE, 0x8084), ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_EMAIL_2, PT_UNICODE, PROP_TAG(PT_UNICODE, 0x8094), ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_EMAIL_3, PT_UNICODE, PROP_TAG(PT_UNICODE, 0x80a4), ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_IM_AIM,  PT_UNICODE, PROP_TAG(PT_UNICODE, 0x8062), ELEMENT_TYPE_COMPLEX},
-
-	{ E_CONTACT_PHONE_BUSINESS, PT_UNICODE, PR_OFFICE_TELEPHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_HOME, PT_UNICODE, PR_HOME_TELEPHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_MOBILE, PT_UNICODE, PR_MOBILE_TELEPHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_HOME_FAX, PT_UNICODE, PR_HOME_FAX_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_BUSINESS_FAX, PT_UNICODE, PR_BUSINESS_FAX_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_PAGER, PT_UNICODE, PR_PAGER_TELEPHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_ASSISTANT, PT_UNICODE, PR_ASSISTANT_TELEPHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_COMPANY, PT_UNICODE, PR_COMPANY_MAIN_PHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-
-	{ E_CONTACT_HOMEPAGE_URL, PT_UNICODE, PROP_TAG(PT_UNICODE, 0x802b), ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_FREEBUSY_URL, PT_UNICODE, PROP_TAG(PT_UNICODE, 0x80d8), ELEMENT_TYPE_SIMPLE},
-
-	{ E_CONTACT_ROLE, PT_UNICODE, PR_PROFESSION_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_TITLE, PT_UNICODE, PR_TITLE_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_ORG, PT_UNICODE, PR_COMPANY_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_ORG_UNIT, PT_UNICODE, PR_DEPARTMENT_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_MANAGER, PT_UNICODE, PR_MANAGER_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_ASSISTANT, PT_UNICODE, PR_ASSISTANT_UNICODE, ELEMENT_TYPE_SIMPLE},
-
-	{ E_CONTACT_OFFICE, PT_UNICODE, PR_OFFICE_LOCATION_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_SPOUSE, PT_UNICODE, PR_SPOUSE_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
-
-	{ E_CONTACT_BIRTH_DATE,  PT_SYSTIME, PR_BIRTHDAY, ELEMENT_TYPE_COMPLEX},
-	{ E_CONTACT_ANNIVERSARY, PT_SYSTIME, PR_WEDDING_ANNIVERSARY, ELEMENT_TYPE_COMPLEX},
-
-	{ E_CONTACT_NOTE, PT_UNICODE, PR_BODY_UNICODE, ELEMENT_TYPE_SIMPLE},
-
-	{ E_CONTACT_ADDRESS_HOME, PT_UNICODE, PROP_TAG(PT_UNICODE, 0x801a), ELEMENT_TYPE_COMPLEX},
-	{ E_CONTACT_ADDRESS_WORK, PT_UNICODE, PROP_TAG(PT_UNICODE, 0x801c), ELEMENT_TYPE_COMPLEX},
-//		{ E_CONTACT_BOOK_URI, ELEMENT_TYPE_SIMPLE, "book_uri"}
-//		{ E_CONTACT_CATEGORIES, },
-	};
-
-static gint maplen = G_N_ELEMENTS(mappings);
 
 struct _EBookBackendMAPIGALPrivate
 {
@@ -111,7 +48,6 @@ struct _EBookBackendMAPIGALPrivate
 	gchar *summary_file_name;
 	EBookBackendSummary *summary;
 	EBookBackendCache *cache;
-
 };
 
 #define SUMMARY_FLUSH_TIMEOUT 5000
@@ -167,15 +103,90 @@ book_view_notify_status (EDataBookView *view, const gchar *status)
 	e_data_book_view_notify_status_message (view, status);
 }
 
+static guint32
+current_time_ms (void)
+{
+	GTimeVal tv;
+
+	g_get_current_time (&tv);
+
+	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+}
+
+struct fetch_gal_data
+{
+	EBookBackendMAPIGAL *ebmapi;
+	EDataBookView *book_view;
+	mapi_id_t fid; /* folder ID of contacts, for named IDs */
+	guint32 last_update; /* when in micro-seconds was done last notification about progress */
+};
+
+static gboolean
+fetch_gal_cb (ExchangeMapiConnection *conn, uint32_t row_index, uint32_t n_rows, struct SRow *aRow, gpointer data)
+{
+	EBookBackendMAPIGALPrivate *priv;
+	struct fetch_gal_data *fgd = data;
+	EContact *contact;
+	gchar *uid;
+	guint32 current_time;
+
+	g_return_val_if_fail (conn != NULL, FALSE);
+	g_return_val_if_fail (aRow != NULL, FALSE);
+	g_return_val_if_fail (data != NULL, FALSE);
+
+	priv = fgd->ebmapi->priv;
+	if (priv->kill_cache_build)
+		return FALSE;
+
+	contact = mapi_book_contact_from_props (conn, fgd->fid, NULL, aRow);
+	if (!contact) {
+		/* just ignore them */
+		return TRUE;
+	}
+
+	uid = g_strdup_printf ("%d", row_index);
+	e_contact_set (contact, E_CONTACT_UID, uid);
+	g_free (uid);
+
+	e_book_backend_cache_add_contact (priv->cache, contact);
+	e_book_backend_summary_add_contact (priv->summary, contact);
+
+	if (!fgd->book_view)
+		fgd->book_view = find_book_view (fgd->ebmapi);
+
+	if (fgd->book_view)
+		e_data_book_view_notify_update (fgd->book_view, contact);
+
+	current_time = current_time_ms ();
+	if (fgd->book_view && current_time - fgd->last_update >= 333) {
+		gchar *status_msg;
+
+		if (n_rows > 0) {
+			/* To translators : This is used to cache the downloaded contacts from GAL.
+			   The first %d is an index of the GAL entry,
+			   the second %d is total count of entries in GAL. */
+			status_msg = g_strdup_printf (_("Caching GAL entry %d/%d"), row_index, n_rows);
+		} else {
+			/* To translators : This is used to cache the downloaded contacts from GAL.
+			   %d is an index of the GAL entry. */
+			status_msg = g_strdup_printf (_("Caching GAL entry %d"), row_index);
+		}
+		book_view_notify_status (fgd->book_view, status_msg);
+		g_free (status_msg);
+		fgd->last_update = current_time;
+	}
+
+	g_object_unref (contact);
+
+	return TRUE;
+}
+
 static gpointer
 build_cache (EBookBackendMAPIGAL *ebmapi)
 {
-	EBookBackendMAPIGALPrivate *priv = ((EBookBackendMAPIGAL *) ebmapi)->priv;
+	EBookBackendMAPIGALPrivate *priv = ebmapi->priv;
 	gchar *tmp;
-	GPtrArray *contacts_array = g_ptr_array_new();
-	gint i = 0;
-	gchar *status_msg;
-	EDataBookView *book_view;
+	struct fetch_gal_data fgd = { 0 };
 
 	//FIXME: What if book view is NULL? Can it be? Check that.
 	if (!priv->cache) {
@@ -189,63 +200,33 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 		printf("Summary file name is %s\n", priv->summary_file_name);
 	}
 
-	exchange_mapi_connection_get_gal (priv->conn, contacts_array);
+	fgd.ebmapi = ebmapi;
+	fgd.book_view = find_book_view (ebmapi);
+	fgd.fid = exchange_mapi_connection_get_default_folder_id (priv->conn, olFolderContacts);
+	fgd.last_update = current_time_ms ();
 
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
+	exchange_mapi_connection_fetch_gal (priv->conn,
+					mapi_book_get_prop_list, GET_ALL_KNOWN_IDS,
+					fetch_gal_cb, &fgd);
 
-	book_view = find_book_view (ebmapi);
-
-	if (book_view)
-		e_data_book_view_notify_complete (book_view,
-						  GNOME_Evolution_Addressbook_Success);
-
-	for (i = 0; i < contacts_array->len && !priv->kill_cache_build; i++) {
-		EContact *contact = e_contact_new ();
-		ExchangeMAPIGALEntry *gal_entry = contacts_array->pdata[i];
-		gchar *uid;
-
-		uid = g_strdup_printf ("%d", i);
-
-		e_contact_set (contact, E_CONTACT_UID, uid);
-		e_contact_set (contact, E_CONTACT_FULL_NAME, gal_entry->name);
-		e_contact_set (contact, E_CONTACT_EMAIL_1, gal_entry->email);
-
-		e_book_backend_cache_add_contact (priv->cache, contact);
-		e_book_backend_summary_add_contact (priv->summary, contact);
-
-		if (book_view && (i % 200 == 0)) {
-			/* To translators : This is used to cache the downloaded contacts from GAL.
-			   First %d : Number of contacts cached till now.
-			   Second %d : Total number of contacts which need to be cached.
-			   So (%d/%d) displays the progress.
-			   Example: Caching the GAL entries (1200/50000)…
-			*/
-			status_msg = g_strdup_printf (_("Caching the GAL entries (%d/%d)… "),
-							 i, contacts_array->len);
-			book_view_notify_status (book_view, status_msg);
-			g_free (status_msg);
-		}
-
-		g_object_unref(contact);
-		g_free (uid);
+	if (fgd.book_view) {
+		e_data_book_view_notify_complete (fgd.book_view, GNOME_Evolution_Addressbook_Success);
+		e_data_book_view_unref (fgd.book_view);
 	}
-
-	if (book_view) {
-		e_data_book_view_notify_complete (book_view,
-						  GNOME_Evolution_Addressbook_Success);
-		e_data_book_view_unref (book_view);
-	}
-
-	g_ptr_array_free (contacts_array, TRUE);
 
 	tmp = g_strdup_printf("%d", priv->kill_cache_build ? 0 : (gint)time (NULL));
 	e_book_backend_cache_set_time (priv->cache, tmp);
 	printf("setting time  %s\n", tmp);
 	g_free (tmp);
+
 	e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
+
 	e_book_backend_summary_save (priv->summary);
+
 	priv->is_cache_ready = !priv->kill_cache_build;
 	priv->is_summary_ready = !priv->kill_cache_build;
+
 	return NULL;
 }
 
@@ -255,10 +236,14 @@ e_book_backend_mapi_gal_get_supported_fields (EBookBackend *backend,
 		      guint32	    opid)
 
 {
+	GList *fields;
+
+	fields = mapi_book_get_supported_fields ();
 	e_data_book_respond_get_supported_fields (book,
 						  opid,
 						  GNOME_Evolution_Addressbook_Success,
-						  supported_fields);
+						  fields);
+	g_list_free (fields);
 }
 
 static void
@@ -548,80 +533,6 @@ get_closure (EDataBookView *book_view)
 	return g_object_get_data (G_OBJECT (book_view), "closure");
 }
 
-#if 0
-static EContact *
-emapidump_gal (struct SRow *gal_entry)
-{
-	EContact *contact = e_contact_new ();
-	gint i;
-
-//	exchange_mapi_debug_property_dump (properties);
-	for (i=1; i<maplen; i++) {
-		gpointer value;
-
-		/* can cast it, no writing to the value; and it'll be freed not before the end of this function */
-		value = (gpointer) exchange_mapi_util_find_row_propval (gal_entry, mappings[i].mapi_id);
-		if (mappings[i].element_type == PT_UNICODE && mappings[i].contact_type == ELEMENT_TYPE_SIMPLE) {
-			if (value)
-				e_contact_set (contact, mappings[i].field_id, value);
-		} else if (mappings[i].contact_type == ELEMENT_TYPE_SIMPLE) {
-			if (value && mappings[i].element_type == PT_SYSTIME) {
-				struct FILETIME *t = value;
-				time_t time;
-				NTTIME nt;
-				gchar buff[129];
-
-				nt = t->dwHighDateTime;
-				nt = nt << 32;
-				nt |= t->dwLowDateTime;
-				time = nt_time_to_unix (nt);
-				e_contact_set (contact, mappings[i].field_id, ctime_r (&time, buff));
-			} else {
-				printf("Nothing is printed\n");
-			}
-		}
-	}
-}
-
-static gboolean
-create_gal_contact_cb (FetchItemsCallbackData *item_data, gpointer data)
-{
-	EDataBookView *book_view = data;
-	BESearchClosure *closure = get_closure (book_view);
-	EBookBackendMAPIGAL *be = closure->bg;
-	EContact *contact;
-	EBookBackendMAPIGALPrivate *priv = ((EBookBackendMAPIGAL *) be)->priv;
-	gchar *suid;
-	GSList *l;
-	gint counter;
-
-	if (!e_flag_is_set (closure->running)) {
-		printf("Might be that the operation is cancelled. Lets ask our parent also to do.\n");
-		return FALSE;
-	}
-
-//	contact = emapidump_contact (item_data->properties);
-	for (l=item_data->gallist; l; l=l->next) {
-		struct SRow *SRow = (struct SRow *) (l->data);
-		counter++;
-		contact = emapidump_gal (SRow);
-		suid = exchange_mapi_util_mapi_ids_to_uid (item_data->fid, item_data->mid);
-
-		if (contact) {
-			/* UID of the contact is nothing but the concatenated string of hex id of folder and the message.*/
-			e_contact_set (contact, E_CONTACT_UID, suid);
-			e_contact_set (contact, E_CONTACT_BOOK_URI, priv->uri);
-			e_data_book_view_notify_update (book_view, contact);
-			g_object_unref(contact);
-		}
-
-		g_free (suid);
-	}
-	g_print ("\n The counter for the above data is %d\n", counter);
-	return TRUE;
-}
-#endif
-
 static void
 get_contacts_from_cache (EBookBackendMAPIGAL *ebmapi,
 			 const gchar *query,
@@ -779,7 +690,7 @@ book_view_thread (gpointer data)
 	g_object_ref (book_view);
 	e_flag_set (closure->running);
 
-	book_view_notify_status (book_view, "Searching…");
+	book_view_notify_status (book_view, _("Searching"));
 	query = e_data_book_view_get_card_query (book_view);
 
 	if (!find_book_view (backend))
@@ -983,7 +894,6 @@ static void e_book_backend_mapi_gal_class_init (EBookBackendMAPIGALClass *klass)
 {
 	GObjectClass  *object_class = G_OBJECT_CLASS (klass);
 	EBookBackendClass *parent_class;
-	gint i;
 
 	e_book_backend_mapi_gal_parent_class = g_type_class_peek_parent (klass);
 
@@ -1009,13 +919,6 @@ static void e_book_backend_mapi_gal_class_init (EBookBackendMAPIGALClass *klass)
 	parent_class->set_mode                   = e_book_backend_mapi_gal_set_mode;
 	parent_class->remove			 = e_book_backend_mapi_gal_remove;
 	object_class->dispose                    = e_book_backend_mapi_gal_dispose;
-
-	supported_fields = NULL;
-	for (i = 0; i < maplen; i++) {
-		supported_fields = g_list_append (supported_fields,
-						  (gchar *)e_contact_field_name (mappings[i].field_id));
-	}
-	supported_fields = g_list_append (supported_fields, (gpointer) "file_as");
 }
 
 /**

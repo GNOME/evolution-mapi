@@ -913,90 +913,71 @@ cleanup:
 	return status;
 }
 
-static ExchangeMAPIGALEntry *
-mapidump_PAB_gal_entry (struct SRow *aRow)
-{
-	const gchar	*addrtype;
-	const gchar	*name;
-	const gchar	*email;
-	const gchar	*account;
-	ExchangeMAPIGALEntry *gal_entry;
-
-	addrtype = (const gchar *)exchange_mapi_util_find_row_propval (aRow, PR_ADDRTYPE);
-	name = (const gchar *)exchange_mapi_util_find_row_propval (aRow, PR_DISPLAY_NAME_UNICODE);
-	email = (const gchar *)exchange_mapi_util_find_row_propval (aRow, PR_SMTP_ADDRESS_UNICODE);
-	account = (const gchar *)exchange_mapi_util_find_row_propval (aRow, PR_ACCOUNT_UNICODE);
-
-	printf("[%s] %s:\n\tName: %-25s\n\tEmail: %-25s\n",
-	       addrtype, account, name, email);
-
-	gal_entry = g_new0 (ExchangeMAPIGALEntry, 1);
-	gal_entry->name = g_strdup (name);
-	gal_entry->email = g_strdup (email);
-
-	return gal_entry;
-}
-
 gboolean
-exchange_mapi_connection_get_gal (ExchangeMapiConnection *conn, GPtrArray *contacts_array)
+exchange_mapi_connection_fetch_gal (ExchangeMapiConnection *conn, BuildReadPropsCB build_props, gpointer brp_data, FetchGALCallback cb, gpointer data)
 {
-	struct SPropTagArray	*SPropTagArray;
-	struct SRowSet		*SRowSet;
+	struct SPropTagArray	*propsTagArray;
+	struct SRowSet		*aRowSet;
 	enum MAPISTATUS		retval;
-	uint32_t		i;
-	uint32_t		count;
+	uint32_t		i, count, n_rows = 0;
 	uint8_t			ulFlags;
 	TALLOC_CTX *mem_ctx;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	g_return_val_if_fail (build_props != NULL, FALSE);
+	g_return_val_if_fail (cb != NULL, FALSE);
 
-	mem_ctx = talloc_init ("ExchangeMAPI_GetGAL");
+	mem_ctx = talloc_init ("ExchangeMAPI_FetchGAL");
 
 	LOCK ();
 
-	SPropTagArray = set_SPropTagArray(mem_ctx, 0xc,
-					  PR_INSTANCE_KEY,
-					  PR_ENTRYID,
-					  PR_DISPLAY_NAME_UNICODE,
-					  PR_SMTP_ADDRESS_UNICODE,
-					  PR_DISPLAY_TYPE,
-					  PR_OBJECT_TYPE,
-					  PR_ADDRTYPE,
-					  PR_OFFICE_TELEPHONE_NUMBER_UNICODE,
-					  PR_OFFICE_LOCATION_UNICODE,
-					  PR_TITLE_UNICODE,
-					  PR_COMPANY_NAME_UNICODE,
-					  PR_ACCOUNT_UNICODE);
+	#ifdef HAVE_GETGALTABLECOUNT
+	retval = GetGALTableCount (priv->session, &n_rows);
+	if (retval != MAPI_E_SUCCESS) {
+		mapi_errstr ("GetGALTableCount", GetLastError ());
+		n_rows = 0;
+	}
+	#endif
 
-	count = 0x7;
+	propsTagArray = set_SPropTagArray (mem_ctx, 0x1, PR_MESSAGE_CLASS);
+	if (!build_props (conn, 0, mem_ctx, propsTagArray, brp_data)) {
+		mapi_errstr ("build_props", GetLastError ());
+		UNLOCK();
+		talloc_free (mem_ctx);
+		return FALSE;
+	}
+
+	retval = MAPI_E_SUCCESS;
+	count = 0;
 	ulFlags = TABLE_START;
-	do {
-		count += 0x2;
-		SRowSet = NULL;
-		retval = GetGALTable (priv->session, SPropTagArray, &SRowSet, count, ulFlags);
-		if ((!SRowSet) || (!(SRowSet->aRow)) || retval != MAPI_E_SUCCESS) {
-			UNLOCK ();
-			MAPIFreeBuffer (SPropTagArray);
-			return FALSE;
+	while (retval == MAPI_E_SUCCESS) {
+		aRowSet = NULL;
+		/* fetch per 10 items */
+		retval = GetGALTable (priv->session, propsTagArray, &aRowSet, 10, ulFlags);
+		if ((!aRowSet) || (!(aRowSet->aRow)) || retval != MAPI_E_SUCCESS) {
+			break;
 		}
-		if (SRowSet->cRows) {
-			for (i = 0; i < SRowSet->cRows; i++) {
-				ExchangeMAPIGALEntry *gal_entry = g_new0 (ExchangeMAPIGALEntry, 1);
-				gal_entry = mapidump_PAB_gal_entry(&SRowSet->aRow[i]);
-				g_ptr_array_add(contacts_array, gal_entry);
+		if (aRowSet->cRows) {
+			for (i = 0; i < aRowSet->cRows; i++, count++) {
+				if (!cb (conn, count, n_rows, &aRowSet->aRow[i], data)) {
+					retval = MAPI_E_RESERVED;
+					break;
+				}
 			}
+		} else {
+			MAPIFreeBuffer (aRowSet);
+			break;
 		}
-		ulFlags = TABLE_CUR;
-		MAPIFreeBuffer(SRowSet);
-	} while (SRowSet->cRows == count);
-	mapi_errstr("GetPABTable", GetLastError());
 
-	MAPIFreeBuffer(SPropTagArray);
+		ulFlags = TABLE_CUR;
+		MAPIFreeBuffer (aRowSet);
+	}
+
+	talloc_free (mem_ctx);
 
 	UNLOCK ();
 
-	return TRUE;
-
+	return retval == MAPI_E_SUCCESS;
 }
 
 /* Returns TRUE if all recipients were read succcesfully, else returns FALSE */

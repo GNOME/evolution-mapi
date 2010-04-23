@@ -148,10 +148,24 @@ save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
 AC_LINK_IFELSE([AC_LANG_PROGRAM(
 	[[#include <libmapi/libmapi.h>]],
 	[[RegisterNotification (NULL, 0)]])],
-	[AC_DEFINE(HAVE_CORRECT_REGISTERNOTIFICATION, 1, [libmapi provides correct RegisterNotification function]) ac_cv_have_wtu=yes],[ac_cv_have_wtu=no])
+	[AC_DEFINE(HAVE_CORRECT_REGISTERNOTIFICATION, 1, [libmapi provides correct RegisterNotification function]) ac_cv_have_crn=yes],[ac_cv_have_crn=no])
 CFLAGS=$save_cflags
 LIBS=$save_libs
-AC_MSG_RESULT([$ac_cv_have_wtu])
+AC_MSG_RESULT([$ac_cv_have_crn])
+
+dnl ****************************
+dnl Check for GetGALTableCount function
+dnl ****************************
+AC_MSG_CHECKING([libmapi GetGALTableCount function])
+save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
+save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
+AC_LINK_IFELSE([AC_LANG_PROGRAM(
+	[[#include <libmapi/libmapi.h>]],
+	[[GetGALTableCount (NULL, NULL)]])],
+	[AC_DEFINE(HAVE_GETGALTABLECOUNT, 1, [libmapi provides GetGALTableCount function]) ac_cv_have_ggtc=yes],[ac_cv_have_ggtc=no])
+CFLAGS=$save_cflags
+LIBS=$save_libs
+AC_MSG_RESULT([$ac_cv_have_ggtc])
 
 dnl ****************************
 dnl Expose version information

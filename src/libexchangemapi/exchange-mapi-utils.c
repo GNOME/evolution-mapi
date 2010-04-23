@@ -203,6 +203,25 @@ exchange_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag)
 	return (find_SPropValue_data(aRow, proptag));
 }
 
+gconstpointer
+exchange_mapi_util_find_row_namedid (struct SRow *aRow, ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
+{
+	uint32_t proptag;
+	gconstpointer res = NULL;
+
+	g_return_val_if_fail (aRow != NULL, NULL);
+	g_return_val_if_fail (conn != NULL, NULL);
+
+	proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, namedid);
+	if (proptag != MAPI_E_RESERVED)
+		res = exchange_mapi_util_find_row_propval (aRow, proptag);
+
+	if (!res)
+		res = exchange_mapi_util_find_row_propval (aRow, namedid);
+
+	return res;
+}
+
 /*
  * Retrieve the property value for a given mapi_SPropValue_array and property tag.
  *

@@ -39,12 +39,10 @@ exchange_mapi_util_mapi_ids_to_uid (mapi_id_t fid, mapi_id_t mid);
 gboolean
 exchange_mapi_util_mapi_ids_from_uid (const gchar *str, mapi_id_t *fid, mapi_id_t *mid);
 
-gconstpointer
-exchange_mapi_util_find_SPropVal_array_propval (struct SPropValue *values, uint32_t proptag);
-gconstpointer
-exchange_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag);
-gconstpointer
-exchange_mapi_util_find_array_propval (struct mapi_SPropValue_array *properties, uint32_t proptag);
+gconstpointer exchange_mapi_util_find_SPropVal_array_propval (struct SPropValue *values, uint32_t proptag);
+gconstpointer exchange_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag);
+gconstpointer exchange_mapi_util_find_row_namedid (struct SRow *aRow, ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t namedid);
+gconstpointer exchange_mapi_util_find_array_propval (struct mapi_SPropValue_array *properties, uint32_t proptag);
 gconstpointer exchange_mapi_util_find_array_namedid (struct mapi_SPropValue_array *properties, ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t namedid);
 
 ExchangeMAPIStream *

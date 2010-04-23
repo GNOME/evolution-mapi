@@ -104,11 +104,6 @@ typedef struct {
 } ExchangeMAPIRecipient;
 
 typedef struct {
-	const gchar *name;
-	const gchar *email;
-} ExchangeMAPIGALEntry;
-
-typedef struct {
 	uint32_t cValues;
 	struct SPropValue *lpProps;
 	GSList *streams;
@@ -138,6 +133,7 @@ typedef struct {
 } ResolveNamedIDsData;
 
 typedef gboolean (*FetchCallback)	(FetchItemsCallbackData *item_data, gpointer data);
+typedef gboolean (*FetchGALCallback)	(ExchangeMapiConnection *conn, uint32_t row_index, uint32_t n_rows, struct SRow *aRow, gpointer data);
 typedef gboolean (*BuildWritePropsCB)	(ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data);
 typedef gboolean (*BuildReadPropsCB)	(ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
 
@@ -163,12 +159,15 @@ gboolean		exchange_mapi_connection_fetch_item (ExchangeMapiConnection *conn, map
 					guint32 options);
 
 gboolean		exchange_mapi_connection_fetch_items (ExchangeMapiConnection *conn, mapi_id_t fid,
-					struct mapi_SRestriction *res,struct SSortOrderSet *sort_order,
+					struct mapi_SRestriction *res, struct SSortOrderSet *sort_order,
 					BuildReadPropsCB build_props, gpointer brp_data,
 					FetchCallback cb, gpointer data,
 					guint32 options);
 
-gboolean		exchange_mapi_connection_get_gal (ExchangeMapiConnection *conn, GPtrArray *contacts_array);
+gboolean		exchange_mapi_connection_fetch_gal (ExchangeMapiConnection *conn,
+					BuildReadPropsCB build_props, gpointer brp_data,
+					FetchGALCallback cb, gpointer data);
+
 mapi_id_t		exchange_mapi_connection_create_folder (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t pfid, const gchar *name);
 gboolean		exchange_mapi_connection_remove_folder (ExchangeMapiConnection *conn, mapi_id_t fid);
 gboolean		exchange_mapi_connection_empty_folder (ExchangeMapiConnection *conn, mapi_id_t fid);
