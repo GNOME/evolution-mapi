@@ -6,12 +6,13 @@
 # This file is distributed under the same license as the Evolution-mapi package.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 # Fran Diéguez <frandieguez@ubuntu.com>, 2009, 2010.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi-master-po-gl-77000.merged\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-04-17 20:55+0200\n"
-"PO-Revision-Date: 2010-04-17 20:55+0200\n"
+"POT-Creation-Date: 2010-04-24 03:36+0200\n"
+"PO-Revision-Date: 2010-04-24 03:37+0200\n"
 "Last-Translator: Fran Diéguez <frandieguez@ubuntu.com>\n"
 "Language-Team: Galician <proxecto@trasno.net>\n"
 "MIME-Version: 1.0\n"
@@ -121,54 +122,62 @@ msgid "Folder size"
 msgstr "Tamaño do cartafol"
 
 #. To translators : This is used to cache the downloaded contacts from GAL.
-#. First %d : Number of contacts cached till now.
-#. Second %d : Total number of contacts which need to be cached.
-#. So (%d/%d) displays the progress.
-#. Example: Caching the GAL entries (1200/50000)…
-#.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:223
+#. The first %d is an index of the GAL entry,
+#. the second %d is total count of entries in GAL.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:168
 #, c-format
-msgid "Caching the GAL entries (%d/%d)… "
-msgstr "Gardando na caché as entradas da GAL (%d/%d)... "
+msgid "Caching GAL entry %d/%d"
+msgstr "Gardando na caché a entrada da GAL %d/%d"
+
+#. To translators : This is used to cache the downloaded contacts from GAL.
+#. %d is an index of the GAL entry.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:172
+#, c-format
+msgid "Caching GAL entry %d"
+msgstr "Gardando na caché a entrada da GAL %d"
+
+#: ../src/addressbook/e-book-backend-mapi-gal.c:693
+msgid "Searching"
+msgstr "Buscando"
 
 #. To translators : Here Evolution MAPI downloads the entries from the GAL server
-#: ../src/addressbook/e-book-backend-mapi-gal.c:800
+#: ../src/addressbook/e-book-backend-mapi-gal.c:711
 msgid "Downloading GAL entries from server…"
 msgstr "Descargando as entradas da GAL desde o servidor..."
 
-#: ../src/calendar/e-cal-backend-mapi.c:199
-#: ../src/calendar/e-cal-backend-mapi.c:1219
+#: ../src/calendar/e-cal-backend-mapi.c:124
+#: ../src/calendar/e-cal-backend-mapi.c:1237
 #: ../src/camel/camel-mapi-store.c:586
 msgid "Authentication failed"
 msgstr "Fallou a autenticación"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:469
+#: ../src/calendar/e-cal-backend-mapi.c:394
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Cargando os elementos no cartafol %s"
 
 #. FIXME: String : We need to restart evolution-data-server
-#: ../src/calendar/e-cal-backend-mapi.c:701
-#: ../src/calendar/e-cal-backend-mapi.c:712
-#: ../src/calendar/e-cal-backend-mapi.c:740
-#: ../src/calendar/e-cal-backend-mapi.c:802
-#: ../src/calendar/e-cal-backend-mapi.c:812
+#: ../src/calendar/e-cal-backend-mapi.c:723
+#: ../src/calendar/e-cal-backend-mapi.c:733
+#: ../src/calendar/e-cal-backend-mapi.c:760
+#: ../src/calendar/e-cal-backend-mapi.c:822
+#: ../src/calendar/e-cal-backend-mapi.c:831
 msgid "Error fetching changes from the server."
 msgstr "Produciuse un erro ao obter os cambios do servidor."
 
-#: ../src/calendar/e-cal-backend-mapi.c:1139
-#: ../src/calendar/e-cal-backend-mapi.c:1149
-#: ../src/calendar/e-cal-backend-mapi.c:1254
-#: ../src/calendar/e-cal-backend-mapi.c:1336
+#: ../src/calendar/e-cal-backend-mapi.c:1158
+#: ../src/calendar/e-cal-backend-mapi.c:1167
+#: ../src/calendar/e-cal-backend-mapi.c:1272
+#: ../src/calendar/e-cal-backend-mapi.c:1354
 msgid "Could not create cache file"
 msgstr "Non foi posíbel crear o ficheiro da caché"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1265
+#: ../src/calendar/e-cal-backend-mapi.c:1283
 msgid "Could not create thread for populating cache"
 msgstr "Non foi posíbel crear o fío de execución para encher a caché"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1699
+#: ../src/calendar/e-cal-backend-mapi.c:1715
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -176,65 +185,65 @@ msgstr ""
 "A capacidade para modificar as instancias únicas dunha cita recorrente aínda "
 "non está implementada. Non se realizou ningún cambio na cita do servidor."
 
-#: ../src/camel/camel-mapi-folder.c:479
+#: ../src/camel/camel-mapi-folder.c:480
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr ""
 "Actualizando a información local da caché de resumo nas mensaxes novas en %s"
 
-#: ../src/camel/camel-mapi-folder.c:708
+#: ../src/camel/camel-mapi-folder.c:718
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Recuperando os ID das mensaxes desde o servidor para %s"
 
-#: ../src/camel/camel-mapi-folder.c:730
+#: ../src/camel/camel-mapi-folder.c:739
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Eliminando as mensaxes borradas da caché en %s"
 
 #. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:993
+#: ../src/camel/camel-mapi-folder.c:1017
 msgid "Fetching summary information for new messages in"
 msgstr "Obtendo a información de resumo para as mensaxes novas en"
 
-#: ../src/camel/camel-mapi-folder.c:1095 ../src/camel/camel-mapi-folder.c:1849
-#: ../src/camel/camel-mapi-folder.c:1857
+#: ../src/camel/camel-mapi-folder.c:1119 ../src/camel/camel-mapi-folder.c:1802
+#: ../src/camel/camel-mapi-folder.c:1810
 msgid "This message is not available in offline mode."
 msgstr "Esta mensaxe non está dispoñíbel no modo sen conexión."
 
-#: ../src/camel/camel-mapi-folder.c:1108
+#: ../src/camel/camel-mapi-folder.c:1132
 msgid "Fetching items failed"
 msgstr "Fallou a obtención de elementos"
 
 #. Translators: The first %s is replaced with a message ID,
 #. the second %s is replaced with a detailed error string
-#: ../src/camel/camel-mapi-folder.c:1811 ../src/camel/camel-mapi-folder.c:1832
+#: ../src/camel/camel-mapi-folder.c:1764 ../src/camel/camel-mapi-folder.c:1785
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Non foi posíbel obter a mensaxe: %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1811
+#: ../src/camel/camel-mapi-folder.c:1764
 msgid "No such message"
 msgstr "Non existe esta mensaxe"
 
-#: ../src/camel/camel-mapi-folder.c:1823
+#: ../src/camel/camel-mapi-folder.c:1776
 msgid "Message fetching cancelled by user."
 msgstr "A obtención da mensaxe foi cancelada polo usuario."
 
-#: ../src/camel/camel-mapi-folder.c:1880 ../src/camel/camel-mapi-folder.c:1889
+#: ../src/camel/camel-mapi-folder.c:1832 ../src/camel/camel-mapi-folder.c:1841
 msgid "Could not get message"
 msgstr "Non foi posíbel obter a mensaxe"
 
-#: ../src/camel/camel-mapi-folder.c:2174
+#: ../src/camel/camel-mapi-folder.c:2128
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Non foi posíbel engadir unha mensaxe ao cartafol `%s'"
 
-#: ../src/camel/camel-mapi-folder.c:2181
+#: ../src/camel/camel-mapi-folder.c:2135
 msgid "Offline."
 msgstr "Desconectado."
 
-#: ../src/camel/camel-mapi-folder.c:2299
+#: ../src/camel/camel-mapi-folder.c:2255
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Non foi posíbel cargar o resumo de %s"
@@ -292,7 +301,7 @@ msgid "All Public Folders"
 msgstr "Todos os cartafoles públicos"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:334 ../src/camel/camel-mapi-transport.c:119
+#: ../src/camel/camel-mapi-store.c:334 ../src/camel/camel-mapi-transport.c:118
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Servidor Exchange MAPI %s"
@@ -300,7 +309,7 @@ msgstr "Servidor Exchange MAPI %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:338 ../src/camel/camel-mapi-transport.c:122
+#: ../src/camel/camel-mapi-store.c:338 ../src/camel/camel-mapi-transport.c:121
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Servizo Exchange MAPI para %s en %s"
@@ -332,29 +341,29 @@ msgstr "Non foi posíbel crear cartafoles MAPI no modo sen conexión."
 msgid "Cannot create new folder '%s'"
 msgstr "Non foi posíbel crear un cartafol novo '%s'"
 
-#: ../src/camel/camel-mapi-store.c:758
+#: ../src/camel/camel-mapi-store.c:760
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
 msgstr "Non foi posíbel renomear o cartafol MAPI '%s'. O cartafol non existe."
 
-#: ../src/camel/camel-mapi-store.c:769
+#: ../src/camel/camel-mapi-store.c:771
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'."
 msgstr "Non foi posíbel renomear o cartafol predefinido MAPI de '%s' a '%s'."
 
-#: ../src/camel/camel-mapi-store.c:794 ../src/camel/camel-mapi-store.c:809
-#: ../src/camel/camel-mapi-store.c:860
+#: ../src/camel/camel-mapi-store.c:796 ../src/camel/camel-mapi-store.c:811
+#: ../src/camel/camel-mapi-store.c:862
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "Non foi posíbel renomear o cartafol MAPI de '%s' a '%s'"
 
-#: ../src/camel/camel-mapi-store.c:1397
+#: ../src/camel/camel-mapi-store.c:1401
 msgid "Folder list not available in offline mode."
 msgstr "A lista de cartafoles non está dispoñíbel no modo sen conexión."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:93
-#: ../src/camel/camel-mapi-transport.c:107
+#: ../src/camel/camel-mapi-transport.c:92
+#: ../src/camel/camel-mapi-transport.c:106
 msgid "Could not send message."
 msgstr "Non foi posíbel enviar a mensaxe."
 
