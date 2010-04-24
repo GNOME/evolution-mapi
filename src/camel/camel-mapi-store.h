@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef __CAMEL_MAPI_STORE_H__
-#define __CAMEL_MAPI_STORE_H__
+#ifndef CAMEL_MAPI_STORE_H
+#define CAMEL_MAPI_STORE_H
 
 #include <glib/gi18n.h>
 
@@ -31,10 +31,24 @@
 #include <exchange-mapi-connection.h>
 #include <exchange-mapi-folder.h>
 
-#define CAMEL_MAPI_STORE_TYPE     (camel_mapi_store_get_type ())
-#define CAMEL_MAPI_STORE(obj)     (CAMEL_CHECK_CAST((obj), CAMEL_MAPI_STORE_TYPE, CamelMapiStore))
-#define CAMEL_MAPI_STORE_CLASS(k) (CAMEL_CHECK_CLASS_CAST ((k), CAMEL_MAPI_STORE_TYPE, CamelMapiStoreClass))
-#define CAMEL_IS_MAPI_STORE(o)    (CAMEL_CHECK_TYPE((o), CAMEL_MAPI_STORE_TYPE))
+/* Standard GObject macros */
+#define CAMEL_TYPE_MAPI_STORE \
+	(camel_mapi_store_get_type ())
+#define CAMEL_MAPI_STORE(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST \
+	((obj), CAMEL_TYPE_MAPI_STORE, CamelMapiStore))
+#define CAMEL_MAPI_STORE_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_CAST \
+	((cls), CAMEL_TYPE_MAPI_STORE, CamelMapiStoreClass))
+#define CAMEL_IS_MAPI_STORE(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE \
+	((obj), CAMEL_TYPE_MAPI_STORE))
+#define CAMEL_IS_MAPI_STORE_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_TYPE \
+	((cls), CAMEL_TYPE_MAPI_STORE))
+#define CAMEL_MAPI_STORE_GET_CLASS(obj) \
+	(G_TYPE_INSTANCE_GET_CLASS \
+	((obj), CAMEL_TYPE_MAPI_STORE, CamelMapiStoreClass))
 
 /* TODO : Move this to libcamel. Task when merging */
 #define CAMEL_FOLDER_FLAGS_LAST (1<<13)
@@ -42,6 +56,8 @@
 #define CAMEL_MAPI_FOLDER_PUBLIC (CAMEL_FOLDER_FLAGS_LAST << 1)
 #define CAMEL_MAPI_FOLDER_PERSONAL (CAMEL_FOLDER_FLAGS_LAST << 2)
 #define CAMEL_MAPI_FOLDER_FORIEGN (CAMEL_FOLDER_FLAGS_LAST << 3)
+
+G_BEGIN_DECLS
 
 /**
  * definition of CamelMAPIStore
@@ -64,26 +80,14 @@ struct _CamelMapiStore{
 };
 
 struct _CamelMapiStoreClass {
-	CamelOfflineStoreClass		parent_class;
+	CamelOfflineStoreClass parent_class;
 };
 
 /**
  * PROTOTYPES
  */
 
-#ifndef __BEGIN_DECLS
-#ifdef __cplusplus
-#define __BEGIN_DECLS		extern "C" {
-#define __END_DECLS		}
-#else
-#define __BEGIN_DECLS
-#define __END_DECLS
-#endif
-#endif
-
-__BEGIN_DECLS
-/* Standard Camel function */
-CamelType camel_mapi_store_get_type(void);
+GType camel_mapi_store_get_type(void);
 gboolean camel_mapi_store_connected(CamelMapiStore *, CamelException *);
 
 const gchar * camel_mapi_store_folder_id_lookup (CamelMapiStore *mapi_store, const gchar *folder_name);
@@ -97,6 +101,6 @@ void camel_mapi_store_unset_notification_data (CamelMapiStore *mstore);
 
 ExchangeMapiConnection *camel_mapi_store_get_exchange_connection (CamelMapiStore *mapi_store);
 
-__END_DECLS
+G_END_DECLS
 
-#endif /* __CAMEL_OPENCHANGE_STORE_H__ */
+#endif /* CAMEL_OPENCHANGE_STORE_H */

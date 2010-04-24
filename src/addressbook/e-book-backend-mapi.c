@@ -743,7 +743,7 @@ mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 				}
 			}
 
-			camel_object_unref (addr);
+			g_object_unref (addr);
 			g_free (raw);
 		}
 
@@ -1370,7 +1370,7 @@ mapi_book_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid, struc
 					e_vcard_attribute_add_value (attr, value);
 
 				g_free (value);
-				camel_object_unref (addr);
+				g_object_unref (addr);
 
 				str = g_strdup_printf ("%d", i + 1);
 				e_vcard_attribute_add_param_with_value (attr,

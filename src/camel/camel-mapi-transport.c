@@ -53,6 +53,8 @@ CamelStore *get_store(void);
 
 void	set_store(CamelStore *);
 
+G_DEFINE_TYPE (CamelMapiTransport, camel_mapi_transport, CAMEL_TYPE_TRANSPORT)
+
 /*CreateItem would return the MID of the new message or '0' if we fail.*/
 static mapi_id_t
 mapi_message_item_send (ExchangeMapiConnection *conn, MapiItem *item)
@@ -124,40 +126,21 @@ mapi_transport_get_name(CamelService *service, gboolean brief)
 }
 
 static void
-camel_mapi_transport_class_init(CamelMapiTransportClass *camel_mapi_transport_class)
+camel_mapi_transport_class_init (CamelMapiTransportClass *class)
 {
-	CamelTransportClass *camel_transport_class =
-		CAMEL_TRANSPORT_CLASS (camel_mapi_transport_class);
-	CamelServiceClass *camel_service_class =
-		CAMEL_SERVICE_CLASS (camel_mapi_transport_class);
+	CamelServiceClass *service_class;
+	CamelTransportClass *transport_class;
 
-	camel_service_class->get_name = mapi_transport_get_name;
-	camel_transport_class->send_to = mapi_send_to;
+	service_class = CAMEL_SERVICE_CLASS (class);
+	service_class->get_name = mapi_transport_get_name;
+
+	transport_class = CAMEL_TRANSPORT_CLASS (class);
+	transport_class->send_to = mapi_send_to;
 }
 
 static void
-camel_mapi_transport_init (CamelTransport *transport)
+camel_mapi_transport_init (CamelMapiTransport *transport)
 {
 
-}
-
-CamelType
-camel_mapi_transport_get_type (void)
-{
-	static CamelType camel_mapi_transport_type = CAMEL_INVALID_TYPE;
-
-	if (camel_mapi_transport_type == CAMEL_INVALID_TYPE) {
-		camel_mapi_transport_type =
-			camel_type_register (CAMEL_TRANSPORT_TYPE,
-					     "CamelMapiTransport",
-					     sizeof (CamelMapiTransport),
-					     sizeof (CamelMapiTransportClass),
-					     (CamelObjectClassInitFunc) camel_mapi_transport_class_init,
-					     NULL,
-					     (CamelObjectInitFunc) camel_mapi_transport_init,
-					     NULL);
-	}
-
-	return camel_mapi_transport_type;
 }
 

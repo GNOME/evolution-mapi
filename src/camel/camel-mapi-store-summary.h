@@ -21,21 +21,37 @@
  *
  */
 
-#ifndef _CAMEL_MAPI_STORE_SUMMARY_H
-#define _CAMEL_MAPI_STORE_SUMMARY_H
+#ifndef CAMEL_MAPI_STORE_SUMMARY_H
+#define CAMEL_MAPI_STORE_SUMMARY_H
 
 #include <camel/camel.h>
 
 #define CAMEL_MAPI_STORE_SUMMARY_VERSION (0)
 
-#define CAMEL_MAPI_STORE_SUMMARY(obj)         CAMEL_CHECK_CAST (obj, camel_mapi_store_summary_get_type (), CamelMapiStoreSummary)
-#define CAMEL_MAPI_STORE_SUMMARY_CLASS(klass) CAMEL_CHECK_CLASS_CAST (klass, camel_mapi_store_summary_get_type (), CamelMapiStoreSummaryClass)
-#define CAMEL_IS_MAPI_STORE_SUMMARY(obj)      CAMEL_CHECK_TYPE (obj, camel_mapi_store_summary_get_type ())
+/* Standard GObject macros */
+#define CAMEL_TYPE_MAPI_STORE_SUMMARY \
+	(camel_mapi_store_summary_get_type ())
+#define CAMEL_MAPI_STORE_SUMMARY(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST \
+	((obj), CAMEL_TYPE_MAPI_STORE_SUMMARY, CamelMapiStoreSummary))
+#define CAMEL_MAPI_STORE_SUMMARY_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_CAST \
+	((cls), CAMEL_TYPE_MAPI_STORE_SUMMARY, CamelMapiStoreSummaryClass))
+#define CAMEL_IS_MAPI_STORE_SUMMARY(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE \
+	((obj), CAMEL_TYPE_MAPI_STORE_SUMMARY))
+#define CAMEL_IS_MAPI_STORE_SUMMARY_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_TYPE \
+	((cls), CAMEL_TYPE_MAPI_STORE_SUMMARY))
+#define CAMEL_MAPI_STORE_SUMMARY_GET_CLASS(obj) \
+	(G_TYPE_INSTANCE_GET_CLASS \
+	((obj), CAMEL_TYPE_MAPI_STORE_SUMMARY, CamelMapiStoreSummaryClass))
 
 G_BEGIN_DECLS
 
-typedef struct _CamelMapiStoreSummary      CamelMapiStoreSummary;
+typedef struct _CamelMapiStoreSummary CamelMapiStoreSummary;
 typedef struct _CamelMapiStoreSummaryClass CamelMapiStoreSummaryClass;
+typedef struct _CamelMapiStoreSummaryPrivate CamelMapiStoreSummaryPrivate;
 
 typedef struct _CamelMapiStoreInfo CamelMapiStoreInfo;
 
@@ -54,9 +70,8 @@ struct _CamelMapiStoreInfo {
 };
 
 struct _CamelMapiStoreSummary {
-	CamelStoreSummary summary;
-
-	struct _CamelMapiStoreSummaryPrivate *priv;
+	CamelStoreSummary parent;
+	CamelMapiStoreSummaryPrivate *priv;
 
 	/* header info */
 	guint32 version;        /* version of base part of file */
@@ -67,7 +82,7 @@ struct _CamelMapiStoreSummaryClass {
 	CamelStoreSummaryClass summary_class;
 };
 
-CamelType                        camel_mapi_store_summary_get_type      (void);
+GType                        camel_mapi_store_summary_get_type      (void);
 CamelMapiStoreSummary      *camel_mapi_store_summary_new        (void);
 CamelMapiStoreInfo *camel_mapi_store_summary_full_name(CamelMapiStoreSummary *s, const gchar *full_name);
 CamelMapiStoreInfo *camel_mapi_store_summary_add_from_full(CamelMapiStoreSummary *s, const gchar *full, gchar dir_sep,
@@ -83,4 +98,4 @@ gchar *camel_mapi_store_summary_full_from_path(CamelMapiStoreSummary *s, const g
 
 G_END_DECLS
 
-#endif /* _CAMEL_MAPI_STORE_SUMMARY_H */
+#endif /* CAMEL_MAPI_STORE_SUMMARY_H */

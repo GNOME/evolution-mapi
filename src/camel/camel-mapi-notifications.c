@@ -284,9 +284,9 @@ camel_mapi_notification_listener_stop (CamelMapiStore *mstore, gpointer start_va
 	g_object_unref (thread_data->cancellable);
 	g_free (thread_data);
 
-	camel_object_ref (mstore);
+	g_object_ref (mstore);
 	camel_service_lock (CAMEL_SERVICE (mstore), CS_REC_CONNECT_LOCK);
 	camel_mapi_store_unset_notification_data (mstore);
 	camel_service_unlock (CAMEL_SERVICE (mstore), CS_REC_CONNECT_LOCK);
-	camel_object_unref (mstore);
+	g_object_unref (mstore);
 }

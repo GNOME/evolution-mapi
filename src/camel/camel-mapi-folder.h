@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef __MAPI_FOLDER_H__
-#define __MAPI_FOLDER_H__
+#ifndef CAMEL_MAPI_FOLDER_H
+#define CAMEL_MAPI_FOLDER_H
 
 #include <camel/camel.h>
 #include <libmapi/libmapi.h>
@@ -30,10 +30,24 @@
 
 #define PATH_FOLDER ".evolution/mail/mapi"
 
-#define CAMEL_MAPI_FOLDER_TYPE     (camel_mapi_folder_get_type ())
-#define CAMEL_MAPI_FOLDER(obj)     (CAMEL_CHECK_CAST((obj), CAMEL_MAPI_FOLDER_TYPE, CamelMapiFolder))
-#define CAMEL_MAPI_FOLDER_CLASS(k) (CAMEL_CHECK_CLASS_CAST ((k), CAMEL_MAPI_FOLDER_TYPE, CamelMapiFolderClass))
-#define CAMEL_IS_MAPI_FOLDER(o)    (CAMEL_CHECK_TYPE((o), CAMEL_MAPI_FOLDER_TYPE))
+/* Standard GObject macros */
+#define CAMEL_TYPE_MAPI_FOLDER \
+	(camel_mapi_folder_get_type ())
+#define CAMEL_MAPI_FOLDER(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST \
+	((obj), CAMEL_TYPE_MAPI_FOLDER, CamelMapiFolder))
+#define CAMEL_MAPI_FOLDER_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_CAST \
+	((cls), CAMEL_TYPE_MAPI_FOLDER, CamelMapiFolderClass))
+#define CAMEL_IS_MAPI_FOLDER(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE \
+	((obj), CAMEL_TYPE_MAPI_FOLDER))
+#define CAMEL_IS_MAPI_FOLDER_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_TYPE \
+	((cls), CAMEL_TYPE_MAPI_FOLDER))
+#define CAMEL_MAPI_FOLDER_GET_CLASS(obj) \
+	(G_TYPE_INSTANCE_GET_CLASS \
+	((obj), CAMEL_TYPE_MAPI_FOLDER, CamelMapiFolderClass))
 
 /**
  * DATA STRUCTURES
@@ -96,13 +110,13 @@ typedef struct  {
 
 void mapi_item_free (MapiItem *item);
 
-typedef struct  _CamelMapiFolder CamelMapiFolder;
-typedef struct  _CamelMapiFolderClass CamelMapiFolderClass;
+typedef struct _CamelMapiFolder CamelMapiFolder;
+typedef struct _CamelMapiFolderClass CamelMapiFolderClass;
+typedef struct _CamelMapiFolderPrivate CamelMapiFolderPrivate;
 
 struct _CamelMapiFolder {
-	CamelOfflineFolder parent_object;
-
-	struct _CamelMapiFolderPrivate *priv;
+	CamelOfflineFolder parent;
+	CamelMapiFolderPrivate *priv;
 
 	CamelFolderSearch *search;
 
@@ -118,10 +132,7 @@ struct _CamelMapiFolder {
 
 struct _CamelMapiFolderClass {
 	CamelOfflineFolderClass parent_class;
-
-	/* Virtual methods */
-
-} ;
+};
 
 typedef struct {
 	GSList *items_list;
@@ -130,8 +141,7 @@ typedef struct {
 	CamelFolderChangeInfo *changes;
 }fetch_items_data;
 
-/* Standard Camel function */
-CamelType camel_mapi_folder_get_type (void);
+GType camel_mapi_folder_get_type (void);
 
 /* implemented */
 CamelFolder *
@@ -144,4 +154,4 @@ gboolean camel_mapi_folder_fetch_summary (CamelStore *store, const mapi_id_t fid
 
 G_END_DECLS
 
-#endif /* CAMEL_GROUPWISE_FOLDER_H */
+#endif /* CAMEL_MAPI_FOLDER_H */

@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef __CAMEL_MAPI_UTILS_H__
-#define __CAMEL_MAPI_UTILS_H__
+#ifndef CAMEL_MAPI_UTILS_H
+#define CAMEL_MAPI_UTILS_H
 
 G_BEGIN_DECLS
 

@@ -23,8 +23,8 @@
 
 /* For push notification listener*/
 
-#ifndef _CAMEL_MAPI_NOTIFICATIONS_H
-#define _CAMEL_MAPI_NOTIFICATIONS_H
+#ifndef CAMEL_MAPI_NOTIFICATIONS_H
+#define CAMEL_MAPI_NOTIFICATIONS_H
 
 G_BEGIN_DECLS
 
@@ -33,4 +33,4 @@ void camel_mapi_notification_listener_stop (CamelMapiStore *store, gpointer star
 
 G_END_DECLS
 
-#endif
+#endif /* CAMEL_MAPI_NOTIFICATIONS_H */

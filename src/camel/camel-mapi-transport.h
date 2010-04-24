@@ -22,32 +22,46 @@
  */
 
 #ifndef CAMEL_MAPI_TRANSPORT_H
-#define CAMEL_MAPI_TRANSPORT_H 1
+#define CAMEL_MAPI_TRANSPORT_H
 
 #include <camel/camel.h>
 #include <libmapi/libmapi.h>
 #include <exchange-mapi-connection.h>
 
-#define CAMEL_MAPI_TRANSPORT_TYPE     (camel_mapi_transport_get_type ())
-#define CAMEL_MAPI_TRANSPORT(obj)     (CAMEL_CHECK_CAST((obj), CAMEL_MAPI_TRANSPORT_TYPE, CamelMapiTransport))
-#define CAMEL_MAPI_TRANSPORT_CLASS(k) (CAMEL_CHECK_CLASS_CAST ((k), CAMEL_MAPI_TRANSPORT_TYPE, CamelMapiTransportClass))
-#define CAMEL_IS_MAPI_TRANSPORT(o)    (CAMEL_CHECK_TYPE((o), CAMEL_MAPI_TRANSPORT_TYPE))
+/* Standard GObject macros */
+#define CAMEL_TYPE_MAPI_TRANSPORT \
+	(camel_mapi_transport_get_type ())
+#define CAMEL_MAPI_TRANSPORT(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST \
+	((obj), CAMEL_TYPE_MAPI_TRANSPORT, CamelMapiTransport))
+#define CAMEL_MAPI_TRANSPORT_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_CAST \
+	((cls), CAMEL_TYPE_MAPI_TRANSPORT, CamelMapiTransportClass))
+#define CAMEL_IS_MAPI_TRANSPORT(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE \
+	((obj), CAMEL_TYPE_MAPI_TRANSPORT))
+#define CAMEL_IS_MAPI_TRANSPORT_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_TYPE \
+	((cls), CAMEL_TYPE_MAPI_TRANSPORT))
+#define CAMEL_MAPI_TRANSPORT_GET_CLASS(obj) \
+	(G_TYPE_INSTANCE_GET_CLASS \
+	((obj), CAMEL_TYPE_MAPI_TRANSPORT, CamelMapiTransportClass))
 
 G_BEGIN_DECLS
 
-typedef struct {
-	CamelTransport parent_object;
+typedef struct _CamelMapiTransport CamelMapiTransport;
+typedef struct _CamelMapiTransportClass CamelMapiTransportClass;
+
+struct _CamelMapiTransport {
+	CamelTransport parent;
 	gboolean connected;
+};
 
-} CamelMapiTransport;
-
-typedef struct {
+struct _CamelMapiTransportClass {
 	CamelTransportClass parent_class;
+};
 
-} CamelMapiTransportClass;
-
-/* Standard Camel function */
-CamelType camel_mapi_transport_get_type (void);
+GType camel_mapi_transport_get_type (void);
 
 G_END_DECLS
 

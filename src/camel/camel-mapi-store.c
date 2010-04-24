@@ -57,6 +57,10 @@
 
 #define d(x) printf("%s:%s:%s \n", G_STRLOC, G_STRFUNC, x)
 
+#define CAMEL_MAPI_STORE_GET_PRIVATE(obj) \
+	(G_TYPE_INSTANCE_GET_PRIVATE \
+	((obj), CAMEL_TYPE_MAPI_STORE, CamelMapiStorePrivate))
+
 struct _CamelMapiStorePrivate {
 	gchar *profile;
 	ExchangeMapiConnection *conn;
@@ -73,11 +77,7 @@ struct _CamelMapiStorePrivate {
 	gpointer notification_data; /* pointer to a notification data; can be only one */
 };
 
-static CamelOfflineStoreClass *parent_class = NULL;
-
-static void	camel_mapi_store_class_init(CamelMapiStoreClass *);
-static void	camel_mapi_store_init(CamelMapiStore *, CamelMapiStoreClass *);
-static void	camel_mapi_store_finalize(CamelObject *);
+G_DEFINE_TYPE (CamelMapiStore, camel_mapi_store, CAMEL_TYPE_OFFLINE_STORE)
 
 /* service methods */
 static gboolean	mapi_construct(CamelService *, CamelSession *,
@@ -158,23 +158,71 @@ mapi_compare_folder_name(gconstpointer a, gconstpointer b)
 }
 
 static void
-camel_mapi_store_class_init(CamelMapiStoreClass *klass)
+mapi_store_dispose (GObject *object)
 {
-	CamelServiceClass	*service_class =
-		CAMEL_SERVICE_CLASS (klass);
-	CamelStoreClass		*store_class = (CamelStoreClass *) klass;
+	CamelMapiStorePrivate *priv;
 
-	parent_class = (CamelOfflineStoreClass *) camel_type_get_global_classfuncs(CAMEL_TYPE_OFFLINE_STORE);
+	priv = CAMEL_MAPI_STORE_GET_PRIVATE (object);
 
+	if (priv->conn != NULL) {
+		g_object_unref (priv->conn);
+		priv->conn = NULL;
+	}
+
+	/* Chain up to parent's dispose() method. */
+	G_OBJECT_CLASS (camel_mapi_store_parent_class)->dispose (object);
+}
+
+static void
+mapi_store_finalize (GObject *object)
+{
+	CamelMapiStorePrivate *priv;
+
+	priv = CAMEL_MAPI_STORE_GET_PRIVATE (object);
+
+	g_free (priv->profile);
+	g_free (priv->storage_path);
+	g_free (priv->base_url);
+
+	if (priv->id_hash != NULL)
+		g_hash_table_destroy (priv->id_hash);
+
+	if (priv->name_hash != NULL)
+		g_hash_table_destroy (priv->name_hash);
+
+	if (priv->parent_hash != NULL)
+		g_hash_table_destroy (priv->parent_hash);
+
+	if (priv->default_folders != NULL)
+		g_hash_table_destroy (priv->default_folders);
+
+	/* Chain up to parent's finalize() method. */
+	G_OBJECT_CLASS (camel_mapi_store_parent_class)->finalize (object);
+}
+
+static void
+camel_mapi_store_class_init (CamelMapiStoreClass *class)
+{
+	GObjectClass *object_class;
+	CamelServiceClass *service_class;
+	CamelStoreClass *store_class;
+
+	g_type_class_add_private (class, sizeof (CamelMapiStorePrivate));
+
+	object_class = G_OBJECT_CLASS (class);
+	object_class->dispose = mapi_store_dispose;
+	object_class->finalize = mapi_store_finalize;
+
+	service_class = CAMEL_SERVICE_CLASS (class);
 	service_class->construct = mapi_construct;
 	service_class->get_name = mapi_get_name;
 	service_class->connect = mapi_connect;
 	service_class->disconnect = mapi_disconnect;
 	service_class->query_auth_types = mapi_query_auth_types;
 
+	store_class = CAMEL_STORE_CLASS (class);
 	store_class->hash_folder_name = mapi_hash_folder_name;
 	store_class->compare_folder_name = mapi_compare_folder_name;
-	/* store_class->get_inbox = mapi_get_inbox; */
 	store_class->get_folder = mapi_get_folder;
 	store_class->create_folder = mapi_create_folder;
 	store_class->delete_folder = mapi_delete_folder;
@@ -187,84 +235,15 @@ camel_mapi_store_class_init(CamelMapiStoreClass *klass)
 	store_class->noop = mapi_noop;
 }
 
-CamelType
-camel_mapi_store_get_type(void)
-{
-	static CamelType camel_mapi_store_type = CAMEL_INVALID_TYPE;
-
-	if (camel_mapi_store_type == CAMEL_INVALID_TYPE) {
-		camel_mapi_store_type = camel_type_register(camel_offline_store_get_type (),
-							    "CamelMapiStores",
-							    sizeof (CamelMapiStore),
-							    sizeof (CamelMapiStoreClass),
-							    (CamelObjectClassInitFunc) camel_mapi_store_class_init,
-							    NULL,
-							    (CamelObjectInitFunc) camel_mapi_store_init,
-							    (CamelObjectFinalizeFunc) camel_mapi_store_finalize);
-	}
-
-	return camel_mapi_store_type;
-}
-
 /*
 ** store is already initilyse to NULL or 0 value
-** klass already have a parent_class
+** class already have a parent_class
 ** nothing must be doing here
 */
-static void camel_mapi_store_init(CamelMapiStore *store, CamelMapiStoreClass *klass)
+static void
+camel_mapi_store_init (CamelMapiStore *mapi_store)
 {
-	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
-	CamelMapiStorePrivate *priv = g_new0 (CamelMapiStorePrivate, 1);
-
-	mapi_store->summary = NULL;
-
-	priv->conn = NULL;
-	priv->storage_path = NULL;
-	priv->base_url = NULL;
-	priv->folders_synced = FALSE;
-	priv->notification_data = NULL;
-
-	mapi_store->priv = priv;
-
-}
-
-static void camel_mapi_store_finalize(CamelObject *object)
-{
-	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (object);
-
-	if (mapi_store && mapi_store->priv) {
-		CamelMapiStorePrivate *priv = mapi_store->priv;
-
-		#define freeStr(x)		\
-			if (x) {		\
-				g_free (x);	\
-				x = NULL;	\
-			}
-		#define destroyHash(h)				\
-			if (h) {				\
-				g_hash_table_destroy (h);	\
-				h = NULL;			\
-			}
-
-		freeStr (priv->profile);
-		freeStr (priv->storage_path);
-		freeStr (priv->base_url);
-		destroyHash (priv->id_hash);
-		destroyHash (priv->name_hash);
-		destroyHash (priv->parent_hash);
-		destroyHash (priv->default_folders);
-
-		if (priv->conn) {
-			g_object_unref (priv->conn);
-			priv->conn = NULL;
-		}
-
-		#undef freeStr
-		#undef destroyHash
-
-		g_free (mapi_store->priv);
-		mapi_store->priv = NULL;
-	}
+	mapi_store->priv = CAMEL_MAPI_STORE_GET_PRIVATE (mapi_store);
 }
 
 /* service methods */
@@ -277,7 +256,7 @@ static gboolean mapi_construct(CamelService *service, CamelSession *session,
 	CamelMapiStorePrivate *priv = mapi_store->priv;
 	gchar *path = NULL;
 
-	if (!CAMEL_SERVICE_CLASS (parent_class)->construct (service, session, provider, url, ex))
+	if (!CAMEL_SERVICE_CLASS (camel_mapi_store_parent_class)->construct (service, session, provider, url, ex))
 		return FALSE;
 
 /*	if (!(url->host || url->user)) { */
@@ -671,7 +650,7 @@ mapi_delete_folder(CamelStore *store, const gchar *folder_name, CamelException *
 	if (status) {
 		/* Fixme ??  */
 /*		if (mapi_store->current_folder) */
-/*			camel_object_unref (mapi_store->current_folder); */
+/*			g_object_unref (mapi_store->current_folder); */
 		mapi_forget_folder(mapi_store,folder_name,ex);
 
 		/* remove from name_cache at the end, because the folder_id is from there */
