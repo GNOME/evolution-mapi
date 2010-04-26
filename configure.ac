@@ -139,6 +139,20 @@ LIBS=$save_libs
 AC_MSG_RESULT([$ac_cv_have_wtu])
 
 dnl ****************************
+dnl Check for RegisterNotification function with two params
+dnl ****************************
+AC_MSG_CHECKING([libmapi RegisterNotification function with two params])
+save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
+save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
+AC_LINK_IFELSE([AC_LANG_PROGRAM(
+	[[#include <libmapi/libmapi.h>]],
+	[[RegisterNotification (NULL, 0)]])],
+	[AC_DEFINE(HAVE_CORRECT_REGISTERNOTIFICATION, 1, [libmapi provides correct RegisterNotification function]) ac_cv_have_crn=yes],[ac_cv_have_crn=no])
+CFLAGS=$save_cflags
+LIBS=$save_libs
+AC_MSG_RESULT([$ac_cv_have_crn])
+
+dnl ****************************
 dnl Expose version information
 dnl ****************************
 API_VERSION=$EDS_PACKAGE

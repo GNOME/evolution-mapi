@@ -785,7 +785,7 @@ mapidump_PAB_gal_entry (struct SRow *aRow)
 	const char	*account;
 	ExchangeMAPIGALEntry *gal_entry;
 
-	addrtype = (const gchar *)exchange_mapi_util_find_row_propval (aRow, PR_ADDRTYPE);
+	addrtype = (const gchar *)exchange_mapi_util_find_row_propval (aRow, PR_ADDRTYPE_UNICODE);
 	name = (const gchar *)exchange_mapi_util_find_row_propval (aRow, PR_DISPLAY_NAME_UNICODE);
 	email = (const gchar *)exchange_mapi_util_find_row_propval (aRow, PR_SMTP_ADDRESS_UNICODE);
 	account = (const gchar *)exchange_mapi_util_find_row_propval (aRow, PR_ACCOUNT_UNICODE);
@@ -822,7 +822,7 @@ exchange_mapi_util_get_gal (GPtrArray *contacts_array)
 					  PR_SMTP_ADDRESS_UNICODE,
 					  PR_DISPLAY_TYPE,
 					  PR_OBJECT_TYPE,
-					  PR_ADDRTYPE,
+					  PR_ADDRTYPE_UNICODE,
 					  PR_OFFICE_TELEPHONE_NUMBER_UNICODE,
 					  PR_OFFICE_LOCATION_UNICODE,
 					  PR_TITLE_UNICODE,
@@ -889,7 +889,7 @@ exchange_mapi_util_get_recipients (mapi_object_t *obj_message, GSList **recip_li
 		recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_SMTP_ADDRESS_UNICODE));
 		/* fallback */
 		if (!recipient->email_id) {
-			const char *addrtype = talloc_steal (recipient->mem_ctx, (const char *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE));
+			const char *addrtype = talloc_steal (recipient->mem_ctx, (const char *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE_UNICODE));
 			if (addrtype && !g_ascii_strcasecmp(addrtype, "SMTP"))
 				recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_EMAIL_ADDRESS_UNICODE));
 		}
@@ -968,7 +968,7 @@ exchange_mapi_util_modify_recipients (TALLOC_CTX *mem_ctx, mapi_object_t *obj_me
 					  PR_DISPLAY_TYPE,
 					  PR_TRANSMITTABLE_DISPLAY_NAME_UNICODE,
 					  PR_EMAIL_ADDRESS_UNICODE,
-					  PR_ADDRTYPE,
+					  PR_ADDRTYPE_UNICODE,
 					  PR_SEND_RICH_INFO,
 					  PR_7BIT_DISPLAY_NAME_UNICODE,
 					  PR_SMTP_ADDRESS_UNICODE);
@@ -3154,13 +3154,17 @@ exchange_mapi_util_ex_to_smtp (const gchar *ex_address)
 gboolean
 exchange_mapi_events_init ()
 {
-	enum MAPISTATUS retval;
+	gboolean retval;
 
 	LOCK();
-	retval = RegisterNotification(0);
+	#ifdef HAVE_CORRECT_REGISTERNOTIFICATION
+	retval = RegisterNotification (global_mapi_session, 0) == MAPI_E_SUCCESS;
+	#else
+	retval = RegisterNotification (0) == MAPI_E_SUCCESS;
+	#endif
 	UNLOCK();
 
-	return (retval == MAPI_E_SUCCESS);
+	return retval;
 }
 
 gboolean

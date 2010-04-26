@@ -335,7 +335,7 @@ exchange_mapi_cal_util_fetch_organizer (ECalComponent *comp, GSList **recip_list
 		val = MAPI_MAILUSER;
 		set_SPropValue_proptag (&(recipient->in.ext_lpProps[1]), PR_OBJECT_TYPE, (const void *)&val);
 		str = "SMTP";
-		set_SPropValue_proptag (&(recipient->in.ext_lpProps[2]), PR_ADDRTYPE, (const void *)(str));
+		set_SPropValue_proptag (&(recipient->in.ext_lpProps[2]), PR_ADDRTYPE_UNICODE, (const void *)(str));
 		str = recipient->email_id;
 		set_SPropValue_proptag (&(recipient->in.ext_lpProps[3]), PR_SMTP_ADDRESS_UNICODE, (gconstpointer )(str));
 
@@ -408,7 +408,7 @@ exchange_mapi_cal_util_fetch_recipients (ECalComponent *comp, GSList **recip_lis
 		val = MAPI_MAILUSER;
 		set_SPropValue_proptag (&(recipient->in.ext_lpProps[1]), PR_OBJECT_TYPE, (const void *)&val);
 		str = "SMTP";
-		set_SPropValue_proptag (&(recipient->in.ext_lpProps[2]), PR_ADDRTYPE, (const void *)(str));
+		set_SPropValue_proptag (&(recipient->in.ext_lpProps[2]), PR_ADDRTYPE_UNICODE, (const void *)(str));
 		str = recipient->email_id;
 		set_SPropValue_proptag (&(recipient->in.ext_lpProps[3]), PR_SMTP_ADDRESS_UNICODE, (gconstpointer )(str));
 
@@ -816,10 +816,10 @@ exchange_mapi_cal_util_mapi_props_to_comp (icalcomponent_kind kind, const gchar 
 			if (icalcomponent_get_first_property (ical_comp, ICAL_ORGANIZER_PROPERTY) == NULL) {
 				gchar *val;
 //				const gchar *sender_name = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_NAME_UNICODE);
-				const char *sender_email_type = (const char *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE);
+				const char *sender_email_type = (const char *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE);
 				const gchar *sender_email = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE);
 				const gchar *sent_name = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE);
-				const char *sent_email_type = (const char *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE);
+				const char *sent_email_type = (const char *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE);
 				const gchar *sent_email = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
 
 				if (!g_utf8_collate (sender_email_type, "EX"))
@@ -1028,10 +1028,10 @@ fetch_server_data_cb (FetchItemsCallbackData *item_data, gpointer data)
 	ui32 = (const uint32_t *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_LONG, 0x8201));
 	cbdata->appt_seq = ui32 ? *ui32 : 0;
 	cbdata->username = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE);
-	cbdata->useridtype = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE);
+	cbdata->useridtype = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE);
 	cbdata->userid = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
 	cbdata->ownername = exchange_mapi_util_find_array_propval (properties, PR_SENDER_NAME_UNICODE);
-	cbdata->owneridtype = exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE);
+	cbdata->owneridtype = exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE);
 	cbdata->ownerid = exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE);
 
 	cbdata->comp = comp; 
@@ -1087,12 +1087,12 @@ update_attendee_status (struct mapi_SPropValue_array *properties, mapi_id_t mid)
 	fetch_server_data (mid, &cbdata);
 
 	att = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
-	addrtype = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE);
+	addrtype = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE);
 	if (addrtype && !g_ascii_strcasecmp (addrtype, "EX"))
 		att = exchange_mapi_util_ex_to_smtp (att);
 
 	att_sentby = exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE);
-	addrtype = exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE);
+	addrtype = exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE);
 	if (addrtype && !g_ascii_strcasecmp (addrtype, "EX"))
 		att_sentby = exchange_mapi_util_ex_to_smtp (att_sentby);
 
@@ -1198,10 +1198,10 @@ update_server_object (struct mapi_SPropValue_array *properties, GSList *attachme
 
 		cbdata.comp = comp;
 		cbdata.username = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_NAME_UNICODE);
-		cbdata.useridtype = (const char *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE);
+		cbdata.useridtype = (const char *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE);
 		cbdata.userid = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE);
 		cbdata.ownername = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE);
-		cbdata.owneridtype = (const char *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE);
+		cbdata.owneridtype = (const char *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE);
 		cbdata.ownerid = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
 		cbdata.is_modify = FALSE;
 		cbdata.msgflags = MSGFLAG_READ;
@@ -1696,13 +1696,13 @@ exchange_mapi_cal_util_build_props (struct SPropValue **value, struct SPropTagAr
 
 	set_SPropValue_proptag(&props[i++], PR_SENT_REPRESENTING_NAME_UNICODE,
 		(const void *) cbdata->ownername); 						/* propcount++ */
-	set_SPropValue_proptag(&props[i++], PR_SENT_REPRESENTING_ADDRTYPE, 
+	set_SPropValue_proptag(&props[i++], PR_SENT_REPRESENTING_ADDRTYPE_UNICODE, 
 		(const void *) cbdata->owneridtype); 						/* propcount++ */
 	set_SPropValue_proptag(&props[i++], PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
 		(const void *) cbdata->ownerid); 						/* propcount++ */
 	set_SPropValue_proptag(&props[i++], PR_SENDER_NAME_UNICODE,
 		(const void *) cbdata->username); 						/* propcount++ */
-	set_SPropValue_proptag(&props[i++], PR_SENDER_ADDRTYPE, 
+	set_SPropValue_proptag(&props[i++], PR_SENDER_ADDRTYPE_UNICODE, 
 		(const void *) cbdata->useridtype); 						/* propcount++ */
 	set_SPropValue_proptag(&props[i++], PR_SENDER_EMAIL_ADDRESS_UNICODE,
 		(const void *) cbdata->userid); 						/* propcount++ */
