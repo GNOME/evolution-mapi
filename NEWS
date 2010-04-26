@@ -1,3 +1,23 @@
+evolution-mapi 0.30.1 2010-04-26
+--------------------------------
+Bug Fixes:
+	Bug #595914 - Doesn't display the Cyrrilic symbols in folder names (Luf)
+	Bug #598564 - Has problems encoding mails containing html (Milan Crha)
+	Bug #600389 - UTF8 characters in contacts not shown properly (Milan Crha)
+	Bug #600395 - 'Folder size' option is shown onto each MAPI folder (Johnny Jacob)
+	Bug #600655 - Calendar property doesn't show calendar hierarchy (Milan Crha)
+	Bug #608307 - Renaming a parent folder disappears sub folders (Milan Crha)
+	Bug #610229 - Status bar progress goes beyond 100 percentage (Punit Jain)
+	Bug #613146 - Message list shows messages that were deleted externally (Milan Crha)
+	Bug #615838 - Use _ADDRTYPE_UNICODE properties (Milan Crha)
+Misc:
+	Add LOCK/UNLOCK around RegisterNotification (Milan Crha)
+
+Translations:
+	Carles Ferrando (ca)
+	Umarzuki Bin Mochlis Moktar (ms)
+	Xandru Armesto (ast)
+
 evolution-mapi 0.30.0 2010-03-29
 --------------------------------
 Bug Fixes:
