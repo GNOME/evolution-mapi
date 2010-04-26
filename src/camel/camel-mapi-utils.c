@@ -78,7 +78,7 @@ mapi_item_add_recipient (const gchar *recipients, OlMailRecipientType type, GSLi
 	val = MAPI_MAILUSER;
 	set_SPropValue_proptag (&(recipient->in.ext_lpProps[1]), PR_OBJECT_TYPE, (gconstpointer )&val);
 	str = "SMTP";
-	set_SPropValue_proptag (&(recipient->in.ext_lpProps[2]), PR_ADDRTYPE, (gconstpointer )(str));
+	set_SPropValue_proptag (&(recipient->in.ext_lpProps[2]), PR_ADDRTYPE_UNICODE, (gconstpointer )(str));
 	str = recipient->email_id;
 	set_SPropValue_proptag (&(recipient->in.ext_lpProps[3]), PR_SMTP_ADDRESS_UNICODE, (gconstpointer )(str));
 	/* FIXME: Please add the correct names here instead of the e-mail ID */

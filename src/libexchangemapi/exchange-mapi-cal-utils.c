@@ -335,7 +335,7 @@ exchange_mapi_cal_util_fetch_organizer (ECalComponent *comp, GSList **recip_list
 		val = MAPI_MAILUSER;
 		set_SPropValue_proptag (&(recipient->in.ext_lpProps[1]), PR_OBJECT_TYPE, (gconstpointer )&val);
 		str = "SMTP";
-		set_SPropValue_proptag (&(recipient->in.ext_lpProps[2]), PR_ADDRTYPE, (gconstpointer )(str));
+		set_SPropValue_proptag (&(recipient->in.ext_lpProps[2]), PR_ADDRTYPE_UNICODE, (gconstpointer )(str));
 		str = recipient->email_id;
 		set_SPropValue_proptag (&(recipient->in.ext_lpProps[3]), PR_SMTP_ADDRESS_UNICODE, (gconstpointer )(str));
 
@@ -408,7 +408,7 @@ exchange_mapi_cal_util_fetch_recipients (ECalComponent *comp, GSList **recip_lis
 		val = MAPI_MAILUSER;
 		set_SPropValue_proptag (&(recipient->in.ext_lpProps[1]), PR_OBJECT_TYPE, (gconstpointer )&val);
 		str = "SMTP";
-		set_SPropValue_proptag (&(recipient->in.ext_lpProps[2]), PR_ADDRTYPE, (gconstpointer )(str));
+		set_SPropValue_proptag (&(recipient->in.ext_lpProps[2]), PR_ADDRTYPE_UNICODE, (gconstpointer )(str));
 		str = recipient->email_id;
 		set_SPropValue_proptag (&(recipient->in.ext_lpProps[3]), PR_SMTP_ADDRESS_UNICODE, (gconstpointer )(str));
 
@@ -816,10 +816,10 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 			if (icalcomponent_get_first_property (ical_comp, ICAL_ORGANIZER_PROPERTY) == NULL) {
 				gchar *val;
 //				const gchar *sender_name = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_NAME_UNICODE);
-				const gchar *sender_email_type = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE);
+				const gchar *sender_email_type = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE);
 				const gchar *sender_email = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE);
 				const gchar *sent_name = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE);
-				const gchar *sent_email_type = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE);
+				const gchar *sent_email_type = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE);
 				const gchar *sent_email = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
 
 				if (!g_utf8_collate (sender_email_type, "EX"))
@@ -1028,10 +1028,10 @@ fetch_server_data_cb (FetchItemsCallbackData *item_data, gpointer data)
 	ui32 = (const uint32_t *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_LONG, 0x8201));
 	cbdata->appt_seq = ui32 ? *ui32 : 0;
 	cbdata->username = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE);
-	cbdata->useridtype = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE);
+	cbdata->useridtype = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE);
 	cbdata->userid = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
 	cbdata->ownername = exchange_mapi_util_find_array_propval (properties, PR_SENDER_NAME_UNICODE);
-	cbdata->owneridtype = exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE);
+	cbdata->owneridtype = exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE);
 	cbdata->ownerid = exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE);
 
 	cbdata->comp = comp;
@@ -1086,12 +1086,12 @@ update_attendee_status (ExchangeMapiConnection *conn, struct mapi_SPropValue_arr
 	fetch_server_data (conn, mid, &cbdata);
 
 	att = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
-	addrtype = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE);
+	addrtype = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE);
 	if (addrtype && !g_ascii_strcasecmp (addrtype, "EX"))
 		att = exchange_mapi_connection_ex_to_smtp (conn, att);
 
 	att_sentby = exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE);
-	addrtype = exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE);
+	addrtype = exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE);
 	if (addrtype && !g_ascii_strcasecmp (addrtype, "EX"))
 		att_sentby = exchange_mapi_connection_ex_to_smtp (conn, att_sentby);
 
@@ -1198,10 +1198,10 @@ update_server_object (ExchangeMapiConnection *conn, struct mapi_SPropValue_array
 		cbdata.kind = kind;
 		cbdata.comp = comp;
 		cbdata.username = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_NAME_UNICODE);
-		cbdata.useridtype = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE);
+		cbdata.useridtype = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE);
 		cbdata.userid = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE);
 		cbdata.ownername = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE);
-		cbdata.owneridtype = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE);
+		cbdata.owneridtype = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE);
 		cbdata.ownerid = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
 		cbdata.is_modify = FALSE;
 		cbdata.msgflags = MSGFLAG_READ;
@@ -1651,10 +1651,10 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 	set_value (PR_IMPORTANCE, &flag32);
 
 	set_value (PR_SENT_REPRESENTING_NAME_UNICODE, cbdata->ownername);
-	set_value (PR_SENT_REPRESENTING_ADDRTYPE, cbdata->owneridtype);
+	set_value (PR_SENT_REPRESENTING_ADDRTYPE_UNICODE, cbdata->owneridtype);
 	set_value (PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE, cbdata->ownerid);
 	set_value (PR_SENDER_NAME_UNICODE, cbdata->username);
-	set_value (PR_SENDER_ADDRTYPE, cbdata->useridtype);
+	set_value (PR_SENDER_ADDRTYPE_UNICODE, cbdata->useridtype);
 	set_value (PR_SENDER_EMAIL_ADDRESS_UNICODE, cbdata->userid);
 
 	flag32 = cbdata->msgflags;
@@ -2140,15 +2140,15 @@ exchange_mapi_cal_utils_get_props_cb (ExchangeMapiConnection *conn, mapi_id_t fi
 		PR_MSG_EDITOR_FORMAT,
 
 		PR_SENT_REPRESENTING_NAME_UNICODE,
-		PR_SENT_REPRESENTING_ADDRTYPE,
+		PR_SENT_REPRESENTING_ADDRTYPE_UNICODE,
 		PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
 
 		PR_SENDER_NAME_UNICODE,
-		PR_SENDER_ADDRTYPE,
+		PR_SENDER_ADDRTYPE_UNICODE,
 		PR_SENDER_EMAIL_ADDRESS_UNICODE,
 
 		PR_RCVD_REPRESENTING_NAME_UNICODE,
-		PR_RCVD_REPRESENTING_ADDRTYPE,
+		PR_RCVD_REPRESENTING_ADDRTYPE_UNICODE,
 		PR_RCVD_REPRESENTING_EMAIL_ADDRESS_UNICODE
 	};
 

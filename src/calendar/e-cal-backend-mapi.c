@@ -559,7 +559,7 @@ mapi_cal_get_known_ids (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX 
 	   if you add new add it here too, otherwise it may not be fetched */
 	static uint32_t known_cal_mapi_ids[] = {
 		PR_7BIT_DISPLAY_NAME_UNICODE,
-		PR_ADDRTYPE,
+		PR_ADDRTYPE_UNICODE,
 		PR_ATTACH_DATA_BIN,
 		PR_ATTACH_FILENAME_UNICODE,
 		PR_ATTACH_LONG_FILENAME_UNICODE,
@@ -586,7 +586,7 @@ mapi_cal_get_known_ids (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX 
 		PR_OWNER_APPT_ID,
 		PR_PRIORITY,
 		PR_PROCESSED,
-		PR_RCVD_REPRESENTING_ADDRTYPE,
+		PR_RCVD_REPRESENTING_ADDRTYPE_UNICODE,
 		PR_RCVD_REPRESENTING_EMAIL_ADDRESS_UNICODE,
 		PR_RCVD_REPRESENTING_NAME_UNICODE,
 		PR_RECIPIENT_DISPLAY_NAME_UNICODE,
@@ -596,12 +596,12 @@ mapi_cal_get_known_ids (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX 
 		PR_RENDERING_POSITION,
 		PR_RESPONSE_REQUESTED,
 		PR_RTF_IN_SYNC,
-		PR_SENDER_ADDRTYPE,
+		PR_SENDER_ADDRTYPE_UNICODE,
 		PR_SENDER_EMAIL_ADDRESS_UNICODE,
 		PR_SENDER_NAME_UNICODE,
 		PR_SEND_INTERNET_ENCODING,
 		PR_SENSITIVITY,
-		PR_SENT_REPRESENTING_ADDRTYPE,
+		PR_SENT_REPRESENTING_ADDRTYPE_UNICODE,
 		PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
 		PR_SENT_REPRESENTING_NAME_UNICODE,
 		PR_SMTP_ADDRESS_UNICODE,
@@ -1415,10 +1415,10 @@ mapi_cal_get_required_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC
 		PROP_TAG(PT_BINARY, 0x0023),
 		PROP_TAG(PT_BINARY, 0x0003),
 		PR_SENT_REPRESENTING_NAME_UNICODE,
-		PR_SENT_REPRESENTING_ADDRTYPE,
+		PR_SENT_REPRESENTING_ADDRTYPE_UNICODE,
 		PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
 		PR_SENDER_NAME_UNICODE,
-		PR_SENDER_ADDRTYPE,
+		PR_SENDER_ADDRTYPE_UNICODE,
 		PR_SENDER_EMAIL_ADDRESS_UNICODE
 	};	
 
@@ -1443,10 +1443,10 @@ capture_req_props (FetchItemsCallbackData *item_data, gpointer data)
 	cbdata->cleanglobalid = (const struct Binary_r *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0023));
 	cbdata->globalid = (const struct Binary_r *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0003));
 	cbdata->username = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE);
-	cbdata->useridtype = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE);
+	cbdata->useridtype = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE);
 	cbdata->userid = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
 	cbdata->ownername = exchange_mapi_util_find_array_propval (properties, PR_SENDER_NAME_UNICODE);
-	cbdata->owneridtype = exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE);
+	cbdata->owneridtype = exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE);
 	cbdata->ownerid = exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE);
 
 	return TRUE;

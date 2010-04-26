@@ -1007,7 +1007,7 @@ exchange_mapi_util_get_recipients (mapi_object_t *obj_message, GSList **recip_li
 		recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_SMTP_ADDRESS_UNICODE));
 		/* fallback */
 		if (!recipient->email_id) {
-			const gchar *addrtype = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE));
+			const gchar *addrtype = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE_UNICODE));
 			if (addrtype && !g_ascii_strcasecmp(addrtype, "SMTP"))
 				recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_EMAIL_ADDRESS_UNICODE));
 		}
@@ -1089,7 +1089,7 @@ exchange_mapi_util_modify_recipients (ExchangeMapiConnection *conn, TALLOC_CTX *
 					  PR_DISPLAY_TYPE,
 					  PR_TRANSMITTABLE_DISPLAY_NAME_UNICODE,
 					  PR_EMAIL_ADDRESS_UNICODE,
-					  PR_ADDRTYPE,
+					  PR_ADDRTYPE_UNICODE,
 					  PR_SEND_RICH_INFO,
 					  PR_7BIT_DISPLAY_NAME_UNICODE,
 					  PR_SMTP_ADDRESS_UNICODE);
