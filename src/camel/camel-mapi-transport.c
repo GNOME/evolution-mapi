@@ -57,7 +57,7 @@
 
 
 #include <camel/camel-private.h>
-#include <camel/camel-i18n.h>
+#include <glib/gi18n-lib.h>
 #include <camel/camel-net-utils.h>
 #include "camel-mapi-store.h"
 #include "camel-mapi-folder.h"

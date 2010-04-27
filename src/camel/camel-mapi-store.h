@@ -28,7 +28,7 @@
 #include <camel/camel-offline-store.h>
 #include <camel-mapi-store-summary.h>
 #include <camel/camel-net-utils.h>
-#include <camel/camel-i18n.h>
+#include <glib/gi18n-lib.h>
 
 #include <exchange-mapi-folder.h>
 

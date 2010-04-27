@@ -28,7 +28,7 @@
 
 #include <string.h>
 #include <unistd.h>
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 
 #include <gtk/gtk.h>
 #include <camel/camel-provider.h>

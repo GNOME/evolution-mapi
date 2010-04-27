@@ -41,7 +41,7 @@
 #include <camel/camel-stream-mem.h>
 
 #include <camel/camel-private.h>
-#include <camel/camel-i18n.h>
+#include <glib/gi18n-lib.h>
 #include <camel/camel-net-utils.h>
 #include <camel/camel-seekable-stream.h>
 #include <camel/camel-sasl.h>
