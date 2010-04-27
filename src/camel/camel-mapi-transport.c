@@ -27,7 +27,7 @@
 
 #include <string.h>
 
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 
 #include <libmapi/libmapi.h>
 #include <gen_ndr/exchange.h>

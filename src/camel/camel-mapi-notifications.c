@@ -31,7 +31,7 @@
 #include <errno.h>
 
 #include <glib.h>
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 #include <gio/gio.h>
 

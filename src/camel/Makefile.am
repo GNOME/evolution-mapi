@@ -10,6 +10,7 @@ AM_CPPFLAGS = -I.. 				\
 	$(CAMEL_CFLAGS)				\
 	$(LIBECAL_CFLAGS)			\
         $(LIBMAPI_CFLAGS)                       \
+	-DEXCHANGE_MAPI_LOCALEDIR=\"$(localedir)\" \
 	-DG_LOG_DOMAIN=\"camel-mapi-provider\"
 
 libcamelmapi_la_SOURCES = 			\

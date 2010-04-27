@@ -24,7 +24,7 @@
 #ifndef CAMEL_MAPI_STORE_H
 #define CAMEL_MAPI_STORE_H
 
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 
 #include <camel/camel.h>
 

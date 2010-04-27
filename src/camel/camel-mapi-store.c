@@ -30,7 +30,7 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 
 #include "camel-mapi-store.h"

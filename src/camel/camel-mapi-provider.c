@@ -27,7 +27,7 @@
 
 #include <sys/types.h>
 #include <string.h>
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 
 #include <gmodule.h>
 
@@ -101,6 +101,7 @@ void
 camel_provider_module_init(void)
 {
 	mapi_provider.name = "Exchange MAPI";
+	mapi_provider.translation_domain = (gchar *) GETTEXT_PACKAGE;
 	mapi_provider.auto_detect = mapi_auto_detect_cb;
 	mapi_provider.authtypes = g_list_prepend (mapi_provider.authtypes, &camel_mapi_password_authtype);
 	mapi_provider.url_hash = mapi_url_hash;
@@ -108,6 +109,10 @@ camel_provider_module_init(void)
 	mapi_provider.license = "LGPL";
 	mapi_provider.object_types[CAMEL_PROVIDER_STORE] = camel_mapi_store_get_type();
 	mapi_provider.object_types[CAMEL_PROVIDER_TRANSPORT] = camel_mapi_transport_get_type();
+
+	bindtextdomain (GETTEXT_PACKAGE, EXCHANGE_MAPI_LOCALEDIR);
+	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+
 	camel_provider_register (&mapi_provider);
 }
 

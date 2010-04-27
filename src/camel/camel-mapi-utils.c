@@ -23,11 +23,15 @@
 
 /* -- Generate MIME to ITEM -- */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
 
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 
 #include <libmapi/libmapi.h>
 #include <gen_ndr/exchange.h>

@@ -28,7 +28,7 @@
 #include "exchange-mapi-account-listener.h"
 #include "exchange-mapi-account-setup.h"
 #include <string.h>
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 #include <camel/camel.h>
 #include <libedataserverui/e-passwords.h>
 #include <libedataserver/e-account.h>
