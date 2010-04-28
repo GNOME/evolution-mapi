@@ -55,16 +55,4 @@ typedef struct
 EBookBackend *e_book_backend_mapi_new      (void);
 GType         e_book_backend_mapi_get_type (void);
 
-#define GET_ALL_KNOWN_IDS (GINT_TO_POINTER(1))
-#define GET_SHORT_SUMMARY (GINT_TO_POINTER(2))
-
-GList *mapi_book_get_supported_fields (void);
-
-/* data is one of GET_ALL_KNOWN_IDS or GET_SHORT_SUMMARY */
-gboolean mapi_book_get_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
-
-/* only one of mapi_properties and aRow can be set */
-EContact *mapi_book_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid, struct mapi_SPropValue_array *mapi_properties, struct SRow *aRow);
-
 #endif /* __E_BOOK_BACKEND_MAPI_H__ */
-

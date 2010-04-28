@@ -13,11 +13,15 @@ extension_LTLIBRARIES = libebookbackendmapi.la \
 libebookbackendmapi_la_SOURCES =		\
 	e-book-backend-mapi.c			\
 	e-book-backend-mapi.h			\
+	e-book-backend-mapi-utils.c		\
+	e-book-backend-mapi-utils.h		\
 	e-book-backend-mapi-factory.c
 
 libebookbackendmapigal_la_SOURCES =		\
 	e-book-backend-mapi-gal.c		\
 	e-book-backend-mapi-gal.h		\
+	e-book-backend-mapi-utils.c		\
+	e-book-backend-mapi-utils.h		\
 	e-book-backend-mapi-gal-factory.c
 
 libebookbackendmapi_la_LIBADD =			\

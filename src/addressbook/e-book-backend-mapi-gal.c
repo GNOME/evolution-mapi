@@ -21,8 +21,8 @@
 #include <libedata-book/e-book-backend-cache.h>
 #include <libedata-book/e-book-backend-summary.h>
 
-#include "e-book-backend-mapi.h"
 #include "e-book-backend-mapi-gal.h"
+#include "e-book-backend-mapi-utils.h"
 
 G_DEFINE_TYPE (EBookBackendMAPIGAL, e_book_backend_mapi_gal, E_TYPE_BOOK_BACKEND)
 
@@ -138,7 +138,7 @@ fetch_gal_cb (ExchangeMapiConnection *conn, uint32_t row_index, uint32_t n_rows,
 	if (priv->kill_cache_build)
 		return FALSE;
 
-	contact = mapi_book_contact_from_props (conn, fgd->fid, NULL, aRow);
+	contact = mapi_book_utils_contact_from_props (conn, fgd->fid, NULL, aRow);
 	if (!contact) {
 		/* just ignore them */
 		return TRUE;
@@ -207,7 +207,7 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	exchange_mapi_connection_fetch_gal (priv->conn,
-					mapi_book_get_prop_list, GET_ALL_KNOWN_IDS,
+					mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 					fetch_gal_cb, &fgd);
 
 	if (fgd.book_view) {
@@ -238,7 +238,7 @@ e_book_backend_mapi_gal_get_supported_fields (EBookBackend *backend,
 {
 	GList *fields;
 
-	fields = mapi_book_get_supported_fields ();
+	fields = mapi_book_utils_get_supported_fields ();
 	e_data_book_respond_get_supported_fields (book,
 						  opid,
 						  GNOME_Evolution_Addressbook_Success,
