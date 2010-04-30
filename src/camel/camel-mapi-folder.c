@@ -105,47 +105,16 @@ mapi_folder_search_by_uids (CamelFolder *folder, const gchar *expression, GPtrAr
 	return matches;
 }
 
-static gint
-mapi_getv (CamelObject *object, CamelException *ex, CamelArgGetV *args)
-{
-	CamelFolder *folder = (CamelFolder *)object;
-	gint i, count = 0;
-	guint32 tag;
-
-	for (i=0; i<args->argc; i++) {
-		CamelArgGet *arg = &args->argv[i];
-
-		tag = arg->tag;
-
-		switch (tag & CAMEL_ARG_TAG) {
-
-			case CAMEL_OBJECT_ARG_DESCRIPTION:
-				if (folder->description == NULL) {
-					CamelURL *uri = ((CamelService *)folder->parent_store)->url;
-
-					folder->description = g_strdup_printf("%s@%s:%s", uri->user, uri->host, folder->full_name);
-				}
-				*arg->ca_str = folder->description;
-				break;
-			default:
-				count++;
-				continue;
-		}
-
-		arg->tag = (tag & CAMEL_ARG_TYPE) | CAMEL_ARG_IGNORE;
-	}
-
-	if (count)
-		return ((CamelObjectClass *)camel_mapi_folder_parent_class)->getv(object, ex, args);
-
-	return 0;
-
-}
-
 static gboolean
 mapi_refresh_info(CamelFolder *folder, CamelException *ex)
 {
+	CamelStore *parent_store;
 	CamelStoreInfo *si;
+	const gchar *full_name;
+
+	full_name = camel_folder_get_full_name (folder);
+	parent_store = camel_folder_get_parent_store (folder);
+
 	/*
 	 * Checking for the summary->time_string here since the first the a
 	 * user views a folder, the read cursor is in progress, and the getQM
@@ -154,20 +123,22 @@ mapi_refresh_info(CamelFolder *folder, CamelException *ex)
 	//	if (summary->time_string && (strlen (summary->time_string) > 0))  {
 	if (1) {
 		mapi_refresh_folder(folder, ex);
-		si = camel_store_summary_path ((CamelStoreSummary *)((CamelMapiStore *)folder->parent_store)->summary, folder->full_name);
+		si = camel_store_summary_path ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary, full_name);
 
 		if (si) {
 			guint32 unread, total;
-			camel_object_get (folder, NULL, CAMEL_FOLDER_TOTAL, &total, CAMEL_FOLDER_UNREAD, &unread, NULL);
+
+			unread = folder->summary->unread_count;
+			total = camel_folder_summary_count (folder->summary);
 			if (si->total != total || si->unread != unread) {
 				si->total = total;
 				si->unread = unread;
-				camel_store_summary_touch ((CamelStoreSummary *)((CamelMapiStore *)folder->parent_store)->summary);
+				camel_store_summary_touch ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary);
 			}
-			camel_store_summary_info_free ((CamelStoreSummary *)((CamelMapiStore *)folder->parent_store)->summary, si);
+			camel_store_summary_info_free ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary, si);
 		}
 		camel_folder_summary_save_to_db (folder->summary, ex);
-		camel_store_summary_save ((CamelStoreSummary *)((CamelMapiStore *)folder->parent_store)->summary);
+		camel_store_summary_save ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary);
 	} else {
 		/* We probably could not get the messages the first time. (get_folder) failed???!
 		 * so do a get_folder again. And hope that it works
@@ -462,26 +433,35 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 {
 	CamelMapiMessageInfo *mi = NULL;
 	CamelMessageInfo *pmi = NULL;
-	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (folder->parent_store);
+	CamelMapiStore *mapi_store;
+	CamelStore *parent_store;
 
 	guint32 status_flags = 0;
 	CamelFolderChangeInfo *changes = NULL;
 	gboolean exists = FALSE;
 	GString *str = g_string_new (NULL);
 	const gchar *from_email, *folder_id = NULL;
+	const gchar *full_name;
 	GSList *item_list = list;
 	gint total_items = g_slist_length (item_list), i=0;
 
 	changes = *changeinfo;
 
-	folder_id = camel_mapi_store_folder_id_lookup (mapi_store, folder->full_name);
+	full_name = camel_folder_get_full_name (folder);
+	parent_store = camel_folder_get_parent_store (folder);
+
+	mapi_store = CAMEL_MAPI_STORE (parent_store);
+
+	folder_id = camel_mapi_store_folder_id_lookup (mapi_store, full_name);
 
 	if (!folder_id) {
 		d(printf("\nERROR - Folder id not present. Cannot refresh info\n"));
 		return;
 	}
 
-	camel_operation_start (NULL, _("Updating local summary cache for new messages in %s"), folder->name);
+	camel_operation_start (
+		NULL, _("Updating local summary cache for new messages in %s"),
+		camel_folder_get_name (folder));
 
 	for (; item_list != NULL; item_list = g_slist_next (item_list) ) {
 		MapiItem *temp_item;
@@ -633,7 +613,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 
 		/********************* Summary ends *************************/
 		/* FIXME : Don't use folder names for identifying */
-		if (!strcmp (folder->full_name, "Junk Mail"))
+		if (!strcmp (camel_folder_get_full_name (folder), "Junk Mail"))
 			continue;
 
 		g_free (msg_uid);
@@ -647,9 +627,13 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 static void
 mapi_sync_summary (CamelFolder *folder, CamelException *ex)
 {
+	CamelStore *parent_store;
+
+	parent_store = camel_folder_get_parent_store (folder);
+
 	camel_folder_summary_save_to_db (folder->summary, ex);
-	camel_store_summary_touch ((CamelStoreSummary *)((CamelMapiStore *)folder->parent_store)->summary);
-	camel_store_summary_save ((CamelStoreSummary *)((CamelMapiStore *)folder->parent_store)->summary);
+	camel_store_summary_touch ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary);
+	camel_store_summary_save ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary);
 }
 
 static void
@@ -704,14 +688,20 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 {
 	struct mapi_update_deleted_msg *m = (struct mapi_update_deleted_msg *)msg;
 
-	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (m->folder->parent_store);
-	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (m->folder);
+	CamelMapiStore *mapi_store;
+	CamelMapiFolder *mapi_folder;
 	CamelFolderChangeInfo *changes = NULL;
 	CamelMessageInfo *info = NULL;
+	CamelStore *parent_store;
 
 	guint32 index, count, options = 0;
 	GSList *server_uid_list = NULL;
 	const gchar *uid = NULL;
+
+	parent_store = camel_folder_get_parent_store (m->folder);
+
+	mapi_folder = CAMEL_MAPI_FOLDER (m->folder);
+	mapi_store = CAMEL_MAPI_STORE (parent_store);
 
 	if (((CamelOfflineStore *) mapi_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL ||
 			((CamelService *)mapi_store)->status == CAMEL_SERVICE_DISCONNECTED) {
@@ -719,7 +709,9 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 		return;
 	}
 
-	camel_operation_start (NULL, _("Retrieving message IDs from server for %s"), m->folder->name);
+	camel_operation_start (
+		NULL, _("Retrieving message IDs from server for %s"),
+		camel_folder_get_name (m->folder));
 
 	camel_service_lock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
 
@@ -740,7 +732,9 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 	changes = camel_folder_change_info_new ();
 
 	count = camel_folder_summary_count (m->folder->summary);
-	camel_operation_start (NULL, _("Removing deleted messages from cache in %s"), m->folder->name);
+	camel_operation_start (
+		NULL, _("Removing deleted messages from cache in %s"),
+		camel_folder_get_name (m->folder));
 
 	/* Iterate over cache and check if the UID is in server*/
 	for (index = 0; index < count; index++) {
@@ -796,16 +790,19 @@ static void
 mapi_sync_deleted_free (CamelSession *session, CamelSessionThreadMsg *msg)
 {
 	struct mapi_update_deleted_msg *m = (struct mapi_update_deleted_msg *)msg;
+	CamelStore *parent_store;
+
+	parent_store = camel_folder_get_parent_store (m->folder);
 
 	if (m->need_refresh) {
 		CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (m->folder->summary);
 		if (mapi_summary) {
 			CamelException ex = CAMEL_EXCEPTION_INITIALISER;
 
-			camel_service_lock (CAMEL_SERVICE (m->folder->parent_store), CS_REC_CONNECT_LOCK);
+			camel_service_lock (CAMEL_SERVICE (parent_store), CS_REC_CONNECT_LOCK);
 			g_free (mapi_summary->sync_time_stamp);
 			mapi_summary->sync_time_stamp = NULL;
-			camel_service_unlock (CAMEL_SERVICE (m->folder->parent_store), CS_REC_CONNECT_LOCK);
+			camel_service_unlock (CAMEL_SERVICE (parent_store), CS_REC_CONNECT_LOCK);
 
 			mapi_refresh_folder (m->folder, &ex);
 
@@ -826,20 +823,28 @@ static CamelSessionThreadOps deleted_items_sync_ops = {
 static gboolean
 mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 {
-	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (folder->parent_store);
-	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (folder);
+	CamelMapiStore *mapi_store;
+	CamelMapiFolder *mapi_folder;
 	CamelMessageInfo *info = NULL;
 	CamelMapiMessageInfo *mapi_info = NULL;
+	CamelStore *parent_store;
 
 	GSList *read_items = NULL, *unread_items = NULL, *to_free = NULL;
 	flags_diff_t diff, unset_flags;
 	const gchar *folder_id;
+	const gchar *full_name;
 	mapi_id_t fid, deleted_items_fid;
 	gint count, i;
 	guint32 options =0;
 
 	GSList *deleted_items, *deleted_head;
 	deleted_items = deleted_head = NULL;
+
+	full_name = camel_folder_get_full_name (folder);
+	parent_store = camel_folder_get_parent_store (folder);
+
+	mapi_folder = CAMEL_MAPI_FOLDER (folder);
+	mapi_store = CAMEL_MAPI_STORE (parent_store);
 
 	if (((CamelOfflineStore *) mapi_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL ||
 			((CamelService *)mapi_store)->status == CAMEL_SERVICE_DISCONNECTED) {
@@ -850,7 +855,7 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	if (((CamelMapiFolder *)folder)->type & CAMEL_MAPI_FOLDER_PUBLIC)
 		options |= MAPI_OPTIONS_USE_PFSTORE;
 
-	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store, folder->full_name);
+	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store, full_name);
 	exchange_mapi_util_mapi_id_from_string (folder_id, &fid);
 
 	camel_service_lock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
@@ -1038,12 +1043,13 @@ void
 mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 {
 
-	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (folder->parent_store);
-	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (folder);
-	CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (folder->summary);
-	CamelSession *session = ((CamelService *)folder->parent_store)->session;
+	CamelMapiStore *mapi_store;
+	CamelMapiFolder *mapi_folder;
+	CamelMapiSummary *mapi_summary;
+	CamelSession *session;
+	CamelStore *parent_store;
 
-	gboolean is_proxy = folder->parent_store->flags & CAMEL_STORE_PROXY;
+	gboolean is_proxy;
 	gboolean is_locked = FALSE;
 	gboolean status;
 
@@ -1051,8 +1057,18 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 	struct SSortOrderSet *sort = NULL;
 	struct mapi_update_deleted_msg *deleted_items_op_msg;
 	fetch_items_data *fetch_data = g_new0 (fetch_items_data, 1);
-
 	const gchar *folder_id = NULL;
+	const gchar *full_name;
+
+	full_name = camel_folder_get_full_name (folder);
+	parent_store = camel_folder_get_parent_store (folder);
+
+	mapi_folder = CAMEL_MAPI_FOLDER (folder);
+	mapi_store = CAMEL_MAPI_STORE (parent_store);
+	mapi_summary = CAMEL_MAPI_SUMMARY (folder->summary);
+
+	is_proxy = parent_store->flags & CAMEL_STORE_PROXY;
+	session = CAMEL_SERVICE (parent_store)->session;
 
 	if (((CamelOfflineStore *) mapi_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL)
 		goto end1;
@@ -1062,9 +1078,9 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 	mapi_sync (folder, FALSE, ex);
 
 	//creating a copy
-	folder_id = camel_mapi_store_folder_id_lookup (mapi_store, folder->full_name);
+	folder_id = camel_mapi_store_folder_id_lookup (mapi_store, full_name);
 	if (!folder_id) {
-		d(printf ("\nERROR - Folder id not present. Cannot refresh info for %s\n", folder->full_name));
+		d(printf ("\nERROR - Folder id not present. Cannot refresh info for %s\n", full_name));
 		goto end1;
 	}
 
@@ -1401,9 +1417,13 @@ mapi_mime_set_msg_headers (CamelFolder *folder, CamelMimeMessage *msg, MapiItem 
 	const gchar *from_email;
 	time_t recieved_time;
 	CamelInternetAddress *addr = NULL;
-	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE(folder->parent_store);
+	CamelMapiStore *mapi_store;
+	CamelStore *parent_store;
 	gint offset = 0;
 	time_t actual_time;
+
+	parent_store = camel_folder_get_parent_store (folder);
+	mapi_store = CAMEL_MAPI_STORE (parent_store);
 
 	/* Setting headers from PR_TRANSPORT_MESSAGE_HEADERS */
 	if (item->header.transport_headers) {
@@ -1748,15 +1768,20 @@ static CamelMimeMessage *
 mapi_folder_get_message( CamelFolder *folder, const gchar *uid, CamelException *ex )
 {
 	CamelMimeMessage *msg = NULL;
-	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER(folder);
-	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE(folder->parent_store);
+	CamelMapiFolder *mapi_folder;
+	CamelMapiStore *mapi_store;
 	CamelMapiMessageInfo *mi = NULL;
-
 	CamelStream *stream, *cache_stream;
+	CamelStore *parent_store;
 	mapi_id_t id_folder;
 	mapi_id_t id_message;
 	MapiItem *item = NULL;
 	guint32 options = 0;
+
+	parent_store = camel_folder_get_parent_store (folder);
+
+	mapi_folder = CAMEL_MAPI_FOLDER (folder);
+	mapi_store = CAMEL_MAPI_STORE (parent_store);
 
 	/* see if it is there in cache */
 
@@ -1921,11 +1946,12 @@ mapi_get_message_info(CamelFolder *folder, const gchar *uid)
 static gboolean
 mapi_expunge (CamelFolder *folder, CamelException *ex)
 {
-	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE(folder->parent_store);
-	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (folder);
+	CamelMapiStore *mapi_store;
+	CamelMapiFolder *mapi_folder;
 	CamelMapiMessageInfo *minfo;
 	CamelMessageInfo *info;
 	CamelFolderChangeInfo *changes;
+	CamelStore *parent_store;
 
 	mapi_id_t fid;
 
@@ -1934,11 +1960,18 @@ mapi_expunge (CamelFolder *folder, CamelException *ex)
 	gchar *folder_id;
 	GSList *deleted_items, *deleted_head;
 	GSList *deleted_items_uid, *deleted_items_uid_head;
+	const gchar *full_name;
 
 	deleted_items = deleted_head = NULL;
 	deleted_items_uid = deleted_items_uid_head = NULL;
 
-	folder_id =  g_strdup (camel_mapi_store_folder_id_lookup (mapi_store, folder->full_name));
+	full_name = camel_folder_get_full_name (folder);
+	parent_store = camel_folder_get_parent_store (folder);
+
+	mapi_folder = CAMEL_MAPI_FOLDER (folder);
+	mapi_store = CAMEL_MAPI_STORE (parent_store);
+
+	folder_id =  g_strdup (camel_mapi_store_folder_id_lookup (mapi_store, full_name));
 	exchange_mapi_util_mapi_id_from_string (folder_id, &fid);
 
 	if ((mapi_folder->type & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH) {
@@ -2025,23 +2058,35 @@ mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 {
 	mapi_id_t src_fid, dest_fid;
 
-	CamelOfflineStore *offline = (CamelOfflineStore *) destination->parent_store;
-	CamelMapiStore *mapi_store= CAMEL_MAPI_STORE(source->parent_store);
+	CamelOfflineStore *offline;
+	CamelMapiStore *mapi_store;
 	CamelFolderChangeInfo *changes = NULL;
-
+	CamelStore *source_parent_store;
+	CamelStore *destination_parent_store;
 	const gchar *folder_id = NULL;
+	const gchar *source_full_name;
+	const gchar *destination_full_name;
 	gint i = 0;
 
 	GSList *src_msg_ids = NULL;
+
+	source_full_name = camel_folder_get_full_name (source);
+	source_parent_store = camel_folder_get_parent_store (source);
+
+	destination_full_name = camel_folder_get_full_name (destination);
+	destination_parent_store = camel_folder_get_parent_store (destination);
+
+	mapi_store = CAMEL_MAPI_STORE (source_parent_store);
+	offline = CAMEL_OFFLINE_STORE (destination_parent_store);
 
 	/* check for offline operation */
 	if (offline->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL)
 		return TRUE;
 
-	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store, source->full_name);
+	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store, source_full_name);
 	exchange_mapi_util_mapi_id_from_string (folder_id, &src_fid);
 
-	folder_id = camel_mapi_store_folder_id_lookup (mapi_store, destination->full_name);
+	folder_id = camel_mapi_store_folder_id_lookup (mapi_store, destination_full_name);
 	exchange_mapi_util_mapi_id_from_string (folder_id, &dest_fid);
 
 	for (i=0; i < uids->len; i++) {
@@ -2098,18 +2143,25 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 		const CamelMessageInfo *info, gchar **appended_uid,
 		CamelException *ex)
 {
-	CamelMapiStore *mapi_store= CAMEL_MAPI_STORE(folder->parent_store);
-	CamelOfflineStore *offline = (CamelOfflineStore *) folder->parent_store;
+	CamelMapiStore *mapi_store;
+	CamelOfflineStore *offline;
 	CamelAddress *from = NULL;
 	CamelStoreInfo *si;
-
+	CamelStore *parent_store;
 	MapiItem *item = NULL;
 	mapi_id_t fid = 0, mid = 0;
 	const gchar *folder_id;
+	const gchar *full_name;
 	guint32 folder_flags = 0;
 
+	full_name = camel_folder_get_full_name (folder);
+	parent_store = camel_folder_get_parent_store (folder);
+
+	mapi_store = CAMEL_MAPI_STORE (parent_store);
+	offline = CAMEL_OFFLINE_STORE (parent_store);
+
 	/*Reject outbox / sent & trash*/
-	si = camel_store_summary_path ((CamelStoreSummary *)mapi_store->summary, folder->full_name);
+	si = camel_store_summary_path ((CamelStoreSummary *)mapi_store->summary, full_name);
 	if (si) {
 		folder_flags = si->flags;
 		camel_store_summary_info_free ((CamelStoreSummary *)mapi_store->summary, si);
@@ -2119,7 +2171,7 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 	    ((folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_OUTBOX)) {
 		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM,
 				      _("Cannot append message to folder '%s'"),
-				      folder->full_name);
+				      full_name);
 		return FALSE;
 	}
 
@@ -2129,8 +2181,7 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 		return FALSE;
 	}
 
-	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store,
-							folder->full_name);
+	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store, full_name);
 
 	exchange_mapi_util_mapi_id_from_string (folder_id, &fid);
 
@@ -2165,19 +2216,36 @@ mapi_folder_dispose (GObject *object)
 }
 
 static void
+mapi_folder_constructed (GObject *object)
+{
+	CamelFolder *folder;
+	CamelStore *parent_store;
+	CamelURL *url;
+	const gchar *full_name;
+	gchar *description;
+
+	folder = CAMEL_FOLDER (object);
+	full_name = camel_folder_get_full_name (folder);
+	parent_store = camel_folder_get_parent_store (folder);
+	url = CAMEL_SERVICE (parent_store)->url;
+
+	description = g_strdup_printf (
+		"%s@%s:%s", url->user, url->host, full_name);
+	camel_folder_set_description (folder, description);
+	g_free (description);
+}
+
+static void
 camel_mapi_folder_class_init (CamelMapiFolderClass *class)
 {
 	GObjectClass *object_class;
-	CamelObjectClass *camel_object_class;
 	CamelFolderClass *folder_class;
 
 	g_type_class_add_private (class, sizeof (CamelMapiFolderPrivate));
 
 	object_class = G_OBJECT_CLASS (class);
 	object_class->dispose = mapi_folder_dispose;
-
-	camel_object_class = CAMEL_OBJECT_CLASS (class);
-	camel_object_class->getv = mapi_getv;
+	object_class->constructed = mapi_folder_constructed;
 
 	folder_class = CAMEL_FOLDER_CLASS (class);
 	folder_class->get_message = mapi_folder_get_message;
@@ -2223,18 +2291,21 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 	CamelMapiStore  *mapi_store = (CamelMapiStore *) store;
 
 	gchar *summary_file, *state_file;
-	gchar *short_name;
+	const gchar *short_name;
 	guint32 i = 0;
 
-	folder = g_object_new (CAMEL_TYPE_MAPI_FOLDER, NULL);
-
-	mapi_folder = CAMEL_MAPI_FOLDER(folder);
 	short_name = strrchr (folder_name, '/');
 	if (short_name)
 		short_name++;
 	else
-		short_name = (gchar *) folder_name;
-	camel_folder_construct (folder, store, folder_name, short_name);
+		short_name = folder_name;
+
+	folder = g_object_new (
+		CAMEL_TYPE_MAPI_FOLDER,
+		"name", short_name, "full-name", folder_name,
+		"parent-store", store, NULL);
+
+	mapi_folder = CAMEL_MAPI_FOLDER(folder);
 
 	summary_file = g_strdup_printf ("%s/%s/summary",folder_dir, folder_name);
 
@@ -2251,9 +2322,9 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 
 	/* set/load persistent state */
 	state_file = g_strdup_printf ("%s/%s/cmeta", folder_dir, folder_name);
-	camel_object_set(folder, NULL, CAMEL_OBJECT_STATE_FILE, state_file, NULL);
+	camel_object_set_state_filename (CAMEL_OBJECT (folder), state_file);
 	g_free(state_file);
-	camel_object_state_read(folder);
+	camel_object_state_read (CAMEL_OBJECT (folder));
 
 	state_file = g_strdup_printf ("%s/%s", folder_dir, folder_name);
 	mapi_folder->cache = camel_data_cache_new (state_file, ex);

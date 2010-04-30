@@ -65,6 +65,7 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 
 	fetch_items_data *fetch_data;
 	CamelFolder *folder = NULL;
+	CamelStore *parent_store;
 	gint info_count = -1;
 	CamelStoreInfo *info;
 	CamelMapiStoreInfo *mapi_info;
@@ -100,6 +101,8 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 	if (!folder)
 		return;
 
+	parent_store = camel_folder_get_parent_store (folder);
+
 	/*Use restriction to fetch the message summary based on MID*/
 	res = g_new0 (struct mapi_SRestriction, 1);
 
@@ -120,8 +123,8 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 	camel_folder_summary_touch (folder->summary);
 	/* mapi_sync_summary */
 	camel_folder_summary_save_to_db (folder->summary, NULL);
-	camel_store_summary_touch ((CamelStoreSummary *)((CamelMapiStore *)folder->parent_store)->summary);
-	camel_store_summary_save ((CamelStoreSummary *)((CamelMapiStore *)folder->parent_store)->summary);
+	camel_store_summary_touch ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary);
+	camel_store_summary_save ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary);
 
 	camel_object_trigger_event (folder, "folder_changed", fetch_data->changes);
 
