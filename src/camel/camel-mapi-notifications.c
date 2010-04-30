@@ -116,9 +116,9 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 	fetch_data->changes = camel_folder_change_info_new ();
 	fetch_data->folder = folder;
 
-	camel_service_lock (CAMEL_SERVICE (store), CS_REC_CONNECT_LOCK);
+	camel_service_lock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	camel_mapi_folder_fetch_summary ((CamelStore *)store, new_mail_notif->FID, res, NULL, fetch_data, options);
-	camel_service_unlock (CAMEL_SERVICE (store), CS_REC_CONNECT_LOCK);
+	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	camel_folder_summary_touch (folder->summary);
 	/* mapi_sync_summary */
@@ -221,11 +221,11 @@ mapi_push_notification_listener_thread (gpointer data)
 	cb_data->callback = mapi_notifications_continue_check;
 	cb_data->data = thread_data;
 
-	camel_service_lock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
+	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	conn = camel_mapi_store_get_exchange_connection (mapi_store);
 	if (!conn) {
-		camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
+		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		g_return_val_if_reached (NULL);
 	}
 
@@ -236,11 +236,11 @@ mapi_push_notification_listener_thread (gpointer data)
 						&thread_data->connection, mapi_notifications_filter,
 						thread_data->event_data);
 
-		camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
+		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		exchange_mapi_connection_events_monitor (conn, cb_data); /*Blocking call. Don't hold locks here*/
 		exchange_mapi_connection_events_unsubscribe (conn, thread_data->connection);
 	} else
-		camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
+		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	g_free (cb_data);
 	g_object_unref (conn);
@@ -288,8 +288,8 @@ camel_mapi_notification_listener_stop (CamelMapiStore *mstore, gpointer start_va
 	g_free (thread_data);
 
 	g_object_ref (mstore);
-	camel_service_lock (CAMEL_SERVICE (mstore), CS_REC_CONNECT_LOCK);
+	camel_service_lock (CAMEL_SERVICE (mstore), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	camel_mapi_store_unset_notification_data (mstore);
-	camel_service_unlock (CAMEL_SERVICE (mstore), CS_REC_CONNECT_LOCK);
+	camel_service_unlock (CAMEL_SERVICE (mstore), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	g_object_unref (mstore);
 }

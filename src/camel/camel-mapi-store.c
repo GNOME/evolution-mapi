@@ -400,14 +400,14 @@ mapi_connect(CamelService *service, CamelException *ex)
 		camel_service_construct (service, service->session, service->provider, service->url, ex);
 	}
 
-	camel_service_lock (service, CS_REC_CONNECT_LOCK);
+	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 	if (check_for_connection (service, ex)) {
-		camel_service_unlock (service, CS_REC_CONNECT_LOCK);
+		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		return TRUE;
 	}
 
 	if (!mapi_auth_loop (service, ex)) {
-		camel_service_unlock (service, CS_REC_CONNECT_LOCK);
+		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		camel_service_disconnect (service, TRUE, NULL);
 		return FALSE;
 	}
@@ -424,7 +424,7 @@ mapi_connect(CamelService *service, CamelException *ex)
 
 	camel_store_summary_save ((CamelStoreSummary *) store->summary);
 
-	camel_service_unlock (service, CS_REC_CONNECT_LOCK);
+	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	return TRUE;
 }
@@ -566,7 +566,7 @@ mapi_create_folder(CamelStore *store, const gchar *parent_name, const gchar *fol
 			return NULL;
 	}
 
-	camel_service_lock (CAMEL_SERVICE (store), CS_REC_CONNECT_LOCK);
+	camel_service_lock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	exchange_mapi_util_mapi_id_from_string (parent_id, &parent_fid);
 	new_folder_id = exchange_mapi_connection_create_folder (priv->conn, olFolderInbox, parent_fid, folder_name);
@@ -584,7 +584,7 @@ mapi_create_folder(CamelStore *store, const gchar *parent_name, const gchar *fol
 		camel_object_trigger_event (CAMEL_OBJECT (store), "folder_created", root);
 	}
 
-	camel_service_unlock (CAMEL_SERVICE (store), CS_REC_CONNECT_LOCK);
+	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	return root;
 
 }
@@ -636,10 +636,10 @@ mapi_delete_folder(CamelStore *store, const gchar *folder_name, CamelException *
 	mapi_id_t folder_fid;
 	gboolean status = FALSE;
 
-	camel_service_lock (CAMEL_SERVICE (store), CS_REC_CONNECT_LOCK);
+	camel_service_lock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	if (!camel_mapi_store_connected ((CamelMapiStore *)store, ex)) {
-		camel_service_unlock (CAMEL_SERVICE (store), CS_REC_CONNECT_LOCK);
+		camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		return !camel_exception_is_set (ex);
 	}
 
@@ -659,7 +659,7 @@ mapi_delete_folder(CamelStore *store, const gchar *folder_name, CamelException *
 		g_hash_table_remove (priv->name_hash, folder_name);
 	}
 
-	camel_service_unlock (CAMEL_SERVICE (store), CS_REC_CONNECT_LOCK);
+	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	return !camel_exception_is_set (ex);
 }
@@ -724,10 +724,10 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 	const gchar *old_fid_str, *new_parent_fid_str = NULL;
 	mapi_id_t old_fid;
 
-	camel_service_lock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
+	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	if (!camel_mapi_store_connected ((CamelMapiStore *)store, ex)) {
-		camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
+		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		return !camel_exception_is_set (ex);
 	}
 
@@ -738,7 +738,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM,
 				      _("Cannot rename MAPI folder '%s'. Folder does not exist."),
 				      old_name);
-		camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
+		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		return FALSE;
 	}
 
@@ -749,7 +749,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM,
 				      _("Cannot rename MAPI default folder '%s' to '%s'."),
 				      old_name, new_name);
-		camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
+		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		return FALSE;
 	}
 
@@ -773,7 +773,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 
 	if (!exchange_mapi_util_mapi_id_from_string (old_fid_str, &old_fid)) {
 		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename MAPI folder '%s' to '%s'"), old_name, new_name);
-		camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
+		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		g_free (old_parent);
 		g_free (new_parent);
 		return FALSE;
@@ -789,7 +789,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 			camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM,
 						  _("Cannot rename MAPI folder '%s' to '%s'"), old_name, new_name);
 
-			camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
+			camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 			g_free (old_parent);
 			g_free (new_parent);
 			return FALSE;
@@ -837,7 +837,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 			   !exchange_mapi_util_mapi_id_from_string (old_parent_fid_str, &old_parent_fid) ||
 			   !exchange_mapi_util_mapi_id_from_string (new_parent_fid_str, &new_parent_fid) ||
 			   !exchange_mapi_connection_move_folder (priv->conn, old_fid, old_parent_fid, new_parent_fid, tmp)) {
-			camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
+			camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 			camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename MAPI folder '%s' to '%s'"), old_name, new_name);
 			g_free (old_parent);
 			g_free (new_parent);
@@ -860,7 +860,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 		g_free (folder_id);
 	}
 
-	camel_service_unlock (CAMEL_SERVICE (mapi_store), CS_REC_CONNECT_LOCK);
+	camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	si = camel_store_summary_path ((CamelStoreSummary *)mapi_store->summary, old_name);
 	if (si) {
@@ -1548,7 +1548,7 @@ mapi_get_folder_info(CamelStore *store, const gchar *top, guint32 flags, CamelEx
 	 * is used as is here.
 	 */
 
-	camel_service_lock (CAMEL_SERVICE (store), CS_REC_CONNECT_LOCK);
+	camel_service_lock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	if (((CamelOfflineStore *) store)->state == CAMEL_OFFLINE_STORE_NETWORK_AVAIL) {
 		if (((CamelService *)store)->status == CAMEL_SERVICE_DISCONNECTED) {
@@ -1568,14 +1568,14 @@ mapi_get_folder_info(CamelStore *store, const gchar *top, guint32 flags, CamelEx
 		mapi_folders_sync (mapi_store, top, flags, ex);
 
 		if (camel_exception_is_set (ex)) {
-			camel_service_unlock (CAMEL_SERVICE (store), CS_REC_CONNECT_LOCK);
+			camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 			return NULL;
 		}
 		camel_store_summary_touch ((CamelStoreSummary *)mapi_store->summary);
 		camel_store_summary_save ((CamelStoreSummary *)mapi_store->summary);
 	}
 
-	camel_service_unlock (CAMEL_SERVICE (store), CS_REC_CONNECT_LOCK);
+	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	s_count = camel_store_summary_count((CamelStoreSummary *)mapi_store->summary);
 	info = mapi_get_folder_info_offline (store, top, flags, ex);
