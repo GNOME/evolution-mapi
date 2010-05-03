@@ -2358,6 +2358,12 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 
 		if (!strcmp(folder_name, camel_mapi_store_info_full_name (mapi_store->summary, si))) {
 			mapi_folder->type = si->flags;
+			if ((si->flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH)
+				folder->folder_flags |= CAMEL_FOLDER_IS_TRASH;
+			else if ((si->flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_JUNK)
+				folder->folder_flags  |= CAMEL_FOLDER_IS_JUNK;
+			camel_store_summary_info_free((CamelStoreSummary *)mapi_store->summary, si);
+			break;
 		}
 
 		camel_store_summary_info_free((CamelStoreSummary *)mapi_store->summary, si);
