@@ -114,6 +114,7 @@ static void		mapi_unsubscribe_folder(CamelStore *, const char *, CamelException 
 static void		mapi_noop(CamelStore *, CamelException *);
 static CamelFolderInfo * mapi_build_folder_info(CamelMapiStore *mapi_store, const char *parent_name, const char *folder_name);
 static gboolean mapi_fid_is_system_folder (CamelMapiStore *mapi_store, const char *fid);
+static CamelFolder *mapi_get_trash (CamelStore *store, CamelException *ex);
 
 static void mapi_update_folder_hash_tables (CamelMapiStore *store, const gchar *name, const gchar *fid, const gchar *parent_id);
 /* static const gchar* mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid, gboolean use_cache); */
@@ -198,6 +199,7 @@ camel_mapi_store_class_init(CamelMapiStoreClass *klass)
 	store_class->folder_subscribed = mapi_folder_subscribed;
 	store_class->unsubscribe_folder = mapi_unsubscribe_folder;
 	store_class->noop = mapi_noop;
+	store_class->get_trash = mapi_get_trash;
 }
 
 CamelType 
@@ -1732,3 +1734,53 @@ mapi_noop(CamelStore *store, CamelException *ex)
 
 }
 
+static CamelFolder *
+mapi_get_folder_with_type (CamelStore *store, guint folder_type, CamelException *ex)
+{
+	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
+	CamelFolderInfo *all_fi, *fi;
+	CamelFolder *folder = NULL;
+
+	g_return_val_if_fail (mapi_store != NULL, NULL);
+	g_return_val_if_fail (mapi_store->priv != NULL, NULL);
+
+	all_fi = camel_store_get_folder_info (store, NULL, CAMEL_STORE_FOLDER_INFO_RECURSIVE, ex);
+	fi = all_fi;
+	while (fi) {
+		CamelFolderInfo *next;
+
+		if ((fi->flags & CAMEL_FOLDER_TYPE_MASK) == folder_type) {
+			folder = camel_store_get_folder (store, fi->full_name, 0, ex);
+			break;
+		}
+
+		/* move to the next, depth-first search */
+		next = fi->child;
+		if (!next)
+			next = fi->next;
+		if (!next) {
+			next = fi->parent;
+			while (next) {
+				CamelFolderInfo *sibl = next->next;
+				if (sibl) {
+					next = sibl;
+					break;
+				} else {
+					next = next->parent;
+				}
+			}
+		}
+
+		fi = next;
+	}
+
+	camel_store_free_folder_info (store, all_fi);
+
+	return folder;
+}
+
+static CamelFolder *
+mapi_get_trash (CamelStore *store, CamelException *ex)
+{
+	return mapi_get_folder_with_type (store, CAMEL_FOLDER_TYPE_TRASH, ex);
+}
