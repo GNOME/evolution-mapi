@@ -1,3 +1,51 @@
+evolution-mapi 0.31.1 2010-05-03
+--------------------------------
+Bug Fixes:
+	Bug #565964 - Translation issues (added translator's comments) (Milan Crha)
+	Bug #586096 - Contact list doesn't work at all (Milan Crha)
+	Bug #595914 - Doesn't display the Cyrrilic symbols in folder names (Luf)
+	Bug #592452 - Slow mail message fetching (Milan Crha)
+	Bug #598564 - Has problems encoding mails containing html (Milan Crha)
+	Bug #600389 - UTF8 characters in contacts not shown properly (Milan Crha)
+	Bug #600395 - 'Folder size' option is shown onto each MAPI folder (Johnny Jacob)
+	Bug #600655 - Calendar property doesn't show calendar hierarchy (Milan Crha)
+	Bug #608307 - Renaming a parent folder disappears sub folders (Milan Crha)
+	Bug #608766 - Replace pthread with GLib's GThread (Milan Crha)
+	Bug #608885 - Allow multiple MAPI accounts (Milan Crha)
+	Bug #610229 - Status bar progress goes beyond 100 percentage (Punit Jain)
+	Bug #610697 - GAL addressbook only shows e-mail addresses (Milan Crha)
+	Bug #613146 - Message list shows messages that were deleted externally (Milan Crha)
+	Bug #615265 - Compile with -DGSEAL_ENABLE (Andre Klapper)
+	Bug #615678 - i18n not working (Mario Carrion)
+	Bug #615716 — Miscellaneous string fixes (Philip Withnall)
+	Bug #615776 - Do not use its own copy of camel-private.h (Milan Crha)
+	Bug #615838 - Use _ADDRTYPE_UNICODE properties (Milan Crha)
+	Bug #616319 - Cache named IDs instead of fetching them repeatedly (Milan Crha)
+	Bug #616912 - Undefined symbol mapi_book_get_prop_list on GAL backend (Milan Crha)
+
+Misc:
+	camel/camel-i18n.h and other headers gone, adapt to it properly (Milan Crha)
+	Only #include Camel's top-level header (Matthew Barnes)
+	Adapt to Camel API changes (Matthew Barnes)
+	Whitespace and coding style cleanup (Matthew Barnes)
+	Use GtkSpinner instead of ESpinner (removed) (Matthew Barnes)
+	Connect to the server in mapi_account_added when not connected yet (Milan Crha)
+	Assign CamelStoreClass::free_folder_info (Milan Crha)
+	Check for RegisterNotification function with two params (Milan Crha)
+	Added asturian language (Xandru Armesto)
+	Camel is now GObject based (Matthew Barnes)
+
+Translations:
+	Bruno Brouard (fr)
+	Carles Ferrando (ca@valencia)
+	Francisco Diéguez (gl)
+	Jorge González (es)
+	Kjartan Maraas (nb)
+	Matej Urbančič (sl)
+	Philip Withnall (en_GB)
+	Umarzuki Bin Mochlis Moktar (ms)
+	Xandru Armesto (ast)
+
 evolution-mapi 0.29.92 2010-03-08
 --------------------------------
 Bug Fixes:
