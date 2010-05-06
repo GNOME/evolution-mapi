@@ -282,6 +282,6 @@ mapi_summary_clear (CamelFolderSummary *summary, gboolean uncache)
 	camel_folder_summary_clear_db (summary);
 
 	if (camel_folder_change_info_changed (changes))
-		camel_object_trigger_event (summary->folder, "folder_changed", changes);
+		camel_folder_changed (summary->folder, changes);
 	camel_folder_change_info_free (changes);
 }

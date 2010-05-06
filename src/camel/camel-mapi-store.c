@@ -95,7 +95,7 @@ static gboolean		mapi_delete_folder(CamelStore *, const gchar *, CamelException 
 static gboolean		mapi_rename_folder(CamelStore *, const gchar *, const gchar *, CamelException *);
 static CamelFolderInfo	*mapi_get_folder_info(CamelStore *, const gchar *, guint32, CamelException *);
 static gboolean		mapi_subscribe_folder(CamelStore *, const gchar *, CamelException *);
-static gboolean mapi_folder_subscribed (CamelStore *store, const gchar *folder_name);
+static gboolean mapi_folder_is_subscribed (CamelStore *store, const gchar *folder_name);
 static gboolean		mapi_unsubscribe_folder(CamelStore *, const gchar *, CamelException *);
 static gboolean		mapi_noop(CamelStore *, CamelException *);
 static CamelFolderInfo * mapi_build_folder_info(CamelMapiStore *mapi_store, const gchar *parent_name, const gchar *folder_name);
@@ -231,7 +231,7 @@ camel_mapi_store_class_init (CamelMapiStoreClass *class)
 	store_class->get_folder_info = mapi_get_folder_info;
 	store_class->free_folder_info = camel_store_free_folder_info_full;
 	store_class->subscribe_folder = mapi_subscribe_folder;
-	store_class->folder_subscribed = mapi_folder_subscribed;
+	store_class->folder_is_subscribed = mapi_folder_is_subscribed;
 	store_class->unsubscribe_folder = mapi_unsubscribe_folder;
 	store_class->noop = mapi_noop;
 	store_class->get_trash = mapi_get_trash;
@@ -583,7 +583,7 @@ mapi_create_folder(CamelStore *store, const gchar *parent_name, const gchar *fol
 
 		mapi_update_folder_hash_tables (mapi_store, root->full_name, fid, parent_id);
 
-		camel_object_trigger_event (CAMEL_OBJECT (store), "folder_created", root);
+		camel_store_folder_created (store, root);
 	}
 
 	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
@@ -624,7 +624,7 @@ mapi_forget_folder (CamelMapiStore *mapi_store, const gchar *folder_name, CamelE
 	camel_store_summary_save ((CamelStoreSummary *)mapi_store->summary);
 
 	fi = mapi_build_folder_info (mapi_store, NULL, folder_name);
-	camel_object_trigger_event (CAMEL_OBJECT (mapi_store), "folder_deleted", fi);
+	camel_store_folder_deleted (CAMEL_STORE (mapi_store), fi);
 	camel_folder_info_free (fi);
 }
 
@@ -1353,8 +1353,8 @@ remove_path_from_store_summary (const gchar *path, gpointer value, CamelMapiStor
 				fi->name = g_strdup (fi->name + 1);
 		}
 
-		camel_object_trigger_event (CAMEL_OBJECT (mstore), "folder_unsubscribed", fi);
-		camel_object_trigger_event (CAMEL_OBJECT (mstore), "folder_deleted", fi);
+		camel_store_folder_unsubscribed (CAMEL_STORE (mstore), fi);
+		camel_store_folder_deleted (CAMEL_STORE (mstore), fi);
 		camel_folder_info_free (fi);
 
 		camel_store_summary_info_free ((CamelStoreSummary *)mstore->summary, si);
@@ -1500,8 +1500,8 @@ mapi_folders_sync (CamelMapiStore *store, const gchar *top, guint32 flags, Camel
 			camel_store_summary_info_ref ((CamelStoreSummary *)store->summary, (CamelStoreInfo *)mapi_si);
 
 			if (!subscription_list) {
-				camel_object_trigger_event (CAMEL_OBJECT (store), "folder_created", info);
-				camel_object_trigger_event (CAMEL_OBJECT (store), "folder_subscribed", info);
+				camel_store_folder_created (CAMEL_STORE (store), info);
+				camel_store_folder_subscribed (CAMEL_STORE (store), info);
 			}
 		}
 
@@ -1671,14 +1671,14 @@ mapi_subscribe_folder(CamelStore *store, const gchar *folder_name, CamelExceptio
 	fi->flags |= CAMEL_FOLDER_NOCHILDREN;
 	fi->flags |= CAMEL_STORE_INFO_FOLDER_SUBSCRIBED;
 
-	camel_object_trigger_event (CAMEL_OBJECT (store), "folder_subscribed", fi);
+	camel_store_folder_subscribed (store, fi);
 	camel_folder_info_free (fi);
 
 	return TRUE;
 }
 
 static gboolean
-mapi_folder_subscribed (CamelStore *store, const gchar *folder_name)
+mapi_folder_is_subscribed (CamelStore *store, const gchar *folder_name)
 {
 	CamelMapiStore *mapi_store = (CamelMapiStore *) store;
 	CamelStoreInfo *si;
@@ -1724,7 +1724,7 @@ mapi_unsubscribe_folder(CamelStore *store, const gchar *folder_name, CamelExcept
 
 	fi = mapi_build_folder_info (mapi_store, parent_name, folder_name);
 
-	camel_object_trigger_event (CAMEL_OBJECT (store), "folder_unsubscribed", fi);
+	camel_store_folder_unsubscribed (store, fi);
 	camel_folder_info_free (fi);
 
 	return TRUE;

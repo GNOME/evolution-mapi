@@ -767,7 +767,7 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 		/* Check if we have to stop */
 		if (camel_operation_cancel_check(NULL)) {
 			if (camel_folder_change_info_changed (changes))
-				camel_object_trigger_event (m->folder, "folder_changed", changes);
+				camel_folder_changed (m->folder, changes);
 			camel_folder_change_info_free (changes);
 			return;
 		}
@@ -776,7 +776,7 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 	camel_operation_end (NULL);
 
 	if (camel_folder_change_info_changed (changes))
-		camel_object_trigger_event (m->folder, "folder_changed", changes);
+		camel_folder_changed (m->folder, changes);
 	camel_folder_change_info_free (changes);
 
 	m->need_refresh = camel_folder_summary_count (m->folder->summary) != g_slist_length (server_uid_list);
@@ -1173,7 +1173,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 
 		camel_session_thread_queue (session, &deleted_items_op_msg->msg, 0);
 
-		camel_object_trigger_event (folder, "folder_changed", fetch_data->changes);
+		camel_folder_changed (folder, fetch_data->changes);
 		camel_folder_change_info_free (fetch_data->changes);
 	}
 
@@ -2043,7 +2043,7 @@ mapi_expunge (CamelFolder *folder, CamelException *ex)
 	}
 
 	if (delete)
-		camel_object_trigger_event (CAMEL_OBJECT (folder), "folder_changed", changes);
+		camel_folder_changed (folder, changes);
 
 	g_free (folder_id);
 	camel_folder_change_info_free (changes);
@@ -2107,7 +2107,7 @@ mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 				camel_folder_summary_remove_uid (source->summary, uids->pdata[i]);
 				camel_folder_change_info_remove_uid (changes, uids->pdata[i]);
 			}
-			camel_object_trigger_event (source, "folder_changed", changes);
+			camel_folder_changed (source, changes);
 			camel_folder_change_info_free (changes);
 
 		}

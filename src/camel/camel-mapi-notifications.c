@@ -126,7 +126,7 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 	camel_store_summary_touch ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary);
 	camel_store_summary_save ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary);
 
-	camel_object_trigger_event (folder, "folder_changed", fetch_data->changes);
+	camel_folder_changed (folder, fetch_data->changes);
 
 	camel_folder_change_info_free (fetch_data->changes);
 	g_free (res);
