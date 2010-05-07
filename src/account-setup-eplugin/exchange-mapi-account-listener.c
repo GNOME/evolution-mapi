@@ -514,6 +514,89 @@ remove_addressbook_sources (ExchangeMAPIAccountInfo *existing_account_info)
 }
 
 static void
+update_sources_fn (gpointer data, gpointer user_data)
+{
+	ExchangeMapiConnection *conn = data;
+	EAccount *account;
+	GSList *folders_list;
+
+	g_return_if_fail (conn != NULL);
+
+	account = g_object_get_data (G_OBJECT (conn), "EAccount");
+	if (!account) {
+		g_object_unref (conn);
+		g_return_if_fail (account != NULL);
+		return;
+	}
+
+	g_object_set_data (G_OBJECT (conn), "EAccount", NULL);
+
+	folders_list = exchange_mapi_connection_peek_folders_list (conn);
+
+	if (account->enabled && lookup_account_info (account->uid)) {
+		add_addressbook_sources (account, folders_list);
+		add_calendar_sources (account, folders_list);
+	}
+
+	g_object_unref (conn);
+	g_object_unref (account);
+}
+
+static void
+run_update_sources_thread (ExchangeMapiConnection *conn, EAccount *account)
+{
+	static GThreadPool *thread_pool = NULL;
+
+	g_return_if_fail (conn != NULL);
+	g_return_if_fail (account != NULL);
+
+	/* this should be called only on the main thread, thus no locking needed */
+	if (!thread_pool)
+		thread_pool = g_thread_pool_new (update_sources_fn, NULL, 1, FALSE, NULL);
+
+	g_object_set_data (G_OBJECT (conn), "EAccount", g_object_ref (account));
+
+	if (!thread_pool)
+		update_sources_fn (conn, NULL);
+	else
+		g_thread_pool_push (thread_pool, conn, NULL);
+}
+
+struct create_sources_data
+{
+	gchar *profile_name;
+	EAccount *account;
+};
+
+static gboolean
+check_for_account_conn_cb (gpointer data)
+{
+	struct create_sources_data *csd = data;
+
+	g_return_val_if_fail (csd != NULL, FALSE);
+	g_return_val_if_fail (csd->profile_name != NULL, FALSE);
+	g_return_val_if_fail (csd->account != NULL, FALSE);
+
+	if (csd->account->enabled && !lookup_account_info (csd->account->uid)) {
+		ExchangeMapiConnection *conn;
+
+		conn = exchange_mapi_connection_find (csd->profile_name);
+		if (!conn) {
+			/* try later, it's still trying to connect */
+			return TRUE;
+		}
+
+		run_update_sources_thread (conn, csd->account);
+	}
+
+	g_object_unref (csd->account);
+	g_free (csd->profile_name);
+	g_free (csd);
+
+	return FALSE;
+}
+
+static void
 mapi_account_added (EAccountList *account_listener, EAccount *account)
 {
 	ExchangeMAPIAccountInfo *info = NULL;
@@ -530,7 +613,6 @@ mapi_account_added (EAccountList *account_listener, EAccount *account)
 	mapi_accounts = g_list_append (mapi_accounts, info);
 
 	if (account->enabled) {
-		GSList *folders_list;
 		CamelURL *url;
 		ExchangeMapiConnection *conn;
 
@@ -542,20 +624,26 @@ mapi_account_added (EAccountList *account_listener, EAccount *account)
 			/* connect to the server when not connected yet */
 			if (!create_profile_entry (url, account)) {
 				camel_url_free (url);
+				g_warning ("%s: Failed to create MAPI profile for '%s'", G_STRFUNC, account->name);
 				return;
 			}
 
 			conn = exchange_mapi_connection_find (camel_url_get_param (url, "profile"));
 		}
+
+		if (conn) {
+			run_update_sources_thread (conn, account);
+		} else {
+			struct create_sources_data *csd;
+
+			csd = g_new0 (struct create_sources_data, 1);
+			csd->profile_name = g_strdup (camel_url_get_param (url, "profile"));
+			csd->account = g_object_ref (account);
+
+			g_timeout_add_seconds (1, check_for_account_conn_cb, csd);
+		}
+
 		camel_url_free (url);
-		g_return_if_fail (conn != NULL);
-
-		folders_list = exchange_mapi_connection_peek_folders_list (conn);
-
-		add_addressbook_sources (account, folders_list);
-		add_calendar_sources (account, folders_list);
-
-		g_object_unref (conn);
 	}
 }
 
@@ -771,6 +859,12 @@ exchange_mapi_account_listener_construct (ExchangeMAPIAccountListener *config_li
 			info->name = g_strdup (account->name);
 			info->source_url = g_strdup (account->source->url);
 			info->enabled = account->enabled;
+
+			if (!account->enabled) {
+				remove_addressbook_sources (info);
+				remove_calendar_sources (account);
+			}
+
 			mapi_accounts = g_list_append (mapi_accounts, info);
 		}
 	}
