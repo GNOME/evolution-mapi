@@ -337,13 +337,14 @@ mapi_auth_loop (CamelService *service, CamelException *ex)
 
 	gchar *errbuf = NULL;
 	gboolean authenticated = FALSE;
+	guint32 prompt_flags = CAMEL_SESSION_PASSWORD_SECRET;
 
 	service->url->passwd = NULL;
 
 	while (!authenticated) {
 		if (errbuf) {
 			/* We need to un-cache the password before prompting again */
-			camel_session_forget_password (session, service, E_PASSWORD_COMPONENT, "password", ex);
+			prompt_flags |= CAMEL_SESSION_PASSWORD_REPROMPT;
 			g_free (service->url->passwd);
 			service->url->passwd = NULL;
 		}
@@ -361,7 +362,7 @@ mapi_auth_loop (CamelService *service, CamelException *ex)
 						  service->url->host);
 			service->url->passwd =
 				camel_session_get_password (session, service, E_PASSWORD_COMPONENT,
-							    prompt, "password", CAMEL_SESSION_PASSWORD_SECRET, ex);
+							    prompt, "password", prompt_flags, ex);
 			g_free (prompt);
 			g_free (errbuf);
 			errbuf = NULL;
