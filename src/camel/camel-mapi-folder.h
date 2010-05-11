@@ -149,7 +149,7 @@ camel_mapi_folder_new(CamelStore *store, const gchar *folder_name, const gchar *
 
 void mapi_update_summary ( CamelFolder *folder, GList *item_list,CamelException *ex);
 void mapi_refresh_folder(CamelFolder *folder, CamelException *ex);
-gboolean camel_mapi_folder_fetch_summary (CamelStore *store, const mapi_id_t fid, struct mapi_SRestriction *res,
+gboolean camel_mapi_folder_fetch_summary (CamelStore *store, CamelFolder *folder, const mapi_id_t fid, struct mapi_SRestriction *res,
 					  struct SSortOrderSet *sort, fetch_items_data *fetch_data, guint32 options);
 
 G_END_DECLS

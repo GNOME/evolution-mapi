@@ -1015,7 +1015,7 @@ mapi_camel_get_summary_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC
 }
 
 gboolean
-camel_mapi_folder_fetch_summary (CamelStore *store, const mapi_id_t fid, struct mapi_SRestriction *res,
+camel_mapi_folder_fetch_summary (CamelStore *store, CamelFolder *folder, const mapi_id_t fid, struct mapi_SRestriction *res,
 				 struct SSortOrderSet *sort, fetch_items_data *fetch_data, guint32 options)
 {
 	gboolean status;
@@ -1023,7 +1023,7 @@ camel_mapi_folder_fetch_summary (CamelStore *store, const mapi_id_t fid, struct 
 
 	/*TODO : Check for online state*/
 
-	camel_operation_start (NULL, _("Fetching summary information for new messages in")); /* %s"), folder->name); */
+	camel_operation_start (NULL, _("Fetching summary information for new messages in %s"), camel_folder_get_name (folder));
 
 	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
@@ -1145,7 +1145,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		if (((CamelMapiFolder *)folder)->type & CAMEL_MAPI_FOLDER_PUBLIC)
 			options |= MAPI_OPTIONS_USE_PFSTORE;
 
-		status = camel_mapi_folder_fetch_summary ((CamelStore *)mapi_store, temp_folder_id, res, sort,
+		status = camel_mapi_folder_fetch_summary ((CamelStore *)mapi_store, folder, temp_folder_id, res, sort,
 							  fetch_data, options);
 
 		if (!status) {
