@@ -80,6 +80,7 @@ struct _ECalBackendMAPIPrivate {
 	CalMode			mode;
 	gboolean		mode_changed;
 	icaltimezone		*default_zone;
+	gboolean		populating_cache; /* whether in populate_cache */
 
 	/* timeout handler for syncing sendoptions */
 	guint			sendoptions_sync_timeout;
@@ -1136,10 +1137,17 @@ populate_cache (ECalBackendMAPI *cbmapi)
 	gchar t_str [26];
 
 	priv = cbmapi->priv;
-	source = e_cal_backend_get_source (E_CAL_BACKEND (cbmapi));
-	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
 
 	g_mutex_lock (priv->mutex);
+	if (priv->populating_cache) {
+		g_mutex_unlock (priv->mutex);
+		return GNOME_Evolution_Calendar_Success;
+	}
+	priv->populating_cache = TRUE;
+	g_mutex_unlock (priv->mutex);
+
+	source = e_cal_backend_get_source (E_CAL_BACKEND (cbmapi));
+	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
 
 	itt_current = icaltime_current_time_with_zone (icaltimezone_get_utc_timezone ());
 	current_time = icaltime_as_timet_with_zone (itt_current, icaltimezone_get_utc_timezone ());
@@ -1157,6 +1165,8 @@ populate_cache (ECalBackendMAPI *cbmapi)
 						MAPI_OPTIONS_FETCH_ALL)) {
 			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Could not create cache file"));
 			e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
+			g_mutex_lock (priv->mutex);
+			priv->populating_cache = FALSE;
 			g_mutex_unlock (priv->mutex);
 			return GNOME_Evolution_Calendar_OtherError;
 		}
@@ -1166,6 +1176,8 @@ populate_cache (ECalBackendMAPI *cbmapi)
 						MAPI_OPTIONS_FETCH_ALL)) {
 		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Could not create cache file"));
 		e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
+		g_mutex_lock (priv->mutex);
+		priv->populating_cache = FALSE;
 		g_mutex_unlock (priv->mutex);
 		return GNOME_Evolution_Calendar_OtherError;
 	}
@@ -1179,6 +1191,8 @@ populate_cache (ECalBackendMAPI *cbmapi)
 
 	e_cal_backend_cache_set_marker (priv->cache);
 
+	g_mutex_lock (priv->mutex);
+	priv->populating_cache = FALSE;
 	g_mutex_unlock (priv->mutex);
 
 	return GNOME_Evolution_Calendar_Success;
@@ -1300,6 +1314,9 @@ e_cal_backend_mapi_open (ECalBackendSync *backend, EDataCal *cal, gboolean only_
 	gchar *mangled_uri;
 	gint i;
 	uint32_t olFolder = 0;
+
+	if (e_cal_backend_is_loaded (E_CAL_BACKEND (backend)))
+		return GNOME_Evolution_Calendar_Success;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
@@ -2559,6 +2576,7 @@ e_cal_backend_mapi_init (ECalBackendMAPI *cbmapi)
 
 	/* create the mutex for thread safety */
 	priv->mutex = g_mutex_new ();
+	priv->populating_cache = FALSE;
 
 	cbmapi->priv = priv;
 

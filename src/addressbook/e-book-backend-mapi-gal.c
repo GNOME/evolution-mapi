@@ -384,8 +384,13 @@ e_book_backend_mapi_gal_load_source (EBookBackend *backend,
 	const gchar *offline, *tmp;
 	gchar **tokens;
 	gchar *uri = NULL;
+
 	if (enable_debug)
 		printf("MAPI load source\n");
+
+	if (e_book_backend_is_loaded (backend))
+		return GNOME_Evolution_Addressbook_Success;
+
 	offline = e_source_get_property (source, "offline_sync");
 	if (offline  && g_str_equal (offline, "1"))
 		priv->marked_for_offline = TRUE;
