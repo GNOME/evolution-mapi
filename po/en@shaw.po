@@ -4,17 +4,19 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2009-11-06 19:17+0200\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
+"POT-Creation-Date: 2010-05-12 21:54+0000\n"
+"PO-Revision-Date: 2010-05-12 18:35 -0400\n"
 "Last-Translator: Thomas Thurman <tthurman@gnome.org>\n"
-"Language-Team: Shavian <ubuntu-l10n-en-shaw@lists.launchpad.net>\n"
+"Language-Team: Shavian <ubuntu-l10n-en-shaw@launchpad.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n!=1;\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:617
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
 #, c-format
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:707
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:228
 msgid "Enter Password for %s@%s"
 msgstr "𐑧𐑯𐑑𐑼 𐑐𐑭𐑕𐑢𐑼𐑛 𐑓𐑹 %s@%s"
 
@@ -22,122 +24,150 @@ msgstr "𐑧𐑯𐑑𐑼 𐑐𐑭𐑕𐑢𐑼𐑛 𐑓𐑹 %s@%s"
 #. using GtkEntryCompletion in the username gtkentry. But plugins
 #. as of now does not have access to it
 #. TODO : Fix strings
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:133
 msgid "Select username"
 msgstr "𐑕𐑩𐑤𐑧𐑒𐑑 𐑿𐑟𐑼𐑯𐑱𐑥"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
 msgid "Full name"
 msgstr "𐑓𐑫𐑤 𐑯𐑱𐑥"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
-msgid "User name"
-msgstr "𐑿𐑟𐑼 𐑯𐑱𐑥"
+#, fuzzy
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:148
+msgid "Username"
+msgstr "𐑿𐑟𐑼𐑯𐑱𐑥"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:217
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
 msgstr ""
 "𐑕𐑻𐑝𐑼, 𐑿𐑟𐑼𐑯𐑱𐑥 𐑯 𐑛𐑴𐑥𐑱𐑯 𐑯𐑱𐑥 𐑒𐑨𐑯𐑪𐑑 𐑚𐑰 𐑧𐑥𐑐𐑑𐑦. 𐑐𐑤𐑰𐑟 𐑓𐑦𐑤 𐑞𐑧𐑥 𐑢𐑦𐑞 𐑒𐑼𐑧𐑒𐑑 𐑝𐑨𐑤𐑿𐑟."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:272
 msgid "Authentication finished successfully."
 msgstr "𐑷𐑔𐑧𐑯𐑑𐑦𐑒𐑱𐑖𐑩𐑯 𐑓𐑦𐑯𐑦𐑖𐑑 𐑕𐑩𐑒𐑕𐑧𐑕𐑓𐑩𐑤𐑦."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:278
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:288
 msgid "Authentication failed."
 msgstr "𐑷𐑔𐑧𐑯𐑑𐑦𐑒𐑱𐑖𐑩𐑯 𐑓𐑱𐑤𐑛."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:344
 msgid "_Domain name:"
 msgstr "_𐑛𐑴𐑥𐑱𐑯 𐑯𐑱𐑥:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:354
 msgid "_Authenticate"
 msgstr "_𐑷𐑔𐑧𐑯𐑑𐑦𐑒𐑱𐑑"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:491
 msgid "Personal Folders"
 msgstr "𐑐𐑻𐑕𐑩𐑯𐑩𐑤 𐑓𐑴𐑤𐑛𐑼𐑟"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:619
 msgid "_Location:"
 msgstr "_𐑤𐑴𐑒𐑱𐑖𐑩𐑯:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:132
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:102
 msgid "Folder"
 msgstr "𐑓𐑴𐑤𐑛𐑼"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:137
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:107
 msgid "Size"
 msgstr "𐑕𐑲𐑟"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:157
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:127
 msgid "Unable to retrieve folder size information"
 msgstr "𐑳𐑯𐑱𐑚𐑩𐑤 𐑑 𐑮𐑦𐑑𐑮𐑰𐑝 𐑓𐑴𐑤𐑛𐑼 𐑕𐑲𐑟 𐑦𐑯𐑓𐑼𐑥𐑱𐑖𐑩𐑯"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:181
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:151
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:344
 msgid "Folder Size"
 msgstr "𐑓𐑴𐑤𐑛𐑼 𐑕𐑲𐑟"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:189
-msgid "Fetching folder list ..."
-msgstr "𐑓𐑧𐑗𐑦𐑙 𐑓𐑴𐑤𐑛𐑼 𐑤𐑦𐑕𐑑 ..."
+#, fuzzy
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:160
+msgid "Fetching folder list…"
+msgstr "𐑓𐑧𐑗𐑦𐑙 𐑓𐑴𐑤𐑛𐑼 𐑤𐑦𐑕𐑑…"
 
 #. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:305
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:329
 msgid "Miscellaneous"
 msgstr "𐑥𐑦𐑕𐑩𐑤𐑱𐑯𐑰𐑩𐑕"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:318
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:342
 msgid "View the size of all Exchange folders"
 msgstr "𐑝𐑿 𐑞 𐑕𐑲𐑟 𐑝 𐑷𐑤 ·𐑧𐑒𐑕𐑗𐑱𐑯𐑡 𐑓𐑴𐑤𐑛𐑼𐑟"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:320
-msgid "Folders Size"
-msgstr "𐑓𐑴𐑤𐑛𐑼𐑟 𐑕𐑲𐑟"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:331
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:355
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
 msgstr "·𐑧𐑒𐑕𐑗𐑱𐑯𐑡 𐑕𐑧𐑑𐑦𐑙𐑟"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:340
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:364
 msgid "Folder size"
 msgstr "𐑓𐑴𐑤𐑛𐑼 𐑕𐑲𐑟"
 
-#: ../src/calendar/e-cal-backend-mapi.c:115
-#: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:472
+#. To translators : This is used to cache the downloaded contacts from GAL.
+#. The first %d is an index of the GAL entry,
+#. the second %d is total count of entries in GAL.
+#, fuzzy, c-format
+#: ../src/addressbook/e-book-backend-mapi-gal.c:168
+msgid "Caching GAL entry %d/%d"
+msgstr "𐑒𐑨𐑖𐑦𐑙 𐑜𐑨𐑤 𐑧𐑯𐑑𐑮𐑦 %d/%d"
+
+#. To translators : This is used to cache the downloaded contacts from GAL.
+#. %d is an index of the GAL entry.
+#, fuzzy, c-format
+#: ../src/addressbook/e-book-backend-mapi-gal.c:172
+msgid "Caching GAL entry %d"
+msgstr "𐑒𐑨𐑖𐑦𐑙 𐑜𐑨𐑤 𐑧𐑯𐑑𐑮𐑦 %d"
+
+#, fuzzy
+#: ../src/addressbook/e-book-backend-mapi-gal.c:698
+msgid "Searching"
+msgstr "𐑕𐑻𐑗𐑦𐑙"
+
+#. To translators : Here Evolution MAPI downloads the entries from the GAL server
+#, fuzzy
+#: ../src/addressbook/e-book-backend-mapi-gal.c:716
+msgid "Downloading GAL entries from server…"
+msgstr "𐑛𐑬𐑯𐑤𐑴𐑛𐑦𐑙 𐑜𐑨𐑤 𐑧𐑯𐑑𐑮𐑦𐑟 𐑓𐑮𐑪𐑥 𐑕𐑻𐑝𐑼…"
+
+#: ../src/calendar/e-cal-backend-mapi.c:125
+#: ../src/calendar/e-cal-backend-mapi.c:1251
+#: ../src/camel/camel-mapi-store.c:568
 msgid "Authentication failed"
 msgstr "𐑷𐑔𐑧𐑯𐑑𐑦𐑒𐑱𐑖𐑩𐑯 𐑓𐑱𐑤𐑛"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:391
 #, c-format
+#: ../src/calendar/e-cal-backend-mapi.c:395
 msgid "Loading items in folder %s"
 msgstr "𐑤𐑴𐑛𐑦𐑙 𐑲𐑑𐑩𐑥𐑟 𐑦𐑯 𐑓𐑴𐑤𐑛𐑼 %s"
 
 #. FIXME: String : We need to restart evolution-data-server
-#: ../src/calendar/e-cal-backend-mapi.c:581
-#: ../src/calendar/e-cal-backend-mapi.c:592
-#: ../src/calendar/e-cal-backend-mapi.c:618
+#: ../src/calendar/e-cal-backend-mapi.c:724
+#: ../src/calendar/e-cal-backend-mapi.c:734
+#: ../src/calendar/e-cal-backend-mapi.c:761
+#: ../src/calendar/e-cal-backend-mapi.c:823
+#: ../src/calendar/e-cal-backend-mapi.c:832
 msgid "Error fetching changes from the server."
 msgstr "𐑻𐑼 𐑓𐑧𐑗𐑦𐑙 𐑗𐑱𐑯𐑡𐑩𐑟 𐑓𐑮𐑪𐑥 𐑞 𐑕𐑻𐑝𐑼."
 
-#: ../src/calendar/e-cal-backend-mapi.c:973
-#: ../src/calendar/e-cal-backend-mapi.c:983
-#: ../src/calendar/e-cal-backend-mapi.c:1088
-#: ../src/calendar/e-cal-backend-mapi.c:1170
+#: ../src/calendar/e-cal-backend-mapi.c:1166
+#: ../src/calendar/e-cal-backend-mapi.c:1177
+#: ../src/calendar/e-cal-backend-mapi.c:1286
+#: ../src/calendar/e-cal-backend-mapi.c:1371
 msgid "Could not create cache file"
 msgstr "𐑒𐑫𐑛 𐑯𐑪𐑑 𐑒𐑮𐑦𐑱𐑑 𐑒𐑨𐑖 𐑓𐑲𐑤"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1099
+#: ../src/calendar/e-cal-backend-mapi.c:1297
 msgid "Could not create thread for populating cache"
 msgstr "𐑒𐑫𐑛 𐑯𐑪𐑑 𐑒𐑮𐑦𐑱𐑑 𐑔𐑮𐑧𐑛 𐑓𐑹 𐑐𐑪𐑐𐑿𐑤𐑱𐑑𐑦𐑙 𐑒𐑨𐑖"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1513
+#: ../src/calendar/e-cal-backend-mapi.c:1732
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -145,103 +175,136 @@ msgstr ""
 "𐑕𐑩𐑐𐑹𐑑 𐑓𐑹 𐑥𐑪𐑛𐑦𐑓𐑲𐑦𐑙 𐑕𐑦𐑙𐑜𐑩𐑤 𐑦𐑯𐑕𐑑𐑨𐑯𐑕𐑩𐑟 𐑝 𐑩 𐑮𐑦𐑒𐑻𐑦𐑙 𐑩𐑐𐑶𐑯𐑑𐑥𐑩𐑯𐑑 𐑦𐑟 𐑯𐑪𐑑 𐑘𐑧𐑑 "
 "𐑦𐑥𐑐𐑤𐑩𐑥𐑧𐑯𐑑𐑩𐑛. 𐑯𐑴 𐑗𐑱𐑯𐑡 𐑢𐑪𐑟 𐑥𐑱𐑛 𐑑 𐑞 𐑩𐑐𐑶𐑯𐑑𐑥𐑩𐑯𐑑 𐑪𐑯 𐑞 𐑕𐑻𐑝𐑼."
 
-#: ../src/camel/camel-mapi-folder.c:482
 #, c-format
+#: ../src/camel/camel-mapi-folder.c:358
 msgid "Updating local summary cache for new messages in %s"
 msgstr "𐑳𐑐𐑛𐑱𐑑𐑦𐑙 𐑤𐑴𐑒𐑩𐑤 𐑕𐑳𐑥𐑼𐑦 𐑒𐑨𐑖 𐑓𐑹 𐑯𐑿 𐑥𐑧𐑕𐑦𐑡𐑩𐑟 𐑦𐑯 %s"
 
-#: ../src/camel/camel-mapi-folder.c:737
+#, fuzzy, c-format
+#: ../src/camel/camel-mapi-folder.c:608
+msgid "Retrieving message IDs from server for %s"
+msgstr "𐑮𐑦𐑥𐑵𐑝𐑦𐑙 𐑛𐑦𐑤𐑰𐑑𐑩𐑛 𐑥𐑧𐑕𐑦𐑡𐑩𐑟 𐑓𐑮𐑪𐑥 𐑒𐑨𐑖 𐑦𐑯 %s"
+
 #, c-format
+#: ../src/camel/camel-mapi-folder.c:631
 msgid "Removing deleted messages from cache in %s"
 msgstr "𐑮𐑦𐑥𐑵𐑝𐑦𐑙 𐑛𐑦𐑤𐑰𐑑𐑩𐑛 𐑥𐑧𐑕𐑦𐑡𐑩𐑟 𐑓𐑮𐑪𐑥 𐑒𐑨𐑖 𐑦𐑯 %s"
 
-#: ../src/camel/camel-mapi-folder.c:1061 ../src/camel/camel-mapi-folder.c:1694
-#: ../src/camel/camel-mapi-folder.c:1702
-msgid "This message is not available in offline mode."
-msgstr "𐑞𐑦𐑕 𐑥𐑧𐑕𐑦𐑡 𐑦𐑟 𐑯𐑪𐑑 𐑩𐑝𐑱𐑤𐑩𐑚𐑩𐑤 𐑦𐑯 𐑪𐑓𐑤𐑲𐑯 𐑥𐑴𐑛."
-
-#: ../src/camel/camel-mapi-folder.c:1070
+#. TODO : Check for online state
 #, c-format
+#: ../src/camel/camel-mapi-folder.c:921
 msgid "Fetching summary information for new messages in %s"
 msgstr "𐑓𐑧𐑗𐑦𐑙 𐑕𐑳𐑥𐑼𐑦 𐑦𐑯𐑓𐑼𐑥𐑱𐑖𐑩𐑯 𐑓𐑹 𐑯𐑿 𐑥𐑧𐑕𐑦𐑡𐑩𐑟 𐑦𐑯 %s"
 
-#: ../src/camel/camel-mapi-folder.c:1080
+#: ../src/camel/camel-mapi-folder.c:1034 ../src/camel/camel-mapi-folder.c:1148
+#: ../src/camel/camel-mapi-folder.c:1156
+msgid "This message is not available in offline mode."
+msgstr "𐑞𐑦𐑕 𐑥𐑧𐑕𐑦𐑡 𐑦𐑟 𐑯𐑪𐑑 𐑩𐑝𐑱𐑤𐑩𐑚𐑩𐑤 𐑦𐑯 𐑪𐑓𐑤𐑲𐑯 𐑥𐑴𐑛."
+
+#: ../src/camel/camel-mapi-folder.c:1047
 msgid "Fetching items failed"
 msgstr "𐑓𐑧𐑗𐑦𐑙 𐑲𐑑𐑩𐑥𐑟 𐑓𐑱𐑤𐑛"
 
-#: ../src/camel/camel-mapi-folder.c:1658
+#. Translators: The first %s is replaced with a message ID,
+#. the second %s is replaced with a detailed error string
 #, c-format
-msgid ""
-"Cannot get message: %s\n"
-"  %s"
-msgstr ""
-"𐑒𐑨𐑯𐑪𐑑 𐑜𐑧𐑑 𐑥𐑧𐑕𐑦𐑡: %s\n"
-"  %s"
-
-#: ../src/camel/camel-mapi-folder.c:1658
-msgid "No such message"
-msgstr "𐑯𐑴 𐑕𐑳𐑗 𐑥𐑧𐑕𐑦𐑡"
-
-#: ../src/camel/camel-mapi-folder.c:1670
-msgid "Message fetching cancelled by user."
-msgstr "𐑥𐑧𐑕𐑦𐑡 𐑓𐑧𐑗𐑦𐑙 𐑒𐑨𐑯𐑕𐑩𐑤𐑛 𐑚𐑲 𐑿𐑟𐑼."
-
-#: ../src/camel/camel-mapi-folder.c:1677
-#, c-format
+#: ../src/camel/camel-mapi-folder.c:1110 ../src/camel/camel-mapi-folder.c:1131
 msgid "Cannot get message %s: %s"
 msgstr "𐑒𐑨𐑯𐑪𐑑 𐑜𐑧𐑑 𐑥𐑧𐑕𐑦𐑡 %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1723 ../src/camel/camel-mapi-folder.c:1732
+#: ../src/camel/camel-mapi-folder.c:1110
+msgid "No such message"
+msgstr "𐑯𐑴 𐑕𐑳𐑗 𐑥𐑧𐑕𐑦𐑡"
+
+#: ../src/camel/camel-mapi-folder.c:1122
+msgid "Message fetching cancelled by user."
+msgstr "𐑥𐑧𐑕𐑦𐑡 𐑓𐑧𐑗𐑦𐑙 𐑒𐑨𐑯𐑕𐑩𐑤𐑛 𐑚𐑲 𐑿𐑟𐑼."
+
+#: ../src/camel/camel-mapi-folder.c:1178 ../src/camel/camel-mapi-folder.c:1187
 msgid "Could not get message"
 msgstr "𐑒𐑫𐑛 𐑯𐑪𐑑 𐑜𐑧𐑑 𐑥𐑧𐑕𐑦𐑡"
 
-#: ../src/camel/camel-mapi-folder.c:2012
 #, c-format
+#: ../src/camel/camel-mapi-folder.c:1490
 msgid "Cannot append message to folder '%s'"
 msgstr "𐑒𐑨𐑯𐑪𐑑 𐑩𐑐𐑧𐑯𐑛 𐑥𐑧𐑕𐑦𐑡 𐑑 𐑓𐑴𐑤𐑛𐑼 '%s'"
 
-#: ../src/camel/camel-mapi-folder.c:2019
+#: ../src/camel/camel-mapi-folder.c:1497
 msgid "Offline."
 msgstr "𐑪𐑓𐑤𐑲𐑯."
 
-#: ../src/camel/camel-mapi-folder.c:2139
 #, c-format
+#: ../src/camel/camel-mapi-folder.c:1635
 msgid "Could not load summary for %s"
 msgstr "𐑒𐑫𐑛 𐑯𐑪𐑑 𐑤𐑴𐑛 𐑕𐑳𐑥𐑼𐑦 𐑓𐑹 %s"
 
-#: ../src/camel/camel-mapi-provider.c:51
+#: ../src/camel/camel-mapi-provider.c:44
 msgid "Checking for new mail"
 msgstr "𐑗𐑧𐑒𐑦𐑙 𐑓𐑹 𐑯𐑿 𐑥𐑱𐑤"
 
-#: ../src/camel/camel-mapi-provider.c:57
+#, fuzzy
+#: ../src/camel/camel-mapi-provider.c:46
+msgid "C_heck for new messages in all folders"
+msgstr "C_heck 𐑓𐑹 𐑯𐑿 𐑥𐑧𐑕𐑦𐑡𐑩𐑟 𐑦𐑯 𐑷𐑤 𐑓𐑴𐑤𐑛𐑼𐑟"
+
+#: ../src/camel/camel-mapi-provider.c:50
 msgid "Options"
 msgstr "𐑪𐑐𐑖𐑩𐑯𐑟"
 
-#: ../src/camel/camel-mapi-provider.c:64
+#, fuzzy
+#: ../src/camel/camel-mapi-provider.c:52
+msgid "Automatically synchroni_ze account locally"
+msgstr "𐑷𐑑𐑩𐑥𐑨𐑑𐑦𐑒𐑤𐑦 synchroni_ze 𐑩𐑒𐑬𐑯𐑑 𐑤𐑴𐑒𐑩𐑤𐑦"
+
+#. i18n: copy from evolution:camel-imap-provider.c
+#, fuzzy
+#: ../src/camel/camel-mapi-provider.c:55
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "_Apply 𐑓𐑦𐑤𐑑𐑼𐑟 𐑑 𐑯𐑿 𐑥𐑧𐑕𐑦𐑡𐑩𐑟 𐑦𐑯 Inbox 𐑪𐑯 𐑞𐑦𐑕 𐑕𐑻𐑝𐑼"
+
+#: ../src/camel/camel-mapi-provider.c:57
 msgid "Check new messages for _Junk contents"
 msgstr "𐑗𐑧𐑒 𐑯𐑿 𐑥𐑧𐑕𐑦𐑡𐑩𐑟 𐑓𐑹 _𐑡𐑩𐑙𐑒 𐑒𐑪𐑯𐑑𐑩𐑯𐑑𐑕"
 
-#: ../src/camel/camel-mapi-provider.c:93
+#, fuzzy
+#: ../src/camel/camel-mapi-provider.c:59
+msgid "Only check for Junk messag_es in the Inbox folder"
+msgstr "𐑴𐑯𐑤𐑦 𐑗𐑧𐑒 𐑓𐑹 𐑡𐑩𐑙𐑒 messag_es 𐑦𐑯 𐑞 Inbox 𐑓𐑴𐑤𐑛𐑼"
+
+#, fuzzy
+#: ../src/camel/camel-mapi-provider.c:70
+msgid "For accessing Microsoft Exchange/OpenChange servers using MAPI"
+msgstr "𐑓𐑹 𐑨𐑒𐑕𐑧𐑕𐑦𐑙 𐑥𐑲𐑒𐑮𐑴𐑕𐑪𐑓𐑑 𐑧𐑒𐑕𐑗𐑱𐑯𐑡/OpenChange 𐑕𐑻𐑝𐑼𐑟 𐑿𐑟𐑦𐑙 𐑥𐑨𐑐𐑰"
+
+#: ../src/camel/camel-mapi-provider.c:85
 msgid "Password"
 msgstr "𐑐𐑭𐑕𐑢𐑼𐑛"
 
-#: ../src/camel/camel-mapi-store.c:61
+#, fuzzy
+#: ../src/camel/camel-mapi-provider.c:86
+msgid ""
+"This option will connect to the OpenChange server using a plaintext password."
+msgstr "𐑞𐑦𐑕 𐑪𐑐𐑖𐑩𐑯 𐑢𐑦𐑤 𐑒𐑩𐑯𐑧𐑒𐑑 𐑑 𐑞 OpenChange 𐑕𐑻𐑝𐑼 𐑿𐑟𐑦𐑙 𐑩 plaintext 𐑐𐑭𐑕𐑢𐑼𐑛."
+
+#: ../src/camel/camel-mapi-store.c:48
 msgid "Favorites"
 msgstr "𐑓𐑱𐑝𐑼𐑦𐑑𐑕"
 
-#: ../src/camel/camel-mapi-store.c:62
+#: ../src/camel/camel-mapi-store.c:49
 msgid "All Public Folders"
 msgstr "𐑷𐑤 𐑐𐑳𐑚𐑤𐑦𐑒 𐑓𐑴𐑤𐑛𐑼𐑟"
 
-#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
+#. Translators: The %s is replaced with a server's host name
 #, c-format
+#: ../src/camel/camel-mapi-store.c:315 ../src/camel/camel-mapi-transport.c:121
 msgid "Exchange MAPI server %s"
 msgstr "·𐑧𐑒𐑕𐑗𐑱𐑯𐑡 MAPI 𐑕𐑻𐑝𐑼 %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
+#. Translators: The first %s is replaced with a user name, the second with a server's host name
 #, c-format
+#: ../src/camel/camel-mapi-store.c:319 ../src/camel/camel-mapi-transport.c:124
 msgid "Exchange MAPI service for %s on %s"
 msgstr "·𐑧𐑒𐑕𐑗𐑱𐑯𐑡 MAPI 𐑕𐑻𐑝𐑦𐑕 𐑓𐑹 %s 𐑪𐑯 %s"
 
@@ -249,49 +312,52 @@ msgstr "·𐑧𐑒𐑕𐑗𐑱𐑯𐑡 MAPI 𐑕𐑻𐑝𐑦𐑕 𐑓𐑹 %s �
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:315
 #, c-format
+#: ../src/camel/camel-mapi-store.c:359
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s 𐑐𐑤𐑰𐑟 𐑧𐑯𐑑𐑼 𐑞 MAPI 𐑐𐑭𐑕𐑢𐑼𐑛 𐑓𐑹 %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:328
+#: ../src/camel/camel-mapi-store.c:372
 msgid "You did not enter a password."
 msgstr "𐑿 𐑛𐑦𐑛 𐑯𐑪𐑑 𐑧𐑯𐑑𐑼 𐑩 𐑐𐑭𐑕𐑢𐑼𐑛."
 
-#: ../src/camel/camel-mapi-store.c:336
 #, c-format
+#: ../src/camel/camel-mapi-store.c:379
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "𐑳𐑯𐑱𐑚𐑩𐑤 𐑑 𐑷𐑔𐑧𐑯𐑑𐑦𐑒𐑱𐑑 𐑑 ·𐑧𐑒𐑕𐑗𐑱𐑯𐑡 MAPI 𐑕𐑻𐑝𐑼."
 
-#: ../src/camel/camel-mapi-store.c:456
+#: ../src/camel/camel-mapi-store.c:552
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "𐑒𐑨𐑯𐑪𐑑 𐑒𐑮𐑦𐑱𐑑 MAPI 𐑓𐑴𐑤𐑛𐑼𐑟 𐑦𐑯 𐑪𐑓𐑤𐑲𐑯 𐑥𐑴𐑛."
 
-#: ../src/camel/camel-mapi-store.c:461
-#, c-format
-msgid "Cannot create new folder `%s'"
+#, fuzzy, c-format
+#: ../src/camel/camel-mapi-store.c:557
+msgid "Cannot create new folder '%s'"
 msgstr "𐑒𐑨𐑯𐑪𐑑 𐑒𐑮𐑦𐑱𐑑 𐑯𐑿 𐑓𐑴𐑤𐑛𐑼 `%s'"
 
-#: ../src/camel/camel-mapi-store.c:670
-#, c-format
-msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
+#, fuzzy, c-format
+#: ../src/camel/camel-mapi-store.c:742
+msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
 msgstr "𐑒𐑨𐑯𐑪𐑑 𐑮𐑰𐑯𐑱𐑥 MAPI 𐑓𐑴𐑤𐑛𐑼 `%s'. 𐑓𐑴𐑤𐑛𐑼 𐑛𐑳𐑟 𐑯𐑪𐑑 𐑧𐑒𐑟𐑦𐑕𐑑."
 
-#: ../src/camel/camel-mapi-store.c:681
-#, c-format
-msgid "Cannot rename MAPI default folder `%s' to `%s'."
+#, fuzzy, c-format
+#: ../src/camel/camel-mapi-store.c:753
+msgid "Cannot rename MAPI default folder '%s' to '%s'."
 msgstr "𐑒𐑨𐑯𐑪𐑑 𐑮𐑰𐑯𐑱𐑥 MAPI 𐑛𐑦𐑓𐑷𐑤𐑑 𐑓𐑴𐑤𐑛𐑼 `%s' 𐑑 `%s'."
 
-#: ../src/camel/camel-mapi-store.c:699
-#, c-format
-msgid "Cannot rename MAPI folder `%s' to `%s'"
+#, fuzzy, c-format
+#: ../src/camel/camel-mapi-store.c:778 ../src/camel/camel-mapi-store.c:793
+#: ../src/camel/camel-mapi-store.c:844
+msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "𐑒𐑨𐑯𐑪𐑑 𐑮𐑰𐑯𐑱𐑥 MAPI 𐑓𐑴𐑤𐑛𐑼 `%s' 𐑑 `%s'"
 
-#: ../src/camel/camel-mapi-store.c:1227
+#: ../src/camel/camel-mapi-store.c:1383
 msgid "Folder list not available in offline mode."
 msgstr "𐑓𐑴𐑤𐑛𐑼 𐑤𐑦𐑕𐑑 𐑯𐑪𐑑 𐑩𐑝𐑱𐑤𐑩𐑚𐑩𐑤 𐑦𐑯 𐑪𐑓𐑤𐑲𐑯 𐑥𐑴𐑛."
 
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:116
+#: ../src/camel/camel-mapi-transport.c:95
+#: ../src/camel/camel-mapi-transport.c:109
 msgid "Could not send message."
 msgstr "𐑒𐑫𐑛 𐑯𐑪𐑑 𐑕𐑧𐑯𐑛 𐑥𐑧𐑕𐑦𐑡."
+
