@@ -1344,7 +1344,7 @@ fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 }
 
 gchar *
-exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, mapi_id_t orig_fid, mapi_id_t orig_mid, const gchar *msg_class,
+exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, mapi_id_t orig_fid, mapi_id_t orig_mid, mapi_object_t *obj_message, const gchar *msg_class,
 				   GSList *streams, GSList *recipients, GSList *attachments)
 {
 	struct fetch_camel_cal_data fccd = { 0 };
@@ -1367,7 +1367,13 @@ exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, mapi_id_t ori
 	} else
 		return NULL;
 
-	exchange_mapi_connection_fetch_item (conn, orig_fid, orig_mid,
+	if (obj_message)
+		exchange_mapi_connection_fetch_object_props (conn, NULL, orig_fid, obj_message,
+					exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (fccd.kind),
+					fetch_camel_cal_comp_cb, &fccd,
+					MAPI_OPTIONS_FETCH_ALL);
+	else
+		exchange_mapi_connection_fetch_item (conn, orig_fid, orig_mid,
 					exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (fccd.kind),
 					fetch_camel_cal_comp_cb, &fccd,
 					MAPI_OPTIONS_FETCH_ALL);

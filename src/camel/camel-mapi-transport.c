@@ -46,6 +46,7 @@
 #define d(x) x
 
 #include <exchange-mapi-defs.h>
+#include "exchange-mapi-mail-utils.h"
 
 #define STREAM_SIZE 4000
 
@@ -57,7 +58,7 @@ G_DEFINE_TYPE (CamelMapiTransport, camel_mapi_transport, CAMEL_TYPE_TRANSPORT)
 
 /*CreateItem would return the MID of the new message or '0' if we fail.*/
 static mapi_id_t
-mapi_message_item_send (ExchangeMapiConnection *conn, MapiItem *item)
+mapi_message_item_send (ExchangeMapiConnection *conn, MailItem *item)
 {
 	guint64 fid = 0;
 	mapi_id_t mid = 0;
@@ -74,7 +75,7 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 	      CamelAddress *from, CamelAddress *recipients, CamelException *ex)
 {
 	ExchangeMapiConnection *conn;
-	MapiItem *item = NULL;
+	MailItem *item = NULL;
 	const gchar *namep;
 	const gchar *addressp;
 	mapi_id_t st = 0;
@@ -95,7 +96,7 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 		return FALSE;
 	}
 
-	/* Convert MIME to MAPIItem, attacment lists and recipient list.*/
+	/* Convert MIME to MailItem, attacment lists and recipient list.*/
 	item = camel_mapi_utils_mime_to_item (message, from, ex);
 
 	/* send */

@@ -26,7 +26,11 @@
 
 G_BEGIN_DECLS
 
-MapiItem *
+#include <exchange-mapi-connection.h>
+#include <exchange-mapi-mail-utils.h>
+#include <camel/camel.h>
+
+MailItem *
 camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, CamelException *ex);
 
 gboolean

@@ -55,61 +55,6 @@
 
 G_BEGIN_DECLS
 
-typedef enum  {
-	MAPI_ITEM_TYPE_MAIL=1,
-	MAPI_ITEM_TYPE_APPOINTMENT,
-	MAPI_ITEM_TYPE_CONTACT,
-	MAPI_ITEM_TYPE_JOURNAL,
-	MAPI_ITEM_TYPE_TASK
-} MapiItemType;
-
-typedef enum  {
-	PART_TYPE_PLAIN_TEXT=1,
-	PART_TYPE_TEXT_HTML
-} MapiItemPartType;
-
-typedef struct {
-	gchar *subject;
-	gchar *from;
-	gchar *from_email;
-	gchar *from_type;
-
-	gchar *references;
-	gchar *message_id;
-	gchar *in_reply_to;
-	/*TODO : Obsolete this. Moved to recipient list*/
-	gchar *to;
-	gchar *cc;
-	gchar *bcc;
-
-	gint flags;
-	glong size;
-	time_t recieved_time;
-	time_t send_time;
-	guint cpid; /* codepage id */
-	gchar *transport_headers;
-} MapiItemHeader;
-
-typedef struct {
-	GSList *body_parts;
-} MapiItemMessage;
-
-typedef struct  {
-	mapi_id_t fid;
-	mapi_id_t mid;
-
-	MapiItemHeader header;
-	MapiItemMessage msg;
-
-	gboolean is_cal;
-
-	GSList *recipients;
-	GSList *attachments;
-	GSList *generic_streams;
-}MapiItem;
-
-void mapi_item_free (MapiItem *item);
-
 typedef struct _CamelMapiFolder CamelMapiFolder;
 typedef struct _CamelMapiFolderClass CamelMapiFolderClass;
 typedef struct _CamelMapiFolderPrivate CamelMapiFolderPrivate;

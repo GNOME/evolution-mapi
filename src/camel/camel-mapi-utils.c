@@ -38,6 +38,7 @@
 
 #include <exchange-mapi-defs.h>
 #include "exchange-mapi-utils.h"
+#include "exchange-mapi-mail-utils.h"
 
 #include "camel-mapi-store.h"
 #include "camel-mapi-folder.h"
@@ -49,7 +50,7 @@
 #define STREAM_SIZE 4000
 
 static void
-mapi_item_add_recipient (const gchar *recipients, OlMailRecipientType type, GSList **recipient_list)
+mail_item_add_recipient (const gchar *recipients, OlMailRecipientType type, GSList **recipient_list)
 {
 	ExchangeMAPIRecipient *recipient;
 	uint32_t val = 0;
@@ -97,7 +98,7 @@ mapi_item_add_recipient (const gchar *recipients, OlMailRecipientType type, GSLi
 }
 
 static void
-mapi_item_set_from(MapiItem *item, const gchar *from)
+mail_item_set_from(MailItem *item, const gchar *from)
 {
 	if (item->header.from)
 		g_free (item->header.from);
@@ -106,7 +107,7 @@ mapi_item_set_from(MapiItem *item, const gchar *from)
 }
 
 static void
-mapi_item_set_subject(MapiItem *item, const gchar *subject)
+mail_item_set_subject(MailItem *item, const gchar *subject)
 {
 	if (item->header.subject)
 		g_free (item->header.subject);
@@ -117,7 +118,7 @@ mapi_item_set_subject(MapiItem *item, const gchar *subject)
 #define MAX_READ_SIZE 0x1000
 
 static void
-mapi_item_set_body_stream (MapiItem *item, CamelStream *body, MapiItemPartType part_type)
+mail_item_set_body_stream (MailItem *item, CamelStream *body, MailItemPartType part_type)
 {
 	guint8 *buf = g_new0 (guint8 , STREAM_SIZE);
 	guint32	read_size = 0, i;
@@ -179,7 +180,7 @@ mapi_item_set_body_stream (MapiItem *item, CamelStream *body, MapiItemPartType p
 }
 
 static gboolean
-mapi_item_add_attach (MapiItem *item, CamelMimePart *part, CamelStream *content_stream)
+mail_item_add_attach (MailItem *item, CamelMimePart *part, CamelStream *content_stream)
 {
 	guint8 *buf = g_new0 (guint8 , STREAM_SIZE);
 	const gchar *content_id = NULL;
@@ -252,7 +253,7 @@ mapi_item_add_attach (MapiItem *item, CamelMimePart *part, CamelStream *content_
 }
 
 static gboolean
-mapi_do_multipart (CamelMultipart *mp, MapiItem *item, gboolean *is_first)
+mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first)
 {
 	CamelDataWrapper *dw;
 	CamelStream *content_stream;
@@ -291,19 +292,19 @@ mapi_do_multipart (CamelMultipart *mp, MapiItem *item, gboolean *is_first)
 		type = camel_mime_part_get_content_type(part);
 
 		if (i_part == 0 && (*is_first) && camel_content_type_is (type, "text", "plain")) {
-			mapi_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT);
+			mail_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT);
 			*is_first = FALSE;
 		} else if (camel_content_type_is (type, "text", "html")) {
-			mapi_item_set_body_stream (item, content_stream, PART_TYPE_TEXT_HTML);
+			mail_item_set_body_stream (item, content_stream, PART_TYPE_TEXT_HTML);
 		} else {
-			mapi_item_add_attach (item, part, content_stream);
+			mail_item_add_attach (item, part, content_stream);
 		}
 	}
 
 	return TRUE;
 }
 
-MapiItem *
+MailItem *
 camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, CamelException *ex)
 {
 	CamelDataWrapper *dw = NULL;
@@ -311,7 +312,7 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 	CamelStream *content_stream;
 	CamelMultipart *multipart;
 	CamelInternetAddress *to, *cc, *bcc;
-	MapiItem *item = g_new0 (MapiItem, 1);
+	MailItem *item = g_new0 (MailItem, 1);
 	const gchar *namep;
 	const gchar *addressp;
 	const gchar *content_type;
@@ -333,25 +334,25 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 		namep = NULL;
 	}
 
-	mapi_item_set_from (item, namep);
+	mail_item_set_from (item, namep);
 
 	to = camel_mime_message_get_recipients(message, CAMEL_RECIPIENT_TYPE_TO);
 	for (i = 0; to && camel_internet_address_get (to, i, &namep, &addressp); i++) {
-		mapi_item_add_recipient (addressp, olTo, &recipient_list);
+		mail_item_add_recipient (addressp, olTo, &recipient_list);
 	}
 
 	cc = camel_mime_message_get_recipients(message, CAMEL_RECIPIENT_TYPE_CC);
 	for (i = 0; cc && camel_internet_address_get (cc, i, &namep, &addressp); i++) {
-		mapi_item_add_recipient (addressp, olCC, &recipient_list);
+		mail_item_add_recipient (addressp, olCC, &recipient_list);
 	}
 
 	bcc = camel_mime_message_get_recipients(message, CAMEL_RECIPIENT_TYPE_BCC);
 	for (i = 0; bcc && camel_internet_address_get (bcc, i, &namep, &addressp); i++) {
-		mapi_item_add_recipient (addressp, olBCC, &recipient_list);
+		mail_item_add_recipient (addressp, olBCC, &recipient_list);
 	}
 
 	if (camel_mime_message_get_subject(message)) {
-		mapi_item_set_subject(item, camel_mime_message_get_subject(message));
+		mail_item_set_subject(item, camel_mime_message_get_subject(message));
 	}
 
 	/*Add message threading properties */
@@ -375,7 +376,7 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 			content_stream = (CamelStream *)camel_stream_mem_new();
 			content_size = camel_data_wrapper_decode_to_stream(dw, (CamelStream *)content_stream);
 
-			mapi_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT);
+			mail_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT);
 		}
 	}
 
@@ -388,7 +389,7 @@ gboolean
 camel_mapi_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data)
 {
 
-	MapiItem *item = (MapiItem *) data;
+	MailItem *item = (MailItem *) data;
 	GSList *l;
 	bool send_rich_info;
 	uint32_t msgflag;

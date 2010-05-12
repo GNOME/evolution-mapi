@@ -153,6 +153,13 @@ ExchangeMapiConnection *exchange_mapi_connection_find (const gchar *profile);
 gboolean		exchange_mapi_connection_reconnect (ExchangeMapiConnection *conn, const gchar *password);
 gboolean		exchange_mapi_connection_close (ExchangeMapiConnection *conn);
 gboolean		exchange_mapi_connection_connected (ExchangeMapiConnection *conn);
+
+gboolean		exchange_mapi_connection_fetch_object_props (
+					ExchangeMapiConnection *conn, mapi_object_t *obj_folder, mapi_id_t fid, mapi_object_t *obj_message,
+					BuildReadPropsCB build_props, gpointer brp_data,
+					FetchCallback cb, gpointer data,
+					guint32 options);
+
 gboolean		exchange_mapi_connection_fetch_item (ExchangeMapiConnection *conn, mapi_id_t fid, mapi_id_t mid,
 					BuildReadPropsCB build_props, gpointer brp_data,
 					FetchCallback cb, gpointer data,
