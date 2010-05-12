@@ -984,7 +984,7 @@ create_contact_list_cb (FetchItemsCallbackData *item_data, gpointer data)
 	const mapi_id_t fid = item_data->fid;
 	const mapi_id_t mid = item_data->mid;
 
-	GList *list = * (GList **) data;
+	GList **listptr = data;
 	EContact *contact;
 	gchar *suid;
 
@@ -997,11 +997,8 @@ create_contact_list_cb (FetchItemsCallbackData *item_data, gpointer data)
 		e_contact_set (contact, E_CONTACT_UID, suid);
 //		e_contact_set (contact, E_CONTACT_BOOK_URI, priv->uri);
 		//FIXME: Should we set this? How can we get this first?
-		list = g_list_prepend (list, e_vcard_to_string (E_VCARD (contact),
-								EVC_FORMAT_VCARD_30));
+		*listptr = g_list_prepend (*listptr, e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30));
 		g_object_unref (contact);
-		if (* (GList **)data == NULL)
-			* (GList **)data = list;
 	}
 
 	g_free (suid);
@@ -1066,16 +1063,17 @@ e_book_backend_mapi_get_contact_list (EBookBackend *backend,
 		else {
 			struct mapi_SRestriction res;
 			GList *vcard_str = NULL;
+			gboolean no_summary_search = g_ascii_strcasecmp (query, "(contains \"x-evolution-any-field\" \"\")") == 0;
 
 			printf("Not marked for cache\n");
 
 			/* Unfortunately MAPI Doesn't support searching well, we do allow only online search for emails rest all are returned as error. */
-			if (!build_restriction_emails_contains (&res, query)) {
+			if (!no_summary_search && !build_restriction_emails_contains (&res, query)) {
 				e_data_book_respond_get_contact_list (book, opid, GNOME_Evolution_Addressbook_OtherError, NULL);
 				return;
 			}
 
-			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
+			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, no_summary_search ? NULL : &res, NULL,
 								mapi_book_utils_get_prop_list, GET_SHORT_SUMMARY,
 								create_contact_list_cb, &vcard_str,
 								MAPI_OPTIONS_FETCH_ALL)) {
