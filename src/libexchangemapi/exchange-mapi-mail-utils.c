@@ -616,6 +616,7 @@ mapi_mime_classify_attachments (GSList *attachments, GSList **inline_attachs, GS
 		const gchar *filename, *mime_type, *content_id = NULL;
 		CamelContentType *content_type;
 		CamelMimePart *part;
+		const uint32_t *ui32;
 
 		stream = exchange_mapi_util_find_stream (attach->streams, PR_ATTACH_DATA_BIN);
 
@@ -635,21 +636,21 @@ mapi_mime_classify_attachments (GSList *attachments, GSList **inline_attachs, GS
 		camel_content_type_set_param (((CamelDataWrapper *) part)->mime_type, "name", filename);
 
 		/*Content-Type*/
-		mime_type = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (attach->lpProps, PR_ATTACH_MIME_TAG);
-		if (!mime_type) {
-			const uint32_t *ui32 = (const uint32_t *) exchange_mapi_util_find_SPropVal_array_propval (attach->lpProps, PR_ATTACH_METHOD);
-			if (ui32 && *ui32 == ATTACH_EMBEDDED_MSG)
-				mime_type = "message/rfc822";
+		ui32 = (const uint32_t *) exchange_mapi_util_find_SPropVal_array_propval (attach->lpProps, PR_ATTACH_METHOD);
+		if (ui32 && *ui32 == ATTACH_EMBEDDED_MSG) {
+			mime_type = "message/rfc822";
+		} else {
+			mime_type = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (attach->lpProps, PR_ATTACH_MIME_TAG);
+			if (!mime_type)
+				mime_type = "application/octet-stream";
 		}
-		if (!mime_type)
-			mime_type = "application/octet-stream";
 
 		camel_mime_part_set_content (part, (const gchar *) stream->value->data, stream->value->len, mime_type);
 
 		content_type = camel_mime_part_get_content_type (part);
 		if (content_type && camel_content_type_is (content_type, "text", "*"))
 			camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_QUOTEDPRINTABLE);
-		else
+		else if (!ui32 || *ui32 != ATTACH_EMBEDDED_MSG)
 			camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
 
 		/*Content-ID*/

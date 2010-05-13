@@ -1194,8 +1194,24 @@ mapi_folder_get_message( CamelFolder *folder, const gchar *uid, CamelException *
 	CAMEL_MAPI_FOLDER_REC_LOCK (folder, cache_lock);
 	if ((cache_stream = camel_data_cache_add (mapi_folder->cache, "cache", uid, NULL))) {
 		if (camel_data_wrapper_write_to_stream ((CamelDataWrapper *) msg, cache_stream) == -1
-				|| camel_stream_flush (cache_stream) == -1)
+				|| camel_stream_flush (cache_stream) == -1) {
 			camel_data_cache_remove (mapi_folder->cache, "cache", uid, NULL);
+		} else {
+			CamelMimeMessage *msg2;
+
+			/* workaround to get message back from cache, as that one is properly
+			   encoded with attachments and so on. Not sure what's going wrong when
+			   composing message in memory, but when they are read from the cache
+			   they appear properly in the UI. */
+			msg2 = camel_mime_message_new ();
+			camel_stream_reset (cache_stream);
+			if (camel_data_wrapper_construct_from_stream (CAMEL_DATA_WRAPPER (msg2), cache_stream) == -1) {
+				g_object_unref (msg2);
+			} else {
+				g_object_unref (msg);
+				msg = msg2;
+			}
+		}
 		g_object_unref (cache_stream);
 	}
 
