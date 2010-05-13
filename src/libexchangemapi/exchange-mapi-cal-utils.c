@@ -1241,6 +1241,7 @@ check_server_for_object (struct mapi_SPropValue_array *properties, mapi_id_t *mi
 	fid = exchange_mapi_get_default_folder_id (olFolderCalendar);
 
 	array = exchange_mapi_util_resolve_named_prop (olFolderCalendar, fid, 0x0023, PSETID_Meeting);
+	g_return_if_fail (array != NULL);
 	proptag = array->aulPropTag[0];
 
 	res.rt = RES_PROPERTY;
