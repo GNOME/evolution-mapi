@@ -815,7 +815,7 @@ obj_message_to_camel_mime (ExchangeMapiConnection *conn, mapi_id_t fid, mapi_obj
 	g_return_val_if_fail (conn != NULL, NULL);
 	g_return_val_if_fail (obj_msg != NULL, NULL);
 
-	if (!exchange_mapi_connection_fetch_object_props (conn, NULL, fid, obj_msg, mapi_mail_get_item_prop_list, NULL,
+	if (!exchange_mapi_connection_fetch_object_props (conn, NULL, fid, 0, obj_msg, mapi_mail_get_item_prop_list, NULL,
 					fetch_props_to_mail_item_cb, &item,
 					MAPI_OPTIONS_FETCH_ALL | MAPI_OPTIONS_GETBESTBODY)
 	    || item == NULL) {
@@ -1588,7 +1588,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 
 /* obj_folder and obj_message are released only when obj_folder is not NULL and when returned TRUE */
 gboolean
-exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_object_t *obj_folder, mapi_id_t fid, mapi_object_t *obj_message,
+exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_object_t *obj_folder, mapi_id_t fid, mapi_id_t mid, mapi_object_t *obj_message,
 				     BuildReadPropsCB build_props, gpointer brp_data,
 				     FetchCallback cb, gpointer data,
 				     guint32 options)
@@ -1601,7 +1601,6 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 	GSList *recip_list = NULL;
 	GSList *stream_list = NULL;
 	gboolean result = FALSE;
-	mapi_id_t mid;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	g_return_val_if_fail (priv->session != NULL, FALSE);
@@ -1658,8 +1657,6 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 
 		mapi_SPropValue_array_named (obj_message, &properties_array);
 	}
-
-	mid = mapi_object_get_id (obj_message);
 
 	/* Release the objects so that the callback may use the store. */
 	if (obj_folder) {
@@ -1741,7 +1738,7 @@ exchange_mapi_connection_fetch_item (ExchangeMapiConnection *conn, mapi_id_t fid
 		goto cleanup;
 	}
 
-	result = exchange_mapi_connection_fetch_object_props (conn, &obj_folder, fid, &obj_message, build_props, brp_data, cb, data, options);
+	result = exchange_mapi_connection_fetch_object_props (conn, &obj_folder, fid, mid, &obj_message, build_props, brp_data, cb, data, options);
 
 cleanup:
 	if (!result) {

@@ -1368,7 +1368,7 @@ exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, mapi_id_t ori
 		return NULL;
 
 	if (obj_message)
-		exchange_mapi_connection_fetch_object_props (conn, NULL, orig_fid, obj_message,
+		exchange_mapi_connection_fetch_object_props (conn, NULL, orig_fid, orig_mid, obj_message,
 					exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (fccd.kind),
 					fetch_camel_cal_comp_cb, &fccd,
 					MAPI_OPTIONS_FETCH_ALL);
