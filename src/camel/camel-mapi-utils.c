@@ -403,8 +403,8 @@ camel_mapi_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_
 	cpid = 65001; /* UTF8 */
 	set_value (PR_INTERNET_CPID, &cpid);
 	set_value (PR_SUBJECT_UNICODE, item->header.subject);
-	set_value (PR_CONVERSATION_TOPIC_UNICODE, item->header.subject);
-	set_value (PR_NORMALIZED_SUBJECT_UNICODE, item->header.subject);
+	/* PR_CONVERSATION_TOPIC_UNICODE and PR_NORMALIZED_SUBJECT_UNICODE, together with PR_SUBJECT_PREFIX_UNICODE
+	   are computed from PR_SUBJECT by the server */
 
 	send_rich_info = false;
 	set_value (PR_SEND_RICH_INFO, &send_rich_info);
