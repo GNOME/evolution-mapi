@@ -203,6 +203,15 @@ mapi_message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 		camel_mapi_summary_parent_class);
 
 	info = folder_summary_class->message_info_from_db (s, mir);
+	if (info) {
+		gchar *part = mir->bdata;
+		if (part && *part) {
+			CamelMapiMessageInfo *m_info;
+
+			m_info = (CamelMapiMessageInfo *) info;
+			MS_EXTRACT_FIRST_DIGIT (m_info->server_flags);
+		}
+	}
 
 	return info;
 }
@@ -211,12 +220,15 @@ static CamelMIRecord *
 mapi_message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info)
 {
 	CamelFolderSummaryClass *folder_summary_class;
+	CamelMapiMessageInfo *m_info = (CamelMapiMessageInfo *) info;
 	struct _CamelMIRecord *mir;
 
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (
 		camel_mapi_summary_parent_class);
 
 	mir = folder_summary_class->message_info_to_db (s, info);
+	if (mir)
+		mir->bdata = g_strdup_printf ("%u", m_info->server_flags);
 
 	return mir;
 }

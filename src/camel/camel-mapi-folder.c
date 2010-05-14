@@ -396,6 +396,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 		}
 
 		mi->info.flags = item->header.flags;
+		mi->server_flags = mi->info.flags;
 
 		if (!exists) {
 			GSList *l = NULL;
@@ -821,6 +822,8 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 				to_free = g_slist_prepend (to_free, mid);
 			else
 				g_free (mid);
+
+			mapi_info->server_flags = mapi_info->info.flags;
 		}
 		camel_message_info_free (info);
 	}
@@ -836,6 +839,13 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	if (read_items) {
 		camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		exchange_mapi_connection_set_flags (camel_mapi_store_get_exchange_connection (mapi_store), 0, fid, read_items, 0, options);
+		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		g_slist_free (read_items);
+	}
+
+	if (unread_items) {
+		camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		exchange_mapi_connection_set_flags (camel_mapi_store_get_exchange_connection (mapi_store), 0, fid, unread_items, CLEAR_READ_FLAG, options);
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		g_slist_free (read_items);
 	}
@@ -1534,6 +1544,24 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 	return !camel_exception_is_set (ex);
 }
 
+static gboolean
+mapi_set_message_flags (CamelFolder *folder, const gchar *uid, guint32 flags, guint32 set)
+{
+	CamelMessageInfo *info;
+	gint res;
+
+	g_return_val_if_fail (folder->summary != NULL, FALSE);
+
+	info = camel_folder_summary_uid (folder->summary, uid);
+	if (info == NULL)
+		return FALSE;
+
+	res = camel_message_info_set_flags (info, flags, set);
+
+	camel_message_info_free (info);
+	return res;
+}
+
 static void
 mapi_folder_dispose (GObject *object)
 {
@@ -1590,6 +1618,7 @@ camel_mapi_folder_class_init (CamelMapiFolderClass *class)
 	folder_class->append_message = mapi_append_message;
 	folder_class->refresh_info = mapi_refresh_info;
 	folder_class->sync = mapi_sync;
+	folder_class->set_message_flags = mapi_set_message_flags;
 	folder_class->expunge = mapi_expunge;
 	folder_class->transfer_messages_to = mapi_transfer_messages_to;
 }
