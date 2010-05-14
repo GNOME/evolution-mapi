@@ -1,5 +1,5 @@
 # Shavian translation for evolution-mapi.
-# Copyright (C) 2009 The Gnome Foundation.
+# Copyright (C) 2010 The Gnome Foundation.
 # Thomas Thurman <tthurman@gnome.org>, 2009.
 msgid ""
 msgstr ""
@@ -32,7 +32,6 @@ msgstr "𐑕𐑩𐑤𐑧𐑒𐑑 𐑿𐑟𐑼𐑯𐑱𐑥"
 msgid "Full name"
 msgstr "𐑓𐑫𐑤 𐑯𐑱𐑥"
 
-#, fuzzy
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:148
 msgid "Username"
 msgstr "𐑿𐑟𐑼𐑯𐑱𐑥"
@@ -86,7 +85,6 @@ msgstr "𐑳𐑯𐑱𐑚𐑩𐑤 𐑑 𐑮𐑦𐑑𐑮𐑰𐑝 𐑓𐑴𐑤𐑛�
 msgid "Folder Size"
 msgstr "𐑓𐑴𐑤𐑛𐑼 𐑕𐑲𐑟"
 
-#, fuzzy
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:160
 msgid "Fetching folder list…"
 msgstr "𐑓𐑧𐑗𐑦𐑙 𐑓𐑴𐑤𐑛𐑼 𐑤𐑦𐑕𐑑…"
@@ -112,28 +110,26 @@ msgstr "𐑓𐑴𐑤𐑛𐑼 𐑕𐑲𐑟"
 #. To translators : This is used to cache the downloaded contacts from GAL.
 #. The first %d is an index of the GAL entry,
 #. the second %d is total count of entries in GAL.
-#, fuzzy, c-format
+#, c-format
 #: ../src/addressbook/e-book-backend-mapi-gal.c:168
 msgid "Caching GAL entry %d/%d"
-msgstr "𐑒𐑨𐑖𐑦𐑙 𐑜𐑨𐑤 𐑧𐑯𐑑𐑮𐑦 %d/%d"
+msgstr "𐑒𐑨𐑖𐑦𐑙 GAL 𐑧𐑯𐑑𐑮𐑦 %d/%d"
 
 #. To translators : This is used to cache the downloaded contacts from GAL.
 #. %d is an index of the GAL entry.
-#, fuzzy, c-format
+#, c-format
 #: ../src/addressbook/e-book-backend-mapi-gal.c:172
 msgid "Caching GAL entry %d"
-msgstr "𐑒𐑨𐑖𐑦𐑙 𐑜𐑨𐑤 𐑧𐑯𐑑𐑮𐑦 %d"
+msgstr "𐑒𐑨𐑖𐑦𐑙 GAL 𐑧𐑯𐑑𐑮𐑦 %d"
 
-#, fuzzy
 #: ../src/addressbook/e-book-backend-mapi-gal.c:698
 msgid "Searching"
 msgstr "𐑕𐑻𐑗𐑦𐑙"
 
 #. To translators : Here Evolution MAPI downloads the entries from the GAL server
-#, fuzzy
 #: ../src/addressbook/e-book-backend-mapi-gal.c:716
 msgid "Downloading GAL entries from server…"
-msgstr "𐑛𐑬𐑯𐑤𐑴𐑛𐑦𐑙 𐑜𐑨𐑤 𐑧𐑯𐑑𐑮𐑦𐑟 𐑓𐑮𐑪𐑥 𐑕𐑻𐑝𐑼…"
+msgstr "𐑛𐑬𐑯𐑤𐑴𐑛𐑦𐑙 GAL 𐑧𐑯𐑑𐑮𐑦𐑟 𐑓𐑮𐑪𐑥 𐑕𐑻𐑝𐑼…"
 
 #: ../src/calendar/e-cal-backend-mapi.c:125
 #: ../src/calendar/e-cal-backend-mapi.c:1251
@@ -180,10 +176,10 @@ msgstr ""
 msgid "Updating local summary cache for new messages in %s"
 msgstr "𐑳𐑐𐑛𐑱𐑑𐑦𐑙 𐑤𐑴𐑒𐑩𐑤 𐑕𐑳𐑥𐑼𐑦 𐑒𐑨𐑖 𐑓𐑹 𐑯𐑿 𐑥𐑧𐑕𐑦𐑡𐑩𐑟 𐑦𐑯 %s"
 
-#, fuzzy, c-format
+#, c-format
 #: ../src/camel/camel-mapi-folder.c:608
 msgid "Retrieving message IDs from server for %s"
-msgstr "𐑮𐑦𐑥𐑵𐑝𐑦𐑙 𐑛𐑦𐑤𐑰𐑑𐑩𐑛 𐑥𐑧𐑕𐑦𐑡𐑩𐑟 𐑓𐑮𐑪𐑥 𐑒𐑨𐑖 𐑦𐑯 %s"
+msgstr "𐑮𐑧𐑑𐑮𐑰𐑝𐑦𐑙 𐑥𐑧𐑕𐑦𐑡 ID𐑟 𐑓𐑮𐑪𐑥 𐑕𐑻𐑝𐑼 𐑓𐑹 %s"
 
 #, c-format
 #: ../src/camel/camel-mapi-folder.c:631
@@ -242,49 +238,43 @@ msgstr "𐑒𐑫𐑛 𐑯𐑪𐑑 𐑤𐑴𐑛 𐑕𐑳𐑥𐑼𐑦 𐑓𐑹 %s"
 msgid "Checking for new mail"
 msgstr "𐑗𐑧𐑒𐑦𐑙 𐑓𐑹 𐑯𐑿 𐑥𐑱𐑤"
 
-#, fuzzy
 #: ../src/camel/camel-mapi-provider.c:46
 msgid "C_heck for new messages in all folders"
-msgstr "C_heck 𐑓𐑹 𐑯𐑿 𐑥𐑧𐑕𐑦𐑡𐑩𐑟 𐑦𐑯 𐑷𐑤 𐑓𐑴𐑤𐑛𐑼𐑟"
+msgstr "_𐑗𐑧𐑒 𐑓𐑹 𐑯𐑿 𐑥𐑧𐑕𐑦𐑡𐑩𐑟 𐑦𐑯 𐑷𐑤 𐑓𐑴𐑤𐑛𐑼𐑟"
 
 #: ../src/camel/camel-mapi-provider.c:50
 msgid "Options"
 msgstr "𐑪𐑐𐑖𐑩𐑯𐑟"
 
-#, fuzzy
 #: ../src/camel/camel-mapi-provider.c:52
 msgid "Automatically synchroni_ze account locally"
-msgstr "𐑷𐑑𐑩𐑥𐑨𐑑𐑦𐑒𐑤𐑦 synchroni_ze 𐑩𐑒𐑬𐑯𐑑 𐑤𐑴𐑒𐑩𐑤𐑦"
+msgstr "𐑷𐑑𐑩𐑥𐑨𐑑𐑦𐑒𐑤𐑦 𐑕𐑦𐑯𐑒𐑮𐑴𐑯𐑲_𐑟 𐑩𐑒𐑬𐑯𐑑 𐑤𐑴𐑒𐑩𐑤𐑦"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#, fuzzy
 #: ../src/camel/camel-mapi-provider.c:55
 msgid "_Apply filters to new messages in Inbox on this server"
-msgstr "_Apply 𐑓𐑦𐑤𐑑𐑼𐑟 𐑑 𐑯𐑿 𐑥𐑧𐑕𐑦𐑡𐑩𐑟 𐑦𐑯 Inbox 𐑪𐑯 𐑞𐑦𐑕 𐑕𐑻𐑝𐑼"
+msgstr "_𐑩𐑐𐑤𐑦 𐑓𐑦𐑤𐑑𐑼𐑟 𐑑 𐑯𐑿 𐑥𐑧𐑕𐑦𐑡𐑩𐑟 𐑦𐑯 𐑦𐑯𐑚𐑪𐑒𐑕 𐑪𐑯 𐑞𐑦𐑕 𐑕𐑻𐑝𐑼"
 
 #: ../src/camel/camel-mapi-provider.c:57
 msgid "Check new messages for _Junk contents"
 msgstr "𐑗𐑧𐑒 𐑯𐑿 𐑥𐑧𐑕𐑦𐑡𐑩𐑟 𐑓𐑹 _𐑡𐑩𐑙𐑒 𐑒𐑪𐑯𐑑𐑩𐑯𐑑𐑕"
 
-#, fuzzy
 #: ../src/camel/camel-mapi-provider.c:59
 msgid "Only check for Junk messag_es in the Inbox folder"
-msgstr "𐑴𐑯𐑤𐑦 𐑗𐑧𐑒 𐑓𐑹 𐑡𐑩𐑙𐑒 messag_es 𐑦𐑯 𐑞 Inbox 𐑓𐑴𐑤𐑛𐑼"
+msgstr "𐑴𐑯𐑤𐑦 𐑗𐑧𐑒 𐑓𐑹 𐑡𐑩𐑙𐑒 𐑥𐑧𐑕𐑩𐑡𐑧_𐑟 𐑦𐑯 𐑞 Inbox 𐑓𐑴𐑤𐑛𐑼"
 
-#, fuzzy
 #: ../src/camel/camel-mapi-provider.c:70
 msgid "For accessing Microsoft Exchange/OpenChange servers using MAPI"
-msgstr "𐑓𐑹 𐑨𐑒𐑕𐑧𐑕𐑦𐑙 𐑥𐑲𐑒𐑮𐑴𐑕𐑪𐑓𐑑 𐑧𐑒𐑕𐑗𐑱𐑯𐑡/OpenChange 𐑕𐑻𐑝𐑼𐑟 𐑿𐑟𐑦𐑙 𐑥𐑨𐑐𐑰"
+msgstr "𐑓𐑹 𐑨𐑒𐑕𐑧𐑕𐑦𐑙 ·𐑥𐑲𐑒𐑮𐑴𐑕𐑪𐑓𐑑 ·𐑧𐑒𐑕𐑗𐑱𐑯𐑡/OpenChange 𐑕𐑻𐑝𐑼𐑟 𐑿𐑟𐑦𐑙 MAPI"
 
 #: ../src/camel/camel-mapi-provider.c:85
 msgid "Password"
 msgstr "𐑐𐑭𐑕𐑢𐑼𐑛"
 
-#, fuzzy
 #: ../src/camel/camel-mapi-provider.c:86
 msgid ""
 "This option will connect to the OpenChange server using a plaintext password."
-msgstr "𐑞𐑦𐑕 𐑪𐑐𐑖𐑩𐑯 𐑢𐑦𐑤 𐑒𐑩𐑯𐑧𐑒𐑑 𐑑 𐑞 OpenChange 𐑕𐑻𐑝𐑼 𐑿𐑟𐑦𐑙 𐑩 plaintext 𐑐𐑭𐑕𐑢𐑼𐑛."
+msgstr "𐑞𐑦𐑕 𐑪𐑐𐑖𐑩𐑯 𐑢𐑦𐑤 𐑒𐑩𐑯𐑧𐑒𐑑 𐑑 𐑞 OpenChange 𐑕𐑻𐑝𐑼 𐑿𐑟𐑦𐑙 𐑩 𐑐𐑤𐑱𐑯𐑑𐑧𐑒𐑕𐑑 𐑐𐑭𐑕𐑢𐑼𐑛."
 
 #: ../src/camel/camel-mapi-store.c:48
 msgid "Favorites"
@@ -330,22 +320,22 @@ msgstr "𐑳𐑯𐑱𐑚𐑩𐑤 𐑑 𐑷𐑔𐑧𐑯𐑑𐑦𐑒𐑱𐑑 𐑑 
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "𐑒𐑨𐑯𐑪𐑑 𐑒𐑮𐑦𐑱𐑑 MAPI 𐑓𐑴𐑤𐑛𐑼𐑟 𐑦𐑯 𐑪𐑓𐑤𐑲𐑯 𐑥𐑴𐑛."
 
-#, fuzzy, c-format
+#, c-format
 #: ../src/camel/camel-mapi-store.c:557
 msgid "Cannot create new folder '%s'"
 msgstr "𐑒𐑨𐑯𐑪𐑑 𐑒𐑮𐑦𐑱𐑑 𐑯𐑿 𐑓𐑴𐑤𐑛𐑼 `%s'"
 
-#, fuzzy, c-format
+#, c-format
 #: ../src/camel/camel-mapi-store.c:742
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
 msgstr "𐑒𐑨𐑯𐑪𐑑 𐑮𐑰𐑯𐑱𐑥 MAPI 𐑓𐑴𐑤𐑛𐑼 `%s'. 𐑓𐑴𐑤𐑛𐑼 𐑛𐑳𐑟 𐑯𐑪𐑑 𐑧𐑒𐑟𐑦𐑕𐑑."
 
-#, fuzzy, c-format
+#, c-format
 #: ../src/camel/camel-mapi-store.c:753
 msgid "Cannot rename MAPI default folder '%s' to '%s'."
 msgstr "𐑒𐑨𐑯𐑪𐑑 𐑮𐑰𐑯𐑱𐑥 MAPI 𐑛𐑦𐑓𐑷𐑤𐑑 𐑓𐑴𐑤𐑛𐑼 `%s' 𐑑 `%s'."
 
-#, fuzzy, c-format
+#, c-format
 #: ../src/camel/camel-mapi-store.c:778 ../src/camel/camel-mapi-store.c:793
 #: ../src/camel/camel-mapi-store.c:844
 msgid "Cannot rename MAPI folder '%s' to '%s'"
