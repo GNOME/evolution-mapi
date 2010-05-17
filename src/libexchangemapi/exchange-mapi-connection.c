@@ -26,6 +26,7 @@
 #include <config.h>
 #endif
 
+#include <glib/gi18n-lib.h>
 #include <camel/camel.h>
 
 #include "exchange-mapi-connection.h"
@@ -3079,14 +3080,13 @@ cleanup:
 }
 
 gboolean
-exchange_mapi_connection_get_pf_folders_list (ExchangeMapiConnection *conn, GSList **mapi_folders, mapi_id_t parent_fid)
+exchange_mapi_connection_get_pf_folders_list (ExchangeMapiConnection *conn, GSList **mapi_folders)
 {
 	enum MAPISTATUS		retval;
 	TALLOC_CTX		*mem_ctx;
 	gboolean		result = FALSE;
 	mapi_id_t		mailbox_id;
 	ExchangeMAPIFolder	*folder;
-	mapi_object_t obj_parent_folder;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	g_return_val_if_fail (priv->session != NULL, FALSE);
@@ -3099,34 +3099,19 @@ exchange_mapi_connection_get_pf_folders_list (ExchangeMapiConnection *conn, GSLi
 	if (!ensure_public_store (priv))
 		goto cleanup;
 
-	/* Open the folder if parent_fid is given. */
-	if (parent_fid) {
-		mapi_object_init(&obj_parent_folder);
-
-		retval = OpenFolder (&priv->public_store, parent_fid, &obj_parent_folder);
-		if (retval != MAPI_E_SUCCESS) {
-			mapi_errstr("OpenFolder", GetLastError());
-			goto cleanup;
-		}
-	} else {
-		retval = GetDefaultPublicFolder (&priv->public_store, &mailbox_id, olFolderPublicIPMSubtree);
+	retval = GetDefaultPublicFolder (&priv->public_store, &mailbox_id, olFolderPublicIPMSubtree);
 		if (retval != MAPI_E_SUCCESS) {
 			mapi_errstr("GetDefaultPublicFolder", GetLastError());
 			goto cleanup;
 		}
-	}
-	/*  TODO : Localized string */
-	folder = exchange_mapi_folder_new ("All Public Folders", IPF_NOTE, 0,
-					   mailbox_id, 0, 0, 0 ,0);
+
+	folder = exchange_mapi_folder_new (_("All Public Folders"), IPF_NOTE, 0, mailbox_id, 0, 0, 0 ,0);
 	folder->is_default = true;
 	folder->default_type = olPublicFoldersAllPublicFolders;
-
 	*mapi_folders = g_slist_prepend (*mapi_folders, folder);
-
-	/* FIXME: check status of get_child_folders */
-	get_child_folders (mem_ctx, MAPI_FAVOURITE_FOLDER, parent_fid ? &obj_parent_folder : &priv->public_store,
-			   parent_fid ? parent_fid : mailbox_id, mapi_folders, 1);
-
+	get_child_folders (mem_ctx, MAPI_FAVOURITE_FOLDER, &priv->public_store,
+			   mailbox_id, mapi_folders, -1);
+	*mapi_folders = g_slist_reverse (*mapi_folders);
 	result = TRUE;
 
 cleanup:

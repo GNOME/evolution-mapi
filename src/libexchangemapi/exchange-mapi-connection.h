@@ -197,7 +197,7 @@ gboolean		exchange_mapi_connection_remove_items (ExchangeMapiConnection *conn, u
 gboolean		exchange_mapi_connection_copy_items (ExchangeMapiConnection *conn, mapi_id_t src_fid, mapi_id_t dest_fid, GSList *mids);
 gboolean		exchange_mapi_connection_move_items (ExchangeMapiConnection *conn, mapi_id_t src_fid, mapi_id_t dest_fid, GSList *mids);
 gboolean 		exchange_mapi_connection_get_folders_list (ExchangeMapiConnection *conn, GSList **mapi_folders);
-gboolean		exchange_mapi_connection_get_pf_folders_list (ExchangeMapiConnection *conn, GSList **mapi_folders, mapi_id_t parent_id);
+gboolean		exchange_mapi_connection_get_pf_folders_list (ExchangeMapiConnection *conn, GSList **mapi_folders);
 GSList *		exchange_mapi_connection_peek_folders_list (ExchangeMapiConnection *conn);
 
 gboolean		exchange_mapi_connection_resolve_named_props (ExchangeMapiConnection *conn, mapi_id_t fid, ResolveNamedIDsData *named_ids_list, guint named_ids_n_elems);

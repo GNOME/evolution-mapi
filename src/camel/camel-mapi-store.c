@@ -1365,7 +1365,7 @@ remove_path_from_store_summary (const gchar *path, gpointer value, CamelMapiStor
 }
 
 static void
-mapi_folders_sync (CamelMapiStore *store, const gchar *top, guint32 flags, CamelException *ex)
+mapi_folders_sync (CamelMapiStore *store, guint32 flags, CamelException *ex)
 {
 	CamelMapiStorePrivate  *priv = store->priv;
 	gboolean status;
@@ -1404,21 +1404,11 @@ mapi_folders_sync (CamelMapiStore *store, const gchar *top, guint32 flags, Camel
 	}
 
 	subscription_list = (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST);
-
 	if (subscription_list) {
 		/*Consult the name <-> fid hash table for a FID.*/
-		gchar *parent_id = NULL;
-		mapi_id_t pid = 0;
-
-		parent_id = (top) ? g_strdup (camel_mapi_store_folder_id_lookup_offline (store, top)) : NULL;
-		exchange_mapi_util_mapi_id_from_string (parent_id, &pid);
-
-		status = exchange_mapi_connection_get_pf_folders_list (priv->conn, &folder_list, pid);
-
+		status = exchange_mapi_connection_get_pf_folders_list (priv->conn, &folder_list);
 		if (!status)
 			g_warning ("Could not get Public folder list..\n");
-
-		g_free (parent_id);
 	}
 
 	temp_list = folder_list;
@@ -1427,8 +1417,7 @@ mapi_folders_sync (CamelMapiStore *store, const gchar *top, guint32 flags, Camel
 	url = camel_url_to_string (CAMEL_SERVICE(store)->url,
 				   (CAMEL_URL_HIDE_PASSWORD|
 				    CAMEL_URL_HIDE_PARAMS|
-				    CAMEL_URL_HIDE_AUTH) );
-
+				    CAMEL_URL_HIDE_AUTH));
 	if ( url[strlen(url) - 1] != '/') {
 		temp_url = g_strconcat (url, "/", NULL);
 		g_free ((gchar *)url);
@@ -1437,7 +1426,7 @@ mapi_folders_sync (CamelMapiStore *store, const gchar *top, guint32 flags, Camel
 
 	/*populate the hash table for finding the mapping from container id <-> folder name*/
 	for (;temp_list != NULL; temp_list = g_slist_next (temp_list) ) {
-		const gchar *full_name;
+		const gchar *full_name = NULL;
 		gchar *fid = NULL, *parent_id = NULL, *tmp = NULL;
 
 		fid = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", exchange_mapi_folder_get_fid((ExchangeMAPIFolder *)(temp_list->data)));
@@ -1466,7 +1455,6 @@ mapi_folders_sync (CamelMapiStore *store, const gchar *top, guint32 flags, Camel
 			g_hash_table_insert (priv->default_folders, type,
 					     g_strdup(fid));
 		}
-
 		g_free (fid);
 		g_free (parent_id);
 		g_free (tmp);
@@ -1482,7 +1470,8 @@ mapi_folders_sync (CamelMapiStore *store, const gchar *top, guint32 flags, Camel
 			continue;
 
 		info = mapi_convert_to_folder_info (store, folder, (const gchar *)url, ex);
-		if (!(mapi_si = (CamelMapiStoreInfo *) camel_store_summary_path ((CamelStoreSummary *)store->summary, info->full_name))) {
+		mapi_si = (CamelMapiStoreInfo *) camel_store_summary_path ((CamelStoreSummary *)store->summary, info->full_name);
+		if (!mapi_si) {
 			gchar *fid, *pfid = NULL;
 
 			fid = g_strdup_printf ("%016" G_GINT64_MODIFIER "X",
@@ -1491,7 +1480,6 @@ mapi_folders_sync (CamelMapiStore *store, const gchar *top, guint32 flags, Camel
 						exchange_mapi_folder_get_parent_id((ExchangeMAPIFolder *)(folder_list->data)));
 
 			mapi_si = camel_mapi_store_summary_add_from_full (store->summary, info->full_name, '/', fid, pfid);
-
 			g_free (fid);
 			g_free (pfid);
 			if (mapi_si == NULL) {
@@ -1568,7 +1556,7 @@ mapi_get_folder_info(CamelStore *store, const gchar *top, guint32 flags, CamelEx
 	     (!mapi_store->priv->folders_synced) ||
 	     (top && *top && !camel_mapi_store_folder_id_lookup (mapi_store, top))) &&
 	    (check_for_connection ((CamelService *)store, ex) || ((CamelService *)store)->status == CAMEL_SERVICE_CONNECTING)) {
-		mapi_folders_sync (mapi_store, top, flags, ex);
+		mapi_folders_sync (mapi_store, flags, ex);
 
 		if (camel_exception_is_set (ex)) {
 			camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
