@@ -456,7 +456,7 @@ mapi_mime_msg_body (MailItem *item, const ExchangeMAPIStream *body)
 	camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_8BIT);
 
 	if (body && body->value && body->value->len > 0) {
-		const gchar * type = NULL;
+		const gchar *type = NULL;
 		gchar *buff = NULL;
 
 		if (item->is_cal)
@@ -465,7 +465,7 @@ mapi_mime_msg_body (MailItem *item, const ExchangeMAPIStream *body)
 			type = (body->proptag == PR_BODY || body->proptag == PR_BODY_UNICODE) ?
 				"text/plain" : "text/html";
 
-		if (item->header.cpid) {
+		if (item->header.cpid && (body->proptag & 0xFFFF) != PT_UNICODE) {
 			if (item->header.cpid == 20127)
 				buff = g_strdup_printf ("%s; charset=\"us-ascii\"", type);
 			else if (item->header.cpid >= 28591 && item->header.cpid <= 28599)
