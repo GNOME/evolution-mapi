@@ -1,3 +1,32 @@
+evolution-mapi 0.31.2 2010-05-24
+--------------------------------
+Bug Fixes:
+	Bug #337479 - Evolution forgets password on any error (Milan Crha)
+	Bug #569631 - Evolution hangs during the initial fetch of calendar items (Milan Crha)
+	Bug #599311 - Doesn't show email attachments (Milan Crha)
+	Bug #600386 - Do not use charset on messages with UNICODE body fetched (Milan Crha)
+	Bug #603006 - Move All Contacts To enabled for read-only address books (Milan Crha)
+	Bug #604498 - Incorrectly decoded message in UI (Milan Crha)
+	Bug #607632 - Marking a message unread doesn't reflect on a server (Johnny Jacob)
+	Bug #608408 - Folder -> Subscription doesn't show sub folders (Punit Jain)
+	Bug #611560 - 'Mark as junk' should be disabled in junk folder (Milan Crha)
+	Bug #617498 - Sometimes account configuration creates only mailer part (Milan Crha)
+	Bug #617509 - File->Empty trash doesn't expunge Deleted items (Milan Crha)
+	Bug #618504 - Meeting request mails are shown as plain text (Milan Crha)
+	Bug #618602 - Prepends an additional "Re: " to message reply (Milan Crha)
+	Bug #618872 - Awfully slow fetching of folder hierarchy (Punit Jain)
+
+Misc:
+	Adapt to Camel API changes (Matthew Barnes)
+	Fix CamelOperation string (add folder name to it) (Milan Crha)
+	Milan and Bharath ordained as maintainers (Johnny Jacob)
+
+Translations:
+	Fran Diéguez (gl)
+	Jorge González (es)
+	Mario Blättermann (de)
+	Thomas Thurman (en@shaw)
+
 evolution-mapi 0.31.1 2010-05-03
 --------------------------------
 Bug Fixes:
