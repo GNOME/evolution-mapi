@@ -169,6 +169,12 @@ mapi_item_set_body_stream (MapiItem *item, CamelStream *body, MapiItemPartType p
 			g_byte_array_append (stream->value, (const guint8 *)"", 1);
 
 		item->msg.body_parts = g_slist_append (item->msg.body_parts, stream);
+	} else if (stream->proptag == PR_HTML) {
+		/* PR_HTML shouldn't be in UTF-16 */
+		if (!is_null_terminated)
+			g_byte_array_append (stream->value, (const guint8 *)"", 1);
+
+		item->generic_streams = g_slist_append (item->generic_streams, stream);
 	} else {
 		gsize written = 0;
 		gchar *in_unicode;
@@ -414,7 +420,7 @@ camel_mapi_utils_create_item_build_props (struct SPropValue **value, struct SPro
 
 	props = g_new0 (struct SPropValue, 11 + 1);
 
-	*cpid = 65001; /* UTF8 */
+	*cpid = 65001; /* UTF8 - also used with PR_HTML */
 	set_SPropValue_proptag(&props[i++], PR_INTERNET_CPID, cpid);
 	set_SPropValue_proptag(&props[i++], PR_SUBJECT_UNICODE, g_strdup (item->header.subject));
 	/* PR_CONVERSATION_TOPIC_UNICODE and PR_NORMALIZED_SUBJECT_UNICODE, together with PR_SUBJECT_PREFIX_UNICODE

@@ -224,7 +224,7 @@ exchange_mapi_connection_close (void)
 }
 
 static gboolean 
-exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, uint32_t proptag, GSList **stream_list)
+exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32_t *cpid, uint32_t proptag, GSList **stream_list)
 {
 	enum MAPISTATUS	retval;
 	TALLOC_CTX 	*mem_ctx;
@@ -289,8 +289,27 @@ exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, uint32_t pro
 		ExchangeMAPIStream 		*stream = g_new0 (ExchangeMAPIStream, 1);
 		struct mapi_SPropValue_array 	properties_array;
 
-		stream->value = g_byte_array_sized_new (off_data);
-		stream->value = g_byte_array_append (stream->value, buf_data, off_data);
+		stream->value = NULL;
+
+		if (proptag == PR_HTML && ((cpid && (*cpid == 1200 || *cpid == 1201)) || (off_data > 5 && buf_data[3] == '\0'))) {
+			/* this is special, get the CPID and transform to utf8 when it's utf16 */
+			gsize written = 0;
+			gchar *in_utf8;
+
+			in_utf8 = g_convert ((const gchar *) buf_data, off_data, "UTF-8", "UTF-16", NULL, &written, NULL);
+			if (in_utf8 && written > 0) {
+				stream->value = g_byte_array_sized_new (written + 1);
+				g_byte_array_append (stream->value, (const guint8 *) in_utf8, written);
+
+				if (in_utf8[written] != '\0')
+					g_byte_array_append (stream->value, (const guint8 *) "", 1);
+			}
+		}
+
+		if (!stream->value) {
+			stream->value = g_byte_array_sized_new (off_data);
+			g_byte_array_append (stream->value, buf_data, off_data);
+		}
 
 		/* Build a mapi_SPropValue_array structure */
 		properties_array.cValues = 1; 
@@ -337,7 +356,8 @@ exchange_mapi_util_read_body_stream (mapi_object_t *obj_message, GSList **stream
 	mem_ctx = talloc_init ("ExchangeMAPI_ReadBodyStream");
 
 	/* Build the array of properties we want to fetch */
-	SPropTagArray = set_SPropTagArray(mem_ctx, 0x6,
+	SPropTagArray = set_SPropTagArray(mem_ctx, 0x7,
+					  PR_INTERNET_CPID,
 					  PR_MSG_EDITOR_FORMAT,
 					  PR_BODY,
 					  PR_BODY_UNICODE,
@@ -402,7 +422,7 @@ exchange_mapi_util_read_body_stream (mapi_object_t *obj_message, GSList **stream
 				body.data = talloc_memdup(mem_ctx, data, size);
 				body.length = size;
 				retval = MAPI_E_SUCCESS;
-			} else if (exchange_mapi_util_read_generic_stream (obj_message, PR_HTML, stream_list)) {
+			} else if (exchange_mapi_util_read_generic_stream (obj_message, exchange_mapi_util_find_SPropVal_array_propval (lpProps, PR_INTERNET_CPID), PR_HTML, stream_list)) {
 				retval = MAPI_E_SUCCESS;
 			}
 			break;
@@ -747,13 +767,13 @@ exchange_mapi_util_get_attachments (mapi_object_t *obj_message, GSList **attach_
 		/* just to get all the other streams */
 		for (z=0; z < properties.cValues; z++) {
 			if ((properties.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY) 
-				exchange_mapi_util_read_generic_stream (&obj_attach, properties.lpProps[z].ulPropTag, &(attachment->streams));
+				exchange_mapi_util_read_generic_stream (&obj_attach, exchange_mapi_util_find_array_propval (&properties, PR_INTERNET_CPID), properties.lpProps[z].ulPropTag, &(attachment->streams));
 		}
 
 		/* HACK */
 		ui32 = (const uint32_t *) get_SPropValue_SRow_data(&rows_attach.aRow[i_row_attach], PR_ATTACH_METHOD);
 		if (ui32 && *ui32 == ATTACH_BY_VALUE)
-			exchange_mapi_util_read_generic_stream (&obj_attach, PR_ATTACH_DATA_BIN, &(attachment->streams));
+			exchange_mapi_util_read_generic_stream (&obj_attach, exchange_mapi_util_find_array_propval (&properties, PR_INTERNET_CPID), PR_ATTACH_DATA_BIN, &(attachment->streams));
 
 		*attach_list = g_slist_append (*attach_list, attachment);
 
@@ -1362,7 +1382,7 @@ GetProps_cleanup:
 					for (z=0; z < properties_array.cValues; z++) {
 						if ((properties_array.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY && 
 						    (options & MAPI_OPTIONS_FETCH_GENERIC_STREAMS)) 
-						exchange_mapi_util_read_generic_stream (&obj_message, properties_array.lpProps[z].ulPropTag, &stream_list);
+						exchange_mapi_util_read_generic_stream (&obj_message, exchange_mapi_util_find_array_propval (&properties_array, PR_INTERNET_CPID), properties_array.lpProps[z].ulPropTag, &stream_list);
 					}
 
 					mapi_SPropValue_array_named(&obj_message, &properties_array);
@@ -1544,7 +1564,7 @@ exchange_mapi_connection_fetch_item (mapi_id_t fid, mapi_id_t mid,
 		/* just to get all the other streams */
 		for (z=0; z < properties_array.cValues; z++)
 			if ((properties_array.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY && (options & MAPI_OPTIONS_FETCH_GENERIC_STREAMS))
-				exchange_mapi_util_read_generic_stream (&obj_message, properties_array.lpProps[z].ulPropTag, &stream_list);
+				exchange_mapi_util_read_generic_stream (&obj_message, exchange_mapi_util_find_array_propval (&properties_array, PR_INTERNET_CPID), properties_array.lpProps[z].ulPropTag, &stream_list);
 
 		mapi_SPropValue_array_named(&obj_message, &properties_array);
 	}
