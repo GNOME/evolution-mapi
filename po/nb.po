@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-data-server 2.29.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-24 16:30+0200\n"
+"POT-Creation-Date: 2010-05-24 16:31+0200\n"
 "PO-Revision-Date: 2010-05-24 16:30+0200\n"
 "Last-Translator: Kjartan Maraas <kmaraas@gnome.org>\n"
 "Language-Team: Norwegian Bokmal <i18n-nb@lister.ping.uio.no>\n"
@@ -285,6 +285,7 @@ msgid "Favorites"
 msgstr "Favoritter"
 
 #: ../src/camel/camel-mapi-store.c:49
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3103
 msgid "All Public Folders"
 msgstr "Alle offentlige mapper"
 
