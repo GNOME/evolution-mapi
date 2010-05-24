@@ -8,3 +8,4 @@ src/camel/camel-mapi-folder.c
 src/camel/camel-mapi-provider.c
 src/camel/camel-mapi-store.c
 src/camel/camel-mapi-transport.c
+src/libexchangemapi/exchange-mapi-connection.c
