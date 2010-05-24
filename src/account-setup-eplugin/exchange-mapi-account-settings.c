@@ -65,54 +65,52 @@ enum {
 typedef struct
 {
 	GtkDialog *dialog;
-	GtkWidget *spinner;
-	GtkWidget *spinner_label;
 	GtkBox *spinner_hbox;
 
 	gchar *profile;
+
+	GSList *folder_list;
+	ExchangeMapiConnection *conn;
 } FolderSizeDialogData;
 
 static gboolean
-mapi_settings_get_folder_size (gpointer data)
+fill_folder_size_dialog_cb (gpointer data)
 {
-	/* TreeView */
-	GtkWidget *view;
+	GtkWidget *widget;
 	GtkCellRenderer *renderer;
 	GtkListStore *store;
 	GtkTreeIter iter;
 	GtkBox *content_area;
 	FolderSizeDialogData *dialog_data = (FolderSizeDialogData *)data;
-	GSList *folder_list;
-	ExchangeMapiConnection *conn;
-
-	folder_list = NULL;
-	conn = exchange_mapi_connection_find (dialog_data->profile);
-	if (conn && exchange_mapi_connection_connected (conn))
-		folder_list = exchange_mapi_connection_peek_folders_list (conn);
 
 	/* Hide progress bar. Set status*/
-	gtk_widget_destroy (dialog_data->spinner_label);
-	gtk_widget_destroy (dialog_data->spinner);
+	gtk_widget_destroy (GTK_WIDGET (dialog_data->spinner_hbox));
 
-	if (folder_list) {
+	if (dialog_data->folder_list) {
+		GtkWidget *scrolledwindow, *tree_view;
+
+		scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
+		gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+		gtk_widget_show (scrolledwindow);
+
 		/*Tree View */
-		view =  gtk_tree_view_new ();
+		tree_view =  gtk_tree_view_new ();
 		renderer = gtk_cell_renderer_text_new ();
-		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),-1,
+		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (tree_view),-1,
 							     _("Folder"), renderer, "text", COL_FOLDERSIZE_NAME,
 							     NULL);
 
 		renderer = gtk_cell_renderer_text_new ();
-		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),-1,
+		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (tree_view),-1,
 							     _("Size"), renderer, "text", COL_FOLDERSIZE_SIZE,
 							     NULL);
 		/* Model for TreeView */
 		store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
-		gtk_tree_view_set_model (GTK_TREE_VIEW (view), GTK_TREE_MODEL (store));
+		gtk_tree_view_set_model (GTK_TREE_VIEW (tree_view), GTK_TREE_MODEL (store));
 
 		/* Populate model with data */
-		while (folder_list) {
-			ExchangeMAPIFolder *folder = (ExchangeMAPIFolder *) folder_list->data;
+		while (dialog_data->folder_list) {
+			ExchangeMAPIFolder *folder = (ExchangeMAPIFolder *) dialog_data->folder_list->data;
 			gchar *folder_size = g_format_size_for_display (folder->size);
 
 			gtk_list_store_append (store, &iter);
@@ -120,29 +118,49 @@ mapi_settings_get_folder_size (gpointer data)
 					    COL_FOLDERSIZE_NAME, folder->folder_name,
 					    COL_FOLDERSIZE_SIZE, folder_size,
 					    -1);
-			folder_list = g_slist_next (folder_list);
+			dialog_data->folder_list = g_slist_next (dialog_data->folder_list);
 			g_free (folder_size);
 		}
+
+		gtk_container_add (GTK_CONTAINER (scrolledwindow), tree_view);
+		widget = scrolledwindow;
 	} else {
-		view = gtk_label_new (_("Unable to retrieve folder size information"));
+		widget = gtk_label_new (_("Unable to retrieve folder size information"));
 	}
 
-	gtk_widget_show_all (view);
+	gtk_widget_show_all (widget);
 
 	/* Pack into content_area */
 	content_area = (GtkBox*) gtk_dialog_get_content_area (dialog_data->dialog);
-	gtk_box_pack_start (content_area, view, TRUE, TRUE, 6);
+	gtk_box_pack_start (content_area, widget, TRUE, TRUE, 6);
 
-	if (conn)
-		g_object_unref (conn);
+	if (dialog_data->conn)
+		g_object_unref (dialog_data->conn);
 
 	return FALSE;
+}
+
+static gpointer
+mapi_settings_get_folder_size (gpointer data)
+{
+	FolderSizeDialogData *dialog_data = (FolderSizeDialogData *)data;
+
+	dialog_data->folder_list = NULL;
+	dialog_data->conn = exchange_mapi_connection_find (dialog_data->profile);
+	if (dialog_data->conn && exchange_mapi_connection_connected (dialog_data->conn))
+		dialog_data->folder_list = exchange_mapi_connection_peek_folders_list (dialog_data->conn);
+
+	g_timeout_add (100, fill_folder_size_dialog_cb, dialog_data);
+
+	return NULL;
 }
 
 static void
 mapi_settings_run_folder_size_dialog (const gchar *profile, gpointer data)
 {
 	GtkBox *content_area;
+	GtkWidget *spinner, *alignment;
+	GtkWidget *spinner_label;
 	FolderSizeDialogData *dialog_data;
 	GThread *folder_list_thread;
 
@@ -153,16 +171,22 @@ mapi_settings_run_folder_size_dialog (const gchar *profile, gpointer data)
 							   GTK_STOCK_CLOSE, GTK_RESPONSE_ACCEPT,
 							   NULL);
 
+	gtk_window_set_default_size (GTK_WINDOW (dialog_data->dialog), 250, 300);
+
 	content_area = (GtkBox *)gtk_dialog_get_content_area (dialog_data->dialog);
 
-	dialog_data->spinner = gtk_spinner_new ();
-	gtk_spinner_start (GTK_SPINNER (dialog_data->spinner));
-	dialog_data->spinner_label = gtk_label_new (_("Fetching folder list…"));
+	spinner = gtk_spinner_new ();
+	gtk_spinner_start (GTK_SPINNER (spinner));
+	spinner_label = gtk_label_new (_("Fetching folder list…"));
 
-	dialog_data->spinner_hbox = (GtkBox *) gtk_hbox_new (TRUE, 6);
+	dialog_data->spinner_hbox = (GtkBox *) gtk_hbox_new (FALSE, 6);
 
-	gtk_box_pack_start (dialog_data->spinner_hbox, GTK_WIDGET (dialog_data->spinner), TRUE, TRUE, 6);
-	gtk_box_pack_start (dialog_data->spinner_hbox, GTK_WIDGET (dialog_data->spinner_label), TRUE, TRUE, 6);
+	alignment = gtk_alignment_new (1.0, 0.5, 0.0, 1.0);
+	gtk_container_add (GTK_CONTAINER (alignment), spinner);
+	gtk_misc_set_alignment (GTK_MISC (spinner_label), 0.0, 0.5);
+
+	gtk_box_pack_start (dialog_data->spinner_hbox, alignment, TRUE, TRUE, 0);
+	gtk_box_pack_start (dialog_data->spinner_hbox, spinner_label, TRUE, TRUE, 0);
 
 	/* Pack the TreeView into dialog's content area */
 	gtk_box_pack_start (content_area, GTK_WIDGET (dialog_data->spinner_hbox), TRUE, TRUE, 6);
@@ -171,7 +195,7 @@ mapi_settings_run_folder_size_dialog (const gchar *profile, gpointer data)
 	dialog_data->profile = g_strdup (profile);
 
 	/* Fetch folder list and size information in a thread */
-	folder_list_thread = g_thread_create ((GThreadFunc)mapi_settings_get_folder_size, dialog_data, TRUE, NULL);
+	folder_list_thread = g_thread_create (mapi_settings_get_folder_size, dialog_data, TRUE, NULL);
 
 	/* Start the dialog */
 	gtk_dialog_run (dialog_data->dialog);
