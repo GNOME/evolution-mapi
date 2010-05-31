@@ -435,7 +435,6 @@ check_node (GtkTreeStore *ts, ExchangeMAPIFolder *folder, GtkTreeIter iter)
 {
 	GtkTreeModel *ts_model;
 	mapi_id_t fid;
-	gboolean status = FALSE;
 
 	ts_model = GTK_TREE_MODEL (ts);
 
@@ -451,14 +450,15 @@ check_node (GtkTreeStore *ts, ExchangeMAPIFolder *folder, GtkTreeIter iter)
 	if (gtk_tree_model_iter_has_child (ts_model, &iter)) {
 		GtkTreeIter child;
 		gtk_tree_model_iter_children (ts_model, &child, &iter);
-		status = check_node (ts, folder, child);
+		if (check_node (ts, folder, child))
+		    return TRUE;
 	}
 
-	while (gtk_tree_model_iter_next (ts_model, &iter) && !status) {
-		status = check_node (ts, folder, iter);
+	if (gtk_tree_model_iter_next (ts_model, &iter)) {
+		return check_node (ts, folder, iter);
 	}
 
-	return status;
+	return FALSE;
 }
 
 static void
