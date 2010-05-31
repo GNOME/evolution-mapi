@@ -224,8 +224,13 @@ gboolean		exchange_mapi_connection_events_unsubscribe (ExchangeMapiConnection *c
 
 /* profile functions */
 
+enum {
+	CREATE_PROFILE_FLAG_NONE = 0,
+	CREATE_PROFILE_FLAG_USE_SSL = (1 << 0)
+};
+
 gboolean		exchange_mapi_create_profile (const gchar *username, const gchar *password,
-				       const gchar *domain, const gchar *server,
+				       const gchar *domain, const gchar *server, guint32 flags,
 				       gchar **error_msg, mapi_profile_callback_t cb, gpointer data);
 
 gboolean		exchange_mapi_delete_profile (const gchar *profile);

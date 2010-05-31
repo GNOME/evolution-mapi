@@ -215,6 +215,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 
 	if (!url->user || !*url->user || !url->host || !*url->host || !domain_name || !*domain_name) {
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Server, username and domain name cannot be empty. Please fill them with correct values."));
+		camel_url_free (url);
 		return;
 	}
 
@@ -234,11 +235,11 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 
 	/*Can there be a account without password ?*/
 	if (password && *password && domain_name && *domain_name && *url->user && *url->host) {
+		guint32 cp_flags = (camel_url_get_param (url, "ssl") && g_str_equal (camel_url_get_param (url, "ssl"), "1")) ? CREATE_PROFILE_FLAG_USE_SSL : CREATE_PROFILE_FLAG_NONE;
 		gchar *error_msg = NULL;
 		gboolean status = exchange_mapi_create_profile (url->user, password, domain_name,
-								url->host, &error_msg,
-								(mapi_profile_callback_t) create_profile_callback,
-								url->user);
+								url->host, cp_flags, &error_msg,
+								(mapi_profile_callback_t) create_profile_callback, url->user);
 		if (status) {
 			/* profile was created, try to connect to the server */
 			ExchangeMapiConnection *conn;
@@ -317,6 +318,25 @@ domain_entry_changed(GtkWidget *entry, EConfig *config)
 	camel_url_free (url);
 }
 
+static void
+secure_check_toggled (GtkWidget *check, EConfig *config)
+{
+	EMConfigTargetAccount *target = (EMConfigTargetAccount *)(config->target);
+	CamelURL *url = NULL;
+	gchar *url_string = NULL;
+
+	url = camel_url_new (e_account_get_string (target->account, E_ACCOUNT_SOURCE_URL), NULL);
+
+	camel_url_set_param (url, "ssl", gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check)) ? "1" : NULL);
+
+	url_string = camel_url_to_string (url, 0);
+	e_account_set_string (target->account, E_ACCOUNT_SOURCE_URL, url_string);
+	e_account_set_string (target->account, E_ACCOUNT_TRANSPORT_URL, url_string);
+	g_free (url_string);
+
+	camel_url_free (url);
+}
+
 GtkWidget *
 org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData *data)
 {
@@ -336,7 +356,10 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 		GtkWidget *label;
 		GtkWidget *domain_name;
 		GtkWidget *auth_button;
+		GtkWidget *secure_conn;
 		const gchar *domain_value = camel_url_get_param (url, "domain");
+		const gchar *use_ssl = camel_url_get_param (url, "ssl");
+
 		g_object_get (data->parent, "n-rows", &row, NULL);
 
 		/* Domain name & Authenticate Button */
@@ -358,6 +381,14 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 		gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row+1, 0, 0, 0, 0);
 		gtk_widget_show_all (GTK_WIDGET (hbox));
 		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (hbox), 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
+
+		row++;
+
+		secure_conn = gtk_check_button_new_with_mnemonic (_("_Use secure connection"));
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (secure_conn), use_ssl && g_str_equal (use_ssl, "1"));
+		g_signal_connect (secure_conn, "toggled", G_CALLBACK (secure_check_toggled), data->config);
+		gtk_widget_show (secure_conn);
+		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (secure_conn), 1, 2, row, row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
 	}
 
 	camel_url_free (url);

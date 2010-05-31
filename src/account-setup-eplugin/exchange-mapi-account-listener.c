@@ -713,7 +713,9 @@ create_profile_entry (CamelURL *url, EAccount *account)
 		g_free (key);
 
 		if (password) {
-			status = exchange_mapi_create_profile (url->user, password, camel_url_get_param (url, "domain"), url->host, NULL, NULL, NULL);
+			guint32 cp_flags = (camel_url_get_param (url, "ssl") && g_str_equal (camel_url_get_param (url, "ssl"), "1")) ? CREATE_PROFILE_FLAG_USE_SSL : CREATE_PROFILE_FLAG_NONE;
+
+			status = exchange_mapi_create_profile (url->user, password, camel_url_get_param (url, "domain"), url->host, cp_flags, NULL, NULL, NULL);
 			if (status) {
 				/* profile was created, try to connect to the server */
 				ExchangeMapiConnection *conn;

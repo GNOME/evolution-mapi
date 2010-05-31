@@ -3404,7 +3404,7 @@ mapi_profile_load (const gchar *profname, const gchar *password)
 
 gboolean
 exchange_mapi_create_profile (const gchar *username, const gchar *password, const gchar *domain,
-			      const gchar *server, gchar **error_msg,
+			      const gchar *server, guint32 flags, gchar **error_msg,
 			      mapi_profile_callback_t callback, gpointer data)
 {
 	enum MAPISTATUS	retval;
@@ -3441,6 +3441,9 @@ exchange_mapi_create_profile (const gchar *username, const gchar *password, cons
 	mapi_profile_add_string_attr(profname, "binding", server);
 	mapi_profile_add_string_attr(profname, "workstation", workstation);
 	mapi_profile_add_string_attr(profname, "domain", domain);
+
+	if ((flags & CREATE_PROFILE_FLAG_USE_SSL) != 0)
+		mapi_profile_add_string_attr (profname, "seal", "true");
 
 	/* This is only convenient here and should be replaced at some point */
 	mapi_profile_add_string_attr(profname, "codepage", "0x4e4");
