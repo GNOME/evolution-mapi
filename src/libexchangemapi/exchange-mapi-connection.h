@@ -175,6 +175,8 @@ gboolean		exchange_mapi_connection_fetch_gal (ExchangeMapiConnection *conn,
 					BuildReadPropsCB build_props, gpointer brp_data,
 					FetchGALCallback cb, gpointer data);
 
+gboolean		exchange_mapi_connection_get_public_folder (ExchangeMapiConnection *conn, mapi_object_t *obj_object);
+
 mapi_id_t		exchange_mapi_connection_create_folder (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t pfid, const gchar *name);
 gboolean		exchange_mapi_connection_remove_folder (ExchangeMapiConnection *conn, mapi_id_t fid);
 gboolean		exchange_mapi_connection_empty_folder (ExchangeMapiConnection *conn, mapi_id_t fid);

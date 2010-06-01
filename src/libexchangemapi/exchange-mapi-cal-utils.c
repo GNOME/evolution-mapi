@@ -2120,6 +2120,236 @@ exchange_mapi_cal_util_get_new_appt_id (ExchangeMapiConnection *conn, mapi_id_t 
 	return id;
 }
 
+static time_t
+mapi_get_date_from_string (const gchar *dtstring)
+{
+	time_t t = 0;
+	GTimeVal t_val;
+
+	g_return_val_if_fail (dtstring != NULL, 0);
+
+	if (g_time_val_from_iso8601 (dtstring, &t_val)) {
+		t = (time_t) t_val.tv_sec;
+	} else if (strlen (dtstring) == 8) {
+		/* It might be a date value */
+		GDate date;
+		struct tm tt;
+		guint16 year;
+		guint month;
+		guint8 day;
+
+		g_date_clear (&date, 1);
+#define digit_at(x,y) (x[y] - '0')
+		year = digit_at (dtstring, 0) * 1000
+			+ digit_at (dtstring, 1) * 100
+			+ digit_at (dtstring, 2) * 10
+			+ digit_at (dtstring, 3);
+		month = digit_at (dtstring, 4) * 10 + digit_at (dtstring, 5);
+		day = digit_at (dtstring, 6) * 10 + digit_at (dtstring, 7);
+
+		g_date_set_year (&date, year);
+		g_date_set_month (&date, month);
+		g_date_set_day (&date, day);
+
+		g_date_to_struct_tm (&date, &tt);
+		t = mktime (&tt);
+
+	} else
+		g_warning ("Could not parse the string \n");
+
+        return t;
+}
+
+static void
+populate_freebusy_data (struct Binary_r *bin, uint32_t month, uint32_t year, GList **freebusy, const gchar *accept_type, ECalComponent *comp)
+{
+	uint16_t	event_start;
+	uint16_t	event_end;
+	uint32_t	i;
+	uint32_t       	hour;
+	uint32_t	day;
+	const char	*month_name;
+	uint32_t	minutes;
+	uint32_t	real_month;
+	gchar *date_string = NULL;
+	gchar *start = NULL, *end = NULL;
+	time_t start_date, end_date;
+	icalcomponent *icalcomp = NULL;
+
+	if (!bin)
+		return;
+	/* bin.cb must be a multiple of 4 */
+	if (bin->cb % 4)
+		return;
+
+	year = mapidump_freebusy_year(month, year);
+	month_name = mapidump_freebusy_month(month, year);
+	if (!month_name)
+		return;
+
+	for (i = 0; i < bin->cb; i+= 4) {
+		event_start = (bin->lpb[i + 1] << 8) | bin->lpb[i];
+		event_end = (bin->lpb[i + 3] << 8) | bin->lpb[i + 2];
+
+		for (hour = 0; hour < 24; hour++) {
+			if (!(((event_start - (60 * hour)) % 1440) && (((event_start - (60 * hour)) % 1440) - 30))) {
+				struct icalperiodtype ipt;
+				icalproperty *icalprop;
+				icaltimetype itt;
+
+				day = ((event_start - (60 * hour)) / 1440) + 1;
+				minutes = (event_start - (60 * hour)) % 1440;
+				real_month = month - (year * 16);
+				
+				date_string = g_strdup_printf ("%.2u-%.2u-%.2u", year, real_month, day);
+				start = g_strdup_printf ("%sT%.2u:%.2u:00Z", date_string, hour + daylight, minutes);
+				g_free (date_string);
+
+				day = ((event_end - (60 * hour)) / 1440) + 1;
+				minutes = (event_end - (60 * hour)) % 1440;
+
+				if (minutes >= 60) {
+					hour += minutes / 60;
+					minutes %= 60;
+				}
+
+				date_string = g_strdup_printf ("%.2u-%.2u-%.2u", year, real_month, day);
+				end = g_strdup_printf ("%sT%.2u:%.2u:00Z", date_string, hour + daylight, minutes);
+				g_free (date_string);
+
+				start_date = mapi_get_date_from_string (start);
+				end_date = mapi_get_date_from_string (end);
+
+				memset (&ipt, 0, sizeof (struct icalperiodtype));
+				
+				itt = icaltime_from_timet_with_zone (start_date, 0, icaltimezone_get_utc_timezone ());
+				ipt.start = itt;
+
+				itt = icaltime_from_timet_with_zone (end_date, 0, icaltimezone_get_utc_timezone ());
+				ipt.end = itt;
+			
+				icalcomp = e_cal_component_get_icalcomponent (comp);
+				icalprop = icalproperty_new_freebusy (ipt);
+
+				if (!strcmp (accept_type, "Busy"))
+					icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "BUSY");
+				else if (!strcmp (accept_type, "Tentative"))
+					icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "BUSY-TENTATIVE");
+				else if (!strcmp (accept_type, "OutOfOffice"))
+					icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "BUSY-UNAVAILABLE");
+
+				icalcomponent_add_property(icalcomp, icalprop);
+				g_free (start);
+				g_free (end);
+			}
+		}
+	}
+}
+
+gboolean
+exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, GList *users, time_t start, time_t end, GList **freebusy)
+{
+	struct SRow		aRow;
+	enum MAPISTATUS		retval;
+	uint32_t		i;
+	mapi_object_t           obj_store;
+	GList *l;
+
+	const uint32_t			*publish_start;
+	const struct LongArray_r       	*busy_months;
+	const struct BinaryArray_r	*busy_events;
+	const struct LongArray_r       	*tentative_months;
+	const struct BinaryArray_r	*tentative_events;
+	const struct LongArray_r       	*oof_months;
+	const struct BinaryArray_r	*oof_events;
+	uint32_t			year;
+	uint32_t			event_year;
+
+	gchar *name = NULL;
+	ECalComponent *comp;
+	ECalComponentAttendee attendee;
+	GSList *attendee_list = NULL;
+	icalcomponent *icalcomp = NULL;
+	icaltimetype start_time, end_time;
+	icaltimezone *default_zone = NULL;
+
+	exchange_mapi_connection_get_public_folder (conn, &obj_store);
+	
+	for ( l = users; l != NULL; l = g_list_next (l)) {
+		retval = GetUserFreeBusyData (&obj_store, (const gchar *)l->data, &aRow);
+
+		if (retval != MAPI_E_SUCCESS) return false;
+
+		/* Step 2. Dump properties */
+		publish_start = (const uint32_t *) find_SPropValue_data(&aRow, PR_FREEBUSY_START_RANGE);
+		busy_months = (const struct LongArray_r *) find_SPropValue_data(&aRow, PR_FREEBUSY_BUSY_MONTHS);
+		busy_events = (const struct BinaryArray_r *) find_SPropValue_data(&aRow, PR_FREEBUSY_BUSY_EVENTS);
+		tentative_months = (const struct LongArray_r *) find_SPropValue_data(&aRow, PR_FREEBUSY_TENTATIVE_MONTHS);
+		tentative_events = (const struct BinaryArray_r *) find_SPropValue_data(&aRow, PR_FREEBUSY_TENTATIVE_EVENTS);
+		oof_months = (const struct LongArray_r *) find_SPropValue_data(&aRow, PR_FREEBUSY_OOF_MONTHS);
+		oof_events = (const struct BinaryArray_r *) find_SPropValue_data(&aRow, PR_FREEBUSY_OOF_EVENTS);
+
+		year = GetFreeBusyYear(publish_start);
+
+		comp = e_cal_component_new ();
+		e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_FREEBUSY);
+		e_cal_component_commit_sequence (comp);
+		icalcomp = e_cal_component_get_icalcomponent (comp);
+
+		start_time = icaltime_from_timet_with_zone (start, 0, default_zone ? default_zone : NULL);
+		end_time = icaltime_from_timet_with_zone (end, 0, default_zone ? default_zone : NULL);
+		icalcomponent_set_dtstart (icalcomp, start_time);
+		icalcomponent_set_dtend (icalcomp, end_time);
+
+		memset (&attendee, 0, sizeof (ECalComponentAttendee));
+		if (name)
+			attendee.cn = name;
+		if (l->data)
+			attendee.value = l->data;
+
+		attendee.cutype = ICAL_CUTYPE_INDIVIDUAL;
+		attendee.role = ICAL_ROLE_REQPARTICIPANT;
+		attendee.status = ICAL_PARTSTAT_NEEDSACTION;
+
+		attendee_list = g_slist_append (attendee_list, &attendee);
+
+		e_cal_component_set_attendee_list (comp, attendee_list);
+		g_slist_free (attendee_list);
+		g_free ((gchar *) name);
+		g_free ((gchar *) l->data);
+
+		if (busy_months && ((*(const uint32_t *) busy_months) != MAPI_E_NOT_FOUND) &&
+		    busy_events && ((*(const uint32_t *) busy_events) != MAPI_E_NOT_FOUND)) {
+			for (i = 0; i < busy_months->cValues; i++) {
+				event_year = mapidump_freebusy_year(busy_months->lpl[i], year);
+				populate_freebusy_data (&busy_events->lpbin[i], busy_months->lpl[i], event_year, freebusy, "Busy", comp);
+			}
+		}
+		
+		if (tentative_months && ((*(const uint32_t *) tentative_months) != MAPI_E_NOT_FOUND) &&
+		    tentative_events && ((*(const uint32_t *) tentative_events) != MAPI_E_NOT_FOUND)) {
+			for (i = 0; i < tentative_months->cValues; i++) {
+				event_year = mapidump_freebusy_year(tentative_months->lpl[i], year);
+				populate_freebusy_data (&tentative_events->lpbin[i], tentative_months->lpl[i], event_year, freebusy, "Tentative", comp);
+			}
+		}
+
+		if (oof_months && ((*(const uint32_t *) oof_months) != MAPI_E_NOT_FOUND) &&
+		    oof_events && ((*(const uint32_t *) oof_events) != MAPI_E_NOT_FOUND)) {
+			for (i = 0; i < oof_months->cValues; i++) {
+				event_year = mapidump_freebusy_year(oof_months->lpl[i], year);
+				populate_freebusy_data (&oof_events->lpbin[i], oof_months->lpl[i], event_year, freebusy, "OutOfOffice", comp);
+			}
+		}
+
+		e_cal_component_commit_sequence (comp);
+		*freebusy = g_list_append (*freebusy, e_cal_component_get_as_string (comp));
+//		g_object_unref (comp);
+		MAPIFreeBuffer(aRow.lpProps);
+	}
+	return TRUE;
+}
+
 /* beware, the 'data' pointer is an integer of the event kind */
 gboolean
 exchange_mapi_cal_utils_get_props_cb (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)

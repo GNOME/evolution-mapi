@@ -2266,9 +2266,15 @@ static ECalBackendSyncStatus
 e_cal_backend_mapi_get_free_busy (ECalBackendSync *backend, EDataCal *cal,
 				  GList *users, time_t start, time_t end, GList **freebusy)
 {
+	ECalBackendMAPI *cbmapi;
+	ECalBackendMAPIPrivate *priv;
+
+	cbmapi = E_CAL_BACKEND_MAPI (backend);
+	priv = cbmapi->priv;
+
+	exchange_mapi_cal_utils_get_free_busy_data (priv->conn, users, start, end, freebusy);
 
 	return GNOME_Evolution_Calendar_Success;
-
 }
 
 typedef struct {
