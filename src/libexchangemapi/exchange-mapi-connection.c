@@ -1091,10 +1091,12 @@ exchange_mapi_connection_fetch_gal (ExchangeMapiConnection *conn, BuildReadProps
 gboolean
 exchange_mapi_connection_get_public_folder (ExchangeMapiConnection *conn, mapi_object_t *obj_store)
 {
-	enum MAPISTATUS		retval;
-	
+	enum MAPISTATUS retval;
+
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	g_return_val_if_fail (priv->session != NULL, FALSE);
+
+	LOCK ();
 
 	mapi_object_init (&priv->public_store);
 
@@ -1102,10 +1104,12 @@ exchange_mapi_connection_get_public_folder (ExchangeMapiConnection *conn, mapi_o
 
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr ("OpenPublicFolder", GetLastError());
-		exit(1);
 	}
 
 	*obj_store = priv->public_store;
+	UNLOCK ();
+
+	return retval == MAPI_E_SUCCESS;
 }
 
 /* Returns TRUE if all recipients were read succcesfully, else returns FALSE */
