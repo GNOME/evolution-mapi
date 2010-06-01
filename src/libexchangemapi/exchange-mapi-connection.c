@@ -2803,7 +2803,7 @@ get_child_folders(TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, m
 	mapi_object_t		obj_table;
 	struct SPropTagArray	*SPropTagArray = NULL;
 	struct SRowSet		rowset;
-	uint32_t		i, row_count = 0;
+	uint32_t		i, row_count = 0, cursor_pos, count;
 	gboolean		result = TRUE;
 
 	/* sanity check */
@@ -2844,43 +2844,55 @@ get_child_folders(TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, m
 		goto cleanup;
 	}
 
-	/* Fill the table columns with data from the rows */
-	retval = QueryRows(&obj_table, row_count, TBL_ADVANCE, &rowset);
-	if (retval != MAPI_E_SUCCESS) {
-		mapi_errstr("QueryRows", GetLastError());
-		goto cleanup;
-	}
+	cursor_pos = 0;
+
+	do {
+		retval = QueryPosition (&obj_table, &cursor_pos, &count);
+		if (retval != MAPI_E_SUCCESS) {
+			mapi_errstr("QueryPosition", GetLastError());
+			goto cleanup;
+		}
+
+		/* Fill the table columns with data from the rows */
+		retval = QueryRows (&obj_table, 100, TBL_ADVANCE, &rowset);
+		if (retval != MAPI_E_SUCCESS) {
+			mapi_errstr("QueryRows", GetLastError());
+			goto cleanup;
+		}
 
 
-	for (i = 0; i < rowset.cRows; i++) {
-		ExchangeMAPIFolder *folder = NULL;
-		gchar *newname = NULL;
+		for (i = 0; i < rowset.cRows; i++) {
+			ExchangeMAPIFolder *folder = NULL;
+			gchar *newname = NULL;
 
-		const mapi_id_t *fid = (const mapi_id_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_FID);
-		const mapi_id_t *pid = (const mapi_id_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_PARENT_FID);
-		const gchar *class = (const gchar *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_CONTAINER_CLASS);
-		const gchar *name = (const gchar *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_DISPLAY_NAME_UNICODE);
-		const uint32_t *unread = (const uint32_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_CONTENT_UNREAD);
-		const uint32_t *total = (const uint32_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_CONTENT_COUNT);
-		const uint32_t *child = (const uint32_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_FOLDER_CHILD_COUNT);
-		const uint32_t *folder_size = (const uint32_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_MESSAGE_SIZE);
+			const mapi_id_t *fid = (const mapi_id_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_FID);
+			const mapi_id_t *pid = (const mapi_id_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_PARENT_FID);
+			const gchar *class = (const gchar *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_CONTAINER_CLASS);
+			const gchar *name = (const gchar *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_DISPLAY_NAME_UNICODE);
+			const uint32_t *unread = (const uint32_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_CONTENT_UNREAD);
+			const uint32_t *total = (const uint32_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_CONTENT_COUNT);
+			const uint32_t *child = (const uint32_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_FOLDER_CHILD_COUNT);
+			const uint32_t *folder_size = (const uint32_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_MESSAGE_SIZE);
 
-		if (!class)
-			class = IPF_NOTE;
+			if (!class)
+				class = IPF_NOTE;
 
-		newname = utf8tolinux (name);
-		g_debug("|---+ %-15s : (Container class: %s %016" G_GINT64_MODIFIER "X) UnRead : %d Total : %d size : %d",
-			newname, class, *fid, unread ? *unread : 0, total ? *total : 0, folder_size ? *folder_size : 0);
+			newname = utf8tolinux (name);
+			g_debug("|---+ %-15s : (Container class: %s %016" G_GINT64_MODIFIER "X) UnRead : %d Total : %d size : %d",
+				newname, class, *fid, unread ? *unread : 0, total ? *total : 0, folder_size ? *folder_size : 0);
 
-		folder = exchange_mapi_folder_new (newname, class, folder_hier, *fid, pid ? *pid : folder_id,
-						   child ? *child : 0, unread ? *unread : 0, total ? *total : 0);
+			folder = exchange_mapi_folder_new (newname, class, folder_hier, *fid, pid ? *pid : folder_id,
+							   child ? *child : 0, unread ? *unread : 0, total ? *total : 0);
 
-		folder->size = folder_size ? *folder_size : 0;
+			folder->size = folder_size ? *folder_size : 0;
 
-		*mapi_folders = g_slist_prepend (*mapi_folders, folder);
+			*mapi_folders = g_slist_prepend (*mapi_folders, folder);
 
-		g_free (newname);
-	}
+			g_free (newname);
+		}
+
+		cursor_pos += rowset.cRows;
+	} while (cursor_pos < row_count && rowset.cRows);
 
 cleanup:
 	MAPIFreeBuffer (SPropTagArray);
