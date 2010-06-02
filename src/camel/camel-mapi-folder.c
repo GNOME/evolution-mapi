@@ -1704,10 +1704,57 @@ mapi_mime_build_multipart_mixed (CamelMultipart *content, GSList *attachs)
 	return m_mixed;
 }
 
+static gboolean
+is_apple_attachment (ExchangeMAPIAttachment *attach, guint32 *data_len, guint32 *resource_len)
+{
+	gboolean is_apple = FALSE;
+	ExchangeMAPIStream *enc_stream = exchange_mapi_util_find_stream (attach->streams, PR_ATTACH_ENCODING);
+	guint8 apple_enc_magic[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x14, 0x03, 0x0B, 0x01 };
+
+	if (enc_stream && enc_stream->value && enc_stream->value->len == G_N_ELEMENTS (apple_enc_magic)) {
+		gint idx;
+
+		is_apple = TRUE;
+		for (idx = 0; idx < enc_stream->value->len && is_apple; idx++) {
+			is_apple = apple_enc_magic[idx] == enc_stream->value->data[idx];
+		}
+	} else {
+		const struct Binary_r *bin = exchange_mapi_util_find_SPropVal_array_propval (attach->lpProps, PR_ATTACH_ENCODING);
+		if (bin && bin->cb == G_N_ELEMENTS (apple_enc_magic)) {
+			gint idx;
+
+			is_apple = TRUE;
+			for (idx = 0; idx < bin->cb && is_apple; idx++) {
+				is_apple = apple_enc_magic[idx] == bin->lpb[idx];
+			}
+		}
+	}
+
+	if (is_apple) {
+		/* check boundaries too */
+		ExchangeMAPIStream *data_stream = exchange_mapi_util_find_stream (attach->streams, PR_ATTACH_DATA_BIN);
+
+		is_apple = data_stream && data_stream->value && data_stream->value->len > 128;
+
+		if (is_apple) {
+			const guint8 *bin = data_stream->value->data;
+
+			/* in big-endian format */
+			*data_len = (bin[83] << 24) | (bin[84] << 16) | (bin[85] << 8) | (bin[86]);
+			*resource_len = (bin[87] << 24) | (bin[88] << 16) | (bin[89] << 8) | (bin[90]);
+
+			/* +/- mod 128 (but the first 128 is a header length) */
+			is_apple = 128 + *data_len + *resource_len <= data_stream->value->len && bin[1] < 64;
+		}
+	}
+
+	return is_apple;
+}
+
 /*Takes raw attachment streams and converts to MIME Parts. Parts are added to
   either inline / non-inline lists.*/
 static void
-mapi_mime_classify_attachments (GSList *attachments, GSList **inline_attachs, GSList **noninline)
+mapi_mime_classify_attachments (mapi_id_t fid, GSList *attachments, GSList **inline_attachs, GSList **noninline)
 {
 	for (;attachments != NULL; attachments = attachments->next) {
 		ExchangeMAPIAttachment *attach = (ExchangeMAPIAttachment *)attachments->data;
@@ -1715,11 +1762,26 @@ mapi_mime_classify_attachments (GSList *attachments, GSList **inline_attachs, GS
 		const char *filename, *mime_type, *content_id = NULL; 
 		CamelContentType *content_type;
 		CamelMimePart *part;
+		gboolean is_apple;
+		guint32 apple_data_len = 0, apple_resource_len = 0;
 
 		stream = exchange_mapi_util_find_stream (attach->streams, PR_ATTACH_DATA_BIN);
 
 		if (!stream || stream->value->len <= 0) {
 			continue;
+		}
+
+		is_apple = is_apple_attachment (attach, &apple_data_len, &apple_resource_len);
+
+		/*Content-Type*/
+		mime_type = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (attach->lpProps, PR_ATTACH_MIME_TAG);
+		if (!mime_type)
+			mime_type = "application/octet-stream";
+
+		if (is_apple) {
+			mime_type = "application/applefile";
+		} else if (strstr (mime_type, "apple") != NULL) {
+			mime_type = "application/octet-stream";
 		}
 
 		part = camel_mime_part_new ();
@@ -1730,28 +1792,102 @@ mapi_mime_classify_attachments (GSList *attachments, GSList **inline_attachs, GS
 		if (!(filename && *filename))
 			filename = (const char *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps, 
 												 PR_ATTACH_FILENAME_UNICODE);
-		camel_mime_part_set_filename(part, g_strdup(filename));
+		camel_mime_part_set_filename (part, filename);
 		camel_content_type_set_param (((CamelDataWrapper *) part)->mime_type, "name", filename);
 
-		/*Content-Type*/
-		mime_type = (const char *) exchange_mapi_util_find_SPropVal_array_propval (attach->lpProps, PR_ATTACH_MIME_TAG);
-		if (!mime_type)
-			mime_type = "application/octet-stream";
+		if (is_apple) {
+			ExchangeMAPIStream *strm;
+			CamelMultipart *mp;
+			struct SPropTagArray *array;
+			uint32_t proptag;
+			gchar *apple_filename;
 
-		camel_mime_part_set_content (part, (const char *) stream->value->data, stream->value->len, mime_type);
+			mp = camel_multipart_new ();
+			camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (mp), "multipart/appledouble");
+			camel_multipart_set_boundary (mp, NULL);
 
-
-		content_type = camel_mime_part_get_content_type (part);
-		if (content_type && camel_content_type_is (content_type, "text", "*"))
-			camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_QUOTEDPRINTABLE);
-		else
 			camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
+
+			strm = NULL;
+			array = exchange_mapi_util_resolve_named_prop (olFolderCalendar, fid, 0x0023, PSETID_Meeting);
+			g_return_if_fail (array != NULL);
+
+			proptag = exchange_mapi_util_create_named_prop (0, fid, "AttachmentMacInfo", PT_BINARY);
+			if (proptag != 0)
+				strm = exchange_mapi_util_find_stream (attach->streams, proptag);
+			if (!strm)
+				strm = exchange_mapi_util_find_stream (attach->streams, PidNameAttachmentMacInfo);
+
+			if (strm && strm->value && strm->value->len > 0) {
+				camel_mime_part_set_content (part, (const gchar *) strm->value->data, strm->value->len, mime_type);
+			} else {
+				/* RFC 1740 */
+				guint8 header[] = {
+					0x00, 0x05, 0x16, 0x07, /* magic */
+					0x00, 0x02, 0x00, 0x00, /* version */
+					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* filler */
+					0x00, 0x01, /* number of entries */
+					0x00, 0x00, 0x00, 0x02, /* entry ID - resource fork */
+					0x00, 0x00, 0x00, 0x26, /* entry offset - 38th byte*/
+					0x00, 0x00, 0x00, 0x00  /* entry length */
+				};
+
+				GByteArray *arr = g_byte_array_sized_new (apple_resource_len + G_N_ELEMENTS (header));
+
+				header[34] = (apple_resource_len >> 24) & 0xFF;
+				header[35] = (apple_resource_len >> 16) & 0xFF;
+				header[36] = (apple_resource_len >>  8) & 0xFF;
+				header[37] = (apple_resource_len      ) & 0xFF;
+
+				g_byte_array_append (arr, header, G_N_ELEMENTS (header));
+				g_byte_array_append (arr, stream->value->data + 128 + apple_data_len + (apple_data_len % 128), apple_resource_len);
+
+				camel_mime_part_set_content (part, (const gchar *) arr->data, arr->len, mime_type);
+
+				g_byte_array_free (arr, TRUE);
+			}
+
+			camel_multipart_add_part (mp, part);
+			camel_object_unref (part);
+
+			part = camel_mime_part_new ();
+
+			apple_filename = g_strndup ((gchar *)stream->value->data + 2, stream->value->data[1]);
+			camel_mime_part_set_filename (part, (apple_filename && *apple_filename) ? apple_filename : filename);
+			g_free (apple_filename);
+
+			mime_type = NULL;
+			proptag = exchange_mapi_util_create_named_prop (0, fid, "AttachmentMacContentType", PT_UNICODE);
+			if (proptag != 0)
+				mime_type = exchange_mapi_util_find_SPropVal_array_propval (attach->lpProps, proptag);
+			if (!mime_type)
+				mime_type = exchange_mapi_util_find_SPropVal_array_propval (attach->lpProps, PidNameAttachmentMacContentType);
+			if (!mime_type)
+				mime_type = "application/octet-stream";
+
+			camel_mime_part_set_content (part, (const gchar *) stream->value->data + 128, apple_data_len, mime_type);
+			camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
+			camel_multipart_add_part (mp, part);
+			camel_object_unref (part);
+
+			part = camel_mime_part_new ();
+			camel_medium_set_content_object (CAMEL_MEDIUM (part), CAMEL_DATA_WRAPPER (mp));
+			camel_object_unref (mp);
+		} else {
+			camel_mime_part_set_content (part, (const gchar *) stream->value->data, stream->value->len, mime_type);
+
+			content_type = camel_mime_part_get_content_type (part);
+			if (content_type && camel_content_type_is (content_type, "text", "*"))
+				camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_QUOTEDPRINTABLE);
+			else
+				camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
+		}
 
 		/*Content-ID*/
 		content_id = (const char *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps, 
 											   PR_ATTACH_CONTENT_ID);
 		/* TODO : Add disposition */
-		if (content_id) {
+		if (content_id && !is_apple) {
 			camel_mime_part_set_content_id (part, content_id);
 			*inline_attachs = g_slist_append (*inline_attachs, part);
 		} else
@@ -1777,7 +1913,7 @@ mapi_folder_item_to_msg( CamelFolder *folder, MapiItem *item, CamelException *ex
 
 	mapi_mime_set_recipient_list (msg, item);
 	mapi_mime_set_msg_headers (folder, msg, item);
-	mapi_mime_classify_attachments (attach_list, &inline_attachs, &noninline_attachs);
+	mapi_mime_classify_attachments (item->fid, attach_list, &inline_attachs, &noninline_attachs);
 
 	build_alternative = (g_slist_length (item->msg.body_parts) > 1) && inline_attachs;
 	build_related = !build_alternative && inline_attachs;
