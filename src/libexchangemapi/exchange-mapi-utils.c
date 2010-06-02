@@ -163,6 +163,25 @@ exchange_mapi_util_find_SPropVal_array_propval (struct SPropValue *values, uint3
 	return (get_SPropValue(values, proptag));
 }
 
+gconstpointer
+exchange_mapi_util_find_SPropVal_array_namedid (struct SPropValue *values, ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
+{
+	uint32_t proptag;
+	gconstpointer res = NULL;
+
+	g_return_val_if_fail (values != NULL, NULL);
+	g_return_val_if_fail (conn != NULL, NULL);
+
+	proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, namedid);
+	if (proptag != MAPI_E_RESERVED)
+		res = exchange_mapi_util_find_SPropVal_array_propval (values, proptag);
+
+	if (!res)
+		res = exchange_mapi_util_find_SPropVal_array_propval (values, namedid);
+
+	return res;
+}
+
 /*
  * Retrieve the property value for a given SRow and property tag.
  *
