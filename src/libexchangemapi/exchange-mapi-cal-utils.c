@@ -895,7 +895,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 
 		complete = (const double *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_DOUBLE, 0x8102));
 		if (complete) {
-			prop = icalproperty_new_percentcomplete ((gint)(*complete * 100));
+			prop = icalproperty_new_percentcomplete ((gint)(*complete * 100 + 1e-9));
 			icalcomponent_add_property (ical_comp, prop);
 		}
 
