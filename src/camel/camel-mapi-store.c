@@ -45,9 +45,6 @@
 /* This definition should be in-sync with those in exchange-mapi-account-setup.c and exchange-account-listener.c */
 #define E_PASSWORD_COMPONENT "ExchangeMAPI"
 
-#define DISPLAY_NAME_FAVOURITES _("Favorites")
-#define DISPLAY_NAME_ALL_PUBLIC_FOLDERS _("All Public Folders")
-
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -501,7 +498,7 @@ mapi_get_folder(CamelStore *store, const gchar *folder_name, guint32 flags, Came
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
 	CamelMapiStorePrivate *priv = mapi_store->priv;
-	CamelMapiStoreInfo *si;
+	CamelStoreInfo *si;
 	CamelFolder *folder;
 	gchar *storage_path;
 
@@ -530,7 +527,7 @@ mapi_get_folder(CamelStore *store, const gchar *folder_name, guint32 flags, Came
 	}
 
 	if (si)
-		camel_store_summary_info_free ((CamelStoreSummary *)mapi_store->summary, (CamelStoreInfo *)si);
+		camel_store_summary_info_free ((CamelStoreSummary *)mapi_store->summary, si);
 
 	storage_path = g_strdup_printf ("%s/folders", priv->storage_path);
 	folder = camel_mapi_folder_new (store, folder_name, storage_path, flags, ex);
@@ -1399,7 +1396,12 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, CamelException *ex)
 		if (si == NULL)
 			continue;
 
-		g_hash_table_insert (old_cache_folders, g_strdup (camel_store_info_path (store->summary, si)), GINT_TO_POINTER (1));
+		/* those whose left in old_cache_folders are removed at the end,
+		   which is not good for public folders, thus preserve them from
+		   an automatic removal */
+		if ((si->flags & CAMEL_MAPI_FOLDER_PUBLIC) == 0 || (si->flags & CAMEL_FOLDER_SUBSCRIBED) == 0)
+			g_hash_table_insert (old_cache_folders, g_strdup (camel_store_info_path (store->summary, si)), GINT_TO_POINTER (1));
+
 		camel_store_summary_info_free ((CamelStoreSummary *)store->summary, si);
 	}
 
@@ -1532,7 +1534,6 @@ mapi_get_folder_info(CamelStore *store, const gchar *top, guint32 flags, CamelEx
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
 	CamelFolderInfo *info = NULL;
-	gint s_count = 0;
 
 	/*
 	 * Thanks to Michael, for his cached folders implementation in IMAP
@@ -1568,7 +1569,6 @@ mapi_get_folder_info(CamelStore *store, const gchar *top, guint32 flags, CamelEx
 
 	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
-	s_count = camel_store_summary_count((CamelStoreSummary *)mapi_store->summary);
 	info = mapi_get_folder_info_offline (store, top, flags, ex);
 	return info;
 }
@@ -1627,12 +1627,28 @@ static gboolean
 mapi_subscribe_folder(CamelStore *store, const gchar *folder_name, CamelException *ex)
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
-
 	CamelFolderInfo *fi;
 	CamelStoreInfo *si = NULL;
-	gchar *parent_name = NULL;
-	gchar *f_name = NULL;
+	const gchar *parent_name = NULL, *use_folder_name = folder_name;
+	gboolean favourites = FALSE;
 	/* TODO : exchange_mapi_add_to_favorites (); */
+
+	if (g_str_has_prefix (folder_name, DISPLAY_NAME_ALL_PUBLIC_FOLDERS) ) {
+		const gchar *f_name = NULL;
+
+		parent_name = DISPLAY_NAME_FAVOURITES;
+
+		f_name = strrchr (folder_name,'/');
+		if (!f_name) {
+			/* Don't process All Public Folder. */
+			return TRUE;
+		}
+
+		use_folder_name = ++f_name;
+		favourites = TRUE;
+	}
+
+	fi = mapi_build_folder_info (mapi_store, parent_name, use_folder_name);
 
 	si = camel_store_summary_path((CamelStoreSummary *)mapi_store->summary, folder_name);
 	if (si != NULL) {
@@ -1641,20 +1657,20 @@ mapi_subscribe_folder(CamelStore *store, const gchar *folder_name, CamelExceptio
 			si->flags |= CAMEL_FOLDER_SUBSCRIBED;
 			camel_store_summary_touch((CamelStoreSummary *)mapi_store->summary);
 		}
+
+		if (favourites) {
+			CamelURL *url;
+
+			url = camel_url_new (mapi_store->priv->base_url, NULL);
+			url->path = g_strdup_printf ("/%s", camel_store_info_path (mapi_store->summary, si));
+			g_free (fi->uri);
+			fi->uri = camel_url_to_string (url, CAMEL_URL_HIDE_ALL);
+
+			camel_url_free (url);
+		}
+
 		camel_store_summary_info_free((CamelStoreSummary *)mapi_store->summary, si);
 	}
-
-	if (g_str_has_prefix (folder_name, DISPLAY_NAME_ALL_PUBLIC_FOLDERS) ) {
-		parent_name = DISPLAY_NAME_FAVOURITES;
-
-		f_name = strrchr(folder_name,'/');
-		if (f_name != NULL)
-			folder_name = ++f_name;
-		else  //Don't process All Public Folder.
-			return TRUE;
-	}
-
-	fi = mapi_build_folder_info (mapi_store, parent_name, folder_name);
 
 	fi->flags |= CAMEL_FOLDER_SUBSCRIBED;
 	fi->flags |= CAMEL_FOLDER_NOCHILDREN;

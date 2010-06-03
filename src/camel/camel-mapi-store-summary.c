@@ -235,24 +235,34 @@ store_info_set_string(CamelStoreSummary *s, CamelStoreInfo *mi, gint type, const
 	}
 }
 
-CamelMapiStoreInfo *
-camel_mapi_store_summary_full_name(CamelMapiStoreSummary *s, const gchar *full_name)
+CamelStoreInfo *
+camel_mapi_store_summary_full_name(CamelMapiStoreSummary *ms, const gchar *full_name)
 {
 	gint count, i;
-	CamelMapiStoreInfo *info;
+	CamelStoreInfo *si;
+	CamelStoreSummary *s;
+	const gchar *favourite = NULL;
 
-	count = camel_store_summary_count((CamelStoreSummary *)s);
-	for (i=0;i<count;i++) {
-		info = (CamelMapiStoreInfo *)camel_store_summary_index((CamelStoreSummary *)s, i);
-		if (info) {
-			if (strcmp(info->full_name, full_name) == 0)
-				return info;
-			camel_store_summary_info_free((CamelStoreSummary *)s, (CamelStoreInfo *)info);
+	g_return_val_if_fail (full_name != NULL, NULL);
+
+	s = CAMEL_STORE_SUMMARY (ms);
+	g_return_val_if_fail (s != NULL, NULL);
+
+	if (g_str_has_prefix (full_name, DISPLAY_NAME_FAVOURITES))
+		favourite = full_name + strlen (DISPLAY_NAME_FAVOURITES) + 1;
+
+	count = camel_store_summary_count (s);
+	for (i = 0; i < count; i++) {
+		si = camel_store_summary_index (s, i);
+		if (si) {
+			if (g_str_equal (camel_mapi_store_info_full_name (s, si), full_name)
+			    || (favourite && g_str_equal (camel_store_info_name (s, si), favourite)))
+				return si;
+			camel_store_summary_info_free (s, si);
 		}
 	}
 
 	return NULL;
-
 }
 
 gchar *
@@ -283,9 +293,9 @@ camel_mapi_store_summary_full_to_path(CamelMapiStoreSummary *s, const gchar *ful
 
 CamelMapiStoreInfo *
 camel_mapi_store_summary_add_from_full(CamelMapiStoreSummary *s, const gchar *full,
-				       gchar dir_sep, gchar *folder_id, gchar *parent_id)
+				       gchar dir_sep, const gchar *folder_id, const gchar *parent_id)
 {
-	CamelMapiStoreInfo *info;
+	CamelStoreInfo *info;
 	gchar *pathu8;
 	gint len;
 	gchar *full_name;
@@ -300,20 +310,20 @@ camel_mapi_store_summary_add_from_full(CamelMapiStoreSummary *s, const gchar *fu
 
 	info = camel_mapi_store_summary_full_name(s, full_name);
 	if (info) {
-		camel_store_summary_info_free((CamelStoreSummary *)s, (CamelStoreInfo *)info);
+		camel_store_summary_info_free((CamelStoreSummary *)s, info);
 		d(printf("  already there\n"));
-		return info;
+		return (CamelMapiStoreInfo *) info;
 	}
 	pathu8 = camel_mapi_store_summary_full_to_path(s, full_name, '/');
-	info = (CamelMapiStoreInfo *)camel_store_summary_add_from_path((CamelStoreSummary *)s, pathu8);
+	info = camel_store_summary_add_from_path ((CamelStoreSummary *)s, pathu8);
 
 	if (info) {
-		camel_store_info_set_string((CamelStoreSummary *)s, (CamelStoreInfo *)info, CAMEL_MAPI_STORE_INFO_FULL_NAME, full_name);
-		camel_store_info_set_string((CamelStoreSummary *)s, (CamelStoreInfo *)info, CAMEL_MAPI_STORE_INFO_FOLDER_ID, folder_id);
-		camel_store_info_set_string((CamelStoreSummary *)s, (CamelStoreInfo *)info, CAMEL_MAPI_STORE_INFO_PARENT_ID, parent_id);
+		camel_store_info_set_string ((CamelStoreSummary *)s, info, CAMEL_MAPI_STORE_INFO_FULL_NAME, full_name);
+		camel_store_info_set_string ((CamelStoreSummary *)s, info, CAMEL_MAPI_STORE_INFO_FOLDER_ID, folder_id);
+		camel_store_info_set_string ((CamelStoreSummary *)s, info, CAMEL_MAPI_STORE_INFO_PARENT_ID, parent_id);
 	}
 
-	return info;
+	return (CamelMapiStoreInfo *) info;
 }
 
 gchar *

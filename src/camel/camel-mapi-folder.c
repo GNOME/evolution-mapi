@@ -611,6 +611,9 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 
 	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
+	if (mapi_folder->type & CAMEL_MAPI_FOLDER_PUBLIC)
+		options |= MAPI_OPTIONS_USE_PFSTORE;
+
 	/*Get the UID list from server.*/
 	exchange_mapi_connection_fetch_items  (camel_mapi_store_get_exchange_connection (mapi_store), m->folder_id, NULL, NULL,
 					       mapi_camel_get_last_modif_list, NULL,
@@ -1654,7 +1657,7 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 
 	gchar *summary_file, *state_file;
 	const gchar *short_name;
-	guint32 i = 0;
+	CamelStoreInfo *si;
 
 	short_name = strrchr (folder_name, '/');
 	if (short_name)
@@ -1713,22 +1716,18 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 		return NULL;
 	}
 
-	for (i=0;i<camel_store_summary_count((CamelStoreSummary *)mapi_store->summary);i++) {
-		CamelStoreInfo *si = camel_store_summary_index((CamelStoreSummary *)mapi_store->summary, i);
-		if (si == NULL)
-			continue;
+	si = camel_mapi_store_summary_full_name (mapi_store->summary, folder_name);
+	if (si) {
+		mapi_folder->type = si->flags;
 
-		if (!strcmp(folder_name, camel_mapi_store_info_full_name (mapi_store->summary, si))) {
-			mapi_folder->type = si->flags;
-			if ((si->flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH)
-				folder->folder_flags |= CAMEL_FOLDER_IS_TRASH;
-			else if ((si->flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_JUNK)
-				folder->folder_flags  |= CAMEL_FOLDER_IS_JUNK;
-			camel_store_summary_info_free((CamelStoreSummary *)mapi_store->summary, si);
-			break;
-		}
-
-		camel_store_summary_info_free((CamelStoreSummary *)mapi_store->summary, si);
+		if ((si->flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH)
+			folder->folder_flags |= CAMEL_FOLDER_IS_TRASH;
+		else if ((si->flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_JUNK)
+			folder->folder_flags  |= CAMEL_FOLDER_IS_JUNK;
+		camel_store_summary_info_free ((CamelStoreSummary *)mapi_store->summary, si);
+	} else {
+		g_warning ("%s: cannot find '%s' in known folders", G_STRFUNC, folder_name);
 	}
+
 	return folder;
 }

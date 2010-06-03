@@ -59,7 +59,7 @@ enum {
 	CAMEL_MAPI_STORE_INFO_FULL_NAME = CAMEL_STORE_INFO_LAST,
 	CAMEL_MAPI_STORE_INFO_FOLDER_ID,
 	CAMEL_MAPI_STORE_INFO_PARENT_ID,
-	CAMEL_MAPI_STORE_INFO_LAST,
+	CAMEL_MAPI_STORE_INFO_LAST
 };
 
 struct _CamelMapiStoreInfo {
@@ -84,9 +84,9 @@ struct _CamelMapiStoreSummaryClass {
 
 GType                        camel_mapi_store_summary_get_type      (void);
 CamelMapiStoreSummary      *camel_mapi_store_summary_new        (void);
-CamelMapiStoreInfo *camel_mapi_store_summary_full_name(CamelMapiStoreSummary *s, const gchar *full_name);
+CamelStoreInfo *camel_mapi_store_summary_full_name(CamelMapiStoreSummary *s, const gchar *full_name);
 CamelMapiStoreInfo *camel_mapi_store_summary_add_from_full(CamelMapiStoreSummary *s, const gchar *full, gchar dir_sep,
-							   gchar *folder_id, gchar *parent_id);
+							   const gchar *folder_id, const gchar *parent_id);
 
 gchar *camel_mapi_store_summary_full_to_path(CamelMapiStoreSummary *s, const gchar *full_name, gchar dir_sep);
 gchar *camel_mapi_store_summary_path_to_full(CamelMapiStoreSummary *s, const gchar *path, gchar dir_sep);
