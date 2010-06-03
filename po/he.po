@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-27 16:43+0300\n"
-"PO-Revision-Date: 2010-05-27 17:02+0200\n"
+"POT-Creation-Date: 2010-06-03 14:02+0300\n"
+"PO-Revision-Date: 2010-06-03 14:03+0200\n"
 "Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
 "Language-Team: he\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:707
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:228
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:229
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "יש להזין ססמה עבור %s@‏%s"
@@ -44,28 +44,32 @@ msgid ""
 msgstr ""
 "שם השרת, המשתמש והמתחם לא יכולים להיות ריקים. אנא מלא אותם עם ערכים נכונים."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:272
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:273
 msgid "Authentication finished successfully."
 msgstr "האימות הסתיים בהצלחה."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:278
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:288
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:279
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:289
 msgid "Authentication failed."
 msgstr "האימות נכשל."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:344
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:367
 msgid "_Domain name:"
 msgstr "שם _מתחם:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:354
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:377
 msgid "_Authenticate"
 msgstr "_אימות"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:491
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:387
+msgid "_Use secure connection"
+msgstr "שימוש בחיבור _מאובטח"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:522
 msgid "Personal Folders"
 msgstr "תיקיות אישיות"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:619
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:650
 msgid "_Location:"
 msgstr "מי_קום:"
 
@@ -282,7 +286,7 @@ msgid "Favorites"
 msgstr "מועדפים"
 
 #: ../src/camel/camel-mapi-store.c:49
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3123
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3159
 msgid "All Public Folders"
 msgstr "כל התיקיות הציבוריות"
 
