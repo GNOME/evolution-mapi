@@ -1074,7 +1074,7 @@ e_book_backend_mapi_get_contact_list (EBookBackend *backend,
 			}
 
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, no_summary_search ? NULL : &res, NULL,
-								mapi_book_utils_get_prop_list, GET_SHORT_SUMMARY,
+								mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 								create_contact_list_cb, &vcard_str,
 								MAPI_OPTIONS_FETCH_ALL)) {
 				e_data_book_respond_get_contact_list (book, opid, GNOME_Evolution_Addressbook_OtherError, NULL);
