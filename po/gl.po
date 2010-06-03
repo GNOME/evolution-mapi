@@ -11,15 +11,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi-master-po-gl-77000.merged\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-12 23:53+0200\n"
-"PO-Revision-Date: 2010-05-12 23:53+0200\n"
+"POT-Creation-Date: 2010-06-03 21:47+0200\n"
+"PO-Revision-Date: 2010-06-03 21:47+0200\n"
 "Last-Translator: Fran Diéguez <frandieguez@ubuntu.com>\n"
-"Language-Team: Galician <gnome@g11n.net>\n"
+"Language-Team: Galician <gnome@g11.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: gl\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\\\n"
 "X-Generator: KBabel 1.11.4\n"
 
 # SOME DESCRIPTIVE TITLE.
@@ -28,7 +28,7 @@ msgstr ""
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:707
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:228
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:229
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Introduza o contrasinal para %s@%s"
@@ -57,67 +57,71 @@ msgstr ""
 "O servidor, o nome de usuario e o dominio non poden estar baleiros. "
 "Compléteos cos valores apropiados."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:272
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:273
 msgid "Authentication finished successfully."
 msgstr "A autenticación terminou correctamente."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:278
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:288
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:279
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:289
 msgid "Authentication failed."
 msgstr "Fallou a autenticación."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:344
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:367
 msgid "_Domain name:"
 msgstr "Nome do _dominio:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:354
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:377
 msgid "_Authenticate"
 msgstr "_Autenticar"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:491
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:387
+msgid "_Use secure connection"
+msgstr "_Usar unha conexión segura"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:522
 msgid "Personal Folders"
 msgstr "Cartafoles persoais"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:619
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:650
 msgid "_Location:"
 msgstr "_Localización:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:102
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:100
 msgid "Folder"
 msgstr "Cartafol"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:107
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:105
 msgid "Size"
 msgstr "Tamaño"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:127
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:128
 msgid "Unable to retrieve folder size information"
 msgstr "Non foi posíbel recuperar información sobre o tamaño do cartafol "
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:151
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:344
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:169
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:368
 msgid "Folder Size"
 msgstr "Tamaño do cartafol"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:160
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:180
 msgid "Fetching folder list…"
 msgstr "Recuperando a lista de cartafoles..."
 
 #. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:329
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:353
 msgid "Miscellaneous"
 msgstr "Misceláneo"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:342
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:366
 msgid "View the size of all Exchange folders"
 msgstr "Ver o tamaño de todos os cartafoles de intercambio"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:355
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:379
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
 msgstr "Configuracións de intercambio"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:364
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:388
 msgid "Folder size"
 msgstr "Tamaño do cartafol"
 
@@ -147,7 +151,7 @@ msgstr "Descargando as entradas da GAL desde o servidor..."
 
 #: ../src/calendar/e-cal-backend-mapi.c:125
 #: ../src/calendar/e-cal-backend-mapi.c:1251
-#: ../src/camel/camel-mapi-store.c:568
+#: ../src/camel/camel-mapi-store.c:565
 msgid "Authentication failed"
 msgstr "Fallou a autenticación"
 
@@ -191,60 +195,60 @@ msgid "Updating local summary cache for new messages in %s"
 msgstr ""
 "Actualizando a información local da caché de resumo nas mensaxes novas en %s"
 
-#: ../src/camel/camel-mapi-folder.c:608
+#: ../src/camel/camel-mapi-folder.c:609
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Recuperando os ID das mensaxes desde o servidor para %s"
 
-#: ../src/camel/camel-mapi-folder.c:631
+#: ../src/camel/camel-mapi-folder.c:635
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Eliminando as mensaxes borradas da caché en %s"
 
 #. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:921
+#: ../src/camel/camel-mapi-folder.c:934
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Obtendo a información de resumo para as mensaxes novas en %s"
 
-#: ../src/camel/camel-mapi-folder.c:1034 ../src/camel/camel-mapi-folder.c:1148
-#: ../src/camel/camel-mapi-folder.c:1156
+#: ../src/camel/camel-mapi-folder.c:1047 ../src/camel/camel-mapi-folder.c:1161
+#: ../src/camel/camel-mapi-folder.c:1169
 msgid "This message is not available in offline mode."
 msgstr "Esta mensaxe non está dispoñíbel no modo sen conexión."
 
-#: ../src/camel/camel-mapi-folder.c:1047
+#: ../src/camel/camel-mapi-folder.c:1060
 msgid "Fetching items failed"
 msgstr "Fallou a obtención de elementos"
 
 #. Translators: The first %s is replaced with a message ID,
 #. the second %s is replaced with a detailed error string
-#: ../src/camel/camel-mapi-folder.c:1110 ../src/camel/camel-mapi-folder.c:1131
+#: ../src/camel/camel-mapi-folder.c:1123 ../src/camel/camel-mapi-folder.c:1144
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Non foi posíbel obter a mensaxe: %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1110
+#: ../src/camel/camel-mapi-folder.c:1123
 msgid "No such message"
 msgstr "Non existe esta mensaxe"
 
-#: ../src/camel/camel-mapi-folder.c:1122
+#: ../src/camel/camel-mapi-folder.c:1135
 msgid "Message fetching cancelled by user."
 msgstr "A obtención da mensaxe foi cancelada polo usuario."
 
-#: ../src/camel/camel-mapi-folder.c:1178 ../src/camel/camel-mapi-folder.c:1187
+#: ../src/camel/camel-mapi-folder.c:1191 ../src/camel/camel-mapi-folder.c:1200
 msgid "Could not get message"
 msgstr "Non foi posíbel obter a mensaxe"
 
-#: ../src/camel/camel-mapi-folder.c:1490
+#: ../src/camel/camel-mapi-folder.c:1519
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Non foi posíbel engadir unha mensaxe ao cartafol `%s'"
 
-#: ../src/camel/camel-mapi-folder.c:1497
+#: ../src/camel/camel-mapi-folder.c:1526
 msgid "Offline."
 msgstr "Desconectado."
 
-#: ../src/camel/camel-mapi-folder.c:1635
+#: ../src/camel/camel-mapi-folder.c:1683
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Non foi posíbel cargar o resumo de %s"
@@ -293,16 +297,8 @@ msgstr ""
 "Esta opción conectarase co servidor Openchange usando un contrasinal de "
 "texto plano."
 
-#: ../src/camel/camel-mapi-store.c:48
-msgid "Favorites"
-msgstr "Preferidos"
-
-#: ../src/camel/camel-mapi-store.c:49
-msgid "All Public Folders"
-msgstr "Todos os cartafoles públicos"
-
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:315 ../src/camel/camel-mapi-transport.c:121
+#: ../src/camel/camel-mapi-store.c:312 ../src/camel/camel-mapi-transport.c:121
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Servidor Exchange MAPI %s"
@@ -310,7 +306,7 @@ msgstr "Servidor Exchange MAPI %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:319 ../src/camel/camel-mapi-transport.c:124
+#: ../src/camel/camel-mapi-store.c:316 ../src/camel/camel-mapi-transport.c:124
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Servizo Exchange MAPI para %s en %s"
@@ -319,46 +315,46 @@ msgstr "Servizo Exchange MAPI para %s en %s"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:359
+#: ../src/camel/camel-mapi-store.c:356
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s Introduza o contrasinal MAPI para %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:372
+#: ../src/camel/camel-mapi-store.c:369
 msgid "You did not enter a password."
 msgstr "Non introduciu un contrasinal."
 
-#: ../src/camel/camel-mapi-store.c:379
+#: ../src/camel/camel-mapi-store.c:376
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Non foi posíbel autenticar no servidor Exchange MAPI."
 
-#: ../src/camel/camel-mapi-store.c:552
+#: ../src/camel/camel-mapi-store.c:549
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "Non foi posíbel crear cartafoles MAPI no modo sen conexión."
 
-#: ../src/camel/camel-mapi-store.c:557
+#: ../src/camel/camel-mapi-store.c:554
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "Non foi posíbel crear un cartafol novo '%s'"
 
-#: ../src/camel/camel-mapi-store.c:742
+#: ../src/camel/camel-mapi-store.c:739
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
 msgstr "Non foi posíbel renomear o cartafol MAPI '%s'. O cartafol non existe."
 
-#: ../src/camel/camel-mapi-store.c:753
+#: ../src/camel/camel-mapi-store.c:750
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'."
 msgstr "Non foi posíbel renomear o cartafol predefinido MAPI de '%s' a '%s'."
 
-#: ../src/camel/camel-mapi-store.c:778 ../src/camel/camel-mapi-store.c:793
-#: ../src/camel/camel-mapi-store.c:844
+#: ../src/camel/camel-mapi-store.c:775 ../src/camel/camel-mapi-store.c:790
+#: ../src/camel/camel-mapi-store.c:841
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "Non foi posíbel renomear o cartafol MAPI de '%s' a '%s'"
 
-#: ../src/camel/camel-mapi-store.c:1383
+#: ../src/camel/camel-mapi-store.c:1380
 msgid "Folder list not available in offline mode."
 msgstr "A lista de cartafoles non está dispoñíbel no modo sen conexión."
 
@@ -367,6 +363,13 @@ msgstr "A lista de cartafoles non está dispoñíbel no modo sen conexión."
 #: ../src/camel/camel-mapi-transport.c:109
 msgid "Could not send message."
 msgstr "Non foi posíbel enviar a mensaxe."
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3159
+msgid "All Public Folders"
+msgstr "Todos os cartafoles públicos"
+
+#~ msgid "Favorites"
+#~ msgstr "Preferidos"
 
 #~ msgid "Folders Size"
 #~ msgstr "Tamaño dos cartafoles"
