@@ -1,18 +1,18 @@
 # Evolution MAPI eesti keele tõlge.
 # Estonian translation of Evolution MAPI.
 #
-# Copyright (C) 2009 The GNOME Project.
+# Copyright (C) 2009, 2010 The GNOME Project.
 # This file is distributed under the same license as the evolution-mapi package.
 #
-# Ivar Smolin <okul@linux.ee>, 2002, 2009.
+# Ivar Smolin <okul@linux.ee>, 2002, 2009, 2010.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: evolution-mapi master\n"
+"Project-Id-Version: evolution-mapi MASTER\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2009-09-14 15:03+0000\n"
-"PO-Revision-Date: 2009-09-01 13:18+0300\n"
+"POT-Creation-Date: 2010-06-03 14:13+0000\n"
+"PO-Revision-Date: 2010-06-04 13:44+0300\n"
 "Last-Translator: Ivar Smolin <okul@linux.ee>\n"
 "Language-Team: Estonian <et@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -33,7 +33,7 @@ msgstr "Kasutajanime valimine"
 msgid "Full name"
 msgstr "Täisnimi"
 
-msgid "User name"
+msgid "Username"
 msgstr "Kasutajanimi"
 
 msgid ""
@@ -55,6 +55,9 @@ msgstr "_Domeeninimi:"
 msgid "_Authenticate"
 msgstr "_Autendi"
 
+msgid "_Use secure connection"
+msgstr "Kasuta _turvalist ühendust"
+
 msgid "Personal Folders"
 msgstr "Isiklikud kaustad"
 
@@ -73,24 +76,41 @@ msgstr "Kausta suuruse andmeid pole võimalik vastu võtta"
 msgid "Folder Size"
 msgstr "Kausta suurus"
 
-msgid "Fetching folder list ..."
-msgstr "Kaustade nimekirja vastuvõtmine..."
+msgid "Fetching folder list…"
+msgstr "Kaustade nimekirja vastuvõtmine…"
 
 #. Miscellaneous settings
 msgid "Miscellaneous"
-msgstr ""
+msgstr "Muu"
 
 msgid "View the size of all Exchange folders"
 msgstr "Kõigi Exchange kaustade suuruste vaatamine"
-
-msgid "Folders Size"
-msgstr "Kausta suurus"
 
 msgid "Exchange Settings"
 msgstr "Exchange sätted"
 
 msgid "Folder size"
 msgstr "Kausta suurus"
+
+#. To translators : This is used to cache the downloaded contacts from GAL.
+#. The first %d is an index of the GAL entry,
+#. the second %d is total count of entries in GAL.
+#, c-format
+msgid "Caching GAL entry %d/%d"
+msgstr "GAL-kirje %d/%d puhverdamine"
+
+#. To translators : This is used to cache the downloaded contacts from GAL.
+#. %d is an index of the GAL entry.
+#, c-format
+msgid "Caching GAL entry %d"
+msgstr "GAL-kirje %d puhverdamine"
+
+msgid "Searching"
+msgstr "Otsimine"
+
+#. To translators : Here Evolution MAPI downloads the entries from the GAL server
+msgid "Downloading GAL entries from server…"
+msgstr "GAL-kirjete allalaadimine serverist…"
 
 msgid "Authentication failed"
 msgstr "Tõrge autentimisel"
@@ -127,33 +147,28 @@ msgstr ""
 msgid "Removing deleted messages from cache in %s"
 msgstr "Kaustast %s kustutatud sõnumite andmete eemaldamine puhvrist"
 
-msgid "This message is not available in offline mode."
-msgstr "See sõnum pole võrguvabas režiimis saadaval."
-
+#. TODO : Check for online state
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Kaustas %s olevate uute sõnumite kohta andmete hankimine"
 
+msgid "This message is not available in offline mode."
+msgstr "See sõnum pole võrguvabas režiimis saadaval."
+
 msgid "Fetching items failed"
 msgstr "Tõrge kirjete hankimisel"
 
+#. Translators: The first %s is replaced with a message ID,
+#. the second %s is replaced with a detailed error string
 #, c-format
-msgid ""
-"Cannot get message: %s\n"
-"  %s"
-msgstr ""
-"Sõnumit pole võimalik hankida: %s\n"
-"  %s"
+msgid "Cannot get message %s: %s"
+msgstr "Sõnumit %s pole võimalik hankida: %s"
 
 msgid "No such message"
 msgstr "Sellist sõnumit ei ole"
 
 msgid "Message fetching cancelled by user."
 msgstr "Sõnumi vastuvõtmine katkestati kasutaja poolt."
-
-#, c-format
-msgid "Cannot get message %s: %s"
-msgstr "Sõnumit %s pole võimalik hankida: %s"
 
 msgid "Could not get message"
 msgstr "Sõnumit pole võimalik hankida"
@@ -173,7 +188,7 @@ msgid "Checking for new mail"
 msgstr "Uute sõnumite kontrollimine"
 
 msgid "C_heck for new messages in all folders"
-msgstr ""
+msgstr "Uute sõnumite kontrollimine _kõikides kaustades"
 
 msgid "Options"
 msgstr "Valikud"
@@ -191,29 +206,25 @@ msgstr ""
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr ""
 
-msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+msgid "For accessing Microsoft Exchange/OpenChange servers using MAPI"
 msgstr "MAPI kaudu Microsoft Exchange / OpenChange serveritele ligipääsuks"
 
 msgid "Password"
 msgstr "Parool"
 
 msgid ""
-"This option will connect to the Openchange server using a plaintext password."
+"This option will connect to the OpenChange server using a plaintext password."
 msgstr ""
-"See valik ühendab Openchange serveriga, kasutades avatekstilist parooli."
+"See valik ühendab OpenChange serveriga, kasutades avatekstilist parooli."
 
-msgid "Favorites"
-msgstr "Lemmikud"
-
-msgid "All Public Folders"
-msgstr "Kõik avalikud kaustad"
-
+#. Translators: The %s is replaced with a server's host name
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI server %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
+#. Translators: The first %s is replaced with a user name, the second with a server's host name
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Exchange MAPI-teenus kasutajale %s hostil %s"
@@ -237,20 +248,20 @@ msgid "Cannot create MAPI folders in offline mode."
 msgstr "MAPI-kaustu pole võimalik võrguvabas režiimis luua."
 
 #, c-format
-msgid "Cannot create new folder `%s'"
-msgstr "Uut kausta `%s' pole võimalik luua"
+msgid "Cannot create new folder '%s'"
+msgstr "Uut kausta '%s' pole võimalik luua"
 
 #, c-format
-msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
-msgstr "MAPI-kausta `%s' nime pole võimalik muuta. Kausta pole olemas."
+msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
+msgstr "MAPI-kausta '%s' nime pole võimalik muuta. Kausta pole olemas."
 
 #, c-format
-msgid "Cannot rename MAPI default folder `%s' to `%s'."
-msgstr "Vaikimisi MAPI-kaustale `%s' pole võimalik uut nime `%s' määrata"
+msgid "Cannot rename MAPI default folder '%s' to '%s'."
+msgstr "Vaikimisi MAPI-kaustale '%s' pole võimalik uut nime '%s' määrata"
 
 #, c-format
-msgid "Cannot rename MAPI folder `%s' to `%s'"
-msgstr "MAPI-kaustale `%s' pole võimalik uut nime `%s' määrata"
+msgid "Cannot rename MAPI folder '%s' to '%s'"
+msgstr "MAPI-kaustale '%s' pole võimalik uut nime '%s' määrata"
 
 msgid "Folder list not available in offline mode."
 msgstr "Kaustade nimekiri pole võrguvabas režiimis saadaval."
@@ -258,3 +269,12 @@ msgstr "Kaustade nimekiri pole võrguvabas režiimis saadaval."
 #. Fixme : Set a better error message. Would be helful in troubleshooting.
 msgid "Could not send message."
 msgstr "Sõnumit pole võimalik saata."
+
+msgid "All Public Folders"
+msgstr "Kõik avalikud kaustad"
+
+#~ msgid "Folders Size"
+#~ msgstr "Kausta suurus"
+
+#~ msgid "Favorites"
+#~ msgstr "Lemmikud"
