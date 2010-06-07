@@ -112,12 +112,12 @@ e_cal_backend_mapi_authenticate (ECalBackend *backend)
 	if (priv->conn)
 		g_object_unref (priv->conn);
 
-	priv->conn = exchange_mapi_connection_new (priv->profile, priv->password);
-	if (!priv->conn) {
-		priv->conn = exchange_mapi_connection_find (priv->profile);
-		if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
-			exchange_mapi_connection_reconnect (priv->conn, priv->password);
-	}
+	/* rather reuse already established connection */
+	priv->conn = exchange_mapi_connection_find (priv->profile);
+	if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
+		exchange_mapi_connection_reconnect (priv->conn, priv->password);
+	else if (!priv->conn)
+		priv->conn = exchange_mapi_connection_new (priv->profile, priv->password);
 
 	if (priv->conn && exchange_mapi_connection_connected (priv->conn)) {
 		return GNOME_Evolution_Calendar_Success;

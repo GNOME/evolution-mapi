@@ -360,8 +360,7 @@ mapi_book_utils_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid,
 				nt |= t->dwLowDateTime;
 				time = nt_time_to_unix (nt);
 				e_contact_set (contact, mappings[i].field_id, ctime_r (&time, buff));
-			} else
-				printf("Nothing is printed\n");
+			}
 		} else if (contact_type == ELEMENT_TYPE_COMPLEX) {
 			if (mappings[i].field_id == E_CONTACT_IM_AIM) {
 				GList *list = g_list_append (NULL, value);

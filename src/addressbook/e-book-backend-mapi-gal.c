@@ -286,12 +286,13 @@ e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
 
 	case GNOME_Evolution_Addressbook_MODE_REMOTE:
 
-		priv->conn = exchange_mapi_connection_new (priv->profile, passwd);
-		if (!priv->conn) {
-			priv->conn = exchange_mapi_connection_find (priv->profile);
-			if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
-				exchange_mapi_connection_reconnect (priv->conn, passwd);
-		}
+		/* rather reuse already established connection */
+		priv->conn = exchange_mapi_connection_find (priv->profile);
+		if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
+			exchange_mapi_connection_reconnect (priv->conn, passwd);
+		else if (!priv->conn)
+			priv->conn = exchange_mapi_connection_new (priv->profile, passwd);
+
 		if (!priv->conn)
 			return e_data_book_respond_authenticate_user (book, opid,GNOME_Evolution_Addressbook_OtherError);
 
