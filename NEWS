@@ -1,3 +1,32 @@
+evolution-mapi 0.31.3 2010-06-07
+--------------------------------
+
+Features:
+	Free/Busy search implementation in MAPI (Bharath Acharya)
+	Setup SSL connection (Bug #579185) (Milan Crha)
+	Support multipart/appledouble attachments (Bug #619741) (Milan Crha)
+
+Bug Fixes:
+	Bug #478840 - Folder size dialog improvements (Milan Crha)
+	Bug #607384 - Replying causes the message to appear as garbage (Milan Crha)
+	Bug #607524 - 'Save as vcard' doesn't work (Bharath Acharya)
+	Bug #618661 - Crashes e-addressbook-factory (Milan Crha)
+	Bug #620095 - Deadlock while filling folder list in Contacts (Oded Arbel)
+	Bug #620257 - Doesn't show all public folders (Milan Crha)
+	Bug #620367 - Cannot subscribe to Public folders (Milan Crha)
+
+Misc:
+	Fixes in exchange_mapi_connection_get_public_folder (Bharath Acharya)
+	Fix rounding issue with convert from double to int (Milan Crha)
+
+Translations:
+	Fran Diéguez (gl)
+	Ivar Smolin (et)
+	Jorge González (es)
+	Kjartan Maraas (nb)
+	Matej Urbančič (sl)
+	Yaron Shahrabani (he)
+
 evolution-mapi 0.31.2 2010-05-24
 --------------------------------
 Bug Fixes:
