@@ -784,8 +784,9 @@ exchange_mapi_cal_util_mapi_props_to_comp (icalcomponent_kind kind, const gchar 
 			prop = icalproperty_new_dtstart (icaltime_from_timet_with_zone (t.tv_sec, (b && *b), zone));
 			if (zone && icaltimezone_get_tzid (zone)) {
 				icalproperty_add_parameter (prop, icalparameter_new_tzid (icaltimezone_get_tzid (zone)));
-				icalcomponent_add_property (ical_comp, prop);
 			}
+
+			icalcomponent_add_property (ical_comp, prop);
 		}
 
 		stream = exchange_mapi_util_find_stream (streams, PROP_TAG(PT_BINARY, 0x825F));
@@ -800,8 +801,9 @@ exchange_mapi_cal_util_mapi_props_to_comp (icalcomponent_kind kind, const gchar 
 			prop = icalproperty_new_dtend (icaltime_from_timet_with_zone (t.tv_sec, (b && *b), zone));
 			if (zone && icaltimezone_get_tzid (zone)) {
 				icalproperty_add_parameter (prop, icalparameter_new_tzid (icaltimezone_get_tzid (zone)));
-				icalcomponent_add_property (ical_comp, prop);
 			}
+
+			icalcomponent_add_property (ical_comp, prop);
 		}
 
 		ui32 = (const uint32_t *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_LONG, 0x8205));
@@ -1207,8 +1209,10 @@ update_server_object (struct mapi_SPropValue_array *properties, GSList *attachme
 		cbdata.msgflags = MSGFLAG_READ;
 		cbdata.meeting_type = MEETING_REQUEST_RCVD;
 		cbdata.resp = olResponseNone;
-		cbdata.appt_seq = (*(const uint32_t *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_LONG, 0x8201)));
-		cbdata.appt_id = (*(const uint32_t *)find_mapi_SPropValue_data(properties, PR_OWNER_APPT_ID));
+		ui32 = find_mapi_SPropValue_data (properties, PROP_TAG (PT_LONG, 0x8201));
+		cbdata.appt_seq = ui32 ? *ui32 : 0;
+		ui32 = find_mapi_SPropValue_data (properties, PR_OWNER_APPT_ID);
+		cbdata.appt_id = ui32 ? *ui32 : 0;
 		cbdata.globalid = (const struct Binary_r *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0003));
 		cbdata.cleanglobalid = (const struct Binary_r *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0023));
 		cbdata.get_timezone = NULL;
