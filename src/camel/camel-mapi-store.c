@@ -98,6 +98,7 @@ static gboolean		mapi_noop(CamelStore *, CamelException *);
 static CamelFolderInfo * mapi_build_folder_info(CamelMapiStore *mapi_store, const gchar *parent_name, const gchar *folder_name);
 static gboolean mapi_fid_is_system_folder (CamelMapiStore *mapi_store, const gchar *fid);
 static CamelFolder *mapi_get_trash (CamelStore *store, CamelException *ex);
+static CamelFolder *mapi_get_junk (CamelStore *store, CamelException *ex);
 
 static void mapi_update_folder_hash_tables (CamelMapiStore *store, const gchar *name, const gchar *fid, const gchar *parent_id);
 /* static const gchar * mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid, gboolean use_cache); */
@@ -232,6 +233,7 @@ camel_mapi_store_class_init (CamelMapiStoreClass *class)
 	store_class->unsubscribe_folder = mapi_unsubscribe_folder;
 	store_class->noop = mapi_noop;
 	store_class->get_trash = mapi_get_trash;
+	store_class->get_junk = mapi_get_junk;
 }
 
 /*
@@ -299,7 +301,7 @@ static gboolean mapi_construct(CamelService *service, CamelSession *session,
 	store->flags &= ~CAMEL_STORE_VJUNK;
 	store->flags &= ~CAMEL_STORE_VTRASH;
 
-	store->flags |= CAMEL_STORE_SUBSCRIPTIONS;
+	store->flags |= CAMEL_STORE_SUBSCRIPTIONS | CAMEL_STORE_REAL_JUNK_FOLDER;
 
 	return TRUE;
 }
@@ -1800,4 +1802,10 @@ static CamelFolder *
 mapi_get_trash (CamelStore *store, CamelException *ex)
 {
 	return mapi_get_folder_with_type (store, CAMEL_FOLDER_TYPE_TRASH, ex);
+}
+
+static CamelFolder *
+mapi_get_junk (CamelStore *store, CamelException *ex)
+{
+	return mapi_get_folder_with_type (store, CAMEL_FOLDER_TYPE_JUNK, ex);
 }

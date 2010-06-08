@@ -728,16 +728,14 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	CamelMapiMessageInfo *mapi_info = NULL;
 	CamelStore *parent_store;
 
-	GSList *read_items = NULL, *unread_items = NULL, *to_free = NULL;
+	GSList *read_items = NULL, *unread_items = NULL, *to_free = NULL, *junk_items = NULL, *deleted_items = NULL, *l;
 	flags_diff_t diff, unset_flags;
 	const gchar *folder_id;
 	const gchar *full_name;
 	mapi_id_t fid, deleted_items_fid;
 	gint count, i;
 	guint32 options =0;
-
-	GSList *deleted_items, *deleted_head;
-	deleted_items = deleted_head = NULL;
+	gboolean is_junk_folder;
 
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
@@ -764,6 +762,8 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 		return TRUE;
 	}
 	camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+
+	is_junk_folder = (mapi_folder->type & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_JUNK;
 
 	count = camel_folder_summary_count (folder->summary);
 	CAMEL_MAPI_FOLDER_REC_LOCK (folder, cache_lock);
@@ -795,22 +795,13 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 				camel_message_info_free (info);
 				g_free (mid);
 				continue;
-			} else {
-				if (diff.bits & CAMEL_MESSAGE_DELETED) {
-					if (diff.bits & CAMEL_MESSAGE_SEEN) {
-						read_items = g_slist_prepend (read_items, mid);
-						used = TRUE;
-					}
-					if (deleted_items) {
-						deleted_items = g_slist_prepend (deleted_items, mid);
-						used = TRUE;
-					} else {
-						g_slist_free (deleted_head);
-						deleted_head = NULL;
-						deleted_head = deleted_items = g_slist_prepend (deleted_items, mid);
-						used = TRUE;
-					}
-				}
+			}
+			if (diff.bits & CAMEL_MESSAGE_DELETED) {
+				deleted_items = g_slist_prepend (deleted_items, mid);
+				used = TRUE;
+			} else if (!is_junk_folder && (diff.bits & CAMEL_MESSAGE_JUNK) != 0) {
+				junk_items = g_slist_prepend (junk_items, mid);
+				used = TRUE;
 			}
 
 			if (diff.bits & CAMEL_MESSAGE_SEEN) {
@@ -843,14 +834,12 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 		camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		exchange_mapi_connection_set_flags (camel_mapi_store_get_exchange_connection (mapi_store), 0, fid, read_items, 0, options);
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-		g_slist_free (read_items);
 	}
 
 	if (unread_items) {
 		camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		exchange_mapi_connection_set_flags (camel_mapi_store_get_exchange_connection (mapi_store), 0, fid, unread_items, CLEAR_READ_FLAG, options);
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-		g_slist_free (read_items);
 	}
 
 	/* Remove messages from server*/
@@ -866,20 +855,33 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	}
 
+	
+	if (junk_items) {
+		mapi_id_t junk_fid = 0;
+
+		camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		exchange_mapi_util_mapi_id_from_string (camel_mapi_store_system_folder_fid (mapi_store, olFolderJunk), &junk_fid);
+		exchange_mapi_connection_move_items (camel_mapi_store_get_exchange_connection (mapi_store), fid, junk_fid, junk_items);
+		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+
+		/* in junk_items are only emails which are not deleted */
+		deleted_items = g_slist_concat (deleted_items, g_slist_copy (junk_items));
+	}
+
 	/*Remove messages from local cache*/
-	while (deleted_items) {
-		gchar * deleted_msg_uid = g_strdup_printf ("%016" G_GINT64_MODIFIER "X%016" G_GINT64_MODIFIER "X", fid, *(mapi_id_t *)deleted_items->data);
+	for (l = deleted_items; l; l = l->next) {
+		gchar * deleted_msg_uid = g_strdup_printf ("%016" G_GINT64_MODIFIER "X%016" G_GINT64_MODIFIER "X", fid, *(mapi_id_t *)l->data);
 
 		CAMEL_MAPI_FOLDER_REC_LOCK (folder, cache_lock);
 		camel_folder_summary_remove_uid (folder->summary, deleted_msg_uid);
 		camel_data_cache_remove(mapi_folder->cache, "cache", deleted_msg_uid, NULL);
 		CAMEL_MAPI_FOLDER_REC_UNLOCK (folder, cache_lock);
-
-		deleted_items = g_slist_next (deleted_items);
 	}
 
+	g_slist_free (read_items);
 	g_slist_free (unread_items);
-	g_slist_free (deleted_head);
+	g_slist_free (deleted_items);
+	g_slist_free (junk_items);
 
 	g_slist_foreach (to_free, (GFunc) g_free, NULL);
 	g_slist_free (to_free);
@@ -1634,7 +1636,7 @@ camel_mapi_folder_init (CamelMapiFolder *mapi_folder)
 	mapi_folder->priv = CAMEL_MAPI_FOLDER_GET_PRIVATE (mapi_folder);
 
 	folder->permanent_flags = CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_DELETED |
-		CAMEL_MESSAGE_DRAFT | CAMEL_MESSAGE_FLAGGED | CAMEL_MESSAGE_SEEN;
+		CAMEL_MESSAGE_DRAFT | CAMEL_MESSAGE_FLAGGED | CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_JUNK;
 
 	folder->folder_flags = CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY | CAMEL_FOLDER_HAS_SEARCH_CAPABILITY;
 
