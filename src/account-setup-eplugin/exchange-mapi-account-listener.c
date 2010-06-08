@@ -149,6 +149,30 @@ lookup_account_info (const gchar *key)
 	return NULL;
 }
 
+static ESource *
+find_source_by_fid (GSList *sources, const gchar *fid)
+{
+	GSList *s;
+
+	g_return_val_if_fail (fid != NULL, NULL);
+
+	if (!sources)
+		return NULL;
+
+	for (s = sources; s; s = s->next) {
+		ESource *source = s->data;
+
+		if (source && E_IS_SOURCE (source)) {
+			const gchar *has_fid = e_source_get_property (source, "folder-id");
+
+			if (has_fid && g_str_equal (fid, has_fid))
+				return source;
+		}
+	}
+
+	return NULL;
+}
+
 #define CALENDAR_SOURCES	"/apps/evolution/calendar/sources"
 #define TASK_SOURCES		"/apps/evolution/tasks/sources"
 #define JOURNAL_SOURCES		"/apps/evolution/memos/sources"
@@ -159,15 +183,16 @@ lookup_account_info (const gchar *key)
 #define ITIP_MESSAGE_HANDLING	"/apps/evolution/itip/delete_processed"
 
 static void
-add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType folder_type, CamelURL *url)
+add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType folder_type, CamelURL *url, mapi_id_t trash_fid)
 {
 	ESourceList *source_list = NULL;
 	ESourceGroup *group = NULL;
 	const gchar *conf_key = NULL, *source_selection_key = NULL;
-	GSList *temp_list = NULL;
 	GConfClient* client;
-	GSList *ids, *temp;
+	GSList *ids, *temp_list, *old_sources = NULL;
 	gchar *base_uri = NULL;
+	gboolean is_new_group = FALSE;
+	
 
 	if (folder_type == MAPI_FOLDER_TYPE_APPOINTMENT) {
 		conf_key = CALENDAR_SOURCES;
@@ -188,10 +213,19 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 	source_list = e_source_list_new_for_gconf (client, conf_key);
 	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, url->user, url->host);
 	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
-	if (group)
+	if (group) {
 		e_source_group_set_name (group, account->name);
-	else
+		g_object_ref (group);
+		is_new_group = FALSE;
+		old_sources = NULL;
+		for (temp_list = e_source_group_peek_sources (group); temp_list; temp_list = temp_list->next) {
+			old_sources = g_slist_prepend (old_sources, temp_list->data);
+		}
+	} else {
 		group = e_source_group_new (account->name, base_uri);
+		is_new_group = TRUE;
+		old_sources = NULL;
+	}
 	g_free (base_uri);
 	e_source_group_set_property (group, "create_source", "yes");
 	e_source_group_set_property (group, "username", url->user);
@@ -209,13 +243,24 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 		ExchangeMAPIFolder *folder = temp_list->data;
 		ESource *source = NULL;
 		gchar *relative_uri = NULL, *fid = NULL;
+		gboolean is_new_source = FALSE;
 
-		if (folder->container_class != folder_type)
+		if (folder->container_class != folder_type || trash_fid == exchange_mapi_folder_get_parent_id (folder))
 			continue;
 
 		fid = exchange_mapi_util_mapi_id_to_string (folder->folder_id);
 		relative_uri = g_strconcat (";", fid, NULL);
-		source = e_source_new (folder->folder_name, relative_uri);
+		source = find_source_by_fid (old_sources, fid);
+		if (source) {
+			is_new_source = FALSE;
+			g_object_ref (source);
+			old_sources = g_slist_remove (old_sources, source);
+			e_source_set_name (source, folder->folder_name);
+			e_source_set_relative_uri (source, relative_uri);
+		} else {
+			source = e_source_new (folder->folder_name, relative_uri);
+			is_new_source = TRUE;
+		}
 		e_source_set_property (source, "auth", "1");
 		e_source_set_property (source, "auth-domain", EXCHANGE_MAPI_PASSWORD_COMPONENT);
 		e_source_set_property (source, "auth-type", "plain/password");
@@ -242,16 +287,15 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 		e_source_set_property (source, "acl-owner-name", account->id->name);
 		e_source_set_property (source, "acl-owner-email", account->id->address);
 
-		e_source_group_add_source (group, source, -1);
+		if (is_new_source)
+			e_source_group_add_source (group, source, -1);
 
 		if (source_selection_key && folder->is_default) {
 			ids = gconf_client_get_list (client, source_selection_key , GCONF_VALUE_STRING, NULL);
 			ids = g_slist_append (ids, g_strdup (e_source_peek_uid (source)));
 			gconf_client_set_list (client, source_selection_key, GCONF_VALUE_STRING, ids, NULL);
 
-			for (temp = ids; temp != NULL; temp = g_slist_next (temp))
-				g_free (temp->data);
-
+			g_slist_foreach (ids, (GFunc) g_free, NULL);
 			g_slist_free (ids);
 		}
 
@@ -260,11 +304,23 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 		g_free (fid);
 	}
 
-	if (!e_source_list_add_group (source_list, group, -1))
-		return;
+	if (old_sources) {
+		/* these were not found on the server by fid, thus remove them */
+		for (temp_list = old_sources; temp_list; temp_list = temp_list->next) {
+			ESource *source = temp_list->data;
+
+			if (source && E_IS_SOURCE (source))
+				e_source_group_remove_source (group, source);
+		}
+
+		g_slist_free (old_sources);
+	}
+
+	if (is_new_group && !e_source_list_add_group (source_list, group, -1))
+		g_warning ("%s: Failed to add new group", G_STRFUNC);
 
 	if (!e_source_list_sync (source_list, NULL))
-		return;
+		g_warning ("%s: Failed to sync source list", G_STRFUNC);
 
 	g_object_unref (group);
 	g_object_unref (source_list);
@@ -344,16 +400,16 @@ remove_cal_esource (EAccount *existing_account_info, ExchangeMAPIFolderType fold
    adds the new account info to mapi_accounts list */
 
 static void
-add_calendar_sources (EAccount *account, GSList *folders)
+add_calendar_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid)
 {
 	CamelURL *url;
 
 	url = camel_url_new (account->source->url, NULL);
 
 	if (url) {
-		add_cal_esource (account, folders, MAPI_FOLDER_TYPE_APPOINTMENT, url);
-		add_cal_esource (account, folders, MAPI_FOLDER_TYPE_TASK, url);
-		add_cal_esource (account, folders, MAPI_FOLDER_TYPE_MEMO, url);
+		add_cal_esource (account, folders, MAPI_FOLDER_TYPE_APPOINTMENT, url, trash_fid);
+		add_cal_esource (account, folders, MAPI_FOLDER_TYPE_TASK, url, trash_fid);
+		add_cal_esource (account, folders, MAPI_FOLDER_TYPE_MEMO, url, trash_fid);
 	}
 
 	camel_url_free (url);
@@ -379,15 +435,16 @@ remove_calendar_sources (EAccount *account)
 }
 
 static gboolean
-add_addressbook_sources (EAccount *account, GSList *folders)
+add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid)
 {
 	CamelURL *url;
 	ESourceList *list;
 	ESourceGroup *group;
 	ESource *source;
 	gchar *base_uri;
-	GSList *temp_list;
+	GSList *temp_list, *old_sources = NULL;
 	GConfClient* client;
+	gboolean is_new_group = FALSE;
 
 	url = camel_url_new (account->source->url, NULL);
 	if (url == NULL) {
@@ -398,10 +455,19 @@ add_addressbook_sources (EAccount *account, GSList *folders)
 	client = gconf_client_get_default ();
 	list = e_source_list_new_for_gconf (client, "/apps/evolution/addressbook/sources" );
 	group = e_source_list_peek_group_by_base_uri (list, base_uri);
-	if (group)
+	if (group) {
 		e_source_group_set_name (group, account->name);
-	else
+		g_object_ref (group);
+		is_new_group = FALSE;
+		old_sources = NULL;
+		for (temp_list = e_source_group_peek_sources (group); temp_list; temp_list = temp_list->next) {
+			old_sources = g_slist_prepend (old_sources, temp_list->data);
+		}
+	} else {
 		group = e_source_group_new (account->name, base_uri);
+		is_new_group = TRUE;
+		old_sources = NULL;
+	}
 	e_source_group_set_property (group, "user", url->user);
 	e_source_group_set_property (group, "host", url->host);
 	e_source_group_set_property (group, "profile", camel_url_get_param (url, "profile"));
@@ -409,20 +475,32 @@ add_addressbook_sources (EAccount *account, GSList *folders)
 
 	for (temp_list = folders; temp_list != NULL; temp_list = g_slist_next (temp_list)) {
 		ExchangeMAPIFolder *folder = temp_list->data;
-		gchar *tmp = NULL;
-		if (folder->container_class != MAPI_FOLDER_TYPE_CONTACT)
+		gchar *fid, *relative_uri;
+		gboolean is_new_source = FALSE;
+
+		if (folder->container_class != MAPI_FOLDER_TYPE_CONTACT || trash_fid == exchange_mapi_folder_get_parent_id (folder))
 			continue;
 
-		source = e_source_new (folder->folder_name, g_strconcat (";",folder->folder_name, NULL));
+		fid = exchange_mapi_util_mapi_id_to_string (folder->folder_id);
+		relative_uri = g_strconcat (";", folder->folder_name, NULL);
+		source = find_source_by_fid (old_sources, fid);
+		if (source) {
+			is_new_source = FALSE;
+			g_object_ref (source);
+			old_sources = g_slist_remove (old_sources, source);
+			e_source_set_name (source, folder->folder_name);
+			e_source_set_relative_uri (source, relative_uri);
+		} else {
+			source = e_source_new (folder->folder_name, relative_uri);
+			is_new_source = TRUE;
+		}
 		e_source_set_property (source, "auth", "plain/password");
 		e_source_set_property (source, "auth-domain", EXCHANGE_MAPI_PASSWORD_COMPONENT);
 		e_source_set_property(source, "user", url->user);
 		e_source_set_property(source, "host", url->host);
 		e_source_set_property(source, "profile", camel_url_get_param (url, "profile"));
 		e_source_set_property(source, "domain", camel_url_get_param (url, "domain"));
-		tmp = exchange_mapi_util_mapi_id_to_string (folder->folder_id);
-		e_source_set_property(source, "folder-id", tmp);
-		g_free (tmp);
+		e_source_set_property(source, "folder-id", fid);
 		e_source_set_property (source, "offline_sync",
 					       camel_url_get_param (url, "offline_sync") ? "1" : "0");
 		e_source_set_property (source, "completion", "true");
@@ -433,18 +511,38 @@ add_addressbook_sources (EAccount *account, GSList *folders)
 			e_source_set_property (source, "parent-fid", tmp);
 			g_free (tmp);
 		}
-		e_source_group_add_source (group, source, -1);
+		if (is_new_source)
+			e_source_group_add_source (group, source, -1);
 		g_object_unref (source);
+		g_free (fid);
+		g_free (relative_uri);
 	}
 
 	//Add GAL
 	{
 		gchar *uri;
+		gboolean is_new_source = FALSE;
 
-		uri = g_strdup_printf("mapigal://%s@%s/;Global Address List", url->user, url->host);
-		source = e_source_new_with_absolute_uri ("Global Address List", uri);
+		uri = g_strdup_printf ("mapigal://%s@%s/;Global Address List", url->user, url->host);
+		for (temp_list = old_sources; temp_list; temp_list = temp_list->next) {
+			source = temp_list->data;
+
+			if (source && E_IS_SOURCE (source)
+			    && e_source_peek_absolute_uri (source)
+			    && g_str_equal (e_source_peek_absolute_uri (source), uri))
+				break;
+		}
+
+		if (source) {
+			is_new_source = FALSE;
+			g_object_ref (source);
+			old_sources = g_slist_remove (old_sources, source);
+			e_source_set_name (source, _("Global Address List"));
+		} else {
+			source = e_source_new_with_absolute_uri (_("Global Address List"), uri);
+			is_new_source = TRUE;
+		}
 		g_free (uri);
-		// source = e_source_new ("Global Address List", g_strconcat (";","Global Address List" , NULL));
 		e_source_set_property (source, "auth", "plain/password");
 		e_source_set_property (source, "auth-domain", "MAPIGAL");
 
@@ -459,12 +557,29 @@ add_addressbook_sources (EAccount *account, GSList *folders)
 		e_source_set_property(source, "offline_sync", "1");
 		e_source_set_property (source, "completion", "true");
 		e_source_set_property (source, "delete", "no");
-		e_source_group_add_source (group, source, -1);
+		if (is_new_source)
+			e_source_group_add_source (group, source, -1);
 		g_object_unref (source);
 	}
 
-	e_source_list_add_group (list, group, -1);
-	e_source_list_sync (list, NULL);
+	if (old_sources) {
+		/* these were not found on the server by fid, thus remove them */
+		for (temp_list = old_sources; temp_list; temp_list = temp_list->next) {
+			ESource *source = temp_list->data;
+
+			if (source && E_IS_SOURCE (source))
+				e_source_group_remove_source (group, source);
+		}
+
+		g_slist_free (old_sources);
+	}
+
+	if (is_new_group && !e_source_list_add_group (list, group, -1))
+		g_warning ("%s: Failed to add new group", G_STRFUNC);
+
+	if (!e_source_list_sync (list, NULL))
+		g_warning ("%s: Failed to sync source list", G_STRFUNC);
+
 	g_object_unref (group);
 	g_object_unref (list);
 	g_object_unref (client);
@@ -513,20 +628,20 @@ remove_addressbook_sources (ExchangeMAPIAccountInfo *existing_account_info)
 	camel_url_free (url);
 }
 
-static void
-update_sources_fn (gpointer data, gpointer user_data)
+static gboolean
+update_sources_idle_cb (gpointer data)
 {
 	ExchangeMapiConnection *conn = data;
 	EAccount *account;
 	GSList *folders_list;
 
-	g_return_if_fail (conn != NULL);
+	g_return_val_if_fail (conn != NULL, FALSE);
 
 	account = g_object_get_data (G_OBJECT (conn), "EAccount");
 	if (!account) {
 		g_object_unref (conn);
-		g_return_if_fail (account != NULL);
-		return;
+		g_return_val_if_fail (account != NULL, FALSE);
+		return FALSE;
 	}
 
 	g_object_set_data (G_OBJECT (conn), "EAccount", NULL);
@@ -534,12 +649,31 @@ update_sources_fn (gpointer data, gpointer user_data)
 	folders_list = exchange_mapi_connection_peek_folders_list (conn);
 
 	if (account->enabled && lookup_account_info (account->uid)) {
-		add_addressbook_sources (account, folders_list);
-		add_calendar_sources (account, folders_list);
+		mapi_id_t trash_fid = exchange_mapi_connection_get_default_folder_id (conn, olFolderDeletedItems);
+
+		add_addressbook_sources (account, folders_list, trash_fid);
+		add_calendar_sources (account, folders_list, trash_fid);
 	}
 
 	g_object_unref (conn);
 	g_object_unref (account);
+
+	return FALSE;
+}
+
+static void
+update_sources_fn (gpointer data, gpointer user_data)
+{
+	ExchangeMapiConnection *conn = data;
+
+	g_return_if_fail (conn != NULL);
+
+	/* this fetches folder_list to the connection cache,
+	   thus next call will be quick as much as possible */
+	exchange_mapi_connection_peek_folders_list (conn);
+
+	/* run a job in a main thread */
+	g_idle_add (update_sources_idle_cb, conn);
 }
 
 static void
@@ -577,7 +711,7 @@ check_for_account_conn_cb (gpointer data)
 	g_return_val_if_fail (csd->profile_name != NULL, FALSE);
 	g_return_val_if_fail (csd->account != NULL, FALSE);
 
-	if (csd->account->enabled && !lookup_account_info (csd->account->uid)) {
+	if (csd->account->enabled && lookup_account_info (csd->account->uid)) {
 		ExchangeMapiConnection *conn;
 
 		conn = exchange_mapi_connection_find (csd->profile_name);
@@ -597,6 +731,42 @@ check_for_account_conn_cb (gpointer data)
 }
 
 static void
+update_account_sources (EAccount *account, gboolean can_create_profile)
+{
+	CamelURL *url;
+	ExchangeMapiConnection *conn;
+
+	url = camel_url_new (account->source->url, NULL);
+	g_return_if_fail (url != NULL);
+
+	conn = exchange_mapi_connection_find (camel_url_get_param (url, "profile"));
+	if (!conn && can_create_profile) {
+		/* connect to the server when not connected yet */
+		if (!create_profile_entry (url, account)) {
+			camel_url_free (url);
+			g_warning ("%s: Failed to create MAPI profile for '%s'", G_STRFUNC, account->name);
+			return;
+		}
+
+		conn = exchange_mapi_connection_find (camel_url_get_param (url, "profile"));
+	}
+
+	if (conn) {
+		run_update_sources_thread (conn, account);
+	} else {
+		struct create_sources_data *csd;
+
+		csd = g_new0 (struct create_sources_data, 1);
+		csd->profile_name = g_strdup (camel_url_get_param (url, "profile"));
+		csd->account = g_object_ref (account);
+
+		g_timeout_add_seconds (1, check_for_account_conn_cb, csd);
+	}
+
+	camel_url_free (url);
+}
+
+static void
 mapi_account_added (EAccountList *account_listener, EAccount *account)
 {
 	ExchangeMAPIAccountInfo *info = NULL;
@@ -612,39 +782,8 @@ mapi_account_added (EAccountList *account_listener, EAccount *account)
 
 	mapi_accounts = g_list_append (mapi_accounts, info);
 
-	if (account->enabled) {
-		CamelURL *url;
-		ExchangeMapiConnection *conn;
-
-		url = camel_url_new (info->source_url, NULL);
-		g_return_if_fail (url != NULL);
-
-		conn = exchange_mapi_connection_find (camel_url_get_param (url, "profile"));
-		if (!conn) {
-			/* connect to the server when not connected yet */
-			if (!create_profile_entry (url, account)) {
-				camel_url_free (url);
-				g_warning ("%s: Failed to create MAPI profile for '%s'", G_STRFUNC, account->name);
-				return;
-			}
-
-			conn = exchange_mapi_connection_find (camel_url_get_param (url, "profile"));
-		}
-
-		if (conn) {
-			run_update_sources_thread (conn, account);
-		} else {
-			struct create_sources_data *csd;
-
-			csd = g_new0 (struct create_sources_data, 1);
-			csd->profile_name = g_strdup (camel_url_get_param (url, "profile"));
-			csd->account = g_object_ref (account);
-
-			g_timeout_add_seconds (1, check_for_account_conn_cb, csd);
-		}
-
-		camel_url_free (url);
-	}
+	if (account->enabled)
+		update_account_sources (account, TRUE);
 }
 
 static void
@@ -862,12 +1001,15 @@ exchange_mapi_account_listener_construct (ExchangeMAPIAccountListener *config_li
 			info->source_url = g_strdup (account->source->url);
 			info->enabled = account->enabled;
 
+			mapi_accounts = g_list_append (mapi_accounts, info);
+
 			if (!account->enabled) {
 				remove_addressbook_sources (info);
 				remove_calendar_sources (account);
+			} else {
+				/* fetch new calendars/remove dropped from a server, if any */
+				update_account_sources (account, FALSE);
 			}
-
-			mapi_accounts = g_list_append (mapi_accounts, info);
 		}
 	}
 
