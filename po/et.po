@@ -4,7 +4,7 @@
 # Copyright (C) 2009 The GNOME Project.
 # This file is distributed under the same license as the evolution-mapi package.
 #
-# Ivar Smolin <okul@linux.ee>, 2002, 2009.
+# Ivar Smolin <okul@linux.ee>, 2002, 2009, 2010.
 #
 msgid ""
 msgstr ""
@@ -12,7 +12,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
 "POT-Creation-Date: 2010-03-17 15:22+0000\n"
-"PO-Revision-Date: 2009-09-01 13:18+0300\n"
+"PO-Revision-Date: 2010-06-04 13:44+0300\n"
 "Last-Translator: Ivar Smolin <okul@linux.ee>\n"
 "Language-Team: Estonian <et@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -78,7 +78,7 @@ msgstr "Kaustade nimekirja vastuvõtmine..."
 
 #. Miscellaneous settings
 msgid "Miscellaneous"
-msgstr ""
+msgstr "Muu"
 
 msgid "View the size of all Exchange folders"
 msgstr "Kõigi Exchange kaustade suuruste vaatamine"
@@ -142,10 +142,8 @@ msgid "Removing deleted messages from cache in %s"
 msgstr "Kaustast %s kustutatud sõnumite andmete eemaldamine puhvrist"
 
 #. TODO : Check for online state
-#, fuzzy
-#| msgid "Fetching summary information for new messages in %s"
 msgid "Fetching summary information for new messages in"
-msgstr "Kaustas %s olevate uute sõnumite kohta andmete hankimine"
+msgstr "Kaustas olevate uute sõnumite kohta andmete hankimine"
 
 msgid "This message is not available in offline mode."
 msgstr "See sõnum pole võrguvabas režiimis saadaval."
@@ -189,7 +187,7 @@ msgid "Checking for new mail"
 msgstr "Uute sõnumite kontrollimine"
 
 msgid "C_heck for new messages in all folders"
-msgstr ""
+msgstr "Uute sõnumite kontrollimine _kõikides kaustades"
 
 msgid "Options"
 msgstr "Valikud"
