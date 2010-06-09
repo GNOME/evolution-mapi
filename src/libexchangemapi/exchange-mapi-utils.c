@@ -1011,14 +1011,14 @@ exchange_mapi_utils_add_spropvalue (TALLOC_CTX *mem_ctx, struct SPropValue **val
 	g_return_val_if_fail (n_values != NULL, FALSE);
 
 	if ((prop_tag & 0xFFFF) == PT_DOUBLE) {
-		uint32_t zero = 0;
+		uint64_t zero = 0;
 
 		/* add an empty fake value and rewrite it */
 		*values_array = add_SPropValue (mem_ctx, *values_array, n_values, PROP_TAG(PT_LONG, 0x0001), &zero);
 
 		((*values_array)[(*n_values) - 1]).ulPropTag = prop_tag;
 		((*values_array)[(*n_values) - 1]).dwAlignPad = 0;
-		((*values_array)[(*n_values) - 1]).value.dbl = *((gdouble *) prop_value);
+		memcpy (&((*values_array)[(*n_values) - 1]).value.dbl, prop_value, 8);
 	} else {
 		*values_array = add_SPropValue (mem_ctx, *values_array, n_values, prop_tag, prop_value);
 	}

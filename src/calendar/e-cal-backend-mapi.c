@@ -442,8 +442,8 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 			e_cal_component_commit_sequence (comp);
 			comp_str = e_cal_component_get_as_string (comp);
 
-			e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), (const gchar *) comp_str);
 			e_cal_backend_cache_put_component (priv->cache, comp);
+			e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), (const gchar *) comp_str);
 
 			g_free (comp_str);
 		}
@@ -472,8 +472,8 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 				e_cal_component_commit_sequence (comp);
 				modif_comp_str = e_cal_component_get_as_string (comp);
 
-				e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbmapi), cache_comp_str, modif_comp_str);
 				e_cal_backend_cache_put_component (priv->cache, comp);
+				e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbmapi), cache_comp_str, modif_comp_str);
 
 				g_object_unref (comp);
 				g_free (cache_comp_str);
@@ -1844,6 +1844,9 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 
 	*old_object = e_cal_component_get_as_string (cache_comp);
 	*new_object = e_cal_component_get_as_string (comp);
+
+	e_cal_backend_cache_put_component (priv->cache, comp);
+	e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbmapi), *old_object, *new_object);
 
 	g_object_unref (comp);
 	g_object_unref (cache_comp);

@@ -877,7 +877,8 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 			e_cal_component_remove_all_alarms (comp);
 
 	} else if (icalcomponent_isa (ical_comp) == ICAL_VTODO_COMPONENT) {
-		const double *complete = 0;
+		const double *complete = NULL;
+		const uint64_t *status = NULL;
 
 		/* NOTE: Exchange tasks are DATE values, not DATE-TIME values, but maybe someday, we could expect Exchange to support it;) */
 		if (get_mapi_SPropValue_array_date_timeval (&t, properties, PROP_TAG(PT_SYSTIME, 0x8104)) == MAPI_E_SUCCESS)
@@ -885,10 +886,10 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 		if (get_mapi_SPropValue_array_date_timeval (&t, properties, PROP_TAG(PT_SYSTIME, 0x8105)) == MAPI_E_SUCCESS)
 			icalcomponent_set_due (ical_comp, icaltime_from_timet_with_zone (t.tv_sec, 1, default_zone));
 
-		ui32 = (const uint32_t *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_LONG, 0x8101));
-		if (ui32) {
-			icalcomponent_set_status (ical_comp, get_taskstatus_from_prop(*ui32));
-			if (*ui32 == olTaskComplete
+		status = (const uint64_t *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_LONG, 0x8101));
+		if (status) {
+			icalcomponent_set_status (ical_comp, get_taskstatus_from_prop(*status));
+			if (*status == olTaskComplete
 			&& get_mapi_SPropValue_array_date_timeval (&t, properties, PROP_TAG(PT_SYSTIME, 0x810F)) == MAPI_E_SUCCESS) {
 				prop = icalproperty_new_completed (icaltime_from_timet_with_zone (t.tv_sec, 1, default_zone));
 				icalcomponent_add_property (ical_comp, prop);
