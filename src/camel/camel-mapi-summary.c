@@ -33,6 +33,7 @@
 
 #include "camel-mapi-folder.h"
 #include "camel-mapi-summary.h"
+#include "camel-mapi-store.h"
 
 #define CAMEL_MAPI_SUMMARY_VERSION (1)
 
@@ -148,6 +149,41 @@ camel_mapi_summary_new (CamelFolder *folder, const gchar *filename)
 	return summary;
 }
 
+void
+camel_mapi_summary_update_store_info_counts (CamelMapiSummary *mapi_summary)
+{
+	CamelFolderSummary *summary;
+
+	g_return_if_fail (mapi_summary != NULL);
+
+	summary = CAMEL_FOLDER_SUMMARY (mapi_summary);
+	g_return_if_fail (summary != NULL);
+
+	if (summary->folder) {
+		CamelMapiStore *mapi_store;
+
+		mapi_store = CAMEL_MAPI_STORE (camel_folder_get_parent_store (summary->folder));
+		if (mapi_store && mapi_store->summary) {
+			CamelStoreInfo *si;
+			CamelStoreSummary *store_summary = CAMEL_STORE_SUMMARY (mapi_store->summary);
+
+			g_return_if_fail (store_summary != NULL);
+
+			si = camel_store_summary_path (store_summary, camel_folder_get_full_name (summary->folder));
+			if (si) {
+				if (si->unread != summary->unread_count || si->total != summary->saved_count) {
+					si->unread = summary->unread_count;
+					si->total = summary->saved_count;
+
+					camel_store_summary_touch (store_summary);
+				}
+
+				camel_store_summary_info_free (store_summary, si);
+			}
+		}
+	}
+}
+
 static gint
 mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
 {
@@ -173,6 +209,7 @@ mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
 
 	return 0;
 }
+
 static CamelFIRecord *
 mapi_summary_header_to_db (CamelFolderSummary *summary, CamelException *ex)
 {
@@ -189,6 +226,8 @@ mapi_summary_header_to_db (CamelFolderSummary *summary, CamelException *ex)
 		return NULL;
 
 	fir->bdata = g_strdup_printf ("%d %s", CAMEL_MAPI_SUMMARY_VERSION, mapi_summary->sync_time_stamp);
+
+	camel_mapi_summary_update_store_info_counts (mapi_summary);
 
 	return fir;
 }

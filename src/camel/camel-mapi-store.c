@@ -1671,6 +1671,9 @@ mapi_subscribe_folder(CamelStore *store, const gchar *folder_name, CamelExceptio
 			camel_url_free (url);
 		}
 
+		fi->unread = si->unread;
+		fi->total = si->total;
+		fi->flags = si->flags;
 		camel_store_summary_info_free((CamelStoreSummary *)mapi_store->summary, si);
 	}
 

@@ -105,47 +105,45 @@ mapi_folder_search_by_uids (CamelFolder *folder, const gchar *expression, GPtrAr
 	return matches;
 }
 
-static gboolean
-mapi_refresh_info(CamelFolder *folder, CamelException *ex)
+static void
+update_store_summary (CamelFolder *folder, CamelException *ex)
 {
 	CamelStore *parent_store;
+	CamelStoreSummary *store_summary;
 	CamelStoreInfo *si;
 	const gchar *full_name;
 
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
+	store_summary = (CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary;
 
-	/*
-	 * Checking for the summary->time_string here since the first the a
-	 * user views a folder, the read cursor is in progress, and the getQM
-	 * should not interfere with the process
-	 */
-	//	if (summary->time_string && (strlen (summary->time_string) > 0))  {
-	if (1) {
-		mapi_refresh_folder(folder, ex);
-		si = camel_store_summary_path ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary, full_name);
+	si = camel_store_summary_path (store_summary, full_name);
 
-		if (si) {
-			guint32 unread, total;
+	if (si) {
+		guint32 unread, total;
 
-			unread = folder->summary->unread_count;
-			total = camel_folder_summary_count (folder->summary);
-			if (si->total != total || si->unread != unread) {
-				si->total = total;
-				si->unread = unread;
-				camel_store_summary_touch ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary);
-			}
-			camel_store_summary_info_free ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary, si);
+		unread = folder->summary->unread_count;
+		total = camel_folder_summary_count (folder->summary);
+
+		if (si->total != total || si->unread != unread) {
+			si->total = total;
+			si->unread = unread;
+			camel_store_summary_touch (store_summary);
 		}
-		camel_folder_summary_save_to_db (folder->summary, ex);
-		camel_store_summary_save ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary);
-	} else {
-		/* We probably could not get the messages the first time. (get_folder) failed???!
-		 * so do a get_folder again. And hope that it works
-		 */
-		g_print("Reloading folder...something wrong with the summary....\n");
+		camel_store_summary_info_free (store_summary, si);
 	}
-	//#endif
+	camel_folder_summary_save_to_db (folder->summary, ex);
+	camel_store_summary_save (store_summary);
+}
+
+static gboolean
+mapi_refresh_info (CamelFolder *folder, CamelException *ex)
+{
+	mapi_refresh_folder (folder, ex);
+	if (camel_exception_is_set (ex))
+		return FALSE;
+
+	update_store_summary (folder, ex);
 
 	return !camel_exception_is_set (ex);
 }
@@ -521,18 +519,6 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 }
 
 static void
-mapi_sync_summary (CamelFolder *folder, CamelException *ex)
-{
-	CamelStore *parent_store;
-
-	parent_store = camel_folder_get_parent_store (folder);
-
-	camel_folder_summary_save_to_db (folder->summary, ex);
-	camel_store_summary_touch ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary);
-	camel_store_summary_save ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary);
-}
-
-static void
 mapi_utils_do_flags_diff (flags_diff_t *diff, guint32 old, guint32 _new)
 {
 	diff->changed = old ^ _new;
@@ -550,11 +536,17 @@ struct mapi_update_deleted_msg {
 static gboolean
 deleted_items_sync_cb (FetchItemsCallbackData *item_data, gpointer data)
 {
-	GSList **uid_list = (GSList **) data;
+	guint32 msg_flags = CAMEL_MESSAGE_FOLDER_FLAGGED; /* to not have 0 in the hash table */
+	GHashTable *uids = data;
 	gchar *msg_uid = exchange_mapi_util_mapi_ids_to_uid (item_data->fid,
 							     item_data->mid);
 
-	*uid_list = g_slist_prepend (*uid_list, msg_uid);
+	if ((item_data->msg_flags & MSGFLAG_READ) != 0)
+		msg_flags |= CAMEL_MESSAGE_SEEN;
+	if ((item_data->msg_flags & MSGFLAG_HASATTACH) != 0)
+		msg_flags |= CAMEL_MESSAGE_ATTACHMENTS;
+
+	g_hash_table_insert (uids, msg_uid, GINT_TO_POINTER (msg_flags));
 
 	/* Progress update */
 	if (item_data->total > 0)
@@ -565,18 +557,6 @@ deleted_items_sync_cb (FetchItemsCallbackData *item_data, gpointer data)
 		return FALSE;
 
 	return TRUE;
-}
-
-static gboolean
-mapi_camel_get_last_modif_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
-{
-	static const uint32_t prop_list[] = {
-		PR_LAST_MODIFICATION_TIME
-	};
-
-	g_return_val_if_fail (props != NULL, FALSE);
-
-	return exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, prop_list, G_N_ELEMENTS (prop_list));
 }
 
 static void
@@ -591,8 +571,9 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 	CamelStore *parent_store;
 
 	guint32 index, count, options = 0;
-	GSList *server_uid_list = NULL;
+	GHashTable *server_messages = NULL;
 	const gchar *uid = NULL;
+	gboolean flags_changed = FALSE;
 
 	parent_store = camel_folder_get_parent_store (m->folder);
 
@@ -614,10 +595,12 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 	if (mapi_folder->type & CAMEL_MAPI_FOLDER_PUBLIC)
 		options |= MAPI_OPTIONS_USE_PFSTORE;
 
+	server_messages = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
 	/*Get the UID list from server.*/
 	exchange_mapi_connection_fetch_items  (camel_mapi_store_get_exchange_connection (mapi_store), m->folder_id, NULL, NULL,
-					       mapi_camel_get_last_modif_list, NULL,
-					       deleted_items_sync_cb, &server_uid_list,
+					       NULL, NULL,
+					       deleted_items_sync_cb, server_messages,
 					       options | MAPI_OPTIONS_DONT_OPEN_MESSAGE);
 
 	camel_operation_end (NULL);
@@ -625,8 +608,10 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 	camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	/* Check if we have to stop */
-	if (camel_operation_cancel_check(NULL))
+	if (camel_operation_cancel_check(NULL)) {
+		g_hash_table_destroy (server_messages);
 		return;
+	}
 
 	changes = camel_folder_change_info_new ();
 
@@ -637,34 +622,47 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 
 	/* Iterate over cache and check if the UID is in server*/
 	for (index = 0; index < count; index++) {
-		GSList *tmp_list_item = NULL;
+		guint32 msg_flags;
 
 		/* Iterate in a reverse order, thus removal will not hurt */
 		info = camel_folder_summary_index (m->folder->summary, count - index - 1);
 		if (!info) continue; /*This is bad. *Should* not happen*/
 
 		uid = camel_message_info_uid (info);
-
-		if (server_uid_list) {
-			/* TODO : Find a better way and avoid this linear search */
-			tmp_list_item = g_slist_find_custom (server_uid_list, (gconstpointer) uid,
-						  (GCompareFunc) g_strcmp0);
+		if (!uid) {
+			camel_message_info_free (info);
+			continue;
 		}
 
+		msg_flags = GPOINTER_TO_INT (g_hash_table_lookup (server_messages, uid));
+
 		/* If it is not in server list, clean our cache */
-		if ((!tmp_list_item || !tmp_list_item->data) && uid) {
+		if (!msg_flags) {
 			CAMEL_MAPI_FOLDER_REC_LOCK (m->folder, cache_lock);
 			camel_folder_summary_remove_uid (m->folder->summary, uid);
 			camel_data_cache_remove (mapi_folder->cache, "cache", uid, NULL);
 			camel_folder_change_info_remove_uid (changes, uid);
 			CAMEL_MAPI_FOLDER_REC_UNLOCK (m->folder, cache_lock);
+		} else {
+			CamelMapiMessageInfo *mapi_info = (CamelMapiMessageInfo *) info;
+
+			msg_flags = msg_flags & (~CAMEL_MESSAGE_FOLDER_FLAGGED);
+			if (mapi_info->server_flags != msg_flags) {
+				mapi_info->server_flags = msg_flags;
+				camel_message_info_set_flags (info, msg_flags, CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ATTACHMENTS);
+				camel_folder_change_info_change_uid (changes, uid);
+				flags_changed = TRUE;
+			}
 		}
+
+		camel_message_info_free (info);
 
 		/* Progress update */
 		camel_operation_progress (NULL, (index * 100)/count); /* ;-) */
 
 		/* Check if we have to stop */
 		if (camel_operation_cancel_check(NULL)) {
+			g_hash_table_destroy (server_messages);
 			if (camel_folder_change_info_changed (changes))
 				camel_folder_changed (m->folder, changes);
 			camel_folder_change_info_free (changes);
@@ -674,15 +672,16 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 
 	camel_operation_end (NULL);
 
-	if (camel_folder_change_info_changed (changes))
+	if (camel_folder_change_info_changed (changes)) {
+		if (flags_changed)
+			camel_mapi_summary_update_store_info_counts (CAMEL_MAPI_SUMMARY (CAMEL_FOLDER (mapi_folder)->summary));
 		camel_folder_changed (m->folder, changes);
+	}
 	camel_folder_change_info_free (changes);
 
-	m->need_refresh = camel_folder_summary_count (m->folder->summary) != g_slist_length (server_uid_list);
+	m->need_refresh = camel_folder_summary_count (m->folder->summary) != g_hash_table_size (server_messages);
 
-	/* Discard server uid list */
-	g_slist_foreach (server_uid_list, (GFunc) g_free, NULL);
-	g_slist_free (server_uid_list);
+	g_hash_table_destroy (server_messages);
 }
 
 static void
@@ -745,7 +744,7 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 
 	if (((CamelOfflineStore *) mapi_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL ||
 			((CamelService *)mapi_store)->status == CAMEL_SERVICE_DISCONNECTED) {
-		mapi_sync_summary (folder, ex);
+		update_store_summary (folder, ex);
 		return !camel_exception_is_set (ex);
 	}
 
@@ -891,7 +890,7 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	}
 
 	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-	mapi_sync_summary (folder, ex);
+	update_store_summary (folder, ex);
 	camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	return !camel_exception_is_set (ex);
@@ -1068,7 +1067,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		mapi_summary->sync_time_stamp = g_time_val_to_iso8601 (&fetch_data->last_modification_time);
 
 		camel_folder_summary_touch (folder->summary);
-		mapi_sync_summary (folder, ex);
+		update_store_summary (folder, ex);
 
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		is_locked = FALSE;

@@ -1439,11 +1439,12 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 		goto cleanup;
 	}
 
-	SPropTagArray = set_SPropTagArray(mem_ctx, 0x4,
+	SPropTagArray = set_SPropTagArray(mem_ctx, 0x5,
 					  PR_FID,
 					  PR_MID,
 					  PR_LAST_MODIFICATION_TIME,
-					  PR_HASATTACH);
+					  PR_HASATTACH,
+					  PR_MESSAGE_FLAGS);
 
 	/* Set primary columns to be fetched */
 	retval = SetColumns(&obj_table, SPropTagArray);
@@ -1500,6 +1501,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 			const mapi_id_t *pfid;
 			const mapi_id_t	*pmid;
 			const bool *has_attach = NULL;
+			const uint32_t *msg_flags;
 			GSList *attach_list = NULL;
 			GSList *recip_list = NULL;
 			GSList *stream_list = NULL;
@@ -1511,6 +1513,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 			pmid = (const uint64_t *) get_SPropValue_SRow_data(&SRowSet.aRow[i], PR_MID);
 
 			has_attach = (const bool *) get_SPropValue_SRow_data(&SRowSet.aRow[i], PR_HASATTACH);
+			msg_flags = get_SPropValue_SRow_data (&SRowSet.aRow[i], PR_MESSAGE_FLAGS);
 
 			if (options & MAPI_OPTIONS_DONT_OPEN_MESSAGE)
 				goto relax;
@@ -1588,6 +1591,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 				item_data->conn = conn;
 				item_data->fid = *pfid;
 				item_data->mid = *pmid;
+				item_data->msg_flags = msg_flags ? *msg_flags : 0;
 				item_data->properties = &properties_array;
 				item_data->streams = stream_list;
 				item_data->recipients = recip_list;

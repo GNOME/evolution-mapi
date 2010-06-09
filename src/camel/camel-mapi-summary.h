@@ -85,6 +85,7 @@ GType camel_mapi_summary_get_type (void);
 CamelFolderSummary *camel_mapi_summary_new (struct _CamelFolder *folder, const gchar *filename);
 
 void mapi_summary_clear (CamelFolderSummary *summary, gboolean uncache);
+void camel_mapi_summary_update_store_info_counts (CamelMapiSummary *mapi_summary);
 
 G_END_DECLS
 

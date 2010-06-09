@@ -115,6 +115,7 @@ typedef struct {
 	struct mapi_SPropValue_array *properties;
 	mapi_id_t fid;
 	mapi_id_t mid;
+	uint32_t msg_flags; /* used only with fetch_items */
 	GSList *attachments;
 	GSList *recipients;
 	GSList *gallist;
