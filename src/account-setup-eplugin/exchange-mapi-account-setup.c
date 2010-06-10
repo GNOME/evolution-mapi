@@ -835,7 +835,7 @@ exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 	conn = exchange_mapi_connection_find (e_source_get_property (source, "profile"));
 	g_return_if_fail (conn != NULL);
 
-	fid = exchange_mapi_connection_create_folder (conn, type, pfid, e_source_peek_name (source));
+	fid = exchange_mapi_connection_create_folder (conn, type, pfid, 0, e_source_peek_name (source));
 	g_object_unref (conn);
 
 	sfid = exchange_mapi_util_mapi_id_to_string (fid);

@@ -178,12 +178,12 @@ gboolean		exchange_mapi_connection_fetch_gal (ExchangeMapiConnection *conn,
 
 gboolean		exchange_mapi_connection_get_public_folder (ExchangeMapiConnection *conn, mapi_object_t *obj_object);
 
-mapi_id_t		exchange_mapi_connection_create_folder (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t pfid, const gchar *name);
-gboolean		exchange_mapi_connection_remove_folder (ExchangeMapiConnection *conn, mapi_id_t fid);
-gboolean		exchange_mapi_connection_empty_folder (ExchangeMapiConnection *conn, mapi_id_t fid);
-gboolean		exchange_mapi_connection_rename_folder (ExchangeMapiConnection *conn, mapi_id_t fid, const gchar *new_name);
-gboolean		exchange_mapi_connection_move_folder (ExchangeMapiConnection *conn, mapi_id_t src_fid, mapi_id_t src_parent_fid, mapi_id_t des_fid, const gchar *new_name);
-GSList *		exchange_mapi_connection_check_restriction (ExchangeMapiConnection *conn, mapi_id_t fid, struct mapi_SRestriction *res);
+mapi_id_t		exchange_mapi_connection_create_folder (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t pfid, guint32 fid_options, const gchar *name);
+gboolean		exchange_mapi_connection_remove_folder (ExchangeMapiConnection *conn, mapi_id_t fid, guint32 fid_options);
+gboolean		exchange_mapi_connection_empty_folder (ExchangeMapiConnection *conn, mapi_id_t fid, guint32 fid_options);
+gboolean		exchange_mapi_connection_rename_folder (ExchangeMapiConnection *conn, mapi_id_t fid, guint32 fid_options, const gchar *new_name);
+gboolean		exchange_mapi_connection_move_folder (ExchangeMapiConnection *conn, mapi_id_t src_fid, mapi_id_t src_parent_fid, guint32 src_fid_options, mapi_id_t des_fid, guint32 des_fid_options, const gchar *new_name);
+GSList *		exchange_mapi_connection_check_restriction (ExchangeMapiConnection *conn, mapi_id_t fid, guint32 fid_options, struct mapi_SRestriction *res);
 mapi_id_t		exchange_mapi_connection_get_default_folder_id (ExchangeMapiConnection *conn, uint32_t olFolder);
 mapi_id_t		exchange_mapi_connection_create_item (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid,
 					BuildWritePropsCB build_props, gpointer bwp_data,
@@ -195,10 +195,10 @@ gboolean		exchange_mapi_connection_modify_item (ExchangeMapiConnection *conn, ui
 					GSList *recipients, GSList *attachments, GSList *generic_streams,
 					uint32_t options);
 
-gboolean		exchange_mapi_connection_set_flags (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, GSList *mid_list, uint32_t flag, guint32 options);
-gboolean		exchange_mapi_connection_remove_items (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, GSList *mids);
-gboolean		exchange_mapi_connection_copy_items (ExchangeMapiConnection *conn, mapi_id_t src_fid, mapi_id_t dest_fid, GSList *mids);
-gboolean		exchange_mapi_connection_move_items (ExchangeMapiConnection *conn, mapi_id_t src_fid, mapi_id_t dest_fid, GSList *mids);
+gboolean		exchange_mapi_connection_set_flags (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, guint32 fid_options, GSList *mid_list, uint32_t flag);
+gboolean		exchange_mapi_connection_remove_items (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, guint32 fid_options, GSList *mids);
+enum MAPISTATUS		exchange_mapi_connection_copy_items (ExchangeMapiConnection *conn, mapi_id_t src_fid, guint32 src_fid_options, mapi_id_t dest_fid, guint32 dest_fid_options, GSList *mids);
+enum MAPISTATUS		exchange_mapi_connection_move_items (ExchangeMapiConnection *conn, mapi_id_t src_fid, guint32 src_fid_options, mapi_id_t dest_fid, guint32 dest_fid_options, GSList *mids);
 gboolean 		exchange_mapi_connection_get_folders_list (ExchangeMapiConnection *conn, GSList **mapi_folders);
 gboolean		exchange_mapi_connection_get_pf_folders_list (ExchangeMapiConnection *conn, GSList **mapi_folders);
 GSList *		exchange_mapi_connection_peek_folders_list (ExchangeMapiConnection *conn);

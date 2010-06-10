@@ -1182,7 +1182,7 @@ update_server_object (ExchangeMapiConnection *conn, struct mapi_SPropValue_array
 			idlist.id = *mid;
 			ids = g_slist_append (ids, &idlist);
 
-			exchange_mapi_connection_remove_items (conn, olFolderCalendar, fid, ids);
+			exchange_mapi_connection_remove_items (conn, olFolderCalendar, fid, 0, ids);
 			g_slist_free (ids);
 		} else
 			create_new = FALSE;
@@ -1256,7 +1256,7 @@ check_server_for_object (ExchangeMapiConnection *conn, struct mapi_SPropValue_ar
 	set_SPropValue_proptag (&sprop, proptag, (gconstpointer ) sb);
 	cast_mapi_SPropValue (&(res.res.resProperty.lpProp), &sprop);
 
-	ids = exchange_mapi_connection_check_restriction (conn, fid, &res);
+	ids = exchange_mapi_connection_check_restriction (conn, fid, 0, &res);
 
 	if (ids && g_slist_length(ids) == 1) {
 		struct id_list *idlist = (struct id_list *)(ids->data);
@@ -2112,7 +2112,7 @@ exchange_mapi_cal_util_get_new_appt_id (ExchangeMapiConnection *conn, mapi_id_t 
 			GSList *ids = NULL;
 			set_SPropValue_proptag (&sprop, PR_OWNER_APPT_ID, (gconstpointer ) &id);
 			cast_mapi_SPropValue (&(res.res.resProperty.lpProp), &sprop);
-			ids = exchange_mapi_connection_check_restriction (conn, fid, &res);
+			ids = exchange_mapi_connection_check_restriction (conn, fid, 0, &res);
 			if (ids) {
 				GSList *l;
 				for (l = ids; l; l = l->next)

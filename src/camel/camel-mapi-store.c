@@ -571,7 +571,7 @@ mapi_create_folder(CamelStore *store, const gchar *parent_name, const gchar *fol
 	camel_service_lock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	exchange_mapi_util_mapi_id_from_string (parent_id, &parent_fid);
-	new_folder_id = exchange_mapi_connection_create_folder (priv->conn, olFolderInbox, parent_fid, folder_name);
+	new_folder_id = exchange_mapi_connection_create_folder (priv->conn, olFolderInbox, parent_fid, 0, folder_name);
 	if (new_folder_id != 0) {
 		CamelMapiStoreInfo *si;
 		gchar *fid = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", new_folder_id);
@@ -647,7 +647,7 @@ mapi_delete_folder(CamelStore *store, const gchar *folder_name, CamelException *
 
 	folder_id = g_hash_table_lookup (priv->name_hash, folder_name);
 	exchange_mapi_util_mapi_id_from_string (folder_id, &folder_fid);
-	status = exchange_mapi_connection_remove_folder (priv->conn, folder_fid);
+	status = exchange_mapi_connection_remove_folder (priv->conn, folder_fid, 0);
 
 	if (status) {
 		/* Fixme ??  */
@@ -785,7 +785,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 		gchar *folder_id;
 
 		/* renaming in the same folder, thus no MoveFolder necessary */
-		if (!exchange_mapi_connection_rename_folder (priv->conn, old_fid, tmp ? tmp : new_name)) {
+		if (!exchange_mapi_connection_rename_folder (priv->conn, old_fid, 0, tmp ? tmp : new_name)) {
 			/*To translators : '%s to %s' is current name of the folder  and
 			new name of the folder.*/
 			camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM,
@@ -838,7 +838,7 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 		} else if (!old_parent_fid_str || !new_parent_fid_str ||
 			   !exchange_mapi_util_mapi_id_from_string (old_parent_fid_str, &old_parent_fid) ||
 			   !exchange_mapi_util_mapi_id_from_string (new_parent_fid_str, &new_parent_fid) ||
-			   !exchange_mapi_connection_move_folder (priv->conn, old_fid, old_parent_fid, new_parent_fid, tmp)) {
+			   !exchange_mapi_connection_move_folder (priv->conn, old_fid, old_parent_fid, 0, new_parent_fid, 0, tmp)) {
 			camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 			camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot rename MAPI folder '%s' to '%s'"), old_name, new_name);
 			g_free (old_parent);

@@ -346,7 +346,7 @@ e_cal_backend_mapi_remove (ECalBackendSync *backend, EDataCal *cal)
 	if (priv->mode == CAL_MODE_LOCAL || !priv->conn || !exchange_mapi_connection_connected (priv->conn))
 		return GNOME_Evolution_Calendar_RepositoryOffline;
 
-	status = exchange_mapi_connection_remove_folder (priv->conn, priv->fid);
+	status = exchange_mapi_connection_remove_folder (priv->conn, priv->fid, 0);
 	if (!status)
 		return GNOME_Evolution_Calendar_OtherError;
 
@@ -1920,7 +1920,7 @@ e_cal_backend_mapi_remove_object (ECalBackendSync *backend, EDataCal *cal,
 				list = g_slist_prepend (list, (gpointer) data);
 //			}
 
-			if (exchange_mapi_connection_remove_items (priv->conn, priv->olFolder, priv->fid, list)) {
+			if (exchange_mapi_connection_remove_items (priv->conn, priv->olFolder, priv->fid, 0, list)) {
 				for (l = comp_list; l; l = l->next) {
 					ECalComponent *comp = E_CAL_COMPONENT (l->data);
 					ECalComponentId *id = e_cal_component_get_id (comp);

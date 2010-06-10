@@ -783,7 +783,7 @@ e_book_backend_mapi_remove_contacts (EBookBackend *backend,
 			tmp = tmp->next;
 		}
 
-		exchange_mapi_connection_remove_items (priv->conn, olFolderContacts, priv->fid, list);
+		exchange_mapi_connection_remove_items (priv->conn, olFolderContacts, priv->fid, 0, list);
 		if (priv->marked_for_offline && priv->is_cache_ready) {
 			tmp = id_list;
 			while (tmp) {
@@ -1637,7 +1637,7 @@ e_book_backend_mapi_remove (EBookBackend *backend,
 
 	case GNOME_Evolution_Addressbook_MODE_REMOTE:
 
-		status = exchange_mapi_connection_remove_folder (priv->conn, priv->fid);
+		status = exchange_mapi_connection_remove_folder (priv->conn, priv->fid, 0);
 		if (!status) {
 			e_data_book_respond_remove (book, opid, GNOME_Evolution_Addressbook_OtherError);
 			return;
