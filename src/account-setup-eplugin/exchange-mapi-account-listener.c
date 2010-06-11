@@ -523,6 +523,7 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		gchar *uri;
 		gboolean is_new_source = FALSE;
 
+		source = NULL;
 		uri = g_strdup_printf ("mapigal://%s@%s/;Global Address List", url->user, url->host);
 		for (temp_list = old_sources; temp_list; temp_list = temp_list->next) {
 			source = temp_list->data;
