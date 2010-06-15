@@ -1294,15 +1294,16 @@ cleanup:
 }
 
 static enum MAPISTATUS
-open_folder (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, guint32 fid_options, mapi_object_t *obj_folder)
+open_folder (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t *fid, guint32 fid_options, mapi_object_t *obj_folder)
 {
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, MAPI_E_INVALID_PARAMETER);
 	g_return_val_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (fid != NULL, MAPI_E_INVALID_PARAMETER);
 
-	if (fid == 0) {
+	if (*fid == 0) {
 		enum MAPISTATUS retval;
 
-		retval = GetDefaultFolder (&priv->msg_store, &fid, olFolder);
+		retval = GetDefaultFolder (&priv->msg_store, fid, olFolder);
 		if (retval != MAPI_E_SUCCESS)
 			return retval;
 
@@ -1314,7 +1315,7 @@ open_folder (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, gui
 			return MAPI_E_CALL_FAILED;
 	}
 
-	return OpenFolder (((fid_options & MAPI_OPTIONS_USE_PFSTORE) != 0 ? &priv->public_store : &priv->msg_store), fid, obj_folder);
+	return OpenFolder (((fid_options & MAPI_OPTIONS_USE_PFSTORE) != 0 ? &priv->public_store : &priv->msg_store), *fid, obj_folder);
 }
 
 GSList *
@@ -1340,7 +1341,7 @@ exchange_mapi_connection_check_restriction (ExchangeMapiConnection *conn, mapi_i
 	mapi_object_init(&obj_table);
 
 	/* Attempt to open the folder */
-	retval = open_folder (conn, 0, fid, fid_options, &obj_folder);
+	retval = open_folder (conn, 0, &fid, fid_options, &obj_folder);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder", GetLastError());
 		goto cleanup;
@@ -1445,7 +1446,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 	mapi_object_init(&obj_table);
 
 	/* Attempt to open the folder */
-	retval = open_folder (conn, 0, fid, options, &obj_folder);
+	retval = open_folder (conn, 0, &fid, options, &obj_folder);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder", GetLastError());
 		goto cleanup;
@@ -1788,7 +1789,7 @@ exchange_mapi_connection_fetch_item (ExchangeMapiConnection *conn, mapi_id_t fid
 	mapi_object_init(&obj_message);
 
 	/* Attempt to open the folder */
-	retval = open_folder (conn, 0, fid, options, &obj_folder);
+	retval = open_folder (conn, 0, &fid, options, &obj_folder);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder", GetLastError());
 		goto cleanup;
@@ -1836,7 +1837,7 @@ exchange_mapi_connection_create_folder (ExchangeMapiConnection *conn, uint32_t o
 	mapi_object_init(&obj_folder);
 
 	/* We now open the top/parent folder */
-	retval = open_folder (conn, olFolder, pfid, fid_options, &obj_top);
+	retval = open_folder (conn, olFolder, &pfid, fid_options, &obj_top);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder", GetLastError());
 		goto cleanup;
@@ -1909,7 +1910,7 @@ exchange_mapi_connection_empty_folder (ExchangeMapiConnection *conn, mapi_id_t f
 	mapi_object_init (&obj_folder);
 
 	/* Attempt to open the folder to be emptied */
-	retval = open_folder (conn, 0, fid, fid_options, &obj_folder);
+	retval = open_folder (conn, 0, &fid, fid_options, &obj_folder);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder", GetLastError());
 		goto cleanup;
@@ -1969,7 +1970,7 @@ exchange_mapi_connection_remove_folder (ExchangeMapiConnection *conn, mapi_id_t 
 	 */
 
 	/* Attempt to open the folder to be removed */
-	retval = open_folder (conn, 0, fid, fid_options, &obj_folder);
+	retval = open_folder (conn, 0, &fid, fid_options, &obj_folder);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder", GetLastError());
 		goto cleanup;
@@ -1985,7 +1986,7 @@ exchange_mapi_connection_remove_folder (ExchangeMapiConnection *conn, mapi_id_t 
 	g_debug("Folder with id %016" G_GINT64_MODIFIER "X was emptied ", fid);
 
 	/* Attempt to open the top/parent folder */
-	retval = open_folder (conn, 0, folder->parent_folder_id, fid_options, &obj_top);
+	retval = open_folder (conn, 0, &folder->parent_folder_id, fid_options, &obj_top);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder", GetLastError());
 		goto cleanup;
@@ -2035,7 +2036,7 @@ exchange_mapi_connection_rename_folder (ExchangeMapiConnection *conn, mapi_id_t 
 	mapi_object_init(&obj_folder);
 
 	/* Open the folder to be renamed */
-	retval = open_folder (conn, 0, fid, fid_options, &obj_folder);
+	retval = open_folder (conn, 0, &fid, fid_options, &obj_folder);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder", GetLastError());
 		goto cleanup;
@@ -2086,19 +2087,19 @@ exchange_mapi_connection_move_folder (ExchangeMapiConnection *conn, mapi_id_t sr
 	mapi_object_init (&obj_src_parent);
 	mapi_object_init (&obj_des);
 
-	retval = open_folder (conn, 0, src_fid, src_fid_options, &obj_src);
+	retval = open_folder (conn, 0, &src_fid, src_fid_options, &obj_src);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr ("open_folder src_fid", GetLastError());
 		goto cleanup;
 	}
 
-	retval = open_folder (conn, 0, src_parent_fid, src_fid_options, &obj_src_parent);
+	retval = open_folder (conn, 0, &src_parent_fid, src_fid_options, &obj_src_parent);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr ("open_folder src_parent_fid", GetLastError());
 		goto cleanup;
 	}
 
-	retval = open_folder (conn, 0, des_fid, des_fid_options, &obj_des);
+	retval = open_folder (conn, 0, &des_fid, des_fid_options, &obj_des);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr ("open_folder des_fid", GetLastError());
 		goto cleanup;
@@ -2177,7 +2178,7 @@ exchange_mapi_connection_resolve_named_props (ExchangeMapiConnection *conn, mapi
 	SPropTagArray = talloc_zero (mem_ctx, struct SPropTagArray);
 
 	/* Attempt to open the folder */
-	retval = open_folder (conn, 0, fid, 0, &obj_folder);
+	retval = open_folder (conn, 0, &fid, 0, &obj_folder);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder", GetLastError());
 		goto cleanup;
@@ -2297,7 +2298,7 @@ exchange_mapi_connection_resolve_named_prop (ExchangeMapiConnection *conn, mapi_
 	SPropTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
 
 	/* Attempt to open the folder */
-	retval = open_folder (conn, 0, fid, 0, &obj_folder);
+	retval = open_folder (conn, 0, &fid, 0, &obj_folder);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder", GetLastError());
 		goto cleanup;
@@ -2395,7 +2396,7 @@ exchange_mapi_connection_create_item (ExchangeMapiConnection *conn, uint32_t olF
 	mapi_object_init(&obj_message);
 
 	/* Attempt to open the folder */
-	retval = open_folder (conn, olFolder, fid, options, &obj_folder);
+	retval = open_folder (conn, olFolder, &fid, options, &obj_folder);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder", GetLastError());
 		goto cleanup;
@@ -2517,7 +2518,7 @@ exchange_mapi_connection_modify_item (ExchangeMapiConnection *conn, uint32_t olF
 	mapi_object_init(&obj_message);
 
 	/* Attempt to open the folder */
-	retval = open_folder (conn, olFolder, fid, options, &obj_folder);
+	retval = open_folder (conn, olFolder, &fid, options, &obj_folder);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder", GetLastError());
 		goto cleanup;
@@ -2616,7 +2617,7 @@ exchange_mapi_connection_set_flags (ExchangeMapiConnection *conn, uint32_t olFol
 		id_messages[i] = *((mapi_id_t *)tmp->data);
 
 	/* Attempt to open the folder */
-	retval = open_folder (conn, olFolder, fid, fid_options, &obj_folder);
+	retval = open_folder (conn, olFolder, &fid, fid_options, &obj_folder);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder", GetLastError());
 		goto cleanup;
@@ -2659,13 +2660,13 @@ mapi_move_items (ExchangeMapiConnection *conn, mapi_id_t src_fid, guint32 src_fi
 	for (l = mid_list; l != NULL; l = g_slist_next (l))
 		mapi_id_array_add_id (&msg_id_array, *((mapi_id_t *)l->data));
 
-	retval = open_folder (conn, 0, src_fid, src_fid_options, &obj_folder_src);
+	retval = open_folder (conn, 0, &src_fid, src_fid_options, &obj_folder_src);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder - source folder", GetLastError());
 		goto cleanup;
 	}
 
-	retval = open_folder (conn, 0, dest_fid, dest_fid_options, &obj_folder_dst);
+	retval = open_folder (conn, 0, &dest_fid, dest_fid_options, &obj_folder_dst);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder - destination folder", GetLastError());
 		goto cleanup;
@@ -2751,7 +2752,7 @@ exchange_mapi_connection_remove_items (ExchangeMapiConnection *conn, uint32_t ol
 	}
 
 	/* Attempt to open the folder */
-	retval = open_folder (conn, olFolder, fid, fid_options, &obj_folder);
+	retval = open_folder (conn, olFolder, &fid, fid_options, &obj_folder);
 	if (retval != MAPI_E_SUCCESS) {
 		mapi_errstr("open_folder", GetLastError());
 		goto cleanup;
