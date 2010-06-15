@@ -1448,7 +1448,7 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cbdata *cb
 		return;
 
 	array = exchange_mapi_util_resolve_named_prop (priv->olFolder, priv->fid, 0x0023, PSETID_Meeting);
-	proptag = array->aulPropTag[0];
+	proptag = array ? array->aulPropTag[0] : PidLidCleanGlobalObjectId;
 
 	res.rt = RES_PROPERTY;
 	res.res.resProperty.relop = RELOP_EQ;
