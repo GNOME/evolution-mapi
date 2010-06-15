@@ -1490,6 +1490,7 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cal_cbdata
 		return;
 
 	proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidCleanGlobalObjectId);
+	if (proptag == MAPI_E_RESERVED) proptag = PidLidCleanGlobalObjectId;
 
 	res.rt = RES_PROPERTY;
 	res.res.resProperty.relop = RELOP_EQ;
