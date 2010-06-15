@@ -1326,6 +1326,20 @@ fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 		g_free (smid);
 	}
 
+	if (!comp) {
+		/* read component from a mail, if not found in the calendar */
+		if (mid)
+			smid = exchange_mapi_util_mapi_id_to_string (mid);
+		else
+			smid = e_cal_component_gen_uid();
+		comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, fccd->kind, smid,
+							item_data->properties, item_data->streams, item_data->recipients,
+							NULL, NULL, NULL);
+		set_attachments_to_cal_component (comp, item_data->attachments, fileuri);
+		e_cal_component_set_uid (comp, smid);
+		g_free (smid);
+	}
+
 	g_free (fileuri);
 	g_free (filename);
 
