@@ -61,7 +61,7 @@ static const struct field_element_mapping {
 	{ E_CONTACT_UID, PT_UNICODE, 0, ELEMENT_TYPE_SIMPLE},
 	{ E_CONTACT_REV, PT_SYSTIME, PR_LAST_MODIFICATION_TIME, ELEMENT_TYPE_SIMPLE},
 
-	{ E_CONTACT_FILE_AS, PT_UNICODE, PR_EMS_AB_MANAGER_T_UNICODE, ELEMENT_TYPE_SIMPLE},
+	{ E_CONTACT_FILE_AS, PT_UNICODE, PidLidFileUnder, ELEMENT_TYPE_SIMPLE | ELEMENT_TYPE_NAMEDID},
 	{ E_CONTACT_FULL_NAME, PT_UNICODE, PR_DISPLAY_NAME_UNICODE, ELEMENT_TYPE_SIMPLE },
 	{ E_CONTACT_GIVEN_NAME, PT_UNICODE, PR_GIVEN_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
 	{ E_CONTACT_FAMILY_NAME, PT_UNICODE, PR_SURNAME_UNICODE, ELEMENT_TYPE_SIMPLE},
@@ -140,7 +140,6 @@ mapi_book_utils_get_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALL
 		PR_DEPARTMENT_NAME_UNICODE,
 		PR_DISPLAY_NAME_UNICODE,
 		PR_SMTP_ADDRESS_UNICODE, /* used in GAL */
-		PR_EMS_AB_MANAGER_T_UNICODE,
 		PR_FID,
 		PR_GIVEN_NAME_UNICODE,
 		PR_HASATTACH,
@@ -198,6 +197,8 @@ mapi_book_utils_get_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALL
 		{ PidLidDistributionListOneOffMembers, 0 },
 		{ PidLidDistributionListMembers, 0 },
 		{ PidLidDistributionListChecksum, 0 },
+
+		{ PidLidFileUnder, 0 },
 
 		{ PidLidEmail1OriginalDisplayName, 0 },
 		{ PidLidEmail2OriginalDisplayName, 0 },
