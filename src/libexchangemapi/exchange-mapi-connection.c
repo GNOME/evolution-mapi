@@ -944,7 +944,11 @@ exchange_mapi_util_get_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 		attachment->cValues = properties.cValues;
 		attachment->lpProps = g_new0 (struct SPropValue, attachment->cValues + 1);
 		for (z=0; z < properties.cValues; z++) {
-			cast_SPropValue (&properties.lpProps[z], &(attachment->lpProps[z]));
+			cast_SPropValue (
+				#ifdef HAVE_MEMCTX_ON_CAST_SPROPVALUE
+				mem_ctx,
+				#endif
+				&properties.lpProps[z], &(attachment->lpProps[z]));
 
 			if ((attachment->lpProps[z].ulPropTag & 0xFFFF) == PT_STRING8) {
 				struct SPropValue *lpProps;

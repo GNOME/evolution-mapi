@@ -168,6 +168,20 @@ LIBS=$save_libs
 AC_MSG_RESULT([$ac_cv_have_ggtc])
 
 dnl ****************************
+dnl Check for cast_SPropValue function with three params
+dnl ****************************
+AC_MSG_CHECKING([libmapi cast_SPropValue function with three params])
+save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
+save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
+AC_LINK_IFELSE([AC_LANG_PROGRAM(
+	[[#include <libmapi/libmapi.h>]],
+	[[cast_SPropValue (NULL, NULL, NULL)]])],
+	[AC_DEFINE(HAVE_MEMCTX_ON_CAST_SPROPVALUE, 1, [libmapi provides cast_SPropValue with mem context parameter]) ac_cv_have_mocs=yes],[ac_cv_have_mocs=no])
+CFLAGS=$save_cflags
+LIBS=$save_libs
+AC_MSG_RESULT([$ac_cv_have_mocs])
+
+dnl ****************************
 dnl Expose version information
 dnl ****************************
 API_VERSION=$EDS_PACKAGE
