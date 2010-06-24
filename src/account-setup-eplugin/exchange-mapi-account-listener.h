@@ -25,7 +25,7 @@
 
 #include <glib.h>
 #include <glib-object.h>
-
+#include <camel/camel.h>
 G_BEGIN_DECLS
 
 #define EXCHANGE_MAPI_ACCOUNT_LISTENER_TYPE		(exchange_mapi_account_listener_get_type ())
@@ -47,6 +47,8 @@ struct _ExchangeMAPIAccountListenerClass {
 	GObjectClass parent_class;
 };
 
+void				exchange_mapi_add_esource (CamelURL *url, const gchar *folder_name, const gchar *fid, gint folder_type);
+void				exchange_mapi_remove_esource (CamelURL *url, const gchar *folder_name, const gchar *fid, gint folder_type);
 GType				exchange_mapi_account_listener_get_type (void);
 ExchangeMAPIAccountListener *	exchange_mapi_account_listener_new (void);
 

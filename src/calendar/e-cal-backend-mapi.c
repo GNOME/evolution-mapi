@@ -338,15 +338,18 @@ e_cal_backend_mapi_remove (ECalBackendSync *backend, EDataCal *cal)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
-	gboolean status = FALSE;
+	gboolean status = TRUE;
+	ESource *source = NULL;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
+	source = e_cal_backend_get_source (E_CAL_BACKEND (cbmapi));
+
 	if (priv->mode == CAL_MODE_LOCAL || !priv->conn || !exchange_mapi_connection_connected (priv->conn))
 		return GNOME_Evolution_Calendar_RepositoryOffline;
-
-	status = exchange_mapi_connection_remove_folder (priv->conn, priv->fid, 0);
+	if (strcmp (e_source_get_property (source, "public"), "yes") != 0)
+		status = exchange_mapi_connection_remove_folder (priv->conn, priv->fid, 0);
 	if (!status)
 		return GNOME_Evolution_Calendar_OtherError;
 
@@ -674,6 +677,9 @@ get_deltas (gpointer handle)
 	gboolean use_restriction = FALSE;
 	GSList *ls = NULL;
 	struct deleted_items_data did;
+	ESource *source = NULL;
+	guint32 options= MAPI_OPTIONS_FETCH_ALL;
+	gboolean is_public = FALSE; 
 
 	if (!handle)
 		return FALSE;
@@ -681,7 +687,7 @@ get_deltas (gpointer handle)
 	cbmapi = (ECalBackendMAPI *) handle;
 	priv= cbmapi->priv;
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
-
+	source = e_cal_backend_get_source (E_CAL_BACKEND (cbmapi));
 	if (priv->mode == CAL_MODE_LOCAL)
 		return FALSE;
 
@@ -716,25 +722,39 @@ get_deltas (gpointer handle)
 //	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	/* FIXME: GetProps does not seem to work for tasks :-( */
 	if (kind == ICAL_VTODO_COMPONENT) {
+		if (strcmp (e_source_get_property(source, "public"), "yes") == 0 ) {
+			options |= MAPI_OPTIONS_USE_PFSTORE;
+			is_public = TRUE;
+			use_restriction = FALSE;	
+		}
+
 		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
-						mapi_cal_get_known_ids, NULL,
+						is_public ? NULL : mapi_cal_get_known_ids, NULL,
 						mapi_cal_get_changes_cb, cbmapi,
-						MAPI_OPTIONS_FETCH_ALL)) {
+						options)) {
 			/* FIXME: String : We need to restart evolution-data-server */
 			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
 //			e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 			g_static_mutex_unlock (&updating);
 			return FALSE;
 		}
-	} else if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
-						exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
+	} else {
+		if (strcmp (e_source_get_property(source, "public"), "yes") == 0) {
+			options |= MAPI_OPTIONS_USE_PFSTORE;
+			is_public = TRUE;
+			use_restriction = FALSE;
+		} 
+
+		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
+						is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 						mapi_cal_get_changes_cb, cbmapi,
-						MAPI_OPTIONS_FETCH_ALL)) {
+						options)) {
 		/* FIXME: String : We need to restart evolution-data-server */
 		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
 //		e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 		g_static_mutex_unlock (&updating);
 		return FALSE;
+		}
 	}
 //	e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 
@@ -753,10 +773,15 @@ get_deltas (gpointer handle)
 	did.cbmapi = cbmapi;
 	did.cache_keys = e_cal_backend_cache_get_keys (priv->cache);
 	did.unknown_mids = NULL;
+	options = 0;
+
+	if (strcmp (e_source_get_property(source, "public"), "yes") == 0 )
+		options = MAPI_OPTIONS_USE_PFSTORE;
+
 	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 						mapi_cal_get_idlist, NULL,
 						handle_deleted_items_cb, &did,
-						0)) {
+						options)) {
 		/* FIXME: String : We need to restart evolution-data-server */
 		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
 		g_slist_free (did.cache_keys);
@@ -764,6 +789,7 @@ get_deltas (gpointer handle)
 		return FALSE;
 	}
 
+	options = MAPI_OPTIONS_FETCH_ALL;
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	for (ls = did.cache_keys; ls; ls = g_slist_next (ls)) {
 		ECalComponent *comp = NULL;
@@ -816,25 +842,37 @@ get_deltas (gpointer handle)
 		g_slist_free (did.unknown_mids);
 
 		if (kind == ICAL_VTODO_COMPONENT) {
+			if (strcmp (e_source_get_property(source, "public"), "yes") == 0) {
+				options |= MAPI_OPTIONS_USE_PFSTORE;
+				is_public = TRUE;
+			}
+ 			
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
-						mapi_cal_get_known_ids, NULL,
+						is_public ? NULL : mapi_cal_get_known_ids, NULL,
 						mapi_cal_get_changes_cb, cbmapi,
-						MAPI_OPTIONS_FETCH_ALL)) {
+						options)) {
+								
 				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
 				g_static_mutex_unlock (&updating);
 				g_free (or_res);
 				return FALSE;
 			}
-		} else if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
-						exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
+		} else {
+			if (strcmp (e_source_get_property(source, "public"), "yes") == 0) {
+				options |= MAPI_OPTIONS_USE_PFSTORE;
+				is_public = TRUE;
+			}
+
+			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
+						is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 						mapi_cal_get_changes_cb, cbmapi,
-						MAPI_OPTIONS_FETCH_ALL)) {
+						options)) {
 			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
 			g_free (or_res);
 			g_static_mutex_unlock (&updating);
 			return FALSE;
+			}
 		}
-
 		g_free (or_res);
 	}
 
@@ -1135,7 +1173,8 @@ populate_cache (ECalBackendMAPI *cbmapi)
 	struct tm tm;
 	gchar *time_string = NULL;
 	gchar t_str [26];
-
+	guint32 options= MAPI_OPTIONS_FETCH_ALL;
+	gboolean is_public = FALSE;  
 	priv = cbmapi->priv;
 
 	g_mutex_lock (priv->mutex);
@@ -1159,10 +1198,15 @@ populate_cache (ECalBackendMAPI *cbmapi)
 //	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	/* FIXME: GetProps does not seem to work for tasks :-( */
 	if (kind == ICAL_VTODO_COMPONENT) {
+		if (strcmp (e_source_get_property(source, "public"), "yes") == 0) {
+			options |= MAPI_OPTIONS_USE_PFSTORE;
+			is_public = TRUE;	
+		}
+		
 		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
-						mapi_cal_get_known_ids, NULL,
+						is_public ? NULL : mapi_cal_get_known_ids, NULL,
 						mapi_cal_cache_create_cb, cbmapi,
-						MAPI_OPTIONS_FETCH_ALL)) {
+						options)) {
 			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Could not create cache file"));
 			e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 			g_mutex_lock (priv->mutex);
@@ -1170,16 +1214,23 @@ populate_cache (ECalBackendMAPI *cbmapi)
 			g_mutex_unlock (priv->mutex);
 			return GNOME_Evolution_Calendar_OtherError;
 		}
-	} else if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
-						exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
+	} else {
+		if (strcmp (e_source_get_property(source, "public"), "yes") ==0 ) {
+			options |= MAPI_OPTIONS_USE_PFSTORE;
+			is_public = TRUE;
+		}
+		
+		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
+						is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 						mapi_cal_cache_create_cb, cbmapi,
-						MAPI_OPTIONS_FETCH_ALL)) {
-		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Could not create cache file"));
-		e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
-		g_mutex_lock (priv->mutex);
-		priv->populating_cache = FALSE;
-		g_mutex_unlock (priv->mutex);
-		return GNOME_Evolution_Calendar_OtherError;
+						options)) {
+			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Could not create cache file"));
+			e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
+			g_mutex_lock (priv->mutex);
+			priv->populating_cache = FALSE;
+			g_mutex_unlock (priv->mutex);
+			return GNOME_Evolution_Calendar_OtherError;
+		}
 	}
 //	e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 

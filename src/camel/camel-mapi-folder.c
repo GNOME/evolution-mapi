@@ -155,7 +155,7 @@ fetch_items_summary_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 	GSList **slist = &(fi_data->items_list);
 
-	long *flags;
+	long *flags = NULL;
 	struct FILETIME *delivery_date = NULL;
 	struct FILETIME *last_modification_time = NULL;
 	struct timeval item_modification_time = { 0 };

@@ -179,7 +179,7 @@ find_source_by_fid (GSList *sources, const gchar *fid)
 #define SELECTED_CALENDARS	"/apps/evolution/calendar/display/selected_calendars"
 #define SELECTED_TASKS		"/apps/evolution/calendar/tasks/selected_tasks"
 #define SELECTED_JOURNALS	"/apps/evolution/calendar/memos/selected_memos"
-
+#define ADDRESSBOOK_SOURCES     "/apps/evolution/addressbook/sources"
 #define ITIP_MESSAGE_HANDLING	"/apps/evolution/itip/delete_processed"
 
 static void
@@ -269,6 +269,7 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 		e_source_set_property (source, "profile", camel_url_get_param (url, "profile"));
 		e_source_set_property (source, "domain", camel_url_get_param (url, "domain"));
 		e_source_set_property (source, "folder-id", fid);
+		e_source_set_property (source, "public", "no");
 		e_source_set_property (source, "offline_sync",
 					camel_url_get_param (url, "offline_sync") ? "1" : "0");
 
@@ -308,9 +309,11 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 		/* these were not found on the server by fid, thus remove them */
 		for (temp_list = old_sources; temp_list; temp_list = temp_list->next) {
 			ESource *source = temp_list->data;
-
-			if (source && E_IS_SOURCE (source))
-				e_source_group_remove_source (group, source);
+		
+			if (source && E_IS_SOURCE (source)) {
+				if (strcmp (e_source_get_property (source, "public"), "yes") != 0)
+					e_source_group_remove_source (group, source);
+			}
 		}
 
 		g_slist_free (old_sources);
@@ -326,6 +329,136 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 	g_object_unref (source_list);
 	g_object_unref (client);
 }
+
+void exchange_mapi_add_esource (CamelURL *url, const gchar *folder_name, const gchar *fid, gint folder_type)
+{
+	ESourceList *source_list = NULL;
+	ESourceGroup *group = NULL;
+	const gchar *conf_key = NULL;
+	GConfClient* client;
+	GSList *sources;
+	ESource *source = NULL;
+	gchar *relative_uri = NULL;
+	gchar *base_uri = NULL;
+	
+	if (url == NULL)
+		return;
+	
+	if (folder_type == MAPI_FOLDER_TYPE_APPOINTMENT) 
+		conf_key = CALENDAR_SOURCES;
+	else if (folder_type == MAPI_FOLDER_TYPE_TASK) 
+		conf_key = TASK_SOURCES;
+	else if (folder_type == MAPI_FOLDER_TYPE_MEMO) 
+		conf_key = JOURNAL_SOURCES;
+	else if (folder_type == MAPI_FOLDER_TYPE_JOURNAL)
+		conf_key = JOURNAL_SOURCES;
+	else if (folder_type == MAPI_FOLDER_TYPE_CONTACT)
+		conf_key = ADDRESSBOOK_SOURCES;
+	else {
+		g_warning ("%s: %s: Unknown ExchangeMAPIFolderType\n", G_STRLOC, G_STRFUNC);
+		return;
+	}
+
+	client = gconf_client_get_default ();
+	source_list = e_source_list_new_for_gconf (client, conf_key);
+	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, url->user, url->host);
+	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
+	sources = e_source_group_peek_sources (group);	
+	for (; sources != NULL; sources = g_slist_next (sources)) {
+		ESource *source = E_SOURCE (sources->data);
+		gchar* folder_id = e_source_get_duped_property (source, "folder-id");
+		if (folder_id && fid) { 
+			if (strcmp (fid, folder_id) != 0) 
+				continue;
+			else {
+				g_warning ("%s: %s: Esource Already exist \n", G_STRLOC, G_STRFUNC);
+				return;	
+			}
+		}
+	}
+
+	
+	relative_uri = g_strconcat (";", fid, NULL);
+	source = e_source_new (folder_name, relative_uri);
+	e_source_set_property (source, "auth", "1");
+	e_source_set_property (source, "auth-domain", EXCHANGE_MAPI_PASSWORD_COMPONENT);
+	e_source_set_property (source, "auth-type", "plain/password");
+	e_source_set_property (source, "username", url->user);
+	e_source_set_property (source, "host", url->host);
+	e_source_set_property (source, "profile", camel_url_get_param (url, "profile"));
+	e_source_set_property (source, "domain", camel_url_get_param (url, "domain"));
+	e_source_set_property (source, "folder-id", fid);
+	e_source_set_property (source, "offline_sync",
+				camel_url_get_param (url, "offline_sync") ? "1" : "0");
+	e_source_set_property (source, "public", "yes");
+	e_source_set_property (source, "delete", "yes");
+
+	e_source_group_add_source (group, source, -1);
+
+	g_object_unref (source);
+	g_free (relative_uri);
+			
+	if (!e_source_list_add_group (source_list, group, -1))
+		return;
+
+	if (!e_source_list_sync (source_list, NULL))
+		return;
+
+	g_object_unref (group);
+	g_object_unref (source_list);
+	g_object_unref (client);
+}
+
+
+void exchange_mapi_remove_esource (CamelURL *url, const gchar* folder_name, const gchar *fid, gint folder_type)
+{
+	ESourceList *source_list = NULL;
+	ESourceGroup *group = NULL;
+	const gchar *conf_key = NULL;
+	GConfClient* client;
+	GSList *sources=NULL;
+	gchar *base_uri = NULL;
+	
+	if (url == NULL)
+		return;
+
+	if (folder_type == MAPI_FOLDER_TYPE_APPOINTMENT) 
+		conf_key = CALENDAR_SOURCES;
+	else if (folder_type == MAPI_FOLDER_TYPE_TASK) 
+		conf_key = TASK_SOURCES;
+	else if (folder_type == MAPI_FOLDER_TYPE_MEMO) 
+		conf_key = JOURNAL_SOURCES;
+	else if (folder_type == MAPI_FOLDER_TYPE_JOURNAL)
+		conf_key = JOURNAL_SOURCES;
+	else if (folder_type == MAPI_FOLDER_TYPE_CONTACT)
+		conf_key = ADDRESSBOOK_SOURCES;
+	else {
+		g_warning ("%s: %s: Unknown ExchangeMAPIFolderType\n", G_STRLOC, G_STRFUNC);
+		return;
+	}
+
+	client = gconf_client_get_default ();
+	source_list = e_source_list_new_for_gconf (client, conf_key);
+	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, url->user, url->host);
+	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
+	sources = e_source_group_peek_sources (group);	
+	
+	for (; sources != NULL; sources = g_slist_next (sources)) {
+		ESource *source = E_SOURCE (sources->data);
+		gchar* folder_id = e_source_get_duped_property (source, "folder-id"); 
+		if (folder_id && fid)
+			if (strcmp(fid, folder_id) == 0) {
+				e_source_group_remove_source(group, source);
+				break;
+			}
+	}
+
+	g_free (base_uri);
+	g_object_unref (source_list);
+	g_object_unref (client);
+
+}
+
 
 static void
 remove_cal_esource (EAccount *existing_account_info, ExchangeMAPIFolderType folder_type, CamelURL *url)
@@ -501,6 +634,7 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		e_source_set_property(source, "profile", camel_url_get_param (url, "profile"));
 		e_source_set_property(source, "domain", camel_url_get_param (url, "domain"));
 		e_source_set_property(source, "folder-id", fid);
+		e_source_set_property (source, "public", "no");
 		e_source_set_property (source, "offline_sync",
 					       camel_url_get_param (url, "offline_sync") ? "1" : "0");
 		e_source_set_property (source, "completion", "true");
@@ -568,8 +702,10 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		for (temp_list = old_sources; temp_list; temp_list = temp_list->next) {
 			ESource *source = temp_list->data;
 
-			if (source && E_IS_SOURCE (source))
-				e_source_group_remove_source (group, source);
+			if (source && E_IS_SOURCE (source)) {
+				if (strcmp(e_source_get_property(source, "public"), "yes") != 0)
+					e_source_group_remove_source (group, source);
+			}
 		}
 
 		g_slist_free (old_sources);

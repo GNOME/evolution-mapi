@@ -896,7 +896,16 @@ e_book_backend_mapi_get_contact (EBookBackend *backend,
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
 	EContact *contact = NULL;
 	gchar *vcard;
-
+	ESource *source;
+	guint32 options = MAPI_OPTIONS_FETCH_ALL; 
+	gboolean is_public = FALSE; 
+	
+	source = e_book_backend_get_source(backend);
+	if (strcmp (e_source_get_property(source, "public"), "yes") == 0 ) {
+		options |= MAPI_OPTIONS_USE_PFSTORE;
+		is_public = TRUE;
+	}
+ 
 	if (enable_debug)
 		printf("mapi: get_contact %s\n", id);
 
@@ -947,9 +956,9 @@ e_book_backend_mapi_get_contact (EBookBackend *backend,
 
 			exchange_mapi_util_mapi_ids_from_uid (id, &fid, &mid);
 			exchange_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
-							mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
+							is_public ? NULL : mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 							create_contact_item, contact,
-							MAPI_OPTIONS_FETCH_ALL);
+							options);
 
 			if (contact) {
 				e_contact_set (contact, E_CONTACT_BOOK_URI, priv->uri);
@@ -1012,6 +1021,14 @@ e_book_backend_mapi_get_contact_list (EBookBackend *backend,
 					    const gchar   *query )
 {
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
+	ESource *source;
+	guint32 options = MAPI_OPTIONS_FETCH_ALL; 
+	gboolean is_public = FALSE; 	
+	source = e_book_backend_get_source(backend);
+	if (strcmp (e_source_get_property(source, "public"), "yes") == 0 ) {
+		options |= MAPI_OPTIONS_USE_PFSTORE;
+		is_public = TRUE;
+	}
 
 	printf("mapi: get contact list %s\n", query);
 	switch (priv->mode) {
@@ -1074,9 +1091,9 @@ e_book_backend_mapi_get_contact_list (EBookBackend *backend,
 			}
 
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, no_summary_search ? NULL : &res, NULL,
-								mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
+								is_public ? NULL : mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 								create_contact_list_cb, &vcard_str,
-								MAPI_OPTIONS_FETCH_ALL)) {
+								options)) {
 				e_data_book_respond_get_contact_list (book, opid, GNOME_Evolution_Addressbook_OtherError, NULL);
 				return;
 			}
@@ -1198,6 +1215,15 @@ book_view_thread (gpointer data)
 	GList *contacts = NULL, *temp_list = NULL;
 	//Number of multiple restriction to apply
 	guint res_count = 6;
+	ESource *source;
+	guint32 options = MAPI_OPTIONS_FETCH_ALL; 
+	gboolean is_public = FALSE; 
+
+	source = e_book_backend_get_source(E_BOOK_BACKEND(backend));
+	if (strcmp (e_source_get_property(source, "public"), "yes") == 0 ) {
+		options |= MAPI_OPTIONS_USE_PFSTORE;
+		is_public = TRUE;
+	}
 
 	if (enable_debug)
 		printf("mapi: book view\n");
@@ -1322,9 +1348,9 @@ book_view_thread (gpointer data)
 
 			//FIXME: We need to fetch only the query from the server live and not everything.
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
-							   mapi_book_utils_get_prop_list, GET_SHORT_SUMMARY,
+							   is_public ? NULL : mapi_book_utils_get_prop_list, GET_SHORT_SUMMARY,
 							   create_contact_cb, book_view,
-							   MAPI_OPTIONS_FETCH_ALL)) {
+							   options)) {
 			if (e_flag_is_set (closure->running))
 				e_data_book_view_notify_complete (book_view,
 								  GNOME_Evolution_Addressbook_OtherError);
@@ -1337,9 +1363,9 @@ book_view_thread (gpointer data)
 			}
 		} else {
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
-							mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
+							is_public ? NULL : mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 							create_contact_cb, book_view,
-							MAPI_OPTIONS_FETCH_ALL)) {
+							options)) {
 				if (e_flag_is_set (closure->running))
 					e_data_book_view_notify_complete (book_view,
 									  GNOME_Evolution_Addressbook_OtherError);
@@ -1427,6 +1453,15 @@ build_cache (EBookBackendMAPI *ebmapi)
 {
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) ebmapi)->priv;
 	gchar *tmp;
+	ESource *source;
+	guint32 options = MAPI_OPTIONS_FETCH_ALL; 
+	gboolean is_public = FALSE; 
+
+	source = e_book_backend_get_source(E_BOOK_BACKEND(ebmapi));
+	if (strcmp (e_source_get_property(source, "public"), "yes") == 0 ) {
+		options |= MAPI_OPTIONS_USE_PFSTORE;
+		is_public = TRUE;
+	}
 
 	//FIXME: What if book view is NULL? Can it be? Check that.
 	if (!priv->cache) {
@@ -1443,9 +1478,9 @@ build_cache (EBookBackendMAPI *ebmapi)
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 
 	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
-						mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
+						is_public ? NULL : mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 						cache_contact_cb, ebmapi,
-						MAPI_OPTIONS_FETCH_ALL)) {
+						options)) {
 		printf("Error during caching addressbook\n");
 		e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 		return NULL;
@@ -1624,8 +1659,9 @@ e_book_backend_mapi_remove (EBookBackend *backend,
 {
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
 	gchar *cache_uri = NULL;
-	gboolean status;
-
+	gboolean status = TRUE;
+	ESource *source;
+	source = e_book_backend_get_source (backend);
 	if (enable_debug)
 		printf("mapi: remove\n");
 
@@ -1636,8 +1672,10 @@ e_book_backend_mapi_remove (EBookBackend *backend,
 		return;
 
 	case GNOME_Evolution_Addressbook_MODE_REMOTE:
-
-		status = exchange_mapi_connection_remove_folder (priv->conn, priv->fid, 0);
+		
+		if (strcmp (e_source_get_property(source, "public"), "yes") != 0)
+			status = exchange_mapi_connection_remove_folder (priv->conn, priv->fid, 0);
+		
 		if (!status) {
 			e_data_book_respond_remove (book, opid, GNOME_Evolution_Addressbook_OtherError);
 			return;
