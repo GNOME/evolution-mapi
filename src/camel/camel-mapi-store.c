@@ -101,6 +101,8 @@ static gboolean mapi_fid_is_system_folder (CamelMapiStore *mapi_store, const gch
 static void mapi_update_hash_table_type (CamelMapiStore *store, const gchar *full_name, guint *folder_type);
 static CamelFolder *mapi_get_trash (CamelStore *store, CamelException *ex);
 static CamelFolder *mapi_get_junk (CamelStore *store, CamelException *ex);
+static gboolean mapi_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, CamelException *ex);
+
 static void mapi_update_folder_hash_tables (CamelMapiStore *store, const gchar *name, const gchar *fid, const gchar *parent_id);
 guint mapi_folders_hash_table_type_lookup (CamelMapiStore *store, const gchar *name);
 /* static const gchar * mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid, gboolean use_cache); */
@@ -237,6 +239,7 @@ camel_mapi_store_class_init (CamelMapiStoreClass *class)
 	store_class->noop = mapi_noop;
 	store_class->get_trash = mapi_get_trash;
 	store_class->get_junk = mapi_get_junk;
+	store_class->can_refresh_folder = mapi_can_refresh_folder;
 }
 
 /*
@@ -1863,4 +1866,11 @@ static CamelFolder *
 mapi_get_junk (CamelStore *store, CamelException *ex)
 {
 	return mapi_get_folder_with_type (store, CAMEL_FOLDER_TYPE_JUNK, ex);
+}
+
+static gboolean
+mapi_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, CamelException *ex)
+{
+	return CAMEL_STORE_CLASS(camel_mapi_store_parent_class)->can_refresh_folder (store, info, ex) ||
+	      (camel_url_get_param (((CamelService *)store)->url, "check_all") != NULL);
 }
