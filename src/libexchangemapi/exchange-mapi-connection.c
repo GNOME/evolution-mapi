@@ -1147,11 +1147,6 @@ exchange_mapi_util_get_recipients (mapi_object_t *obj_message, GSList **recip_li
 			if (addrtype && !g_ascii_strcasecmp(addrtype, "SMTP"))
 				recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_EMAIL_ADDRESS_UNICODE));
 		}
-		/* fail */
-		if (!recipient->email_id) {
-			g_debug ("%s: %s() - object has a recipient without a PR_SMTP_ADDRESS ", G_STRLOC, G_STRFUNC);
-			mapidump_SRow (&(rows_recip.aRow[i_row_recip]), " ");
-		}
 
 		recipient->out_SRow.ulAdrEntryPad = rows_recip.aRow[i_row_recip].ulAdrEntryPad;
 		recipient->out_SRow.cValues = rows_recip.aRow[i_row_recip].cValues;
