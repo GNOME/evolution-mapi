@@ -383,7 +383,8 @@ exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32
 	g_return_val_if_fail (((proptag & 0xFFFF) == PT_BINARY), FALSE);
 
 	/* if compressed RTF stream, then return */
-	g_return_val_if_fail (proptag != PR_RTF_COMPRESSED, FALSE);
+	if (proptag == PR_RTF_COMPRESSED)
+		return FALSE;
 
 	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 	g_debug("Attempt to read stream for proptag 0x%08X ", proptag);
