@@ -570,7 +570,7 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 		NTTIME nt;
 		struct FILETIME t;
 		
-		tmtime.tm_mday = date->day - 1;
+		tmtime.tm_mday = date->day;
 		tmtime.tm_mon = date->month - 1;
 		tmtime.tm_year = date->year - 1900;
 
@@ -589,7 +589,7 @@ mapi_book_build_props (struct SPropValue ** value, struct SPropTagArray * SPropT
 		NTTIME nt;
 		struct FILETIME t;
 		
-		tmtime.tm_mday = date->day - 1;
+		tmtime.tm_mday = date->day;
 		tmtime.tm_mon = date->month - 1;
 		tmtime.tm_year = date->year - 1900;
 
@@ -1142,7 +1142,7 @@ emapidump_contact(struct mapi_SPropValue_array *properties)
 					time = nt_time_to_unix (nt);
 					tmtime = gmtime (&time);
 					//FIXME: Move to new libmapi api to get string dates.
-					date.day = tmtime->tm_mday + 1;
+					date.day = tmtime->tm_mday;
 					date.month = tmtime->tm_mon + 1;
 					date.year = tmtime->tm_year + 1900;
 					e_contact_set (contact, mappings[i].field_id, &date);
