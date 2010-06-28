@@ -1,3 +1,36 @@
+evolution-mapi 0.31.4 2010-06-28
+--------------------------------
+
+Feature:
+	Public calendar/task/address book support in mapi (Bug #600661) (Punit Jain)
+
+Bug Fixes:
+	Bug #568424 - Copy/Move mails with public folders fails (Milan Crha)
+	Bug #585353 - Marking Junk doesn't work on mapi account (Milan Crha)
+	Bug #602413 - Crash in get_server_data, e_cal_backend_mapi_send_objects (Milan Crha)
+	Bug #607438 - 'Mark as complete' in task doesn't stick in view (Milan Crha)
+	Bug #611557 - Update calendar/addressbook sources on start (Milan Crha)
+	Bug #612395 - Folder unread count disappears (Milan Crha)
+	Bug #620810 - Crash when opening a meeting invite (Milan Crha)
+	Bug #621072 - Deleted meeting's request mail isn't shown properly (Milan Crha)
+	Bug #621232 - GAL ESource steals previous addressbook (Milan Crha)
+	Bug #621526 - Cann't create meeting in default calendar (Milan Crha)
+	Bug #622567 - Do not search meeting invites in user's calendar (Milan Crha)
+	Bug #622687 - Unnecessary warning in exchange_mapi_util_read_generic_stream (Milan Crha)
+
+Misc:
+	Fix GAL contacts to not display LDAP_DN as name (Bharath Acharya)
+	Added Indonesian translation (Ekasari Nugraheni)
+	Latest openchange svn has mem_ctx param on cast_SPropValue (Milan Crha)
+	Let work "Check for new messages in all folders" as expected (Milan Crha)
+
+Translations:
+	Andika Triwidada (id)
+	Fran Diéguez (gl)
+	Jorge González (es)
+	Kjartan Maraas (nb)
+	Yaron Shahrabani (he)
+
 evolution-mapi 0.31.3 2010-06-07
 --------------------------------
 
