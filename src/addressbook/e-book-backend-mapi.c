@@ -636,7 +636,7 @@ mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 		NTTIME nt;
 		struct FILETIME t;
 
-		tmtime.tm_mday = date->day - 1;
+		tmtime.tm_mday = date->day;
 		tmtime.tm_mon = date->month - 1;
 		tmtime.tm_year = date->year - 1900;
 
@@ -656,7 +656,7 @@ mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 		NTTIME nt;
 		struct FILETIME t;
 
-		tmtime.tm_mday = date->day - 1;
+		tmtime.tm_mday = date->day;
 		tmtime.tm_mon = date->month - 1;
 		tmtime.tm_year = date->year - 1900;
 

@@ -383,7 +383,7 @@ mapi_book_utils_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid,
 					time = nt_time_to_unix (nt);
 					tmtime = gmtime (&time);
 					//FIXME: Move to new libmapi api to get string dates.
-					date.day = tmtime->tm_mday + 1;
+					date.day = tmtime->tm_mday;
 					date.month = tmtime->tm_mon + 1;
 					date.year = tmtime->tm_year + 1900;
 					e_contact_set (contact, mappings[i].field_id, &date);
