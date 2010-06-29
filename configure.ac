@@ -41,11 +41,13 @@ AC_ARG_ENABLE([gtk3],
 if test "x${enable_gtk3}" = "xyes"; then
 	LIBEDATASERVER_UI_API_VERSION=3.0
 	GTK_PACKAGE="gtk+-3.0"
+	EVO_PLUGIN_PACKAGE="evolution-plugin-3.0"
 	gtk_minimum_version="2.90.4"
 	gweather_minimum_version="2.90.0"
 else	
 	LIBEDATASERVER_UI_API_VERSION=1.2
 	GTK_PACKAGE="gtk+-2.0"
+	EVO_PLUGIN_PACKAGE="evolution-plugin"
 	gtk_minimum_version="2.20.0"
 	gweather_minimum_version="2.25.4"
 fi
@@ -147,7 +149,7 @@ PKG_CHECK_MODULES(CAMEL, camel-provider-$EDS_PACKAGE >= eds_minimum_version)
 dnl ****************************
 dnl Check for evolution plugins 
 dnl ****************************
-PKG_CHECK_MODULES(EVOLUTION_PLUGIN, evolution-plugin >= evo_minimum_version)
+PKG_CHECK_MODULES(EVOLUTION_PLUGIN, $EVO_PLUGIN_PACKAGE >= evo_minimum_version)
 
 dnl ****************************
 dnl Check for LibMAPI
