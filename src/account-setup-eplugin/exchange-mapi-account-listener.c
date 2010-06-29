@@ -180,7 +180,6 @@ find_source_by_fid (GSList *sources, const gchar *fid)
 #define SELECTED_TASKS		"/apps/evolution/calendar/tasks/selected_tasks"
 #define SELECTED_JOURNALS	"/apps/evolution/calendar/memos/selected_memos"
 #define ADDRESSBOOK_SOURCES     "/apps/evolution/addressbook/sources"
-#define ITIP_MESSAGE_HANDLING	"/apps/evolution/itip/delete_processed"
 
 static void
 add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType folder_type, CamelURL *url, mapi_id_t trash_fid)
@@ -209,7 +208,6 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 	}
 
 	client = gconf_client_get_default ();
-	gconf_client_set_bool (client, ITIP_MESSAGE_HANDLING, TRUE, NULL);
 	source_list = e_source_list_new_for_gconf (client, conf_key);
 	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, url->user, url->host);
 	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
@@ -487,7 +485,6 @@ remove_cal_esource (EAccount *existing_account_info, ExchangeMAPIFolderType fold
 	}
 
 	client = gconf_client_get_default();
-	gconf_client_set_bool (client, ITIP_MESSAGE_HANDLING, FALSE, NULL);
 	list = e_source_list_new_for_gconf (client, conf_key);
 	groups = e_source_list_peek_groups (list);
 
