@@ -26,6 +26,33 @@ dnl *******************
 m4_define([eds_minimum_version], [2.31.1])
 m4_define([evo_minimum_version], [2.31.1])
 m4_define([libmapi_minimum_version], [0.9])
+m4_define([glib_minimum_version], [2.16.1])
+m4_define([gconf_minimum_version], [2.0.0])
+
+dnl **********************************
+dnl Gtk-3 compatibility
+dnl Use the API version 3.0 while compiling with gtk+-3
+dnl **********************************
+AC_ARG_ENABLE([gtk3],
+	AS_HELP_STRING([--enable-gtk3],
+	[Attempt to use gtk+-3]),
+	[enable_gtk3=$enableval],[enable_gtk3=no])
+
+if test "x${enable_gtk3}" = "xyes"; then
+	LIBEDATASERVER_UI_API_VERSION=3.0
+	GTK_PACKAGE="gtk+-3.0"
+	gtk_minimum_version="2.90.4"
+	gweather_minimum_version="2.90.0"
+else	
+	LIBEDATASERVER_UI_API_VERSION=1.2
+	GTK_PACKAGE="gtk+-2.0"
+	gtk_minimum_version="2.20.0"
+	gweather_minimum_version="2.25.4"
+fi
+
+AM_CONDITIONAL([ENABLE_GTK3], [test "$enable_gtk3" = yes])
+GTK_MODULE="$GTK_PACKAGE >= $gtk_minimum_version"
+AC_SUBST(GTK_MODULE)
 
 dnl ***********************************
 dnl Automake 1.11 - Silent Build Rules
@@ -96,6 +123,14 @@ AM_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
 PKG_PROG_PKG_CONFIG
+
+dnl *****************************
+dnl Check for GNOME Platform
+dnl *****************************
+PKG_CHECK_MODULES(GNOME_PLATFORM,
+	[glib-2.0 >= glib_minimum_version
+	$GTK_MODULE
+	gconf-2.0 >= gconf_minimum_version])
 
 dnl ********************************
 dnl Check for evolution-data-server 
