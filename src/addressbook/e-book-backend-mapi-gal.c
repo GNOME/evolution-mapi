@@ -196,12 +196,6 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 		priv->cache = e_book_backend_cache_new (priv->uri);
 	}
 
-	if (!priv->summary) {
-		priv->summary = e_book_backend_summary_new (priv->summary_file_name,
-							    SUMMARY_FLUSH_TIMEOUT);
-		printf("Summary file name is %s\n", priv->summary_file_name);
-	}
-
 	fgd.ebmapi = ebmapi;
 	fgd.book_view = find_book_view (ebmapi);
 	fgd.fid = exchange_mapi_connection_get_default_folder_id (priv->conn, olFolderContacts);
@@ -410,12 +404,13 @@ e_book_backend_mapi_gal_load_source (EBookBackend *backend,
 		return GNOME_Evolution_Addressbook_OfflineUnavailable;
 	}
 
+	g_free (priv->summary_file_name);
+	priv->summary_file_name = get_filename_from_uri (priv->uri, "cache.summary");
+	if (priv->summary) g_object_unref (priv->summary);
+	priv->summary = e_book_backend_summary_new (priv->summary_file_name, SUMMARY_FLUSH_TIMEOUT);
+
 	if (priv->marked_for_offline) {
-		priv->summary_file_name = get_filename_from_uri (priv->uri, "cache.summary");
 		if (g_file_test (priv->summary_file_name, G_FILE_TEST_EXISTS)) {
-			printf("Loading the summary\n");
-			priv->summary = e_book_backend_summary_new (priv->summary_file_name,
-								    SUMMARY_FLUSH_TIMEOUT);
 			e_book_backend_summary_load (priv->summary);
 			priv->is_summary_ready = TRUE;
 		}
@@ -424,7 +419,6 @@ e_book_backend_mapi_gal_load_source (EBookBackend *backend,
 		if (e_book_backend_cache_exists (priv->uri)) {
 			gchar *last_time;
 
-			printf("Loading the cache\n");
 			priv->cache = e_book_backend_cache_new (priv->uri);
 
 			last_time = e_book_backend_cache_get_time (priv->cache);
@@ -432,8 +426,6 @@ e_book_backend_mapi_gal_load_source (EBookBackend *backend,
 			g_free (last_time);
 		}
 		//FIXME: We may have to do a time based reload. Or deltas should upload.
-	} else {
-		priv->summary = e_book_backend_summary_new (NULL,SUMMARY_FLUSH_TIMEOUT);
 	}
 
 	e_book_backend_set_is_loaded (E_BOOK_BACKEND (backend), TRUE);

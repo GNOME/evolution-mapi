@@ -274,25 +274,24 @@ e_book_backend_mapi_load_source (EBookBackend *backend,
 		return GNOME_Evolution_Addressbook_OfflineUnavailable;
 	}
 
+	g_free (priv->summary_file_name);
+	priv->summary_file_name = get_filename_from_uri (priv->uri, "cache.summary");
+	if (priv->summary) g_object_unref (priv->summary);
+	priv->summary = e_book_backend_summary_new (priv->summary_file_name, SUMMARY_FLUSH_TIMEOUT);
+
 	if (priv->marked_for_offline) {
-		priv->summary_file_name = get_filename_from_uri (priv->uri, "cache.summary");
 		if (g_file_test (priv->summary_file_name, G_FILE_TEST_EXISTS)) {
-			printf("Loading the summary\n");
-			priv->summary = e_book_backend_summary_new (priv->summary_file_name,
-								    SUMMARY_FLUSH_TIMEOUT);
 			e_book_backend_summary_load (priv->summary);
 			priv->is_summary_ready = TRUE;
 		}
 
 		/* Load the cache as well.*/
 		if (e_book_backend_cache_exists (priv->uri)) {
-			printf("Loading the cache\n");
 			priv->cache = e_book_backend_cache_new (priv->uri);
 			priv->is_cache_ready = TRUE;
 		}
 		//FIXME: We may have to do a time based reload. Or deltas should upload.
 	} else {
-		priv->summary = e_book_backend_summary_new (NULL,SUMMARY_FLUSH_TIMEOUT);
 		priv->cache = e_book_backend_cache_new (priv->uri);
 	}
 
@@ -1477,14 +1476,7 @@ build_cache (EBookBackendMAPI *ebmapi)
 
 	//FIXME: What if book view is NULL? Can it be? Check that.
 	if (!priv->cache) {
-		printf("Caching for the first time\n");
 		priv->cache = e_book_backend_cache_new (priv->uri);
-	}
-
-	if (!priv->summary) {
-		priv->summary = e_book_backend_summary_new (priv->summary_file_name,
-							    SUMMARY_FLUSH_TIMEOUT);
-		printf("Summary file name is %s\n", priv->summary_file_name);
 	}
 
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
