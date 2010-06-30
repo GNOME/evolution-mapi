@@ -42,12 +42,14 @@ struct _EBookBackendMAPIGALPrivate
 	gboolean is_summary_ready;
 	gboolean is_writable;
 	gchar *uri;
-	gchar *book_name;
 
 	GMutex *lock;
 	gchar *summary_file_name;
 	EBookBackendSummary *summary;
 	EBookBackendCache *cache;
+
+	GStaticMutex running_mutex;
+	GHashTable *view_to_closure_hash; /* EDataBookView -> BESearchClosure */
 };
 
 #define SUMMARY_FLUSH_TIMEOUT 5000
@@ -285,6 +287,7 @@ e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
 		return;
 
 	case GNOME_Evolution_Addressbook_MODE_REMOTE:
+		g_static_mutex_lock (&priv->running_mutex);
 
 		/* rather reuse already established connection */
 		priv->conn = exchange_mapi_connection_find (priv->profile);
@@ -293,8 +296,11 @@ e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
 		else if (!priv->conn)
 			priv->conn = exchange_mapi_connection_new (priv->profile, passwd);
 
-		if (!priv->conn)
-			return e_data_book_respond_authenticate_user (book, opid,GNOME_Evolution_Addressbook_OtherError);
+		if (!priv->conn) {
+			e_data_book_respond_authenticate_user (book, opid,GNOME_Evolution_Addressbook_OtherError);
+			g_static_mutex_unlock (&priv->running_mutex);
+			return;
+		}
 
 		if (priv->cache && priv->is_cache_ready) {
 			printf("FIXME: Should check for an update in the cache\n");
@@ -310,6 +316,7 @@ e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
 		}
 		e_book_backend_set_is_writable (backend, FALSE);
 		e_data_book_respond_authenticate_user (book, opid, GNOME_Evolution_Addressbook_Success);
+		g_static_mutex_unlock (&priv->running_mutex);
 		return;
 
 	default :
@@ -383,8 +390,6 @@ e_book_backend_mapi_gal_load_source (EBookBackend *backend,
 {
 	EBookBackendMAPIGALPrivate *priv = ((EBookBackendMAPIGAL *) backend)->priv;
 	const gchar *offline, *tmp;
-	gchar **tokens;
-	gchar *uri = NULL;
 
 	if (enable_debug)
 		printf("MAPI load source\n");
@@ -398,17 +403,7 @@ e_book_backend_mapi_gal_load_source (EBookBackend *backend,
 
 	/* Either we are in Online mode or this is marked for offline */
 
-	priv->uri = g_strdup (e_source_get_uri (source));
-
-	tokens = g_strsplit (priv->uri, ";", 2);
-	if (tokens[0])
-		uri = g_strdup (tokens [0]);
-	priv->book_name  = g_strdup (tokens[1]);
-	if (priv->book_name == NULL) {
-		g_warning ("Bookname is null for %s\n", uri);
-		return GNOME_Evolution_Addressbook_OtherError;
-	}
-	g_strfreev (tokens);
+	priv->uri = e_source_get_uri (source);
 
 	if (priv->mode ==  GNOME_Evolution_Addressbook_MODE_LOCAL &&
 	    !priv->marked_for_offline ) {
@@ -441,7 +436,6 @@ e_book_backend_mapi_gal_load_source (EBookBackend *backend,
 		priv->summary = e_book_backend_summary_new (NULL,SUMMARY_FLUSH_TIMEOUT);
 	}
 
-	g_free (uri);
 	e_book_backend_set_is_loaded (E_BOOK_BACKEND (backend), TRUE);
 	e_book_backend_set_is_writable (backend, FALSE);
 	if (priv->mode ==  GNOME_Evolution_Addressbook_MODE_LOCAL) {
@@ -501,42 +495,58 @@ e_book_backend_mapi_gal_set_mode (EBookBackend *backend, GNOME_Evolution_Address
 	}
 }
 
-static void
-e_book_backend_mapi_gal_dispose (GObject *object)
-{
-	/* FIXME : provide implmentation */
-	EBookBackendMAPIGALPrivate *priv = ((EBookBackendMAPIGAL *) object)->priv;
-
-	if (priv->profile) {
-		g_free (priv->profile);
-		priv->profile = NULL;
-	}
-	if (priv->conn) {
-		g_object_unref (priv->conn);
-		priv->conn = NULL;
-	}
-	if (priv->uri) {
-		g_free (priv->uri);
-		priv->uri = NULL;
-	}
-
-	if (priv->build_cache_thread) {
-		priv->kill_cache_build = TRUE;
-		g_thread_join (priv->build_cache_thread);
-		priv->build_cache_thread = NULL;
-	}
-}
-
 typedef struct {
 	EBookBackendMAPIGAL *bg;
-	GThread *thread;
-	EFlag *running;
+	EDataBookView *book_view;
+	gboolean stop;
 } BESearchClosure;
 
 static BESearchClosure*
-get_closure (EDataBookView *book_view)
+init_closure (EDataBookView *book_view, EBookBackendMAPIGAL *bg)
 {
-	return g_object_get_data (G_OBJECT (book_view), "closure");
+	BESearchClosure *closure;
+
+	g_return_val_if_fail (bg != NULL, NULL);
+	g_return_val_if_fail (bg->priv != NULL, NULL);
+	g_return_val_if_fail (bg->priv->view_to_closure_hash != NULL, NULL);
+	
+	closure = g_new0 (BESearchClosure, 1);
+	closure->bg = bg;
+	closure->book_view = book_view;
+	closure->stop = FALSE;
+
+	g_hash_table_insert (bg->priv->view_to_closure_hash, g_object_ref (book_view), closure);
+
+	return closure;
+}
+
+static void
+destroy_closure (BESearchClosure *closure)
+{
+	g_return_if_fail (closure != NULL);
+
+	if (closure->book_view)
+		g_object_unref (closure->book_view);
+	g_free (closure);
+}
+
+static void
+stop_book_view (EDataBookView *book_view, BESearchClosure *closure, EBookBackendMAPIGAL *mapi_backend)
+{
+	g_return_if_fail (closure != NULL);
+
+	closure->stop = TRUE;
+}
+
+static void
+untrack_book_view (EBookBackendMAPIGAL *mapi_backend, EDataBookView *book_view)
+{
+	g_return_if_fail (mapi_backend != NULL);
+	g_return_if_fail (mapi_backend->priv != NULL);
+	g_return_if_fail (mapi_backend->priv->view_to_closure_hash != NULL);
+	g_return_if_fail (book_view != NULL);
+
+	g_hash_table_remove (mapi_backend->priv->view_to_closure_hash, book_view);
 }
 
 static void
@@ -552,7 +562,7 @@ get_contacts_from_cache (EBookBackendMAPIGAL *ebmapi,
 		gchar *uid;
 		EContact *contact;
 
-                if (!e_flag_is_set (closure->running))
+                if (closure->stop)
                         break;
 
 		uid = g_ptr_array_index (ids, i);
@@ -562,9 +572,6 @@ get_contacts_from_cache (EBookBackendMAPIGAL *ebmapi,
 			g_object_unref (contact);
 		}
 	}
-	if (e_flag_is_set (closure->running))
-		e_data_book_view_notify_complete (book_view,
-						  GNOME_Evolution_Addressbook_Success);
 }
 #if 0
 static gboolean
@@ -605,96 +612,19 @@ build_restriction_emails_contains (struct mapi_SRestriction *res,
 }
 #endif
 
-static gboolean
-build_multiple_restriction_emails_contains (struct mapi_SRestriction *res,
-					    struct mapi_SRestriction_or *or_res,
-					    const gchar *query)
-{
-	gchar *email=NULL, *tmp, *tmp1;
-	//Number of restriction to apply
-	guint res_count = 6;
-
-	/* This currently supports "email foo@bar.soo" */
-	tmp = strdup (query);
-
-	tmp = strstr (tmp, "email");
-	if (tmp ) {
-		tmp = strchr (tmp, '\"');
-		if (tmp && ++tmp) {
-			tmp = strchr (tmp, '\"');
-			if (tmp && ++tmp) {
-				tmp1 = tmp;
-				tmp1 = strchr (tmp1, '\"');
-				if (tmp1) {
-					*tmp1 = 0;
-					email = tmp;
-				}
-			}
-		}
-	}
-
-	if (email==NULL || !strchr (email, '@'))
-		return FALSE;
-
-	or_res[0].rt = RES_CONTENT;
-	or_res[0].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[0].res.resContent.ulPropTag = PR_EMS_AB_MANAGER_T_UNICODE;
-	or_res[0].res.resContent.lpProp.value.lpszA = email;
-
-	or_res[1].rt = RES_CONTENT;
-	or_res[1].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[1].res.resContent.ulPropTag = PR_DISPLAY_NAME_UNICODE;
-	or_res[1].res.resContent.lpProp.value.lpszA = email;
-
-	or_res[2].rt = RES_CONTENT;
-	or_res[2].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[2].res.resContent.ulPropTag = PR_GIVEN_NAME_UNICODE;
-	or_res[2].res.resContent.lpProp.value.lpszA = email;
-
-	or_res[3].rt = RES_CONTENT;
-	or_res[3].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[3].res.resContent.ulPropTag = PROP_TAG(PT_UNICODE, 0x8084);
-	or_res[3].res.resContent.lpProp.value.lpszA = email;
-
-	or_res[4].rt = RES_CONTENT;
-	or_res[4].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[4].res.resContent.ulPropTag = PROP_TAG(PT_UNICODE, 0x8094);
-	or_res[4].res.resContent.lpProp.value.lpszA = email;
-
-	or_res[5].rt = RES_CONTENT;
-	or_res[5].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[5].res.resContent.ulPropTag = PROP_TAG(PT_UNICODE, 0x80a4);
-	or_res[5].res.resContent.lpProp.value.lpszA = email;
-
-	res = g_new0 (struct mapi_SRestriction, 1);
-
-	res->rt = RES_OR;
-	res->res.resOr.cRes = res_count;
-	res->res.resOr.res = or_res;
-
-	return TRUE;
-}
-
 static void
 book_view_thread (gpointer data)
 {
-	struct mapi_SRestriction res;
-	struct mapi_SRestriction_or *or_res = NULL;
-	EDataBookView *book_view = data;
-	BESearchClosure *closure = get_closure (book_view);
+	BESearchClosure *closure = data;
+	EDataBookView *book_view = closure->book_view;
 	EBookBackendMAPIGAL *backend = closure->bg;
 	EBookBackendMAPIGALPrivate *priv = backend->priv;
 	const gchar *query = NULL;
 	GPtrArray *ids = NULL;
 	GList *contacts = NULL, *temp_list = NULL;
-	//Number of multiple restriction to apply
-	guint res_count = 6;
 
 	if (enable_debug)
 		printf("mapi: book view\n");
-
-	g_object_ref (book_view);
-	e_flag_set (closure->running);
 
 	book_view_notify_status (book_view, _("Searching"));
 	query = e_data_book_view_get_card_query (book_view);
@@ -708,13 +638,16 @@ book_view_thread (gpointer data)
 				e_book_backend_notify_auth_required (E_BOOK_BACKEND (backend));
 				e_data_book_view_notify_complete (book_view,
 							GNOME_Evolution_Addressbook_AuthenticationRequired);
-				g_object_unref (book_view);
+				untrack_book_view (backend, book_view);
+				destroy_closure (closure);
 				return;
 			}
 
 			if (priv->marked_for_offline && !priv->is_cache_ready) {
 				/* To translators : Here Evolution MAPI downloads the entries from the GAL server */
 				book_view_notify_status (book_view, _("Downloading GAL entries from server…"));
+				untrack_book_view (backend, book_view);
+				destroy_closure (closure);
 				return;
 			}
 
@@ -724,11 +657,10 @@ book_view_thread (gpointer data)
 					if (enable_debug)
 						printf ("reading the contacts from summary \n");
 					ids = e_book_backend_summary_search (priv->summary, query);
-					if (ids && ids->len > 0) {
+					if (ids && ids->len > 0)
 						get_contacts_from_cache (backend, query, ids, book_view, closure);
+					if (ids)
 						g_ptr_array_free (ids, TRUE);
-					}
-					g_object_unref (book_view);
 					break;
 				}
 
@@ -739,7 +671,7 @@ book_view_thread (gpointer data)
 								      query);
 				temp_list = contacts;
 				for (; contacts != NULL; contacts = g_list_next(contacts)) {
-					if (!e_flag_is_set (closure->running)) {
+					if (closure->stop) {
 						for (;contacts != NULL; contacts = g_list_next (contacts))
 							g_object_unref (contacts->data);
 						break;
@@ -748,58 +680,26 @@ book_view_thread (gpointer data)
 									E_CONTACT(contacts->data));
 					g_object_unref (contacts->data);
 				}
-				if (e_flag_is_set (closure->running))
-					e_data_book_view_notify_complete (book_view,
-									  GNOME_Evolution_Addressbook_Success);
 				if (temp_list)
-					 g_list_free (temp_list);
-				g_object_unref (book_view);
+					g_list_free (temp_list);
 				break;
 			}
 
 			if (e_book_backend_summary_is_summary_query (priv->summary, query)) {
-				or_res = g_new (struct mapi_SRestriction_or, res_count);
+				ids = e_book_backend_summary_search (priv->summary, query);
+				if (ids && ids->len > 0)
+					get_contacts_from_cache (backend, query, ids, book_view, closure);
+				if (ids)
+					g_ptr_array_free (ids, TRUE);
+				break;
+			}
 
-				if (!build_multiple_restriction_emails_contains (&res, or_res, query)) {
-					e_data_book_view_notify_complete (book_view,
-								  GNOME_Evolution_Addressbook_OtherError);
-					return;
-				}
-
-			if (e_flag_is_set (closure->running))
-				e_data_book_view_notify_complete (book_view,
-								  GNOME_Evolution_Addressbook_Success);
-			g_object_unref (book_view);
 			break;
-		}
 	}
 
-	if (book_view)
-		e_data_book_view_notify_complete (book_view,
-						  GNOME_Evolution_Addressbook_Success);
-	return;
-}
-
-static void
-closure_destroy (BESearchClosure *closure)
-{
-	e_flag_free (closure->running);
-	g_free (closure);
-}
-
-static BESearchClosure*
-init_closure (EDataBookView *book_view, EBookBackendMAPIGAL *bg)
-{
-	BESearchClosure *closure = g_new (BESearchClosure, 1);
-
-	closure->bg = bg;
-	closure->thread = NULL;
-	closure->running = e_flag_new ();
-
-	g_object_set_data_full (G_OBJECT (book_view), "closure",
-				closure, (GDestroyNotify)closure_destroy);
-
-	return closure;
+	e_data_book_view_notify_complete (book_view, GNOME_Evolution_Addressbook_Success);
+	untrack_book_view (backend, book_view);
+	destroy_closure (closure);
 }
 
 static void
@@ -837,12 +737,12 @@ e_book_backend_mapi_gal_start_book_view (EBookBackend  *backend,
 {
 	BESearchClosure *closure = init_closure (book_view, E_BOOK_BACKEND_MAPIGAL (backend));
 
+	g_return_if_fail (closure != NULL);
+
 	if (enable_debug)
 		printf ("mapi: start_book_view...\n");
-	closure->thread = g_thread_create ((GThreadFunc) book_view_thread, book_view, FALSE, NULL);
-	e_flag_wait (closure->running);
 
-	/* at this point we know the book view thread is actually running */
+	g_thread_create ((GThreadFunc) book_view_thread, closure, FALSE, NULL);
 }
 
 static void
@@ -851,7 +751,8 @@ e_book_backend_mapi_gal_stop_book_view (EBookBackend  *backend,
 {
 	if (enable_debug)
 		printf("mapi: stop book view\n");
-	/* FIXME : provide implmentation */
+
+	untrack_book_view (E_BOOK_BACKEND_MAPIGAL (backend), book_view);
 }
 
 static void
@@ -896,12 +797,84 @@ e_book_backend_mapi_gal_remove (EBookBackend *backend, EDataBook *book, guint32 
 	e_data_book_respond_remove (book, opid, GNOME_Evolution_Addressbook_PermissionDenied);
 }
 
-static void e_book_backend_mapi_gal_class_init (EBookBackendMAPIGALClass *klass)
+static void
+e_book_backend_mapi_gal_init (EBookBackendMAPIGAL *backend)
+{
+	EBookBackendMAPIGALPrivate *priv;
+
+	priv = g_new0 (EBookBackendMAPIGALPrivate, 1);
+	/* Priv Struct init */
+	backend->priv = priv;
+
+	priv->build_cache_thread = NULL;
+	priv->view_to_closure_hash = g_hash_table_new (g_direct_hash, g_direct_equal);
+	g_static_mutex_init (&priv->running_mutex);
+
+/*	priv->marked_for_offline = FALSE;
+	priv->uri = NULL;
+	priv->cache = NULL;
+	priv->is_summary_ready = FALSE;
+	priv->is_cache_ready = FALSE;
+
+*/	if (g_getenv ("MAPI_DEBUG"))
+		enable_debug = TRUE;
+	else
+		enable_debug = FALSE;
+}
+
+static void
+e_book_backend_mapi_gal_dispose (GObject *object)
+{
+	EBookBackendMAPIGAL *mapi_backend = E_BOOK_BACKEND_MAPIGAL (object);
+	EBookBackendMAPIGALPrivate *priv = mapi_backend->priv;
+
+	if (priv) {
+		if (priv->view_to_closure_hash) {
+			g_hash_table_foreach (priv->view_to_closure_hash, (GHFunc) stop_book_view, mapi_backend);
+			g_hash_table_destroy (priv->view_to_closure_hash);
+			priv->view_to_closure_hash = NULL;
+		}
+
+		if (priv->build_cache_thread) {
+			priv->kill_cache_build = TRUE;
+			g_thread_join (priv->build_cache_thread);
+			priv->build_cache_thread = NULL;
+		}
+
+		#define FREE(x) if (x) { g_free (x); x = NULL; }
+		#define UNREF(x) if (x) { g_object_unref (x); x = NULL; }
+
+		/* this will also ensure any pending authentication
+		   request is finished and it's safe to free memory */
+		g_static_mutex_lock (&priv->running_mutex);
+
+		UNREF (priv->conn);
+		UNREF (priv->cache);
+		UNREF (priv->summary);
+
+		FREE (priv->profile);
+		FREE (priv->uri);
+		FREE (priv->summary_file_name);
+
+		g_static_mutex_unlock (&priv->running_mutex);
+		g_static_mutex_free (&priv->running_mutex);
+
+		FREE (mapi_backend->priv);
+
+		#undef UNREF
+		#undef FREE
+	}
+
+	/* Chain up to parent's dispose() method. */
+	if (G_OBJECT_CLASS (e_book_backend_mapi_gal_parent_class)->dispose)
+		G_OBJECT_CLASS (e_book_backend_mapi_gal_parent_class)->dispose (object);
+}
+
+static void
+e_book_backend_mapi_gal_class_init (EBookBackendMAPIGALClass *klass)
 {
 	GObjectClass  *object_class = G_OBJECT_CLASS (klass);
 	EBookBackendClass *parent_class;
-
-	e_book_backend_mapi_gal_parent_class = g_type_class_peek_parent (klass);
 
 	parent_class = E_BOOK_BACKEND_CLASS (klass);
 
@@ -924,6 +897,7 @@ static void e_book_backend_mapi_gal_class_init (EBookBackendMAPIGALClass *klass)
 	parent_class->cancel_operation		 = e_book_backend_mapi_gal_cancel_operation;
 	parent_class->set_mode                   = e_book_backend_mapi_gal_set_mode;
 	parent_class->remove			 = e_book_backend_mapi_gal_remove;
+
 	object_class->dispose                    = e_book_backend_mapi_gal_dispose;
 }
 
@@ -935,32 +909,10 @@ e_book_backend_mapi_gal_new (void)
 {
 	EBookBackendMAPIGAL *backend;
 
-//	if (enable_debug)
+	if (enable_debug)
 		printf ("\ne_book_backend_mapi_gal_new...\n");
 
 	backend = g_object_new (E_TYPE_BOOK_BACKEND_MAPIGAL, NULL);
 
 	return E_BOOK_BACKEND (backend);
-}
-
-static void	e_book_backend_mapi_gal_init (EBookBackendMAPIGAL *backend)
-{
-	EBookBackendMAPIGALPrivate *priv;
-
-	priv= g_new0 (EBookBackendMAPIGALPrivate, 1);
-	/* Priv Struct init */
-	backend->priv = priv;
-
-	priv->build_cache_thread = NULL;
-
-/*	priv->marked_for_offline = FALSE;
-	priv->uri = NULL;
-	priv->cache = NULL;
-	priv->is_summary_ready = FALSE;
-	priv->is_cache_ready = FALSE;
-
-*/	if (g_getenv ("MAPI_DEBUG"))
-		enable_debug = TRUE;
-	else
-		enable_debug = FALSE;
 }
