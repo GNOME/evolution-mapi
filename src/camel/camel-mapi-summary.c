@@ -41,7 +41,7 @@
 #define MS_EXTRACT_FIRST_DIGIT(val) val=strtoul (part, &part, 10);
 
 /*Prototypes*/
-static CamelFIRecord* mapi_summary_header_to_db (CamelFolderSummary *, CamelException *ex);
+static CamelFIRecord* mapi_summary_header_to_db (CamelFolderSummary *, GError **error);
 static gint mapi_summary_header_from_db (CamelFolderSummary *, CamelFIRecord *fir);
 
 static CamelMessageInfo *mapi_message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir);
@@ -127,23 +127,21 @@ CamelFolderSummary *
 camel_mapi_summary_new (CamelFolder *folder, const gchar *filename)
 {
 	CamelFolderSummary *summary;
-	CamelException ex;
+	GError *local_error = NULL;
 
 	summary = g_object_new (CAMEL_TYPE_MAPI_SUMMARY, NULL);
-
-	camel_exception_init (&ex);
 
 	summary->folder = folder;
 	camel_folder_summary_set_build_content (summary, TRUE);
 	camel_folder_summary_set_filename (summary, filename);
 
-	if (camel_folder_summary_load_from_db (summary, &ex) == -1) {
+	if (camel_folder_summary_load_from_db (summary, &local_error) == -1) {
 		/* FIXME: Isn't this dangerous ? We clear the summary
 		if it cannot be loaded, for some random reason.
 		We need to pass the ex and find out why it is not loaded etc. ? */
 		camel_folder_summary_clear_db (summary);
-		g_warning ("Unable to load summary %s\n", camel_exception_get_description (&ex));
-		camel_exception_clear (&ex);
+		g_warning ("Unable to load summary %s\n", local_error->message);
+		g_error_free (local_error);
 	}
 
 	return summary;
@@ -211,7 +209,7 @@ mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
 }
 
 static CamelFIRecord *
-mapi_summary_header_to_db (CamelFolderSummary *summary, CamelException *ex)
+mapi_summary_header_to_db (CamelFolderSummary *summary, GError **error)
 {
 	CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY(summary);
 	CamelFolderSummaryClass *folder_summary_class;
@@ -220,7 +218,7 @@ mapi_summary_header_to_db (CamelFolderSummary *summary, CamelException *ex)
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (
 		camel_mapi_summary_parent_class);
 
-	fir = folder_summary_class->summary_header_to_db (summary, ex);
+	fir = folder_summary_class->summary_header_to_db (summary, error);
 
 	if (!fir)
 		return NULL;

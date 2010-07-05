@@ -125,11 +125,11 @@ mail_item_set_body_stream (MailItem *item, CamelStream *body, MailItemPartType p
 	ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 	gboolean contains_only_7bit = TRUE, is_null_terminated = FALSE;
 
-	camel_seekable_stream_seek((CamelSeekableStream *)body, 0, CAMEL_STREAM_SET);
+	camel_seekable_stream_seek((CamelSeekableStream *)body, 0, CAMEL_STREAM_SET, NULL);
 
 	stream->value = g_byte_array_new ();
 
-	while (read_size = camel_stream_read (body, (gchar *)buf, STREAM_SIZE), read_size > 0) {
+	while (read_size = camel_stream_read (body, (gchar *)buf, STREAM_SIZE, NULL), read_size > 0) {
 		stream->value = g_byte_array_append (stream->value, buf, read_size);
 
 		is_null_terminated = buf [read_size - 1] == 0;
@@ -247,8 +247,8 @@ mail_item_add_attach (MailItem *item, CamelMimePart *part, CamelStream *content_
 	stream->proptag = PR_ATTACH_DATA_BIN;
 	stream->value = g_byte_array_new ();
 
-	camel_seekable_stream_seek((CamelSeekableStream *)content_stream, 0, CAMEL_STREAM_SET);
-	while (read_size = camel_stream_read(content_stream, (gchar *)buf, STREAM_SIZE), read_size > 0) {
+	camel_seekable_stream_seek((CamelSeekableStream *)content_stream, 0, CAMEL_STREAM_SET, NULL);
+	while (read_size = camel_stream_read(content_stream, (gchar *)buf, STREAM_SIZE, NULL), read_size > 0) {
 		stream->value = g_byte_array_append (stream->value, buf, read_size);
 	}
 
@@ -288,9 +288,9 @@ mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first)
 		filename = camel_mime_part_get_filename(part);
 
 		content_stream = camel_stream_mem_new();
-		content_size = camel_data_wrapper_decode_to_stream (dw, (CamelStream *) content_stream);
+		content_size = camel_data_wrapper_decode_to_stream (dw, (CamelStream *) content_stream, NULL);
 
-		camel_seekable_stream_seek((CamelSeekableStream *)content_stream, 0, CAMEL_STREAM_SET);
+		camel_seekable_stream_seek((CamelSeekableStream *)content_stream, 0, CAMEL_STREAM_SET, NULL);
 
 		description = camel_mime_part_get_description(part);
 		content_id = camel_mime_part_get_content_id(part);
@@ -311,7 +311,7 @@ mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first)
 }
 
 MailItem *
-camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, CamelException *ex)
+camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, GError **error)
 {
 	CamelDataWrapper *dw = NULL;
 	CamelContentType *type;
@@ -380,7 +380,7 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, Ca
 			content_type = camel_content_type_simple (type);
 
 			content_stream = (CamelStream *)camel_stream_mem_new();
-			content_size = camel_data_wrapper_decode_to_stream(dw, (CamelStream *)content_stream);
+			content_size = camel_data_wrapper_decode_to_stream(dw, (CamelStream *)content_stream, NULL);
 
 			mail_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT);
 		}

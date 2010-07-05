@@ -70,26 +70,26 @@ typedef struct {
 /*For collecting summary info from server*/
 
 static void mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **changeinfo,
-			       CamelException *ex, gboolean uid_flag);
+			       GError **error, gboolean uid_flag);
 
 G_DEFINE_TYPE (CamelMapiFolder, camel_mapi_folder, CAMEL_TYPE_OFFLINE_FOLDER)
 
 static GPtrArray *
-mapi_folder_search_by_expression (CamelFolder *folder, const gchar *expression, CamelException *ex)
+mapi_folder_search_by_expression (CamelFolder *folder, const gchar *expression, GError **error)
 {
 	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER(folder);
 	GPtrArray *matches;
 
 	CAMEL_MAPI_FOLDER_LOCK(mapi_folder, search_lock);
 	camel_folder_search_set_folder (mapi_folder->search, folder);
-	matches = camel_folder_search_search(mapi_folder->search, expression, NULL, ex);
+	matches = camel_folder_search_search(mapi_folder->search, expression, NULL, error);
 	CAMEL_MAPI_FOLDER_UNLOCK(mapi_folder, search_lock);
 
 	return matches;
 }
 
 static GPtrArray *
-mapi_folder_search_by_uids (CamelFolder *folder, const gchar *expression, GPtrArray *uids, CamelException *ex)
+mapi_folder_search_by_uids (CamelFolder *folder, const gchar *expression, GPtrArray *uids, GError **error)
 {
 	GPtrArray *matches;
 	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (folder);
@@ -99,19 +99,20 @@ mapi_folder_search_by_uids (CamelFolder *folder, const gchar *expression, GPtrAr
 
 	CAMEL_MAPI_FOLDER_LOCK (mapi_folder, search_lock);
 	camel_folder_search_set_folder (mapi_folder->search, folder);
-	matches = camel_folder_search_search (mapi_folder->search, expression, uids, ex);
+	matches = camel_folder_search_search (mapi_folder->search, expression, uids, error);
 	CAMEL_MAPI_FOLDER_UNLOCK (mapi_folder, search_lock);
 
 	return matches;
 }
 
-static void
-update_store_summary (CamelFolder *folder, CamelException *ex)
+static gboolean
+update_store_summary (CamelFolder *folder, GError **error)
 {
 	CamelStore *parent_store;
 	CamelStoreSummary *store_summary;
 	CamelStoreInfo *si;
 	const gchar *full_name;
+	gboolean success;
 
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
@@ -132,20 +133,20 @@ update_store_summary (CamelFolder *folder, CamelException *ex)
 		}
 		camel_store_summary_info_free (store_summary, si);
 	}
-	camel_folder_summary_save_to_db (folder->summary, ex);
+
+	success = camel_folder_summary_save_to_db (folder->summary, error);
 	camel_store_summary_save (store_summary);
+
+	return success;
 }
 
 static gboolean
-mapi_refresh_info (CamelFolder *folder, CamelException *ex)
+mapi_refresh_info (CamelFolder *folder, GError **error)
 {
-	mapi_refresh_folder (folder, ex);
-	if (camel_exception_is_set (ex))
+	if (!mapi_refresh_folder (folder, error))
 		return FALSE;
 
-	update_store_summary (folder, ex);
-
-	return !camel_exception_is_set (ex);
+	return update_store_summary (folder, error);
 }
 
 static gboolean
@@ -322,7 +323,7 @@ mapi_set_message_references (CamelMapiMessageInfo *mapi_mi, const gchar *referen
 
 static void
 mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **changeinfo,
-		   CamelException *ex, gboolean uid_flag)
+		   GError **error, gboolean uid_flag)
 {
 	CamelMapiMessageInfo *mi = NULL;
 	CamelMessageInfo *pmi = NULL;
@@ -695,18 +696,17 @@ mapi_sync_deleted_free (CamelSession *session, CamelSessionThreadMsg *msg)
 	if (m->need_refresh) {
 		CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (m->folder->summary);
 		if (mapi_summary) {
-			CamelException ex = CAMEL_EXCEPTION_INITIALISER;
+			GError *local_error = NULL;
 
 			camel_service_lock (CAMEL_SERVICE (parent_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 			g_free (mapi_summary->sync_time_stamp);
 			mapi_summary->sync_time_stamp = NULL;
 			camel_service_unlock (CAMEL_SERVICE (parent_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
-			mapi_refresh_folder (m->folder, &ex);
-
-			if (camel_exception_is_set (&ex))
-				g_warning ("%s: %s", G_STRFUNC, ex.desc);
-			camel_exception_clear (&ex);
+			if (!mapi_refresh_folder (m->folder, &local_error)) {
+				g_warning ("%s: %s", G_STRFUNC, local_error->message);
+				g_error_free (local_error);
+			}
 		}
 	}
 
@@ -719,7 +719,7 @@ static CamelSessionThreadOps deleted_items_sync_ops = {
 };
 
 static gboolean
-mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
+mapi_sync (CamelFolder *folder, gboolean expunge, GError **error)
 {
 	CamelMapiStore *mapi_store;
 	CamelMapiFolder *mapi_folder;
@@ -735,6 +735,7 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	gint count, i;
 	guint32 options =0;
 	gboolean is_junk_folder;
+	gboolean success;
 
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
@@ -744,8 +745,7 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 
 	if (((CamelOfflineStore *) mapi_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL ||
 			((CamelService *)mapi_store)->status == CAMEL_SERVICE_DISCONNECTED) {
-		update_store_summary (folder, ex);
-		return !camel_exception_is_set (ex);
+		return update_store_summary (folder, error);
 	}
 
 	if (((CamelMapiFolder *)folder)->type & CAMEL_MAPI_FOLDER_PUBLIC)
@@ -755,9 +755,8 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	exchange_mapi_util_mapi_id_from_string (folder_id, &fid);
 
 	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-	if (!camel_mapi_store_connected (mapi_store, ex)) {
+	if (!camel_mapi_store_connected (mapi_store, NULL)) {
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-		camel_exception_clear (ex);
 		return TRUE;
 	}
 	camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
@@ -890,10 +889,10 @@ mapi_sync (CamelFolder *folder, gboolean expunge, CamelException *ex)
 	}
 
 	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-	update_store_summary (folder, ex);
+	success = update_store_summary (folder, error);
 	camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
-	return !camel_exception_is_set (ex);
+	return success;
 }
 
 static gboolean
@@ -948,8 +947,8 @@ camel_mapi_folder_fetch_summary (CamelStore *store, CamelFolder *folder, const m
 	return status;
 }
 
-void
-mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
+gboolean
+mapi_refresh_folder(CamelFolder *folder, GError **error)
 {
 
 	CamelMapiStore *mapi_store;
@@ -961,6 +960,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 	gboolean is_proxy;
 	gboolean is_locked = FALSE;
 	gboolean status;
+	gboolean success = TRUE;
 
 	struct mapi_SRestriction *res = NULL;
 	struct SSortOrderSet *sort = NULL;
@@ -984,7 +984,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 
 	/* Sync-up the (un)read changes before getting updates,
 	so that the getFolderList will reflect the most recent changes too */
-	mapi_sync (folder, FALSE, ex);
+	mapi_sync (folder, FALSE, NULL);
 
 	//creating a copy
 	folder_id = camel_mapi_store_folder_id_lookup (mapi_store, full_name);
@@ -1000,7 +1000,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	is_locked = TRUE;
 
-	if (!camel_mapi_store_connected (mapi_store, ex))
+	if (!camel_mapi_store_connected (mapi_store, NULL))
 		goto end1;
 
 	/*Get the New Items*/
@@ -1042,10 +1042,13 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 
 		exchange_mapi_util_mapi_id_from_string (folder_id, &temp_folder_id);
 
-		if (!camel_mapi_store_connected (mapi_store, ex)) {
+		if (!camel_mapi_store_connected (mapi_store, NULL)) {
 			/*BUG : Fix exception string.*/
-			camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_UNAVAILABLE,
-					     _("This message is not available in offline mode."));
+			g_set_error (
+				error, CAMEL_SERVICE_ERROR,
+				CAMEL_SERVICE_ERROR_UNAVAILABLE,
+				_("This message is not available in offline mode."));
+			success = FALSE;
 			goto end1;
 		}
 
@@ -1058,7 +1061,11 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 							  fetch_data, options);
 
 		if (!status) {
-			camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_INVALID, _("Fetching items failed"));
+			g_set_error (
+				error, CAMEL_SERVICE_ERROR,
+				CAMEL_SERVICE_ERROR_INVALID,
+				_("Fetching items failed"));
+			success = FALSE;
 			goto end1;
 		}
 
@@ -1067,7 +1074,7 @@ mapi_refresh_folder(CamelFolder *folder, CamelException *ex)
 		mapi_summary->sync_time_stamp = g_time_val_to_iso8601 (&fetch_data->last_modification_time);
 
 		camel_folder_summary_touch (folder->summary);
-		update_store_summary (folder, ex);
+		update_store_summary (folder, NULL);
 
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		is_locked = FALSE;
@@ -1093,10 +1100,12 @@ end1:
 	g_slist_foreach (fetch_data->items_list, (GFunc) mail_item_free, NULL);
 	g_slist_free (fetch_data->items_list);
 	g_free (fetch_data);
+
+	return success;
 }
 
 static CamelMimeMessage *
-mapi_folder_get_message( CamelFolder *folder, const gchar *uid, CamelException *ex )
+mapi_folder_get_message( CamelFolder *folder, const gchar *uid, GError **error )
 {
 	CamelMimeMessage *msg = NULL;
 	CamelMapiFolder *mapi_folder;
@@ -1120,30 +1129,32 @@ mapi_folder_get_message( CamelFolder *folder, const gchar *uid, CamelException *
 	if (mi == NULL) {
 		/* Translators: The first %s is replaced with a message ID,
 		   the second %s is replaced with a detailed error string */
-		camel_exception_setv(ex, CAMEL_EXCEPTION_FOLDER_INVALID_UID,
-				_("Cannot get message %s: %s"), uid, _("No such message"));
+		g_set_error (
+			error, CAMEL_FOLDER_ERROR,
+			CAMEL_FOLDER_ERROR_INVALID_UID,
+			_("Cannot get message %s: %s"), uid,
+			_("No such message"));
 		return NULL;
 	}
-	cache_stream  = camel_data_cache_get (mapi_folder->cache, "cache", uid, ex);
+	cache_stream  = camel_data_cache_get (mapi_folder->cache, "cache", uid, error);
 	stream = camel_stream_mem_new ();
 	if (cache_stream) {
+		GError *local_error = NULL;
+
 		msg = camel_mime_message_new ();
-		camel_stream_reset (stream);
-		camel_stream_write_to_stream (cache_stream, stream);
-		camel_stream_reset (stream);
-		if (camel_data_wrapper_construct_from_stream ((CamelDataWrapper *) msg, stream) == -1) {
-			if (errno == EINTR) {
-				camel_exception_setv (ex, CAMEL_EXCEPTION_USER_CANCEL, _("Message fetching cancelled by user."));
+		camel_stream_reset (stream, NULL);
+		camel_stream_write_to_stream (cache_stream, stream, NULL);
+		camel_stream_reset (stream, NULL);
+		if (camel_data_wrapper_construct_from_stream ((CamelDataWrapper *) msg, stream, &local_error) == -1) {
+			if (g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
 				g_object_unref (msg);
 				g_object_unref (cache_stream);
 				g_object_unref (stream);
 				camel_message_info_free (&mi->info);
 				return NULL;
 			} else {
-				/* Translators: The first %s is replaced with a message ID,
-				   the second %s is replaced with a detailed error string */
-				camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM, _("Cannot get message %s: %s"),
-						uid, g_strerror (errno));
+				/* Translators: The %s is replaced with a message ID */
+				g_prefix_error (error, "Cannot get message %s: ", uid);
 				g_object_unref (msg);
 				msg = NULL;
 			}
@@ -1158,16 +1169,20 @@ mapi_folder_get_message( CamelFolder *folder, const gchar *uid, CamelException *
 	}
 
 	if (((CamelOfflineStore *) mapi_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL) {
-		camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_UNAVAILABLE,
-				_("This message is not available in offline mode."));
+		g_set_error (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("This message is not available in offline mode."));
 		camel_message_info_free (&mi->info);
 		return NULL;
 	}
 
 	/* Check if we are really offline */
-	if (!camel_mapi_store_connected (mapi_store, ex)) {
-		camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_UNAVAILABLE,
-				_("This message is not available in offline mode."));
+	if (!camel_mapi_store_connected (mapi_store, NULL)) {
+		g_set_error (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("This message is not available in offline mode."));
 		camel_message_info_free (&mi->info);
 		return NULL;
 	}
@@ -1189,7 +1204,10 @@ mapi_folder_get_message( CamelFolder *folder, const gchar *uid, CamelException *
 	camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	if (item == NULL) {
-		camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_INVALID, _("Could not get message"));
+		g_set_error (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_INVALID,
+			_("Could not get message"));
 		camel_message_info_free (&mi->info);
 		return NULL;
 	}
@@ -1198,7 +1216,10 @@ mapi_folder_get_message( CamelFolder *folder, const gchar *uid, CamelException *
 	mail_item_free (item);
 
 	if (!msg) {
-		camel_exception_set (ex, CAMEL_EXCEPTION_SERVICE_INVALID, _("Could not get message"));
+		g_set_error (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_INVALID,
+			_("Could not get message"));
 		camel_message_info_free (&mi->info);
 
 		return NULL;
@@ -1207,8 +1228,8 @@ mapi_folder_get_message( CamelFolder *folder, const gchar *uid, CamelException *
 	/* add to cache */
 	CAMEL_MAPI_FOLDER_REC_LOCK (folder, cache_lock);
 	if ((cache_stream = camel_data_cache_add (mapi_folder->cache, "cache", uid, NULL))) {
-		if (camel_data_wrapper_write_to_stream ((CamelDataWrapper *) msg, cache_stream) == -1
-				|| camel_stream_flush (cache_stream) == -1) {
+		if (camel_data_wrapper_write_to_stream ((CamelDataWrapper *) msg, cache_stream, NULL) == -1
+				|| camel_stream_flush (cache_stream, NULL) == -1) {
 			camel_data_cache_remove (mapi_folder->cache, "cache", uid, NULL);
 		} else {
 			CamelMimeMessage *msg2;
@@ -1218,8 +1239,8 @@ mapi_folder_get_message( CamelFolder *folder, const gchar *uid, CamelException *
 			   composing message in memory, but when they are read from the cache
 			   they appear properly in the UI. */
 			msg2 = camel_mime_message_new ();
-			camel_stream_reset (cache_stream);
-			if (camel_data_wrapper_construct_from_stream (CAMEL_DATA_WRAPPER (msg2), cache_stream) == -1) {
+			camel_stream_reset (cache_stream, NULL);
+			if (camel_data_wrapper_construct_from_stream (CAMEL_DATA_WRAPPER (msg2), cache_stream, NULL) == -1) {
 				g_object_unref (msg2);
 			} else {
 				g_object_unref (msg);
@@ -1291,7 +1312,7 @@ mapi_get_message_info(CamelFolder *folder, const gchar *uid)
 #endif
 
 static gboolean
-mapi_expunge (CamelFolder *folder, CamelException *ex)
+mapi_expunge (CamelFolder *folder, GError **error)
 {
 	CamelMapiStore *mapi_store;
 	CamelMapiFolder *mapi_folder;
@@ -1401,7 +1422,7 @@ mapi_expunge (CamelFolder *folder, CamelException *ex)
 static gboolean
 mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 		CamelFolder *destination, GPtrArray **transferred_uids,
-		gboolean delete_originals, CamelException *ex)
+		gboolean delete_originals, GError **error)
 {
 	mapi_id_t src_fid, dest_fid;
 	guint32 src_fid_options, dest_fid_options;
@@ -1416,6 +1437,7 @@ mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 	const gchar *destination_full_name;
 	gint i = 0;
 	GSList *src_msg_ids = NULL;
+	gboolean success = TRUE;
 
 	if (!CAMEL_IS_MAPI_FOLDER (source) || !CAMEL_IS_MAPI_FOLDER (destination) ||
 	    (CAMEL_MAPI_FOLDER (source)->type & CAMEL_MAPI_FOLDER_PUBLIC) != 0 ||
@@ -1427,7 +1449,7 @@ mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 		folder_class = CAMEL_FOLDER_CLASS (camel_mapi_folder_parent_class);
 		return folder_class->transfer_messages_to (
 			source, uids, destination, transferred_uids,
-			delete_originals, ex);
+			delete_originals, error);
 	}
 
 	source_full_name = camel_folder_get_full_name (source);
@@ -1464,7 +1486,10 @@ mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 		if (retval != MAPI_E_SUCCESS) {
 			const gchar *err_str = mapi_get_errstr (retval);
 
-			camel_exception_set (ex, CAMEL_EXCEPTION_SYSTEM, err_str ? err_str : _("Unknown error"));
+			g_set_error (
+				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				"%s", err_str ? err_str : _("Unknown error"));
+			success = FALSE;
 		} else {
 			changes = camel_folder_change_info_new ();
 
@@ -1481,14 +1506,17 @@ mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 		if (retval != MAPI_E_SUCCESS) {
 			const gchar *err_str = mapi_get_errstr (retval);
 
-			camel_exception_set (ex, CAMEL_EXCEPTION_SYSTEM, err_str ? err_str : _("Unknown error"));
+			g_set_error (
+				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				"%s", err_str ? err_str : _("Unknown error"));
+			success = FALSE;
 		}
 	}
 
 	g_slist_foreach (src_msg_ids, (GFunc) g_free, NULL);
 	g_slist_free (src_msg_ids);
 
-	return !camel_exception_is_set (ex);
+	return success;
 }
 
 static void
@@ -1509,7 +1537,7 @@ mapi_cmp_uids (CamelFolder *folder, const gchar *uid1, const gchar *uid2)
 static gboolean
 mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 		const CamelMessageInfo *info, gchar **appended_uid,
-		CamelException *ex)
+		GError **error)
 {
 	CamelMapiStore *mapi_store;
 	CamelOfflineStore *offline;
@@ -1537,15 +1565,17 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 
 	if (((folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH) ||
 	    ((folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_OUTBOX)) {
-		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM,
-				      _("Cannot append message to folder '%s'"),
-				      full_name);
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Cannot append message to folder '%s'"),
+			full_name);
 		return FALSE;
 	}
 
 	if (offline->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL) {
-		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM,
-				      _("Offline."));
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Offline."));
 		return FALSE;
 	}
 
@@ -1556,7 +1586,9 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 	/* Convert MIME to Item */
 	from = (CamelAddress *) camel_mime_message_get_from (message);
 
-	item = camel_mapi_utils_mime_to_item (message, from, ex);
+	item = camel_mapi_utils_mime_to_item (message, from, error);
+	if (item == NULL)
+		return FALSE;
 
 	mid = exchange_mapi_connection_create_item (camel_mapi_store_get_exchange_connection (mapi_store), -1, fid,
 					 camel_mapi_utils_create_item_build_props, item,
@@ -1566,7 +1598,7 @@ mapi_append_message (CamelFolder *folder, CamelMimeMessage *message,
 	if (appended_uid)
 		*appended_uid = exchange_mapi_util_mapi_ids_to_uid(fid, mid);
 
-	return !camel_exception_is_set (ex);
+	return TRUE;
 }
 
 static gboolean
@@ -1670,7 +1702,7 @@ camel_mapi_folder_init (CamelMapiFolder *mapi_folder)
 
 CamelFolder *
 camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar *folder_dir,
-		      guint32 flags, CamelException *ex)
+		      guint32 flags, GError **error)
 {
 
 	CamelFolder	*folder = NULL;
@@ -1701,9 +1733,10 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 
 	if (!folder->summary) {
 		g_object_unref (CAMEL_OBJECT (folder));
-		camel_exception_setv (ex, CAMEL_EXCEPTION_SYSTEM,
-				_("Could not load summary for %s"),
-				folder_name);
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Could not load summary for %s"),
+			folder_name);
 		return NULL;
 	}
 
@@ -1714,7 +1747,7 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 	camel_object_state_read (CAMEL_OBJECT (folder));
 
 	state_file = g_strdup_printf ("%s/%s", folder_dir, folder_name);
-	mapi_folder->cache = camel_data_cache_new (state_file, ex);
+	mapi_folder->cache = camel_data_cache_new (state_file, error);
 	g_free (state_file);
 	if (!mapi_folder->cache) {
 		g_object_unref (folder);

@@ -72,7 +72,7 @@ mapi_message_item_send (ExchangeMapiConnection *conn, MailItem *item)
 
 static gboolean
 mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
-	      CamelAddress *from, CamelAddress *recipients, CamelException *ex)
+	      CamelAddress *from, CamelAddress *recipients, GError **error)
 {
 	ExchangeMapiConnection *conn;
 	MailItem *item = NULL;
@@ -92,12 +92,15 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 
 	conn = exchange_mapi_connection_find (camel_url_get_param (url, "profile"));
 	if (!conn) {
-		camel_exception_setv (ex, CAMEL_EXCEPTION_SERVICE_UNAVAILABLE, _("Could not send message."));
+		g_set_error (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("Could not send message."));
 		return FALSE;
 	}
 
 	/* Convert MIME to MailItem, attacment lists and recipient list.*/
-	item = camel_mapi_utils_mime_to_item (message, from, ex);
+	item = camel_mapi_utils_mime_to_item (message, from, NULL);
 
 	/* send */
 	st = mapi_message_item_send (conn, item);
@@ -106,7 +109,10 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 
 	if (st == 0) {
 		/*Fixme : Set a better error message. Would be helful in troubleshooting. */
-		camel_exception_setv (ex, CAMEL_EXCEPTION_SERVICE_UNAVAILABLE,_("Could not send message."));
+		g_set_error (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("Could not send message."));
 		return FALSE;
 	}
 

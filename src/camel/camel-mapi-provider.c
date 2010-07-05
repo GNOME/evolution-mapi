@@ -89,7 +89,7 @@ CamelServiceAuthType camel_mapi_password_authtype = {
 };
 
 static gint
-mapi_auto_detect_cb(CamelURL *url, GHashTable **auto_detected, CamelException *ex)
+mapi_auto_detect_cb(CamelURL *url, GHashTable **auto_detected, GError **error)
 {
 	*auto_detected = g_hash_table_new (g_str_hash, g_str_equal);
 	g_hash_table_insert (*auto_detected, g_strdup ("poa"), g_strdup (url->host));

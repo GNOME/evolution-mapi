@@ -92,7 +92,7 @@ struct _CamelMapiStoreClass {
  */
 
 GType camel_mapi_store_get_type(void);
-gboolean camel_mapi_store_connected(CamelMapiStore *, CamelException *);
+gboolean camel_mapi_store_connected(CamelMapiStore *, GError **);
 
 const gchar * camel_mapi_store_folder_id_lookup (CamelMapiStore *mapi_store, const gchar *folder_name);
 const gchar * camel_mapi_store_folder_lookup (CamelMapiStore *mapi_store, const gchar *folder_id);

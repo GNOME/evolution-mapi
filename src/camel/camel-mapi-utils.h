@@ -31,7 +31,7 @@ G_BEGIN_DECLS
 #include <camel/camel.h>
 
 MailItem *
-camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, CamelException *ex);
+camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, GError **error);
 
 gboolean
 camel_mapi_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data);

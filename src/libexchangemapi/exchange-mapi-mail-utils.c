@@ -381,11 +381,11 @@ mapi_mime_set_msg_headers (ExchangeMapiConnection *conn, CamelMimeMessage *msg, 
 
 		stream = camel_stream_mem_new_with_buffer (item->header.transport_headers, strlen (item->header.transport_headers));
 		parser = camel_mime_parser_new ();
-		camel_mime_parser_init_with_stream (parser, stream);
+		camel_mime_parser_init_with_stream (parser, stream, NULL);
 		camel_mime_parser_scan_from (parser, FALSE);
 		g_object_unref (stream);
 
-		if (camel_mime_part_construct_from_parser (part, parser) != -1) {
+		if (camel_mime_part_construct_from_parser (part, parser, NULL) != -1) {
 			struct _camel_header_raw *h;
 
 			for (h = part->headers; h; h = h->next) {
