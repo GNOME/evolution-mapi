@@ -52,11 +52,10 @@ mail_item_free (MailItem *item)
 gboolean
 fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 {
-	long *flags;
-	struct FILETIME *delivery_date;
-	const gchar *msg_class;
-	NTTIME ntdate;
-	ExchangeMAPIStream *body;
+	long *flags = NULL;
+	struct FILETIME *delivery_date = NULL;
+	const gchar *msg_class = NULL;
+	ExchangeMAPIStream *body = NULL;
 
 	MailItem *item;
 	MailItem **i = (MailItem **)data;
@@ -101,7 +100,7 @@ fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 	}
 
 	item->is_cal = FALSE;
-	if (g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_PREFIX)) {
+	if (msg_class && g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_PREFIX)) {
 		guint8 *appointment_body_str = (guint8 *) exchange_mapi_cal_util_camel_helper (item_data->conn, item_data->fid, item_data->mid, NULL, msg_class,
 												item_data->streams, item_data->recipients, item_data->attachments);
 
@@ -132,15 +131,17 @@ fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 	}
 
 	if (delivery_date) {
+		NTTIME ntdate = { 0 };
+
 		ntdate = delivery_date->dwHighDateTime;
 		ntdate = ntdate << 32;
 		ntdate |= delivery_date->dwLowDateTime;
 		item->header.recieved_time = nt_time_to_unix(ntdate);
 	}
 
-	if ((*flags & MSGFLAG_READ) != 0)
+	if (flags && (*flags & MSGFLAG_READ) != 0)
 		item->header.flags |= CAMEL_MESSAGE_SEEN;
-	if ((*flags & MSGFLAG_HASATTACH) != 0)
+	if (flags && (*flags & MSGFLAG_HASATTACH) != 0)
 		item->header.flags |= CAMEL_MESSAGE_ATTACHMENTS;
 
 	item->attachments = item_data->attachments;
