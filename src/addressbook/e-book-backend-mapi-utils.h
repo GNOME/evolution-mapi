@@ -23,6 +23,9 @@
 
 #include "exchange-mapi-connection.h"
 
+#define EDB_ERROR(_code) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, NULL)
+#define EDB_ERROR_EX(_code, _msg) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, _msg)
+
 /* vCard parameter name in contact list */
 #define EMA_X_MEMBERID "X-EMA-MEMBER-ID"
 #define EMA_X_MEMBERVALUE "X-EMA-MEMBER-VALUE"

@@ -247,10 +247,11 @@ get_filename_from_uri (const gchar *uri, const gchar *file)
 	return filename;
 }
 
-static GNOME_Evolution_Addressbook_CallStatus
+static void
 e_book_backend_mapi_load_source (EBookBackend *backend,
 				 ESource      *source,
-				 gboolean     only_if_exists)
+				 gboolean     only_if_exists,
+				 GError **perror)
 {
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
 	const gchar *offline, *tmp;
@@ -259,7 +260,7 @@ e_book_backend_mapi_load_source (EBookBackend *backend,
 		printf("MAPI load source\n");
 
 	if (e_book_backend_is_loaded (backend))
-		return GNOME_Evolution_Addressbook_Success;
+		return /* Success */;
 
 	offline = e_source_get_property (source, "offline_sync");
 	if (offline  && g_str_equal (offline, "1"))
@@ -269,9 +270,10 @@ e_book_backend_mapi_load_source (EBookBackend *backend,
 
 	priv->uri = e_source_get_uri (source);
 
-	if (priv->mode ==  GNOME_Evolution_Addressbook_MODE_LOCAL &&
+	if (priv->mode ==  E_DATA_BOOK_MODE_LOCAL &&
 	    !priv->marked_for_offline ) {
-		return GNOME_Evolution_Addressbook_OfflineUnavailable;
+		g_propagate_error (perror, EDB_ERROR (OFFLINE_UNAVAILABLE));
+		return;
 	}
 
 	g_free (priv->summary_file_name);
@@ -297,13 +299,14 @@ e_book_backend_mapi_load_source (EBookBackend *backend,
 
 	e_book_backend_set_is_loaded (E_BOOK_BACKEND (backend), TRUE);
 	e_book_backend_set_is_writable (backend, TRUE);
-	if (priv->mode ==  GNOME_Evolution_Addressbook_MODE_LOCAL) {
+	if (priv->mode ==  E_DATA_BOOK_MODE_LOCAL) {
 		e_book_backend_set_is_writable (backend, FALSE);
 		e_book_backend_notify_writable (backend, FALSE);
 		e_book_backend_notify_connection_status (backend, FALSE);
 		if (!priv->cache) {
 			printf("Unfortunately the cache is not yet created\n");
-			return GNOME_Evolution_Addressbook_OfflineUnavailable;
+			g_propagate_error (perror, EDB_ERROR (OFFLINE_UNAVAILABLE));
+			return;
 		}
 	} else {
 		e_book_backend_notify_connection_status (backend, TRUE);
@@ -316,8 +319,8 @@ e_book_backend_mapi_load_source (EBookBackend *backend,
 	printf("Folder is %s %016" G_GINT64_MODIFIER "X\n", tmp, priv->fid);
 
 	/* Once aunthentication in address book works this can be removed */
-	if (priv->mode == GNOME_Evolution_Addressbook_MODE_LOCAL) {
-		return GNOME_Evolution_Addressbook_Success;
+	if (priv->mode == E_DATA_BOOK_MODE_LOCAL) {
+		return /* Success */;
 	}
 
 	// writable property will be set in authenticate_user callback
@@ -326,8 +329,6 @@ e_book_backend_mapi_load_source (EBookBackend *backend,
 
 	if (enable_debug)
 		printf("For profile %s and folder %s - %016" G_GINT64_MODIFIER "X\n", priv->profile, tmp, priv->fid);
-
-	return GNOME_Evolution_Addressbook_Success;
 }
 
 static gchar *
@@ -706,11 +707,11 @@ e_book_backend_mapi_create_contact (EBookBackend *backend,
 
 	switch (priv->mode) {
 
-	case GNOME_Evolution_Addressbook_MODE_LOCAL :
-		e_data_book_respond_create(book, opid, GNOME_Evolution_Addressbook_RepositoryOffline, NULL);
-		return;
+	case E_DATA_BOOK_MODE_LOCAL:
+		e_data_book_respond_create(book, opid, EDB_ERROR (REPOSITORY_OFFLINE), NULL);
+		break;
 
-	case  GNOME_Evolution_Addressbook_MODE_REMOTE :
+	case E_DATA_BOOK_MODE_REMOTE:
 		contact = e_contact_new_from_vcard(vcard);
 		mcd.contact = contact;
 		mcd.cache = priv->cache;
@@ -718,7 +719,7 @@ e_book_backend_mapi_create_contact (EBookBackend *backend,
 				mapi_book_write_props, &mcd,
 				NULL, NULL, NULL, 0);
 		if (!status) {
-			e_data_book_respond_create(book, opid, GNOME_Evolution_Addressbook_OtherError, NULL);
+			e_data_book_respond_create(book, opid, EDB_ERROR (OTHER_ERROR), NULL);
 			return;
 		}
 		id = exchange_mapi_util_mapi_ids_to_uid (priv->fid, status);
@@ -735,11 +736,9 @@ e_book_backend_mapi_create_contact (EBookBackend *backend,
 		if (priv->marked_for_offline && priv->is_summary_ready)
 			e_book_backend_summary_add_contact (priv->summary, contact);
 
-		e_data_book_respond_create(book, opid, GNOME_Evolution_Addressbook_Success, contact);
-		return;
+		e_data_book_respond_create(book, opid, NULL /* Success */, contact);
+		break;
 	}
-
-	return;
 }
 
 static void
@@ -758,12 +757,11 @@ e_book_backend_mapi_remove_contacts (EBookBackend *backend,
 
 	switch (priv->mode) {
 
-	case GNOME_Evolution_Addressbook_MODE_LOCAL :
-		e_data_book_respond_remove_contacts (book, opid, GNOME_Evolution_Addressbook_RepositoryOffline, NULL);
-		return;
+	case E_DATA_BOOK_MODE_LOCAL:
+		e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (REPOSITORY_OFFLINE), NULL);
+		break;
 
-	case GNOME_Evolution_Addressbook_MODE_REMOTE:
-
+	case E_DATA_BOOK_MODE_REMOTE:
 		while (tmp) {
 			struct id_list *data = g_new (struct id_list, 1);
 			exchange_mapi_util_mapi_ids_from_uid (tmp->data, &fid, &mid);
@@ -790,9 +788,8 @@ e_book_backend_mapi_remove_contacts (EBookBackend *backend,
 		}
 
 		g_slist_free (list);
-		e_data_book_respond_remove_contacts (book, opid,
-							     GNOME_Evolution_Addressbook_Success, id_list);
-		return;
+		e_data_book_respond_remove_contacts (book, opid, NULL /* Success */, id_list);
+		break;
 	default:
 		break;
 	}
@@ -816,10 +813,10 @@ e_book_backend_mapi_modify_contact (EBookBackend *backend,
 
 	switch (priv->mode) {
 
-	case GNOME_Evolution_Addressbook_MODE_LOCAL :
-		e_data_book_respond_modify(book, opid, GNOME_Evolution_Addressbook_RepositoryOffline, NULL);
-		return;
-	case GNOME_Evolution_Addressbook_MODE_REMOTE :
+	case E_DATA_BOOK_MODE_LOCAL:
+		e_data_book_respond_modify (book, opid, EDB_ERROR (REPOSITORY_OFFLINE), NULL);
+		break;
+	case E_DATA_BOOK_MODE_REMOTE:
 		contact = e_contact_new_from_vcard(vcard);
 		tmp = e_contact_get (contact, E_CONTACT_UID);
 		exchange_mapi_util_mapi_ids_from_uid (tmp, &fid, &mid);
@@ -832,8 +829,8 @@ e_book_backend_mapi_modify_contact (EBookBackend *backend,
 				NULL, NULL, NULL, 0);
 		printf("getting %d\n", status);
 		if (!status) {
-			e_data_book_respond_modify(book, opid, GNOME_Evolution_Addressbook_OtherError, NULL);
-			return;
+			e_data_book_respond_modify (book, opid, EDB_ERROR (OTHER_ERROR), NULL);
+			break;
 		}
 
 		e_contact_set (contact, E_CONTACT_BOOK_URI, priv->uri);
@@ -851,7 +848,7 @@ e_book_backend_mapi_modify_contact (EBookBackend *backend,
 		if (priv->marked_for_offline && priv->is_summary_ready)
 			e_book_backend_summary_add_contact (priv->summary, contact);
 
-		e_data_book_respond_modify (book, opid, GNOME_Evolution_Addressbook_Success, contact);
+		e_data_book_respond_modify (book, opid, NULL /* Success */, contact);
 
 	}
 }
@@ -900,7 +897,7 @@ e_book_backend_mapi_get_contact (EBookBackend *backend,
 
 	switch (priv->mode) {
 
-	case GNOME_Evolution_Addressbook_MODE_LOCAL:
+	case E_DATA_BOOK_MODE_LOCAL:
 		contact = e_book_backend_cache_get_contact (priv->cache,
 							    id);
 		if (contact) {
@@ -908,18 +905,18 @@ e_book_backend_mapi_get_contact (EBookBackend *backend,
 						     EVC_FORMAT_VCARD_30);
 			e_data_book_respond_get_contact (book,
 							 opid,
-							 GNOME_Evolution_Addressbook_Success,
+							 NULL /* Success */,
 							 vcard);
 			g_free (vcard);
 			g_object_unref (contact);
 			return;
 		}
 		else {
-			e_data_book_respond_get_contact (book, opid, GNOME_Evolution_Addressbook_ContactNotFound, "");
+			e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
 			return;
 		}
 
-	case GNOME_Evolution_Addressbook_MODE_REMOTE:
+	case E_DATA_BOOK_MODE_REMOTE:
 
 		if (priv->marked_for_offline && e_book_backend_cache_is_populated (priv->cache)) {
 			contact = e_book_backend_cache_get_contact (priv->cache,
@@ -929,14 +926,14 @@ e_book_backend_mapi_get_contact (EBookBackend *backend,
 							     EVC_FORMAT_VCARD_30);
 				e_data_book_respond_get_contact (book,
 								 opid,
-								 GNOME_Evolution_Addressbook_Success,
+								 NULL /* Success */,
 								 vcard);
 				g_free (vcard);
 				g_object_unref (contact);
 				return;
 			}
 			else {
-				e_data_book_respond_get_contact (book, opid, GNOME_Evolution_Addressbook_ContactNotFound, "");
+				e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
 				return;
 			}
 
@@ -955,14 +952,14 @@ e_book_backend_mapi_get_contact (EBookBackend *backend,
 							     EVC_FORMAT_VCARD_30);
 				e_data_book_respond_get_contact (book,
 								 opid,
-								 GNOME_Evolution_Addressbook_Success,
+								 NULL /* Success */,
 								 vcard);
 				g_free (vcard);
 				g_object_unref (contact);
 				return;
 
 			} else {
-				e_data_book_respond_get_contact (book, opid, GNOME_Evolution_Addressbook_ContactNotFound, "");
+				e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
 				return;
 			}
 		}
@@ -1021,7 +1018,7 @@ e_book_backend_mapi_get_contact_list (EBookBackend *backend,
 
 	printf("mapi: get contact list %s\n", query);
 	switch (priv->mode) {
-	case GNOME_Evolution_Addressbook_MODE_LOCAL:
+	case E_DATA_BOOK_MODE_LOCAL:
 		if (priv->marked_for_offline && priv->cache) {
 			GList *contacts;
 			GList *vcard_strings = NULL;
@@ -1038,14 +1035,14 @@ e_book_backend_mapi_get_contact_list (EBookBackend *backend,
 
 			g_list_free (contacts);
 			printf("get_contact_list in  %s returning %d contacts\n", priv->uri, g_list_length (vcard_strings));
-			e_data_book_respond_get_contact_list (book, opid, GNOME_Evolution_Addressbook_Success, vcard_strings);
+			e_data_book_respond_get_contact_list (book, opid, NULL /* Success */, vcard_strings);
 			return;
 		}
-		e_data_book_respond_get_contact_list (book, opid, GNOME_Evolution_Addressbook_RepositoryOffline,
+		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (REPOSITORY_OFFLINE),
 						      NULL);
 		return;
 
-	case GNOME_Evolution_Addressbook_MODE_REMOTE:
+	case E_DATA_BOOK_MODE_REMOTE:
 		printf("Mode : Remote\n");
 		if (priv->marked_for_offline && priv->cache) {
 			GList *contacts;
@@ -1063,7 +1060,7 @@ e_book_backend_mapi_get_contact_list (EBookBackend *backend,
 
 			g_list_free (contacts);
 			printf("get_contact_list in %s  returning %d contacts\n", priv->uri, g_list_length (vcard_strings));
-			e_data_book_respond_get_contact_list (book, opid, GNOME_Evolution_Addressbook_Success, vcard_strings);
+			e_data_book_respond_get_contact_list (book, opid, NULL /* Success */, vcard_strings);
 			return;
 		}
 		else {
@@ -1075,7 +1072,7 @@ e_book_backend_mapi_get_contact_list (EBookBackend *backend,
 
 			/* Unfortunately MAPI Doesn't support searching well, we do allow only online search for emails rest all are returned as error. */
 			if (!no_summary_search && !build_restriction_emails_contains (&res, query)) {
-				e_data_book_respond_get_contact_list (book, opid, GNOME_Evolution_Addressbook_OtherError, NULL);
+				e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (OTHER_ERROR), NULL);
 				return;
 			}
 
@@ -1083,11 +1080,11 @@ e_book_backend_mapi_get_contact_list (EBookBackend *backend,
 								is_public ? NULL : mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 								create_contact_list_cb, &vcard_str,
 								options)) {
-				e_data_book_respond_get_contact_list (book, opid, GNOME_Evolution_Addressbook_OtherError, NULL);
+				e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (OTHER_ERROR), NULL);
 				return;
 			}
 			printf("get_contact_list in %s returning %d contacts\n", priv->uri, g_list_length (vcard_str));
-			e_data_book_respond_get_contact_list (book, opid, GNOME_Evolution_Addressbook_Success, vcard_str);
+			e_data_book_respond_get_contact_list (book, opid, NULL /* Success */, vcard_str);
 			return;
 
 		}
@@ -1221,7 +1218,8 @@ book_view_thread (gpointer data)
 	guint res_count = 6;
 	ESource *source;
 	guint32 options = MAPI_OPTIONS_FETCH_ALL; 
-	gboolean is_public = FALSE; 
+	gboolean is_public = FALSE;
+	GError *err = NULL;
 
 	source = e_book_backend_get_source(E_BOOK_BACKEND(backend));
 	if (strcmp (e_source_get_property(source, "public"), "yes") == 0 ) {
@@ -1237,18 +1235,18 @@ book_view_thread (gpointer data)
 
 	switch (priv->mode) {
 
-	case GNOME_Evolution_Addressbook_MODE_LOCAL:
+	case E_DATA_BOOK_MODE_LOCAL:
 		if (!priv->marked_for_offline) {
-			e_data_book_view_notify_complete (book_view,
-					GNOME_Evolution_Addressbook_OfflineUnavailable);
+			err = EDB_ERROR (OFFLINE_UNAVAILABLE);
+			e_data_book_view_notify_complete (book_view, err);
+			g_error_free (err);
 			untrack_book_view (backend, book_view);
 			destroy_closure (closure);
 			return;
 		}
 		if (!priv->cache) {
 			printf("The cache is not yet built\n");
-			e_data_book_view_notify_complete (book_view,
-					GNOME_Evolution_Addressbook_Success);
+			e_data_book_view_notify_complete (book_view, NULL /* Success */);
 			untrack_book_view (backend, book_view);
 			destroy_closure (closure);
 			return;
@@ -1285,19 +1283,20 @@ book_view_thread (gpointer data)
 							E_CONTACT(contacts->data));
 			g_object_unref (contacts->data);
 		}
-		e_data_book_view_notify_complete (book_view, GNOME_Evolution_Addressbook_Success);
+		e_data_book_view_notify_complete (book_view, NULL /* Success */);
 		if (temp_list)
 			 g_list_free (temp_list);
 		untrack_book_view (backend, book_view);
 		destroy_closure (closure);
 		return;
 
-	case GNOME_Evolution_Addressbook_MODE_REMOTE:
+	case E_DATA_BOOK_MODE_REMOTE:
 
 		if (!priv->conn || !exchange_mapi_connection_connected (priv->conn)) {
 			e_book_backend_notify_auth_required (E_BOOK_BACKEND (backend));
-			e_data_book_view_notify_complete (book_view,
-						GNOME_Evolution_Addressbook_AuthenticationRequired);
+			err = EDB_ERROR (AUTHENTICATION_REQUIRED);
+			e_data_book_view_notify_complete (book_view, err);
+			g_error_free (err);
 			untrack_book_view (backend, book_view);
 			destroy_closure (closure);
 			return;
@@ -1334,7 +1333,7 @@ book_view_thread (gpointer data)
 								E_CONTACT(contacts->data));
 				g_object_unref (contacts->data);
 			}
-			e_data_book_view_notify_complete (book_view, GNOME_Evolution_Addressbook_Success);
+			e_data_book_view_notify_complete (book_view, NULL /* Success */);
 			if (temp_list)
 				 g_list_free (temp_list);
 			untrack_book_view (backend, book_view);
@@ -1349,8 +1348,9 @@ book_view_thread (gpointer data)
 			or_res = g_new0 (struct mapi_SRestriction_or, res_count);
 
 			if (!build_multiple_restriction_emails_contains (priv->conn, priv->fid, &res, or_res, query, &to_free)) {
-				e_data_book_view_notify_complete (book_view,
-							  GNOME_Evolution_Addressbook_OtherError);
+				err = EDB_ERROR_EX (OTHER_ERROR, "Cannot build query based on email");
+				e_data_book_view_notify_complete (book_view, err);
+				g_error_free (err);
 				g_free (or_res);
 				g_free (to_free);
 				untrack_book_view (backend, book_view);
@@ -1363,7 +1363,9 @@ book_view_thread (gpointer data)
 							   is_public ? NULL : mapi_book_utils_get_prop_list, GET_SHORT_SUMMARY,
 							   create_contact_cb, closure,
 							   options)) {
-				e_data_book_view_notify_complete (book_view, GNOME_Evolution_Addressbook_OtherError);
+				err = EDB_ERROR (OTHER_ERROR);
+				e_data_book_view_notify_complete (book_view, err);
+				g_error_free (err);
 
 				if (or_res)
 					g_free(or_res);
@@ -1380,14 +1382,16 @@ book_view_thread (gpointer data)
 							is_public ? NULL : mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 							create_contact_cb, closure,
 							options)) {
-				e_data_book_view_notify_complete (book_view, GNOME_Evolution_Addressbook_OtherError);
+				err = EDB_ERROR (OTHER_ERROR);
+				e_data_book_view_notify_complete (book_view, err);
+				g_error_free (err);
 				untrack_book_view (backend, book_view);
 				destroy_closure (closure);
 				return;
 			}
 		}
 
-		e_data_book_view_notify_complete (book_view, GNOME_Evolution_Addressbook_Success);
+		e_data_book_view_notify_complete (book_view, NULL /* Success */);
 	default:
 		break;
 	}
@@ -1432,7 +1436,7 @@ e_book_backend_mapi_get_changes (EBookBackend *backend,
 	if (enable_debug)
 		printf("mapi: get changes\n");
 	/* FIXME : provide implmentation */
-	e_data_book_respond_get_changes (book, opid, GNOME_Evolution_Addressbook_RepositoryOffline, NULL);
+	e_data_book_respond_get_changes (book, opid, EDB_ERROR (NOT_SUPPORTED), NULL);
 }
 
 static gboolean
@@ -1558,13 +1562,13 @@ e_book_backend_mapi_authenticate_user (EBookBackend *backend,
 	}
 
 	switch (priv->mode) {
-	case GNOME_Evolution_Addressbook_MODE_LOCAL:
+	case E_DATA_BOOK_MODE_LOCAL:
 		e_book_backend_notify_writable (backend, FALSE);
 		e_book_backend_notify_connection_status (backend, FALSE);
-		e_data_book_respond_authenticate_user (book, opid, GNOME_Evolution_Addressbook_Success);
+		e_data_book_respond_authenticate_user (book, opid, NULL /* Success */);
 		return;
 
-	case GNOME_Evolution_Addressbook_MODE_REMOTE:
+	case E_DATA_BOOK_MODE_REMOTE:
 		g_static_mutex_lock (&priv->running_mutex);
 
 		/* rather reuse already established connection */
@@ -1575,7 +1579,7 @@ e_book_backend_mapi_authenticate_user (EBookBackend *backend,
 			priv->conn = exchange_mapi_connection_new (priv->profile, passwd);
 
 		if (!priv->conn) {
-			e_data_book_respond_authenticate_user (book, opid,GNOME_Evolution_Addressbook_OtherError);
+			e_data_book_respond_authenticate_user (book, opid, EDB_ERROR_EX (OTHER_ERROR, "Cannot connect"));
 			g_static_mutex_unlock (&priv->running_mutex);
 			return;
 		}
@@ -1590,7 +1594,7 @@ e_book_backend_mapi_authenticate_user (EBookBackend *backend,
 			g_thread_create ((GThreadFunc) build_cache, backend, FALSE, NULL);
 		}
 		e_book_backend_set_is_writable (backend, TRUE);
-		e_data_book_respond_authenticate_user (book, opid, GNOME_Evolution_Addressbook_Success);
+		e_data_book_respond_authenticate_user (book, opid, NULL /* Success */);
 		g_static_mutex_unlock (&priv->running_mutex);
 		return;
 
@@ -1611,7 +1615,7 @@ e_book_backend_mapi_get_required_fields (EBookBackend *backend,
 
 	fields = g_list_append (fields, (gchar *)e_contact_field_name (E_CONTACT_FILE_AS));
 	e_data_book_respond_get_supported_fields (book, opid,
-						  GNOME_Evolution_Addressbook_Success,
+						  NULL /* Success */,
 						  fields);
 	g_list_free (fields);
 }
@@ -1628,7 +1632,7 @@ e_book_backend_mapi_get_supported_fields (EBookBackend *backend,
 
 	fields = mapi_book_utils_get_supported_fields ();
 	e_data_book_respond_get_supported_fields (book, opid,
-						  GNOME_Evolution_Addressbook_Success,
+						  NULL /* Success */,
 						  fields);
 	g_list_free (fields);
 
@@ -1647,18 +1651,18 @@ e_book_backend_mapi_get_supported_auth_methods (EBookBackend *backend, EDataBook
 	auth_methods = g_list_append (auth_methods, auth_method);
 	e_data_book_respond_get_supported_auth_methods (book,
 							opid,
-							GNOME_Evolution_Addressbook_Success,
+							NULL /* Success */,
 							auth_methods);
 	g_free (auth_method);
 	g_list_free (auth_methods);
 }
 
-static GNOME_Evolution_Addressbook_CallStatus
-e_book_backend_mapi_cancel_operation (EBookBackend *backend, EDataBook *book)
+static void
+e_book_backend_mapi_cancel_operation (EBookBackend *backend, EDataBook *book, GError **perror)
 {
 	if (enable_debug)
 		printf ("mapi cancel_operation...\n");
-	return GNOME_Evolution_Addressbook_CouldNotCancel;
+	g_propagate_error (perror, EDB_ERROR (COULD_NOT_CANCEL));
 }
 
 static void
@@ -1676,17 +1680,17 @@ e_book_backend_mapi_remove (EBookBackend *backend,
 
 	switch (priv->mode) {
 
-	case GNOME_Evolution_Addressbook_MODE_LOCAL:
-		e_data_book_respond_remove (book, opid, GNOME_Evolution_Addressbook_OfflineUnavailable);
+	case E_DATA_BOOK_MODE_LOCAL:
+		e_data_book_respond_remove (book, opid, EDB_ERROR (OFFLINE_UNAVAILABLE));
 		return;
 
-	case GNOME_Evolution_Addressbook_MODE_REMOTE:
+	case E_DATA_BOOK_MODE_REMOTE:
 		
 		if (strcmp (e_source_get_property(source, "public"), "yes") != 0)
 			status = exchange_mapi_connection_remove_folder (priv->conn, priv->fid, 0);
 		
 		if (!status) {
-			e_data_book_respond_remove (book, opid, GNOME_Evolution_Addressbook_OtherError);
+			e_data_book_respond_remove (book, opid, EDB_ERROR (OTHER_ERROR));
 			return;
 		}
 
@@ -1715,7 +1719,7 @@ e_book_backend_mapi_remove (EBookBackend *backend,
 		}
 		g_free (cache_uri);
 
-		e_data_book_respond_remove (book, opid, GNOME_Evolution_Addressbook_Success);
+		e_data_book_respond_remove (book, opid, NULL /* Success */);
 		return;
 
 	default:
@@ -1728,7 +1732,7 @@ e_book_backend_mapi_remove (EBookBackend *backend,
 }
 
 static void
-e_book_backend_mapi_set_mode (EBookBackend *backend, GNOME_Evolution_Addressbook_BookMode mode)
+e_book_backend_mapi_set_mode (EBookBackend *backend, EDataBookMode mode)
 {
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
 
@@ -1737,12 +1741,12 @@ e_book_backend_mapi_set_mode (EBookBackend *backend, GNOME_Evolution_Addressbook
 
 	priv->mode = mode;
 	if (e_book_backend_is_loaded (backend)) {
-		if (mode == GNOME_Evolution_Addressbook_MODE_LOCAL) {
+		if (mode == E_DATA_BOOK_MODE_LOCAL) {
 			e_book_backend_notify_writable (backend, FALSE);
 			e_book_backend_notify_connection_status (backend, FALSE);
 			/* FIXME: Uninitialize mapi here. may be.*/
 		}
-		else if (mode == GNOME_Evolution_Addressbook_MODE_REMOTE) {
+		else if (mode == E_DATA_BOOK_MODE_REMOTE) {
 			e_book_backend_notify_writable (backend, TRUE);
 			e_book_backend_notify_connection_status (backend, TRUE);
 			e_book_backend_notify_auth_required (backend); //FIXME: WTH is this required.
