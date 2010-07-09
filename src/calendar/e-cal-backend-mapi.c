@@ -679,7 +679,8 @@ get_deltas (gpointer handle)
 	struct deleted_items_data did;
 	ESource *source = NULL;
 	guint32 options= MAPI_OPTIONS_FETCH_ALL;
-	gboolean is_public = FALSE; 
+	gboolean is_public = FALSE;
+	TALLOC_CTX *mem_ctx = NULL;
 
 	if (!handle)
 		return FALSE;
@@ -701,6 +702,7 @@ get_deltas (gpointer handle)
 		struct SPropValue sprop;
 		struct timeval t;
 
+		mem_ctx = talloc_init ("ExchangeMAPI_get_deltas_cal");
 		use_restriction = TRUE;
 		res.rt = RES_PROPERTY;
 		res.res.resProperty.relop = RELOP_GE;
@@ -709,7 +711,11 @@ get_deltas (gpointer handle)
 		t.tv_sec = icaltime_as_timet_with_zone (itt_cache, icaltimezone_get_utc_timezone ());
 		t.tv_usec = 0;
 		set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
-		cast_mapi_SPropValue (&(res.res.resProperty.lpProp), &sprop);
+		cast_mapi_SPropValue (
+			#ifdef HAVE_MEMCTX_ON_CAST_MAPI_SPROPVALUE
+			mem_ctx,
+			#endif
+			&(res.res.resProperty.lpProp), &sprop);
 	}
 
 	itt_current = icaltime_current_time_with_zone (icaltimezone_get_utc_timezone ());
@@ -736,6 +742,8 @@ get_deltas (gpointer handle)
 			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
 //			e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 			g_static_mutex_unlock (&updating);
+			if (mem_ctx)
+				talloc_free (mem_ctx);
 			return FALSE;
 		}
 	} else {
@@ -753,6 +761,8 @@ get_deltas (gpointer handle)
 		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
 //		e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 		g_static_mutex_unlock (&updating);
+		if (mem_ctx)
+			talloc_free (mem_ctx);
 		return FALSE;
 		}
 	}
@@ -764,6 +774,10 @@ get_deltas (gpointer handle)
 	e_cal_backend_cache_put_server_utc_time (priv->cache, time_string);
 	g_free (time_string);
 
+	if (mem_ctx) {
+		talloc_free (mem_ctx);
+		mem_ctx = NULL;
+	}
 	/* handle deleted items here by going over the entire cache and
 	 * checking for deleted items.*/
 
@@ -1530,6 +1544,7 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cal_cbdata
 	struct SPropValue sprop;
 	struct Binary_r sb;
 	uint32_t proptag = 0x0;
+	TALLOC_CTX *mem_ctx;
 
 	uid = icalcomponent_get_uid (comp);
 	exchange_mapi_util_mapi_id_from_string (uid, &mid);
@@ -1549,13 +1564,20 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cal_cbdata
 
 	exchange_mapi_cal_util_generate_globalobjectid (TRUE, uid, &sb);
 
+	mem_ctx = talloc_init ("ExchangeMAPI_cal_get_server_data");
 	set_SPropValue_proptag (&sprop, proptag, (gconstpointer ) &sb);
-	cast_mapi_SPropValue (&(res.res.resProperty.lpProp), &sprop);
+	cast_mapi_SPropValue (
+		#ifdef HAVE_MEMCTX_ON_CAST_MAPI_SPROPVALUE
+		mem_ctx,
+		#endif
+		&(res.res.resProperty.lpProp), &sprop);
 
 	exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 					mapi_cal_get_required_props, NULL,
 					capture_req_props, cbdata,
 					MAPI_OPTIONS_FETCH_GENERIC_STREAMS);
+
+	talloc_free (mem_ctx);
 }
 
 static icaltimezone *e_cal_backend_mapi_internal_get_timezone (ECalBackend *backend, const gchar *tzid);

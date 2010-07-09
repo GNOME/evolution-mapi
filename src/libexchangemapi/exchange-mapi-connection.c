@@ -1584,7 +1584,11 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 							properties_array.lpProps[k].value.MVbin.bin[ci].lpb = lpProps[k].value.MVbin.lpbin[ci].lpb;
 						}
 					} else {
-						cast_mapi_SPropValue (&properties_array.lpProps[k], &lpProps[k]);
+						cast_mapi_SPropValue (
+							#ifdef HAVE_MEMCTX_ON_CAST_MAPI_SPROPVALUE
+							mem_ctx,
+							#endif
+							&properties_array.lpProps[k], &lpProps[k]);
 					}
 				}
 			} else
@@ -1711,7 +1715,11 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 		properties_array.cValues = prop_count;
 		properties_array.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, prop_count + 1);
 		for (k=0; k < prop_count; k++)
-			cast_mapi_SPropValue(&properties_array.lpProps[k], &lpProps[k]);
+			cast_mapi_SPropValue (
+				#ifdef HAVE_MEMCTX_ON_CAST_MAPI_SPROPVALUE
+				mem_ctx,
+				#endif
+				&properties_array.lpProps[k], &lpProps[k]);
 
 	} else
 		retval = GetPropsAll (obj_message, &properties_array);

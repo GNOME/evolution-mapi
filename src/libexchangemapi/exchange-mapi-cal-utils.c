@@ -1780,8 +1780,14 @@ exchange_mapi_cal_util_get_new_appt_id (ExchangeMapiConnection *conn, mapi_id_t 
 		id = g_random_int ();
 		if (id) {
 			GSList *ids = NULL;
+			TALLOC_CTX *mem_ctx = talloc_init ("ExchangeMAPI_get_new_appt_id");
+
 			set_SPropValue_proptag (&sprop, PR_OWNER_APPT_ID, (gconstpointer ) &id);
-			cast_mapi_SPropValue (&(res.res.resProperty.lpProp), &sprop);
+			cast_mapi_SPropValue (
+				#ifdef HAVE_MEMCTX_ON_CAST_MAPI_SPROPVALUE
+				mem_ctx,
+				#endif
+				&(res.res.resProperty.lpProp), &sprop);
 			ids = exchange_mapi_connection_check_restriction (conn, fid, 0, &res);
 			if (ids) {
 				GSList *l;
@@ -1789,6 +1795,8 @@ exchange_mapi_cal_util_get_new_appt_id (ExchangeMapiConnection *conn, mapi_id_t 
 					g_free (l->data);
 			} else
 				found = TRUE;
+
+			talloc_free (mem_ctx);
 		}
 	};
 

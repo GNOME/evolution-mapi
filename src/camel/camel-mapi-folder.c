@@ -962,6 +962,7 @@ mapi_refresh_folder(CamelFolder *folder, GError **error)
 	gboolean status;
 	gboolean success = TRUE;
 
+	TALLOC_CTX *mem_ctx = NULL;
 	struct mapi_SRestriction *res = NULL;
 	struct SSortOrderSet *sort = NULL;
 	struct mapi_update_deleted_msg *deleted_items_op_msg;
@@ -1014,6 +1015,7 @@ mapi_refresh_folder(CamelFolder *folder, GError **error)
 			struct SPropValue sprop;
 			struct timeval t;
 
+			mem_ctx = talloc_init ("ExchangeMAPI_mapi_refresh_folder");
 			res = g_new0 (struct mapi_SRestriction, 1);
 			res->rt = RES_PROPERTY;
 			/*RELOP_GE acts more like >=. Few extra items are being fetched.*/
@@ -1025,7 +1027,11 @@ mapi_refresh_folder(CamelFolder *folder, GError **error)
 
 			//Creation time ?
 			set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
-			cast_mapi_SPropValue (&(res->res.resProperty.lpProp), &sprop);
+			cast_mapi_SPropValue (
+				#ifdef HAVE_MEMCTX_ON_CAST_MAPI_SPROPVALUE
+				mem_ctx,
+				#endif
+				&(res->res.resProperty.lpProp), &sprop);
 
 		}
 
@@ -1100,6 +1106,9 @@ end1:
 	g_slist_foreach (fetch_data->items_list, (GFunc) mail_item_free, NULL);
 	g_slist_free (fetch_data->items_list);
 	g_free (fetch_data);
+
+	if (mem_ctx)
+		talloc_free (mem_ctx);
 
 	return success;
 }
