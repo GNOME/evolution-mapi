@@ -112,7 +112,7 @@ update_store_summary (CamelFolder *folder, GError **error)
 	CamelStoreSummary *store_summary;
 	CamelStoreInfo *si;
 	const gchar *full_name;
-	gboolean success;
+	gint retval;
 
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
@@ -134,10 +134,10 @@ update_store_summary (CamelFolder *folder, GError **error)
 		camel_store_summary_info_free (store_summary, si);
 	}
 
-	success = camel_folder_summary_save_to_db (folder->summary, error);
+	retval = camel_folder_summary_save_to_db (folder->summary, error);
 	camel_store_summary_save (store_summary);
 
-	return success;
+	return (retval == 0);
 }
 
 static gboolean
