@@ -610,7 +610,8 @@ static GtkWidget *
 exchange_mapi_create (GtkWidget *parent, ESource *source, ExchangeMAPIFolderType folder_type)
 {
 	GtkWidget *vbox, *label, *scroll, *tv;
-	gchar *uri_text;
+	gchar *uri_text, *profile = NULL;
+	ESourceGroup *group;
 	gint row;
 	GtkCellRenderer *rcell;
 	GtkTreeStore *ts;
@@ -626,11 +627,17 @@ exchange_mapi_create (GtkWidget *parent, ESource *source, ExchangeMAPIFolderType
 	}
 
 	folders = NULL;
-	conn = exchange_mapi_connection_find (e_source_get_property (source, "profile"));
+	group = e_source_peek_group (source);
+	profile = g_strdup (e_source_get_property (source, "profile"));
+	if (profile == NULL) {
+		profile = e_source_group_get_property (group, "profile");
+		e_source_set_property (source, "profile", profile);
+	}
+	conn = exchange_mapi_connection_find (profile);
+	g_free (profile);
 	if (conn && exchange_mapi_connection_connected (conn))
 		folders = exchange_mapi_connection_peek_folders_list (conn);
-
-	acc = e_source_group_peek_name (e_source_peek_group (source));
+	acc = e_source_group_peek_name (group);
 	ts = gtk_tree_store_new (NUM_COLS, G_TYPE_STRING, G_TYPE_INT64, G_TYPE_POINTER);
 
 	add_folders (folders, ts, folder_type);
@@ -743,12 +750,26 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 {
 	EABConfigTargetSource *t = (EABConfigTargetSource *) target;
 	ESource *source = t->source;
-	gchar *uri_text;
+	gchar *uri_text, *r_uri, *sfid;
 	ESourceGroup *grp;
-
+	ExchangeMapiConnection *conn;
+	mapi_id_t fid, pfid;
 	uri_text = e_source_get_uri (source);
 	if (uri_text && g_ascii_strncasecmp (uri_text, MAPI_URI_PREFIX, MAPI_PREFIX_LENGTH))
 		return;
+	
+	exchange_mapi_util_mapi_id_from_string (e_source_get_property (source, "parent-fid"), &pfid);
+
+	/* the profile should be already connected */
+	conn = exchange_mapi_connection_find (e_source_get_property (source, "profile"));
+	g_return_if_fail (conn != NULL);
+
+	fid = exchange_mapi_connection_create_folder (conn, olFolderContacts, pfid, 0, e_source_peek_name (source));
+	g_object_unref (conn);
+
+	sfid = exchange_mapi_util_mapi_id_to_string (fid);
+	r_uri = g_strconcat (";", sfid, NULL);
+	e_source_set_relative_uri (source, r_uri);
 
 	//FIXME: Offline handling
 	grp = e_source_peek_group (source);
@@ -761,7 +782,10 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	e_source_set_relative_uri (source, g_strconcat (";",e_source_peek_name (source), NULL));
 
 	e_source_set_property (source, "completion", "true");
+	e_source_set_property (source, "public", "no");
 	// Update the folder list in the plugin and ExchangeMAPIFolder
+	g_free (r_uri);
+	g_free (sfid);
 
 	return;
 }
@@ -847,6 +871,7 @@ exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 	e_source_set_property (source, "auth", "1");
 	e_source_set_property (source, "auth-domain", EXCHANGE_MAPI_PASSWORD_COMPONENT);
 	e_source_set_property (source, "auth-type", "plain/password");
+	e_source_set_property (source, "public", "no");
 
 	group = e_source_peek_group (source);
 
