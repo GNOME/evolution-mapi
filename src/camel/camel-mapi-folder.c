@@ -1145,7 +1145,7 @@ mapi_folder_get_message( CamelFolder *folder, const gchar *uid, GError **error )
 			_("No such message"));
 		return NULL;
 	}
-	cache_stream  = camel_data_cache_get (mapi_folder->cache, "cache", uid, error);
+	cache_stream  = camel_data_cache_get (mapi_folder->cache, "cache", uid, NULL);
 	stream = camel_stream_mem_new ();
 	if (cache_stream) {
 		GError *local_error = NULL;
