@@ -1,3 +1,21 @@
+evolution-mapi 0.31.5 2010-07-12
+--------------------------------
+
+Bug Fixes:
+	Bug #621761 - Usage of uninitialized variable in fetch_props_to_mail_item_cb (Milan Crha)
+	Bug #623028 - Crash in e_data_book_view_notify_complete (Milan Crha)
+	Bug #623057 - Calls e_book_backend_summary_new with NULL filename (Milan Crha)
+	Bug #623204 - Be able to report detailed errors from backends (Milan Crha)
+	Bug #623280 - Creating new calendar/... not reflected on a server (Punit Jain)
+	Bug #623919 - Error while opening any newly received message (Matthew Barnes)
+
+Misc:
+	Migrate from CamelException to GError (Matthew Barnes)
+	Adapt to recent openchange svn trunk (Milan Crha)
+
+Translations:
+	Matej Urbančič (sl)
+
 evolution-mapi 0.31.4 2010-06-28
 --------------------------------
 
