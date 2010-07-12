@@ -2462,6 +2462,11 @@ e_cal_backend_mapi_get_free_busy (ECalBackendSync *backend, EDataCal *cal,
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
+	if (!priv->conn) {
+		g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
+		return;
+	}
+
 	if (!exchange_mapi_cal_utils_get_free_busy_data (priv->conn, users, start, end, freebusy, &mapi_error)) {
 		mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to get Free/Busy data"));
 
