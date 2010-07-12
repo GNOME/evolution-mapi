@@ -1427,14 +1427,6 @@ e_cal_backend_mapi_connect (ECalBackendMAPI *cbmapi, GError **perror)
 		break;
 	}
 
-	priv->cache = e_cal_backend_cache_new (e_cal_backend_get_uri (E_CAL_BACKEND (cbmapi)), source_type);
-	if (!priv->cache) {
-		g_propagate_error (perror, EDC_ERROR_EX (OtherError, _("Could not create cache file")));
-		return;
-	}
-
-	e_cal_backend_cache_put_default_timezone (priv->cache, priv->default_zone);
-
 	/* spawn a new thread for caching the calendar items */
 	thread = g_thread_create ((GThreadFunc) cache_init, cbmapi, FALSE, &error);
 	if (!thread) {
@@ -1496,11 +1488,27 @@ e_cal_backend_mapi_open (ECalBackendSync *backend, EDataCal *cal, gboolean only_
 		break;
 	}
 
+	if (priv->cache) {
+		g_object_unref (priv->cache);
+		priv->cache = NULL;
+	}
+
+	/* Always create cache here */
+	priv->cache = e_cal_backend_cache_new (e_cal_backend_get_uri (E_CAL_BACKEND (cbmapi)), source_type);
+	if (!priv->cache) {
+		g_mutex_unlock (priv->mutex);
+		g_propagate_error (perror, EDC_ERROR_EX (OtherError, _("Could not create cache file")));
+		return;
+	}
+
+	e_cal_backend_cache_put_default_timezone (priv->cache, priv->default_zone);
+
 	/* Not for remote */
 	if (priv->mode == CAL_MODE_LOCAL) {
 		const gchar *display_contents = NULL;
 
 		cbmapi->priv->read_only = TRUE;
+
 		display_contents = e_source_get_property (esource, "offline_sync");
 
 		if (!display_contents || !g_str_equal (display_contents, "1")) {
@@ -1509,16 +1517,6 @@ e_cal_backend_mapi_open (ECalBackendSync *backend, EDataCal *cal, gboolean only_
 			return;
 		}
 
-		/* Cache created here for the first time */
-		if (!priv->cache) {
-			priv->cache = e_cal_backend_cache_new (e_cal_backend_get_uri (E_CAL_BACKEND (cbmapi)), source_type);
-			if (!priv->cache) {
-				g_mutex_unlock (priv->mutex);
-				g_propagate_error (perror, EDC_ERROR_EX (OtherError, _("Could not create cache file")));
-				return;
-			}
-		}
-		e_cal_backend_cache_put_default_timezone (priv->cache, priv->default_zone);
 		g_mutex_unlock (priv->mutex);
 		return /* Success */;
 	}
