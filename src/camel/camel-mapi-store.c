@@ -596,6 +596,7 @@ mapi_create_folder(CamelStore *store, const gchar *parent_name, const gchar *fol
 		root = mapi_build_folder_info(mapi_store, parent_name, folder_name);
 
 		si = camel_mapi_store_summary_add_from_full(mapi_store->summary, root->full_name, '/', fid, parent_id);
+		si->info.flags |= CAMEL_MAPI_FOLDER_MAIL;
 		camel_store_summary_save((CamelStoreSummary *)mapi_store->summary);
 
 		mapi_update_folder_hash_tables (mapi_store, root->full_name, fid, parent_id);
@@ -1764,7 +1765,6 @@ static gboolean
 mapi_subscribe_folder(CamelStore *store, const gchar *folder_name, GError **error)
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
-	guint folder_type = mapi_folders_hash_table_type_lookup(mapi_store, folder_name);
 	CamelFolderInfo *fi;
 	CamelStoreInfo *si = NULL;
 	const gchar *parent_name = NULL, *use_folder_name = folder_name, *fid = NULL;
@@ -1797,7 +1797,7 @@ mapi_subscribe_folder(CamelStore *store, const gchar *folder_name, GError **erro
 		}
 	}
 
-	if (folder_type == MAPI_FOLDER_TYPE_MAIL || folder_type == MAPI_FOLDER_TYPE_UNKNOWN) {
+	if (si->flags & CAMEL_MAPI_FOLDER_MAIL) {
 		fi = mapi_build_folder_info (mapi_store, parent_name, use_folder_name);		
 		if (favourites) {
 			CamelURL *url;
@@ -1816,9 +1816,10 @@ mapi_subscribe_folder(CamelStore *store, const gchar *folder_name, GError **erro
 		fi->flags |= CAMEL_STORE_INFO_FOLDER_SUBSCRIBED;
 		camel_store_folder_subscribed (store, fi);
 		camel_folder_info_free (fi);
-	} else
+	} else {
+		guint folder_type = mapi_folders_hash_table_type_lookup (mapi_store, folder_name);
 		exchange_mapi_add_esource (CAMEL_SERVICE(mapi_store)->url, use_folder_name, fid, folder_type);
-	
+	}
 	camel_store_summary_info_free((CamelStoreSummary *)mapi_store->summary, si);
 	return TRUE;
 }
@@ -1849,7 +1850,6 @@ mapi_unsubscribe_folder(CamelStore *store, const gchar *folder_name, GError **er
 
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
 	CamelURL *url = CAMEL_SERVICE (mapi_store)->url;
-	guint folder_type = mapi_folders_hash_table_type_lookup(mapi_store, folder_name);
 	fid = camel_mapi_store_folder_id_lookup(mapi_store, folder_name);
 	si = camel_store_summary_path((CamelStoreSummary *)mapi_store->summary, folder_name);
 	if (si) {
@@ -1873,9 +1873,10 @@ mapi_unsubscribe_folder(CamelStore *store, const gchar *folder_name, GError **er
 		fi = mapi_build_folder_info (mapi_store, parent_name, folder_name);
 		camel_store_folder_unsubscribed (store, fi);
 		camel_folder_info_free (fi);
-	} else 
+	} else {
+		guint folder_type = mapi_folders_hash_table_type_lookup (mapi_store, folder_name);
 		exchange_mapi_remove_esource(url, folder_name, fid, folder_type);
-	
+	}
 	camel_store_summary_info_free((CamelStoreSummary *)mapi_store->summary, si);
 		
 	return TRUE;
