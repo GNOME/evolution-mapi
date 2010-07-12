@@ -58,14 +58,14 @@ G_DEFINE_TYPE (CamelMapiTransport, camel_mapi_transport, CAMEL_TYPE_TRANSPORT)
 
 /*CreateItem would return the MID of the new message or '0' if we fail.*/
 static mapi_id_t
-mapi_message_item_send (ExchangeMapiConnection *conn, MailItem *item)
+mapi_message_item_send (ExchangeMapiConnection *conn, MailItem *item, GError **perror)
 {
 	guint64 fid = 0;
 	mapi_id_t mid = 0;
 
 	mid = exchange_mapi_connection_create_item (conn, olFolderSentMail, fid,
 					 camel_mapi_utils_create_item_build_props, item,
-					 item->recipients, item->attachments, item->generic_streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE);
+					 item->recipients, item->attachments, item->generic_streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE, perror);
 
 	return mid;
 }
@@ -80,6 +80,7 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 	const gchar *addressp;
 	mapi_id_t st = 0;
 	CamelURL *url;
+	GError *mapi_error = NULL;
 
 	if (!camel_internet_address_get((CamelInternetAddress *)from, 0, &namep, &addressp)) {
 		return (FALSE);
@@ -103,16 +104,21 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 	item = camel_mapi_utils_mime_to_item (message, from, NULL);
 
 	/* send */
-	st = mapi_message_item_send (conn, item);
+	st = mapi_message_item_send (conn, item, error);
 
 	g_object_unref (conn);
 
 	if (st == 0) {
-		/*Fixme : Set a better error message. Would be helful in troubleshooting. */
-		g_set_error (
-			error, CAMEL_SERVICE_ERROR,
-			CAMEL_SERVICE_ERROR_UNAVAILABLE,
-			_("Could not send message."));
+		if (mapi_error) {
+			g_set_error (
+				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				_("Could not send message: %s"), mapi_error->message);
+			g_error_free (mapi_error);
+		} else {
+			g_set_error (
+				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				_("Could not send message."));
+		}
 		return FALSE;
 	}
 

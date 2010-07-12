@@ -21,10 +21,13 @@
 #ifndef __E_BOOK_BACKEND_MAPI_UTILS_H__
 #define __E_BOOK_BACKEND_MAPI_UTILS_H__
 
+#include <libedata-book/e-data-book.h>
 #include "exchange-mapi-connection.h"
 
 #define EDB_ERROR(_code) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, NULL)
 #define EDB_ERROR_EX(_code, _msg) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, _msg)
+
+void mapi_error_to_edb_error (GError **perror, const GError *mapi_error, EDataBookStatus code, const gchar *context);
 
 /* vCard parameter name in contact list */
 #define EMA_X_MEMBERID "X-EMA-MEMBER-ID"

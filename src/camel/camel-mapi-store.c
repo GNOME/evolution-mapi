@@ -342,6 +342,8 @@ mapi_auth_loop (CamelService *service, GError **error)
 	service->url->passwd = NULL;
 
 	while (!authenticated) {
+		GError *mapi_error = NULL;
+
 		if (errbuf) {
 			/* We need to un-cache the password before prompting again */
 			prompt_flags |= CAMEL_SESSION_PASSWORD_REPROMPT;
@@ -376,10 +378,14 @@ mapi_auth_loop (CamelService *service, GError **error)
 			}
 		}
 
-		store->priv->conn = exchange_mapi_connection_new (store->priv->profile, service->url->passwd);
+		store->priv->conn = exchange_mapi_connection_new (store->priv->profile, service->url->passwd, &mapi_error);
 		if (!store->priv->conn || !exchange_mapi_connection_connected (store->priv->conn)) {
-			errbuf = g_strdup_printf (_("Unable to authenticate to Exchange MAPI server."));
-
+			if (mapi_error) {
+				errbuf = g_strdup_printf (_("Unable to authenticate to Exchange MAPI server: %s"), mapi_error->message);
+				g_error_free (mapi_error);
+			} else {
+				errbuf = g_strdup (_("Unable to authenticate to Exchange MAPI server"));
+			}
 		} else
 			authenticated = TRUE;
 
@@ -549,6 +555,7 @@ mapi_create_folder(CamelStore *store, const gchar *parent_name, const gchar *fol
 	CamelFolderInfo *root = NULL;
 	gchar *parent_id;
 	mapi_id_t parent_fid, new_folder_id;
+	GError *mapi_error = NULL;
 
 	if (((CamelOfflineStore *) store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL) {
 		g_set_error (
@@ -581,7 +588,7 @@ mapi_create_folder(CamelStore *store, const gchar *parent_name, const gchar *fol
 	camel_service_lock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	exchange_mapi_util_mapi_id_from_string (parent_id, &parent_fid);
-	new_folder_id = exchange_mapi_connection_create_folder (priv->conn, olFolderInbox, parent_fid, 0, folder_name);
+	new_folder_id = exchange_mapi_connection_create_folder (priv->conn, olFolderInbox, parent_fid, 0, folder_name, &mapi_error);
 	if (new_folder_id != 0) {
 		CamelMapiStoreInfo *si;
 		gchar *fid = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", new_folder_id);
@@ -594,6 +601,17 @@ mapi_create_folder(CamelStore *store, const gchar *parent_name, const gchar *fol
 		mapi_update_folder_hash_tables (mapi_store, root->full_name, fid, parent_id);
 
 		camel_store_folder_created (store, root);
+	} else {
+		if (mapi_error) {
+			g_set_error (
+				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				_("Cannot create folder '%s': %s"), folder_name, mapi_error->message);
+			g_error_free (mapi_error);
+		} else {
+			g_set_error (
+				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				_("Cannot create folder '%s'"), folder_name);
+		}
 	}
 
 	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
@@ -667,7 +685,7 @@ mapi_delete_folder(CamelStore *store, const gchar *folder_name, GError **error)
 
 	folder_id = g_hash_table_lookup (priv->name_hash, folder_name);
 	exchange_mapi_util_mapi_id_from_string (folder_id, &folder_fid);
-	status = exchange_mapi_connection_remove_folder (priv->conn, folder_fid, 0);
+	status = exchange_mapi_connection_remove_folder (priv->conn, folder_fid, 0, &local_error);
 
 	if (status) {
 		/* Fixme ??  */
@@ -679,6 +697,22 @@ mapi_delete_folder(CamelStore *store, const gchar *folder_name, GError **error)
 		/*g_hash_table_remove (priv->parent_hash, folder_id);*/
 		g_hash_table_remove (priv->id_hash, folder_id);
 		g_hash_table_remove (priv->name_hash, folder_name);
+	} else {
+		success = FALSE;
+
+		if (local_error) {
+			g_set_error (
+				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				_("Cannot remove folder '%s': %s"),
+				folder_name, local_error->message);
+			
+			g_error_free (local_error);
+		} else {
+			g_set_error (
+				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				_("Cannot remove folder '%s'"),
+				folder_name);
+		}
 	}
 
 	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
@@ -817,13 +851,22 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 		gchar *folder_id;
 
 		/* renaming in the same folder, thus no MoveFolder necessary */
-		if (!exchange_mapi_connection_rename_folder (priv->conn, old_fid, 0, tmp ? tmp : new_name)) {
-			/*To translators : '%s to %s' is current name of the folder  and
-			new name of the folder.*/
-			g_set_error (
-				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				_("Cannot rename MAPI folder '%s' to '%s'"),
-				old_name, new_name);
+		if (!exchange_mapi_connection_rename_folder (priv->conn, old_fid, 0, tmp ? tmp : new_name, &local_error)) {
+			if (local_error) {
+				g_set_error (
+					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+					/* Translators: '%s to %s' is current name of the folder and new name of the folder.
+					   The last '%s' is a detailed error message. */
+					_("Cannot rename MAPI folder '%s' to '%s': %s"),
+					old_name, new_name, local_error->message);
+				g_error_free (local_error);
+			} else {
+				g_set_error (
+					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+					/* Translators: '%s to %s' is current name of the folder and new name of the folder. */
+					_("Cannot rename MAPI folder '%s' to '%s'"),
+					old_name, new_name);
+			}
 
 			camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 			g_free (old_parent);
@@ -872,12 +915,20 @@ mapi_rename_folder(CamelStore *store, const gchar *old_name, const gchar *new_na
 		} else if (!old_parent_fid_str || !new_parent_fid_str ||
 			   !exchange_mapi_util_mapi_id_from_string (old_parent_fid_str, &old_parent_fid) ||
 			   !exchange_mapi_util_mapi_id_from_string (new_parent_fid_str, &new_parent_fid) ||
-			   !exchange_mapi_connection_move_folder (priv->conn, old_fid, old_parent_fid, 0, new_parent_fid, 0, tmp)) {
+			   !exchange_mapi_connection_move_folder (priv->conn, old_fid, old_parent_fid, 0, new_parent_fid, 0, tmp, &local_error)) {
 			camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-			g_set_error (
-				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				_("Cannot rename MAPI folder '%s' to '%s'"),
-				old_name, new_name);
+			if (local_error) {
+				g_set_error (
+					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+					_("Cannot rename MAPI folder '%s' to '%s': %s"),
+					old_name, new_name, local_error->message);
+				g_error_free (local_error);
+			} else {
+				g_set_error (
+					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+					_("Cannot rename MAPI folder '%s' to '%s'"),
+					old_name, new_name);
+			}
 			g_free (old_parent);
 			g_free (new_parent);
 			return FALSE;
@@ -1432,6 +1483,7 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GError **error)
 	guint32 count, i;
 	CamelStoreInfo *si = NULL;
 	GHashTable *old_cache_folders;
+	GError *err = NULL;
 
 	if (!camel_mapi_store_connected (store, NULL)) {
 		g_set_error (
@@ -1441,10 +1493,12 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GError **error)
 		return FALSE;
 	}
 
-	status = exchange_mapi_connection_get_folders_list (priv->conn, &folder_list);
+	status = exchange_mapi_connection_get_folders_list (priv->conn, &folder_list, &err);
 
 	if (!status) {
-		g_warning ("Could not get folder list..\n");
+		g_warning ("Could not get folder list (%s)\n", err ? err->message : "Unknown error");
+		if (err)
+			g_error_free (err);
 		return TRUE;
 	}
 
@@ -1467,10 +1521,15 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GError **error)
 
 	subscription_list = (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST);
 	if (subscription_list) {
+		GError *err = NULL;
+
 		/*Consult the name <-> fid hash table for a FID.*/
-		status = exchange_mapi_connection_get_pf_folders_list (priv->conn, &folder_list);
+		status = exchange_mapi_connection_get_pf_folders_list (priv->conn, &folder_list, &err);
 		if (!status)
-			g_warning ("Could not get Public folder list..\n");
+			g_warning ("Could not get Public folder list (%s)\n", err ? err->message : "Unknown error");
+
+		if (err)
+			g_error_free (err);
 	}
 
 	temp_list = folder_list;

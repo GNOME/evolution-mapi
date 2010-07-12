@@ -101,7 +101,7 @@ gboolean exchange_mapi_cal_utils_add_named_ids (ExchangeMapiConnection *conn, ma
 gboolean exchange_mapi_cal_utils_get_props_cb (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
 gboolean exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data);
 
-gboolean exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, GList *users, time_t start, time_t end, GList **freebusy);
+gboolean exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, GList *users, time_t start, time_t end, GList **freebusy, GError **mapi_error);
 
 G_END_DECLS
 

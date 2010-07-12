@@ -783,7 +783,7 @@ update_sources_idle_cb (gpointer data)
 	folders_list = exchange_mapi_connection_peek_folders_list (conn);
 
 	if (account->enabled && lookup_account_info (account->uid)) {
-		mapi_id_t trash_fid = exchange_mapi_connection_get_default_folder_id (conn, olFolderDeletedItems);
+		mapi_id_t trash_fid = exchange_mapi_connection_get_default_folder_id (conn, olFolderDeletedItems, NULL);
 
 		add_addressbook_sources (account, folders_list, trash_fid);
 		add_calendar_sources (account, folders_list, trash_fid);
@@ -949,10 +949,17 @@ mapi_account_removed (EAccountList *account_listener, EAccount *account)
 	if (url != NULL) {
 		const gchar *profile = camel_url_get_param (url, "profile");
 		gchar *key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
-		exchange_mapi_delete_profile (profile);
+		GError *error = NULL;
+
+		exchange_mapi_delete_profile (profile, &error);
 		e_passwords_forget_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
+
 		g_free (key);
 		camel_url_free (url);
+		if (error) {
+			g_warning ("%s: Failed to delete profile: %s", G_STRFUNC, error->message);
+			g_error_free (error);
+		}
 	}
 
 	/* Free up the structure */
@@ -986,9 +993,10 @@ create_profile_entry (CamelURL *url, EAccount *account)
 		g_free (key);
 
 		if (password) {
+			GError *error = NULL;
 			guint32 cp_flags = (camel_url_get_param (url, "ssl") && g_str_equal (camel_url_get_param (url, "ssl"), "1")) ? CREATE_PROFILE_FLAG_USE_SSL : CREATE_PROFILE_FLAG_NONE;
 
-			status = exchange_mapi_create_profile (url->user, password, camel_url_get_param (url, "domain"), url->host, cp_flags, NULL, NULL, NULL);
+			status = exchange_mapi_create_profile (url->user, password, camel_url_get_param (url, "domain"), url->host, cp_flags, NULL, NULL, &error);
 			if (status) {
 				/* profile was created, try to connect to the server */
 				ExchangeMapiConnection *conn;
@@ -997,13 +1005,18 @@ create_profile_entry (CamelURL *url, EAccount *account)
 				status = FALSE;
 				profname = exchange_mapi_util_profile_name (url->user, camel_url_get_param (url, "domain"), url->host, FALSE);
 
-				conn = exchange_mapi_connection_new (profname, password);
+				conn = exchange_mapi_connection_new (profname, password, &error);
 				if (conn) {
 					status = exchange_mapi_connection_connected (conn);
 					g_object_unref (conn);
 				}
 
 				g_free (profname);
+			}
+
+			if (error) {
+				g_warning ("%s: Failed to create profile: %s", G_STRFUNC, error->message);
+				g_error_free (error);
 			}
 		}
 

@@ -30,6 +30,7 @@
 #include <string.h>
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <glib/gi18n-lib.h>
 
 #include <libebook/e-contact.h>
 #include <camel/camel.h>
@@ -218,7 +219,7 @@ mapi_book_utils_get_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALL
 
 	/* called with fid = 0 from GAL */
 	if (!fid)
-		fid = exchange_mapi_connection_get_default_folder_id (conn, olFolderContacts);
+		fid = exchange_mapi_connection_get_default_folder_id (conn, olFolderContacts, NULL);
 
 	return exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
 }
@@ -431,4 +432,34 @@ mapi_book_utils_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid,
 	#undef get_str_namedid
 
 	return contact;
+}
+
+void
+mapi_error_to_edb_error (GError **perror, const GError *mapi_error, EDataBookStatus code, const gchar *context)
+{
+	gchar *err_msg = NULL;
+
+	if (!perror)
+		return;
+
+	if (code == E_DATA_BOOK_STATUS_OTHER_ERROR && mapi_error) {
+		/* Change error to more accurate only with OTHER_ERROR */
+		switch (mapi_error->code) {
+		case MAPI_E_PASSWORD_CHANGE_REQUIRED:
+		case MAPI_E_PASSWORD_EXPIRED:
+			code = E_DATA_BOOK_STATUS_AUTHENTICATION_REQUIRED;
+			break;
+		default:
+			break;
+		}
+	}
+
+	if (context)
+		err_msg = g_strconcat (context, mapi_error ? ": " : NULL, mapi_error ? mapi_error->message : NULL, NULL);
+	else if (!mapi_error)
+		err_msg = g_strdup (_("Uknown error"));
+
+	g_propagate_error (perror, e_data_book_create_error (code, err_msg ? err_msg : mapi_error->message));
+
+	g_free (err_msg);
 }

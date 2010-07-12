@@ -172,7 +172,7 @@ exchange_mapi_util_find_SPropVal_array_namedid (struct SPropValue *values, Excha
 	g_return_val_if_fail (values != NULL, NULL);
 	g_return_val_if_fail (conn != NULL, NULL);
 
-	proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, namedid);
+	proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
 	if (proptag != MAPI_E_RESERVED)
 		res = exchange_mapi_util_find_SPropVal_array_propval (values, proptag);
 
@@ -231,7 +231,7 @@ exchange_mapi_util_find_row_namedid (struct SRow *aRow, ExchangeMapiConnection *
 	g_return_val_if_fail (aRow != NULL, NULL);
 	g_return_val_if_fail (conn != NULL, NULL);
 
-	proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, namedid);
+	proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
 	if (proptag != MAPI_E_RESERVED)
 		res = exchange_mapi_util_find_row_propval (aRow, proptag);
 
@@ -290,7 +290,7 @@ exchange_mapi_util_find_array_namedid (struct mapi_SPropValue_array *properties,
 	g_return_val_if_fail (properties != NULL, NULL);
 	g_return_val_if_fail (conn != NULL, NULL);
 
-	proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, namedid);
+	proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
 	if (proptag != MAPI_E_RESERVED)
 		res = exchange_mapi_util_find_array_propval (properties, proptag);
 
@@ -988,7 +988,7 @@ exchange_mapi_utils_add_named_ids_to_props_array (ExchangeMapiConnection *conn, 
 	g_return_val_if_fail (named_ids_list != NULL, FALSE);
 	g_return_val_if_fail (named_ids_n_elems > 0, FALSE);
 
-	if (!exchange_mapi_connection_resolve_named_props (conn, fid, named_ids_list, named_ids_n_elems))
+	if (!exchange_mapi_connection_resolve_named_props (conn, fid, named_ids_list, named_ids_n_elems, NULL))
 		return FALSE;
 
 	for (i = 0; i < named_ids_n_elems; i++) {
@@ -1038,7 +1038,7 @@ exchange_mapi_utils_add_spropvalue_named_id (ExchangeMapiConnection *conn, mapi_
 	g_return_val_if_fail (values_array != NULL, FALSE);
 	g_return_val_if_fail (n_values != NULL, FALSE);
 
-	prop_tag = exchange_mapi_connection_resolve_named_prop (conn, fid, named_id);
+	prop_tag = exchange_mapi_connection_resolve_named_prop (conn, fid, named_id, NULL);
 	if (prop_tag == MAPI_E_RESERVED)
 		return FALSE;
 

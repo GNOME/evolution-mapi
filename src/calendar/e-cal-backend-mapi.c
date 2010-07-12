@@ -103,11 +103,42 @@ static ECalBackendClass *parent_class = NULL;
 
 static GStaticMutex auth_mutex = G_STATIC_MUTEX_INIT;
 
+static void
+mapi_error_to_edc_error (GError **perror, const GError *mapi_error, EDataCalCallStatus code, const gchar *context)
+{
+	gchar *err_msg = NULL;
+
+	if (!perror)
+		return;
+
+	if (code == OtherError && mapi_error) {
+		/* Change error to more accurate only with OtherError */
+		switch (mapi_error->code) {
+		case MAPI_E_PASSWORD_CHANGE_REQUIRED:
+		case MAPI_E_PASSWORD_EXPIRED:
+			code = AuthenticationRequired;
+			break;
+		default:
+			break;
+		}
+	}
+
+	if (context)
+		err_msg = g_strconcat (context, mapi_error ? ": " : NULL, mapi_error ? mapi_error->message : NULL, NULL);
+	else if (!mapi_error)
+		err_msg = g_strdup (_("Uknown error"));
+
+	g_propagate_error (perror, EDC_ERROR_EX (code, err_msg ? err_msg : mapi_error->message));
+
+	g_free (err_msg);
+}
+
 static gboolean
 e_cal_backend_mapi_authenticate (ECalBackend *backend, GError **perror)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
+	GError *mapi_error = NULL;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
@@ -118,14 +149,22 @@ e_cal_backend_mapi_authenticate (ECalBackend *backend, GError **perror)
 	/* rather reuse already established connection */
 	priv->conn = exchange_mapi_connection_find (priv->profile);
 	if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
-		exchange_mapi_connection_reconnect (priv->conn, priv->password);
+		exchange_mapi_connection_reconnect (priv->conn, priv->password, &mapi_error);
 	else if (!priv->conn)
-		priv->conn = exchange_mapi_connection_new (priv->profile, priv->password);
+		priv->conn = exchange_mapi_connection_new (priv->profile, priv->password, &mapi_error);
 
 	if (priv->conn && exchange_mapi_connection_connected (priv->conn)) {
 		/* Success */;
 	} else {
-		g_propagate_error (perror, EDC_ERROR (AuthenticationFailed));
+		mapi_error_to_edc_error (perror, mapi_error, AuthenticationFailed, NULL);
+		if (mapi_error)
+			g_error_free (mapi_error);
+		return FALSE;
+	}
+
+	if (mapi_error) {
+		mapi_error_to_edc_error (perror, mapi_error, AuthenticationFailed, NULL);
+		g_error_free (mapi_error);
 		return FALSE;
 	}
 
@@ -345,8 +384,12 @@ e_cal_backend_mapi_remove (ECalBackendSync *backend, EDataCal *cal, GError **per
 		return;
 	}
 	if (strcmp (e_source_get_property (source, "public"), "yes") != 0) {
-		if (!exchange_mapi_connection_remove_folder (priv->conn, priv->fid, 0)) {
-			g_propagate_error (perror, EDC_ERROR (OtherError));
+		GError *mapi_error = NULL;
+
+		if (!exchange_mapi_connection_remove_folder (priv->conn, priv->fid, 0, &mapi_error)) {
+			mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to remove public folder"));
+			if (mapi_error)
+				g_error_free (mapi_error);
 			return;
 		}
 	}
@@ -675,6 +718,7 @@ get_deltas (gpointer handle)
 	guint32 options= MAPI_OPTIONS_FETCH_ALL;
 	gboolean is_public = FALSE;
 	TALLOC_CTX *mem_ctx = NULL;
+	GError *mapi_error = NULL;
 
 	if (!handle)
 		return FALSE;
@@ -731,9 +775,16 @@ get_deltas (gpointer handle)
 		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
 						is_public ? NULL : mapi_cal_get_known_ids, NULL,
 						mapi_cal_get_changes_cb, cbmapi,
-						options)) {
-			/* FIXME: String : We need to restart evolution-data-server */
-			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
+						options, &mapi_error)) {
+			if (mapi_error) {
+				gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
+				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
+				g_free (msg);
+				g_error_free (mapi_error);
+			} else {
+				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
+			}
+
 //			e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 			g_static_mutex_unlock (&updating);
 			if (mem_ctx)
@@ -750,14 +801,21 @@ get_deltas (gpointer handle)
 		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
 						is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 						mapi_cal_get_changes_cb, cbmapi,
-						options)) {
-		/* FIXME: String : We need to restart evolution-data-server */
-		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
-//		e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
-		g_static_mutex_unlock (&updating);
-		if (mem_ctx)
-			talloc_free (mem_ctx);
-		return FALSE;
+						options, &mapi_error)) {
+			if (mapi_error) {
+				gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
+				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
+				g_free (msg);
+				g_error_free (mapi_error);
+			} else {
+				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
+			}
+
+			//e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
+			g_static_mutex_unlock (&updating);
+			if (mem_ctx)
+				talloc_free (mem_ctx);
+			return FALSE;
 		}
 	}
 //	e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
@@ -789,9 +847,16 @@ get_deltas (gpointer handle)
 	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 						mapi_cal_get_idlist, NULL,
 						handle_deleted_items_cb, &did,
-						options)) {
-		/* FIXME: String : We need to restart evolution-data-server */
-		e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
+						options, &mapi_error)) {
+		if (mapi_error) {
+			gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
+			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
+			g_free (msg);
+			g_error_free (mapi_error);
+		} else {
+			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
+		}
+
 		g_slist_free (did.cache_keys);
 		g_static_mutex_unlock (&updating);
 		return FALSE;
@@ -858,9 +923,17 @@ get_deltas (gpointer handle)
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 						is_public ? NULL : mapi_cal_get_known_ids, NULL,
 						mapi_cal_get_changes_cb, cbmapi,
-						options)) {
+						options, &mapi_error)) {
 								
-				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
+				if (mapi_error) {
+					gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
+					e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
+					g_free (msg);
+					g_error_free (mapi_error);
+				} else {
+					e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
+				}
+
 				g_static_mutex_unlock (&updating);
 				g_free (or_res);
 				return FALSE;
@@ -874,11 +947,19 @@ get_deltas (gpointer handle)
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 						is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 						mapi_cal_get_changes_cb, cbmapi,
-						options)) {
-			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Error fetching changes from the server."));
-			g_free (or_res);
-			g_static_mutex_unlock (&updating);
-			return FALSE;
+						options, &mapi_error)) {
+				if (mapi_error) {
+					gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
+					e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
+					g_free (msg);
+					g_error_free (mapi_error);
+				} else {
+					e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
+				}
+
+				g_free (or_res);
+				g_static_mutex_unlock (&updating);
+				return FALSE;
 			}
 		}
 		g_free (or_res);
@@ -1179,7 +1260,9 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 	gchar *time_string = NULL;
 	gchar t_str [26];
 	guint32 options= MAPI_OPTIONS_FETCH_ALL;
-	gboolean is_public = FALSE;  
+	gboolean is_public = FALSE;
+	GError *mapi_error = NULL;
+
 	priv = cbmapi->priv;
 
 	g_mutex_lock (priv->mutex);
@@ -1211,12 +1294,15 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 						is_public ? NULL : mapi_cal_get_known_ids, NULL,
 						mapi_cal_cache_create_cb, cbmapi,
-						options)) {
+						options, &mapi_error)) {
 			e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 			g_mutex_lock (priv->mutex);
 			priv->populating_cache = FALSE;
 			g_mutex_unlock (priv->mutex);
-			g_propagate_error (perror, EDC_ERROR_EX (OtherError, _("Could not create cache file")));
+			mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to fetch items from a server"));
+			if (mapi_error)
+				g_error_free (mapi_error);
+
 			return FALSE;
 		}
 	} else {
@@ -1228,12 +1314,16 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 						is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 						mapi_cal_cache_create_cb, cbmapi,
-						options)) {
+						options, &mapi_error)) {
 			e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 			g_mutex_lock (priv->mutex);
 			priv->populating_cache = FALSE;
 			g_mutex_unlock (priv->mutex);
-			g_propagate_error (perror, EDC_ERROR_EX (OtherError, _("Could not create cache file")));
+
+			mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to fetch items from a server"));
+			if (mapi_error)
+				g_error_free (mapi_error);
+
 			return FALSE;
 		}
 	}
@@ -1540,11 +1630,11 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cal_cbdata
 	if (exchange_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
 					mapi_cal_get_required_props, NULL,
 					capture_req_props, cbdata,
-					MAPI_OPTIONS_FETCH_GENERIC_STREAMS))
+					MAPI_OPTIONS_FETCH_GENERIC_STREAMS, NULL))
 
 		return;
 
-	proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidCleanGlobalObjectId);
+	proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidCleanGlobalObjectId, NULL);
 	if (proptag == MAPI_E_RESERVED) proptag = PidLidCleanGlobalObjectId;
 
 	res.rt = RES_PROPERTY;
@@ -1564,7 +1654,7 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cal_cbdata
 	exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 					mapi_cal_get_required_props, NULL,
 					capture_req_props, cbdata,
-					MAPI_OPTIONS_FETCH_GENERIC_STREAMS);
+					MAPI_OPTIONS_FETCH_GENERIC_STREAMS, NULL);
 
 	talloc_free (mem_ctx);
 }
@@ -1588,6 +1678,7 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, gchar
 	struct cal_cbdata cbdata = { 0 };
 	struct Binary_r globalid;
 	struct icaltimetype current;
+	GError *mapi_error = NULL;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
@@ -1627,7 +1718,7 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, gchar
 		if (ba) {
 			ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 			stream->value = ba;
-			stream->proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur);
+			stream->proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, NULL);
 			if (stream->proptag != MAPI_E_RESERVED)
 				streams = g_slist_append (streams, stream);
 		}
@@ -1669,7 +1760,7 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, gchar
 
 			mid = exchange_mapi_connection_create_item (priv->conn, priv->olFolder, priv->fid,
 							exchange_mapi_cal_utils_write_props_cb, &cbdata,
-							recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT);
+							recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT, &mapi_error);
 			g_free (cbdata.props);
 //			g_free (globalid.lpb);
 			if (!mid) {
@@ -1677,7 +1768,9 @@ e_cal_backend_mapi_create_object (ECalBackendSync *backend, EDataCal *cal, gchar
 				exchange_mapi_util_free_recipient_list (&recipients);
 				exchange_mapi_util_free_stream_list (&streams);
 				exchange_mapi_util_free_attachment_list (&attachments);
-				g_propagate_error (error, EDC_ERROR (OtherError));
+				mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to create item on a server"));
+				if (mapi_error)
+					g_error_free (mapi_error);
 				return;
 			}
 
@@ -1784,6 +1877,7 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 	gboolean no_increment = FALSE;
 	icalproperty *prop;
 	struct icaltimetype current;
+	GError *mapi_error = NULL;
 
 	*old_object = *new_object = NULL;
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
@@ -1832,7 +1926,7 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 		if (ba) {
 			ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 			stream->value = ba;
-			stream->proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur);
+			stream->proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, NULL);
 			if (stream->proptag != MAPI_E_RESERVED)
 				streams = g_slist_append (streams, stream);
 		}
@@ -1895,7 +1989,7 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 
 		status = exchange_mapi_connection_modify_item (priv->conn, priv->olFolder, priv->fid, mid,
 						exchange_mapi_cal_utils_write_props_cb, &cbdata,
-						recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT);
+						recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT, &mapi_error);
 		g_free (cbdata.props);
 		if (!status) {
 			g_object_unref (comp);
@@ -1903,7 +1997,10 @@ e_cal_backend_mapi_modify_object (ECalBackendSync *backend, EDataCal *cal, const
 			exchange_mapi_util_free_recipient_list (&recipients);
 			exchange_mapi_util_free_stream_list (&streams);
 			exchange_mapi_util_free_attachment_list (&attachments);
-			g_propagate_error (error, EDC_ERROR (OtherError));
+
+			mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to modify item on a server"));
+			if (mapi_error)
+				g_error_free (mapi_error);
 			return;
 		}
 		break;
@@ -1990,6 +2087,7 @@ e_cal_backend_mapi_remove_object (ECalBackendSync *backend, EDataCal *cal,
 			g_free (new_calobj);
 		} else {
 			GSList *list=NULL, *l, *comp_list = e_cal_backend_cache_get_components_by_uid (priv->cache, uid);
+			GError *ri_error = NULL;
 
 //			if (e_cal_component_has_attendees (E_CAL_COMPONENT (comp_list->data))) {
 //			} else {
@@ -1998,7 +2096,7 @@ e_cal_backend_mapi_remove_object (ECalBackendSync *backend, EDataCal *cal,
 				list = g_slist_prepend (list, (gpointer) data);
 //			}
 
-			if (exchange_mapi_connection_remove_items (priv->conn, priv->olFolder, priv->fid, 0, list)) {
+			if (exchange_mapi_connection_remove_items (priv->conn, priv->olFolder, priv->fid, 0, list, &ri_error)) {
 				for (l = comp_list; l; l = l->next) {
 					ECalComponent *comp = E_CAL_COMPONENT (l->data);
 					ECalComponentId *id = e_cal_component_get_id (comp);
@@ -2014,7 +2112,7 @@ e_cal_backend_mapi_remove_object (ECalBackendSync *backend, EDataCal *cal,
 				*object = NULL;
 				err = NULL; /* Success */
 			} else
-				err = EDC_ERROR_EX (OtherError, "Cannot remove items from a server");
+				mapi_error_to_edc_error (&err, ri_error, OtherError, "Cannot remove items from a server");
 
 			g_slist_free (list);
 			g_slist_free (comp_list);
@@ -2044,6 +2142,7 @@ e_cal_backend_mapi_send_objects (ECalBackendSync *backend, EDataCal *cal, const 
 	ECalBackendMAPIPrivate *priv;
 	icalcomponent_kind kind;
 	icalcomponent *icalcomp;
+	GError *mapi_error = NULL;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
@@ -2088,7 +2187,7 @@ e_cal_backend_mapi_send_objects (ECalBackendSync *backend, EDataCal *cal, const 
 				if (ba) {
 					ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 					stream->value = ba;
-					stream->proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur);
+					stream->proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, NULL);
 					if (stream->proptag != MAPI_E_RESERVED)
 						streams = g_slist_append (streams, stream);
 				}
@@ -2146,13 +2245,15 @@ e_cal_backend_mapi_send_objects (ECalBackendSync *backend, EDataCal *cal, const 
 
 			mid = exchange_mapi_connection_create_item (priv->conn, olFolderSentMail, 0,
 							exchange_mapi_cal_utils_write_props_cb, &cbdata,
-							recipients, attachments, streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE);
+							recipients, attachments, streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE, &mapi_error);
 			g_free (cbdata.props);
 			if (!mid) {
 				g_object_unref (comp);
 				exchange_mapi_util_free_recipient_list (&recipients);
 				exchange_mapi_util_free_attachment_list (&attachments);
-				g_propagate_error (error, EDC_ERROR_EX (OtherError, "Cannot create item on a server"));
+				mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to create item on a server"));
+				if (mapi_error)
+					g_error_free (mapi_error);
 				return;
 			}
 
@@ -2356,11 +2457,17 @@ e_cal_backend_mapi_get_free_busy (ECalBackendSync *backend, EDataCal *cal,
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
+	GError *mapi_error = NULL;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
-	exchange_mapi_cal_utils_get_free_busy_data (priv->conn, users, start, end, freebusy);
+	if (!exchange_mapi_cal_utils_get_free_busy_data (priv->conn, users, start, end, freebusy, &mapi_error)) {
+		mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to get Free/Busy data"));
+
+		if (mapi_error)
+			g_error_free (mapi_error);
+	}
 }
 
 typedef struct {

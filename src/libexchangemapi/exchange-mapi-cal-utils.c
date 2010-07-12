@@ -816,7 +816,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 			b = (const bool *)find_mapi_SPropValue_data(properties, PR_RESPONSE_REQUESTED);
 			ical_attendees_from_props (ical_comp, recipients, (b && *b));
 			if (icalcomponent_get_first_property (ical_comp, ICAL_ORGANIZER_PROPERTY) == NULL) {
-				gchar *val;
+				gchar *val, *sender_free = NULL, *sent_free = NULL;
 //				const gchar *sender_name = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_NAME_UNICODE);
 				const gchar *sender_email_type = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE);
 				const gchar *sender_email = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE);
@@ -824,10 +824,14 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 				const gchar *sent_email_type = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE);
 				const gchar *sent_email = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
 
-				if (!g_utf8_collate (sender_email_type, "EX"))
-					sender_email = exchange_mapi_connection_ex_to_smtp (conn, sender_email);
-				if (!g_utf8_collate (sent_email_type, "EX"))
-					sent_email = exchange_mapi_connection_ex_to_smtp (conn, sent_email);
+				if (!g_utf8_collate (sender_email_type, "EX")) {
+					sender_free = exchange_mapi_connection_ex_to_smtp (conn, sender_email, NULL);
+					sender_email = sender_free;
+				}
+				if (!g_utf8_collate (sent_email_type, "EX")) {
+					sent_free = exchange_mapi_connection_ex_to_smtp (conn, sent_email, NULL);
+					sent_email = sent_free;
+				}
 
 				val = g_strdup_printf ("MAILTO:%s", sent_email);
 				prop = icalproperty_new_organizer (val);
@@ -844,6 +848,9 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 				}
 
 				icalcomponent_add_property (ical_comp, prop);
+
+				g_free (sender_free);
+				g_free (sent_free);
 			}
 		}
 
@@ -1046,12 +1053,12 @@ exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, mapi_id_t ori
 		exchange_mapi_connection_fetch_object_props (conn, NULL, orig_fid, orig_mid, obj_message,
 					exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (fccd.kind),
 					fetch_camel_cal_comp_cb, &fccd,
-					MAPI_OPTIONS_FETCH_ALL);
+					MAPI_OPTIONS_FETCH_ALL, NULL);
 	else
 		exchange_mapi_connection_fetch_item (conn, orig_fid, orig_mid,
 					exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (fccd.kind),
 					fetch_camel_cal_comp_cb, &fccd,
-					MAPI_OPTIONS_FETCH_ALL);
+					MAPI_OPTIONS_FETCH_ALL, NULL);
 
 	return fccd.result_data;
 }
@@ -1075,7 +1082,7 @@ exchange_mapi_cal_utils_add_named_ids (ExchangeMapiConnection *conn, mapi_id_t f
 	icalcomponent_kind kind = pkind;
 
 	if (!props) {
-		if (!exchange_mapi_connection_resolve_named_props (conn, fid, common_nids, G_N_ELEMENTS (common_nids)))
+		if (!exchange_mapi_connection_resolve_named_props (conn, fid, common_nids, G_N_ELEMENTS (common_nids), NULL))
 			return FALSE;
 	} else if (!exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, common_nids, G_N_ELEMENTS (common_nids)))
 		return FALSE;
@@ -1129,7 +1136,7 @@ appt_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem
 	};
 
 	if (!props)
-		return exchange_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids));
+		return exchange_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), NULL);
 
 	return exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
 }
@@ -1158,7 +1165,7 @@ task_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem
 	};
 
 	if (!props)
-		return exchange_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids));
+		return exchange_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), NULL);
 
 	return exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
 }
@@ -1174,7 +1181,7 @@ note_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem
 	};
 
 	if (!props)
-		return exchange_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids));
+		return exchange_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), NULL);
 
 	return exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
 }
@@ -1788,7 +1795,7 @@ exchange_mapi_cal_util_get_new_appt_id (ExchangeMapiConnection *conn, mapi_id_t 
 				mem_ctx,
 				#endif
 				&(res.res.resProperty.lpProp), &sprop);
-			ids = exchange_mapi_connection_check_restriction (conn, fid, 0, &res);
+			ids = exchange_mapi_connection_check_restriction (conn, fid, 0, &res, NULL);
 			if (ids) {
 				GSList *l;
 				for (l = ids; l; l = l->next)
@@ -1930,10 +1937,10 @@ populate_freebusy_data (struct Binary_r *bin, uint32_t month, uint32_t year, GLi
 }
 
 gboolean
-exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, GList *users, time_t start, time_t end, GList **freebusy)
+exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, GList *users, time_t start, time_t end, GList **freebusy, GError **mapi_error)
 {
 	struct SRow		aRow;
-	enum MAPISTATUS		retval;
+	enum MAPISTATUS		ms;
 	uint32_t		i;
 	mapi_object_t           obj_store;
 	GList *l;
@@ -1956,12 +1963,22 @@ exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, GList 
 	icaltimetype start_time, end_time;
 	icaltimezone *default_zone = NULL;
 
-	exchange_mapi_connection_get_public_folder (conn, &obj_store);
+	if (!exchange_mapi_connection_get_public_folder (conn, &obj_store, mapi_error)) {
+		return FALSE;
+	}
 	
 	for ( l = users; l != NULL; l = g_list_next (l)) {
-		retval = GetUserFreeBusyData (&obj_store, (const gchar *)l->data, &aRow);
+		ms = GetUserFreeBusyData (&obj_store, (const gchar *)l->data, &aRow);
 
-		if (retval != MAPI_E_SUCCESS) return false;
+		if (ms != MAPI_E_SUCCESS) {
+			gchar *context = g_strconcat ("GetUserFreeBusyData for ", l->data, NULL);
+
+			make_mapi_error (mapi_error, context, ms);
+
+			g_free (context);
+
+			return FALSE;
+		}
 
 		/* Step 2. Dump properties */
 		publish_start = (const uint32_t *) find_SPropValue_data(&aRow, PR_FREEBUSY_START_RANGE);
@@ -2030,6 +2047,7 @@ exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, GList 
 //		g_object_unref (comp);
 		MAPIFreeBuffer(aRow.lpProps);
 	}
+
 	return TRUE;
 }
 

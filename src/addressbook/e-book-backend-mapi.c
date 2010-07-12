@@ -30,6 +30,7 @@
 #include <string.h>
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <glib/gi18n-lib.h>
 
 #include <sys/time.h>
 /*
@@ -199,17 +200,17 @@ build_multiple_restriction_emails_contains (ExchangeMapiConnection *conn, mapi_i
 
 	or_res[3].rt = RES_CONTENT;
 	or_res[3].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[3].res.resContent.ulPropTag = exchange_mapi_connection_resolve_named_prop (conn, fid, PidLidEmail1OriginalDisplayName);
+	or_res[3].res.resContent.ulPropTag = exchange_mapi_connection_resolve_named_prop (conn, fid, PidLidEmail1OriginalDisplayName, NULL);
 	or_res[3].res.resContent.lpProp.value.lpszA = email;
 
 	or_res[4].rt = RES_CONTENT;
 	or_res[4].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[4].res.resContent.ulPropTag = exchange_mapi_connection_resolve_named_prop (conn, fid, PidLidEmail2OriginalDisplayName);
+	or_res[4].res.resContent.ulPropTag = exchange_mapi_connection_resolve_named_prop (conn, fid, PidLidEmail2OriginalDisplayName, NULL);
 	or_res[4].res.resContent.lpProp.value.lpszA = email;
 
 	or_res[5].rt = RES_CONTENT;
 	or_res[5].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[5].res.resContent.ulPropTag = exchange_mapi_connection_resolve_named_prop (conn, fid, PidLidEmail3OriginalDisplayName);
+	or_res[5].res.resContent.ulPropTag = exchange_mapi_connection_resolve_named_prop (conn, fid, PidLidEmail3OriginalDisplayName, NULL);
 	or_res[5].res.resContent.lpProp.value.lpszA = email;
 
 	res = g_new0 (struct mapi_SRestriction, 1);
@@ -452,7 +453,7 @@ mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 	g_return_val_if_fail (values != NULL, FALSE);
 	g_return_val_if_fail (n_values != NULL, FALSE);
 
-	if (!exchange_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids)))
+	if (!exchange_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), NULL))
 		return FALSE;
 
 	if (GPOINTER_TO_INT (e_contact_get (mcd->contact, E_CONTACT_IS_LIST))) {
@@ -701,6 +702,7 @@ e_book_backend_mapi_create_contact (EBookBackend *backend,
 	mapi_id_t status;
 	MapiCreateitemData mcd;
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
+	GError *mapi_error = NULL;
 
 	if (enable_debug)
 		printf("mapi create_contact \n");
@@ -717,9 +719,16 @@ e_book_backend_mapi_create_contact (EBookBackend *backend,
 		mcd.cache = priv->cache;
 		status = exchange_mapi_connection_create_item (priv->conn, olFolderContacts, priv->fid,
 				mapi_book_write_props, &mcd,
-				NULL, NULL, NULL, 0);
+				NULL, NULL, NULL, 0, &mapi_error);
 		if (!status) {
-			e_data_book_respond_create(book, opid, EDB_ERROR (OTHER_ERROR), NULL);
+			GError *error = NULL;
+
+			mapi_error_to_edb_error (&error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to create item on a server"));
+
+			e_data_book_respond_create (book, opid, error, NULL);
+
+			if (mapi_error)
+				g_error_free (mapi_error);
 			return;
 		}
 		id = exchange_mapi_util_mapi_ids_to_uid (priv->fid, status);
@@ -751,6 +760,7 @@ e_book_backend_mapi_remove_contacts (EBookBackend *backend,
 	GList *tmp = id_list;
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
 	mapi_id_t fid, mid;
+	GError *err = NULL;
 
 	if (enable_debug)
 		printf("mapi: remove_contacts\n");
@@ -770,7 +780,7 @@ e_book_backend_mapi_remove_contacts (EBookBackend *backend,
 			tmp = tmp->next;
 		}
 
-		exchange_mapi_connection_remove_items (priv->conn, olFolderContacts, priv->fid, 0, list);
+		exchange_mapi_connection_remove_items (priv->conn, olFolderContacts, priv->fid, 0, list, &err);
 		if (priv->marked_for_offline && priv->is_cache_ready) {
 			tmp = id_list;
 			while (tmp) {
@@ -788,7 +798,17 @@ e_book_backend_mapi_remove_contacts (EBookBackend *backend,
 		}
 
 		g_slist_free (list);
-		e_data_book_respond_remove_contacts (book, opid, NULL /* Success */, id_list);
+
+		if (err) {
+			GError *mapi_err = err;
+
+			err = NULL;
+			mapi_error_to_edb_error (&err, mapi_err, E_DATA_BOOK_STATUS_OTHER_ERROR, NULL);
+
+			g_error_free (mapi_err);
+		}
+
+		e_data_book_respond_remove_contacts (book, opid, err, id_list);
 		break;
 	default:
 		break;
@@ -807,6 +827,7 @@ e_book_backend_mapi_modify_contact (EBookBackend *backend,
 	mapi_id_t fid, mid;
 	gboolean status;
 	gchar *tmp;
+	GError *mapi_error = NULL;
 
 	if (enable_debug)
 		printf("mapi: modify_contacts\n");
@@ -826,10 +847,15 @@ e_book_backend_mapi_modify_contact (EBookBackend *backend,
 		mcd.cache = priv->cache;
 		status = exchange_mapi_connection_modify_item (priv->conn, olFolderContacts, priv->fid, mid,
 				mapi_book_write_props, &mcd,
-				NULL, NULL, NULL, 0);
+				NULL, NULL, NULL, 0, &mapi_error);
 		printf("getting %d\n", status);
 		if (!status) {
-			e_data_book_respond_modify (book, opid, EDB_ERROR (OTHER_ERROR), NULL);
+			GError *perror = NULL;
+
+			mapi_error_to_edb_error (&perror, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to modify item on a server"));
+			e_data_book_respond_modify (book, opid, perror, NULL);
+			if (mapi_error)
+				g_error_free (mapi_error);
 			break;
 		}
 
@@ -891,7 +917,7 @@ e_book_backend_mapi_get_contact (EBookBackend *backend,
 		options |= MAPI_OPTIONS_USE_PFSTORE;
 		is_public = TRUE;
 	}
- 
+
 	if (enable_debug)
 		printf("mapi: get_contact %s\n", id);
 
@@ -939,12 +965,13 @@ e_book_backend_mapi_get_contact (EBookBackend *backend,
 
 		} else {
 			mapi_id_t fid, mid;
+			GError *mapi_error = NULL;
 
 			exchange_mapi_util_mapi_ids_from_uid (id, &fid, &mid);
 			exchange_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
 							is_public ? NULL : mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 							create_contact_item, contact,
-							options);
+							options, &mapi_error);
 
 			if (contact) {
 				e_contact_set (contact, E_CONTACT_BOOK_URI, priv->uri);
@@ -959,7 +986,19 @@ e_book_backend_mapi_get_contact (EBookBackend *backend,
 				return;
 
 			} else {
-				e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
+				GError *err = NULL;
+
+				if (!mapi_error || mapi_error->code == MAPI_E_NOT_FOUND) {
+					err = EDB_ERROR (CONTACT_NOT_FOUND);
+				} else {
+					mapi_error_to_edb_error (&err, mapi_error, E_DATA_BOOK_STATUS_CONTACT_NOT_FOUND, NULL);
+				}
+
+				e_data_book_respond_get_contact (book, opid, err, "");
+
+				if (mapi_error)
+					g_error_free (mapi_error);
+
 				return;
 			}
 		}
@@ -1064,6 +1103,7 @@ e_book_backend_mapi_get_contact_list (EBookBackend *backend,
 			return;
 		}
 		else {
+			GError *mapi_error = NULL;
 			struct mapi_SRestriction res;
 			GList *vcard_str = NULL;
 			gboolean no_summary_search = g_ascii_strcasecmp (query, "(contains \"x-evolution-any-field\" \"\")") == 0;
@@ -1079,8 +1119,15 @@ e_book_backend_mapi_get_contact_list (EBookBackend *backend,
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, no_summary_search ? NULL : &res, NULL,
 								is_public ? NULL : mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 								create_contact_list_cb, &vcard_str,
-								options)) {
-				e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (OTHER_ERROR), NULL);
+								options, &mapi_error)) {
+				GError *err = NULL;
+
+				mapi_error_to_edb_error (&err, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch items from a server"));
+				e_data_book_respond_get_contact_list (book, opid, err, NULL);
+
+				if (mapi_error)
+					g_error_free (mapi_error);
+
 				return;
 			}
 			printf("get_contact_list in %s returning %d contacts\n", priv->uri, g_list_length (vcard_str));
@@ -1220,6 +1267,7 @@ book_view_thread (gpointer data)
 	guint32 options = MAPI_OPTIONS_FETCH_ALL; 
 	gboolean is_public = FALSE;
 	GError *err = NULL;
+	GError *mapi_error = NULL;
 
 	source = e_book_backend_get_source(E_BOOK_BACKEND(backend));
 	if (strcmp (e_source_get_property(source, "public"), "yes") == 0 ) {
@@ -1362,10 +1410,13 @@ book_view_thread (gpointer data)
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 							   is_public ? NULL : mapi_book_utils_get_prop_list, GET_SHORT_SUMMARY,
 							   create_contact_cb, closure,
-							   options)) {
-				err = EDB_ERROR (OTHER_ERROR);
+							   options, &mapi_error)) {
+				mapi_error_to_edb_error (&err, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch items from a server"));
 				e_data_book_view_notify_complete (book_view, err);
 				g_error_free (err);
+
+				if (mapi_error)
+					g_error_free (mapi_error);
 
 				if (or_res)
 					g_free(or_res);
@@ -1381,10 +1432,14 @@ book_view_thread (gpointer data)
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 							is_public ? NULL : mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 							create_contact_cb, closure,
-							options)) {
-				err = EDB_ERROR (OTHER_ERROR);
+							options, &mapi_error)) {
+				mapi_error_to_edb_error (&err, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch items from a server"));
 				e_data_book_view_notify_complete (book_view, err);
 				g_error_free (err);
+
+				if (mapi_error)
+					g_error_free (mapi_error);
+
 				untrack_book_view (backend, book_view);
 				destroy_closure (closure);
 				return;
@@ -1488,7 +1543,7 @@ build_cache (EBookBackendMAPI *ebmapi)
 	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 						is_public ? NULL : mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 						cache_contact_cb, ebmapi,
-						options)) {
+						options, NULL)) {
 		printf("Error during caching addressbook\n");
 		e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 		return NULL;
@@ -1532,7 +1587,7 @@ update_cache (EBookBackendMAPI *ebmapi)
 	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 						mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 						cache_contact_cb, ebmapi,
-						MAPI_OPTIONS_FETCH_ALL)) {
+						MAPI_OPTIONS_FETCH_ALL, NULL)) {
 		printf("Error during caching addressbook\n");
 		e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 		return NULL;
@@ -1556,6 +1611,7 @@ e_book_backend_mapi_authenticate_user (EBookBackend *backend,
 					    const gchar *auth_method)
 {
 	EBookBackendMAPIPrivate *priv = ((EBookBackendMAPI *) backend)->priv;
+	GError *mapi_error = NULL;
 
 	if (enable_debug) {
 		printf ("mapi: authenticate user\n");
@@ -1574,13 +1630,24 @@ e_book_backend_mapi_authenticate_user (EBookBackend *backend,
 		/* rather reuse already established connection */
 		priv->conn = exchange_mapi_connection_find (priv->profile);
 		if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
-			exchange_mapi_connection_reconnect (priv->conn, passwd);
+			exchange_mapi_connection_reconnect (priv->conn, passwd, &mapi_error);
 		else if (!priv->conn)
-			priv->conn = exchange_mapi_connection_new (priv->profile, passwd);
+			priv->conn = exchange_mapi_connection_new (priv->profile, passwd, &mapi_error);
 
-		if (!priv->conn) {
-			e_data_book_respond_authenticate_user (book, opid, EDB_ERROR_EX (OTHER_ERROR, "Cannot connect"));
+		if (!priv->conn || mapi_error) {
+			GError *err = NULL;
+
+			if (priv->conn) {
+				g_object_unref (priv->conn);
+				priv->conn = NULL;
+			}
+				
+			mapi_error_to_edb_error (&err, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Cannot connect"));
+			e_data_book_respond_authenticate_user (book, opid, err);
 			g_static_mutex_unlock (&priv->running_mutex);
+
+			if (mapi_error)
+				g_error_free (mapi_error);
 			return;
 		}
 
@@ -1674,7 +1741,10 @@ e_book_backend_mapi_remove (EBookBackend *backend,
 	gchar *cache_uri = NULL;
 	gboolean status = TRUE;
 	ESource *source;
+	GError *mapi_error = NULL;
+
 	source = e_book_backend_get_source (backend);
+
 	if (enable_debug)
 		printf("mapi: remove\n");
 
@@ -1687,10 +1757,19 @@ e_book_backend_mapi_remove (EBookBackend *backend,
 	case E_DATA_BOOK_MODE_REMOTE:
 		
 		if (strcmp (e_source_get_property(source, "public"), "yes") != 0)
-			status = exchange_mapi_connection_remove_folder (priv->conn, priv->fid, 0);
+			status = exchange_mapi_connection_remove_folder (priv->conn, priv->fid, 0, &mapi_error);
 		
 		if (!status) {
-			e_data_book_respond_remove (book, opid, EDB_ERROR (OTHER_ERROR));
+			GError *err = NULL;
+
+			if (mapi_error) {
+				mapi_error_to_edb_error (&err, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to remove public folder"));
+				g_error_free (mapi_error);
+			} else {
+				err = EDB_ERROR (OTHER_ERROR);
+			}
+
+			e_data_book_respond_remove (book, opid, err);
 			return;
 		}
 

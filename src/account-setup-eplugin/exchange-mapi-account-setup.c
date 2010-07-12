@@ -236,10 +236,10 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	/*Can there be a account without password ?*/
 	if (password && *password && domain_name && *domain_name && *url->user && *url->host) {
 		guint32 cp_flags = (camel_url_get_param (url, "ssl") && g_str_equal (camel_url_get_param (url, "ssl"), "1")) ? CREATE_PROFILE_FLAG_USE_SSL : CREATE_PROFILE_FLAG_NONE;
-		gchar *error_msg = NULL;
-		gboolean status = exchange_mapi_create_profile (url->user, password, domain_name,
-								url->host, cp_flags, &error_msg,
-								(mapi_profile_callback_t) create_profile_callback, url->user);
+		GError *error = NULL;
+		gboolean status = exchange_mapi_create_profile (url->user, password, domain_name, url->host, cp_flags,
+								(mapi_profile_callback_t) create_profile_callback, url->user,
+								&error);
 		if (status) {
 			/* profile was created, try to connect to the server */
 			ExchangeMapiConnection *conn;
@@ -248,7 +248,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 			status = FALSE;
 			profname = exchange_mapi_util_profile_name (url->user, domain_name, url->host, FALSE);
 
-			conn = exchange_mapi_connection_new (profname, password);
+			conn = exchange_mapi_connection_new (profname, password, &error);
 			if (conn) {
 				status = exchange_mapi_connection_connected (conn);
 				g_object_unref (conn);
@@ -276,14 +276,15 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 
 			e_passwords_forget_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
 
-			e = g_strconcat (_("Authentication failed."), "\n", error_msg, NULL);
+			e = g_strconcat (_("Authentication failed."), "\n", error ? error->message : NULL, NULL);
 
 			e_notice (NULL, GTK_MESSAGE_ERROR, "%s", e);
 
 			g_free (e);
 		}
 
-		g_free (error_msg);
+		if (error)
+			g_error_free (error);
 	} else {
 		e_passwords_forget_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Authentication failed."));
@@ -754,6 +755,8 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	ESourceGroup *grp;
 	ExchangeMapiConnection *conn;
 	mapi_id_t fid, pfid;
+	GError *mapi_error = NULL;
+
 	uri_text = e_source_get_uri (source);
 	if (uri_text && g_ascii_strncasecmp (uri_text, MAPI_URI_PREFIX, MAPI_PREFIX_LENGTH))
 		return;
@@ -764,8 +767,19 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	conn = exchange_mapi_connection_find (e_source_get_property (source, "profile"));
 	g_return_if_fail (conn != NULL);
 
-	fid = exchange_mapi_connection_create_folder (conn, olFolderContacts, pfid, 0, e_source_peek_name (source));
+	fid = exchange_mapi_connection_create_folder (conn, olFolderContacts, pfid, 0, e_source_peek_name (source), &mapi_error);
 	g_object_unref (conn);
+
+	if (!fid) {
+		if (mapi_error) {
+			e_notice (NULL, GTK_MESSAGE_ERROR, _("Failed to create address book '%s': %s"), e_source_peek_name (source), mapi_error->message);
+			g_error_free (mapi_error);
+		} else {
+			e_notice (NULL, GTK_MESSAGE_ERROR, _("Failed to create address book '%s'"), e_source_peek_name (source));
+		}
+
+		return;
+	}
 
 	sfid = exchange_mapi_util_mapi_id_to_string (fid);
 	r_uri = g_strconcat (";", sfid, NULL);
@@ -831,6 +845,7 @@ exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 	mapi_id_t fid, pfid;
 	uint32_t type;
 	gchar *uri_text = e_source_get_uri (source);
+	GError *mapi_error = NULL;
 
 	if (!uri_text || g_ascii_strncasecmp (uri_text, MAPI_URI_PREFIX, MAPI_PREFIX_LENGTH))
 		return;
@@ -859,8 +874,19 @@ exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 	conn = exchange_mapi_connection_find (e_source_get_property (source, "profile"));
 	g_return_if_fail (conn != NULL);
 
-	fid = exchange_mapi_connection_create_folder (conn, type, pfid, 0, e_source_peek_name (source));
+	fid = exchange_mapi_connection_create_folder (conn, type, pfid, 0, e_source_peek_name (source), &mapi_error);
 	g_object_unref (conn);
+
+	if (!fid) {
+		if (mapi_error) {
+			e_notice (NULL, GTK_MESSAGE_ERROR, _("Failed to create calendar '%s': %s"), e_source_peek_name (source), mapi_error->message);
+			g_error_free (mapi_error);
+		} else {
+			e_notice (NULL, GTK_MESSAGE_ERROR, _("Failed to create calendar '%s'"), e_source_peek_name (source));
+		}
+
+		return;
+	}
 
 	sfid = exchange_mapi_util_mapi_id_to_string (fid);
 	tmp = g_strconcat (";", sfid, NULL);

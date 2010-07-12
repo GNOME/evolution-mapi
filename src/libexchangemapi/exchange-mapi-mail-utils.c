@@ -367,7 +367,6 @@ static void
 mapi_mime_set_msg_headers (ExchangeMapiConnection *conn, CamelMimeMessage *msg, MailItem *item)
 {
 	gchar *temp_str = NULL;
-	const gchar *from_email;
 	time_t recieved_time;
 	CamelInternetAddress *addr = NULL;
 	gint offset = 0;
@@ -419,9 +418,11 @@ mapi_mime_set_msg_headers (ExchangeMapiConnection *conn, CamelMimeMessage *msg, 
 
 	if (item->header.from) {
 		if ((item->header.from_type != NULL) && !g_utf8_collate (item->header.from_type, "EX")) {
-			from_email = exchange_mapi_connection_ex_to_smtp (conn, item->header.from_email);
+			gchar *from_email;
+
+			from_email = exchange_mapi_connection_ex_to_smtp (conn, item->header.from_email, NULL);
 			g_free (item->header.from_email);
-			item->header.from_email = g_strdup (from_email);
+			item->header.from_email = from_email;
 		}
 
 		item->header.from_email = item->header.from_email ?
@@ -716,7 +717,7 @@ mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, GSL
 			camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
 
 			strm = NULL;
-			proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, PidNameAttachmentMacInfo);
+			proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, PidNameAttachmentMacInfo, NULL);
 			if (proptag != MAPI_E_RESERVED)
 				strm = exchange_mapi_util_find_stream (attach->streams, proptag);
 			if (!strm)

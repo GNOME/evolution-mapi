@@ -187,6 +187,7 @@ static gpointer
 build_cache (EBookBackendMAPIGAL *ebmapi)
 {
 	EBookBackendMAPIGALPrivate *priv = ebmapi->priv;
+	GError *mapi_error = NULL;
 	gchar *tmp;
 	struct fetch_gal_data fgd = { 0 };
 
@@ -198,17 +199,27 @@ build_cache (EBookBackendMAPIGAL *ebmapi)
 
 	fgd.ebmapi = ebmapi;
 	fgd.book_view = find_book_view (ebmapi);
-	fgd.fid = exchange_mapi_connection_get_default_folder_id (priv->conn, olFolderContacts);
+	fgd.fid = exchange_mapi_connection_get_default_folder_id (priv->conn, olFolderContacts, NULL);
 	fgd.last_update = current_time_ms ();
 
 	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	exchange_mapi_connection_fetch_gal (priv->conn,
 					mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
-					fetch_gal_cb, &fgd);
+					fetch_gal_cb, &fgd, &mapi_error);
 
 	if (fgd.book_view) {
-		e_data_book_view_notify_complete (fgd.book_view, NULL /* Success */);
+		GError *error = NULL;
+
+		if (mapi_error) {
+			mapi_error_to_edb_error (&error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch GAL entries"));
+			g_error_free (mapi_error);
+		}
+
+		e_data_book_view_notify_complete (fgd.book_view, error);
 		e_data_book_view_unref (fgd.book_view);
+
+		if (error)
+			g_error_free (error);
 	}
 
 	tmp = g_strdup_printf("%d", priv->kill_cache_build ? 0 : (gint)time (NULL));
@@ -267,6 +278,7 @@ e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
 {
 	EBookBackendMAPIGAL *ebmapi = (EBookBackendMAPIGAL *) backend;
 	EBookBackendMAPIGALPrivate *priv = ebmapi->priv;
+	GError *mapi_error = NULL;
 
 	if (enable_debug) {
 		printf ("mapi: authenticate user\n");
@@ -286,13 +298,24 @@ e_book_backend_mapi_gal_authenticate_user (EBookBackend *backend,
 		/* rather reuse already established connection */
 		priv->conn = exchange_mapi_connection_find (priv->profile);
 		if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
-			exchange_mapi_connection_reconnect (priv->conn, passwd);
+			exchange_mapi_connection_reconnect (priv->conn, passwd, &mapi_error);
 		else if (!priv->conn)
-			priv->conn = exchange_mapi_connection_new (priv->profile, passwd);
+			priv->conn = exchange_mapi_connection_new (priv->profile, passwd, &mapi_error);
 
-		if (!priv->conn) {
-			e_data_book_respond_authenticate_user (book, opid, EDB_ERROR_EX (OTHER_ERROR, "Cannot connect"));
+		if (!priv->conn || mapi_error) {
+			GError *err = NULL;
+
+			if (priv->conn) {
+				g_object_unref (priv->conn);
+				priv->conn = NULL;
+			}
+				
+			mapi_error_to_edb_error (&err, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Cannot connect"));
+			e_data_book_respond_authenticate_user (book, opid, err);
 			g_static_mutex_unlock (&priv->running_mutex);
+
+			if (mapi_error)
+				g_error_free (mapi_error);
 			return;
 		}
 

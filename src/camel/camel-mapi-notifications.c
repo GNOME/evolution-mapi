@@ -117,7 +117,7 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 	fetch_data->folder = folder;
 
 	camel_service_lock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-	camel_mapi_folder_fetch_summary ((CamelStore *)store, folder, new_mail_notif->FID, res, NULL, fetch_data, options);
+	camel_mapi_folder_fetch_summary ((CamelStore *)store, folder, new_mail_notif->FID, res, NULL, fetch_data, options, NULL);
 	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	camel_folder_summary_touch (folder->summary);
@@ -231,14 +231,14 @@ mapi_push_notification_listener_thread (gpointer data)
 
 	g_object_ref (conn);
 
-	if (exchange_mapi_connection_events_init (conn)) {
+	if (exchange_mapi_connection_events_init (conn, NULL)) {
 		exchange_mapi_connection_events_subscribe (conn, thread_data->event_options, thread_data->event_mask,
 						&thread_data->connection, mapi_notifications_filter,
-						thread_data->event_data);
+						thread_data->event_data, NULL);
 
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		exchange_mapi_connection_events_monitor (conn, cb_data); /*Blocking call. Don't hold locks here*/
-		exchange_mapi_connection_events_unsubscribe (conn, thread_data->connection);
+		exchange_mapi_connection_events_unsubscribe (conn, thread_data->connection, NULL);
 	} else
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
