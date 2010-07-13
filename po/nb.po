@@ -7,20 +7,21 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-data-server 2.31.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-06-19 16:02+0200\n"
-"PO-Revision-Date: 2010-06-19 16:02+0200\n"
+"POT-Creation-Date: 2010-07-13 14:27+0200\n"
+"PO-Revision-Date: 2010-07-13 14:33+0200\n"
 "Last-Translator: Kjartan Maraas <kmaraas@gnome.org>\n"
 "Language-Team: Norwegian Bokmal <i18n-nb@lister.ping.uio.no>\n"
+"Language: nb\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:541
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:543
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:672
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:674
 msgid "Global Address List"
 msgstr "Global adresseliste"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:847
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:987
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:229
 #, c-format
 msgid "Enter Password for %s@%s"
@@ -55,29 +56,49 @@ msgid "Authentication finished successfully."
 msgstr "Autentisering fullført."
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:279
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:289
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:290
 msgid "Authentication failed."
 msgstr "Autentisering feilet."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:367
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:368
 msgid "_Domain name:"
 msgstr "_Domenenavn:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:377
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:378
 msgid "_Authenticate"
 msgstr "_Autentiser"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:387
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:388
 msgid "_Use secure connection"
 msgstr "Br_uk sikker tilkobling"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:522
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:523
 msgid "Personal Folders"
 msgstr "Personlige mapper"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:650
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:658
 msgid "_Location:"
 msgstr "_Lokasjon:"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:775
+#, c-format
+msgid "Failed to create address book '%s': %s"
+msgstr "Klarte ikke å lage adressebok «%s»: %s"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:778
+#, c-format
+msgid "Failed to create address book '%s'"
+msgstr "Klarte ikke å lage adressebok «%s»"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:882
+#, c-format
+msgid "Failed to create calendar '%s': %s"
+msgstr "Klarte ikke å lage kalender «%s»: %s"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:885
+#, c-format
+msgid "Failed to create calendar '%s'"
+msgstr "Kan ikke å lage kalender «%s»"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:100
 msgid "Folder"
@@ -121,60 +142,85 @@ msgstr "Mappestørrelse"
 #. To translators : This is used to cache the downloaded contacts from GAL.
 #. The first %d is an index of the GAL entry,
 #. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:168
+#: ../src/addressbook/e-book-backend-mapi-gal.c:170
 #, c-format
 msgid "Caching GAL entry %d/%d"
 msgstr "Mellomlagrer GAL-oppføring %d/%d"
 
 #. To translators : This is used to cache the downloaded contacts from GAL.
 #. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:172
+#: ../src/addressbook/e-book-backend-mapi-gal.c:174
 #, c-format
 msgid "Caching GAL entry %d"
 msgstr "Mellomlagrer GAL-oppføring %d"
 
-#: ../src/addressbook/e-book-backend-mapi-gal.c:699
+#: ../src/addressbook/e-book-backend-mapi-gal.c:214
+msgid "Failed to fetch GAL entries"
+msgstr "Klarte ikke å hente GAL-oppføringer"
+
+#: ../src/addressbook/e-book-backend-mapi-gal.c:313
+msgid "Cannot connect"
+msgstr "Kan ikke koble til"
+
+#: ../src/addressbook/e-book-backend-mapi-gal.c:645
 msgid "Searching"
 msgstr "Søker"
 
 #. To translators : Here Evolution MAPI downloads the entries from the GAL server
-#: ../src/addressbook/e-book-backend-mapi-gal.c:717
+#: ../src/addressbook/e-book-backend-mapi-gal.c:665
 msgid "Downloading GAL entries from server…"
 msgstr "Laster ned GAL-oppføringer fra tjener…"
 
-#: ../src/calendar/e-cal-backend-mapi.c:125
-#: ../src/calendar/e-cal-backend-mapi.c:1251
-#: ../src/camel/camel-mapi-store.c:567
-msgid "Authentication failed"
-msgstr "Autentisering feilet"
+#: ../src/calendar/e-cal-backend-mapi.c:129
+msgid "Uknown error"
+msgstr "Ukjent feil"
+
+#: ../src/calendar/e-cal-backend-mapi.c:390
+msgid "Failed to remove public folder"
+msgstr "Klarte ikke å fjerne offentlig mappe"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:395
+#: ../src/calendar/e-cal-backend-mapi.c:435
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Laster oppføring i mappe %s"
 
-#. FIXME: String : We need to restart evolution-data-server
-#: ../src/calendar/e-cal-backend-mapi.c:724
-#: ../src/calendar/e-cal-backend-mapi.c:734
-#: ../src/calendar/e-cal-backend-mapi.c:761
-#: ../src/calendar/e-cal-backend-mapi.c:823
-#: ../src/calendar/e-cal-backend-mapi.c:832
-msgid "Error fetching changes from the server."
-msgstr "Feil under henting av endringer fra tjener."
+#: ../src/calendar/e-cal-backend-mapi.c:780
+#: ../src/calendar/e-cal-backend-mapi.c:806
+#: ../src/calendar/e-cal-backend-mapi.c:852
+#: ../src/calendar/e-cal-backend-mapi.c:929
+#: ../src/calendar/e-cal-backend-mapi.c:952
+#, c-format
+msgid "Failed to fetch changes from a server: %s"
+msgstr "Klarte ikke å hente endringer fra en tjener: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1166
-#: ../src/calendar/e-cal-backend-mapi.c:1177
-#: ../src/calendar/e-cal-backend-mapi.c:1286
-#: ../src/calendar/e-cal-backend-mapi.c:1371
-msgid "Could not create cache file"
-msgstr "Kunne ikke opprette bufferfil"
+#: ../src/calendar/e-cal-backend-mapi.c:785
+#: ../src/calendar/e-cal-backend-mapi.c:811
+#: ../src/calendar/e-cal-backend-mapi.c:857
+#: ../src/calendar/e-cal-backend-mapi.c:934
+#: ../src/calendar/e-cal-backend-mapi.c:957
+msgid "Failed to fetch changes from a server"
+msgstr "Klarte ikke å hente endringer fra en tjener"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1297
+#: ../src/calendar/e-cal-backend-mapi.c:1302
+#: ../src/calendar/e-cal-backend-mapi.c:1323
+msgid "Failed to fetch items from a server"
+msgstr "Klarte ikke å hente oppføringer fra en tjener"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1435
 msgid "Could not create thread for populating cache"
 msgstr "Kunne ikke opprette tråd for å populere buffer"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1733
+#: ../src/calendar/e-cal-backend-mapi.c:1500
+msgid "Could not create cache file"
+msgstr "Kunne ikke opprette bufferfil"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1769
+#: ../src/calendar/e-cal-backend-mapi.c:2252
+msgid "Failed to create item on a server"
+msgstr "Klarte ikke å opprette en oppføring på en tjener"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1894
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -182,69 +228,93 @@ msgstr ""
 "Støtte for å endre enkeltinstanser av gjentakende avtaler er ikke "
 "implementert ennå. Ingen endring ble gjort i avtalen på tjeneren."
 
-#: ../src/camel/camel-mapi-folder.c:356
+#: ../src/calendar/e-cal-backend-mapi.c:1999
+msgid "Failed to modify item on a server"
+msgstr "Klarte ikke å endre oppføring på en tjener"
+
+#: ../src/calendar/e-cal-backend-mapi.c:2469
+msgid "Failed to get Free/Busy data"
+msgstr "Klarte ikke å hente ledig-/opptatt-data"
+
+#: ../src/camel/camel-mapi-folder.c:357
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "Oppdaterer lokal sammendragsinformasjon for nye meldinger i %s"
 
-#: ../src/camel/camel-mapi-folder.c:590
+#: ../src/camel/camel-mapi-folder.c:593
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Henter meldings-IDer fra tjener for %s"
 
-#: ../src/camel/camel-mapi-folder.c:620
+#: ../src/camel/camel-mapi-folder.c:623
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Fjerner slettede meldinger fra mellomlager i %s"
 
 #. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:935
+#: ../src/camel/camel-mapi-folder.c:949
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Henter sammendragsinformasjon for nye meldinger i %s"
 
-#: ../src/camel/camel-mapi-folder.c:1048 ../src/camel/camel-mapi-folder.c:1162
-#: ../src/camel/camel-mapi-folder.c:1170
+#: ../src/camel/camel-mapi-folder.c:1072 ../src/camel/camel-mapi-folder.c:1207
+#: ../src/camel/camel-mapi-folder.c:1217
+#, c-format
 msgid "This message is not available in offline mode."
 msgstr "Denne meldingen er ikke tilgjengelig i frakoblet modus."
 
-#: ../src/camel/camel-mapi-folder.c:1061
+#: ../src/camel/camel-mapi-folder.c:1089
+#, c-format
+msgid "Fetching items failed: %s"
+msgstr "Henting av oppføringer feilet: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1094
 msgid "Fetching items failed"
 msgstr "Henting av oppføringer feilet"
 
-#. Translators: The first %s is replaced with a message ID,
-#. the second %s is replaced with a detailed error string
-#: ../src/camel/camel-mapi-folder.c:1124 ../src/camel/camel-mapi-folder.c:1145
+#: ../src/camel/camel-mapi-folder.c:1167
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Kan ikke hente melding %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1124
+#: ../src/camel/camel-mapi-folder.c:1168
 msgid "No such message"
 msgstr "Ingen slik melding"
 
-#: ../src/camel/camel-mapi-folder.c:1136
-msgid "Message fetching cancelled by user."
-msgstr "Henting av melding avbrutt av bruker."
+#: ../src/camel/camel-mapi-folder.c:1243
+#, c-format
+msgid "Could not get message: %s"
+msgstr "Kunne ikke hente melding: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1192 ../src/camel/camel-mapi-folder.c:1201
+#: ../src/camel/camel-mapi-folder.c:1249 ../src/camel/camel-mapi-folder.c:1262
+#, c-format
 msgid "Could not get message"
 msgstr "Kunne ikke hente melding"
 
-#: ../src/camel/camel-mapi-folder.c:1467 ../src/camel/camel-mapi-folder.c:1484
+#: ../src/camel/camel-mapi-folder.c:1399
+#, c-format
+msgid "Failed to empty Trash: %s"
+msgstr "Klarte ikke å tømme papirkurven: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1404
+msgid "Failed to empty Trash"
+msgstr "Klarte ikke å tømme papirkurven"
+
+#: ../src/camel/camel-mapi-folder.c:1540 ../src/camel/camel-mapi-folder.c:1561
 msgid "Unknown error"
 msgstr "Ukjent feil"
 
-#: ../src/camel/camel-mapi-folder.c:1541
+#: ../src/camel/camel-mapi-folder.c:1623
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Kan legge til melding i mappe «%s»"
 
-#: ../src/camel/camel-mapi-folder.c:1548
+#: ../src/camel/camel-mapi-folder.c:1631 ../src/camel/camel-mapi-folder.c:1656
+#, c-format
 msgid "Offline."
 msgstr "Frakoblet."
 
-#: ../src/camel/camel-mapi-folder.c:1705
+#: ../src/camel/camel-mapi-folder.c:1802
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Kunne ikke laste sammendrag for %s"
@@ -294,7 +364,7 @@ msgstr ""
 "klartekst-passord."
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:314 ../src/camel/camel-mapi-transport.c:121
+#: ../src/camel/camel-mapi-store.c:315 ../src/camel/camel-mapi-transport.c:133
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI-tjener %s"
@@ -302,7 +372,7 @@ msgstr "Exchange MAPI-tjener %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:318 ../src/camel/camel-mapi-transport.c:124
+#: ../src/camel/camel-mapi-store.c:319 ../src/camel/camel-mapi-transport.c:136
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Exchange MAPI-tjeneste for %s på %s"
@@ -311,55 +381,162 @@ msgstr "Exchange MAPI-tjeneste for %s på %s"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:358
+#: ../src/camel/camel-mapi-store.c:361
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s Oppgi MAPI-passord for %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:371
+#: ../src/camel/camel-mapi-store.c:376
+#, c-format
 msgid "You did not enter a password."
 msgstr "Du skrev ikke inn et passord."
 
-#: ../src/camel/camel-mapi-store.c:378
+#: ../src/camel/camel-mapi-store.c:384
 #, c-format
-msgid "Unable to authenticate to Exchange MAPI server."
-msgstr "Kunne ikke autentisere mot Exchange MAPI-tjener."
+msgid "Unable to authenticate to Exchange MAPI server: %s"
+msgstr "Kan ikke autentisere mot Exchange MAPI-tjener: %s"
 
-#: ../src/camel/camel-mapi-store.c:551
+#: ../src/camel/camel-mapi-store.c:387
+msgid "Unable to authenticate to Exchange MAPI server"
+msgstr "Kan ikke autentisere mot Exchange MAPI-tjener"
+
+#: ../src/camel/camel-mapi-store.c:563
+#, c-format
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "Kan ikke opprette MAPI-mapper i frakoblet modus."
 
-#: ../src/camel/camel-mapi-store.c:556
+#: ../src/camel/camel-mapi-store.c:570
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "Kan ikke opprette ny mappe «%s»"
 
-#: ../src/camel/camel-mapi-store.c:741
+#: ../src/camel/camel-mapi-store.c:584
+#, c-format
+msgid "Authentication failed"
+msgstr "Autentisering feilet"
+
+#: ../src/camel/camel-mapi-store.c:609
+#, c-format
+msgid "Cannot create folder '%s': %s"
+msgstr "Kan ikke opprette mappe «%s»: %s"
+
+#: ../src/camel/camel-mapi-store.c:614
+#, c-format
+msgid "Cannot create folder '%s'"
+msgstr "Kan ikke opprette mappe «%s»"
+
+#: ../src/camel/camel-mapi-store.c:707
+#, c-format
+msgid "Cannot remove folder '%s': %s"
+msgstr "Kan ikke fjerne mappe «%s»: %s"
+
+#: ../src/camel/camel-mapi-store.c:714
+#, c-format
+msgid "Cannot remove folder '%s'"
+msgstr "Kan ikke fjerne mappe «%s»"
+
+#: ../src/camel/camel-mapi-store.c:804
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
 msgstr "Kan ikke endre navn på MAPI-mappe «%s». Mappen eksisterer ikke."
 
-#: ../src/camel/camel-mapi-store.c:752
+#: ../src/camel/camel-mapi-store.c:816
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'."
 msgstr "Kan ikke endre navn på forvalgt MAPI-mappe «%s» til «%s»."
 
-#: ../src/camel/camel-mapi-store.c:777 ../src/camel/camel-mapi-store.c:792
-#: ../src/camel/camel-mapi-store.c:843
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:843 ../src/camel/camel-mapi-store.c:868
+#: ../src/camel/camel-mapi-store.c:930
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "Kan ikke endre navn på MAPI-mappe «%s» til «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1382
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#. The last '%s' is a detailed error message.
+#: ../src/camel/camel-mapi-store.c:861 ../src/camel/camel-mapi-store.c:924
+#, c-format
+msgid "Cannot rename MAPI folder '%s' to '%s': %s"
+msgstr "Kan ikke endre navn på MAPI-mappe «%s» til «%s»: %s"
+
+#: ../src/camel/camel-mapi-store.c:1493
+#, c-format
 msgid "Folder list not available in offline mode."
 msgstr "Mappelisten er ikke tilgjengelig i frakoblet modus."
 
-#. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:95
-#: ../src/camel/camel-mapi-transport.c:109
+#: ../src/camel/camel-mapi-transport.c:99
+#: ../src/camel/camel-mapi-transport.c:120
+#, c-format
 msgid "Could not send message."
 msgstr "Kunne ikke sende meldingen."
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3143
+#: ../src/camel/camel-mapi-transport.c:115
+#, c-format
+msgid "Could not send message: %s"
+msgstr "Kunne ikke sende melding: %s"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:100
+msgid "Failed to login into the server"
+msgstr "Klarte ikke å logge inn på tjeneren"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:101
+msgid "Cannot create more sessions, session limit was reached"
+msgstr "Kan ikke opprette flere sesjoner. Grensen for antall sesjoner ble nådd"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:102
+msgid "User cancelled operation"
+msgstr "Bruker avbrøt operasjonen"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:103
+msgid "Unable to abort"
+msgstr "Kan ikke avbryte"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:104
+msgid "Network error"
+msgstr "Nettverksfeil"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:105
+msgid "Disk error"
+msgstr "Diskfeil"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:106
+msgid "Password change required"
+msgstr "Bytte av passord kreves"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:107
+msgid "Password expired"
+msgstr "Passord utløpt"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:108
+msgid "Invalid workstation account"
+msgstr "Ugyldig arbeidsstasjonskonto"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:109
+msgid "Invalid access time"
+msgstr "Ugyldig aksesstid"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:110
+msgid "Account is disabled"
+msgstr "Kontoen er deaktivert"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:111
+msgid "End of session"
+msgstr "Slutt på sesjonen"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:116
+#, c-format
+msgid "MAPI error %s (0x%x) occurred"
+msgstr "MAPI-feil %s (0x%x) oppsto"
+
+#. Translators: The first '%s' is replaced with an error context,
+#. aka where the error occurred, the second '%s' is replaced with
+#. the error message.
+#: ../src/libexchangemapi/exchange-mapi-connection.c:126
+#, c-format
+msgctxt "EXCHANGEMAPI_ERROR"
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3281
 msgid "All Public Folders"
 msgstr "Alle offentlige mapper"
