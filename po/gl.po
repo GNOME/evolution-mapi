@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi-master-po-gl-77000.merged\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-13 02:57+0200\n"
+"POT-Creation-Date: 2010-07-13 03:09+0200\n"
 "PO-Revision-Date: 2010-07-13 03:05+0200\n"
 "Last-Translator: Fran Diéguez <frandieguez@ubuntu.com>\n"
 "Language-Team: Galician <gnome@g11n.net>\n"
@@ -203,7 +203,7 @@ msgstr "Cargando os elementos no cartafol %s"
 #: ../src/calendar/e-cal-backend-mapi.c:952
 #, c-format
 msgid "Failed to fetch changes from a server: %s"
-msgstr "Produciuse un erro ao obter os cambios do servidor."
+msgstr "Produciuse un erro ao obter os cambios do servidor: %s"
 
 #: ../src/calendar/e-cal-backend-mapi.c:785
 #: ../src/calendar/e-cal-backend-mapi.c:811
@@ -278,7 +278,7 @@ msgstr "Esta mensaxe non está dispoñíbel no modo sen conexión."
 #: ../src/camel/camel-mapi-folder.c:1089
 #, c-format
 msgid "Fetching items failed: %s"
-msgstr "Fallou a obtención de elementos"
+msgstr "Fallou a obtención de elementos: %s"
 
 #: ../src/camel/camel-mapi-folder.c:1094
 msgid "Fetching items failed"
@@ -296,7 +296,7 @@ msgstr "Non existe esta mensaxe"
 #: ../src/camel/camel-mapi-folder.c:1243
 #, c-format
 msgid "Could not get message: %s"
-msgstr "Non foi posíbel obter a mensaxe"
+msgstr "Non foi posíbel obter a mensaxe: %s"
 
 #: ../src/camel/camel-mapi-folder.c:1249 ../src/camel/camel-mapi-folder.c:1262
 #, c-format
@@ -406,7 +406,7 @@ msgstr "Non introduciu un contrasinal."
 #: ../src/camel/camel-mapi-store.c:384
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server: %s"
-msgstr "Non foi posíbel autenticar no servidor Exchange MAPI."
+msgstr "Non foi posíbel autenticar no servidor Exchange MAPI: %s"
 
 #: ../src/camel/camel-mapi-store.c:387
 msgid "Unable to authenticate to Exchange MAPI server"
@@ -430,7 +430,7 @@ msgstr "Fallou a autenticación"
 #: ../src/camel/camel-mapi-store.c:609
 #, c-format
 msgid "Cannot create folder '%s': %s"
-msgstr "Non foi posíbel crear un cartafol novo «%s»"
+msgstr "Non foi posíbel crear un cartafol novo «%s»: %s"
 
 #: ../src/camel/camel-mapi-store.c:614
 #, c-format
@@ -469,7 +469,7 @@ msgstr "Non foi posíbel renomear o cartafol MAPI de «%s» a «%s»"
 #: ../src/camel/camel-mapi-store.c:861 ../src/camel/camel-mapi-store.c:924
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
-msgstr "Non foi posíbel renomear o cartafol MAPI de «%s» a «%s»"
+msgstr "Non foi posíbel renomear o cartafol MAPI de «%s» a «%s»: %s"
 
 #: ../src/camel/camel-mapi-store.c:1493
 #, c-format
@@ -485,7 +485,7 @@ msgstr "Non foi posíbel enviar a mensaxe."
 #: ../src/camel/camel-mapi-transport.c:115
 #, c-format
 msgid "Could not send message: %s"
-msgstr "Non foi posíbel enviar a mensaxe."
+msgstr "Non foi posíbel enviar a mensaxe: %s"
 
 #: ../src/libexchangemapi/exchange-mapi-connection.c:100
 msgid "Failed to login into the server"
