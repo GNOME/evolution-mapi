@@ -528,11 +528,14 @@ ical_attendees_from_props (icalcomponent *ical_comp, GSList *recipients, gboolea
 			ui32 = (const uint32_t *) get_SPropValue_SRow_data (&recip->out_SRow, PR_RECIPIENT_TYPE);
 			param = icalparameter_new_role (get_role_from_type (ui32 ? *ui32 : olTo));
 			icalproperty_add_parameter (prop, param);
-#if 0
+
 			/* CALENDAR USER TYPE */
-			param = icalparameter_new_cutype ();
+			param = NULL;
+			if (ui32 && *ui32 == 0x03)
+				param = icalparameter_new_cutype (ICAL_CUTYPE_RESOURCE);
+			if (!param)
+				param = icalparameter_new_cutype (ICAL_CUTYPE_INDIVIDUAL);
 			icalproperty_add_parameter (prop, param);
-#endif
 		}
 
 		if (prop)
