@@ -1399,7 +1399,7 @@ e_cal_backend_mapi_connect (ECalBackendMAPI *cbmapi, GError **perror)
 	}
 
 	/* We have established a connection */
-	if (priv->cache && priv->fid) {
+	if (priv->cache && priv->fid && e_cal_backend_cache_get_marker (priv->cache)) {
 		priv->mode = CAL_MODE_REMOTE;
 		if (priv->mode_changed && !priv->dthread) {
 			priv->mode_changed = FALSE;

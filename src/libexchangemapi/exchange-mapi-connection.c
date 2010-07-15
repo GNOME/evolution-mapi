@@ -1645,20 +1645,17 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 			}
 
 			if (has_attach && *has_attach && (MAPI_OPTIONS_FETCH_ATTACHMENTS & options)) {
-				if (!exchange_mapi_util_get_attachments (conn, fid, &obj_message, &attach_list, perror))
-					goto loop_cleanup;
+				exchange_mapi_util_get_attachments (conn, fid, &obj_message, &attach_list, NULL);
 			}
 
 			if (options & MAPI_OPTIONS_FETCH_RECIPIENTS) {
-				if (!exchange_mapi_util_get_recipients (&obj_message, &recip_list, perror))
-					goto loop_cleanup;
+				exchange_mapi_util_get_recipients (&obj_message, &recip_list, perror);
 			}
 
 			/* get the main body stream no matter what */
 			if (options & MAPI_OPTIONS_FETCH_BODY_STREAM) {
-				if (!exchange_mapi_util_read_body_stream (&obj_message, &stream_list,
-								     options & MAPI_OPTIONS_GETBESTBODY, perror))
-					goto loop_cleanup;
+				exchange_mapi_util_read_body_stream (&obj_message, &stream_list,
+								     options & MAPI_OPTIONS_GETBESTBODY, NULL);
 			}
 
 			if (propsTagArray && propsTagArray->cValues) {
@@ -1804,21 +1801,18 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 
 	/* Fetch attachments */
 	if (options & MAPI_OPTIONS_FETCH_ATTACHMENTS) {
-		if (!exchange_mapi_util_get_attachments (conn, fid, obj_message, &attach_list, perror))
-			goto cleanup;
+		exchange_mapi_util_get_attachments (conn, fid, obj_message, &attach_list, NULL);
 	}
 
 	/* Fetch recipients */
 	if (options & MAPI_OPTIONS_FETCH_RECIPIENTS) {
-		if (!exchange_mapi_util_get_recipients (obj_message, &recip_list, perror))
-			goto cleanup;
+		exchange_mapi_util_get_recipients (obj_message, &recip_list, NULL);
 	}
 
 	/* get the main body stream no matter what */
 	if (options & MAPI_OPTIONS_FETCH_BODY_STREAM) {
-		if (!exchange_mapi_util_read_body_stream (obj_message, &stream_list,
-			options & MAPI_OPTIONS_GETBESTBODY, perror))
-			goto cleanup;
+		exchange_mapi_util_read_body_stream (obj_message, &stream_list,
+			options & MAPI_OPTIONS_GETBESTBODY, NULL);
 	}
 
 	if (propsTagArray && propsTagArray->cValues) {
