@@ -235,6 +235,24 @@ LIBS=$save_libs
 AC_MSG_RESULT([$ac_cv_have_mocms])
 
 dnl ****************************
+dnl Check for PR_RECIPIENT_FLAGS
+dnl ****************************
+AC_MSG_CHECKING([libmapi provides PR_RECIPIENT_FLAGS])
+save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
+save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
+AC_LINK_IFELSE([AC_LANG_PROGRAM(
+	[[#include <libmapi/libmapi.h>]],
+	[[printf ("%d", PR_RECIPIENT_FLAGS)]])],
+	[AC_DEFINE(HAVE_PR_RECIPIENT_FLAGS, 1, [libmapi provides PR_RECIPIENT_FLAGS]) ac_cv_have_prf=yes],[ac_cv_have_prf=no])
+CFLAGS=$save_cflags
+LIBS=$save_libs
+AC_MSG_RESULT([$ac_cv_have_prf])
+
+if test "x${ac_cv_have_prf}" = "xno"; then
+	CFLAGS="$CFLAGS -DPR_RECIPIENT_FLAGS=PR_RECIPIENTS_FLAGS"
+fi
+
+dnl ****************************
 dnl Expose version information
 dnl ****************************
 API_VERSION=$EDS_PACKAGE

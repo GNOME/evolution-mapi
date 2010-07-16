@@ -312,7 +312,7 @@ exchange_mapi_cal_util_fetch_organizer (ECalComponent *comp, GSList **recip_list
 		set_SPropValue_proptag (&(recipient->in.req_lpProps[0]), PR_SEND_INTERNET_ENCODING, (gconstpointer )&val);
 
 		val = RECIP_SENDABLE | RECIP_ORGANIZER;
-		set_SPropValue_proptag (&(recipient->in.req_lpProps[1]), PR_RECIPIENTS_FLAGS, (gconstpointer )&val);
+		set_SPropValue_proptag (&(recipient->in.req_lpProps[1]), PR_RECIPIENT_FLAGS, (gconstpointer )&val);
 
 		val = olResponseNone;
 		set_SPropValue_proptag (&(recipient->in.req_lpProps[2]), PR_RECIPIENT_TRACKSTATUS, (gconstpointer )&val);
@@ -384,7 +384,7 @@ exchange_mapi_cal_util_fetch_recipients (ECalComponent *comp, GSList **recip_lis
 		set_SPropValue_proptag (&(recipient->in.req_lpProps[0]), PR_SEND_INTERNET_ENCODING, (gconstpointer )&val);
 
 		val = RECIP_SENDABLE | (!g_ascii_strcasecmp(str, org) ? RECIP_ORGANIZER : 0);
-		set_SPropValue_proptag (&(recipient->in.req_lpProps[1]), PR_RECIPIENTS_FLAGS, (gconstpointer )&val);
+		set_SPropValue_proptag (&(recipient->in.req_lpProps[1]), PR_RECIPIENT_FLAGS, (gconstpointer )&val);
 
 		param = icalproperty_get_first_parameter (att_prop, ICAL_PARTSTAT_PARAMETER);
 		val = get_trackstatus_from_partstat (icalparameter_get_partstat(param));
@@ -493,7 +493,7 @@ ical_attendees_from_props (icalcomponent *ical_comp, GSList *recipients, gboolea
 		else
 			continue;
 
-		flags = (const uint32_t *) get_SPropValue_SRow_data (&recip->out_SRow, PR_RECIPIENTS_FLAGS);
+		flags = (const uint32_t *) get_SPropValue_SRow_data (&recip->out_SRow, PR_RECIPIENT_FLAGS);
 
 		if (flags && (*flags & RECIP_ORGANIZER)) {
 			prop = icalproperty_new_organizer (val);
