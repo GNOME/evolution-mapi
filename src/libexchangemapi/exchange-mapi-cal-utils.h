@@ -58,17 +58,17 @@ struct cal_cbdata {
 	MAPIMeetingOptions meeting_type;
 	uint32_t appt_id;
 	uint32_t appt_seq;
-	const struct Binary_r *globalid;
-	const struct Binary_r *cleanglobalid;
+	struct Binary_r *globalid;
+	struct Binary_r *cleanglobalid;
 
 	uint32_t msgflags;
 	OlResponseStatus resp;
-	const gchar *username;
-	const gchar *useridtype;
-	const gchar *userid;
-	const gchar *ownername;
-	const gchar *owneridtype;
-	const gchar *ownerid;
+	gchar *username;
+	gchar *useridtype;
+	gchar *userid;
+	gchar *ownername;
+	gchar *owneridtype;
+	gchar *ownerid;
 
 	/* custom callback to get timezone from a backend */
 	gpointer get_tz_data;

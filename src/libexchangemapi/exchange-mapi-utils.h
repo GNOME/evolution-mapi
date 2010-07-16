@@ -80,4 +80,7 @@ gboolean exchange_mapi_utils_add_spropvalue_named_id (ExchangeMapiConnection *co
 
 uint32_t exchange_mapi_utils_push_crc32 (uint32_t crc32, uint8_t *bytes, uint32_t n_bytes);
 
+struct Binary_r *exchange_mapi_util_copy_binary_r (const struct Binary_r *bin);
+void exchange_mapi_util_free_binary_r (struct Binary_r *bin);
+
 #endif

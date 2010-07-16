@@ -26,7 +26,7 @@
 
 #include <glib.h>
 
-#include <libedata-cal/e-cal-backend-sync.h>
+#include <libedata-cal/e-cal-backend.h>
 
 G_BEGIN_DECLS
 
@@ -41,32 +41,18 @@ typedef struct _ECalBackendMAPIClass   ECalBackendMAPIClass;
 typedef struct _ECalBackendMAPIPrivate ECalBackendMAPIPrivate;
 
 struct _ECalBackendMAPI {
-	ECalBackendSync backend;
+	ECalBackend backend;
 
 	/* Private data */
 	ECalBackendMAPIPrivate *priv;
 };
 
 struct _ECalBackendMAPIClass {
-	ECalBackendSyncClass parent_class;
+	ECalBackendClass parent_class;
 };
 
 GType	e_cal_backend_mapi_get_type(void);
 
-const gchar *
-e_cal_backend_mapi_get_local_attachments_store (ECalBackendMAPI *cbmapi);
-
-const gchar *
-e_cal_backend_mapi_get_owner_name (ECalBackendMAPI *cbmapi);
-const gchar *
-e_cal_backend_mapi_get_owner_email (ECalBackendMAPI *cbmapi);
-
-const gchar *
-e_cal_backend_mapi_get_user_name (ECalBackendMAPI *cbmapi);
-const gchar *
-e_cal_backend_mapi_get_user_email (ECalBackendMAPI *cbmapi);
-
 G_END_DECLS
 
 #endif /* E_CAL_BACKEND_MAPI_H */
-

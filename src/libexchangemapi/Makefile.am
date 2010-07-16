@@ -31,7 +31,9 @@ libexchangemapi_1_0_la_SOURCES =		\
 	exchange-mapi-cal-recur-utils.c		\
 	exchange-mapi-cal-recur-utils.h		\
 	exchange-mapi-mail-utils.c		\
-	exchange-mapi-mail-utils.h
+	exchange-mapi-mail-utils.h		\
+	em-operation-queue.c			\
+	em-operation-queue.h
 
 
 libexchangemapi_1_0_la_LIBADD =			\
@@ -53,7 +55,8 @@ libexchangemapiinclude_HEADERS = 		\
 	exchange-mapi-cal-utils.h		\
 	exchange-mapi-cal-tz-utils.h		\
 	exchange-mapi-cal-recur-utils.h		\
-	exchange-mapi-mail-utils.h
+	exchange-mapi-mail-utils.h		\
+	em-operation-queue.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libexchangemapi-$(EVO_MAPI_API_VERSION).pc

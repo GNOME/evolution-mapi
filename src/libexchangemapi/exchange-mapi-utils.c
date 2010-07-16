@@ -1108,3 +1108,31 @@ exchange_mapi_utils_push_crc32 (uint32_t crc32, uint8_t *bytes, uint32_t n_bytes
 
 	return crc32;
 }
+
+/* copies a Binary_r, which should be freed with exchange_mapi_util_free_binary_r() */
+struct Binary_r *
+exchange_mapi_util_copy_binary_r (const struct Binary_r *bin)
+{
+	struct Binary_r *res;
+
+	if (!bin || !bin->cb)
+		return NULL;
+
+	res = g_new0 (struct Binary_r, 1);
+	res->cb = bin->cb;
+	res->lpb = g_new (uint8_t, res->cb);
+	memcpy (res->lpb, bin->lpb, res->cb);
+
+	return res;
+}
+
+/* frees Binary_r previously allocated by exchange_mapi_util_copy_binary_r() */
+void
+exchange_mapi_util_free_binary_r (struct Binary_r *bin)
+{
+	if (!bin)
+		return;
+
+	g_free (bin->lpb);
+	g_free (bin);
+}
