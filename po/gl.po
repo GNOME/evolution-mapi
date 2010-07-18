@@ -11,10 +11,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi-master-po-gl-77000.merged\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-13 03:09+0200\n"
-"PO-Revision-Date: 2010-07-13 03:05+0200\n"
+"POT-Creation-Date: 2010-07-18 19:13+0200\n"
+"PO-Revision-Date: 2010-07-18 19:13+0200\n"
 "Last-Translator: Fran Diéguez <frandieguez@ubuntu.com>\n"
-"Language-Team: Galician <gnome@g11n.net>\n"
+"Language-Team: Galician <gnome-gl-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -182,56 +182,56 @@ msgstr "Buscando"
 msgid "Downloading GAL entries from server…"
 msgstr "Descargando as entradas da GAL desde o servidor..."
 
-#: ../src/calendar/e-cal-backend-mapi.c:129
+#: ../src/calendar/e-cal-backend-mapi.c:131
 msgid "Uknown error"
 msgstr "Erro descoñecido"
 
-#: ../src/calendar/e-cal-backend-mapi.c:390
+#: ../src/calendar/e-cal-backend-mapi.c:329
 msgid "Failed to remove public folder"
 msgstr "Produciuse un fallo ao eliminar o cartafol público"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:435
+#: ../src/calendar/e-cal-backend-mapi.c:374
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Cargando os elementos no cartafol %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:780
-#: ../src/calendar/e-cal-backend-mapi.c:806
-#: ../src/calendar/e-cal-backend-mapi.c:852
-#: ../src/calendar/e-cal-backend-mapi.c:929
-#: ../src/calendar/e-cal-backend-mapi.c:952
+#: ../src/calendar/e-cal-backend-mapi.c:730
+#: ../src/calendar/e-cal-backend-mapi.c:756
+#: ../src/calendar/e-cal-backend-mapi.c:803
+#: ../src/calendar/e-cal-backend-mapi.c:882
+#: ../src/calendar/e-cal-backend-mapi.c:905
 #, c-format
 msgid "Failed to fetch changes from a server: %s"
 msgstr "Produciuse un erro ao obter os cambios do servidor: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:785
-#: ../src/calendar/e-cal-backend-mapi.c:811
-#: ../src/calendar/e-cal-backend-mapi.c:857
-#: ../src/calendar/e-cal-backend-mapi.c:934
-#: ../src/calendar/e-cal-backend-mapi.c:957
+#: ../src/calendar/e-cal-backend-mapi.c:735
+#: ../src/calendar/e-cal-backend-mapi.c:761
+#: ../src/calendar/e-cal-backend-mapi.c:808
+#: ../src/calendar/e-cal-backend-mapi.c:887
+#: ../src/calendar/e-cal-backend-mapi.c:910
 msgid "Failed to fetch changes from a server"
 msgstr "Produciuse un erro ao obter os cambios do servidor."
 
-#: ../src/calendar/e-cal-backend-mapi.c:1302
-#: ../src/calendar/e-cal-backend-mapi.c:1323
+#: ../src/calendar/e-cal-backend-mapi.c:1255
+#: ../src/calendar/e-cal-backend-mapi.c:1276
 msgid "Failed to fetch items from a server"
 msgstr "Produciuse un erro ao obter os cambios do servidor."
 
-#: ../src/calendar/e-cal-backend-mapi.c:1435
+#: ../src/calendar/e-cal-backend-mapi.c:1388
 msgid "Could not create thread for populating cache"
 msgstr "Non foi posíbel crear o fío de execución para encher a caché"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1500
+#: ../src/calendar/e-cal-backend-mapi.c:1453
 msgid "Could not create cache file"
 msgstr "Non foi posíbel crear o ficheiro da caché"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1769
-#: ../src/calendar/e-cal-backend-mapi.c:2252
+#: ../src/calendar/e-cal-backend-mapi.c:1749
+#: ../src/calendar/e-cal-backend-mapi.c:2235
 msgid "Failed to create item on a server"
 msgstr "Non foi posíbel autenticar no servidor Exchange MAPI."
 
-#: ../src/calendar/e-cal-backend-mapi.c:1894
+#: ../src/calendar/e-cal-backend-mapi.c:1873
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -239,11 +239,11 @@ msgstr ""
 "A capacidade para modificar as instancias únicas dunha cita recorrente aínda "
 "non está implementada. Non se realizou ningún cambio na cita do servidor."
 
-#: ../src/calendar/e-cal-backend-mapi.c:1999
+#: ../src/calendar/e-cal-backend-mapi.c:1979
 msgid "Failed to modify item on a server"
 msgstr "Produciuse un fallo ao modificar o elemento nun servidor"
 
-#: ../src/calendar/e-cal-backend-mapi.c:2469
+#: ../src/calendar/e-cal-backend-mapi.c:2483
 msgid "Failed to get Free/Busy data"
 msgstr "Produciuse un fallo ao obter os datos Libres/Ocupados"
 
@@ -549,7 +549,7 @@ msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3281
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3275
 msgid "All Public Folders"
 msgstr "Todos os cartafoles públicos"
 
