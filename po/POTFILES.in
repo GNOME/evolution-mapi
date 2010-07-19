@@ -2,7 +2,9 @@ src/account-setup-eplugin/exchange-mapi-account-listener.c
 src/account-setup-eplugin/exchange-mapi-account-setup.c
 src/account-setup-eplugin/exchange-mapi-account-settings.c
 src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml
+src/addressbook/e-book-backend-mapi.c
 src/addressbook/e-book-backend-mapi-gal.c
+src/addressbook/e-book-backend-mapi-utils.c
 src/calendar/e-cal-backend-mapi.c
 src/camel/camel-mapi-folder.c
 src/camel/camel-mapi-provider.c
