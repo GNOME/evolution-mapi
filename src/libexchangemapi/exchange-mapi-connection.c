@@ -28,6 +28,7 @@
 
 #include <glib/gi18n-lib.h>
 #include <camel/camel.h>
+#include <libedataserver/e-data-server-util.h>
 
 #include "exchange-mapi-connection.h"
 #include "exchange-mapi-folder.h"
@@ -35,7 +36,7 @@
 #include "exchange-mapi-mail-utils.h"
 #include <param.h>
 
-#define DEFAULT_PROF_PATH ".evolution/mapi-profiles.ldb"
+#define DEFAULT_PROF_NAME "mapi-profiles.ldb"
 
 static void register_connection (ExchangeMapiConnection *conn);
 static void unregister_connection (ExchangeMapiConnection *conn);
@@ -3461,6 +3462,7 @@ ensure_mapi_init_called (GError **perror)
 {
 	static gboolean called = FALSE;
 	static GStaticMutex mutex = G_STATIC_MUTEX_INIT;
+	const gchar *user_data_dir;
 	gchar *profpath;
 	enum MAPISTATUS ms;
 
@@ -3470,7 +3472,8 @@ ensure_mapi_init_called (GError **perror)
 		return TRUE;
 	}
 
-	profpath = g_build_filename (g_get_home_dir (), DEFAULT_PROF_PATH, NULL);
+	user_data_dir = e_get_user_data_dir ();
+	profpath = g_build_filename (user_data_dir, DEFAULT_PROF_NAME, NULL);
 
 	if (!g_file_test (profpath, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR)) {
 		/* Create a ProfileStore */

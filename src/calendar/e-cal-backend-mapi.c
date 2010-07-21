@@ -93,8 +93,6 @@ struct _ECalBackendMAPIPrivate {
 	/* timeout handler for syncing sendoptions */
 	guint			sendoptions_sync_timeout;
 
-	gchar			*local_attachments_store;
-
 	/* used exclusively for delta fetching */
 	guint			timeout_id;
 	GThread			*dthread;
@@ -136,17 +134,6 @@ mapi_error_to_edc_error (GError **perror, const GError *mapi_error, EDataCalCall
 }
 
 /* **** UTILITY FUNCTIONS **** */
-#if 0
-static const gchar *
-ecbm_get_local_attachments_store (ECalBackendMAPI *cbmapi)
-{
-	ECalBackendMAPIPrivate *priv;
-
-	priv = cbmapi->priv;
-
-	return priv->local_attachments_store;
-}
-#endif
 
 static const gchar *
 ecbm_get_owner_name (ECalBackendMAPI *cbmapi)
@@ -389,10 +376,14 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 	GSList *attachments = item_data->attachments;
 	ECalBackendMAPI *cbmapi	= data;
 	ECalBackendMAPIPrivate *priv = cbmapi->priv;
-	icalcomponent_kind kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
+	icalcomponent_kind kind;
 	gchar *tmp = NULL;
 	ECalComponent *cache_comp = NULL;
+	const gchar *cache_dir;
 	const bool *recurring;
+
+	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
+	cache_dir = e_cal_backend_get_cache_dir (E_CAL_BACKEND (cbmapi));
 
 //	exchange_mapi_debug_property_dump (array);
 
@@ -413,7 +404,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 	if (cache_comp == NULL) {
 		ECalComponent *comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, array,
 									streams, recipients, attachments,
-									priv->local_attachments_store, priv->default_zone);
+									cache_dir, priv->default_zone);
 
 		if (E_IS_CAL_COMPONENT (comp)) {
 			gchar *comp_str;
@@ -446,7 +437,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 				comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, array,
 									streams, recipients, attachments,
-									priv->local_attachments_store, priv->default_zone);
+									cache_dir, priv->default_zone);
 
 				e_cal_component_commit_sequence (comp);
 				modif_comp_str = e_cal_component_get_as_string (comp);
@@ -1150,10 +1141,14 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 	GSList *attachments = item_data->attachments;
 	ECalBackendMAPI *cbmapi	= E_CAL_BACKEND_MAPI (data);
 	ECalBackendMAPIPrivate *priv = cbmapi->priv;
-	icalcomponent_kind kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
+	icalcomponent_kind kind;
         ECalComponent *comp = NULL;
 	gchar *tmp = NULL;
 	const bool *recurring = NULL;
+	const gchar *cache_dir;
+
+	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
+	cache_dir = e_cal_backend_get_cache_dir (E_CAL_BACKEND (cbmapi));
 
 //	exchange_mapi_debug_property_dump (properties);
 
@@ -1179,7 +1174,7 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 	tmp = exchange_mapi_util_mapi_id_to_string (mid);
 	comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, properties,
 							streams, recipients, attachments,
-							priv->local_attachments_store, priv->default_zone);
+							cache_dir, priv->default_zone);
 	g_free (tmp);
 
 	if (E_IS_CAL_COMPONENT (comp)) {
@@ -1396,10 +1391,9 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, gboolean only_if_exists, const g
 	ECalBackendMAPIPrivate *priv;
 	ECalSourceType source_type;
 	ESource *esource;
-	const gchar *source = NULL, *fid = NULL;
+	const gchar *fid = NULL;
+	const gchar *cache_dir;
 	gchar *filename;
-	gchar *mangled_uri;
-	gint i;
 	gboolean res;
 	uint32_t olFolder = 0;
 
@@ -1423,17 +1417,14 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, gboolean only_if_exists, const g
 	switch (e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi))) {
 	case ICAL_VEVENT_COMPONENT:
 		source_type = E_CAL_SOURCE_TYPE_EVENT;
-		source = "calendar";
 		olFolder = olFolderCalendar;
 		break;
 	case ICAL_VTODO_COMPONENT:
 		source_type = E_CAL_SOURCE_TYPE_TODO;
-		source = "tasks";
 		olFolder = olFolderTasks;
 		break;
 	case ICAL_VJOURNAL_COMPONENT:
 		source_type = E_CAL_SOURCE_TYPE_JOURNAL;
-		source = "journal";
 		olFolder = olFolderNotes;
 		break;
 	default:
@@ -1447,7 +1438,11 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, gboolean only_if_exists, const g
 	}
 
 	/* Always create cache here */
-	priv->cache = e_cal_backend_cache_new (e_cal_backend_get_uri (E_CAL_BACKEND (cbmapi)), source_type);
+	cache_dir = e_cal_backend_get_cache_dir (backend);
+	filename = g_build_filename (cache_dir, "cache.xml", NULL);
+	priv->cache = e_cal_backend_cache_new (filename);
+	g_free (filename);
+
 	if (!priv->cache) {
 		g_mutex_unlock (priv->mutex);
 		g_propagate_error (perror, EDC_ERROR_EX (OtherError, _("Could not create cache file")));
@@ -1485,28 +1480,6 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, gboolean only_if_exists, const g
 
 	exchange_mapi_util_mapi_id_from_string (fid, &priv->fid);
 	priv->olFolder = olFolder;
-
-	/* Set the local attachment store */
-	mangled_uri = g_strdup (e_cal_backend_get_uri (E_CAL_BACKEND (cbmapi)));
-	/* mangle the URI to not contain invalid characters */
-	for (i = 0; i < strlen (mangled_uri); i++) {
-		switch (mangled_uri[i]) {
-		case ':' :
-		case '/' :
-			mangled_uri[i] = '_';
-		}
-	}
-
-	filename = g_build_filename (g_get_home_dir (),
-				     ".evolution/cache/", source,
-				     mangled_uri,
-				     G_DIR_SEPARATOR_S,
-				     NULL);
-
-	g_free (mangled_uri);
-	priv->local_attachments_store =
-		g_filename_to_uri (filename, NULL, NULL);
-	g_free (filename);
 
 	g_mutex_unlock (priv->mutex);
 
@@ -1656,11 +1629,14 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, gchar **calobj, gchar *
 	struct cal_cbdata cbdata = { 0 };
 	struct Binary_r globalid;
 	struct icaltimetype current;
+	const gchar *cache_dir;
 	GError *mapi_error = NULL;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
+
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
+	cache_dir = e_cal_backend_get_cache_dir (E_CAL_BACKEND (backend));
 
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (calobj != NULL && *calobj != NULL, InvalidArg);
@@ -1707,7 +1683,7 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, gchar **calobj, gchar *
 		exchange_mapi_cal_util_fetch_recipients (comp, &recipients);
 
 	if (e_cal_component_has_attachments (comp))
-		exchange_mapi_cal_util_fetch_attachments (comp, &attachments, priv->local_attachments_store);
+		exchange_mapi_cal_util_fetch_attachments (comp, &attachments, cache_dir);
 
 	cbdata.kind = kind;
 	cbdata.username = (gchar *) ecbm_get_user_name (cbmapi);
@@ -1854,12 +1830,15 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, const gchar *calobj, Ca
 	gboolean no_increment = FALSE;
 	icalproperty *prop;
 	struct icaltimetype current;
+	const gchar *cache_dir;
 	GError *mapi_error = NULL;
 
 	*old_object = *new_object = NULL;
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
-	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
+
+	kind = e_cal_backend_get_kind (backend);
+	cache_dir = e_cal_backend_get_cache_dir (backend);
 
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
@@ -1913,7 +1892,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, const gchar *calobj, Ca
 		exchange_mapi_cal_util_fetch_recipients (comp, &recipients);
 
 	if (e_cal_component_has_attachments (comp))
-		exchange_mapi_cal_util_fetch_attachments (comp, &attachments, priv->local_attachments_store);
+		exchange_mapi_cal_util_fetch_attachments (comp, &attachments, cache_dir);
 
 	e_cal_component_get_uid (comp, &uid);
 //	rid = e_cal_component_get_recurid_as_string (comp);
@@ -2119,11 +2098,14 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, GLi
 	ECalBackendMAPIPrivate *priv;
 	icalcomponent_kind kind;
 	icalcomponent *icalcomp;
+	const gchar *cache_dir;
 	GError *mapi_error = NULL;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
+
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
+	cache_dir = e_cal_backend_get_cache_dir (E_CAL_BACKEND (backend));
 
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
@@ -2171,7 +2153,7 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, GLi
 			}
 
 			if (e_cal_component_has_attachments (comp))
-				exchange_mapi_cal_util_fetch_attachments (comp, &attachments, priv->local_attachments_store);
+				exchange_mapi_cal_util_fetch_attachments (comp, &attachments, cache_dir);
 
 			cbdata.kind = kind;
 			cbdata.comp = comp;
@@ -3593,11 +3575,6 @@ ecbm_finalize (GObject *object)
 	if (priv->owner_email) {
 		g_free (priv->owner_email);
 		priv->owner_email = NULL;
-	}
-
-	if (priv->local_attachments_store) {
-		g_free (priv->local_attachments_store);
-		priv->local_attachments_store = NULL;
 	}
 
 	if (priv->sendoptions_sync_timeout) {

@@ -29,8 +29,6 @@
 /* This definition should be in-sync with the definition in camel-mapi-store.c */
 #define EXCHANGE_MAPI_PASSWORD_COMPONENT "ExchangeMAPI"
 
-#define DEFAULT_PROF_PATH ".evolution/mapi-profiles.ldb"
-
 #define MAPI_URI_PREFIX   "mapi://" 
 #define MAPI_PREFIX_LENGTH 7
 

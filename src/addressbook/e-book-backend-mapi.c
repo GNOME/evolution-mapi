@@ -126,32 +126,6 @@ static const struct field_element_mapping {
 	/* { E_CONTACT_CATEGORIES, } */
 	};
 
-static gchar *
-ebbm_get_filename_from_uri (const gchar *uri, const gchar *file)
-{
-	gchar *mangled_uri, *filename;
-	gint i;
-
-	/* mangle the URI to not contain invalid characters */
-	mangled_uri = g_strdup (uri);
-	for (i = 0; i < strlen (mangled_uri); i++) {
-		switch (mangled_uri[i]) {
-		case ':' :
-		case '/' :
-			mangled_uri[i] = '_';
-		}
-	}
-
-	/* generate the file name */
-	filename = g_build_filename (g_get_home_dir (), ".evolution", "cache", "addressbook",
-				     mangled_uri, file, NULL);
-
-	/* free memory */
-	g_free (mangled_uri);
-
-	return filename;
-}
-
 static gboolean
 ebbm_get_cache_time (EBookBackendMAPI *ebma, glong *cache_seconds)
 {
@@ -406,6 +380,7 @@ ebbm_load_source (EBookBackendMAPI *ebma, ESource *source, gboolean only_if_exis
 {
 	EBookBackendMAPIPrivate *priv = ebma->priv;
 	const gchar *offline;
+	const gchar *cache_dir;
 	gchar *summary_file_name;
 
 	if (e_book_backend_is_loaded (E_BOOK_BACKEND (ebma)))
@@ -421,7 +396,8 @@ ebbm_load_source (EBookBackendMAPI *ebma, ESource *source, gboolean only_if_exis
 	g_free (priv->profile);
 	priv->profile = g_strdup (e_source_get_property (source, "profile"));
 
-	summary_file_name = ebbm_get_filename_from_uri (priv->book_uri, "cache.summary");
+	cache_dir = e_book_backend_get_cache_dir (E_BOOK_BACKEND (ebma));
+	summary_file_name = g_build_filename (cache_dir, "cache.summary", NULL);
 	if (priv->summary)
 		g_object_unref (priv->summary);
 	priv->summary = e_book_backend_summary_new (summary_file_name, SUMMARY_FLUSH_TIMEOUT_SECS * 1000);
@@ -432,7 +408,7 @@ ebbm_load_source (EBookBackendMAPI *ebma, ESource *source, gboolean only_if_exis
 
 	if (priv->cache)
 		g_object_unref (priv->cache);
-	priv->cache = e_book_backend_cache_new (priv->book_uri);
+	priv->cache = e_book_backend_cache_new (summary_file_name);
 
 	g_free (summary_file_name);
 
@@ -459,6 +435,7 @@ static void
 ebbm_remove (EBookBackendMAPI *ebma, GError **error)
 {
 	EBookBackendMAPIPrivate *priv;
+	const gchar *cache_dir;
 	gchar *filename;
 
 	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
@@ -482,12 +459,14 @@ ebbm_remove (EBookBackendMAPI *ebma, GError **error)
 		priv->cache = NULL;
 	}
 
-	filename = ebbm_get_filename_from_uri (priv->book_uri, "cache.summary");
+	cache_dir = e_book_backend_get_cache_dir (E_BOOK_BACKEND (ebma));
+
+	filename = g_build_filename (cache_dir, "cache.summary", NULL);
 	if (g_file_test (filename, G_FILE_TEST_EXISTS))
 			g_unlink (filename);
 	g_free (filename);
 
-	filename = ebbm_get_filename_from_uri (priv->book_uri, "cache.xml");
+	filename = g_build_filename (cache_dir, "cache.xml", NULL);
 	if (g_file_test (filename, G_FILE_TEST_EXISTS))
 			g_unlink (filename);
 	g_free (filename);

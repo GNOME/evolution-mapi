@@ -28,8 +28,6 @@
 #include <libmapi/libmapi.h>
 #include <exchange-mapi-connection.h>
 
-#define PATH_FOLDER ".evolution/mail/mapi"
-
 /* Standard GObject macros */
 #define CAMEL_TYPE_MAPI_FOLDER \
 	(camel_mapi_folder_get_type ())

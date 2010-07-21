@@ -967,8 +967,6 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 	return comp;
 }
 
-#define TEMP_ATTACH_STORE ".evolution/cache/tmp"
-
 struct fetch_camel_cal_data {
 	icalcomponent_kind kind;
 	icalproperty_method method;
@@ -982,13 +980,12 @@ fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 	ECalComponent *comp = NULL;
 	mapi_id_t mid = 0;
 	icalcomponent *icalcomp = NULL;
-	gchar *str = NULL, *smid = NULL, *filename, *fileuri;
+	gchar *str = NULL, *smid = NULL, *fileuri;
 
 	g_return_val_if_fail (item_data != NULL, FALSE);
 	g_return_val_if_fail (fccd != NULL, FALSE);
 
-	filename = g_build_filename (g_get_home_dir (), TEMP_ATTACH_STORE, NULL);
-	fileuri = g_filename_to_uri (filename, NULL, NULL);
+	fileuri = g_filename_to_uri (g_get_tmp_dir (), NULL, NULL);
 
 	if (!comp) {
 		/* read component from a mail, if not found in the calendar */
@@ -1007,7 +1004,6 @@ fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 	}
 
 	g_free (fileuri);
-	g_free (filename);
 
 	icalcomp = e_cal_util_new_top_level ();
 	icalcomponent_set_method (icalcomp, fccd->method);
