@@ -276,7 +276,7 @@ AC_SUBST_FILE(EVO_PLUGIN_RULE)
 dnl *******************
 dnl Special directories
 dnl *******************
-plugindir=`$PKG_CONFIG --variable=plugindir evolution-plugin`
+plugindir=`$PKG_CONFIG --variable=plugindir $EVO_PLUGIN_PACKAGE`
 AC_SUBST(plugindir)
 
 extensiondir=`$PKG_CONFIG --variable=extensiondir evolution-data-server-$EDS_PACKAGE`
