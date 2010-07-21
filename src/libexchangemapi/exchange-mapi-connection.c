@@ -1119,7 +1119,7 @@ cleanup:
 }
 
 gboolean
-exchange_mapi_connection_fetch_gal (ExchangeMapiConnection *conn, BuildReadPropsCB build_props, gpointer brp_data, FetchGALCallback cb, gpointer data, GError **perror)
+exchange_mapi_connection_fetch_gal (ExchangeMapiConnection *conn, struct mapi_SRestriction *restrictions, BuildReadPropsCB build_props, gpointer brp_data, FetchGALCallback cb, gpointer data, GError **perror)
 {
 	struct SPropTagArray	*propsTagArray;
 	struct SRowSet		*aRowSet;
@@ -1157,8 +1157,8 @@ exchange_mapi_connection_fetch_gal (ExchangeMapiConnection *conn, BuildReadProps
 	ulFlags = TABLE_START;
 	while (ms == MAPI_E_SUCCESS) {
 		aRowSet = NULL;
-		/* fetch per 10 items */
-		ms = GetGALTable (priv->session, propsTagArray, &aRowSet, 10, ulFlags);
+		/* fetch per 100 items */
+		ms = GetGALTable (priv->session, propsTagArray, &aRowSet, 100, ulFlags);
 		if ((!aRowSet) || (!(aRowSet->aRow)) || ms != MAPI_E_SUCCESS) {
 			break;
 		}

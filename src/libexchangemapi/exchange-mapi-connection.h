@@ -175,7 +175,7 @@ gboolean		exchange_mapi_connection_fetch_items (ExchangeMapiConnection *conn, ma
 					FetchCallback cb, gpointer data,
 					guint32 options, GError **perror);
 
-gboolean		exchange_mapi_connection_fetch_gal (ExchangeMapiConnection *conn,
+gboolean		exchange_mapi_connection_fetch_gal (ExchangeMapiConnection *conn, struct mapi_SRestriction *restrictions,
 					BuildReadPropsCB build_props, gpointer brp_data,
 					FetchGALCallback cb, gpointer data, GError **perror);
 

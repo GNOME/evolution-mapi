@@ -21,34 +21,34 @@
  *
  */
 
-#ifndef __E_BOOK_BACKEND_MAPIGAL_H__
-#define __E_BOOK_BACKEND_MAPIGAL_H__
+#ifndef __E_BOOK_BACKEND_MAPI_GAL_H__
+#define __E_BOOK_BACKEND_MAPI_GAL_H__
 
-#include <libedata-book/e-book-backend.h>
-#include <libedata-book/e-book-backend-sync.h>
-#include "exchange-mapi-connection.h"
-#include "exchange-mapi-defs.h"
-#include "exchange-mapi-utils.h"
+#include "e-book-backend-mapi.h"
+
+G_BEGIN_DECLS
+
+#define E_TYPE_BOOK_BACKEND_MAPI_GAL        (e_book_backend_mapi_gal_get_type ())
+#define E_BOOK_BACKEND_MAPI_GAL(o)          (G_TYPE_CHECK_INSTANCE_CAST ((o), E_TYPE_BOOK_BACKEND_MAPI_GAL, EBookBackendMAPIGAL))
+#define E_BOOK_BACKEND_MAPI_GAL_CLASS(k)    (G_TYPE_CHECK_CLASS_CAST ((k), E_TYPE_BOOK_BACKEND_MAPI_GAL, EBookBackendMAPIGALClass))
+#define E_IS_BOOK_BACKEND_MAPI_GAL(o)       (G_TYPE_CHECK_INSTANCE_TYPE ((o), E_TYPE_BOOK_BACKEND_MAPI_GAL))
+#define E_IS_BOOK_BACKEND_MAPI_GAL_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), E_TYPE_BOOK_BACKEND_MAPI_GAL))
 
 typedef struct _EBookBackendMAPIGALPrivate EBookBackendMAPIGALPrivate;
 
 typedef struct {
-	EBookBackend             parent_object;
+	EBookBackendMAPI            parent_object;
 	EBookBackendMAPIGALPrivate *priv;
 } EBookBackendMAPIGAL;
 
 typedef struct {
-	EBookBackendClass parent_class;
+	EBookBackendMAPIClass parent_class;
 } EBookBackendMAPIGALClass;
 
 EBookBackend *e_book_backend_mapi_gal_new      (void);
-GType       e_book_backend_mapi_gal_get_type (void);
+GType         e_book_backend_mapi_gal_get_type (void);
 
-#define E_TYPE_BOOK_BACKEND_MAPIGAL        (e_book_backend_mapi_gal_get_type ())
-#define E_BOOK_BACKEND_MAPIGAL(o)          (G_TYPE_CHECK_INSTANCE_CAST ((o), E_TYPE_BOOK_BACKEND_MAPIGAL, EBookBackendMAPIGAL))
-#define E_BOOK_BACKEND_MAPIGAL_CLASS(k)    (G_TYPE_CHECK_CLASS_CAST ((k), E_TYPE_BOOK_BACKEND_MAPIGAL, EBookBackendMAPIGALClass))
-#define E_IS_BOOK_BACKEND_MAPIGAL(o)       (G_TYPE_CHECK_INSTANCE_TYPE ((o), E_TYPE_BOOK_BACKEND_MAPIGAL))
-#define E_IS_BOOK_BACKEND_MAPIGAL_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), E_TYPE_BOOK_BACKEND_MAPIGAL))
+G_END_DECLS
 
-#endif /* __E_BOOK_BACKEND_MAPIGAL_H__ */
+#endif /* __E_BOOK_BACKEND_MAPI_GAL_H__ */
 
