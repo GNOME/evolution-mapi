@@ -3363,7 +3363,7 @@ exchange_mapi_connection_events_init (ExchangeMapiConnection *conn, GError **per
 	#ifdef HAVE_CORRECT_REGISTERNOTIFICATION
 	ms = RegisterNotification (priv->session, 0);
 	#else
-	res = MAPI_E_NOT_IMPLEMENTED;
+	ms = MAPI_E_INTERFACE_NO_SUPPORT;
 	#endif
 	UNLOCK ();
 
