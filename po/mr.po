@@ -3,13 +3,13 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Sandeep Shedmake <sandeep.shedmake@gmail.com>, 2009.
-# Sandeep Shedmake <sshedmak@redhat.com>, 2009.
+# Sandeep Shedmake <sshedmak@redhat.com>, 2009, 2010.
 msgid ""
 msgstr ""
 "Project-Id-Version: mr\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
-"POT-Creation-Date: 2009-09-08 06:24+0000\n"
-"PO-Revision-Date: 2009-09-14 11:12+0530\n"
+"POT-Creation-Date: 2010-07-17 09:32+0000\n"
+"PO-Revision-Date: 2010-07-22 15:34+0530\n"
 "Last-Translator: Sandeep Shedmake <sshedmak@redhat.com>\n"
 "Language-Team: Marathi <fedora-trans-mr@redhat.com>\n"
 "MIME-Version: 1.0\n"
@@ -18,8 +18,8 @@ msgstr ""
 "X-Generator: KBabel 1.11.4\n"
 "Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:632
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:233
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "%s@%s करीता पासवर्ड प्रविष्ट करा"
@@ -28,121 +28,140 @@ msgstr "%s@%s करीता पासवर्ड प्रविष्ट क
 #. using GtkEntryCompletion in the username gtkentry. But plugins
 #. as of now does not have access to it
 #. TODO : Fix strings
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:138
 msgid "Select username"
 msgstr "वापरकर्त्याचे नाव नीवडा"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:148
 msgid "Full name"
 msgstr "पूर्ण नाव"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:153
 msgid "User name"
 msgstr "वापरकर्त्याचे नाव"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:222
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
 msgstr "सर्व्हर, वापरकर्तानाव व क्षेत्र नाव रिकामे असू शकत नाही. कृपया योग्य मूल्य प्रविष्ट करा."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:260
 msgid "Authentication finished successfully."
 msgstr "ओळख पटवणे यशस्वीरित्या पूर्ण झाले."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:266
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:276
 msgid "Authentication failed."
 msgstr "ओळख पटवणे अपयशी."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:331
 msgid "_Domain name:"
 msgstr "क्षेत्र नाव (_D):"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:341
 msgid "_Authenticate"
 msgstr "ओळख पटवा (_A)"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:479
 msgid "Personal Folders"
 msgstr "वैयक्तिक फोल्डर"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:599
 msgid "_Location:"
 msgstr "ठिकाण (_L):"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
-msgid "_Folder size"
-msgstr "फोल्डर आकार (_F)"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:101
 msgid "Folder"
 msgstr "फोल्डर"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:106
 msgid "Size"
 msgstr "आकार"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:126
 msgid "Unable to retrieve folder size information"
 msgstr "फोल्डर आकार विषयी माहिती प्राप्त करण्यास अशक्य"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:147
 msgid "Folder Size"
 msgstr "फोल्डरचे आकार"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:156
 msgid "Fetching folder list ..."
 msgstr "फोल्डर सूची प्राप्त करत आहे ..."
 
 #. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:275
 msgid "Miscellaneous"
 msgstr "मिश्र"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:288
 msgid "View the size of all Exchange folders"
 msgstr "सर्व एक्सचेंज फोल्डर्सच्या आकाराचे दृष्य"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:290
 msgid "Folders Size"
 msgstr "फोल्डर्स्चे आकार"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:301
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
 msgstr "एक्सचेंज संरचना"
 
-#: ../src/calendar/e-cal-backend-mapi.c:115
-#: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:472
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:310
+msgid "Folder size"
+msgstr "फोल्डर आकार"
+
+#. To translators : This is used to cache the downloaded contacts from GAL.
+#. First %d : Number of contacts cached till now.
+#. Second %d : Total number of contacts which need to be cached.
+#. So (%d/%d) displays the progress.
+#. Example: Caching the GAL entries (1200/50000)...
+#.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:221
+#, c-format
+msgid "Caching the GAL entries (%d/%d)... "
+msgstr "GAL नोंद (%d/%d) कॅश करत आहे... "
+
+#. To translators : Here Evolution MAPI downloads the entries from the GAL server
+#: ../src/addressbook/e-book-backend-mapi-gal.c:793
+msgid "Downloading GAL entries from server..."
+msgstr "सर्व्हर पासून GAL नोंद डाऊनलोड करत आहे..."
+
+#: ../src/calendar/e-cal-backend-mapi.c:191
+#: ../src/calendar/e-cal-backend-mapi.c:1218
+#: ../src/camel/camel-mapi-store.c:570
 msgid "Authentication failed"
 msgstr "ओळख पटवणे अपयशी"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:391
+#: ../src/calendar/e-cal-backend-mapi.c:467
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "फोल्डर %s अंतर्गत घटक दाखल करत आहे"
 
 #. FIXME: String : We need to restart evolution-data-server
-#: ../src/calendar/e-cal-backend-mapi.c:581
-#: ../src/calendar/e-cal-backend-mapi.c:592
-#: ../src/calendar/e-cal-backend-mapi.c:618
+#: ../src/calendar/e-cal-backend-mapi.c:699
+#: ../src/calendar/e-cal-backend-mapi.c:710
+#: ../src/calendar/e-cal-backend-mapi.c:738
+#: ../src/calendar/e-cal-backend-mapi.c:800
+#: ../src/calendar/e-cal-backend-mapi.c:810
 msgid "Error fetching changes from the server."
 msgstr "सर्व्हर पासून बद प्राप्त करतेवेळी त्रुटी आढळली."
 
-#: ../src/calendar/e-cal-backend-mapi.c:973
-#: ../src/calendar/e-cal-backend-mapi.c:983
-#: ../src/calendar/e-cal-backend-mapi.c:1088
-#: ../src/calendar/e-cal-backend-mapi.c:1170
+#: ../src/calendar/e-cal-backend-mapi.c:1138
+#: ../src/calendar/e-cal-backend-mapi.c:1148
+#: ../src/calendar/e-cal-backend-mapi.c:1253
+#: ../src/calendar/e-cal-backend-mapi.c:1335
 msgid "Could not create cache file"
 msgstr "कॅशे फाइल बनविण्यास अशक्य"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1099
+#: ../src/calendar/e-cal-backend-mapi.c:1264
 msgid "Could not create thread for populating cache"
 msgstr "कॅशे करीता थ्रेड बनविण्यास अशक्य"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1513
+#: ../src/calendar/e-cal-backend-mapi.c:1698
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -150,37 +169,36 @@ msgstr ""
 "पुनराकृत भेट घटना संपादीत करण्याकरीता सर्मथन अजूनही लागू केले गेले नाही. सर्व्हर वरील भेट "
 "करीता बदल लागू केले गेले नाही."
 
-#: ../src/camel/camel-mapi-folder.c:478
+#: ../src/camel/camel-mapi-folder.c:493
 #, c-format
-#| msgid "Fetching summary information for new messages in %s"
 msgid "Updating local summary cache for new messages in %s"
 msgstr "%s अंतर्गत नवीन संदेश करीता सारांश माहिती सुधारीत करत आहे"
 
-#: ../src/camel/camel-mapi-folder.c:702
+#: ../src/camel/camel-mapi-folder.c:723
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "%s करीता सर्व्हरपासून संदेश IDs प्राप्त करत आहे"
 
-#: ../src/camel/camel-mapi-folder.c:724
+#: ../src/camel/camel-mapi-folder.c:745
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "%s मधील कॅशे पासून रद्द केलेले संदेश काढून टाकत आहे"
 
-#: ../src/camel/camel-mapi-folder.c:1029 ../src/camel/camel-mapi-folder.c:1643
-#: ../src/camel/camel-mapi-folder.c:1651
+#. TODO : Check for online state
+#: ../src/camel/camel-mapi-folder.c:1013
+msgid "Fetching summary information for new messages in"
+msgstr "अंतर्गत नवीन संदेशकरीता सारांश माहिती प्राप्त करत आहे"
+
+#: ../src/camel/camel-mapi-folder.c:1115 ../src/camel/camel-mapi-folder.c:2005
+#: ../src/camel/camel-mapi-folder.c:2013
 msgid "This message is not available in offline mode."
 msgstr "हे संदेश ऑफलाइन पद्धतीत उपलब्ध नाही."
 
-#: ../src/camel/camel-mapi-folder.c:1038
-#, c-format
-msgid "Fetching summary information for new messages in %s"
-msgstr "%s अंतर्गत नवीन संदेश करीता सारांश माहिती प्राप्त करत आहे"
-
-#: ../src/camel/camel-mapi-folder.c:1048
+#: ../src/camel/camel-mapi-folder.c:1128
 msgid "Fetching items failed"
 msgstr "घटक प्राप्त करणे अशक्य"
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1969
 #, c-format
 msgid ""
 "Cannot get message: %s\n"
@@ -189,35 +207,33 @@ msgstr ""
 "संदेश प्राप्त करणे अशक्य: %s\n"
 "  %s"
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1969
 msgid "No such message"
 msgstr "यानुरूप संदेश आढळले नाही"
 
-#: ../src/camel/camel-mapi-folder.c:1619
+#: ../src/camel/camel-mapi-folder.c:1981
 msgid "Message fetching cancelled by user."
 msgstr "वापरकर्ता द्वारे संदेश प्राप्त करणे रद्द झाले."
 
-#: ../src/camel/camel-mapi-folder.c:1626
+#: ../src/camel/camel-mapi-folder.c:1988
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "संदेश %s प्राप्त करणे अशक्य: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1672 ../src/camel/camel-mapi-folder.c:1684
+#: ../src/camel/camel-mapi-folder.c:2036 ../src/camel/camel-mapi-folder.c:2045
 msgid "Could not get message"
 msgstr "संदेश प्राप्त करणे अशक्य"
 
-#: ../src/camel/camel-mapi-folder.c:1964
+#: ../src/camel/camel-mapi-folder.c:2331
 #, c-format
-#| msgid "Cannot create new folder `%s'"
 msgid "Cannot append message to folder '%s'"
 msgstr "फोल्डर `%s' करीता संदेश समाविष्ट करणे अशक्य"
 
-#: ../src/camel/camel-mapi-folder.c:1971
-#, c-format
-msgid "Offline. '%s'"
-msgstr "ऑफलाइन. '%s'"
+#: ../src/camel/camel-mapi-folder.c:2338
+msgid "Offline."
+msgstr "ऑफलाइन."
 
-#: ../src/camel/camel-mapi-folder.c:2091
+#: ../src/camel/camel-mapi-folder.c:2458
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s करीता सारांश दाखल करणे अशक्य"
@@ -261,26 +277,24 @@ msgstr "पासवर्ड"
 
 #: ../src/camel/camel-mapi-provider.c:94
 msgid "This option will connect to the Openchange server using a plaintext password."
-msgstr ""
-"पाठ्य स्वरूप पासवर्डाचे वापर करून हा पर्याय Openchange सर्व्हरशी जुळवणी स्थापीत "
-"करतो."
+msgstr "पाठ्य स्वरूप पासवर्डाचे वापर करून हा पर्याय Openchange सर्व्हरशी जुळवणी स्थापीत करतो."
 
-#: ../src/camel/camel-mapi-store.c:61
+#: ../src/camel/camel-mapi-store.c:63
 msgid "Favorites"
 msgstr "पसंतीचे"
 
-#: ../src/camel/camel-mapi-store.c:62
+#: ../src/camel/camel-mapi-store.c:64
 msgid "All Public Folders"
 msgstr "सर्व सार्वजणीक फोल्डर"
 
-#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
+#: ../src/camel/camel-mapi-store.c:315 ../src/camel/camel-mapi-transport.c:128
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI सर्व्हर %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
+#: ../src/camel/camel-mapi-store.c:319 ../src/camel/camel-mapi-transport.c:130
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "%2$s वरील %1$s करीता Exchange MAPI सेवा"
@@ -289,45 +303,46 @@ msgstr "%2$s वरील %1$s करीता Exchange MAPI सेवा"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:315
+#: ../src/camel/camel-mapi-store.c:357
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%2$s@%3$s करीता कृपया %1$s MAPI पासवर्ड प्रविष्ट करा"
 
-#: ../src/camel/camel-mapi-store.c:328
+#: ../src/camel/camel-mapi-store.c:370
 msgid "You did not enter a password."
 msgstr "तुम्ही पासवर्ड प्रविष्ट केला नाही."
 
-#: ../src/camel/camel-mapi-store.c:336
+#: ../src/camel/camel-mapi-store.c:378
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server."
 msgstr "Exchange MAPI सर्व्हर वर ओळख पटवणे अशक्य."
 
-#: ../src/camel/camel-mapi-store.c:456
+#: ../src/camel/camel-mapi-store.c:554
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "MAPI फोल्डर ऑफलाइन पद्धतीत बनविणे अशक्य."
 
-#: ../src/camel/camel-mapi-store.c:461
+#: ../src/camel/camel-mapi-store.c:559
 #, c-format
 msgid "Cannot create new folder `%s'"
 msgstr "नवीन फोल्डर `%s' बनविणे शक्य नाही"
 
-#: ../src/camel/camel-mapi-store.c:670
+#: ../src/camel/camel-mapi-store.c:743
 #, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr "MAPI फोल्डर `%s' चे पुन्ह नामांकन शक्य नाही. फोल्डर अस्तित्वात नाही."
 
-#: ../src/camel/camel-mapi-store.c:681
+#: ../src/camel/camel-mapi-store.c:754
 #, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr "MAPI मुलभूत फोल्डरचे `%s' पासून `%s' असे पुन्हनामांकन शक्य नाही."
 
-#: ../src/camel/camel-mapi-store.c:699
+#: ../src/camel/camel-mapi-store.c:778 ../src/camel/camel-mapi-store.c:793
+#: ../src/camel/camel-mapi-store.c:844
 #, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgstr "MAPI फोल्डरचे `%s' पासून `%s' असे पुन्हनामांकन अशक्यी"
 
-#: ../src/camel/camel-mapi-store.c:1227
+#: ../src/camel/camel-mapi-store.c:1383
 msgid "Folder list not available in offline mode."
 msgstr "ऑफलाइल पद्धतीत फोल्डर यादी उपलब्ध नाही."
 
