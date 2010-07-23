@@ -81,7 +81,7 @@ e_mapi_error_quark (void)
 void
 make_mapi_error (GError **perror, const gchar *context, enum MAPISTATUS mapi_status)
 {
-	const gchar *error_msg = NULL;
+	const gchar *error_msg = NULL, *status_name;
 	gchar *to_free = NULL;
 	GError *error;
 
@@ -114,7 +114,10 @@ make_mapi_error (GError **perror, const gchar *context, enum MAPISTATUS mapi_sta
 	#undef err
 
 	default:
-		to_free = g_strdup_printf (_("MAPI error %s (0x%x) occurred"), mapi_get_errstr (mapi_status), mapi_status);
+		status_name = mapi_get_errstr (mapi_status);
+		if (!status_name)
+			status_name = "";
+		to_free = g_strdup_printf (_("MAPI error %s (0x%x) occurred"), status_name, mapi_status);
 		error_msg = to_free;
 	}
 
@@ -327,7 +330,8 @@ exchange_mapi_connection_find (const gchar *profile)
 
 
 /* Specifies READ/WRITE sizes to be used while handling normal streams */
-#define STREAM_MAX_READ_SIZE    0x1000
+#define STREAM_MAX_READ_SIZE    0x8000
+#define STREAM_MAX_READ_SIZE_DF 0x1000
 #define STREAM_MAX_WRITE_SIZE   0x1000
 #define STREAM_ACCESS_READ      0x0000
 #define STREAM_ACCESS_WRITE     0x0001
@@ -462,13 +466,88 @@ exchange_mapi_connection_connected (ExchangeMapiConnection *conn)
 	return priv->session != NULL;
 }
 
+/* proptag should be already set for this stream */
+static void
+set_stream_value (ExchangeMAPIStream *stream, const uint32_t *cpid, const guint8 *buf_data, guint32 buf_len, gboolean converted)
+{
+	g_return_if_fail (stream != NULL);
+
+	stream->value = NULL;
+
+	if (!converted && stream->proptag == PR_HTML && ((cpid && (*cpid == 1200 || *cpid == 1201)) || (buf_len > 5 && buf_data[3] == '\0'))) {
+		/* this is special, get the CPID and transform to utf8 when it's utf16 */
+		gsize written = 0;
+		gchar *in_utf8;
+
+		in_utf8 = g_convert ((const gchar *) buf_data, buf_len, "UTF-8", "UTF-16", NULL, &written, NULL);
+		if (in_utf8 && written > 0) {
+			stream->value = g_byte_array_sized_new (written + 1);
+			g_byte_array_append (stream->value, (const guint8 *) in_utf8, written);
+
+			if (in_utf8[written] != '\0')
+				g_byte_array_append (stream->value, (const guint8 *) "", 1);
+		}
+	}
+
+	if (!stream->value) {
+		stream->value = g_byte_array_sized_new (buf_len);
+		g_byte_array_append (stream->value, buf_data, buf_len);
+	}
+}
+
+/* returns whether found that property */
 static gboolean
-exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32_t *cpid, uint32_t proptag, GSList **stream_list, GError **perror)
+add_stream_from_properties (GSList **stream_list, struct mapi_SPropValue_array *properties, uint32_t proptag, const uint32_t *cpid)
+{
+	if (exchange_mapi_util_find_stream (*stream_list, proptag)) {
+		return TRUE;
+	} else if (properties) {
+		gconstpointer data;
+
+		data = exchange_mapi_util_find_array_propval (properties, proptag);
+		if (data) {
+			const struct SBinary_short *bin;
+			const gchar *str;
+			ExchangeMAPIStream *stream;
+
+			switch (proptag & 0xFFFF) {
+			case PT_BINARY:
+				bin = data;
+				if (bin->cb) {
+					stream = g_new0 (ExchangeMAPIStream, 1);
+
+					stream->proptag = proptag;
+					set_stream_value (stream, cpid, bin->lpb, bin->cb, FALSE);
+
+					*stream_list = g_slist_append (*stream_list, stream);
+				}
+
+				return TRUE;
+			case PT_STRING8:
+			case PT_UNICODE:
+				str = data;
+				stream = g_new0 (ExchangeMAPIStream, 1);
+
+				stream->proptag = proptag;
+				set_stream_value (stream, cpid, (const guint8 *) str, strlen (str) + 1, FALSE);
+
+				*stream_list = g_slist_append (*stream_list, stream);
+
+				return TRUE;
+			}
+		}
+	}
+
+	return FALSE;
+}
+
+static gboolean
+exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32_t *cpid, uint32_t proptag, GSList **stream_list, struct mapi_SPropValue_array *properties, GError **perror)
 {
 	enum MAPISTATUS	ms;
 	TALLOC_CTX	*mem_ctx;
 	mapi_object_t	obj_stream;
-	uint16_t	cn_read = 0;
+	uint16_t	cn_read = 0, max_read;
 	uint32_t	off_data = 0;
 	uint8_t		*buf_data = NULL;
 	uint32_t	buf_size = 0;
@@ -481,6 +560,9 @@ exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32
 	/* if compressed RTF stream, then return */
 	if (proptag == PR_RTF_COMPRESSED)
 		return FALSE;
+
+	if (add_stream_from_properties (stream_list, properties, proptag, cpid))
+		return TRUE;
 
 	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 	g_debug("Attempt to read stream for proptag 0x%08X ", proptag);
@@ -507,9 +589,33 @@ exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32
 	if (!buf_data)
 		goto cleanup;
 
+	/* determine max_read first, to read by chunks as long as possible */
+	max_read = buf_size > STREAM_MAX_READ_SIZE ? STREAM_MAX_READ_SIZE : buf_size;
+	do {
+		ms = ReadStream (&obj_stream, (buf_data) + off_data, max_read, &cn_read);
+		if (ms == MAPI_E_SUCCESS) {
+			if (cn_read == 0) {
+				done = TRUE;
+			} else {
+				off_data += cn_read;
+				if (off_data >= buf_size)
+					done = TRUE;
+			}
+			break;
+		}
+
+		if (ms == 0x2c80)
+			max_read = max_read >> 1;
+		else
+			max_read = STREAM_MAX_READ_SIZE_DF;
+
+		if (max_read < STREAM_MAX_READ_SIZE_DF)
+			max_read = STREAM_MAX_READ_SIZE_DF;
+	} while (ms == 0x2c80); /* an error when max_read is too large? */
+
 	/* Read from the stream */
 	while (!done) {
-		ms = ReadStream (&obj_stream, (buf_data) + off_data, STREAM_MAX_READ_SIZE, &cn_read);
+		ms = ReadStream (&obj_stream, (buf_data) + off_data, max_read, &cn_read);
 		if (ms != MAPI_E_SUCCESS) {
 			make_mapi_error (perror, "ReadStream", ms);
 			done = TRUE;
@@ -520,33 +626,11 @@ exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32
 			if (off_data >= buf_size)
 				done = TRUE;
 		}
-	};
+	}
 
 	if (ms == MAPI_E_SUCCESS) {
 		ExchangeMAPIStream		*stream = g_new0 (ExchangeMAPIStream, 1);
 		struct mapi_SPropValue_array	properties_array;
-
-		stream->value = NULL;
-
-		if (proptag == PR_HTML && ((cpid && (*cpid == 1200 || *cpid == 1201)) || (off_data > 5 && buf_data[3] == '\0'))) {
-			/* this is special, get the CPID and transform to utf8 when it's utf16 */
-			gsize written = 0;
-			gchar *in_utf8;
-
-			in_utf8 = g_convert ((const gchar *) buf_data, off_data, "UTF-8", "UTF-16", NULL, &written, NULL);
-			if (in_utf8 && written > 0) {
-				stream->value = g_byte_array_sized_new (written + 1);
-				g_byte_array_append (stream->value, (const guint8 *) in_utf8, written);
-
-				if (in_utf8[written] != '\0')
-					g_byte_array_append (stream->value, (const guint8 *) "", 1);
-			}
-		}
-
-		if (!stream->value) {
-			stream->value = g_byte_array_sized_new (off_data);
-			g_byte_array_append (stream->value, buf_data, off_data);
-		}
 
 		/* Build a mapi_SPropValue_array structure */
 		properties_array.cValues = 1;
@@ -556,6 +640,7 @@ exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32
 		mapi_SPropValue_array_named (obj_message, &properties_array);
 
 		stream->proptag = properties_array.lpProps[0].ulPropTag;
+		set_stream_value (stream, cpid, buf_data, off_data, FALSE);
 
 		g_debug("Attempt succeeded for proptag 0x%08X (after name conversion) ", stream->proptag);
 
@@ -571,145 +656,26 @@ cleanup:
 	return (ms == MAPI_E_SUCCESS);
 }
 
-static gboolean
-exchange_mapi_util_read_body_stream (mapi_object_t *obj_message, GSList **stream_list, gboolean getbestbody, GError **perror)
+static void
+exchange_mapi_util_read_body_stream (mapi_object_t *obj_message, GSList **stream_list, struct mapi_SPropValue_array *properties, gboolean by_best_body)
 {
-	enum MAPISTATUS			ms;
-	TALLOC_CTX			*mem_ctx;
-	struct SPropTagArray		*SPropTagArray;
-	struct SPropValue		*lpProps;
-	uint32_t			count;
-	DATA_BLOB			body;
-	uint8_t			editor;
-	const gchar			*data = NULL;
-	const bool			*rtf_in_sync;
-	uint32_t			proptag = 0;
+	const uint32_t *cpid = exchange_mapi_util_find_array_propval (properties, PR_INTERNET_CPID);
+	gboolean can_html = FALSE;
 
-	/* sanity check */
-	e_return_val_mapi_error_if_fail (obj_message, MAPI_E_INVALID_PARAMETER, FALSE);
+	if (!add_stream_from_properties (stream_list, properties, PR_BODY_UNICODE, cpid))
+		add_stream_from_properties (stream_list, properties, PR_BODY, cpid);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	if (by_best_body) {
+		uint8_t best_body = 0;
 
-	mem_ctx = talloc_init ("ExchangeMAPI_ReadBodyStream");
-
-	/* Build the array of properties we want to fetch */
-	SPropTagArray = set_SPropTagArray(mem_ctx, 0x7,
-					  PR_INTERNET_CPID,
-					  PR_MSG_EDITOR_FORMAT,
-					  PR_BODY,
-					  PR_BODY_UNICODE,
-					  PR_HTML,
-					  PR_RTF_COMPRESSED,
-					  PR_RTF_IN_SYNC);
-
-	lpProps = talloc_zero(mem_ctx, struct SPropValue);
-	ms = GetProps (obj_message, SPropTagArray, &lpProps, &count);
-	MAPIFreeBuffer(SPropTagArray);
-
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "GetProps", ms);
-		return FALSE;
-	}
-
-	if (getbestbody) {
-		/* Use BestBody Algo */
-		ms = GetBestBody (obj_message, &editor);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "GetBestBody", ms);
-			/* On failure, fallback to Plain Text */
-			editor = olEditorText;
-		}
-
-		/* HACK : We can't handle RTF. So default to HTML */
-		if (editor != olEditorText && editor != olEditorHTML)
-			editor = olEditorHTML;
+		can_html = GetBestBody (obj_message, &best_body) == MAPI_E_SUCCESS && best_body == olEditorHTML;
 	} else {
-		const uint32_t *ui32 = (const uint32_t *) exchange_mapi_util_find_SPropVal_array_propval(lpProps, PR_MSG_EDITOR_FORMAT);
-		/* if PR_MSG_EDITOR_FORMAT doesn't exist, set it to PLAINTEXT */
-		editor = ui32 ? *ui32 : olEditorText;
+		const uint32_t *ui32 = exchange_mapi_util_find_array_propval (properties, PR_MSG_EDITOR_FORMAT);
+		can_html = ui32 && *ui32 == olEditorHTML;
 	}
 
-	/* initialize body DATA_BLOB */
-	body.data = NULL;
-	body.length = 0;
-
-	ms = -1;
-	switch (editor) {
-		case olEditorText:
-			if ((data = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (lpProps, PR_BODY_UNICODE)) != NULL)
-				proptag = PR_BODY_UNICODE;
-			else if ((data = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (lpProps, PR_BODY)) != NULL)
-				proptag = PR_BODY;
-			if (data) {
-				gsize size = strlen(data)+1;
-				body.data = talloc_memdup(mem_ctx, data, size);
-				body.length = size;
-				ms = MAPI_E_SUCCESS;
-			}
-			break;
-		case olEditorHTML:
-			/* Fixme : */
-			/*if ((data = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (lpProps, PR_BODY_HTML_UNICODE)) != NULL) */
-			/*	proptag = PR_BODY_HTML_UNICODE; */
-			if ((data = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (lpProps, PR_BODY_HTML)) != NULL)
-				proptag = PR_BODY_HTML;
-
-			if (data) {
-				gsize size = strlen(data)+1;
-				body.data = talloc_memdup(mem_ctx, data, size);
-				body.length = size;
-				ms = MAPI_E_SUCCESS;
-			} else if (exchange_mapi_util_read_generic_stream (obj_message, exchange_mapi_util_find_SPropVal_array_propval (lpProps, PR_INTERNET_CPID), PR_HTML, stream_list, NULL)) {
-				ms = MAPI_E_SUCCESS;
-			}
-			break;
-		case olEditorRTF:
-			rtf_in_sync = (const bool *) exchange_mapi_util_find_SPropVal_array_propval (lpProps, PR_RTF_IN_SYNC);
-//			if (!(rtf_in_sync && *rtf_in_sync))
-			{
-				mapi_object_t obj_stream;
-
-				mapi_object_init(&obj_stream);
-
-				ms = OpenStream(obj_message, PR_RTF_COMPRESSED, STREAM_ACCESS_READ, &obj_stream);
-				if (ms != MAPI_E_SUCCESS) {
-					make_mapi_error (perror, "OpenStream", ms);
-					mapi_object_release(&obj_stream);
-					break;
-				}
-
-				ms = WrapCompressedRTFStream(&obj_stream, &body);
-				if (ms != MAPI_E_SUCCESS) {
-					make_mapi_error (perror, "WrapCompressedRTFStream", ms);
-					mapi_object_release(&obj_stream);
-					break;
-				}
-
-				proptag = PR_RTF_COMPRESSED;
-
-				mapi_object_release(&obj_stream);
-			}
-			break;
-		default:
-			break;
-	}
-
-	if (ms == MAPI_E_SUCCESS && proptag) {
-		ExchangeMAPIStream	*stream = g_new0 (ExchangeMAPIStream, 1);
-
-		stream->value = g_byte_array_sized_new (body.length);
-		stream->value = g_byte_array_append (stream->value, body.data, body.length);
-
-		stream->proptag = proptag;
-
-		*stream_list = g_slist_append (*stream_list, stream);
-	}
-
-	talloc_free (mem_ctx);
-
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-	return (ms == MAPI_E_SUCCESS) && (!perror || !*perror);
+	if (can_html)
+		exchange_mapi_util_read_generic_stream (obj_message, cpid, PR_HTML, stream_list, properties, NULL);
 }
 
 /* Returns TRUE if all streams were written succcesfully, else returns FALSE */
@@ -1059,15 +1025,15 @@ exchange_mapi_util_get_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 		}
 
 		/* just to get all the other streams */
-		for (z=0; z < properties.cValues; z++) {
+		for (z = 0; z < properties.cValues; z++) {
 			if ((properties.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY) {
-				exchange_mapi_util_read_generic_stream (&obj_attach, exchange_mapi_util_find_array_propval (&properties, PR_INTERNET_CPID), properties.lpProps[z].ulPropTag, &(attachment->streams), NULL);
+				exchange_mapi_util_read_generic_stream (&obj_attach, exchange_mapi_util_find_array_propval (&properties, PR_INTERNET_CPID), properties.lpProps[z].ulPropTag, &(attachment->streams), &properties, NULL);
 			}
 		}
 
 		ui32 = (const uint32_t *) get_SPropValue_SRow_data(&rows_attach.aRow[i_row_attach], PR_ATTACH_METHOD);
 		if (ui32 && *ui32 == ATTACH_BY_VALUE) {
-			exchange_mapi_util_read_generic_stream (&obj_attach, exchange_mapi_util_find_array_propval (&properties, PR_INTERNET_CPID), PR_ATTACH_DATA_BIN, &(attachment->streams), NULL);
+			exchange_mapi_util_read_generic_stream (&obj_attach, exchange_mapi_util_find_array_propval (&properties, PR_INTERNET_CPID), PR_ATTACH_DATA_BIN, &(attachment->streams), &properties, NULL);
 		} else if (ui32 && *ui32 == ATTACH_EMBEDDED_MSG) {
 			mapi_object_t obj_emb_msg;
 
@@ -1080,18 +1046,9 @@ exchange_mapi_util_get_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 				bytes = obj_message_to_camel_mime (conn, fid, &obj_emb_msg);
 				if (bytes) {
 					ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
-					struct mapi_SPropValue_array properties_array;
 
 					stream->value = bytes;
-
-					/* Build a mapi_SPropValue_array structure */
-					properties_array.cValues = 1;
-					properties_array.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, properties_array.cValues + 1);
-					properties_array.lpProps[0].ulPropTag = PR_ATTACH_DATA_BIN;
-					/* This call is needed in case the read stream was a named prop. */
-					mapi_SPropValue_array_named (obj_message, &properties_array);
-
-					stream->proptag = properties_array.lpProps[0].ulPropTag;
+					stream->proptag = PR_ATTACH_DATA_BIN;
 
 					attachment->streams = g_slist_append (attachment->streams, stream);
 				}
@@ -1645,20 +1602,6 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 				goto loop_cleanup;
 			}
 
-			if (has_attach && *has_attach && (MAPI_OPTIONS_FETCH_ATTACHMENTS & options)) {
-				exchange_mapi_util_get_attachments (conn, fid, &obj_message, &attach_list, NULL);
-			}
-
-			if (options & MAPI_OPTIONS_FETCH_RECIPIENTS) {
-				exchange_mapi_util_get_recipients (&obj_message, &recip_list, perror);
-			}
-
-			/* get the main body stream no matter what */
-			if (options & MAPI_OPTIONS_FETCH_BODY_STREAM) {
-				exchange_mapi_util_read_body_stream (&obj_message, &stream_list,
-								     options & MAPI_OPTIONS_GETBESTBODY, NULL);
-			}
-
 			if (propsTagArray && propsTagArray->cValues) {
 				struct SPropValue *lpProps;
 				struct SPropTagArray *tags;
@@ -1666,8 +1609,8 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 				/* we need to make a local copy of the tag array
 				 * since GetProps will modify the array on any
 				 * errors */
-				tags = set_SPropTagArray (mem_ctx, 0x1, propsTagArray->aulPropTag[0]);
-				for (k = 1; k < propsTagArray->cValues; k++)
+				tags = set_SPropTagArray (mem_ctx, 0x1, PR_MSG_EDITOR_FORMAT);
+				for (k = 0; k < propsTagArray->cValues; k++)
 					SPropTagArray_add (mem_ctx, tags, propsTagArray->aulPropTag[k]);
 
 				ms = GetProps (&obj_message, tags, &lpProps, &prop_count);
@@ -1678,7 +1621,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 				properties_array.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue,
 									 prop_count + 1);
 				properties_array.cValues = prop_count;
-				for (k=0; k < prop_count; k++) {
+				for (k = 0; k < prop_count; k++) {
 					if ((lpProps[k].ulPropTag & 0xFFFF) == PT_MV_BINARY) {
 						uint32_t ci;
 
@@ -1702,17 +1645,34 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 				if (ms != MAPI_E_SUCCESS)
 					make_mapi_error (perror, "GetPropsAll", ms);
 			}
+
+			if (has_attach && *has_attach && (MAPI_OPTIONS_FETCH_ATTACHMENTS & options)) {
+				exchange_mapi_util_get_attachments (conn, fid, &obj_message, &attach_list, NULL);
+			}
+
+			if (options & MAPI_OPTIONS_FETCH_RECIPIENTS) {
+				exchange_mapi_util_get_recipients (&obj_message, &recip_list, perror);
+			}
+
+			/* get the main body stream no matter what */
+			if (options & MAPI_OPTIONS_FETCH_BODY_STREAM) {
+				exchange_mapi_util_read_body_stream (&obj_message, &stream_list, &properties_array, (options & MAPI_OPTIONS_GETBESTBODY) != 0);
+			}
+
  relax:
 			if (ms == MAPI_E_SUCCESS) {
 				FetchItemsCallbackData *item_data;
-				uint32_t z;
 
 				if ((options & MAPI_OPTIONS_DONT_OPEN_MESSAGE) == 0) {
-					/* just to get all the other streams */
-					for (z=0; z < properties_array.cValues; z++) {
-						if ((properties_array.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY &&
-						    (options & MAPI_OPTIONS_FETCH_GENERIC_STREAMS))
-						exchange_mapi_util_read_generic_stream (&obj_message, exchange_mapi_util_find_array_propval (&properties_array, PR_INTERNET_CPID), properties_array.lpProps[z].ulPropTag, &stream_list, NULL);
+					if ((options & MAPI_OPTIONS_FETCH_GENERIC_STREAMS) != 0) {
+						uint32_t z;
+						const uint32_t *cpid = exchange_mapi_util_find_array_propval (&properties_array, PR_INTERNET_CPID);
+
+						/* just to get all the other streams */
+						for (z = 0; z < properties_array.cValues; z++) {
+							if ((properties_array.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY)
+								exchange_mapi_util_read_generic_stream (&obj_message, cpid, properties_array.lpProps[z].ulPropTag, &stream_list, &properties_array, NULL);
+						}
 					}
 
 					mapi_SPropValue_array_named(&obj_message, &properties_array);
@@ -1793,27 +1753,15 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 	mem_ctx = talloc_init("ExchangeMAPI_FetchObjectProps");
 
 	if (build_props) {
-		propsTagArray = set_SPropTagArray (mem_ctx, 0x1, PR_MESSAGE_CLASS);
+		propsTagArray = set_SPropTagArray (mem_ctx, 0x3,
+			PR_MESSAGE_CLASS,
+			PR_HASATTACH,
+			PR_MSG_EDITOR_FORMAT);
+
 		if (!build_props (conn, fid, mem_ctx, propsTagArray, brp_data)) {
 			make_mapi_error (perror, "build_props", MAPI_E_CALL_FAILED);
 			goto cleanup;
 		}
-	}
-
-	/* Fetch attachments */
-	if (options & MAPI_OPTIONS_FETCH_ATTACHMENTS) {
-		exchange_mapi_util_get_attachments (conn, fid, obj_message, &attach_list, NULL);
-	}
-
-	/* Fetch recipients */
-	if (options & MAPI_OPTIONS_FETCH_RECIPIENTS) {
-		exchange_mapi_util_get_recipients (obj_message, &recip_list, NULL);
-	}
-
-	/* get the main body stream no matter what */
-	if (options & MAPI_OPTIONS_FETCH_BODY_STREAM) {
-		exchange_mapi_util_read_body_stream (obj_message, &stream_list,
-			options & MAPI_OPTIONS_GETBESTBODY, NULL);
 	}
 
 	if (propsTagArray && propsTagArray->cValues) {
@@ -1835,20 +1783,41 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 				mem_ctx,
 				#endif
 				&properties_array.lpProps[k], &lpProps[k]);
-
 	} else {
 		ms = GetPropsAll (obj_message, &properties_array);
 		if (ms != MAPI_E_SUCCESS)
 			make_mapi_error (perror, "GetPropsAll", ms);
 	}
 
-	if (ms == MAPI_E_SUCCESS) {
-		uint32_t z;
+	/* Fetch attachments */
+	if (options & MAPI_OPTIONS_FETCH_ATTACHMENTS) {
+		const bool *has_attach = exchange_mapi_util_find_array_propval (&properties_array, PR_HASATTACH);
 
-		/* just to get all the other streams */
-		for (z=0; z < properties_array.cValues; z++)
-			if ((properties_array.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY && (options & MAPI_OPTIONS_FETCH_GENERIC_STREAMS))
-				exchange_mapi_util_read_generic_stream (obj_message, exchange_mapi_util_find_array_propval (&properties_array, PR_INTERNET_CPID), properties_array.lpProps[z].ulPropTag, &stream_list, NULL);
+		if (has_attach && *has_attach)
+			exchange_mapi_util_get_attachments (conn, fid, obj_message, &attach_list, NULL);
+	}
+
+	/* Fetch recipients */
+	if (options & MAPI_OPTIONS_FETCH_RECIPIENTS) {
+		exchange_mapi_util_get_recipients (obj_message, &recip_list, NULL);
+	}
+
+	/* get the main body stream no matter what */
+	if (options & MAPI_OPTIONS_FETCH_BODY_STREAM) {
+		exchange_mapi_util_read_body_stream (obj_message, &stream_list, &properties_array, (options & MAPI_OPTIONS_GETBESTBODY) != 0);
+	}
+
+	if (ms == MAPI_E_SUCCESS) {
+		if ((options & MAPI_OPTIONS_FETCH_GENERIC_STREAMS)) {
+			uint32_t z;
+
+			/* just to get all the other streams */
+			for (z = 0; z < properties_array.cValues; z++) {
+				if ((properties_array.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY) {
+					exchange_mapi_util_read_generic_stream (obj_message, exchange_mapi_util_find_array_propval (&properties_array, PR_INTERNET_CPID), properties_array.lpProps[z].ulPropTag, &stream_list, &properties_array, NULL);
+				}
+			}
+		}
 
 		mapi_SPropValue_array_named (obj_message, &properties_array);
 	}
@@ -1919,7 +1888,6 @@ exchange_mapi_connection_fetch_item (ExchangeMapiConnection *conn, mapi_id_t fid
 	if (ms != MAPI_E_SUCCESS) {
 		goto cleanup;
 	}
-
 	/* Open the item */
 	ms = OpenMessage (&obj_folder, fid, mid, &obj_message, 0x0);
 	if (ms != MAPI_E_SUCCESS) {

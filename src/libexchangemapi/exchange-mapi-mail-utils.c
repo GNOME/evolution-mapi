@@ -261,9 +261,6 @@ mapi_mail_get_item_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLO
 		PR_BODY,
 		PR_BODY_UNICODE,
 		PR_HTML,
-		/*Fixme : If this property is fetched, it garbles everything else. */
-		/*PR_BODY_HTML, */
-		/*PR_BODY_HTML_UNICODE, */
 
 		PR_DISPLAY_TO_UNICODE,
 		PR_DISPLAY_CC_UNICODE,
@@ -571,7 +568,7 @@ mapi_mime_build_multipart_alternative (MailItem *item, GSList *body_parts, GSLis
 	while (body_parts) {
 		const ExchangeMAPIStream *stream = (ExchangeMAPIStream *) body_parts->data;
 		part = camel_mime_part_new ();
-		if ((stream->proptag == PR_HTML || stream->proptag == PR_BODY_HTML_UNICODE)
+		if ((stream->proptag == PR_HTML)
 		    && inline_attachs) {
 			CamelMultipart *m_related;
 			m_related = mapi_mime_build_multipart_related (item, stream,
@@ -584,6 +581,8 @@ mapi_mime_build_multipart_alternative (MailItem *item, GSList *body_parts, GSLis
 
 		camel_multipart_add_part (m_alternative, part);
 		g_object_unref (part);
+
+		body_parts = body_parts->next;
 	}
 
 	return m_alternative;
@@ -818,7 +817,7 @@ mapi_mail_item_to_mime_message (ExchangeMapiConnection *conn, MailItem *item)
 	mapi_mime_set_msg_headers (conn, msg, item);
 	mapi_mime_classify_attachments (conn, item->fid, attach_list, &inline_attachs, &noninline_attachs);
 
-	build_alternative = (g_slist_length (item->msg.body_parts) > 1) && inline_attachs;
+	build_alternative = g_slist_length (item->msg.body_parts) > 1;
 	build_related = !build_alternative && inline_attachs;
 
 	if (build_alternative) {
