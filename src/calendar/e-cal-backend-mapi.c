@@ -30,7 +30,7 @@
 
 #include <libical/icaltz-util.h>
 
-#include <libedata-cal/e-cal-backend-cache.h>
+#include <libedata-cal/e-cal-backend-file-store.h>
 #include <libedataserver/e-xml-hash-utils.h>
 
 #include <exchange-mapi-connection.h>
@@ -54,6 +54,9 @@
 
 #define EDC_ERROR(_code) e_data_cal_create_error (_code, NULL)
 #define EDC_ERROR_EX(_code, _msg) e_data_cal_create_error (_code, _msg)
+
+#define SERVER_UTC_TIME "server_utc_time"
+#define CACHE_MARKER "populated"
 
 G_DEFINE_TYPE (ECalBackendMAPI, e_cal_backend_mapi, E_TYPE_CAL_BACKEND)
 
@@ -80,7 +83,7 @@ struct _ECalBackendMAPIPrivate {
 
 	/* A mutex to control access to the private structure */
 	GMutex			*mutex;
-	ECalBackendCache	*cache;
+	ECalBackendStore	*store;
 	gboolean		read_only;
 	gchar			*uri;
 	gchar			*username;
@@ -323,8 +326,8 @@ ecbm_remove (ECalBackend *backend, EDataCal *cal, GError **perror)
 	g_mutex_lock (priv->mutex);
 
 	/* remove the cache */
-	if (priv->cache)
-		e_file_cache_remove (E_FILE_CACHE (priv->cache));
+	if (priv->store)
+		e_cal_backend_store_remove (priv->store);
 
 	g_mutex_unlock (priv->mutex);
 }
@@ -399,7 +402,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 	}
 
 	tmp = exchange_mapi_util_mapi_id_to_string (mid);
-	cache_comp = e_cal_backend_cache_get_component (priv->cache, tmp, NULL);
+	cache_comp = e_cal_backend_store_get_component (priv->store, tmp, NULL);
 
 	if (cache_comp == NULL) {
 		ECalComponent *comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, array,
@@ -412,7 +415,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 			e_cal_component_commit_sequence (comp);
 			comp_str = e_cal_component_get_as_string (comp);
 
-			e_cal_backend_cache_put_component (priv->cache, comp);
+			e_cal_backend_store_put_component (priv->store, comp);
 			e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), (const gchar *) comp_str);
 
 			g_free (comp_str);
@@ -442,7 +445,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 				e_cal_component_commit_sequence (comp);
 				modif_comp_str = e_cal_component_get_as_string (comp);
 
-				e_cal_backend_cache_put_component (priv->cache, comp);
+				e_cal_backend_store_put_component (priv->store, comp);
 				e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbmapi), cache_comp_str, modif_comp_str);
 
 				g_object_unref (comp);
@@ -476,7 +479,7 @@ copy_strings_in_slist (GSList *slist)
 
 struct deleted_items_data {
 	ECalBackendMAPI *cbmapi;
-	GSList *cache_keys;
+	GSList *cache_ids;
 	GSList *unknown_mids; /* MIDs of items not in the cache */
 };
 
@@ -492,12 +495,12 @@ handle_deleted_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 	g_return_val_if_fail (did != NULL, FALSE);
 
 	tmp = exchange_mapi_util_mapi_id_to_string (mid);
-	cache_comp_uid = g_slist_find_custom (did->cache_keys, tmp, (GCompareFunc) (g_ascii_strcasecmp));
+	cache_comp_uid = g_slist_find_custom (did->cache_ids, tmp, (GCompareFunc) (g_ascii_strcasecmp));
 	if (cache_comp_uid != NULL) {
 		ECalBackendMAPIPrivate *priv = did->cbmapi->priv;
 		ECalComponent *comp;
 
-		comp = e_cal_backend_cache_get_component (priv->cache, cache_comp_uid->data, NULL);
+		comp = e_cal_backend_store_get_component (priv->store, cache_comp_uid->data, NULL);
 		if (comp) {
 			struct icaltimetype *last_mod = NULL;
 			struct timeval t;
@@ -517,7 +520,7 @@ handle_deleted_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 		}
 
 		g_free (cache_comp_uid->data);
-		did->cache_keys = g_slist_remove_link (did->cache_keys, cache_comp_uid);
+		did->cache_ids = g_slist_remove_link (did->cache_ids, cache_comp_uid);
 	} else {
 		/* fetch it, as it is not in the cache */
 		need_refetch = TRUE;
@@ -673,7 +676,7 @@ get_deltas (gpointer handle)
 
 	g_static_mutex_lock (&updating);
 
-	serv_time = e_cal_backend_cache_get_server_utc_time (priv->cache);
+	serv_time = e_cal_backend_store_get_key_value (priv->store, SERVER_UTC_TIME);
 	if (serv_time)
 		itt_cache = icaltime_from_string (serv_time);
 
@@ -764,7 +767,7 @@ get_deltas (gpointer handle)
 	e_cal_backend_notify_view_done (E_CAL_BACKEND (cbmapi), NULL /* Success */);
 
 	time_string = g_strdup (t_str);
-	e_cal_backend_cache_put_server_utc_time (priv->cache, time_string);
+	e_cal_backend_store_put_key_value (priv->store, SERVER_UTC_TIME, time_string);
 	g_free (time_string);
 
 	if (mem_ctx) {
@@ -778,9 +781,9 @@ get_deltas (gpointer handle)
 	 * The items in the list are pointers to internal data,
 	 * so should not be freed, only the list should. */
 	did.cbmapi = cbmapi;
-	did.cache_keys = e_cal_backend_cache_get_keys (priv->cache);
+	did.cache_ids = e_cal_backend_store_get_component_ids (priv->store);
 	did.unknown_mids = NULL;
-	copy_strings_in_slist (did.cache_keys);
+	copy_strings_in_slist (did.cache_ids);
 	options = 0;
 
 	if (strcmp (e_source_get_property(source, "public"), "yes") == 0 )
@@ -799,19 +802,19 @@ get_deltas (gpointer handle)
 			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
 		}
 
-		g_slist_foreach (did.cache_keys, (GFunc) g_free, NULL);
-		g_slist_free (did.cache_keys);
+		g_slist_foreach (did.cache_ids, (GFunc) g_free, NULL);
+		g_slist_free (did.cache_ids);
 		g_static_mutex_unlock (&updating);
 		return FALSE;
 	}
 
 	options = MAPI_OPTIONS_FETCH_ALL;
-	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
-	for (ls = did.cache_keys; ls; ls = g_slist_next (ls)) {
+	e_cal_backend_store_freeze_changes (priv->store);	
+	for (ls = did.cache_ids; ls; ls = g_slist_next (ls)) {
 		ECalComponent *comp = NULL;
 		icalcomponent *icalcomp = NULL;
 
-		comp = e_cal_backend_cache_get_component (priv->cache, (const gchar *) ls->data, NULL);
+		comp = e_cal_backend_store_get_component (priv->store, (const gchar *) ls->data, NULL);
 
 		if (!comp)
 			continue;
@@ -824,17 +827,17 @@ get_deltas (gpointer handle)
 			comp_str = e_cal_component_get_as_string (comp);
 			e_cal_backend_notify_object_removed (E_CAL_BACKEND (cbmapi),
 					id, comp_str, NULL);
-			e_cal_backend_cache_remove_component (priv->cache, (const gchar *) id->uid, id->rid);
+			e_cal_backend_store_remove_component (priv->store, (const gchar *) id->uid, id->rid);
 
 			e_cal_component_free_id (id);
 			g_free (comp_str);
 		}
 		g_object_unref (comp);
 	}
-	e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
+	e_cal_backend_store_thaw_changes (priv->store);
 
-	g_slist_foreach (did.cache_keys, (GFunc) g_free, NULL);
-	g_slist_free (did.cache_keys);
+	g_slist_foreach (did.cache_ids, (GFunc) g_free, NULL);
+	g_slist_free (did.cache_ids);
 
 	if (did.unknown_mids) {
 		gint i;
@@ -955,7 +958,7 @@ ecbm_get_object (ECalBackend *backend, EDataCal *cal, const gchar *uid, const gc
 	g_mutex_lock (priv->mutex);
 
 	/* search the object in the cache */
-	comp = e_cal_backend_cache_get_component (priv->cache, uid, rid);
+	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
 
 	if (comp) {
 		g_mutex_unlock (priv->mutex);
@@ -980,7 +983,7 @@ ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, const gchar *sexp, GL
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
-	GList *components, *l;
+	GSList *components, *l;
 	ECalBackendSExp *cbsexp;
 	gboolean search_needed = TRUE;
 
@@ -1003,7 +1006,7 @@ ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, const gchar *sexp, GL
 	}
 
 	*objects = NULL;
-	components = e_cal_backend_cache_get_components (priv->cache);
+	components = e_cal_backend_store_get_components (priv->store);
 
 	for (l = components; l != NULL; l = l->next) {
 		ECalComponent *comp = E_CAL_COMPONENT (l->data);
@@ -1017,8 +1020,8 @@ ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, const gchar *sexp, GL
 	}
 
 	g_object_unref (cbsexp);
-	g_list_foreach (components, (GFunc) g_object_unref, NULL);
-	g_list_free (components);
+	g_slist_foreach (components, (GFunc) g_object_unref, NULL);
+	g_slist_free (components);
 	g_mutex_unlock (priv->mutex);
 }
 
@@ -1183,7 +1186,7 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 		comp_str = e_cal_component_get_as_string (comp);
 		e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), (const gchar *) comp_str);
 		g_free (comp_str);
-		e_cal_backend_cache_put_component (priv->cache, comp);
+		e_cal_backend_store_put_component (priv->store, comp);
 		g_object_unref (comp);
 	}
 
@@ -1243,7 +1246,7 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 						is_public ? NULL : mapi_cal_get_known_ids, NULL,
 						mapi_cal_cache_create_cb, cbmapi,
 						options, &mapi_error)) {
-			e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
+			e_cal_backend_store_thaw_changes (priv->store);
 			g_mutex_lock (priv->mutex);
 			priv->populating_cache = FALSE;
 			g_mutex_unlock (priv->mutex);
@@ -1263,7 +1266,7 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 						is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 						mapi_cal_cache_create_cb, cbmapi,
 						options, &mapi_error)) {
-			e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
+			e_cal_backend_store_thaw_changes (priv->store);
 			g_mutex_lock (priv->mutex);
 			priv->populating_cache = FALSE;
 			g_mutex_unlock (priv->mutex);
@@ -1280,10 +1283,11 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 	e_cal_backend_notify_view_done (E_CAL_BACKEND (cbmapi), NULL /* Success */);
 
 	time_string = g_strdup (t_str);
-	e_cal_backend_cache_put_server_utc_time (priv->cache, time_string);
+	e_cal_backend_store_put_key_value (priv->store, SERVER_UTC_TIME, time_string);
+
 	g_free (time_string);
 
-	e_cal_backend_cache_set_marker (priv->cache);
+	e_cal_backend_store_put_key_value (priv->store, CACHE_MARKER, "1");
 
 	g_mutex_lock (priv->mutex);
 	priv->populating_cache = FALSE;
@@ -1302,7 +1306,7 @@ cache_init (ECalBackendMAPI *cbmapi)
 
 	priv->mode = CAL_MODE_REMOTE;
 
-	if (!e_cal_backend_cache_get_marker (priv->cache)) {
+	if (!e_cal_backend_store_get_key_value (priv->store, CACHE_MARKER)) {
 		/* Populate the cache for the first time.*/
 		if (!populate_cache (cbmapi, NULL)) {
 			g_warning (G_STRLOC ": Could not populate the cache");
@@ -1347,7 +1351,7 @@ ecbm_connect (ECalBackendMAPI *cbmapi, GError **perror)
 	}
 
 	/* We have established a connection */
-	if (priv->cache && priv->fid && e_cal_backend_cache_get_marker (priv->cache)) {
+	if (priv->store && priv->fid && e_cal_backend_store_put_key_value (priv->store, CACHE_MARKER, "1")) {
 		priv->mode = CAL_MODE_REMOTE;
 		if (priv->mode_changed && !priv->dthread) {
 			priv->mode_changed = FALSE;
@@ -1375,6 +1379,7 @@ ecbm_connect (ECalBackendMAPI *cbmapi, GError **perror)
 		break;
 	}
 
+	e_cal_backend_store_load (priv->store);
 	/* spawn a new thread for caching the calendar items */
 	thread = g_thread_create ((GThreadFunc) cache_init, cbmapi, FALSE, &error);
 	if (!thread) {
@@ -1393,7 +1398,6 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, gboolean only_if_exists, const g
 	ESource *esource;
 	const gchar *fid = NULL;
 	const gchar *cache_dir;
-	gchar *filename;
 	gboolean res;
 	uint32_t olFolder = 0;
 
@@ -1432,24 +1436,21 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, gboolean only_if_exists, const g
 		break;
 	}
 
-	if (priv->cache) {
-		g_object_unref (priv->cache);
-		priv->cache = NULL;
+	if (priv->store) {
+		g_object_unref (priv->store);
+		priv->store = NULL;
 	}
 
 	/* Always create cache here */
 	cache_dir = e_cal_backend_get_cache_dir (backend);
-	filename = g_build_filename (cache_dir, "cache.xml", NULL);
-	priv->cache = e_cal_backend_cache_new (filename);
-	g_free (filename);
+	priv->store = e_cal_backend_file_store_new (cache_dir);
 
-	if (!priv->cache) {
+	if (!priv->store) {
 		g_mutex_unlock (priv->mutex);
 		g_propagate_error (perror, EDC_ERROR_EX (OtherError, _("Could not create cache file")));
 		return;
 	}
-
-	e_cal_backend_cache_put_default_timezone (priv->cache, priv->default_zone);
+	e_cal_backend_store_set_default_timezone (priv->store, priv->default_zone);
 
 	/* Not for remote */
 	if (priv->mode == CAL_MODE_LOCAL) {
@@ -1736,7 +1737,7 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, gchar **calobj, gchar *
 				g_free (tmp);
 
 			e_cal_component_commit_sequence (comp);
-			e_cal_backend_cache_put_component (priv->cache, comp);
+			e_cal_backend_store_put_component (priv->store, comp);
 			*calobj = e_cal_component_get_as_string (comp);
 			e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), *calobj);
 			break;
@@ -1905,10 +1906,10 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, const gchar *calobj, Ca
 	case CAL_MODE_ANY :
 	case CAL_MODE_REMOTE :	/* when online, send the item to the server */
 		/* check if the object exists */
-		cache_comp = e_cal_backend_cache_get_component (priv->cache, uid, rid);
+		cache_comp = e_cal_backend_store_get_component (priv->store, uid, rid);
 		if (!cache_comp) {
 			get_deltas (cbmapi);
-			cache_comp = e_cal_backend_cache_get_component (priv->cache, uid, rid);
+			cache_comp = e_cal_backend_store_get_component (priv->store, uid, rid);
 		}
 
 		if (!cache_comp) {
@@ -1974,7 +1975,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, const gchar *calobj, Ca
 	*old_object = e_cal_component_get_as_string (cache_comp);
 	*new_object = e_cal_component_get_as_string (comp);
 
-	e_cal_backend_cache_put_component (priv->cache, comp);
+	e_cal_backend_store_put_component (priv->store, comp);
 	e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbmapi), *old_object, *new_object);
 
 	g_object_unref (comp);
@@ -2043,7 +2044,7 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal,
 			}
 			g_free (new_calobj);
 		} else {
-			GSList *list=NULL, *l, *comp_list = e_cal_backend_cache_get_components_by_uid (priv->cache, uid);
+			GSList *list=NULL, *l, *comp_list = e_cal_backend_store_get_components_by_uid (priv->store, uid);
 			GError *ri_error = NULL;
 
 //			if (e_cal_component_has_attendees (E_CAL_COMPONENT (comp_list->data))) {
@@ -2058,7 +2059,7 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal,
 					ECalComponent *comp = E_CAL_COMPONENT (l->data);
 					ECalComponentId *id = e_cal_component_get_id (comp);
 
-					e_cal_backend_cache_remove_component (priv->cache, id->uid, id->rid);
+					e_cal_backend_store_remove_component (priv->store, id->uid, id->rid);
 					if (!id->rid || !g_str_equal (id->rid, rid))
 						e_cal_backend_notify_object_removed (E_CAL_BACKEND (cbmapi), id, e_cal_component_get_as_string (comp), NULL);
 					e_cal_component_free_id (id);
@@ -2406,7 +2407,7 @@ ecbm_add_timezone (ECalBackend *backend, EDataCal *cal, const gchar *tzobj, GErr
 		zone = icaltimezone_new ();
 		icaltimezone_set_component (zone, tz_comp);
 
-		if (e_cal_backend_cache_put_timezone (priv->cache, zone) == FALSE) {
+		if (e_cal_backend_store_put_timezone (priv->store, zone) == FALSE) {
 			icaltimezone_free (zone, 1);
 			g_propagate_error (error, EDC_ERROR_EX (OtherError, "Cannot push timezone to cache"));
 			return;
@@ -2481,7 +2482,7 @@ ecbm_compute_changes_foreach_key (const gchar *key, const gchar *value, gpointer
 {
 	ECalBackendMAPIComputeChangesData *be_data = data;
 
-	if (!e_cal_backend_cache_get_component (be_data->backend->priv->cache, key, NULL)) {
+	if (!e_cal_backend_store_get_component (be_data->backend->priv->store, key, NULL)) {
 		ECalComponent *comp;
 
 		comp = e_cal_component_new ();
@@ -2501,7 +2502,7 @@ ecbm_compute_changes_foreach_key (const gchar *key, const gchar *value, gpointer
 static void
 ecbm_compute_changes (ECalBackendMAPI *cbmapi, const gchar *change_id, GList **adds, GList **modifies, GList **deletes, GError **perror)
 {
-	ECalBackendCache *cache;
+	ECalBackendStore *store;
 	gchar *filename;
 	EXmlHash *ehash;
 	ECalBackendMAPIComputeChangesData be_data;
@@ -2509,7 +2510,7 @@ ecbm_compute_changes (ECalBackendMAPI *cbmapi, const gchar *change_id, GList **a
 	gchar *unescaped_uri;
 	GError *err = NULL;
 
-	cache = cbmapi->priv->cache;
+	store = cbmapi->priv->store;
 
 	/* FIXME Will this always work? */
 	unescaped_uri = g_uri_unescape_string (cbmapi->priv->uri, "");
@@ -2591,7 +2592,7 @@ ecbm_is_loaded (ECalBackend *backend)
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
-	return (priv->cache && (priv->conn || priv->mode == CAL_MODE_LOCAL)) ? TRUE : FALSE;
+	return (priv->store && (priv->conn || priv->mode == CAL_MODE_LOCAL)) ? TRUE : FALSE;
 }
 
 static void
@@ -2702,7 +2703,7 @@ ecbm_internal_get_timezone (ECalBackend *backend, const gchar *tzid)
 	g_return_val_if_fail (cbmapi->priv != NULL, NULL);
 	g_return_val_if_fail (tzid != NULL, NULL);
 
-	zone = (icaltimezone *) e_cal_backend_cache_get_timezone (cbmapi->priv->cache, tzid);
+	zone = (icaltimezone *) e_cal_backend_store_get_timezone (cbmapi->priv->store, tzid);
 
 	if (!zone && E_CAL_BACKEND_CLASS (e_cal_backend_mapi_parent_class)->internal_get_timezone)
 		zone = E_CAL_BACKEND_CLASS (e_cal_backend_mapi_parent_class)->internal_get_timezone (backend, tzid);
@@ -3537,9 +3538,9 @@ ecbm_finalize (GObject *object)
 		priv->mutex = NULL;
 	}
 
-	if (priv->cache) {
-		g_object_unref (priv->cache);
-		priv->cache = NULL;
+	if (priv->store) {
+		g_object_unref (priv->store);
+		priv->store = NULL;
 	}
 
 	if (priv->username) {
