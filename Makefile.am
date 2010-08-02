@@ -15,4 +15,7 @@ CLEANFILES = 	intltool-merge	\
 		intltool-update	\
 		intltool-extract	
 
+DISTCHECK_CONFIGURE_FLAGS =	\
+	--enable-gtk3
+
 -include $(top_srcdir)/git.mk
