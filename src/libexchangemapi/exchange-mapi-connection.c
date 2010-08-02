@@ -328,7 +328,6 @@ exchange_mapi_connection_find (const gchar *profile)
 
 /* tracking alive connections - end  */
 
-
 /* Specifies READ/WRITE sizes to be used while handling normal streams */
 #define STREAM_MAX_READ_SIZE    0x8000
 #define STREAM_MAX_READ_SIZE_DF 0x1000
@@ -340,7 +339,7 @@ exchange_mapi_connection_find (const gchar *profile)
 #define CHECK_CORRECT_CONN_AND_GET_PRIV(_conn, _val)								\
 	ExchangeMapiConnectionPrivate *priv;									\
 														\
-	e_return_val_mapi_error_if_fail (_conn != NULL, MAPI_E_INVALID_PARAMETER, _val); 			\
+	e_return_val_mapi_error_if_fail (_conn != NULL, MAPI_E_INVALID_PARAMETER, _val);			\
 	e_return_val_mapi_error_if_fail (EXCHANGE_IS_MAPI_CONNECTION (_conn), MAPI_E_INVALID_PARAMETER, _val);	\
 														\
 	priv = EXCHANGE_MAPI_CONNECTION_GET_PRIVATE (_conn);							\
@@ -2932,7 +2931,6 @@ get_child_folders (TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, 
 			result = FALSE;
 			goto cleanup;
 		}
-
 
 		for (i = 0; i < rowset.cRows; i++) {
 			ExchangeMAPIFolder *folder = NULL;

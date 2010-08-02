@@ -1265,9 +1265,9 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 			return FALSE;	\
 		} G_STMT_END
 
-	#define set_datetime_value(hex, dtval) G_STMT_START { 		\
-		struct FILETIME	filetime; 				\
-		NTTIME		nttime; 					\
+	#define set_datetime_value(hex, dtval) G_STMT_START {		\
+		struct FILETIME	filetime;				\
+		NTTIME		nttime;					\
 									\
 		nttime = timeval_to_nttime(dtval);				\
 									\
@@ -1279,8 +1279,8 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 		} G_STMT_END
 
 	#define set_named_datetime_value(named_id, dtval) G_STMT_START { \
-		struct FILETIME	filetime; 				\
-		NTTIME		nttime; 					\
+		struct FILETIME	filetime;				\
+		NTTIME		nttime;					\
 									\
 		nttime = timeval_to_nttime(dtval);				\
 									\
@@ -1855,9 +1855,9 @@ populate_freebusy_data (struct Binary_r *bin, uint32_t month, uint32_t year, GLi
 	uint16_t	event_start;
 	uint16_t	event_end;
 	uint32_t	i;
-	uint32_t       	hour;
+	uint32_t	hour;
 	uint32_t	day;
-	const char	*month_name;
+	const gchar	*month_name;
 	uint32_t	minutes;
 	uint32_t	real_month;
 	gchar *date_string = NULL;
@@ -1889,7 +1889,7 @@ populate_freebusy_data (struct Binary_r *bin, uint32_t month, uint32_t year, GLi
 				day = ((event_start - (60 * hour)) / 1440) + 1;
 				minutes = (event_start - (60 * hour)) % 1440;
 				real_month = month - (year * 16);
-				
+
 				date_string = g_strdup_printf ("%.2u-%.2u-%.2u", year, real_month, day);
 				start = g_strdup_printf ("%sT%.2u:%.2u:00Z", date_string, hour + daylight, minutes);
 				g_free (date_string);
@@ -1910,13 +1910,13 @@ populate_freebusy_data (struct Binary_r *bin, uint32_t month, uint32_t year, GLi
 				end_date = mapi_get_date_from_string (end);
 
 				memset (&ipt, 0, sizeof (struct icalperiodtype));
-				
+
 				itt = icaltime_from_timet_with_zone (start_date, 0, icaltimezone_get_utc_timezone ());
 				ipt.start = itt;
 
 				itt = icaltime_from_timet_with_zone (end_date, 0, icaltimezone_get_utc_timezone ());
 				ipt.end = itt;
-			
+
 				icalcomp = e_cal_component_get_icalcomponent (comp);
 				icalprop = icalproperty_new_freebusy (ipt);
 
@@ -1945,11 +1945,11 @@ exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, GList 
 	GList *l;
 
 	const uint32_t			*publish_start;
-	const struct LongArray_r       	*busy_months;
+	const struct LongArray_r	*busy_months;
 	const struct BinaryArray_r	*busy_events;
-	const struct LongArray_r       	*tentative_months;
+	const struct LongArray_r	*tentative_months;
 	const struct BinaryArray_r	*tentative_events;
-	const struct LongArray_r       	*oof_months;
+	const struct LongArray_r	*oof_months;
 	const struct BinaryArray_r	*oof_events;
 	uint32_t			year;
 	uint32_t			event_year;
@@ -1965,7 +1965,7 @@ exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, GList 
 	if (!exchange_mapi_connection_get_public_folder (conn, &obj_store, mapi_error)) {
 		return FALSE;
 	}
-	
+
 	for ( l = users; l != NULL; l = g_list_next (l)) {
 		ms = GetUserFreeBusyData (&obj_store, (const gchar *)l->data, &aRow);
 
@@ -2024,7 +2024,7 @@ exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, GList 
 				populate_freebusy_data (&busy_events->lpbin[i], busy_months->lpl[i], event_year, freebusy, "Busy", comp);
 			}
 		}
-		
+
 		if (tentative_months && ((*(const uint32_t *) tentative_months) != MAPI_E_NOT_FOUND) &&
 		    tentative_events && ((*(const uint32_t *) tentative_events) != MAPI_E_NOT_FOUND)) {
 			for (i = 0; i < tentative_months->cValues; i++) {

@@ -331,7 +331,6 @@ mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 		set_str_con_value (PR_DISPLAY_NAME_UNICODE, E_CONTACT_FILE_AS);
 		set_str_con_value (PR_NORMALIZED_SUBJECT_UNICODE, E_CONTACT_FILE_AS);
 
-
 		local = e_contact_get_attributes (mcd->contact, E_CONTACT_EMAIL);
 		if (member_ids)
 			local = g_list_sort_with_data (local, cmp_member_id, member_ids);
@@ -641,7 +640,7 @@ fetch_contacts_uids_cb (FetchItemsCallbackData *item_data, gpointer data)
 	gchar *suid;
 
 	g_return_val_if_fail (data != NULL, FALSE);
-	
+
 	suid = exchange_mapi_util_mapi_ids_to_uid (item_data->fid, item_data->mid);
 	if (suid)
 		g_hash_table_insert (fcud->uids, suid, GINT_TO_POINTER (1));
@@ -1190,7 +1189,7 @@ e_book_backend_mapi_contacts_class_init (EBookBackendMAPIContactsClass *klass)
 	parent_class->op_get_contact_list		= ebbm_contacts_get_contact_list;
 
 	parent_class->op_connection_status_changed	= ebbm_contacts_connection_status_changed;
-	parent_class->op_get_status_message     	= ebbm_contacts_get_status_message;
+	parent_class->op_get_status_message		= ebbm_contacts_get_status_message;
 	parent_class->op_fetch_contacts			= ebbm_contacts_fetch_contacts;
 	parent_class->op_fetch_known_uids		= ebbm_contacts_fetch_known_uids;
 }

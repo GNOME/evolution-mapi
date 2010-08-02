@@ -214,7 +214,6 @@ folder_size_clicked (GtkButton *button, EAccount *account)
 	g_return_if_fail (account != NULL);
 	g_return_if_fail (E_IS_ACCOUNT (account));
 
-	
 	url = camel_url_new (e_account_get_string (account,  E_ACCOUNT_SOURCE_URL), NULL);
 	g_return_if_fail (url != NULL);
 

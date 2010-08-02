@@ -191,7 +191,6 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 	GSList *ids, *temp_list, *old_sources = NULL;
 	gchar *base_uri = NULL;
 	gboolean is_new_group = FALSE;
-	
 
 	if (folder_type == MAPI_FOLDER_TYPE_APPOINTMENT) {
 		conf_key = CALENDAR_SOURCES;
@@ -307,7 +306,7 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 		/* these were not found on the server by fid, thus remove them */
 		for (temp_list = old_sources; temp_list; temp_list = temp_list->next) {
 			ESource *source = temp_list->data;
-		
+
 			if (source && E_IS_SOURCE (source)) {
 				if (strcmp (e_source_get_property (source, "public"), "yes") != 0)
 					e_source_group_remove_source (group, source);
@@ -338,15 +337,15 @@ void exchange_mapi_add_esource (CamelURL *url, const gchar *folder_name, const g
 	ESource *source = NULL;
 	gchar *relative_uri = NULL;
 	gchar *base_uri = NULL;
-	
+
 	if (url == NULL)
 		return;
-	
-	if (folder_type == MAPI_FOLDER_TYPE_APPOINTMENT) 
+
+	if (folder_type == MAPI_FOLDER_TYPE_APPOINTMENT)
 		conf_key = CALENDAR_SOURCES;
-	else if (folder_type == MAPI_FOLDER_TYPE_TASK) 
+	else if (folder_type == MAPI_FOLDER_TYPE_TASK)
 		conf_key = TASK_SOURCES;
-	else if (folder_type == MAPI_FOLDER_TYPE_MEMO) 
+	else if (folder_type == MAPI_FOLDER_TYPE_MEMO)
 		conf_key = JOURNAL_SOURCES;
 	else if (folder_type == MAPI_FOLDER_TYPE_JOURNAL)
 		conf_key = JOURNAL_SOURCES;
@@ -361,21 +360,20 @@ void exchange_mapi_add_esource (CamelURL *url, const gchar *folder_name, const g
 	source_list = e_source_list_new_for_gconf (client, conf_key);
 	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, url->user, url->host);
 	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
-	sources = e_source_group_peek_sources (group);	
+	sources = e_source_group_peek_sources (group);
 	for (; sources != NULL; sources = g_slist_next (sources)) {
 		ESource *source = E_SOURCE (sources->data);
-		gchar* folder_id = e_source_get_duped_property (source, "folder-id");
-		if (folder_id && fid) { 
-			if (strcmp (fid, folder_id) != 0) 
+		gchar * folder_id = e_source_get_duped_property (source, "folder-id");
+		if (folder_id && fid) {
+			if (strcmp (fid, folder_id) != 0)
 				continue;
 			else {
 				g_warning ("%s: %s: Esource Already exist \n", G_STRLOC, G_STRFUNC);
-				return;	
+				return;
 			}
 		}
 	}
 
-	
 	relative_uri = g_strconcat (";", fid, NULL);
 	source = e_source_new (folder_name, relative_uri);
 	e_source_set_property (source, "auth", "1");
@@ -395,7 +393,7 @@ void exchange_mapi_add_esource (CamelURL *url, const gchar *folder_name, const g
 
 	g_object_unref (source);
 	g_free (relative_uri);
-			
+
 	if (!e_source_list_add_group (source_list, group, -1))
 		return;
 
@@ -407,8 +405,7 @@ void exchange_mapi_add_esource (CamelURL *url, const gchar *folder_name, const g
 	g_object_unref (client);
 }
 
-
-void exchange_mapi_remove_esource (CamelURL *url, const gchar* folder_name, const gchar *fid, gint folder_type)
+void exchange_mapi_remove_esource (CamelURL *url, const gchar * folder_name, const gchar *fid, gint folder_type)
 {
 	ESourceList *source_list = NULL;
 	ESourceGroup *group = NULL;
@@ -416,15 +413,15 @@ void exchange_mapi_remove_esource (CamelURL *url, const gchar* folder_name, cons
 	GConfClient* client;
 	GSList *sources=NULL;
 	gchar *base_uri = NULL;
-	
+
 	if (url == NULL)
 		return;
 
-	if (folder_type == MAPI_FOLDER_TYPE_APPOINTMENT) 
+	if (folder_type == MAPI_FOLDER_TYPE_APPOINTMENT)
 		conf_key = CALENDAR_SOURCES;
-	else if (folder_type == MAPI_FOLDER_TYPE_TASK) 
+	else if (folder_type == MAPI_FOLDER_TYPE_TASK)
 		conf_key = TASK_SOURCES;
-	else if (folder_type == MAPI_FOLDER_TYPE_MEMO) 
+	else if (folder_type == MAPI_FOLDER_TYPE_MEMO)
 		conf_key = JOURNAL_SOURCES;
 	else if (folder_type == MAPI_FOLDER_TYPE_JOURNAL)
 		conf_key = JOURNAL_SOURCES;
@@ -439,11 +436,11 @@ void exchange_mapi_remove_esource (CamelURL *url, const gchar* folder_name, cons
 	source_list = e_source_list_new_for_gconf (client, conf_key);
 	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, url->user, url->host);
 	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
-	sources = e_source_group_peek_sources (group);	
-	
+	sources = e_source_group_peek_sources (group);
+
 	for (; sources != NULL; sources = g_slist_next (sources)) {
 		ESource *source = E_SOURCE (sources->data);
-		gchar* folder_id = e_source_get_duped_property (source, "folder-id"); 
+		gchar * folder_id = e_source_get_duped_property (source, "folder-id");
 		if (folder_id && fid)
 			if (strcmp(fid, folder_id) == 0) {
 				e_source_group_remove_source(group, source);
@@ -456,7 +453,6 @@ void exchange_mapi_remove_esource (CamelURL *url, const gchar* folder_name, cons
 	g_object_unref (client);
 
 }
-
 
 static void
 remove_cal_esource (EAccount *existing_account_info, ExchangeMAPIFolderType folder_type, CamelURL *url)

@@ -217,7 +217,6 @@ em_operation_queue_cancel (EMOperationQueue *queue, gpointer worker_data)
 			break;
 		}
 	}
-	
 
 	UNLOCK ();
 

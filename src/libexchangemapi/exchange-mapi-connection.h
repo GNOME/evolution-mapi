@@ -202,7 +202,7 @@ gboolean		exchange_mapi_connection_set_flags (ExchangeMapiConnection *conn, uint
 gboolean		exchange_mapi_connection_remove_items (ExchangeMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, guint32 fid_options, GSList *mids, GError **perror);
 gboolean		exchange_mapi_connection_copy_items (ExchangeMapiConnection *conn, mapi_id_t src_fid, guint32 src_fid_options, mapi_id_t dest_fid, guint32 dest_fid_options, GSList *mids, GError **perror);
 gboolean		exchange_mapi_connection_move_items (ExchangeMapiConnection *conn, mapi_id_t src_fid, guint32 src_fid_options, mapi_id_t dest_fid, guint32 dest_fid_options, GSList *mids, GError **perror);
-gboolean 		exchange_mapi_connection_get_folders_list (ExchangeMapiConnection *conn, GSList **mapi_folders, GError **perror);
+gboolean		exchange_mapi_connection_get_folders_list (ExchangeMapiConnection *conn, GSList **mapi_folders, GError **perror);
 gboolean		exchange_mapi_connection_get_pf_folders_list (ExchangeMapiConnection *conn, GSList **mapi_folders, GError **perror);
 GSList *		exchange_mapi_connection_peek_folders_list (ExchangeMapiConnection *conn);
 

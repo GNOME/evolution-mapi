@@ -446,7 +446,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 							g_free (tmp);
 						} else
 							to = formatted_id;
-						count_to ++;
+						count_to++;
 						break;
 
 					case MAPI_CC:
@@ -457,7 +457,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 							g_free (tmp);
 						} else
 							cc = formatted_id;
-						count_cc ++;
+						count_cc++;
 						break;
 
 					default:
@@ -862,7 +862,6 @@ mapi_sync (CamelFolder *folder, gboolean expunge, GError **error)
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	}
 
-	
 	if (junk_items) {
 		mapi_id_t junk_fid = 0;
 		GError *err = NULL;
@@ -1533,7 +1532,7 @@ mapi_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 
 	if (delete_originals) {
 		GError *err = NULL;
-		
+
 		if (!exchange_mapi_connection_move_items (camel_mapi_store_get_exchange_connection (mapi_store), src_fid, src_fid_options, dest_fid, dest_fid_options, src_msg_ids, &err)) {
 			g_set_error (
 				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,

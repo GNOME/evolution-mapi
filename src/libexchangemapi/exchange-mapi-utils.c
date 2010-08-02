@@ -930,7 +930,7 @@ exchange_crlf_to_lf (const gchar *in)
  *
  * Constructs profile name from given parameters and
  * returns it as a newly allocated string. It can also
- * rename old profile name string to a new name, if requested. 
+ * rename old profile name string to a new name, if requested.
  **/
 gchar *
 exchange_mapi_util_profile_name (const gchar *username, const gchar *domain, const gchar *hostname, gboolean migrate)

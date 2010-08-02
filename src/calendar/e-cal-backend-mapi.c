@@ -713,7 +713,7 @@ get_deltas (gpointer handle)
 		if (strcmp (e_source_get_property(source, "public"), "yes") == 0 ) {
 			options |= MAPI_OPTIONS_USE_PFSTORE;
 			is_public = TRUE;
-			use_restriction = FALSE;	
+			use_restriction = FALSE;
 		}
 
 		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
@@ -740,7 +740,7 @@ get_deltas (gpointer handle)
 			options |= MAPI_OPTIONS_USE_PFSTORE;
 			is_public = TRUE;
 			use_restriction = FALSE;
-		} 
+		}
 
 		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
 						is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
@@ -809,7 +809,7 @@ get_deltas (gpointer handle)
 	}
 
 	options = MAPI_OPTIONS_FETCH_ALL;
-	e_cal_backend_store_freeze_changes (priv->store);	
+	e_cal_backend_store_freeze_changes (priv->store);
 	for (ls = did.cache_ids; ls; ls = g_slist_next (ls)) {
 		ECalComponent *comp = NULL;
 		icalcomponent *icalcomp = NULL;
@@ -866,12 +866,12 @@ get_deltas (gpointer handle)
 				options |= MAPI_OPTIONS_USE_PFSTORE;
 				is_public = TRUE;
 			}
- 			
+
 			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 						is_public ? NULL : mapi_cal_get_known_ids, NULL,
 						mapi_cal_get_changes_cb, cbmapi,
 						options, &mapi_error)) {
-								
+
 				if (mapi_error) {
 					gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
 					e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
@@ -1239,9 +1239,9 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 	if (kind == ICAL_VTODO_COMPONENT) {
 		if (strcmp (e_source_get_property(source, "public"), "yes") == 0) {
 			options |= MAPI_OPTIONS_USE_PFSTORE;
-			is_public = TRUE;	
+			is_public = TRUE;
 		}
-		
+
 		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 						is_public ? NULL : mapi_cal_get_known_ids, NULL,
 						mapi_cal_cache_create_cb, cbmapi,
@@ -1261,7 +1261,7 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 			options |= MAPI_OPTIONS_USE_PFSTORE;
 			is_public = TRUE;
 		}
-		
+
 		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 						is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 						mapi_cal_cache_create_cb, cbmapi,
@@ -1506,7 +1506,7 @@ mapi_cal_get_required_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC
 		PR_SENDER_NAME_UNICODE,
 		PR_SENDER_ADDRTYPE_UNICODE,
 		PR_SENDER_EMAIL_ADDRESS_UNICODE
-	};	
+	};
 
 	g_return_val_if_fail (props != NULL, FALSE);
 

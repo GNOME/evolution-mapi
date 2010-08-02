@@ -760,7 +760,7 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	uri_text = e_source_get_uri (source);
 	if (uri_text && g_ascii_strncasecmp (uri_text, MAPI_URI_PREFIX, MAPI_PREFIX_LENGTH))
 		return;
-	
+
 	exchange_mapi_util_mapi_id_from_string (e_source_get_property (source, "parent-fid"), &pfid);
 
 	/* the profile should be already connected */

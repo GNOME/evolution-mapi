@@ -1149,7 +1149,7 @@ ebbm_op_load_source (EBookBackend *backend, ESource *source, gboolean only_if_ex
 	ebmac = E_BOOK_BACKEND_MAPI_GET_CLASS (ebbm);
 	g_return_if_fail (ebmac != NULL);
 
-	/* it's a sync op by e_book_backend_open 
+	/* it's a sync op by e_book_backend_open
 	op = g_new0 (OperationLoadSource, 1);
 	op->base.ot = OP_LOAD_SOURCE;
 	op->base.book = book;
@@ -1479,7 +1479,7 @@ e_book_backend_mapi_update_view_by_cache (EBookBackendMAPI *ebma, EDataBookView 
 
 		ids = e_book_backend_summary_search (summary, query);
 		if (ids) {
-			for (i = 0; i < ids->len; i ++) {
+			for (i = 0; i < ids->len; i++) {
 				gchar *uid;
 				EContact *contact;
 
@@ -1663,7 +1663,7 @@ mapi_book_utils_get_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALL
 		PR_MID,
 		PR_EMAIL_ADDRESS_UNICODE
 	};
-	
+
 	/* do not make this array static, the function modifies it on run */
 	ResolveNamedIDsData nids[] = {
 		{ PidLidDistributionListName, 0 },

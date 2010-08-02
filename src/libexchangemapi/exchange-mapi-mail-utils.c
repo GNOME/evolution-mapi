@@ -294,7 +294,6 @@ mapi_mail_get_item_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLO
 	return exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, item_props, G_N_ELEMENTS (item_props));
 }
 
-
 static void
 mapi_mime_set_recipient_list (CamelMimeMessage *msg, MailItem *item)
 {
