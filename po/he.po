@@ -7,20 +7,20 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-13 13:14+0300\n"
-"PO-Revision-Date: 2010-07-13 13:21+0200\n"
+"POT-Creation-Date: 2010-08-03 10:44+0300\n"
+"PO-Revision-Date: 2010-08-03 10:46+0200\n"
 "Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
 "Language-Team: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:672
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:674
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:668
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:670
 msgid "Global Address List"
 msgstr "רשימת כתובות גלובלית"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:987
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:983
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:229
 #, c-format
 msgid "Enter Password for %s@%s"
@@ -111,7 +111,7 @@ msgid "Unable to retrieve folder size information"
 msgstr "לא ניתן להוריד את נתוני גודל התיקייה"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:169
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:368
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:367
 msgid "Folder Size"
 msgstr "גודל התיקייה"
 
@@ -120,105 +120,127 @@ msgid "Fetching folder list…"
 msgstr "רשימת התיקיות מתקבלת..."
 
 #. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:353
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:352
 msgid "Miscellaneous"
 msgstr "שונות"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:366
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:365
 msgid "View the size of all Exchange folders"
 msgstr "צפייה בגודלן של כל תיקיות ה־Exchange"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:379
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:378
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
 msgstr "הגדרות Exchange"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:388
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:387
 msgid "Folder size"
 msgstr "גודל התיקייה"
 
-#. To translators : This is used to cache the downloaded contacts from GAL.
-#. The first %d is an index of the GAL entry,
-#. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:170
-#, c-format
-msgid "Caching GAL entry %d/%d"
-msgstr "רשומת GAL מס' %d/%d נשמרת במטמון"
-
-#. To translators : This is used to cache the downloaded contacts from GAL.
-#. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:174
-#, c-format
-msgid "Caching GAL entry %d"
-msgstr "רשומת GAL מס' %d נשמרת במטמון"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:214
-msgid "Failed to fetch GAL entries"
-msgstr "ארע כשל בקבלת רשומות ה־GAL"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:313
+#: ../src/addressbook/e-book-backend-mapi.c:539
 msgid "Cannot connect"
 msgstr "לא ניתן להתחבר"
 
-#: ../src/addressbook/e-book-backend-mapi-gal.c:645
+#: ../src/addressbook/e-book-backend-mapi.c:682
 msgid "Searching"
 msgstr "בחיפוש"
 
-#. To translators : Here Evolution MAPI downloads the entries from the GAL server
-#: ../src/addressbook/e-book-backend-mapi-gal.c:665
-msgid "Downloading GAL entries from server…"
-msgstr "רשומות ה־GAL מורדות מהשרת..."
-
-#: ../src/calendar/e-cal-backend-mapi.c:129
+#: ../src/addressbook/e-book-backend-mapi.c:1935
+#: ../src/calendar/e-cal-backend-mapi.c:132
 msgid "Uknown error"
 msgstr "שגיאה בלתי ידועה"
 
-#: ../src/calendar/e-cal-backend-mapi.c:390
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:713
+#: ../src/calendar/e-cal-backend-mapi.c:319
 msgid "Failed to remove public folder"
 msgstr "ארע כשל בהסרת תיקייה ציבורית"
 
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:770
+#: ../src/calendar/e-cal-backend-mapi.c:1726
+#: ../src/calendar/e-cal-backend-mapi.c:2218
+msgid "Failed to create item on a server"
+msgstr "ארע כשל ביצירת פריט בשרת"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:896
+#: ../src/calendar/e-cal-backend-mapi.c:1959
+msgid "Failed to modify item on a server"
+msgstr "ארע כשל בשינוי פריט בשרת"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1043
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1109
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1160
+#: ../src/calendar/e-cal-backend-mapi.c:1253
+#: ../src/calendar/e-cal-backend-mapi.c:1274
+msgid "Failed to fetch items from a server"
+msgstr "ארע כשל בקבלת פריטים מהשרת"
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. %d is an index of the contact.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1061
+#, c-format
+msgid "Caching contact %d"
+msgstr "איש קשר מס׳ %d נשמר במטמון"
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. The first %d is an index of the contact,
+#. the second %d is total count of conacts on the server.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1065
+#, c-format
+msgid "Caching contact %d/%d"
+msgstr "איש קשר %d מתוך %d נשמר במטמון"
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. %d is an index of the GAL entry.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:127
+#, c-format
+msgid "Caching GAL contact %d"
+msgstr "איש קשר GAL מס׳ %d נשמר במטמון"
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. The first %d is an index of the GAL entry,
+#. the second %d is total count of entries in GAL.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:131
+#, c-format
+msgid "Caching GAL contact %d/%d"
+msgstr "איש קשר %d מתוך %d נשמר במטמון"
+
+#: ../src/addressbook/e-book-backend-mapi-gal.c:162
+#: ../src/addressbook/e-book-backend-mapi-gal.c:197
+msgid "Failed to fetch GAL entries"
+msgstr "ארע כשל בקבלת רשומות ה־GAL"
+
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:435
+#: ../src/calendar/e-cal-backend-mapi.c:364
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "טוען פריטים בתיקייה %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:780
-#: ../src/calendar/e-cal-backend-mapi.c:806
-#: ../src/calendar/e-cal-backend-mapi.c:852
-#: ../src/calendar/e-cal-backend-mapi.c:929
-#: ../src/calendar/e-cal-backend-mapi.c:952
+#: ../src/calendar/e-cal-backend-mapi.c:724
+#: ../src/calendar/e-cal-backend-mapi.c:750
+#: ../src/calendar/e-cal-backend-mapi.c:797
+#: ../src/calendar/e-cal-backend-mapi.c:876
+#: ../src/calendar/e-cal-backend-mapi.c:899
 #, c-format
 msgid "Failed to fetch changes from a server: %s"
 msgstr "ארע כשל בקבלת שינויים מהשרת: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:785
-#: ../src/calendar/e-cal-backend-mapi.c:811
-#: ../src/calendar/e-cal-backend-mapi.c:857
-#: ../src/calendar/e-cal-backend-mapi.c:934
-#: ../src/calendar/e-cal-backend-mapi.c:957
+#: ../src/calendar/e-cal-backend-mapi.c:729
+#: ../src/calendar/e-cal-backend-mapi.c:755
+#: ../src/calendar/e-cal-backend-mapi.c:802
+#: ../src/calendar/e-cal-backend-mapi.c:881
+#: ../src/calendar/e-cal-backend-mapi.c:904
 msgid "Failed to fetch changes from a server"
 msgstr "ארע כשל בקבלת שינויים מהשרת"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1302
-#: ../src/calendar/e-cal-backend-mapi.c:1323
-msgid "Failed to fetch items from a server"
-msgstr "ארע כשל בקבלת פריטים מהשרת"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1435
+#: ../src/calendar/e-cal-backend-mapi.c:1388
 msgid "Could not create thread for populating cache"
 msgstr "לא ניתן ליצור תהליכון ליצירת מטמון"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1500
+#: ../src/calendar/e-cal-backend-mapi.c:1450
 msgid "Could not create cache file"
 msgstr "לא ניתן ליצור קובץ מטמון"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1769
-#: ../src/calendar/e-cal-backend-mapi.c:2252
-msgid "Failed to create item on a server"
-msgstr "ארע כשל ביצירת פריט בשרת"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1894
+#: ../src/calendar/e-cal-backend-mapi.c:1853
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -226,11 +248,7 @@ msgstr ""
 "תמיכה בשינוי מופעים יחידים של פגישות חוזרות אינה ממומשת עדיין. לא חל שינוי "
 "על פגישות שעל השרת."
 
-#: ../src/calendar/e-cal-backend-mapi.c:1999
-msgid "Failed to modify item on a server"
-msgstr "ארע כשל בשינוי פריט בשרת"
-
-#: ../src/calendar/e-cal-backend-mapi.c:2469
+#: ../src/calendar/e-cal-backend-mapi.c:2466
 msgid "Failed to get Free/Busy data"
 msgstr "ארע כשל בקבלת נתוני פנוי/עסוק"
 
@@ -250,69 +268,69 @@ msgid "Removing deleted messages from cache in %s"
 msgstr "הסרת ההודעות שנמחקו מהמטמון ב־%s"
 
 #. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:949
+#: ../src/camel/camel-mapi-folder.c:948
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "מקבל את נתוני הסיכום עבור הודעות חדשות תחת %s"
 
-#: ../src/camel/camel-mapi-folder.c:1072 ../src/camel/camel-mapi-folder.c:1207
-#: ../src/camel/camel-mapi-folder.c:1217
+#: ../src/camel/camel-mapi-folder.c:1071 ../src/camel/camel-mapi-folder.c:1206
+#: ../src/camel/camel-mapi-folder.c:1216
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "הודעה זאת אינה זמינה במצב לא מקוון."
 
-#: ../src/camel/camel-mapi-folder.c:1089
+#: ../src/camel/camel-mapi-folder.c:1088
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "קבלת הפריטים נכשלה: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1094
+#: ../src/camel/camel-mapi-folder.c:1093
 msgid "Fetching items failed"
 msgstr "קבלת הפריטים נכשלה"
 
-#: ../src/camel/camel-mapi-folder.c:1167
+#: ../src/camel/camel-mapi-folder.c:1166
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "לא ניתן לקבל את ההודעה %s: ‏%s"
 
-#: ../src/camel/camel-mapi-folder.c:1168
+#: ../src/camel/camel-mapi-folder.c:1167
 msgid "No such message"
 msgstr "אין כזאת הודעה"
 
-#: ../src/camel/camel-mapi-folder.c:1243
+#: ../src/camel/camel-mapi-folder.c:1242
 #, c-format
 msgid "Could not get message: %s"
 msgstr "לא ניתן לקבל הודעה: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1249 ../src/camel/camel-mapi-folder.c:1262
+#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1261
 #, c-format
 msgid "Could not get message"
 msgstr "לא ניתן לקבל הודעה"
 
-#: ../src/camel/camel-mapi-folder.c:1399
+#: ../src/camel/camel-mapi-folder.c:1398
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "ארע כשל בפינוי האשפה: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1404
+#: ../src/camel/camel-mapi-folder.c:1403
 msgid "Failed to empty Trash"
 msgstr "ארע כשל בפינוי האשפה"
 
-#: ../src/camel/camel-mapi-folder.c:1540 ../src/camel/camel-mapi-folder.c:1561
+#: ../src/camel/camel-mapi-folder.c:1539 ../src/camel/camel-mapi-folder.c:1560
 msgid "Unknown error"
 msgstr "שגיאה בלתי ידועה"
 
-#: ../src/camel/camel-mapi-folder.c:1623
+#: ../src/camel/camel-mapi-folder.c:1622
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "לא ניתן להוסיף את ההודעה לתיקייה החדשה '%s'"
 
-#: ../src/camel/camel-mapi-folder.c:1631 ../src/camel/camel-mapi-folder.c:1656
+#: ../src/camel/camel-mapi-folder.c:1630 ../src/camel/camel-mapi-folder.c:1655
 #, c-format
 msgid "Offline."
 msgstr "מנותק."
 
-#: ../src/camel/camel-mapi-folder.c:1802
+#: ../src/camel/camel-mapi-folder.c:1801
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "לא ניתן לטעון את הסיכום עבור %s"
@@ -471,55 +489,55 @@ msgstr "לא ניתן לשלוח הודעה."
 msgid "Could not send message: %s"
 msgstr "לא ניתן לשלוח הודעה: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:100
+#: ../src/libexchangemapi/exchange-mapi-connection.c:101
 msgid "Failed to login into the server"
 msgstr "ארע כשל בכניסה לשרת"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:101
+#: ../src/libexchangemapi/exchange-mapi-connection.c:102
 msgid "Cannot create more sessions, session limit was reached"
 msgstr "לא ניתן ליצור הפעלות נוספות, ישנן הפעלות לפי המכסה"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:102
+#: ../src/libexchangemapi/exchange-mapi-connection.c:103
 msgid "User cancelled operation"
 msgstr "הפעולה בוטלה על ידי המשתמש"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:103
+#: ../src/libexchangemapi/exchange-mapi-connection.c:104
 msgid "Unable to abort"
 msgstr "לא ניתן לבטל"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:104
+#: ../src/libexchangemapi/exchange-mapi-connection.c:105
 msgid "Network error"
 msgstr "שגיאת רשת"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:105
+#: ../src/libexchangemapi/exchange-mapi-connection.c:106
 msgid "Disk error"
 msgstr "שגיאת כונן"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:106
+#: ../src/libexchangemapi/exchange-mapi-connection.c:107
 msgid "Password change required"
 msgstr "נדרש שינוי ססמה"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:107
+#: ../src/libexchangemapi/exchange-mapi-connection.c:108
 msgid "Password expired"
 msgstr "תוקף הססמה פג"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:108
+#: ../src/libexchangemapi/exchange-mapi-connection.c:109
 msgid "Invalid workstation account"
 msgstr "חשבון תחנת העבודה שגוי"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:109
+#: ../src/libexchangemapi/exchange-mapi-connection.c:110
 msgid "Invalid access time"
 msgstr "זמן הגישה שגוי"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:110
+#: ../src/libexchangemapi/exchange-mapi-connection.c:111
 msgid "Account is disabled"
 msgstr "החשבון מנוטרל"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:111
+#: ../src/libexchangemapi/exchange-mapi-connection.c:112
 msgid "End of session"
 msgstr "סיום ההפעלה"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:116
+#: ../src/libexchangemapi/exchange-mapi-connection.c:120
 #, c-format
 msgid "MAPI error %s (0x%x) occurred"
 msgstr "ארעה שגיאת MAPI‏ %s‏ (0x%x)"
@@ -527,15 +545,18 @@ msgstr "ארעה שגיאת MAPI‏ %s‏ (0x%x)"
 #. Translators: The first '%s' is replaced with an error context,
 #. aka where the error occurred, the second '%s' is replaced with
 #. the error message.
-#: ../src/libexchangemapi/exchange-mapi-connection.c:126
+#: ../src/libexchangemapi/exchange-mapi-connection.c:130
 #, c-format
 msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s:‏ %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3281
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3242
 msgid "All Public Folders"
 msgstr "כל התיקיות הציבוריות"
+
+#~ msgid "Downloading GAL entries from server…"
+#~ msgstr "רשומות ה־GAL מורדות מהשרת..."
 
 #~ msgid "Message fetching cancelled by user."
 #~ msgstr "קבלת ההודעות בוטלה על ידי המשתמש."
