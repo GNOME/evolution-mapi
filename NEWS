@@ -1,3 +1,43 @@
+evolution-mapi 0.31.6 2010-08-02
+--------------------------------
+
+Bug Fixes:
+	Bug 602395 - Reply to all in meeting pop up doesn't seem to work
+	             (Milan Crha)
+	Bug 623192 - Crash on creating new folder (Punit Jain)
+	Bug 624012 - Calendar backend requires cache for operations
+	             (Milan Crha)
+	Bug 624013 - Free/Busy fetch in offline claims a runtime error
+	             (Milan Crha)
+	Bug 624888 - Build breakage in master with OpenChange 0.9 (Milan Crha)
+	Bug 625069 - Slow message fetching (Milan Crha)
+	Bug 625382 - Migration from ECalBackendCache to ECalBackendStore
+	             (Punit Jain)
+
+Other Changes:
+	* Follow-up fix for breakness after changes for bug #622695
+	  (Milan Crha)
+	* PR_RECIPIENTS_FLAGS renamed to PR_RECIPIENT_FLAGS in openchange
+	  (Milan Crha)
+	* Make calendar backend fully asynchronous (Milan Crha)
+	* Merge common parts of EBookBackend-s and make it more asynchronous
+	  (Milan Crha)
+	* Adapt to libedata-book and libedata-cal API changes. (Matthew Barnes)
+
+Translations:
+	Runa Bhattacharjee (bn_IN)
+	Mario Blättermann (de)
+	Fotis Tsamis (el)
+	Jorge González (es)
+	Fran Diéguez (gl)
+	Yaron Shahrabani (he)
+	Sandeep Shedmake (mr)
+	Kjartan Maraas (nb)
+	krishnababu k (te)
+	Eleanor Chen (zh_CN)
+	Tao Wang (zh_CN)
+	Chao-Hsiung Liao (zh_HK)
+
 evolution-mapi 0.31.5 2010-07-12
 --------------------------------
 
