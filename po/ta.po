@@ -96,7 +96,7 @@ msgstr "'%s' முகவரி புத்தகத்தை உருவா�
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:778
 #, c-format
 msgid "Failed to create address book '%s'"
-msgstr "'s' முகவரி புத்தகத்தை உருவாக்க முடியவில்லை"
+msgstr "%'s' முகவரி புத்தகத்தை உருவாக்க முடியவில்லை"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:882
 #, c-format
@@ -106,7 +106,7 @@ msgstr " '%s' நாள்காட்டியை  உருவாக்க ம
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:885
 #, c-format
 msgid "Failed to create calendar '%s'"
-msgstr "உருவாக்குவதில்"
+msgstr "'%s' நாள்காட்டியை  உருவாக்க முடியவில்லை"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:100
 msgid "Folder"
