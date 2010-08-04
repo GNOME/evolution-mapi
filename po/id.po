@@ -1,16 +1,17 @@
 # Indonesian translation for evolution-mapi.
 # Copyright (C) 2010 evolution-mapi's COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-mapi package.
-# Ekasari Nugraheni <iin@informatika.lipi.go.id>, 2010.
 #
+# Ekasari Nugraheni <iin@informatika.lipi.go.id>, 2010.
+# Dirgita <dirgitadevina@yahoo.co.id>, 2010.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2010-06-20 23:58+0000\n"
-"PO-Revision-Date: 2010-06-21 07:00+0700\n"
-"Last-Translator: Andika Triwidada <andika@gmail.com>\n"
+"POT-Creation-Date: 2010-08-02 23:46+0000\n"
+"PO-Revision-Date: 2010-07-17 06:35+0700\n"
+"Last-Translator: Dirgita <dirgitadevina@yahoo.co.id>\n"
 "Language-Team: GNOME Indonesian Translation Team <gnome@i15n.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -18,17 +19,18 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Poedit-Language: Indonesian\n"
 "X-Poedit-Country: Indonesia\n"
+"X-Generator: Lokalize 1.0\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:541
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:543
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:668
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:670
 msgid "Global Address List"
 msgstr "Daftar Alamat Global"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:847
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:983
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:229
 #, c-format
 msgid "Enter Password for %s@%s"
-msgstr "Masukkan Kata Kunci untuk %s@%s"
+msgstr "Masukkan Sandi untuk %s@%s"
 
 #. NOTE: A good way would be display the list of username entries
 #. using GtkEntryCompletion in the username gtkentry. But plugins
@@ -51,37 +53,57 @@ msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
 msgstr ""
-"Server, nama pengguna dan nama domain tidak boleh kosong. Silakan diisi "
-"dengan nilai-nilai yang benar."
+"Server, nama pengguna, dan nama domain tidak boleh kosong. Silakan diisi "
+"dengan benar."
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:273
 msgid "Authentication finished successfully."
 msgstr "Otentikasi selesai dengan sukses."
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:279
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:289
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:290
 msgid "Authentication failed."
 msgstr "Otentikasi gagal."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:367
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:368
 msgid "_Domain name:"
 msgstr "Nama _domain:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:377
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:378
 msgid "_Authenticate"
 msgstr "Otentik_asi"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:387
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:388
 msgid "_Use secure connection"
 msgstr "G_unakan koneksi yang aman"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:522
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:523
 msgid "Personal Folders"
 msgstr "Folder Pribadi"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:650
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:658
 msgid "_Location:"
 msgstr "_Lokasi:"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:775
+#, c-format
+msgid "Failed to create address book '%s': %s"
+msgstr "Gagal membuat buku alamat '%s': %s"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:778
+#, c-format
+msgid "Failed to create address book '%s'"
+msgstr "Gagal membuat buku alamat '%s'"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:882
+#, c-format
+msgid "Failed to create calendar '%s': %s"
+msgstr "Gagal membuat kalender '%s': %s"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:885
+#, c-format
+msgid "Failed to create calendar '%s'"
+msgstr "Gagal membuat kalender '%s'"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:100
 msgid "Folder"
@@ -96,7 +118,7 @@ msgid "Unable to retrieve folder size information"
 msgstr "Tidak dapat mengambil informasi ukuran folder"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:169
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:368
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:367
 msgid "Folder Size"
 msgstr "Ukuran Folder"
 
@@ -105,150 +127,214 @@ msgid "Fetching folder list…"
 msgstr "Mengambil daftar folder…"
 
 #. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:353
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:352
 msgid "Miscellaneous"
 msgstr "Lain-lain"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:366
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:365
 msgid "View the size of all Exchange folders"
-msgstr "Lihat ukuran semua folder-folder Exchange "
+msgstr "Menampilkan ukuran semua folder Exchange"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:379
+# Apakah Exchange di sini adalah nama produk?
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:378
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
 msgstr "Pengaturan Exchange"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:388
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:387
 msgid "Folder size"
 msgstr "Ukuran folder"
 
-#. To translators : This is used to cache the downloaded contacts from GAL.
-#. The first %d is an index of the GAL entry,
-#. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:168
-#, c-format
-msgid "Caching GAL entry %d/%d"
-msgstr "Menyinggahkan entri GAL %d/%d"
+#: ../src/addressbook/e-book-backend-mapi.c:539
+msgid "Cannot connect"
+msgstr "Tidak dapat terhubung"
 
-#. To translators : This is used to cache the downloaded contacts from GAL.
-#. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:172
-#, c-format
-msgid "Caching GAL entry %d"
-msgstr "Menyinggahkan entri GAL %d"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:699
+#: ../src/addressbook/e-book-backend-mapi.c:682
 msgid "Searching"
 msgstr "Mencari"
 
-#. To translators : Here Evolution MAPI downloads the entries from the GAL server
-#: ../src/addressbook/e-book-backend-mapi-gal.c:717
-msgid "Downloading GAL entries from server…"
-msgstr "Mengunduh entri GAL dari server…"
+#: ../src/addressbook/e-book-backend-mapi.c:1935
+#: ../src/calendar/e-cal-backend-mapi.c:132
+msgid "Uknown error"
+msgstr "Galat tak dikenal"
 
-#: ../src/calendar/e-cal-backend-mapi.c:125
-#: ../src/calendar/e-cal-backend-mapi.c:1251
-#: ../src/camel/camel-mapi-store.c:567
-msgid "Authentication failed"
-msgstr "Otentikasi gagal"
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:713
+#: ../src/calendar/e-cal-backend-mapi.c:319
+msgid "Failed to remove public folder"
+msgstr "Gagal menghapus folder publik"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:770
+#: ../src/calendar/e-cal-backend-mapi.c:1726
+#: ../src/calendar/e-cal-backend-mapi.c:2218
+msgid "Failed to create item on a server"
+msgstr "Gagal membuat item pada server"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:896
+#: ../src/calendar/e-cal-backend-mapi.c:1959
+msgid "Failed to modify item on a server"
+msgstr "Gagal mengubah item pada server"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1043
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1109
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1160
+#: ../src/calendar/e-cal-backend-mapi.c:1253
+#: ../src/calendar/e-cal-backend-mapi.c:1274
+msgid "Failed to fetch items from a server"
+msgstr "Gagal mengambil item dari server"
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. %d is an index of the contact.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1061
+msgid "Caching contact %d"
+msgstr "Menyinggahkan kontak %d"
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. The first %d is an index of the contact,
+#. the second %d is total count of conacts on the server.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1065
+msgid "Caching contact %d/%d"
+msgstr "Menyinggahkan kontak %d/%d"
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. %d is an index of the GAL entry.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:127
+msgid "Caching GAL contact %d"
+msgstr "Menyinggahkan kontak GAL %d"
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. The first %d is an index of the GAL entry,
+#. the second %d is total count of entries in GAL.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:131
+msgid "Caching GAL contact %d/%d"
+msgstr "Menyinggahkan kontak GAL %d/%d"
+
+#: ../src/addressbook/e-book-backend-mapi-gal.c:162
+#: ../src/addressbook/e-book-backend-mapi-gal.c:197
+msgid "Failed to fetch GAL entries"
+msgstr "Gagal mengambil entri GAL"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:395
+#: ../src/calendar/e-cal-backend-mapi.c:364
 #, c-format
 msgid "Loading items in folder %s"
-msgstr "Memuat butir-butir dalam folder %s"
+msgstr "Memuat item dalam folder %s"
 
-#. FIXME: String : We need to restart evolution-data-server
 #: ../src/calendar/e-cal-backend-mapi.c:724
-#: ../src/calendar/e-cal-backend-mapi.c:734
-#: ../src/calendar/e-cal-backend-mapi.c:761
-#: ../src/calendar/e-cal-backend-mapi.c:823
-#: ../src/calendar/e-cal-backend-mapi.c:832
-msgid "Error fetching changes from the server."
-msgstr "Kesalahan saat mengambil perubahan dari server."
+#: ../src/calendar/e-cal-backend-mapi.c:750
+#: ../src/calendar/e-cal-backend-mapi.c:797
+#: ../src/calendar/e-cal-backend-mapi.c:876
+#: ../src/calendar/e-cal-backend-mapi.c:899
+#, c-format
+msgid "Failed to fetch changes from a server: %s"
+msgstr "Gagal mengambil perubahan dari server: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1166
-#: ../src/calendar/e-cal-backend-mapi.c:1177
-#: ../src/calendar/e-cal-backend-mapi.c:1286
-#: ../src/calendar/e-cal-backend-mapi.c:1371
-msgid "Could not create cache file"
-msgstr "Tidak dapat membuat berkas cache"
+#: ../src/calendar/e-cal-backend-mapi.c:729
+#: ../src/calendar/e-cal-backend-mapi.c:755
+#: ../src/calendar/e-cal-backend-mapi.c:802
+#: ../src/calendar/e-cal-backend-mapi.c:881
+#: ../src/calendar/e-cal-backend-mapi.c:904
+msgid "Failed to fetch changes from a server"
+msgstr "Gagal mengambil perubahan dari server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1297
+#: ../src/calendar/e-cal-backend-mapi.c:1388
 msgid "Could not create thread for populating cache"
-msgstr "Tidak dapat membuat thread untuk mengisi cache"
+msgstr "Tidak dapat membuat uliran untuk mengisi tembolok"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1733
+#: ../src/calendar/e-cal-backend-mapi.c:1450
+msgid "Could not create cache file"
+msgstr "Tidak dapat membuat berkas tembolok"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1853
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
 msgstr ""
 "Dukungan untuk memodifikasi satu janji yang berulang belum "
-"diimplementasikan. Tidak ada perubahan yang dilakukan ke janji pada server."
+"diimplementasikan. Tidak ada perubahan pada janji di server."
 
-#: ../src/camel/camel-mapi-folder.c:356
+#: ../src/calendar/e-cal-backend-mapi.c:2466
+msgid "Failed to get Free/Busy data"
+msgstr "Gagal memperoleh data Luang/Sibuk"
+
+#: ../src/camel/camel-mapi-folder.c:357
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
-msgstr "Memperbarui rangkuman cache lokal untuk pesan-pesan baru dalam %s"
+msgstr "Memperbarui rangkuman tembolok lokal untuk pesan-pesan baru dalam %s"
 
-#: ../src/camel/camel-mapi-folder.c:590
+#: ../src/camel/camel-mapi-folder.c:593
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Mengambil ID pesan dari server untuk %s"
 
-#: ../src/camel/camel-mapi-folder.c:620
+#: ../src/camel/camel-mapi-folder.c:623
 #, c-format
 msgid "Removing deleted messages from cache in %s"
-msgstr "Menghapus pesan yang telah ditandai dari cache di %s"
+msgstr "Menghapus pesan yang telah ditandai dari tembolok di %s"
 
 #. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:935
+#: ../src/camel/camel-mapi-folder.c:948
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Mengambil ringkasan informasi untuk pesan baru di %s"
 
-#: ../src/camel/camel-mapi-folder.c:1048 ../src/camel/camel-mapi-folder.c:1162
-#: ../src/camel/camel-mapi-folder.c:1170
+#: ../src/camel/camel-mapi-folder.c:1071 ../src/camel/camel-mapi-folder.c:1206
+#: ../src/camel/camel-mapi-folder.c:1216
+#, c-format
 msgid "This message is not available in offline mode."
 msgstr "Pesan ini tidak tersedia dalam modus luring"
 
-#: ../src/camel/camel-mapi-folder.c:1061
-msgid "Fetching items failed"
-msgstr "Pengambilan butir-butir gagal"
+#: ../src/camel/camel-mapi-folder.c:1088
+#, c-format
+msgid "Fetching items failed: %s"
+msgstr "Gagal mengambil item: %s"
 
-#. Translators: The first %s is replaced with a message ID,
-#. the second %s is replaced with a detailed error string
-#: ../src/camel/camel-mapi-folder.c:1124 ../src/camel/camel-mapi-folder.c:1145
+#: ../src/camel/camel-mapi-folder.c:1093
+msgid "Fetching items failed"
+msgstr "Gagal mengambil item"
+
+#: ../src/camel/camel-mapi-folder.c:1166
 #, c-format
 msgid "Cannot get message %s: %s"
-msgstr "Tidak bisa mendapatkan pesan %s: %s"
+msgstr "Tidak dapat memperoleh pesan %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1124
+#: ../src/camel/camel-mapi-folder.c:1167
 msgid "No such message"
 msgstr "Tidak ada pesan"
 
-#: ../src/camel/camel-mapi-folder.c:1136
-msgid "Message fetching cancelled by user."
-msgstr "Pengambilan pesan dibatalkan oleh pengguna."
+#: ../src/camel/camel-mapi-folder.c:1242
+#, c-format
+msgid "Could not get message: %s"
+msgstr "Tidak dapat memperoleh pesan: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1192 ../src/camel/camel-mapi-folder.c:1201
+#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1261
+#, c-format
 msgid "Could not get message"
-msgstr "Tidak bisa mendapatkan pesan"
+msgstr "Tidak dapat memperoleh pesan"
 
-#: ../src/camel/camel-mapi-folder.c:1467 ../src/camel/camel-mapi-folder.c:1484
+#: ../src/camel/camel-mapi-folder.c:1398
+#, c-format
+msgid "Failed to empty Trash: %s"
+msgstr "Gagal mengosongkan Tempat Sampah: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1403
+msgid "Failed to empty Trash"
+msgstr "Gagal mengosongkan Tempat Sampah"
+
+#: ../src/camel/camel-mapi-folder.c:1539 ../src/camel/camel-mapi-folder.c:1560
 msgid "Unknown error"
 msgstr "Kesalahan tak dikenal"
 
-#: ../src/camel/camel-mapi-folder.c:1541
+#: ../src/camel/camel-mapi-folder.c:1622
 #, c-format
 msgid "Cannot append message to folder '%s'"
-msgstr "Tidak bisa menambahkan pesan ke folder '%s'"
+msgstr "Tidak dapat menambahkan pesan pada folder '%s'"
 
-#: ../src/camel/camel-mapi-folder.c:1548
+#: ../src/camel/camel-mapi-folder.c:1630 ../src/camel/camel-mapi-folder.c:1655
+#, c-format
 msgid "Offline."
 msgstr "Luring."
 
-#: ../src/camel/camel-mapi-folder.c:1705
+#: ../src/camel/camel-mapi-folder.c:1801
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Tidak dapat memuat ringkasan untuk %s"
@@ -263,42 +349,42 @@ msgstr "P_eriksa pesan baru di semua folder"
 
 #: ../src/camel/camel-mapi-provider.c:50
 msgid "Options"
-msgstr "Pilihan"
+msgstr "Opsi"
 
 #: ../src/camel/camel-mapi-provider.c:52
 msgid "Automatically synchroni_ze account locally"
-msgstr "Secara otomatis men_sikronisasi akun secara lokal "
+msgstr "_Secara otomatis menyelaraskan akun secara lokal"
 
 #. i18n: copy from evolution:camel-imap-provider.c
 #: ../src/camel/camel-mapi-provider.c:55
 msgid "_Apply filters to new messages in Inbox on this server"
-msgstr "Ter_apkan filter terhadap pesan baru di Kotak masuk server ini"
+msgstr "Ter_apkan penyaring terhadap pesan baru di Kotak Masuk server ini"
 
 #: ../src/camel/camel-mapi-provider.c:57
 msgid "Check new messages for _Junk contents"
-msgstr "Periksa pesan baru apakah pesan berisi _sampah"
+msgstr "_Periksa pesan baru dari pesan sampah"
 
 #: ../src/camel/camel-mapi-provider.c:59
 msgid "Only check for Junk messag_es in the Inbox folder"
-msgstr "Hanya memeriksa p_esan-pesan sampah di folder Kotak masuk"
+msgstr "Hanya memeriksa p_esan sampah pada folder Kotak Masuk"
 
 #: ../src/camel/camel-mapi-provider.c:70
 msgid "For accessing Microsoft Exchange/OpenChange servers using MAPI"
-msgstr "Untuk mengakses Microsoft Exchange/OpenChange servers memakai MAPI"
+msgstr "Untuk mengakses server Microsoft Exchange/OpenChange dengan MAPI"
 
 #: ../src/camel/camel-mapi-provider.c:85
 msgid "Password"
-msgstr "Kata sandi"
+msgstr "Sandi"
 
 #: ../src/camel/camel-mapi-provider.c:86
 msgid ""
 "This option will connect to the OpenChange server using a plaintext password."
 msgstr ""
-"Opsi ini akan terhubung ke server OpenChange dengan menggunakan kata kunci "
-"teks biasa."
+"Opsi ini akan membuat hubungan pada server OpenChange dengan sandi teks "
+"biasa."
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:314 ../src/camel/camel-mapi-transport.c:121
+#: ../src/camel/camel-mapi-store.c:315 ../src/camel/camel-mapi-transport.c:133
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Server MAPI Exchange %s"
@@ -306,7 +392,7 @@ msgstr "Server MAPI Exchange %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:318 ../src/camel/camel-mapi-transport.c:124
+#: ../src/camel/camel-mapi-store.c:319 ../src/camel/camel-mapi-transport.c:136
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Layanan MAPI Exchange MAPI untuk %s pada %s"
@@ -315,55 +401,163 @@ msgstr "Layanan MAPI Exchange MAPI untuk %s pada %s"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:358
+#: ../src/camel/camel-mapi-store.c:361
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
-msgstr "%s Silakan masukkan kata kunci MAPI untuk %s@%s"
+msgstr "%s Masukkan sandi MAPI untuk %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:371
-msgid "You did not enter a password."
-msgstr "Anda tidak memasukkan kata kunci."
-
-#: ../src/camel/camel-mapi-store.c:378
+#: ../src/camel/camel-mapi-store.c:376
 #, c-format
-msgid "Unable to authenticate to Exchange MAPI server."
-msgstr "Tidak dapat meng-otentikasi untuk server MAPI Exchange."
+msgid "You did not enter a password."
+msgstr "Anda tidak memasukkan sandi."
 
-#: ../src/camel/camel-mapi-store.c:551
+#: ../src/camel/camel-mapi-store.c:384
+#, c-format
+msgid "Unable to authenticate to Exchange MAPI server: %s"
+msgstr "Tidak dapat mengotentikasi untuk server MAPI Exchange: %s"
+
+#: ../src/camel/camel-mapi-store.c:387
+msgid "Unable to authenticate to Exchange MAPI server"
+msgstr "Tidak dapat mengotentikasi untuk server MAPI Exchange"
+
+#: ../src/camel/camel-mapi-store.c:563
+#, c-format
 msgid "Cannot create MAPI folders in offline mode."
-msgstr "Tidak bisa membuat folder MAPI dalam modus luring."
+msgstr "Tidak dapat membuat folder MAPI dalam modus luring."
 
-#: ../src/camel/camel-mapi-store.c:556
+#: ../src/camel/camel-mapi-store.c:570
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "Tidak dapat membuat folder baru '%s'"
 
-#: ../src/camel/camel-mapi-store.c:741
+#: ../src/camel/camel-mapi-store.c:584
+#, c-format
+msgid "Authentication failed"
+msgstr "Otentikasi gagal"
+
+#: ../src/camel/camel-mapi-store.c:609
+#, c-format
+msgid "Cannot create folder '%s': %s"
+msgstr "Tidak dapat membuat folder '%s': %s"
+
+#: ../src/camel/camel-mapi-store.c:614
+#, c-format
+msgid "Cannot create folder '%s'"
+msgstr "Tidak dapat membuat folder '%s'"
+
+#: ../src/camel/camel-mapi-store.c:707
+#, c-format
+msgid "Cannot remove folder '%s': %s"
+msgstr "Tidak dapat menghapus folder '%s': %s"
+
+#: ../src/camel/camel-mapi-store.c:714
+#, c-format
+msgid "Cannot remove folder '%s'"
+msgstr "Tidak dapat menghapus folder '%s'"
+
+#: ../src/camel/camel-mapi-store.c:804
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
 msgstr "Tidak dapat mengubah nama folder MAPI '%s'. Folder tidak ada."
 
-#: ../src/camel/camel-mapi-store.c:752
+#: ../src/camel/camel-mapi-store.c:816
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'."
 msgstr "Tidak dapat mengubah nama baku folder MAPI  '%s' menjadi '%s'."
 
-#: ../src/camel/camel-mapi-store.c:777 ../src/camel/camel-mapi-store.c:792
-#: ../src/camel/camel-mapi-store.c:843
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:843 ../src/camel/camel-mapi-store.c:868
+#: ../src/camel/camel-mapi-store.c:930
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "Tidak dapat mengubah nama folder MAPI '%s' menjadi '%s'"
 
-#: ../src/camel/camel-mapi-store.c:1382
-msgid "Folder list not available in offline mode."
-msgstr "Daftar Folder tidak tersedia dalam modus luring."
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#. The last '%s' is a detailed error message.
+#: ../src/camel/camel-mapi-store.c:861 ../src/camel/camel-mapi-store.c:924
+#, c-format
+msgid "Cannot rename MAPI folder '%s' to '%s': %s"
+msgstr "Tidak dapat mengubah nama folder MAPI '%s' menjadi '%s': %s"
 
-#. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:95
-#: ../src/camel/camel-mapi-transport.c:109
+#: ../src/camel/camel-mapi-store.c:1493
+#, c-format
+msgid "Folder list not available in offline mode."
+msgstr "Daftar folder tidak tersedia dalam modus luring."
+
+#: ../src/camel/camel-mapi-transport.c:99
+#: ../src/camel/camel-mapi-transport.c:120
+#, c-format
 msgid "Could not send message."
 msgstr "Tidak dapat mengirim pesan."
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3143
+#: ../src/camel/camel-mapi-transport.c:115
+#, c-format
+msgid "Could not send message: %s"
+msgstr "Tidak dapat mengirim pesan: %s"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:101
+msgid "Failed to login into the server"
+msgstr "Gagal masuk pada server"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:102
+msgid "Cannot create more sessions, session limit was reached"
+msgstr ""
+"Tidak dapat membuat sesi yang lain, telah sampai pada batas jumlah sesi"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:103
+msgid "User cancelled operation"
+msgstr "Pengguna membatalkan operasi"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:104
+msgid "Unable to abort"
+msgstr "Tidak dapat membatalkan"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:105
+msgid "Network error"
+msgstr "Galat pada jaringan"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:106
+msgid "Disk error"
+msgstr "Galat pada diska"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:107
+msgid "Password change required"
+msgstr "Perlu mengubah sandi"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:108
+msgid "Password expired"
+msgstr "Sandi kedaluwarsa"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:109
+msgid "Invalid workstation account"
+msgstr "Akun tidak sah untuk stasiun kerja"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:110
+msgid "Invalid access time"
+msgstr "Waktu akses tidak sah"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:111
+msgid "Account is disabled"
+msgstr "Akun dinonaktifkan"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:112
+msgid "End of session"
+msgstr "Akhir sesi"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:120
+#, c-format
+msgid "MAPI error %s (0x%x) occurred"
+msgstr "Terjadi galat MAPI %s (0x%x)"
+
+#. Translators: The first '%s' is replaced with an error context,
+#. aka where the error occurred, the second '%s' is replaced with
+#. the error message.
+#: ../src/libexchangemapi/exchange-mapi-connection.c:130
+#, c-format
+msgctxt "EXCHANGEMAPI_ERROR"
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3242
 msgid "All Public Folders"
 msgstr "Semua Folder Publik"
