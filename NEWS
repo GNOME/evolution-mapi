@@ -1,3 +1,16 @@
+evolution-mapi 0.30.3 2010-08-11
+--------------------------------
+
+Bug Fixes:
+	Bug #622923 - Birthday/Anniversary shifted by one day (Charles Bovy)
+
+Translations:
+	Fotis Tsamis (el)
+	Andika Triwidada (id)
+	Sandeep Shedmake (mr)
+	krishnababu k (te)
+	Yinghua Wang (zh_CN)
+
 evolution-mapi 0.30.2 2010-06-21
 --------------------------------
 Bug Fixes:
