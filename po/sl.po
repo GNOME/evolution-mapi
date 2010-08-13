@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
 "POT-Creation-Date: 2010-08-11 11:04+0000\n"
-"PO-Revision-Date: 2010-08-13 22:06+0100\n"
+"PO-Revision-Date: 2010-08-13 22:08+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
@@ -182,7 +182,7 @@ msgstr "Pridobivanje predmeta na strežniku je spodletelo"
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:1061
 #, c-format
 msgid "Caching contact %d"
-msgstr "Predpomnjenje stika %s"
+msgstr "Predpomnjenje stika %d"
 
 #. Translators : This is used to cache the downloaded contacts from a server.
 #. The first %d is an index of the contact,
