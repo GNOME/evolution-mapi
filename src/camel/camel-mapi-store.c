@@ -1845,7 +1845,7 @@ mapi_unsubscribe_folder(CamelStore *store, const gchar *folder_name, GError **er
 	CamelFolderInfo *fi;
 	CamelStoreInfo *si;
 	gchar *parent_name = NULL;
-	const gchar *fid = NULL;
+	const gchar *fid = NULL, *use_folder_name = folder_name;
 	gchar *f_name = NULL;
 
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
@@ -1874,7 +1874,7 @@ mapi_unsubscribe_folder(CamelStore *store, const gchar *folder_name, GError **er
 		camel_store_folder_unsubscribed (store, fi);
 		camel_folder_info_free (fi);
 	} else {
-		guint folder_type = mapi_folders_hash_table_type_lookup (mapi_store, folder_name);
+		guint folder_type = mapi_folders_hash_table_type_lookup (mapi_store, use_folder_name);
 		exchange_mapi_remove_esource(url, folder_name, fid, folder_type);
 	}
 	camel_store_summary_info_free((CamelStoreSummary *)mapi_store->summary, si);
