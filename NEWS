@@ -1,3 +1,23 @@
+evolution-mapi 0.31.90 2010-08-16
+---------------------------------
+
+Bug Fixes:
+	Bug #626173 - Load the store after cache creation (Punit Jain)
+	Bug #626860 - Crash while unsubscribing folder (Punit Jain)
+
+Translations:
+	Daniel Nylander (sv)
+	Dirgita (id)
+	Fran Diéguez (gl)
+	Hideki Yamane (ja)
+	Jorge González (es)
+	Kjartan Maraas (nb)
+	Lucian Adrian Grijincu (ro)
+	Matej Urbančič (sl)
+	Vasudeven (ta)
+	Yaron Shahrabani (he)
+	Yinghua Wang (zh_CN)
+
 evolution-mapi 0.31.6 2010-08-02
 --------------------------------
 
