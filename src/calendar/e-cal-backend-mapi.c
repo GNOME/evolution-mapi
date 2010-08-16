@@ -1379,7 +1379,6 @@ ecbm_connect (ECalBackendMAPI *cbmapi, GError **perror)
 		break;
 	}
 
-	e_cal_backend_store_load (priv->store);
 	/* spawn a new thread for caching the calendar items */
 	thread = g_thread_create ((GThreadFunc) cache_init, cbmapi, FALSE, &error);
 	if (!thread) {
@@ -1450,6 +1449,8 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, gboolean only_if_exists, const g
 		g_propagate_error (perror, EDC_ERROR_EX (OtherError, _("Could not create cache file")));
 		return;
 	}
+
+	e_cal_backend_store_load (priv->store);
 	e_cal_backend_store_set_default_timezone (priv->store, priv->default_zone);
 
 	/* Not for remote */
