@@ -4,22 +4,22 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: evolution-mapi 0.31.5\n"
+"Project-Id-Version: evolution-mapi 0.31.91\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-20 15:07+0800\n"
-"PO-Revision-Date: 2010-07-16 10:31+0800\n"
+"POT-Creation-Date: 2010-08-21 20:16+0800\n"
+"PO-Revision-Date: 2010-08-20 09:03+0800\n"
 "Last-Translator: Chao-Hsiung Liao <j_h_liau@yahoo.com.tw>\n"
 "Language-Team: Chinese/Traditional <zh-l10n@lists.linux.org.tw>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:672
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:674
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:668
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:670
 msgid "Global Address List"
 msgstr "全域通訊清單"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:987
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:983
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:229
 #, c-format
 msgid "Enter Password for %s@%s"
@@ -109,7 +109,7 @@ msgid "Unable to retrieve folder size information"
 msgstr "無法取得資料夾大小資訊"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:169
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:368
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:367
 msgid "Folder Size"
 msgstr "資料夾大小"
 
@@ -118,124 +118,134 @@ msgid "Fetching folder list…"
 msgstr "正在取得資料夾清單…"
 
 #. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:353
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:352
 msgid "Miscellaneous"
 msgstr "雜項"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:366
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:365
 msgid "View the size of all Exchange folders"
 msgstr "檢視所有 Exchange 資料夾的大小"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:379
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:378
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
 msgstr "Exchange 設定值"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:388
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:387
 msgid "Folder size"
 msgstr "資料夾大小"
 
-#: ../src/addressbook/e-book-backend-mapi.c:726
-#: ../src/calendar/e-cal-backend-mapi.c:1749
-#: ../src/calendar/e-cal-backend-mapi.c:2235
-msgid "Failed to create item on a server"
-msgstr "無法在伺服器建立項目"
-
-#: ../src/addressbook/e-book-backend-mapi.c:855
-#: ../src/calendar/e-cal-backend-mapi.c:1979
-msgid "Failed to modify item on a server"
-msgstr "無法在伺服器修改項目"
-
-#: ../src/addressbook/e-book-backend-mapi.c:1125
-#: ../src/addressbook/e-book-backend-mapi.c:1414
-#: ../src/addressbook/e-book-backend-mapi.c:1436
-#: ../src/calendar/e-cal-backend-mapi.c:1255
-#: ../src/calendar/e-cal-backend-mapi.c:1276
-msgid "Failed to fetch items from a server"
-msgstr "無法從伺服器取回項目"
-
-#: ../src/addressbook/e-book-backend-mapi.c:1645
-#: ../src/addressbook/e-book-backend-mapi-gal.c:313
+#: ../src/addressbook/e-book-backend-mapi.c:539
 msgid "Cannot connect"
 msgstr "不能連線"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1766
-#: ../src/calendar/e-cal-backend-mapi.c:329
-msgid "Failed to remove public folder"
-msgstr "無法移除公用資料夾"
-
-#. To translators : This is used to cache the downloaded contacts from GAL.
-#. The first %d is an index of the GAL entry,
-#. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:170
-#, c-format
-msgid "Caching GAL entry %d/%d"
-msgstr "正在快取 GAL 項目 %d/%d"
-
-#. To translators : This is used to cache the downloaded contacts from GAL.
-#. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:174
-#, c-format
-msgid "Caching GAL entry %d"
-msgstr "正在快取 GAL 項目 %d"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:214
-msgid "Failed to fetch GAL entries"
-msgstr "無法擷取 GAL 項目"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:645
+#: ../src/addressbook/e-book-backend-mapi.c:682
 msgid "Searching"
 msgstr "正在搜尋"
 
-#. To translators : Here Evolution MAPI downloads the entries from the GAL server
-#: ../src/addressbook/e-book-backend-mapi-gal.c:665
-msgid "Downloading GAL entries from server…"
-msgstr "正在從伺服器下載 GAL 項目…"
-
-#: ../src/addressbook/e-book-backend-mapi-utils.c:460
-#: ../src/calendar/e-cal-backend-mapi.c:131
+#: ../src/addressbook/e-book-backend-mapi.c:1935
+#: ../src/calendar/e-cal-backend-mapi.c:132
 msgid "Uknown error"
 msgstr "不明的錯誤"
 
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:713
+#: ../src/calendar/e-cal-backend-mapi.c:319
+msgid "Failed to remove public folder"
+msgstr "無法移除公用資料夾"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:770
+#: ../src/calendar/e-cal-backend-mapi.c:1727
+#: ../src/calendar/e-cal-backend-mapi.c:2219
+msgid "Failed to create item on a server"
+msgstr "無法在伺服器建立項目"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:896
+#: ../src/calendar/e-cal-backend-mapi.c:1960
+msgid "Failed to modify item on a server"
+msgstr "無法在伺服器修改項目"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1043
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1109
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1160
+#: ../src/calendar/e-cal-backend-mapi.c:1253
+#: ../src/calendar/e-cal-backend-mapi.c:1274
+msgid "Failed to fetch items from a server"
+msgstr "無法從伺服器取回項目"
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. %d is an index of the contact.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1061
+#, c-format
+msgid "Caching contact %d"
+msgstr "正在快取連絡人 %d"
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. The first %d is an index of the contact,
+#. the second %d is total count of conacts on the server.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1065
+#, c-format
+msgid "Caching contact %d/%d"
+msgstr "正在快取連絡人 %d/%d"
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. %d is an index of the GAL entry.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:127
+#, c-format
+msgid "Caching GAL contact %d"
+msgstr "正在快取 GAL 連絡人 %d"
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. The first %d is an index of the GAL entry,
+#. the second %d is total count of entries in GAL.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:131
+#, c-format
+msgid "Caching GAL contact %d/%d"
+msgstr "正在快取 GAL 連絡人 %d/%d"
+
+#: ../src/addressbook/e-book-backend-mapi-gal.c:162
+#: ../src/addressbook/e-book-backend-mapi-gal.c:197
+msgid "Failed to fetch GAL entries"
+msgstr "無法擷取 GAL 項目"
+
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:374
+#: ../src/calendar/e-cal-backend-mapi.c:364
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "正在載入資料夾 %s 的項目"
 
-#: ../src/calendar/e-cal-backend-mapi.c:730
-#: ../src/calendar/e-cal-backend-mapi.c:756
-#: ../src/calendar/e-cal-backend-mapi.c:803
-#: ../src/calendar/e-cal-backend-mapi.c:882
-#: ../src/calendar/e-cal-backend-mapi.c:905
+#: ../src/calendar/e-cal-backend-mapi.c:724
+#: ../src/calendar/e-cal-backend-mapi.c:750
+#: ../src/calendar/e-cal-backend-mapi.c:797
+#: ../src/calendar/e-cal-backend-mapi.c:876
+#: ../src/calendar/e-cal-backend-mapi.c:899
 #, c-format
 msgid "Failed to fetch changes from a server: %s"
 msgstr "無法從伺服器取回變更：%s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:735
-#: ../src/calendar/e-cal-backend-mapi.c:761
-#: ../src/calendar/e-cal-backend-mapi.c:808
-#: ../src/calendar/e-cal-backend-mapi.c:887
-#: ../src/calendar/e-cal-backend-mapi.c:910
+#: ../src/calendar/e-cal-backend-mapi.c:729
+#: ../src/calendar/e-cal-backend-mapi.c:755
+#: ../src/calendar/e-cal-backend-mapi.c:802
+#: ../src/calendar/e-cal-backend-mapi.c:881
+#: ../src/calendar/e-cal-backend-mapi.c:904
 msgid "Failed to fetch changes from a server"
 msgstr "無法從伺服器取回變更"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1388
+#: ../src/calendar/e-cal-backend-mapi.c:1387
 msgid "Could not create thread for populating cache"
 msgstr "無法建立移植快取的執行緒"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1453
+#: ../src/calendar/e-cal-backend-mapi.c:1449
 msgid "Could not create cache file"
 msgstr "無法建立快取檔案"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1873
+#: ../src/calendar/e-cal-backend-mapi.c:1854
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
 msgstr ""
 "支援修改週期性約會的單一實體功能尚未實作。伺服器上的約會項目不會有變更。"
 
-#: ../src/calendar/e-cal-backend-mapi.c:2483
+#: ../src/calendar/e-cal-backend-mapi.c:2467
 msgid "Failed to get Free/Busy data"
 msgstr "無法取得空閒/忙碌資料"
 
@@ -255,69 +265,69 @@ msgid "Removing deleted messages from cache in %s"
 msgstr "正從 %s 的快取移除已刪除的郵件"
 
 #. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:949
+#: ../src/camel/camel-mapi-folder.c:948
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "正取得 %s 中新郵件的摘要資訊"
 
-#: ../src/camel/camel-mapi-folder.c:1072 ../src/camel/camel-mapi-folder.c:1207
-#: ../src/camel/camel-mapi-folder.c:1217
+#: ../src/camel/camel-mapi-folder.c:1071 ../src/camel/camel-mapi-folder.c:1206
+#: ../src/camel/camel-mapi-folder.c:1216
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "這封郵件無法在離線模式下使用。"
 
-#: ../src/camel/camel-mapi-folder.c:1089
+#: ../src/camel/camel-mapi-folder.c:1088
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "取得項目失敗：%s"
 
-#: ../src/camel/camel-mapi-folder.c:1094
+#: ../src/camel/camel-mapi-folder.c:1093
 msgid "Fetching items failed"
 msgstr "取得項目失敗"
 
-#: ../src/camel/camel-mapi-folder.c:1167
+#: ../src/camel/camel-mapi-folder.c:1166
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "無法取得郵件 %s： %s"
 
-#: ../src/camel/camel-mapi-folder.c:1168
+#: ../src/camel/camel-mapi-folder.c:1167
 msgid "No such message"
 msgstr "沒有這個郵件。"
 
-#: ../src/camel/camel-mapi-folder.c:1243
+#: ../src/camel/camel-mapi-folder.c:1242
 #, c-format
 msgid "Could not get message: %s"
 msgstr "無法取得郵件：%s"
 
-#: ../src/camel/camel-mapi-folder.c:1249 ../src/camel/camel-mapi-folder.c:1262
+#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1261
 #, c-format
 msgid "Could not get message"
 msgstr "無法取得郵件。"
 
-#: ../src/camel/camel-mapi-folder.c:1399
+#: ../src/camel/camel-mapi-folder.c:1398
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "無法清理回收筒：%s"
 
-#: ../src/camel/camel-mapi-folder.c:1404
+#: ../src/camel/camel-mapi-folder.c:1403
 msgid "Failed to empty Trash"
 msgstr "無法清理回收筒"
 
-#: ../src/camel/camel-mapi-folder.c:1540 ../src/camel/camel-mapi-folder.c:1561
+#: ../src/camel/camel-mapi-folder.c:1539 ../src/camel/camel-mapi-folder.c:1560
 msgid "Unknown error"
 msgstr "不明的錯誤"
 
-#: ../src/camel/camel-mapi-folder.c:1623
+#: ../src/camel/camel-mapi-folder.c:1622
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "不能將郵件加入至資料夾「%s」"
 
-#: ../src/camel/camel-mapi-folder.c:1631 ../src/camel/camel-mapi-folder.c:1656
+#: ../src/camel/camel-mapi-folder.c:1630 ../src/camel/camel-mapi-folder.c:1655
 #, c-format
 msgid "Offline."
 msgstr "離線。"
 
-#: ../src/camel/camel-mapi-folder.c:1802
+#: ../src/camel/camel-mapi-folder.c:1801
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "無法載入 %s 的摘要"
@@ -476,55 +486,55 @@ msgstr "無法送出郵件。"
 msgid "Could not send message: %s"
 msgstr "郵件無法傳送： %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:100
+#: ../src/libexchangemapi/exchange-mapi-connection.c:101
 msgid "Failed to login into the server"
 msgstr "無法登入伺服器"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:101
+#: ../src/libexchangemapi/exchange-mapi-connection.c:102
 msgid "Cannot create more sessions, session limit was reached"
 msgstr "不能建立更多的作業階段，已達作業階段上限"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:102
+#: ../src/libexchangemapi/exchange-mapi-connection.c:103
 msgid "User cancelled operation"
 msgstr "使用者已取消操作"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:103
+#: ../src/libexchangemapi/exchange-mapi-connection.c:104
 msgid "Unable to abort"
 msgstr "無法中止"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:104
+#: ../src/libexchangemapi/exchange-mapi-connection.c:105
 msgid "Network error"
 msgstr "網路錯誤"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:105
+#: ../src/libexchangemapi/exchange-mapi-connection.c:106
 msgid "Disk error"
 msgstr "磁碟錯誤"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:106
+#: ../src/libexchangemapi/exchange-mapi-connection.c:107
 msgid "Password change required"
 msgstr "需要改變密碼 "
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:107
+#: ../src/libexchangemapi/exchange-mapi-connection.c:108
 msgid "Password expired"
 msgstr "密碼已經到期"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:108
+#: ../src/libexchangemapi/exchange-mapi-connection.c:109
 msgid "Invalid workstation account"
 msgstr "無效的工作站帳號"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:109
+#: ../src/libexchangemapi/exchange-mapi-connection.c:110
 msgid "Invalid access time"
 msgstr "無效的存取時間"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:110
+#: ../src/libexchangemapi/exchange-mapi-connection.c:111
 msgid "Account is disabled"
 msgstr "這個帳號已停用"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:111
+#: ../src/libexchangemapi/exchange-mapi-connection.c:112
 msgid "End of session"
 msgstr "作業階段結束"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:116
+#: ../src/libexchangemapi/exchange-mapi-connection.c:120
 #, c-format
 msgid "MAPI error %s (0x%x) occurred"
 msgstr "發生 MAPI 錯誤 %s (0x%x) 錯誤"
@@ -532,15 +542,18 @@ msgstr "發生 MAPI 錯誤 %s (0x%x) 錯誤"
 #. Translators: The first '%s' is replaced with an error context,
 #. aka where the error occurred, the second '%s' is replaced with
 #. the error message.
-#: ../src/libexchangemapi/exchange-mapi-connection.c:126
+#: ../src/libexchangemapi/exchange-mapi-connection.c:130
 #, c-format
 msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s：%s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3275
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3242
 msgid "All Public Folders"
 msgstr "所有公用資料夾"
+
+#~ msgid "Downloading GAL entries from server…"
+#~ msgstr "正在從伺服器下載 GAL 項目…"
 
 #~ msgid "Folders Size"
 #~ msgstr "資料夾大小"
