@@ -629,16 +629,8 @@ exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32
 
 	if (ms == MAPI_E_SUCCESS) {
 		ExchangeMAPIStream		*stream = g_new0 (ExchangeMAPIStream, 1);
-		struct mapi_SPropValue_array	properties_array;
 
-		/* Build a mapi_SPropValue_array structure */
-		properties_array.cValues = 1;
-		properties_array.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, properties_array.cValues + 1);
-		properties_array.lpProps[0].ulPropTag = proptag;
-		/* This call is needed in case the read stream was a named prop. */
-		mapi_SPropValue_array_named (obj_message, &properties_array);
-
-		stream->proptag = properties_array.lpProps[0].ulPropTag;
+		stream->proptag = proptag;
 		set_stream_value (stream, cpid, buf_data, off_data, FALSE);
 
 		g_debug("Attempt succeeded for proptag 0x%08X (after name conversion) ", stream->proptag);
@@ -1022,6 +1014,8 @@ exchange_mapi_util_get_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 				MAPIFreeBuffer (tags);
 			}
 		}
+
+		mapi_SPropValue_array_named (&obj_attach, &properties);
 
 		/* just to get all the other streams */
 		for (z = 0; z < properties.cValues; z++) {
@@ -1663,6 +1657,8 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 				FetchItemsCallbackData *item_data;
 
 				if ((options & MAPI_OPTIONS_DONT_OPEN_MESSAGE) == 0) {
+					mapi_SPropValue_array_named (&obj_message, &properties_array);
+
 					if ((options & MAPI_OPTIONS_FETCH_GENERIC_STREAMS) != 0) {
 						uint32_t z;
 						const uint32_t *cpid = exchange_mapi_util_find_array_propval (&properties_array, PR_INTERNET_CPID);
@@ -1673,8 +1669,6 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 								exchange_mapi_util_read_generic_stream (&obj_message, cpid, properties_array.lpProps[z].ulPropTag, &stream_list, &properties_array, NULL);
 						}
 					}
-
-					mapi_SPropValue_array_named(&obj_message, &properties_array);
 				}
 
 				/* NOTE: stream_list, recipient_list and attach_list
@@ -1807,6 +1801,8 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 	}
 
 	if (ms == MAPI_E_SUCCESS) {
+		mapi_SPropValue_array_named (obj_message, &properties_array);
+
 		if ((options & MAPI_OPTIONS_FETCH_GENERIC_STREAMS)) {
 			uint32_t z;
 
@@ -1817,8 +1813,6 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 				}
 			}
 		}
-
-		mapi_SPropValue_array_named (obj_message, &properties_array);
 	}
 
 	/* Release the objects so that the callback may use the store. */
