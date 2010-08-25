@@ -2039,7 +2039,7 @@ exchange_mapi_connection_remove_folder (ExchangeMapiConnection *conn, mapi_id_t 
 	for (l = exchange_mapi_connection_peek_folders_list (conn); l && !folder; l = l->next) {
 		folder = l->data;
 
-		if (!folder || !folder->folder_id)
+		if (!folder || !folder->folder_id || folder->folder_id != fid)
 			folder = NULL;
 	}
 
