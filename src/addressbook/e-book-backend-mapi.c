@@ -1058,6 +1058,8 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 	} break;
 	}
 
+	if (op->book)
+		g_object_unref (op->book);
 	g_free (op);
 }
 
@@ -1074,6 +1076,9 @@ base_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, Operatio
 	ebbm = E_BOOK_BACKEND_MAPI (backend);
 	priv = ebbm->priv;
 	g_return_if_fail (priv != NULL);
+
+	if (book)
+		g_object_ref (book);
 
 	op = g_new0 (OperationBase, 1);
 	op->ot = ot;
@@ -1096,6 +1101,9 @@ str_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, const gch
 	ebbm = E_BOOK_BACKEND_MAPI (backend);
 	priv = ebbm->priv;
 	g_return_if_fail (priv != NULL);
+
+	if (book)
+		g_object_ref (book);
 
 	op = g_new0 (OperationStr, 1);
 	op->base.ot = ot;
@@ -1182,6 +1190,9 @@ ebbm_op_remove_contacts (EBookBackend *backend, EDataBook *book, guint32 opid, G
 	priv = ebbm->priv;
 	g_return_if_fail (priv != NULL);
 
+	if (book)
+		g_object_ref (book);
+
 	op = g_new0 (OperationIDList, 1);
 	op->base.ot = OP_REMOVE_CONTACTS;
 	op->base.book = book;
@@ -1261,6 +1272,9 @@ ebbm_op_authenticate_user (EBookBackend *backend, EDataBook *book, guint32 opid,
 	priv = ebbm->priv;
 	g_return_if_fail (priv != NULL);
 
+	if (book)
+		g_object_ref (book);
+
 	op = g_new0 (OperationAuthenticateUser, 1);
 	op->base.ot = OP_AUTHENTICATE_USER;
 	op->base.book = book;
@@ -1287,6 +1301,7 @@ e_book_backend_mapi_init (EBookBackendMAPI *ebma)
 	priv->conn_lock = g_mutex_new ();
 
 	priv->update_cache = g_cancellable_new ();
+	priv->update_cache_thread = NULL;
 }
 
 static void

@@ -3232,6 +3232,9 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 	} break;
 	}
 
+	if (op->cal)
+		g_object_unref (op->cal);
+
 	g_free (op);
 }
 
@@ -3262,6 +3265,9 @@ base_op_abstract (ECalBackend *backend, EDataCal *cal, EServerMethodContext cont
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
 
+	if (cal)
+		g_object_ref (cal);
+
 	op = g_new0 (OperationBase, 1);
 	op->ot = ot;
 	op->cal = cal;
@@ -3283,6 +3289,9 @@ str_op_abstract (ECalBackend *backend, EDataCal *cal, EServerMethodContext conte
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
+
+	if (cal)
+		g_object_ref (cal);
 
 	op = g_new0 (OperationStr, 1);
 	op->base.ot = ot;
@@ -3306,6 +3315,9 @@ str2_op_abstract (ECalBackend *backend, EDataCal *cal, EServerMethodContext cont
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
+
+	if (cal)
+		g_object_ref (cal);
 
 	op = g_new0 (OperationStr2, 1);
 	op->base.ot = ot;
@@ -3363,6 +3375,9 @@ ecbm_op_open (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
 
+	if (cal)
+		g_object_ref (cal);
+
 	op = g_new0 (OperationOpen, 1);
 	op->base.ot = OP_OPEN;
 	op->base.cal = cal;
@@ -3393,6 +3408,9 @@ ecbm_op_modify_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
 
+	if (cal)
+		g_object_ref (cal);
+
 	op = g_new0 (OperationModify, 1);
 	op->base.ot = OP_MODIFY_OBJECT;
 	op->base.cal = cal;
@@ -3416,6 +3434,9 @@ ecbm_op_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
+
+	if (cal)
+		g_object_ref (cal);
 
 	op = g_new0 (OperationRemove, 1);
 	op->base.ot = OP_REMOVE_OBJECT;
