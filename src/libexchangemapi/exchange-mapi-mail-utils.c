@@ -46,6 +46,8 @@ mail_item_free (MailItem *item)
 	exchange_mapi_util_free_stream_list (&item->generic_streams);
 	exchange_mapi_util_free_recipient_list (&item->recipients);
 
+	g_free (item->msg_class);
+
 	g_free (item);
 }
 
@@ -98,6 +100,8 @@ fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 			break;
 		}
 	}
+
+	item->msg_class = g_strdup (msg_class);
 
 	item->is_cal = FALSE;
 	if (msg_class && g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_PREFIX)) {
@@ -655,8 +659,11 @@ is_apple_attachment (ExchangeMAPIAttachment *attach, guint32 *data_len, guint32 
 /*Takes raw attachment streams and converts to MIME Parts. Parts are added to
   either inline / non-inline lists.*/
 static void
-mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, GSList *attachments, GSList **inline_attachs, GSList **noninline)
+mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, const gchar *msg_class, GSList *attachments, GSList **inline_attachs, GSList **noninline)
 {
+	/* SMIME encrypted are without ending dot */
+	gboolean is_smime = msg_class && strstr (msg_class, ".SMIME.") > msg_class;
+
 	for (;attachments != NULL; attachments = attachments->next) {
 		ExchangeMAPIAttachment *attach = (ExchangeMAPIAttachment *)attachments->data;
 		ExchangeMAPIStream *stream = NULL;
@@ -771,7 +778,35 @@ mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, GSL
 			part = camel_mime_part_new ();
 			camel_medium_set_content (CAMEL_MEDIUM (part), CAMEL_DATA_WRAPPER (mp));
 			g_object_unref (mp);
-		} else {
+		} else if (is_smime) {
+			CamelMimeParser *parser;
+			CamelStream *mem;
+
+			mem = camel_stream_mem_new ();
+			camel_stream_write (mem, (const gchar *) stream->value->data, stream->value->len, NULL);
+			camel_stream_reset (mem, NULL);
+
+			parser = camel_mime_parser_new ();
+			camel_mime_parser_scan_from (parser, FALSE);
+			camel_mime_parser_scan_pre_from (parser, FALSE);
+			camel_mime_parser_init_with_stream (parser, mem, NULL);
+
+			if (camel_mime_parser_step (parser, NULL, NULL) == CAMEL_MIME_PARSER_STATE_HEADER
+			    && camel_mime_parser_content_type (parser) != NULL) {
+				g_object_unref (part);
+				part = camel_mime_part_new ();
+
+				camel_data_wrapper_set_mime_type_field (CAMEL_DATA_WRAPPER (part), camel_mime_parser_content_type (parser));
+				camel_mime_part_construct_content_from_parser (part, parser, NULL);
+			} else {
+				is_smime = FALSE;
+			}
+
+			g_object_unref (parser);
+			g_object_unref (mem);
+		} 
+
+		if (!is_smime && !is_apple) {
 			camel_mime_part_set_content (part, (const gchar *) stream->value->data, stream->value->len, mime_type);
 
 			content_type = camel_mime_part_get_content_type (part);
@@ -785,7 +820,7 @@ mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, GSL
 		content_id = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps,
 											   PR_ATTACH_CONTENT_ID);
 		/* TODO : Add disposition */
-		if (content_id && !is_apple) {
+		if (content_id && !is_apple && !is_smime) {
 			camel_mime_part_set_content_id (part, content_id);
 			*inline_attachs = g_slist_append (*inline_attachs, part);
 		} else
@@ -805,6 +840,7 @@ mapi_mail_item_to_mime_message (ExchangeMapiConnection *conn, MailItem *item)
 
 	gboolean build_alternative = FALSE;
 	gboolean build_related = FALSE;
+	gboolean skip_set_content = FALSE;
 
 	g_return_val_if_fail (conn != NULL, NULL);
 	g_return_val_if_fail (item != NULL, NULL);
@@ -814,7 +850,7 @@ mapi_mail_item_to_mime_message (ExchangeMapiConnection *conn, MailItem *item)
 
 	mapi_mime_set_recipient_list (msg, item);
 	mapi_mime_set_msg_headers (conn, msg, item);
-	mapi_mime_classify_attachments (conn, item->fid, attach_list, &inline_attachs, &noninline_attachs);
+	mapi_mime_classify_attachments (conn, item->fid, item->msg_class, attach_list, &inline_attachs, &noninline_attachs);
 
 	build_alternative = g_slist_length (item->msg.body_parts) > 1;
 	build_related = !build_alternative && inline_attachs;
@@ -838,12 +874,34 @@ mapi_mail_item_to_mime_message (ExchangeMapiConnection *conn, MailItem *item)
 	}
 
 	if (noninline_attachs) { /* multipart/mixed */
-		multipart_body = mapi_mime_build_multipart_mixed (multipart_body,
-								  noninline_attachs);
+		if (build_alternative || build_related) {
+			multipart_body = mapi_mime_build_multipart_mixed (multipart_body, noninline_attachs);
+		} else if (g_slist_length (noninline_attachs) == 1 && item->msg_class && strstr (item->msg_class, ".SMIME") > item->msg_class) {
+			CamelMimePart *part = noninline_attachs->data;
+
+			skip_set_content = TRUE;
+
+			camel_medium_set_content (CAMEL_MEDIUM (msg), CAMEL_DATA_WRAPPER (part));
+
+			if (!strstr (item->msg_class, ".SMIME.")) {
+				/* encrypted */
+				camel_medium_set_content (CAMEL_MEDIUM (msg), camel_medium_get_content (CAMEL_MEDIUM (part)));
+				camel_mime_part_set_encoding (CAMEL_MIME_PART (msg), camel_mime_part_get_encoding (part));
+			} else {
+				/* signed */
+				camel_medium_set_content (CAMEL_MEDIUM (msg), CAMEL_DATA_WRAPPER (part));
+			}
+		} else {
+			mapi_mime_multipart_add_attachments (multipart_body, noninline_attachs);
+		}
 	}
 
-	camel_medium_set_content (CAMEL_MEDIUM (msg), CAMEL_DATA_WRAPPER(multipart_body));
+	if (!skip_set_content)
+		camel_medium_set_content (CAMEL_MEDIUM (msg), CAMEL_DATA_WRAPPER(multipart_body));
+
 	g_object_unref (multipart_body);
+	g_slist_free (inline_attachs);
+	g_slist_free (noninline_attachs);
 
 	return msg;
 }

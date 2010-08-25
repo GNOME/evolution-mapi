@@ -63,6 +63,7 @@ typedef struct {
 typedef struct  {
 	mapi_id_t fid;
 	mapi_id_t mid;
+	gchar *msg_class;
 
 	MailItemHeader header;
 	MailItemMessage msg;
