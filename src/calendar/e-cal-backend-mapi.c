@@ -3495,6 +3495,9 @@ ecbm_op_get_free_busy (ECalBackend *backend, EDataCal *cal, EServerMethodContext
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
 
+	if (cal)
+		g_object_ref (cal);
+
 	op = g_new0 (OperationGetFreeBusy, 1);
 	op->base.ot = OP_GET_FREE_BUSY;
 	op->base.cal = cal;
