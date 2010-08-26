@@ -372,6 +372,9 @@ ebbm_update_cache_cb (gpointer data)
 	if (book_view)
 		e_data_book_view_notify_complete (book_view, NULL);
 
+	/* indicate the thread is not running */
+	g_cancellable_cancel (priv->update_cache);
+
 	return NULL;
 }
 

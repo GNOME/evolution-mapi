@@ -267,16 +267,22 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 		e_source_set_property (source, "domain", camel_url_get_param (url, "domain"));
 		e_source_set_property (source, "folder-id", fid);
 		e_source_set_property (source, "public", "no");
-		e_source_set_property (source, "offline_sync",
+
+		if (is_new_source)
+			e_source_set_property (source, "offline_sync",
 					camel_url_get_param (url, "offline_sync") ? "1" : "0");
 
 		if (folder->is_default)
 			e_source_set_property (source, "delete", "no");
+		else
+			e_source_set_property (source, "delete", NULL);
 
 		if (folder->parent_folder_id) {
 			gchar *tmp = exchange_mapi_util_mapi_id_to_string (folder->parent_folder_id);
 			e_source_set_property (source, "parent-fid", tmp);
 			g_free (tmp);
+		} else {
+			e_source_set_property (source, "parent-fid", NULL);
 		}
 
 		e_source_set_property (source, "acl-user-name", account->id->name);
@@ -628,16 +634,26 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		e_source_set_property(source, "domain", camel_url_get_param (url, "domain"));
 		e_source_set_property(source, "folder-id", fid);
 		e_source_set_property (source, "public", "no");
-		e_source_set_property (source, "offline_sync",
+
+		if (is_new_source) {
+			e_source_set_property (source, "offline_sync",
 					       camel_url_get_param (url, "offline_sync") ? "1" : "0");
-		e_source_set_property (source, "completion", "true");
+			e_source_set_property (source, "completion", "true");
+		}
+
 		if (folder->is_default)
 			e_source_set_property (source, "delete", "no");
+		else
+			e_source_set_property (source, "delete", NULL);
+
 		if (folder->parent_folder_id) {
 			gchar *tmp = exchange_mapi_util_mapi_id_to_string (folder->parent_folder_id);
 			e_source_set_property (source, "parent-fid", tmp);
 			g_free (tmp);
+		} else {
+			e_source_set_property (source, "parent-fid", NULL);
 		}
+
 		if (is_new_source)
 			e_source_group_add_source (group, source, -1);
 		g_object_unref (source);
@@ -680,10 +696,12 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		e_source_set_property(source, "view-limit", camel_url_get_param (url, "ad_limit"));
 		e_source_set_property(source, "profile", camel_url_get_param (url, "profile"));
 		e_source_set_property(source, "domain", camel_url_get_param (url, "domain"));
-		// e_source_set_property (source, "offline_sync",
-		// camel_url_get_param (url, "offline_sync") ? "1" : "0");
-		e_source_set_property(source, "offline_sync", "1");
-		e_source_set_property (source, "completion", "true");
+
+		if (is_new_source) {
+			e_source_set_property(source, "offline_sync", "1");
+			e_source_set_property (source, "completion", "true");
+		}
+
 		e_source_set_property (source, "delete", "no");
 		if (is_new_source)
 			e_source_group_add_source (group, source, -1);
