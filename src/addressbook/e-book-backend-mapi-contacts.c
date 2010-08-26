@@ -689,8 +689,8 @@ ebbm_contacts_remove (EBookBackendMAPI *ebma, GError **error)
 	priv = E_BOOK_BACKEND_MAPI_CONTACTS (ebma)->priv;
 	e_return_data_book_error_if_fail (priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
-	if (E_BOOK_BACKEND_MAPI_GET_CLASS (ebma)->op_remove)
-		E_BOOK_BACKEND_MAPI_GET_CLASS (ebma)->op_remove (ebma, &mapi_error);
+	if (E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_remove)
+		E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_remove (ebma, &mapi_error);
 
 	if (mapi_error) {
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, NULL);
