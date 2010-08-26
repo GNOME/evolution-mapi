@@ -1950,7 +1950,7 @@ mapi_error_to_edb_error (GError **perror, const GError *mapi_error, EDataBookSta
 	if (context)
 		err_msg = g_strconcat (context, mapi_error ? ": " : NULL, mapi_error ? mapi_error->message : NULL, NULL);
 	else if (!mapi_error)
-		err_msg = g_strdup (_("Uknown error"));
+		err_msg = g_strdup (_("Unknown error"));
 
 	g_propagate_error (perror, e_data_book_create_error (code, err_msg ? err_msg : mapi_error->message));
 
