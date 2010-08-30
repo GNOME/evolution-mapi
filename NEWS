@@ -1,3 +1,27 @@
+evolution-mapi 0.31.91 2010-08-30
+---------------------------------
+
+Bug Fixes:
+	Bug #586199 - Recurrence event modification doesn't get reflected (Milan Crha)
+	Bug #624597 - Opening S/MIME signed and/or encrypted messages fails (Milan Crha)
+	Bug #627255 - Folder deletion doesn't work well (Punit Jain)
+	Bug #627331 - Crash in e_data_book_respond_authenticate_user (Milan Crha)
+	Bug #627703 - Crash on double free while fetching Free/Busy (Milan Crha)
+	Bug #628004 - Forgets 'copy locally for offline' setting (Milan Crha)
+	Bug #628016 - Stack overflow in ebbm_contacts_remove (Milan Crha)
+
+Misc:
+	Two typos fixed (Claude Paroz)
+
+Translations:
+	A S Alam (pa)
+	Ask H. Larsen (da)
+	Chao-Hsiung Liao (zh_HK, zh_TW)
+	Claude Paroz (fr)
+	Gabor Kelemen (hu)
+	Michael Kotsarinis (el)
+	Nils (fr)
+
 evolution-mapi 0.31.90 2010-08-16
 ---------------------------------
 
