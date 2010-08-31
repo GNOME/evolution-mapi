@@ -183,20 +183,23 @@ ecbm_authenticate (ECalBackend *backend, GError **perror)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
+	ExchangeMapiConnection *old_conn;
 	GError *mapi_error = NULL;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
-	if (priv->conn)
-		g_object_unref (priv->conn);
+	old_conn = priv->conn;
 
-	/* rather reuse already established connection */
-	priv->conn = exchange_mapi_connection_find (priv->profile);
-	if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
-		exchange_mapi_connection_reconnect (priv->conn, priv->password, &mapi_error);
-	else if (!priv->conn)
-		priv->conn = exchange_mapi_connection_new (priv->profile, priv->password, &mapi_error);
+	priv->conn = exchange_mapi_connection_new (priv->profile, priv->password, &mapi_error);
+	if (!priv->conn) {
+		priv->conn = exchange_mapi_connection_find (priv->profile);
+		if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
+			exchange_mapi_connection_reconnect (priv->conn, priv->password, &mapi_error);
+	}
+
+	if (old_conn)
+		g_object_unref (old_conn);
 
 	if (priv->conn && exchange_mapi_connection_connected (priv->conn)) {
 		/* Success */;

@@ -430,7 +430,8 @@ mapi_connect(CamelService *service, GError **error)
 	event_mask = fnevNewMail | fnevObjectCreated | fnevObjectDeleted |
 		fnevObjectModified | fnevObjectMoved | fnevObjectCopied;
 
-	if (!store->priv->notification_data)
+	/* use MAPI_LISTEN_NOTIFY=1 to enable notifications */
+	if (!store->priv->notification_data && g_getenv ("MAPI_LISTEN_NOTIFY") != NULL)
 		store->priv->notification_data = camel_mapi_notification_listener_start (store, event_mask, MAPI_EVENTS_USE_STORE);
 
 	camel_store_summary_save ((CamelStoreSummary *) store->summary);

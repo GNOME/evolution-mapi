@@ -242,7 +242,9 @@ ebbm_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restricti
 	g_return_if_fail (ebmac != NULL);
 	g_return_if_fail (ebmac->op_fetch_contacts != NULL);
 
+	e_file_cache_freeze_changes (E_FILE_CACHE (ebma->priv->cache));
 	ebmac->op_fetch_contacts (ebma, restriction, book_view, &notify_data, error);
+	e_file_cache_thaw_changes (E_FILE_CACHE (ebma->priv->cache));
 
 	if (last_modification_secs && *last_modification_secs < notify_data.last_modification)
 		*last_modification_secs = notify_data.last_modification;
@@ -406,13 +408,16 @@ ebbm_load_source (EBookBackendMAPI *ebma, ESource *source, gboolean only_if_exis
 	priv->summary = e_book_backend_summary_new (summary_file_name, SUMMARY_FLUSH_TIMEOUT_SECS * 1000);
 
 	if (g_file_test (summary_file_name, G_FILE_TEST_EXISTS)) {
-		e_book_backend_summary_load (priv->summary);
+		if (!e_book_backend_summary_load (priv->summary))
+			g_unlink (summary_file_name);
 	}
+
+	g_free (summary_file_name);
 
 	if (priv->cache)
 		g_object_unref (priv->cache);
+	summary_file_name = g_build_filename (cache_dir, "cache.xml", NULL);
 	priv->cache = e_book_backend_cache_new (summary_file_name);
-
 	g_free (summary_file_name);
 
 	e_book_backend_set_is_loaded (E_BOOK_BACKEND (ebma), TRUE);
@@ -506,6 +511,7 @@ ebbm_authenticate_user (EBookBackendMAPI *ebma, const gchar *user, const gchar *
 {
 	EBookBackendMAPIPrivate *priv = ebma->priv;
 	GError *mapi_error = NULL;
+	ExchangeMapiConnection *old_conn;
 
 	switch (priv->mode) {
 	case E_DATA_BOOK_MODE_LOCAL:
@@ -521,17 +527,18 @@ ebbm_authenticate_user (EBookBackendMAPI *ebma, const gchar *user, const gchar *
 
 		e_book_backend_mapi_lock_connection (ebma);
 
-		if (priv->conn) {
-			g_object_unref (priv->conn);
-			priv->conn = NULL;
+		old_conn = priv->conn;
+		priv->conn = NULL;
+
+		priv->conn = exchange_mapi_connection_new (priv->profile, passwd, &mapi_error);
+		if (!priv->conn) {
+			priv->conn = exchange_mapi_connection_find (priv->profile);
+			if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
+				exchange_mapi_connection_reconnect (priv->conn, passwd, &mapi_error);
 		}
 
-		/* rather reuse already established connection */
-		priv->conn = exchange_mapi_connection_find (priv->profile);
-		if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
-			exchange_mapi_connection_reconnect (priv->conn, passwd, &mapi_error);
-		else if (!priv->conn)
-			priv->conn = exchange_mapi_connection_new (priv->profile, passwd, &mapi_error);
+		if (old_conn)
+			g_object_unref (old_conn);
 
 		if (!priv->conn || mapi_error) {
 			if (priv->conn) {
