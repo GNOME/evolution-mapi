@@ -12,7 +12,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
 "POT-Creation-Date: 2010-08-26 18:36+0000\n"
-"PO-Revision-Date: 2010-09-05 21:26+0300\n"
+"PO-Revision-Date: 2010-09-06 16:28+0300\n"
 "Last-Translator: Ivar Smolin <okul@linux.ee>\n"
 "Language-Team: Estonian <et@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "Global Address List"
-msgstr ""
+msgstr "Globaalne aadressiraamat"
 
 #, c-format
 msgid "Enter Password for %s@%s"
@@ -124,10 +124,10 @@ msgid "Failed to remove public folder"
 msgstr "Tõrge avaliku kausta eemaldamisel"
 
 msgid "Failed to create item on a server"
-msgstr ""
+msgstr "Tõrge kirje loomisel serverisse"
 
 msgid "Failed to modify item on a server"
-msgstr ""
+msgstr "Tõrge serveris oleva kirje muutmisel"
 
 msgid "Failed to fetch items from a server"
 msgstr "Viga serverist kirjete hankimisel"
@@ -174,7 +174,7 @@ msgid "Failed to fetch changes from a server"
 msgstr "Tõrge serverist muudatuste hankimisel"
 
 msgid "Could not create thread for populating cache"
-msgstr ""
+msgstr "Puhvri paljundamiseks pole võimalik lõime luua"
 
 msgid "Could not create cache file"
 msgstr "Puhverfaili pole võimalik luua"
@@ -183,6 +183,8 @@ msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
 msgstr ""
+"Korduva sündmuse üksiku esinemise muutmine pole veel teostatud. Serveris "
+"olevat sündmust ei muudetud."
 
 msgid "Failed to get Free/Busy data"
 msgstr "Tõrge vaba/hõivatud andmete hankimisel"
@@ -193,7 +195,7 @@ msgstr "Kausta %s uute sõnumite andmete lisamine kohalikku kokkuvõttepuhvrisse
 
 #, c-format
 msgid "Retrieving message IDs from server for %s"
-msgstr ""
+msgstr "%s jaoks serverist sõnumi ID vastuvõtmine"
 
 #, c-format
 msgid "Removing deleted messages from cache in %s"
@@ -377,6 +379,8 @@ msgstr "Tõrge serverisse sisselogimisel"
 
 msgid "Cannot create more sessions, session limit was reached"
 msgstr ""
+"Rohkem seansse pole võimalik luua, kuna sellega ületatakse suurima seansside "
+"arvu piirang"
 
 msgid "User cancelled operation"
 msgstr "Kasutaja tühistas toimingu"
@@ -391,16 +395,16 @@ msgid "Disk error"
 msgstr "Ketta viga"
 
 msgid "Password change required"
-msgstr ""
+msgstr "Nõutakse parooli vahetamist"
 
 msgid "Password expired"
 msgstr "Parool on aegunud"
 
 msgid "Invalid workstation account"
-msgstr ""
+msgstr "Vigane tööjaamakonto"
 
 msgid "Invalid access time"
-msgstr ""
+msgstr "Vigane ligipääsuaeg"
 
 msgid "Account is disabled"
 msgstr "Konto on keelatud"
