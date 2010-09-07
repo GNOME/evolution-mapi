@@ -372,6 +372,37 @@ notify_progress (ECalBackendMAPI *cbmapi, guint64 index, guint64 total)
 	g_free (progress_string);
 }
 
+static icaltimezone *
+resolve_tzid (const char *tzid, gpointer user_data)
+{
+	icaltimezone *zone;
+
+	zone = (!strcmp (tzid, "UTC"))
+		? icaltimezone_get_utc_timezone ()
+		: icaltimezone_get_builtin_timezone_from_tzid (tzid);
+
+	if (!zone)
+		zone = e_cal_backend_internal_get_timezone (E_CAL_BACKEND (user_data), tzid);
+
+	return zone;
+}
+
+static void
+put_component_to_store (ECalBackendMAPI *cbmapi,
+			ECalComponent *comp)
+{
+	time_t time_start, time_end;
+	ECalBackendMAPIPrivate *priv;
+
+	priv = cbmapi->priv;
+
+	e_cal_util_get_component_occur_times (comp, &time_start, &time_end,
+						resolve_tzid, cbmapi, priv->default_zone,
+						e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi)));
+
+	e_cal_backend_store_put_component_with_time_range (priv->store, comp, time_start, time_end);
+}
+
 static gboolean
 mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 {
@@ -418,7 +449,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 			e_cal_component_commit_sequence (comp);
 			comp_str = e_cal_component_get_as_string (comp);
 
-			e_cal_backend_store_put_component (priv->store, comp);
+			put_component_to_store (cbmapi, comp);
 			e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), (const gchar *) comp_str);
 
 			g_free (comp_str);
@@ -448,7 +479,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 				e_cal_component_commit_sequence (comp);
 				modif_comp_str = e_cal_component_get_as_string (comp);
 
-				e_cal_backend_store_put_component (priv->store, comp);
+				put_component_to_store (cbmapi, comp);
 				e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbmapi), cache_comp_str, modif_comp_str);
 
 				g_object_unref (comp);
@@ -739,7 +770,7 @@ get_deltas (gpointer handle)
 			return FALSE;
 		}
 	} else {
-		if (strcmp (e_source_get_property(source, "public"), "yes") == 0) {
+		if (strcmp (e_source_get_property (source, "public"), "yes") == 0) {
 			options |= MAPI_OPTIONS_USE_PFSTORE;
 			is_public = TRUE;
 			use_restriction = FALSE;
@@ -989,6 +1020,8 @@ ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, const gchar *sexp, GL
 	GSList *components, *l;
 	ECalBackendSExp *cbsexp;
 	gboolean search_needed = TRUE;
+	time_t occur_start = -1, occur_end = -1;
+	gboolean prunning_by_time;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
@@ -1009,7 +1042,11 @@ ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, const gchar *sexp, GL
 	}
 
 	*objects = NULL;
-	components = e_cal_backend_store_get_components (priv->store);
+	prunning_by_time = e_cal_backend_sexp_evaluate_occur_times(cbsexp, &occur_start, &occur_end);
+
+	components = prunning_by_time ?
+		e_cal_backend_store_get_components_occuring_in_range (priv->store, occur_start, occur_end)
+		: e_cal_backend_store_get_components (priv->store);
 
 	for (l = components; l != NULL; l = l->next) {
 		ECalComponent *comp = E_CAL_COMPONENT (l->data);
@@ -1189,7 +1226,7 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 		comp_str = e_cal_component_get_as_string (comp);
 		e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), (const gchar *) comp_str);
 		g_free (comp_str);
-		e_cal_backend_store_put_component (priv->store, comp);
+		put_component_to_store (cbmapi, comp);
 		g_object_unref (comp);
 	}
 
@@ -1741,7 +1778,7 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, gchar **calobj, gchar *
 				g_free (tmp);
 
 			e_cal_component_commit_sequence (comp);
-			e_cal_backend_store_put_component (priv->store, comp);
+			put_component_to_store (cbmapi, comp);
 			*calobj = e_cal_component_get_as_string (comp);
 			e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), *calobj);
 			break;
@@ -1979,7 +2016,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, const gchar *calobj, Ca
 	*old_object = e_cal_component_get_as_string (cache_comp);
 	*new_object = e_cal_component_get_as_string (comp);
 
-	e_cal_backend_store_put_component (priv->store, comp);
+	put_component_to_store (cbmapi, comp);
 	e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbmapi), *old_object, *new_object);
 
 	g_object_unref (comp);
