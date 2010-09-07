@@ -228,7 +228,7 @@ action_folder_size_cb (GtkAction *action,
 {
 	EShellSidebar *shell_sidebar;
 	EMFolderTree *folder_tree;
-	const gchar *folder_uri;
+	gchar *folder_uri;
 	GtkTreeSelection *selection;
 	gchar *profile = NULL;
 
@@ -272,6 +272,7 @@ action_folder_size_cb (GtkAction *action,
 	if (g_str_has_prefix (folder_uri, "mapi://"))
 		mapi_settings_run_folder_size_dialog (profile, NULL);
 
+	g_free (folder_uri);
 	g_free (profile);
 }
 
@@ -286,7 +287,7 @@ folder_size_actions_update_cb (EShellView *shell_view, GtkActionEntry *entries)
 
 	EShellSidebar *shell_sidebar;
 	EMFolderTree *folder_tree;
-	const gchar *folder_uri = NULL;
+	gchar *folder_uri = NULL;
 	CamelURL *url = NULL;
 	gboolean show_menu_entry = FALSE;
 
@@ -294,8 +295,10 @@ folder_size_actions_update_cb (EShellView *shell_view, GtkActionEntry *entries)
 	g_object_get (shell_sidebar, "folder-tree", &folder_tree, NULL);
 	folder_uri = em_folder_tree_get_selected_uri (folder_tree);
 	g_object_unref (folder_tree);
-	if (!(folder_uri && *folder_uri))
+	if (!(folder_uri && *folder_uri)) {
+		g_free (folder_uri);
 		return;
+	}
 
 	shell_content = e_shell_view_get_shell_content (shell_view);
 	shell_window = e_shell_view_get_shell_window (shell_view);
@@ -316,6 +319,7 @@ folder_size_actions_update_cb (EShellView *shell_view, GtkActionEntry *entries)
 	}
 
 	gtk_action_set_visible (folder_size_action, show_menu_entry);
+	g_free (folder_uri);
 }
 
 /* used only in Account Editor */
