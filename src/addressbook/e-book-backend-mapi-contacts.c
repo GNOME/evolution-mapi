@@ -698,7 +698,7 @@ ebbm_contacts_remove (EBookBackendMAPI *ebma, GError **error)
 		return;
 	}
 
-	if (priv->is_public_folder) {
+	if (!priv->is_public_folder) {
 		ExchangeMapiConnection *conn;
 
 		e_book_backend_mapi_lock_connection (ebma);
@@ -707,7 +707,7 @@ ebbm_contacts_remove (EBookBackendMAPI *ebma, GError **error)
 		if (!conn) {
 			g_propagate_error (error, EDB_ERROR (OFFLINE_UNAVAILABLE));
 		} else {
-			exchange_mapi_connection_remove_folder (conn, priv->fid, MAPI_OPTIONS_USE_PFSTORE, &mapi_error);
+			exchange_mapi_connection_remove_folder (conn, priv->fid, 0, &mapi_error);
 
 			if (mapi_error) {
 				mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to remove public folder"));
