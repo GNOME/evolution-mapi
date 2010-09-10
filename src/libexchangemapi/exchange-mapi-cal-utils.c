@@ -439,6 +439,7 @@ set_attachments_to_cal_component (ECalComponent *comp, GSList *attach_list, cons
 		ExchangeMAPIStream *stream;
 		gchar *attach_file_url, *filename;
 		const gchar *str, *attach;
+		GError *error = NULL;
 		guint len;
 		gint fd = -1;
 
@@ -452,8 +453,15 @@ set_attachments_to_cal_component (ECalComponent *comp, GSList *attach_list, cons
 		str = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval(attach_item->lpProps, PR_ATTACH_LONG_FILENAME_UNICODE);
 		if (!(str && *str))
 			str = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval(attach_item->lpProps, PR_ATTACH_FILENAME_UNICODE);
-		attach_file_url = g_strconcat (local_store_uri, G_DIR_SEPARATOR_S, uid, "-", str, NULL);
-		filename = g_filename_from_uri (attach_file_url, NULL, NULL);
+		filename = g_strconcat (local_store_uri, G_DIR_SEPARATOR_S, uid, "-", str, NULL);
+		attach_file_url = g_filename_to_uri (filename, NULL, &error);
+	
+		if (!attach_file_url) {
+			g_message ("Could not get attach_file_url %s \n", error->message);
+			g_clear_error (&error);
+			g_free (filename);
+			return;
+		}
 
 		fd = g_open (filename, O_RDWR|O_CREAT|O_TRUNC|O_BINARY, 0600);
 		if (fd == -1) {
