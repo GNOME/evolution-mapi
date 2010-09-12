@@ -4,17 +4,17 @@
 # Andre Klapper <ak-47@gmx.net>, 2009.
 # Mario Blättermann <mariobl@gnome.org>, 2009, 2010.
 # Hendrik Richter <hendrikr@gnome.org>, 2009.
-# Christian Kirbach <Christian.Kirbach@googlemail.com>, 2009.
+# Christian Kirbach <Christian.Kirbach@googlemail.com>, 2009, 2010.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2010-07-12 13:18+0000\n"
-"PO-Revision-Date: 2010-07-16 20:32+0100\n"
-"Last-Translator: Mario Blättermann <mariobl@gnome.org>\n"
-"Language-Team: German <gnome-de@gnome.org>\n"
+"POT-Creation-Date: 2010-09-12 10:35+0000\n"
+"PO-Revision-Date: 2010-09-12 20:30+0200\n"
+"Last-Translator: Christian Kirbach <Christian.Kirbach@googlemail.com>\n"
+"Language-Team: Deutsch <gnome-de@gnome.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -22,12 +22,12 @@ msgstr ""
 "X-Poedit-Language: German\n"
 "X-Poedit-Country: GERMANY\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:672
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:674
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:684
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:686
 msgid "Global Address List"
 msgstr "Globale Adressliste"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:987
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:1001
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:229
 #, c-format
 msgid "Enter Password for %s@%s"
@@ -119,7 +119,7 @@ msgid "Unable to retrieve folder size information"
 msgstr "Information über Ordnergröße kann nicht erhalten werden"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:169
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:368
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:371
 msgid "Folder Size"
 msgstr "Ordnergröße"
 
@@ -128,106 +128,128 @@ msgid "Fetching folder list…"
 msgstr "Ordnerliste wird abgerufen …"
 
 #. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:353
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:356
 msgid "Miscellaneous"
 msgstr "Verschiedenes"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:366
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:369
 msgid "View the size of all Exchange folders"
 msgstr "Größe aller Exchange-Ordner betrachten"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:379
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:382
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
 msgstr "Exchange-Einstellungen"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:388
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:391
 msgid "Folder size"
 msgstr "Ordnergröße"
 
-#. To translators : This is used to cache the downloaded contacts from GAL.
-#. The first %d is an index of the GAL entry,
-#. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:170
-#, c-format
-msgid "Caching GAL entry %d/%d"
-msgstr "GAL-Eintrag wird zwischengespeichert (%d/%d)"
-
-#. To translators : This is used to cache the downloaded contacts from GAL.
-#. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:174
-#, c-format
-msgid "Caching GAL entry %d"
-msgstr "GAL-Eintrag %d wird zwischengespeichert"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:214
-msgid "Failed to fetch GAL entries"
-msgstr "Holen der GAL-Einträge ist fehlgeschlagen"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:313
+#: ../src/addressbook/e-book-backend-mapi.c:549
 msgid "Cannot connect"
 msgstr "Verbinden nicht möglich"
 
-#: ../src/addressbook/e-book-backend-mapi-gal.c:645
+#: ../src/addressbook/e-book-backend-mapi.c:692
 msgid "Searching"
 msgstr "Suchen"
 
-#. To translators : Here Evolution MAPI downloads the entries from the GAL server
-#: ../src/addressbook/e-book-backend-mapi-gal.c:665
-msgid "Downloading GAL entries from server…"
-msgstr "GAL-Einträge werden vom Server heruntergeladen …"
-
-#: ../src/calendar/e-cal-backend-mapi.c:129
-msgid "Uknown error"
+#: ../src/addressbook/e-book-backend-mapi.c:1960
+#: ../src/calendar/e-cal-backend-mapi.c:132
+#: ../src/camel/camel-mapi-folder.c:1539 ../src/camel/camel-mapi-folder.c:1560
+msgid "Unknown error"
 msgstr "Unbekannter Fehler"
 
-#: ../src/calendar/e-cal-backend-mapi.c:390
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:713
+#: ../src/calendar/e-cal-backend-mapi.c:322
 msgid "Failed to remove public folder"
 msgstr "Öffenlicher Ordner konnte nicht entfernt werden"
 
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:770
+#: ../src/calendar/e-cal-backend-mapi.c:1767
+#: ../src/calendar/e-cal-backend-mapi.c:2259
+msgid "Failed to create item on a server"
+msgstr "Fehler beim Erstellen des Objekts auf dem Server"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:896
+#: ../src/calendar/e-cal-backend-mapi.c:2000
+msgid "Failed to modify item on a server"
+msgstr "Bearbeiten eines Objekts auf einem Server ist fehlgeschlagen"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1043
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1109
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1160
+#: ../src/calendar/e-cal-backend-mapi.c:1293
+#: ../src/calendar/e-cal-backend-mapi.c:1314
+msgid "Failed to fetch items from a server"
+msgstr "Fehler beim Abrufen der Objekte vom Server"
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. %d is an index of the contact.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1061
+#, c-format
+msgid "Caching contact %d"
+msgstr "Kontakt %d wird zwischengespeichert"
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. The first %d is an index of the contact,
+#. the second %d is total count of conacts on the server.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1065
+#, c-format
+msgid "Caching contact %d/%d"
+msgstr "Kontakt %d/%d wird zwischengespeichert"
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. %d is an index of the GAL entry.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:127
+#, c-format
+msgid "Caching GAL contact %d"
+msgstr "GAL-Kontakt %d wird zwischengespeichert"
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. The first %d is an index of the GAL entry,
+#. the second %d is total count of entries in GAL.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:131
+#, c-format
+msgid "Caching GAL contact %d/%d"
+msgstr "GAL-Kontakt %d/%d wird zwischengespeichert"
+
+#: ../src/addressbook/e-book-backend-mapi-gal.c:162
+#: ../src/addressbook/e-book-backend-mapi-gal.c:197
+msgid "Failed to fetch GAL entries"
+msgstr "Holen der GAL-Einträge ist fehlgeschlagen"
+
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:435
+#: ../src/calendar/e-cal-backend-mapi.c:367
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Elemente im Ordner »%s« werden geladen"
 
-#: ../src/calendar/e-cal-backend-mapi.c:780
-#: ../src/calendar/e-cal-backend-mapi.c:806
-#: ../src/calendar/e-cal-backend-mapi.c:852
-#: ../src/calendar/e-cal-backend-mapi.c:929
-#: ../src/calendar/e-cal-backend-mapi.c:952
+#: ../src/calendar/e-cal-backend-mapi.c:758
+#: ../src/calendar/e-cal-backend-mapi.c:784
+#: ../src/calendar/e-cal-backend-mapi.c:831
+#: ../src/calendar/e-cal-backend-mapi.c:910
+#: ../src/calendar/e-cal-backend-mapi.c:933
 #, c-format
 msgid "Failed to fetch changes from a server: %s"
 msgstr "Fehler beim Abrufen der Änderungen vom Server: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:785
-#: ../src/calendar/e-cal-backend-mapi.c:811
-#: ../src/calendar/e-cal-backend-mapi.c:857
-#: ../src/calendar/e-cal-backend-mapi.c:934
-#: ../src/calendar/e-cal-backend-mapi.c:957
+#: ../src/calendar/e-cal-backend-mapi.c:763
+#: ../src/calendar/e-cal-backend-mapi.c:789
+#: ../src/calendar/e-cal-backend-mapi.c:836
+#: ../src/calendar/e-cal-backend-mapi.c:915
+#: ../src/calendar/e-cal-backend-mapi.c:938
 msgid "Failed to fetch changes from a server"
 msgstr "Fehler beim Abrufen der Änderungen vom Server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1302
-#: ../src/calendar/e-cal-backend-mapi.c:1323
-msgid "Failed to fetch items from a server"
-msgstr "Fehler beim Abrufen der Objekte vom Server"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1432
-#: ../src/calendar/e-cal-backend-mapi.c:1517
-msgid "Could not create cache file"
-msgstr "Zwischenspeicherdatei konnte nicht erzeugt werden"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1443
+#: ../src/calendar/e-cal-backend-mapi.c:1427
 msgid "Could not create thread for populating cache"
 msgstr "Thread zum Füllen des Zwischenspeichers konnte nicht erzeugt werden"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1771
-#: ../src/calendar/e-cal-backend-mapi.c:2254
-msgid "Failed to create item on a server"
-msgstr "Fehler beim Erstellen des Objekts auf dem Server"
+#: ../src/calendar/e-cal-backend-mapi.c:1489
+msgid "Could not create cache file"
+msgstr "Zwischenspeicherdatei konnte nicht erzeugt werden"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1896
+#: ../src/calendar/e-cal-backend-mapi.c:1894
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -236,11 +258,7 @@ msgstr ""
 "nicht unterstützt. Der auf dem Server gespeicherte Termin wurde daher nicht "
 "verändert."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2001
-msgid "Failed to modify item on a server"
-msgstr "Bearbeiten eines Objekts auf einem Server ist fehlgeschlagen"
-
-#: ../src/calendar/e-cal-backend-mapi.c:2466
+#: ../src/calendar/e-cal-backend-mapi.c:2507
 msgid "Failed to get Free/Busy data"
 msgstr "Holen der Verfügbarkeitsdaten ist fehlgeschlagen"
 
@@ -248,8 +266,8 @@ msgstr "Holen der Verfügbarkeitsdaten ist fehlgeschlagen"
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr ""
-"Zwischenspeicher der zusammenfassenden Informationen für neue Nachrichten in %"
-"s wird aktualisiert"
+"Zwischenspeicher der zusammenfassenden Informationen für neue Nachrichten in "
+"%s wird aktualisiert"
 
 #: ../src/camel/camel-mapi-folder.c:593
 #, c-format
@@ -262,70 +280,66 @@ msgid "Removing deleted messages from cache in %s"
 msgstr "Gelöschte Nachrichten werden aus dem Zwischenspeicher in %s entfernt"
 
 #. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:949
+#: ../src/camel/camel-mapi-folder.c:948
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr ""
 "Zusammenfassende Informationen werden abgerufen für neue Nachrichten in %s"
 
-#: ../src/camel/camel-mapi-folder.c:1072 ../src/camel/camel-mapi-folder.c:1207
-#: ../src/camel/camel-mapi-folder.c:1217
+#: ../src/camel/camel-mapi-folder.c:1071 ../src/camel/camel-mapi-folder.c:1206
+#: ../src/camel/camel-mapi-folder.c:1216
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Diese Nachricht ist im Offline-Modus nicht verfügbar."
 
-#: ../src/camel/camel-mapi-folder.c:1089
+#: ../src/camel/camel-mapi-folder.c:1088
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Abrufen der Elemente gescheitert: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1094
+#: ../src/camel/camel-mapi-folder.c:1093
 msgid "Fetching items failed"
 msgstr "Abrufen der Elemente gescheitert"
 
-#: ../src/camel/camel-mapi-folder.c:1167
+#: ../src/camel/camel-mapi-folder.c:1166
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Nachricht »%s« kann nicht abgerufen werden: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1168
+#: ../src/camel/camel-mapi-folder.c:1167
 msgid "No such message"
 msgstr "Keine solche Nachricht"
 
-#: ../src/camel/camel-mapi-folder.c:1243
+#: ../src/camel/camel-mapi-folder.c:1242
 #, c-format
 msgid "Could not get message: %s"
 msgstr "Nachricht konnte nicht abgerufen werden: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1249 ../src/camel/camel-mapi-folder.c:1262
+#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1261
 #, c-format
 msgid "Could not get message"
 msgstr "Nachricht konnte nicht abgerufen werden"
 
-#: ../src/camel/camel-mapi-folder.c:1399
+#: ../src/camel/camel-mapi-folder.c:1398
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "Leeren des Mülleimers ist fehlgeschlagen: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1404
+#: ../src/camel/camel-mapi-folder.c:1403
 msgid "Failed to empty Trash"
 msgstr "Leeren des Mülleimers ist fehlgeschlagen"
 
-#: ../src/camel/camel-mapi-folder.c:1540 ../src/camel/camel-mapi-folder.c:1561
-msgid "Unknown error"
-msgstr "Unbekannter Fehler"
-
-#: ../src/camel/camel-mapi-folder.c:1623
+#: ../src/camel/camel-mapi-folder.c:1622
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Nachricht konnte nicht an Ordner »%s« angehängt werden"
 
-#: ../src/camel/camel-mapi-folder.c:1631 ../src/camel/camel-mapi-folder.c:1656
+#: ../src/camel/camel-mapi-folder.c:1630 ../src/camel/camel-mapi-folder.c:1655
 #, c-format
 msgid "Offline."
 msgstr "Offline."
 
-#: ../src/camel/camel-mapi-folder.c:1802
+#: ../src/camel/camel-mapi-folder.c:1801
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Zusammenfassung für »%s« konnte nicht geladen werden"
@@ -411,67 +425,67 @@ msgstr "Legitimation am Exchange MAPI-Server gescheitert: %s"
 msgid "Unable to authenticate to Exchange MAPI server"
 msgstr "Legitimation am Exchange MAPI-Server gescheitert"
 
-#: ../src/camel/camel-mapi-store.c:563
+#: ../src/camel/camel-mapi-store.c:564
 #, c-format
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "MAPI-Ordner können im Offline-Modus nicht erstellt werden."
 
-#: ../src/camel/camel-mapi-store.c:570
+#: ../src/camel/camel-mapi-store.c:571
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "Neuer Ordner »%s« konnte nicht angelegt werden."
 
-#: ../src/camel/camel-mapi-store.c:584
+#: ../src/camel/camel-mapi-store.c:585
 #, c-format
 msgid "Authentication failed"
 msgstr "Legitimation gescheitert"
 
-#: ../src/camel/camel-mapi-store.c:608
+#: ../src/camel/camel-mapi-store.c:610
 #, c-format
 msgid "Cannot create folder '%s': %s"
 msgstr "Ordner »%s« konnte nicht angelegt werden: %s"
 
-#: ../src/camel/camel-mapi-store.c:613
+#: ../src/camel/camel-mapi-store.c:615
 #, c-format
 msgid "Cannot create folder '%s'"
 msgstr "Ordner »%s« konnte nicht angelegt werden"
 
-#: ../src/camel/camel-mapi-store.c:706
+#: ../src/camel/camel-mapi-store.c:708
 #, c-format
 msgid "Cannot remove folder '%s': %s"
 msgstr "Ordner »%s« konnte nicht entfernt werden: %s"
 
-#: ../src/camel/camel-mapi-store.c:713
+#: ../src/camel/camel-mapi-store.c:715
 #, c-format
 msgid "Cannot remove folder '%s'"
 msgstr "Ordner »%s« konnte nicht entfernt werden"
 
-#: ../src/camel/camel-mapi-store.c:803
+#: ../src/camel/camel-mapi-store.c:805
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
 msgstr ""
 "MAPI-Ordner »%s« konnte nicht umbenannt werden. Der Ordner existiert nicht."
 
-#: ../src/camel/camel-mapi-store.c:815
+#: ../src/camel/camel-mapi-store.c:817
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'."
 msgstr "MAPI-Vorgabeordner »%s« konnte nicht in »%s« umbenannt werden."
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:842 ../src/camel/camel-mapi-store.c:867
-#: ../src/camel/camel-mapi-store.c:929
+#: ../src/camel/camel-mapi-store.c:844 ../src/camel/camel-mapi-store.c:869
+#: ../src/camel/camel-mapi-store.c:931
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "MAPI-Ordner »%s« konnte nicht in »%s« umbenannt werden."
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
 #. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:860 ../src/camel/camel-mapi-store.c:923
+#: ../src/camel/camel-mapi-store.c:862 ../src/camel/camel-mapi-store.c:925
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "MAPI-Ordner »%s« konnte nicht in »%s« umbenannt werden: %s"
 
-#: ../src/camel/camel-mapi-store.c:1492
+#: ../src/camel/camel-mapi-store.c:1494
 #, c-format
 msgid "Folder list not available in offline mode."
 msgstr "Ordnerliste ist im Offline-Modus nicht verfügbar."
@@ -487,56 +501,57 @@ msgstr "Nachricht konnte nicht gesendet werden."
 msgid "Could not send message: %s"
 msgstr "Nachricht konnte nicht gesendet werden: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:100
+#: ../src/libexchangemapi/exchange-mapi-connection.c:103
 msgid "Failed to login into the server"
 msgstr "Anmeldung am Server ist gescheitert"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:101
+#: ../src/libexchangemapi/exchange-mapi-connection.c:104
 msgid "Cannot create more sessions, session limit was reached"
 msgstr ""
-"Weitere Sitzungen können nicht erstellt werden, maximale Anzahl wurde erreicht"
+"Weitere Sitzungen können nicht erstellt werden, maximale Anzahl wurde "
+"erreicht"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:102
+#: ../src/libexchangemapi/exchange-mapi-connection.c:105
 msgid "User cancelled operation"
 msgstr "Der Vorgang wurde vom Benutzer abgebrochen"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:103
+#: ../src/libexchangemapi/exchange-mapi-connection.c:106
 msgid "Unable to abort"
 msgstr "Abbruch nicht möglich"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:104
+#: ../src/libexchangemapi/exchange-mapi-connection.c:107
 msgid "Network error"
 msgstr "Netzwerkfehler"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:105
+#: ../src/libexchangemapi/exchange-mapi-connection.c:108
 msgid "Disk error"
 msgstr "Speichergerätefehler"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:106
+#: ../src/libexchangemapi/exchange-mapi-connection.c:109
 msgid "Password change required"
 msgstr "Änderung des Passworts ist erforderlich"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:107
+#: ../src/libexchangemapi/exchange-mapi-connection.c:110
 msgid "Password expired"
 msgstr "Passwort ist abgelaufen"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:108
+#: ../src/libexchangemapi/exchange-mapi-connection.c:111
 msgid "Invalid workstation account"
 msgstr "Ungültiges Arbeitsrechner-Konto"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:109
+#: ../src/libexchangemapi/exchange-mapi-connection.c:112
 msgid "Invalid access time"
 msgstr "Ungültige Zugriffszeit"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:110
+#: ../src/libexchangemapi/exchange-mapi-connection.c:113
 msgid "Account is disabled"
 msgstr "Konto wurde deaktiviert"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:111
+#: ../src/libexchangemapi/exchange-mapi-connection.c:114
 msgid "End of session"
 msgstr "Ende der Sitzung"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:116
+#: ../src/libexchangemapi/exchange-mapi-connection.c:122
 #, c-format
 msgid "MAPI error %s (0x%x) occurred"
 msgstr "MAPI-Fehler %s (0x%x) ist aufgetreten"
@@ -544,15 +559,21 @@ msgstr "MAPI-Fehler %s (0x%x) ist aufgetreten"
 #. Translators: The first '%s' is replaced with an error context,
 #. aka where the error occurred, the second '%s' is replaced with
 #. the error message.
-#: ../src/libexchangemapi/exchange-mapi-connection.c:126
+#: ../src/libexchangemapi/exchange-mapi-connection.c:132
 #, c-format
 msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3281
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3244
 msgid "All Public Folders"
 msgstr "Alle öffentlichen Ordner"
+
+#~ msgid "Downloading GAL entries from server…"
+#~ msgstr "GAL-Einträge werden vom Server heruntergeladen …"
+
+#~ msgid "Uknown error"
+#~ msgstr "Unbekannter Fehler"
 
 #~ msgid "Message fetching cancelled by user."
 #~ msgstr "Abrufen der Nachricht wurde vom Benutzer abgebrochen."
