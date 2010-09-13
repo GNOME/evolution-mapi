@@ -1,3 +1,24 @@
+evolution-mapi 0.31.92 2010-09-13
+---------------------------------
+
+Bug Fixes:
+	Bug #601481 - Calendar not handling attachments properly (Punit Jain)
+	Bug #627999 - Cannot autocomplete with contacts (Milan Crha)
+	Bug #628851 - Cannot delete address book (Bharath Acharya)
+	Bug #629393 - git.mk breaks parallel builds (Matthew Barnes)
+
+Misc:
+	Various memory leaks (Milan Crha)
+	Adapt to the changes for optimization in EDS (Punit Jain)
+
+Translations:
+	Changwoo Ryu (ko)
+	Duarte Loreto (pt)
+	Ivar Smolin (et)
+	Marek Černocký (cs)
+	Mario Blättermann (de)
+	Philip Withnall (en_GB)
+
 evolution-mapi 0.31.91 2010-08-30
 ---------------------------------
 
