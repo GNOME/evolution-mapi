@@ -36,10 +36,6 @@
 	(g_static_mutex_lock(&((CamelMapiFolder *)f)->priv->l))
 #define CAMEL_MAPI_FOLDER_UNLOCK(f, l) \
 	(g_static_mutex_unlock(&((CamelMapiFolder *)f)->priv->l))
-#define CAMEL_MAPI_FOLDER_REC_LOCK(f, l) \
-	(g_static_rec_mutex_lock(&((CamelMapiFolder *)f)->priv->l))
-#define CAMEL_MAPI_FOLDER_REC_UNLOCK(f, l) \
-	(g_static_rec_mutex_unlock(&((CamelMapiFolder *)f)->priv->l))
 //#else
 #define MAPI_FOLDER_LOCK(f, l)
 #define MAPI_FOLDER_UNLOCK(f, l)
