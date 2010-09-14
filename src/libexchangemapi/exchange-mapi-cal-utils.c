@@ -988,12 +988,12 @@ fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 	ECalComponent *comp = NULL;
 	mapi_id_t mid = 0;
 	icalcomponent *icalcomp = NULL;
-	gchar *str = NULL, *smid = NULL, *fileuri;
+	gchar *str = NULL, *smid = NULL, *filepath;
 
 	g_return_val_if_fail (item_data != NULL, FALSE);
 	g_return_val_if_fail (fccd != NULL, FALSE);
 
-	fileuri = g_filename_to_uri (g_get_tmp_dir (), NULL, NULL);
+	filepath = g_strdup (g_get_tmp_dir ());
 
 	if (!comp) {
 		/* read component from a mail, if not found in the calendar */
@@ -1005,13 +1005,12 @@ fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 			smid = e_cal_component_gen_uid();
 		comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, fccd->kind, smid,
 							item_data->properties, item_data->streams, item_data->recipients,
-							NULL, NULL, NULL);
-		set_attachments_to_cal_component (comp, item_data->attachments, fileuri);
+							item_data->attachments, filepath, NULL);
 		e_cal_component_set_uid (comp, smid);
 		g_free (smid);
 	}
 
-	g_free (fileuri);
+	g_free (filepath);
 
 	icalcomp = e_cal_util_new_top_level ();
 	icalcomponent_set_method (icalcomp, fccd->method);
