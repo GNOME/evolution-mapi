@@ -384,7 +384,7 @@ mapi_mime_set_msg_headers (ExchangeMapiConnection *conn, CamelMimeMessage *msg, 
 		camel_mime_parser_scan_from (parser, FALSE);
 		g_object_unref (stream);
 
-		if (camel_mime_part_construct_from_parser (part, parser, NULL) != -1) {
+		if (camel_mime_part_construct_from_parser_sync (part, parser, NULL, NULL)) {
 			struct _camel_header_raw *h;
 
 			for (h = part->headers; h; h = h->next) {
@@ -783,7 +783,7 @@ mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, con
 			CamelStream *mem;
 
 			mem = camel_stream_mem_new ();
-			camel_stream_write (mem, (const gchar *) stream->value->data, stream->value->len, NULL);
+			camel_stream_write (mem, (const gchar *) stream->value->data, stream->value->len, NULL, NULL);
 			camel_stream_reset (mem, NULL);
 
 			parser = camel_mime_parser_new ();
@@ -797,7 +797,7 @@ mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, con
 				part = camel_mime_part_new ();
 
 				camel_data_wrapper_set_mime_type_field (CAMEL_DATA_WRAPPER (part), camel_mime_parser_content_type (parser));
-				camel_mime_part_construct_content_from_parser (part, parser, NULL);
+				camel_mime_part_construct_content_from_parser (part, parser, NULL, NULL);
 			} else {
 				is_smime = FALSE;
 			}

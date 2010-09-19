@@ -95,7 +95,8 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 		info_count--;
 	}
 
-	folder = camel_store_get_folder ((CamelStore *)store, folder_name, 0, NULL);
+	folder = camel_store_get_folder_sync (
+		(CamelStore *)store, folder_name, 0, NULL, NULL);
 
 	/* Abort on failure*/
 	if (!folder)
@@ -117,7 +118,7 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 	fetch_data->folder = folder;
 
 	camel_service_lock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-	camel_mapi_folder_fetch_summary ((CamelStore *)store, folder, new_mail_notif->FID, res, NULL, fetch_data, options, NULL);
+	camel_mapi_folder_fetch_summary ((CamelStore *)store, folder, new_mail_notif->FID, res, NULL, fetch_data, options, NULL, NULL);
 	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	camel_folder_summary_touch (folder->summary);

@@ -908,7 +908,8 @@ obj_message_to_camel_mime (ExchangeMapiConnection *conn, mapi_id_t fid, mapi_obj
 
 		mem = camel_stream_mem_new ();
 		camel_stream_mem_set_byte_array (CAMEL_STREAM_MEM (mem), res);
-		camel_data_wrapper_write_to_stream (CAMEL_DATA_WRAPPER (msg), mem, NULL);
+		camel_data_wrapper_write_to_stream_sync (
+			CAMEL_DATA_WRAPPER (msg), mem, NULL, NULL);
 
 		g_object_unref (mem);
 		g_object_unref (msg);

@@ -71,8 +71,12 @@ mapi_message_item_send (ExchangeMapiConnection *conn, MailItem *item, GError **p
 }
 
 static gboolean
-mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
-	      CamelAddress *from, CamelAddress *recipients, GError **error)
+mapi_send_to_sync (CamelTransport *transport,
+                   CamelMimeMessage *message,
+                   CamelAddress *from,
+                   CamelAddress *recipients,
+                   GCancellable *cancellable,
+                   GError **error)
 {
 	ExchangeMapiConnection *conn;
 	MailItem *item = NULL;
@@ -101,7 +105,7 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 	}
 
 	/* Convert MIME to MailItem, attacment lists and recipient list.*/
-	item = camel_mapi_utils_mime_to_item (message, from, NULL);
+	item = camel_mapi_utils_mime_to_item (message, from, cancellable, NULL);
 
 	/* send */
 	st = mapi_message_item_send (conn, item, error);
@@ -148,7 +152,7 @@ camel_mapi_transport_class_init (CamelMapiTransportClass *class)
 	service_class->get_name = mapi_transport_get_name;
 
 	transport_class = CAMEL_TRANSPORT_CLASS (class);
-	transport_class->send_to = mapi_send_to;
+	transport_class->send_to_sync = mapi_send_to_sync;
 }
 
 static void

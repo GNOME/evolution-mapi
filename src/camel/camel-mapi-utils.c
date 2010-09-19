@@ -118,7 +118,7 @@ mail_item_set_subject(MailItem *item, const gchar *subject)
 #define MAX_READ_SIZE 0x1000
 
 static void
-mail_item_set_body_stream (MailItem *item, CamelStream *body, MailItemPartType part_type)
+mail_item_set_body_stream (MailItem *item, CamelStream *body, MailItemPartType part_type, GCancellable *cancellable)
 {
 	guint8 *buf = g_new0 (guint8 , STREAM_SIZE);
 	guint32	read_size = 0, i;
@@ -129,7 +129,7 @@ mail_item_set_body_stream (MailItem *item, CamelStream *body, MailItemPartType p
 
 	stream->value = g_byte_array_new ();
 
-	while (read_size = camel_stream_read (body, (gchar *)buf, STREAM_SIZE, NULL), read_size > 0) {
+	while (read_size = camel_stream_read (body, (gchar *)buf, STREAM_SIZE, cancellable, NULL), read_size > 0) {
 		stream->value = g_byte_array_append (stream->value, buf, read_size);
 
 		is_null_terminated = buf [read_size - 1] == 0;
@@ -186,7 +186,7 @@ mail_item_set_body_stream (MailItem *item, CamelStream *body, MailItemPartType p
 }
 
 static gboolean
-mail_item_add_attach (MailItem *item, CamelMimePart *part, CamelStream *content_stream)
+mail_item_add_attach (MailItem *item, CamelMimePart *part, CamelStream *content_stream, GCancellable *cancellable)
 {
 	guint8 *buf = g_new0 (guint8 , STREAM_SIZE);
 	const gchar *content_id = NULL;
@@ -248,7 +248,7 @@ mail_item_add_attach (MailItem *item, CamelMimePart *part, CamelStream *content_
 	stream->value = g_byte_array_new ();
 
 	camel_seekable_stream_seek((CamelSeekableStream *)content_stream, 0, CAMEL_STREAM_SET, NULL);
-	while (read_size = camel_stream_read(content_stream, (gchar *)buf, STREAM_SIZE, NULL), read_size > 0) {
+	while (read_size = camel_stream_read(content_stream, (gchar *)buf, STREAM_SIZE, cancellable, NULL), read_size > 0) {
 		stream->value = g_byte_array_append (stream->value, buf, read_size);
 	}
 
@@ -259,7 +259,7 @@ mail_item_add_attach (MailItem *item, CamelMimePart *part, CamelStream *content_
 }
 
 static gboolean
-mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first)
+mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first, GCancellable *cancellable)
 {
 	CamelDataWrapper *dw;
 	CamelStream *content_stream;
@@ -280,7 +280,7 @@ mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first)
 		dw = camel_medium_get_content (CAMEL_MEDIUM (part));
 		if (CAMEL_IS_MULTIPART(dw)) {
 			/* recursive */
-			if (!mapi_do_multipart (CAMEL_MULTIPART (dw), item, is_first))
+			if (!mapi_do_multipart (CAMEL_MULTIPART (dw), item, is_first, cancellable))
 				return FALSE;
 			continue;
 		}
@@ -288,7 +288,8 @@ mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first)
 		filename = camel_mime_part_get_filename(part);
 
 		content_stream = camel_stream_mem_new();
-		content_size = camel_data_wrapper_decode_to_stream (dw, (CamelStream *) content_stream, NULL);
+		content_size = camel_data_wrapper_decode_to_stream_sync (
+			dw, (CamelStream *) content_stream, cancellable, NULL);
 
 		camel_seekable_stream_seek((CamelSeekableStream *)content_stream, 0, CAMEL_STREAM_SET, NULL);
 
@@ -298,12 +299,12 @@ mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first)
 		type = camel_mime_part_get_content_type(part);
 
 		if (i_part == 0 && (*is_first) && camel_content_type_is (type, "text", "plain")) {
-			mail_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT);
+			mail_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT, cancellable);
 			*is_first = FALSE;
 		} else if (camel_content_type_is (type, "text", "html")) {
-			mail_item_set_body_stream (item, content_stream, PART_TYPE_TEXT_HTML);
+			mail_item_set_body_stream (item, content_stream, PART_TYPE_TEXT_HTML, cancellable);
 		} else {
-			mail_item_add_attach (item, part, content_stream);
+			mail_item_add_attach (item, part, content_stream, cancellable);
 		}
 	}
 
@@ -311,7 +312,7 @@ mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first)
 }
 
 MailItem *
-camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, GError **error)
+camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, GCancellable *cancellable, GError **error)
 {
 	CamelDataWrapper *dw = NULL;
 	CamelContentType *type;
@@ -371,7 +372,7 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, GE
 
 	if (CAMEL_IS_MULTIPART(multipart)) {
 		gboolean is_first = TRUE;
-		if (!mapi_do_multipart (CAMEL_MULTIPART(multipart), item, &is_first))
+		if (!mapi_do_multipart (CAMEL_MULTIPART(multipart), item, &is_first, cancellable))
 			printf("camel message multi part error\n");
 	} else {
 		dw = camel_medium_get_content (CAMEL_MEDIUM (message));
@@ -380,9 +381,10 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, GE
 			content_type = camel_content_type_simple (type);
 
 			content_stream = (CamelStream *)camel_stream_mem_new();
-			content_size = camel_data_wrapper_decode_to_stream(dw, (CamelStream *)content_stream, NULL);
+			content_size = camel_data_wrapper_decode_to_stream_sync (
+				dw, (CamelStream *)content_stream, cancellable, NULL);
 
-			mail_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT);
+			mail_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT, cancellable);
 		}
 	}
 
