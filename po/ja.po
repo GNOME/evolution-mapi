@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2010-08-03 11:38+0000\n"
+"POT-Creation-Date: 2010-09-19 19:48+0000\n"
 "PO-Revision-Date: 2010-08-04 13:52+0900\n"
 "Last-Translator: Hideki Yamane (Debian-JP) <henrich@debian.or.jp>\n"
 "Language-Team: Japanese <takeshi.aihana@gmail.com>\n"
@@ -18,16 +18,16 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:668
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:670
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:684
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:686
 msgid "Global Address List"
 msgstr "グローバルアドレスリスト"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:983
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:1001
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:229
 #, c-format
 msgid "Enter Password for %s@%s"
-msgstr "%s@%s のパスワードを入力して下さい"
+msgstr "%s@%s のパスワードを入力してください"
 
 #. NOTE: A good way would be display the list of username entries
 #. using GtkEntryCompletion in the username gtkentry. But plugins
@@ -50,8 +50,8 @@ msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
 msgstr ""
-"サーバ名とユーザ名とドメイン名を全て入力して下さい (これらの項目を空にはでき"
-"ません)"
+"サーバ名とユーザ名とドメイン名をすべて入力してください (これらの項目を空には"
+"できません)"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:273
 msgid "Authentication finished successfully."
@@ -115,7 +115,7 @@ msgid "Unable to retrieve folder size information"
 msgstr "フォルダサイズ情報を取得できません"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:169
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:367
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:371
 msgid "Folder Size"
 msgstr "フォルダサイズ"
 
@@ -124,57 +124,58 @@ msgid "Fetching folder list…"
 msgstr "フォルダ一覧を取得中..."
 
 #. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:352
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:356
 msgid "Miscellaneous"
 msgstr "その他"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:365
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:369
 msgid "View the size of all Exchange folders"
-msgstr "全ての Exchange フォルダのサイズを表示する"
+msgstr "すべての Exchange フォルダのサイズを表示する"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:378
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:382
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
 msgstr "Exchange の設定"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:387
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:391
 msgid "Folder size"
 msgstr "フォルダサイズ"
 
-#: ../src/addressbook/e-book-backend-mapi.c:539
+#: ../src/addressbook/e-book-backend-mapi.c:549
 msgid "Cannot connect"
 msgstr "接続できません"
 
-#: ../src/addressbook/e-book-backend-mapi.c:682
+#: ../src/addressbook/e-book-backend-mapi.c:692
 msgid "Searching"
 msgstr "検索中"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1935
+#: ../src/addressbook/e-book-backend-mapi.c:1960
 #: ../src/calendar/e-cal-backend-mapi.c:132
-msgid "Uknown error"
+#: ../src/camel/camel-mapi-folder.c:1539 ../src/camel/camel-mapi-folder.c:1560
+msgid "Unknown error"
 msgstr "不明なエラー"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:713
-#: ../src/calendar/e-cal-backend-mapi.c:319
+#: ../src/calendar/e-cal-backend-mapi.c:322
 msgid "Failed to remove public folder"
 msgstr "パブリックなフォルダを削除できませんでした"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:770
-#: ../src/calendar/e-cal-backend-mapi.c:1726
-#: ../src/calendar/e-cal-backend-mapi.c:2218
+#: ../src/calendar/e-cal-backend-mapi.c:1767
+#: ../src/calendar/e-cal-backend-mapi.c:2259
 msgid "Failed to create item on a server"
 msgstr "サーバ上にアイテムを作成できませんでした"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:896
-#: ../src/calendar/e-cal-backend-mapi.c:1959
+#: ../src/calendar/e-cal-backend-mapi.c:2000
 msgid "Failed to modify item on a server"
 msgstr "サーバ上のアイテムを変更できませんでした"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:1043
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:1109
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:1160
-#: ../src/calendar/e-cal-backend-mapi.c:1253
-#: ../src/calendar/e-cal-backend-mapi.c:1274
+#: ../src/calendar/e-cal-backend-mapi.c:1293
+#: ../src/calendar/e-cal-backend-mapi.c:1314
 msgid "Failed to fetch items from a server"
 msgstr "サーバからアイテムを取得できませんでした"
 
@@ -214,37 +215,37 @@ msgid "Failed to fetch GAL entries"
 msgstr "GAL のエントリを取得できませんでした"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:364
+#: ../src/calendar/e-cal-backend-mapi.c:367
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "%s フォルダにあるアイテムの読み込み中"
 
-#: ../src/calendar/e-cal-backend-mapi.c:724
-#: ../src/calendar/e-cal-backend-mapi.c:750
-#: ../src/calendar/e-cal-backend-mapi.c:797
-#: ../src/calendar/e-cal-backend-mapi.c:876
-#: ../src/calendar/e-cal-backend-mapi.c:899
+#: ../src/calendar/e-cal-backend-mapi.c:758
+#: ../src/calendar/e-cal-backend-mapi.c:784
+#: ../src/calendar/e-cal-backend-mapi.c:831
+#: ../src/calendar/e-cal-backend-mapi.c:910
+#: ../src/calendar/e-cal-backend-mapi.c:933
 #, c-format
 msgid "Failed to fetch changes from a server: %s"
 msgstr "サーバから変更を取得できませんでした: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:729
-#: ../src/calendar/e-cal-backend-mapi.c:755
-#: ../src/calendar/e-cal-backend-mapi.c:802
-#: ../src/calendar/e-cal-backend-mapi.c:881
-#: ../src/calendar/e-cal-backend-mapi.c:904
+#: ../src/calendar/e-cal-backend-mapi.c:763
+#: ../src/calendar/e-cal-backend-mapi.c:789
+#: ../src/calendar/e-cal-backend-mapi.c:836
+#: ../src/calendar/e-cal-backend-mapi.c:915
+#: ../src/calendar/e-cal-backend-mapi.c:938
 msgid "Failed to fetch changes from a server"
 msgstr "サーバから変更を取得できませんでした"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1388
+#: ../src/calendar/e-cal-backend-mapi.c:1427
 msgid "Could not create thread for populating cache"
 msgstr "キャッシュを収集するスレッドを生成できませんでした"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1450
+#: ../src/calendar/e-cal-backend-mapi.c:1489
 msgid "Could not create cache file"
 msgstr "キャッシュ・ファイルを生成できませんでした"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1853
+#: ../src/calendar/e-cal-backend-mapi.c:1894
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -252,7 +253,7 @@ msgstr ""
 "繰り返しの予定を変更する機能は未だ実装されていません (サーバにある予定は変更"
 "されません)"
 
-#: ../src/calendar/e-cal-backend-mapi.c:2466
+#: ../src/calendar/e-cal-backend-mapi.c:2507
 msgid "Failed to get Free/Busy data"
 msgstr "フリー/ビジーなデータの取得に失敗しました"
 
@@ -322,10 +323,6 @@ msgstr "ゴミ箱を空にできませんでした: %s"
 msgid "Failed to empty Trash"
 msgstr "ゴミ箱を空にできませんでした"
 
-#: ../src/camel/camel-mapi-folder.c:1539 ../src/camel/camel-mapi-folder.c:1560
-msgid "Unknown error"
-msgstr "不明なエラー"
-
 #: ../src/camel/camel-mapi-folder.c:1622
 #, c-format
 msgid "Cannot append message to folder '%s'"
@@ -347,7 +344,7 @@ msgstr "新着メールの確認"
 
 #: ../src/camel/camel-mapi-provider.c:46
 msgid "C_heck for new messages in all folders"
-msgstr "全てのフォルダをチェックする(_H)"
+msgstr "すべてのフォルダをチェックする(_H)"
 
 #: ../src/camel/camel-mapi-provider.c:50
 msgid "Options"
@@ -407,7 +404,7 @@ msgstr "%s@%s の Exchange MAPI サーバ"
 #: ../src/camel/camel-mapi-store.c:361
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
-msgstr "%s (%s@%s に対する MAPI のパスワードを入力して下さい)"
+msgstr "%s (%s@%s に対する MAPI のパスワードを入力してください)"
 
 #: ../src/camel/camel-mapi-store.c:376
 #, c-format
@@ -423,66 +420,66 @@ msgstr "Excahge MAPI サーバに対する認証を実施できません: %s"
 msgid "Unable to authenticate to Exchange MAPI server"
 msgstr "Exchange MAPI サーバに対する認証を実施できません"
 
-#: ../src/camel/camel-mapi-store.c:563
+#: ../src/camel/camel-mapi-store.c:564
 #, c-format
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "オフライン・モードでは MAPI のフォルダを生成できません"
 
-#: ../src/camel/camel-mapi-store.c:570
+#: ../src/camel/camel-mapi-store.c:571
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "新しいフォルダ '%s' を生成できません"
 
-#: ../src/camel/camel-mapi-store.c:584
+#: ../src/camel/camel-mapi-store.c:585
 #, c-format
 msgid "Authentication failed"
 msgstr "認証に失敗しました"
 
-#: ../src/camel/camel-mapi-store.c:609
+#: ../src/camel/camel-mapi-store.c:610
 #, c-format
 msgid "Cannot create folder '%s': %s"
 msgstr "新しいフォルダ '%s' を生成できません: %s"
 
-#: ../src/camel/camel-mapi-store.c:614
+#: ../src/camel/camel-mapi-store.c:615
 #, c-format
 msgid "Cannot create folder '%s'"
 msgstr "新しいフォルダ '%s' を生成できません"
 
-#: ../src/camel/camel-mapi-store.c:707
+#: ../src/camel/camel-mapi-store.c:708
 #, c-format
 msgid "Cannot remove folder '%s': %s"
 msgstr "フォルダ '%s' を削除できません: %s"
 
-#: ../src/camel/camel-mapi-store.c:714
+#: ../src/camel/camel-mapi-store.c:715
 #, c-format
 msgid "Cannot remove folder '%s'"
 msgstr "フォルダ '%s' を削除できません"
 
-#: ../src/camel/camel-mapi-store.c:804
+#: ../src/camel/camel-mapi-store.c:805
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
 msgstr "MAPI のフォルダ名 '%s' の名前を変更できません。フォルダがありません。"
 
-#: ../src/camel/camel-mapi-store.c:816
+#: ../src/camel/camel-mapi-store.c:817
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'."
 msgstr "MAPI のデフォルトのフォルダ '%s' を '%s' に変更できません。"
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:843 ../src/camel/camel-mapi-store.c:868
-#: ../src/camel/camel-mapi-store.c:930
+#: ../src/camel/camel-mapi-store.c:844 ../src/camel/camel-mapi-store.c:869
+#: ../src/camel/camel-mapi-store.c:931
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "MAPI のフォルダ名を '%s' から '%s' に変更できません"
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
 #. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:861 ../src/camel/camel-mapi-store.c:924
+#: ../src/camel/camel-mapi-store.c:862 ../src/camel/camel-mapi-store.c:925
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "MAPI のフォルダ名を '%s' から '%s' に変更できません: %s"
 
-#: ../src/camel/camel-mapi-store.c:1493
+#: ../src/camel/camel-mapi-store.c:1494
 #, c-format
 msgid "Folder list not available in offline mode."
 msgstr "オフライン・モードではフォルダのリストを利用できません"
@@ -498,55 +495,55 @@ msgstr "メッセージを送信できませんでした"
 msgid "Could not send message: %s"
 msgstr "メッセージを送信できませんでした: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:101
+#: ../src/libexchangemapi/exchange-mapi-connection.c:103
 msgid "Failed to login into the server"
 msgstr "サーバのログインに失敗しました"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:102
+#: ../src/libexchangemapi/exchange-mapi-connection.c:104
 msgid "Cannot create more sessions, session limit was reached"
 msgstr "セッションをこれ以上作成できません。セッション数の上限に達しました"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:103
+#: ../src/libexchangemapi/exchange-mapi-connection.c:105
 msgid "User cancelled operation"
 msgstr "ユーザが操作をキャンセルしました"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:104
+#: ../src/libexchangemapi/exchange-mapi-connection.c:106
 msgid "Unable to abort"
 msgstr "中断できません"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:105
+#: ../src/libexchangemapi/exchange-mapi-connection.c:107
 msgid "Network error"
 msgstr "ネットワークエラー"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:106
+#: ../src/libexchangemapi/exchange-mapi-connection.c:108
 msgid "Disk error"
 msgstr "ディスクエラー"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:107
+#: ../src/libexchangemapi/exchange-mapi-connection.c:109
 msgid "Password change required"
 msgstr "パスワードの変更が必要です"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:108
+#: ../src/libexchangemapi/exchange-mapi-connection.c:110
 msgid "Password expired"
 msgstr "パスワードが期限切れです"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:109
+#: ../src/libexchangemapi/exchange-mapi-connection.c:111
 msgid "Invalid workstation account"
 msgstr "ワークステーションのアカウントが無効です"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:110
+#: ../src/libexchangemapi/exchange-mapi-connection.c:112
 msgid "Invalid access time"
 msgstr "アクセス時間が無効です"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:111
+#: ../src/libexchangemapi/exchange-mapi-connection.c:113
 msgid "Account is disabled"
 msgstr "アカウントが無効になっています"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:112
+#: ../src/libexchangemapi/exchange-mapi-connection.c:114
 msgid "End of session"
 msgstr "セッションの終了"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:120
+#: ../src/libexchangemapi/exchange-mapi-connection.c:122
 #, c-format
 msgid "MAPI error %s (0x%x) occurred"
 msgstr "MAPI エラー %s (0x%x) が発生しました"
@@ -554,15 +551,18 @@ msgstr "MAPI エラー %s (0x%x) が発生しました"
 #. Translators: The first '%s' is replaced with an error context,
 #. aka where the error occurred, the second '%s' is replaced with
 #. the error message.
-#: ../src/libexchangemapi/exchange-mapi-connection.c:130
+#: ../src/libexchangemapi/exchange-mapi-connection.c:132
 #, c-format
 msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3242
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3244
 msgid "All Public Folders"
-msgstr "全ての公開フォルダ"
+msgstr "すべての公開フォルダ"
+
+#~ msgid "Uknown error"
+#~ msgstr "不明なエラー"
 
 #~ msgid "Folders Size"
 #~ msgstr "フォルダサイズ"
