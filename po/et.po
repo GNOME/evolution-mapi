@@ -8,12 +8,12 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: evolution-mapi MASTER\n"
+"Project-Id-Version: evolution-mapi 2.32\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2010-08-26 18:36+0000\n"
-"PO-Revision-Date: 2010-09-06 16:28+0300\n"
-"Last-Translator: Ivar Smolin <okul@linux.ee>\n"
+"POT-Creation-Date: 2010-09-19 19:48+0000\n"
+"PO-Revision-Date: 2010-09-18 21:31+0300\n"
+"Last-Translator: Mattias Põldaru <mahfiaz gmail com>\n"
 "Language-Team: Estonian <et@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -261,17 +261,17 @@ msgid "Options"
 msgstr "Valikud"
 
 msgid "Automatically synchroni_ze account locally"
-msgstr ""
+msgstr "Konto automaatne kohalik sünkroniseerimine"
 
 #. i18n: copy from evolution:camel-imap-provider.c
 msgid "_Apply filters to new messages in Inbox on this server"
-msgstr ""
+msgstr "_Filtrite automaatne rakendamine selle serveri saabuva posti kaustale"
 
 msgid "Check new messages for _Junk contents"
-msgstr ""
+msgstr "Uute sõnumite seast otsitakse _rämpsposti"
 
 msgid "Only check for Junk messag_es in the Inbox folder"
-msgstr ""
+msgstr "Rämpsposti otsitakse ainult _saabuvate kirjade kaustast"
 
 msgid "For accessing Microsoft Exchange/OpenChange servers using MAPI"
 msgstr "MAPI kaudu Microsoft Exchange / OpenChange serveritele ligipääsuks"
@@ -414,7 +414,7 @@ msgstr "Seansi lõpp"
 
 #, c-format
 msgid "MAPI error %s (0x%x) occurred"
-msgstr ""
+msgstr "Esines MAPI viga %s (0x%x)"
 
 #. Translators: The first '%s' is replaced with an error context,
 #. aka where the error occurred, the second '%s' is replaced with
@@ -426,15 +426,3 @@ msgstr "%s: %s"
 
 msgid "All Public Folders"
 msgstr "Kõik avalikud kaustad"
-
-#~ msgid "Downloading GAL entries from server…"
-#~ msgstr "GAL-kirjete allalaadimine serverist…"
-
-#~ msgid "Message fetching cancelled by user."
-#~ msgstr "Sõnumi vastuvõtmine katkestati kasutaja poolt."
-
-#~ msgid "Folders Size"
-#~ msgstr "Kausta suurus"
-
-#~ msgid "Favorites"
-#~ msgstr "Lemmikud"
