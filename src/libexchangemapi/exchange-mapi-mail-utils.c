@@ -304,7 +304,8 @@ mapi_mime_set_recipient_list (CamelMimeMessage *msg, MailItem *item)
 	GSList *l = NULL;
 	CamelInternetAddress *to_addr, *cc_addr, *bcc_addr;
 
-	g_return_if_fail (item->recipients != NULL);
+	if (!item->recipients || item->header.transport_headers)
+		return;
 
 	to_addr = camel_internet_address_new ();
 	cc_addr = camel_internet_address_new ();
@@ -360,7 +361,9 @@ mapi_mime_set_recipient_list (CamelMimeMessage *msg, MailItem *item)
 		camel_mime_message_set_recipients(msg, "Bcc", bcc_addr);
 	}
 
-	/*TODO : Unref *_addr ? */
+	g_object_unref (to_addr);
+	g_object_unref (cc_addr);
+	g_object_unref (bcc_addr);
 }
 
 static void
