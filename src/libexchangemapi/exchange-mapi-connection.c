@@ -974,7 +974,7 @@ exchange_mapi_util_get_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 		struct mapi_SPropValue_array properties;
 		const uint32_t	*ui32;
 		mapi_object_t	obj_attach;
-		uint32_t	z;
+		uint32_t	z, az;
 
 		mapi_object_init(&obj_attach);
 
@@ -992,32 +992,66 @@ exchange_mapi_util_get_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 			goto loop_cleanup;
 		}
 
+		mapi_SPropValue_array_named (&obj_attach, &properties);
+
+		az = 0;
 		attachment = g_new0 (ExchangeMAPIAttachment, 1);
 		attachment->cValues = properties.cValues;
 		attachment->lpProps = g_new0 (struct SPropValue, attachment->cValues + 1);
 		for (z=0; z < properties.cValues; z++) {
+			gboolean skip = FALSE;
+
+			/* skip all "strange" properties */
+			switch (properties.lpProps[z].ulPropTag & 0xFFFF) {
+			case PT_UNSPECIFIED:
+			case PT_NULL:
+			case PT_CURRENCY:
+			case PT_APPTIME:
+			case PT_CLSID:
+			case PT_SVREID:
+			case PT_SRESTRICT:
+			case PT_ACTIONS:
+			case PT_MV_SHORT:
+			case PT_MV_LONG:
+			case PT_MV_FLOAT:
+			case PT_MV_DOUBLE:
+			case PT_MV_CURRENCY:
+			case PT_MV_APPTIME:
+			case PT_MV_I8:
+			case PT_MV_CLSID:
+				skip = TRUE;
+				break;
+			default:
+				break;
+			}
+
+			if (skip) {
+				attachment->cValues--;
+				continue;
+			}
+
 			cast_SPropValue (
 				#ifdef HAVE_MEMCTX_ON_CAST_SPROPVALUE
 				mem_ctx,
 				#endif
-				&properties.lpProps[z], &(attachment->lpProps[z]));
+				&properties.lpProps[z], &(attachment->lpProps[az]));
 
-			if ((attachment->lpProps[z].ulPropTag & 0xFFFF) == PT_STRING8) {
+			if ((attachment->lpProps[az].ulPropTag & 0xFFFF) == PT_STRING8) {
 				struct SPropValue *lpProps;
 				struct SPropTagArray *tags;
 				uint32_t prop_count = 0;
 
 				/* prefer unicode strings, if available */
-				tags = set_SPropTagArray (mem_ctx, 0x1, (attachment->lpProps[z].ulPropTag & 0xFFFF0000) | PT_UNICODE);
+				tags = set_SPropTagArray (mem_ctx, 0x1, (attachment->lpProps[az].ulPropTag & 0xFFFF0000) | PT_UNICODE);
 				if (MAPI_E_SUCCESS == GetProps (&obj_attach, tags, &lpProps, &prop_count) && prop_count == 1 && lpProps) {
 					if ((lpProps->ulPropTag & 0xFFFF) == PT_UNICODE)
-						attachment->lpProps[z] = *lpProps;
+						attachment->lpProps[az] = *lpProps;
 				}
 				MAPIFreeBuffer (tags);
 			}
-		}
 
-		mapi_SPropValue_array_named (&obj_attach, &properties);
+			az++;
+		}
 
 		/* just to get all the other streams */
 		for (z = 0; z < properties.cValues; z++) {
