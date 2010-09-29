@@ -138,6 +138,7 @@ ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restr
 	GError *mapi_error = NULL;
 	struct FetchGalData fgd = { 0 };
 	ExchangeMapiConnection *conn;
+	gchar *last_fetch;
 
 	e_book_backend_mapi_lock_connection (ebma);
 
@@ -147,6 +148,23 @@ ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restr
 		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
 
 		return;
+	}
+
+	/* GAL doesn't use restrictions yet, thus just fetches all items always */
+	last_fetch = e_book_backend_mapi_cache_get (ebma, "gal-last-update");
+	if (last_fetch) {
+		GTimeVal last_tv = { 0 }, now = { 0 };
+
+		g_get_current_time (&now);
+
+		/* refetch gal only once per week */
+		if (g_time_val_from_iso8601 (last_fetch, &last_tv) && now.tv_sec - last_tv.tv_sec <= 60 * 60 * 24 * 7) {
+			g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Cancelled");
+			g_free (last_fetch);
+			return;
+		}
+
+		g_free (last_fetch);
 	}
 
 	fgd.ebma = ebma;
@@ -161,6 +179,16 @@ ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restr
 	if (mapi_error) {
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch GAL entries"));
 		g_error_free (mapi_error);
+	} else {
+		GTimeVal now = { 0 };
+
+		g_get_current_time (&now);
+
+		last_fetch = g_time_val_to_iso8601 (&now);
+		if (last_fetch && *last_fetch)
+			e_book_backend_mapi_cache_set (ebma, "gal-last-update", last_fetch);
+
+		g_free (last_fetch);
 	}
 
 	e_book_backend_mapi_unlock_connection (ebma);

@@ -105,6 +105,8 @@ void e_book_backend_mapi_update_view_by_cache (EBookBackendMAPI *ebma, EDataBook
 gboolean e_book_backend_mapi_is_marked_for_offline (EBookBackendMAPI *ebma);
 gboolean e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView *book_view, EContact *contact, const struct timeval *pr_last_modification_time, gint index, gint total, gpointer notify_contact_data);
 void e_book_backend_mapi_notify_contact_removed (EBookBackendMAPI *ebma, const gchar *uid);
+void   e_book_backend_mapi_cache_set (EBookBackendMAPI *ebma, const gchar *key, const gchar *value);
+gchar *e_book_backend_mapi_cache_get (EBookBackendMAPI *ebma, const gchar *key);
 
 /* utility functions/macros */
 
