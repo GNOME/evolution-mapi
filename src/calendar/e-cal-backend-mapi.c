@@ -92,6 +92,7 @@ struct _ECalBackendMAPIPrivate {
 	gboolean		mode_changed;
 	icaltimezone		*default_zone;
 	gboolean		populating_cache; /* whether in populate_cache */
+	GMutex			*updating_mutex;
 
 	/* timeout handler for syncing sendoptions */
 	guint			sendoptions_sync_timeout;
@@ -290,13 +291,21 @@ ecbm_get_static_capabilities (ECalBackend *backend, EDataCal *cal, gchar **capab
 //				CAL_STATIC_CAPABILITY_DELEGATE_SUPPORTED ","
 //				CAL_STATIC_CAPABILITY_NO_ORGANIZER ","
 //				CAL_STATIC_CAPABILITY_DELEGATE_TO_MANY ","
-				CAL_STATIC_CAPABILITY_HAS_UNACCEPTED_MEETING
+				CAL_STATIC_CAPABILITY_HAS_UNACCEPTED_MEETING ","
+				CAL_STATIC_CAPABILITY_REFRESH_SUPPORTED
 				  );
 }
 static void
 ecbm_refresh (ECalBackend *backend, EDataCal *cal, GError **perror)
 {
-	g_propagate_error (perror, EDC_ERROR (NotSupported));
+	ECalBackendMAPI *cbmapi;
+	ECalBackendMAPIPrivate *priv;
+
+	cbmapi = E_CAL_BACKEND_MAPI (backend);
+	priv = cbmapi->priv;
+
+	if (priv && priv->dlock && priv->dlock->cond)
+		g_cond_signal (priv->dlock->cond);
 }
 
 static void
@@ -681,7 +690,6 @@ get_deltas (gpointer handle)
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
 	icalcomponent_kind kind;
-	static GStaticMutex updating = G_STATIC_MUTEX_INIT;
 	icaltimetype itt_current, itt_cache = icaltime_null_time();
 	time_t current_time;
 	struct tm tm;
@@ -708,7 +716,7 @@ get_deltas (gpointer handle)
 	if (priv->mode == CAL_MODE_LOCAL)
 		return FALSE;
 
-	g_static_mutex_lock (&updating);
+	g_mutex_lock (priv->updating_mutex);
 
 	serv_time = e_cal_backend_store_get_key_value (priv->store, SERVER_UTC_TIME);
 	if (serv_time)
@@ -764,7 +772,7 @@ get_deltas (gpointer handle)
 			}
 
 //			e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
-			g_static_mutex_unlock (&updating);
+			g_mutex_unlock (priv->updating_mutex);
 			if (mem_ctx)
 				talloc_free (mem_ctx);
 			return FALSE;
@@ -790,7 +798,7 @@ get_deltas (gpointer handle)
 			}
 
 			//e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
-			g_static_mutex_unlock (&updating);
+			g_mutex_unlock (priv->updating_mutex);
 			if (mem_ctx)
 				talloc_free (mem_ctx);
 			return FALSE;
@@ -838,7 +846,7 @@ get_deltas (gpointer handle)
 
 		g_slist_foreach (did.cache_ids, (GFunc) g_free, NULL);
 		g_slist_free (did.cache_ids);
-		g_static_mutex_unlock (&updating);
+		g_mutex_unlock (priv->updating_mutex);
 		return FALSE;
 	}
 
@@ -915,7 +923,7 @@ get_deltas (gpointer handle)
 					e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
 				}
 
-				g_static_mutex_unlock (&updating);
+				g_mutex_unlock (priv->updating_mutex);
 				g_free (or_res);
 				return FALSE;
 			}
@@ -939,14 +947,14 @@ get_deltas (gpointer handle)
 				}
 
 				g_free (or_res);
-				g_static_mutex_unlock (&updating);
+				g_mutex_unlock (priv->updating_mutex);
 				return FALSE;
 			}
 		}
 		g_free (or_res);
 	}
 
-	g_static_mutex_unlock (&updating);
+	g_mutex_unlock (priv->updating_mutex);
 	return TRUE;
 }
 
@@ -3603,6 +3611,11 @@ ecbm_finalize (GObject *object)
 		priv->mutex = NULL;
 	}
 
+	if (priv->updating_mutex) {
+		g_mutex_free (priv->updating_mutex);
+		priv->updating_mutex = NULL;
+	}
+
 	if (priv->store) {
 		g_object_unref (priv->store);
 		priv->store = NULL;
@@ -3729,6 +3742,7 @@ e_cal_backend_mapi_init (ECalBackendMAPI *cbmapi)
 
 	/* create the mutex for thread safety */
 	priv->mutex = g_mutex_new ();
+	priv->updating_mutex = g_mutex_new ();
 	priv->populating_cache = FALSE;
 	priv->op_queue = em_operation_queue_new ((EMOperationQueueFunc) ecbm_operation_cb, cbmapi);
 
