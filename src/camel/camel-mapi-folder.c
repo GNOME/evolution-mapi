@@ -1828,8 +1828,18 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 /*		return NULL; */
 /*	} */
 
-	if (camel_url_get_param (((CamelService *) store)->url, "filter"))
-		folder->folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
+	if ((store->flags & CAMEL_STORE_FILTER_INBOX) != 0) {
+		CamelFolderInfo *fi;
+
+		fi = camel_store_get_folder_info (store, folder_name, 0, NULL);
+		if (fi) {
+			if ((fi->flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_INBOX) {
+				folder->folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
+			}
+
+			camel_store_free_folder_info (store, fi);
+		}
+	}
 
 	mapi_folder->search = camel_folder_search_new ();
 	if (!mapi_folder->search) {
