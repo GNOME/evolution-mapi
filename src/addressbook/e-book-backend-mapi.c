@@ -299,6 +299,7 @@ ebbm_update_cache_cb (gpointer data)
 	EBookBackendMAPIClass *ebmac;
 	glong last_modification_secs = 0;
 	EDataBookView *book_view;
+	GError *error = NULL;
 
 	g_return_val_if_fail (ebma != NULL, NULL);
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma), NULL);
@@ -324,14 +325,13 @@ ebbm_update_cache_cb (gpointer data)
 		if (!ebbm_get_cache_time (ebma, &last_modification_secs))
 			last_modification_secs = 0;
 
-		ebbm_fetch_contacts (ebma, restriction, NULL, &last_modification_secs, NULL);
+		ebbm_fetch_contacts (ebma, restriction, NULL, &last_modification_secs, &error);
 
 		talloc_free (mem_ctx);
 	}
 
-	if (!g_cancellable_is_cancelled (priv->update_cache) && ebmac->op_fetch_known_uids) {
+	if (!error && !g_cancellable_is_cancelled (priv->update_cache) && ebmac->op_fetch_known_uids) {
 		GHashTable *uids = g_hash_table_new_full (g_str_hash, g_str_equal, (GDestroyNotify) g_free, NULL);
-		GError *error = NULL;
 
 		ebmac->op_fetch_known_uids (ebma, priv->update_cache, uids, &error);
 
@@ -347,7 +347,8 @@ ebbm_update_cache_cb (gpointer data)
 
 				if (!uid || g_hash_table_lookup (uids, uid)
 				    || g_str_equal (uid, "populated")
-				    || g_str_equal (uid, "last_update_time"))
+				    || g_str_equal (uid, "last_update_time")
+				    || g_str_has_prefix (uid, "key:"))
 					continue;
 
 				/* uid is hold by a cache, thus make a copy before remove */
@@ -366,9 +367,10 @@ ebbm_update_cache_cb (gpointer data)
 		}
 
 		g_hash_table_destroy (uids);
-		if (error)
-			g_error_free (error);
 	}
+
+	if (error)
+		g_error_free (error);
 
 	book_view = ebbm_pick_book_view (ebma);
 	if (book_view)
@@ -701,9 +703,10 @@ ebbm_book_view_thread (gpointer data)
 		if (ebmac && ebmac->op_book_view_thread)
 			ebmac->op_book_view_thread (bvtd->ebma, bvtd->book_view, &error);
 
-		if (!error && !priv->marked_for_offline) {
+		if (!error && !priv->marked_for_offline && !e_book_backend_cache_is_populated (priv->cache)) {
 			/* todo: create restriction based on the book_view */
 			ebbm_fetch_contacts (bvtd->ebma, NULL, bvtd->book_view, NULL, &error);
+			e_book_backend_cache_set_populated (priv->cache);
 		}
 	}
 
@@ -1622,6 +1625,54 @@ e_book_backend_mapi_notify_contact_removed (EBookBackendMAPI *ebma, const gchar 
 	e_book_backend_cache_remove_contact (priv->cache, uid);
 	e_book_backend_summary_remove_contact (priv->summary, uid);
 	e_book_backend_notify_remove (E_BOOK_BACKEND (ebma), uid);
+}
+
+static gchar *
+create_cache_key (const gchar *key)
+{
+	g_return_val_if_fail (key != NULL, NULL);
+
+	return g_strconcat ("key:", key, NULL);
+}
+
+void
+e_book_backend_mapi_cache_set (EBookBackendMAPI *ebma, const gchar *key, const gchar *value)
+{
+	gchar *real_key;
+
+	g_return_if_fail (ebma != NULL);
+	g_return_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma));
+	g_return_if_fail (ebma->priv != NULL);
+	g_return_if_fail (ebma->priv->cache != NULL);
+	g_return_if_fail (key != NULL);
+
+	real_key = create_cache_key (key);
+	g_return_if_fail (real_key != NULL);
+
+	if (!e_file_cache_add_object (E_FILE_CACHE (ebma->priv->cache), real_key, value))
+		e_file_cache_replace_object (E_FILE_CACHE (ebma->priv->cache), real_key, value);
+
+	g_free (real_key);
+}
+
+gchar *
+e_book_backend_mapi_cache_get (EBookBackendMAPI *ebma, const gchar *key)
+{
+	gchar *real_key, *res;
+
+	g_return_val_if_fail (ebma != NULL, NULL);
+	g_return_val_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma), NULL);
+	g_return_val_if_fail (ebma->priv != NULL, NULL);
+	g_return_val_if_fail (ebma->priv->cache != NULL, NULL);
+	g_return_val_if_fail (key != NULL, NULL);
+
+	real_key = create_cache_key (key);
+	g_return_val_if_fail (real_key != NULL, NULL);
+
+	res = g_strdup (e_file_cache_get_object (E_FILE_CACHE (ebma->priv->cache), real_key));
+	g_free (real_key);
+
+	return res;
 }
 
 /* utility functions/macros */
