@@ -1963,6 +1963,10 @@ mapi_get_junk (CamelStore *store, GError **error)
 static gboolean
 mapi_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, GError **error)
 {
+	/* skip unselectable folders from automatic refresh */
+	if (info && (info->flags & CAMEL_FOLDER_NOSELECT) != 0)
+		return FALSE;
+
 	return CAMEL_STORE_CLASS(camel_mapi_store_parent_class)->can_refresh_folder (store, info, error) ||
 	      (camel_url_get_param (((CamelService *)store)->url, "check_all") != NULL);
 }
