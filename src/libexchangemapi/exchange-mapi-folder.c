@@ -28,7 +28,7 @@
 #include "exchange-mapi-connection.h"
 #include "exchange-mapi-folder.h"
 
-#define d(x) x
+#define d(x)
 
 static ExchangeMAPIFolderType
 container_class_to_type (const gchar *type)

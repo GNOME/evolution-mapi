@@ -44,7 +44,7 @@
 #include <exchange-mapi-connection.h>
 #include <exchange-mapi-utils.h>
 
-#define d(x) x
+#define d(x)
 
 gint e_plugin_lib_enable (EPlugin *ep, gint enable);
 
@@ -75,7 +75,7 @@ free_mapi_listener ( void )
 gint
 e_plugin_lib_enable (EPlugin *ep, gint enable)
 {
-	g_debug ("Loading Exchange MAPI Plugin \n");
+	d(g_debug ("Loading Exchange MAPI Plugin"));
 
 	if (!config_listener) {
 		config_listener = exchange_mapi_account_listener_new ();

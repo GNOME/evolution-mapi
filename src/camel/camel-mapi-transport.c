@@ -43,7 +43,7 @@
 #include "camel-mapi-folder.h"
 #include "camel-mapi-store-summary.h"
 #include "camel-mapi-utils.h"
-#define d(x) x
+#define d(x)
 
 #include <exchange-mapi-defs.h>
 #include "exchange-mapi-mail-utils.h"

@@ -41,7 +41,7 @@
 #include <exchange-mapi-connection.h>
 #include <exchange-mapi-utils.h>
 
-#define d(x) x
+#define d(x)
 
 G_DEFINE_TYPE (ExchangeMAPIAccountListener, exchange_mapi_account_listener, G_TYPE_OBJECT)
 

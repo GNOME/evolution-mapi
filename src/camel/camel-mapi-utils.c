@@ -45,7 +45,7 @@
 #include "camel-mapi-store-summary.h"
 #include "camel-mapi-utils.h"
 
-#define d(x) x
+#define d(x)
 
 #define STREAM_SIZE 4000
 

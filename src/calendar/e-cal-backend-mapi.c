@@ -40,7 +40,7 @@
 
 #include "e-cal-backend-mapi.h"
 
-#define d(x) x
+#define d(x)
 
 #ifdef G_OS_WIN32
 /* Undef the similar macro from pthread.h, it doesn't check if
