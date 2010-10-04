@@ -1013,7 +1013,10 @@ mapi_cmp_uids (CamelFolder *folder, const gchar *uid1, const gchar *uid2)
 }
 
 static gboolean
-mapi_set_message_flags (CamelFolder *folder, const gchar *uid, guint32 flags, guint32 set)
+mapi_set_message_flags (CamelFolder *folder,
+                        const gchar *uid,
+                        CamelMessageFlags flags,
+                        CamelMessageFlags set)
 {
 	CamelMessageInfo *info;
 	gint res;
