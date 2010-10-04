@@ -326,6 +326,10 @@ ebbm_update_cache_cb (gpointer data)
 			last_modification_secs = 0;
 
 		ebbm_fetch_contacts (ebma, restriction, NULL, &last_modification_secs, &error);
+		if (!error)
+			e_book_backend_cache_set_populated (priv->cache);
+		else
+			e_file_cache_remove_object (E_FILE_CACHE (priv->cache), "populated");
 
 		talloc_free (mem_ctx);
 	}
@@ -695,7 +699,7 @@ ebbm_book_view_thread (gpointer data)
 
 	e_book_backend_mapi_update_view_by_cache (bvtd->ebma, bvtd->book_view, &error);
 
-	if (!error && priv && priv->conn && !priv->update_cache_thread
+	if (!error && priv && priv->conn && (!priv->update_cache_thread || g_cancellable_is_cancelled (priv->update_cache))
 	    && e_book_backend_mapi_book_view_is_running (bvtd->ebma, bvtd->book_view)) {
 		EBookBackendMAPIClass *ebmac;
 
@@ -703,12 +707,19 @@ ebbm_book_view_thread (gpointer data)
 		if (ebmac && ebmac->op_book_view_thread)
 			ebmac->op_book_view_thread (bvtd->ebma, bvtd->book_view, &error);
 
-		if (!error && !priv->marked_for_offline && !e_book_backend_cache_is_populated (priv->cache)) {
+		if (!error && !e_book_backend_cache_is_populated (priv->cache)) {
 			/* todo: create restriction based on the book_view */
+			g_cancellable_reset (priv->update_cache);
 			ebbm_fetch_contacts (bvtd->ebma, NULL, bvtd->book_view, NULL, &error);
-			e_book_backend_cache_set_populated (priv->cache);
+			g_cancellable_cancel (priv->update_cache);
+
+			if (!error)
+				e_book_backend_cache_set_populated (priv->cache);
 		}
 	}
+
+	if (error && g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+		g_clear_error (&error);
 
 	/* do not stop book view when filling cache */
 	if (e_book_backend_mapi_book_view_is_running (bvtd->ebma, bvtd->book_view)

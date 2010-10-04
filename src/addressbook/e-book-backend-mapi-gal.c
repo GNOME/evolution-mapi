@@ -139,6 +139,7 @@ ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restr
 	struct FetchGalData fgd = { 0 };
 	ExchangeMapiConnection *conn;
 	gchar *last_fetch;
+	gboolean fetch_successful;
 
 	e_book_backend_mapi_lock_connection (ebma);
 
@@ -146,7 +147,6 @@ ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restr
 	if (!conn) {
 		e_book_backend_mapi_unlock_connection (ebma);
 		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
-
 		return;
 	}
 
@@ -161,6 +161,7 @@ ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restr
 		if (g_time_val_from_iso8601 (last_fetch, &last_tv) && now.tv_sec - last_tv.tv_sec <= 60 * 60 * 24 * 7) {
 			g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Cancelled");
 			g_free (last_fetch);
+			e_book_backend_mapi_unlock_connection (ebma);
 			return;
 		}
 
@@ -172,13 +173,15 @@ ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restr
 	fgd.notify_contact_data = notify_contact_data;
 	fgd.fid = exchange_mapi_connection_get_default_folder_id (conn, olFolderContacts, NULL);
 
-	exchange_mapi_connection_fetch_gal (conn, restriction,
+	fetch_successful = exchange_mapi_connection_fetch_gal (conn, restriction,
 		mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 		fetch_gal_cb, &fgd, &mapi_error);
 
 	if (mapi_error) {
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch GAL entries"));
 		g_error_free (mapi_error);
+	} else if (!fetch_successful) {
+		g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Cancelled");
 	} else {
 		GTimeVal now = { 0 };
 
