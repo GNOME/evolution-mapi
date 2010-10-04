@@ -1,3 +1,30 @@
+evolution-mapi 2.91.0 2010-10-04
+--------------------------------
+
+Bug Fixes:
+	Bug 629481 - Critical warning from mapi_sync function (Milan Crha)
+	Bug 629484 - Do not refresh 'Favourites' folder itself (Milan Crha)
+	Bug 629489 - Could not get attach_file_url (Punit Jain)
+	Bug 629492 - Messages can be without recipients (Milan Crha)
+	Bug 629499 - Runs incoming filters in all folders (Milan Crha)
+	Bug 629507 - gal re-fetches itself (Milan Crha)
+	Bug 629507 - gal re-fetches itself (part ][) (Milan Crha)
+	Bug 629603 - Allow calendar refresh on demand (Milan Crha)
+	Bug 629836 - Crash on an event fetching (Milan Crha)
+
+Misc:
+	Adapt to Camel API changes. (Matthew Barnes)
+	GtkObject is gone in GTK3 (Milan Crha)
+
+Translations:
+	Mattias Põldaru (et)
+	Milo Casagrande (it)
+	Takayuki KUSANO (ja)
+	Žygimantas Beručka (lt)
+	Wouter Bolsterlee (nl)
+	Piotr Drąg (pl)
+	Antonio Fernandes C. Neto (pt_BR)
+
 evolution-mapi 0.31.92 2010-09-13
 ---------------------------------
 
