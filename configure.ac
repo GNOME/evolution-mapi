@@ -3,7 +3,7 @@ dnl Written by Julien Kerihuel <j.kerihuel@openchange.org>
 dnl Modified for GNOME Evolution MAPI Provider by Johnny Jacob <jjohnny@novell.com>
 
 AC_PREREQ(2.58)
-AC_INIT([evolution-mapi], [2.91.0], [http://bugzilla.gnome.org/browse.cgi?product=evolution-mapi])
+AC_INIT([evolution-mapi], [2.91.1], [http://bugzilla.gnome.org/browse.cgi?product=evolution-mapi])
 AM_INIT_AUTOMAKE([gnu 1.9])
 AC_CONFIG_SRCDIR(README)
 AC_CONFIG_HEADERS(config.h)
