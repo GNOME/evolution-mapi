@@ -377,7 +377,7 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 
 		auth_button = gtk_button_new_with_mnemonic (_("_Authenticate"));
 		gtk_box_pack_start (GTK_BOX (hbox), auth_button, FALSE, FALSE, 0);
-		g_signal_connect(GTK_OBJECT(auth_button), "clicked",  G_CALLBACK(validate_credentials), data->config);
+		g_signal_connect (auth_button, "clicked",  G_CALLBACK (validate_credentials), data->config);
 
 		gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row+1, 0, 0, 0, 0);
 		gtk_widget_show_all (GTK_WIDGET (hbox));
