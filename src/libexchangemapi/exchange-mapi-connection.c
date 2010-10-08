@@ -28,7 +28,10 @@
 
 #include <glib/gi18n-lib.h>
 #include <camel/camel.h>
+#include <libedataserver/e-account.h>
+#include <libedataserver/e-account-list.h>
 #include <libedataserver/e-data-server-util.h>
+#include <libedataserver/e-flag.h>
 
 #include "exchange-mapi-connection.h"
 #include "exchange-mapi-folder.h"
@@ -40,6 +43,7 @@
 
 static void register_connection (ExchangeMapiConnection *conn);
 static void unregister_connection (ExchangeMapiConnection *conn);
+static gboolean mapi_profile_create (const gchar *username, const gchar *password, const gchar *domain, const gchar *server, guint32 flags, mapi_profile_callback_t callback, gpointer data, GError **perror, gboolean use_locking);
 static struct mapi_session *mapi_profile_load (const gchar *profname, const gchar *password, GError **perror);
 static void ema_global_lock (void);
 static void ema_global_unlock (void);
@@ -3447,6 +3451,89 @@ exchange_mapi_connection_events_monitor (ExchangeMapiConnection *conn, struct ma
 
 /* profile related functions - begin */
 
+struct tcp_data
+{
+	const gchar *profname;
+	const gchar *password;
+	EFlag *eflag;
+	gboolean has_profile;
+};
+
+static gboolean
+try_create_profile_main_thread_cb (struct tcp_data *data)
+{
+	EAccountList *accounts;
+	EIterator *iter;
+	GConfClient *gconf;
+
+	g_return_val_if_fail (data != NULL, FALSE);
+
+	gconf = gconf_client_get_default ();
+	accounts = e_account_list_new (gconf);
+	for (iter = e_list_get_iterator (E_LIST (accounts)); e_iterator_is_valid (iter); e_iterator_next (iter)) {
+		EAccount *account = E_ACCOUNT (e_iterator_get (iter));
+		if (account && account->source && account->source->url && g_ascii_strncasecmp (account->source->url, "mapi://", 7) == 0) {
+			CamelURL *url = camel_url_new (e_account_get_string (account, E_ACCOUNT_SOURCE_URL), NULL);
+			const gchar *domain_name;
+
+			domain_name = camel_url_get_param (url, "domain");
+			if (data->password && *data->password && domain_name && *domain_name && url->user && *url->user && url->host && *url->host) {
+				gchar *profname = exchange_mapi_util_profile_name (url->user, domain_name, url->host, FALSE);
+
+				if (profname && g_str_equal (profname, data->profname)) {
+					guint32 cp_flags = (camel_url_get_param (url, "ssl") && g_str_equal (camel_url_get_param (url, "ssl"), "1")) ? CREATE_PROFILE_FLAG_USE_SSL : CREATE_PROFILE_FLAG_NONE;
+
+					/* do not use locking here, because when this is called then other thread is holding the lock */
+					data->has_profile = mapi_profile_create (url->user, data->password, domain_name, url->host, cp_flags, NULL, NULL, NULL, FALSE);
+
+					g_free (profname);
+					camel_url_free (url);
+					break;
+				}
+
+				g_free (profname);
+			}
+
+			camel_url_free (url);
+		}
+	}
+
+	g_object_unref (accounts);
+	g_object_unref (gconf);
+
+	e_flag_set (data->eflag);
+
+	return FALSE;
+}
+
+static gboolean
+try_create_profile (const gchar *profname, const gchar *password)
+{
+	struct tcp_data data;
+
+	g_return_val_if_fail (profname != NULL, FALSE);
+	g_return_val_if_fail (*profname != 0, FALSE);
+	g_return_val_if_fail (password != NULL, FALSE);
+	g_return_val_if_fail (*password != 0, FALSE);
+
+	data.profname = profname;
+	data.password = password;
+	data.eflag = e_flag_new ();
+	data.has_profile = FALSE;
+
+	if (!g_main_context_is_owner (g_main_context_default ())) {
+		/* function called from other than main thread */
+		g_timeout_add (10, (GSourceFunc) try_create_profile_main_thread_cb, &data);
+		e_flag_wait (data.eflag);
+	} else {
+		try_create_profile_main_thread_cb (&data);
+	}
+
+	e_flag_free (data.eflag);
+
+	return data.has_profile;
+}
+
 static void
 mapi_debug_logger (const gchar * domain, GLogLevelFlags level, const gchar * message, gpointer data)
 {
@@ -3558,6 +3645,9 @@ mapi_profile_load (const gchar *profname, const gchar *password, GError **perror
 	g_debug("Loading profile %s ", profname);
 
 	ms = MapiLogonEx (&session, profname, password);
+	if (ms == MAPI_E_NOT_FOUND && try_create_profile (profname, password))
+		ms = MapiLogonEx (&session, profname, password);
+
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "MapiLogonEx", ms);
 		goto cleanup;
@@ -3570,11 +3660,12 @@ mapi_profile_load (const gchar *profname, const gchar *password, GError **perror
 	return session;
 }
 
-gboolean
-exchange_mapi_create_profile (const gchar *username, const gchar *password, const gchar *domain,
-			      const gchar *server, guint32 flags,
-			      mapi_profile_callback_t callback, gpointer data,
-			      GError **perror)
+static gboolean
+mapi_profile_create (const gchar *username, const gchar *password, const gchar *domain,
+		     const gchar *server, guint32 flags,
+		     mapi_profile_callback_t callback, gpointer data,
+		     GError **perror,
+		     gboolean use_locking)
 {
 	enum MAPISTATUS	ms;
 	gboolean result = FALSE;
@@ -3586,12 +3677,14 @@ exchange_mapi_create_profile (const gchar *username, const gchar *password, cons
 	e_return_val_mapi_error_if_fail (username && *username && password && *password &&
 			      domain && *domain && server && *server, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	g_static_rec_mutex_lock (&profile_mutex);
+	if (use_locking)
+		g_static_rec_mutex_lock (&profile_mutex);
 
 	g_debug ("Create profile with %s %s %s\n", username, domain, server);
 
 	if (!ensure_mapi_init_called (perror)) {
-		g_static_rec_mutex_unlock (&profile_mutex);
+		if (use_locking)
+			g_static_rec_mutex_unlock (&profile_mutex);
 		return FALSE;
 	}
 
@@ -3661,9 +3754,19 @@ exchange_mapi_create_profile (const gchar *username, const gchar *password, cons
 		mapi_object_release (&msg_store);
 	}*/
 
-	g_static_rec_mutex_unlock (&profile_mutex);
+	if (use_locking)
+		g_static_rec_mutex_unlock (&profile_mutex);
 
 	return result;
+}
+
+gboolean
+exchange_mapi_create_profile (const gchar *username, const gchar *password, const gchar *domain,
+			      const gchar *server, guint32 flags,
+			      mapi_profile_callback_t callback, gpointer data,
+			      GError **perror)
+{
+	return mapi_profile_create (username, password, domain, server, flags, callback, data, perror, TRUE);
 }
 
 gboolean
