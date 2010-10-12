@@ -1693,9 +1693,6 @@ mapi_disconnect_sync (CamelService *service,
 	}
 
 	store->priv->folders_synced = FALSE;
-
-	camel_offline_store_set_online_sync (
-		CAMEL_OFFLINE_STORE (store), FALSE, cancellable, NULL);
 	service->status = CAMEL_SERVICE_DISCONNECTED;
 
 	return TRUE;
