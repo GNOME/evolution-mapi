@@ -2013,6 +2013,14 @@ exchange_mapi_connection_create_folder (ExchangeMapiConnection *conn, uint32_t o
 
 	fid = mapi_object_get_id (&obj_folder);
 	g_debug("Folder %s created with id %016" G_GINT64_MODIFIER "X ", name, fid);
+	
+	/* we should also update folder list locally */
+	if (fid != 0 && priv->folders != NULL) {
+		ExchangeMAPIFolder *folder = NULL;
+		folder = exchange_mapi_folder_new (name, type, MAPI_PERSONAL_FOLDER, fid, pfid, 0, 0, 0);
+		if (folder)
+			priv->folders = g_slist_append (priv->folders, folder);
+	}
 
 cleanup:
 	mapi_object_release(&obj_folder);
@@ -2080,13 +2088,16 @@ exchange_mapi_connection_remove_folder (ExchangeMapiConnection *conn, mapi_id_t 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
+	g_return_val_if_fail (fid != 0, FALSE);
+
 	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	folder = NULL;
-	for (l = exchange_mapi_connection_peek_folders_list (conn); l && !folder; l = l->next) {
+	for (l = exchange_mapi_connection_peek_folders_list (conn); l; l = l->next) {
 		folder = l->data;
-
-		if (!folder || !folder->folder_id || folder->folder_id != fid)
+		if (folder && folder->folder_id == fid)
+			break;
+		else
 			folder = NULL;
 	}
 
