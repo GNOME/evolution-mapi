@@ -922,6 +922,38 @@ obj_message_to_camel_mime (ExchangeMapiConnection *conn, mapi_id_t fid, mapi_obj
 	return res;
 }
 
+static gboolean
+may_skip_property (uint32_t proptag)
+{
+	/* skip all "strange" properties */
+	gboolean skip = TRUE;
+
+	switch (proptag & 0xFFFF) {
+	case PT_BOOLEAN:
+	case PT_I2:
+	case PT_LONG:
+	case PT_DOUBLE:
+	case PT_I8:
+	case PT_STRING8:
+	case PT_UNICODE:
+	case PT_SYSTIME:
+	case PT_BINARY:
+	case PT_ERROR:
+	case PT_CLSID:
+	case PT_SVREID:
+	case PT_MV_STRING8:
+	case PT_MV_UNICODE:
+	case PT_MV_BINARY:
+	case PT_MV_LONG:
+		skip = FALSE;
+		break;
+	default:
+		break;
+	}
+
+	return skip;
+}
+
 /* Returns TRUE if all attachments were read succcesfully, else returns FALSE */
 static gboolean
 exchange_mapi_util_get_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, mapi_object_t *obj_message, GSList **attach_list, GError **perror)
@@ -1004,33 +1036,7 @@ exchange_mapi_util_get_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 		attachment->cValues = properties.cValues;
 		attachment->lpProps = g_new0 (struct SPropValue, attachment->cValues + 1);
 		for (z=0; z < properties.cValues; z++) {
-			gboolean skip = FALSE;
-
-			/* skip all "strange" properties */
-			switch (properties.lpProps[z].ulPropTag & 0xFFFF) {
-			case PT_UNSPECIFIED:
-			case PT_NULL:
-			case PT_CURRENCY:
-			case PT_APPTIME:
-			case PT_CLSID:
-			case PT_SVREID:
-			case PT_SRESTRICT:
-			case PT_ACTIONS:
-			case PT_MV_SHORT:
-			case PT_MV_LONG:
-			case PT_MV_FLOAT:
-			case PT_MV_DOUBLE:
-			case PT_MV_CURRENCY:
-			case PT_MV_APPTIME:
-			case PT_MV_I8:
-			case PT_MV_CLSID:
-				skip = TRUE;
-				break;
-			default:
-				break;
-			}
-
-			if (skip) {
+			if (may_skip_property (properties.lpProps[z].ulPropTag)) {
 				attachment->cValues--;
 				continue;
 			}
@@ -1641,7 +1647,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 			if (propsTagArray && propsTagArray->cValues) {
 				struct SPropValue *lpProps;
 				struct SPropTagArray *tags;
-				uint32_t prop_count = 0, k;
+				uint32_t prop_count = 0, k, ll;
 				/* we need to make a local copy of the tag array
 				 * since GetProps will modify the array on any
 				 * errors */
@@ -1657,23 +1663,26 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 				properties_array.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue,
 									 prop_count + 1);
 				properties_array.cValues = prop_count;
-				for (k = 0; k < prop_count; k++) {
+				for (k = 0, ll = 0; k < prop_count; k++, ll++) {
 					if ((lpProps[k].ulPropTag & 0xFFFF) == PT_MV_BINARY) {
 						uint32_t ci;
 
-						properties_array.lpProps[k].ulPropTag = lpProps[k].ulPropTag;
-						properties_array.lpProps[k].value.MVbin.cValues = lpProps[k].value.MVbin.cValues;
-						properties_array.lpProps[k].value.MVbin.bin = (struct SBinary_short *) talloc_array (mem_ctx, struct Binary_r, properties_array.lpProps[k].value.MVbin.cValues);
-						for (ci = 0; ci < properties_array.lpProps[k].value.MVbin.cValues; ci++) {
-							properties_array.lpProps[k].value.MVbin.bin[ci].cb = lpProps[k].value.MVbin.lpbin[ci].cb;
-							properties_array.lpProps[k].value.MVbin.bin[ci].lpb = lpProps[k].value.MVbin.lpbin[ci].lpb;
+						properties_array.lpProps[ll].ulPropTag = lpProps[k].ulPropTag;
+						properties_array.lpProps[ll].value.MVbin.cValues = lpProps[k].value.MVbin.cValues;
+						properties_array.lpProps[ll].value.MVbin.bin = (struct SBinary_short *) talloc_array (mem_ctx, struct Binary_r, properties_array.lpProps[ll].value.MVbin.cValues);
+						for (ci = 0; ci < properties_array.lpProps[ll].value.MVbin.cValues; ci++) {
+							properties_array.lpProps[ll].value.MVbin.bin[ci].cb = lpProps[k].value.MVbin.lpbin[ci].cb;
+							properties_array.lpProps[ll].value.MVbin.bin[ci].lpb = lpProps[k].value.MVbin.lpbin[ci].lpb;
 						}
+					} else if (may_skip_property (lpProps[k].ulPropTag)) {
+						ll--;
+						properties_array.cValues--;
 					} else {
 						cast_mapi_SPropValue (
 							#ifdef HAVE_MEMCTX_ON_CAST_MAPI_SPROPVALUE
 							mem_ctx,
 							#endif
-							&properties_array.lpProps[k], &lpProps[k]);
+							&properties_array.lpProps[ll], &lpProps[k]);
 					}
 				}
 			} else {
@@ -1804,7 +1813,7 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 
 	if (propsTagArray && propsTagArray->cValues) {
 		struct SPropValue *lpProps;
-		uint32_t prop_count = 0, k;
+		uint32_t prop_count = 0, k, ll;
 
 		lpProps = talloc_zero(mem_ctx, struct SPropValue);
 
@@ -1815,12 +1824,18 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 		/* Conversion from SPropValue to mapi_SPropValue. (no padding here) */
 		properties_array.cValues = prop_count;
 		properties_array.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, prop_count + 1);
-		for (k=0; k < prop_count; k++)
-			cast_mapi_SPropValue (
-				#ifdef HAVE_MEMCTX_ON_CAST_MAPI_SPROPVALUE
-				mem_ctx,
-				#endif
-				&properties_array.lpProps[k], &lpProps[k]);
+		for (k = 0, ll = 0; k < prop_count; k++, ll++) {
+			if (may_skip_property (lpProps[k].ulPropTag)) {
+				ll--;
+				properties_array.cValues--;
+			} else {
+				cast_mapi_SPropValue (
+					#ifdef HAVE_MEMCTX_ON_CAST_MAPI_SPROPVALUE
+					mem_ctx,
+					#endif
+					&properties_array.lpProps[ll], &lpProps[k]);
+			}
+		}
 	} else {
 		ms = GetPropsAll (obj_message, &properties_array);
 		if (ms != MAPI_E_SUCCESS)
