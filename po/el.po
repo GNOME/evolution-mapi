@@ -9,9 +9,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi.HEAD\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-17 12:31+0300\n"
-"PO-Revision-Date: 2010-07-03 00:11+0300\n"
-"Last-Translator: Fotis Tsamis <ftsamis@gmail.com>\n"
+"POT-Creation-Date: 2010-10-15 13:26+0300\n"
+"PO-Revision-Date: 2010-09-14 02:46+0200\n"
+"Last-Translator: Bakaoukas Nikolaos <nikolaos.x1@gmail.com>\n"
 "Language-Team: Greek <team@gnome.gr>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -37,7 +37,6 @@ msgid "Full name"
 msgstr "Πλήρες όνομα"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:153
-#, fuzzy
 msgid "User name"
 msgstr "Όνομα χρήστη"
 
@@ -91,7 +90,6 @@ msgid "Folder Size"
 msgstr "Μέγεθος φακέλου"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:156
-#, fuzzy
 msgid "Fetching folder list ..."
 msgstr "Λήψη της λίστας φακέλων..."
 
@@ -124,13 +122,12 @@ msgstr "Μέγεθος φακέλου"
 #. Example: Caching the GAL entries (1200/50000)...
 #.
 #: ../src/addressbook/e-book-backend-mapi-gal.c:221
-#, fuzzy, c-format
+#, c-format
 msgid "Caching the GAL entries (%d/%d)... "
-msgstr "Εισαγωγή της εγγραφής GAL %d/%d στην μνήμη cache"
+msgstr "Προσωρινή αποθήκευση των εγγραφών GAL (%d/%d)..."
 
 #. To translators : Here Evolution MAPI downloads the entries from the GAL server
 #: ../src/addressbook/e-book-backend-mapi-gal.c:793
-#, fuzzy
 msgid "Downloading GAL entries from server..."
 msgstr "Λήψη των εγγραφών GAL από τον διακομιστή..."
 
@@ -194,9 +191,8 @@ msgstr "Αφαίρεση διαγραμμένων μηνυμάτων από τη
 
 #. TODO : Check for online state
 #: ../src/camel/camel-mapi-folder.c:1013
-#, fuzzy
 msgid "Fetching summary information for new messages in"
-msgstr "Λήψη περιληπτικών πληροφοριών για νέα μηνύματα στο %s"
+msgstr "Λήψη περιληπτικών πληροφοριών για νέα μηνύματα"
 
 #: ../src/camel/camel-mapi-folder.c:1115 ../src/camel/camel-mapi-folder.c:2005
 #: ../src/camel/camel-mapi-folder.c:2013
@@ -279,22 +275,20 @@ msgstr ""
 "Να γίνεται έλεγχος για ανεπιθύμητα μηνύματα μόνο στο φάκελο Εισερχόμενα"
 
 #: ../src/camel/camel-mapi-provider.c:78
-#, fuzzy
 msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
 msgstr ""
-"Για την πρόσβαση εξυπηρετητών Microsoft Exchange/OpenChange με χρήση MAPI"
+"Για την πρόσβαση σε εξυπηρετητές Microsoft Exchange/OpenChange με χρήση MAPI"
 
 #: ../src/camel/camel-mapi-provider.c:93
 msgid "Password"
 msgstr "Συνθηματικό"
 
 #: ../src/camel/camel-mapi-provider.c:94
-#, fuzzy
 msgid ""
 "This option will connect to the Openchange server using a plaintext password."
 msgstr ""
-"Αυτή η επιλογή θα κάνει χρήση συνθηματικού χωρίς κρυπτογράφηση για σύνδεση "
-"με τον εξυπηρετητή OpenChange."
+"Αυτή η επιλογή θα κάνει χρήση συνθηματικού σε μορφή απλού κειμένου για "
+"σύνδεση με τον εξυπηρετητή OpenChange."
 
 #: ../src/camel/camel-mapi-store.c:63
 msgid "Favorites"
@@ -340,28 +334,27 @@ msgstr ""
 "Δεν είναι δυνατή η δημιουργία φακέλων MAPI σε λειτουργία χωρίς σύνδεση."
 
 #: ../src/camel/camel-mapi-store.c:559
-#, fuzzy, c-format
+#, c-format
 msgid "Cannot create new folder `%s'"
-msgstr "Δεν είναι δυνατή η δημιουργία του φακέλου '%s'"
+msgstr "Δεν είναι δυνατή η δημιουργία του νέου φακέλου '%s'"
 
 #: ../src/camel/camel-mapi-store.c:743
-#, fuzzy, c-format
+#, c-format
 msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgstr ""
-"Δεν είναι δυνατή η μετονομασία του φακέλου MAPI '%s'. Ανύπαρκτος φάκελος."
+"Δεν είναι δυνατή η μετονομασία του φακέλου MAPI '%s'. Ο φάκελος δεν υπάρχει."
 
 #: ../src/camel/camel-mapi-store.c:754
-#, fuzzy, c-format
+#, c-format
 msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgstr ""
-"Δεν είναι δυνατή η μετονομασία του προεπιλεγμένου φακέλου MAPI από '%s' σε '%"
-"s'."
+"Δεν είναι δυνατή η μετονομασία του προεπιλεγμένου φακέλου MAPI '%s' σε '%s'."
 
 #: ../src/camel/camel-mapi-store.c:778 ../src/camel/camel-mapi-store.c:793
 #: ../src/camel/camel-mapi-store.c:844
-#, fuzzy, c-format
+#, c-format
 msgid "Cannot rename MAPI folder `%s' to `%s'"
-msgstr "Δεν είναι δυνατή η μετονομασία του φακέλου MAPI από '%s' σε '%s'"
+msgstr "Δεν είναι δυνατή η μετονομασία του φακέλου MAPI '%s' σε '%s'"
 
 #: ../src/camel/camel-mapi-store.c:1383
 msgid "Folder list not available in offline mode."
@@ -371,26 +364,3 @@ msgstr "Η λίστα των φακέλων δεν είναι διαθέσιμη
 #: ../src/camel/camel-mapi-transport.c:116
 msgid "Could not send message."
 msgstr "Δεν ήταν δυνατή η αποστολή του μηνύματος."
-
-#~| msgid "Global Address List / Active Directory"
-#~ msgid "Global Address List"
-#~ msgstr "Γενική λίστα διευθύνσεων"
-
-#~ msgid "_Use secure connection"
-#~ msgstr "Χρήση _ασφαλούς σύνδεσης"
-
-#~| msgid "Caching the GAL entries (%d/%d)... "
-#~ msgid "Caching GAL entry %d"
-#~ msgstr "Εισαγωγή της εγγραφής GAL %d στην μνήμη cache"
-
-#~ msgid "Searching"
-#~ msgstr "Αναζήτηση"
-
-#~ msgid "Unknown error"
-#~ msgstr "Άγνωστο σφάλμα"
-
-#~ msgid "_Global Catalog server name:"
-#~ msgstr "Όνομα εξυπηρετητή γενικού _καταλόγου:"
-
-#~ msgid "_Limit number of GAL responses: %s"
-#~ msgstr "_Περιορισμός του αριθμού απαντήσεων GAL: %s"
