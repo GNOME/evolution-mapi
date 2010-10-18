@@ -98,12 +98,15 @@ mail_item_add_recipient (const gchar *recipients, OlMailRecipientType type, GSLi
 }
 
 static void
-mail_item_set_from(MailItem *item, const gchar *from)
+mail_item_set_from(MailItem *item, const gchar *from_name, const gchar *from_email)
 {
 	if (item->header.from)
 		g_free (item->header.from);
+	if (item->header.from_email)
+		g_free (item->header.from_email);
 
-	item->header.from = g_strdup (from);
+	item->header.from = g_strdup (from_name);
+	item->header.from_email = g_strdup (from_email);
 }
 
 static void
@@ -311,8 +314,21 @@ mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first, GCanc
 	return TRUE;
 }
 
+static void
+mail_item_set_time (time_t *item_time, time_t camel_time, gint camel_offset)
+{
+	if (camel_time == CAMEL_MESSAGE_DATE_CURRENT) {
+		*item_time = 0;
+	} else {
+		/* Convert to UTC */
+		/*camel_time -= (camel_offset / 100) * 60 * 60;
+		camel_time -= (camel_offset % 100) * 60;*/
+		*item_time = camel_time;
+	}
+}
+
 MailItem *
-camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, GCancellable *cancellable, GError **error)
+camel_mapi_utils_mime_to_item (CamelMimeMessage *message, gint32 message_camel_flags, CamelAddress *from, GCancellable *cancellable, GError **error)
 {
 	CamelDataWrapper *dw = NULL;
 	CamelContentType *type;
@@ -320,9 +336,12 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, GC
 	CamelMultipart *multipart;
 	CamelInternetAddress *to, *cc, *bcc;
 	MailItem *item = g_new0 (MailItem, 1);
-	const gchar *namep;
-	const gchar *addressp;
+	const gchar *namep = NULL;
+	const gchar *addressp = NULL;
 	const gchar *content_type;
+	time_t msg_time = 0;
+	gint msg_time_offset = 0;
+	GArray *headers;
 
 	gssize	content_size;
 	GSList *recipient_list = NULL;
@@ -341,7 +360,18 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, GC
 		namep = NULL;
 	}
 
-	mail_item_set_from (item, namep);
+	item->header.flags = 0;
+	if (message_camel_flags & CAMEL_MESSAGE_SEEN)
+		item->header.flags |= MSGFLAG_READ;
+	if (message_camel_flags & CAMEL_MESSAGE_ATTACHMENTS)
+		item->header.flags |= MSGFLAG_HASATTACH;
+
+	mail_item_set_from (item, namep, addressp);
+
+	msg_time = camel_mime_message_get_date (message, &msg_time_offset);
+	if (msg_time == CAMEL_MESSAGE_DATE_CURRENT)
+		msg_time = camel_mime_message_get_date_received (message, &msg_time_offset);
+	mail_item_set_time (&item->header.recieved_time, msg_time, msg_time_offset);
 
 	to = camel_mime_message_get_recipients(message, CAMEL_RECIPIENT_TYPE_TO);
 	for (i = 0; to && camel_internet_address_get (to, i, &namep, &addressp); i++) {
@@ -360,6 +390,25 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, CamelAddress *from, GC
 
 	if (camel_mime_message_get_subject(message)) {
 		mail_item_set_subject(item, camel_mime_message_get_subject(message));
+	}
+
+	headers = camel_medium_get_headers (CAMEL_MEDIUM (message));
+	if (headers) {
+		GString *hstr = g_string_new ("");
+		gint i;
+
+		for (i = 0; i < headers->len; i++) {
+			CamelMediumHeader *h = &g_array_index (headers, CamelMediumHeader, i);
+
+			if (!h->name || !*h->name || g_ascii_strncasecmp (h->name, "X-Evolution", 11) == 0)
+				continue;
+
+			g_string_append_printf (hstr, "%s: %s\n", h->name, h->value ? h->value : "");
+		}
+
+		camel_medium_free_headers (CAMEL_MEDIUM (message), headers);
+
+		item->header.transport_headers = g_string_free (hstr, hstr->len == 0);
 	}
 
 	/*Add message threading properties */
@@ -400,7 +449,6 @@ camel_mapi_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_
 	MailItem *item = (MailItem *) data;
 	GSList *l;
 	bool send_rich_info;
-	uint32_t msgflag;
 	uint32_t cpid;
 
 	#define set_value(hex, val) G_STMT_START { \
@@ -417,8 +465,29 @@ camel_mapi_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_
 	send_rich_info = false;
 	set_value (PR_SEND_RICH_INFO, &send_rich_info);
 
-	msgflag = MSGFLAG_UNSENT;
-	set_value (PR_MESSAGE_FLAGS, &msgflag);
+	set_value (PR_MESSAGE_FLAGS, &item->header.flags);
+
+	if (item->header.from && *item->header.from)
+		set_value (PR_SENT_REPRESENTING_NAME_UNICODE, item->header.from);
+
+	if (item->header.from_email && *item->header.from_email) {
+		set_value (PR_SENT_REPRESENTING_ADDRTYPE_UNICODE, "SMTP");
+		set_value (PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE, item->header.from_email);
+	}
+
+	if (item->header.recieved_time != 0) {
+		struct FILETIME msg_date = { 0 };
+		NTTIME nttime = 0;
+		unix_to_nt_time (&nttime, item->header.recieved_time);
+
+		msg_date.dwHighDateTime = nttime >> 32;
+		msg_date.dwLowDateTime = nttime & 0xFFFFFFFF;
+
+		set_value (PR_MESSAGE_DELIVERY_TIME, &msg_date);
+	}
+
+	if (item->header.transport_headers && *item->header.transport_headers)
+		set_value (PR_TRANSPORT_MESSAGE_HEADERS_UNICODE, item->header.transport_headers);
 
 	/* Message threading information */
 	if (item->header.references)

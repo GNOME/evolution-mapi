@@ -407,17 +407,16 @@ mapi_mime_set_msg_headers (ExchangeMapiConnection *conn, CamelMimeMessage *msg, 
 
 		g_object_unref (parser);
 		g_object_unref (part);
+	} else {
+		recieved_time = item->header.recieved_time;
+		actual_time = camel_header_decode_date (ctime(&recieved_time), &offset);
+		camel_mime_message_set_date (msg, actual_time, offset);
 	}
 
 	/* Overwrite headers if we have specific properties available*/
 	temp_str = item->header.subject;
 	if (temp_str)
 		camel_mime_message_set_subject (msg, temp_str);
-
-	recieved_time = item->header.recieved_time;
-
-	actual_time = camel_header_decode_date (ctime(&recieved_time), &offset);
-	/* camel_mime_message_set_date (msg, actual_time, offset); */
 
 	if (item->header.from) {
 		if ((item->header.from_type != NULL) && !g_utf8_collate (item->header.from_type, "EX")) {

@@ -1123,7 +1123,7 @@ mapi_folder_append_message_sync (CamelFolder *folder,
 	/* Convert MIME to Item */
 	from = (CamelAddress *) camel_mime_message_get_from (message);
 
-	item = camel_mapi_utils_mime_to_item (message, from, cancellable, error);
+	item = camel_mapi_utils_mime_to_item (message, info ? camel_message_info_flags (info) : 0, from, cancellable, error);
 	if (item == NULL)
 		return FALSE;
 
