@@ -1,3 +1,16 @@
+evolution-mapi 2.91.1 2010-10-18
+--------------------------------
+
+Bug Fixes:
+	Bug 630698 - Cannot remove just created folder (Punit Jain)
+	Bug 630712 - Crash in add_cal_esource (Milan Crha)
+	Bug 631496 - Crash fetching property (Milan Crha)
+	Bug 631500 - Recursive call when disabling account (Milan Crha)
+	Bug 631621 - Cannot connect after update (Milan Crha)
+
+Translations:
+	Gil Forcada (ca)
+
 evolution-mapi 2.91.0 2010-10-04
 --------------------------------
 
