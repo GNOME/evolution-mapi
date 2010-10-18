@@ -762,7 +762,7 @@ ebbm_contacts_create_contact (EBookBackendMAPI *ebma, const gchar *vcard, EConta
 
 	mid = exchange_mapi_connection_create_item (conn, olFolderContacts, priv->fid,
 		mapi_book_write_props, &mcd,
-		NULL, NULL, NULL, priv->is_public_folder ? MAPI_OPTIONS_USE_PFSTORE : 0, &mapi_error);
+		NULL, NULL, NULL, MAPI_OPTIONS_DONT_SUBMIT | (priv->is_public_folder ? MAPI_OPTIONS_USE_PFSTORE : 0), &mapi_error);
 
 	e_book_backend_mapi_unlock_connection (ebma);
 
