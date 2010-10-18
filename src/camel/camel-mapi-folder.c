@@ -1130,7 +1130,7 @@ mapi_folder_append_message_sync (CamelFolder *folder,
 	mid = exchange_mapi_connection_create_item (camel_mapi_store_get_exchange_connection (mapi_store), -1, fid,
 					 camel_mapi_utils_create_item_build_props, item,
 					 item->recipients, item->attachments,
-					 item->generic_streams, 0, &mapi_error);
+					 item->generic_streams, MAPI_OPTIONS_DONT_SUBMIT, &mapi_error);
 
 	if (!mid) {
 		if (mapi_error) {
