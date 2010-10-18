@@ -63,6 +63,8 @@ mapi_message_item_send (ExchangeMapiConnection *conn, MailItem *item, GError **p
 	guint64 fid = 0;
 	mapi_id_t mid = 0;
 
+	item->header.flags = MSGFLAG_UNSENT;
+
 	mid = exchange_mapi_connection_create_item (conn, olFolderSentMail, fid,
 					 camel_mapi_utils_create_item_build_props, item,
 					 item->recipients, item->attachments, item->generic_streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE, perror);
@@ -101,7 +103,7 @@ mapi_send_to (CamelTransport *transport, CamelMimeMessage *message,
 	}
 
 	/* Convert MIME to MailItem, attacment lists and recipient list.*/
-	item = camel_mapi_utils_mime_to_item (message, from, NULL);
+	item = camel_mapi_utils_mime_to_item (message, 0, from, NULL);
 
 	/* send */
 	st = mapi_message_item_send (conn, item, error);
