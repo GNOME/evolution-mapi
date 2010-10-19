@@ -63,7 +63,15 @@ mapi_message_item_send (ExchangeMapiConnection *conn, MailItem *item, GError **p
 	guint64 fid = 0;
 	mapi_id_t mid = 0;
 
+	#define unset(x) g_free (x); x = NULL
+
 	item->header.flags = MSGFLAG_UNSENT;
+	unset (item->header.from);
+	unset (item->header.from_email);
+	unset (item->header.transport_headers);
+	item->header.recieved_time = 0;
+
+	#undef unset
 
 	mid = exchange_mapi_connection_create_item (conn, olFolderSentMail, fid,
 					 camel_mapi_utils_create_item_build_props, item,
