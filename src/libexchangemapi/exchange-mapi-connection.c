@@ -1375,7 +1375,7 @@ exchange_mapi_util_modify_recipients (ExchangeMapiConnection *conn, TALLOC_CTX *
 	/* Modify the recipient table */
 	ms = ModifyRecipients (obj_message, SRowSet);
 	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "ModifyRecpients", ms);
+		make_mapi_error (perror, "ModifyRecipients", ms);
 		goto cleanup;
 	}
 
