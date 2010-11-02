@@ -161,7 +161,6 @@ fetch_items_summary_cb (FetchItemsCallbackData *item_data, gpointer data)
 	struct timeval item_modification_time = { 0 };
 	struct timeval fi_data_mod_time = { 0 };
 	guint32 j = 0;
-	NTTIME ntdate;
 
 	MailItem *item = g_new0(MailItem , 1);
 
@@ -200,17 +199,12 @@ fetch_items_summary_cb (FetchItemsCallbackData *item_data, gpointer data)
 	/* item->header.from = camel_internet_address_format_address (from_name, from_email); */
 
 	if (delivery_date) {
-		ntdate = delivery_date->dwHighDateTime;
-		ntdate = ntdate << 32;
-		ntdate |= delivery_date->dwLowDateTime;
-		item->header.recieved_time = nt_time_to_unix(ntdate);
+		item->header.recieved_time = exchange_mapi_util_filetime_to_time_t (delivery_date);
 	}
 
 	if (last_modification_time) {
-		ntdate = last_modification_time->dwHighDateTime;
-		ntdate = ntdate << 32;
-		ntdate |= last_modification_time->dwLowDateTime;
-		nttime_to_timeval (&item_modification_time, ntdate);
+		item_modification_time.tv_sec = exchange_mapi_util_filetime_to_time_t (last_modification_time);
+		item_modification_time.tv_usec = 0;
 	}
 
 	fi_data_mod_time.tv_sec = fi_data->last_modification_time.tv_sec;

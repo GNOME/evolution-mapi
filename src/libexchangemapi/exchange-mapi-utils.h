@@ -83,4 +83,7 @@ uint32_t exchange_mapi_utils_push_crc32 (uint32_t crc32, uint8_t *bytes, uint32_
 struct Binary_r *exchange_mapi_util_copy_binary_r (const struct Binary_r *bin);
 void exchange_mapi_util_free_binary_r (struct Binary_r *bin);
 
+time_t exchange_mapi_util_filetime_to_time_t (const struct FILETIME *filetime);
+void exchange_mapi_util_time_t_to_filetime (const time_t tt, struct FILETIME *filetime);
+
 #endif

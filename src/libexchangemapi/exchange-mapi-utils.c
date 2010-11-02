@@ -1136,3 +1136,37 @@ exchange_mapi_util_free_binary_r (struct Binary_r *bin)
 	g_free (bin->lpb);
 	g_free (bin);
 }
+
+time_t
+exchange_mapi_util_filetime_to_time_t (const struct FILETIME *filetime)
+{
+	NTTIME nt;
+
+	if (!filetime)
+		return (time_t) -1;
+
+	nt = filetime->dwHighDateTime;
+	nt = nt << 32;
+	nt |= filetime->dwLowDateTime;
+
+	nt /=  10 * 1000 * 1000;
+	nt -= 11644473600LL;
+
+	return (time_t) nt;
+}
+
+void
+exchange_mapi_util_time_t_to_filetime (const time_t tt, struct FILETIME *filetime)
+{
+	NTTIME nt;
+
+	g_return_if_fail (filetime != NULL);
+
+	nt = tt;
+	nt += 11644473600LL;
+	nt *=  10 * 1000 * 1000;
+
+	filetime->dwLowDateTime = nt & 0xFFFFFFFF;
+	nt = nt >> 32;
+	filetime->dwHighDateTime = nt & 0xFFFFFFFF;
+}

@@ -1244,7 +1244,7 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 	struct icaltimetype dtstart, dtend, utc_dtstart, utc_dtend;
 	const icaltimezone *utc_zone;
 	const gchar *dtstart_tz_location, *dtend_tz_location, *text = NULL;
-	struct timeval t;
+	time_t tt;
 
 	g_return_val_if_fail (conn != NULL, FALSE);
 	g_return_val_if_fail (mem_ctx != NULL, FALSE);
@@ -1280,12 +1280,8 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 
 	#define set_datetime_value(hex, dtval) G_STMT_START {		\
 		struct FILETIME	filetime;				\
-		NTTIME		nttime;					\
 									\
-		nttime = timeval_to_nttime(dtval);				\
-									\
-		filetime.dwLowDateTime = (nttime << 32) >> 32;		\
-		filetime.dwHighDateTime = nttime >> 32;			\
+		exchange_mapi_util_time_t_to_filetime (dtval, &filetime); \
 									\
 		if (!exchange_mapi_utils_add_spropvalue (mem_ctx, values, n_values, hex, &filetime)) \
 			return FALSE;	\
@@ -1293,12 +1289,8 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 
 	#define set_named_datetime_value(named_id, dtval) G_STMT_START { \
 		struct FILETIME	filetime;				\
-		NTTIME		nttime;					\
 									\
-		nttime = timeval_to_nttime(dtval);				\
-									\
-		filetime.dwLowDateTime = (nttime << 32) >> 32;		\
-		filetime.dwHighDateTime = nttime >> 32;			\
+		exchange_mapi_util_time_t_to_filetime (dtval, &filetime); \
 									\
 		if (!exchange_mapi_utils_add_spropvalue_named_id (conn, fid, mem_ctx, values, n_values, named_id, &filetime)) \
 			return FALSE;	\
@@ -1398,13 +1390,11 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 		}
 	set_named_value (PidLidReminderSet, &b);
 	set_named_value (PidLidReminderDelta, &flag32);
-	t.tv_sec = icaltime_as_timet (utc_dtstart);
-	t.tv_usec = 0;
-	set_named_datetime_value (PidLidReminderTime, &t);
-	t.tv_sec = icaltime_as_timet (utc_dtstart) - (flag32 * SECS_IN_MINUTE);
-	t.tv_usec = 0;
+	tt = icaltime_as_timet (utc_dtstart);
+	set_named_datetime_value (PidLidReminderTime, tt);
+	tt = icaltime_as_timet (utc_dtstart) - (flag32 * SECS_IN_MINUTE);
 	/* ReminderNextTime: FIXME for recurrence */
-	set_named_datetime_value (PidLidReminderSignalTime, &t);
+	set_named_datetime_value (PidLidReminderSignalTime, tt);
 
 	/* Sensitivity, Private */
 	flag32 = olNormal;	/* default */
@@ -1417,15 +1407,13 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 	set_value (PR_SENSITIVITY, &flag32);
 	set_named_value (PidLidPrivate, &b);
 
-	t.tv_sec = icaltime_as_timet (utc_dtstart);
-	t.tv_usec = 0;
-	set_named_datetime_value (PidLidCommonStart, &t);
-	set_datetime_value (PR_START_DATE, &t);
+	tt = icaltime_as_timet (utc_dtstart);
+	set_named_datetime_value (PidLidCommonStart, tt);
+	set_datetime_value (PR_START_DATE, tt);
 
-	t.tv_sec = icaltime_as_timet (utc_dtend);
-	t.tv_usec = 0;
-	set_named_datetime_value (PidLidCommonEnd, &t);
-	set_datetime_value (PR_END_DATE, &t);
+	tt = icaltime_as_timet (utc_dtend);
+	set_named_datetime_value (PidLidCommonEnd, tt);
+	set_datetime_value (PR_END_DATE, tt);
 
 	b = 1;
 	set_value (PR_RESPONSE_REQUESTED, &b);
@@ -1472,11 +1460,10 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 		set_named_value (PidLidAutoFillLocation, &b);
 
 		/* Start */
-		t.tv_sec = icaltime_as_timet (utc_dtstart);
-		t.tv_usec = 0;
-		set_named_datetime_value (PidLidAppointmentStartWhole, &t);
+		tt = icaltime_as_timet (utc_dtstart);
+		set_named_datetime_value (PidLidAppointmentStartWhole, tt);
 		/* FIXME: for recurrence */
-		set_named_datetime_value (PidLidClipStart, &t);
+		set_named_datetime_value (PidLidClipStart, tt);
 
 		/* Start TZ */
 		mapi_tzid = exchange_mapi_cal_tz_util_get_mapi_equivalent ((dtstart_tz_location && *dtstart_tz_location) ? dtstart_tz_location : "UTC");
@@ -1486,11 +1473,10 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 		}
 
 		/* End */
-		t.tv_sec = icaltime_as_timet (utc_dtend);
-		t.tv_usec = 0;
-		set_named_datetime_value (PidLidAppointmentEndWhole, &t);
+		tt = icaltime_as_timet (utc_dtend);
+		set_named_datetime_value (PidLidAppointmentEndWhole, tt);
 		/* FIXME: for recurrence */
-		set_named_datetime_value (PidLidClipEnd, &t);
+		set_named_datetime_value (PidLidClipEnd, tt);
 
 		/* End TZ */
 		mapi_tzid = exchange_mapi_cal_tz_util_get_mapi_equivalent ((dtend_tz_location && *dtend_tz_location) ? dtend_tz_location : "UTC");
@@ -1731,25 +1717,22 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 			completed = icalproperty_get_completed (prop);
 
 			completed.hour = completed.minute = completed.second = 0; completed.is_date = completed.is_utc = 1;
-			t.tv_sec = icaltime_as_timet (completed);
-			t.tv_usec = 0;
-			set_named_datetime_value (PidLidTaskDateCompleted, &t);
+			tt = icaltime_as_timet (completed);
+			set_named_datetime_value (PidLidTaskDateCompleted, tt);
 		}
 
 		/* Start */
 		dtstart.hour = dtstart.minute = dtstart.second = 0; dtstart.is_date = dtstart.is_utc = 1;
-		t.tv_sec = icaltime_as_timet (dtstart);
-		t.tv_usec = 0;
+		tt = icaltime_as_timet (dtstart);
 		if (!icaltime_is_null_time (dtstart)) {
-			set_named_datetime_value (PidLidTaskStartDate, &t);
+			set_named_datetime_value (PidLidTaskStartDate, tt);
 		}
 
 		/* Due */
 		dtend.hour = dtend.minute = dtend.second = 0; dtend.is_date = dtend.is_utc = 1;
-		t.tv_sec = icaltime_as_timet (dtend);
-		t.tv_usec = 0;
+		tt = icaltime_as_timet (dtend);
 		if (!icaltime_is_null_time (dtend)) {
-			set_named_datetime_value (PidLidTaskDueDate, &t);
+			set_named_datetime_value (PidLidTaskDueDate, tt);
 		}
 
 		/* FIXME: Evolution does not support recurring tasks */
