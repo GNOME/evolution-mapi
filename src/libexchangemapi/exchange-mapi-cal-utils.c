@@ -368,9 +368,14 @@ exchange_mapi_cal_util_fetch_recipients (ECalComponent *comp, GSList **recip_lis
 		const gchar *str = NULL;
 		icalparameter *param;
 
+		str = icalproperty_get_attendee (att_prop);
+		if (!str || g_ascii_strcasecmp (str, org) == 0) {
+			att_prop = icalcomponent_get_next_property (icalcomp, ICAL_ATTENDEE_PROPERTY);
+			continue;
+		}
+
 		recipient = g_new0 (ExchangeMAPIRecipient, 1);
 
-		str = icalproperty_get_attendee (att_prop);
 		if (!g_ascii_strncasecmp (str, "mailto:", 7))
 			recipient->email_id = (str) + 7;
 		else
