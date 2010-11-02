@@ -477,11 +477,8 @@ camel_mapi_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_
 
 	if (item->header.recieved_time != 0) {
 		struct FILETIME msg_date = { 0 };
-		NTTIME nttime = 0;
-		unix_to_nt_time (&nttime, item->header.recieved_time);
 
-		msg_date.dwHighDateTime = nttime >> 32;
-		msg_date.dwLowDateTime = nttime & 0xFFFFFFFF;
+		exchange_mapi_util_time_t_to_filetime (item->header.recieved_time, &msg_date);
 
 		set_value (PR_MESSAGE_DELIVERY_TIME, &msg_date);
 	}

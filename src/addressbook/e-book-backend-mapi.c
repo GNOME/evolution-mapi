@@ -1914,15 +1914,10 @@ mapi_book_utils_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid,
 				e_contact_set (contact, mappings[i].field_id, value);
 		} else if (contact_type == ELEMENT_TYPE_SIMPLE) {
 			if (value && mappings[i].element_type == PT_SYSTIME) {
-				struct FILETIME *t = value;
-				time_t time;
-				NTTIME nt;
+				const struct FILETIME *t = value;
 				gchar buff[129];
+				time_t time = exchange_mapi_util_filetime_to_time_t (t);
 
-				nt = t->dwHighDateTime;
-				nt = nt << 32;
-				nt |= t->dwLowDateTime;
-				time = nt_time_to_unix (nt);
 				e_contact_set (contact, mappings[i].field_id, ctime_r (&time, buff));
 			}
 		} else if (contact_type == ELEMENT_TYPE_COMPLEX) {
@@ -1934,18 +1929,15 @@ mapi_book_utils_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid,
 				g_list_free (list);
 			} else if (mappings[i].field_id == E_CONTACT_BIRTH_DATE
 				   || mappings[i].field_id == E_CONTACT_ANNIVERSARY) {
-				struct FILETIME *t = value;
+				const struct FILETIME *t = value;
 				time_t time;
-				NTTIME nt;
 				struct tm * tmtime;
 				if (value) {
 					EContactDate date = {0};
-					nt = t->dwHighDateTime;
-					nt = nt << 32;
-					nt |= t->dwLowDateTime;
-					time = nt_time_to_unix (nt);
+
+					time = exchange_mapi_util_filetime_to_time_t (t);
 					tmtime = gmtime (&time);
-					//FIXME: Move to new libmapi api to get string dates.
+
 					date.day = tmtime->tm_mday;
 					date.month = tmtime->tm_mon + 1;
 					date.year = tmtime->tm_year + 1900;

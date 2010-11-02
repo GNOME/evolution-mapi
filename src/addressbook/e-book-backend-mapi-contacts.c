@@ -451,19 +451,14 @@ mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 	/* BDAY AND ANNV */
 	if (e_contact_get (mcd->contact, E_CONTACT_BIRTH_DATE)) {
 		EContactDate *date = e_contact_get (mcd->contact, E_CONTACT_BIRTH_DATE);
-		struct tm tmtime;
-		time_t lt;
-		NTTIME nt;
+		struct tm tmtime = { 0 };
 		struct FILETIME t;
 
 		tmtime.tm_mday = date->day;
 		tmtime.tm_mon = date->month - 1;
 		tmtime.tm_year = date->year - 1900;
 
-		lt = mktime (&tmtime);
-		unix_to_nt_time (&nt, lt);
-		t.dwLowDateTime = (nt << 32) >> 32;
-		t.dwHighDateTime = (nt >> 32);
+		exchange_mapi_util_time_t_to_filetime (mktime (&tmtime) + (24 * 60 * 60), &t);
 
 		if (!exchange_mapi_utils_add_spropvalue (mem_ctx, values, n_values, PR_BIRTHDAY, &t))
 			return FALSE;
@@ -471,19 +466,14 @@ mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 
 	if (e_contact_get (mcd->contact, E_CONTACT_ANNIVERSARY)) {
 		EContactDate *date = e_contact_get (mcd->contact, E_CONTACT_ANNIVERSARY);
-		struct tm tmtime;
-		time_t lt;
-		NTTIME nt;
+		struct tm tmtime = { 0 };
 		struct FILETIME t;
 
 		tmtime.tm_mday = date->day;
 		tmtime.tm_mon = date->month - 1;
 		tmtime.tm_year = date->year - 1900;
 
-		lt = mktime (&tmtime);
-		unix_to_nt_time (&nt, lt);
-		t.dwLowDateTime = (nt << 32) >> 32;
-		t.dwHighDateTime = (nt >> 32);
+		exchange_mapi_util_time_t_to_filetime (mktime (&tmtime) + (24 * 60 * 60), &t);
 
 		if (!exchange_mapi_utils_add_spropvalue (mem_ctx, values, n_values, PR_WEDDING_ANNIVERSARY, &t))
 			return FALSE;

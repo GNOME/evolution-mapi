@@ -135,12 +135,7 @@ fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 	}
 
 	if (delivery_date) {
-		NTTIME ntdate = { 0 };
-
-		ntdate = delivery_date->dwHighDateTime;
-		ntdate = ntdate << 32;
-		ntdate |= delivery_date->dwLowDateTime;
-		item->header.recieved_time = nt_time_to_unix(ntdate);
+		item->header.recieved_time = exchange_mapi_util_filetime_to_time_t (delivery_date);
 	}
 
 	if (flags && (*flags & MSGFLAG_READ) != 0)
