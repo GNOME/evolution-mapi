@@ -1,3 +1,17 @@
+evolution-mapi 2.91.2 2010-11-08
+--------------------------------
+
+Bug Fixes:
+	Bug 608388 - Copying a mail from another account loses headers
+	             (Milan Crha)
+	Bug 632449 - Copy message to Inbox tries to send it (Milan Crha)
+	Bug 633182 - Meeting invites sent also to organiser (Milan Crha)
+	Bug 633185 - Can't handle Birthdays before 01/01/1970 (Milan Crha)
+
+Translations:
+	Carles Ferrando (ca@valencia)
+	Gheyret T.Kenji (ug)
+
 evolution-mapi 2.91.1 2010-10-18
 --------------------------------
 
