@@ -1,4 +1,4 @@
-# SOME DESCRIPTIVE TITLE.
+# Uyghur translation for evolution-mapi.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # Sahran <sahran.ug@gmail.com>, 2010
@@ -6,9 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-mapi\n"
-"POT-Creation-Date: 2010-10-19 10:34+0000\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
+"POT-Creation-Date: 2010-11-08 05:04+0000\n"
 "PO-Revision-Date: 2010-08-26 06:23+0000\n"
 "Last-Translator: Sahran <sahran@live.com>\n"
 "Language-Team: Uyghur Computer Science Association <UKIJ@yahoogroups.com>\n"
@@ -47,9 +46,7 @@ msgstr "ئىشلەتكۈچى ئاتى"
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
-msgstr ""
-"مۇلازىمېتىر، ئىشلەتكۈچى ئاتى ۋە دائىرە بوش قالدۇرۇلمايدۇ. توغرا قىممەتنى "
-"تولدۇرۇڭ."
+msgstr "مۇلازىمېتىر، ئىشلەتكۈچى ئاتى ۋە دائىرە بوش قالدۇرۇلمايدۇ. توغرا قىممەتنى تولدۇرۇڭ."
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:273
 msgid "Authentication finished successfully."
@@ -147,31 +144,31 @@ msgstr "باغلىنالمىدى"
 msgid "Searching"
 msgstr "ئىزدەۋاتىدۇ"
 
-#: ../src/addressbook/e-book-backend-mapi.c:2022
+#: ../src/addressbook/e-book-backend-mapi.c:2014
 #: ../src/calendar/e-cal-backend-mapi.c:133
-#: ../src/camel/camel-mapi-folder.c:1543 ../src/camel/camel-mapi-folder.c:1564
+#: ../src/camel/camel-mapi-folder.c:1711 ../src/camel/camel-mapi-folder.c:1732
 msgid "Unknown error"
 msgstr "نامەلۇم خاتالىق"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:713
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:703
 #: ../src/calendar/e-cal-backend-mapi.c:331
 msgid "Failed to remove public folder"
 msgstr "ئاممىۋى قىسقۇچنى ئۆچۈرۈش مەغلۇپ بولدى."
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:770
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:760
 #: ../src/calendar/e-cal-backend-mapi.c:1775
 #: ../src/calendar/e-cal-backend-mapi.c:2267
 msgid "Failed to create item on a server"
 msgstr "مۇلازىمېتىردا تۈر قۇرۇش مەغلۇپ بولدى."
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:896
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:886
 #: ../src/calendar/e-cal-backend-mapi.c:2008
 msgid "Failed to modify item on a server"
 msgstr "مۇلازىمېتىردىكى تۈرنى ئۆزگەرتىش مەغلۇپ بولدى"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1043
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1109
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1160
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1033
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1099
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1150
 #: ../src/calendar/e-cal-backend-mapi.c:1301
 #: ../src/calendar/e-cal-backend-mapi.c:1322
 msgid "Failed to fetch items from a server"
@@ -179,7 +176,7 @@ msgstr "مۇلازىمېتىردىن تۈرگە ئېرىشىش مەغلۇپ بو
 
 #. Translators : This is used to cache the downloaded contacts from a server.
 #. %d is an index of the contact.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1061
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1051
 #, c-format
 msgid "Caching contact %d"
 msgstr "%d ئالاقىلەشكۈچىنى غەملەۋاتىدۇ"
@@ -187,7 +184,7 @@ msgstr "%d ئالاقىلەشكۈچىنى غەملەۋاتىدۇ"
 #. Translators : This is used to cache the downloaded contacts from a server.
 #. The first %d is an index of the contact,
 #. the second %d is total count of conacts on the server.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1065
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1055
 #, c-format
 msgid "Caching contact %d/%d"
 msgstr "%d/%d ئالاقىلەشكۈچىنى غەملەۋاتىدۇ"
@@ -247,89 +244,87 @@ msgstr "غەملەك ھۆججىتى قۇرالمىدى"
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
-msgstr ""
-"دەۋرىيلىك ئالدىن كېلىشىشنى ئۆزگەرتىشكە نىسبەتەن يەككە ئەمەلىي مىسالنى قوللاش "
-"تېخى ئەمەلگە ئاشمىدى. مۇلازىمېتىردىكى ئالدىن كېلىشىشنى ئۆزگەرتەلمىدى."
+msgstr "دەۋرىيلىك ئالدىن كېلىشىشنى ئۆزگەرتىشكە نىسبەتەن يەككە ئەمەلىي مىسالنى قوللاش تېخى ئەمەلگە ئاشمىدى. مۇلازىمېتىردىكى ئالدىن كېلىشىشنى ئۆزگەرتەلمىدى."
 
 #: ../src/calendar/e-cal-backend-mapi.c:2515
 msgid "Failed to get Free/Busy data"
 msgstr "ئەركىن/ئالدىراش سانلىق-مەلۇماتقا ئېرىشىش مەغلۇپ بولدى"
 
-#: ../src/camel/camel-mapi-folder.c:356
+#: ../src/camel/camel-mapi-folder.c:348
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "%s دىكى يېڭى ئۇچۇرنى يەرلىك ئۈزۈندى غەملەككە يۈكلەۋاتىدۇ"
 
-#: ../src/camel/camel-mapi-folder.c:592
+#: ../src/camel/camel-mapi-folder.c:584
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "%s مۇلازىمېتىردىن ئۇچۇر ID نى ئىزدەۋاتىدۇ"
 
-#: ../src/camel/camel-mapi-folder.c:622
+#: ../src/camel/camel-mapi-folder.c:614
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "%s غەملەكتىن ئۆچۈرۈلگەن ئۇچۇرنى چىقىرىۋەتمەكتە"
 
 #. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:952
+#: ../src/camel/camel-mapi-folder.c:751
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "%s دىكى يېڭى ئۇچۇر ئۈچۈن ئۈزۈندى ئۇچۇرىغا ئېرىشىۋاتىدۇ"
 
-#: ../src/camel/camel-mapi-folder.c:1075 ../src/camel/camel-mapi-folder.c:1210
-#: ../src/camel/camel-mapi-folder.c:1220
+#: ../src/camel/camel-mapi-folder.c:874 ../src/camel/camel-mapi-folder.c:1338
+#: ../src/camel/camel-mapi-folder.c:1348
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "بۇ ئۇچۇرنى تورسىز ھالەتتە ئىشلەتكىلى بولمايدۇ."
 
-#: ../src/camel/camel-mapi-folder.c:1092
+#: ../src/camel/camel-mapi-folder.c:891
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "تۈرگە ئېرىشىش  مەغلۇپ بولدى: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1097
+#: ../src/camel/camel-mapi-folder.c:896
 msgid "Fetching items failed"
 msgstr "تۈرگە ئېرىشىش  مەغلۇپ بولدى"
 
-#: ../src/camel/camel-mapi-folder.c:1170
-#, c-format
-msgid "Cannot get message %s: %s"
-msgstr "ئۇچۇرغا ئېرىشەلمىدى %s: %s"
-
-#: ../src/camel/camel-mapi-folder.c:1171
-msgid "No such message"
-msgstr "ئۇچۇر مەۋجۇت ئەمەس"
-
-#: ../src/camel/camel-mapi-folder.c:1246
-#, c-format
-msgid "Could not get message: %s"
-msgstr "ئۇچۇرغا ئېرىشەلمىدى: %s"
-
-#: ../src/camel/camel-mapi-folder.c:1252 ../src/camel/camel-mapi-folder.c:1265
-#, c-format
-msgid "Could not get message"
-msgstr "ئۇچۇرغا ئېرىشەلمىدى"
-
-#: ../src/camel/camel-mapi-folder.c:1402
-#, c-format
-msgid "Failed to empty Trash: %s"
-msgstr "ئەخلەتخانىنى بوشىتىش مەغلۇپ بولدى: %s"
-
-#: ../src/camel/camel-mapi-folder.c:1407
-msgid "Failed to empty Trash"
-msgstr "ئەخلەتخانىنى بوشىتىش مەغلۇپ بولدى"
-
-#: ../src/camel/camel-mapi-folder.c:1626
+#: ../src/camel/camel-mapi-folder.c:1101
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "'%s' قىسقۇچقا ئۇچۇر قوشالمىدى"
 
-#: ../src/camel/camel-mapi-folder.c:1634 ../src/camel/camel-mapi-folder.c:1659
+#: ../src/camel/camel-mapi-folder.c:1109 ../src/camel/camel-mapi-folder.c:1134
 #, c-format
 msgid "Offline."
 msgstr "تورسىز."
 
-#: ../src/camel/camel-mapi-folder.c:1804
+#: ../src/camel/camel-mapi-folder.c:1193
+#, c-format
+msgid "Failed to empty Trash: %s"
+msgstr "ئەخلەتخانىنى بوشىتىش مەغلۇپ بولدى: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1198
+msgid "Failed to empty Trash"
+msgstr "ئەخلەتخانىنى بوشىتىش مەغلۇپ بولدى"
+
+#: ../src/camel/camel-mapi-folder.c:1298
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "ئۇچۇرغا ئېرىشەلمىدى %s: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1299
+msgid "No such message"
+msgstr "ئۇچۇر مەۋجۇت ئەمەس"
+
+#: ../src/camel/camel-mapi-folder.c:1374
+#, c-format
+msgid "Could not get message: %s"
+msgstr "ئۇچۇرغا ئېرىشەلمىدى: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1380 ../src/camel/camel-mapi-folder.c:1393
+#, c-format
+msgid "Could not get message"
+msgstr "ئۇچۇرغا ئېرىشەلمىدى"
+
+#: ../src/camel/camel-mapi-folder.c:1826
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s نىڭ ئۈزۈندىسىنى يۈكلىيەلمىدى"
@@ -353,8 +348,7 @@ msgstr "يەرلىك ھېساباتنى ئۆزلۈكىدىن قەدەمداشل�
 #. i18n: copy from evolution:camel-imap-provider.c
 #: ../src/camel/camel-mapi-provider.c:55
 msgid "_Apply filters to new messages in Inbox on this server"
-msgstr ""
-"بۇ مۇلازىمېتىردىكى قوبۇللاش ساندۇقىدا يېڭى ئۇچۇرلارغا سۈزگۈچ قوللان(_A)"
+msgstr "بۇ مۇلازىمېتىردىكى قوبۇللاش ساندۇقىدا يېڭى ئۇچۇرلارغا سۈزگۈچ قوللان(_A)"
 
 #: ../src/camel/camel-mapi-provider.c:57
 msgid "Check new messages for _Junk contents"
@@ -366,9 +360,7 @@ msgstr "پەقەت قوبۇللاش ساندۇقىدىلا ئەخلەت ئۇچۇ
 
 #: ../src/camel/camel-mapi-provider.c:70
 msgid "For accessing Microsoft Exchange/OpenChange servers using MAPI"
-msgstr ""
-"MAPI ئۇسۇلىنى ئىشلىتىپ مىكروسوفت Exchange/OpenChange مۇلازىمېتىرىنى زىيارەت "
-"قىلماق"
+msgstr "MAPI ئۇسۇلىنى ئىشلىتىپ مىكروسوفت Exchange/OpenChange مۇلازىمېتىرىنى زىيارەت قىلماق"
 
 #: ../src/camel/camel-mapi-provider.c:85
 msgid "Password"
@@ -377,11 +369,75 @@ msgstr "ئىم"
 #: ../src/camel/camel-mapi-provider.c:86
 msgid ""
 "This option will connect to the OpenChange server using a plaintext password."
-msgstr ""
-"بۇ تاللانما ساپ تېكىست ئىم ئىشلىتىپ OpenChange مۇلازىمېتىرىغا باغلىنىدۇ."
+msgstr "بۇ تاللانما ساپ تېكىست ئىم ئىشلىتىپ OpenChange مۇلازىمېتىرىغا باغلىنىدۇ."
+
+#: ../src/camel/camel-mapi-store.c:345
+#, c-format
+msgid "Folder list not available in offline mode."
+msgstr "تورسىز ھالەتتە قىسقۇچ تىزىملىكىنى ئىشلەتكىلى بولمايدۇ."
+
+#: ../src/camel/camel-mapi-store.c:971
+#, c-format
+msgid "Cannot create MAPI folders in offline mode."
+msgstr "تورسىز ھالەتتە MAPI قىسقۇچ قۇرالمايدۇ."
+
+#: ../src/camel/camel-mapi-store.c:978
+#, c-format
+msgid "Cannot create new folder '%s'"
+msgstr "'%s' يېڭى قىسقۇچ قۇرالمىدى"
+
+#: ../src/camel/camel-mapi-store.c:992
+#, c-format
+msgid "Authentication failed"
+msgstr "دەلىللەش مەغلۇپ بولدى"
+
+#: ../src/camel/camel-mapi-store.c:1017
+#, c-format
+msgid "Cannot create folder '%s': %s"
+msgstr "'%s' قىسقۇچ قۇرالمىدى: %s"
+
+#: ../src/camel/camel-mapi-store.c:1022
+#, c-format
+msgid "Cannot create folder '%s'"
+msgstr "'%s' قىسقۇچ قۇرالمىدى"
+
+#: ../src/camel/camel-mapi-store.c:1079
+#, c-format
+msgid "Cannot remove folder '%s': %s"
+msgstr "'%s' قىسقۇچنى چىقىرىۋېتەلمىدى: %s"
+
+#: ../src/camel/camel-mapi-store.c:1086
+#, c-format
+msgid "Cannot remove folder '%s'"
+msgstr "'%s' قىسقۇچنى چىقىرىۋېتەلمىدى"
+
+#: ../src/camel/camel-mapi-store.c:1131
+#, c-format
+msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
+msgstr "MAPI قىسقۇچ '%s' نىڭ ئاتىنى ئۆزگەرتەلمەيدۇ. قىسقۇچ مەۋجۇت ئەمەس."
+
+#: ../src/camel/camel-mapi-store.c:1143
+#, c-format
+msgid "Cannot rename MAPI default folder '%s' to '%s'."
+msgstr "MAPI نىڭ كۆڭۈلدىكى قىسقۇچىنىڭ ئاتى '%s' نى '%s' غا ئۆزگەرتەلمەيدۇ."
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1170 ../src/camel/camel-mapi-store.c:1195
+#: ../src/camel/camel-mapi-store.c:1257
+#, c-format
+msgid "Cannot rename MAPI folder '%s' to '%s'"
+msgstr "MAPI قىسقۇچىنىڭ ئاتى '%s' نى '%s' غا ئۆزگەرتەلمەيدۇ"
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#. The last '%s' is a detailed error message.
+#: ../src/camel/camel-mapi-store.c:1188 ../src/camel/camel-mapi-store.c:1251
+#, c-format
+msgid "Cannot rename MAPI folder '%s' to '%s': %s"
+msgstr "MAPI قىسقۇچىنىڭ ئاتى '%s' نى '%s' غا ئۆزگەرتەلمەيدۇ: %s"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:315 ../src/camel/camel-mapi-transport.c:143
+#: ../src/camel/camel-mapi-store.c:1542
+#: ../src/camel/camel-mapi-transport.c:147
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI مۇلازىمېتىر %s"
@@ -389,7 +445,8 @@ msgstr "Exchange MAPI مۇلازىمېتىر %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:319 ../src/camel/camel-mapi-transport.c:146
+#: ../src/camel/camel-mapi-store.c:1546
+#: ../src/camel/camel-mapi-transport.c:150
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "%s دىكى %s بولسا Exchange MAPI مۇلازىمىتى"
@@ -398,96 +455,32 @@ msgstr "%s دىكى %s بولسا Exchange MAPI مۇلازىمىتى"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:361
+#: ../src/camel/camel-mapi-store.c:1580
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s@%s نىڭ MAPI ئىمنى كىرگۈزۈڭ %s"
 
-#: ../src/camel/camel-mapi-store.c:376
+#: ../src/camel/camel-mapi-store.c:1595
 #, c-format
 msgid "You did not enter a password."
 msgstr "ئىم كىرگۈزمىدىڭىز."
 
-#: ../src/camel/camel-mapi-store.c:384
+#: ../src/camel/camel-mapi-store.c:1603
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server: %s"
 msgstr "Exchange MAPI مۇلازىمېتىرىنى دەلىللىيەلمىدى: %s"
 
-#: ../src/camel/camel-mapi-store.c:387
+#: ../src/camel/camel-mapi-store.c:1606
 msgid "Unable to authenticate to Exchange MAPI server"
 msgstr "Exchange MAPI مۇلازىمېتىرىنى دەلىللىيەلمىدى"
 
-#: ../src/camel/camel-mapi-store.c:564
-#, c-format
-msgid "Cannot create MAPI folders in offline mode."
-msgstr "تورسىز ھالەتتە MAPI قىسقۇچ قۇرالمايدۇ."
-
-#: ../src/camel/camel-mapi-store.c:571
-#, c-format
-msgid "Cannot create new folder '%s'"
-msgstr "'%s' يېڭى قىسقۇچ قۇرالمىدى"
-
-#: ../src/camel/camel-mapi-store.c:585
-#, c-format
-msgid "Authentication failed"
-msgstr "دەلىللەش مەغلۇپ بولدى"
-
-#: ../src/camel/camel-mapi-store.c:610
-#, c-format
-msgid "Cannot create folder '%s': %s"
-msgstr "'%s' قىسقۇچ قۇرالمىدى: %s"
-
-#: ../src/camel/camel-mapi-store.c:615
-#, c-format
-msgid "Cannot create folder '%s'"
-msgstr "'%s' قىسقۇچ قۇرالمىدى"
-
-#: ../src/camel/camel-mapi-store.c:708
-#, c-format
-msgid "Cannot remove folder '%s': %s"
-msgstr "'%s' قىسقۇچنى چىقىرىۋېتەلمىدى: %s"
-
-#: ../src/camel/camel-mapi-store.c:715
-#, c-format
-msgid "Cannot remove folder '%s'"
-msgstr "'%s' قىسقۇچنى چىقىرىۋېتەلمىدى"
-
-#: ../src/camel/camel-mapi-store.c:805
-#, c-format
-msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
-msgstr "MAPI قىسقۇچ '%s' نىڭ ئاتىنى ئۆزگەرتەلمەيدۇ. قىسقۇچ مەۋجۇت ئەمەس."
-
-#: ../src/camel/camel-mapi-store.c:817
-#, c-format
-msgid "Cannot rename MAPI default folder '%s' to '%s'."
-msgstr "MAPI نىڭ كۆڭۈلدىكى قىسقۇچىنىڭ ئاتى '%s' نى '%s' غا ئۆزگەرتەلمەيدۇ."
-
-#. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:844 ../src/camel/camel-mapi-store.c:869
-#: ../src/camel/camel-mapi-store.c:931
-#, c-format
-msgid "Cannot rename MAPI folder '%s' to '%s'"
-msgstr "MAPI قىسقۇچىنىڭ ئاتى '%s' نى '%s' غا ئۆزگەرتەلمەيدۇ"
-
-#. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:862 ../src/camel/camel-mapi-store.c:925
-#, c-format
-msgid "Cannot rename MAPI folder '%s' to '%s': %s"
-msgstr "MAPI قىسقۇچىنىڭ ئاتى '%s' نى '%s' غا ئۆزگەرتەلمەيدۇ: %s"
-
-#: ../src/camel/camel-mapi-store.c:1494
-#, c-format
-msgid "Folder list not available in offline mode."
-msgstr "تورسىز ھالەتتە قىسقۇچ تىزىملىكىنى ئىشلەتكىلى بولمايدۇ."
-
-#: ../src/camel/camel-mapi-transport.c:109
-#: ../src/camel/camel-mapi-transport.c:130
+#: ../src/camel/camel-mapi-transport.c:113
+#: ../src/camel/camel-mapi-transport.c:134
 #, c-format
 msgid "Could not send message."
 msgstr "ئۇچۇر يوللىيالمايدۇ."
 
-#: ../src/camel/camel-mapi-transport.c:125
+#: ../src/camel/camel-mapi-transport.c:129
 #, c-format
 msgid "Could not send message: %s"
 msgstr "ئۇچۇر يوللىيالمايدۇ: %s"
@@ -554,6 +547,6 @@ msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3308
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3309
 msgid "All Public Folders"
 msgstr "بارلىق ئاممىۋى قىسقۇچلار"
