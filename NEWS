@@ -1,3 +1,33 @@
+evolution-mapi 0.32.1 2010-11-15
+---------------------------------
+
+Bug Fixes:
+	Bug #608388 - Copying a mail from another account loses 
+		      headers (Milan Crha)
+	Bug #629481 - Critical warning from mapi_sync function (Milan Crha)
+	Bug #629484 - Do not refresh 'Favourites' folder itself (Milan Crha)
+	Bug #629492 - Messages can be without recipients (Milan Crha)
+	Bug #629499 - Runs incoming filters in all folders (Milan Crha)
+	Bug #629507 - Gal re-fetches itself (Milan Crha)
+	Bug #629603 - Allow calendar refresh on demand (Milan Crha)
+	Bug #629836 - Crash on an event fetching (Milan Crha)
+	Bug #630698 - Cannot remove just created folder (Punit Jain)
+	Bug #630712 - Crash in add_cal_esource (Milan Crha)
+	Bug #631496 - Crash fetching property unsupported by 
+		      cast_mapi_SPropValue (Milan Crha)
+	Bug #631621 - Cannot connect after update (Milan Crha)
+	Bug #632449 - Copy message to Inbox tries to send it (Milan Crha)
+	Bug #633182 - Meeting invites sent also to organiser (Milan Crha)
+	Bug #633185 - Can't handle Birthdays before 01/01/1970 (Milan Crha)
+
+Misc:
+	Unable to send mail after fix for bug #608388 (Milan Crha)
+
+Translations:
+	Carles Ferrando (ca@valencia)
+	Gil Forcada (ca)
+	Inaki Larranaga Murgoitio (eu)
+
 evolution-mapi 0.32.0 2010-09-27
 ---------------------------------
 
