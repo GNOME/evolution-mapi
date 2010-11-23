@@ -175,7 +175,11 @@ mail_item_set_body_stream (MailItem *item, CamelStream *body, MailItemPartType p
 		in_unicode = g_convert ((const gchar *)stream->value->data, stream->value->len, "UTF-16", "UTF-8", NULL, &written, NULL);
 		if (in_unicode && written > 0) {
 			g_byte_array_set_size (stream->value, 0);
-			g_byte_array_append (stream->value, (const guint8 *) in_unicode, written);
+			/* skip Unicode marker, if there */
+			if (written >= 2 && (const guchar) in_unicode[0] == 0xFF && (const guchar) in_unicode[1] == 0xFE)
+				g_byte_array_append (stream->value, (const guint8 *) in_unicode + 2, written - 2);
+			else
+				g_byte_array_append (stream->value, (const guint8 *) in_unicode, written);
 
 			/* null-terminated unicode string */
 			g_byte_array_append (stream->value, (const guint8 *)"", 1);
