@@ -484,7 +484,12 @@ set_stream_value (ExchangeMAPIStream *stream, const uint32_t *cpid, const guint8
 		gsize written = 0;
 		gchar *in_utf8;
 
-		in_utf8 = g_convert ((const gchar *) buf_data, buf_len, "UTF-8", "UTF-16", NULL, &written, NULL);
+		/* skip Unicode marker, if there */
+		if (buf_len >= 2 && buf_data[0] == 0xFF && buf_data[1] == 0xFE)
+			in_utf8 = g_convert ((const gchar *) buf_data + 2, buf_len - 2, "UTF-8", "UTF-16", NULL, &written, NULL);
+		else
+			in_utf8 = g_convert ((const gchar *) buf_data, buf_len, "UTF-8", "UTF-16", NULL, &written, NULL);
+
 		if (in_utf8 && written > 0) {
 			stream->value = g_byte_array_sized_new (written + 1);
 			g_byte_array_append (stream->value, (const guint8 *) in_utf8, written);
