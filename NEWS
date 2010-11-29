@@ -1,3 +1,12 @@
+evolution-mapi 2.91.3 2010-11-29
+--------------------------------
+
+Bug Fixes:
+	Bug #635078 - Do not write unicode markers in UTF16 strings (Milan Crha)
+
+Translations:
+	Gheyret T.Kenji (ug)
+
 evolution-mapi 2.91.2 2010-11-08
 --------------------------------
 
