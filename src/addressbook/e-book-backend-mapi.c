@@ -192,8 +192,9 @@ ebbm_pick_book_view (EBookBackendMAPI *ebma)
 		return NULL;
 	}
 
+	e_iterator_last (iter);
 	if (e_iterator_is_valid (iter)) {
-		/* just always use the first book view */
+		/* just always use the last book view */
 		EDataBookView *v = (EDataBookView *) e_iterator_get (iter);
 		if (v)
 			rv = v;
@@ -203,6 +204,30 @@ ebbm_pick_book_view (EBookBackendMAPI *ebma)
 	g_object_unref (views);
 
 	return rv;
+}
+
+static void
+complete_views (EBookBackendMAPI *ebma)
+{
+	EList *views;
+	EIterator *iter;
+
+	g_return_if_fail (ebma != NULL);
+
+	views = e_book_backend_get_book_views (E_BOOK_BACKEND (ebma));
+	if (!views)
+		return;
+
+	for (iter = e_list_get_iterator (views); iter && e_iterator_is_valid (iter); e_iterator_next (iter)) {
+		EDataBookView *book_view = (EDataBookView *) e_iterator_get (iter);
+
+		if (book_view)
+			e_data_book_view_notify_complete (book_view, NULL);
+	}
+
+	if (iter)
+		g_object_unref (iter);
+	g_object_unref (views);
 }
 
 struct FetchContactsData
@@ -298,7 +323,6 @@ ebbm_update_cache_cb (gpointer data)
 	EBookBackendMAPIPrivate *priv;
 	EBookBackendMAPIClass *ebmac;
 	glong last_modification_secs = 0;
-	EDataBookView *book_view;
 	GError *error = NULL;
 
 	g_return_val_if_fail (ebma != NULL, NULL);
@@ -376,9 +400,7 @@ ebbm_update_cache_cb (gpointer data)
 	if (error)
 		g_error_free (error);
 
-	book_view = ebbm_pick_book_view (ebma);
-	if (book_view)
-		e_data_book_view_notify_complete (book_view, NULL);
+	complete_views (ebma);
 
 	/* indicate the thread is not running */
 	g_cancellable_cancel (priv->update_cache);
