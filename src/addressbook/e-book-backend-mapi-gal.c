@@ -33,6 +33,29 @@ struct _EBookBackendMAPIGALPrivate
 	gint32 unused;
 };
 
+static gchar *
+get_uid_from_row (struct SRow *aRow, uint32_t row_index, mapi_id_t fid)
+{
+	gchar *suid = NULL;
+	const gchar *str;
+
+	g_return_val_if_fail (aRow != NULL, NULL);
+
+	str = exchange_mapi_util_find_row_propval (aRow, PR_EMAIL_ADDRESS_UNICODE);
+	if (str && *str)
+		suid = g_strdup (str);
+
+	if (!suid) {
+		const mapi_id_t *midptr;
+
+		midptr = exchange_mapi_util_find_row_propval (aRow, PR_MID);
+
+		suid = exchange_mapi_util_mapi_ids_to_uid (fid, midptr ? *midptr : row_index);
+	}
+
+	return suid;
+}
+
 struct FetchGalData
 {
 	EBookBackendMAPI *ebma;
@@ -59,6 +82,14 @@ fetch_gal_cb (ExchangeMapiConnection *conn, uint32_t row_index, uint32_t n_rows,
 		return TRUE;
 	}
 
+	if (!e_contact_get_const (contact, E_CONTACT_UID)) {
+		gchar *suid;
+
+		suid = get_uid_from_row (aRow, row_index, fgd->fid);
+		e_contact_set (contact, E_CONTACT_UID, suid);
+		g_free (suid);
+	}
+
 	spropval = get_SPropValue_SRow (aRow, PR_LAST_MODIFICATION_TIME);
 	if (spropval && get_mapi_SPropValue_date_timeval (&tv, *spropval) == MAPI_E_SUCCESS)
 		last_modification = &tv;
@@ -77,21 +108,22 @@ struct FetchGalUidsData
 {
 	GCancellable *cancelled;
 	GHashTable *uids;
+	mapi_id_t fid; /* folder ID of contacts */
 };
 
 static gboolean
 fetch_gal_uids_cb (ExchangeMapiConnection *conn, uint32_t row_index, uint32_t n_rows, struct SRow *aRow, gpointer data)
 {
-	const gchar *uid;
+	gchar *uid;
 	struct FetchGalUidsData *fgud = data;
 
 	g_return_val_if_fail (conn != NULL, FALSE);
 	g_return_val_if_fail (aRow != NULL, FALSE);
 	g_return_val_if_fail (data != NULL, FALSE);
 
-	uid = exchange_mapi_util_find_row_propval (aRow, PR_EMAIL_ADDRESS_UNICODE);
+	uid = get_uid_from_row (aRow, row_index, fgud->fid);
 	if (uid)
-		g_hash_table_insert (fgud->uids, g_strdup (uid), GINT_TO_POINTER (1));
+		g_hash_table_insert (fgud->uids, uid, GINT_TO_POINTER (1));
 
 	return !g_cancellable_is_cancelled (fgud->cancelled);
 }
@@ -219,6 +251,7 @@ ebbm_gal_fetch_known_uids (EBookBackendMAPI *ebma, GCancellable *cancelled, GHas
 
 	fgud.cancelled = cancelled;
 	fgud.uids = uids;
+	fgud.fid = exchange_mapi_connection_get_default_folder_id (conn, olFolderContacts, NULL);
 
 	exchange_mapi_connection_fetch_gal (conn, NULL,
 		mapi_book_utils_get_prop_list, GET_UIDS_ONLY,
