@@ -37,9 +37,6 @@
 
 #define CAMEL_MAPI_SUMMARY_VERSION (1)
 
-/* Macros for DB Summary */
-#define MS_EXTRACT_FIRST_DIGIT(val) val=strtoul (part, &part, 10);
-
 /*Prototypes*/
 static CamelFIRecord* mapi_summary_header_to_db (CamelFolderSummary *, GError **error);
 static gint mapi_summary_header_from_db (CamelFolderSummary *, CamelFIRecord *fir);
@@ -198,9 +195,9 @@ mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
 	part = fir->bdata;
 
 	if (part)
-		MS_EXTRACT_FIRST_DIGIT(mapi_summary->version);
+		mapi_summary->version = bdata_extract_digit (&part);
 
-	if (part && part++) {
+	if (part && *part && part++) {
 		g_free (mapi_summary->sync_time_stamp);
 		mapi_summary->sync_time_stamp = g_strdup (part);
 	}
@@ -246,7 +243,7 @@ mapi_message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 			CamelMapiMessageInfo *m_info;
 
 			m_info = (CamelMapiMessageInfo *) info;
-			MS_EXTRACT_FIRST_DIGIT (m_info->server_flags);
+			m_info->server_flags = bdata_extract_digit (&part);
 		}
 	}
 
@@ -281,7 +278,7 @@ mapi_content_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 		camel_mapi_summary_parent_class);
 
 	if (part)
-		MS_EXTRACT_FIRST_DIGIT (type);
+		type = bdata_extract_digit (&part);
 
 	mir->cinfo = part;
 
