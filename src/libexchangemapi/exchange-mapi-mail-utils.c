@@ -41,6 +41,8 @@ mail_item_free (MailItem *item)
 	g_free (item->header.references);
 	g_free (item->header.message_id);
 	g_free (item->header.in_reply_to);
+	g_free (item->header.content_class);
+	g_free (item->header.transport_headers);
 
 	exchange_mapi_util_free_attachment_list (&item->attachments);
 	exchange_mapi_util_free_stream_list (&item->generic_streams);
@@ -56,8 +58,9 @@ fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 {
 	long *flags = NULL;
 	struct FILETIME *delivery_date = NULL;
-	const gchar *msg_class = NULL;
+	const gchar *msg_class = NULL, *content_class = NULL;
 	ExchangeMAPIStream *body = NULL;
+	uint32_t content_class_pid;
 
 	MailItem *item;
 	MailItem **i = (MailItem **)data;
@@ -70,6 +73,10 @@ fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 		exchange_mapi_debug_property_dump (item_data->properties);
 		camel_debug_end();
 	}
+
+	content_class_pid = exchange_mapi_connection_resolve_named_prop (item_data->conn, item_data->fid, PidNameContentClass, NULL);
+	if (content_class_pid == MAPI_E_RESERVED)
+		content_class_pid = 0;
 
 	item = g_new0 (MailItem , 1);
 	item->fid = item_data->fid;
@@ -97,11 +104,14 @@ fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 			flags = (long *) prop_data;
 			break;
 		default:
+			if (content_class_pid != 0 && item_data->properties->lpProps[j].ulPropTag == content_class_pid)
+				content_class = (const gchar *) prop_data;
 			break;
 		}
 	}
 
 	item->msg_class = g_strdup (msg_class);
+	item->header.content_class = g_strdup (content_class);
 
 	item->is_cal = FALSE;
 	if (msg_class && g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_PREFIX)) {
@@ -288,9 +298,17 @@ mapi_mail_get_item_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLO
 		PR_RCVD_REPRESENTING_EMAIL_ADDRESS_UNICODE
 	};
 
+	/* do not make this array static, the function modifies it on run */
+	ResolveNamedIDsData nids[] = {
+		{ PidNameContentClass, 0 }
+	};
+
 	g_return_val_if_fail (props != NULL, FALSE);
 
-	return exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, item_props, G_N_ELEMENTS (item_props));
+	if (!exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, item_props, G_N_ELEMENTS (item_props)))
+		return FALSE;
+
+	return exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
 }
 
 static void
@@ -407,6 +425,9 @@ mapi_mime_set_msg_headers (ExchangeMapiConnection *conn, CamelMimeMessage *msg, 
 		actual_time = camel_header_decode_date (ctime(&recieved_time), &offset);
 		camel_mime_message_set_date (msg, actual_time, offset);
 	}
+
+	if (item->header.content_class)
+		camel_medium_add_header (CAMEL_MEDIUM (msg), "Content-class", item->header.content_class);
 
 	/* Overwrite headers if we have specific properties available*/
 	temp_str = item->header.subject;
