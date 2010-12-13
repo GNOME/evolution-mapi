@@ -54,6 +54,7 @@ typedef struct {
 	time_t send_time;
 	guint cpid; /* codepage id */
 	gchar *transport_headers;
+	gchar *content_class;
 } MailItemHeader;
 
 typedef struct {
