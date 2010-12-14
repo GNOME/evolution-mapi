@@ -240,6 +240,7 @@ gboolean		exchange_mapi_create_profile (const gchar *username, const gchar *pass
 				       mapi_profile_callback_t cb, gpointer data, GError **perror);
 
 gboolean		exchange_mapi_delete_profile (const gchar *profile, GError **perror);
+void			exchange_mapi_rename_profile (const gchar *old_name, const gchar *new_name);
 
 /* utility functions */
 

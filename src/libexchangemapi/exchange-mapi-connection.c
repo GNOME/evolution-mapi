@@ -143,6 +143,10 @@ make_mapi_error (GError **perror, const gchar *context, enum MAPISTATUS mapi_sta
 	g_propagate_error (perror, error);
 }
 
+#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+struct mapi_context *mapi_ctx = NULL;
+#endif
+
 typedef struct _ExchangeMapiConnectionPrivate ExchangeMapiConnectionPrivate;
 
 struct _ExchangeMapiConnectionPrivate {
@@ -1304,7 +1308,11 @@ exchange_mapi_util_modify_recipients (ExchangeMapiConnection *conn, TALLOC_CTX *
 	enum MAPISTATUS	ms;
 	struct SPropTagArray	*SPropTagArray = NULL;
 	struct SRowSet		*SRowSet = NULL;
+	#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+	struct PropertyTagArray_r *FlagList = NULL;
+	#else
 	struct SPropTagArray	*FlagList = NULL;
+	#endif
 	GSList			*l;
 	const gchar		**users = NULL;
 	uint32_t		i, j, count = 0;
@@ -2814,7 +2822,11 @@ mapi_move_items (ExchangeMapiConnection *conn, mapi_id_t src_fid, guint32 src_fi
 
 	mapi_object_init(&obj_folder_src);
 	mapi_object_init(&obj_folder_dst);
-	mapi_id_array_init(&msg_id_array);
+	mapi_id_array_init (
+		#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+		mapi_ctx,
+		#endif
+		&msg_id_array);
 
 	for (l = mid_list; l != NULL; l = g_slist_next (l))
 		mapi_id_array_add_id (&msg_id_array, *((mapi_id_t *)l->data));
@@ -3353,7 +3365,11 @@ exchange_mapi_connection_ex_to_smtp (ExchangeMapiConnection *conn, const gchar *
 	TALLOC_CTX		*mem_ctx;
 	struct SPropTagArray	*SPropTagArray;
 	struct SRowSet		*SRowSet = NULL;
+	#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+	struct PropertyTagArray_r *flaglist = NULL;
+	#else
 	struct SPropTagArray	*flaglist = NULL;
+	#endif
 	const gchar		*str_array[2];
 	gchar			*smtp_addr = NULL;
 
@@ -3608,7 +3624,11 @@ ensure_mapi_init_called (GError **perror)
 		}
 	}
 
-	ms = MAPIInitialize (profpath);
+	ms = MAPIInitialize (
+		#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+		&mapi_ctx,
+		#endif
+		profpath);
 	if (ms == MAPI_E_SESSION_LIMIT) {
 		/* do nothing, the profile store is already initialized */
 		/* but this shouldn't happen */
@@ -3670,15 +3690,31 @@ mapi_profile_load (const gchar *profname, const gchar *password, GError **perror
 	/* Initialize libmapi logger*/
 	if (g_getenv ("MAPI_DEBUG")) {
 		debug_log_level = atoi (g_getenv ("MAPI_DEBUG"));
-		SetMAPIDumpData(TRUE);
-		SetMAPIDebugLevel(debug_log_level);
+		SetMAPIDumpData (
+			#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+			mapi_ctx,
+			#endif
+			TRUE);
+		SetMAPIDebugLevel (
+			#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+			mapi_ctx,
+			#endif
+			debug_log_level);
 	}
 
 	g_debug("Loading profile %s ", profname);
 
-	ms = MapiLogonEx (&session, profname, password);
+	ms = MapiLogonEx (
+		#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+		mapi_ctx,
+		#endif
+		&session, profname, password);
 	if (ms == MAPI_E_NOT_FOUND && try_create_profile (profname, password))
-		ms = MapiLogonEx (&session, profname, password);
+		ms = MapiLogonEx (
+			#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+			mapi_ctx,
+			#endif
+			&session, profname, password);
 
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "MapiLogonEx", ms);
@@ -3723,34 +3759,60 @@ mapi_profile_create (const gchar *username, const gchar *password, const gchar *
 	profname = exchange_mapi_util_profile_name (username, domain, server, TRUE);
 
 	/* Delete any existing profiles with the same profilename */
-	ms = DeleteProfile (profname);
+	ms = DeleteProfile (
+		#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+		mapi_ctx,
+		#endif
+		profname);
 	/* don't bother to check error - it would be valid if we got an error */
 
-	ms = CreateProfile (profname, username, password, OC_PROFILE_NOPASSWORD);
+	ms = CreateProfile (
+		#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+		mapi_ctx,
+		#endif
+		profname, username, password, OC_PROFILE_NOPASSWORD);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "CreateProfile", ms);
 		goto cleanup;
 	}
 
-	mapi_profile_add_string_attr(profname, "binding", server);
-	mapi_profile_add_string_attr(profname, "workstation", workstation);
-	mapi_profile_add_string_attr(profname, "domain", domain);
+	#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+	#define add_string_attr(_prof,_aname,_val)				\
+		mapi_profile_add_string_attr (mapi_ctx, _prof, _aname, _val)
+	#else
+	#define add_string_attr(_prof,_aname,_val)				\
+		mapi_profile_add_string_attr (_prof, _aname, _val)
+	#endif
+
+	add_string_attr (profname, "binding", server);
+	add_string_attr (profname, "workstation", workstation);
+	add_string_attr (profname, "domain", domain);
 
 	if ((flags & CREATE_PROFILE_FLAG_USE_SSL) != 0)
-		mapi_profile_add_string_attr (profname, "seal", "true");
+		add_string_attr (profname, "seal", "true");
 
 	/* This is only convenient here and should be replaced at some point */
-	mapi_profile_add_string_attr(profname, "codepage", "0x4e4");
-	mapi_profile_add_string_attr(profname, "language", "0x409");
-	mapi_profile_add_string_attr(profname, "method", "0x409");
+	add_string_attr (profname, "codepage", "0x4e4");
+	add_string_attr (profname, "language", "0x409");
+	add_string_attr (profname, "method", "0x409");
+
+	#undef add_string_attr
 
 	/* Login now */
 	g_debug("Logging into the server... ");
-	ms = MapiLogonProvider (&session, profname, password, PROVIDER_ID_NSPI);
+	ms = MapiLogonProvider (
+		#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+		mapi_ctx,
+		#endif
+		&session, profname, password, PROVIDER_ID_NSPI);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "MapiLogonProvider", ms);
 		g_debug ("Deleting profile %s ", profname);
-		DeleteProfile (profname);
+		DeleteProfile (
+			#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+			mapi_ctx,
+			#endif
+			profname);
 		goto cleanup;
 	}
 	g_debug("MapiLogonProvider : succeeded \n");
@@ -3759,7 +3821,11 @@ mapi_profile_create (const gchar *username, const gchar *password, const gchar *
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "ProcessNetworkProfile", ms);
 		g_debug ("Deleting profile %s ", profname);
-		DeleteProfile (profname);
+		DeleteProfile (
+			#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+			mapi_ctx,
+			#endif
+			profname);
 		goto cleanup;
 	}
 	g_debug("ProcessNetworkProfile : succeeded \n");
@@ -3813,7 +3879,11 @@ exchange_mapi_delete_profile (const gchar *profile, GError **perror)
 
 		g_debug ("Deleting profile %s ", profile);
 
-		ms = DeleteProfile (profile);
+		ms = DeleteProfile (
+			#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+			mapi_ctx,
+			#endif
+			profile);
 		if (ms == MAPI_E_SUCCESS) {
 			result = TRUE;
 		} else {
@@ -3824,6 +3894,23 @@ exchange_mapi_delete_profile (const gchar *profile, GError **perror)
 	g_static_rec_mutex_unlock (&profile_mutex);
 
 	return result;
+}
+
+void
+exchange_mapi_rename_profile (const gchar *old_name, const gchar *new_name)
+{
+	g_return_if_fail (old_name != NULL);
+	g_return_if_fail (new_name != NULL);
+
+	g_static_rec_mutex_lock (&profile_mutex);
+
+	RenameProfile (
+		#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+		mapi_ctx,
+		#endif
+		old_name, new_name);
+
+	g_static_rec_mutex_unlock (&profile_mutex);
 }
 
 /* profile related functions - end */

@@ -947,7 +947,7 @@ exchange_mapi_util_profile_name (const gchar *username, const gchar *domain, con
 		old_name = g_strdup_printf ("%s@%s", username, domain);
 		old_name = g_strcanon (old_name, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@", '_');
 
-		RenameProfile (old_name, res);
+		exchange_mapi_rename_profile (old_name, res);
 
 		g_free (old_name);
 	}

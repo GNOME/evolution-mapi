@@ -253,6 +253,20 @@ if test "x${ac_cv_have_prf}" = "xno"; then
 fi
 
 dnl ****************************
+dnl Check for MAPIInitialize function with two params
+dnl ****************************
+AC_MSG_CHECKING([libmapi MAPIInitialize function with two params])
+save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
+save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
+AC_LINK_IFELSE([AC_LANG_PROGRAM(
+	[[#include <libmapi/libmapi.h>]],
+	[[MAPIInitialize (NULL, NULL)]])],
+	[AC_DEFINE(HAVE_LIBMAPI_CONTEXT_PARAM, 1, [libmapi uses context parameters]) ac_cv_have_lcp=yes],[ac_cv_have_lcp=no])
+CFLAGS=$save_cflags
+LIBS=$save_libs
+AC_MSG_RESULT([$ac_cv_have_lcp])
+
+dnl ****************************
 dnl Expose version information
 dnl ****************************
 API_VERSION=$EDS_PACKAGE
