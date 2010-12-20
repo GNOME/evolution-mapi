@@ -11,10 +11,11 @@ msgstr ""
 "Project-Id-Version: evolution-mapi MASTER\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi\n"
-"POT-Creation-Date: 2010-08-26 18:36+0000\n"
+"POT-Creation-Date: 2010-12-14 18:52+0000\n"
 "PO-Revision-Date: 2010-09-18 21:31+0300\n"
 "Last-Translator: Mattias Põldaru <mahfiaz gmail com>\n"
 "Language-Team: Estonian <et@li.org>\n"
+"Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -218,6 +219,21 @@ msgid "Fetching items failed"
 msgstr "Tõrge kirjete hankimisel"
 
 #, c-format
+msgid "Cannot append message to folder '%s'"
+msgstr "Sõnumit pole võimalik kausta `%s' lisada"
+
+#, c-format
+msgid "Offline."
+msgstr "Ühendamata."
+
+#, c-format
+msgid "Failed to empty Trash: %s"
+msgstr "Tõrge prügikasti tühjendamisel: %s"
+
+msgid "Failed to empty Trash"
+msgstr "Tõrge prügikasti tühjendamisel"
+
+#, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Sõnumit %s pole võimalik hankida: %s"
 
@@ -231,21 +247,6 @@ msgstr "Sõnumit pole võimalik hankida: %s"
 #, c-format
 msgid "Could not get message"
 msgstr "Sõnumit pole võimalik hankida"
-
-#, c-format
-msgid "Failed to empty Trash: %s"
-msgstr "Tõrge prügikasti tühjendamisel: %s"
-
-msgid "Failed to empty Trash"
-msgstr "Tõrge prügikasti tühjendamisel"
-
-#, c-format
-msgid "Cannot append message to folder '%s'"
-msgstr "Sõnumit pole võimalik kausta `%s' lisada"
-
-#, c-format
-msgid "Offline."
-msgstr "Ühendamata."
 
 #, c-format
 msgid "Could not load summary for %s"
@@ -284,36 +285,9 @@ msgid ""
 msgstr ""
 "See valik ühendab OpenChange serveriga, kasutades avatekstilist parooli."
 
-#. Translators: The %s is replaced with a server's host name
 #, c-format
-msgid "Exchange MAPI server %s"
-msgstr "Exchange MAPI server %s"
-
-#. To translators : Example string : Exchange MAPI service for
-#. _username_ on _server host name__
-#. Translators: The first %s is replaced with a user name, the second with a server's host name
-#, c-format
-msgid "Exchange MAPI service for %s on %s"
-msgstr "Exchange MAPI-teenus kasutajale %s hostil %s"
-
-#. To translators : First %s : is the error text or the reason
-#. for prompting the user if it is available.
-#. Second %s is : Username.
-#. Third %s is : Server host name.
-#, c-format
-msgid "%s Please enter the MAPI password for %s@%s"
-msgstr "%s Palun sisesta konto %s@%s MAPI-parool"
-
-#, c-format
-msgid "You did not enter a password."
-msgstr "Sa ei sisestanud parooli."
-
-#, c-format
-msgid "Unable to authenticate to Exchange MAPI server: %s"
-msgstr "Exchange MAPI-serverisse pole võimalik autentida: %s"
-
-msgid "Unable to authenticate to Exchange MAPI server"
-msgstr "Exchange MAPI-serverisse pole võimalik autentida"
+msgid "Folder list not available in offline mode."
+msgstr "Kaustade nimekiri pole võrguvabas režiimis saadaval."
 
 #, c-format
 msgid "Cannot create MAPI folders in offline mode."
@@ -362,9 +336,36 @@ msgstr "MAPI-kaustale '%s' pole võimalik uut nime '%s' määrata"
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "MAPI-kaustale '%s' pole võimalik uut nime '%s' määrata: %s"
 
+#. Translators: The %s is replaced with a server's host name
 #, c-format
-msgid "Folder list not available in offline mode."
-msgstr "Kaustade nimekiri pole võrguvabas režiimis saadaval."
+msgid "Exchange MAPI server %s"
+msgstr "Exchange MAPI server %s"
+
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#. Translators: The first %s is replaced with a user name, the second with a server's host name
+#, c-format
+msgid "Exchange MAPI service for %s on %s"
+msgstr "Exchange MAPI-teenus kasutajale %s hostil %s"
+
+#. To translators : First %s : is the error text or the reason
+#. for prompting the user if it is available.
+#. Second %s is : Username.
+#. Third %s is : Server host name.
+#, c-format
+msgid "%s Please enter the MAPI password for %s@%s"
+msgstr "%s Palun sisesta konto %s@%s MAPI-parool"
+
+#, c-format
+msgid "You did not enter a password."
+msgstr "Sa ei sisestanud parooli."
+
+#, c-format
+msgid "Unable to authenticate to Exchange MAPI server: %s"
+msgstr "Exchange MAPI-serverisse pole võimalik autentida: %s"
+
+msgid "Unable to authenticate to Exchange MAPI server"
+msgstr "Exchange MAPI-serverisse pole võimalik autentida"
 
 #, c-format
 msgid "Could not send message."
