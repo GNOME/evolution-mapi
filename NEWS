@@ -1,3 +1,12 @@
+evolution-mapi 2.91.4 2010-12-20
+--------------------------------
+
+Bug Fixes:
+	Bug #573125 - Use new bdata_extract_ functions instead of own macros (Milan Crha)
+	Bug #636854 - Ensure GAL contacts has filled UID (Milan Crha)
+	Bug #633121 - Fetch also Content-class message header (Milan Crha)
+	Bug #636840 - Fails to build with openchange svn trunk (rev 2377) (Milan Crha)
+
 evolution-mapi 2.91.3 2010-11-29
 --------------------------------
 
