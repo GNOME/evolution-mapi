@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
-"POT-Creation-Date: 2010-11-13 20:54+0000\n"
+"POT-Creation-Date: 2010-12-14 18:52+0000\n"
 "PO-Revision-Date: 2010-08-26 06:23+0000\n"
 "Last-Translator: Sahran <sahran@live.com>\n"
 "Language-Team: Uyghur Computer Science Association <UKIJ@yahoogroups.com>\n"
@@ -136,15 +136,15 @@ msgstr "Exchange تەڭشەك"
 msgid "Folder size"
 msgstr "قىسقۇچ چوڭلۇقى"
 
-#: ../src/addressbook/e-book-backend-mapi.c:555
+#: ../src/addressbook/e-book-backend-mapi.c:577
 msgid "Cannot connect"
 msgstr "باغلىنالمىدى"
 
-#: ../src/addressbook/e-book-backend-mapi.c:698
+#: ../src/addressbook/e-book-backend-mapi.c:720
 msgid "Searching"
 msgstr "ئىزدەۋاتىدۇ"
 
-#: ../src/addressbook/e-book-backend-mapi.c:2014
+#: ../src/addressbook/e-book-backend-mapi.c:2036
 #: ../src/calendar/e-cal-backend-mapi.c:133
 #: ../src/camel/camel-mapi-folder.c:1711 ../src/camel/camel-mapi-folder.c:1732
 msgid "Unknown error"
@@ -191,7 +191,7 @@ msgstr "%d/%d ئالاقىلەشكۈچىنى غەملەۋاتىدۇ"
 
 #. Translators : This is used to cache the downloaded contacts from GAL.
 #. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:127
+#: ../src/addressbook/e-book-backend-mapi-gal.c:159
 #, c-format
 msgid "Caching GAL contact %d"
 msgstr "GAL ئالاقىلەشكۈچى %d نى غەملەۋاتىدۇ"
@@ -199,13 +199,13 @@ msgstr "GAL ئالاقىلەشكۈچى %d نى غەملەۋاتىدۇ"
 #. Translators : This is used to cache the downloaded contacts from GAL.
 #. The first %d is an index of the GAL entry,
 #. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:131
+#: ../src/addressbook/e-book-backend-mapi-gal.c:163
 #, c-format
 msgid "Caching GAL contact %d/%d"
 msgstr "GAL ئالاقىلەشكۈچى %d/%d نى غەملەۋاتىدۇ"
 
-#: ../src/addressbook/e-book-backend-mapi-gal.c:181
-#: ../src/addressbook/e-book-backend-mapi-gal.c:228
+#: ../src/addressbook/e-book-backend-mapi-gal.c:213
+#: ../src/addressbook/e-book-backend-mapi-gal.c:261
 msgid "Failed to fetch GAL entries"
 msgstr "GAL تۈرلىرىگە ئېرىشىش مەغلۇپ بولدى"
 
@@ -547,6 +547,6 @@ msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3309
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3326
 msgid "All Public Folders"
 msgstr "بارلىق ئاممىۋى قىسقۇچلار"
