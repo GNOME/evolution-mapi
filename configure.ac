@@ -23,7 +23,7 @@ EDS_PACKAGE=1.2
 dnl *******************
 dnl Required Packages
 dnl *******************
-m4_define([eds_minimum_version], [2.31.6])
+m4_define([eds_minimum_version], [2.91.5])
 m4_define([evo_minimum_version], [2.31.1])
 m4_define([libmapi_minimum_version], [0.9])
 m4_define([glib_minimum_version], [2.16.1])
@@ -293,8 +293,11 @@ dnl *******************
 plugindir=`$PKG_CONFIG --variable=plugindir $EVO_PLUGIN_PACKAGE`
 AC_SUBST(plugindir)
 
-extensiondir=`$PKG_CONFIG --variable=extensiondir evolution-data-server-$EDS_PACKAGE`
-AC_SUBST(extensiondir) 
+ebook_backenddir=`$PKG_CONFIG --variable=backenddir libedata-book-1.2`
+AC_SUBST(ebook_backenddir)
+
+ecal_backenddir=`$PKG_CONFIG --variable=backenddir libedata-cal-1.2`
+AC_SUBST(ecal_backenddir)
 
 camel_providerdir=`$PKG_CONFIG --variable=camel_providerdir camel-provider-$EDS_PACKAGE`
 AC_SUBST(camel_providerdir) 

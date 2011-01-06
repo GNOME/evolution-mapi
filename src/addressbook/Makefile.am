@@ -7,7 +7,7 @@ AM_CPPFLAGS =					\
 	$(LIBEDATABOOK_CFLAGS)			\
 	$(LIBMAPI_CFLAGS)
 
-extension_LTLIBRARIES = libebookbackendmapi.la
+ebook_backend_LTLIBRARIES = libebookbackendmapi.la
 
 libebookbackendmapi_la_SOURCES =		\
 	e-book-backend-mapi.c			\

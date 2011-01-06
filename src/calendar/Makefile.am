@@ -7,7 +7,7 @@ AM_CPPFLAGS =					\
 	$(LIBEDATACAL_CFLAGS)			\
 	$(LIBMAPI_CFLAGS)
 
-extension_LTLIBRARIES = libecalbackendmapi.la
+ecal_backend_LTLIBRARIES = libecalbackendmapi.la
 
 libecalbackendmapi_la_SOURCES =			\
 	e-cal-backend-mapi-factory.c		\
