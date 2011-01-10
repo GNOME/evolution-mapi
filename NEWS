@@ -1,3 +1,17 @@
+evolution-mapi 2.91.5 2011-01-10
+--------------------------------
+
+Bug Fixes:
+	(none)
+
+Other changes:
+	* Adapt to split E-D-S backend directories. (Matthew Barnes)
+
+Translations:
+	Mattias Põldaru	(et)
+	Gheyret T.Kenji (ug)
+	Torstein Adolf Winterseth (nb)
+
 evolution-mapi 2.91.4 2010-12-20
 --------------------------------
 
