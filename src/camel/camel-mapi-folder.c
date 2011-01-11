@@ -1178,6 +1178,27 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 
 	if ((mapi_folder->type & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH) {
 		GError *mapi_error = NULL;
+		GPtrArray *folders;
+		gint ii;
+
+		/* get deleted messages from all active folders too */
+		folders = camel_object_bag_list (parent_store->folders);
+		for (ii = 0; ii < folders->len; ii++) {
+			CamelFolder *opened_folder = CAMEL_FOLDER (folders->pdata[ii]);
+			CamelMapiFolder *mf;
+
+			if (!opened_folder)
+				continue;
+
+			mf = CAMEL_MAPI_FOLDER (opened_folder);
+			if (mf && (mf->type & CAMEL_FOLDER_TYPE_MASK) != CAMEL_FOLDER_TYPE_TRASH) {
+				if (camel_folder_get_deleted_message_count (opened_folder) > 0)
+					camel_folder_synchronize_sync (opened_folder, TRUE, cancellable, NULL);
+			}
+
+			g_object_unref (opened_folder);
+		}
+		g_ptr_array_free (folders, TRUE);
 
 		camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		status = exchange_mapi_connection_empty_folder (camel_mapi_store_get_exchange_connection (mapi_store), fid, 0, &mapi_error);
@@ -1450,6 +1471,7 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 	CamelMessageInfo *info = NULL;
 	CamelMapiMessageInfo *mapi_info = NULL;
 	CamelStore *parent_store;
+	CamelFolderChangeInfo *changes = NULL;
 
 	GSList *read_items = NULL, *unread_items = NULL, *to_free = NULL, *junk_items = NULL, *deleted_items = NULL, *l;
 	flags_diff_t diff, unset_flags;
@@ -1611,10 +1633,19 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 	for (l = deleted_items; l; l = l->next) {
 		gchar * deleted_msg_uid = g_strdup_printf ("%016" G_GINT64_MODIFIER "X%016" G_GINT64_MODIFIER "X", fid, *(mapi_id_t *)l->data);
 
+		if (!changes)
+			changes = camel_folder_change_info_new ();
+		camel_folder_change_info_remove_uid (changes, deleted_msg_uid);
+
 		camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
 		camel_folder_summary_remove_uid (folder->summary, deleted_msg_uid);
 		camel_data_cache_remove(mapi_folder->cache, "cache", deleted_msg_uid, NULL);
 		camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+	}
+
+	if (changes) {
+		camel_folder_changed (folder, changes);
+		camel_folder_change_info_free (changes);
 	}
 
 	g_slist_free (read_items);

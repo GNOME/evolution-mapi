@@ -3902,7 +3902,8 @@ exchange_mapi_rename_profile (const gchar *old_name, const gchar *new_name)
 	g_return_if_fail (old_name != NULL);
 	g_return_if_fail (new_name != NULL);
 
-	g_static_rec_mutex_lock (&profile_mutex);
+	/* do not use locking here, it's called with a lock held already */
+	/* g_static_rec_mutex_lock (&profile_mutex); */
 
 	RenameProfile (
 		#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
@@ -3910,7 +3911,7 @@ exchange_mapi_rename_profile (const gchar *old_name, const gchar *new_name)
 		#endif
 		old_name, new_name);
 
-	g_static_rec_mutex_unlock (&profile_mutex);
+	/* g_static_rec_mutex_unlock (&profile_mutex); */
 }
 
 /* profile related functions - end */
