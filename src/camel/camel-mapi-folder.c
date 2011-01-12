@@ -69,7 +69,7 @@ typedef struct {
 /*For collecting summary info from server*/
 
 static void mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **changeinfo,
-			       GCancellable *cancellable, GError **error, gboolean uid_flag);
+			       GCancellable *cancellable, GError **error);
 
 static gboolean		mapi_folder_synchronize_sync
 						(CamelFolder *folder,
@@ -222,7 +222,7 @@ fetch_items_summary_cb (FetchItemsCallbackData *item_data, gpointer data)
 	/*Write summary to db in batches of SUMMARY_FETCH_BATCH_COUNT items.*/
 	if ((item_data->index % SUMMARY_FETCH_BATCH_COUNT == 0) ||
 	     item_data->index == item_data->total-1) {
-		mapi_update_cache (fi_data->folder, *slist, &fi_data->changes, NULL, NULL, false);
+		mapi_update_cache (fi_data->folder, *slist, &fi_data->changes, NULL, NULL);
 		g_slist_foreach (*slist, (GFunc)mail_item_free, NULL);
 		g_slist_free (*slist);
 		*slist = NULL;
@@ -313,7 +313,7 @@ mapi_set_message_references (CamelMapiMessageInfo *mapi_mi, const gchar *referen
 
 static void
 mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **changeinfo,
-		   GCancellable *cancellable, GError **error, gboolean uid_flag)
+		   GCancellable *cancellable, GError **error)
 {
 	CamelMapiMessageInfo *mi = NULL;
 	CamelMessageInfo *pmi = NULL;
@@ -357,11 +357,9 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 		exists = FALSE;
 		status_flags = 0;
 
-		if (uid_flag == FALSE) {
-			temp_item = (MailItem *)item_list->data;
-			id = temp_item->mid;
-			item = temp_item;
-		}
+		temp_item = (MailItem *)item_list->data;
+		id = temp_item->mid;
+		item = temp_item;
 
 		camel_operation_progress (cancellable, (100*i)/total_items);
 
@@ -1125,6 +1123,32 @@ mapi_folder_append_message_sync (CamelFolder *folder,
 					 camel_mapi_utils_create_item_build_props, item,
 					 item->recipients, item->attachments,
 					 item->generic_streams, MAPI_OPTIONS_DONT_SUBMIT, &mapi_error);
+
+	if (mid) {
+		CamelFolderChangeInfo *changes = camel_folder_change_info_new ();
+		GSList *items = g_slist_append (NULL, item);
+		guint32 flags;
+
+		item->fid = fid;
+		item->mid = mid;
+
+		flags = item->header.flags;
+		item->header.flags = 0;
+		if (flags & MSGFLAG_READ)
+			item->header.flags |= CAMEL_MESSAGE_SEEN;
+		if (flags & MSGFLAG_HASATTACH)
+			item->header.flags |= CAMEL_MESSAGE_ATTACHMENTS;
+
+		mapi_update_cache (folder, items, &changes, cancellable, error);
+
+		g_slist_free (items);
+
+		if (camel_folder_change_info_changed (changes))
+			camel_folder_changed (folder, changes);
+		camel_folder_change_info_free (changes);
+	}
+
+	mail_item_free (item);
 
 	if (!mid) {
 		if (mapi_error) {
