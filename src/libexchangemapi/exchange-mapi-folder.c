@@ -73,6 +73,25 @@ exchange_mapi_folder_new (const gchar *folder_name, const gchar *container_class
 	return folder;
 }
 
+ExchangeMAPIFolder *
+exchange_mapi_folder_copy (ExchangeMAPIFolder *src)
+{
+	ExchangeMAPIFolder *res;
+
+	g_return_val_if_fail (src != NULL, NULL);
+
+	res = g_new0 (ExchangeMAPIFolder, 1);
+	*res = *src;
+	
+	res->owner_name = g_strdup (src->owner_name);
+	res->owner_email = g_strdup (src->owner_email);
+	res->user_name = g_strdup (src->user_name);
+	res->user_email = g_strdup (src->user_email);
+	res->folder_name = g_strdup (src->folder_name);
+
+	return res;
+}
+
 void
 exchange_mapi_folder_free (ExchangeMAPIFolder *folder)
 {
@@ -128,6 +147,19 @@ guint32
 exchange_mapi_folder_get_total_count (ExchangeMAPIFolder *folder)
 {
 	return folder->total;
+}
+
+GSList *
+exchange_mapi_folder_copy_list (GSList *folder_list)
+{
+	GSList *res, *ii;
+	
+	res = g_slist_copy (folder_list);
+	for (ii = res; ii; ii = ii->next) {
+		ii->data = exchange_mapi_folder_copy (ii->data);
+	}
+
+	return res;
 }
 
 void

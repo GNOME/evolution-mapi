@@ -160,6 +160,7 @@ struct _ExchangeMapiConnectionPrivate {
 	mapi_object_t public_store;
 
 	GSList *folders;		/* list of ExchangeMapiFolder pointers */
+	GStaticRecMutex folders_lock;	/* lock for 'folders' variable */
 
 	GHashTable *named_ids;		/* cache of named ids; key is a folder ID, value is a hash table
 					   of named_id to prop_id in that respective folder */
@@ -174,8 +175,11 @@ disconnect (ExchangeMapiConnectionPrivate *priv)
 	if (!priv->session)
 		return;
 
+	g_static_rec_mutex_lock (&priv->folders_lock);
 	if (priv->folders)
 		exchange_mapi_folder_free_list (priv->folders);
+	priv->folders = NULL;
+	g_static_rec_mutex_unlock (&priv->folders_lock);
 
 	if (priv->has_public_store)
 		mapi_object_release (&priv->public_store);
@@ -187,7 +191,6 @@ disconnect (ExchangeMapiConnectionPrivate *priv)
 
 	priv->session = NULL;
 	priv->has_public_store = FALSE;
-	priv->folders = NULL;
 }
 
 /* should have session_lock locked already, when calling this function */
@@ -236,6 +239,7 @@ exchange_mapi_connection_finalize (GObject *object)
 
 		UNLOCK ();
 		g_static_rec_mutex_free (&priv->session_lock);
+		g_static_rec_mutex_free (&priv->folders_lock);
 	}
 
 	if (G_OBJECT_CLASS (exchange_mapi_connection_parent_class)->finalize)
@@ -260,6 +264,9 @@ exchange_mapi_connection_init (ExchangeMapiConnection *conn)
 
 	priv = EXCHANGE_MAPI_CONNECTION_GET_PRIVATE (conn);
 	g_return_if_fail (priv != NULL);
+
+	g_static_rec_mutex_init (&priv->session_lock);
+	g_static_rec_mutex_init (&priv->folders_lock);
 
 	priv->session = NULL;
 	priv->profile = NULL;
@@ -2041,7 +2048,9 @@ exchange_mapi_connection_create_folder (ExchangeMapiConnection *conn, uint32_t o
 
 	fid = mapi_object_get_id (&obj_folder);
 	g_debug("Folder %s created with id %016" G_GINT64_MODIFIER "X ", name, fid);
-	
+
+	g_static_rec_mutex_lock (&priv->folders_lock);
+
 	/* we should also update folder list locally */
 	if (fid != 0 && priv->folders != NULL) {
 		ExchangeMAPIFolder *folder = NULL;
@@ -2049,6 +2058,8 @@ exchange_mapi_connection_create_folder (ExchangeMapiConnection *conn, uint32_t o
 		if (folder)
 			priv->folders = g_slist_append (priv->folders, folder);
 	}
+
+	g_static_rec_mutex_unlock (&priv->folders_lock);
 
 cleanup:
 	mapi_object_release(&obj_folder);
@@ -2175,7 +2186,10 @@ cleanup:
 	mapi_object_release(&obj_folder);
 	mapi_object_release(&obj_top);
 
+	g_static_rec_mutex_lock (&priv->folders_lock);
 	priv->folders = g_slist_remove (priv->folders, folder);
+	g_static_rec_mutex_unlock (&priv->folders_lock);
+
 	exchange_mapi_folder_free (folder);
 
 	UNLOCK ();
@@ -3349,10 +3363,15 @@ exchange_mapi_connection_peek_folders_list (ExchangeMapiConnection *conn)
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
-	if (!priv->folders)
+	g_static_rec_mutex_lock (&priv->folders_lock);
+
+	if (!priv->folders) {
+		LOCK ();
 		exchange_mapi_connection_get_folders_list (conn, &priv->folders, perror);
-	UNLOCK ();
+		UNLOCK ();
+	}
+
+	g_static_rec_mutex_unlock (&priv->folders_lock);
 
 	return priv->folders;
 }

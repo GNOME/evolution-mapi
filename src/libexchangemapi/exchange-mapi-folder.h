@@ -77,6 +77,7 @@ exchange_mapi_folder_new (const gchar *folder_name, const gchar *container_class
 			  ExchangeMAPIFolderCategory catgory,
 			  mapi_id_t folder_id, mapi_id_t parent_folder_id,
 			  uint32_t child_count, uint32_t unread_count, uint32_t total);
+ExchangeMAPIFolder *exchange_mapi_folder_copy (ExchangeMAPIFolder *src);
 void exchange_mapi_folder_free (ExchangeMAPIFolder *folder);
 ExchangeMAPIFolderType exchange_mapi_container_class (gchar *type);
 
@@ -88,6 +89,7 @@ guint32 exchange_mapi_folder_get_unread_count (ExchangeMAPIFolder *folder);
 guint32 exchange_mapi_folder_get_total_count (ExchangeMAPIFolder *folder);
 gboolean exchange_mapi_folder_is_root (ExchangeMAPIFolder *folder);
 
+GSList *exchange_mapi_folder_copy_list (GSList *folder_list);
 void exchange_mapi_folder_free_list (GSList *folder_list);
 
 #endif

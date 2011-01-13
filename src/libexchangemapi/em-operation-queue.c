@@ -273,3 +273,69 @@ em_operation_queue_length (EMOperationQueue *queue)
 
 	return len;
 }
+
+struct async_queue_data
+{
+	gpointer worker_data;
+	gpointer user_data;
+	EMOperationQueueFunc worker_cb;
+	EMOperationQueueFunc done_cb;
+
+	gboolean cancelled;
+};
+
+static gboolean
+async_queue_idle_cb (gpointer user_data)
+{
+	struct async_queue_data *data = user_data;
+
+	g_return_val_if_fail (data != NULL, FALSE);
+	g_return_val_if_fail (data->done_cb != NULL, FALSE);
+
+	if (data->done_cb)
+		data->done_cb (data->worker_data, data->cancelled, data->user_data);
+
+	g_free (data);
+
+	return FALSE;
+}
+
+static void
+async_queue_worker_cb (gpointer worker_data, gboolean cancelled, gpointer user_data)
+{
+	struct async_queue_data *data = worker_data;
+
+	g_return_if_fail (data != NULL);
+
+	data->cancelled = cancelled;
+
+	if (data->worker_cb)
+		data->worker_cb (data->worker_data, data->cancelled, data->user_data);
+
+	if (data->done_cb)
+		g_idle_add (async_queue_idle_cb, data);
+	else
+		g_free (data);
+}
+
+EMOperationQueue *
+em_async_queue_new (void)
+{
+	return em_operation_queue_new (async_queue_worker_cb, NULL);
+}
+
+void
+em_async_queue_push (EMOperationQueue *queue, gpointer worker_data, gpointer user_data, EMOperationQueueFunc worker_cb, EMOperationQueueFunc done_cb)
+{
+	struct async_queue_data *data;
+
+	g_return_if_fail (queue != NULL);
+
+	data = g_new0 (struct async_queue_data, 1);
+	data->worker_data = worker_data;
+	data->user_data = user_data;
+	data->worker_cb = worker_cb;
+	data->done_cb = done_cb;
+
+	em_operation_queue_push (queue, data);
+}

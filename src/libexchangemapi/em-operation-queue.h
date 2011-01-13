@@ -62,4 +62,11 @@ gboolean		em_operation_queue_cancel	(EMOperationQueue *queue, gpointer worker_da
 gboolean		em_operation_queue_cancel_all	(EMOperationQueue *queue);
 gint			em_operation_queue_length	(EMOperationQueue *queue);
 
+EMOperationQueue *	em_async_queue_new		(void);
+void			em_async_queue_push		(EMOperationQueue *queue,
+							 gpointer worker_data,
+							 gpointer user_data,
+							 EMOperationQueueFunc worker_cb, /* run in a new thread */
+							 EMOperationQueueFunc done_cb);  /* run in a main thread */
+
 #endif /* EM_OPERATION_QUEUE */
