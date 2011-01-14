@@ -2752,7 +2752,10 @@ ecbm_internal_get_timezone (ECalBackend *backend, const gchar *tzid)
 	g_return_val_if_fail (cbmapi->priv != NULL, NULL);
 	g_return_val_if_fail (tzid != NULL, NULL);
 
-	zone = (icaltimezone *) e_cal_backend_store_get_timezone (cbmapi->priv->store, tzid);
+	if (tzid && g_str_equal (tzid, "*default-zone*"))
+		zone = e_cal_backend_internal_get_default_timezone (backend);
+	else
+		zone = (icaltimezone *) e_cal_backend_store_get_timezone (cbmapi->priv->store, tzid);
 
 	if (!zone && E_CAL_BACKEND_CLASS (e_cal_backend_mapi_parent_class)->internal_get_timezone)
 		zone = E_CAL_BACKEND_CLASS (e_cal_backend_mapi_parent_class)->internal_get_timezone (backend, tzid);
