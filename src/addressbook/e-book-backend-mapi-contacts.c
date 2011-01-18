@@ -648,7 +648,7 @@ ebbm_contacts_load_source (EBookBackendMAPI *ebma, ESource *source, gboolean onl
 		return /* Success */;
 
 	priv->fid = 0;
-	priv->is_public_folder = e_source_get_property (source, "public") && g_str_equal (e_source_get_property (source, "public"), "yes");
+	priv->is_public_folder = g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0;
 
 	exchange_mapi_util_mapi_id_from_string (e_source_get_property (source, "folder-id"), &priv->fid);
 

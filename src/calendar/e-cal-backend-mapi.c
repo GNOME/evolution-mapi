@@ -324,7 +324,7 @@ ecbm_remove (ECalBackend *backend, EDataCal *cal, GError **perror)
 		g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
 		return;
 	}
-	if (strcmp (e_source_get_property (source, "public"), "yes") != 0) {
+	if (g_strcmp0 (e_source_get_property (source, "public"), "yes") != 0) {
 		GError *mapi_error = NULL;
 
 		if (!exchange_mapi_connection_remove_folder (priv->conn, priv->fid, 0, &mapi_error)) {
@@ -752,7 +752,7 @@ get_deltas (gpointer handle)
 //	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	/* FIXME: GetProps does not seem to work for tasks :-( */
 	if (kind == ICAL_VTODO_COMPONENT) {
-		if (strcmp (e_source_get_property(source, "public"), "yes") == 0 ) {
+		if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
 			options |= MAPI_OPTIONS_USE_PFSTORE;
 			is_public = TRUE;
 			use_restriction = FALSE;
@@ -778,7 +778,7 @@ get_deltas (gpointer handle)
 			return FALSE;
 		}
 	} else {
-		if (strcmp (e_source_get_property (source, "public"), "yes") == 0) {
+		if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
 			options |= MAPI_OPTIONS_USE_PFSTORE;
 			is_public = TRUE;
 			use_restriction = FALSE;
@@ -828,7 +828,7 @@ get_deltas (gpointer handle)
 	copy_strings_in_slist (did.cache_ids);
 	options = 0;
 
-	if (strcmp (e_source_get_property(source, "public"), "yes") == 0 )
+	if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0)
 		options = MAPI_OPTIONS_USE_PFSTORE;
 
 	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
@@ -904,7 +904,7 @@ get_deltas (gpointer handle)
 		g_slist_free (did.unknown_mids);
 
 		if (kind == ICAL_VTODO_COMPONENT) {
-			if (strcmp (e_source_get_property(source, "public"), "yes") == 0) {
+			if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
 				options |= MAPI_OPTIONS_USE_PFSTORE;
 				is_public = TRUE;
 			}
@@ -928,7 +928,7 @@ get_deltas (gpointer handle)
 				return FALSE;
 			}
 		} else {
-			if (strcmp (e_source_get_property(source, "public"), "yes") == 0) {
+			if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
 				options |= MAPI_OPTIONS_USE_PFSTORE;
 				is_public = TRUE;
 			}
@@ -1285,7 +1285,7 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 //	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	/* FIXME: GetProps does not seem to work for tasks :-( */
 	if (kind == ICAL_VTODO_COMPONENT) {
-		if (strcmp (e_source_get_property(source, "public"), "yes") == 0) {
+		if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
 			options |= MAPI_OPTIONS_USE_PFSTORE;
 			is_public = TRUE;
 		}
@@ -1305,7 +1305,7 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 			return FALSE;
 		}
 	} else {
-		if (strcmp (e_source_get_property(source, "public"), "yes") ==0 ) {
+		if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
 			options |= MAPI_OPTIONS_USE_PFSTORE;
 			is_public = TRUE;
 		}

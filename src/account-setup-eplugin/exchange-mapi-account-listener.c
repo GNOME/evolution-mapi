@@ -346,8 +346,7 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 			ESource *source = temp_list->data;
 
 			if (source && E_IS_SOURCE (source)) {
-				if (!e_source_get_property (source, "public") ||
-				    strcmp (e_source_get_property (source, "public"), "yes") != 0)
+				if (g_strcmp0 (e_source_get_property (source, "public"), "yes") != 0)
 					e_source_group_remove_source (group, source);
 			}
 		}
@@ -763,8 +762,7 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 			ESource *source = temp_list->data;
 
 			if (source && E_IS_SOURCE (source)) {
-				if (!e_source_get_property (source, "public") ||
-				    strcmp (e_source_get_property (source, "public"), "yes") != 0)
+				if (g_strcmp0 (e_source_get_property (source, "public"), "yes") != 0)
 					e_source_group_remove_source (group, source);
 			}
 		}
