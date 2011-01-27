@@ -490,7 +490,7 @@ set_stream_value (ExchangeMAPIStream *stream, const uint32_t *cpid, const guint8
 
 	stream->value = NULL;
 
-	if (!converted && stream->proptag == PR_HTML && ((cpid && (*cpid == 1200 || *cpid == 1201)) || (buf_len > 5 && buf_data[3] == '\0'))) {
+	if (!converted && (stream->proptag == PR_HTML || (stream->proptag & 0xFFFF) == PT_UNICODE) && ((cpid && (*cpid == 1200 || *cpid == 1201)) || (buf_len > 5 && buf_data[3] == '\0'))) {
 		/* this is special, get the CPID and transform to utf8 when it's utf16 */
 		gsize written = 0;
 		gchar *in_utf8;
@@ -576,7 +576,7 @@ exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32
 
 	/* sanity */
 	e_return_val_mapi_error_if_fail (obj_message, MAPI_E_INVALID_PARAMETER, FALSE);
-	e_return_val_mapi_error_if_fail (((proptag & 0xFFFF) == PT_BINARY), MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (((proptag & 0xFFFF) == PT_BINARY) || ((proptag & 0xFFFF) == PT_STRING8 || ((proptag & 0xFFFF) == PT_UNICODE)), MAPI_E_INVALID_PARAMETER, FALSE);
 
 	/* if compressed RTF stream, then return */
 	if (proptag == PR_RTF_COMPRESSED)
@@ -650,7 +650,7 @@ exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32
 	}
 
 	if (ms == MAPI_E_SUCCESS) {
-		ExchangeMAPIStream		*stream = g_new0 (ExchangeMAPIStream, 1);
+		ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 
 		stream->proptag = proptag;
 		set_stream_value (stream, cpid, buf_data, off_data, FALSE);
@@ -673,10 +673,11 @@ static void
 exchange_mapi_util_read_body_stream (mapi_object_t *obj_message, GSList **stream_list, struct mapi_SPropValue_array *properties, gboolean by_best_body)
 {
 	const uint32_t *cpid = exchange_mapi_util_find_array_propval (properties, PR_INTERNET_CPID);
-	gboolean can_html = FALSE;
+	gboolean can_html = FALSE, has_body = FALSE, has_body_unicode;
 
-	if (!add_stream_from_properties (stream_list, properties, PR_BODY_UNICODE, cpid))
-		add_stream_from_properties (stream_list, properties, PR_BODY, cpid);
+	has_body_unicode = add_stream_from_properties (stream_list, properties, PR_BODY_UNICODE, cpid);
+	if (!has_body_unicode)
+		has_body = add_stream_from_properties (stream_list, properties, PR_BODY, cpid);
 
 	if (by_best_body) {
 		uint8_t best_body = 0;
@@ -689,6 +690,12 @@ exchange_mapi_util_read_body_stream (mapi_object_t *obj_message, GSList **stream
 
 	if (can_html)
 		exchange_mapi_util_read_generic_stream (obj_message, cpid, PR_HTML, stream_list, properties, NULL);
+
+	if (!has_body_unicode)
+		has_body_unicode = exchange_mapi_util_read_generic_stream (obj_message, cpid, PR_BODY_UNICODE, stream_list, properties, NULL);
+
+	if (!has_body && !has_body_unicode)
+		exchange_mapi_util_read_generic_stream (obj_message, cpid, PR_BODY, stream_list, properties, NULL);
 }
 
 /* Returns TRUE if all streams were written succcesfully, else returns FALSE */
