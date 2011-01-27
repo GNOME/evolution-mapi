@@ -3263,7 +3263,7 @@ exchange_mapi_connection_get_folders_list (ExchangeMapiConnection *conn, GSList 
 					   MAPI_PERSONAL_FOLDER, mailbox_id, 0, 0, 0 ,0);
 	folder->is_default = true;
 	folder->default_type = olFolderTopInformationStore; /*Is this correct ?*/
-	folder->size = *mailbox_size;
+	folder->size = mailbox_size ? *mailbox_size : 0;
 
 	*mapi_folders = g_slist_prepend (*mapi_folders, folder);
 
