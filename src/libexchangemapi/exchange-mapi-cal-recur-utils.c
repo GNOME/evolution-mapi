@@ -656,8 +656,10 @@ exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp)
 	/* some constant */
 	flag32 = *((guint32 *)ptr);
 	ptr += sizeof (guint32);
+	/* It should be set, but not must. It can be, technically, any value.
+	   Seen were 0x3006, 0x3008, 0x3009. It affects format of extended exception info
 	if (flag32 != WRITER_VERSION2)
-		return FALSE;
+		return FALSE; */
 
 	/* start time in mins */
 	flag32 = *((guint32 *)ptr);
@@ -697,11 +699,6 @@ exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp)
 
 	/* FIXME: this also has modified instances */
 	e_cal_component_set_exdate_list (comp, exdate_list);
-
-	g_print ("\n== MAPI to ICAL == The recurrence blob data is as follows:\n");
-	for (i = 0; i < ba->len; ++i)
-		g_print ("0x%02X ", ba->data[i]);
-	g_print("\n== End of stream ==\n");
 
 	return TRUE;
 }
