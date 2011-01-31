@@ -1,3 +1,25 @@
+evolution-mapi 2.91.6 2011-01-31
+--------------------------------
+
+Bug Fixes:
+	Bug #632142 - File->Empty Trash does not remove just deleted emails
+		      (Milan Crha)
+	Bug #638340 - Hides modified message after Remove attachments function
+		      (Milan Crha)
+	Bug #638247 - Deadlock when enables an account (Milan Crha)
+	Bug #638337 - All day event created in evolution shows for two days
+		      in owa. (Milan Crha)
+	Bug #634062 - Crash when missing ESource property "public" (Milan Crha)
+	Bug #640066 - Fails to fully download large text/plain messages.
+		      (Milan Crha)
+	Bug #640584 - Crash if mailbox size property is missing (Jelmer Vernooij)
+	Bug #604029 - Modified recurring events are shown as single instance.
+		      (Milan Crha)
+
+Other Changes:
+	* Adapt to Camel API changes. (Matthew Barnes)
+	* Drop the --enable-gtk3 configure option. (Matthew Barnes)
+
 evolution-mapi 2.91.5 2011-01-10
 --------------------------------
 
