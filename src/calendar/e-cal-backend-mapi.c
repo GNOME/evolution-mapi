@@ -2223,6 +2223,7 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, GLi
 				if (e_cal_component_has_attendees (comp))
 					exchange_mapi_cal_util_fetch_recipients (comp, &recipients);
 				break;
+			case ICAL_METHOD_REPLY:
 			case ICAL_METHOD_RESPONSE :
 				cbdata.meeting_type = MEETING_RESPONSE;
 				cbdata.resp = find_my_response (cbmapi, comp);
@@ -2233,7 +2234,7 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, GLi
 				cbdata.meeting_type = NOT_A_MEETING;
 				cbdata.resp = olResponseNone;
 				if (e_cal_component_has_attendees (comp))
-					exchange_mapi_cal_util_fetch_recipients (comp, &recipients);
+					exchange_mapi_cal_util_fetch_organizer (comp, &recipients);
 				break;
 			}
 
@@ -2353,21 +2354,6 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, 
 				g_free (comp_str);
 				g_free (old_object);
 				g_free (new_object);
-				if (!err) {
-					GList *users = NULL, *l;
-					icalcomponent *resp_comp = e_cal_util_new_top_level ();
-					icalcomponent_set_method (resp_comp, ICAL_METHOD_RESPONSE);
-					icalcomponent_add_component (resp_comp,
-						icalcomponent_new_clone(e_cal_component_get_icalcomponent(comp)));
-					comp_str = icalcomponent_as_ical_string_r (resp_comp);
-					ecbm_send_objects (backend, cal, comp_str, &users, &new_object, &err);
-					g_free (comp_str);
-					g_free (new_object);
-					for (l = users; l; l = l->next)
-						g_free (l->data);
-					g_list_free (users);
-					icalcomponent_free (resp_comp);
-				}
 
 				if (err)
 					stop = TRUE;
