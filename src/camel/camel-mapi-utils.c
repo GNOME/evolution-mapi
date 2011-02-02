@@ -265,6 +265,80 @@ mail_item_add_attach (MailItem *item, CamelMimePart *part, CamelStream *content_
 	return TRUE;
 }
 
+static CamelStream *
+get_content_stream (CamelMimePart *part)
+{
+	CamelStream *content_stream;
+	CamelStream *filter_stream = NULL;
+	CamelMimeFilterWindows *windows = NULL;
+	CamelDataWrapper *dw;
+
+	g_return_val_if_fail (part != NULL, NULL);
+
+	dw = camel_medium_get_content (CAMEL_MEDIUM (part));
+	g_return_val_if_fail (dw != NULL, NULL);
+
+	content_stream = camel_stream_mem_new();
+
+	if (camel_mime_part_get_content_type (part)) {
+		const gchar *charset = camel_content_type_param (camel_mime_part_get_content_type (part), "charset");
+
+		if (charset && *charset && g_ascii_strcasecmp (charset, "utf8") != 0 && g_ascii_strcasecmp (charset, "utf-8") != 0) {
+			if (g_ascii_strncasecmp (charset, "iso-8859-", 9) == 0) {
+				CamelStream *null;
+
+				/* Since a few Windows mailers like to claim they sent
+				 * out iso-8859-# encoded text when they really sent
+				 * out windows-cp125#, do some simple sanity checking
+				 * before we move on... */
+
+				null = camel_stream_null_new ();
+				filter_stream = camel_stream_filter_new (null);
+				g_object_unref (null);
+
+				windows = (CamelMimeFilterWindows *)camel_mime_filter_windows_new (charset);
+				camel_stream_filter_add (
+					CAMEL_STREAM_FILTER (filter_stream),
+					CAMEL_MIME_FILTER (windows));
+
+				camel_data_wrapper_decode_to_stream (dw, (CamelStream *)filter_stream, NULL);
+				camel_stream_flush ((CamelStream *)filter_stream, NULL);
+				g_object_unref (filter_stream);
+
+				charset = camel_mime_filter_windows_real_charset (windows);
+			}
+
+			if (charset && *charset) {
+				CamelMimeFilter *filter;
+
+				filter_stream = camel_stream_filter_new (content_stream);
+
+				if ((filter = camel_mime_filter_charset_new (charset, "UTF-8"))) {
+					camel_stream_filter_add (
+						CAMEL_STREAM_FILTER (filter_stream),
+						CAMEL_MIME_FILTER (filter));
+					g_object_unref (filter);
+				} else {
+					g_object_unref (filter_stream);
+					filter_stream = NULL;
+				}
+			}
+		}
+	}
+
+	if (filter_stream) {
+		camel_data_wrapper_decode_to_stream (dw, (CamelStream *) filter_stream, NULL);
+		camel_stream_flush (filter_stream, NULL);
+		g_object_unref (filter_stream);
+	} else {
+		camel_data_wrapper_decode_to_stream (dw, (CamelStream *) content_stream, NULL);
+	}
+
+	camel_seekable_stream_seek ((CamelSeekableStream *) content_stream, 0, CAMEL_STREAM_SET, NULL);
+
+	return content_stream;
+}
+
 static gboolean
 mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first)
 {
@@ -276,7 +350,6 @@ mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first)
 	const gchar *filename;
 	const gchar *description;
 	const gchar *content_id;
-	gint content_size;
 
 	g_return_val_if_fail (is_first != NULL, FALSE);
 
@@ -294,10 +367,7 @@ mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first)
 		/* filename */
 		filename = camel_mime_part_get_filename(part);
 
-		content_stream = camel_stream_mem_new();
-		content_size = camel_data_wrapper_decode_to_stream (dw, (CamelStream *) content_stream, NULL);
-
-		camel_seekable_stream_seek((CamelSeekableStream *)content_stream, 0, CAMEL_STREAM_SET, NULL);
+		content_stream = get_content_stream (part);
 
 		description = camel_mime_part_get_description(part);
 		content_id = camel_mime_part_get_content_id(part);
@@ -312,6 +382,9 @@ mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first)
 		} else {
 			mail_item_add_attach (item, part, content_stream);
 		}
+
+		if (content_stream)
+			g_object_unref (content_stream);
 	}
 
 	return TRUE;
@@ -334,19 +407,16 @@ MailItem *
 camel_mapi_utils_mime_to_item (CamelMimeMessage *message, gint32 message_camel_flags, CamelAddress *from, GError **error)
 {
 	CamelDataWrapper *dw = NULL;
-	CamelContentType *type;
 	CamelStream *content_stream;
 	CamelMultipart *multipart;
 	CamelInternetAddress *to, *cc, *bcc;
 	MailItem *item = g_new0 (MailItem, 1);
 	const gchar *namep = NULL;
 	const gchar *addressp = NULL;
-	const gchar *content_type;
 	time_t msg_time = 0;
 	gint msg_time_offset = 0;
 	GArray *headers;
 
-	gssize	content_size;
 	GSList *recipient_list = NULL;
 	gint i = 0;
 
@@ -429,13 +499,12 @@ camel_mapi_utils_mime_to_item (CamelMimeMessage *message, gint32 message_camel_f
 	} else {
 		dw = camel_medium_get_content (CAMEL_MEDIUM (message));
 		if (dw) {
-			type = camel_mime_part_get_content_type((CamelMimePart *)message);
-			content_type = camel_content_type_simple (type);
-
-			content_stream = (CamelStream *)camel_stream_mem_new();
-			content_size = camel_data_wrapper_decode_to_stream(dw, (CamelStream *)content_stream, NULL);
+			content_stream = get_content_stream ((CamelMimePart *) message);
 
 			mail_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT);
+
+			if (content_stream)
+				g_object_unref (content_stream);
 		}
 	}
 
