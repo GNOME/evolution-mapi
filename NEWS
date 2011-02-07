@@ -1,3 +1,12 @@
+evolution-mapi 0.32.2 2011-02-07
+--------------------------------
+
+Bug Fixes:
+	Bug #633121 - Fetch also Content-class message header (Milan Crha)
+	Bug #634062 - Crash when missing ESource property "public" (Milan Crha)
+	Bug #635078 - Do not write unicode markers in UTF16 strings (Milan Crha)
+	Bug #636854 - Ensure GAL contacts has filled UID (Milan Crha)
+
 evolution-mapi 0.32.1 2010-11-15
 ---------------------------------
 
