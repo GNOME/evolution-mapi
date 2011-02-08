@@ -85,7 +85,7 @@ exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_l
 ECalComponent *
 exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcomponent_kind kind, const gchar *mid, struct mapi_SPropValue_array *properties,
 					   GSList *streams, GSList *recipients, GSList *attachments,
-					   const gchar *local_store_uri, const icaltimezone *default_zone);
+					   const gchar *local_store_uri, const icaltimezone *default_zone, gboolean is_reply);
 
 void
 exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *uid, struct Binary_r *sb);
@@ -102,6 +102,8 @@ gboolean exchange_mapi_cal_utils_get_props_cb (ExchangeMapiConnection *conn, map
 gboolean exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data);
 
 gboolean exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, const GList *users, time_t start, time_t end, GList **freebusy, GError **mapi_error);
+
+gchar *exchange_mapi_cal_utils_get_icomp_x_prop (icalcomponent *comp, const gchar *key);
 
 G_END_DECLS
 

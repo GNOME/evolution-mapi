@@ -450,7 +450,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 	if (cache_comp == NULL) {
 		ECalComponent *comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, array,
 									streams, recipients, attachments,
-									cache_dir, priv->default_zone);
+									cache_dir, priv->default_zone, FALSE);
 
 		if (E_IS_CAL_COMPONENT (comp)) {
 			gchar *comp_str;
@@ -483,7 +483,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 				comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, array,
 									streams, recipients, attachments,
-									cache_dir, priv->default_zone);
+									cache_dir, priv->default_zone, FALSE);
 
 				e_cal_component_commit_sequence (comp);
 				modif_comp_str = e_cal_component_get_as_string (comp);
@@ -1225,7 +1225,7 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 	tmp = exchange_mapi_util_mapi_id_to_string (mid);
 	comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, properties,
 							streams, recipients, attachments,
-							cache_dir, priv->default_zone);
+							cache_dir, priv->default_zone, FALSE);
 	g_free (tmp);
 
 	if (E_IS_CAL_COMPONENT (comp)) {
@@ -1587,6 +1587,23 @@ capture_req_props (FetchItemsCallbackData *item_data, gpointer data)
 	return TRUE;
 }
 
+static void
+get_comp_mid (icalcomponent *icalcomp, mapi_id_t *mid)
+{
+	gchar *x_mid;
+
+	g_return_if_fail (icalcomp != NULL);
+	g_return_if_fail (mid != NULL);
+
+	x_mid = exchange_mapi_cal_utils_get_icomp_x_prop (icalcomp, "X-EVOLUTION-MAPI-MID");
+	if (x_mid) {
+		exchange_mapi_util_mapi_id_from_string (x_mid, mid);
+		g_free (x_mid);
+	} else {
+		exchange_mapi_util_mapi_id_from_string (icalcomponent_get_uid (icalcomp), mid);
+	}
+}
+
 /* should call free_server_data() before done with cbdata */
 static void
 get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cal_cbdata *cbdata)
@@ -1601,7 +1618,7 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cal_cbdata
 	TALLOC_CTX *mem_ctx;
 
 	uid = icalcomponent_get_uid (comp);
-	exchange_mapi_util_mapi_id_from_string (uid, &mid);
+	get_comp_mid (comp, &mid);
 	if (exchange_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
 					mapi_cal_get_required_props, NULL,
 					capture_req_props, cbdata,
@@ -1670,14 +1687,12 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, gchar **calobj, gchar *
 	icalcomponent_kind kind;
 	icalcomponent *icalcomp;
 	ECalComponent *comp;
-	const gchar *compuid;
 	mapi_id_t mid = 0;
 	gchar *tmp = NULL;
 	GSList *recipients = NULL;
 	GSList *attachments = NULL;
 	GSList *streams = NULL;
 	struct cal_cbdata cbdata = { 0 };
-	struct Binary_r globalid;
 	struct icaltimetype current;
 	const gchar *cache_dir;
 	GError *mapi_error = NULL;
@@ -1757,16 +1772,13 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, gchar **calobj, gchar *
 			cbdata.resp = (recipients != NULL) ? olResponseOrganized : olResponseNone;
 			cbdata.appt_id = exchange_mapi_cal_util_get_new_appt_id (priv->conn, priv->fid);
 			cbdata.appt_seq = 0;
-			e_cal_component_get_uid (comp, &compuid);
-			exchange_mapi_cal_util_generate_globalobjectid (TRUE, compuid, &globalid);
-			cbdata.globalid = &globalid;
-			cbdata.cleanglobalid = &globalid;
+			cbdata.globalid = NULL;
+			cbdata.cleanglobalid = NULL;
 
 			mid = exchange_mapi_connection_create_item (priv->conn, priv->olFolder, priv->fid,
 							exchange_mapi_cal_utils_write_props_cb, &cbdata,
 							recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT, &mapi_error);
 			g_free (cbdata.props);
-//			g_free (globalid.lpb);
 			if (!mid) {
 				g_object_unref (comp);
 				exchange_mapi_util_free_recipient_list (&recipients);
@@ -1798,8 +1810,7 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, gchar **calobj, gchar *
 			return;
 	}
 
-	/* blatant HACK /me blames some stupid design in e-d-s */
-	if (e_cal_component_has_attachments (comp) && !fetch_deltas(cbmapi))
+	if (!fetch_deltas(cbmapi))
 		g_cond_signal (priv->dlock->cond);
 
 	g_object_unref (comp);
@@ -1970,7 +1981,8 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, const gchar *calobj, Ca
 			g_propagate_error (error, EDC_ERROR (ObjectNotFound));
 			return;
 		}
-		exchange_mapi_util_mapi_id_from_string (uid, &mid);
+
+		get_comp_mid (e_cal_component_get_icalcomponent (cache_comp), &mid);
 
 		cbdata.comp = comp;
 		cbdata.msgflags = MSGFLAG_READ;
@@ -2076,7 +2088,7 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal,
 			return;
 		}
 
-		exchange_mapi_util_mapi_id_from_string (uid, &mid);
+		get_comp_mid (icalcomp, &mid);
 
 		if (mod == CALOBJ_MOD_THIS && rid && *rid) {
 			gchar *obj = NULL, *new_object = NULL, *new_calobj = NULL;
@@ -2249,7 +2261,23 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, GLi
 			cbdata.get_tz_data = cbmapi;
 
 			e_cal_component_get_uid (comp, &compuid);
-			exchange_mapi_cal_util_generate_globalobjectid (TRUE, compuid, &globalid);
+
+			/* inherit GlobalID from the source object, if available */
+			if (e_cal_component_get_icalcomponent (comp)) {
+				gchar *propval;
+
+				propval = exchange_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-GLOBALID");
+				if (propval && *propval) {
+					exchange_mapi_cal_util_generate_globalobjectid (TRUE, propval, &globalid);
+					compuid = NULL;
+				}
+
+				g_free (propval);
+			}
+
+			if (compuid)
+				exchange_mapi_cal_util_generate_globalobjectid (TRUE, compuid, &globalid);
+
 			cbdata.globalid = &globalid;
 			cbdata.cleanglobalid = &globalid;
 
@@ -2365,10 +2393,62 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, 
 				g_free (old_object);
 				g_free (new_object);
 				break;
-			case ICAL_METHOD_REPLY :
-				/* responses are automatically updated even as they are rendered (just like in Outlook) */
-				/* FIXME: the above might not be true anymore */
-				break;
+			case ICAL_METHOD_REPLY : {
+				ECalComponent *cache_comp;
+
+				g_mutex_lock (priv->mutex);
+				cache_comp = e_cal_backend_store_get_component (priv->store, uid, NULL);
+				g_mutex_unlock (priv->mutex);
+				if (cache_comp) {
+					gboolean any_changed = FALSE;
+					GSList *reply_attendees = NULL, *ri, *cache_attendees = NULL, *ci;
+
+					e_cal_component_get_attendee_list (comp, &reply_attendees);
+					e_cal_component_get_attendee_list (cache_comp, &cache_attendees);
+
+					for (ri = reply_attendees; ri; ri = ri->next) {
+						ECalComponentAttendee *ra = ri->data;
+
+						if (!ra || !ra->value || !*ra->value)
+							continue;
+
+						for (ci = cache_attendees; ci; ci = ci->next) {
+							ECalComponentAttendee *ca = ci->data;
+
+							if (!ca || !ca->value || !*ca->value || g_ascii_strcasecmp (ra->value, ca->value) != 0)
+								continue;
+
+							if (ca->status == ra->status)
+								continue;
+
+							ca->status = ra->status;
+							any_changed = TRUE;
+						}
+					}
+
+					if (any_changed) {
+						old_object = NULL;
+						new_object = NULL;
+
+						e_cal_component_set_attendee_list (cache_comp, cache_attendees);
+
+						comp_str = e_cal_component_get_as_string (cache_comp);
+						ecbm_modify_object (backend, cal, comp_str, CALOBJ_MOD_ALL, &old_object, &new_object, &err);
+
+						g_free (old_object);
+						g_free (new_object);
+						g_free (comp_str);
+					}
+
+					e_cal_component_free_attendee_list (reply_attendees);
+					e_cal_component_free_attendee_list (cache_attendees);
+
+					if (err)
+						stop = TRUE;
+
+					g_object_unref (cache_comp);
+				}
+				} break;
 			default :
 				break;
 			}

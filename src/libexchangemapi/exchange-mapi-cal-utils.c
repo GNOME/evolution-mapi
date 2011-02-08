@@ -687,7 +687,7 @@ id_to_string (GByteArray *ba)
 ECalComponent *
 exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcomponent_kind kind, const gchar *mid, struct mapi_SPropValue_array *properties,
 					   GSList *streams, GSList *recipients, GSList *attachments,
-					   const gchar *local_store_uri, const icaltimezone *default_zone)
+					   const gchar *local_store_uri, const icaltimezone *default_zone, gboolean is_reply)
 {
 	ECalComponent *comp = NULL;
 	struct timeval t;
@@ -770,6 +770,16 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 			prop = icalproperty_new_x (value);
 			icalproperty_set_x_name (prop, "X-EVOLUTION-MAPI-GLOBALID");
 			icalcomponent_add_property (ical_comp, prop);
+			if (value && *value) {
+				e_cal_component_set_uid (comp, value);
+
+				if (!g_str_equal (value, mid)) {
+					prop = icalproperty_new_x (mid);
+					icalproperty_set_x_name (prop, "X-EVOLUTION-MAPI-MID");
+					icalcomponent_add_property (ical_comp, prop);
+				}
+			}
+
 			g_free (value);
 		}
 
@@ -833,9 +843,75 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 		if (recipients) {
 			b = (const bool *)find_mapi_SPropValue_data(properties, PR_RESPONSE_REQUESTED);
 			ical_attendees_from_props (ical_comp, recipients, (b && *b));
-			if (icalcomponent_get_first_property (ical_comp, ICAL_ORGANIZER_PROPERTY) == NULL) {
+			if (is_reply) {
+				if (icalcomponent_get_first_property (ical_comp, ICAL_ORGANIZER_PROPERTY) == NULL) {
+					gchar *val, *to_free = NULL;
+					const gchar *name = exchange_mapi_util_find_array_propval (properties, PR_RCVD_REPRESENTING_NAME_UNICODE);
+					const gchar *email_type = exchange_mapi_util_find_array_propval (properties, PR_RCVD_REPRESENTING_ADDRTYPE_UNICODE);
+					const gchar *email = exchange_mapi_util_find_array_propval (properties, PR_RCVD_REPRESENTING_EMAIL_ADDRESS_UNICODE);
+
+					if (!name)
+						name = "";
+					if (!email_type)
+						email_type = "";
+					if (!email)
+						email = "";
+
+					if (g_str_equal (email_type, "EX")) {
+						to_free = exchange_mapi_connection_ex_to_smtp (conn, email, NULL);
+						email = to_free;
+					}
+
+					val = g_strdup_printf ("MAILTO:%s", email);
+					prop = icalproperty_new_organizer (val);
+					g_free (val);
+
+					/* CN */
+					param = icalparameter_new_cn (name);
+					icalproperty_add_parameter (prop, param);
+
+					icalcomponent_add_property (ical_comp, prop);
+
+					g_free (to_free);
+				}
+
+				if (icalcomponent_get_first_property (ical_comp, ICAL_ATTENDEE_PROPERTY) == NULL) {
+					const uint32_t *ui32;
+					gchar *val, *to_free = NULL;
+					const gchar *name = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE);
+					const gchar *email_type = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE);
+					const gchar *email = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
+
+					if (!name)
+						name = "";
+					if (!email_type)
+						email_type = "";
+					if (!email)
+						email = "";
+
+					if (g_str_equal (email_type, "EX")) {
+						to_free = exchange_mapi_connection_ex_to_smtp (conn, email, NULL);
+						email = to_free;
+					}
+
+					val = g_strdup_printf ("MAILTO:%s", email);
+					prop = icalproperty_new_attendee (val);
+					g_free (val);
+
+					/* CN */
+					param = icalparameter_new_cn (name);
+					icalproperty_add_parameter (prop, param);
+
+					ui32 = exchange_mapi_util_find_array_propval (properties, PidLidResponseStatus);
+					param = icalparameter_new_partstat (get_partstat_from_trackstatus (ui32 ? *ui32 : olResponseNone));
+					icalproperty_add_parameter (prop, param);
+
+					icalcomponent_add_property (ical_comp, prop);
+
+					g_free (to_free);
+				}
+			} else if (icalcomponent_get_first_property (ical_comp, ICAL_ORGANIZER_PROPERTY) == NULL) {
 				gchar *val, *sender_free = NULL, *sent_free = NULL;
-//				const gchar *sender_name = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_NAME_UNICODE);
 				const gchar *sender_email_type = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE);
 				const gchar *sender_email = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE);
 				const gchar *sent_name = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE);
@@ -1012,8 +1088,8 @@ fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 			smid = e_cal_component_gen_uid();
 		comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, fccd->kind, smid,
 							item_data->properties, item_data->streams, item_data->recipients,
-							item_data->attachments, filepath, NULL);
-		e_cal_component_set_uid (comp, smid);
+							item_data->attachments, filepath, NULL, TRUE);
+
 		g_free (smid);
 	}
 
@@ -1560,8 +1636,13 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 		flag32 = cbdata->appt_seq;
 		set_named_value (PidLidAppointmentSequence, &flag32);
 
-		set_named_value (PidLidCleanGlobalObjectId, cbdata->cleanglobalid);
-		set_named_value (PidLidGlobalObjectId, cbdata->globalid);
+		if (cbdata->cleanglobalid) {
+			set_named_value (PidLidCleanGlobalObjectId, cbdata->cleanglobalid);
+		}
+
+		if (cbdata->globalid) {
+			set_named_value (PidLidGlobalObjectId, cbdata->globalid);
+		}
 
 		flag32 = cbdata->resp;
 		set_named_value (PidLidResponseStatus, &flag32);
@@ -2125,3 +2206,28 @@ exchange_mapi_cal_utils_get_props_cb (ExchangeMapiConnection *conn, mapi_id_t fi
 
 	return exchange_mapi_cal_utils_add_named_ids (conn, fid, mem_ctx, props, GPOINTER_TO_INT (data));
 }
+
+gchar *
+exchange_mapi_cal_utils_get_icomp_x_prop (icalcomponent *comp, const gchar *key)
+{
+	icalproperty *xprop;
+
+	/* Find the old one first */
+	xprop = icalcomponent_get_first_property (comp, ICAL_X_PROPERTY);
+
+	while (xprop) {
+		const gchar *str = icalproperty_get_x_name (xprop);
+
+		if (str && !strcmp (str, key)) {
+			break;
+		}
+
+		xprop = icalcomponent_get_next_property (comp, ICAL_X_PROPERTY);
+	}
+
+	if (xprop)
+		return icalproperty_get_value_as_string_r (xprop);
+
+	return NULL;
+}
+
