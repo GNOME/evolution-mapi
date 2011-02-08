@@ -1297,7 +1297,7 @@ mapi_store_rename_folder_sync (CamelStore *store,
 		oldpath = g_build_filename (priv->storage_path, "folders", old_name, NULL);
 		newpath = g_build_filename (priv->storage_path, "folders", new_name, NULL);
 
-		if (g_file_test (oldpath, G_FILE_TEST_IS_DIR) && g_rename (oldpath, newpath) == -1) {
+		if (g_file_test (oldpath, G_FILE_TEST_IS_DIR) && g_rename (oldpath, newpath) == -1 && errno != ENOENT) {
 			g_warning ("Could not rename message cache '%s' to '%s': %s: cache reset", oldpath, newpath, g_strerror (errno));
 		}
 
@@ -1340,14 +1340,21 @@ mapi_store_subscribe_folder_sync (CamelStore *store,
 		use_folder_name = ++f_name;
 		favourites = TRUE;
 	}
+
 	si = camel_store_summary_path((CamelStoreSummary *)mapi_store->summary, folder_name);
 
-	if (si != NULL) {
-		if ((si->flags & CAMEL_STORE_INFO_FOLDER_SUBSCRIBED) == 0) {
-			si->flags |= CAMEL_STORE_INFO_FOLDER_SUBSCRIBED;
-			si->flags |= CAMEL_FOLDER_SUBSCRIBED;
-			camel_store_summary_touch((CamelStoreSummary *)mapi_store->summary);
-		}
+	if (!si) {
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Folder '%s' not found"), folder_name);
+
+		return FALSE;
+	}
+
+	if ((si->flags & CAMEL_STORE_INFO_FOLDER_SUBSCRIBED) == 0) {
+		si->flags |= CAMEL_STORE_INFO_FOLDER_SUBSCRIBED;
+		si->flags |= CAMEL_FOLDER_SUBSCRIBED;
+		camel_store_summary_touch((CamelStoreSummary *)mapi_store->summary);
 	}
 
 	if (si->flags & CAMEL_MAPI_FOLDER_MAIL) {
@@ -1399,6 +1406,9 @@ mapi_store_unsubscribe_folder_sync (CamelStore *store,
 			camel_store_summary_touch((CamelStoreSummary *)mapi_store->summary);
 			camel_store_summary_save((CamelStoreSummary *)mapi_store->summary);
 		}
+	} else {
+		/* no such folder in the cache, might be unsubscribed already */
+		return TRUE;
 	}
 
 	if (g_str_has_prefix (folder_name, DISPLAY_NAME_ALL_PUBLIC_FOLDERS) ) {
@@ -1418,7 +1428,8 @@ mapi_store_unsubscribe_folder_sync (CamelStore *store,
 		guint folder_type = mapi_folders_hash_table_type_lookup (mapi_store, use_folder_name);
 		exchange_mapi_remove_esource(url, folder_name, fid, folder_type);
 	}
-	camel_store_summary_info_free((CamelStoreSummary *)mapi_store->summary, si);
+
+	camel_store_summary_info_free ((CamelStoreSummary *)mapi_store->summary, si);
 
 	return TRUE;
 }
@@ -1915,6 +1926,8 @@ mapi_folders_hash_table_type_lookup (CamelMapiStore *store, const gchar *name)
 	CamelMapiStorePrivate  *priv = store->priv;
 	guint *folder_type = g_hash_table_lookup (priv->container_hash, name);
 
+	g_return_val_if_fail (folder_type != NULL, 0);
+
 	return *folder_type;
 }
 
@@ -1925,10 +1938,11 @@ mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid,
 	CamelMapiStorePrivate  *priv = store->priv;
 	const gchar *name = g_hash_table_lookup (priv->id_hash, fid);
 
-	if (!name && use_cache)
+	if (!name && use_cache) {
 		mapi_folders_update_hash_tables_from_cache (store);
 
-	name = g_hash_table_lookup (priv->id_hash, fid);
+		name = g_hash_table_lookup (priv->id_hash, fid);
+	}
 
 	return name;
 }
