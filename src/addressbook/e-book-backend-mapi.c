@@ -1535,6 +1535,9 @@ e_book_backend_mapi_update_view_by_cache (EBookBackendMAPI *ebma, EDataBookView 
 	query = e_data_book_view_get_card_query (book_view);
 	e_book_backend_mapi_get_summary_and_cache (ebma, &summary, &cache);
 
+	if (!summary || !cache)
+		return;
+
 	if (e_book_backend_summary_is_summary_query (summary, query)) {
 		GPtrArray *ids = NULL;
 

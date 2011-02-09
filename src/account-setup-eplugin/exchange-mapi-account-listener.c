@@ -607,10 +607,10 @@ remove_calendar_sources (EAccount *account)
 
 	g_object_ref (account);
 
-	if (g_main_context_is_owner (g_main_context_default ())) {
-		remove_calendar_sources_async (account, FALSE, NULL);
-	} else {
+	if (!g_main_context_get_thread_default () || g_main_context_is_owner (g_main_context_default ())) {
 		em_async_queue_push (async_ops, account, NULL, NULL, remove_calendar_sources_async);
+	} else {
+		remove_calendar_sources_async (account, FALSE, NULL);
 	}
 }
 
@@ -830,10 +830,10 @@ remove_addressbook_sources (ExchangeMAPIAccountInfo *existing_account_info)
 {
 	g_return_if_fail (existing_account_info != NULL);
 
-	if (g_main_context_is_owner (g_main_context_default ())) {
-		remove_addressbook_sources_async (copy_mapi_account_info (existing_account_info), FALSE, NULL);
-	} else {
+	if (!g_main_context_get_thread_default () || g_main_context_is_owner (g_main_context_default ())) {
 		em_async_queue_push (async_ops, copy_mapi_account_info (existing_account_info), NULL, NULL, remove_addressbook_sources_async);
+	} else {
+		remove_addressbook_sources_async (copy_mapi_account_info (existing_account_info), FALSE, NULL);
 	}
 }
 
@@ -872,10 +872,10 @@ add_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid)
 	data->folders = exchange_mapi_folder_copy_list (folders);
 	data->trash_fid = trash_fid;
 
-	if (g_main_context_is_owner (g_main_context_default ())) {
-		add_sources_async (data, FALSE, NULL);
-	} else {
+	if (!g_main_context_get_thread_default () || g_main_context_is_owner (g_main_context_default ())) {
 		em_async_queue_push (async_ops, data, NULL, NULL, add_sources_async);
+	} else {
+		add_sources_async (data, FALSE, NULL);
 	}
 }
 
@@ -1021,7 +1021,7 @@ update_account_sources (EAccount *account, gboolean can_create_profile)
 {
 	g_return_if_fail (account != NULL);
 
-	if (g_main_context_is_owner (g_main_context_default ())) {
+	if (!g_main_context_get_thread_default () || g_main_context_is_owner (g_main_context_default ())) {
 		/* called from main thread, but we want this to be called
 		   in its own thread, thus create it */
 		em_async_queue_push (async_ops, g_object_ref (account), GINT_TO_POINTER (can_create_profile ? 1 : 0), update_account_sources_async, NULL);

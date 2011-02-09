@@ -797,6 +797,8 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 
 	e_source_set_property (source, "completion", "true");
 	e_source_set_property (source, "public", "no");
+	e_source_set_property (source, "folder-id", sfid);
+
 	// Update the folder list in the plugin and ExchangeMAPIFolder
 	g_free (r_uri);
 	g_free (sfid);
