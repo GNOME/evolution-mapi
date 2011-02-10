@@ -672,20 +672,11 @@ exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp)
 	/* modified exceptions */
 	flag16 = *((guint16 *)ptr);
 	ptr += sizeof (guint16);
-	if (flag16 != 0x0)
-		return FALSE;
-
-	/* reserved block1 size - has to be 0 */
-	flag32 = *((guint32 *)ptr);
-	ptr += sizeof (guint32);
-	if (flag32 != 0x0)
-		return FALSE;
-
-	/* reserved block2 size - has to be 0 */
-	flag32 = *((guint32 *)ptr);
-	ptr += sizeof (guint32);
-	if (flag32 != 0x0)
-		return FALSE;
+    /* FIXME: there are flag16 count modified exceptions here, which
+              are variable in size, followed by a ReservedBlock1{Size,}
+              and ReservedBlock2{Size,}.  However, since we have nothing 
+              else to do until we are able to parse these modified
+              instances, we just stop now. */
 
 	/* Set the recurrence */
 	{
