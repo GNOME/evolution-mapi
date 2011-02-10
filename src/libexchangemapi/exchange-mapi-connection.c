@@ -2018,7 +2018,7 @@ exchange_mapi_connection_create_folder (ExchangeMapiConnection *conn, uint32_t o
 	}
 
 	/* Attempt to create the folder */
-	ms = CreateFolder (&obj_top, FOLDER_GENERIC, name, "Created using Evolution/LibMAPI", OPEN_IF_EXISTS, &obj_folder);
+	ms = CreateFolder (&obj_top, FOLDER_GENERIC, name, "Created using Evolution/LibMAPI", OPEN_IF_EXISTS | MAPI_UNICODE, &obj_folder);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "CreateFolder", ms);
 		goto cleanup;

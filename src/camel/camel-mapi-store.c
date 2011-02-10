@@ -1010,6 +1010,7 @@ mapi_store_create_folder_sync (CamelStore *store,
 		mapi_update_folder_hash_tables (mapi_store, root->full_name, fid, parent_id);
 
 		camel_store_folder_created (store, root);
+		camel_store_folder_subscribed (store, root);
 	} else {
 		if (mapi_error) {
 			g_set_error (
