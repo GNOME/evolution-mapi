@@ -184,7 +184,8 @@ disconnect (ExchangeMapiConnectionPrivate *priv)
 	if (priv->has_public_store)
 		mapi_object_release (&priv->public_store);
 	Logoff (&priv->msg_store);
-	mapi_object_release (&priv->msg_store);
+	/* it's released by the Logoff() call
+	mapi_object_release (&priv->msg_store); */
 
 	if (priv->named_ids)
 		g_hash_table_remove_all (priv->named_ids);
