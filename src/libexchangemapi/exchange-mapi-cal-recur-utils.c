@@ -26,6 +26,7 @@
 #endif
 
 #include "exchange-mapi-cal-recur-utils.h"
+#include <libecal/e-cal-util.h>
 
 /* Reader/Writer versions */
 #define READER_VERSION	0x3004
@@ -75,6 +76,18 @@ struct ExceptionInfo {
 	uint32_t AppointmentColor;
 };
 #endif
+
+/* Override flags defining what fields might be found in ExceptionInfo */
+#define ARO_SUBJECT 0x0001
+#define ARO_MEETINGTYPE 0x0002
+#define ARO_REMINDERDELTA 0x0004
+#define ARO_REMINDER 0x0008
+#define ARO_LOCATION 0x0010
+#define ARO_BUSYSTATUS 0x0020
+#define ARO_ATTACHMENT 0x0040
+#define ARO_SUBTYPE 0x0080
+#define ARO_APPTCOLOR 0x0100
+#define ARO_EXCEPTIONAL_BODY 0x0200
 
 static icalrecurrencetype_weekday
 get_ical_weekstart (uint32_t fdow)
@@ -234,11 +247,11 @@ check_calendar_type (guint16 type)
 }
 
 gboolean
-exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp)
+exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList **extra_detached)
 {
 	struct icalrecurrencetype rt;
 	guint16 flag16;
-	guint32 flag32;
+	guint32 flag32, writer_version;
 	guint8 *ptr = ba->data;
 	gint i;
 	GSList *exdate_list = NULL;
@@ -632,7 +645,9 @@ exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp)
 	/* number of changed exceptions */
 	flag32 = *((guint32 *)ptr);
 	ptr += sizeof (guint32);
-	/* FIXME: Parse modified instances */
+	/* For each changed exception, there will be a corresponding
+          ExceptionInfo below.  So at present we don't need to do
+          anything with the information here beyond skipping it */
 	if (flag32)
 		ptr += flag32 * sizeof (guint32);
 
@@ -654,11 +669,11 @@ exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp)
 		return FALSE;
 
 	/* some constant */
-	flag32 = *((guint32 *)ptr);
+	writer_version = *((guint32 *)ptr);
 	ptr += sizeof (guint32);
 	/* It should be set, but not must. It can be, technically, any value.
 	   Seen were 0x3006, 0x3008, 0x3009. It affects format of extended exception info
-	if (flag32 != WRITER_VERSION2)
+	if (writer_version != WRITER_VERSION2)
 		return FALSE; */
 
 	/* start time in mins */
@@ -668,15 +683,6 @@ exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp)
 	/* end time in mins */
 	flag32 = *((guint32 *)ptr);
 	ptr += sizeof (guint32);
-
-	/* modified exceptions */
-	flag16 = *((guint16 *)ptr);
-	ptr += sizeof (guint16);
-    /* FIXME: there are flag16 count modified exceptions here, which
-              are variable in size, followed by a ReservedBlock1{Size,}
-              and ReservedBlock2{Size,}.  However, since we have nothing 
-              else to do until we are able to parse these modified
-              instances, we just stop now. */
 
 	/* Set the recurrence */
 	{
@@ -691,6 +697,207 @@ exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp)
 	/* FIXME: this also has modified instances */
 	e_cal_component_set_exdate_list (comp, exdate_list);
 
+	/* modified exceptions, an ExceptionCount sized list of
+	   ExceptionInfo instances */
+	flag16 = *((guint16 *)ptr);
+	ptr += sizeof (guint16);
+	if (flag16 && extra_detached) {
+		gint count = flag16;
+
+		e_cal_component_commit_sequence (comp);
+
+		for (i = 0; i < count; i++) {
+			uint32_t starttime, endtime, origtime;
+			guint16 overrideflags;
+			struct icaltimetype tt;
+			ECalComponent *detached = NULL;
+			ECalComponentDateTime edt;
+			ECalComponentRange rid;
+
+			/* ExceptionInfo.StartTime */
+			starttime = *((guint32 *)ptr);
+			ptr += sizeof (guint32);
+
+			/* ExceptionInfo.EndTime */
+			endtime = *((guint32 *)ptr);
+			ptr += sizeof (guint32);
+
+			/* ExceptionInfo.OriginalStartDate */
+			origtime = *((guint32 *)ptr);
+			ptr += sizeof (guint32);
+
+			/* make a shallow clone of comp */
+			detached = e_cal_component_clone (comp);
+
+			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (origtime), 0, 0);
+			rid.type = E_CAL_COMPONENT_RANGE_SINGLE;
+			rid.datetime.value = &tt;
+			rid.datetime.tzid = "UTC";
+			e_cal_component_set_recurid (detached, &rid);
+
+			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (starttime), 0, 0);
+			edt.value = &tt;
+			edt.tzid = "UTC";
+			e_cal_component_set_dtstart (detached, &edt);
+
+			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (endtime), 0, 0);
+			edt.value = &tt;
+			edt.tzid = "UTC";
+			e_cal_component_set_dtend (detached, &edt);
+
+			e_cal_component_set_rdate_list (detached, NULL);
+			e_cal_component_set_rrule_list (detached, NULL);
+			e_cal_component_set_exdate_list (detached, NULL);
+			e_cal_component_set_exrule_list (detached, NULL);
+
+			/* continue parsing stuff we don't need, because we need to
+			   get to the next ExceptionInfo object or back out to the
+			   containing AppointmentRecurrencePattern object */
+
+			/* ExceptionInfo.OverrideFlags */
+			overrideflags = *((guint16 *) ptr);
+			ptr += sizeof (guint16);
+
+			if (overrideflags & ARO_SUBJECT) {
+				ECalComponentText text = { 0 };
+				gchar *str;
+
+				/* ExceptionInfo.SubjectLength, ExceptionInfo.SubjectLength2
+				   and ExceptionInfo.Subject */
+				ptr += sizeof (guint16);
+				flag16 = *(guint16 *)ptr; /* use SubjectLength2 */
+				ptr += sizeof (guint16);
+				/* note a discrepency in MS-OXOCAL here, which suggests that
+				   Subject is actually 2 bytes */
+
+				str = g_strndup ((const gchar *) ptr, flag16);
+				text.value = str;
+				e_cal_component_set_summary (detached, &text);
+				g_free (str);
+
+				ptr += flag16;
+			}
+
+			if (overrideflags & ARO_MEETINGTYPE) {
+				/* ExceptionInfo.MeetingType */
+				ptr += sizeof (guint32);
+			}
+
+			if (overrideflags & ARO_REMINDERDELTA) {
+				/* ExceptionInfo.ReminderDelta */
+				ptr += sizeof (guint32);
+			}
+
+			if (overrideflags & ARO_REMINDER) {
+				/* ExceptionInfo.ReminderSet */
+				ptr += sizeof (guint32);
+			}
+
+			if (overrideflags & ARO_LOCATION) {
+				gchar *str;
+
+				/* ExceptionInfo.LocationLength, ExceptionInfo.LocationLength2
+				   and ExceptionInfo.Location */
+				ptr += sizeof (guint16);
+				flag16 = *(guint16 *) ptr; /* use LocationLength2 */
+				ptr += sizeof (guint16);
+				/* note a discrepency in MS-OXOCAL here, which suggests that
+				   Location is actually 4 bytes */
+
+				str = g_strndup ((const gchar *) ptr, flag16);
+				e_cal_component_set_location (detached, str);
+				g_free (str);
+
+				ptr += flag16;
+			}
+
+			if (overrideflags & ARO_BUSYSTATUS) {
+				/* ExceptionInfo.BusyStatus */
+				ptr += sizeof (guint32);
+			}
+
+			if (overrideflags & ARO_ATTACHMENT) {
+				/* ExceptionInfo.Attachment */
+				ptr += sizeof (guint32);
+			}
+
+			if (overrideflags & ARO_SUBTYPE) {
+				/* ExceptionInfo.Subtype */
+				ptr += sizeof (guint32);
+			}
+
+			if (overrideflags & ARO_APPTCOLOR) {
+				/* ExceptionInfo.AppointmentColor */
+				ptr += sizeof (guint32);
+			}
+
+			/* ExceptionInfo.ReservedBlock1Size */
+			flag32 = *((guint32 *)ptr);
+			ptr += sizeof (guint32) * 2;
+			/* The spec is self-contradicting regarding ReservedBlock1Size
+			   And Reserved1Block here.  Observations are that the former
+			   exists as a 4 byte integer which "MUST" be but isn't always
+			   set to 0, and ReservedBlock1 simply doesn't exist.
+			 */
+
+			if (writer_version >= 0x3009) {
+				/* ChangeHighlight struct */
+				flag32 = *((guint32 *)ptr);
+				ptr += sizeof (guint32) * (1 + flag32);
+			}
+
+			/* ReservedBlockEE1Size */
+			flag32 = *((guint32 *)ptr);
+			ptr += sizeof (guint32);
+			if (!flag32) {
+				/* it's supposed to be 0 */
+				
+				/* StartTime */
+				ptr += sizeof (guint32);
+
+				/* EndTime */
+				ptr += sizeof (guint32);
+
+				/* OriginalStartDate */
+				ptr += sizeof (guint32);
+
+				if (overrideflags & ARO_SUBJECT) {
+					ECalComponentText text = { 0 };
+					gchar *str;
+
+					/* SubjectLength */
+					flag16 = *(guint16 *)ptr;
+					ptr += sizeof (guint16);
+
+					str = g_convert ((const gchar *) ptr, flag16 * 2, "UTF-8", "UTF-16", NULL, NULL, NULL);
+					text.value = str;
+					e_cal_component_set_summary (detached, &text);
+					g_free (str);
+
+					ptr += flag16 * 2;
+				}
+
+				if (overrideflags & ARO_LOCATION) {
+					gchar *str;
+
+					/* LocationLength */
+					flag16 = *(guint16 *)ptr;
+					ptr += sizeof (guint16);
+
+					str = g_convert ((const gchar *) ptr, flag16 * 2, "UTF-8", "UTF-16", NULL, NULL, NULL);
+					e_cal_component_set_location (detached, str);
+					g_free (str);
+
+					ptr += flag16 * 2;
+				}
+			}
+
+			*extra_detached = g_slist_append (*extra_detached, detached);
+		}
+	}
+
+	/* in case anyone ever needs to traverse further, from this point ptr 
+	   should be pointing at AppointmentRecurrencePattern.ReservedBlock1Size */
 	return TRUE;
 }
 

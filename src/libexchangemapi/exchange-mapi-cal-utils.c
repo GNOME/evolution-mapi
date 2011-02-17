@@ -692,7 +692,7 @@ id_to_string (GByteArray *ba)
 ECalComponent *
 exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcomponent_kind kind, const gchar *mid, struct mapi_SPropValue_array *properties,
 					   GSList *streams, GSList *recipients, GSList *attachments,
-					   const gchar *local_store_uri, const icaltimezone *default_zone, gboolean is_reply)
+					   const gchar *local_store_uri, const icaltimezone *default_zone, gboolean is_reply, GSList **detached_components)
 {
 	ECalComponent *comp = NULL;
 	struct timeval t;
@@ -957,7 +957,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 		if (b && *b) {
 			stream = exchange_mapi_util_find_stream (streams, PidLidAppointmentRecur);
 			if (stream) {
-				exchange_mapi_cal_util_bin_to_rrule (stream->value, comp);
+				exchange_mapi_cal_util_bin_to_rrule (stream->value, comp, detached_components);
 			}
 		}
 
@@ -1074,6 +1074,7 @@ fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 {
 	struct fetch_camel_cal_data *fccd = data;
 	ECalComponent *comp = NULL;
+	GSList *detached_recurrences = NULL, *d_i = NULL;
 	mapi_id_t mid = 0;
 	icalcomponent *icalcomp = NULL;
 	gchar *str = NULL, *smid = NULL, *filepath;
@@ -1093,7 +1094,8 @@ fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 			smid = e_cal_component_gen_uid();
 		comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, fccd->kind, smid,
 							item_data->properties, item_data->streams, item_data->recipients,
-							item_data->attachments, filepath, NULL, TRUE);
+							item_data->attachments, filepath, NULL, TRUE, 
+							&detached_recurrences);
 
 		g_free (smid);
 	}
@@ -1105,10 +1107,16 @@ fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 	if (comp)
 		icalcomponent_add_component (icalcomp,
 			icalcomponent_new_clone(e_cal_component_get_icalcomponent(comp)));
+	for (d_i = detached_recurrences; d_i; d_i = g_slist_next (d_i)) {
+		icalcomponent_add_component (icalcomp,
+				icalcomponent_new_clone (e_cal_component_get_icalcomponent (d_i->data)));
+		g_object_unref (d_i->data);
+	}
 	str = icalcomponent_as_ical_string_r (icalcomp);
 	icalcomponent_free (icalcomp);
 	if (comp)
 		g_object_unref (comp);
+	g_slist_free (detached_recurrences);
 
 	exchange_mapi_util_free_stream_list (&item_data->streams);
 	exchange_mapi_util_free_recipient_list (&item_data->recipients);

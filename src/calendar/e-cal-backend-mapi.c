@@ -420,6 +420,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 	GSList *streams = item_data->streams;
 	GSList *recipients = item_data->recipients;
 	GSList *attachments = item_data->attachments;
+	GSList *detached = NULL, *d_i = NULL;
 	ECalBackendMAPI *cbmapi	= data;
 	ECalBackendMAPIPrivate *priv = cbmapi->priv;
 	icalcomponent_kind kind;
@@ -450,20 +451,27 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 	if (cache_comp == NULL) {
 		ECalComponent *comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, array,
 									streams, recipients, attachments,
-									cache_dir, priv->default_zone, FALSE);
+									cache_dir, priv->default_zone, FALSE, &detached);
 
-		if (E_IS_CAL_COMPONENT (comp)) {
-			gchar *comp_str;
+		detached = g_slist_prepend (detached, comp);
 
-			e_cal_component_commit_sequence (comp);
-			comp_str = e_cal_component_get_as_string (comp);
+		for (d_i = detached; d_i; d_i = g_slist_next (d_i)) {
+			comp = d_i->data;
 
-			put_component_to_store (cbmapi, comp);
-			e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), (const gchar *) comp_str);
+			if (E_IS_CAL_COMPONENT (comp)) {
+				gchar *comp_str;
 
-			g_free (comp_str);
+				e_cal_component_commit_sequence (comp);
+				put_component_to_store (cbmapi, comp);
+
+				comp_str = e_cal_component_get_as_string (comp);
+				e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), comp_str);
+				g_free (comp_str);
+			}
+
+			g_object_unref (comp);
 		}
-		g_object_unref (comp);
+		g_slist_free (detached);
 	} else {
 		struct timeval t;
 
@@ -483,7 +491,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 				comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, array,
 									streams, recipients, attachments,
-									cache_dir, priv->default_zone, FALSE);
+									cache_dir, priv->default_zone, FALSE, NULL);
 
 				e_cal_component_commit_sequence (comp);
 				modif_comp_str = e_cal_component_get_as_string (comp);
@@ -1190,6 +1198,7 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 	GSList *streams = item_data->streams;
 	GSList *recipients = item_data->recipients;
 	GSList *attachments = item_data->attachments;
+	GSList *detached = NULL, *d_i = NULL;
 	ECalBackendMAPI *cbmapi	= E_CAL_BACKEND_MAPI (data);
 	ECalBackendMAPIPrivate *priv = cbmapi->priv;
 	icalcomponent_kind kind;
@@ -1225,18 +1234,27 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 	tmp = exchange_mapi_util_mapi_id_to_string (mid);
 	comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, properties,
 							streams, recipients, attachments,
-							cache_dir, priv->default_zone, FALSE);
+							cache_dir, priv->default_zone, FALSE, &detached);
 	g_free (tmp);
 
-	if (E_IS_CAL_COMPONENT (comp)) {
-		gchar *comp_str;
-		e_cal_component_commit_sequence (comp);
-		comp_str = e_cal_component_get_as_string (comp);
-		e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), (const gchar *) comp_str);
-		g_free (comp_str);
-		put_component_to_store (cbmapi, comp);
+	detached = g_slist_prepend (detached, comp);
+	for (d_i = detached; d_i; d_i = g_slist_next (d_i)) {
+		comp = d_i->data;
+
+		if (E_IS_CAL_COMPONENT (comp)) {
+			gchar *comp_str;
+
+			e_cal_component_commit_sequence (comp);
+			put_component_to_store (cbmapi, comp);
+
+			comp_str = e_cal_component_get_as_string (comp);
+			e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), comp_str);
+			g_free (comp_str);
+		}
+
 		g_object_unref (comp);
 	}
+	g_slist_free (detached);
 
 	exchange_mapi_util_free_stream_list (&streams);
 	exchange_mapi_util_free_recipient_list (&recipients);

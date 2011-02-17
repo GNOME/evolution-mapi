@@ -31,7 +31,7 @@
 G_BEGIN_DECLS
 
 gboolean
-exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp);
+exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList **extra_detached);
 
 GByteArray *
 exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps);
