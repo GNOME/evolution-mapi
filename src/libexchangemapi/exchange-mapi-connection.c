@@ -3079,8 +3079,16 @@ cleanup:
 	return result;
 }
 
-/* TODO : Find a right place for this. */
-#define PR_ADDITIONAL_REN_ENTRYIDS    PROP_TAG(PT_MV_BINARY, 0x36D8)
+/* TODO : Find a right place for this.
+ * The following are only defined in openchange fairly recently, so
+ * we will conditionally define them here otherwise
+ */
+#ifndef PR_ADDITIONAL_REN_ENTRYIDS
+	#define PR_ADDITIONAL_REN_ENTRYIDS    PROP_TAG(PT_MV_BINARY, 0x36D8)
+#endif
+#ifndef PidTagMailboxOwnerName
+	#define PidTagMailboxOwnerName PR_USER_NAME_UNICODE
+#endif
 
 /*NOTE : This should be called when you hold the connection lock*/
 /*NOTE : IsMailboxFolder doesn't support this yet. */
@@ -3255,7 +3263,7 @@ exchange_mapi_connection_get_folders_list (ExchangeMapiConnection *conn, GSList 
 					  PR_DISPLAY_NAME_UNICODE,
 					  PR_MAILBOX_OWNER_NAME_UNICODE,
 					  PR_MESSAGE_SIZE,
-					  PR_USER_NAME_UNICODE);
+					  PidTagMailboxOwnerName);
 
 	lpProps = talloc_zero(mem_ctx, struct SPropValue);
 	ms = GetProps (&priv->msg_store, SPropTagArray, &lpProps, &count);
@@ -3274,7 +3282,7 @@ exchange_mapi_connection_get_folders_list (ExchangeMapiConnection *conn, GSList 
 	/* betting that these will never fail */
 	mailbox_name = (const gchar *) exchange_mapi_util_find_row_propval (&aRow, PR_DISPLAY_NAME_UNICODE);
 	mailbox_owner_name = (const gchar *) exchange_mapi_util_find_row_propval (&aRow, PR_MAILBOX_OWNER_NAME_UNICODE);
-	mailbox_user_name = (const gchar *) exchange_mapi_util_find_row_propval (&aRow, PR_USER_NAME_UNICODE);
+	mailbox_user_name = (const gchar *) exchange_mapi_util_find_row_propval (&aRow, PidTagMailboxOwnerName);
 	mailbox_size = (const uint32_t *)exchange_mapi_util_find_row_propval  (&aRow, PR_MESSAGE_SIZE);
 
 	/* Prepare the directory listing */

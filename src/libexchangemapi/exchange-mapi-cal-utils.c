@@ -34,6 +34,11 @@
 #define O_BINARY 0
 #endif
 
+/* This property changed names in openchange, try to support both */
+#ifndef PidLidTaskAcceptanceState
+	#define PidLidTaskAcceptanceState PidLidAcceptanceState
+#endif
+
 #define d(x) 
 
 static gboolean appt_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props);
@@ -1252,7 +1257,7 @@ task_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem
 		{ PidLidTaskFRecurring, 0 },
 		{ PidLidTaskRole, 0 },
 		{ PidLidTaskOwnership, 0 },
-		{ PidLidAcceptanceState, 0 }
+		{ PidLidTaskAcceptanceState, 0 }
 	};
 
 	if (!props)
