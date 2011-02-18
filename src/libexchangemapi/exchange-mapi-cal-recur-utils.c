@@ -703,17 +703,16 @@ exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList
 	ptr += sizeof (guint16);
 	if (flag16 && extra_detached) {
 		gint count = flag16;
+		guint16 *overrideflags = g_new0 (guint16, count);
+		ECalComponent **detached = g_new0 (ECalComponent *, count);
+		uint32_t starttime, endtime, origtime;
+		struct icaltimetype tt;
+		ECalComponentDateTime edt;
+		ECalComponentRange rid;
 
 		e_cal_component_commit_sequence (comp);
 
 		for (i = 0; i < count; i++) {
-			uint32_t starttime, endtime, origtime;
-			guint16 overrideflags;
-			struct icaltimetype tt;
-			ECalComponent *detached = NULL;
-			ECalComponentDateTime edt;
-			ECalComponentRange rid;
-
 			/* ExceptionInfo.StartTime */
 			starttime = *((guint32 *)ptr);
 			ptr += sizeof (guint32);
@@ -727,38 +726,38 @@ exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList
 			ptr += sizeof (guint32);
 
 			/* make a shallow clone of comp */
-			detached = e_cal_component_clone (comp);
+			detached[i] = e_cal_component_clone (comp);
 
 			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (origtime), 0, 0);
 			rid.type = E_CAL_COMPONENT_RANGE_SINGLE;
 			rid.datetime.value = &tt;
 			rid.datetime.tzid = "UTC";
-			e_cal_component_set_recurid (detached, &rid);
+			e_cal_component_set_recurid (detached[i], &rid);
 
 			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (starttime), 0, 0);
 			edt.value = &tt;
 			edt.tzid = "UTC";
-			e_cal_component_set_dtstart (detached, &edt);
+			e_cal_component_set_dtstart (detached[i], &edt);
 
 			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (endtime), 0, 0);
 			edt.value = &tt;
 			edt.tzid = "UTC";
-			e_cal_component_set_dtend (detached, &edt);
+			e_cal_component_set_dtend (detached[i], &edt);
 
-			e_cal_component_set_rdate_list (detached, NULL);
-			e_cal_component_set_rrule_list (detached, NULL);
-			e_cal_component_set_exdate_list (detached, NULL);
-			e_cal_component_set_exrule_list (detached, NULL);
+			e_cal_component_set_rdate_list (detached[i], NULL);
+			e_cal_component_set_rrule_list (detached[i], NULL);
+			e_cal_component_set_exdate_list (detached[i], NULL);
+			e_cal_component_set_exrule_list (detached[i], NULL);
 
 			/* continue parsing stuff we don't need, because we need to
 			   get to the next ExceptionInfo object or back out to the
 			   containing AppointmentRecurrencePattern object */
 
 			/* ExceptionInfo.OverrideFlags */
-			overrideflags = *((guint16 *) ptr);
+			overrideflags[i] = *((guint16 *) ptr);
 			ptr += sizeof (guint16);
 
-			if (overrideflags & ARO_SUBJECT) {
+			if (overrideflags[i] & ARO_SUBJECT) {
 				ECalComponentText text = { 0 };
 				gchar *str;
 
@@ -772,28 +771,28 @@ exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList
 
 				str = g_strndup ((const gchar *) ptr, flag16);
 				text.value = str;
-				e_cal_component_set_summary (detached, &text);
+				e_cal_component_set_summary (detached[i], &text);
 				g_free (str);
 
 				ptr += flag16;
 			}
 
-			if (overrideflags & ARO_MEETINGTYPE) {
+			if (overrideflags[i] & ARO_MEETINGTYPE) {
 				/* ExceptionInfo.MeetingType */
 				ptr += sizeof (guint32);
 			}
 
-			if (overrideflags & ARO_REMINDERDELTA) {
+			if (overrideflags[i] & ARO_REMINDERDELTA) {
 				/* ExceptionInfo.ReminderDelta */
 				ptr += sizeof (guint32);
 			}
 
-			if (overrideflags & ARO_REMINDER) {
+			if (overrideflags[i] & ARO_REMINDER) {
 				/* ExceptionInfo.ReminderSet */
 				ptr += sizeof (guint32);
 			}
 
-			if (overrideflags & ARO_LOCATION) {
+			if (overrideflags[i] & ARO_LOCATION) {
 				gchar *str;
 
 				/* ExceptionInfo.LocationLength, ExceptionInfo.LocationLength2
@@ -805,95 +804,108 @@ exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList
 				   Location is actually 4 bytes */
 
 				str = g_strndup ((const gchar *) ptr, flag16);
-				e_cal_component_set_location (detached, str);
+				e_cal_component_set_location (detached[i], str);
 				g_free (str);
 
 				ptr += flag16;
 			}
 
-			if (overrideflags & ARO_BUSYSTATUS) {
+			if (overrideflags[i] & ARO_BUSYSTATUS) {
 				/* ExceptionInfo.BusyStatus */
 				ptr += sizeof (guint32);
 			}
 
-			if (overrideflags & ARO_ATTACHMENT) {
+			if (overrideflags[i] & ARO_ATTACHMENT) {
 				/* ExceptionInfo.Attachment */
 				ptr += sizeof (guint32);
 			}
 
-			if (overrideflags & ARO_SUBTYPE) {
+			if (overrideflags[i] & ARO_SUBTYPE) {
 				/* ExceptionInfo.Subtype */
 				ptr += sizeof (guint32);
 			}
 
-			if (overrideflags & ARO_APPTCOLOR) {
+			if (overrideflags[i] & ARO_APPTCOLOR) {
 				/* ExceptionInfo.AppointmentColor */
 				ptr += sizeof (guint32);
 			}
+		}
 
-			/* ExceptionInfo.ReservedBlock1Size */
-			flag32 = *((guint32 *)ptr);
-			ptr += sizeof (guint32) * 2;
-			/* The spec is self-contradicting regarding ReservedBlock1Size
-			   And Reserved1Block here.  Observations are that the former
-			   exists as a 4 byte integer which "MUST" be but isn't always
-			   set to 0, and ReservedBlock1 simply doesn't exist.
-			 */
+		/* ExceptionInfo.ReservedBlock1Size */
+		flag32 = *((guint32 *)ptr);
+		ptr += sizeof (guint32);
+		/* the size MUST be zero according to the doc, but... */
+		ptr += flag32;
 
+		/* ExtendedExceptionInfo */
+		for (i = 0; i < count; i++) {
+			/* conditionally parse the ChangeHighlight struct */
 			if (writer_version >= 0x3009) {
-				/* ChangeHighlight struct */
+				/* ChangeHighlightSize */
 				flag32 = *((guint32 *)ptr);
-				ptr += sizeof (guint32) * (1 + flag32);
+				ptr += sizeof (guint32);
+				/* again, the size MUST be zero according to the doc, but... */
+				ptr += flag32;
 			}
 
 			/* ReservedBlockEE1Size */
 			flag32 = *((guint32 *)ptr);
 			ptr += sizeof (guint32);
-			if (!flag32) {
-				/* it's supposed to be 0 */
-				
-				/* StartTime */
-				ptr += sizeof (guint32);
+			/* again, the size MUST be zero according to the doc, but... */
+			ptr += flag32;
 
-				/* EndTime */
-				ptr += sizeof (guint32);
+			/* it's supposed to be 0 */
 
-				/* OriginalStartDate */
-				ptr += sizeof (guint32);
+			/* StartTime */
+			ptr += sizeof (guint32);
 
-				if (overrideflags & ARO_SUBJECT) {
-					ECalComponentText text = { 0 };
-					gchar *str;
+			/* EndTime */
+			ptr += sizeof (guint32);
 
-					/* SubjectLength */
-					flag16 = *(guint16 *)ptr;
-					ptr += sizeof (guint16);
+			/* OriginalStartDate */
+			ptr += sizeof (guint32);
 
-					str = g_convert ((const gchar *) ptr, flag16 * 2, "UTF-8", "UTF-16", NULL, NULL, NULL);
-					text.value = str;
-					e_cal_component_set_summary (detached, &text);
-					g_free (str);
+			if (overrideflags[i] & ARO_SUBJECT) {
+				ECalComponentText text = { 0 };
+				gchar *str;
 
-					ptr += flag16 * 2;
-				}
+				/* SubjectLength */
+				flag16 = *(guint16 *)ptr;
+				ptr += sizeof (guint16);
 
-				if (overrideflags & ARO_LOCATION) {
-					gchar *str;
+				str = g_convert ((const gchar *) ptr, flag16 * 2, "UTF-8", "UTF-16", NULL, NULL, NULL);
+				text.value = str;
+				e_cal_component_set_summary (detached[i], &text);
+				g_free (str);
 
-					/* LocationLength */
-					flag16 = *(guint16 *)ptr;
-					ptr += sizeof (guint16);
-
-					str = g_convert ((const gchar *) ptr, flag16 * 2, "UTF-8", "UTF-16", NULL, NULL, NULL);
-					e_cal_component_set_location (detached, str);
-					g_free (str);
-
-					ptr += flag16 * 2;
-				}
+				ptr += flag16 * 2;
 			}
 
-			*extra_detached = g_slist_append (*extra_detached, detached);
+			if (overrideflags[i] & ARO_LOCATION) {
+				gchar *str;
+
+				/* LocationLength */
+				flag16 = *(guint16 *)ptr;
+				ptr += sizeof (guint16);
+
+				str = g_convert ((const gchar *) ptr, flag16 * 2, "UTF-8", "UTF-16", NULL, NULL, NULL);
+				e_cal_component_set_location (detached[i], str);
+				g_free (str);
+
+				ptr += flag16 * 2;
+			}
+
+			/* ReservedBlockEE2Size */
+			flag32 = *((guint32 *)ptr);
+			ptr += sizeof (guint32);
+			/* the size MUST be zero according to the doc, but... */
+			ptr += flag32;
 		}
+		for (i = 0; i < count; i++) {
+			*extra_detached = g_slist_append (*extra_detached, detached[i]);
+		}
+		g_free (overrideflags);
+		g_free (detached);
 	}
 
 	/* in case anyone ever needs to traverse further, from this point ptr 
