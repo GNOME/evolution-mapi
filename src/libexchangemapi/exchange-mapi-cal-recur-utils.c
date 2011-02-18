@@ -848,6 +848,9 @@ exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList
 				ptr += flag32;
 			}
 
+			if (!(overrideflags[i] & (ARO_SUBJECT | ARO_LOCATION)))
+				continue;
+
 			/* ReservedBlockEE1Size */
 			flag32 = *((guint32 *)ptr);
 			ptr += sizeof (guint32);
