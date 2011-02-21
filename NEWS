@@ -1,3 +1,26 @@
+evolution-mapi 2.91.90 2011-02-21
+---------------------------------
+
+Bug Fixes:
+	Bug #610227 - Failure accepting meeting with 'send reply to sender' (Milan Crha)
+	Bug #641251 - All sent mail containing unicode/utf8 is converted to junk (Milan Crha)
+	Bug #615636 - Meeting requests/responses don't match calendar events (Milan Crha)
+	Bug #641108 - Crash on new folder move when unsubscribing (Milan Crha)
+	Bug #641123 - Not set "folder-id" property on an addressbook source (Milan Crha)
+	Bug #641701 - Use unicode strings when creating folders (Milan Crha)
+	Bug #642450 - Does not build against openchange trunk (Sean Finney)
+	Bug #642022 - Modified instances in a recurrent event disappear (Sean Finney)
+
+Other Changes:
+	Fix for RRULE bin parsing for recurrences with modifications (Sean Finney)
+	Logoff() releases msg_store on its own (Milan Crha)
+
+Translations:
+	Marek Černocký (cs)
+	Piotr Drąg (pl)
+	Jorge González (es)
+	Matej Urbančič (sl)
+
 evolution-mapi 2.91.6 2011-01-31
 --------------------------------
 
