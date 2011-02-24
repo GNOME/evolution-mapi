@@ -1094,7 +1094,7 @@ fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 			smid = e_cal_component_gen_uid();
 		comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, fccd->kind, smid,
 							item_data->properties, item_data->streams, item_data->recipients,
-							item_data->attachments, filepath, NULL, TRUE, 
+							item_data->attachments, filepath, NULL, fccd->method == ICAL_METHOD_REPLY,
 							&detached_recurrences);
 
 		g_free (smid);
