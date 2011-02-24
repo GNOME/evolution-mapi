@@ -34,8 +34,6 @@ static void thread_func_cb (gpointer data, gpointer pqueue);
 
 G_DEFINE_TYPE (EMOperationQueue, em_operation_queue, G_TYPE_OBJECT)
 
-#define EM_OPERATION_QUEUE_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), EM_TYPE_OPERATION_QUEUE, EMOperationQueuePrivate))
-
 struct _EMOperationQueuePrivate
 {
 	GMutex *lock;
@@ -95,7 +93,7 @@ em_operation_queue_init (EMOperationQueue *queue)
 	g_return_if_fail (queue != NULL);
 	g_return_if_fail (EM_IS_OPERATION_QUEUE (queue));
 
-	queue->priv = EM_OPERATION_QUEUE_GET_PRIVATE (queue);
+	queue->priv = G_TYPE_INSTANCE_GET_PRIVATE (queue, EM_TYPE_OPERATION_QUEUE, EMOperationQueuePrivate);
 	priv = queue->priv;
 	g_return_if_fail (priv != NULL);
 

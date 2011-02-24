@@ -45,6 +45,7 @@ GQuark e_mapi_error_quark (void);
 
 typedef struct _ExchangeMapiConnection ExchangeMapiConnection;
 typedef struct _ExchangeMapiConnectionClass ExchangeMapiConnectionClass;
+typedef struct _ExchangeMapiConnectionPrivate ExchangeMapiConnectionPrivate;
 
 typedef enum {
 	MAPI_OPTIONS_FETCH_ATTACHMENTS = 1<<0,
@@ -143,6 +144,8 @@ typedef gboolean (*BuildReadPropsCB)	(ExchangeMapiConnection *conn, mapi_id_t fi
 
 struct _ExchangeMapiConnection {
 	GObject parent;
+
+	ExchangeMapiConnectionPrivate *priv;
 };
 
 struct _ExchangeMapiConnectionClass {

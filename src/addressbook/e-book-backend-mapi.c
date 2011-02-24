@@ -1335,19 +1335,14 @@ ebbm_op_authenticate_user (EBookBackend *backend, EDataBook *book, guint32 opid,
 static void
 e_book_backend_mapi_init (EBookBackendMAPI *ebma)
 {
-	EBookBackendMAPIPrivate *priv;
+	ebma->priv = G_TYPE_INSTANCE_GET_PRIVATE (ebma, E_TYPE_BOOK_BACKEND_MAPI, EBookBackendMAPIPrivate);
 
-	priv = G_TYPE_INSTANCE_GET_PRIVATE (ebma, E_TYPE_BOOK_BACKEND_MAPI, EBookBackendMAPIPrivate);
+	ebma->priv->op_queue = em_operation_queue_new ((EMOperationQueueFunc) ebbm_operation_cb, ebma);
+	ebma->priv->running_book_views = g_hash_table_new (g_direct_hash, g_direct_equal);
+	ebma->priv->conn_lock = g_mutex_new ();
 
-	/* Priv Struct init */
-	ebma->priv = priv;
-
-	priv->op_queue = em_operation_queue_new ((EMOperationQueueFunc) ebbm_operation_cb, ebma);
-	priv->running_book_views = g_hash_table_new (g_direct_hash, g_direct_equal);
-	priv->conn_lock = g_mutex_new ();
-
-	priv->update_cache = g_cancellable_new ();
-	priv->update_cache_thread = NULL;
+	ebma->priv->update_cache = g_cancellable_new ();
+	ebma->priv->update_cache_thread = NULL;
 }
 
 static void

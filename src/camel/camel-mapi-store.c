@@ -54,10 +54,6 @@
 
 #define d(x) printf("%s:%s:%s \n", G_STRLOC, G_STRFUNC, x)
 
-#define CAMEL_MAPI_STORE_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), CAMEL_TYPE_MAPI_STORE, CamelMapiStorePrivate))
-
 struct _CamelMapiStorePrivate {
 	gchar *profile;
 	ExchangeMapiConnection *conn;
@@ -758,7 +754,7 @@ mapi_store_dispose (GObject *object)
 {
 	CamelMapiStorePrivate *priv;
 
-	priv = CAMEL_MAPI_STORE_GET_PRIVATE (object);
+	priv = CAMEL_MAPI_STORE (object)->priv;
 
 	if (priv->conn != NULL) {
 		g_object_unref (priv->conn);
@@ -774,7 +770,7 @@ mapi_store_finalize (GObject *object)
 {
 	CamelMapiStorePrivate *priv;
 
-	priv = CAMEL_MAPI_STORE_GET_PRIVATE (object);
+	priv = CAMEL_MAPI_STORE (object)->priv;
 
 	g_free (priv->profile);
 	g_free (priv->storage_path);
@@ -1489,7 +1485,7 @@ camel_mapi_store_class_init (CamelMapiStoreClass *class)
 static void
 camel_mapi_store_init (CamelMapiStore *mapi_store)
 {
-	mapi_store->priv = CAMEL_MAPI_STORE_GET_PRIVATE (mapi_store);
+	mapi_store->priv = G_TYPE_INSTANCE_GET_PRIVATE (mapi_store, CAMEL_TYPE_MAPI_STORE, CamelMapiStorePrivate);
 }
 
 /* service methods */

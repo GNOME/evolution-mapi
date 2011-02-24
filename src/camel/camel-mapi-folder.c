@@ -48,10 +48,6 @@
 #define SUMMARY_FETCH_BATCH_COUNT 150
 #define d(x)
 
-#define CAMEL_MAPI_FOLDER_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), CAMEL_TYPE_MAPI_FOLDER, CamelMapiFolderPrivate))
-
 struct _CamelMapiFolderPrivate {
 
 //#ifdef ENABLE_THREADS
@@ -1829,7 +1825,7 @@ camel_mapi_folder_init (CamelMapiFolder *mapi_folder)
 {
 	CamelFolder *folder = CAMEL_FOLDER (mapi_folder);
 
-	mapi_folder->priv = CAMEL_MAPI_FOLDER_GET_PRIVATE (mapi_folder);
+	mapi_folder->priv = G_TYPE_INSTANCE_GET_PRIVATE (mapi_folder, CAMEL_TYPE_MAPI_FOLDER, CamelMapiFolderPrivate);
 
 	folder->permanent_flags = CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_DELETED |
 		CAMEL_MESSAGE_DRAFT | CAMEL_MESSAGE_FLAGGED | CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_JUNK;

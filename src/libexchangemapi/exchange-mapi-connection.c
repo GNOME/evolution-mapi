@@ -52,8 +52,6 @@ static void ema_global_unlock (void);
 
 G_DEFINE_TYPE (ExchangeMapiConnection, exchange_mapi_connection, G_TYPE_OBJECT)
 
-#define EXCHANGE_MAPI_CONNECTION_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), EXCHANGE_TYPE_MAPI_CONNECTION, ExchangeMapiConnectionPrivate))
-
 /* These two macros require 'priv' variable of type ExchangeMapiConnectionPrivate */
 #define LOCK()		g_debug ("%s: %s: lock(session/global_lock)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_lock (&priv->session_lock); ema_global_lock();
 #define UNLOCK()	g_debug ("%s: %s: unlock(session/global_lock)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_unlock (&priv->session_lock); ema_global_unlock();
@@ -147,8 +145,6 @@ make_mapi_error (GError **perror, const gchar *context, enum MAPISTATUS mapi_sta
 struct mapi_context *mapi_ctx = NULL;
 #endif
 
-typedef struct _ExchangeMapiConnectionPrivate ExchangeMapiConnectionPrivate;
-
 struct _ExchangeMapiConnectionPrivate {
 	struct mapi_session *session;
 	GStaticRecMutex session_lock;
@@ -226,7 +222,7 @@ exchange_mapi_connection_finalize (GObject *object)
 
 	unregister_connection (EXCHANGE_MAPI_CONNECTION (object));
 
-	priv = EXCHANGE_MAPI_CONNECTION_GET_PRIVATE (object);
+	priv = EXCHANGE_MAPI_CONNECTION (object)->priv;
 
 	if (priv) {
 		LOCK ();
@@ -261,20 +257,18 @@ exchange_mapi_connection_class_init (ExchangeMapiConnectionClass *klass)
 static void
 exchange_mapi_connection_init (ExchangeMapiConnection *conn)
 {
-	ExchangeMapiConnectionPrivate *priv;
+	conn->priv = G_TYPE_INSTANCE_GET_PRIVATE (conn, EXCHANGE_TYPE_MAPI_CONNECTION, ExchangeMapiConnectionPrivate);
+	g_return_if_fail (conn->priv != NULL);
 
-	priv = EXCHANGE_MAPI_CONNECTION_GET_PRIVATE (conn);
-	g_return_if_fail (priv != NULL);
+	g_static_rec_mutex_init (&conn->priv->session_lock);
+	g_static_rec_mutex_init (&conn->priv->folders_lock);
 
-	g_static_rec_mutex_init (&priv->session_lock);
-	g_static_rec_mutex_init (&priv->folders_lock);
+	conn->priv->session = NULL;
+	conn->priv->profile = NULL;
+	conn->priv->has_public_store = FALSE;
+	conn->priv->folders = NULL;
 
-	priv->session = NULL;
-	priv->profile = NULL;
-	priv->has_public_store = FALSE;
-	priv->folders = NULL;
-
-	priv->named_ids = g_hash_table_new_full (g_int64_hash, g_int64_equal, g_free, (GDestroyNotify) g_hash_table_destroy);
+	conn->priv->named_ids = g_hash_table_new_full (g_int64_hash, g_int64_equal, g_free, (GDestroyNotify) g_hash_table_destroy);
 
 	register_connection (conn);
 }
@@ -330,7 +324,7 @@ exchange_mapi_connection_find (const gchar *profile)
 	G_LOCK (known_connections);
 	for (l = known_connections; l != NULL && res == NULL; l = l->next) {
 		ExchangeMapiConnection *conn = EXCHANGE_MAPI_CONNECTION (l->data);
-		ExchangeMapiConnectionPrivate *priv = EXCHANGE_MAPI_CONNECTION_GET_PRIVATE (conn);
+		ExchangeMapiConnectionPrivate *priv = conn->priv;
 
 		if (priv && priv->profile && g_str_equal (profile, priv->profile))
 			res = conn;
@@ -360,7 +354,7 @@ exchange_mapi_connection_find (const gchar *profile)
 	e_return_val_mapi_error_if_fail (_conn != NULL, MAPI_E_INVALID_PARAMETER, _val);			\
 	e_return_val_mapi_error_if_fail (EXCHANGE_IS_MAPI_CONNECTION (_conn), MAPI_E_INVALID_PARAMETER, _val);	\
 														\
-	priv = EXCHANGE_MAPI_CONNECTION_GET_PRIVATE (_conn);							\
+	priv = (_conn)->priv;											\
 	e_return_val_mapi_error_if_fail (priv != NULL, MAPI_E_INVALID_PARAMETER, _val);
 
 /* Creates a new connection object and connects to a server as defined in 'profile' */
@@ -381,7 +375,7 @@ exchange_mapi_connection_new (const gchar *profile, const gchar *password, GErro
 	}
 
 	conn = g_object_new (EXCHANGE_TYPE_MAPI_CONNECTION, NULL);
-	priv = EXCHANGE_MAPI_CONNECTION_GET_PRIVATE (conn);
+	priv = conn->priv;
 	e_return_val_mapi_error_if_fail (priv != NULL, MAPI_E_INVALID_PARAMETER, conn);
 
 	LOCK ();
