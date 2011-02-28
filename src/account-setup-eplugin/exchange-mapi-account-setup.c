@@ -39,6 +39,7 @@
 #include "exchange-mapi-account-setup.h"
 #include <addressbook/gui/widgets/eab-config.h>
 #include <calendar/gui/e-cal-config.h>
+#include <shell/e-shell.h>
 
 #include <exchange-mapi-folder.h>
 #include <exchange-mapi-connection.h>
@@ -198,6 +199,11 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	CamelURL *url = NULL;
 	gchar *key = NULL, *password = NULL;
 	const gchar *domain_name = NULL;
+
+	if (!e_shell_get_online (e_shell_get_default ())) {
+		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Cannot create MAPI folders in offline mode."));
+		return;
+	}
 
 	url = camel_url_new (e_account_get_string (target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
 	domain_name = camel_url_get_param (url, "domain");

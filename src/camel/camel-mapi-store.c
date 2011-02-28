@@ -908,22 +908,22 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 			((CamelService *)store)->status = CAMEL_SERVICE_CONNECTING;
 			mapi_connect_sync ((CamelService *)store, cancellable, NULL);
 		}
-	}
 
-	/* update folders from the server only when asking for the top most or the 'top' is not known;
-	   otherwise believe the local cache, because folders sync is pretty slow operation to be done
-	   one every single question on the folder info */
-	if (((flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST) != 0 ||
-	     (!(flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED)) ||
-	     (!mapi_store->priv->folders_synced) ||
-	     (top && *top && !camel_mapi_store_folder_id_lookup (mapi_store, top))) &&
-	    (check_for_connection ((CamelService *)store, NULL) || ((CamelService *)store)->status == CAMEL_SERVICE_CONNECTING)) {
-		if (!mapi_folders_sync (mapi_store, flags, error)) {
-			camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-			return NULL;
+		/* update folders from the server only when asking for the top most or the 'top' is not known;
+		   otherwise believe the local cache, because folders sync is pretty slow operation to be done
+		   one every single question on the folder info */
+		if (((flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST) != 0 ||
+		    (!(flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED)) ||
+		    (!mapi_store->priv->folders_synced) ||
+		    (top && *top && !camel_mapi_store_folder_id_lookup (mapi_store, top))) &&
+		    (check_for_connection ((CamelService *)store, NULL) || ((CamelService *)store)->status == CAMEL_SERVICE_CONNECTING)) {
+			if (!mapi_folders_sync (mapi_store, flags, error)) {
+				camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+				return NULL;
+			}
+			camel_store_summary_touch ((CamelStoreSummary *)mapi_store->summary);
+			camel_store_summary_save ((CamelStoreSummary *)mapi_store->summary);
 		}
-		camel_store_summary_touch ((CamelStoreSummary *)mapi_store->summary);
-		camel_store_summary_save ((CamelStoreSummary *)mapi_store->summary);
 	}
 
 	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);

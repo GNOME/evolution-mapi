@@ -36,6 +36,7 @@
 #include <libedataserver/e-account-list.h>
 #include <libedataserver/e-source.h>
 #include <libedataserver/e-source-list.h>
+#include <shell/e-shell.h>
 
 #include <exchange-mapi-folder.h>
 #include <exchange-mapi-connection.h>
@@ -1101,6 +1102,9 @@ create_profile_entry (CamelURL *url, EAccount *account)
 {
 	gboolean status = FALSE;
 	guint8 attempts = 0;
+
+	if (!e_shell_get_online (e_shell_get_default ()))
+		return FALSE;
 
 	while (!status && attempts <= 3) {
 		gchar *password = NULL, *key = NULL;

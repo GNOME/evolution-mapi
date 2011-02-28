@@ -48,6 +48,8 @@
 #define SUMMARY_FETCH_BATCH_COUNT 150
 #define d(x)
 
+extern gint camel_application_is_exiting;
+
 struct _CamelMapiFolderPrivate {
 
 //#ifdef ENABLE_THREADS
@@ -227,7 +229,7 @@ fetch_items_summary_cb (FetchItemsCallbackData *item_data, gpointer data)
 	if (item_data->total > 0)
                camel_operation_progress (NULL, (item_data->index * 100)/item_data->total);
 
-	if (camel_operation_cancel_check(NULL))
+	if (camel_operation_cancel_check (NULL) || camel_application_is_exiting)
 		return FALSE;
 
 	return TRUE;
@@ -541,7 +543,7 @@ deleted_items_sync_cb (FetchItemsCallbackData *item_data, gpointer data)
 		camel_operation_progress (NULL, (item_data->index * 100)/item_data->total);
 
 	/* Check if we have to stop */
-	if (camel_operation_cancel_check(NULL))
+	if (camel_operation_cancel_check (NULL) || camel_application_is_exiting)
 		return FALSE;
 
 	return TRUE;
@@ -596,7 +598,7 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 	camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	/* Check if we have to stop */
-	if (camel_operation_cancel_check(NULL)) {
+	if (camel_operation_cancel_check (NULL) || camel_application_is_exiting) {
 		g_hash_table_destroy (server_messages);
 		return;
 	}
@@ -649,7 +651,7 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 		camel_operation_progress (NULL, (index * 100)/count); /* ;-) */
 
 		/* Check if we have to stop */
-		if (camel_operation_cancel_check(NULL)) {
+		if (camel_operation_cancel_check (NULL) || camel_application_is_exiting) {
 			g_hash_table_destroy (server_messages);
 			if (camel_folder_change_info_changed (changes))
 				camel_folder_changed (m->folder, changes);

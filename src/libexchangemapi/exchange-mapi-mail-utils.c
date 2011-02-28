@@ -28,6 +28,8 @@
 #include "exchange-mapi-cal-utils.h"
 #include "exchange-mapi-mail-utils.h"
 
+extern gint camel_application_is_exiting;
+
 void
 mail_item_free (MailItem *item)
 {
@@ -156,6 +158,9 @@ fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 	item->attachments = item_data->attachments;
 
 	*i = item;
+
+	if (camel_application_is_exiting)
+		return FALSE;
 
 	return TRUE;
 }
