@@ -1467,12 +1467,17 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 	flag32 = prop ? get_imp_prop_from_priority (icalproperty_get_priority (prop)) : IMPORTANCE_NORMAL;
 	set_value (PR_IMPORTANCE, &flag32);
 
-	set_value (PR_SENT_REPRESENTING_NAME_UNICODE, cbdata->ownername);
-	set_value (PR_SENT_REPRESENTING_ADDRTYPE_UNICODE, cbdata->owneridtype);
-	set_value (PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE, cbdata->ownerid);
-	set_value (PR_SENDER_NAME_UNICODE, cbdata->username);
-	set_value (PR_SENDER_ADDRTYPE_UNICODE, cbdata->useridtype);
-	set_value (PR_SENDER_EMAIL_ADDRESS_UNICODE, cbdata->userid);
+	if (cbdata->ownername && cbdata->owneridtype && cbdata->ownerid) {
+		set_value (PR_SENT_REPRESENTING_NAME_UNICODE, cbdata->ownername);
+		set_value (PR_SENT_REPRESENTING_ADDRTYPE_UNICODE, cbdata->owneridtype);
+		set_value (PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE, cbdata->ownerid);
+	}
+
+	if (cbdata->username && cbdata->useridtype && cbdata->userid) {
+		set_value (PR_SENDER_NAME_UNICODE, cbdata->username);
+		set_value (PR_SENDER_ADDRTYPE_UNICODE, cbdata->useridtype);
+		set_value (PR_SENDER_EMAIL_ADDRESS_UNICODE, cbdata->userid);
+	}
 
 	flag32 = cbdata->msgflags;
 	set_value (PR_MESSAGE_FLAGS, &flag32);
