@@ -1010,6 +1010,16 @@ ecbm_get_object (ECalBackend *backend, EDataCal *cal, const gchar *uid, const gc
 	/* search the object in the cache */
 	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
 
+	if (!comp) {
+		/* the object is not in the backend store, double check that it's
+		 * also not on the server to prevent for a race condition where we
+		 * might otherwise mistakenly generate a new UID */
+		g_mutex_unlock (priv->mutex);
+		get_deltas (cbmapi);
+		g_mutex_lock (priv->mutex);
+		comp = e_cal_backend_store_get_component (priv->store, uid, rid);
+	}
+
 	if (comp) {
 		g_mutex_unlock (priv->mutex);
 		if (e_cal_backend_get_kind (E_CAL_BACKEND (backend)) ==
