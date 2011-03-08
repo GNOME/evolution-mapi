@@ -483,6 +483,7 @@ mapi_mime_msg_body (MailItem *item, const ExchangeMAPIStream *body)
 	if (body && body->value && body->value->len > 0) {
 		const gchar *type = NULL;
 		gchar *buff = NULL;
+		gboolean strip_last_null;
 
 		if (item->is_cal)
 			type = "text/calendar";
@@ -508,7 +509,8 @@ mapi_mime_msg_body (MailItem *item, const ExchangeMAPIStream *body)
 			type = buff;
 		}
 
-		camel_mime_part_set_content (part, (const gchar *) body->value->data, body->value->len, type);
+		strip_last_null = body->value->len > 0 && body->value->data[body->value->len - 1] == '\0';
+		camel_mime_part_set_content (part, (const gchar *) body->value->data, body->value->len + (strip_last_null ? -1 : 0), type);
 
 		g_free (buff);
 	} else
