@@ -42,7 +42,6 @@
 #include "camel-mapi-folder.h"
 #include "camel-mapi-private.h"
 #include "camel-mapi-summary.h"
-#include "camel-mapi-utils.h"
 
 #define DEBUG_FN( ) printf("----%p %s\n", g_thread_self(), G_STRFUNC);
 #define SUMMARY_FETCH_BATCH_COUNT 150
@@ -1113,12 +1112,12 @@ mapi_folder_append_message_sync (CamelFolder *folder,
 	/* Convert MIME to Item */
 	from = (CamelAddress *) camel_mime_message_get_from (message);
 
-	item = camel_mapi_utils_mime_to_item (message, info ? camel_message_info_flags (info) : 0, from, cancellable, error);
+	item = mapi_mime_message_to_mail_item (message, info ? camel_message_info_flags (info) : 0, from, cancellable, error);
 	if (item == NULL)
 		return FALSE;
 
 	mid = exchange_mapi_connection_create_item (camel_mapi_store_get_exchange_connection (mapi_store), -1, fid,
-					 camel_mapi_utils_create_item_build_props, item,
+					 mapi_mail_utils_create_item_build_props, item,
 					 item->recipients, item->attachments,
 					 item->generic_streams, MAPI_OPTIONS_DONT_SUBMIT, &mapi_error);
 

@@ -19,7 +19,6 @@ libcamelmapi_la_SOURCES = 			\
         camel-mapi-store.c	                \
 	camel-mapi-store-summary.c         	\
 	camel-mapi-summary.c	         	\
-	camel-mapi-utils.c			\
 	camel-mapi-notifications.c		\
 	camel-mapi-transport.c			
 
@@ -29,7 +28,6 @@ noinst_HEADERS =         			\
 	camel-mapi-store-summary.h         	\
 	camel-mapi-summary.h	         	\
 	camel-mapi-transport.h			\
-	camel-mapi-utils.h			\
 	camel-mapi-notifications.h		\
 	camel-mapi-private.h
 

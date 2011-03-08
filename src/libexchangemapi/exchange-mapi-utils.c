@@ -25,7 +25,11 @@
 #include <config.h>
 #endif
 
+#include <glib.h>
+#include <gio/gio.h>
+
 #include "exchange-mapi-utils.h"
+#include "exchange-mapi-mail-utils.h"
 
 #ifdef G_OS_WIN32
 /* Undef the similar macro from pthread.h, it doesn't check if
@@ -324,11 +328,16 @@ exchange_mapi_util_free_attachment_list (GSList **attach_list)
 
 	for (; l != NULL; l = l->next) {
 		ExchangeMAPIAttachment *attachment = (ExchangeMAPIAttachment *) (l->data);
-		/* FIXME: more stuff here */
-		g_free (attachment->lpProps);
-		exchange_mapi_util_free_stream_list (&(attachment->streams));
+
+		if (attachment->mail) {
+			mail_item_free (attachment->mail);
+		} else {
+			g_free (attachment->lpProps);
+			exchange_mapi_util_free_stream_list (&(attachment->streams));
+		}
+
 		g_free (attachment);
-		attachment = NULL;
+		l->data = NULL;
 	}
 	g_slist_free (*attach_list);
 	*attach_list = NULL;

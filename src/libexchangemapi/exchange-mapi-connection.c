@@ -767,6 +767,138 @@ exchange_mapi_util_write_generic_streams (mapi_object_t *obj_message, GSList *st
 	return status;
 }
 
+static void
+set_recipient_properties (TALLOC_CTX *mem_ctx, struct SRow *aRow, ExchangeMAPIRecipient *recipient, gboolean is_external)
+{
+	uint32_t i;
+
+	if (is_external && recipient->in.ext_lpProps) {
+	/* FIXME: Setting PR_ENTRYID property seems to create problems for now. We should take
+	 * another look at this after the CreateOneoffEntryId API is provided by LibMAPI. */
+#if 0
+		struct Binary_r oneoff_eid;
+		struct SPropValue sprop;
+		const gchar *dn = NULL, *email = NULL;
+
+		dn = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (recipient->in.ext_lpProps, PR_DISPLAY_NAME_UNICODE);
+		dn = (dn) ? dn : "";
+		email = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (recipient->in.ext_lpProps, PR_SMTP_ADDRESS_UNICODE);
+		email = (email) ? email : "";
+		exchange_mapi_util_entryid_generate_oneoff (mem_ctx, &oneoff_eid, dn, email);
+		set_SPropValue_proptag (&sprop, PR_ENTRYID, (gconstpointer )(oneoff_eid));
+		SRow_addprop (aRow, sprop);
+#endif
+
+	/* Now, add the properties which are specified for unresolved recipients alone. */
+		for (i = 0; i < recipient->in.ext_cValues; ++i)
+			SRow_addprop (aRow, recipient->in.ext_lpProps[i]);
+	}
+
+	/* Now, add the properties which are specified for each recipient
+	 * irrespective of whether it was resolved or not. */
+	for (i = 0; i < recipient->in.req_cValues; ++i)
+		SRow_addprop (aRow, recipient->in.req_lpProps[i]);
+}
+
+static gboolean
+exchange_mapi_util_modify_recipients (ExchangeMapiConnection *conn, TALLOC_CTX *mem_ctx, mapi_object_t *obj_message , GSList *recipients, gboolean remove_existing, GError **perror)
+{
+	enum MAPISTATUS	ms;
+	struct SPropTagArray	*SPropTagArray = NULL;
+	struct SRowSet		*SRowSet = NULL;
+	#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+	struct PropertyTagArray_r *FlagList = NULL;
+	#else
+	struct SPropTagArray	*FlagList = NULL;
+	#endif
+	GSList			*l;
+	const gchar		**users = NULL;
+	uint32_t		i, j, count = 0;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+
+	SPropTagArray = set_SPropTagArray(mem_ctx, 0xA,
+					  PR_ENTRYID,
+					  PR_DISPLAY_NAME_UNICODE,
+					  PR_OBJECT_TYPE,
+					  PR_DISPLAY_TYPE,
+					  PR_TRANSMITTABLE_DISPLAY_NAME_UNICODE,
+					  PR_EMAIL_ADDRESS_UNICODE,
+					  PR_ADDRTYPE_UNICODE,
+					  PR_SEND_RICH_INFO,
+					  PR_7BIT_DISPLAY_NAME_UNICODE,
+					  PR_SMTP_ADDRESS_UNICODE);
+
+	count = g_slist_length (recipients);
+	users = g_new0 (const gchar *, count + 1);
+
+	for (i = 0, l = recipients; (i < count && l != NULL); ++i, l = l->next) {
+		ExchangeMAPIRecipient *recipient = (ExchangeMAPIRecipient *)(l->data);
+		users[i] = recipient->email_id;
+	}
+
+	/* Attempt to resolve names from the server */
+	LOCK ();
+	ms = ResolveNames (priv->session, users, SPropTagArray, &SRowSet, &FlagList, MAPI_UNICODE);
+	UNLOCK ();
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "ResolveNames", ms);
+		goto cleanup;
+	}
+
+	g_assert (count == FlagList->cValues);
+
+	if (!SRowSet) /* This happens when there are ZERO RESOLVED recipients */
+		SRowSet = talloc_zero(mem_ctx, struct SRowSet);
+
+	for (i = 0, l = recipients, j = 0; (i < count && l != NULL); ++i, l = l->next) {
+		ExchangeMAPIRecipient *recipient = (ExchangeMAPIRecipient *)(l->data);
+		uint32_t last;
+
+		if (FlagList->aulPropTag[i] == MAPI_AMBIGUOUS) {
+			/* We should never get an ambiguous resolution as we use the email-id for resolving.
+			 * However, if we do still get an ambiguous entry, we can't handle it :-( */
+			g_debug ("%s: %s() - '%s' is ambiguous ", G_STRLOC, G_STRFUNC, recipient->email_id);
+		} else if (FlagList->aulPropTag[i] == MAPI_UNRESOLVED) {
+			/* If the recipient is unresolved, consider it is a SMTP one */
+			SRowSet->aRow = talloc_realloc(mem_ctx, SRowSet->aRow, struct SRow, SRowSet->cRows + 1);
+			last = SRowSet->cRows;
+			SRowSet->aRow[last].cValues = 0;
+			SRowSet->aRow[last].lpProps = talloc_zero(mem_ctx, struct SPropValue);
+			set_recipient_properties(mem_ctx, &SRowSet->aRow[last], recipient, TRUE);
+			SRowSet->cRows += 1;
+		} else if (FlagList->aulPropTag[i] == MAPI_RESOLVED) {
+			set_recipient_properties (mem_ctx, &SRowSet->aRow[j], recipient, FALSE);
+			j += 1;
+		}
+	}
+
+	if (remove_existing) {
+		ms = RemoveAllRecipients (obj_message);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "RemoveAllRecipients", ms);
+			goto cleanup;
+		}
+	}
+
+	/* Modify the recipient table */
+	ms = ModifyRecipients (obj_message, SRowSet);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "ModifyRecipients", ms);
+		goto cleanup;
+	}
+
+cleanup:
+	g_free (users);
+
+	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+
+	return TRUE;
+}
+
 static gboolean
 exchange_mapi_util_delete_attachments (mapi_object_t *obj_message, GError **perror)
 {
@@ -842,9 +974,8 @@ cleanup:
 
 /* Returns TRUE if all attachments were written succcesfully, else returns FALSE */
 static gboolean
-exchange_mapi_util_set_attachments (mapi_object_t *obj_message, GSList *attach_list, gboolean remove_existing, GError **perror)
+exchange_mapi_util_set_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, mapi_object_t *obj_message, GSList *attach_list, gboolean remove_existing, GError **perror)
 {
-//	TALLOC_CTX	*mem_ctx;
 	GSList		*l;
 	enum MAPISTATUS	ms;
 	gboolean	status = FALSE;
@@ -853,8 +984,6 @@ exchange_mapi_util_set_attachments (mapi_object_t *obj_message, GSList *attach_l
 
 	if (remove_existing)
 		exchange_mapi_util_delete_attachments (obj_message, NULL);
-
-//	mem_ctx = talloc_init ("ExchangeMAPI_SetAttachments");
 
 	for (l = attach_list; l; l = l->next) {
 		ExchangeMAPIAttachment *attachment = (ExchangeMAPIAttachment *) (l->data);
@@ -869,16 +998,95 @@ exchange_mapi_util_set_attachments (mapi_object_t *obj_message, GSList *attach_l
 			goto cleanup;
 		}
 
-		/* SetProps */
-		ms = SetProps (&obj_attach, attachment->lpProps, attachment->cValues);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "SetProps", ms);
-			goto cleanup;
-		}
+		if (attachment->mail) {
+			struct SPropValue *props = NULL;
+			uint32_t propslen = 0, ui32;
+			MailItem *item = attachment->mail;
+			mapi_object_t obj_emb_msg;
 
-		/* If there are any streams to be set, write them. */
-		if (!exchange_mapi_util_write_generic_streams (&obj_attach, attachment->streams, perror))
-			goto cleanup;
+			ui32 = ATTACH_EMBEDDED_MSG;
+			exchange_mapi_utils_add_spropvalue (mem_ctx, &props, &propslen, PR_ATTACH_METHOD, &ui32);
+			ui32 = 0;
+			exchange_mapi_utils_add_spropvalue (mem_ctx, &props, &propslen, PR_RENDERING_POSITION, &ui32);
+			exchange_mapi_utils_add_spropvalue (mem_ctx, &props, &propslen, PR_ATTACH_MIME_TAG, "message/rfc822");
+			if (item->header.subject)
+				exchange_mapi_utils_add_spropvalue (mem_ctx, &props, &propslen, PR_ATTACH_FILENAME_UNICODE, item->header.subject);
+
+			/* set properties for the item */
+			ms = SetProps (&obj_attach, props, propslen);
+			if (ms != MAPI_E_SUCCESS) {
+				mapi_object_release (&obj_emb_msg);
+				make_mapi_error (perror, "SetProps", ms);
+				goto cleanup;
+			}
+
+			props = NULL;
+			propslen = 0;
+
+			mapi_object_init (&obj_emb_msg);
+
+			ms = OpenEmbeddedMessage (&obj_attach, &obj_emb_msg, MAPI_CREATE);
+			if (ms != MAPI_E_SUCCESS) {
+				make_mapi_error (perror, "OpenEmbeddedMessage", ms);
+				goto cleanup;
+			}
+
+			if (!mapi_mail_utils_create_item_build_props (conn, fid, mem_ctx, &props, &propslen, item)) {
+				make_mapi_error (perror, "build_props", MAPI_E_CALL_FAILED);
+				goto cleanup;
+			}
+
+			/* set properties for the item */
+			ms = SetProps (&obj_emb_msg, props, propslen);
+			if (ms != MAPI_E_SUCCESS) {
+				mapi_object_release (&obj_emb_msg);
+				make_mapi_error (perror, "SetProps", ms);
+				goto cleanup;
+			}
+
+			if (item->generic_streams) {
+				if (!exchange_mapi_util_write_generic_streams (&obj_emb_msg, item->generic_streams, perror)) {
+					mapi_object_release (&obj_emb_msg);
+					goto cleanup;
+				}
+			}
+
+			/* Set attachments if any */
+			if (item->attachments) {
+				if (!exchange_mapi_util_set_attachments (conn, fid, mem_ctx, &obj_emb_msg, item->attachments, FALSE, perror)) {
+					mapi_object_release (&obj_emb_msg);
+					goto cleanup;
+				}
+			}
+
+			/* Set recipients if any */
+			if (item->recipients) {
+				if (!exchange_mapi_util_modify_recipients (conn, mem_ctx, &obj_emb_msg, item->recipients, FALSE, perror)) {
+					mapi_object_release (&obj_emb_msg);
+					goto cleanup;
+				}
+			}
+
+			ms = SaveChangesMessage (&obj_attach, &obj_emb_msg, KeepOpenReadOnly);
+			if (ms != MAPI_E_SUCCESS) {
+				mapi_object_release (&obj_emb_msg);
+				make_mapi_error (perror, "SaveChangesMessage", ms);
+				goto cleanup;
+			}
+
+			mapi_object_release (&obj_emb_msg);
+		} else {
+			/* SetProps */
+			ms = SetProps (&obj_attach, attachment->lpProps, attachment->cValues);
+			if (ms != MAPI_E_SUCCESS) {
+				make_mapi_error (perror, "SetProps", ms);
+				goto cleanup;
+			}
+
+			/* If there are any streams to be set, write them. */
+			if (!exchange_mapi_util_write_generic_streams (&obj_attach, attachment->streams, perror))
+				goto cleanup;
+		}
 
 		/* message->SaveChangesAttachment() */
 		ms = SaveChangesAttachment (obj_message, &obj_attach, KeepOpenReadWrite);
@@ -892,8 +1100,6 @@ exchange_mapi_util_set_attachments (mapi_object_t *obj_message, GSList *attach_l
 	cleanup:
 		mapi_object_release(&obj_attach);
 	}
-
-//	talloc_free (mem_ctx);
 
 	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
@@ -1276,138 +1482,6 @@ cleanup:
 	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return status;
-}
-
-static void
-set_recipient_properties (TALLOC_CTX *mem_ctx, struct SRow *aRow, ExchangeMAPIRecipient *recipient, gboolean is_external)
-{
-	uint32_t i;
-
-	if (is_external && recipient->in.ext_lpProps) {
-	/* FIXME: Setting PR_ENTRYID property seems to create problems for now. We should take
-	 * another look at this after the CreateOneoffEntryId API is provided by LibMAPI. */
-#if 0
-		struct Binary_r oneoff_eid;
-		struct SPropValue sprop;
-		const gchar *dn = NULL, *email = NULL;
-
-		dn = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (recipient->in.ext_lpProps, PR_DISPLAY_NAME_UNICODE);
-		dn = (dn) ? dn : "";
-		email = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (recipient->in.ext_lpProps, PR_SMTP_ADDRESS_UNICODE);
-		email = (email) ? email : "";
-		exchange_mapi_util_entryid_generate_oneoff (mem_ctx, &oneoff_eid, dn, email);
-		set_SPropValue_proptag (&sprop, PR_ENTRYID, (gconstpointer )(oneoff_eid));
-		SRow_addprop (aRow, sprop);
-#endif
-
-	/* Now, add the properties which are specified for unresolved recipients alone. */
-		for (i = 0; i < recipient->in.ext_cValues; ++i)
-			SRow_addprop (aRow, recipient->in.ext_lpProps[i]);
-	}
-
-	/* Now, add the properties which are specified for each recipient
-	 * irrespective of whether it was resolved or not. */
-	for (i = 0; i < recipient->in.req_cValues; ++i)
-		SRow_addprop (aRow, recipient->in.req_lpProps[i]);
-}
-
-static gboolean
-exchange_mapi_util_modify_recipients (ExchangeMapiConnection *conn, TALLOC_CTX *mem_ctx, mapi_object_t *obj_message , GSList *recipients, gboolean remove_existing, GError **perror)
-{
-	enum MAPISTATUS	ms;
-	struct SPropTagArray	*SPropTagArray = NULL;
-	struct SRowSet		*SRowSet = NULL;
-	#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
-	struct PropertyTagArray_r *FlagList = NULL;
-	#else
-	struct SPropTagArray	*FlagList = NULL;
-	#endif
-	GSList			*l;
-	const gchar		**users = NULL;
-	uint32_t		i, j, count = 0;
-
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
-	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
-
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-
-	SPropTagArray = set_SPropTagArray(mem_ctx, 0xA,
-					  PR_ENTRYID,
-					  PR_DISPLAY_NAME_UNICODE,
-					  PR_OBJECT_TYPE,
-					  PR_DISPLAY_TYPE,
-					  PR_TRANSMITTABLE_DISPLAY_NAME_UNICODE,
-					  PR_EMAIL_ADDRESS_UNICODE,
-					  PR_ADDRTYPE_UNICODE,
-					  PR_SEND_RICH_INFO,
-					  PR_7BIT_DISPLAY_NAME_UNICODE,
-					  PR_SMTP_ADDRESS_UNICODE);
-
-	count = g_slist_length (recipients);
-	users = g_new0 (const gchar *, count + 1);
-
-	for (i = 0, l = recipients; (i < count && l != NULL); ++i, l = l->next) {
-		ExchangeMAPIRecipient *recipient = (ExchangeMAPIRecipient *)(l->data);
-		users[i] = recipient->email_id;
-	}
-
-	/* Attempt to resolve names from the server */
-	LOCK ();
-	ms = ResolveNames (priv->session, users, SPropTagArray, &SRowSet, &FlagList, MAPI_UNICODE);
-	UNLOCK ();
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "ResolveNames", ms);
-		goto cleanup;
-	}
-
-	g_assert (count == FlagList->cValues);
-
-	if (!SRowSet) /* This happens when there are ZERO RESOLVED recipients */
-		SRowSet = talloc_zero(mem_ctx, struct SRowSet);
-
-	for (i = 0, l = recipients, j = 0; (i < count && l != NULL); ++i, l = l->next) {
-		ExchangeMAPIRecipient *recipient = (ExchangeMAPIRecipient *)(l->data);
-		uint32_t last;
-
-		if (FlagList->aulPropTag[i] == MAPI_AMBIGUOUS) {
-			/* We should never get an ambiguous resolution as we use the email-id for resolving.
-			 * However, if we do still get an ambiguous entry, we can't handle it :-( */
-			g_debug ("%s: %s() - '%s' is ambiguous ", G_STRLOC, G_STRFUNC, recipient->email_id);
-		} else if (FlagList->aulPropTag[i] == MAPI_UNRESOLVED) {
-			/* If the recipient is unresolved, consider it is a SMTP one */
-			SRowSet->aRow = talloc_realloc(mem_ctx, SRowSet->aRow, struct SRow, SRowSet->cRows + 1);
-			last = SRowSet->cRows;
-			SRowSet->aRow[last].cValues = 0;
-			SRowSet->aRow[last].lpProps = talloc_zero(mem_ctx, struct SPropValue);
-			set_recipient_properties(mem_ctx, &SRowSet->aRow[last], recipient, TRUE);
-			SRowSet->cRows += 1;
-		} else if (FlagList->aulPropTag[i] == MAPI_RESOLVED) {
-			set_recipient_properties (mem_ctx, &SRowSet->aRow[j], recipient, FALSE);
-			j += 1;
-		}
-	}
-
-	if (remove_existing) {
-		ms = RemoveAllRecipients (obj_message);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "RemoveAllRecipients", ms);
-			goto cleanup;
-		}
-	}
-
-	/* Modify the recipient table */
-	ms = ModifyRecipients (obj_message, SRowSet);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "ModifyRecipients", ms);
-		goto cleanup;
-	}
-
-cleanup:
-	g_free (users);
-
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-	return TRUE;
 }
 
 static enum MAPISTATUS
@@ -2609,7 +2683,7 @@ exchange_mapi_connection_create_item (ExchangeMapiConnection *conn, uint32_t olF
 
 	/* Set attachments if any */
 	if (attachments) {
-		if (!exchange_mapi_util_set_attachments (&obj_message, attachments, FALSE, perror))
+		if (!exchange_mapi_util_set_attachments (conn, fid, mem_ctx, &obj_message, attachments, FALSE, perror))
 			goto cleanup;
 	}
 
@@ -2734,7 +2808,7 @@ exchange_mapi_connection_modify_item (ExchangeMapiConnection *conn, uint32_t olF
 
 	/* Set attachments if any */
 	if (attachments) {
-		if (!exchange_mapi_util_set_attachments (&obj_message, attachments, TRUE, perror))
+		if (!exchange_mapi_util_set_attachments (conn, fid, mem_ctx, &obj_message, attachments, TRUE, perror))
 			goto cleanup;
 	} else {
 		exchange_mapi_util_delete_attachments (&obj_message, NULL);

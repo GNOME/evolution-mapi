@@ -42,7 +42,6 @@
 #include "camel-mapi-store.h"
 #include "camel-mapi-folder.h"
 #include "camel-mapi-store-summary.h"
-#include "camel-mapi-utils.h"
 #define d(x)
 
 #include <exchange-mapi-defs.h>
@@ -74,7 +73,7 @@ mapi_message_item_send (ExchangeMapiConnection *conn, MailItem *item, GError **p
 	#undef unset
 
 	mid = exchange_mapi_connection_create_item (conn, olFolderSentMail, fid,
-					 camel_mapi_utils_create_item_build_props, item,
+					 mapi_mail_utils_create_item_build_props, item,
 					 item->recipients, item->attachments, item->generic_streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE, perror);
 
 	return mid;
@@ -115,7 +114,7 @@ mapi_send_to_sync (CamelTransport *transport,
 	}
 
 	/* Convert MIME to MailItem, attacment lists and recipient list.*/
-	item = camel_mapi_utils_mime_to_item (message, 0, from, cancellable, NULL);
+	item = mapi_mime_message_to_mail_item (message, 0, from, cancellable, NULL);
 
 	/* send */
 	st = mapi_message_item_send (conn, item, error);

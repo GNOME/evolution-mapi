@@ -107,11 +107,14 @@ typedef struct {
 	struct SRow out_SRow;
 } ExchangeMAPIRecipient;
 
+struct _MailItem;
+
 typedef struct {
 	uint32_t cValues;
 	struct SPropValue *lpProps;
 	GSList *streams;
 	GSList *objects;
+	struct _MailItem *mail; /* not NULL when writing mail attachment; in this case are other members ignored */
 } ExchangeMAPIAttachment;
 
 typedef struct {

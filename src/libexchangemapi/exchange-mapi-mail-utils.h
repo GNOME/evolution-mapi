@@ -25,6 +25,8 @@
 #endif
 
 #include <glib.h>
+#include <gio/gio.h>
+
 #include <libmapi/libmapi.h>
 
 #include <exchange-mapi-connection.h>
@@ -61,7 +63,7 @@ typedef struct {
 	GSList *body_parts;
 } MailItemMessage;
 
-typedef struct  {
+typedef struct _MailItem {
 	mapi_id_t fid;
 	mapi_id_t mid;
 	gchar *msg_class;
@@ -74,7 +76,7 @@ typedef struct  {
 	GSList *recipients;
 	GSList *attachments;
 	GSList *generic_streams;
-}MailItem;
+} MailItem;
 
 void mail_item_free (MailItem *item);
 
@@ -88,5 +90,10 @@ gboolean mapi_mail_get_item_prop_list (ExchangeMapiConnection *conn, mapi_id_t f
 
 struct _CamelMimeMessage;
 struct _CamelMimeMessage *mapi_mail_item_to_mime_message (ExchangeMapiConnection *conn, MailItem *item);
+
+struct _CamelAddress;
+MailItem *mapi_mime_message_to_mail_item (struct _CamelMimeMessage *message, gint32 message_camel_flags, struct _CamelAddress *from, GCancellable *cancellable, GError **error);
+/* uses MailItem * as 'data' pointer */
+gboolean  mapi_mail_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data);
 
 #endif /* EXCHANGE_MAPI_MAIL_UTILS */
