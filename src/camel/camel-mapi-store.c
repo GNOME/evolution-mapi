@@ -143,6 +143,67 @@ check_for_connection (CamelService *service, GError **error)
 	return store && store->priv->conn && exchange_mapi_connection_connected (store->priv->conn);
 }
 
+/* escapes backslashes with \5C and forward slashes with \2F */
+static gchar *
+escape_slash (const gchar *str)
+{
+	gint ii, jj, count = 0;
+	gchar *res;
+
+	if (!str)
+		return NULL;
+
+	for (ii = 0; str[ii]; ii++) {
+		if (str[ii] == '\\' || str[ii] == '/')
+			count++;
+	}
+
+	if (!count)
+		return g_strdup (str);
+
+	res = g_malloc0 (sizeof (gchar *) * (1 + ii + (2 * count)));
+	for (ii = 0, jj = 0; str[ii]; ii++, jj++) {
+		if (str[ii] == '\\') {
+			res[jj] = '\\';
+			res[jj + 1] = '5';
+			res[jj + 2] = 'C';
+			jj += 2;
+		} else if (str[ii] == '/') {
+			res[jj] = '\\';
+			res[jj + 1] = '2';
+			res[jj + 2] = 'F';
+			jj += 2;
+		} else {
+			res[jj] = str[ii];
+		}
+	}
+
+	res[jj] = '\0';
+
+	return res;
+}
+
+/* reverses escape_slash processing */
+static gchar *
+unescape_slash (const gchar *str)
+{
+	gchar *res = g_strdup (str);
+	gint ii, jj;
+
+	for (ii = 0, jj = 0; res[ii]; ii++, jj++) {
+		if (res[ii] == '\\' && g_ascii_isxdigit (res[ii + 1]) && g_ascii_isxdigit (res[ii + 2])) {
+			res[jj] = ((g_ascii_xdigit_value (res[ii + 1]) & 0xF) << 4) | (g_ascii_xdigit_value (res[ii + 2]) & 0xF);
+			ii += 2;
+		} else if (ii != jj) {
+			res[jj] = res[ii];
+		}
+	}
+
+	res[jj] = '\0';
+
+	return res;
+}
+
 static CamelFolder *
 mapi_get_folder_with_type (CamelStore *store, guint folder_type, GCancellable *cancellable, GError **error)
 {
@@ -197,14 +258,14 @@ mapi_get_folder_with_type (CamelStore *store, guint folder_type, GCancellable *c
 static CamelFolderInfo *
 mapi_convert_to_folder_info (CamelMapiStore *store, ExchangeMAPIFolder *folder, const gchar *url, GError **error)
 {
-	const gchar *name = NULL;
+	gchar *name;
 	gchar *parent, *id = NULL;
 	mapi_id_t mapi_id_folder;
 
 	const gchar *par_name = NULL;
 	CamelFolderInfo *fi;
 
-	name = exchange_mapi_folder_get_name (folder);
+	name = escape_slash (exchange_mapi_folder_get_name (folder));
 
 	id = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", exchange_mapi_folder_get_fid (folder));
 
@@ -252,7 +313,7 @@ mapi_convert_to_folder_info (CamelMapiStore *store, ExchangeMAPIFolder *folder, 
 	mapi_id_folder = exchange_mapi_folder_get_parent_id (folder);
 	parent = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", mapi_id_folder);
 
-	fi->name =  g_strdup (name);
+	fi->name = name;
 
 	par_name = mapi_folders_hash_table_name_lookup (store, parent, TRUE);
 	if (par_name != NULL) {
@@ -408,11 +469,17 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GError **error)
 
 			par_full_name = g_hash_table_lookup (priv->id_hash, parent_id);
 			if (par_full_name) {
-				tmp = g_strconcat (par_full_name, "/", exchange_mapi_folder_get_name (temp_list->data), NULL);
+				gchar *escaped = escape_slash (exchange_mapi_folder_get_name (temp_list->data));
+				tmp = g_strconcat (par_full_name, "/", escaped, NULL);
 				full_name = tmp;
+				g_free (escaped);
 			} else {
-				full_name = exchange_mapi_folder_get_name (temp_list->data);
+				tmp = escape_slash (exchange_mapi_folder_get_name (temp_list->data));
+				full_name = tmp;
 			}
+		} else {
+			tmp = escape_slash (full_name);
+			full_name = tmp;
 		}
 
 		/* remove from here; what lefts is not on the server any more */
@@ -558,6 +625,25 @@ match_path(const gchar *path, const gchar *name)
 	return n == 0 && (p == '%' || p == 0);
 }
 
+static void
+fix_folder_names (CamelFolderInfo *fi)
+{
+	while (fi) {
+		if (fi->name && strchr (fi->name, '\\')) {
+			gchar *unescaped;
+
+			unescaped = unescape_slash (fi->name);
+			g_free (fi->name);
+			fi->name = unescaped;
+		}
+
+		if (fi->child)
+			fix_folder_names (fi->child);
+
+		fi = fi->next;
+	}
+}
+
 static CamelFolderInfo *
 mapi_get_folder_info_offline (CamelStore *store, const gchar *top,
 			 guint32 flags, GError **error)
@@ -658,6 +744,9 @@ mapi_get_folder_info_offline (CamelStore *store, const gchar *top,
 	g_free (path);
 	fi = camel_folder_info_build (folders, top, '/', TRUE);
 	g_ptr_array_free (folders, TRUE);
+
+	fix_folder_names (fi);
+
 	return fi;
 }
 
@@ -1833,13 +1922,10 @@ mapi_build_folder_info(CamelMapiStore *mapi_store, const gchar *parent_name, con
 	fi->unread = -1;
 	fi->total = -1;
 
-	if (parent_name) {
-		if (strlen(parent_name) > 0)
-			fi->full_name = g_strconcat(parent_name, "/", folder_name, NULL);
-		else
-			fi->full_name = g_strdup (folder_name);
-	} else
-		fi->full_name = g_strdup(folder_name);
+	if (parent_name && *parent_name)
+		fi->full_name = g_strconcat (parent_name, "/", folder_name, NULL);
+	else
+		fi->full_name = g_strdup (folder_name);
 
 	url = camel_url_new (priv->base_url, NULL);
 	g_free(url->path);
@@ -1854,9 +1940,8 @@ mapi_build_folder_info(CamelMapiStore *mapi_store, const gchar *parent_name, con
 	else
 		name++;
 
-	/*Fixme : Mark system folders.*/
+	fi->name = g_strdup (name);
 
-	fi->name = g_strdup(name);
 	return fi;
 }
 
