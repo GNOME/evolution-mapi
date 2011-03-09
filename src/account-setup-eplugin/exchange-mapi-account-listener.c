@@ -711,7 +711,7 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 	}
 
 	//Add GAL
-	{
+	if (!gconf_client_get_bool (client, "/apps/evolution/eplugin/mapi/disable_gal", NULL)) {
 		gchar *uri;
 		gboolean is_new_source = FALSE;
 
