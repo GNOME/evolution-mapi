@@ -1110,14 +1110,15 @@ create_profile_entry (CamelURL *url, EAccount *account)
 		gchar *password = NULL, *key = NULL;
 
 		key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
-		password = e_passwords_get_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
+		if (!attempts)
+			password = e_passwords_get_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
 		if (!password) {
 			gboolean remember = account && e_account_get_bool (account, E_ACCOUNT_SOURCE_SAVE_PASSWD);
 			gchar *title;
 
 			title = g_strdup_printf (_("Enter Password for %s@%s"), url->user, url->host);
 			password = e_passwords_ask_password (title, EXCHANGE_MAPI_PASSWORD_COMPONENT, key, title,
-					E_PASSWORDS_REMEMBER_FOREVER|E_PASSWORDS_SECRET,
+					E_PASSWORDS_REMEMBER_FOREVER | E_PASSWORDS_SECRET | (attempts ? E_PASSWORDS_REPROMPT : 0),
 					&remember, NULL);
 			g_free (title);
 		}
