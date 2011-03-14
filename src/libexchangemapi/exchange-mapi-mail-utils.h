@@ -67,6 +67,7 @@ typedef struct _MailItem {
 	mapi_id_t fid;
 	mapi_id_t mid;
 	gchar *msg_class;
+	gchar *pid_name_content_type; /* for PidNameContentType */
 
 	MailItemHeader header;
 	MailItemMessage msg;

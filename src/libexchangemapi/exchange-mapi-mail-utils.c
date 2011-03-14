@@ -51,6 +51,7 @@ mail_item_free (MailItem *item)
 	exchange_mapi_util_free_recipient_list (&item->recipients);
 
 	g_free (item->msg_class);
+	g_free (item->pid_name_content_type);
 
 	g_free (item);
 }
@@ -1146,6 +1147,8 @@ mail_item_add_attach (MailItem *item, CamelMimePart *part, CamelStream *content_
 	item_attach->streams = g_slist_append (item_attach->streams, stream);
 	item->attachments = g_slist_append(item->attachments, item_attach);
 
+	g_free (buf);
+
 	return TRUE;
 }
 
@@ -1224,6 +1227,147 @@ get_content_stream (CamelMimePart *part, GCancellable *cancellable)
 	return content_stream;
 }
 
+static void
+mapi_do_smime_signed (MailItem *item, CamelMultipart *multipart, GCancellable *cancellable, GError **error)
+{
+	CamelMimePart *content, *signature;
+	ExchangeMAPIAttachment *item_attach;
+	ExchangeMAPIStream *stream;
+	CamelStream *content_stream;
+	CamelContentType *type;
+	CamelDataWrapper *dw;
+	uint32_t ui32;
+	guint8 *buf;
+	guint32	read_size;
+	gchar *content_type_str;
+
+	g_free (item->msg_class);
+	item->msg_class = g_strdup ("IPM.Note.SMIME.MultipartSigned");
+
+	content = camel_multipart_get_part (multipart, CAMEL_MULTIPART_SIGNED_CONTENT);
+	signature = camel_multipart_get_part (multipart, CAMEL_MULTIPART_SIGNED_SIGNATURE);
+
+	g_return_if_fail (content != NULL);
+	g_return_if_fail (signature != NULL);
+
+	content_stream = get_content_stream (content, cancellable);
+	type = camel_mime_part_get_content_type (content);
+
+	if (camel_content_type_is (type, "text", "plain")) {
+		mail_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT, cancellable);
+	} else if (camel_content_type_is (type, "text", "html")) {
+		mail_item_set_body_stream (item, content_stream, PART_TYPE_TEXT_HTML, cancellable);
+	} else {
+		mail_item_add_attach (item, content, content_stream, cancellable);
+	}
+
+	if (content_stream)
+		g_object_unref (content_stream);
+
+	content_stream = camel_stream_mem_new ();
+	dw = CAMEL_DATA_WRAPPER (multipart);
+	type = camel_data_wrapper_get_mime_type_field (dw);
+	content_type_str = camel_content_type_format (type);
+
+	#define wstr(str) camel_stream_write (content_stream, str, strlen (str), cancellable, NULL)
+	wstr("Content-Type: ");
+	wstr(content_type_str);
+	wstr("\n\n");
+	#undef wstr
+
+	g_free (content_type_str);
+
+	camel_data_wrapper_write_to_stream_sync (dw, (CamelStream *) content_stream, cancellable, NULL);
+
+	item_attach = g_new0 (ExchangeMAPIAttachment, 1);
+	item_attach->lpProps = g_new0 (struct SPropValue, 6 + 1);
+	item_attach->cValues = 6;
+
+	ui32 = ATTACH_BY_VALUE;
+	set_SPropValue_proptag (&(item_attach->lpProps[0]), PR_ATTACH_METHOD, &ui32);
+	ui32 = -1;
+	set_SPropValue_proptag (&(item_attach->lpProps[1]), PR_RENDERING_POSITION, &ui32);
+	set_SPropValue_proptag (&(item_attach->lpProps[2]), PR_ATTACH_MIME_TAG, "multipart/signed");
+	set_SPropValue_proptag (&(item_attach->lpProps[3]), PR_ATTACH_FILENAME_UNICODE, "SMIME.txt");
+	set_SPropValue_proptag (&(item_attach->lpProps[4]), PR_ATTACH_LONG_FILENAME_UNICODE, "SMIME.txt");
+	set_SPropValue_proptag (&(item_attach->lpProps[5]), PR_DISPLAY_NAME_UNICODE, "SMIME.txt");
+
+	stream = g_new0 (ExchangeMAPIStream, 1);
+	stream->proptag = PR_ATTACH_DATA_BIN;
+	stream->value = g_byte_array_new ();
+
+	buf = g_new0 (guint8 , STREAM_SIZE);
+
+	g_seekable_seek (G_SEEKABLE (content_stream), 0, G_SEEK_SET, NULL, NULL);
+	while (read_size = camel_stream_read (content_stream, (gchar *) buf, STREAM_SIZE, cancellable, NULL), read_size > 0) {
+		stream->value = g_byte_array_append (stream->value, buf, read_size);
+	}
+
+	g_free (buf);
+	g_object_unref (content_stream);
+
+	item_attach->streams = g_slist_append (item_attach->streams, stream);
+	item->attachments = g_slist_append (item->attachments, item_attach);
+}
+
+static void
+mapi_do_smime_encrypted (MailItem *item, CamelMedium *message, GCancellable *cancellable, GError **error)
+{
+	ExchangeMAPIAttachment *item_attach;
+	ExchangeMAPIStream *stream;
+	CamelStream *content_stream;
+	CamelDataWrapper *dw;
+	CamelContentType *type;
+	uint32_t ui32;
+	guint8 *buf;
+	guint32	read_size;
+	gchar *content_type_str;
+
+	g_free (item->msg_class);
+	item->msg_class = g_strdup ("IPM.Note.SMIME");
+
+	type = camel_data_wrapper_get_mime_type_field (CAMEL_DATA_WRAPPER (message));
+	dw = camel_medium_get_content (message);
+
+	content_type_str = camel_content_type_format (type);
+
+	g_free (item->pid_name_content_type);
+	item->pid_name_content_type = content_type_str; /* will be freed with the MailItem structure */
+
+	content_stream = camel_stream_mem_new ();
+	camel_data_wrapper_decode_to_stream_sync (dw, (CamelStream *) content_stream, cancellable, NULL);
+
+	item_attach = g_new0 (ExchangeMAPIAttachment, 1);
+	item_attach->lpProps = g_new0 (struct SPropValue, 6 + 1);
+	item_attach->cValues = 6;
+
+	ui32 = ATTACH_BY_VALUE;
+	set_SPropValue_proptag (&(item_attach->lpProps[0]), PR_ATTACH_METHOD, &ui32);
+	ui32 = -1;
+	set_SPropValue_proptag (&(item_attach->lpProps[1]), PR_RENDERING_POSITION, &ui32);
+	set_SPropValue_proptag (&(item_attach->lpProps[2]), PR_ATTACH_MIME_TAG, content_type_str);
+	set_SPropValue_proptag (&(item_attach->lpProps[3]), PR_ATTACH_FILENAME_UNICODE, "SMIME.txt");
+	set_SPropValue_proptag (&(item_attach->lpProps[4]), PR_ATTACH_LONG_FILENAME_UNICODE, "SMIME.txt");
+	set_SPropValue_proptag (&(item_attach->lpProps[5]), PR_DISPLAY_NAME_UNICODE, "SMIME.txt");
+
+	stream = g_new0 (ExchangeMAPIStream, 1);
+	stream->proptag = PR_ATTACH_DATA_BIN;
+	stream->value = g_byte_array_new ();
+
+	buf = g_new0 (guint8 , STREAM_SIZE);
+
+	g_seekable_seek (G_SEEKABLE (content_stream), 0, G_SEEK_SET, NULL, NULL);
+	while (read_size = camel_stream_read (content_stream, (gchar *) buf, STREAM_SIZE, cancellable, NULL), read_size > 0) {
+		stream->value = g_byte_array_append (stream->value, buf, read_size);
+	}
+
+	g_free (buf);
+	g_object_unref (content_stream);
+
+	item_attach->streams = g_slist_append (item_attach->streams, stream);
+	item->attachments = g_slist_append (item->attachments, item_attach);
+}
+
 static gboolean
 mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first, GCancellable *cancellable)
 {
@@ -1232,9 +1376,6 @@ mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first, GCanc
 	CamelContentType *type;
 	CamelMimePart *part;
 	gint n_part, i_part;
-	const gchar *filename;
-	const gchar *description;
-	const gchar *content_id;
 
 	g_return_val_if_fail (is_first != NULL, FALSE);
 
@@ -1271,13 +1412,7 @@ mapi_do_multipart (CamelMultipart *mp, MailItem *item, gboolean *is_first, GCanc
 			}
 		}
 
-		/* filename */
-		filename = camel_mime_part_get_filename(part);
-
 		content_stream = get_content_stream (part, cancellable);
-
-		description = camel_mime_part_get_description(part);
-		content_id = camel_mime_part_get_content_id(part);
 
 		type = camel_mime_part_get_content_type(part);
 
@@ -1316,6 +1451,7 @@ mapi_mime_message_to_mail_item (CamelMimeMessage *message, gint32 message_camel_
 	CamelDataWrapper *dw = NULL;
 	CamelStream *content_stream;
 	CamelMultipart *multipart;
+	CamelContentType *content_type;
 	CamelInternetAddress *to, *cc, *bcc;
 	MailItem *item = g_new0 (MailItem, 1);
 	const gchar *namep = NULL;
@@ -1396,16 +1532,28 @@ mapi_mime_message_to_mail_item (CamelMimeMessage *message, gint32 message_camel_
 	item->header.in_reply_to = g_strdup (camel_medium_get_header ((CamelMedium *) message, "In-Reply-To"));
 	item->header.message_id = g_strdup (camel_medium_get_header ((CamelMedium *) message, "Message-ID"));
 
-	/* contents body */
-	multipart = (CamelMultipart *)camel_medium_get_content (CAMEL_MEDIUM (message));
+	item->recipients = recipient_list;
 
-	if (CAMEL_IS_MULTIPART(multipart)) {
-		gboolean is_first = TRUE;
-		if (!mapi_do_multipart (CAMEL_MULTIPART(multipart), item, &is_first, cancellable))
-			printf("camel message multi part error\n");
+	content_type = camel_data_wrapper_get_mime_type_field (CAMEL_DATA_WRAPPER (message));
+	g_return_val_if_fail (content_type != NULL, item);
+
+	if (camel_content_type_is (content_type, "application", "x-pkcs7-mime") || camel_content_type_is (content_type, "application", "pkcs7-mime")) {
+		mapi_do_smime_encrypted (item, CAMEL_MEDIUM (message), cancellable, error);
 	} else {
+		/* contents body */
 		dw = camel_medium_get_content (CAMEL_MEDIUM (message));
-		if (dw) {
+
+		if (CAMEL_IS_MULTIPART (dw)) {
+			gboolean is_first = TRUE;
+
+			multipart = CAMEL_MULTIPART (dw);
+
+			if (CAMEL_IS_MULTIPART_SIGNED (multipart) && camel_multipart_get_number (multipart) == 2) {
+				mapi_do_smime_signed (item, multipart, cancellable, error);
+			} else {
+				mapi_do_multipart (multipart, item, &is_first, cancellable);
+			}
+		} else if (dw) {
 			content_stream = get_content_stream ((CamelMimePart *) message, cancellable);
 
 			mail_item_set_body_stream (item, content_stream, PART_TYPE_PLAIN_TEXT, cancellable);
@@ -1414,8 +1562,6 @@ mapi_mime_message_to_mail_item (CamelMimeMessage *message, gint32 message_camel_
 				g_object_unref (content_stream);
 		}
 	}
-
-	item->recipients = recipient_list;
 
 	return item;
 }
@@ -1433,6 +1579,15 @@ mapi_mail_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_t
 		if (!exchange_mapi_utils_add_spropvalue (mem_ctx, values, n_values, hex, val)) \
 			return FALSE;	\
 		} G_STMT_END
+
+	if (item->msg_class) {
+		set_value (PR_MESSAGE_CLASS, item->msg_class);
+	}
+	
+	if (item->pid_name_content_type) {
+		if (!exchange_mapi_utils_add_spropvalue_named_id (conn, fid, mem_ctx, values, n_values, PidNameContentType, item->pid_name_content_type))
+			return FALSE;
+	}
 
 	cpid = 65001; /* UTF8 - also used with PR_HTML */
 	set_value (PR_INTERNET_CPID, &cpid);
