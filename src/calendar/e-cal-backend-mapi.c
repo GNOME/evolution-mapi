@@ -449,7 +449,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 	cache_comp = e_cal_backend_store_get_component (priv->store, tmp, NULL);
 
 	if (cache_comp == NULL) {
-		ECalComponent *comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, array,
+		ECalComponent *comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, kind, tmp, array,
 									streams, recipients, attachments,
 									cache_dir, priv->default_zone, FALSE, &detached);
 
@@ -489,7 +489,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 				e_cal_component_commit_sequence (cache_comp);
 				cache_comp_str = e_cal_component_get_as_string (cache_comp);
 
-				comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, array,
+				comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, kind, tmp, array,
 									streams, recipients, attachments,
 									cache_dir, priv->default_zone, FALSE, NULL);
 
@@ -1242,7 +1242,7 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 	}
 
 	tmp = exchange_mapi_util_mapi_id_to_string (mid);
-	comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, kind, tmp, properties,
+	comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, kind, tmp, properties,
 							streams, recipients, attachments,
 							cache_dir, priv->default_zone, FALSE, &detached);
 	g_free (tmp);

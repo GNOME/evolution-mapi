@@ -690,7 +690,7 @@ id_to_string (GByteArray *ba)
 }
 
 ECalComponent *
-exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcomponent_kind kind, const gchar *mid, struct mapi_SPropValue_array *properties,
+exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id_t fid, icalcomponent_kind kind, const gchar *mid, struct mapi_SPropValue_array *properties,
 					   GSList *streams, GSList *recipients, GSList *attachments,
 					   const gchar *local_store_uri, const icaltimezone *default_zone, gboolean is_reply, GSList **detached_components)
 {
@@ -698,6 +698,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 	struct timeval t;
 	ExchangeMAPIStream *body_stream;
 	const gchar *subject = NULL, *body = NULL;
+	const struct StringArray_r *categories_array;
 	const uint32_t *ui32;
 	const bool *b;
 	icalcomponent *ical_comp;
@@ -751,6 +752,25 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 
 	icalcomponent_set_summary (ical_comp, subject);
 	icalcomponent_set_description (ical_comp, body);
+
+	categories_array = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidNameKeywords);
+	if (categories_array) {
+		GSList *categories = NULL;
+		gint ii;
+
+		for (ii = 0; ii < categories_array->cValues; ii++) {
+			const gchar *category = categories_array->lppszA[ii];
+
+			if (!category || !*category)
+				continue;
+
+			categories = g_slist_append (categories, (gpointer) category);
+		}
+
+		e_cal_component_set_categories_list (comp, categories);
+
+		g_slist_free (categories);
+	}
 
 	if (icalcomponent_isa (ical_comp) == ICAL_VEVENT_COMPONENT) {
 		const gchar *location = NULL;
@@ -1054,8 +1074,6 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 		icalcomponent_add_property (ical_comp, prop);
 	}
 
-	/* FIXME: categories */
-
 	set_attachments_to_cal_component (comp, attachments, local_store_uri);
 
 	e_cal_component_rescan (comp);
@@ -1092,7 +1110,7 @@ fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 			smid = exchange_mapi_util_mapi_id_to_string (item_data->mid);
 		else
 			smid = e_cal_component_gen_uid();
-		comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, fccd->kind, smid,
+		comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, fccd->kind, smid,
 							item_data->properties, item_data->streams, item_data->recipients,
 							item_data->attachments, filepath, NULL, fccd->method == ICAL_METHOD_REPLY,
 							&detached_recurrences);
@@ -1181,7 +1199,8 @@ exchange_mapi_cal_utils_add_named_ids (ExchangeMapiConnection *conn, mapi_id_t f
 		{ PidLidTaskMode, 0 },
 		{ PidLidReminderSignalTime, 0 },
 		{ PidLidTimeZoneStruct, 0 },
-		{ PidLidTimeZoneDescription, 0 }
+		{ PidLidTimeZoneDescription, 0 },
+		{ PidNameKeywords, 0 }
 	};
 	icalcomponent_kind kind = pkind;
 
@@ -1338,6 +1357,7 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 	const gchar *dtstart_tz_location, *dtend_tz_location, *text = NULL;
 	time_t tt;
 	gboolean is_all_day;
+	GSList *categories = NULL;
 
 	g_return_val_if_fail (conn != NULL, FALSE);
 	g_return_val_if_fail (mem_ctx != NULL, FALSE);
@@ -1459,6 +1479,33 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 		text = "";
 	set_value (PR_BODY_UNICODE, text);
 	text = NULL;
+
+	e_cal_component_get_categories_list (comp, &categories);
+	if (categories) {
+		gint ii;
+		GSList *c;
+		struct StringArray_r *categories_array;
+
+		categories_array = talloc_zero (mem_ctx, struct StringArray_r);
+		categories_array->cValues = g_slist_length (categories);
+		categories_array->lppszA = (const char **) talloc_zero_array (mem_ctx, gchar *, categories_array->cValues);
+
+		for (c = categories, ii = 0; c; c = c->next, ii++) {
+			const gchar *category = c->data;
+
+			if (!category || !*category) {
+				ii--;
+				categories_array->cValues--;
+				continue;
+			}
+
+			categories_array->lppszA[ii] = talloc_strdup (mem_ctx, category);
+		}
+
+		set_named_value (PidNameKeywords, categories_array);
+
+		e_cal_component_free_categories_list (categories);
+	}
 
 	/* Priority and Importance */
 	prop = icalcomponent_get_first_property (ical_comp, ICAL_PRIORITY_PROPERTY);
