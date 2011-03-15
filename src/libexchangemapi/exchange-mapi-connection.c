@@ -3462,7 +3462,7 @@ exchange_mapi_connection_peek_folders_list (ExchangeMapiConnection *conn)
 
 /* free returned pointer with g_free() */
 gchar *
-exchange_mapi_connection_ex_to_smtp (ExchangeMapiConnection *conn, const gchar *ex_address, GError **perror)
+exchange_mapi_connection_ex_to_smtp (ExchangeMapiConnection *conn, const gchar *ex_address, gchar **display_name, GError **perror)
 {
 	enum MAPISTATUS	ms;
 	TALLOC_CTX		*mem_ctx;
@@ -3488,15 +3488,18 @@ exchange_mapi_connection_ex_to_smtp (ExchangeMapiConnection *conn, const gchar *
 
 	LOCK ();
 
-	SPropTagArray = set_SPropTagArray(mem_ctx, 0x1,
+	SPropTagArray = set_SPropTagArray (mem_ctx, 0x2,
+					  PR_DISPLAY_NAME_UNICODE,
 					  PR_SMTP_ADDRESS_UNICODE);
 
 	ms = ResolveNames (priv->session, (const gchar **)str_array, SPropTagArray, &SRowSet, &flaglist, MAPI_UNICODE);
 	if (ms != MAPI_E_SUCCESS)
 		ms = ResolveNames (priv->session, (const gchar **)str_array, SPropTagArray, &SRowSet, &flaglist, 0);
 
-	if (ms == MAPI_E_SUCCESS && SRowSet && SRowSet->cRows == 1) {
+	if (ms == MAPI_E_SUCCESS && SRowSet) {
 		smtp_addr = g_strdup (exchange_mapi_util_find_row_propval (SRowSet->aRow, PR_SMTP_ADDRESS_UNICODE));
+		if (display_name)
+			*display_name = g_strdup (exchange_mapi_util_find_row_propval (SRowSet->aRow, PR_DISPLAY_NAME_UNICODE));
 	}
 
 	talloc_free (mem_ctx);

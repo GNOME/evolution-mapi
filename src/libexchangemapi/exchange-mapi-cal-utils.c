@@ -863,7 +863,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 						email = "";
 
 					if (g_str_equal (email_type, "EX")) {
-						to_free = exchange_mapi_connection_ex_to_smtp (conn, email, NULL);
+						to_free = exchange_mapi_connection_ex_to_smtp (conn, email, NULL, NULL);
 						email = to_free;
 					}
 
@@ -895,7 +895,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 						email = "";
 
 					if (g_str_equal (email_type, "EX")) {
-						to_free = exchange_mapi_connection_ex_to_smtp (conn, email, NULL);
+						to_free = exchange_mapi_connection_ex_to_smtp (conn, email, NULL, NULL);
 						email = to_free;
 					}
 
@@ -924,11 +924,11 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, icalcom
 				const gchar *sent_email = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
 
 				if (!g_utf8_collate (sender_email_type, "EX")) {
-					sender_free = exchange_mapi_connection_ex_to_smtp (conn, sender_email, NULL);
+					sender_free = exchange_mapi_connection_ex_to_smtp (conn, sender_email, NULL, NULL);
 					sender_email = sender_free;
 				}
 				if (!g_utf8_collate (sent_email_type, "EX")) {
-					sent_free = exchange_mapi_connection_ex_to_smtp (conn, sent_email, NULL);
+					sent_free = exchange_mapi_connection_ex_to_smtp (conn, sent_email, NULL, NULL);
 					sent_email = sent_free;
 				}
 

@@ -317,8 +317,25 @@ mapi_mail_get_item_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLO
 	return exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
 }
 
+static gboolean
+name_is_email_user (const gchar *name, const gchar *email_id)
+{
+	gint name_len, email_len;
+
+	if (!name || !email_id)
+		return FALSE;
+
+	if (!*name || !*email_id || g_ascii_strcasecmp (email_id, name) == 0)
+		return TRUE;
+
+	name_len = strlen (name);
+	email_len = strlen (email_id);
+
+	return name_len < email_len && g_ascii_strncasecmp (email_id, name, name_len) == 0 && email_id[name_len] == '@';
+}
+
 static void
-mapi_mime_set_recipient_list (CamelMimeMessage *msg, MailItem *item)
+mapi_mime_set_recipient_list (ExchangeMapiConnection *conn, CamelMimeMessage *msg, MailItem *item)
 {
 	GSList *l = NULL;
 	CamelInternetAddress *to_addr, *cc_addr, *bcc_addr;
@@ -331,7 +348,7 @@ mapi_mime_set_recipient_list (CamelMimeMessage *msg, MailItem *item)
 	bcc_addr = camel_internet_address_new ();
 
 	for (l = item->recipients; l; l=l->next) {
-		gchar *display_name;
+		gchar *display_name = NULL;
 		const gchar *name = NULL;
 		uint32_t rcpt_type = MAPI_TO;
 		uint32_t *type = NULL;
@@ -348,12 +365,20 @@ mapi_mime_set_recipient_list (CamelMimeMessage *msg, MailItem *item)
 		/*Name is probably available in one of these props.*/
 		name = (const gchar *) exchange_mapi_util_find_row_propval (aRow, PR_DISPLAY_NAME_UNICODE);
 		name = name ? name : (const gchar *) exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
-		name = name ? name : (const gchar *) exchange_mapi_util_find_row_propval (aRow, PR_7BIT_DISPLAY_NAME_UNICODE);
+		if (!name) {
+			name = (const gchar *) exchange_mapi_util_find_row_propval (aRow, PR_7BIT_DISPLAY_NAME_UNICODE);
+			if (name && !strchr (name, '@')) {
+				gchar *to_free;
+
+				to_free = exchange_mapi_connection_ex_to_smtp (conn, recip->email_id, &display_name, NULL);
+				g_free (to_free);
+			}
+		}
 
 		type = (uint32_t *) exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_TYPE);
 
-		/*Fallbacks. Not good*/
-		display_name = name ? g_strdup (name) : g_strdup (recip->email_id);
+		if (!display_name && name && recip->email_id && !name_is_email_user (name, recip->email_id))
+			display_name = g_strdup (name);
 		rcpt_type = (type ? *type : MAPI_TO);
 
 		switch (rcpt_type) {
@@ -444,7 +469,7 @@ mapi_mime_set_msg_headers (ExchangeMapiConnection *conn, CamelMimeMessage *msg, 
 		if ((item->header.from_type != NULL) && !g_utf8_collate (item->header.from_type, "EX")) {
 			gchar *from_email;
 
-			from_email = exchange_mapi_connection_ex_to_smtp (conn, item->header.from_email, NULL);
+			from_email = exchange_mapi_connection_ex_to_smtp (conn, item->header.from_email, NULL, NULL);
 			g_free (item->header.from_email);
 			item->header.from_email = from_email;
 		}
@@ -874,7 +899,7 @@ mapi_mail_item_to_mime_message (ExchangeMapiConnection *conn, MailItem *item)
 	attach_list = item->attachments;
 	msg = camel_mime_message_new ();
 
-	mapi_mime_set_recipient_list (msg, item);
+	mapi_mime_set_recipient_list (conn, msg, item);
 	mapi_mime_set_msg_headers (conn, msg, item);
 	mapi_mime_classify_attachments (conn, item->fid, item->msg_class, attach_list, &inline_attachs, &noninline_attachs);
 
