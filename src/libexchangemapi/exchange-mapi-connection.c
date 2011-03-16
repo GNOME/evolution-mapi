@@ -2905,21 +2905,12 @@ mapi_move_items (ExchangeMapiConnection *conn, mapi_id_t src_fid, guint32 src_fi
 	enum MAPISTATUS	ms;
 	mapi_object_t obj_folder_src;
 	mapi_object_t obj_folder_dst;
-	mapi_id_array_t msg_id_array;
 	GSList *l;
 
 	e_return_val_mapi_error_if_fail (conn != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
 	mapi_object_init(&obj_folder_src);
 	mapi_object_init(&obj_folder_dst);
-	mapi_id_array_init (
-		#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
-		mapi_ctx,
-		#endif
-		&msg_id_array);
-
-	for (l = mid_list; l != NULL; l = g_slist_next (l))
-		mapi_id_array_add_id (&msg_id_array, *((mapi_id_t *)l->data));
 
 	ms = open_folder (conn, 0, &src_fid, src_fid_options, &obj_folder_src, perror);
 	if (ms != MAPI_E_SUCCESS) {
@@ -2931,14 +2922,31 @@ mapi_move_items (ExchangeMapiConnection *conn, mapi_id_t src_fid, guint32 src_fi
 		goto cleanup;
 	}
 
-	ms = MoveCopyMessages (&obj_folder_src, &obj_folder_dst, &msg_id_array, do_copy);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "MoveCopyMessages", ms);
-		goto cleanup;
+	while (mid_list) {
+		mapi_id_array_t msg_id_array;
+		gint count = 0;
+
+		mapi_id_array_init (
+			#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
+			mapi_ctx,
+			#endif
+			&msg_id_array);
+
+		for (l = mid_list; l != NULL && count < 500; l = g_slist_next (l), count++)
+			mapi_id_array_add_id (&msg_id_array, *((mapi_id_t *)l->data));
+
+		mid_list = l;
+
+		ms = MoveCopyMessages (&obj_folder_src, &obj_folder_dst, &msg_id_array, do_copy);
+		mapi_id_array_release (&msg_id_array);
+
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "MoveCopyMessages", ms);
+			break;
+		}
 	}
 
 cleanup:
-	mapi_id_array_release(&msg_id_array);
 	mapi_object_release(&obj_folder_dst);
 	mapi_object_release(&obj_folder_src);
 
