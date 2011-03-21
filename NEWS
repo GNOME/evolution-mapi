@@ -1,3 +1,23 @@
+evolution-mapi 2.91.92 2011-03-21
+---------------------------------
+
+Bug Fixes:
+	Bug #643791 - Duplicate events from outlook / OWA meetings (Sean Finney)
+	Bug #618514 - Forwarded messages as attachments encoded incorrectly (Milan Crha)
+	Bug #641029 - Be able to disable GAL completely (Milan Crha)
+	Bug #632450 - Support sending S/MIME messages (Milan Crha)
+	Bug #644796 - Lookup for display name for recipients in "Sent Items" (Milan Crha)
+	Bug #601529 - Categories are not handled properly (Milan Crha)
+	Bug #611548 - Move/copy to folder doesn't work for many messages (Milan Crha)
+
+Miscellanous:
+	Do not add extra \0 at the end of text mail message bodies (Milan Crha)
+	Allow slash in folder names (Milan Crha)
+	Reprompt password if given wrong (Milan Crha)
+
+Translations:
+	Claude Paroz (fr)
+
 evolution-mapi 2.91.91 2011-03-07
 ---------------------------------
 
