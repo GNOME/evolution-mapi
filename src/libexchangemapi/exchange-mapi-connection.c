@@ -3072,7 +3072,7 @@ get_child_folders (TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, 
 	}
 
 	/* Get the hierarchy table */
-	ms = GetHierarchyTable (&obj_folder, &obj_table, TableFlags_Depth | TableFlags_NoNotifications | TableFlags_UseUnicode, &row_count);
+	ms = GetHierarchyTable (&obj_folder, &obj_table, TableFlags_Depth | TableFlags_NoNotifications, &row_count);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "GetHierarchyTable", ms);
 		result = FALSE;
