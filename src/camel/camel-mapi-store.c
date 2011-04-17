@@ -445,10 +445,11 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GError **error)
 	temp_list = folder_list;
 	list = folder_list;
 
-	url = camel_url_to_string (CAMEL_SERVICE(store)->url,
-				   (CAMEL_URL_HIDE_PASSWORD|
-				    CAMEL_URL_HIDE_PARAMS|
-				    CAMEL_URL_HIDE_AUTH));
+	url = camel_url_to_string (
+		camel_service_get_camel_url (CAMEL_SERVICE (store)),
+		CAMEL_URL_HIDE_PASSWORD |
+		CAMEL_URL_HIDE_PARAMS |
+		CAMEL_URL_HIDE_AUTH);
 	if ( url[strlen(url) - 1] != '/') {
 		temp_url = g_strconcat (url, "/", NULL);
 		g_free ((gchar *)url);
@@ -904,12 +905,18 @@ mapi_store_can_refresh_folder (CamelStore *store,
                                CamelFolderInfo *info,
                                GError **error)
 {
+	CamelService *service;
+	CamelURL *url;
+
 	/* skip unselectable folders from automatic refresh */
 	if (info && (info->flags & CAMEL_FOLDER_NOSELECT) != 0)
 		return FALSE;
 
+	service = CAMEL_SERVICE (store);
+	url = camel_service_get_camel_url (service);
+
 	return CAMEL_STORE_CLASS(camel_mapi_store_parent_class)->can_refresh_folder (store, info, error) ||
-	      (camel_url_get_param (((CamelService *)store)->url, "check_all") != NULL);
+	      (camel_url_get_param (url, "check_all") != NULL);
 }
 
 static gboolean
@@ -984,30 +991,35 @@ mapi_store_get_folder_info_sync (CamelStore *store,
                                  GError **error)
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
+	CamelServiceConnectionStatus status;
+	CamelService *service;
 
 	/*
 	 * Thanks to Michael, for his cached folders implementation in IMAP
 	 * is used as is here.
 	 */
 
-	camel_service_lock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	service = CAMEL_SERVICE (store);
+	status = camel_service_get_connection_status (service);
+
+	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	if (camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
-		if (((CamelService *)store)->status == CAMEL_SERVICE_DISCONNECTED) {
-			((CamelService *)store)->status = CAMEL_SERVICE_CONNECTING;
-			mapi_connect_sync ((CamelService *)store, cancellable, NULL);
+		if (status == CAMEL_SERVICE_DISCONNECTED) {
+			mapi_connect_sync (service, cancellable, NULL);
 		}
 
 		/* update folders from the server only when asking for the top most or the 'top' is not known;
 		   otherwise believe the local cache, because folders sync is pretty slow operation to be done
 		   one every single question on the folder info */
+		status = camel_service_get_connection_status (service);
 		if (((flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST) != 0 ||
 		    (!(flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED)) ||
 		    (!mapi_store->priv->folders_synced) ||
 		    (top && *top && !camel_mapi_store_folder_id_lookup (mapi_store, top))) &&
-		    (check_for_connection ((CamelService *)store, NULL) || ((CamelService *)store)->status == CAMEL_SERVICE_CONNECTING)) {
+		    (check_for_connection (service, NULL) || status == CAMEL_SERVICE_CONNECTING)) {
 			if (!mapi_folders_sync (mapi_store, flags, error)) {
-				camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+				camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 				return NULL;
 			}
 			camel_store_summary_touch ((CamelStoreSummary *)mapi_store->summary);
@@ -1015,7 +1027,7 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 		}
 	}
 
-	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	return mapi_get_folder_info_offline (store, top, flags, error);
 }
@@ -1463,8 +1475,11 @@ mapi_store_subscribe_folder_sync (CamelStore *store,
 		camel_store_folder_subscribed (store, fi);
 		camel_folder_info_free (fi);
 	} else {
+		CamelURL *url;
 		guint folder_type = mapi_folders_hash_table_type_lookup (mapi_store, folder_name);
-		exchange_mapi_add_esource (CAMEL_SERVICE(mapi_store)->url, use_folder_name, fid, folder_type);
+
+		url = camel_service_get_camel_url (CAMEL_SERVICE (mapi_store));
+		exchange_mapi_add_esource (url, use_folder_name, fid, folder_type);
 	}
 	camel_store_summary_info_free((CamelStoreSummary *)mapi_store->summary, si);
 	return TRUE;
@@ -1483,7 +1498,9 @@ mapi_store_unsubscribe_folder_sync (CamelStore *store,
 	gchar *f_name = NULL;
 
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
-	CamelURL *url = CAMEL_SERVICE (mapi_store)->url;
+	CamelURL *url;
+
+	url = camel_service_get_camel_url (CAMEL_SERVICE (mapi_store));
 	fid = camel_mapi_store_folder_id_lookup(mapi_store, folder_name);
 	si = camel_store_summary_path((CamelStoreSummary *)mapi_store->summary, folder_name);
 	if (si) {
@@ -1609,9 +1626,11 @@ static gboolean mapi_construct(CamelService *service, CamelSession *session,
 	priv->profile = g_strdup (camel_url_get_param(url, "profile"));
 
 	/*base url*/
-	priv->base_url = camel_url_to_string (service->url, (CAMEL_URL_HIDE_PASSWORD |
-						       CAMEL_URL_HIDE_PARAMS   |
-						       CAMEL_URL_HIDE_AUTH)  );
+	priv->base_url = camel_url_to_string (
+		camel_service_get_camel_url (service),
+		CAMEL_URL_HIDE_PASSWORD |
+		CAMEL_URL_HIDE_PARAMS |
+		CAMEL_URL_HIDE_AUTH);
 
 	/*filter*/
 	if (camel_url_get_param (url, "filter"))
@@ -1631,17 +1650,21 @@ static gboolean mapi_construct(CamelService *service, CamelSession *session,
 	return TRUE;
 }
 
-static char
-*mapi_get_name(CamelService *service, gboolean brief)
+static char *
+mapi_get_name(CamelService *service, gboolean brief)
 {
+	CamelURL *url;
+
+	url = camel_service_get_camel_url (service);
+
 	if (brief) {
 		/* Translators: The %s is replaced with a server's host name */
-		return g_strdup_printf(_("Exchange MAPI server %s"), service->url->host);
+		return g_strdup_printf(_("Exchange MAPI server %s"), url->host);
 	} else {
 		/*To translators : Example string : Exchange MAPI service for
 		  _username_ on _server host name__*/
 		return g_strdup_printf(_("Exchange MAPI service for %s on %s"),
-				       service->url->user, service->url->host);
+				       url->user, url->host);
 	}
 }
 
@@ -1649,13 +1672,17 @@ static gboolean
 mapi_auth_loop (CamelService *service, GError **error)
 {
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
-	CamelSession *session = camel_service_get_session (service);
+	CamelSession *session;
+	CamelURL *url;
 
 	gchar *errbuf = NULL;
 	gboolean authenticated = FALSE;
 	guint32 prompt_flags = CAMEL_SESSION_PASSWORD_SECRET;
 
-	service->url->passwd = NULL;
+	url = camel_service_get_camel_url (service);
+	session = camel_service_get_session (service);
+
+	url->passwd = NULL;
 
 	while (!authenticated) {
 		GError *mapi_error = NULL;
@@ -1663,11 +1690,11 @@ mapi_auth_loop (CamelService *service, GError **error)
 		if (errbuf) {
 			/* We need to un-cache the password before prompting again */
 			prompt_flags |= CAMEL_SESSION_PASSWORD_REPROMPT;
-			g_free (service->url->passwd);
-			service->url->passwd = NULL;
+			g_free (url->passwd);
+			url->passwd = NULL;
 		}
 
-		if (!service->url->passwd ) {
+		if (!url->passwd ) {
 			gchar *prompt;
 
 			/*To translators : First %s : is the error text or the reason
@@ -1676,16 +1703,16 @@ mapi_auth_loop (CamelService *service, GError **error)
 			 Third %s is : Server host name.*/
 			prompt = g_strdup_printf (_("%s Please enter the MAPI password for %s@%s"),
 						  errbuf ? errbuf : "",
-						  service->url->user,
-						  service->url->host);
-			service->url->passwd =
+						  url->user,
+						  url->host);
+			url->passwd =
 				camel_session_get_password (session, service, E_PASSWORD_COMPONENT,
 							    prompt, "password", prompt_flags, NULL);
 			g_free (prompt);
 			g_free (errbuf);
 			errbuf = NULL;
 
-			if (!service->url->passwd) {
+			if (!url->passwd) {
 				g_set_error (
 					error, G_IO_ERROR,
 					G_IO_ERROR_CANCELLED,
@@ -1694,7 +1721,7 @@ mapi_auth_loop (CamelService *service, GError **error)
 			}
 		}
 
-		store->priv->conn = exchange_mapi_connection_new (store->priv->profile, service->url->passwd, &mapi_error);
+		store->priv->conn = exchange_mapi_connection_new (store->priv->profile, url->passwd, &mapi_error);
 		if (!store->priv->conn || !exchange_mapi_connection_connected (store->priv->conn)) {
 			if (mapi_error) {
 				errbuf = g_strdup_printf (_("Unable to authenticate to Exchange MAPI server: %s"), mapi_error->message);
@@ -1716,16 +1743,25 @@ mapi_connect_sync (CamelService *service,
 {
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
 	CamelMapiStorePrivate *priv = store->priv;
+	CamelServiceConnectionStatus status;
+	CamelProvider *provider;
+	CamelSession *session;
+	CamelURL *url;
 	guint16 event_mask = 0;
 
-	if (service->status == CAMEL_SERVICE_DISCONNECTED) {
+	url = camel_service_get_camel_url (service);
+	session = camel_service_get_session (service);
+	provider = camel_service_get_provider (service);
+	status = camel_service_get_connection_status (service);
+
+	if (status == CAMEL_SERVICE_DISCONNECTED) {
 		return FALSE;
 	}
 
 	if (!priv) {
 		store->priv = g_new0 (CamelMapiStorePrivate, 1);
 		priv = store->priv;
-		if (!camel_service_construct (service, service->session, service->provider, service->url, error))
+		if (!camel_service_construct (service, session, provider, url, error))
 			return FALSE;
 	}
 
@@ -1741,7 +1777,6 @@ mapi_connect_sync (CamelService *service,
 		return FALSE;
 	}
 
-	service->status = CAMEL_SERVICE_CONNECTED;
 	camel_offline_store_set_online_sync (
 		CAMEL_OFFLINE_STORE (store), TRUE, cancellable, NULL);
 
@@ -1790,7 +1825,6 @@ mapi_disconnect_sync (CamelService *service,
 	}
 
 	store->priv->folders_synced = FALSE;
-	service->status = CAMEL_SERVICE_DISCONNECTED;
 
 	return TRUE;
 }

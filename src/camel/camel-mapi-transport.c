@@ -101,7 +101,7 @@ mapi_send_to_sync (CamelTransport *transport,
 
 	g_return_val_if_fail (CAMEL_IS_SERVICE (transport), FALSE);
 
-	url = CAMEL_SERVICE (transport)->url;
+	url = camel_service_get_camel_url (CAMEL_SERVICE (transport));
 	g_return_val_if_fail (url != NULL, FALSE);
 
 	conn = exchange_mapi_connection_find (camel_url_get_param (url, "profile"));
@@ -141,13 +141,17 @@ mapi_send_to_sync (CamelTransport *transport,
 static gchar *
 mapi_transport_get_name(CamelService *service, gboolean brief)
 {
+	CamelURL *url;
+
+	url = camel_service_get_camel_url (service);
+
 	if (brief) {
 		/* Translators: The %s is replaced with a server's host name */
-		return g_strdup_printf (_("Exchange MAPI server %s"), service->url->host);
+		return g_strdup_printf (_("Exchange MAPI server %s"), url->host);
 	} else {
 		/* Translators: The first %s is replaced with a user name, the second with a server's host name */
 		return g_strdup_printf (_("Exchange MAPI service for %s on %s"),
-					service->url->user, service->url->host);
+					url->user, url->host);
 	}
 }
 
