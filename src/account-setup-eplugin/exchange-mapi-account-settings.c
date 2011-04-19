@@ -313,7 +313,7 @@ folder_size_actions_update_cb (EShellView *shell_view, GtkActionEntry *entries)
 	if (g_str_has_prefix (folder_uri, "mapi://")) {
 		show_menu_entry = TRUE;
 		url = camel_url_new (folder_uri, NULL);
-		if (url && *url->path && strlen (url->path) > 1)
+		if (url && url->path && strlen (url->path) > 1)
 			show_menu_entry = FALSE;
 		camel_url_free (url);
 	}
