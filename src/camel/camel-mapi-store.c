@@ -1718,7 +1718,7 @@ mapi_connect_sync (CamelService *service,
 	CamelMapiStorePrivate *priv = store->priv;
 	guint16 event_mask = 0;
 
-	if (service->status == CAMEL_SERVICE_DISCONNECTED) {
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
 		return FALSE;
 	}
 
