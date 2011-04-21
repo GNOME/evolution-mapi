@@ -1743,7 +1743,6 @@ mapi_connect_sync (CamelService *service,
 {
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
 	CamelMapiStorePrivate *priv = store->priv;
-	CamelServiceConnectionStatus status;
 	CamelProvider *provider;
 	CamelSession *session;
 	CamelURL *url;
@@ -1752,9 +1751,8 @@ mapi_connect_sync (CamelService *service,
 	url = camel_service_get_camel_url (service);
 	session = camel_service_get_session (service);
 	provider = camel_service_get_provider (service);
-	status = camel_service_get_connection_status (service);
 
-	if (status == CAMEL_SERVICE_DISCONNECTED) {
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
 		return FALSE;
 	}
 
