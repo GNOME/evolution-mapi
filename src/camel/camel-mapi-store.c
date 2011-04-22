@@ -478,7 +478,8 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GError **error)
 				full_name = tmp;
 			}
 		} else {
-			tmp = escape_slash (full_name);
+			/* known full_name - everything is escaped already */
+			tmp = g_strdup (full_name);
 			full_name = tmp;
 		}
 
