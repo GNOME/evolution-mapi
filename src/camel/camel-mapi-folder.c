@@ -514,9 +514,9 @@ mapi_utils_do_flags_diff (flags_diff_t *diff, guint32 old, guint32 _new)
 	diff->bits = _new & diff->changed;
 }
 
-struct mapi_update_deleted_msg {
-	CamelSessionThreadMsg msg;
+typedef struct _SyncDeletedData SyncDeletedData;
 
+struct _SyncDeletedData {
 	CamelFolder *folder;
 	mapi_id_t folder_id;
 	gboolean need_refresh;
@@ -549,10 +549,11 @@ deleted_items_sync_cb (FetchItemsCallbackData *item_data, gpointer data)
 }
 
 static void
-mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
+mapi_sync_deleted (CamelSession *session,
+                   GCancellable *cancellable,
+                   SyncDeletedData *data,
+                   GError **error)
 {
-	struct mapi_update_deleted_msg *m = (struct mapi_update_deleted_msg *)msg;
-
 	CamelMapiStore *mapi_store;
 	CamelMapiFolder *mapi_folder;
 	CamelFolderChangeInfo *changes = NULL;
@@ -566,9 +567,9 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 	const gchar *uid = NULL;
 	gboolean flags_changed = FALSE;
 
-	parent_store = camel_folder_get_parent_store (m->folder);
+	parent_store = camel_folder_get_parent_store (data->folder);
 
-	mapi_folder = CAMEL_MAPI_FOLDER (m->folder);
+	mapi_folder = CAMEL_MAPI_FOLDER (data->folder);
 	mapi_store = CAMEL_MAPI_STORE (parent_store);
 
 	service = CAMEL_SERVICE (mapi_store);
@@ -577,12 +578,13 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (mapi_store)) ||
 			status == CAMEL_SERVICE_DISCONNECTED) {
 
-		return;
+		goto exit;
 	}
 
 	camel_operation_push_message (
-		NULL, _("Retrieving message IDs from server for %s"),
-		camel_folder_get_name (m->folder));
+		cancellable,
+		_("Retrieving message IDs from server for %s"),
+		camel_folder_get_name (data->folder));
 
 	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
@@ -592,34 +594,35 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 	server_messages = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
 	/*Get the UID list from server.*/
-	exchange_mapi_connection_fetch_items (camel_mapi_store_get_exchange_connection (mapi_store), m->folder_id, NULL, NULL,
+	exchange_mapi_connection_fetch_items (camel_mapi_store_get_exchange_connection (mapi_store), data->folder_id, NULL, NULL,
 					       NULL, NULL,
 					       deleted_items_sync_cb, server_messages,
 					       options | MAPI_OPTIONS_DONT_OPEN_MESSAGE, NULL);
 
-	camel_operation_pop_message (NULL);
+	camel_operation_pop_message (cancellable);
 
 	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	/* Check if we have to stop */
-	if (camel_operation_cancel_check (NULL) || camel_application_is_exiting) {
+	if (g_cancellable_is_cancelled (cancellable) || camel_application_is_exiting) {
 		g_hash_table_destroy (server_messages);
-		return;
+		goto exit;
 	}
 
 	changes = camel_folder_change_info_new ();
 
-	count = camel_folder_summary_count (m->folder->summary);
+	count = camel_folder_summary_count (data->folder->summary);
 	camel_operation_push_message (
-		NULL, _("Removing deleted messages from cache in %s"),
-		camel_folder_get_name (m->folder));
+		cancellable,
+		_("Removing deleted messages from cache in %s"),
+		camel_folder_get_name (data->folder));
 
 	/* Iterate over cache and check if the UID is in server*/
 	for (index = 0; index < count; index++) {
 		guint32 msg_flags;
 
 		/* Iterate in a reverse order, thus removal will not hurt */
-		info = camel_folder_summary_index (m->folder->summary, count - index - 1);
+		info = camel_folder_summary_index (data->folder->summary, count - index - 1);
 		if (!info) continue; /*This is bad. *Should* not happen*/
 
 		uid = camel_message_info_uid (info);
@@ -632,11 +635,11 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 
 		/* If it is not in server list, clean our cache */
 		if (!msg_flags) {
-			camel_folder_summary_lock (m->folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
-			camel_folder_summary_remove_uid (m->folder->summary, uid);
+			camel_folder_summary_lock (data->folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+			camel_folder_summary_remove_uid (data->folder->summary, uid);
 			camel_data_cache_remove (mapi_folder->cache, "cache", uid, NULL);
 			camel_folder_change_info_remove_uid (changes, uid);
-			camel_folder_summary_unlock (m->folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+			camel_folder_summary_unlock (data->folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
 		} else {
 			CamelMapiMessageInfo *mapi_info = (CamelMapiMessageInfo *) info;
 
@@ -652,65 +655,51 @@ mapi_sync_deleted (CamelSession *session, CamelSessionThreadMsg *msg)
 		camel_message_info_free (info);
 
 		/* Progress update */
-		camel_operation_progress (NULL, (index * 100)/count); /* ;-) */
+		camel_operation_progress (cancellable, (index * 100)/count); /* ;-) */
 
 		/* Check if we have to stop */
-		if (camel_operation_cancel_check (NULL) || camel_application_is_exiting) {
+		if (g_cancellable_is_cancelled (cancellable) || camel_application_is_exiting) {
 			g_hash_table_destroy (server_messages);
 			if (camel_folder_change_info_changed (changes))
-				camel_folder_changed (m->folder, changes);
+				camel_folder_changed (data->folder, changes);
 			camel_folder_change_info_free (changes);
-			return;
+			goto exit;
 		}
 	}
 
-	camel_operation_pop_message (NULL);
+	camel_operation_pop_message (cancellable);
 
 	if (camel_folder_change_info_changed (changes)) {
 		if (flags_changed)
 			camel_mapi_summary_update_store_info_counts (CAMEL_MAPI_SUMMARY (CAMEL_FOLDER (mapi_folder)->summary));
-		camel_folder_changed (m->folder, changes);
+		camel_folder_changed (data->folder, changes);
 	}
 	camel_folder_change_info_free (changes);
 
-	m->need_refresh = camel_folder_summary_count (m->folder->summary) != g_hash_table_size (server_messages);
+	data->need_refresh = camel_folder_summary_count (data->folder->summary) != g_hash_table_size (server_messages);
 
 	g_hash_table_destroy (server_messages);
-}
 
-static void
-mapi_sync_deleted_free (CamelSession *session, CamelSessionThreadMsg *msg)
-{
-	struct mapi_update_deleted_msg *m = (struct mapi_update_deleted_msg *)msg;
-	CamelStore *parent_store;
-
-	parent_store = camel_folder_get_parent_store (m->folder);
-
-	if (m->need_refresh) {
-		CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (m->folder->summary);
+exit:
+	if (data->need_refresh) {
+		CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (data->folder->summary);
 		if (mapi_summary) {
-			GError *local_error = NULL;
-
 			camel_service_lock (CAMEL_SERVICE (parent_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 			g_free (mapi_summary->sync_time_stamp);
 			mapi_summary->sync_time_stamp = NULL;
 			camel_service_unlock (CAMEL_SERVICE (parent_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
-			/* FIXME Need to pass a GCancellable here. */
-			if (!mapi_refresh_folder (m->folder, NULL, &local_error)) {
-				g_warning ("%s: %s", G_STRFUNC, local_error->message);
-				g_error_free (local_error);
-			}
+			mapi_refresh_folder (data->folder, cancellable, error);
 		}
 	}
-
-	g_object_unref (m->folder);
 }
 
-static CamelSessionThreadOps deleted_items_sync_ops = {
-	mapi_sync_deleted,
-	mapi_sync_deleted_free,
-};
+static void
+mapi_sync_deleted_data_free (SyncDeletedData *data)
+{
+	g_object_unref (data->folder);
+	g_slice_free (SyncDeletedData, data);
+}
 
 static gboolean
 mapi_camel_get_summary_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
@@ -783,7 +772,6 @@ mapi_refresh_folder(CamelFolder *folder, GCancellable *cancellable, GError **err
 	TALLOC_CTX *mem_ctx = NULL;
 	struct mapi_SRestriction *res = NULL;
 	struct SSortOrderSet *sort = NULL;
-	struct mapi_update_deleted_msg *deleted_items_op_msg;
 	fetch_items_data *fetch_data = g_new0 (fetch_items_data, 1);
 	const gchar *folder_id = NULL;
 	const gchar *full_name;
@@ -826,6 +814,7 @@ mapi_refresh_folder(CamelFolder *folder, GCancellable *cancellable, GError **err
 
 	/*Get the New Items*/
 	if (!is_proxy) {
+		SyncDeletedData *sync_data;
 		mapi_id_t temp_folder_id;
 		guint32 options = 0;
 		GError *mapi_error = NULL;
@@ -913,14 +902,16 @@ mapi_refresh_folder(CamelFolder *folder, GCancellable *cancellable, GError **err
 		is_locked = FALSE;
 
 		/* Downsync deleted items */
-		deleted_items_op_msg = camel_session_thread_msg_new (session, &deleted_items_sync_ops,
-							 sizeof (*deleted_items_op_msg));
-		deleted_items_op_msg->folder = folder;
-		deleted_items_op_msg->folder_id = temp_folder_id;
-		deleted_items_op_msg->need_refresh = FALSE;
-		g_object_ref (folder);
+		sync_data = g_slice_new0 (SyncDeletedData);
+		sync_data->folder = g_object_ref (folder);
+		sync_data->folder_id = temp_folder_id;
+		sync_data->need_refresh = FALSE;
 
-		camel_session_thread_queue (session, &deleted_items_op_msg->msg, 0);
+		camel_session_submit_job (
+			session,
+			(CamelSessionCallback) mapi_sync_deleted,
+			sync_data,
+			(GDestroyNotify) mapi_sync_deleted_data_free);
 
 		camel_folder_changed (folder, fetch_data->changes);
 		camel_folder_change_info_free (fetch_data->changes);
