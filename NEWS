@@ -1,3 +1,16 @@
+evolution-mapi 3.0.1 2011-04-25
+-------------------------------
+
+Bug Fixes:
+	Bug 648175 - Crash in folder_size_actions_update_cb (Milan Crha)
+
+Other Changes:
+	* Remove unneeded UseUnicode flag in a GetHierarchyTable call
+	  (Milan Crha)
+	* Connect on demand when in online mode (Milan Crha)
+	* Do not escape forward slashes in full folder name (Milan Crha)
+
+
 evolution-mapi 3.0.0 2011-04-04
 -------------------------------
 
