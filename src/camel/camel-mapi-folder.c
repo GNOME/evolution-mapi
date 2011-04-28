@@ -406,10 +406,6 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 				struct SRow *aRow;
 				ExchangeMAPIRecipient *recip = (ExchangeMAPIRecipient *)(l->data);
 
-				/*Can't continue when there is no email-id*/
-				if (!recip->email_id)
-					continue;
-
 				/* Build a SRow structure */
 				aRow = &recip->out_SRow;
 
@@ -421,7 +417,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 					name = name ? name : (const gchar *) exchange_mapi_util_find_row_propval (aRow,
 												 PR_7BIT_DISPLAY_NAME_UNICODE);
 					display_name = name ? name : recip->email_id;
-					formatted_id = camel_internet_address_format_address(display_name, recip->email_id);
+					formatted_id = camel_internet_address_format_address(display_name, recip->email_id ? recip->email_id : "");
 
 					switch (*type) {
 					case MAPI_TO:

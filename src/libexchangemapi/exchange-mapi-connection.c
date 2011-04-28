@@ -1438,7 +1438,7 @@ exchange_mapi_connection_get_public_folder (ExchangeMapiConnection *conn, mapi_o
 
 /* Returns TRUE if all recipients were read succcesfully, else returns FALSE */
 static gboolean
-exchange_mapi_util_get_recipients (mapi_object_t *obj_message, GSList **recip_list, GError **perror)
+exchange_mapi_util_get_recipients (ExchangeMapiConnection *conn, mapi_object_t *obj_message, GSList **recip_list, GError **perror)
 {
 	enum MAPISTATUS		ms;
 	struct SPropTagArray	proptags;
@@ -1463,9 +1463,26 @@ exchange_mapi_util_get_recipients (mapi_object_t *obj_message, GSList **recip_li
 		recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_SMTP_ADDRESS_UNICODE));
 		/* fallback */
 		if (!recipient->email_id) {
-			const gchar *addrtype = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE_UNICODE));
-			if (addrtype && !g_ascii_strcasecmp(addrtype, "SMTP"))
+			uint32_t fallback_props[] = {
+				PROP_TAG (PT_UNICODE, 0x6001), /* PigTagNickname for Recipients table */
+				PR_RECIPIENT_DISPLAY_NAME_UNICODE
+			};
+			gint ii;
+			const gchar *addrtype = exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE_UNICODE);
+
+			if (addrtype && !g_ascii_strcasecmp (addrtype, "SMTP"))
 				recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_EMAIL_ADDRESS_UNICODE));
+
+			for (ii = 0; !recipient->email_id && ii < G_N_ELEMENTS (fallback_props); ii++) {
+				recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), fallback_props[ii]));
+			}
+		}
+
+		if (recipient->email_id) {
+			const gchar *addrtype = exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE_UNICODE);
+
+			if (addrtype && g_ascii_strcasecmp (addrtype, "EX") == 0)
+				recipient->email_id = exchange_mapi_connection_ex_to_smtp (conn, recipient->email_id, NULL, NULL);
 		}
 
 		recipient->out_SRow.ulAdrEntryPad = rows_recip.aRow[i_row_recip].ulAdrEntryPad;
@@ -1792,7 +1809,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 			}
 
 			if (options & MAPI_OPTIONS_FETCH_RECIPIENTS) {
-				exchange_mapi_util_get_recipients (&obj_message, &recip_list, perror);
+				exchange_mapi_util_get_recipients (conn, &obj_message, &recip_list, perror);
 			}
 
 			/* get the main body stream no matter what */
@@ -1948,7 +1965,7 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 
 	/* Fetch recipients */
 	if (options & MAPI_OPTIONS_FETCH_RECIPIENTS) {
-		exchange_mapi_util_get_recipients (obj_message, &recip_list, NULL);
+		exchange_mapi_util_get_recipients (conn, obj_message, &recip_list, NULL);
 	}
 
 	/* get the main body stream no matter what */
