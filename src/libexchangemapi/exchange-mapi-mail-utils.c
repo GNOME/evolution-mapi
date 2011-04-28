@@ -355,10 +355,6 @@ mapi_mime_set_recipient_list (ExchangeMapiConnection *conn, CamelMimeMessage *ms
 		struct SRow *aRow;
 		ExchangeMAPIRecipient *recip = (ExchangeMAPIRecipient *)(l->data);
 
-		/*Can't continue when there is no email-id*/
-		if (!recip->email_id)
-			continue;
-
 		/* Build a SRow structure */
 		aRow = &recip->out_SRow;
 
@@ -377,19 +373,19 @@ mapi_mime_set_recipient_list (ExchangeMapiConnection *conn, CamelMimeMessage *ms
 
 		type = (uint32_t *) exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_TYPE);
 
-		if (!display_name && name && recip->email_id && !name_is_email_user (name, recip->email_id))
+		if (!display_name && name && (!recip->email_id || !name_is_email_user (name, recip->email_id)))
 			display_name = g_strdup (name);
 		rcpt_type = (type ? *type : MAPI_TO);
 
 		switch (rcpt_type) {
 		case MAPI_TO:
-			camel_internet_address_add (to_addr, display_name, recip->email_id);
+			camel_internet_address_add (to_addr, display_name, recip->email_id ? recip->email_id : "");
 			break;
 		case MAPI_CC:
-			camel_internet_address_add (cc_addr, display_name, recip->email_id);
+			camel_internet_address_add (cc_addr, display_name, recip->email_id ? recip->email_id : "");
 			break;
 		case MAPI_BCC:
-			camel_internet_address_add (bcc_addr, display_name, recip->email_id);
+			camel_internet_address_add (bcc_addr, display_name, recip->email_id ? recip->email_id : "");
 			break;
 		}
 
