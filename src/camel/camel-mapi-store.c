@@ -1010,9 +1010,8 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	if (camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
-		if (status == CAMEL_SERVICE_DISCONNECTED) {
-			mapi_connect_sync (service, cancellable, NULL);
-		}
+		if (status == CAMEL_SERVICE_DISCONNECTED)
+			camel_service_connect_sync (service, NULL);
 
 		/* update folders from the server only when asking for the top most or the 'top' is not known;
 		   otherwise believe the local cache, because folders sync is pretty slow operation to be done
@@ -1751,6 +1750,7 @@ mapi_connect_sync (CamelService *service,
                    GError **error)
 {
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
+	CamelServiceConnectionStatus status;
 	CamelProvider *provider;
 	CamelSession *session;
 	CamelURL *url;
@@ -1759,8 +1759,9 @@ mapi_connect_sync (CamelService *service,
 	url = camel_service_get_camel_url (service);
 	session = camel_service_get_session (service);
 	provider = camel_service_get_provider (service);
+	status = camel_service_get_connection_status (service);
 
-	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
+	if (status == CAMEL_SERVICE_DISCONNECTED) {
 		return FALSE;
 	}
 
