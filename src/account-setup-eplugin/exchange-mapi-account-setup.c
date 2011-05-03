@@ -205,7 +205,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 		return;
 	}
 
-	url = camel_url_new (e_account_get_string (target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
+	url = camel_url_new (e_account_get_string (target_account->modified_account, E_ACCOUNT_SOURCE_URL), NULL);
 	domain_name = camel_url_get_param (url, "domain");
 
 	/* Silently remove domain part from a username when user enters it as such.
@@ -228,7 +228,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
 	password = e_passwords_get_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
 	if (!password || !*password) {
-		gboolean remember = e_account_get_bool (target_account->account, E_ACCOUNT_SOURCE_SAVE_PASSWD);
+		gboolean remember = e_account_get_bool (target_account->modified_account, E_ACCOUNT_SOURCE_SAVE_PASSWD);
 		gchar *title;
 
 		g_free (password);
@@ -272,8 +272,8 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 			g_free (profname);
 
 			uri = camel_url_to_string(url, 0);
-			e_account_set_string (target_account->account, E_ACCOUNT_SOURCE_URL, uri);
-			e_account_set_string (target_account->account, E_ACCOUNT_TRANSPORT_URL, uri);
+			e_account_set_string (target_account->modified_account, E_ACCOUNT_SOURCE_URL, uri);
+			e_account_set_string (target_account->modified_account, E_ACCOUNT_TRANSPORT_URL, uri);
 			g_free (uri);
 
 			e_notice (NULL, GTK_MESSAGE_INFO, "%s", _("Authentication finished successfully."));
@@ -309,7 +309,7 @@ domain_entry_changed(GtkWidget *entry, EConfig *config)
 	const gchar *domain = NULL;
 	gchar *url_string = NULL;
 
-	url = camel_url_new (e_account_get_string(target->account, E_ACCOUNT_SOURCE_URL), NULL);
+	url = camel_url_new (e_account_get_string(target->modified_account, E_ACCOUNT_SOURCE_URL), NULL);
 	domain = gtk_entry_get_text (GTK_ENTRY(entry));
 
 	if (domain && domain[0])
@@ -318,8 +318,8 @@ domain_entry_changed(GtkWidget *entry, EConfig *config)
 		camel_url_set_param (url, "domain", NULL);
 
 	url_string = camel_url_to_string (url, 0);
-	e_account_set_string (target->account, E_ACCOUNT_SOURCE_URL, url_string);
-	e_account_set_string (target->account, E_ACCOUNT_TRANSPORT_URL, url_string);
+	e_account_set_string (target->modified_account, E_ACCOUNT_SOURCE_URL, url_string);
+	e_account_set_string (target->modified_account, E_ACCOUNT_TRANSPORT_URL, url_string);
 	g_free (url_string);
 
 	camel_url_free (url);
@@ -332,13 +332,13 @@ secure_check_toggled (GtkWidget *check, EConfig *config)
 	CamelURL *url = NULL;
 	gchar *url_string = NULL;
 
-	url = camel_url_new (e_account_get_string (target->account, E_ACCOUNT_SOURCE_URL), NULL);
+	url = camel_url_new (e_account_get_string (target->modified_account, E_ACCOUNT_SOURCE_URL), NULL);
 
 	camel_url_set_param (url, "ssl", gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check)) ? "1" : NULL);
 
 	url_string = camel_url_to_string (url, 0);
-	e_account_set_string (target->account, E_ACCOUNT_SOURCE_URL, url_string);
-	e_account_set_string (target->account, E_ACCOUNT_TRANSPORT_URL, url_string);
+	e_account_set_string (target->modified_account, E_ACCOUNT_SOURCE_URL, url_string);
+	e_account_set_string (target->modified_account, E_ACCOUNT_TRANSPORT_URL, url_string);
 	g_free (url_string);
 
 	camel_url_free (url);
@@ -353,7 +353,7 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 	gint row;
 
 	target_account = (EMConfigTargetAccount *)data->config->target;
-	url = camel_url_new(e_account_get_string(target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
+	url = camel_url_new(e_account_get_string(target_account->modified_account, E_ACCOUNT_SOURCE_URL), NULL);
 
 	/* is NULL on New Account creation */
 	if (url == NULL)
@@ -409,7 +409,7 @@ org_gnome_exchange_mapi_check_options(EPlugin *epl, EConfigHookPageCheckData *da
 	gboolean status = TRUE;
 
 	if (data->pageid != NULL && g_ascii_strcasecmp (data->pageid, "10.receive") == 0) {
-		CamelURL *url = camel_url_new (e_account_get_string(target->account,
+		CamelURL *url = camel_url_new (e_account_get_string(target->modified_account,
 								    E_ACCOUNT_SOURCE_URL), NULL);
 
 		if (url && url->protocol && g_ascii_strcasecmp (url->protocol, "mapi") == 0) {
