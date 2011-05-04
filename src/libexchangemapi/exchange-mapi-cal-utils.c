@@ -1223,7 +1223,8 @@ appt_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem
 		{ PidLidIsException, 0 },
 		{ PidLidCleanGlobalObjectId, 0 },
 		{ PidLidAppointmentMessageClass, 0 },
-		{ PidLidMeetingType, 0 }
+		{ PidLidMeetingType, 0 },
+		{ PidLidTimeZone, 0 }
 	};
 
 	if (!props)
@@ -1633,6 +1634,21 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 		if (mapi_tzid && *mapi_tzid) {
 			exchange_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &end_tz);
 			set_named_value (PidLidAppointmentTimeZoneDefinitionEndDisplay, &end_tz);
+		}
+
+		/* Recurrences also need to have this rather arbitrary index set
+		   to properly determine SDT/DST and appear in OWA (Bug #629057). */
+		if (e_cal_component_has_recurrences (comp)) {
+			uint64_t pltz;
+			icaltimezone *ictz;
+			const gchar *zone_location = dtstart_tz_location;
+
+			if (!zone_location)
+				zone_location = get_tzid_location ("*default-zone*", cbdata);
+
+			ictz = icaltimezone_get_builtin_timezone (zone_location);
+			pltz = exchange_mapi_cal_util_mapi_tz_pidlidtimezone (ictz);
+			set_named_value (PidLidTimeZone, &pltz);
 		}
 
 		/* Duration */

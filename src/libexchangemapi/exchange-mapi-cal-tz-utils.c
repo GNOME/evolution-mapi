@@ -567,3 +567,198 @@ exchange_mapi_cal_util_bin_to_mapi_tz (GByteArray *ba)
 
 	return buf;
 }
+
+/* Corresponds to the first table in OXOCAL 2.2.5.6.
+   - has_dst is signifies whether the SDT/DST entries are relevant or "N/A"
+   - utc_offset is in minutes east of UTC
+ */
+struct pltz_mapentry {
+	gboolean has_dst;
+	int utc_offset;
+	int standard_wMonth;
+	int standard_wDayOfWeek;
+	int standard_wDay;
+	int standard_wHour;
+	int daylight_wMonth;
+	int daylight_wDayOfWeek;
+	int daylight_wDay;
+	int daylight_wHour;
+};
+
+/* Table contents, current as of [MS-OXOCAL] - v20110315 */
+static const struct pltz_mapentry pltz_table[] = {
+	{ FALSE,  720,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ TRUE,     0, 10, 0, 5, 2,   3, 0, 5, 1 },
+	{ TRUE,    60,  9, 0, 5, 2,   3, 0, 5, 1 },
+	{ TRUE,    60, 10, 0, 5, 3,   3, 0, 5, 2 },
+	{ TRUE,    60, 10, 0, 5, 3,   3, 0, 5, 2 },
+	{ TRUE,   120,  9, 0, 5, 1,   3, 0, 5, 0 },
+	{ TRUE,    60,  9, 0, 5, 1,   3, 0, 5, 0 },
+	{ TRUE,   120, 10, 0, 5, 4,   3, 0, 5, 3 },
+	{ TRUE,  -180,  2, 0, 2, 2,  10, 0, 3, 2 },
+	{ TRUE,  -240, 11, 0, 1, 2,   3, 0, 2, 2 },
+	{ TRUE,  -300, 11, 0, 1, 2,   3, 0, 2, 2 },
+	{ TRUE,  -360, 11, 0, 1, 2,   3, 0, 2, 2 },
+	{ TRUE,  -420, 11, 0, 1, 2,   3, 0, 2, 2 },
+	{ TRUE,  -480, 11, 0, 1, 2,   3, 0, 2, 2 },
+	{ TRUE,  -540, 11, 0, 1, 2,   3, 0, 2, 2 },
+	{ FALSE, -600,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE, -660,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ TRUE,   720,  4, 0, 1, 3,   9, 0, 5, 2 },
+	{ TRUE,   600,  3, 0, 5, 3,  10, 0, 5, 2 },
+	{ TRUE,   570,  3, 0, 5, 3,  10, 0, 5, 2 },
+	{ FALSE,  540,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE,  480,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE,  420,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE,  330,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE,  240,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ TRUE,   210,  9, 2, 4, 2,   3, 0, 1, 2 },
+	{ FALSE,  180,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ TRUE,   120,  9, 0, 3, 2,   3, 5, 5, 2 },
+	{ TRUE,  -210, 11, 0, 1, 0,   3, 0, 2, 0 },
+	{ TRUE,   -60, 10, 0, 5, 1,   3, 0, 5, 0 },
+	{ TRUE,  -120, 10, 0, 5, 1,   3, 0, 5, 0 },
+	{ FALSE,    0,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE, -180,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE, -240,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE, -300,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE, -300,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE, -360,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ TRUE,  -360, 10, 0, 5, 2,   4, 0, 1, 2 },
+	{ FALSE, -420,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE, -720,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE,  720,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE,  660,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ TRUE,   600,  3, 0, 5, 2,  10, 0, 1, 2 },
+	{ FALSE,  600,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE,  570,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ TRUE,   480,  9, 0, 2, 2,   4, 0, 2, 2 },
+	{ FALSE,  360,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE,  300,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ FALSE,  270,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ TRUE,   120,  9, 4, 5, 2,   5, 5, 1, 2 },
+	{ FALSE,  120,  0, 0, 0, 0,   0, 0, 0, 0 },
+	{ TRUE,   180, 10, 0, 5, 1,   3, 0, 5, 0 },
+	{ TRUE,   600,  3, 0, 5, 2,   8, 0, 5, 2 },
+	{ TRUE,   600,  4, 0, 1, 3,  10, 0, 5, 2 },
+	{ TRUE,   570,  4, 0, 1, 3,  10, 0, 5, 2 },
+	{ TRUE,   600,  4, 0, 1, 3,  10, 0, 1, 2 },
+	{ TRUE,  -240,  3, 6, 2, 23, 10, 6, 2, 23 },
+	{ TRUE,   480,  3, 0, 5, 3,  10, 0, 5, 2 },
+	{ TRUE,  -420, 10, 0, 5, 2,   4, 0, 1, 2 },
+	{ TRUE,  -480, 10, 0, 5, 2,   4, 0, 1, 2 }
+};
+
+/* Return the ordinal-th wday day in month as a time_t in the local time.
+	@year: year in decimal form
+	@month: month (1 == Jan)
+	@wday: weekday (0 == Sunday)
+	@ordinal: nth occurence of wday, or last occurrence if out of bounds
+ */
+static time_t
+nth_day_of_month (int year, int month, int wday, int ordinal)
+{
+	struct tm stm = {0};
+	time_t ts;
+
+	/* first day of month */
+	stm.tm_year = year - 1900;
+	stm.tm_mon = month - 1;
+	stm.tm_mday = 1;
+
+	ts = mktime (&stm);
+	/* go to first instance of wday in month */
+	ts += (60 * 60 * 24) * (wday - stm.tm_wday + 7 * (wday < stm.tm_wday));
+	/* go to the n weeks in the future */
+	ts += (60 * 60 * 24 * 7) * (ordinal - 1);
+	localtime_r (&ts, &stm);
+	/* the MS spec says that the 5th such weekday of the month always
+	   refers to the last such day, even if it is the 4th.  So, check to
+       see if we're in the same month, and if not, rewind a week. */
+	if (stm.tm_mon != month - 1)
+		ts -= (60 * 60 * 24 * 7);
+
+	return ts;
+}
+
+/* return the most-correct PidLidTimeZone value w.r.t. OXOCAL 2.2.5.6. */
+int
+exchange_mapi_cal_util_mapi_tz_pidlidtimezone (icaltimezone *ictz)
+{
+	gboolean tz_dst_now = FALSE, tz_has_dst = FALSE;
+	int i, utc_offset = 0, best_index = 0, best_score = -1;
+	const char *tznames;
+	icaltimetype tt;
+
+	if (ictz == NULL)
+		return 0;
+
+	/* Simple hack to determine if our TZ has DST */
+	tznames = icaltimezone_get_tznames (ictz);
+	if (tznames && strchr (tznames, '/'))
+		tz_has_dst = TRUE;
+
+	/* Calculate minutes east of UTC, what MS uses in this spec */
+	tt = icaltime_current_time_with_zone (ictz);
+	utc_offset = icaltimezone_get_utc_offset (ictz, &tt, &tz_dst_now) / 60;
+	if (tz_dst_now)
+		utc_offset -= 60;
+
+	/* Find the PidLidTimeZone entry that matches the most closely to
+	   the SDT/DST rules for the given timezone */
+	for (i = 0; i < sizeof (pltz_table) / sizeof (struct pltz_mapentry); ++i) {
+		const struct pltz_mapentry *pme = &pltz_table[i];
+		time_t pre_sdt, sdt, post_sdt, pre_dst, dst, post_dst;
+		struct tm pre_stm, stm, post_stm;
+		int score = 0;
+
+		if (pme->utc_offset == utc_offset && tz_has_dst == pme->has_dst)
+			score = 1;
+
+		if (score && tz_has_dst) {
+			sdt = nth_day_of_month (tt.year, pme->standard_wMonth,
+			                        pme->standard_wDayOfWeek,
+			                        pme->standard_wDay);
+			/* add the transition hour and a second */
+			sdt += (pme->standard_wHour * 60 * 60) + 1;
+			pre_sdt = sdt - 2 * 60 * 60;
+			post_sdt = sdt + 2 * 60 * 60;
+
+			dst = nth_day_of_month (tt.year, pme->daylight_wMonth,
+			                        pme->daylight_wDayOfWeek,
+			                        pme->daylight_wDay);
+			dst += (pme->daylight_wHour * 60 * 60) + 1;
+			pre_dst = dst - 2 * 60 * 60;
+			post_dst = dst + 2 * 60 * 60;
+
+			localtime_r (&sdt, &stm);
+			localtime_r (&pre_sdt, &pre_stm);
+			localtime_r (&post_sdt, &post_stm);
+
+			if (!stm.tm_isdst)
+				score++;
+			if (pre_stm.tm_isdst)
+				score++;
+			if (!post_stm.tm_isdst)
+				score++;
+
+			localtime_r (&dst, &stm);
+			localtime_r (&pre_dst, &pre_stm);
+			localtime_r (&post_dst, &post_stm);
+
+			if (stm.tm_isdst)
+				score++;
+			if (!pre_stm.tm_isdst)
+				score++;
+			if (post_stm.tm_isdst)
+				score++;
+
+			if (score > best_score) {
+				best_score = score;
+				best_index = i;
+			}
+		}
+	}
+
+	return best_index;
+}
