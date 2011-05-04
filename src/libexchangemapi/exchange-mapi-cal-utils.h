@@ -88,7 +88,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 					   const gchar *local_store_uri, const icaltimezone *default_zone, gboolean is_reply, GSList **detached_components);
 
 void
-exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *uid, struct Binary_r *sb);
+exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *uid, const struct timeval *exception_replace_time, const struct FILETIME *creation_time, struct Binary_r *sb);
 
 gchar *
 exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, mapi_id_t fid, mapi_id_t mid, mapi_object_t *obj_message, const gchar *msg_class,
