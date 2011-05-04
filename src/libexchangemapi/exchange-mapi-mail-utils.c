@@ -907,7 +907,7 @@ mapi_mail_item_to_mime_message (ExchangeMapiConnection *conn, MailItem *item)
 									inline_attachs);
 	} else if (build_related) {
 		multipart_body = mapi_mime_build_multipart_related (item,
-								    item->msg.body_parts->data,
+								    item->msg.body_parts ? item->msg.body_parts->data : NULL,
 								    inline_attachs);
 	} else { /* Simple multipart/mixed */
 		CamelMimePart *part;
