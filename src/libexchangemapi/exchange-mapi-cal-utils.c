@@ -568,11 +568,14 @@ static const uint8_t GID_START_SEQ[] = {
 	0x74, 0xc5, 0xb7, 0x10, 0x1a, 0x82, 0xe0, 0x08
 };
 
+/* exception_replace_time is a value of PidLidExceptionReplaceTime; this is not used for 'clean' object ids.
+   creation_time is a value of PR_CREATION_TIME
+*/
 void
-exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *uid, struct Binary_r *sb)
+exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *uid, const struct timeval *exception_replace_time, const struct FILETIME *creation_time, struct Binary_r *sb)
 {
 	GByteArray *ba;
-	guint32 flag32;
+	guint32 val32;
 	guchar *buf = NULL;
 	gsize len;
 	d(guint32 i);
@@ -581,36 +584,40 @@ exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *
 
 	ba = g_byte_array_append (ba, GID_START_SEQ, (sizeof (GID_START_SEQ) / sizeof (GID_START_SEQ[0])));
 
-	/* FIXME for exceptions */
-	if (is_clean || TRUE) {
-		flag32 = 0;
-		ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
+	val32 = 0;
+	if (!is_clean && exception_replace_time) {
+		struct icaltimetype icaltm = icaltime_from_timet_with_zone (exception_replace_time->tv_sec, 0, icaltimezone_get_utc_timezone ());
+
+		val32 |= (icaltm.year & 0xFF00) << 16;
+		val32 |= (icaltm.year & 0xFF) << 16;
+		val32 |= (icaltm.month & 0xFF) << 8;
+		val32 |= (icaltm.day & 0xFF);
 	}
 
-	/* creation time - may be all 0's  */
-	flag32 = 0;
-	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
-	flag32 = 0;
-	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *) &val32, sizeof (guint32));
+
+	/* creation time */
+	val32 = creation_time ? creation_time->dwLowDateTime : 0;
+	ba = g_byte_array_append (ba, (const guint8 *) &val32, sizeof (guint32));
+	val32 = creation_time ? creation_time->dwHighDateTime : 0;
+	ba = g_byte_array_append (ba, (const guint8 *) &val32, sizeof (guint32));
 
 	/* RESERVED - should be all 0's  */
-	flag32 = 0;
-	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
-	flag32 = 0;
-	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
-
-	/* FIXME: cleanup the UID first */
+	val32 = 0;
+	ba = g_byte_array_append (ba, (const guint8 *) &val32, sizeof (guint32));
+	val32 = 0;
+	ba = g_byte_array_append (ba, (const guint8 *) &val32, sizeof (guint32));
 
 	/* We put Evolution's UID in base64 here */
 	buf = g_base64_decode (uid, &len);
 	if (len % 2 != 0)
 		--len;
-	flag32 = len;
+	val32 = len;
 
 	/* Size in bytes of the following data */
-	ba = g_byte_array_append (ba, (const guint8 *)&flag32, sizeof (guint32));
+	ba = g_byte_array_append (ba, (const guint8 *) &val32, sizeof (guint32));
 	/* Data */
-	ba = g_byte_array_append (ba, (const guint8 *)buf, flag32);
+	ba = g_byte_array_append (ba, (const guint8 *)buf, val32);
 	g_free (buf);
 
 	sb->lpb = ba->data;
@@ -623,17 +630,18 @@ exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *
 	g_byte_array_free (ba, FALSE);
 }
 
+/* returns complete globalid as base64 encoded string */
 static gchar *
-id_to_string (GByteArray *ba)
+globalid_to_string (GByteArray *ba)
 {
 	guint8 *ptr;
 	guint len;
-	gchar *buf = NULL;
-	guint32 flag32, i, j;
+	guint32 i, j;
 
 	g_return_val_if_fail (ba != NULL, NULL);
+
 	/* MSDN docs: the globalID must have an even number of bytes */
-	if ((ba->len)%2 != 0)
+	if ((ba->len) % 2 != 0)
 		return NULL;
 
 	ptr = ba->data;
@@ -644,49 +652,8 @@ id_to_string (GByteArray *ba)
 		if (*ptr != GID_START_SEQ[j])
 			return NULL;
 
-	/* FIXME: for exceptions - len = 4 bytes */
-	flag32 = *((guint32 *)ptr);
-	i += sizeof (guint32);
-	if (!(i < len) || flag32 != 0)
-		return NULL;
-	ptr += sizeof (guint32);
-
-	/* Creation time - len = 8 bytes - skip it */
-	flag32 = *((guint32 *)ptr);
-	i += sizeof (guint32);
-	if (!(i < len))
-		return NULL;
-	ptr += sizeof (guint32);
-
-	flag32 = *((guint32 *)ptr);
-	i += sizeof (guint32);
-	if (!(i < len))
-		return NULL;
-	ptr += sizeof (guint32);
-
-	/* Reserved bytes - len = 8 bytes */
-	flag32 = *((guint32 *)ptr);
-	i += sizeof (guint32);
-	if (!(i < len) || flag32 != 0)
-		return NULL;
-	ptr += sizeof (guint32);
-
-	flag32 = *((guint32 *)ptr);
-	i += sizeof (guint32);
-	if (!(i < len) || flag32 != 0)
-		return NULL;
-	ptr += sizeof (guint32);
-
-	/* This is the real data */
-	flag32 = *((guint32 *)ptr);
-	i += sizeof (guint32);
-	if (!(i < len) || flag32 != (len - i))
-		return NULL;
-	ptr += sizeof (guint32);
-
-	buf = g_base64_encode (ptr, flag32);
-
-	return buf;
+	/* take complete global id */
+	return g_base64_encode (ba->data, ba->len);
 }
 
 ECalComponent *
@@ -778,20 +745,10 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 		gboolean all_day;
 		ExchangeMAPIStream *stream;
 
-		/* CleanGlobalObjectId */
-		stream = exchange_mapi_util_find_stream (streams, PidLidCleanGlobalObjectId);
-		if (stream) {
-			gchar *value = id_to_string (stream->value);
-			prop = icalproperty_new_x (value);
-			icalproperty_set_x_name (prop, "X-EVOLUTION-MAPI-CLEAN-GLOBALID");
-			icalcomponent_add_property (ical_comp, prop);
-			g_free (value);
-		}
-
 		/* GlobalObjectId */
 		stream = exchange_mapi_util_find_stream (streams, PidLidGlobalObjectId);
 		if (stream) {
-			gchar *value = id_to_string (stream->value);
+			gchar *value = globalid_to_string (stream->value);
 			prop = icalproperty_new_x (value);
 			icalproperty_set_x_name (prop, "X-EVOLUTION-MAPI-GLOBALID");
 			icalcomponent_add_property (ical_comp, prop);
@@ -805,6 +762,16 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 				}
 			}
 
+			g_free (value);
+		}
+
+		ui32 = find_mapi_SPropValue_data(properties, PR_OWNER_APPT_ID);
+		if (ui32) {
+			gchar *value = exchange_mapi_util_mapi_id_to_string ((mapi_id_t) (*ui32));
+
+			prop = icalproperty_new_x (value);
+			icalproperty_set_x_name (prop, "X-EVOLUTION-MAPI-OWNER-APPT-ID");
+			icalcomponent_add_property (ical_comp, prop);
 			g_free (value);
 		}
 
@@ -1200,6 +1167,7 @@ exchange_mapi_cal_utils_add_named_ids (ExchangeMapiConnection *conn, mapi_id_t f
 		{ PidLidReminderSignalTime, 0 },
 		{ PidLidTimeZoneStruct, 0 },
 		{ PidLidTimeZoneDescription, 0 },
+		{ PidLidExceptionReplaceTime, 0 },
 		{ PidNameKeywords, 0 }
 	};
 	icalcomponent_kind kind = pkind;
@@ -1696,6 +1664,19 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 		set_named_value (PidLidRecurrenceType, &flag32);
 
 		flag32 = cbdata->appt_id;
+		if (!flag32) {
+			gchar *propval;
+
+			propval = exchange_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-OWNER-APPT-ID");
+			if (propval && *propval) {
+				mapi_id_t as_id = 0;
+
+				if (exchange_mapi_util_mapi_id_from_string (propval, &as_id))
+					flag32 = (uint32_t) as_id;
+			}
+
+			g_free (propval);
+		}
 		set_value (PR_OWNER_APPT_ID, &flag32);
 
 		flag32 = cbdata->appt_seq;

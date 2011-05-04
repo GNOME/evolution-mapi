@@ -642,31 +642,40 @@ mapi_cal_get_known_ids (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX 
 		PR_SENT_REPRESENTING_NAME_UNICODE,
 		PR_SMTP_ADDRESS_UNICODE,
 		PR_START_DATE,
-		PR_SUBJECT_UNICODE,
-		PROP_TAG(PT_BINARY, 0x0003),
-		PROP_TAG(PT_BINARY, 0x0023),
-		PROP_TAG(PT_BINARY, 0x8216),
-		PROP_TAG(PT_BINARY, 0x825E),
-		PROP_TAG(PT_BINARY, 0x825F),
-		PROP_TAG(PT_BOOLEAN, 0x8126),
-		PROP_TAG(PT_BOOLEAN, 0x8215),
-		PROP_TAG(PT_BOOLEAN, 0x8223),
-		PROP_TAG(PT_BOOLEAN, 0x8503),
-		PROP_TAG(PT_DOUBLE, 0x8102),
-		PROP_TAG(PT_LONG, 0x8101),
-		PROP_TAG(PT_LONG, 0x8201),
-		PROP_TAG(PT_LONG, 0x8205),
-		PROP_TAG(PT_STRING8, 0x8208),
-		PROP_TAG(PT_SYSTIME, 0x8104),
-		PROP_TAG(PT_SYSTIME, 0x8105),
-		PROP_TAG(PT_SYSTIME, 0x810F),
-		PROP_TAG(PT_SYSTIME, 0x820D),
-		PROP_TAG(PT_SYSTIME, 0x820E),
-		PROP_TAG(PT_SYSTIME, 0x8502),
-		PROP_TAG(PT_SYSTIME, 0x8560)
+		PR_SUBJECT_UNICODE
+	};
+
+	/* do not make this array static, the function modifies it on run */
+	ResolveNamedIDsData known_nids[] = {
+		{ PidLidGlobalObjectId, 0 },
+		{ PidLidCleanGlobalObjectId, 0 },
+		{ PidLidAppointmentRecur, 0 },
+		{ PidLidAppointmentTimeZoneDefinitionStartDisplay, 0 },
+		{ PidLidAppointmentTimeZoneDefinitionEndDisplay, 0 },
+		{ PidLidTaskFRecurring, 0 },
+		{ PidLidAppointmentSubType, 0 },
+		{ PidLidRecurring, 0 },
+		{ PidLidReminderSet, 0 },
+		{ PidLidPercentComplete, 0 },
+		{ PidLidTaskStatus, 0 },
+		{ PidLidAppointmentSequence, 0 },
+		{ PidLidBusyStatus, 0 },
+		{ PidLidLocation, 0 },
+		{ PidLidTaskStartDate, 0 },
+		{ PidLidTaskDueDate, 0 },
+		{ PidLidTaskDateCompleted, 0 },
+		{ PidLidAppointmentStartWhole, 0 },
+		{ PidLidAppointmentEndWhole, 0 },
+		{ PidLidReminderTime, 0 },
+		{ PidLidReminderSignalTime, 0 },
+		{ PidLidExceptionReplaceTime, 0 },
+		{ PidNameKeywords, 0 }
 	};
 
 	g_return_val_if_fail (props != NULL, FALSE);
+
+	if (!exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, known_nids, G_N_ELEMENTS (known_nids)))
+		return FALSE;
 
 	return exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, known_cal_mapi_ids, G_N_ELEMENTS (known_cal_mapi_ids));
 }
@@ -1634,19 +1643,22 @@ get_comp_mid (icalcomponent *icalcomp, mapi_id_t *mid)
 
 /* should call free_server_data() before done with cbdata */
 static void
-get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cal_cbdata *cbdata)
+get_server_data (ECalBackendMAPI *cbmapi, ECalComponent *comp, struct cal_cbdata *cbdata)
 {
 	ECalBackendMAPIPrivate *priv = cbmapi->priv;
+	icalcomponent *icalcomp;
 	const gchar *uid;
 	mapi_id_t mid;
 	struct mapi_SRestriction res;
 	struct SPropValue sprop;
 	struct Binary_r sb;
 	uint32_t proptag = 0x0;
+	gchar *propval;
 	TALLOC_CTX *mem_ctx;
 
-	uid = icalcomponent_get_uid (comp);
-	get_comp_mid (comp, &mid);
+	icalcomp = e_cal_component_get_icalcomponent (comp);
+	uid = icalcomponent_get_uid (icalcomp);
+	get_comp_mid (icalcomp, &mid);
 	if (exchange_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
 					mapi_cal_get_required_props, NULL,
 					capture_req_props, cbdata,
@@ -1661,7 +1673,22 @@ get_server_data (ECalBackendMAPI *cbmapi, icalcomponent *comp, struct cal_cbdata
 	res.res.resProperty.relop = RELOP_EQ;
 	res.res.resProperty.ulPropTag = proptag;
 
-	exchange_mapi_cal_util_generate_globalobjectid (TRUE, uid, &sb);
+	propval = exchange_mapi_cal_utils_get_icomp_x_prop (icalcomp, "X-EVOLUTION-MAPI-GLOBALID");
+	if (propval && *propval) {
+		gsize len = 0;
+
+		sb.lpb = g_base64_decode (propval, &len);
+		sb.cb = len;
+	} else {
+		struct icaltimetype ical_creation_time = { 0 };
+		struct FILETIME creation_time = { 0 };
+
+		e_cal_component_get_dtstamp (comp, &ical_creation_time);
+
+		exchange_mapi_util_time_t_to_filetime (icaltime_as_timet (ical_creation_time), &creation_time);
+		exchange_mapi_cal_util_generate_globalobjectid (TRUE, uid, NULL, ical_creation_time.year ? &creation_time : NULL, &sb);
+	}
+	g_free (propval);
 
 	mem_ctx = talloc_init ("ExchangeMAPI_cal_get_server_data");
 	set_SPropValue_proptag (&sprop, proptag, (gconstpointer ) &sb);
@@ -2016,7 +2043,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, const gchar *calobj, Ca
 		cbdata.msgflags = MSGFLAG_READ;
 		cbdata.is_modify = TRUE;
 
-		get_server_data (cbmapi, icalcomp, &cbdata);
+		get_server_data (cbmapi, comp, &cbdata);
 		if (modifier_is_organizer(cbmapi, comp)) {
 			cbdata.meeting_type = (recipients != NULL) ? MEETING_OBJECT : NOT_A_MEETING;
 			cbdata.resp = (recipients != NULL) ? olResponseOrganized : olResponseNone;
@@ -2226,7 +2253,11 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, GLi
 			GSList *attachments = NULL;
 			GSList *streams = NULL;
 			const gchar *compuid;
-			struct Binary_r globalid;
+			gchar *propval;
+			struct Binary_r globalid = { 0 }, cleanglobalid = { 0 };
+			struct timeval *exception_repleace_time = NULL, ex_rep_time = { 0 };
+			struct FILETIME creation_time = { 0 };
+			struct icaltimetype ical_creation_time = { 0 };
 
 			e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
 
@@ -2278,7 +2309,7 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, GLi
 				break;
 			}
 
-			get_server_data (cbmapi, subcomp, &cbdata);
+			get_server_data (cbmapi, comp, &cbdata);
 			free_and_dupe_str (cbdata.username, ecbm_get_user_name (cbmapi));
 			free_and_dupe_str (cbdata.useridtype, "SMTP");
 			free_and_dupe_str (cbdata.userid, ecbm_get_user_email (cbmapi));
@@ -2290,24 +2321,53 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, GLi
 
 			e_cal_component_get_uid (comp, &compuid);
 
+			e_cal_component_get_dtstamp (comp, &ical_creation_time);
+			exchange_mapi_util_time_t_to_filetime (icaltime_as_timet (ical_creation_time), &creation_time);
+
+			propval = exchange_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-EXREPTIME");
+			if (propval && *propval) {
+				mapi_id_t val64 = 0;
+
+				if (exchange_mapi_util_mapi_id_from_string (propval, &val64)) {
+					memcpy (&ex_rep_time, &val64, 8);
+					exception_repleace_time = &ex_rep_time;
+				}
+			}
+			g_free (propval);
+
 			/* inherit GlobalID from the source object, if available */
 			if (e_cal_component_get_icalcomponent (comp)) {
-				gchar *propval;
-
 				propval = exchange_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-GLOBALID");
 				if (propval && *propval) {
-					exchange_mapi_cal_util_generate_globalobjectid (TRUE, propval, &globalid);
+					gsize len = 0;
+
+					globalid.lpb = g_base64_decode (propval, &len);
+					globalid.cb = len;
+
+					cleanglobalid.lpb = g_memdup (globalid.lpb, globalid.cb);
+					cleanglobalid.cb = globalid.cb;
+
+					/* PidLidCleanGlobalObjectId is same as PidLidGlobalObjectId,
+					   only exception-information are zeros */
+					if (cleanglobalid.lpb && cleanglobalid.cb > 20) {
+						for (len = 16; len < 20; len++) {
+							cleanglobalid.lpb[len] = 0;
+						}
+					}
+
 					compuid = NULL;
 				}
 
 				g_free (propval);
 			}
 
-			if (compuid)
-				exchange_mapi_cal_util_generate_globalobjectid (TRUE, compuid, &globalid);
+			if (compuid) {
+				exchange_mapi_cal_util_generate_globalobjectid (FALSE, compuid, exception_repleace_time, ical_creation_time.year ? &creation_time : NULL, &globalid);
+				exchange_mapi_cal_util_generate_globalobjectid (TRUE,  compuid, exception_repleace_time, ical_creation_time.year ? &creation_time : NULL, &cleanglobalid);
+			}
 
 			cbdata.globalid = &globalid;
-			cbdata.cleanglobalid = &globalid;
+			cbdata.cleanglobalid = &cleanglobalid;
 
 			mid = exchange_mapi_connection_create_item (priv->conn, olFolderSentMail, 0,
 							exchange_mapi_cal_utils_write_props_cb, &cbdata,
@@ -2316,6 +2376,8 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, GLi
 			cbdata.cleanglobalid = NULL;
 			free_server_data (&cbdata);
 			g_free (cbdata.props);
+			g_free (globalid.lpb);
+			g_free (cleanglobalid.lpb);
 
 			if (!mid) {
 				g_object_unref (comp);
