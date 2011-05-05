@@ -317,7 +317,6 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 	CamelMapiStore *mapi_store;
 	CamelStore *parent_store;
 
-	guint32 status_flags = 0;
 	CamelFolderChangeInfo *changes = NULL;
 	gboolean exists = FALSE;
 	GString *str = g_string_new (NULL);
@@ -349,13 +348,10 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 		MailItem *temp_item;
 		MailItem *item;
 		gchar *msg_uid;
-		guint64 id;
 
 		exists = FALSE;
-		status_flags = 0;
 
 		temp_item = (MailItem *)item_list->data;
-		id = temp_item->mid;
 		item = temp_item;
 
 		camel_operation_progress (cancellable, (100*i)/total_items);

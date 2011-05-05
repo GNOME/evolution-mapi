@@ -162,7 +162,6 @@ mapi_settings_run_folder_size_dialog (const gchar *profile, gpointer data)
 	GtkWidget *spinner, *alignment;
 	GtkWidget *spinner_label;
 	FolderSizeDialogData *dialog_data;
-	GThread *folder_list_thread;
 
 	dialog_data = g_new0 (FolderSizeDialogData, 1);
 
@@ -195,7 +194,7 @@ mapi_settings_run_folder_size_dialog (const gchar *profile, gpointer data)
 	dialog_data->profile = g_strdup (profile);
 
 	/* Fetch folder list and size information in a thread */
-	folder_list_thread = g_thread_create (mapi_settings_get_folder_size, dialog_data, TRUE, NULL);
+	g_thread_create (mapi_settings_get_folder_size, dialog_data, FALSE, NULL);
 
 	/* Start the dialog */
 	gtk_dialog_run (dialog_data->dialog);
@@ -282,7 +281,6 @@ action_folder_size_cb (GtkAction *action,
 static void
 folder_size_actions_update_cb (EShellView *shell_view, GtkActionEntry *entries)
 {
-	EShellContent *shell_content;
 	EShellWindow *shell_window;
 	GtkActionGroup *action_group;
 	GtkUIManager *ui_manager;
@@ -303,7 +301,6 @@ folder_size_actions_update_cb (EShellView *shell_view, GtkActionEntry *entries)
 		return;
 	}
 
-	shell_content = e_shell_view_get_shell_content (shell_view);
 	shell_window = e_shell_view_get_shell_window (shell_view);
 
 	ui_manager = e_shell_window_get_ui_manager (shell_window);

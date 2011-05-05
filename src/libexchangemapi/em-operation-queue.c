@@ -141,7 +141,7 @@ thread_func_cb (gpointer data, gpointer pqueue)
 	UNLOCK ();
 
 	if (priv->worker_cb)
-		priv->worker_cb (op->worker_data, cancelled, priv->user_data);
+		priv->worker_cb (worker_data, cancelled, priv->user_data);
 
 	g_object_unref (queue);
 	g_free (op);

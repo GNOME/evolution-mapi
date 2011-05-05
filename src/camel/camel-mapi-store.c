@@ -757,9 +757,6 @@ mapi_forget_folder (CamelMapiStore *mapi_store, const gchar *folder_name, GError
 	gchar *state_file;
 	gchar *folder_dir, *storage_path;
 	CamelFolderInfo *fi;
-	const gchar *name;
-
-	name = folder_name;
 
 	service = CAMEL_SERVICE (mapi_store);
 	user_data_dir = camel_service_get_user_data_dir (service);
@@ -1751,16 +1748,9 @@ mapi_connect_sync (CamelService *service,
 {
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
 	CamelServiceConnectionStatus status;
-	CamelProvider *provider;
-	CamelSession *session;
-	CamelURL *url;
 	guint16 event_mask = 0;
 
-	url = camel_service_get_camel_url (service);
-	session = camel_service_get_session (service);
-	provider = camel_service_get_provider (service);
 	status = camel_service_get_connection_status (service);
-
 	if (status == CAMEL_SERVICE_DISCONNECTED) {
 		return FALSE;
 	}

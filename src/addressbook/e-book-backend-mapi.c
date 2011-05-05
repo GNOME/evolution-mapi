@@ -178,12 +178,9 @@ ebbm_pick_book_view (EBookBackendMAPI *ebma)
 	EList *views = e_book_backend_get_book_views (E_BOOK_BACKEND (ebma));
 	EIterator *iter;
 	EDataBookView *rv = NULL;
-	gint test;
 
 	if (!views)
 		return NULL;
-
-	test = e_list_length (views);
 
 	iter = e_list_get_iterator (views);
 

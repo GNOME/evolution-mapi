@@ -909,7 +909,6 @@ exchange_lf_to_crlf (const gchar *in)
 gchar *
 exchange_crlf_to_lf (const gchar *in)
 {
-	gint len;
 	const gchar *s;
 	gchar *out;
 	GString *str;
@@ -918,7 +917,6 @@ exchange_crlf_to_lf (const gchar *in)
 
 	str = g_string_new ("");
 
-	len = strlen (in);
 	for (s = in; *s; s++) {
 		if (*s != '\r')
 			str = g_string_append_c (str, *s);

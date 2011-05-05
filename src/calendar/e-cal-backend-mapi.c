@@ -1385,9 +1385,6 @@ static gpointer
 cache_init (ECalBackendMAPI *cbmapi)
 {
 	ECalBackendMAPIPrivate *priv = cbmapi->priv;
-	icalcomponent_kind kind;
-
-	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
 
 	priv->mode = CAL_MODE_REMOTE;
 
@@ -1416,8 +1413,6 @@ static void
 ecbm_connect (ECalBackendMAPI *cbmapi, GError **perror)
 {
 	ECalBackendMAPIPrivate *priv;
-	ESource *source;
-	ECalSourceType source_type;
 	GThread *thread;
 	GError *error = NULL;
 
@@ -1427,8 +1422,6 @@ ecbm_connect (ECalBackendMAPI *cbmapi, GError **perror)
 		g_propagate_error (perror, EDC_ERROR_EX (OtherError, "No folder ID set"));
 		return;
 	}
-
-	source = e_cal_backend_get_source (E_CAL_BACKEND (cbmapi));
 
 	if (!priv->conn || !exchange_mapi_connection_connected (priv->conn)) {
 		g_propagate_error (perror, EDC_ERROR (AuthenticationFailed));
@@ -1449,21 +1442,6 @@ ecbm_connect (ECalBackendMAPI *cbmapi, GError **perror)
 
 	priv->mode_changed = FALSE;
 
-	switch (e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi))) {
-	case ICAL_VEVENT_COMPONENT:
-		source_type = E_CAL_SOURCE_TYPE_EVENT;
-		break;
-	case ICAL_VTODO_COMPONENT:
-		source_type = E_CAL_SOURCE_TYPE_TODO;
-		break;
-	case ICAL_VJOURNAL_COMPONENT:
-		source_type = E_CAL_SOURCE_TYPE_JOURNAL;
-		break;
-	default:
-		source_type = E_CAL_SOURCE_TYPE_EVENT;
-		break;
-	}
-
 	/* spawn a new thread for caching the calendar items */
 	thread = g_thread_create ((GThreadFunc) cache_init, cbmapi, FALSE, &error);
 	if (!thread) {
@@ -1478,7 +1456,6 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, gboolean only_if_exists, const g
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
-	ECalSourceType source_type;
 	ESource *esource;
 	const gchar *fid = NULL;
 	const gchar *cache_dir;
@@ -1503,20 +1480,15 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, gboolean only_if_exists, const g
 	cbmapi->priv->read_only = FALSE;
 
 	switch (e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi))) {
+	default:
 	case ICAL_VEVENT_COMPONENT:
-		source_type = E_CAL_SOURCE_TYPE_EVENT;
 		olFolder = olFolderCalendar;
 		break;
 	case ICAL_VTODO_COMPONENT:
-		source_type = E_CAL_SOURCE_TYPE_TODO;
 		olFolder = olFolderTasks;
 		break;
 	case ICAL_VJOURNAL_COMPONENT:
-		source_type = E_CAL_SOURCE_TYPE_JOURNAL;
 		olFolder = olFolderNotes;
-		break;
-	default:
-		source_type = E_CAL_SOURCE_TYPE_EVENT;
 		break;
 	}
 
@@ -2707,15 +2679,12 @@ ecbm_compute_changes_foreach_key (const gchar *key, const gchar *value, gpointer
 static void
 ecbm_compute_changes (ECalBackendMAPI *cbmapi, const gchar *change_id, GList **adds, GList **modifies, GList **deletes, GError **perror)
 {
-	ECalBackendStore *store;
 	gchar *filename;
 	EXmlHash *ehash;
 	ECalBackendMAPIComputeChangesData be_data;
 	GList *i, *list = NULL;
 	gchar *unescaped_uri;
 	GError *err = NULL;
-
-	store = cbmapi->priv->store;
 
 	/* FIXME Will this always work? */
 	unescaped_uri = g_uri_unescape_string (cbmapi->priv->uri, "");
@@ -2803,13 +2772,8 @@ ecbm_is_loaded (ECalBackend *backend)
 static void
 ecbm_start_query (ECalBackend *backend, EDataCalView *query)
 {
-	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
         GList *objects = NULL;
 	GError *err = NULL;
-
-	cbmapi = E_CAL_BACKEND_MAPI (backend);
-	priv = cbmapi->priv;
 
         ecbm_get_object_list (backend, NULL, e_data_cal_view_get_text (query), &objects, &err);
         if (err) {
@@ -3719,19 +3683,6 @@ ecbm_op_get_free_busy (ECalBackend *backend, EDataCal *cal, EServerMethodContext
 STR_OP_DEF  (ecbm_op_get_changes, OP_GET_CHANGES)
 
 static void
-ecbm_dispose (GObject *object)
-{
-	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
-
-	cbmapi = E_CAL_BACKEND_MAPI (object);
-	priv = cbmapi->priv;
-
-	if (G_OBJECT_CLASS (e_cal_backend_mapi_parent_class)->dispose)
-		(* G_OBJECT_CLASS (e_cal_backend_mapi_parent_class)->dispose) (object);
-}
-
-static void
 ecbm_finalize (GObject *object)
 {
 	ECalBackendMAPI *cbmapi;
@@ -3852,7 +3803,6 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 	object_class = (GObjectClass *) class;
 	backend_class = (ECalBackendClass *) class;
 
-	object_class->dispose = ecbm_dispose;
 	object_class->finalize = ecbm_finalize;
 
 	/* functions done asynchronously */
