@@ -378,6 +378,9 @@ mapi_mime_set_recipient_list (ExchangeMapiConnection *conn, CamelMimeMessage *ms
 			display_name = g_strdup (name);
 		rcpt_type = (type ? *type : MAPI_TO);
 
+		if (!display_name && (!recip->email_id || !*recip->email_id))
+			break;
+
 		switch (rcpt_type) {
 		case MAPI_TO:
 			camel_internet_address_add (to_addr, display_name, recip->email_id ? recip->email_id : "");
@@ -391,6 +394,21 @@ mapi_mime_set_recipient_list (ExchangeMapiConnection *conn, CamelMimeMessage *ms
 		}
 
 		g_free (display_name);
+	}
+
+	if (l != NULL) {
+		/* some recipient didn't have set email or
+		   display name, fallback to PR_DISPLAY_TO/_CC/_BCC */
+		camel_address_remove (CAMEL_ADDRESS (to_addr), -1);
+		camel_address_remove (CAMEL_ADDRESS (cc_addr), -1);
+		camel_address_remove (CAMEL_ADDRESS (bcc_addr), -1);
+
+		if (item->header.to && *item->header.to)
+			camel_address_decode (CAMEL_ADDRESS (to_addr), item->header.to);
+		if (item->header.cc && *item->header.cc)
+			camel_address_decode (CAMEL_ADDRESS (cc_addr), item->header.cc);
+		if (item->header.bcc && *item->header.bcc)
+			camel_address_decode (CAMEL_ADDRESS (bcc_addr), item->header.bcc);
 	}
 
 	/*Add to message*/
