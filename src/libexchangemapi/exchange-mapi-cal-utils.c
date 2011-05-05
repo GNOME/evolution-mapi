@@ -517,7 +517,9 @@ ical_attendees_from_props (icalcomponent *ical_comp, GSList *recipients, gboolea
 			prop = icalproperty_new_organizer (val);
 
 			/* CN */
-			str = (const gchar *) exchange_mapi_util_find_row_propval (&recip->out_SRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
+			str = recip->display_name;
+			if (!str || !*str)
+				str = (const gchar *) exchange_mapi_util_find_row_propval (&recip->out_SRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
 			if (!str)
 				str = (const gchar *) exchange_mapi_util_find_row_propval (&recip->out_SRow, PR_DISPLAY_NAME_UNICODE);
 			if (str) {
@@ -528,7 +530,9 @@ ical_attendees_from_props (icalcomponent *ical_comp, GSList *recipients, gboolea
 			prop = icalproperty_new_attendee (val);
 
 			/* CN */
-			str = (const gchar *) exchange_mapi_util_find_row_propval (&recip->out_SRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
+			str = recip->display_name;
+			if (!str || !*str)
+				str = (const gchar *) exchange_mapi_util_find_row_propval (&recip->out_SRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
 			if (!str)
 				str = (const gchar *) exchange_mapi_util_find_row_propval (&recip->out_SRow, PR_DISPLAY_NAME_UNICODE);
 			if (str) {

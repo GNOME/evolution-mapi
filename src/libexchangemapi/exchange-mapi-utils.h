@@ -59,11 +59,9 @@ exchange_mapi_util_free_stream_list (GSList **stream_list);
 void
 exchange_mapi_debug_property_dump (struct mapi_SPropValue_array *properties);
 
-void exchange_mapi_util_entryid_generate_oneoff (TALLOC_CTX *mem_ctx, struct Binary_r *entryid, const gchar *display_name, const gchar *email);
-gboolean exchange_mapi_util_entryid_decode_oneoff (const struct Binary_r *entyrid, gchar **display_name, gchar **email);
-
-struct Binary_r *
-exchange_mapi_util_entryid_generate_local (TALLOC_CTX *mem_ctx, const gchar *exchange_dn);
+void	 exchange_mapi_util_recip_entryid_generate_smtp (TALLOC_CTX *mem_ctx, struct Binary_r *entryid, const gchar *display_name, const gchar *email);
+void	 exchange_mapi_util_recip_entryid_generate_ex  (TALLOC_CTX *mem_ctx, struct Binary_r *entryid, const gchar *exchange_dn);
+gboolean exchange_mapi_util_recip_entryid_decode (ExchangeMapiConnection *conn, const struct Binary_r *entyrid, gchar **display_name, gchar **email);
 
 gchar *
 exchange_lf_to_crlf (const gchar *in);

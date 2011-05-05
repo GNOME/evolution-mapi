@@ -663,14 +663,14 @@ bin_decode_string (const uint8_t *ptr, uint32_t sz, gchar **str, gboolean is_uni
 			break;
 	}
 
-	if (len >= sz || ptr[len] != 0x00 || (is_unicode && len + 1 >= sz && ptr[len + 1] != 0x00))
+	if (len >= sz || ptr[len] != 0x00 || (is_unicode && (len + 1 >= sz || ptr[len + 1] != 0x00)))
 		return 0;
 
 	if (is_unicode) {
 		*str = g_utf16_to_utf8 ((const gunichar2 *) ptr, len / 2, NULL, NULL, NULL);
 	} else {
 		*str = g_malloc0 (sizeof(gchar) * (1 + len));
-		strncpy (*str, (const gchar *) ptr, len - 1);
+		strncpy (*str, (const gchar *) ptr, len);
 	}
 
 	return len + 1 + (is_unicode ? 1 : 0);
@@ -727,7 +727,7 @@ static const uint8_t MAPI_ONE_OFF_UID[] = {
 #define MAPI_ONE_OFF_MYSTERY_FLAG 0x1000
 
 /**
- * e2k_entryid_generate_oneoff:
+ * exchange_mapi_util_recip_entryid_generate_smtp:
  * @entryid: entry ID to be filled
  * @display_name: the display name of the user
  * @email: the email address
@@ -739,7 +739,7 @@ static const uint8_t MAPI_ONE_OFF_UID[] = {
  * Return value: the recipient ENTRYID
  **/
 void
-exchange_mapi_util_entryid_generate_oneoff (TALLOC_CTX *mem_ctx, struct Binary_r *entryid, const gchar *display_name, const gchar *email)
+exchange_mapi_util_recip_entryid_generate_smtp (TALLOC_CTX *mem_ctx, struct Binary_r *entryid, const gchar *display_name, const gchar *email)
 {
 	g_return_if_fail (entryid != NULL);
 
@@ -752,8 +752,31 @@ exchange_mapi_util_entryid_generate_oneoff (TALLOC_CTX *mem_ctx, struct Binary_r
 	exchange_mapi_util_bin_append_unicode (mem_ctx, entryid, email);
 }
 
-gboolean
-exchange_mapi_util_entryid_decode_oneoff (const struct Binary_r *entryid, gchar **display_name, gchar **email)
+static const uint8_t MAPI_LOCAL_UID[] = {
+	0xdc, 0xa7, 0x40, 0xc8, 0xc0, 0x42, 0x10, 0x1a,
+	0xb4, 0xb9, 0x08, 0x00, 0x2b, 0x2f, 0xe1, 0x82
+};
+
+/**
+ * exchange_mapi_util_recip_entryid_generate_ex:
+ * @exchange_dn: the Exchange 5.5-style DN of the local user
+ *
+ * Constructs an ENTRYID value that can be used as a MAPI
+ * recipient (eg, for a message forwarding server-side rule),
+ * corresponding to the local user identified by @exchange_dn.
+ **/
+void
+exchange_mapi_util_recip_entryid_generate_ex (TALLOC_CTX *mem_ctx, struct Binary_r *entryid, const gchar *exchange_dn)
+{
+	exchange_mapi_util_bin_append_uint32 (mem_ctx, entryid, 0);
+	exchange_mapi_util_bin_append_val (mem_ctx, entryid, MAPI_LOCAL_UID, sizeof(MAPI_LOCAL_UID));
+	exchange_mapi_util_bin_append_uint16 (mem_ctx, entryid, 1);
+	exchange_mapi_util_bin_append_uint16 (mem_ctx, entryid, 0);
+	exchange_mapi_util_bin_append_string (mem_ctx, entryid, exchange_dn);
+}
+
+static gboolean
+recip_entryid_decode_smtp (const struct Binary_r *entryid, gchar **display_name, gchar **email)
 {
 	uint32_t u32, sz, r;
 	uint16_t u16, flags;
@@ -834,35 +857,102 @@ exchange_mapi_util_entryid_decode_oneoff (const struct Binary_r *entryid, gchar 
 	return TRUE;
 }
 
-static const uint8_t MAPI_LOCAL_UID[] = {
-	0xdc, 0xa7, 0x40, 0xc8, 0xc0, 0x42, 0x10, 0x1a,
-	0xb4, 0xb9, 0x08, 0x00, 0x2b, 0x2f, 0xe1, 0x82
-};
+static gboolean
+recip_entryid_decode_ex (const struct Binary_r *entryid, gchar **exchange_dn)
+{
+	uint32_t u32, sz, r;
+	uint8_t *ptr;
+
+	g_return_val_if_fail (entryid != NULL, FALSE);
+	g_return_val_if_fail (entryid->lpb != NULL, FALSE);
+	g_return_val_if_fail (exchange_dn != NULL, FALSE);
+
+	*exchange_dn = NULL;
+
+	ptr = entryid->lpb;
+	sz = entryid->cb;
+
+	u32 = 1;
+	r = bin_decode_uint32 (ptr, sz, &u32);
+	if (!r || u32 != 0)
+		return FALSE;
+
+	ptr += r;
+	sz -= r;
+
+	for (r = 0; r < G_N_ELEMENTS (MAPI_LOCAL_UID) && r < sz; r++) {
+		if (ptr[r] != MAPI_LOCAL_UID[r])
+			return FALSE;
+	}
+
+	if (r != G_N_ELEMENTS (MAPI_LOCAL_UID))
+		return FALSE;
+
+	ptr += r;
+	sz -= r;
+
+	/* version */
+	u32 = 0;
+	r = bin_decode_uint32 (ptr, sz, &u32);
+	if (!r)
+		return FALSE;
+	ptr += r;
+	sz -= r;
+
+	/* type */
+	u32 = 0;
+	r = bin_decode_uint32 (ptr, sz, &u32);
+	if (!r)
+		return FALSE;
+	ptr += r;
+	sz -= r;
+
+	r = bin_decode_string (ptr, sz, exchange_dn, FALSE);
+	if (!r || !*exchange_dn)
+		return FALSE;
+
+	return TRUE;
+}
 
 /**
- * e2k_entryid_generate_local:
- * @exchange_dn: the Exchange 5.5-style DN of the local user
+ * exchange_mapi_util_recip_entryid_decode:
+ * @conn: ExchangeMapiCOnnection to resolve names, if required
+ * @entryid: recipient's ENTRYID to decode
+ * @display_name: (out): stored display name, if any; can be NULL
+ * @email: (out): email or exchange DN; cannot be NULL
  *
- * Constructs an ENTRYID value that can be used as a MAPI
- * recipient (eg, for a message forwarding server-side rule),
- * corresponding to the local user identified by @exchange_dn.
- *
- * Return value: the recipient ENTRYID
+ * Returns: Whether was able to decode recipient information from the @entryid.
  **/
-struct Binary_r *
-exchange_mapi_util_entryid_generate_local (TALLOC_CTX *mem_ctx, const gchar *exchange_dn)
+gboolean
+exchange_mapi_util_recip_entryid_decode (ExchangeMapiConnection *conn, const struct Binary_r *entryid, gchar **display_name, gchar **email)
 {
-	struct Binary_r *entryid;
+	gchar *dispnm = NULL, *exchange_dn = NULL;
 
-	entryid = talloc_zero (mem_ctx, struct Binary_r);
+	g_return_val_if_fail (conn != NULL, FALSE);
+	g_return_val_if_fail (entryid != NULL, FALSE);
+	g_return_val_if_fail (email != NULL, FALSE);
 
-	exchange_mapi_util_bin_append_uint32 (mem_ctx, entryid, 0);
-	exchange_mapi_util_bin_append_val (mem_ctx, entryid, MAPI_LOCAL_UID, sizeof(MAPI_LOCAL_UID));
-	exchange_mapi_util_bin_append_uint16 (mem_ctx, entryid, 1);
-	exchange_mapi_util_bin_append_uint16 (mem_ctx, entryid, 0);
-	exchange_mapi_util_bin_append_string (mem_ctx, entryid, exchange_dn);
+	*email = NULL;
+	if (display_name)
+		*display_name = NULL;
 
-	return entryid;
+	if (recip_entryid_decode_smtp (entryid, &dispnm, email)) {
+		if (display_name)
+			*display_name = dispnm;
+		else
+			g_free (dispnm);
+
+		return TRUE;
+	}
+
+	if (recip_entryid_decode_ex (entryid, &exchange_dn)) {
+		*email = exchange_mapi_connection_ex_to_smtp (conn, exchange_dn, display_name, NULL);
+		g_free (exchange_dn);
+
+		return *email != NULL;
+	}
+
+	return FALSE;
 }
 
 /**

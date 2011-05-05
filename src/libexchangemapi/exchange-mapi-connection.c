@@ -784,7 +784,7 @@ set_recipient_properties (TALLOC_CTX *mem_ctx, struct SRow *aRow, ExchangeMAPIRe
 		dn = (dn) ? dn : "";
 		email = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (recipient->in.ext_lpProps, PR_SMTP_ADDRESS_UNICODE);
 		email = (email) ? email : "";
-		exchange_mapi_util_entryid_generate_oneoff (mem_ctx, &oneoff_eid, dn, email);
+		exchange_mapi_util_recip_entryid_generate_smtp (mem_ctx, &oneoff_eid, dn, email);
 		set_SPropValue_proptag (&sprop, PR_ENTRYID, (gconstpointer )(oneoff_eid));
 		SRow_addprop (aRow, sprop);
 #endif
@@ -1456,33 +1456,42 @@ exchange_mapi_util_get_recipients (ExchangeMapiConnection *conn, mapi_object_t *
 	}
 
 	for (i_row_recip = 0; i_row_recip < rows_recip.cRows; i_row_recip++) {
-		ExchangeMAPIRecipient	*recipient = g_new0 (ExchangeMAPIRecipient, 1);
+		ExchangeMAPIRecipient *recipient = g_new0 (ExchangeMAPIRecipient, 1);
+		gchar *display_name = NULL, *email = NULL;
+		const struct Binary_r *entryid;
 
 		recipient->mem_ctx = talloc_init ("ExchangeMAPI_GetRecipients");
 
-		recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_SMTP_ADDRESS_UNICODE));
-		/* fallback */
-		if (!recipient->email_id) {
-			uint32_t fallback_props[] = {
-				PROP_TAG (PT_UNICODE, 0x6001), /* PigTagNickname for Recipients table */
-				PR_RECIPIENT_DISPLAY_NAME_UNICODE
-			};
-			gint ii;
-			const gchar *addrtype = exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE_UNICODE);
+		entryid = exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_RECIPIENT_ENTRYID);
+		if (entryid && exchange_mapi_util_recip_entryid_decode (conn, entryid, &display_name, &email) && email) {
+			recipient->email_id = talloc_strdup (recipient->mem_ctx, email);
+			if (display_name)
+				recipient->display_name = talloc_strdup (recipient->mem_ctx, display_name);
+		} else {
+			recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_SMTP_ADDRESS_UNICODE));
+			/* fallback */
+			if (!recipient->email_id) {
+				uint32_t fallback_props[] = {
+					PROP_TAG (PT_UNICODE, 0x6001), /* PidTagNickname for Recipients table */
+					PR_RECIPIENT_DISPLAY_NAME_UNICODE
+				};
+				gint ii;
+				const gchar *addrtype = exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE_UNICODE);
 
-			if (addrtype && !g_ascii_strcasecmp (addrtype, "SMTP"))
-				recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_EMAIL_ADDRESS_UNICODE));
+				if (addrtype && !g_ascii_strcasecmp (addrtype, "SMTP"))
+					recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_EMAIL_ADDRESS_UNICODE));
 
-			for (ii = 0; !recipient->email_id && ii < G_N_ELEMENTS (fallback_props); ii++) {
-				recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), fallback_props[ii]));
+				for (ii = 0; !recipient->email_id && ii < G_N_ELEMENTS (fallback_props); ii++) {
+					recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), fallback_props[ii]));
+				}
 			}
-		}
 
-		if (recipient->email_id) {
-			const gchar *addrtype = exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE_UNICODE);
+			if (recipient->email_id) {
+				const gchar *addrtype = exchange_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE_UNICODE);
 
-			if (addrtype && g_ascii_strcasecmp (addrtype, "EX") == 0)
-				recipient->email_id = exchange_mapi_connection_ex_to_smtp (conn, recipient->email_id, NULL, NULL);
+				if (addrtype && g_ascii_strcasecmp (addrtype, "EX") == 0)
+					recipient->email_id = talloc_strdup (recipient->mem_ctx, exchange_mapi_connection_ex_to_smtp (conn, recipient->email_id, NULL, NULL));
+			}
 		}
 
 		recipient->out_SRow.ulAdrEntryPad = rows_recip.aRow[i_row_recip].ulAdrEntryPad;
@@ -1490,6 +1499,9 @@ exchange_mapi_util_get_recipients (ExchangeMapiConnection *conn, mapi_object_t *
 		recipient->out_SRow.lpProps = talloc_steal ((TALLOC_CTX *)recipient->mem_ctx, rows_recip.aRow[i_row_recip].lpProps);
 
 		*recip_list = g_slist_append (*recip_list, recipient);
+
+		g_free (display_name);
+		g_free (email);
 	}
 
 cleanup:

@@ -359,10 +359,11 @@ mapi_mime_set_recipient_list (ExchangeMapiConnection *conn, CamelMimeMessage *ms
 		aRow = &recip->out_SRow;
 
 		/*Name is probably available in one of these props.*/
-		name = (const gchar *) exchange_mapi_util_find_row_propval (aRow, PR_DISPLAY_NAME_UNICODE);
-		name = name ? name : (const gchar *) exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
+		name = recip->display_name;
+		name = name ? name : exchange_mapi_util_find_row_propval (aRow, PR_DISPLAY_NAME_UNICODE);
+		name = name ? name : exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
 		if (!name) {
-			name = (const gchar *) exchange_mapi_util_find_row_propval (aRow, PR_7BIT_DISPLAY_NAME_UNICODE);
+			name = exchange_mapi_util_find_row_propval (aRow, PR_7BIT_DISPLAY_NAME_UNICODE);
 			if (name && !strchr (name, '@')) {
 				gchar *to_free;
 
@@ -393,13 +394,9 @@ mapi_mime_set_recipient_list (ExchangeMapiConnection *conn, CamelMimeMessage *ms
 	}
 
 	/*Add to message*/
-	/*Note : To field is added from PR_TRANSPORT_MESSAGE_HEADERS
-	  But, in sent_items folder we don't get TRANSPORT_MESSAGE_HEADERS */
-	if (!item->header.transport_headers) {
-		camel_mime_message_set_recipients(msg, "To", to_addr);
-		camel_mime_message_set_recipients(msg, "Cc", cc_addr);
-		camel_mime_message_set_recipients(msg, "Bcc", bcc_addr);
-	}
+	camel_mime_message_set_recipients (msg, "To", to_addr);
+	camel_mime_message_set_recipients (msg, "Cc", cc_addr);
+	camel_mime_message_set_recipients (msg, "Bcc", bcc_addr);
 
 	g_object_unref (to_addr);
 	g_object_unref (cc_addr);
