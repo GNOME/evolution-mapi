@@ -412,10 +412,10 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 				type = (uint32_t *) exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_TYPE);
 
 				if (type) {
-					name = (const gchar *) exchange_mapi_util_find_row_propval (aRow, PR_DISPLAY_NAME_UNICODE);
-					name = name ? name : (const gchar *) exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
-					name = name ? name : (const gchar *) exchange_mapi_util_find_row_propval (aRow,
-												 PR_7BIT_DISPLAY_NAME_UNICODE);
+					name = recip->display_name;
+					name = name ? name : exchange_mapi_util_find_row_propval (aRow, PR_DISPLAY_NAME_UNICODE);
+					name = name ? name : exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
+					name = name ? name : exchange_mapi_util_find_row_propval (aRow, PR_7BIT_DISPLAY_NAME_UNICODE);
 					display_name = name ? name : recip->email_id;
 					formatted_id = camel_internet_address_format_address(display_name, recip->email_id ? recip->email_id : "");
 

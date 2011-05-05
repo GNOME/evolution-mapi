@@ -85,8 +85,9 @@ typedef struct {
 
 typedef struct {
 	/* MANDATORY */
-	const gchar *email_id;
 	TALLOC_CTX *mem_ctx;
+	const gchar *email_id;
+	const gchar *display_name;
 
 	/* It is ideal to set all these properties on all recipients
 	 * as we never know if a recipient would be resolved or not. */

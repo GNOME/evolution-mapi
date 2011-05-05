@@ -1869,7 +1869,7 @@ mapi_book_utils_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid,
 
 			br.lpb = members->bin[i].lpb;
 			br.cb = members->bin[i].cb;
-			if (exchange_mapi_util_entryid_decode_oneoff (&br, &display_name, &email)) {
+			if (exchange_mapi_util_recip_entryid_decode (conn, &br, &display_name, &email)) {
 				EVCardAttribute *attr;
 				gchar *value;
 				CamelInternetAddress *addr;

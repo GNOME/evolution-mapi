@@ -367,11 +367,11 @@ mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 						members->lpbin[members->cValues].cb = string_to_bin (mem_ctx, g_hash_table_lookup (member_values, raw), &members->lpbin[members->cValues].lpb);
 						members->cValues++;
 					} else {
-						exchange_mapi_util_entryid_generate_oneoff (mem_ctx, &members->lpbin[members->cValues], nm ? nm : "", eml);
+						exchange_mapi_util_recip_entryid_generate_smtp (mem_ctx, &members->lpbin[members->cValues], nm ? nm : "", eml);
 						members->cValues++;
 					}
 
-					exchange_mapi_util_entryid_generate_oneoff (mem_ctx, &oneoff_members->lpbin[oneoff_members->cValues], nm ? nm : "", eml);
+					exchange_mapi_util_recip_entryid_generate_smtp (mem_ctx, &oneoff_members->lpbin[oneoff_members->cValues], nm ? nm : "", eml);
 					oneoff_members->cValues++;
 
 					list_size += MAX (oneoff_members->lpbin[oneoff_members->cValues - 1].cb, members->lpbin[members->cValues - 1].cb);
