@@ -1857,7 +1857,7 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 
 	folder = g_object_new (
 		CAMEL_TYPE_MAPI_FOLDER,
-		"name", short_name, "full-name", folder_name,
+		"display-name", short_name, "full-name", folder_name,
 		"parent-store", store, NULL);
 
 	mapi_folder = CAMEL_MAPI_FOLDER(folder);
