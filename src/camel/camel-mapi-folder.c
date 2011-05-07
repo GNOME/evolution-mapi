@@ -342,7 +342,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 	camel_operation_push_message (
 		cancellable,
 		_("Updating local summary cache for new messages in %s"),
-		camel_folder_get_name (folder));
+		camel_folder_get_display_name (folder));
 
 	for (; item_list != NULL; item_list = g_slist_next (item_list) ) {
 		MailItem *temp_item;
@@ -576,7 +576,7 @@ mapi_sync_deleted (CamelSession *session,
 	camel_operation_push_message (
 		cancellable,
 		_("Retrieving message IDs from server for %s"),
-		camel_folder_get_name (data->folder));
+		camel_folder_get_display_name (data->folder));
 
 	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
@@ -607,7 +607,7 @@ mapi_sync_deleted (CamelSession *session,
 	camel_operation_push_message (
 		cancellable,
 		_("Removing deleted messages from cache in %s"),
-		camel_folder_get_name (data->folder));
+		camel_folder_get_display_name (data->folder));
 
 	/* Iterate over cache and check if the UID is in server*/
 	for (index = 0; index < count; index++) {
@@ -729,7 +729,7 @@ camel_mapi_folder_fetch_summary (CamelStore *store, CamelFolder *folder, const m
 
 	/*TODO : Check for online state*/
 
-	camel_operation_push_message (cancellable, _("Fetching summary information for new messages in %s"), camel_folder_get_name (folder));
+	camel_operation_push_message (cancellable, _("Fetching summary information for new messages in %s"), camel_folder_get_display_name (folder));
 
 	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
