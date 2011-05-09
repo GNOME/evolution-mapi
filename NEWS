@@ -1,3 +1,37 @@
+evolution-mapi 3.1.1 2011-05-09
+-------------------------------
+
+Bug Fixes:
+	Bug #643561 - Better recurrence blob parsing code (Sean Finney)
+	Bug #648175 - Crash in folder_size_actions_update_cb (Milan Crha)
+	Bug #648732 - Meeting invitation response not recognized by Outlook (Milan Crha)
+	Bug #634486 - Crash when receiving message without body (Milan Crha)
+	Bug #629057 - Some events created in evolution are missing in OWA (Sean Finney)
+	Bug #613147 - Recipients should not be discarded (Milan Crha)
+
+Miscellanous:
+	Remove unneeded UseUnicode flag in a GetHierarchyTable call (Milan Crha)
+	Adapt to sealed up CamelService. (Matthew Barnes)
+	Adapt to CamelService changes. (Matthew Barnes)
+	Do not escape forward slashes in full folder name (Milan Crha)
+	Adapt to new CamelSession background job API. (Matthew Barnes)
+	Properly adapt to changes in CamelService status tracking from eds (Milan Crha)
+	Adapt to EMConfigTargetAccount changes. (Matthew Barnes)
+	Fix compiler warnings introduced in gcc 4.6.0 (Milan Crha)
+	Adapt to CamelFolderInfo changes. (Matthew Barnes)
+	Remove dead assignments. (Matthew Barnes)
+	Remove DISTCHECK_CONFIGURE_FLAGS. (Matthew Barnes)
+	Adapt to CamelFolder:name -> display-name. (Matthew Barnes)
+	Forgot to change property name for folder creation. (Matthew Barnes)
+
+Translations:
+	Rudolfs Mazurs (lv)
+	Joe Hansen (da)
+	Daniel Nylander (sv)
+	Mario Blättermann (de)
+	Gabriel F. Vilar (pt_BR)
+	Takayoshi OKANO (ja)
+
 evolution-mapi 2.91.92 2011-03-21
 ---------------------------------
 
