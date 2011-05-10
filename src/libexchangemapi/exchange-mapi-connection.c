@@ -3871,6 +3871,26 @@ mapi_profile_load (const gchar *profname, const gchar *password, GError **perror
 	return session;
 }
 
+static int
+create_profile_fallback_callback (struct SRowSet *rowset, gconstpointer data)
+{
+	guint32	ii;
+	const gchar *username = (const gchar *) data;
+
+	/* If we can find the exact username, then find & return its index. */
+	for (ii = 0; ii < rowset->cRows; ii++) {
+		const gchar *account_name;
+
+		account_name = exchange_mapi_util_find_row_propval (&(rowset->aRow[ii]), PR_ACCOUNT_UNICODE);
+
+		if (account_name && g_strcmp0 (username, account_name) == 0)
+			return ii;
+	}
+
+	/* cancel it, do authenticate again */
+	return rowset->cRows + 1;
+}
+
 static gboolean
 mapi_profile_create (const gchar *username, const gchar *password, const gchar *domain,
 		     const gchar *server, guint32 flags,
@@ -3883,6 +3903,11 @@ mapi_profile_create (const gchar *username, const gchar *password, const gchar *
 	const gchar *workstation = "localhost";
 	gchar *profname = NULL;
 	struct mapi_session *session = NULL;
+
+	if (!callback) {
+		callback = create_profile_fallback_callback;
+		data = (gpointer) username;
+	}
 
 	/*We need all the params before proceeding.*/
 	e_return_val_mapi_error_if_fail (username && *username && password && *password &&
@@ -3935,9 +3960,9 @@ mapi_profile_create (const gchar *username, const gchar *password, const gchar *
 		add_string_attr (profname, "seal", "true");
 
 	/* This is only convenient here and should be replaced at some point */
-	add_string_attr (profname, "codepage", "0x4e4");
-	add_string_attr (profname, "language", "0x409");
-	add_string_attr (profname, "method", "0x409");
+	add_string_attr (profname, "codepage", "1252");
+	add_string_attr (profname, "language", "1033");
+	add_string_attr (profname, "method", "1033");
 
 	#undef add_string_attr
 
