@@ -26,6 +26,7 @@
 #endif
 
 #include <glib/gstdio.h>
+#include <glib/gi18n-lib.h>
 #include <fcntl.h>
 #include <libecal/e-cal-util.h>
 #include "exchange-mapi-cal-utils.h"
@@ -1810,15 +1811,36 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 
 			break;
 		case MEETING_RESPONSE :
+			#define prefix_subject(prefix) {					\
+				const gchar *summary;						\
+												\
+				summary = icalcomponent_get_summary (ical_comp);		\
+				if (!(summary && *summary))					\
+					summary = "";						\
+												\
+				summary = talloc_asprintf (mem_ctx, "%s %s", prefix, summary);	\
+												\
+				set_value (PR_SUBJECT_UNICODE, summary);			\
+				set_value (PR_NORMALIZED_SUBJECT_UNICODE, summary);		\
+				if (cbdata->appt_seq == 0)					\
+					set_value (PR_CONVERSATION_TOPIC_UNICODE, summary);	\
+			}
 			if (cbdata->resp == olResponseAccepted) {
+				/* Translators: This is a meeting response prefix which will be shown in a message Subject */
+				prefix_subject (C_("MeetingResp", "Accepted:"));
 				text = IPM_SCHEDULE_MEETING_RESP_POS;
 			} else if (cbdata->resp == olResponseTentative) {
+				/* Translators: This is a meeting response prefix which will be shown in a message Subject */
+				prefix_subject (C_("MeetingResp", "Tentative:"));
 				text = IPM_SCHEDULE_MEETING_RESP_TENT;
 			} else if (cbdata->resp == olResponseDeclined) {
+				/* Translators: This is a meeting response prefix which will be shown in a message Subject */
+				prefix_subject (C_("MeetingResp", "Declined:"));
 				text = IPM_SCHEDULE_MEETING_RESP_NEG;
 			} else {
 				text = "";
 			}
+			#undef prefix_subject
 			set_value (PR_MESSAGE_CLASS, text);
 			text = NULL;
 
