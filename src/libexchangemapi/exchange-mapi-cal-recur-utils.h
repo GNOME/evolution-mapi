@@ -30,11 +30,9 @@
 
 G_BEGIN_DECLS
 
-gboolean
-exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList **extra_detached);
+gboolean	exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList **extra_detached, icaltimezone *recur_zone);
 
-GByteArray *
-exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps);
+GByteArray *	exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps);
 
 G_END_DECLS
 

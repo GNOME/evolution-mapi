@@ -948,7 +948,15 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 		if (b && *b) {
 			stream = exchange_mapi_util_find_stream (streams, PidLidAppointmentRecur);
 			if (stream) {
-				exchange_mapi_cal_util_bin_to_rrule (stream->value, comp, detached_components);
+				icaltimezone *recur_zone;
+				const gchar *recur_tz_location;
+
+				recur_tz_location = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidTimeZoneDescription);
+				if (recur_tz_location)
+					recur_tz_location = exchange_mapi_cal_tz_util_get_ical_equivalent (recur_tz_location);
+				recur_zone = recur_tz_location ? icaltimezone_get_builtin_timezone (recur_tz_location) : (icaltimezone *) default_zone;
+
+				exchange_mapi_cal_util_bin_to_rrule (stream->value, comp, detached_components, recur_zone);
 			}
 		}
 
