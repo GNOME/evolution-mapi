@@ -699,7 +699,7 @@ check_calendar_type (guint16 type)
 }
 
 gboolean
-exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList **extra_detached)
+exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList **extra_detached, icaltimezone *recur_zone)
 {
 	struct icalrecurrencetype rt;
 	struct ema_AppointmentRecurrencePattern arp;
@@ -937,17 +937,17 @@ exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList
 			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->OriginalStartDate), 0, 0);
 			rid.type = E_CAL_COMPONENT_RANGE_SINGLE;
 			rid.datetime.value = &tt;
-			rid.datetime.tzid = "UTC";
+			rid.datetime.tzid = recur_zone ? icaltimezone_get_tzid (recur_zone) : "UTC";
 			e_cal_component_set_recurid (detached[i], &rid);
 
 			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->StartDateTime), 0, 0);
 			edt.value = &tt;
-			edt.tzid = "UTC";
+			edt.tzid = recur_zone ? icaltimezone_get_tzid (recur_zone) : "UTC";
 			e_cal_component_set_dtstart (detached[i], &edt);
 
 			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->EndDateTime), 0, 0);
 			edt.value = &tt;
-			edt.tzid = "UTC";
+			edt.tzid = recur_zone ? icaltimezone_get_tzid (recur_zone) : "UTC";
 			e_cal_component_set_dtend (detached[i], &edt);
 
 			e_cal_component_set_rdate_list (detached[i], NULL);
