@@ -1,3 +1,18 @@
+evolution-mapi 3.0.2 2011-05-23
+-------------------------------
+
+Bug Fixes:
+	Bug #613147 - Recipients should not be discarded (Milan Crha)
+	Bug #648732 - Meeting invitation response not recognized by Outlook (Milan Crha)
+	Bug #634486 - Crash when receiving message without body (Milan Crha)
+	Bug #649898 - Modified recurrences have incorrect time (Milan Crha)
+
+Miscellanous:
+	Make changes to let it work with samba4 alpha15 (Milan Crha)
+
+Translations:
+	Takayoshi OKANO (ja)
+
 evolution-mapi 3.0.1 2011-04-25
 -------------------------------
 
