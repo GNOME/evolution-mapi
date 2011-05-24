@@ -129,19 +129,19 @@ fetch_gal_uids_cb (ExchangeMapiConnection *conn, uint32_t row_index, uint32_t n_
 }
 
 static void
-ebbm_gal_create_contact (EBookBackendMAPI *ebma, const gchar *vcard, EContact **contact, GError **error)
+ebbm_gal_create_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *vcard, EContact **contact, GError **error)
 {
 	g_propagate_error (error, EDB_ERROR (PERMISSION_DENIED));
 }
 
 static void
-ebbm_gal_remove_contacts (EBookBackendMAPI *ebma, const GList *ids, GList **removed_ids, GError **error)
+ebbm_gal_remove_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable, const GSList *ids, GSList **removed_ids, GError **error)
 {
 	g_propagate_error (error, EDB_ERROR (PERMISSION_DENIED));
 }
 
 static void
-ebbm_gal_modify_contact (EBookBackendMAPI *ebma, const gchar *vcard, EContact **contact, GError **error)
+ebbm_gal_modify_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *vcard, EContact **contact, GError **error)
 {
 	g_propagate_error (error, EDB_ERROR (PERMISSION_DENIED));
 }

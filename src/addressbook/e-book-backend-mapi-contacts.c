@@ -546,7 +546,7 @@ fetch_contact_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 struct CreateContactListData
 {
 	EBookBackendMAPI *ebma;
-	GList **vCards;
+	GSList **vCards;
 };
 
 static gboolean
@@ -565,7 +565,7 @@ create_contact_list_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 		e_contact_set (contact, E_CONTACT_UID, suid);
 
-		*ccld->vCards = g_list_prepend (*ccld->vCards, e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30));
+		*ccld->vCards = g_slist_prepend (*ccld->vCards, e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30));
 
 		e_book_backend_mapi_notify_contact_update (ccld->ebma, NULL, contact, NULL, -1, -1, NULL);
 
@@ -639,13 +639,17 @@ fetch_contacts_uids_cb (FetchItemsCallbackData *item_data, gpointer data)
 }
 
 static void
-ebbm_contacts_load_source (EBookBackendMAPI *ebma, ESource *source, gboolean only_if_exists, GError **perror)
+ebbm_contacts_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean only_if_exists, GError **perror)
 {
+	ESource *source = e_book_backend_get_source (E_BOOK_BACKEND (ebma));
 	EBookBackendMAPIContactsPrivate *priv = ((EBookBackendMAPIContacts *) ebma)->priv;
 	GError *err = NULL;
 
-	if (e_book_backend_is_loaded (E_BOOK_BACKEND (ebma)))
-		return /* Success */;
+	if (e_book_backend_is_opened (E_BOOK_BACKEND (ebma))) {
+		if (E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_open)
+			E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_open (ebma, cancellable, only_if_exists, perror);
+		return;
+	}
 
 	priv->fid = 0;
 	priv->is_public_folder = g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0;
@@ -653,8 +657,8 @@ ebbm_contacts_load_source (EBookBackendMAPI *ebma, ESource *source, gboolean onl
 	exchange_mapi_util_mapi_id_from_string (e_source_get_property (source, "folder-id"), &priv->fid);
 
 	/* Chain up to parent's op_load_source() method. */
-	if (E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_load_source)
-		E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_load_source (ebma, source, only_if_exists, &err);
+	if (E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_open)
+		E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_open (ebma, cancellable, only_if_exists, &err);
 
 	if (err)
 		g_propagate_error (perror, err);
@@ -663,12 +667,11 @@ ebbm_contacts_load_source (EBookBackendMAPI *ebma, ESource *source, gboolean onl
 static void
 ebbm_contacts_connection_status_changed (EBookBackendMAPI *ebma, gboolean is_online)
 {
-	e_book_backend_set_is_writable (E_BOOK_BACKEND (ebma), is_online);
-	e_book_backend_notify_writable (E_BOOK_BACKEND (ebma), is_online);
+	e_book_backend_notify_readonly (E_BOOK_BACKEND (ebma), !is_online);
 }
 
 static void
-ebbm_contacts_remove (EBookBackendMAPI *ebma, GError **error)
+ebbm_contacts_remove (EBookBackendMAPI *ebma, GCancellable *cancellable, GError **error)
 {
 	EBookBackendMAPIContactsPrivate *priv;
 	GError *mapi_error = NULL;
@@ -680,7 +683,7 @@ ebbm_contacts_remove (EBookBackendMAPI *ebma, GError **error)
 	e_return_data_book_error_if_fail (priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	if (E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_remove)
-		E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_remove (ebma, &mapi_error);
+		E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_remove (ebma, cancellable, &mapi_error);
 
 	if (mapi_error) {
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, NULL);
@@ -710,7 +713,7 @@ ebbm_contacts_remove (EBookBackendMAPI *ebma, GError **error)
 }
 
 static void
-ebbm_contacts_create_contact (EBookBackendMAPI *ebma, const gchar *vcard, EContact **contact, GError **error)
+ebbm_contacts_create_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *vcard, EContact **contact, GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
 	EBookBackendMAPIContactsPrivate *priv;
@@ -777,14 +780,14 @@ ebbm_contacts_create_contact (EBookBackendMAPI *ebma, const gchar *vcard, EConta
 }
 
 static void
-ebbm_contacts_remove_contacts (EBookBackendMAPI *ebma, const GList *id_list, GList **removed_ids, GError **error)
+ebbm_contacts_remove_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable, const GSList *id_list, GSList **removed_ids, GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
 	EBookBackendMAPIContactsPrivate *priv;
 	ExchangeMapiConnection *conn;
 	GError *mapi_error = NULL;
 	GSList *to_remove;
-	const GList *l;
+	const GSList *l;
 
 	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
@@ -817,7 +820,7 @@ ebbm_contacts_remove_contacts (EBookBackendMAPI *ebma, const GList *id_list, GLi
 		idl->id = mid;
 		to_remove = g_slist_prepend (to_remove, idl);
 
-		*removed_ids = g_list_prepend (*removed_ids, g_strdup (uid));
+		*removed_ids = g_slist_prepend (*removed_ids, g_strdup (uid));
 	}
 
 	exchange_mapi_connection_remove_items (conn, olFolderContacts, priv->fid, priv->is_public_folder ? MAPI_OPTIONS_USE_PFSTORE : 0, to_remove, &mapi_error);
@@ -829,8 +832,8 @@ ebbm_contacts_remove_contacts (EBookBackendMAPI *ebma, const GList *id_list, GLi
 
 		g_error_free (mapi_error);
 
-		g_list_foreach (*removed_ids, (GFunc) g_free, NULL);
-		g_list_free (*removed_ids);
+		g_slist_foreach (*removed_ids, (GFunc) g_free, NULL);
+		g_slist_free (*removed_ids);
 		*removed_ids = NULL;
 	}
 
@@ -839,7 +842,7 @@ ebbm_contacts_remove_contacts (EBookBackendMAPI *ebma, const GList *id_list, GLi
 }
 
 static void
-ebbm_contacts_modify_contact (EBookBackendMAPI *ebma, const gchar *vcard, EContact **contact, GError **error)
+ebbm_contacts_modify_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *vcard, EContact **contact, GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
 	EBookBackendMAPIContactsPrivate *priv;
@@ -895,7 +898,7 @@ ebbm_contacts_modify_contact (EBookBackendMAPI *ebma, const gchar *vcard, EConta
 }
 
 static void
-ebbm_contacts_get_contact (EBookBackendMAPI *ebma, const gchar *id, gchar **vcard, GError **error)
+ebbm_contacts_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *id, gchar **vcard, GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
 	EBookBackendMAPIContactsPrivate *priv;
@@ -917,7 +920,7 @@ ebbm_contacts_get_contact (EBookBackendMAPI *ebma, const gchar *id, gchar **vcar
 	e_return_data_book_error_if_fail (priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	if (E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_get_contact)
-		E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_get_contact (ebma, id, vcard, &mapi_error);
+		E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_get_contact (ebma, cancellable, id, vcard, &mapi_error);
 
 	if (mapi_error) {
 		g_propagate_error (error, mapi_error);
@@ -968,7 +971,7 @@ ebbm_contacts_get_contact (EBookBackendMAPI *ebma, const gchar *id, gchar **vcar
 }
 
 static void
-ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, const gchar *query, GList **vCards, GError **error)
+ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *query, GSList **vCards, GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
 	EBookBackendMAPIContactsPrivate *priv;
@@ -991,7 +994,7 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, const gchar *query, GLis
 	e_return_data_book_error_if_fail (priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	if (E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_get_contact_list)
-		E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_get_contact_list (ebma, query, vCards, &mapi_error);
+		E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_get_contact_list (ebma, cancellable, query, vCards, &mapi_error);
 
 	if (mapi_error) {
 		g_propagate_error (error, mapi_error);
@@ -1170,7 +1173,7 @@ e_book_backend_mapi_contacts_class_init (EBookBackendMAPIContactsClass *klass)
 	parent_class = E_BOOK_BACKEND_MAPI_CLASS (klass);
 
 	/* Set the virtual methods. */
-	parent_class->op_load_source			= ebbm_contacts_load_source;
+	parent_class->op_open				= ebbm_contacts_open;
 	parent_class->op_remove				= ebbm_contacts_remove;
 	parent_class->op_create_contact			= ebbm_contacts_create_contact;
 	parent_class->op_remove_contacts		= ebbm_contacts_remove_contacts;

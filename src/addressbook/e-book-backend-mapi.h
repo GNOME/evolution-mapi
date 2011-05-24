@@ -55,19 +55,15 @@ typedef struct
 {
 	EBookBackendClass parent_class;
 
-	void (*op_load_source) (EBookBackendMAPI *ebma, ESource *source, gboolean only_if_exists, GError **error);
-	void (*op_remove) (EBookBackendMAPI *ebma, GError **error);
+	void (*op_open) (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean only_if_exists, GError **error);
+	void (*op_remove) (EBookBackendMAPI *ebma, GCancellable *cancellable, GError **error);
 
-	void (*op_create_contact)  (EBookBackendMAPI *ebma, const gchar *vcard, EContact **contact, GError **error);
-	void (*op_remove_contacts) (EBookBackendMAPI *ebma, const GList *id_list, GList **removed_ids, GError **error);
-	void (*op_modify_contact)  (EBookBackendMAPI *ebma, const gchar *vcard, EContact **contact, GError **error);
-	void (*op_get_contact) (EBookBackendMAPI *ebma, const gchar *id, gchar **vcard, GError **error);
-	void (*op_get_contact_list) (EBookBackendMAPI *ebma, const gchar *query, GList **vCards, GError **error);
-	void (*op_get_changes) (EBookBackendMAPI *ebma, const gchar *change_id, GList **changes, GError **error);
-	void (*op_authenticate_user) (EBookBackendMAPI *ebma, const gchar *user, const gchar *passwd, const gchar *auth_method, GError **error);
-	void (*op_get_required_fields) (EBookBackendMAPI *ebma, GList **fields, GError **error);
-	void (*op_get_supported_fields) (EBookBackendMAPI *ebma, GList **fields, GError **error);
-	void (*op_get_supported_auth_methods) (EBookBackendMAPI *ebma, GList **auth_methods, GError **error);
+	void (*op_create_contact)  (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *vcard, EContact **contact, GError **error);
+	void (*op_remove_contacts) (EBookBackendMAPI *ebma, GCancellable *cancellable, const GSList *id_list, GSList **removed_ids, GError **error);
+	void (*op_modify_contact)  (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *vcard, EContact **contact, GError **error);
+	void (*op_get_contact) (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *id, gchar **vcard, GError **error);
+	void (*op_get_contact_list) (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *query, GSList **vCards, GError **error);
+	void (*op_authenticate_user) (EBookBackendMAPI *ebma, GCancellable *cancellable, ECredentials *credentials, GError **error);
 
 	/* called when online state changes on the backend */
 	void (*op_connection_status_changed) (EBookBackendMAPI *ebma, gboolean is_online);

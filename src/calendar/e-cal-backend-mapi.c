@@ -86,11 +86,7 @@ struct _ECalBackendMAPIPrivate {
 	ECalBackendStore	*store;
 	gboolean		read_only;
 	gchar			*uri;
-	gchar			*username;
-	gchar			*password;
-	CalMode			mode;
 	gboolean		mode_changed;
-	icaltimezone		*default_zone;
 	gboolean		populating_cache; /* whether in populate_cache */
 	GMutex			*updating_mutex;
 
@@ -180,123 +176,73 @@ ecbm_get_user_email (ECalBackendMAPI *cbmapi)
 }
 
 static gboolean
-ecbm_authenticate (ECalBackend *backend, GError **perror)
+ecbm_get_backend_property (ECalBackend *backend, EDataCal *cal, const gchar *prop_name, gchar **prop_value, GError **perror)
 {
-	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
-	ExchangeMapiConnection *old_conn;
-	GError *mapi_error = NULL;
+	gboolean processed = TRUE;
 
-	cbmapi = E_CAL_BACKEND_MAPI (backend);
-	priv = cbmapi->priv;
+	g_return_val_if_fail (backend != NULL, FALSE);
+	g_return_val_if_fail (prop_name != NULL, FALSE);
+	g_return_val_if_fail (prop_value != NULL, FALSE);
 
-	old_conn = priv->conn;
-
-	priv->conn = exchange_mapi_connection_new (priv->profile, priv->password, &mapi_error);
-	if (!priv->conn) {
-		priv->conn = exchange_mapi_connection_find (priv->profile);
-		if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
-			exchange_mapi_connection_reconnect (priv->conn, priv->password, &mapi_error);
-	}
-
-	if (old_conn)
-		g_object_unref (old_conn);
-
-	if (priv->conn && exchange_mapi_connection_connected (priv->conn)) {
-		/* Success */;
-	} else {
-		mapi_error_to_edc_error (perror, mapi_error, AuthenticationFailed, NULL);
-		if (mapi_error)
-			g_error_free (mapi_error);
-		return FALSE;
-	}
-
-	if (mapi_error) {
-		mapi_error_to_edc_error (perror, mapi_error, AuthenticationFailed, NULL);
-		g_error_free (mapi_error);
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-static void
-ecbm_is_read_only (ECalBackend *backend, EDataCal *cal, gboolean *read_only, GError **perror)
-{
-	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
-
-	cbmapi = E_CAL_BACKEND_MAPI (backend);
-	priv = cbmapi->priv;
-
-	*read_only = priv->read_only;
-}
-
-static void
-ecbm_get_cal_address (ECalBackend *backend, EDataCal *cal, gchar **address, GError **perror)
-{
-	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
-
-	cbmapi = E_CAL_BACKEND_MAPI (backend);
-	priv = cbmapi->priv;
-
-	*address = g_strdup (priv->user_email);
-}
-
-static void
-ecbm_get_alarm_email_address (ECalBackend *backend, EDataCal *cal, gchar **address, GError **perror)
-{
-	/* We don't support email alarms. This should not have been called. */
-
-	*address = NULL;
-}
-
-static void
-ecbm_get_ldap_attribute (ECalBackend *backend, EDataCal *cal, gchar **attribute, GError **perror)
-{
-	/* This is just a hack for SunONE */
-	*attribute = NULL;
-}
-
-static void
-ecbm_get_static_capabilities (ECalBackend *backend, EDataCal *cal, gchar **capabilities, GError **perror)
-{
-	/* FIXME: what else ? */
-
-	*capabilities = g_strdup (
+	if (g_str_equal (prop_name, CLIENT_BACKEND_PROPERTY_CAPABILITIES)) {
+		*prop_value = g_strdup (
 				CAL_STATIC_CAPABILITY_NO_ALARM_REPEAT ","
 				CAL_STATIC_CAPABILITY_NO_AUDIO_ALARMS ","
-//				CAL_STATIC_CAPABILITY_NO_DISPLAY_ALARMS ","
 				CAL_STATIC_CAPABILITY_NO_EMAIL_ALARMS ","
 				CAL_STATIC_CAPABILITY_NO_PROCEDURE_ALARMS ","
 				CAL_STATIC_CAPABILITY_ONE_ALARM_ONLY ","
 				CAL_STATIC_CAPABILITY_REMOVE_ALARMS ","
-
-//				CAL_STATIC_CAPABILITY_NO_SHARED_MEMOS ","
-//				CAL_STATIC_CAPABILITY_NO_TASK_ASSIGNMENT ","
 				CAL_STATIC_CAPABILITY_NO_THISANDFUTURE ","
 				CAL_STATIC_CAPABILITY_NO_THISANDPRIOR ","
-//				CAL_STATIC_CAPABILITY_NO_TRANSPARENCY ","
-//				CAL_STATIC_CAPABILITY_ORGANIZER_MUST_ATTEND ","
-//				CAL_STATIC_CAPABILITY_ORGANIZER_NOT_EMAIL_ADDRESS ","
 				CAL_STATIC_CAPABILITY_CREATE_MESSAGES ","
-//				CAL_STATIC_CAPABILITY_SAVE_SCHEDULES ","
 				CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK ","
 				CAL_STATIC_CAPABILITY_NO_CONV_TO_RECUR ","
-//				CAL_STATIC_CAPABILITY_NO_GEN_OPTIONS ","
-//				CAL_STATIC_CAPABILITY_REQ_SEND_OPTIONS ","
-//				CAL_STATIC_CAPABILITY_RECURRENCES_NO_MASTER ","
-//				CAL_STATIC_CAPABILITY_ORGANIZER_MUST_ACCEPT ","
-//				CAL_STATIC_CAPABILITY_DELEGATE_SUPPORTED ","
-//				CAL_STATIC_CAPABILITY_NO_ORGANIZER ","
-//				CAL_STATIC_CAPABILITY_DELEGATE_TO_MANY ","
 				CAL_STATIC_CAPABILITY_HAS_UNACCEPTED_MEETING ","
 				CAL_STATIC_CAPABILITY_REFRESH_SUPPORTED
 				  );
+	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
+		ECalBackendMAPI *cbmapi;
+		ECalBackendMAPIPrivate *priv;
+
+		cbmapi = E_CAL_BACKEND_MAPI (backend);
+		priv = cbmapi->priv;
+
+		*prop_value = g_strdup (priv->user_email);
+	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_ALARM_EMAIL_ADDRESS)) {
+		/* We don't support email alarms. This should not have been called. */
+		*prop_value = NULL;
+	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_DEFAULT_OBJECT)) {
+		ECalComponent *comp;
+
+		comp = e_cal_component_new ();
+
+		switch (e_cal_backend_get_kind (E_CAL_BACKEND (backend))) {
+		case ICAL_VEVENT_COMPONENT:
+			e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_EVENT);
+			break;
+		case ICAL_VTODO_COMPONENT:
+			e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_TODO);
+			break;
+		case ICAL_VJOURNAL_COMPONENT:
+			e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_JOURNAL);
+			break;
+		default:
+			g_object_unref (comp);
+			g_propagate_error (perror, EDC_ERROR (ObjectNotFound));
+			return TRUE;
+		}
+
+		*prop_value = e_cal_component_get_as_string (comp);
+		g_object_unref (comp);
+	} else {
+		processed = FALSE;
+	}
+
+	return processed;
 }
+
 static void
-ecbm_refresh (ECalBackend *backend, EDataCal *cal, GError **perror)
+ecbm_refresh (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, GError **perror)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
@@ -309,7 +255,7 @@ ecbm_refresh (ECalBackend *backend, EDataCal *cal, GError **perror)
 }
 
 static void
-ecbm_remove (ECalBackend *backend, EDataCal *cal, GError **perror)
+ecbm_remove (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, GError **perror)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
@@ -320,7 +266,7 @@ ecbm_remove (ECalBackend *backend, EDataCal *cal, GError **perror)
 
 	source = e_cal_backend_get_source (E_CAL_BACKEND (cbmapi));
 
-	if (priv->mode == CAL_MODE_LOCAL || !priv->conn || !exchange_mapi_connection_connected (priv->conn)) {
+	if (!e_cal_backend_is_online (backend) || !priv->conn || !exchange_mapi_connection_connected (priv->conn)) {
 		g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
 		return;
 	}
@@ -363,22 +309,60 @@ get_element_type (icalcomponent_kind kind)
 }
 #endif
 
-static void
-notify_progress (ECalBackendMAPI *cbmapi, guint64 index, guint64 total)
+struct EMAPIProgressData
 {
-	guint percent = ((gfloat) index/total) * 100;
+	gint percent;
+	const gchar *msg;
+};
+
+static gboolean
+view_progress_cb (EDataCalView *view, gpointer user_data)
+{
+	struct EMAPIProgressData *pd = user_data;
+
+	g_return_val_if_fail (pd != NULL, FALSE);
+
+	if (!e_data_cal_view_is_completed (view) && !e_data_cal_view_is_stopped (view))
+		e_data_cal_view_notify_progress (view, pd->percent, pd->msg);
+
+	/* continue with the next */
+	return TRUE;
+}
+
+static void
+notify_view_progress (ECalBackendMAPI *cbmapi, guint64 index, guint64 total)
+{
+	struct EMAPIProgressData pd = { 0 };
 	gchar *progress_string;
 
-	if (percent > 100)
-		percent = 99;
+	pd.percent = ((gfloat) index/total) * 100;
+	if (pd.percent > 100)
+		pd.percent = 99;
 
 	/* To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server. */
 	progress_string = g_strdup_printf (_("Loading items in folder %s"),
 				e_source_peek_name (e_cal_backend_get_source (E_CAL_BACKEND (cbmapi))));
 
-	e_cal_backend_notify_view_progress (E_CAL_BACKEND (cbmapi), progress_string, percent);
+	pd.msg = progress_string;
+
+	e_cal_backend_foreach_view (E_CAL_BACKEND (cbmapi), view_progress_cb, &pd);
 
 	g_free (progress_string);
+}
+
+static gboolean
+view_completed_cb (EDataCalView *view, gpointer user_data)
+{
+	if (!e_data_cal_view_is_completed (view) && !e_data_cal_view_is_stopped (view))
+		e_data_cal_view_notify_complete (view, NULL);
+
+	return TRUE;
+}
+
+static void
+notify_view_completed (ECalBackendMAPI *cbmapi)
+{
+	e_cal_backend_foreach_view (E_CAL_BACKEND (cbmapi), view_completed_cb, NULL);
 }
 
 static icaltimezone *
@@ -406,7 +390,7 @@ put_component_to_store (ECalBackendMAPI *cbmapi,
 	priv = cbmapi->priv;
 
 	e_cal_util_get_component_occur_times (comp, &time_start, &time_end,
-						resolve_tzid, cbmapi, priv->default_zone,
+						resolve_tzid, cbmapi, icaltimezone_get_utc_timezone (),
 						e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi)));
 
 	e_cal_backend_store_put_component_with_time_range (priv->store, comp, time_start, time_end);
@@ -451,7 +435,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 	if (cache_comp == NULL) {
 		ECalComponent *comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, kind, tmp, array,
 									streams, recipients, attachments,
-									cache_dir, priv->default_zone, FALSE, &detached);
+									cache_dir, icaltimezone_get_utc_timezone (), FALSE, &detached);
 
 		detached = g_slist_prepend (detached, comp);
 
@@ -491,7 +475,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 				comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, kind, tmp, array,
 									streams, recipients, attachments,
-									cache_dir, priv->default_zone, FALSE, NULL);
+									cache_dir, icaltimezone_get_utc_timezone (), FALSE, NULL);
 
 				e_cal_component_commit_sequence (comp);
 				modif_comp_str = e_cal_component_get_as_string (comp);
@@ -513,7 +497,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 	exchange_mapi_util_free_recipient_list (&recipients);
 	exchange_mapi_util_free_attachment_list (&attachments);
 
-	notify_progress (cbmapi, item_data->index, item_data->total);
+	notify_view_progress (cbmapi, item_data->index, item_data->total);
 
 	return TRUE;
 }
@@ -730,7 +714,7 @@ get_deltas (gpointer handle)
 	priv= cbmapi->priv;
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
 	source = e_cal_backend_get_source (E_CAL_BACKEND (cbmapi));
-	if (priv->mode == CAL_MODE_LOCAL)
+	if (!e_cal_backend_is_online (E_CAL_BACKEND (cbmapi)))
 		return FALSE;
 
 	g_mutex_lock (priv->updating_mutex);
@@ -763,8 +747,6 @@ get_deltas (gpointer handle)
 	current_time = icaltime_as_timet_with_zone (itt_current, icaltimezone_get_utc_timezone ());
 	gmtime_r (&current_time, &tm);
 	strftime (t_str, 26, "%Y-%m-%dT%H:%M:%SZ", &tm);
-
-	e_cal_backend_notify_view_progress_start (E_CAL_BACKEND (cbmapi));
 
 //	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	/* FIXME: GetProps does not seem to work for tasks :-( */
@@ -823,7 +805,7 @@ get_deltas (gpointer handle)
 	}
 //	e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 
-	e_cal_backend_notify_view_done (E_CAL_BACKEND (cbmapi), NULL /* Success */);
+	notify_view_completed (cbmapi);
 
 	time_string = g_strdup (t_str);
 	e_cal_backend_store_put_key_value (priv->store, SERVER_UTC_TIME, time_string);
@@ -976,34 +958,7 @@ get_deltas (gpointer handle)
 }
 
 static void
-ecbm_get_default_object (ECalBackend *backend, EDataCal *cal, gchar **object, GError **perror)
-{
-	ECalComponent *comp;
-
-        comp = e_cal_component_new ();
-
-	switch (e_cal_backend_get_kind (E_CAL_BACKEND (backend))) {
-	case ICAL_VEVENT_COMPONENT:
-		e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_EVENT);
-		break;
-	case ICAL_VTODO_COMPONENT:
-		e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_TODO);
-		break;
-	case ICAL_VJOURNAL_COMPONENT:
-		e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_JOURNAL);
-		break;
-	default:
-		g_object_unref (comp);
-		g_propagate_error (perror, EDC_ERROR (ObjectNotFound));
-		return;
-	}
-
-	*object = e_cal_component_get_as_string (comp);
-	g_object_unref (comp);
-}
-
-static void
-ecbm_get_object (ECalBackend *backend, EDataCal *cal, const gchar *uid, const gchar *rid, gchar **object, GError **error)
+ecbm_get_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *uid, const gchar *rid, gchar **object, GError **error)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
@@ -1048,7 +1003,7 @@ ecbm_get_object (ECalBackend *backend, EDataCal *cal, const gchar *uid, const gc
 }
 
 static void
-ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, const gchar *sexp, GList **objects, GError **perror)
+ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *sexp, GSList **objects, GError **perror)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
@@ -1089,7 +1044,7 @@ ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, const gchar *sexp, GL
 				icalcomponent_isa (e_cal_component_get_icalcomponent (comp))) {
 			if ((!search_needed) ||
 					(e_cal_backend_sexp_match_comp (cbsexp, comp, E_CAL_BACKEND (backend)))) {
-				*objects = g_list_append (*objects, e_cal_component_get_as_string (comp));
+				*objects = g_slist_append (*objects, e_cal_component_get_as_string (comp));
 			}
 		}
 	}
@@ -1101,7 +1056,7 @@ ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, const gchar *sexp, GL
 }
 
 static void
-ecbm_get_attachment_list (ECalBackend *backend, EDataCal *cal, const gchar *uid, const gchar *rid, GSList **list, GError **perror)
+ecbm_get_attachment_uris (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *uid, const gchar *rid, GSList **list, GError **perror)
 {
 	/* TODO implement the function */
 	g_propagate_error (perror, EDC_ERROR (NotSupported));
@@ -1219,7 +1174,6 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 	GSList *attachments = item_data->attachments;
 	GSList *detached = NULL, *d_i = NULL;
 	ECalBackendMAPI *cbmapi	= E_CAL_BACKEND_MAPI (data);
-	ECalBackendMAPIPrivate *priv = cbmapi->priv;
 	icalcomponent_kind kind;
         ECalComponent *comp = NULL;
 	gchar *tmp = NULL;
@@ -1253,7 +1207,7 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 	tmp = exchange_mapi_util_mapi_id_to_string (mid);
 	comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, kind, tmp, properties,
 							streams, recipients, attachments,
-							cache_dir, priv->default_zone, FALSE, &detached);
+							cache_dir, icaltimezone_get_utc_timezone (), FALSE, &detached);
 	g_free (tmp);
 
 	detached = g_slist_prepend (detached, comp);
@@ -1279,7 +1233,7 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 	exchange_mapi_util_free_recipient_list (&recipients);
 	exchange_mapi_util_free_attachment_list (&attachments);
 
-	notify_progress (cbmapi, item_data->index, item_data->total);
+	notify_view_progress (cbmapi, item_data->index, item_data->total);
 
 	return TRUE;
 }
@@ -1316,8 +1270,6 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 	current_time = icaltime_as_timet_with_zone (itt_current, icaltimezone_get_utc_timezone ());
 	gmtime_r (&current_time, &tm);
 	strftime (t_str, 26, "%Y-%m-%dT%H:%M:%SZ", &tm);
-
-	e_cal_backend_notify_view_progress_start (E_CAL_BACKEND (cbmapi));
 
 //	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
 	/* FIXME: GetProps does not seem to work for tasks :-( */
@@ -1365,7 +1317,7 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 	}
 //	e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
 
-	e_cal_backend_notify_view_done (E_CAL_BACKEND (cbmapi), NULL /* Success */);
+	notify_view_completed (cbmapi);
 
 	time_string = g_strdup (t_str);
 	e_cal_backend_store_put_key_value (priv->store, SERVER_UTC_TIME, time_string);
@@ -1385,8 +1337,6 @@ static gpointer
 cache_init (ECalBackendMAPI *cbmapi)
 {
 	ECalBackendMAPIPrivate *priv = cbmapi->priv;
-
-	priv->mode = CAL_MODE_REMOTE;
 
 	if (!e_cal_backend_store_get_key_value (priv->store, CACHE_MARKER)) {
 		/* Populate the cache for the first time.*/
@@ -1430,7 +1380,8 @@ ecbm_connect (ECalBackendMAPI *cbmapi, GError **perror)
 
 	/* We have established a connection */
 	if (priv->store && priv->fid && e_cal_backend_store_put_key_value (priv->store, CACHE_MARKER, "1")) {
-		priv->mode = CAL_MODE_REMOTE;
+		e_cal_backend_notify_online (E_CAL_BACKEND (cbmapi), TRUE);
+
 		if (priv->mode_changed && !priv->dthread) {
 			priv->mode_changed = FALSE;
 			fetch_deltas (cbmapi);
@@ -1452,18 +1403,19 @@ ecbm_connect (ECalBackendMAPI *cbmapi, GError **perror)
 }
 
 static void
-ecbm_open (ECalBackend *backend, EDataCal *cal, gboolean only_if_exists, const gchar *username, const gchar *password, GError **perror)
+ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gboolean only_if_exists, GError **perror)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
 	ESource *esource;
 	const gchar *fid = NULL;
 	const gchar *cache_dir;
-	gboolean res;
 	uint32_t olFolder = 0;
 
-	if (e_cal_backend_is_loaded (E_CAL_BACKEND (backend)))
+	if (e_cal_backend_is_opened (E_CAL_BACKEND (backend))) {
+		e_cal_backend_notify_opened (backend, NULL);
 		return /* Success */;
+	}
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
@@ -1472,6 +1424,7 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, gboolean only_if_exists, const g
 	fid = e_source_get_property (esource, "folder-id");
 	if (!(fid && *fid)) {
 		g_propagate_error (perror, EDC_ERROR_EX (OtherError, "No folder ID set"));
+		e_cal_backend_notify_opened (backend, EDC_ERROR_EX (OtherError, "No folder ID set"));
 		return;
 	}
 
@@ -1504,14 +1457,14 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, gboolean only_if_exists, const g
 	if (!priv->store) {
 		g_mutex_unlock (priv->mutex);
 		g_propagate_error (perror, EDC_ERROR_EX (OtherError, _("Could not create cache file")));
+		e_cal_backend_notify_opened (backend, EDC_ERROR_EX (OtherError, _("Could not create cache file")));
 		return;
 	}
 
 	e_cal_backend_store_load (priv->store);
-	e_cal_backend_store_set_default_timezone (priv->store, priv->default_zone);
 
 	/* Not for remote */
-	if (priv->mode == CAL_MODE_LOCAL) {
+	if (!e_cal_backend_is_online (backend)) {
 		const gchar *display_contents = NULL;
 
 		cbmapi->priv->read_only = TRUE;
@@ -1521,15 +1474,14 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, gboolean only_if_exists, const g
 		if (!display_contents || !g_str_equal (display_contents, "1")) {
 			g_mutex_unlock (priv->mutex);
 			g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
+			e_cal_backend_notify_opened (backend, EDC_ERROR (RepositoryOffline));
 			return;
 		}
 
 		g_mutex_unlock (priv->mutex);
+		e_cal_backend_notify_opened (backend, NULL);
 		return /* Success */;
 	}
-
-	priv->username = g_strdup (username);
-	priv->password = g_strdup (password);
 
 	priv->profile = g_strdup (e_source_get_property (esource, "profile"));
 	priv->user_name = g_strdup (e_source_get_property (esource, "acl-user-name"));
@@ -1542,12 +1494,54 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, gboolean only_if_exists, const g
 
 	g_mutex_unlock (priv->mutex);
 
+	e_cal_backend_notify_auth_required (backend, TRUE, NULL);
+}
+
+static void
+ecbm_authenticate_user (ECalBackend *backend, GCancellable *cancellable, ECredentials *credentials, GError **perror)
+{
+	ECalBackendMAPI *cbmapi;
+	ECalBackendMAPIPrivate *priv;
+	ExchangeMapiConnection *old_conn;
+	GError *mapi_error = NULL;
+
 	g_static_mutex_lock (&auth_mutex);
-	res = ecbm_authenticate (E_CAL_BACKEND (cbmapi), perror);
+
+	cbmapi = E_CAL_BACKEND_MAPI (backend);
+	priv = cbmapi->priv;
+
+	old_conn = priv->conn;
+
+	priv->conn = exchange_mapi_connection_new (priv->profile, e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD), &mapi_error);
+	if (!priv->conn) {
+		priv->conn = exchange_mapi_connection_find (priv->profile);
+		if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
+			exchange_mapi_connection_reconnect (priv->conn, e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD), &mapi_error);
+	}
+
+	if (old_conn)
+		g_object_unref (old_conn);
+
+	if (priv->conn && exchange_mapi_connection_connected (priv->conn)) {
+		/* Success */;
+	} else {
+		mapi_error_to_edc_error (perror, mapi_error, AuthenticationFailed, NULL);
+		if (mapi_error)
+			g_error_free (mapi_error);
+		g_static_mutex_unlock (&auth_mutex);
+		return;
+	}
+
+	if (mapi_error) {
+		mapi_error_to_edc_error (perror, mapi_error, AuthenticationFailed, NULL);
+		g_error_free (mapi_error);
+		g_static_mutex_unlock (&auth_mutex);
+		return;
+	}
+
 	g_static_mutex_unlock (&auth_mutex);
 
-	if (res)
-		ecbm_connect (cbmapi, perror);
+	ecbm_connect (cbmapi, perror);
 }
 
 static gboolean
@@ -1707,7 +1701,7 @@ free_server_data (struct cal_cbdata *cbdata)
 static icaltimezone *ecbm_internal_get_timezone (ECalBackend *backend, const gchar *tzid);
 
 static void
-ecbm_create_object (ECalBackend *backend, EDataCal *cal, gchar **calobj, gchar **uid, GError **error)
+ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *calobj, gchar **uid, gchar **new_object, GError **error)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
@@ -1731,15 +1725,16 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, gchar **calobj, gchar *
 	cache_dir = e_cal_backend_get_cache_dir (E_CAL_BACKEND (backend));
 
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
-	e_return_data_cal_error_if_fail (calobj != NULL && *calobj != NULL, InvalidArg);
+	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
+	e_return_data_cal_error_if_fail (new_object != NULL, InvalidArg);
 
-	if (priv->mode == CAL_MODE_LOCAL) {
+	if (!e_cal_backend_is_online (backend)) {
 		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
 		return;
 	}
 
 	/* check the component for validity */
-	icalcomp = icalparser_parse_string (*calobj);
+	icalcomp = icalparser_parse_string (calobj);
 	if (!icalcomp) {
 		g_propagate_error (error, EDC_ERROR (InvalidObject));
 		return;
@@ -1788,53 +1783,50 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, gchar **calobj, gchar *
 	cbdata.get_tz_data = cbmapi;
 
 	/* Check if object exists */
-	switch (priv->mode) {
-		case CAL_MODE_ANY:
-		case CAL_MODE_REMOTE:
-			/* Create an appointment */
-			cbdata.comp = comp;
-			cbdata.is_modify = FALSE;
-			cbdata.msgflags = MSGFLAG_READ;
-			cbdata.meeting_type = (recipients != NULL) ? MEETING_OBJECT : NOT_A_MEETING;
-			cbdata.resp = (recipients != NULL) ? olResponseOrganized : olResponseNone;
-			cbdata.appt_id = exchange_mapi_cal_util_get_new_appt_id (priv->conn, priv->fid);
-			cbdata.appt_seq = 0;
-			cbdata.globalid = NULL;
-			cbdata.cleanglobalid = NULL;
+	if (e_cal_backend_is_online (backend)) {
+		/* Create an appointment */
+		cbdata.comp = comp;
+		cbdata.is_modify = FALSE;
+		cbdata.msgflags = MSGFLAG_READ;
+		cbdata.meeting_type = (recipients != NULL) ? MEETING_OBJECT : NOT_A_MEETING;
+		cbdata.resp = (recipients != NULL) ? olResponseOrganized : olResponseNone;
+		cbdata.appt_id = exchange_mapi_cal_util_get_new_appt_id (priv->conn, priv->fid);
+		cbdata.appt_seq = 0;
+		cbdata.globalid = NULL;
+		cbdata.cleanglobalid = NULL;
 
-			mid = exchange_mapi_connection_create_item (priv->conn, priv->olFolder, priv->fid,
-							exchange_mapi_cal_utils_write_props_cb, &cbdata,
-							recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT, &mapi_error);
-			g_free (cbdata.props);
-			if (!mid) {
-				g_object_unref (comp);
-				exchange_mapi_util_free_recipient_list (&recipients);
-				exchange_mapi_util_free_stream_list (&streams);
-				exchange_mapi_util_free_attachment_list (&attachments);
-				mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to create item on a server"));
-				if (mapi_error)
-					g_error_free (mapi_error);
-				return;
-			}
-
-			tmp = exchange_mapi_util_mapi_id_to_string (mid);
-			e_cal_component_set_uid (comp, tmp);
-			if (uid)
-				*uid = tmp;
-			else
-				g_free (tmp);
-
-			e_cal_component_commit_sequence (comp);
-			put_component_to_store (cbmapi, comp);
-			*calobj = e_cal_component_get_as_string (comp);
-			e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), *calobj);
-			break;
-		default:
+		mid = exchange_mapi_connection_create_item (priv->conn, priv->olFolder, priv->fid,
+						exchange_mapi_cal_utils_write_props_cb, &cbdata,
+						recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT, &mapi_error);
+		g_free (cbdata.props);
+		if (!mid) {
+			g_object_unref (comp);
 			exchange_mapi_util_free_recipient_list (&recipients);
 			exchange_mapi_util_free_stream_list (&streams);
 			exchange_mapi_util_free_attachment_list (&attachments);
-			g_propagate_error (error, EDC_ERROR (UnsupportedMethod));
+			mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to create item on a server"));
+			if (mapi_error)
+				g_error_free (mapi_error);
 			return;
+		}
+
+		tmp = exchange_mapi_util_mapi_id_to_string (mid);
+		e_cal_component_set_uid (comp, tmp);
+		if (uid)
+			*uid = tmp;
+		else
+			g_free (tmp);
+
+		e_cal_component_commit_sequence (comp);
+		put_component_to_store (cbmapi, comp);
+		*new_object = e_cal_component_get_as_string (comp);
+		e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), *new_object);
+	} else {
+		exchange_mapi_util_free_recipient_list (&recipients);
+		exchange_mapi_util_free_stream_list (&streams);
+		exchange_mapi_util_free_attachment_list (&attachments);
+		g_propagate_error (error, EDC_ERROR (UnsupportedMethod));
+		return;
 	}
 
 	if (!fetch_deltas(cbmapi))
@@ -1901,7 +1893,7 @@ find_my_response (ECalBackendMAPI *cbmapi, ECalComponent *comp)
 }
 
 static void
-ecbm_modify_object (ECalBackend *backend, EDataCal *cal, const gchar *calobj, CalObjModType mod, gchar **old_object, gchar **new_object, GError **error)
+ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *calobj, CalObjModType mod, gchar **old_object, gchar **new_object, GError **error)
 {
 	ECalBackendMAPI *cbmapi;
         ECalBackendMAPIPrivate *priv;
@@ -1931,7 +1923,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, const gchar *calobj, Ca
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
 
-	if (priv->mode == CAL_MODE_LOCAL) {
+	if (!e_cal_backend_is_online (backend)) {
 		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
 		return;
 	}
@@ -1989,9 +1981,8 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, const gchar *calobj, Ca
 	cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) ecbm_internal_get_timezone;
 	cbdata.get_tz_data = cbmapi;
 
-	switch (priv->mode) {
-	case CAL_MODE_ANY :
-	case CAL_MODE_REMOTE :	/* when online, send the item to the server */
+	if (e_cal_backend_is_online (backend)) {
+		/* when online, send the item to the server */
 		/* check if the object exists */
 		cache_comp = e_cal_backend_store_get_component (priv->store, uid, rid);
 		if (!cache_comp) {
@@ -2049,8 +2040,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, const gchar *calobj, Ca
 				g_error_free (mapi_error);
 			return;
 		}
-		break;
-	default :
+	} else {
 		g_object_unref (comp);
 		g_object_unref (cache_comp);
 		exchange_mapi_util_free_recipient_list (&recipients);
@@ -2074,7 +2064,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, const gchar *calobj, Ca
 }
 
 static void
-ecbm_remove_object (ECalBackend *backend, EDataCal *cal,
+ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable,
 				  const gchar *uid, const gchar *rid, CalObjModType mod,
 				  gchar **old_object, gchar **object, GError **error)
 {
@@ -2091,97 +2081,90 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal,
 
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 
-	if (priv->mode == CAL_MODE_LOCAL) {
+	if (!e_cal_backend_is_online (backend)) {
 		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
 		return;
 	}
 
-	switch (priv->mode) {
-	case CAL_MODE_ANY :
-	case CAL_MODE_REMOTE :	/* when online, modify/delete the item from the server */
-		/* check if the object exists */
-		/* FIXME: we may have detached instances which need to be removed */
-		ecbm_get_object (backend, cal, uid, NULL, &calobj, &err);
-		if (err) {
-			g_propagate_error (error, err);
-			return;
+	/* when online, modify/delete the item from the server */
+	/* check if the object exists */
+	/* FIXME: we may have detached instances which need to be removed */
+	ecbm_get_object (backend, cal, NULL, uid, NULL, &calobj, &err);
+	if (err) {
+		g_propagate_error (error, err);
+		return;
+	}
+
+	/* check the component for validity */
+	icalcomp = icalparser_parse_string (calobj);
+	if (!icalcomp) {
+		g_free (calobj);
+		g_propagate_error (error, EDC_ERROR (InvalidObject));
+		return;
+	}
+
+	get_comp_mid (icalcomp, &mid);
+
+	if (mod == CALOBJ_MOD_THIS && rid && *rid) {
+		gchar *obj = NULL, *new_object = NULL, *new_calobj = NULL;
+		struct icaltimetype time_rid;
+
+		/*remove a single instance of a recurring event and modify */
+		time_rid = icaltime_from_string (rid);
+		e_cal_util_remove_instances (icalcomp, time_rid, mod);
+		new_calobj  = (gchar *) icalcomponent_as_ical_string_r (icalcomp);
+		ecbm_modify_object (backend, cal, cancellable, new_calobj, CALOBJ_MOD_ALL, &obj, &new_object, &err);
+		if (!err) {
+			*old_object = obj;
+			*object = new_object;
 		}
+		g_free (new_calobj);
+	} else {
+		GSList *list=NULL, *l, *comp_list = e_cal_backend_store_get_components_by_uid (priv->store, uid);
+		GError *ri_error = NULL;
 
-		/* check the component for validity */
-		icalcomp = icalparser_parse_string (calobj);
-		if (!icalcomp) {
-			g_free (calobj);
-			g_propagate_error (error, EDC_ERROR (InvalidObject));
-			return;
-		}
-
-		get_comp_mid (icalcomp, &mid);
-
-		if (mod == CALOBJ_MOD_THIS && rid && *rid) {
-			gchar *obj = NULL, *new_object = NULL, *new_calobj = NULL;
-			struct icaltimetype time_rid;
-
-			/*remove a single instance of a recurring event and modify */
-			time_rid = icaltime_from_string (rid);
-			e_cal_util_remove_instances (icalcomp, time_rid, mod);
-			new_calobj  = (gchar *) icalcomponent_as_ical_string_r (icalcomp);
-			ecbm_modify_object (backend, cal, new_calobj, CALOBJ_MOD_ALL, &obj, &new_object, &err);
-			if (!err) {
-				*old_object = obj;
-				*object = new_object;
-			}
-			g_free (new_calobj);
-		} else {
-			GSList *list=NULL, *l, *comp_list = e_cal_backend_store_get_components_by_uid (priv->store, uid);
-			GError *ri_error = NULL;
-
-//			if (e_cal_component_has_attendees (E_CAL_COMPONENT (comp_list->data))) {
-//			} else {
+		/*if (e_cal_component_has_attendees (E_CAL_COMPONENT (comp_list->data))) {
+		} else {*/
 				struct id_list *data = g_new (struct id_list, 1);
 				data->id = mid;
 				list = g_slist_prepend (list, (gpointer) data);
-//			}
+		/* } */
 
-			if (exchange_mapi_connection_remove_items (priv->conn, priv->olFolder, priv->fid, 0, list, &ri_error)) {
-				for (l = comp_list; l; l = l->next) {
-					ECalComponent *comp = E_CAL_COMPONENT (l->data);
-					ECalComponentId *id = e_cal_component_get_id (comp);
+		if (exchange_mapi_connection_remove_items (priv->conn, priv->olFolder, priv->fid, 0, list, &ri_error)) {
+			for (l = comp_list; l; l = l->next) {
+				ECalComponent *comp = E_CAL_COMPONENT (l->data);
+				ECalComponentId *id = e_cal_component_get_id (comp);
 
-					e_cal_backend_store_remove_component (priv->store, id->uid, id->rid);
-					if (!id->rid || !g_str_equal (id->rid, rid))
-						e_cal_backend_notify_object_removed (E_CAL_BACKEND (cbmapi), id, e_cal_component_get_as_string (comp), NULL);
-					e_cal_component_free_id (id);
+				e_cal_backend_store_remove_component (priv->store, id->uid, id->rid);
+				if (!id->rid || !g_str_equal (id->rid, rid))
+					e_cal_backend_notify_object_removed (E_CAL_BACKEND (cbmapi), id, e_cal_component_get_as_string (comp), NULL);
+				e_cal_component_free_id (id);
 
-					g_object_unref (comp);
-				}
-				*old_object = g_strdup (calobj);
-				*object = NULL;
-				err = NULL; /* Success */
-			} else
-				mapi_error_to_edc_error (&err, ri_error, OtherError, "Cannot remove items from a server");
+				g_object_unref (comp);
+			}
+			*old_object = g_strdup (calobj);
+			*object = NULL;
+			err = NULL; /* Success */
+		} else
+			mapi_error_to_edc_error (&err, ri_error, OtherError, "Cannot remove items from a server");
 
-			g_slist_free (list);
-			g_slist_free (comp_list);
-		}
-		g_free (calobj);
-		break;
-	default:
-		err = EDC_ERROR (UnsupportedMethod);
-		break;
+		g_slist_free (list);
+		g_slist_free (comp_list);
 	}
+	g_free (calobj);
 
 	if (err)
 		g_propagate_error (error, err);
 }
 
 static void
-ecbm_discard_alarm (ECalBackend *backend, EDataCal *cal, const gchar *uid, const gchar *auid, GError **perror)
+ecbm_discard_alarm (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *uid, const gchar *rid, const gchar *auid, GError **perror)
 {
 	g_propagate_error (perror, EDC_ERROR (NotSupported));
 }
 
 static void
-ecbm_send_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, GList **users, gchar **modified_calobj, GError **error)
+ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *calobj, GSList **users, gchar **modified_calobj, GError **error)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
@@ -2199,7 +2182,7 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, GLi
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
 
-	if (priv->mode == CAL_MODE_LOCAL) {
+	if (!e_cal_backend_is_online (backend)) {
 		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
 		return;
 	}
@@ -2376,7 +2359,7 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, GLi
 }
 
 static void
-ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, GError **error)
+ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *calobj, GError **error)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
@@ -2391,7 +2374,7 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, 
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
 
-	if (priv->mode == CAL_MODE_LOCAL) {
+	if (!e_cal_backend_is_online (backend)) {
 		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
 		return;
 	}
@@ -2428,18 +2411,18 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, 
 			switch (method) {
 			case ICAL_METHOD_REQUEST :
 				comp_str = NULL;
-				ecbm_get_object (backend, cal, uid, NULL, &comp_str, &err);
+				ecbm_get_object (backend, cal, NULL, uid, NULL, &comp_str, &err);
 				if (err) {
 					g_clear_error (&err);
 					comp_str = e_cal_component_get_as_string (comp);
 					new_object = comp_str;
-					ecbm_create_object (backend, cal, &new_object, NULL, &err);
+					ecbm_create_object (backend, cal, cancellable, comp_str, NULL, &new_object, &err);
 					if (new_object == comp_str)
 						new_object = NULL;
 				} else {
 					g_free (comp_str);
 					comp_str = e_cal_component_get_as_string (comp);
-					ecbm_modify_object (backend, cal, comp_str, CALOBJ_MOD_ALL, &old_object, &new_object, &err);
+					ecbm_modify_object (backend, cal, cancellable, comp_str, CALOBJ_MOD_ALL, &old_object, &new_object, &err);
 				}
 				g_free (comp_str);
 				g_free (old_object);
@@ -2449,7 +2432,7 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, 
 					stop = TRUE;
 				break;
 			case ICAL_METHOD_CANCEL :
-				ecbm_remove_object (backend, cal, uid, rid, CALOBJ_MOD_THIS, &old_object, &new_object, &err);
+				ecbm_remove_object (backend, cal, cancellable, uid, rid, CALOBJ_MOD_THIS, &old_object, &new_object, &err);
 				if (err)
 					stop = TRUE;
 				g_free (old_object);
@@ -2495,7 +2478,7 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, 
 						e_cal_component_set_attendee_list (cache_comp, cache_attendees);
 
 						comp_str = e_cal_component_get_as_string (cache_comp);
-						ecbm_modify_object (backend, cal, comp_str, CALOBJ_MOD_ALL, &old_object, &new_object, &err);
+						ecbm_modify_object (backend, cal, cancellable, comp_str, CALOBJ_MOD_ALL, &old_object, &new_object, &err);
 
 						g_free (old_object);
 						g_free (new_object);
@@ -2528,7 +2511,7 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, const gchar *calobj, 
 }
 
 static void
-ecbm_get_timezone (ECalBackend *backend, EDataCal *cal, const gchar *tzid, gchar **object, GError **error)
+ecbm_get_timezone (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *tzid, gchar **object, GError **error)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
@@ -2560,7 +2543,7 @@ ecbm_get_timezone (ECalBackend *backend, EDataCal *cal, const gchar *tzid, gchar
 }
 
 static void
-ecbm_add_timezone (ECalBackend *backend, EDataCal *cal, const gchar *tzobj, GError **error)
+ecbm_add_timezone (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *tzobj, GError **error)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
@@ -2594,38 +2577,7 @@ ecbm_add_timezone (ECalBackend *backend, EDataCal *cal, const gchar *tzobj, GErr
 }
 
 static void
-ecbm_set_default_zone (ECalBackend *backend, EDataCal *cal, const gchar *tzobj, GError **error)
-{
-	icalcomponent *tz_comp;
-	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
-	icaltimezone *zone;
-
-	cbmapi = (ECalBackendMAPI *) backend;
-
-	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
-	e_return_data_cal_error_if_fail (tzobj != NULL, InvalidArg);
-
-	priv = cbmapi->priv;
-
-	tz_comp = icalparser_parse_string (tzobj);
-	if (!tz_comp) {
-		g_propagate_error (error, EDC_ERROR (InvalidObject));
-		return;
-	}
-
-	zone = icaltimezone_new ();
-	icaltimezone_set_component (zone, tz_comp);
-
-	if (priv->default_zone)
-		icaltimezone_free (priv->default_zone, 1);
-
-	/* Set the default timezone to it. */
-	priv->default_zone = zone;
-}
-
-static void
-ecbm_get_free_busy (ECalBackend *backend, EDataCal *cal, GList *users, time_t start, time_t end, GList **freebusy, GError **perror)
+ecbm_get_free_busy (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const GSList *users, time_t start, time_t end, GSList **freebusy, GError **perror)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
@@ -2647,166 +2599,34 @@ ecbm_get_free_busy (ECalBackend *backend, EDataCal *cal, GList *users, time_t st
 	}
 }
 
-typedef struct {
-	ECalBackendMAPI *backend;
-	icalcomponent_kind kind;
-	GList *deletes;
-	EXmlHash *ehash;
-} ECalBackendMAPIComputeChangesData;
-
-static void
-ecbm_compute_changes_foreach_key (const gchar *key, const gchar *value, gpointer data)
-{
-	ECalBackendMAPIComputeChangesData *be_data = data;
-
-	if (!e_cal_backend_store_get_component (be_data->backend->priv->store, key, NULL)) {
-		ECalComponent *comp;
-
-		comp = e_cal_component_new ();
-		if (be_data->kind == ICAL_VTODO_COMPONENT)
-			e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_TODO);
-		else
-			e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_EVENT);
-
-		e_cal_component_set_uid (comp, key);
-		be_data->deletes = g_list_prepend (be_data->deletes, e_cal_component_get_as_string (comp));
-
-		e_xmlhash_remove (be_data->ehash, key);
-		g_object_unref (comp);
-	}
-}
-
-static void
-ecbm_compute_changes (ECalBackendMAPI *cbmapi, const gchar *change_id, GList **adds, GList **modifies, GList **deletes, GError **perror)
-{
-	gchar *filename;
-	EXmlHash *ehash;
-	ECalBackendMAPIComputeChangesData be_data;
-	GList *i, *list = NULL;
-	gchar *unescaped_uri;
-	GError *err = NULL;
-
-	/* FIXME Will this always work? */
-	unescaped_uri = g_uri_unescape_string (cbmapi->priv->uri, "");
-	filename = g_strdup_printf ("%s-%s.db", unescaped_uri, change_id);
-	ehash = e_xmlhash_new (filename);
-	g_free (filename);
-	g_free (unescaped_uri);
-
-        ecbm_get_object_list (E_CAL_BACKEND (cbmapi), NULL, "#t", &list, &err);
-        if (err) {
-		g_propagate_error (perror, err);
-                return;
-	}
-
-        /* Calculate adds and modifies */
-	for (i = list; i != NULL; i = g_list_next (i)) {
-		const gchar *uid;
-		gchar *calobj;
-		ECalComponent *comp;
-
-		comp = e_cal_component_new_from_string (i->data);
-		e_cal_component_get_uid (comp, &uid);
-		calobj = i->data;
-
-		g_assert (calobj != NULL);
-
-		/* check what type of change has occurred, if any */
-		switch (e_xmlhash_compare (ehash, uid, calobj)) {
-		case E_XMLHASH_STATUS_SAME:
-			break;
-		case E_XMLHASH_STATUS_NOT_FOUND:
-			*adds = g_list_prepend (*adds, g_strdup (calobj));
-			e_xmlhash_add (ehash, uid, calobj);
-			break;
-		case E_XMLHASH_STATUS_DIFFERENT:
-			*modifies = g_list_prepend (*modifies, g_strdup (calobj));
-			e_xmlhash_add (ehash, uid, calobj);
-			break;
-		}
-
-		g_free (calobj);
-		g_object_unref (comp);
-	}
-	g_list_free (list);
-
-	/* Calculate deletions */
-	be_data.backend = cbmapi;
-	be_data.kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
-	be_data.deletes = NULL;
-	be_data.ehash = ehash;
-	e_xmlhash_foreach_key (ehash, (EXmlHashFunc)ecbm_compute_changes_foreach_key, &be_data);
-
-	*deletes = be_data.deletes;
-
-	e_xmlhash_write (ehash);
-	e_xmlhash_destroy (ehash);
-}
-
-static void
-ecbm_get_changes (ECalBackend *backend, EDataCal *cal, const gchar *change_id, GList **adds, GList **modifies, GList **deletes, GError **error)
-{
-	ECalBackendMAPI *cbmapi;
-
-	cbmapi = E_CAL_BACKEND_MAPI (backend);
-
-	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
-	e_return_data_cal_error_if_fail (change_id != NULL, InvalidArg);
-
-	ecbm_compute_changes (cbmapi, change_id, adds, modifies, deletes, error);
-}
-
 /***** BACKEND CLASS FUNCTIONS *****/
-static gboolean
-ecbm_is_loaded (ECalBackend *backend)
-{
-	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
-
-	cbmapi = E_CAL_BACKEND_MAPI (backend);
-	priv = cbmapi->priv;
-
-	return (priv->store && (priv->conn || priv->mode == CAL_MODE_LOCAL)) ? TRUE : FALSE;
-}
 
 static void
-ecbm_start_query (ECalBackend *backend, EDataCalView *query)
+ecbm_start_view (ECalBackend *backend, EDataCalView *view)
 {
-        GList *objects = NULL;
+        GSList *objects = NULL;
 	GError *err = NULL;
 
-        ecbm_get_object_list (backend, NULL, e_data_cal_view_get_text (query), &objects, &err);
+        ecbm_get_object_list (backend, NULL, NULL, e_data_cal_view_get_text (view), &objects, &err);
         if (err) {
-		e_data_cal_view_notify_done (query, err);
+		e_data_cal_view_notify_complete (view, err);
 		g_error_free (err);
                 return;
 	}
 
 	/* notify listeners of all objects */
 	if (objects) {
-		e_data_cal_view_notify_objects_added (query, (const GList *) objects);
+		e_data_cal_view_notify_objects_added (view, objects);
 		/* free memory */
-		g_list_foreach (objects, (GFunc) g_free, NULL);
-		g_list_free (objects);
+		g_slist_foreach (objects, (GFunc) g_free, NULL);
+		g_slist_free (objects);
 	}
 
-	e_data_cal_view_notify_done (query, NULL /* Success */);
-}
-
-static CalMode
-ecbm_get_mode (ECalBackend *backend)
-{
-	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
-
-	cbmapi = E_CAL_BACKEND_MAPI (backend);
-	priv = cbmapi->priv;
-
-	return priv->mode;
+	e_data_cal_view_notify_complete (view, NULL /* Success */);
 }
 
 static void
-ecbm_set_mode (ECalBackend *backend, CalMode mode)
+ecbm_set_online (ECalBackend *backend, gboolean is_online)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
@@ -2815,49 +2635,26 @@ ecbm_set_mode (ECalBackend *backend, CalMode mode)
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
-	if (!priv->mode && priv->mode == mode) {
-		e_cal_backend_notify_mode (backend, ModeSet,
-					   cal_mode_to_corba (mode));
+	if ((e_cal_backend_is_online (backend) ? 1 : 0) == (is_online ? 1 : 0)) {
 		return;
 	}
 
 	g_mutex_lock (priv->mutex);
 
-	re_open = priv->mode == CAL_MODE_LOCAL && mode == CAL_MODE_REMOTE;
+	re_open = (e_cal_backend_is_online (backend) ? 1 : 0) < (is_online ? 1 : 0);
+	e_cal_backend_notify_online (backend, is_online);
 
 	priv->mode_changed = TRUE;
-	switch (mode) {
-		case CAL_MODE_REMOTE:
-			priv->mode = CAL_MODE_REMOTE;
-			priv->read_only = FALSE;
-			e_cal_backend_notify_mode (backend, ModeSet, Remote);
-			if (ecbm_is_loaded (backend) && re_open)
-			      e_cal_backend_notify_auth_required(backend);
-			break;
-		case CAL_MODE_LOCAL:
-			priv->mode = CAL_MODE_LOCAL;
-			priv->read_only = TRUE;
-			/* do we have to close the connection here ? */
-			e_cal_backend_notify_mode (backend, ModeSet, Remote);
-			break;
-		default:
-			e_cal_backend_notify_mode (backend, ModeNotSupported, cal_mode_to_corba (mode));
-			break;
+	if (is_online) {
+		priv->read_only = FALSE;
+		if (e_cal_backend_is_opened (backend) && re_open)
+			e_cal_backend_notify_auth_required (backend, TRUE, NULL);
+	} else {
+		priv->read_only = TRUE;
 	}
 
+	e_cal_backend_notify_readonly (backend, priv->read_only);
 	g_mutex_unlock (priv->mutex);
-}
-
-static icaltimezone *
-ecbm_internal_get_default_timezone (ECalBackend *backend)
-{
-	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
-
-	cbmapi = E_CAL_BACKEND_MAPI (backend);
-	priv = cbmapi->priv;
-
-	return priv->default_zone;
 }
 
 static icaltimezone *
@@ -2873,7 +2670,7 @@ ecbm_internal_get_timezone (ECalBackend *backend, const gchar *tzid)
 	g_return_val_if_fail (tzid != NULL, NULL);
 
 	if (tzid && g_str_equal (tzid, "*default-zone*"))
-		zone = e_cal_backend_internal_get_default_timezone (backend);
+		zone = icaltimezone_get_utc_timezone ();
 	else
 		zone = (icaltimezone *) e_cal_backend_store_get_timezone (cbmapi->priv->store, tzid);
 
@@ -2913,12 +2710,9 @@ ecbm_internal_get_timezone (ECalBackend *backend, const gchar *tzid)
 /* Async OP functions, data structures and so on */
 
 typedef enum {
-	OP_IS_READONLY,
-	OP_GET_CAL_ADDRESS,
-	OP_GET_ALARM_EMAIL_ADDRESS,
-	OP_GET_LDAP_ATTRIBUTE,
-	OP_GET_STATIC_CAPABILITIES,
+	OP_GET_BACKEND_PROPERTY,
 	OP_OPEN,
+	OP_AUTHENTICATE_USER,
 	OP_REFRESH,
 	OP_REMOVE,
 	OP_CREATE_OBJECT,
@@ -2927,32 +2721,35 @@ typedef enum {
 	OP_DISCARD_ALARM,
 	OP_RECEIVE_OBJECTS,
 	OP_SEND_OBJECTS,
-	OP_GET_DEFAULT_OBJECT,
 	OP_GET_OBJECT,
-	OP_GET_ATTACHMENT_LIST,
+	OP_GET_ATTACHMENT_URIS,
 	OP_GET_OBJECT_LIST,
 	OP_GET_TIMEZONE,
 	OP_ADD_TIMEZONE,
-	OP_SET_DEFAULT_ZONE,
-	OP_GET_CHANGES,
 	OP_GET_FREE_BUSY,
-	OP_START_QUERY
+	OP_START_VIEW
 } OperationType;
 
 typedef struct {
 	OperationType ot;
 
 	EDataCal *cal;
-	EServerMethodContext context;
+	guint32 opid;
+	GCancellable *cancellable;
 } OperationBase;
 
 typedef struct {
 	OperationBase base;
 
 	gboolean only_if_exists;
-	gchar *username;
-	gchar *password;
 } OperationOpen;
+
+typedef struct {
+	OperationBase base;
+
+	ECredentials *credentials;
+	GCancellable *cancellable;
+} OperationAuthenticateUser;
 
 typedef struct {
 	OperationBase base;
@@ -2985,7 +2782,15 @@ typedef struct {
 typedef struct {
 	OperationBase base;
 
-	GList *users;
+	gchar *uid;
+	gchar *rid;
+	gchar *auid;
+} OperationDiscardAlarm;
+
+typedef struct {
+	OperationBase base;
+
+	GSList *users;
 	time_t start;
 	time_t end;
 } OperationGetFreeBusy;
@@ -2993,8 +2798,8 @@ typedef struct {
 typedef struct {
 	OperationBase base;
 
-	EDataCalView *query;
-} OperationStartQuery;
+	EDataCalView *view;
+} OperationStartView;
 
 static void
 ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
@@ -3005,86 +2810,54 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 	g_return_if_fail (E_IS_CAL_BACKEND (backend));
 	g_return_if_fail (op != NULL);
 
+	cancelled = cancelled || (op->cancellable && g_cancellable_is_cancelled (op->cancellable));
+
 	switch (op->ot) {
-	case OP_IS_READONLY: {
+	case OP_GET_BACKEND_PROPERTY: {
+		OperationStr *ops1 = (OperationStr *) op;
 		if (!cancelled) {
-			gboolean read_only = TRUE;
+			gchar *value = NULL;
 
-			ecbm_is_read_only (backend, op->cal, &read_only, &error);
+			if (ecbm_get_backend_property (backend, op->cal, ops1->str, &value, &error) || error)
+				e_data_cal_respond_get_backend_property (op->cal, op->opid, error, value);
+			else
+				(* E_CAL_BACKEND_CLASS (e_cal_backend_mapi_parent_class)->get_backend_property) (backend, op->cal, op->opid, op->cancellable, ops1->str);
 
-			e_data_cal_notify_read_only (op->cal, error, read_only);
+			g_free (value);
 		}
-	} break;
-	case OP_GET_CAL_ADDRESS: {
-		if (!cancelled) {
-			gchar *address = NULL;
-
-			ecbm_get_cal_address (backend, op->cal, &address, &error);
-
-			e_data_cal_notify_cal_address (op->cal, op->context, error, address);
-
-			g_free (address);
-		}
-	} break;
-	case OP_GET_ALARM_EMAIL_ADDRESS: {
-		if (!cancelled) {
-			gchar *address = NULL;
-
-			ecbm_get_alarm_email_address (backend, op->cal, &address, &error);
-
-			e_data_cal_notify_alarm_email_address (op->cal, op->context, error, address);
-
-			g_free (address);
-		}
-	} break;
-	case OP_GET_LDAP_ATTRIBUTE: {
-		if (!cancelled) {
-			gchar *attribute = NULL;
-
-			ecbm_get_ldap_attribute (backend, op->cal, &attribute, &error);
-
-			e_data_cal_notify_ldap_attribute (op->cal, op->context, error, attribute);
-
-			g_free (attribute);
-		}
-	} break;
-	case OP_GET_STATIC_CAPABILITIES: {
-		if (!cancelled) {
-			gchar *capabilities = NULL;
-
-			ecbm_get_static_capabilities (backend, op->cal, &capabilities, &error);
-
-			e_data_cal_notify_static_capabilities (op->cal, op->context, error, capabilities);
-
-			g_free (capabilities);
-		}
+		g_free (ops1->str);
 	} break;
 	case OP_OPEN: {
 		OperationOpen *opo = (OperationOpen *) op;
 
 		if (!cancelled) {
-			ecbm_open (backend, op->cal, opo->only_if_exists, opo->username, opo->password, &error);
+			ecbm_open (backend, op->cal, op->cancellable, opo->only_if_exists, &error);
 
-			e_data_cal_notify_open (op->cal, op->context, error);
+			e_data_cal_respond_open (op->cal, op->opid, error);
 		}
+	} break;
+	case OP_AUTHENTICATE_USER: {
+		OperationAuthenticateUser *opau = (OperationAuthenticateUser *) op;
 
-		if (opo->password)
-			memset (opo->password, 0, strlen (opo->password));
-		g_free (opo->username);
-		g_free (opo->password);
+		if (!cancelled) {
+			ecbm_authenticate_user (backend, op->cancellable, opau->credentials, &error);
+
+			e_cal_backend_notify_opened (backend, error);
+		}
+		e_credentials_free (opau->credentials);
 	} break;
 	case OP_REFRESH: {
 		if (!cancelled) {
-			ecbm_refresh (backend, op->cal, &error);
+			ecbm_refresh (backend, op->cal, op->cancellable, &error);
 
-			e_data_cal_notify_refresh (op->cal, op->context, error);
+			e_data_cal_respond_refresh (op->cal, op->opid, error);
 		}
 	} break;
 	case OP_REMOVE: {
 		if (!cancelled) {
-			ecbm_remove (backend, op->cal, &error);
+			ecbm_remove (backend, op->cal, op->cancellable, &error);
 
-			e_data_cal_notify_remove (op->cal, op->context, error);
+			e_data_cal_respond_remove (op->cal, op->opid, error);
 		}
 	} break;
 	case OP_CREATE_OBJECT: {
@@ -3092,11 +2865,11 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 		const gchar *calobj = ops->str;
 
 		if (!cancelled) {
-			gchar *uid = NULL, *modified_calobj = (gchar *)calobj;
+			gchar *uid = NULL, *modified_calobj = NULL;
 
-			ecbm_create_object (backend, op->cal, &modified_calobj, &uid, &error);
+			ecbm_create_object (backend, op->cal, op->cancellable, calobj, &uid, &modified_calobj, &error);
 
-			e_data_cal_notify_object_created (op->cal, op->context, error, uid, modified_calobj);
+			e_data_cal_respond_create_object (op->cal, op->opid, error, uid, modified_calobj);
 
 			/* free memory */
 			g_free (uid);
@@ -3114,12 +2887,12 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 			gchar *old_object = NULL;
 			gchar *new_object = NULL;
 
-			ecbm_modify_object (backend, op->cal, opm->calobj, opm->mod, &old_object, &new_object, &error);
+			ecbm_modify_object (backend, op->cal, op->cancellable, opm->calobj, opm->mod, &old_object, &new_object, &error);
 
 			if (new_object)
-				e_data_cal_notify_object_modified (op->cal, op->context, error, old_object, new_object);
+				e_data_cal_respond_modify_object (op->cal, op->opid, error, old_object, new_object);
 			else
-				e_data_cal_notify_object_modified (op->cal, op->context, error, old_object, opm->calobj);
+				e_data_cal_respond_modify_object (op->cal, op->opid, error, old_object, opm->calobj);
 
 			g_free (old_object);
 			g_free (new_object);
@@ -3133,7 +2906,7 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 		if (!cancelled) {
 			gchar *object = NULL, *old_object = NULL;
 
-			ecbm_remove_object (backend, op->cal, opr->uid, opr->rid, opr->mod, &old_object, &object, &error);
+			ecbm_remove_object (backend, op->cal, op->cancellable, opr->uid, opr->rid, opr->mod, &old_object, &object, &error);
 
 			if (!error) {
 				ECalComponentId *id = g_new0 (ECalComponentId, 1);
@@ -3142,14 +2915,11 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 				if (opr->mod == CALOBJ_MOD_THIS)
 					id->rid = g_strdup (opr->rid);
 
-				if (!object)
-					e_data_cal_notify_object_removed (op->cal, op->context, error, id, old_object, object);
-				else
-					e_data_cal_notify_object_modified (op->cal, op->context, error, old_object, object);
+				e_data_cal_respond_remove_object (op->cal, op->opid, error, id, old_object, object);
 
 				e_cal_component_free_id (id);
 			} else
-				e_data_cal_notify_object_removed (op->cal, op->context, error, NULL, old_object, object);
+				e_data_cal_respond_remove_object (op->cal, op->opid, error, NULL, old_object, object);
 
 			g_free (old_object);
 			g_free (object);
@@ -3159,26 +2929,26 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 		g_free (opr->rid);
 	} break;
 	case OP_DISCARD_ALARM: {
-		OperationStr2 *ops2 = (OperationStr2 *) op;
-		const gchar *uid = ops2->str1, *auid = ops2->str2;
+		OperationDiscardAlarm *opda = (OperationDiscardAlarm *) op;
 
 		if (!cancelled) {
-			ecbm_discard_alarm (backend, op->cal, uid, auid, &error);
+			ecbm_discard_alarm (backend, op->cal, op->cancellable, opda->uid, opda->rid, opda->auid, &error);
 
-			e_data_cal_notify_alarm_discarded (op->cal, op->context, error);
+			e_data_cal_respond_discard_alarm (op->cal, op->opid, error);
 		}
 
-		g_free (ops2->str1);
-		g_free (ops2->str2);
+		g_free (opda->uid);
+		g_free (opda->rid);
+		g_free (opda->auid);
 	} break;
 	case OP_RECEIVE_OBJECTS: {
 		OperationStr *ops = (OperationStr *) op;
 		const gchar *calobj = ops->str;
 
 		if (!cancelled) {
-			ecbm_receive_objects (backend, op->cal, calobj, &error);
+			ecbm_receive_objects (backend, op->cal, op->cancellable, calobj, &error);
 
-			e_data_cal_notify_objects_received (op->cal, op->context, error);
+			e_data_cal_respond_receive_objects (op->cal, op->opid, error);
 		}
 
 		g_free (ops->str);
@@ -3188,30 +2958,19 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 		const gchar *calobj = ops->str;
 
 		if (!cancelled) {
-			GList *users = NULL;
+			GSList *users = NULL;
 			gchar *modified_calobj = NULL;
 
-			ecbm_send_objects (backend, op->cal, calobj, &users, &modified_calobj, &error);
+			ecbm_send_objects (backend, op->cal, op->cancellable, calobj, &users, &modified_calobj, &error);
 
-			e_data_cal_notify_objects_sent (op->cal, op->context, error, users, modified_calobj);
+			e_data_cal_respond_send_objects (op->cal, op->opid, error, users, modified_calobj);
 
-			g_list_foreach (users, (GFunc) g_free, NULL);
-			g_list_free (users);
+			g_slist_foreach (users, (GFunc) g_free, NULL);
+			g_slist_free (users);
 			g_free (modified_calobj);
 		}
 
 		g_free (ops->str);
-	} break;
-	case OP_GET_DEFAULT_OBJECT: {
-		if (!cancelled) {
-			gchar *object = NULL;
-
-			ecbm_get_default_object (backend, op->cal, &object, &error);
-
-			e_data_cal_notify_default_object (op->cal, op->context, error, object);
-
-			g_free (object);
-		}
 	} break;
 	case OP_GET_OBJECT: {
 		OperationStr2 *ops2 = (OperationStr2 *) op;
@@ -3220,9 +2979,9 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 		if (!cancelled) {
 			gchar *object = NULL;
 
-			ecbm_get_object (backend, op->cal, uid, rid, &object, &error);
+			ecbm_get_object (backend, op->cal, op->cancellable, uid, rid, &object, &error);
 
-			e_data_cal_notify_object (op->cal, op->context, error, object);
+			e_data_cal_respond_get_object (op->cal, op->opid, error, object);
 
 			g_free (object);
 		}
@@ -3230,16 +2989,16 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 		g_free (ops2->str1);
 		g_free (ops2->str2);
 	} break;
-	case OP_GET_ATTACHMENT_LIST: {
+	case OP_GET_ATTACHMENT_URIS: {
 		OperationStr2 *ops2 = (OperationStr2 *) op;
 		const gchar *uid = ops2->str1, *rid = ops2->str2;
 
 		if (!cancelled) {
 			GSList *list = NULL;
 
-			ecbm_get_attachment_list (backend, op->cal, uid, rid, &list, &error);
+			ecbm_get_attachment_uris (backend, op->cal, op->cancellable, uid, rid, &list, &error);
 
-			e_data_cal_notify_attachment_list (op->cal, op->context, error, list);
+			e_data_cal_respond_get_attachment_uris (op->cal, op->opid, error, list);
 
 			g_slist_foreach (list, (GFunc) g_free, NULL);
 			g_free (list);
@@ -3253,14 +3012,14 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 		const gchar *sexp = ops->str;
 
 		if (!cancelled) {
-			GList *objects = NULL;
+			GSList *objects = NULL;
 
-			ecbm_get_object_list (backend, op->cal, sexp, &objects, &error);
+			ecbm_get_object_list (backend, op->cal, op->cancellable, sexp, &objects, &error);
 
-			e_data_cal_notify_object_list (op->cal, op->context, error, objects);
+			e_data_cal_respond_get_object_list (op->cal, op->opid, error, objects);
 
-			g_list_foreach (objects, (GFunc) g_free, NULL);
-			g_list_free (objects);
+			g_slist_foreach (objects, (GFunc) g_free, NULL);
+			g_slist_free (objects);
 		}
 
 		g_free (ops->str);
@@ -3272,7 +3031,7 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 		if (!cancelled) {
 			gchar *object = NULL;
 
-			ecbm_get_timezone (backend, op->cal, tzid, &object, &error);
+			ecbm_get_timezone (backend, op->cal, op->cancellable, tzid, &object, &error);
 
 			if (!object && tzid) {
 				/* fallback if tzid contains only the location of timezone */
@@ -3317,10 +3076,10 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 
 				/* also cache this timezone to backend */
 				if (object)
-					ecbm_add_timezone (backend, op->cal, object, NULL);
+					ecbm_add_timezone (backend, op->cal, op->cancellable, object, NULL);
 			}
 
-			e_data_cal_notify_timezone_requested (op->cal, op->context, error, object);
+			e_data_cal_respond_get_timezone (op->cal, op->opid, error, object);
 
 			g_free (object);
 		}
@@ -3332,44 +3091,9 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 		const gchar *tzobj = ops->str;
 
 		if (!cancelled) {
-			ecbm_add_timezone (backend, op->cal, tzobj, &error);
+			ecbm_add_timezone (backend, op->cal, op->cancellable, tzobj, &error);
 
-			e_data_cal_notify_timezone_added (op->cal, op->context, error, tzobj);
-		}
-
-		g_free (ops->str);
-	} break;
-	case OP_SET_DEFAULT_ZONE: {
-		OperationStr *ops = (OperationStr *) op;
-		const gchar *tz = ops->str;
-
-		if (!cancelled) {
-			ecbm_set_default_zone (backend, op->cal, tz, &error);
-
-			e_data_cal_notify_default_timezone_set (op->cal, op->context, error);
-		}
-
-		g_free (ops->str);
-	} break;
-	case OP_GET_CHANGES: {
-		OperationStr *ops = (OperationStr *) op;
-		const gchar *change_id = ops->str;
-
-		if (!cancelled) {
-			GList *adds = NULL, *modifies = NULL, *deletes = NULL;
-
-			ecbm_get_changes (backend, op->cal, change_id, &adds, &modifies, &deletes, &error);
-
-			e_data_cal_notify_changes (op->cal, op->context, error, adds, modifies, deletes);
-
-			g_list_foreach (adds, (GFunc) g_free, NULL);
-			g_list_free (adds);
-
-			g_list_foreach (modifies, (GFunc) g_free, NULL);
-			g_list_free (modifies);
-
-			g_list_foreach (deletes, (GFunc) g_free, NULL);
-			g_list_free (deletes);
+			e_data_cal_respond_add_timezone (op->cal, op->opid, error);
 		}
 
 		g_free (ops->str);
@@ -3378,43 +3102,47 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 		OperationGetFreeBusy *opgfb = (OperationGetFreeBusy *) op;
 
 		if (!cancelled) {
-			GList *freebusy = NULL;
+			GSList *freebusy = NULL;
 
-			ecbm_get_free_busy (backend, op->cal, opgfb->users, opgfb->start, opgfb->end, &freebusy, &error);
+			ecbm_get_free_busy (backend, op->cal, op->cancellable, opgfb->users, opgfb->start, opgfb->end, &freebusy, &error);
 
-			e_data_cal_notify_free_busy (op->cal, op->context, error, freebusy);
+			if (freebusy)
+				e_data_cal_report_free_busy_data (op->cal, freebusy);
+			e_data_cal_respond_get_free_busy (op->cal, op->opid, error);
 
-			g_list_foreach (freebusy, (GFunc) g_free, NULL);
-			g_list_free (freebusy);
+			g_slist_foreach (freebusy, (GFunc) g_free, NULL);
+			g_slist_free (freebusy);
 		}
 
-		g_list_foreach (opgfb->users, (GFunc) g_free, NULL);
-		g_list_free (opgfb->users);
+		g_slist_foreach (opgfb->users, (GFunc) g_free, NULL);
+		g_slist_free (opgfb->users);
 	} break;
-	case OP_START_QUERY: {
-		OperationStartQuery *opsq = (OperationStartQuery *) op;
+	case OP_START_VIEW: {
+		OperationStartView *opsv = (OperationStartView *) op;
 
 		if (!cancelled) {
-			ecbm_start_query (backend, opsq->query);
+			ecbm_start_view (backend, opsv->view);
 			/* do not notify here, is should start its own thread */
 		}
 
-		g_object_unref (opsq->query);
+		g_object_unref (opsv->view);
 	} break;
 	}
 
+	if (op->cancellable)
+		g_object_unref (op->cancellable);
 	if (op->cal)
 		g_object_unref (op->cal);
 
 	g_free (op);
 }
 
-static GList *
-copy_string_list (GList *lst)
+static GSList *
+copy_string_slist (const GSList *lst)
 {
-	GList *res, *l;
+	GSList *res, *l;
 
-	res = g_list_copy (lst);
+	res = g_slist_copy ((GSList *) lst);
 	for (l = res; l; l = l->next) {
 		l->data = g_strdup (l->data);
 	}
@@ -3423,7 +3151,7 @@ copy_string_list (GList *lst)
 }
 
 static void
-base_op_abstract (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, OperationType ot)
+base_op_abstract (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *cancellable, OperationType ot)
 {
 	OperationBase *op;
 	ECalBackendMAPI *cbmapi;
@@ -3438,17 +3166,20 @@ base_op_abstract (ECalBackend *backend, EDataCal *cal, EServerMethodContext cont
 
 	if (cal)
 		g_object_ref (cal);
+	if (cancellable)
+		g_object_ref (cancellable);
 
 	op = g_new0 (OperationBase, 1);
 	op->ot = ot;
 	op->cal = cal;
-	op->context = context;
+	op->opid = opid;
+	op->cancellable = cancellable;
 
 	em_operation_queue_push (priv->op_queue, op);
 }
 
 static void
-str_op_abstract (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *str, OperationType ot)
+str_op_abstract (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *cancellable, const gchar *str, OperationType ot)
 {
 	OperationStr *op;
 	ECalBackendMAPI *cbmapi;
@@ -3463,18 +3194,21 @@ str_op_abstract (ECalBackend *backend, EDataCal *cal, EServerMethodContext conte
 
 	if (cal)
 		g_object_ref (cal);
+	if (cancellable)
+		g_object_ref (cancellable);
 
 	op = g_new0 (OperationStr, 1);
 	op->base.ot = ot;
 	op->base.cal = cal;
-	op->base.context = context;
+	op->base.opid = opid;
+	op->base.cancellable = cancellable;
 	op->str = g_strdup (str);
 
 	em_operation_queue_push (priv->op_queue, op);
 }
 
 static void
-str2_op_abstract (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *str1, const gchar *str2, OperationType ot)
+str2_op_abstract (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *cancellable, const gchar *str1, const gchar *str2, OperationType ot)
 {
 	OperationStr2 *op;
 	ECalBackendMAPI *cbmapi;
@@ -3489,51 +3223,43 @@ str2_op_abstract (ECalBackend *backend, EDataCal *cal, EServerMethodContext cont
 
 	if (cal)
 		g_object_ref (cal);
+	if (cancellable)
+		g_object_ref (cancellable);
 
 	op = g_new0 (OperationStr2, 1);
 	op->base.ot = ot;
 	op->base.cal = cal;
-	op->base.context = context;
+	op->base.opid = opid;
+	op->base.cancellable = cancellable;
 	op->str1 = g_strdup (str1);
 	op->str2 = g_strdup (str2);
 
 	em_operation_queue_push (priv->op_queue, op);
 }
 
-#define BASE_OP_DEF(_func, _ot)							\
-static void									\
-_func (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)	\
-{										\
-	base_op_abstract (backend, cal, context, _ot);				\
+#define BASE_OP_DEF(_func, _ot)										\
+static void												\
+_func (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *cancellable)			\
+{													\
+	base_op_abstract (backend, cal, opid, cancellable, _ot);					\
 }
 
-#define STR_OP_DEF(_func, _ot)									\
+#define STR_OP_DEF(_func, _ot)										\
+static void												\
+_func (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable * cancellable, const gchar *str)	\
+{													\
+	str_op_abstract (backend, cal, opid, cancellable, str, _ot);					\
+}
+
+#define STR2_OP_DEF(_func, _ot)									\
 static void											\
-_func (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *str)	\
+_func (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *cancellable, const gchar *str1, const gchar *str2)	\
 {												\
-	str_op_abstract (backend, cal, context, str, _ot);					\
-}
-
-#define STR2_OP_DEF(_func, _ot)											\
-static void													\
-_func (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *str1, const gchar *str2)	\
-{														\
-	str2_op_abstract (backend, cal, context, str1, str2, _ot);						\
+	str2_op_abstract (backend, cal, opid, cancellable, str1, str2, _ot);			\
 }
 
 static void
-ecbm_op_is_read_only (ECalBackend *backend, EDataCal *cal)
-{
-	base_op_abstract (backend, cal, NULL, OP_IS_READONLY);
-}
-
-BASE_OP_DEF (ecbm_op_get_cal_address, OP_GET_CAL_ADDRESS)
-BASE_OP_DEF (ecbm_op_get_alarm_email_address , OP_GET_ALARM_EMAIL_ADDRESS)
-BASE_OP_DEF (ecbm_op_get_ldap_attribute, OP_GET_LDAP_ATTRIBUTE)
-BASE_OP_DEF (ecbm_op_get_static_capabilities, OP_GET_STATIC_CAPABILITIES)
-
-static void
-ecbm_op_open (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, gboolean only_if_exists, const gchar *username, const gchar *password)
+ecbm_op_open (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *cancellable, gboolean only_if_exists)
 {
 	OperationOpen *op;
 	ECalBackendMAPI *cbmapi;
@@ -3548,25 +3274,54 @@ ecbm_op_open (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
 
 	if (cal)
 		g_object_ref (cal);
+	if (cancellable)
+		g_object_ref (cancellable);
 
 	op = g_new0 (OperationOpen, 1);
 	op->base.ot = OP_OPEN;
 	op->base.cal = cal;
-	op->base.context = context;
+	op->base.opid = opid;
+	op->base.cancellable = cancellable;
 	op->only_if_exists = only_if_exists;
-	op->username = g_strdup (username);
-	op->password = g_strdup (password);
 
 	em_operation_queue_push (priv->op_queue, op);
 }
 
+static void
+ecbm_op_authenticate_user (ECalBackend *backend, GCancellable *cancellable, ECredentials *credentials)
+{
+	OperationAuthenticateUser *op;
+	ECalBackendMAPI *cbmapi;
+	ECalBackendMAPIPrivate *priv;
+
+	g_return_if_fail (backend != NULL);
+	g_return_if_fail (E_IS_CAL_BACKEND_MAPI (backend));
+
+	cbmapi = E_CAL_BACKEND_MAPI (backend);
+	priv = cbmapi->priv;
+	g_return_if_fail (priv != NULL);
+
+	if (cancellable)
+		g_object_ref (cancellable);
+
+	op = g_new0 (OperationAuthenticateUser, 1);
+	op->base.ot = OP_AUTHENTICATE_USER;
+	op->base.cal = NULL;
+	op->base.opid = 0;
+	op->base.cancellable = cancellable;
+	op->credentials = e_credentials_new_clone (credentials);
+
+	em_operation_queue_push (priv->op_queue, op);
+}
+
+STR_OP_DEF (ecbm_op_get_backend_property, OP_GET_BACKEND_PROPERTY)
 BASE_OP_DEF (ecbm_op_refresh, OP_REFRESH)
 BASE_OP_DEF (ecbm_op_remove, OP_REMOVE)
 
 STR_OP_DEF (ecbm_op_create_object, OP_CREATE_OBJECT)
 
 static void
-ecbm_op_modify_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj, CalObjModType mod)
+ecbm_op_modify_object (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *cancellable, const gchar *calobj, CalObjModType mod)
 {
 	OperationModify *op;
 	ECalBackendMAPI *cbmapi;
@@ -3581,11 +3336,14 @@ ecbm_op_modify_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext
 
 	if (cal)
 		g_object_ref (cal);
+	if (cancellable)
+		g_object_ref (cancellable);
 
 	op = g_new0 (OperationModify, 1);
 	op->base.ot = OP_MODIFY_OBJECT;
 	op->base.cal = cal;
-	op->base.context = context;
+	op->base.opid = opid;
+	op->base.cancellable = cancellable;
 	op->calobj = g_strdup (calobj);
 	op->mod = mod;
 
@@ -3593,7 +3351,7 @@ ecbm_op_modify_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext
 }
 
 static void
-ecbm_op_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *uid, const gchar *rid, CalObjModType mod)
+ecbm_op_remove_object (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *cancellable, const gchar *uid, const gchar *rid, CalObjModType mod)
 {
 	OperationRemove *op;
 	ECalBackendMAPI *cbmapi;
@@ -3608,11 +3366,14 @@ ecbm_op_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext
 
 	if (cal)
 		g_object_ref (cal);
+	if (cancellable)
+		g_object_ref (cancellable);
 
 	op = g_new0 (OperationRemove, 1);
 	op->base.ot = OP_REMOVE_OBJECT;
 	op->base.cal = cal;
-	op->base.context = context;
+	op->base.opid = opid;
+	op->base.cancellable = cancellable;
 	op->uid = g_strdup (uid);
 	op->rid = g_strdup (rid);
 	op->mod = mod;
@@ -3620,21 +3381,10 @@ ecbm_op_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext
 	em_operation_queue_push (priv->op_queue, op);
 }
 
-STR2_OP_DEF (ecbm_op_discard_alarm, OP_DISCARD_ALARM)
-STR_OP_DEF  (ecbm_op_receive_objects, OP_RECEIVE_OBJECTS)
-STR_OP_DEF  (ecbm_op_send_objects, OP_SEND_OBJECTS)
-BASE_OP_DEF (ecbm_op_get_default_object, OP_GET_DEFAULT_OBJECT)
-STR2_OP_DEF (ecbm_op_get_object, OP_GET_OBJECT)
-STR_OP_DEF  (ecbm_op_get_object_list, OP_GET_OBJECT_LIST)
-STR2_OP_DEF (ecbm_op_get_attachment_list, OP_GET_ATTACHMENT_LIST)
-STR_OP_DEF  (ecbm_op_get_timezone, OP_GET_TIMEZONE)
-STR_OP_DEF  (ecbm_op_add_timezone, OP_ADD_TIMEZONE)
-STR_OP_DEF  (ecbm_op_set_default_zone, OP_SET_DEFAULT_ZONE)
-
 static void
-ecbm_op_start_query (ECalBackend *backend, EDataCalView *query)
+ecbm_op_discard_alarm (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *cancellable, const gchar *uid, const gchar *rid, const gchar *auid)
 {
-	OperationStartQuery *op;
+	OperationDiscardAlarm *op;
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
 
@@ -3645,15 +3395,54 @@ ecbm_op_start_query (ECalBackend *backend, EDataCalView *query)
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
 
-	op = g_new0 (OperationStartQuery, 1);
-	op->base.ot = OP_START_QUERY;
-	op->query = g_object_ref (query);
+	if (cal)
+		g_object_ref (cal);
+	if (cancellable)
+		g_object_ref (cancellable);
+
+	op = g_new0 (OperationDiscardAlarm, 1);
+	op->base.ot = OP_DISCARD_ALARM;
+	op->base.cal = cal;
+	op->base.opid = opid;
+	op->base.cancellable = cancellable;
+	op->uid = g_strdup (uid);
+	op->rid = g_strdup (rid);
+	op->auid = g_strdup (auid);
+
+	em_operation_queue_push (priv->op_queue, op);
+}
+
+STR_OP_DEF  (ecbm_op_receive_objects, OP_RECEIVE_OBJECTS)
+STR_OP_DEF  (ecbm_op_send_objects, OP_SEND_OBJECTS)
+STR2_OP_DEF (ecbm_op_get_object, OP_GET_OBJECT)
+STR_OP_DEF  (ecbm_op_get_object_list, OP_GET_OBJECT_LIST)
+STR2_OP_DEF (ecbm_op_get_attachment_uris, OP_GET_ATTACHMENT_URIS)
+STR_OP_DEF  (ecbm_op_get_timezone, OP_GET_TIMEZONE)
+STR_OP_DEF  (ecbm_op_add_timezone, OP_ADD_TIMEZONE)
+
+static void
+ecbm_op_start_view (ECalBackend *backend, EDataCalView *view)
+{
+	OperationStartView *op;
+	ECalBackendMAPI *cbmapi;
+	ECalBackendMAPIPrivate *priv;
+
+	g_return_if_fail (backend != NULL);
+	g_return_if_fail (E_IS_CAL_BACKEND_MAPI (backend));
+
+	cbmapi = E_CAL_BACKEND_MAPI (backend);
+	priv = cbmapi->priv;
+	g_return_if_fail (priv != NULL);
+
+	op = g_new0 (OperationStartView, 1);
+	op->base.ot = OP_START_VIEW;
+	op->view = g_object_ref (view);
 
 	em_operation_queue_push (priv->op_queue, op);
 }
 
 static void
-ecbm_op_get_free_busy (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GList *users, time_t start, time_t end)
+ecbm_op_get_free_busy (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *cancellable, const GSList *users, time_t start, time_t end)
 {
 	OperationGetFreeBusy *op;
 	ECalBackendMAPI *cbmapi;
@@ -3668,19 +3457,20 @@ ecbm_op_get_free_busy (ECalBackend *backend, EDataCal *cal, EServerMethodContext
 
 	if (cal)
 		g_object_ref (cal);
+	if (cancellable)
+		g_object_ref (cancellable);
 
 	op = g_new0 (OperationGetFreeBusy, 1);
 	op->base.ot = OP_GET_FREE_BUSY;
 	op->base.cal = cal;
-	op->base.context = context;
-	op->users = copy_string_list (users);
+	op->base.opid = opid;
+	op->base.cancellable = cancellable;
+	op->users = copy_string_slist (users);
 	op->start = start;
 	op->end = end;
 
 	em_operation_queue_push (priv->op_queue, op);
 }
-
-STR_OP_DEF  (ecbm_op_get_changes, OP_GET_CHANGES)
 
 static void
 ecbm_finalize (GObject *object)
@@ -3731,16 +3521,6 @@ ecbm_finalize (GObject *object)
 		priv->store = NULL;
 	}
 
-	if (priv->username) {
-		g_free (priv->username);
-		priv->username = NULL;
-	}
-
-	if (priv->password) {
-		g_free (priv->password);
-		priv->password = NULL;
-	}
-
 	if (priv->profile) {
 		g_free (priv->profile);
 		priv->profile = NULL;
@@ -3769,11 +3549,6 @@ ecbm_finalize (GObject *object)
 	if (priv->sendoptions_sync_timeout) {
 		g_source_remove (priv->sendoptions_sync_timeout);
 		priv->sendoptions_sync_timeout = 0;
-	}
-
-	if (priv->default_zone) {
-		icaltimezone_free (priv->default_zone, 1);
-		priv->default_zone = NULL;
 	}
 
 	if (priv->conn) {
@@ -3806,18 +3581,14 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 	object_class->finalize = ecbm_finalize;
 
 	/* functions done asynchronously */
-	backend_class->is_read_only = ecbm_op_is_read_only;
-	backend_class->get_cal_address = ecbm_op_get_cal_address;
-	backend_class->get_alarm_email_address = ecbm_op_get_alarm_email_address;
-	backend_class->get_ldap_attribute = ecbm_op_get_ldap_attribute;
-	backend_class->get_static_capabilities = ecbm_op_get_static_capabilities;
+	backend_class->get_backend_property = ecbm_op_get_backend_property;
 	backend_class->open = ecbm_op_open;
+	backend_class->authenticate_user = ecbm_op_authenticate_user;
 	backend_class->refresh = ecbm_op_refresh;
 	backend_class->remove = ecbm_op_remove;
-	backend_class->get_default_object = ecbm_op_get_default_object;
 	backend_class->get_object = ecbm_op_get_object;
 	backend_class->get_object_list = ecbm_op_get_object_list;
-	backend_class->get_attachment_list = ecbm_op_get_attachment_list;
+	backend_class->get_attachment_uris = ecbm_op_get_attachment_uris;
 	backend_class->create_object = ecbm_op_create_object;
 	backend_class->modify_object = ecbm_op_modify_object;
 	backend_class->remove_object = ecbm_op_remove_object;
@@ -3826,16 +3597,11 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 	backend_class->send_objects = ecbm_op_send_objects;
 	backend_class->get_timezone = ecbm_op_get_timezone;
 	backend_class->add_timezone = ecbm_op_add_timezone;
-	backend_class->set_default_zone = ecbm_op_set_default_zone;
 	backend_class->get_free_busy = ecbm_op_get_free_busy;
-	backend_class->get_changes = ecbm_op_get_changes;
-	backend_class->start_query = ecbm_op_start_query;
+	backend_class->start_view = ecbm_op_start_view;
 
 	/* functions done synchronously */
-	backend_class->is_loaded = ecbm_is_loaded;
-	backend_class->get_mode = ecbm_get_mode;
-	backend_class->set_mode = ecbm_set_mode;
-	backend_class->internal_get_default_timezone = ecbm_internal_get_default_timezone;
+	backend_class->set_online = ecbm_set_online;
 	backend_class->internal_get_timezone = ecbm_internal_get_timezone;
 }
 

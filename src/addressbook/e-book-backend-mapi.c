@@ -52,7 +52,6 @@ struct _EBookBackendMAPIPrivate
 	ExchangeMapiConnection *conn;
 	gchar *profile;
 	gchar *book_uri;
-	EDataBookMode mode;
 	gboolean marked_for_offline;
 
 	GThread *update_cache_thread;
@@ -172,59 +171,40 @@ ebbm_set_cache_time (EBookBackendMAPI *ebma, glong cache_seconds)
 	}
 }
 
+static gboolean
+pick_view_cb (EDataBookView *view, gpointer user_data)
+{
+	EDataBookView **pick = user_data;
+
+	g_return_val_if_fail (user_data != NULL, FALSE);
+
+	/* just always use the first book view */
+	*pick = view;
+	return view == NULL;
+}
+
 static EDataBookView *
 ebbm_pick_book_view (EBookBackendMAPI *ebma)
 {
-	EList *views = e_book_backend_get_book_views (E_BOOK_BACKEND (ebma));
-	EIterator *iter;
-	EDataBookView *rv = NULL;
+	EDataBookView *pick = NULL;
 
-	if (!views)
-		return NULL;
+	e_book_backend_foreach_view (E_BOOK_BACKEND (ebma), pick_view_cb, &pick);
 
-	iter = e_list_get_iterator (views);
+	return pick;
+}
 
-	if (!iter) {
-		g_object_unref (views);
-		return NULL;
-	}
+static gboolean
+complete_view_cb (EDataBookView *view, gpointer user_data)
+{
+	e_data_book_view_notify_complete (view, NULL);
 
-	e_iterator_last (iter);
-	if (e_iterator_is_valid (iter)) {
-		/* just always use the last book view */
-		EDataBookView *v = (EDataBookView *) e_iterator_get (iter);
-		if (v)
-			rv = v;
-	}
-
-	g_object_unref (iter);
-	g_object_unref (views);
-
-	return rv;
+	return TRUE;
 }
 
 static void
 complete_views (EBookBackendMAPI *ebma)
 {
-	EList *views;
-	EIterator *iter;
-
-	g_return_if_fail (ebma != NULL);
-
-	views = e_book_backend_get_book_views (E_BOOK_BACKEND (ebma));
-	if (!views)
-		return;
-
-	for (iter = e_list_get_iterator (views); iter && e_iterator_is_valid (iter); e_iterator_next (iter)) {
-		EDataBookView *book_view = (EDataBookView *) e_iterator_get (iter);
-
-		if (book_view)
-			e_data_book_view_notify_complete (book_view, NULL);
-	}
-
-	if (iter)
-		g_object_unref (iter);
-	g_object_unref (views);
+	e_book_backend_foreach_view (E_BOOK_BACKEND (ebma), complete_view_cb, NULL);
 }
 
 struct FetchContactsData
@@ -240,8 +220,6 @@ ebbm_notify_connection_status (EBookBackendMAPI *ebma, gboolean is_online)
 
 	g_return_if_fail (ebma != NULL);
 	g_return_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma));
-
-	e_book_backend_notify_connection_status (E_BOOK_BACKEND (ebma), is_online);
 
 	ebmac = E_BOOK_BACKEND_MAPI_GET_CLASS (ebma);
 	g_return_if_fail (ebmac != NULL);
@@ -406,15 +384,18 @@ ebbm_update_cache_cb (gpointer data)
 }
 
 static void
-ebbm_load_source (EBookBackendMAPI *ebma, ESource *source, gboolean only_if_exists, GError **perror)
+ebbm_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean only_if_exists, GError **perror)
 {
 	EBookBackendMAPIPrivate *priv = ebma->priv;
+	ESource *source = e_book_backend_get_source (E_BOOK_BACKEND (ebma));
 	const gchar *offline;
 	const gchar *cache_dir;
 	gchar *summary_file_name;
 
-	if (e_book_backend_is_loaded (E_BOOK_BACKEND (ebma)))
-		return /* Success */;
+	if (e_book_backend_is_opened (E_BOOK_BACKEND (ebma))) {
+		e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), NULL /* Success */);
+		return;
+	}
 
 	offline = e_source_get_property (source, "offline_sync");
 	priv->marked_for_offline = offline  && g_str_equal (offline, "1");
@@ -445,27 +426,29 @@ ebbm_load_source (EBookBackendMAPI *ebma, ESource *source, gboolean only_if_exis
 	priv->cache = e_book_backend_cache_new (summary_file_name);
 	g_free (summary_file_name);
 
-	e_book_backend_set_is_loaded (E_BOOK_BACKEND (ebma), TRUE);
-	e_book_backend_set_is_writable (E_BOOK_BACKEND (ebma), FALSE);
-	e_book_backend_notify_writable (E_BOOK_BACKEND (ebma), FALSE);
+	e_book_backend_notify_readonly (E_BOOK_BACKEND (ebma), TRUE);
 
-	ebbm_notify_connection_status (ebma, priv->mode != E_DATA_BOOK_MODE_LOCAL);
+	ebbm_notify_connection_status (ebma, e_book_backend_is_online (E_BOOK_BACKEND (ebma)));
 
 	/* Either we are in Online mode or this is marked for offline */
-	if (priv->mode == E_DATA_BOOK_MODE_LOCAL &&
+	if (!e_book_backend_is_online (E_BOOK_BACKEND (ebma)) &&
 	    !priv->marked_for_offline) {
 		g_propagate_error (perror, EDB_ERROR (OFFLINE_UNAVAILABLE));
+		e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), EDB_ERROR (OFFLINE_UNAVAILABLE));
 		return;
 	}
 
 	/* Once aunthentication in address book works this can be removed */
-	if (priv->mode == E_DATA_BOOK_MODE_LOCAL) {
-		return /* Success */;
+	if (!e_book_backend_is_online (E_BOOK_BACKEND (ebma))) {
+		e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), NULL /* Success */);
+		return;
 	}
+
+	e_book_backend_notify_auth_required (E_BOOK_BACKEND (ebma), TRUE, NULL);
 }
 
 static void
-ebbm_remove (EBookBackendMAPI *ebma, GError **error)
+ebbm_remove (EBookBackendMAPI *ebma, GCancellable *cancellable, GError **error)
 {
 	EBookBackendMAPIPrivate *priv;
 	const gchar *cache_dir;
@@ -507,43 +490,51 @@ ebbm_remove (EBookBackendMAPI *ebma, GError **error)
 	e_book_backend_mapi_unlock_connection (ebma);
 }
 
-static gchar *
-ebbm_get_static_capabilities (EBookBackend *backend)
+static gboolean
+ebbm_get_backend_property (EBookBackendMAPI *ebma, const gchar *prop_name, gchar **prop_value, GError **error)
 {
-	return g_strdup ("net,bulk-removes,do-initial-query,contact-lists");
-}
+	gboolean processed = TRUE;
 
-static void
-ebbm_get_required_fields (EBookBackendMAPI *ebma, GList **fields, GError **error)
-{
-	*fields = g_list_append (*fields, (gchar *) e_contact_field_name (E_CONTACT_FILE_AS));
-}
+	g_return_val_if_fail (ebma != NULL, FALSE);
+	g_return_val_if_fail (prop_name != NULL, FALSE);
+	g_return_val_if_fail (prop_value != NULL, FALSE);
 
-static void
-ebbm_get_supported_fields (EBookBackendMAPI *ebma, GList **fields, GError **error)
-{
-	gint i;
+	if (g_str_equal (prop_name, CLIENT_BACKEND_PROPERTY_CAPABILITIES)) {
+		*prop_value = g_strdup ("net,bulk-removes,do-initial-query,contact-lists");
+	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_REQUIRED_FIELDS)) {
+		*prop_value = g_strdup (e_contact_field_name (E_CONTACT_FILE_AS));
+	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_SUPPORTED_FIELDS)) {
+		gint ii;
+		GSList *fields = NULL;
 
-	for (i = 0; i < G_N_ELEMENTS (mappings); i++) {
-		*fields = g_list_append (*fields, (gchar *)e_contact_field_name (mappings[i].field_id));
+		for (ii = 0; ii < G_N_ELEMENTS (mappings); ii++) {
+			fields = g_slist_append (fields, (gpointer) e_contact_field_name (mappings[ii].field_id));
+		}
+
+		fields = g_slist_append (fields, (gpointer) e_contact_field_name (E_CONTACT_BOOK_URI));
+
+		*prop_value = e_data_book_string_slist_to_comma_string (fields);
+
+		g_slist_free (fields);
+	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_SUPPORTED_AUTH_METHODS)) {
+		*prop_value = g_strdup ("plain/password");
+	} else {
+		processed = FALSE;
 	}
 
-	*fields = g_list_append (*fields, (gpointer) e_contact_field_name (E_CONTACT_BOOK_URI));
+	return processed;
 }
 
 static void
-ebbm_authenticate_user (EBookBackendMAPI *ebma, const gchar *user, const gchar *passwd, const gchar *auth_method, GError **error)
+ebbm_authenticate_user (EBookBackendMAPI *ebma, GCancellable *cancellable, ECredentials *credentials, GError **error)
 {
 	EBookBackendMAPIPrivate *priv = ebma->priv;
 	GError *mapi_error = NULL;
 	ExchangeMapiConnection *old_conn;
 
-	switch (priv->mode) {
-	case E_DATA_BOOK_MODE_LOCAL:
+	if (!e_book_backend_is_online (E_BOOK_BACKEND (ebma))) {
 		ebbm_notify_connection_status (ebma, FALSE);
-		return;
-
-	case E_DATA_BOOK_MODE_REMOTE:
+	} else {
 		if (priv->update_cache_thread) {
 			g_cancellable_cancel (priv->update_cache);
 			g_thread_join (priv->update_cache_thread);
@@ -555,11 +546,11 @@ ebbm_authenticate_user (EBookBackendMAPI *ebma, const gchar *user, const gchar *
 		old_conn = priv->conn;
 		priv->conn = NULL;
 
-		priv->conn = exchange_mapi_connection_new (priv->profile, passwd, &mapi_error);
+		priv->conn = exchange_mapi_connection_new (priv->profile, e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD), &mapi_error);
 		if (!priv->conn) {
 			priv->conn = exchange_mapi_connection_find (priv->profile);
 			if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
-				exchange_mapi_connection_reconnect (priv->conn, passwd, &mapi_error);
+				exchange_mapi_connection_reconnect (priv->conn, e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD), &mapi_error);
 		}
 
 		if (old_conn)
@@ -587,51 +578,31 @@ ebbm_authenticate_user (EBookBackendMAPI *ebma, const gchar *user, const gchar *
 
 		/* if (priv->marked_for_offline) */
 			priv->update_cache_thread = g_thread_create (ebbm_update_cache_cb, ebma, TRUE, NULL);
-		break;
-
-	default:
-		break;
 	}
 }
 
 static void
-ebbm_get_supported_auth_methods (EBookBackendMAPI *ebma, GList **auth_methods, GError **error)
-{
-	*auth_methods = g_list_append (*auth_methods, g_strdup ("plain/password"));
-}
-
-static void
-ebbm_cancel_operation (EBookBackend *backend, EDataBook *book, GError **perror)
-{
-	EBookBackendMAPI *ebbm = E_BOOK_BACKEND_MAPI (backend);
-
-	if (!ebbm || !ebbm->priv || !ebbm->priv->op_queue || !em_operation_queue_cancel_all (ebbm->priv->op_queue))
-		g_propagate_error (perror, EDB_ERROR (COULD_NOT_CANCEL));
-}
-
-static void
-ebbm_set_mode (EBookBackend *backend, EDataBookMode mode)
+ebbm_set_online (EBookBackend *backend, gboolean is_online)
 {
 	EBookBackendMAPI *ebma = E_BOOK_BACKEND_MAPI (backend);
 	EBookBackendMAPIPrivate *priv = ebma->priv;
 
-	priv->mode = mode;
-	if (e_book_backend_is_loaded (backend)) {
+	e_book_backend_notify_online (backend, is_online);
+	if (e_book_backend_is_opened (backend)) {
 		e_book_backend_mapi_lock_connection (ebma);
 
-		if (mode == E_DATA_BOOK_MODE_LOCAL) {
-			e_book_backend_notify_writable (backend, FALSE);
-			e_book_backend_set_is_writable (backend, FALSE);
+		if (!is_online) {
+			e_book_backend_notify_readonly (backend, TRUE);
 			ebbm_notify_connection_status (ebma, FALSE);
 
 			if (priv->conn) {
 				g_object_unref (priv->conn);
 				priv->conn = NULL;
 			}
-		} else if (mode == E_DATA_BOOK_MODE_REMOTE) {
+		} else {
 			ebbm_notify_connection_status (ebma, TRUE);
 			if (!priv->conn)
-				e_book_backend_notify_auth_required (backend);
+				e_book_backend_notify_auth_required (backend, TRUE, NULL);
 		}
 
 		e_book_backend_mapi_unlock_connection (ebma);
@@ -639,7 +610,7 @@ ebbm_set_mode (EBookBackend *backend, EDataBookMode mode)
 }
 
 static void
-ebbm_get_contact (EBookBackendMAPI *ebma, const gchar *id, gchar **vcard, GError **error)
+ebbm_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *id, gchar **vcard, GError **error)
 {
 	EBookBackendMAPIPrivate *priv;
 	EContact *contact;
@@ -665,7 +636,7 @@ ebbm_get_contact (EBookBackendMAPI *ebma, const gchar *id, gchar **vcard, GError
 }
 
 static void
-ebbm_get_contact_list (EBookBackendMAPI *ebma, const gchar *query, GList **vCards, GError **error)
+ebbm_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *query, GSList **vCards, GError **error)
 {
 	EBookBackendMAPIPrivate *priv;
 	GList *contacts, *l;
@@ -687,7 +658,7 @@ ebbm_get_contact_list (EBookBackendMAPI *ebma, const gchar *query, GList **vCard
 	for (l = contacts; l; l = g_list_next (l)) {
 		EContact *contact = l->data;
 
-		*vCards = g_list_prepend (*vCards, e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30));
+		*vCards = g_slist_prepend (*vCards, e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30));
 
 		g_object_unref (contact);
 	}
@@ -714,7 +685,7 @@ ebbm_book_view_thread (gpointer data)
 
 	priv = bvtd->ebma->priv;
 
-	e_data_book_view_notify_status_message (bvtd->book_view, _("Searching"));
+	e_data_book_view_notify_progress (bvtd->book_view, -1, _("Searching"));
 
 	e_book_backend_mapi_update_view_by_cache (bvtd->ebma, bvtd->book_view, &error);
 
@@ -755,19 +726,10 @@ ebbm_book_view_thread (gpointer data)
 	return NULL;
 }
 
-static void
-free_data_book_change (EDataBookChange *change)
-{
-	if (change) {
-		g_free (change->vcard);
-		g_free (change);
-	}
-}
-
 /* Async OP functions, data structures and so on */
 
 typedef enum {
-	/* OP_LOAD_SOURCE, */
+	OP_OPEN,
 	OP_REMOVE,
 
 	OP_CREATE_CONTACT,
@@ -777,11 +739,8 @@ typedef enum {
 	OP_GET_CONTACT_LIST,
 	OP_START_BOOK_VIEW,
 	OP_STOP_BOOK_VIEW,
-	OP_GET_CHANGES,
 	OP_AUTHENTICATE_USER,
-	OP_GET_REQUIRED_FIELDS,
-	OP_GET_SUPPORTED_FIELDS,
-	OP_GET_SUPPORTED_AUTH_METHODS,
+	OP_GET_BACKEND_PROPERTY
 } OperationType;
 
 typedef struct {
@@ -789,21 +748,19 @@ typedef struct {
 
 	EDataBook *book;
 	guint32 opid;
+	GCancellable *cancellable;
 } OperationBase;
-
-/* typedef struct {
-	OperationBase base;
-
-	ESource *source;
-	gboolean only_if_exists;
-} OperationLoadSource; */
 
 typedef struct {
 	OperationBase base;
 
-	gchar *user;
-	gchar *passwd;
-	gchar *auth_method;
+	gboolean only_if_exists;
+} OperationOpen;
+
+typedef struct {
+	OperationBase base;
+
+	ECredentials *credentials;
 } OperationAuthenticateUser;
 
 typedef struct {
@@ -815,7 +772,7 @@ typedef struct {
 typedef struct {
 	OperationBase base;
 
-	GList *id_list;
+	GSList *id_list;
 } OperationIDList;
 
 typedef struct {
@@ -841,26 +798,25 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 	ebmac = E_BOOK_BACKEND_MAPI_GET_CLASS (ebma);
 	g_return_if_fail (ebmac != NULL);
 
+	cancelled = cancelled || (op->cancellable && g_cancellable_is_cancelled (op->cancellable));
+
 	switch (op->ot) {
-	/* it's a sync op by e_book_backend_open
-	case OP_LOAD_SOURCE: {
-		OperationLoadSource *opls = (OperationLoadSource *) op;
+	case OP_OPEN: {
+		OperationOpen *opo = (OperationOpen *) op;
 
 		if (!cancelled) {
-			if (ebmac->op_load_source)
-				ebmac->op_load_source (ebma, opls->source, opls->only_if_exists, &error);
+			if (ebmac->op_open)
+				ebmac->op_open (ebma, op->cancellable, opo->only_if_exists, &error);
 			else
 				error = EDB_ERROR (NOT_SUPPORTED);
 
 			e_data_book_respond_open (op->book, op->opid, error);
 		}
-
-		g_object_unref (opls->source);
-	} break; */
+	} break;
 	case OP_REMOVE: {
 		if (!cancelled) {
 			if (ebmac->op_remove)
-				ebmac->op_remove (ebma, &error);
+				ebmac->op_remove (ebma, op->cancellable, &error);
 			else
 				error = EDB_ERROR (NOT_SUPPORTED);
 
@@ -875,7 +831,7 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 			EContact *contact = NULL;
 
 			if (ebmac->op_create_contact)
-				ebmac->op_create_contact (ebma, vcard, &contact, &error);
+				ebmac->op_create_contact (ebma, op->cancellable, vcard, &contact, &error);
 			else
 				error = EDB_ERROR (NOT_SUPPORTED);
 
@@ -894,15 +850,15 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 		OperationIDList *opil = (OperationIDList *) op;
 
 		if (!cancelled) {
-			GList *removed_ids = NULL;
+			GSList *removed_ids = NULL;
 
 			if (ebmac->op_remove_contacts)
-				ebmac->op_remove_contacts (ebma, opil->id_list, &removed_ids, &error);
+				ebmac->op_remove_contacts (ebma, op->cancellable, opil->id_list, &removed_ids, &error);
 			else
 				error = EDB_ERROR (NOT_SUPPORTED);
 
 			if (!error) {
-				GList *r;
+				GSList *r;
 
 				for (r = removed_ids; r; r = r->next) {
 					const gchar *uid = r->data;
@@ -914,12 +870,12 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 
 			e_data_book_respond_remove_contacts (op->book, op->opid, error, removed_ids);
 
-			g_list_foreach (removed_ids, (GFunc) g_free, NULL);
-			g_list_free (removed_ids);
+			g_slist_foreach (removed_ids, (GFunc) g_free, NULL);
+			g_slist_free (removed_ids);
 		}
 
-		g_list_foreach (opil->id_list, (GFunc) g_free, NULL);
-		g_list_free (opil->id_list);
+		g_slist_foreach (opil->id_list, (GFunc) g_free, NULL);
+		g_slist_free (opil->id_list);
 	} break;
 	case OP_MODIFY_CONTACT: {
 		OperationStr *ops = (OperationStr *) op;
@@ -929,7 +885,7 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 			EContact *contact = NULL;
 
 			if (ebmac->op_modify_contact)
-				ebmac->op_modify_contact (ebma, vcard, &contact, &error);
+				ebmac->op_modify_contact (ebma, op->cancellable, vcard, &contact, &error);
 			else
 				error = EDB_ERROR (NOT_SUPPORTED);
 
@@ -952,7 +908,7 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 			gchar *vcard = NULL;
 
 			if (ebmac->op_get_contact)
-				ebmac->op_get_contact (ebma, id, &vcard, &error);
+				ebmac->op_get_contact (ebma, op->cancellable, id, &vcard, &error);
 			else
 				error = EDB_ERROR (NOT_SUPPORTED);
 
@@ -968,18 +924,17 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 		const gchar *query = ops->str;
 
 		if (!cancelled) {
-			GList *vCards = NULL;
+			GSList *vCards = NULL;
 
 			if (ebmac->op_get_contact_list)
-				ebmac->op_get_contact_list (ebma, query, &vCards, &error);
+				ebmac->op_get_contact_list (ebma, op->cancellable, query, &vCards, &error);
 			else
 				error = EDB_ERROR (NOT_SUPPORTED);
 
 			e_data_book_respond_get_contact_list (op->book, op->opid, error, vCards);
 
-			/* respond freed them */
-			/* g_list_foreach (vCards, (GFunc) g_free, NULL); */
-			g_list_free (vCards);
+			g_slist_foreach (vCards, (GFunc) g_free, NULL);
+			g_slist_free (vCards);
 		}
 
 		g_free (ops->str);
@@ -1015,99 +970,46 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 
 		g_object_unref (opbv->book_view);
 	} break;
-	case OP_GET_CHANGES: {
-		OperationStr *ops = (OperationStr *) op;
-		const gchar *change_id = ops->str;
-
-		if (!cancelled) {
-			GList *changes = NULL;
-
-			if (ebmac->op_get_changes)
-				ebmac->op_get_changes (ebma, change_id, &changes, &error);
-			else
-				error = EDB_ERROR (NOT_SUPPORTED);
-
-			e_data_book_respond_get_changes (op->book, op->opid, error, changes);
-
-			g_list_foreach (changes, (GFunc) free_data_book_change, NULL);
-			g_list_free (changes);
-		}
-
-		g_free (ops->str);
-	} break;
 	case OP_AUTHENTICATE_USER: {
 		OperationAuthenticateUser *opau = (OperationAuthenticateUser *) op;
 
 		if (!cancelled) {
 			if (ebmac->op_authenticate_user)
-				ebmac->op_authenticate_user (ebma, opau->user, opau->passwd, opau->auth_method, &error);
+				ebmac->op_authenticate_user (ebma, op->cancellable, opau->credentials, &error);
 			else
 				error = EDB_ERROR (NOT_SUPPORTED);
 
-			e_data_book_respond_authenticate_user (op->book, op->opid, error);
+			e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), error);
 		}
 
-		if (opau->passwd)
-			memset (opau->passwd, 0, strlen (opau->passwd));
-
-		g_free (opau->user);
-		g_free (opau->passwd);
-		g_free (opau->auth_method);
+		e_credentials_free (opau->credentials);
 	} break;
-	case OP_GET_REQUIRED_FIELDS: {
+	case OP_GET_BACKEND_PROPERTY: {
+		OperationStr *ops = (OperationStr *) op;
+		const gchar *prop_name = ops->str;
+
 		if (!cancelled) {
-			GList *fields = NULL;
+			gchar *prop_value = NULL;
 
-			if (ebmac->op_get_required_fields)
-				ebmac->op_get_required_fields (ebma, &fields, &error);
+			if (ebbm_get_backend_property (ebma, prop_name, &prop_value, &error))
+				e_data_book_respond_get_backend_property (op->book, op->opid, error, prop_value);
 			else
-				error = EDB_ERROR (NOT_SUPPORTED);
-
-			e_data_book_respond_get_required_fields (op->book, op->opid, error, fields);
-
-			/* do not free list data, only list itself */
-			g_list_free (fields);
+				(* E_BOOK_BACKEND_CLASS (e_book_backend_mapi_parent_class)->get_backend_property) (backend, op->book, op->opid, op->cancellable, prop_name);
 		}
-	} break;
-	case OP_GET_SUPPORTED_FIELDS: {
-		if (!cancelled) {
-			GList *fields = NULL;
 
-			if (ebmac->op_get_supported_fields)
-				ebmac->op_get_supported_fields (ebma, &fields, &error);
-			else
-				error = EDB_ERROR (NOT_SUPPORTED);
-
-			e_data_book_respond_get_supported_fields (op->book, op->opid, error, fields);
-
-			/* do not free list data, only list itself */
-			g_list_free (fields);
-		}
-	} break;
-	case OP_GET_SUPPORTED_AUTH_METHODS: {
-		if (!cancelled) {
-			GList *methods = NULL;
-
-			if (ebmac->op_get_supported_auth_methods)
-				ebmac->op_get_supported_auth_methods (ebma, &methods, &error);
-			else
-				error = EDB_ERROR (NOT_SUPPORTED);
-
-			e_data_book_respond_get_supported_auth_methods (op->book, op->opid, error, methods);
-
-			g_list_foreach (methods, (GFunc) g_free, NULL);
-			g_list_free (methods);
-		}
+		g_free (ops->str);
 	} break;
 	}
 
+	if (op->cancellable)
+		g_object_unref (op->cancellable);
 	if (op->book)
 		g_object_unref (op->book);
 	g_free (op);
 }
 
 static void
-base_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, OperationType ot)
+base_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cancellable, OperationType ot)
 {
 	OperationBase *op;
 	EBookBackendMAPI *ebbm;
@@ -1122,17 +1024,20 @@ base_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, Operatio
 
 	if (book)
 		g_object_ref (book);
+	if (cancellable)
+		g_object_ref (cancellable);
 
 	op = g_new0 (OperationBase, 1);
 	op->ot = ot;
 	op->book = book;
 	op->opid = opid;
+	op->cancellable = cancellable;
 
 	em_operation_queue_push (priv->op_queue, op);
 }
 
 static void
-str_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, const gchar *str, OperationType ot)
+str_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cancellable, const gchar *str, OperationType ot)
 {
 	OperationStr *op;
 	EBookBackendMAPI *ebbm;
@@ -1147,28 +1052,31 @@ str_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, const gch
 
 	if (book)
 		g_object_ref (book);
+	if (cancellable)
+		g_object_ref (cancellable);
 
 	op = g_new0 (OperationStr, 1);
 	op->base.ot = ot;
 	op->base.book = book;
 	op->base.opid = opid;
+	op->base.cancellable = cancellable;
 	op->str = g_strdup (str);
 
 	em_operation_queue_push (priv->op_queue, op);
 }
 
-#define BASE_OP_DEF(_func, _ot)					\
-static void							\
-_func (EBookBackend *backend, EDataBook *book, guint32 opid)	\
-{								\
-	base_op_abstract (backend, book, opid, _ot);		\
+#define BASE_OP_DEF(_func, _ot)								\
+static void										\
+_func (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cancellable)	\
+{											\
+	base_op_abstract (backend, book, opid, cancellable, _ot);			\
 }
 
 #define STR_OP_DEF(_func, _ot)							\
 static void									\
-_func (EBookBackend *backend, EDataBook *book, guint32 opid, const gchar *str)	\
+_func (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cancellable, const gchar *str)	\
 {										\
-	str_op_abstract (backend, book, opid, str, _ot);			\
+	str_op_abstract (backend, book, opid, cancellable, str, _ot);		\
 }
 
 BASE_OP_DEF (ebbm_op_remove, OP_REMOVE)
@@ -1176,54 +1084,44 @@ STR_OP_DEF  (ebbm_op_create_contact, OP_CREATE_CONTACT)
 STR_OP_DEF  (ebbm_op_modify_contact, OP_MODIFY_CONTACT)
 STR_OP_DEF  (ebbm_op_get_contact, OP_GET_CONTACT)
 STR_OP_DEF  (ebbm_op_get_contact_list, OP_GET_CONTACT_LIST)
-STR_OP_DEF  (ebbm_op_get_changes, OP_GET_CHANGES)
-BASE_OP_DEF (ebbm_op_get_required_fields, OP_GET_REQUIRED_FIELDS)
-BASE_OP_DEF (ebbm_op_get_supported_fields, OP_GET_SUPPORTED_FIELDS)
-BASE_OP_DEF (ebbm_op_get_supported_auth_methods, OP_GET_SUPPORTED_AUTH_METHODS)
+STR_OP_DEF  (ebbm_op_get_backend_property, OP_GET_BACKEND_PROPERTY)
 
 static void
-ebbm_op_load_source (EBookBackend *backend, ESource *source, gboolean only_if_exists, GError **error)
+ebbm_op_open (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cancellable, gboolean only_if_exists)
 {
-	/*OperationLoadSource *op;*/
+	OperationOpen *op;
 	EBookBackendMAPI *ebbm;
 	EBookBackendMAPIPrivate *priv;
-	EBookBackendMAPIClass *ebmac;
 
 	g_return_if_fail (backend != NULL);
 	g_return_if_fail (E_IS_BOOK_BACKEND_MAPI (backend));
-	g_return_if_fail (source != NULL);
 
 	ebbm = E_BOOK_BACKEND_MAPI (backend);
 	priv = ebbm->priv;
 	g_return_if_fail (priv != NULL);
 
-	ebmac = E_BOOK_BACKEND_MAPI_GET_CLASS (ebbm);
-	g_return_if_fail (ebmac != NULL);
+	if (book)
+		g_object_ref (book);
+	if (cancellable)
+		g_object_ref (cancellable);
 
-	/* it's a sync op by e_book_backend_open
-	op = g_new0 (OperationLoadSource, 1);
-	op->base.ot = OP_LOAD_SOURCE;
+	op = g_new0 (OperationOpen, 1);
+	op->base.ot = OP_OPEN;
 	op->base.book = book;
 	op->base.opid = opid;
-	op->source = g_object_ref (source);
+	op->base.cancellable = cancellable;
 	op->only_if_exists = only_if_exists;
 
 	em_operation_queue_push (priv->op_queue, op);
-	*/
-
-	if (ebmac->op_load_source)
-		ebmac->op_load_source (ebbm, source, only_if_exists, error);
-	else
-		g_propagate_error (error, EDB_ERROR (NOT_SUPPORTED));
 }
 
 static void
-ebbm_op_remove_contacts (EBookBackend *backend, EDataBook *book, guint32 opid, GList *id_list)
+ebbm_op_remove_contacts (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cancellable, const GSList *id_list)
 {
 	OperationIDList *op;
 	EBookBackendMAPI *ebbm;
 	EBookBackendMAPIPrivate *priv;
-	GList *l;
+	GSList *l;
 
 	g_return_if_fail (backend != NULL);
 	g_return_if_fail (E_IS_BOOK_BACKEND_MAPI (backend));
@@ -1235,12 +1133,15 @@ ebbm_op_remove_contacts (EBookBackend *backend, EDataBook *book, guint32 opid, G
 
 	if (book)
 		g_object_ref (book);
+	if (cancellable)
+		g_object_ref (cancellable);
 
 	op = g_new0 (OperationIDList, 1);
 	op->base.ot = OP_REMOVE_CONTACTS;
 	op->base.book = book;
 	op->base.opid = opid;
-	op->id_list = g_list_copy (id_list);
+	op->base.cancellable = cancellable;
+	op->id_list = g_slist_copy ((GSList *) id_list);
 
 	for (l = op->id_list; l; l = l->next) {
 		l->data = g_strdup (l->data);
@@ -1302,7 +1203,7 @@ ebbm_op_stop_book_view (EBookBackend *backend, EDataBookView *book_view)
 }
 
 static void
-ebbm_op_authenticate_user (EBookBackend *backend, EDataBook *book, guint32 opid, const gchar *user, const gchar *passwd, const gchar *auth_method)
+ebbm_op_authenticate_user (EBookBackend *backend, GCancellable *cancellable, ECredentials *credentials)
 {
 	OperationAuthenticateUser *op;
 	EBookBackendMAPI *ebbm;
@@ -1315,16 +1216,15 @@ ebbm_op_authenticate_user (EBookBackend *backend, EDataBook *book, guint32 opid,
 	priv = ebbm->priv;
 	g_return_if_fail (priv != NULL);
 
-	if (book)
-		g_object_ref (book);
+	if (cancellable)
+		g_object_ref (cancellable);
 
 	op = g_new0 (OperationAuthenticateUser, 1);
 	op->base.ot = OP_AUTHENTICATE_USER;
-	op->base.book = book;
-	op->base.opid = opid;
-	op->user = g_strdup (user);
-	op->passwd = g_strdup (passwd);
-	op->auth_method = g_strdup (auth_method);
+	op->base.book = NULL;
+	op->base.opid = 0;
+	op->base.cancellable = cancellable;
+	op->credentials = e_credentials_new_clone (credentials);
 
 	em_operation_queue_push (priv->op_queue, op);
 }
@@ -1393,9 +1293,8 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 
 	object_class->dispose                     = ebbm_dispose;
 
-	backend_class->load_source		  = ebbm_op_load_source;
+	backend_class->open			  = ebbm_op_open;
 	backend_class->remove			  = ebbm_op_remove;
-	backend_class->get_static_capabilities    = ebbm_get_static_capabilities;
 	backend_class->create_contact		  = ebbm_op_create_contact;
 	backend_class->remove_contacts		  = ebbm_op_remove_contacts;
 	backend_class->modify_contact		  = ebbm_op_modify_contact;
@@ -1403,19 +1302,12 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 	backend_class->get_contact_list           = ebbm_op_get_contact_list;
 	backend_class->start_book_view            = ebbm_op_start_book_view;
 	backend_class->stop_book_view             = ebbm_op_stop_book_view;
-	backend_class->get_changes                = ebbm_op_get_changes;
 	backend_class->authenticate_user          = ebbm_op_authenticate_user;
-	backend_class->get_required_fields	  = ebbm_op_get_required_fields;
-	backend_class->get_supported_fields	  = ebbm_op_get_supported_fields;
-	backend_class->get_supported_auth_methods = ebbm_op_get_supported_auth_methods;
-	backend_class->cancel_operation		  = ebbm_cancel_operation;
-	backend_class->set_mode                   = ebbm_set_mode;
+	backend_class->get_backend_property	  = ebbm_op_get_backend_property;
+	backend_class->set_online                 = ebbm_set_online;
 
-	klass->op_load_source                     = ebbm_load_source;
+	klass->op_open				  = ebbm_open;
 	klass->op_remove                          = ebbm_remove;
-	klass->op_get_required_fields             = ebbm_get_required_fields;
-	klass->op_get_supported_fields            = ebbm_get_supported_fields;
-	klass->op_get_supported_auth_methods      = ebbm_get_supported_auth_methods;
 	klass->op_authenticate_user               = ebbm_authenticate_user;
 	klass->op_get_contact                     = ebbm_get_contact;
 	klass->op_get_contact_list                = ebbm_get_contact_list;
@@ -1615,7 +1507,7 @@ e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView
 				status_msg = ebmac->op_get_status_message (ebma, index, total);
 
 			if (status_msg)
-				e_data_book_view_notify_status_message (book_view, status_msg);
+				e_data_book_view_notify_progress (book_view, -1, status_msg);
 
 			g_free (status_msg);
 

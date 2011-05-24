@@ -2060,7 +2060,7 @@ mapi_get_date_from_string (const gchar *dtstring)
 }
 
 static void
-populate_freebusy_data (struct Binary_r *bin, uint32_t month, uint32_t year, GList **freebusy, const gchar *accept_type, ECalComponent *comp)
+populate_freebusy_data (struct Binary_r *bin, uint32_t month, uint32_t year, GSList **freebusy, const gchar *accept_type, ECalComponent *comp)
 {
 	uint16_t	event_start;
 	uint16_t	event_end;
@@ -2146,13 +2146,13 @@ populate_freebusy_data (struct Binary_r *bin, uint32_t month, uint32_t year, GLi
 }
 
 gboolean
-exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, const GList *users, time_t start, time_t end, GList **freebusy, GError **mapi_error)
+exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, const GSList *users, time_t start, time_t end, GSList **freebusy, GError **mapi_error)
 {
 	struct SRow		aRow;
 	enum MAPISTATUS		ms;
 	uint32_t		i;
 	mapi_object_t           obj_store;
-	const GList *l;
+	const GSList *l;
 
 	const uint32_t			*publish_start;
 	const struct LongArray_r	*busy_months;
@@ -2171,11 +2171,13 @@ exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, const 
 	icaltimetype start_time, end_time;
 	icaltimezone *default_zone = NULL;
 
+	*freebusy = NULL;
+
 	if (!exchange_mapi_connection_get_public_folder (conn, &obj_store, mapi_error)) {
 		return FALSE;
 	}
 
-	for ( l = users; l != NULL; l = g_list_next (l)) {
+	for ( l = users; l != NULL; l = g_slist_next (l)) {
 		ms = GetUserFreeBusyData (&obj_store, (const gchar *)l->data, &aRow);
 
 		if (ms != MAPI_E_SUCCESS) {
@@ -2247,7 +2249,7 @@ exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, const 
 		}
 
 		e_cal_component_commit_sequence (comp);
-		*freebusy = g_list_append (*freebusy, e_cal_component_get_as_string (comp));
+		*freebusy = g_slist_append (*freebusy, e_cal_component_get_as_string (comp));
 		g_object_unref (comp);
 		MAPIFreeBuffer(aRow.lpProps);
 	}
