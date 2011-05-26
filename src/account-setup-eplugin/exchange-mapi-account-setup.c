@@ -795,7 +795,8 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	grp = e_source_peek_group (source);
 	e_source_set_property (source, "auth", "plain/password");
 	e_source_set_property (source, "auth-domain", EXCHANGE_MAPI_PASSWORD_COMPONENT);
-	e_source_set_property(source, "user", e_source_group_get_property (grp, "user"));
+	e_source_set_property(source, "user", NULL);
+	e_source_set_property(source, "username", e_source_group_get_property (grp, "username") ? e_source_group_get_property (grp, "username") : e_source_group_get_property (grp, "user"));
 	e_source_set_property(source, "host", e_source_group_get_property (grp, "host"));
 	e_source_set_property(source, "profile", e_source_group_get_property (grp, "profile"));
 	e_source_set_property(source, "domain", e_source_group_get_property (grp, "domain"));

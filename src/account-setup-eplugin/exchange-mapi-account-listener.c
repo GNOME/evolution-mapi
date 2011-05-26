@@ -649,7 +649,8 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		is_new_group = TRUE;
 		old_sources = NULL;
 	}
-	e_source_group_set_property (group, "user", url->user);
+	e_source_group_set_property (group, "user", NULL);
+	e_source_group_set_property (group, "username", url->user);
 	e_source_group_set_property (group, "host", url->host);
 	e_source_group_set_property (group, "profile", camel_url_get_param (url, "profile"));
 	e_source_group_set_property (group, "domain", camel_url_get_param (url, "domain"));
@@ -677,7 +678,8 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		}
 		e_source_set_property (source, "auth", "plain/password");
 		e_source_set_property (source, "auth-domain", EXCHANGE_MAPI_PASSWORD_COMPONENT);
-		e_source_set_property(source, "user", url->user);
+		e_source_set_property(source, "user", NULL);
+		e_source_set_property(source, "username", url->user);
 		e_source_set_property(source, "host", url->host);
 		e_source_set_property(source, "profile", camel_url_get_param (url, "profile"));
 		e_source_set_property(source, "domain", camel_url_get_param (url, "domain"));
@@ -740,7 +742,8 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		e_source_set_property (source, "auth-domain", "MAPIGAL");
 
 		//FIXME: Offline handling
-		e_source_set_property(source, "user", url->user);
+		e_source_set_property(source, "user", NULL);
+		e_source_set_property(source, "username", url->user);
 		e_source_set_property(source, "host", camel_url_get_param (url, "ad_server"));
 		e_source_set_property(source, "view-limit", camel_url_get_param (url, "ad_limit"));
 		e_source_set_property(source, "profile", camel_url_get_param (url, "profile"));
