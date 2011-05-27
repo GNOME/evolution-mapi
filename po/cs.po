@@ -11,9 +11,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-mapi\n"
-"POT-Creation-Date: 2011-02-08 18:36+0000\n"
-"PO-Revision-Date: 2011-02-09 13:51+0100\n"
+"product=evolution-mapi&keywords=I18N+L10N\n"
+"POT-Creation-Date: 2011-05-10 16:58+0000\n"
+"PO-Revision-Date: 2011-05-27 10:27+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -22,13 +22,13 @@ msgstr ""
 "Language: cs\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:732
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:734
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:733
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:735
 msgid "Global Address List"
 msgstr "Globální seznam adres"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:1114
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:229
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:1119
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:235
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Zadejte heslo pro %s@%s"
@@ -37,19 +37,25 @@ msgstr "Zadejte heslo pro %s@%s"
 #. using GtkEntryCompletion in the username gtkentry. But plugins
 #. as of now does not have access to it
 #. TODO : Fix strings
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:133
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:134
 msgid "Select username"
 msgstr "Vyberte jméno uživatele"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:144
 msgid "Full name"
 msgstr "Celé jméno"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:148
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
 msgid "Username"
 msgstr "Jméno uživatele"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:217
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
+#: ../src/camel/camel-mapi-store.c:1043
+#, c-format
+msgid "Cannot create MAPI folders in offline mode."
+msgstr "Nelze vytvořit složky MAPI v režimu odpojení."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:223
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -57,51 +63,51 @@ msgstr ""
 "Server, jméno uživatele a název domény nemohou být prázdné. Vyplňte do nich "
 "prosím správné hodnoty."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:273
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:279
 msgid "Authentication finished successfully."
 msgstr "Ověření úspěšně dokončeno."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:279
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:290
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:285
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:296
 msgid "Authentication failed."
 msgstr "Ověření selhalo."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:368
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:374
 msgid "_Domain name:"
 msgstr "Název _domény:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:378
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:384
 msgid "_Authenticate"
 msgstr "_Ověřit"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:388
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:394
 msgid "_Use secure connection"
 msgstr "Po_užít zabezpečené spojení"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:523
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:529
 msgid "Personal Folders"
 msgstr "Osobní složky"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:658
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:664
 msgid "_Location:"
 msgstr "_Místo:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:775
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:781
 #, c-format
 msgid "Failed to create address book '%s': %s"
 msgstr "Selhalo vytvoření adresáře „%s“: %s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:778
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:784
 #, c-format
 msgid "Failed to create address book '%s'"
 msgstr "Selhalo vytvoření adresáře „%s“"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:882
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:890
 #, c-format
 msgid "Failed to create calendar '%s': %s"
 msgstr "Selhalo vytvoření kalendáře „%s“: %s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:885
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:893
 #, c-format
 msgid "Failed to create calendar '%s'"
 msgstr "Selhalo vytvoření kalendáře „%s“"
@@ -118,12 +124,12 @@ msgstr "Velikost"
 msgid "Unable to retrieve folder size information"
 msgstr "Nelze získat informace o velikosti složky"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:169
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:168
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:371
 msgid "Folder Size"
 msgstr "Velikost složky"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:180
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:179
 msgid "Fetching folder list…"
 msgstr "Probíhá stahování seznamu složek…"
 
@@ -145,17 +151,17 @@ msgstr "Nastavení Exchange"
 msgid "Folder size"
 msgstr "Velikost složky"
 
-#: ../src/addressbook/e-book-backend-mapi.c:577
+#: ../src/addressbook/e-book-backend-mapi.c:574
 msgid "Cannot connect"
 msgstr "Nelze se připojit"
 
-#: ../src/addressbook/e-book-backend-mapi.c:720
+#: ../src/addressbook/e-book-backend-mapi.c:717
 msgid "Searching"
 msgstr "Hledání"
 
-#: ../src/addressbook/e-book-backend-mapi.c:2036
+#: ../src/addressbook/e-book-backend-mapi.c:2031
 #: ../src/calendar/e-cal-backend-mapi.c:133
-#: ../src/camel/camel-mapi-folder.c:1766 ../src/camel/camel-mapi-folder.c:1787
+#: ../src/camel/camel-mapi-folder.c:1759 ../src/camel/camel-mapi-folder.c:1780
 msgid "Unknown error"
 msgstr "Neznámá chyba"
 
@@ -165,21 +171,21 @@ msgid "Failed to remove public folder"
 msgstr "Selhalo odstranění veřejné složky"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:760
-#: ../src/calendar/e-cal-backend-mapi.c:1787
-#: ../src/calendar/e-cal-backend-mapi.c:2296
+#: ../src/calendar/e-cal-backend-mapi.c:1814
+#: ../src/calendar/e-cal-backend-mapi.c:2358
 msgid "Failed to create item on a server"
 msgstr "Selhalo vytvoření složky na serveru"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:886
-#: ../src/calendar/e-cal-backend-mapi.c:2020
+#: ../src/calendar/e-cal-backend-mapi.c:2047
 msgid "Failed to modify item on a server"
 msgstr "Selhala úprava složky na serveru"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:1033
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:1099
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:1150
-#: ../src/calendar/e-cal-backend-mapi.c:1301
-#: ../src/calendar/e-cal-backend-mapi.c:1322
+#: ../src/calendar/e-cal-backend-mapi.c:1338
+#: ../src/calendar/e-cal-backend-mapi.c:1359
 msgid "Failed to fetch items from a server"
 msgstr "Selhalo stahování položek ze serveru"
 
@@ -224,32 +230,32 @@ msgstr "Selhalo stahování záznamů GAL"
 msgid "Loading items in folder %s"
 msgstr "Nahrávání položek do složky %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:766
-#: ../src/calendar/e-cal-backend-mapi.c:792
-#: ../src/calendar/e-cal-backend-mapi.c:839
-#: ../src/calendar/e-cal-backend-mapi.c:918
-#: ../src/calendar/e-cal-backend-mapi.c:941
+#: ../src/calendar/e-cal-backend-mapi.c:783
+#: ../src/calendar/e-cal-backend-mapi.c:809
+#: ../src/calendar/e-cal-backend-mapi.c:856
+#: ../src/calendar/e-cal-backend-mapi.c:935
+#: ../src/calendar/e-cal-backend-mapi.c:958
 #, c-format
 msgid "Failed to fetch changes from a server: %s"
 msgstr "Selhalo stahování změn ze serveru: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:771
-#: ../src/calendar/e-cal-backend-mapi.c:797
-#: ../src/calendar/e-cal-backend-mapi.c:844
-#: ../src/calendar/e-cal-backend-mapi.c:923
-#: ../src/calendar/e-cal-backend-mapi.c:946
+#: ../src/calendar/e-cal-backend-mapi.c:788
+#: ../src/calendar/e-cal-backend-mapi.c:814
+#: ../src/calendar/e-cal-backend-mapi.c:861
+#: ../src/calendar/e-cal-backend-mapi.c:940
+#: ../src/calendar/e-cal-backend-mapi.c:963
 msgid "Failed to fetch changes from a server"
 msgstr "Selhalo stahování změn ze serveru"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1435
+#: ../src/calendar/e-cal-backend-mapi.c:1450
 msgid "Could not create thread for populating cache"
 msgstr "Nelze vytvořit vlákno pro naplnění mezipaměti"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1497
+#: ../src/calendar/e-cal-backend-mapi.c:1506
 msgid "Could not create cache file"
 msgstr "Nelze vytvořit soubor pro mezipaměť"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1913
+#: ../src/calendar/e-cal-backend-mapi.c:1940
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -257,85 +263,85 @@ msgstr ""
 "Podpora pro úpravu jednotlivých výskytů opakujících se událostí není dosud "
 "implementována. Změna události na serveru nebyla provedena."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2581
+#: ../src/calendar/e-cal-backend-mapi.c:2643
 msgid "Failed to get Free/Busy data"
 msgstr "Selhalo získání údajů o volných/obsazených termínech"
 
-#: ../src/camel/camel-mapi-folder.c:348
+#: ../src/camel/camel-mapi-folder.c:344
 #, c-format
 msgid "Updating local summary cache for new messages in %s"
 msgstr "Aktualizace místní souhrnné mezipaměti pro nové zprávy v %s"
 
-#: ../src/camel/camel-mapi-folder.c:582
+#: ../src/camel/camel-mapi-folder.c:578
 #, c-format
 msgid "Retrieving message IDs from server for %s"
 msgstr "Probíhá stahování ID zprávy ze serveru pro %s"
 
-#: ../src/camel/camel-mapi-folder.c:612
+#: ../src/camel/camel-mapi-folder.c:609
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Probíhá odstraňování smazaných zpráv z mezipaměti v %s"
 
 #. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:749
+#: ../src/camel/camel-mapi-folder.c:732
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Stahují se souhrnné informace pro nové zprávy v %s"
 
-#: ../src/camel/camel-mapi-folder.c:872 ../src/camel/camel-mapi-folder.c:1383
-#: ../src/camel/camel-mapi-folder.c:1393
+#: ../src/camel/camel-mapi-folder.c:858 ../src/camel/camel-mapi-folder.c:1371
+#: ../src/camel/camel-mapi-folder.c:1381
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Tato zpráva není k dispozici v režimu odpojení."
 
-#: ../src/camel/camel-mapi-folder.c:889
+#: ../src/camel/camel-mapi-folder.c:875
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Stahování položek selhalo: %s"
 
-#: ../src/camel/camel-mapi-folder.c:894
+#: ../src/camel/camel-mapi-folder.c:880
 msgid "Fetching items failed"
 msgstr "Stahování položek selhalo"
 
-#: ../src/camel/camel-mapi-folder.c:1099
+#: ../src/camel/camel-mapi-folder.c:1087
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Zprávu nelze připojit ke složce „%s“"
 
-#: ../src/camel/camel-mapi-folder.c:1107 ../src/camel/camel-mapi-folder.c:1158
+#: ../src/camel/camel-mapi-folder.c:1095 ../src/camel/camel-mapi-folder.c:1146
 #, c-format
 msgid "Offline."
 msgstr "Off-line."
 
-#: ../src/camel/camel-mapi-folder.c:1238
+#: ../src/camel/camel-mapi-folder.c:1226
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "Selhalo vyprázdnění koše: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1243
+#: ../src/camel/camel-mapi-folder.c:1231
 msgid "Failed to empty Trash"
 msgstr "Selhalo vyprázdnění koše"
 
-#: ../src/camel/camel-mapi-folder.c:1343
+#: ../src/camel/camel-mapi-folder.c:1331
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Nelze získat zprávu %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1344
+#: ../src/camel/camel-mapi-folder.c:1332
 msgid "No such message"
 msgstr "Taková zpráva neexistuje"
 
-#: ../src/camel/camel-mapi-folder.c:1419
+#: ../src/camel/camel-mapi-folder.c:1407
 #, c-format
 msgid "Could not get message: %s"
 msgstr "Nelze získat zprávu: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1425 ../src/camel/camel-mapi-folder.c:1438
+#: ../src/camel/camel-mapi-folder.c:1413 ../src/camel/camel-mapi-folder.c:1426
 #, c-format
 msgid "Could not get message"
 msgstr "Nelze získat zprávu"
 
-#: ../src/camel/camel-mapi-folder.c:1881
+#: ../src/camel/camel-mapi-folder.c:1874
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nelze načíst souhrn pro %s"
@@ -384,78 +390,73 @@ msgstr ""
 "Touto volbou se připojíte k serveru OpenChange pomocí hesla v podobě čistého "
 "textu."
 
-#: ../src/camel/camel-mapi-store.c:345
+#: ../src/camel/camel-mapi-store.c:397
 #, c-format
 msgid "Folder list not available in offline mode."
 msgstr "Seznam složek není k dispozici v režimu odpojení."
 
-#: ../src/camel/camel-mapi-store.c:971
-#, c-format
-msgid "Cannot create MAPI folders in offline mode."
-msgstr "Nelze vytvořit složky MAPI v režimu odpojení."
-
-#: ../src/camel/camel-mapi-store.c:978
+#: ../src/camel/camel-mapi-store.c:1050
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "Nelze vytvořit novou složku „%s“"
 
-#: ../src/camel/camel-mapi-store.c:992
+#: ../src/camel/camel-mapi-store.c:1064
 #, c-format
 msgid "Authentication failed"
 msgstr "Ověření selhalo"
 
-#: ../src/camel/camel-mapi-store.c:1017
+#: ../src/camel/camel-mapi-store.c:1090
 #, c-format
 msgid "Cannot create folder '%s': %s"
 msgstr "Nelze vytvořit složku „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1022
+#: ../src/camel/camel-mapi-store.c:1095
 #, c-format
 msgid "Cannot create folder '%s'"
 msgstr "Nelze vytvořit novou složku „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1079
+#: ../src/camel/camel-mapi-store.c:1152
 #, c-format
 msgid "Cannot remove folder '%s': %s"
 msgstr "Nelze odstranit složku „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1086
+#: ../src/camel/camel-mapi-store.c:1159
 #, c-format
 msgid "Cannot remove folder '%s'"
 msgstr "Nelze odstranit složku „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1131
+#: ../src/camel/camel-mapi-store.c:1209
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
 msgstr "Nelze přejmenovat složku MAPI „%s“. Složka neexistuje."
 
-#: ../src/camel/camel-mapi-store.c:1143
+#: ../src/camel/camel-mapi-store.c:1221
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'."
 msgstr "Nelze přejmenovat výchozí složku MAPI „%s“ na „%s“."
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1170 ../src/camel/camel-mapi-store.c:1195
-#: ../src/camel/camel-mapi-store.c:1257
+#: ../src/camel/camel-mapi-store.c:1248 ../src/camel/camel-mapi-store.c:1273
+#: ../src/camel/camel-mapi-store.c:1335
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "Nelze přejmenovat složku MAPI „%s“ na „%s“"
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
 #. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1188 ../src/camel/camel-mapi-store.c:1251
+#: ../src/camel/camel-mapi-store.c:1266 ../src/camel/camel-mapi-store.c:1329
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "Nelze přejmenovat složku MAPI „%s“ na „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1349
+#: ../src/camel/camel-mapi-store.c:1425
 #, c-format
 msgid "Folder '%s' not found"
 msgstr "Složka „%s“ nebyla nalezena"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:1553
-#: ../src/camel/camel-mapi-transport.c:147
+#: ../src/camel/camel-mapi-store.c:1630
+#: ../src/camel/camel-mapi-transport.c:150
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Server Exchange MAPI %s"
@@ -463,8 +464,8 @@ msgstr "Server Exchange MAPI %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:1557
-#: ../src/camel/camel-mapi-transport.c:150
+#: ../src/camel/camel-mapi-store.c:1634
+#: ../src/camel/camel-mapi-transport.c:153
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Služba Exchange MAPI pro %s na %s"
@@ -473,85 +474,103 @@ msgstr "Služba Exchange MAPI pro %s na %s"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:1591
+#: ../src/camel/camel-mapi-store.c:1672
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s Prosím vložte heslo MAPI pro %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:1606
+#: ../src/camel/camel-mapi-store.c:1687
 #, c-format
 msgid "You did not enter a password."
 msgstr "Neuvedli jste heslo."
 
-#: ../src/camel/camel-mapi-store.c:1614
+#: ../src/camel/camel-mapi-store.c:1695
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server: %s"
 msgstr "Není možné ověřit k serveru Exchange MAPI: %s"
 
-#: ../src/camel/camel-mapi-store.c:1617
+#: ../src/camel/camel-mapi-store.c:1698
 msgid "Unable to authenticate to Exchange MAPI server"
 msgstr "Není možné ověřit k serveru Exchange MAPI"
 
-#: ../src/camel/camel-mapi-transport.c:113
-#: ../src/camel/camel-mapi-transport.c:134
+#: ../src/camel/camel-mapi-transport.c:112
+#: ../src/camel/camel-mapi-transport.c:133
 #, c-format
 msgid "Could not send message."
 msgstr "Nelze odeslat zprávu."
 
-#: ../src/camel/camel-mapi-transport.c:129
+#: ../src/camel/camel-mapi-transport.c:128
 #, c-format
 msgid "Could not send message: %s"
 msgstr "Nelze odeslat zprávu: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:107
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1830
+msgctxt "MeetingResp"
+msgid "Accepted:"
+msgstr "Schválené:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1834
+msgctxt "MeetingResp"
+msgid "Tentative:"
+msgstr "Předběžné:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1838
+msgctxt "MeetingResp"
+msgid "Declined:"
+msgstr "Zamítnuté:"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:105
 msgid "Failed to login into the server"
 msgstr "Selhalo přihlášení k serveru."
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:108
+#: ../src/libexchangemapi/exchange-mapi-connection.c:106
 msgid "Cannot create more sessions, session limit was reached"
 msgstr "Nelze vytvořit více sezení, byl dosažen limit sezení"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:109
+#: ../src/libexchangemapi/exchange-mapi-connection.c:107
 msgid "User cancelled operation"
 msgstr "Uživatel zrušil operaci"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:110
+#: ../src/libexchangemapi/exchange-mapi-connection.c:108
 msgid "Unable to abort"
 msgstr "Nelze přerušit"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:111
+#: ../src/libexchangemapi/exchange-mapi-connection.c:109
 msgid "Network error"
 msgstr "Síťová chyba"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:112
+#: ../src/libexchangemapi/exchange-mapi-connection.c:110
 msgid "Disk error"
 msgstr "Disková chyba"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:113
+#: ../src/libexchangemapi/exchange-mapi-connection.c:111
 msgid "Password change required"
 msgstr "Požadována změna hesla"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:114
+#: ../src/libexchangemapi/exchange-mapi-connection.c:112
 msgid "Password expired"
 msgstr "Heslo vypršelo"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:115
+#: ../src/libexchangemapi/exchange-mapi-connection.c:113
 msgid "Invalid workstation account"
 msgstr "Neplatný účet pracovní stanice"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:116
+#: ../src/libexchangemapi/exchange-mapi-connection.c:114
 msgid "Invalid access time"
 msgstr "Neplatný čas přístupu"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:117
+#: ../src/libexchangemapi/exchange-mapi-connection.c:115
 msgid "Account is disabled"
 msgstr "Účet je zakázaný"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:118
+#: ../src/libexchangemapi/exchange-mapi-connection.c:116
 msgid "End of session"
 msgstr "Konec sezení"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:126
+#: ../src/libexchangemapi/exchange-mapi-connection.c:124
 #, c-format
 msgid "MAPI error %s (0x%x) occurred"
 msgstr "Vyskytla se chyba MAPI %s (0x%x)"
@@ -559,12 +578,12 @@ msgstr "Vyskytla se chyba MAPI %s (0x%x)"
 #. Translators: The first '%s' is replaced with an error context,
 #. aka where the error occurred, the second '%s' is replaced with
 #. the error message.
-#: ../src/libexchangemapi/exchange-mapi-connection.c:136
+#: ../src/libexchangemapi/exchange-mapi-connection.c:134
 #, c-format
 msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3347
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3461
 msgid "All Public Folders"
 msgstr "Všechny veřejné složky"
