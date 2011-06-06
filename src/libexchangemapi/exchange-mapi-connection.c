@@ -948,6 +948,9 @@ exchange_mapi_util_delete_attachments (mapi_object_t *obj_message, GError **perr
 		goto cleanup;
 	}
 
+	if (!attach_count)
+		goto cleanup;
+
 	/* foreach attachment, delete by PR_ATTACH_NUM */
 	for (i_row_attach = 0; i_row_attach < rows_attach.cRows; i_row_attach++) {
 		const uint32_t	*num_attach;
@@ -1228,6 +1231,9 @@ exchange_mapi_util_get_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 		make_mapi_error (perror, "QueryRows", ms);
 		goto cleanup;
 	}
+
+	if (!attach_count)
+		goto cleanup;
 
 	/* foreach attachment, open by PR_ATTACH_NUM */
 	for (i_row_attach = 0; i_row_attach < rows_attach.cRows; i_row_attach++) {
@@ -1620,6 +1626,9 @@ exchange_mapi_connection_check_restriction (ExchangeMapiConnection *conn, mapi_i
 		goto cleanup;
 	}
 
+	if (!count)
+		goto cleanup;
+
 	/* Fill the table columns with data from the rows */
 	ms = QueryRows (&obj_table, count, TBL_ADVANCE, &SRowSet);
 	if (ms != MAPI_E_SUCCESS) {
@@ -1732,6 +1741,9 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 			make_mapi_error (perror, "QueryPosition", ms);
 			goto cleanup;
 		}
+
+		if (!count)
+			break;
 
 		/* Fill the table columns with data from the rows */
 		ms = QueryRows (&obj_table, count, TBL_ADVANCE, &SRowSet);
@@ -3134,6 +3146,9 @@ get_child_folders (TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, 
 			result = FALSE;
 			goto cleanup;
 		}
+
+		if (!count)
+			break;
 
 		/* Fill the table columns with data from the rows */
 		ms = QueryRows (&obj_table, 100, TBL_ADVANCE, &rowset);
