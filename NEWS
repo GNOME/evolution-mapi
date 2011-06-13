@@ -1,3 +1,24 @@
+evolution-mapi 3.1.2 2011-06-13
+-------------------------------
+
+Bug Fixes:
+	Bug #649442 - Meeting responses should contain type prefix in subject (Milan Crha)
+	Bug #649898 - Modified recurrences have incorrect time (Milan Crha)
+
+Miscellanous:
+	Make changes to let it work with samba4 alpha15 (Milan Crha)
+	Adapt to EClient changes in eds master (Milan Crha)
+	Use 'username' instead of 'user' property in ESource (Milan Crha)
+	Do not QueryRows when there is no row available (Milan Crha)
+
+Translations:
+	Daniel Mustieles (es)
+	Matej Urbančič (sl)
+	Mario Blättermann (de)
+	Marek Černocký (cs)
+	Gabor Kelemen (hu)
+	Мирослав Николић (sr, sr@latin)
+
 evolution-mapi 3.1.1 2011-05-09
 -------------------------------
 
