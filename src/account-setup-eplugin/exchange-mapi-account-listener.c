@@ -32,7 +32,7 @@
 #include <camel/camel.h>
 #include <libedataserverui/e-passwords.h>
 #include <libedataserver/e-account.h>
-#include <libecal/e-cal.h>
+#include <libecal/e-cal-client.h>
 #include <libedataserver/e-account-list.h>
 #include <libedataserver/e-source.h>
 #include <libedataserver/e-source-list.h>

@@ -708,13 +708,13 @@ exchange_mapi_create_calendar (EPlugin *epl, EConfigHookItemFactoryData *data)
 	ExchangeMAPIFolderType folder_type;
 
 	switch (t->source_type) {
-	case E_CAL_SOURCE_TYPE_EVENT:
+	case E_CAL_CLIENT_SOURCE_TYPE_EVENTS:
 		folder_type = MAPI_FOLDER_TYPE_APPOINTMENT;
 		break;
-	case E_CAL_SOURCE_TYPE_TODO:
+	case E_CAL_CLIENT_SOURCE_TYPE_TASKS:
 		folder_type = MAPI_FOLDER_TYPE_TASK;
 		break;
-	case E_CAL_SOURCE_TYPE_JOURNAL:
+	case E_CAL_CLIENT_SOURCE_TYPE_MEMOS:
 		folder_type = MAPI_FOLDER_TYPE_MEMO;
 		break;
 	default:
@@ -861,13 +861,13 @@ exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 	g_free (uri_text);
 
 	switch (t->source_type) {
-		case E_CAL_SOURCE_TYPE_EVENT:
+		case E_CAL_CLIENT_SOURCE_TYPE_EVENTS:
 			type = olFolderCalendar;
 			break;
-		case E_CAL_SOURCE_TYPE_TODO:
+		case E_CAL_CLIENT_SOURCE_TYPE_TASKS:
 			type = olFolderTasks;
 			break;
-		case E_CAL_SOURCE_TYPE_JOURNAL:
+		case E_CAL_CLIENT_SOURCE_TYPE_MEMOS:
 			type = olFolderNotes;
 			break;
 		default:
