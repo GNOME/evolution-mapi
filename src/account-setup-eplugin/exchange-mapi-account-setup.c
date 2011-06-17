@@ -99,6 +99,12 @@ enum {
   COLS_MAX
 };
 
+static void
+tree_selection_changed (GtkTreeSelection *selection, GtkDialog *dialog)
+{
+	gtk_dialog_set_response_sensitive (dialog, GTK_RESPONSE_ACCEPT, gtk_tree_selection_get_selected (selection, NULL, NULL));
+}
+
 /* Callback for ProcessNetworkProfile. If we have more than one username,
  we need to let the user select. */
 static uint32_t
@@ -112,7 +118,7 @@ create_profile_callback (struct SRowSet *rowset, gpointer data)
 	GtkCellRenderer *renderer;
 	GtkTreeSelection *selection;
 	GtkWidget *dialog, *view;
-	GtkVBox *vbox;
+	GtkBox *vbox;
 	const gchar *username = (const gchar *)data;
 
 	/* If we can find the exact username, then find & return its index. */
@@ -133,8 +139,8 @@ create_profile_callback (struct SRowSet *rowset, gpointer data)
 	/*TODO : Fix strings*/
 	dialog = gtk_dialog_new_with_buttons (_("Select username"),
 					      NULL, GTK_DIALOG_MODAL,
-					      GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
 					      GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT,
+					      GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
 					      NULL);
 
 	/*Tree View */
@@ -148,6 +154,9 @@ create_profile_callback (struct SRowSet *rowset, gpointer data)
 	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
 						     -1, _("Username"), renderer,
 						     "text", COL_MAPI_ACCOUNT, NULL);
+
+	gtk_tree_view_column_set_resizable (gtk_tree_view_get_column (GTK_TREE_VIEW (view), 0), TRUE);
+	gtk_tree_view_column_set_resizable (gtk_tree_view_get_column (GTK_TREE_VIEW (view), 1), TRUE);
 
 	/* Model for TreeView */
 	store = gtk_list_store_new (3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
@@ -173,17 +182,24 @@ create_profile_callback (struct SRowSet *rowset, gpointer data)
 	}
 
 	/* Pack the TreeView into dialog's content area */
-	vbox = (GtkVBox *)gtk_dialog_get_content_area (GTK_DIALOG (dialog));
-	gtk_box_pack_start (GTK_BOX (vbox), view, TRUE, TRUE, 6);
+	vbox = (GtkBox *) gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+
+	gtk_box_pack_start (vbox, gtk_label_new (_("There are more users with similar user name on a server.\nPlease select that you would like to use from the below list.")), TRUE, TRUE, 6);
+	gtk_box_pack_start (vbox, view, TRUE, TRUE, 6);
+
 	gtk_widget_show_all (GTK_WIDGET (vbox));
+
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (view));
+	g_signal_connect (selection, "changed", G_CALLBACK (tree_selection_changed), dialog);
+	tree_selection_changed (selection, GTK_DIALOG (dialog));
 
 	response = gtk_dialog_run (GTK_DIALOG (dialog));
 	if (response == GTK_RESPONSE_ACCEPT) {
 	       /* Get the index from the selected value */
-		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (view));
-		gtk_tree_selection_get_selected (selection, NULL, &iter);
-		gtk_tree_model_get (GTK_TREE_MODEL (store), &iter, COL_MAPI_INDEX,
-				    &index, -1);
+		if (gtk_tree_selection_get_selected (selection, NULL, &iter))
+			gtk_tree_model_get (GTK_TREE_MODEL (store), &iter, COL_MAPI_INDEX, &index, -1);
+		else
+			index = rowset->cRows + 1;
 	} else /* If we return a value > available, we are canceling the login.*/
 	       index = rowset->cRows + 1;
 
