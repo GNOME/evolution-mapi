@@ -3533,7 +3533,7 @@ exchange_mapi_connection_ex_to_smtp (ExchangeMapiConnection *conn, const gchar *
 	if (ms != MAPI_E_SUCCESS)
 		ms = ResolveNames (priv->session, (const gchar **)str_array, SPropTagArray, &SRowSet, &flaglist, 0);
 
-	if (ms == MAPI_E_SUCCESS && SRowSet) {
+	if (ms == MAPI_E_SUCCESS && SRowSet && SRowSet->cRows == 1) {
 		smtp_addr = g_strdup (exchange_mapi_util_find_row_propval (SRowSet->aRow, PR_SMTP_ADDRESS_UNICODE));
 		if (display_name)
 			*display_name = g_strdup (exchange_mapi_util_find_row_propval (SRowSet->aRow, PR_DISPLAY_NAME_UNICODE));
