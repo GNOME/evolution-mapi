@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi.master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N\n"
-"POT-Creation-Date: 2011-05-10 16:58+0000\n"
-"PO-Revision-Date: 2011-05-10 21:24+0200\n"
+"POT-Creation-Date: 2011-06-17 11:37+0000\n"
+"PO-Revision-Date: 2011-06-19 11:14+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -19,13 +19,13 @@ msgstr ""
 "X-Generator: KBabel 1.11.4\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:733
 #: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:735
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:737
 msgid "Global Address List"
 msgstr "Lista global de direcciones"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:1119
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:235
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:1122
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:251
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Introducir la contraseña para %s@%s"
@@ -34,25 +34,33 @@ msgstr "Introducir la contraseña para %s@%s"
 #. using GtkEntryCompletion in the username gtkentry. But plugins
 #. as of now does not have access to it
 #. TODO : Fix strings
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:134
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
 msgid "Select username"
 msgstr "Seleccionar el usuario"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:144
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:150
 msgid "Full name"
 msgstr "Nombre completo"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:155
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:187
+msgid ""
+"There are more users with similar user name on a server.\n"
+"Please select that you would like to use from the below list."
+msgstr ""
+"Hay más usuarios con un nombre de usuario similar en un servidor.\n"
+"Seleccione en la siguiente lista el que quiere usar."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:220
 #: ../src/camel/camel-mapi-store.c:1043
 #, c-format
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "No se pueden crear carpetas MAPI en modo desconectado."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:223
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:239
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -60,51 +68,51 @@ msgstr ""
 "El servidor, nombre de usuario y nombre de dominio no pueden estar vacíos. "
 "Rellénelos con valores correctos."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:279
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:295
 msgid "Authentication finished successfully."
 msgstr "La autenticación finalizó correctamente."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:285
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:296
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:301
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:312
 msgid "Authentication failed."
 msgstr "Falló la autenticación."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:374
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:390
 msgid "_Domain name:"
 msgstr "_Dominio:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:384
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:400
 msgid "_Authenticate"
 msgstr "_Autenticar"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:394
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:410
 msgid "_Use secure connection"
 msgstr "Usar _conexión segura:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:529
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:545
 msgid "Personal Folders"
 msgstr "Carpetas personales"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:664
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:680
 msgid "_Location:"
 msgstr "_Lugar:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:781
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:797
 #, c-format
 msgid "Failed to create address book '%s': %s"
 msgstr "Falló al crear la libreta de direcciones «%s»: %s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:784
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:800
 #, c-format
 msgid "Failed to create address book '%s'"
 msgstr "Falló al crear la libreta de direcciones «%s»"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:890
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:907
 #, c-format
 msgid "Failed to create calendar '%s': %s"
 msgstr "Falló al crear el calendario «%s»: %s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:893
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:910
 #, c-format
 msgid "Failed to create calendar '%s'"
 msgstr "Falló al crear el calendario «%s»"
@@ -148,47 +156,47 @@ msgstr "Configuración de Exchange"
 msgid "Folder size"
 msgstr "Tamaño de la carpeta"
 
-#: ../src/addressbook/e-book-backend-mapi.c:574
+#: ../src/addressbook/e-book-backend-mapi.c:565
 msgid "Cannot connect"
 msgstr "No se puede conectar"
 
-#: ../src/addressbook/e-book-backend-mapi.c:717
+#: ../src/addressbook/e-book-backend-mapi.c:688
 msgid "Searching"
 msgstr "Buscando"
 
-#: ../src/addressbook/e-book-backend-mapi.c:2031
-#: ../src/calendar/e-cal-backend-mapi.c:133
+#: ../src/addressbook/e-book-backend-mapi.c:1923
+#: ../src/calendar/e-cal-backend-mapi.c:129
 #: ../src/camel/camel-mapi-folder.c:1759 ../src/camel/camel-mapi-folder.c:1780
 msgid "Unknown error"
 msgstr "Error desconocido"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:703
-#: ../src/calendar/e-cal-backend-mapi.c:331
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:706
+#: ../src/calendar/e-cal-backend-mapi.c:277
 msgid "Failed to remove public folder"
 msgstr "Falló al quitar la carpeta pública"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:760
-#: ../src/calendar/e-cal-backend-mapi.c:1814
-#: ../src/calendar/e-cal-backend-mapi.c:2358
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:763
+#: ../src/calendar/e-cal-backend-mapi.c:1807
+#: ../src/calendar/e-cal-backend-mapi.c:2341
 msgid "Failed to create item on a server"
 msgstr "Falló al crear el elemento en un servidor"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:886
-#: ../src/calendar/e-cal-backend-mapi.c:2047
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:889
+#: ../src/calendar/e-cal-backend-mapi.c:2038
 msgid "Failed to modify item on a server"
 msgstr "Falló al modificar el elemento en un servidor"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1033
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1099
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1150
-#: ../src/calendar/e-cal-backend-mapi.c:1338
-#: ../src/calendar/e-cal-backend-mapi.c:1359
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1036
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1102
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1153
+#: ../src/calendar/e-cal-backend-mapi.c:1290
+#: ../src/calendar/e-cal-backend-mapi.c:1311
 msgid "Failed to fetch items from a server"
 msgstr "Falló al obtener los elementos de un servidor"
 
 #. Translators : This is used to cache the downloaded contacts from a server.
 #. %d is an index of the contact.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1051
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1054
 #, c-format
 msgid "Caching contact %d"
 msgstr "Cacheando contacto %d"
@@ -196,7 +204,7 @@ msgstr "Cacheando contacto %d"
 #. Translators : This is used to cache the downloaded contacts from a server.
 #. The first %d is an index of the contact,
 #. the second %d is total count of conacts on the server.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1055
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1058
 #, c-format
 msgid "Caching contact %d/%d"
 msgstr "Cacheando contacto %d/%d"
@@ -222,37 +230,38 @@ msgid "Failed to fetch GAL entries"
 msgstr "Falló al obtener las entradas GAL"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:376
+#: ../src/calendar/e-cal-backend-mapi.c:343
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Cargando los elementos en la carpeta %s "
 
-#: ../src/calendar/e-cal-backend-mapi.c:783
-#: ../src/calendar/e-cal-backend-mapi.c:809
-#: ../src/calendar/e-cal-backend-mapi.c:856
-#: ../src/calendar/e-cal-backend-mapi.c:935
-#: ../src/calendar/e-cal-backend-mapi.c:958
+#: ../src/calendar/e-cal-backend-mapi.c:765
+#: ../src/calendar/e-cal-backend-mapi.c:791
+#: ../src/calendar/e-cal-backend-mapi.c:838
+#: ../src/calendar/e-cal-backend-mapi.c:917
+#: ../src/calendar/e-cal-backend-mapi.c:940
 #, c-format
 msgid "Failed to fetch changes from a server: %s"
 msgstr "Falló al obtener los cambios de un servidor:%s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:788
-#: ../src/calendar/e-cal-backend-mapi.c:814
-#: ../src/calendar/e-cal-backend-mapi.c:861
-#: ../src/calendar/e-cal-backend-mapi.c:940
-#: ../src/calendar/e-cal-backend-mapi.c:963
+#: ../src/calendar/e-cal-backend-mapi.c:770
+#: ../src/calendar/e-cal-backend-mapi.c:796
+#: ../src/calendar/e-cal-backend-mapi.c:843
+#: ../src/calendar/e-cal-backend-mapi.c:922
+#: ../src/calendar/e-cal-backend-mapi.c:945
 msgid "Failed to fetch changes from a server"
 msgstr "Falló al obtener los cambios de un servidor"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1450
+#: ../src/calendar/e-cal-backend-mapi.c:1401
 msgid "Could not create thread for populating cache"
 msgstr "No se pudo crear el hilo para la llenar la caché"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1506
+#: ../src/calendar/e-cal-backend-mapi.c:1459
+#: ../src/calendar/e-cal-backend-mapi.c:1460
 msgid "Could not create cache file"
 msgstr "No se pudo crear el archivo de caché"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1940
+#: ../src/calendar/e-cal-backend-mapi.c:1932
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -260,7 +269,7 @@ msgstr ""
 "Aún no está implementado el soporte para modificar instancias aisladas de "
 "una cita recurrente. No se realizó ningún cambio en la cita del servidor."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2643
+#: ../src/calendar/e-cal-backend-mapi.c:2595
 msgid "Failed to get Free/Busy data"
 msgstr "Falló al obtener los datos de disponibilidad"
 
@@ -503,19 +512,19 @@ msgid "Could not send message: %s"
 msgstr "No se pudo enviar el mensaje: %s"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1830
+#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1838
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Aceptada:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1834
+#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1842
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Intentará asistir:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1838
+#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1846
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Rechazada:"
@@ -582,7 +591,7 @@ msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3461
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3476
 msgid "All Public Folders"
 msgstr "Todas las carpetas públicas"
 
