@@ -65,7 +65,7 @@ enum {
 typedef struct
 {
 	GtkDialog *dialog;
-	GtkBox *spinner_hbox;
+	GtkGrid *spinner_grid;
 
 	gchar *profile;
 
@@ -84,7 +84,7 @@ fill_folder_size_dialog_cb (gpointer data)
 	FolderSizeDialogData *dialog_data = (FolderSizeDialogData *)data;
 
 	/* Hide progress bar. Set status*/
-	gtk_widget_destroy (GTK_WIDGET (dialog_data->spinner_hbox));
+	gtk_widget_destroy (GTK_WIDGET (dialog_data->spinner_grid));
 
 	if (dialog_data->folder_list) {
 		GtkWidget *scrolledwindow, *tree_view;
@@ -131,7 +131,7 @@ fill_folder_size_dialog_cb (gpointer data)
 	gtk_widget_show_all (widget);
 
 	/* Pack into content_area */
-	content_area = (GtkBox*) gtk_dialog_get_content_area (dialog_data->dialog);
+	content_area = GTK_BOX (gtk_dialog_get_content_area (dialog_data->dialog));
 	gtk_box_pack_start (content_area, widget, TRUE, TRUE, 6);
 
 	if (dialog_data->conn)
@@ -172,23 +172,26 @@ mapi_settings_run_folder_size_dialog (const gchar *profile, gpointer data)
 
 	gtk_window_set_default_size (GTK_WINDOW (dialog_data->dialog), 250, 300);
 
-	content_area = (GtkBox *)gtk_dialog_get_content_area (dialog_data->dialog);
+	content_area = GTK_BOX (gtk_dialog_get_content_area (dialog_data->dialog));
 
 	spinner = gtk_spinner_new ();
 	gtk_spinner_start (GTK_SPINNER (spinner));
 	spinner_label = gtk_label_new (_("Fetching folder list…"));
 
-	dialog_data->spinner_hbox = (GtkBox *) gtk_hbox_new (FALSE, 6);
+	dialog_data->spinner_grid = GTK_GRID (gtk_grid_new ());
+	gtk_grid_set_column_spacing (dialog_data->spinner_grid, 6);
+	gtk_grid_set_column_homogeneous (dialog_data->spinner_grid, FALSE);
+	gtk_orientable_set_orientation (GTK_ORIENTABLE (dialog_data->spinner_grid), GTK_ORIENTATION_HORIZONTAL);
 
 	alignment = gtk_alignment_new (1.0, 0.5, 0.0, 1.0);
 	gtk_container_add (GTK_CONTAINER (alignment), spinner);
 	gtk_misc_set_alignment (GTK_MISC (spinner_label), 0.0, 0.5);
 
-	gtk_box_pack_start (dialog_data->spinner_hbox, alignment, TRUE, TRUE, 0);
-	gtk_box_pack_start (dialog_data->spinner_hbox, spinner_label, TRUE, TRUE, 0);
+	gtk_container_add (GTK_CONTAINER (dialog_data->spinner_grid), alignment);
+	gtk_container_add (GTK_CONTAINER (dialog_data->spinner_grid), spinner_label);
 
 	/* Pack the TreeView into dialog's content area */
-	gtk_box_pack_start (content_area, GTK_WIDGET (dialog_data->spinner_hbox), TRUE, TRUE, 6);
+	gtk_box_pack_start (content_area, GTK_WIDGET (dialog_data->spinner_grid), TRUE, TRUE, 6);
 	gtk_widget_show_all (GTK_WIDGET (dialog_data->dialog));
 
 	dialog_data->profile = g_strdup (profile);
@@ -329,11 +332,11 @@ org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data
 	EMConfigTargetAccount *target_account;
 	CamelURL *url;
 	const gchar *source_url;
-	GtkVBox *settings;
+	GtkGrid *vsettings;
 
 	/* Miscelleneous setting */
 	GtkFrame *frm_misc;
-	GtkVBox *vbox_misc;
+	GtkGrid *vgrid_misc;
 	GtkTable *tbl_misc;
 	GtkLabel *lbl_fsize;
 	GtkButton *btn_fsize;
@@ -349,16 +352,16 @@ org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data
 		return NULL;
 	}
 
-	settings = (GtkVBox*) g_object_new (GTK_TYPE_VBOX, "homogeneous", FALSE, "spacing", 6, NULL);
-	gtk_container_set_border_width (GTK_CONTAINER (settings), 12);
+	vsettings = GTK_GRID (g_object_new (GTK_TYPE_GRID, "column-homogeneous", FALSE, "column-spacing", 6, "orientation", GTK_ORIENTATION_VERTICAL, NULL));
+	gtk_container_set_border_width (GTK_CONTAINER (vsettings), 12);
 
 	/* Miscellaneous settings */
 	frm_misc = (GtkFrame*) g_object_new (GTK_TYPE_FRAME, "label", _("Miscellaneous"), NULL);
-	gtk_box_pack_start (GTK_BOX (settings), GTK_WIDGET (frm_misc), FALSE, FALSE, 0);
+	gtk_container_add (GTK_CONTAINER (vsettings), GTK_WIDGET (frm_misc));
 
-	vbox_misc = (GtkVBox*) g_object_new (GTK_TYPE_VBOX, "homogeneous", FALSE, "spacing", 6, NULL);
-	gtk_container_set_border_width (GTK_CONTAINER (vbox_misc), 6);
-	gtk_container_add (GTK_CONTAINER (frm_misc), GTK_WIDGET (vbox_misc));
+	vgrid_misc = GTK_GRID (g_object_new (GTK_TYPE_GRID, "column-homogeneous", FALSE, "column-spacing", 6, "orientation", GTK_ORIENTATION_VERTICAL, NULL));
+	gtk_container_set_border_width (GTK_CONTAINER (vgrid_misc), 6);
+	gtk_container_add (GTK_CONTAINER (frm_misc), GTK_WIDGET (vgrid_misc));
 
 	tbl_misc = (GtkTable*) g_object_new (GTK_TYPE_TABLE, "n-rows", 1, "n-columns", 1,
 					     "homogeneous", FALSE, "row-spacing", 6,
@@ -374,14 +377,14 @@ org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data
 	gtk_table_attach (tbl_misc, GTK_WIDGET (btn_fsize), 1, 2, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
 
 	/*Note : Reason for placing this UI is because we try to be like outlook. */
-	gtk_box_pack_start (GTK_BOX (vbox_misc), GTK_WIDGET (tbl_misc), FALSE, FALSE, 0);
-	gtk_widget_show_all (GTK_WIDGET (settings));
+	gtk_container_add (GTK_CONTAINER (vgrid_misc), GTK_WIDGET (tbl_misc));
+	gtk_widget_show_all (GTK_WIDGET (vsettings));
 
 	/*Insert the page*/
-	gtk_notebook_insert_page (GTK_NOTEBOOK (data->parent), GTK_WIDGET (settings),
+	gtk_notebook_insert_page (GTK_NOTEBOOK (data->parent), GTK_WIDGET (vsettings),
 				  gtk_label_new(_("Exchange Settings")), 4);
 
-	return GTK_WIDGET (settings);
+	return GTK_WIDGET (vsettings);
 }
 
 static GtkActionEntry folder_size_entries[] = {

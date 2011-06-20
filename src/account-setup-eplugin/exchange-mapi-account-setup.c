@@ -118,7 +118,7 @@ create_profile_callback (struct SRowSet *rowset, gpointer data)
 	GtkCellRenderer *renderer;
 	GtkTreeSelection *selection;
 	GtkWidget *dialog, *view;
-	GtkBox *vbox;
+	GtkBox *content_area;
 	const gchar *username = (const gchar *)data;
 
 	/* If we can find the exact username, then find & return its index. */
@@ -182,12 +182,12 @@ create_profile_callback (struct SRowSet *rowset, gpointer data)
 	}
 
 	/* Pack the TreeView into dialog's content area */
-	vbox = (GtkBox *) gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+	content_area = GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog)));
 
-	gtk_box_pack_start (vbox, gtk_label_new (_("There are more users with similar user name on a server.\nPlease select that you would like to use from the below list.")), TRUE, TRUE, 6);
-	gtk_box_pack_start (vbox, view, TRUE, TRUE, 6);
+	gtk_box_pack_start (content_area, gtk_label_new (_("There are more users with similar user name on a server.\nPlease select that you would like to use from the below list.")), TRUE, TRUE, 6);
+	gtk_box_pack_start (content_area, view, TRUE, TRUE, 6);
 
-	gtk_widget_show_all (GTK_WIDGET (vbox));
+	gtk_widget_show_all (GTK_WIDGET (content_area));
 
 	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (view));
 	g_signal_connect (selection, "changed", G_CALLBACK (tree_selection_changed), dialog);
@@ -365,7 +365,7 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 {
 	EMConfigTargetAccount *target_account;
 	CamelURL *url;
-	GtkWidget *hbox = NULL;
+	GtkWidget *hgrid = NULL;
 	gint row;
 
 	target_account = (EMConfigTargetAccount *)data->config->target;
@@ -386,7 +386,7 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 		g_object_get (data->parent, "n-rows", &row, NULL);
 
 		/* Domain name & Authenticate Button */
-		hbox = gtk_hbox_new (FALSE, 6);
+		hgrid = g_object_new (GTK_TYPE_GRID, "column-homogeneous", FALSE, "column-spacing", 6, "orientation", GTK_ORIENTATION_HORIZONTAL, NULL);
 		label = gtk_label_new_with_mnemonic (_("_Domain name:"));
 		gtk_widget_show (label);
 
@@ -394,16 +394,16 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 		gtk_label_set_mnemonic_widget (GTK_LABEL (label), domain_name);
 		if (domain_value && *domain_value)
 			gtk_entry_set_text (GTK_ENTRY (domain_name), domain_value);
-		gtk_box_pack_start (GTK_BOX (hbox), domain_name, FALSE, FALSE, 0);
+		gtk_container_add (GTK_CONTAINER (hgrid), domain_name);
 		g_signal_connect (domain_name, "changed", G_CALLBACK(domain_entry_changed), data->config);
 
 		auth_button = gtk_button_new_with_mnemonic (_("_Authenticate"));
-		gtk_box_pack_start (GTK_BOX (hbox), auth_button, FALSE, FALSE, 0);
+		gtk_container_add (GTK_CONTAINER (hgrid), auth_button);
 		g_signal_connect (auth_button, "clicked",  G_CALLBACK (validate_credentials), data->config);
 
 		gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row+1, 0, 0, 0, 0);
-		gtk_widget_show_all (GTK_WIDGET (hbox));
-		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (hbox), 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
+		gtk_widget_show_all (GTK_WIDGET (hgrid));
+		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (hgrid), 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
 
 		row++;
 
@@ -415,7 +415,7 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 	}
 
 	camel_url_free (url);
-	return hbox;
+	return hgrid;
 }
 
 gboolean
@@ -632,7 +632,7 @@ exchange_mapi_cursor_change (GtkTreeView *treeview, ESource *source)
 static GtkWidget *
 exchange_mapi_create (GtkWidget *parent, ESource *source, ExchangeMAPIFolderType folder_type)
 {
-	GtkWidget *vbox, *label, *scroll, *tv;
+	GtkWidget *vgrid, *label, *scroll, *tv;
 	gchar *uri_text, *profile = NULL;
 	ESourceGroup *group;
 	gint row;
@@ -668,19 +668,19 @@ exchange_mapi_create (GtkWidget *parent, ESource *source, ExchangeMAPIFolderType
 	if (conn)
 		g_object_unref (conn);
 
-	vbox = gtk_vbox_new (FALSE, 6);
+	vgrid = g_object_new (GTK_TYPE_GRID, "column-homogeneous", FALSE, "column-spacing", 6, "orientation", GTK_ORIENTATION_VERTICAL, NULL);
 
 	if (folder_type == MAPI_FOLDER_TYPE_CONTACT) {
-		gtk_container_add (GTK_CONTAINER (parent), vbox);
+		gtk_container_add (GTK_CONTAINER (parent), vgrid);
 	} else {
 		g_object_get (parent, "n-rows", &row, NULL);
-		gtk_table_attach (GTK_TABLE (parent), vbox, 0, 2, row+1, row+2, GTK_FILL|GTK_EXPAND, 0, 0, 0);
+		gtk_table_attach (GTK_TABLE (parent), vgrid, 0, 2, row+1, row+2, GTK_FILL|GTK_EXPAND, 0, 0, 0);
 	}
 
 	label = gtk_label_new_with_mnemonic (_("_Location:"));
 	gtk_widget_show (label);
 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-	gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
+	gtk_container_add (GTK_CONTAINER (vgrid), label);
 
 	rcell = gtk_cell_renderer_text_new ();
 	tvc = gtk_tree_view_column_new_with_attributes (acc, rcell, "text", NAME_COL, NULL);
@@ -703,10 +703,10 @@ exchange_mapi_create (GtkWidget *parent, ESource *source, ExchangeMAPIFolderType
 	g_signal_connect (G_OBJECT (tv), "cursor-changed", G_CALLBACK (exchange_mapi_cursor_change), source);
 	gtk_widget_show_all (scroll);
 
-	gtk_box_pack_start (GTK_BOX (vbox), scroll, FALSE, FALSE, 0);
+	gtk_container_add (GTK_CONTAINER (vgrid), scroll);
 
-	gtk_widget_show_all (vbox);
-	return vbox;
+	gtk_widget_show_all (vgrid);
+	return vgrid;
 }
 
 GtkWidget *
