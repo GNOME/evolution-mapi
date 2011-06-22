@@ -1018,7 +1018,6 @@ exchange_mapi_util_set_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 			/* set properties for the item */
 			ms = SetProps (&obj_attach, props, propslen);
 			if (ms != MAPI_E_SUCCESS) {
-				mapi_object_release (&obj_emb_msg);
 				make_mapi_error (perror, "SetProps", ms);
 				goto cleanup;
 			}
