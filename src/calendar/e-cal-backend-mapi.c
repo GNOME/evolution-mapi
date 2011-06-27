@@ -1479,6 +1479,8 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gbool
 		}
 
 		g_mutex_unlock (priv->mutex);
+		e_cal_backend_notify_online (backend, FALSE);
+		e_cal_backend_notify_readonly (backend, priv->read_only);
 		e_cal_backend_notify_opened (backend, NULL);
 		return /* Success */;
 	}
@@ -1494,6 +1496,8 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gbool
 
 	g_mutex_unlock (priv->mutex);
 
+	e_cal_backend_notify_online (backend, TRUE);
+	e_cal_backend_notify_readonly (backend, priv->read_only);
 	e_cal_backend_notify_auth_required (backend, TRUE, NULL);
 }
 

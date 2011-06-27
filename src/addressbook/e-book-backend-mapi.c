@@ -440,10 +440,12 @@ ebbm_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean only_if_e
 
 	/* Once aunthentication in address book works this can be removed */
 	if (!e_book_backend_is_online (E_BOOK_BACKEND (ebma))) {
+		e_book_backend_notify_online (E_BOOK_BACKEND (ebma), FALSE);
 		e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), NULL /* Success */);
 		return;
 	}
 
+	e_book_backend_notify_online (E_BOOK_BACKEND (ebma), TRUE);
 	e_book_backend_notify_auth_required (E_BOOK_BACKEND (ebma), TRUE, NULL);
 }
 
