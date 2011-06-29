@@ -942,14 +942,14 @@ exchange_mapi_util_delete_attachments (mapi_object_t *obj_message, GError **perr
 		goto cleanup;
 	}
 
+	if (!attach_count)
+		goto cleanup;
+
 	ms = QueryRows (&obj_tb_attach, attach_count, TBL_ADVANCE, &rows_attach);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "QueryRows", ms);
 		goto cleanup;
 	}
-
-	if (!attach_count)
-		goto cleanup;
 
 	/* foreach attachment, delete by PR_ATTACH_NUM */
 	for (i_row_attach = 0; i_row_attach < rows_attach.cRows; i_row_attach++) {
@@ -1225,14 +1225,14 @@ exchange_mapi_util_get_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 		goto cleanup;
 	}
 
+	if (!attach_count)
+		goto cleanup;
+
 	ms = QueryRows (&obj_tb_attach, attach_count, TBL_ADVANCE, &rows_attach);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "QueryRows", ms);
 		goto cleanup;
 	}
-
-	if (!attach_count)
-		goto cleanup;
 
 	/* foreach attachment, open by PR_ATTACH_NUM */
 	for (i_row_attach = 0; i_row_attach < rows_attach.cRows; i_row_attach++) {
