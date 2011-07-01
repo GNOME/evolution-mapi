@@ -1,3 +1,22 @@
+evolution-mapi 3.1.3 2011-07-01
+-------------------------------
+
+Bug Fixes:
+	Bug #613209 - Crash after call of ResolveNames (Milan Crha)
+	Bug #652019 - Crash in Select user dialog (Milan Crha)
+	Bug #652857 - Do not use recently deprecated Gtk+ symbols (Milan Crha)
+	Bug #653489 - QueryRows fails on exchange 2010 servers (Milan Crha)
+
+Miscellanous:
+	Do not use deprecated EBook/ECal API (Milan Crha)
+	Remove invalid mapi_object_release() call (Sean Finney)
+	Report readonly and online states from backends in open functions (Milan Crha)
+
+Translations:
+	Daniel Mustieles (es)
+	Mario Blättermann (de)
+	Matej Urbančič (sl)
+
 evolution-mapi 3.1.2 2011-06-13
 -------------------------------
 
