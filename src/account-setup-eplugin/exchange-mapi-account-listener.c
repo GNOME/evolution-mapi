@@ -292,7 +292,6 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 			is_new_source = TRUE;
 		}
 		e_source_set_property (source, "auth", "1");
-		e_source_set_property (source, "auth-domain", EXCHANGE_MAPI_PASSWORD_COMPONENT);
 		e_source_set_property (source, "auth-type", "plain/password");
 		e_source_set_property (source, "username", url->user);
 		e_source_set_property (source, "host", url->host);
@@ -416,7 +415,6 @@ void exchange_mapi_add_esource (CamelURL *url, const gchar *folder_name, const g
 	relative_uri = g_strconcat (";", fid, NULL);
 	source = e_source_new (folder_name, relative_uri);
 	e_source_set_property (source, "auth", "1");
-	e_source_set_property (source, "auth-domain", EXCHANGE_MAPI_PASSWORD_COMPONENT);
 	e_source_set_property (source, "auth-type", "plain/password");
 	e_source_set_property (source, "username", url->user);
 	e_source_set_property (source, "host", url->host);
@@ -677,7 +675,6 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 			is_new_source = TRUE;
 		}
 		e_source_set_property (source, "auth", "plain/password");
-		e_source_set_property (source, "auth-domain", EXCHANGE_MAPI_PASSWORD_COMPONENT);
 		e_source_set_property(source, "user", NULL);
 		e_source_set_property(source, "username", url->user);
 		e_source_set_property(source, "host", url->host);
@@ -739,7 +736,6 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		}
 		g_free (uri);
 		e_source_set_property (source, "auth", "plain/password");
-		e_source_set_property (source, "auth-domain", "MAPIGAL");
 
 		//FIXME: Offline handling
 		e_source_set_property(source, "user", NULL);
@@ -1086,7 +1082,7 @@ mapi_account_removed (EAccountList *account_listener, EAccount *account)
 		GError *error = NULL;
 
 		exchange_mapi_delete_profile (profile, &error);
-		e_passwords_forget_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
+		e_passwords_forget_password (NULL, key);
 
 		g_free (key);
 		camel_url_free (url);
@@ -1114,13 +1110,13 @@ create_profile_entry (CamelURL *url, EAccount *account)
 
 		key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
 		if (!attempts)
-			password = e_passwords_get_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
+			password = e_passwords_get_password (NULL, key);
 		if (!password) {
 			gboolean remember = account && e_account_get_bool (account, E_ACCOUNT_SOURCE_SAVE_PASSWD);
 			gchar *title;
 
 			title = g_strdup_printf (_("Enter Password for %s@%s"), url->user, url->host);
-			password = e_passwords_ask_password (title, EXCHANGE_MAPI_PASSWORD_COMPONENT, key, title,
+			password = e_passwords_ask_password (title, NULL, key, title,
 					E_PASSWORDS_REMEMBER_FOREVER | E_PASSWORDS_SECRET | (attempts ? E_PASSWORDS_REPROMPT : 0),
 					&remember, NULL);
 			g_free (title);

@@ -42,9 +42,6 @@
 #include <exchange-mapi-utils.h>
 //#define d(x) x
 
-/* This definition should be in-sync with those in exchange-mapi-account-setup.c and exchange-account-listener.c */
-#define E_PASSWORD_COMPONENT "ExchangeMAPI"
-
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -1674,7 +1671,7 @@ mapi_auth_loop (CamelService *service, GError **error)
 						  url->user,
 						  url->host);
 			url->passwd =
-				camel_session_get_password (session, service, E_PASSWORD_COMPONENT,
+				camel_session_get_password (session, service,
 							    prompt, "password", prompt_flags, NULL);
 			g_free (prompt);
 			g_free (errbuf);

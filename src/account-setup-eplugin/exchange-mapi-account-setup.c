@@ -242,14 +242,14 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	}
 
 	key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
-	password = e_passwords_get_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
+	password = e_passwords_get_password (NULL, key);
 	if (!password || !*password) {
 		gboolean remember = e_account_get_bool (target_account->modified_account, E_ACCOUNT_SOURCE_SAVE_PASSWD);
 		gchar *title;
 
 		g_free (password);
 		title = g_strdup_printf (_("Enter Password for %s@%s"), url->user, url->host);
-		password = e_passwords_ask_password (title, EXCHANGE_MAPI_PASSWORD_COMPONENT, key, title,
+		password = e_passwords_ask_password (title, NULL, key, title,
 						     E_PASSWORDS_REMEMBER_FOREVER|E_PASSWORDS_SECRET,
 						     &remember, NULL);
 		g_free (title);
@@ -296,7 +296,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 		} else {
 			gchar *e;
 
-			e_passwords_forget_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
+			e_passwords_forget_password (NULL, key);
 
 			e = g_strconcat (_("Authentication failed."), "\n", error ? error->message : NULL, NULL);
 
@@ -308,7 +308,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 		if (error)
 			g_error_free (error);
 	} else {
-		e_passwords_forget_password (EXCHANGE_MAPI_PASSWORD_COMPONENT, key);
+		e_passwords_forget_password (NULL, key);
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Authentication failed."));
 	}
 
@@ -810,7 +810,6 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	//FIXME: Offline handling
 	grp = e_source_peek_group (source);
 	e_source_set_property (source, "auth", "plain/password");
-	e_source_set_property (source, "auth-domain", EXCHANGE_MAPI_PASSWORD_COMPONENT);
 	e_source_set_property(source, "user", NULL);
 	e_source_set_property(source, "username", e_source_group_get_property (grp, "username") ? e_source_group_get_property (grp, "username") : e_source_group_get_property (grp, "user"));
 	e_source_set_property(source, "host", e_source_group_get_property (grp, "host"));
@@ -920,7 +919,6 @@ exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 	g_free (sfid);
 
 	e_source_set_property (source, "auth", "1");
-	e_source_set_property (source, "auth-domain", EXCHANGE_MAPI_PASSWORD_COMPONENT);
 	e_source_set_property (source, "auth-type", "plain/password");
 	e_source_set_property (source, "public", "no");
 
