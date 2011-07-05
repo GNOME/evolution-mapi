@@ -846,7 +846,7 @@ mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, con
 
 			mem = camel_stream_mem_new ();
 			camel_stream_write (mem, (const gchar *) stream->value->data, stream->value->len, NULL, NULL);
-			camel_stream_reset (mem, NULL);
+			g_seekable_seek (G_SEEKABLE (mem), 0, G_SEEK_SET, NULL, NULL);
 
 			parser = camel_mime_parser_new ();
 			camel_mime_parser_scan_from (parser, FALSE);

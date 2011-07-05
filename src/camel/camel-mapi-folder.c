@@ -1338,9 +1338,10 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 		GError *local_error = NULL;
 
 		msg = camel_mime_message_new ();
-		camel_stream_reset (stream, NULL);
+
+		g_seekable_seek (G_SEEKABLE (stream), 0, G_SEEK_SET, NULL, NULL);
 		camel_stream_write_to_stream (cache_stream, stream, cancellable, NULL);
-		camel_stream_reset (stream, NULL);
+		g_seekable_seek (G_SEEKABLE (stream), 0, G_SEEK_SET, NULL, NULL);
 		if (!camel_data_wrapper_construct_from_stream_sync ((CamelDataWrapper *) msg, stream, cancellable, &local_error)) {
 			if (g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
 				g_object_unref (msg);
@@ -1443,7 +1444,7 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 			   composing message in memory, but when they are read from the cache
 			   they appear properly in the UI. */
 			msg2 = camel_mime_message_new ();
-			camel_stream_reset (cache_stream, NULL);
+			g_seekable_seek (G_SEEKABLE (cache_stream), 0, G_SEEK_SET, NULL, NULL);
 			if (!camel_data_wrapper_construct_from_stream_sync (CAMEL_DATA_WRAPPER (msg2), cache_stream, cancellable, NULL)) {
 				g_object_unref (msg2);
 			} else {
