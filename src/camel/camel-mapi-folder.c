@@ -829,11 +829,9 @@ mapi_refresh_folder(CamelFolder *folder, GCancellable *cancellable, GError **err
 
 			//Creation time ?
 			set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
-			cast_mapi_SPropValue (
-				#ifdef HAVE_MEMCTX_ON_CAST_MAPI_SPROPVALUE
-				mem_ctx,
-				#endif
-				&(res->res.resProperty.lpProp), &sprop);
+			cast_mapi_SPropValue (mem_ctx,
+					      &(res->res.resProperty.lpProp),
+					      &sprop);
 
 		}
 

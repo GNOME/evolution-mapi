@@ -181,43 +181,43 @@ fetch_read_item_common_data (MailItem *item, uint32_t propTag, gconstpointer pro
 		} break;
 	/* FIXME : Instead of duping. Use talloc_steal to reuse the memory */
 	case PR_SUBJECT:
-		sv (item->header.subject, utf8tolinux (prop_data));
+		sv (item->header.subject, g_strdup (prop_data));
 		break;
 	case PR_SUBJECT_UNICODE :
 		sv (item->header.subject, g_strdup (prop_data));
 		break;
 	case PR_DISPLAY_TO :
-		sv (item->header.to, utf8tolinux (prop_data));
+		sv (item->header.to, g_strdup (prop_data));
 		break;
 	case PR_DISPLAY_TO_UNICODE :
 		sv (item->header.to, g_strdup (prop_data));
 		break;
 	case PR_DISPLAY_CC:
-		sv (item->header.cc, utf8tolinux (prop_data));
+		sv (item->header.cc, g_strdup (prop_data));
 		break;
 	case PR_DISPLAY_CC_UNICODE:
 		sv (item->header.cc, g_strdup (prop_data));
 		break;
 	case PR_DISPLAY_BCC:
-		sv (item->header.bcc, utf8tolinux (prop_data));
+		sv (item->header.bcc, g_strdup (prop_data));
 		break;
 	case PR_DISPLAY_BCC_UNICODE:
 		sv (item->header.bcc, g_strdup (prop_data));
 		break;
 	case PR_SENT_REPRESENTING_NAME:
-		sv (item->header.from, utf8tolinux (prop_data));
+		sv (item->header.from, g_strdup (prop_data));
 		break;
 	case PR_SENT_REPRESENTING_NAME_UNICODE:
 		sv (item->header.from, g_strdup (prop_data));
 		break;
 	case PR_SENT_REPRESENTING_EMAIL_ADDRESS:
-		sv (item->header.from_email, utf8tolinux (prop_data));
+		sv (item->header.from_email, g_strdup (prop_data));
 		break;
 	case PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE:
 		sv (item->header.from_email, g_strdup (prop_data));
 		break;
 	case PR_SENT_REPRESENTING_ADDRTYPE:
-		sv (item->header.from_type, utf8tolinux (prop_data));
+		sv (item->header.from_type, g_strdup (prop_data));
 		break;
 	case PR_SENT_REPRESENTING_ADDRTYPE_UNICODE:
 		sv (item->header.from_type, g_strdup (prop_data));
@@ -235,7 +235,7 @@ fetch_read_item_common_data (MailItem *item, uint32_t propTag, gconstpointer pro
 		item->header.in_reply_to = g_strdup (prop_data);
 		break;
 	case PR_TRANSPORT_MESSAGE_HEADERS:
-		sv (item->header.transport_headers, utf8tolinux (prop_data));
+		sv (item->header.transport_headers, g_strdup (prop_data));
 		break;
 	case PR_TRANSPORT_MESSAGE_HEADERS_UNICODE:
 		sv (item->header.transport_headers, g_strdup (prop_data));

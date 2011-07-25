@@ -282,11 +282,8 @@ ebbm_build_cache_update_restriction (EBookBackendMAPI *ebma, TALLOC_CTX *mem_ctx
 
 	set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
 
-	cast_mapi_SPropValue (
-		#ifdef HAVE_MEMCTX_ON_CAST_MAPI_SPROPVALUE
-		mem_ctx,
-		#endif
-		&(restriction->res.resProperty.lpProp), &sprop);
+	cast_mapi_SPropValue (mem_ctx, &(restriction->res.resProperty.lpProp),
+			      &sprop);
 
 	return restriction;
 }

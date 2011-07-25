@@ -736,11 +736,8 @@ get_deltas (gpointer handle)
 		t.tv_sec = icaltime_as_timet_with_zone (itt_cache, icaltimezone_get_utc_timezone ());
 		t.tv_usec = 0;
 		set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
-		cast_mapi_SPropValue (
-			#ifdef HAVE_MEMCTX_ON_CAST_MAPI_SPROPVALUE
-			mem_ctx,
-			#endif
-			&(res.res.resProperty.lpProp), &sprop);
+		cast_mapi_SPropValue (mem_ctx, &(res.res.resProperty.lpProp),
+				      &sprop);
 	}
 
 	itt_current = icaltime_current_time_with_zone (icaltimezone_get_utc_timezone ());
@@ -1662,11 +1659,7 @@ get_server_data (ECalBackendMAPI *cbmapi, ECalComponent *comp, struct cal_cbdata
 
 	mem_ctx = talloc_init ("ExchangeMAPI_cal_get_server_data");
 	set_SPropValue_proptag (&sprop, proptag, (gconstpointer ) &sb);
-	cast_mapi_SPropValue (
-		#ifdef HAVE_MEMCTX_ON_CAST_MAPI_SPROPVALUE
-		mem_ctx,
-		#endif
-		&(res.res.resProperty.lpProp), &sprop);
+	cast_mapi_SPropValue (mem_ctx, &(res.res.resProperty.lpProp), &sprop);
 
 	exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 					mapi_cal_get_required_props, NULL,

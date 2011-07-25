@@ -27,9 +27,6 @@
 #include "exchange-mapi-connection.h"
 
 gchar *
-utf8tolinux (const gchar *wstring);
-
-gchar *
 exchange_mapi_util_mapi_id_to_string (mapi_id_t id);
 gboolean
 exchange_mapi_util_mapi_id_from_string (const gchar *str, mapi_id_t *id);

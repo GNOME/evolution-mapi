@@ -41,55 +41,6 @@
 #define gmtime_r(tp,tmp) (gmtime(tp)?(*(tmp)=*gmtime(tp),(tmp)):0)
 #endif
 
-/* Converts a string from Windows-UTF8 to classic-UTF8.
- * NOTE: If the returned value is non-NULL, the caller has to free the newly
- * allocated string using g_free()
- */
-gchar *
-utf8tolinux (const gchar *wstring)
-{
-	#ifndef HAVE_WINDOWS_TO_UTF8
-	/* newer Openchange (0.10+) doesn't provide windows_to_utf8 function,
-	   it does all the necessary decoding to utf8 transparently */
-	return g_strdup (wstring);
-	#else
-	TALLOC_CTX	*mem_ctx;
-	gchar		*newstr, *retval = NULL;
-	gint i;
-	gboolean all_ok = TRUE;
-
-	g_return_val_if_fail (wstring != NULL, NULL);
-
-	/* If all letters are with code <128 then there is nothing
-	   to be converted, thus return the original string copy.
-	   It's not working always, but should be fine for now.
-
-	   This is a temporary hack before the windows_to_utf8 will
-	   be fixed to not drop some letters.
-	*/
-	for (i = 0; all_ok && wstring[i]; i++) {
-		/* signed char, thus '> 128' means '< 0' */
-		all_ok = wstring[i] > 0;
-	}
-
-	if (all_ok)
-		return g_strdup (wstring);
-
-	mem_ctx = talloc_init ("ExchangeMAPI_utf8tolinux");
-
-	newstr = windows_to_utf8(mem_ctx, wstring);
-
-	if (g_utf8_validate (newstr, -1, NULL))
-		retval = g_strdup (newstr);
-	else
-		retval = g_strdup (wstring);
-
-	talloc_free (mem_ctx);
-
-	return retval;
-	#endif
-}
-
 inline gchar *
 exchange_mapi_util_mapi_id_to_string (mapi_id_t id)
 {

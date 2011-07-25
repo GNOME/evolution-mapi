@@ -141,9 +141,7 @@ make_mapi_error (GError **perror, const gchar *context, enum MAPISTATUS mapi_sta
 	g_propagate_error (perror, error);
 }
 
-#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
 struct mapi_context *mapi_ctx = NULL;
-#endif
 
 struct _ExchangeMapiConnectionPrivate {
 	struct mapi_session *session;
@@ -806,11 +804,7 @@ exchange_mapi_util_modify_recipients (ExchangeMapiConnection *conn, TALLOC_CTX *
 	enum MAPISTATUS	ms;
 	struct SPropTagArray	*SPropTagArray = NULL;
 	struct SRowSet		*SRowSet = NULL;
-	#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
 	struct PropertyTagArray_r *FlagList = NULL;
-	#else
-	struct SPropTagArray	*FlagList = NULL;
-	#endif
 	GSList			*l;
 	const gchar		**users = NULL;
 	uint32_t		i, j, count = 0;
@@ -1270,11 +1264,8 @@ exchange_mapi_util_get_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 				continue;
 			}
 
-			cast_SPropValue (
-				#ifdef HAVE_MEMCTX_ON_CAST_SPROPVALUE
-				mem_ctx,
-				#endif
-				&properties.lpProps[z], &(attachment->lpProps[az]));
+			cast_SPropValue (mem_ctx, &properties.lpProps[z],
+					 &(attachment->lpProps[az]));
 
 			if ((attachment->lpProps[az].ulPropTag & 0xFFFF) == PT_STRING8) {
 				struct SPropValue *lpProps;
@@ -1363,13 +1354,11 @@ exchange_mapi_connection_fetch_gal (ExchangeMapiConnection *conn, struct mapi_SR
 
 	LOCK ();
 
-	#ifdef HAVE_GETGALTABLECOUNT
 	ms = GetGALTableCount (priv->session, &n_rows);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "GetGALTableCount", ms);
 		n_rows = 0;
 	}
-	#endif
 
 	propsTagArray = set_SPropTagArray (mem_ctx, 0x1, PR_MESSAGE_CLASS);
 	if (!build_props (conn, 0, mem_ctx, propsTagArray, brp_data)) {
@@ -1814,11 +1803,8 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 						ll--;
 						properties_array.cValues--;
 					} else {
-						cast_mapi_SPropValue (
-							#ifdef HAVE_MEMCTX_ON_CAST_MAPI_SPROPVALUE
-							mem_ctx,
-							#endif
-							&properties_array.lpProps[ll], &lpProps[k]);
+						cast_mapi_SPropValue (mem_ctx,
+								      &properties_array.lpProps[ll],&lpProps[k]);
 					}
 				}
 			} else {
@@ -1965,11 +1951,8 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 				ll--;
 				properties_array.cValues--;
 			} else {
-				cast_mapi_SPropValue (
-					#ifdef HAVE_MEMCTX_ON_CAST_MAPI_SPROPVALUE
-					mem_ctx,
-					#endif
-					&properties_array.lpProps[ll], &lpProps[k]);
+				cast_mapi_SPropValue (mem_ctx,
+						      &properties_array.lpProps[ll], &lpProps[k]);
 			}
 		}
 	} else {
@@ -2966,11 +2949,7 @@ mapi_move_items (ExchangeMapiConnection *conn, mapi_id_t src_fid, guint32 src_fi
 		mapi_id_array_t msg_id_array;
 		gint count = 0;
 
-		mapi_id_array_init (
-			#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
-			mapi_ctx,
-			#endif
-			&msg_id_array);
+		mapi_id_array_init (mapi_ctx, &msg_id_array);
 
 		for (l = mid_list; l != NULL && count < 500; l = g_slist_next (l), count++)
 			mapi_id_array_add_id (&msg_id_array, *((mapi_id_t *)l->data));
@@ -3159,7 +3138,6 @@ get_child_folders (TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, 
 
 		for (i = 0; i < rowset.cRows; i++) {
 			ExchangeMAPIFolder *folder = NULL;
-			gchar *newname = NULL;
 
 			const mapi_id_t *fid = (const mapi_id_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_FID);
 			const mapi_id_t *pid = (const mapi_id_t *)exchange_mapi_util_find_row_propval (&rowset.aRow[i], PR_PARENT_FID);
@@ -3173,18 +3151,15 @@ get_child_folders (TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, 
 			if (!class)
 				class = IPF_NOTE;
 
-			newname = utf8tolinux (name);
 			g_debug("|---+ %-15s : (Container class: %s %016" G_GINT64_MODIFIER "X) UnRead : %d Total : %d size : %d",
-				newname, class, *fid, unread ? *unread : 0, total ? *total : 0, folder_size ? *folder_size : 0);
+				name, class, *fid, unread ? *unread : 0, total ? *total : 0, folder_size ? *folder_size : 0);
 
-			folder = exchange_mapi_folder_new (newname, class, folder_hier, *fid, pid ? *pid : folder_id,
+			folder = exchange_mapi_folder_new (name, class, folder_hier, *fid, pid ? *pid : folder_id,
 							   child ? *child : 0, unread ? *unread : 0, total ? *total : 0);
 
 			folder->size = folder_size ? *folder_size : 0;
 
 			*mapi_folders = g_slist_prepend (*mapi_folders, folder);
-
-			g_free (newname);
 		}
 
 		cursor_pos += rowset.cRows;
@@ -3363,7 +3338,6 @@ exchange_mapi_connection_get_folders_list (ExchangeMapiConnection *conn, GSList 
 	ExchangeMAPIFolder	*folder;
 	uint32_t		count = 0;
 	const gchar		*mailbox_name = NULL;
-	gchar			*utf8_mailbox_name = NULL;
 	const gchar		*mailbox_owner_name = NULL;
 	const gchar		*mailbox_user_name = NULL;
 	const uint32_t          *mailbox_size = NULL;
@@ -3411,10 +3385,8 @@ exchange_mapi_connection_get_folders_list (ExchangeMapiConnection *conn, GSList 
 		goto cleanup;
 	}
 
-	utf8_mailbox_name = utf8tolinux (mailbox_name);
-
 	/* FIXME: May have to get the child folders count? Do we need/use it? */
-	folder = exchange_mapi_folder_new (utf8_mailbox_name, IPF_NOTE,
+	folder = exchange_mapi_folder_new (mailbox_name, IPF_NOTE,
 					   MAPI_PERSONAL_FOLDER, mailbox_id, 0, 0, 0 ,0);
 	folder->is_default = true;
 	folder->default_type = olFolderTopInformationStore; /*Is this correct ?*/
@@ -3424,8 +3396,6 @@ exchange_mapi_connection_get_folders_list (ExchangeMapiConnection *conn, GSList 
 
 	/* FIXME: check status of get_child_folders */
 	result = get_child_folders (mem_ctx, MAPI_PERSONAL_FOLDER, &priv->msg_store, mailbox_id, mapi_folders, perror);
-
-	g_free(utf8_mailbox_name);
 
 	*mapi_folders = g_slist_reverse (*mapi_folders);
 
@@ -3519,11 +3489,7 @@ exchange_mapi_connection_ex_to_smtp (ExchangeMapiConnection *conn, const gchar *
 	TALLOC_CTX		*mem_ctx;
 	struct SPropTagArray	*SPropTagArray;
 	struct SRowSet		*SRowSet = NULL;
-	#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
 	struct PropertyTagArray_r *flaglist = NULL;
-	#else
-	struct SPropTagArray	*flaglist = NULL;
-	#endif
 	const gchar		*str_array[2];
 	gchar			*smtp_addr = NULL;
 
@@ -3572,11 +3538,7 @@ exchange_mapi_connection_events_init (ExchangeMapiConnection *conn, GError **per
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
 	LOCK ();
-	#ifdef HAVE_CORRECT_REGISTERNOTIFICATION
 	ms = RegisterNotification (priv->session, 0);
-	#else
-	ms = MAPI_E_INTERFACE_NO_SUPPORT;
-	#endif
 	UNLOCK ();
 
 	if (ms != MAPI_E_SUCCESS)
@@ -3781,11 +3743,7 @@ ensure_mapi_init_called (GError **perror)
 		}
 	}
 
-	ms = MAPIInitialize (
-		#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
-		&mapi_ctx,
-		#endif
-		profpath);
+	ms = MAPIInitialize (&mapi_ctx, profpath);
 	if (ms == MAPI_E_SESSION_LIMIT) {
 		/* do nothing, the profile store is already initialized */
 		/* but this shouldn't happen */
@@ -3847,31 +3805,15 @@ mapi_profile_load (const gchar *profname, const gchar *password, GError **perror
 	/* Initialize libmapi logger*/
 	if (g_getenv ("MAPI_DEBUG")) {
 		debug_log_level = atoi (g_getenv ("MAPI_DEBUG"));
-		SetMAPIDumpData (
-			#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
-			mapi_ctx,
-			#endif
-			TRUE);
-		SetMAPIDebugLevel (
-			#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
-			mapi_ctx,
-			#endif
-			debug_log_level);
+		SetMAPIDumpData (mapi_ctx, TRUE);
+		SetMAPIDebugLevel (mapi_ctx, debug_log_level);
 	}
 
 	g_debug("Loading profile %s ", profname);
 
-	ms = MapiLogonEx (
-		#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
-		mapi_ctx,
-		#endif
-		&session, profname, password);
+	ms = MapiLogonEx (mapi_ctx, &session, profname, password);
 	if (ms == MAPI_E_NOT_FOUND && try_create_profile (profname, password))
-		ms = MapiLogonEx (
-			#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
-			mapi_ctx,
-			#endif
-			&session, profname, password);
+		ms = MapiLogonEx (mapi_ctx, &session, profname, password);
 
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "MapiLogonEx", ms);
@@ -3941,30 +3883,18 @@ mapi_profile_create (const gchar *username, const gchar *password, const gchar *
 	profname = exchange_mapi_util_profile_name (username, domain, server, TRUE);
 
 	/* Delete any existing profiles with the same profilename */
-	ms = DeleteProfile (
-		#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
-		mapi_ctx,
-		#endif
-		profname);
+	ms = DeleteProfile (mapi_ctx, profname);
 	/* don't bother to check error - it would be valid if we got an error */
 
-	ms = CreateProfile (
-		#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
-		mapi_ctx,
-		#endif
-		profname, username, password, OC_PROFILE_NOPASSWORD);
+	ms = CreateProfile (mapi_ctx, profname, username, password,
+			    OC_PROFILE_NOPASSWORD);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "CreateProfile", ms);
 		goto cleanup;
 	}
 
-	#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
 	#define add_string_attr(_prof,_aname,_val)				\
 		mapi_profile_add_string_attr (mapi_ctx, _prof, _aname, _val)
-	#else
-	#define add_string_attr(_prof,_aname,_val)				\
-		mapi_profile_add_string_attr (_prof, _aname, _val)
-	#endif
 
 	add_string_attr (profname, "binding", server);
 	add_string_attr (profname, "workstation", workstation);
@@ -3982,19 +3912,12 @@ mapi_profile_create (const gchar *username, const gchar *password, const gchar *
 
 	/* Login now */
 	g_debug("Logging into the server... ");
-	ms = MapiLogonProvider (
-		#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
-		mapi_ctx,
-		#endif
-		&session, profname, password, PROVIDER_ID_NSPI);
+	ms = MapiLogonProvider (mapi_ctx, &session, profname, password,
+				PROVIDER_ID_NSPI);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "MapiLogonProvider", ms);
 		g_debug ("Deleting profile %s ", profname);
-		DeleteProfile (
-			#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
-			mapi_ctx,
-			#endif
-			profname);
+		DeleteProfile (mapi_ctx, profname);
 		goto cleanup;
 	}
 	g_debug("MapiLogonProvider : succeeded \n");
@@ -4003,11 +3926,7 @@ mapi_profile_create (const gchar *username, const gchar *password, const gchar *
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "ProcessNetworkProfile", ms);
 		g_debug ("Deleting profile %s ", profname);
-		DeleteProfile (
-			#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
-			mapi_ctx,
-			#endif
-			profname);
+		DeleteProfile (mapi_ctx, profname);
 		goto cleanup;
 	}
 	g_debug("ProcessNetworkProfile : succeeded \n");
@@ -4061,11 +3980,7 @@ exchange_mapi_delete_profile (const gchar *profile, GError **perror)
 
 		g_debug ("Deleting profile %s ", profile);
 
-		ms = DeleteProfile (
-			#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
-			mapi_ctx,
-			#endif
-			profile);
+		ms = DeleteProfile (mapi_ctx, profile);
 		if (ms == MAPI_E_SUCCESS) {
 			result = TRUE;
 		} else {
@@ -4087,11 +4002,7 @@ exchange_mapi_rename_profile (const gchar *old_name, const gchar *new_name)
 	/* do not use locking here, it's called with a lock held already */
 	/* g_static_rec_mutex_lock (&profile_mutex); */
 
-	RenameProfile (
-		#ifdef HAVE_LIBMAPI_CONTEXT_PARAM
-		mapi_ctx,
-		#endif
-		old_name, new_name);
+	RenameProfile (mapi_ctx, old_name, new_name);
 
 	/* g_static_rec_mutex_unlock (&profile_mutex); */
 }
