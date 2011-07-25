@@ -1016,7 +1016,7 @@ exchange_mapi_util_set_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 				exchange_mapi_utils_add_spropvalue (mem_ctx, &props, &propslen, PR_ATTACH_FILENAME_UNICODE, item->header.subject);
 
 			/* set properties for the item */
-			ms = SetProps (&obj_attach, props, propslen);
+			ms = SetProps (&obj_attach, MAPI_PROPS_SKIP_NAMEDID_CHECK, props, propslen);
 			if (ms != MAPI_E_SUCCESS) {
 				make_mapi_error (perror, "SetProps", ms);
 				goto cleanup;
@@ -1039,7 +1039,7 @@ exchange_mapi_util_set_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 			}
 
 			/* set properties for the item */
-			ms = SetProps (&obj_emb_msg, props, propslen);
+			ms = SetProps (&obj_emb_msg, MAPI_PROPS_SKIP_NAMEDID_CHECK, props, propslen);
 			if (ms != MAPI_E_SUCCESS) {
 				mapi_object_release (&obj_emb_msg);
 				make_mapi_error (perror, "SetProps", ms);
@@ -1079,7 +1079,7 @@ exchange_mapi_util_set_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 			mapi_object_release (&obj_emb_msg);
 		} else {
 			/* SetProps */
-			ms = SetProps (&obj_attach, attachment->lpProps, attachment->cValues);
+			ms = SetProps (&obj_attach, MAPI_PROPS_SKIP_NAMEDID_CHECK, attachment->lpProps, attachment->cValues);
 			if (ms != MAPI_E_SUCCESS) {
 				make_mapi_error (perror, "SetProps", ms);
 				goto cleanup;
@@ -1252,7 +1252,7 @@ exchange_mapi_util_get_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 			goto loop_cleanup;
 		}
 
-		ms = GetPropsAll (&obj_attach, &properties);
+		ms = GetPropsAll (&obj_attach, MAPI_UNICODE, &properties);
 		if (ms != MAPI_E_SUCCESS) {
 			make_mapi_error (perror, "GetPropsAll", ms);
 			goto loop_cleanup;
@@ -1283,7 +1283,7 @@ exchange_mapi_util_get_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 
 				/* prefer unicode strings, if available */
 				tags = set_SPropTagArray (mem_ctx, 0x1, (attachment->lpProps[az].ulPropTag & 0xFFFF0000) | PT_UNICODE);
-				if (MAPI_E_SUCCESS == GetProps (&obj_attach, tags, &lpProps, &prop_count) && prop_count == 1 && lpProps) {
+				if (MAPI_E_SUCCESS == GetProps (&obj_attach, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, tags, &lpProps, &prop_count) && prop_count == 1 && lpProps) {
 					if ((lpProps->ulPropTag & 0xFFFF) == PT_UNICODE)
 						attachment->lpProps[az] = *lpProps;
 				}
@@ -1791,7 +1791,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 				for (k = 0; k < propsTagArray->cValues; k++)
 					SPropTagArray_add (mem_ctx, tags, propsTagArray->aulPropTag[k]);
 
-				ms = GetProps (&obj_message, tags, &lpProps, &prop_count);
+				ms = GetProps (&obj_message, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, tags, &lpProps, &prop_count);
 				if (ms != MAPI_E_SUCCESS)
 					make_mapi_error (perror, "GetProps", ms);
 
@@ -1822,7 +1822,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 					}
 				}
 			} else {
-				ms = GetPropsAll (&obj_message, &properties_array);
+				ms = GetPropsAll (&obj_message, MAPI_UNICODE, &properties_array);
 				if (ms != MAPI_E_SUCCESS)
 					make_mapi_error (perror, "GetPropsAll", ms);
 			}
@@ -1953,7 +1953,7 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 
 		lpProps = talloc_zero(mem_ctx, struct SPropValue);
 
-		ms = GetProps (obj_message, propsTagArray, &lpProps, &prop_count);
+		ms = GetProps (obj_message, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, propsTagArray, &lpProps, &prop_count);
 		if (ms != MAPI_E_SUCCESS)
 			make_mapi_error (perror, "GetProps", ms);
 
@@ -1973,7 +1973,7 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 			}
 		}
 	} else {
-		ms = GetPropsAll (obj_message, &properties_array);
+		ms = GetPropsAll (obj_message, MAPI_UNICODE, &properties_array);
 		if (ms != MAPI_E_SUCCESS)
 			make_mapi_error (perror, "GetPropsAll", ms);
 	}
@@ -2156,7 +2156,7 @@ exchange_mapi_connection_create_folder (ExchangeMapiConnection *conn, uint32_t o
 	vals[0].value.lpszA = type;
 	vals[0].ulPropTag = PR_CONTAINER_CLASS;
 
-	ms = SetProps (&obj_folder, vals, 1);
+	ms = SetProps (&obj_folder, MAPI_PROPS_SKIP_NAMEDID_CHECK, vals, 1);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "SetProps", ms);
 		goto cleanup;
@@ -2342,7 +2342,7 @@ exchange_mapi_connection_rename_folder (ExchangeMapiConnection *conn, mapi_id_t 
 	props = talloc_zero(mem_ctx, struct SPropValue);
 	set_SPropValue_proptag (props, PR_DISPLAY_NAME_UNICODE, new_name);
 
-	ms = SetProps (&obj_folder, props, 1);
+	ms = SetProps (&obj_folder, MAPI_PROPS_SKIP_NAMEDID_CHECK, props, 1);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "SetProps", ms);
 		goto cleanup;
@@ -2710,7 +2710,7 @@ exchange_mapi_connection_create_item (ExchangeMapiConnection *conn, uint32_t olF
 	}
 
 	/* set properties for the item */
-	ms = SetProps (&obj_message, props, propslen);
+	ms = SetProps (&obj_message, MAPI_PROPS_SKIP_NAMEDID_CHECK, props, propslen);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "SetProps", ms);
 		goto cleanup;
@@ -2835,7 +2835,7 @@ exchange_mapi_connection_modify_item (ExchangeMapiConnection *conn, uint32_t olF
 	}
 
 	/* set properties for the item */
-	ms = SetProps (&obj_message, props, propslen);
+	ms = SetProps (&obj_message, MAPI_PROPS_SKIP_NAMEDID_CHECK, props, propslen);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "SetProps", ms);
 		goto cleanup;
@@ -3259,7 +3259,7 @@ mapi_get_ren_additional_fids (mapi_object_t *obj_store, GHashTable **folder_list
 	SPropTagArray = set_SPropTagArray(mem_ctx, 0x1, PR_ADDITIONAL_REN_ENTRYIDS);
 
 	lpProps = talloc_zero(mem_ctx, struct SPropValue);
-	ms = GetProps (&obj_folder_inbox, SPropTagArray, &lpProps, &count);
+	ms = GetProps (&obj_folder_inbox, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, SPropTagArray, &lpProps, &count);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "GetProps", ms);
 		goto cleanup;
@@ -3385,7 +3385,7 @@ exchange_mapi_connection_get_folders_list (ExchangeMapiConnection *conn, GSList 
 					  PidTagMailboxOwnerName);
 
 	lpProps = talloc_zero(mem_ctx, struct SPropValue);
-	ms = GetProps (&priv->msg_store, SPropTagArray, &lpProps, &count);
+	ms = GetProps (&priv->msg_store, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, SPropTagArray, &lpProps, &count);
 	MAPIFreeBuffer(SPropTagArray);
 
 	if (ms != MAPI_E_SUCCESS) {
