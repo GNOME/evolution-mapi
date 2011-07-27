@@ -1032,7 +1032,7 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellabl
 	get_all = g_ascii_strcasecmp (query, "(contains \"x-evolution-any-field\" \"\")") == 0;
 	if (!get_all && !build_restriction_emails_contains (&res, query)) {
 		e_book_backend_mapi_unlock_connection (ebma);
-		g_propagate_error (error, EDB_ERROR (OTHER_ERROR));
+		/* g_propagate_error (error, EDB_ERROR (OTHER_ERROR)); */
 
 		return;
 	}
