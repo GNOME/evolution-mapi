@@ -25,11 +25,10 @@
 #include <gio/gio.h>
 
 #include <libedata-book/e-book-backend.h>
-#include <libedata-book/e-book-backend-cache.h>
-#include <libedata-book/e-book-backend-summary.h>
 #include <libedata-book/e-data-book.h>
 #include <libedata-book/e-data-book-view.h>
 
+#include <libedata-book/e-book-backend-sqlitedb.h>
 #include "exchange-mapi-connection.h"
 #include "exchange-mapi-defs.h"
 #include "exchange-mapi-utils.h"
@@ -95,7 +94,7 @@ const gchar *e_book_backend_mapi_get_book_uri (EBookBackendMAPI *ebma);
 void e_book_backend_mapi_lock_connection (EBookBackendMAPI *ebma);
 void e_book_backend_mapi_unlock_connection (EBookBackendMAPI *ebma);
 ExchangeMapiConnection *e_book_backend_mapi_get_connection (EBookBackendMAPI *ebma);
-void e_book_backend_mapi_get_summary_and_cache (EBookBackendMAPI *ebma, EBookBackendSummary **summary, EBookBackendCache **cache);
+void e_book_backend_mapi_get_db (EBookBackendMAPI *ebma, EBookBackendSqliteDB **db);
 gboolean e_book_backend_mapi_book_view_is_running (EBookBackendMAPI *ebma, EDataBookView *book_view);
 void e_book_backend_mapi_update_view_by_cache (EBookBackendMAPI *ebma, EDataBookView *book_view, GError **error);
 gboolean e_book_backend_mapi_is_marked_for_offline (EBookBackendMAPI *ebma);
@@ -110,6 +109,12 @@ gchar *e_book_backend_mapi_cache_get (EBookBackendMAPI *ebma, const gchar *key);
 #define EDB_ERROR_EX(_code, _msg) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, _msg)
 
 void mapi_error_to_edb_error (GError **perror, const GError *mapi_error, EDataBookStatus code, const gchar *context);
+
+/* The EBookBackendSqliteDB functions allow for a single all-caches database,
+ * which is a feature we do not use, and instead have per-folder databases.
+ * Therefore we have a couple arbitrary constants... */
+#define EMA_EBB_CACHE_PROFILEID	"EMA_PROFILE"
+#define EMA_EBB_CACHE_FOLDERID	"EMA_FOLDER"
 
 /* vCard parameter name in contact list */
 #define EMA_X_MEMBERID "X-EMA-MEMBER-ID"

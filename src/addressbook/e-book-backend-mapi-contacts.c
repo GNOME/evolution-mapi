@@ -45,8 +45,6 @@
 #include <libedata-book/e-book-backend-sexp.h>
 #include <libedata-book/e-data-book.h>
 #include <libedata-book/e-data-book-view.h>
-#include <libedata-book/e-book-backend-cache.h>
-#include <libedata-book/e-book-backend-summary.h>
 
 #include "e-book-backend-mapi-contacts.h"
 
@@ -227,7 +225,7 @@ cmp_member_id (gconstpointer a, gconstpointer b, gpointer ht)
 
 typedef struct {
 	EContact *contact;
-	EBookBackendCache *cache;
+	EBookBackendSqliteDB *db;
 } MapiCreateitemData;
 
 static gboolean
@@ -278,6 +276,7 @@ mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 
 	g_return_val_if_fail (mcd != NULL, FALSE);
 	g_return_val_if_fail (mcd->contact != NULL, FALSE);
+	g_return_val_if_fail (mcd->db != NULL, FALSE);
 	g_return_val_if_fail (conn != NULL, FALSE);
 	g_return_val_if_fail (mem_ctx != NULL, FALSE);
 	g_return_val_if_fail (values != NULL, FALSE);
@@ -287,14 +286,19 @@ mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 		return FALSE;
 
 	if (GPOINTER_TO_INT (e_contact_get (mcd->contact, E_CONTACT_IS_LIST))) {
-		EContact *old_contact;
+		const gchar *uid = NULL;
+		EContact *old_contact = NULL;
 		GList *local, *l;
 		struct BinaryArray_r *members, *oneoff_members;
 		uint32_t list_size = 0, u32, crc32 = 0;
 		GHashTable *member_values = NULL, *member_ids = NULL;
+		GError *error = NULL;
 
-		old_contact = e_contact_get_const (mcd->contact, E_CONTACT_UID) ? e_book_backend_cache_get_contact (mcd->cache, e_contact_get_const (mcd->contact, E_CONTACT_UID)) : NULL;
-		if (old_contact) {
+		uid = e_contact_get_const (mcd->contact, E_CONTACT_UID);
+		if (uid)
+			old_contact = e_book_backend_sqlitedb_get_contact (mcd->db, EMA_EBB_CACHE_FOLDERID, uid, &error);
+
+		if (!error && old_contact) {
 			member_values = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 			member_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
@@ -321,6 +325,9 @@ mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 			g_list_foreach (local, (GFunc)e_vcard_attribute_free, NULL);
 			g_list_free (local);
 		}
+
+		if (error)
+			g_error_free (error);
 
 		set_str_value (PR_MESSAGE_CLASS, IPM_DISTLIST);
 		u32 = 0xFFFFFFFF;
@@ -750,7 +757,7 @@ ebbm_contacts_create_contact (EBookBackendMAPI *ebma, GCancellable *cancellable,
 		return;
 	}
 
-	e_book_backend_mapi_get_summary_and_cache (ebma, NULL, &mcd.cache);
+	e_book_backend_mapi_get_db (ebma, &mcd.db);
 	mcd.contact = *contact;
 
 	mid = exchange_mapi_connection_create_item (conn, olFolderContacts, priv->fid,
@@ -878,7 +885,7 @@ ebbm_contacts_modify_contact (EBookBackendMAPI *ebma, GCancellable *cancellable,
 		return;
 	}
 
-	e_book_backend_mapi_get_summary_and_cache (ebma, NULL, &mcd.cache);
+	e_book_backend_mapi_get_db (ebma, &mcd.db);
 	mcd.contact = *contact;
 
 	exchange_mapi_util_mapi_ids_from_uid (e_contact_get_const (*contact, E_CONTACT_UID), &fid, &mid);

@@ -18,8 +18,6 @@
 #include <libedata-book/e-book-backend-sexp.h>
 #include <libedata-book/e-data-book.h>
 #include <libedata-book/e-data-book-view.h>
-#include <libedata-book/e-book-backend-cache.h>
-#include <libedata-book/e-book-backend-summary.h>
 
 #include "e-book-backend-mapi-gal.h"
 
