@@ -1252,8 +1252,6 @@ exchange_mapi_util_get_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 			goto loop_cleanup;
 		}
 
-		mapi_SPropValue_array_named (&obj_attach, &properties);
-
 		az = 0;
 		attachment = g_new0 (ExchangeMAPIAttachment, 1);
 		attachment->cValues = properties.cValues;
@@ -1770,7 +1768,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 			}
 
 			if (propsTagArray && propsTagArray->cValues) {
-				struct SPropValue *lpProps;
+				struct SPropValue *lpProps = NULL;
 				struct SPropTagArray *tags;
 				uint32_t prop_count = 0, k, ll;
 				/* we need to make a local copy of the tag array
@@ -1784,7 +1782,6 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 				if (ms != MAPI_E_SUCCESS)
 					make_mapi_error (perror, "GetProps", ms);
 
-				MAPIFreeBuffer (tags);
 				properties_array.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue,
 									 prop_count + 1);
 				properties_array.cValues = prop_count;
@@ -1831,8 +1828,6 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 				FetchItemsCallbackData *item_data;
 
 				if ((options & MAPI_OPTIONS_DONT_OPEN_MESSAGE) == 0) {
-					mapi_SPropValue_array_named (&obj_message, &properties_array);
-
 					if ((options & MAPI_OPTIONS_FETCH_GENERIC_STREAMS) != 0) {
 						uint32_t z;
 						const uint32_t *cpid = exchange_mapi_util_find_array_propval (&properties_array, PR_INTERNET_CPID);
@@ -1980,8 +1975,6 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 	}
 
 	if (ms == MAPI_E_SUCCESS) {
-		mapi_SPropValue_array_named (obj_message, &properties_array);
-
 		if ((options & MAPI_OPTIONS_FETCH_GENERIC_STREAMS)) {
 			uint32_t z;
 

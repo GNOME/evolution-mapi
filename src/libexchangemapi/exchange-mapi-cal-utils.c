@@ -751,7 +751,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 		ExchangeMAPIStream *stream;
 
 		/* GlobalObjectId */
-		stream = exchange_mapi_util_find_stream (streams, PidLidGlobalObjectId);
+		stream = exchange_mapi_util_find_stream_namedid (streams, conn, fid, PidLidGlobalObjectId);
 		if (stream) {
 			gchar *value = globalid_to_string (stream->value);
 			prop = icalproperty_new_x (value);
@@ -781,7 +781,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 		}
 
 		/* AppointmentSequence */
-		ui32 = (const uint32_t *)find_mapi_SPropValue_data(properties, PidLidAppointmentSequence);
+		ui32 = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidAppointmentSequence);
 		if (ui32) {
 			gchar *value = g_strdup_printf ("%d", *ui32);
 			prop = icalproperty_new_x (value);
@@ -790,21 +790,21 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 			g_free (value);
 		}
 
-		location = (const gchar *)exchange_mapi_util_find_array_propval(properties, PidLidLocation);
+		location = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidLocation);
 		if (location && *location)
 			icalcomponent_set_location (ical_comp, location);
 
-		b = (const bool *)find_mapi_SPropValue_data(properties, PidLidAppointmentSubType);
+		b = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidAppointmentSubType);;
 		all_day = b && *b;
 
-		stream = exchange_mapi_util_find_stream (streams, PidLidAppointmentTimeZoneDefinitionStartDisplay);
+		stream = exchange_mapi_util_find_stream_namedid (streams, conn, fid, PidLidAppointmentTimeZoneDefinitionStartDisplay);
 		if (stream) {
 			gchar *buf = exchange_mapi_cal_util_bin_to_mapi_tz (stream->value);
 			dtstart_tz_location = exchange_mapi_cal_tz_util_get_ical_equivalent (buf);
 			g_free (buf);
 		}
 
-		if (get_mapi_SPropValue_array_date_timeval (&t, properties, PidLidAppointmentStartWhole) == MAPI_E_SUCCESS) {
+		if (exchange_mapi_util_find_array_datetime_namedid (&t, properties, conn, fid, PidLidAppointmentStartWhole) == MAPI_E_SUCCESS) {
 			icaltimezone *zone = dtstart_tz_location ? icaltimezone_get_builtin_timezone (dtstart_tz_location) : (icaltimezone *)default_zone;
 			prop = icalproperty_new_dtstart (icaltime_from_timet_with_zone (t.tv_sec, all_day, zone));
 			if (!all_day && zone && icaltimezone_get_tzid (zone)) {
@@ -814,14 +814,14 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 			icalcomponent_add_property (ical_comp, prop);
 		}
 
-		stream = exchange_mapi_util_find_stream (streams, PidLidAppointmentTimeZoneDefinitionEndDisplay);
+		stream = exchange_mapi_util_find_stream_namedid (streams, conn, fid, PidLidAppointmentTimeZoneDefinitionEndDisplay);
 		if (stream) {
 			gchar *buf = exchange_mapi_cal_util_bin_to_mapi_tz (stream->value);
 			dtend_tz_location = exchange_mapi_cal_tz_util_get_ical_equivalent (buf);
 			g_free (buf);
 		}
 
-		if (get_mapi_SPropValue_array_date_timeval (&t, properties, PidLidAppointmentEndWhole) == MAPI_E_SUCCESS) {
+		if (exchange_mapi_util_find_array_datetime_namedid (&t, properties, conn, fid, PidLidAppointmentEndWhole) == MAPI_E_SUCCESS) {
 			icaltimezone *zone = dtend_tz_location ? icaltimezone_get_builtin_timezone (dtend_tz_location) : (icaltimezone *)default_zone;
 			prop = icalproperty_new_dtend (icaltime_from_timet_with_zone (t.tv_sec, all_day, zone));
 			if (!all_day && zone && icaltimezone_get_tzid (zone)) {
@@ -831,7 +831,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 			icalcomponent_add_property (ical_comp, prop);
 		}
 
-		ui32 = (const uint32_t *)find_mapi_SPropValue_data(properties, PidLidBusyStatus);
+		ui32 = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidBusyStatus);
 		if (ui32) {
 			prop = icalproperty_new_transp (get_transp_from_prop (*ui32));
 			icalcomponent_add_property (ical_comp, prop);
@@ -899,7 +899,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 					param = icalparameter_new_cn (name);
 					icalproperty_add_parameter (prop, param);
 
-					ui32 = exchange_mapi_util_find_array_propval (properties, PidLidResponseStatus);
+					ui32 = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidResponseStatus);
 					param = icalparameter_new_partstat (get_partstat_from_trackstatus (ui32 ? *ui32 : olResponseNone));
 					icalproperty_add_parameter (prop, param);
 
@@ -945,9 +945,9 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 			}
 		}
 
-		b = (const bool *)find_mapi_SPropValue_data(properties, PidLidRecurring);
+		b = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidRecurring);
 		if (b && *b) {
-			stream = exchange_mapi_util_find_stream (streams, PidLidAppointmentRecur);
+			stream = exchange_mapi_util_find_stream_namedid (streams, conn, fid, PidLidAppointmentRecur);
 			if (stream) {
 				icaltimezone *recur_zone;
 				const gchar *recur_tz_location;
@@ -961,12 +961,12 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 			}
 		}
 
-		b = (const bool *)find_mapi_SPropValue_data(properties, PidLidReminderSet);
+		b = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidReminderSet);
 		if (b && *b) {
 			struct timeval start, displaytime;
 
-			if ((get_mapi_SPropValue_array_date_timeval (&start, properties, PidLidReminderTime) == MAPI_E_SUCCESS)
-			 && (get_mapi_SPropValue_array_date_timeval (&displaytime, properties, PidLidReminderSignalTime) == MAPI_E_SUCCESS)) {
+			if ((exchange_mapi_util_find_array_datetime_namedid (&start, properties, conn, fid, PidLidReminderTime) == MAPI_E_SUCCESS)
+			 && (exchange_mapi_util_find_array_datetime_namedid (&displaytime, properties, conn, fid, PidLidReminderSignalTime) == MAPI_E_SUCCESS)) {
 				ECalComponentAlarm *e_alarm = e_cal_component_alarm_new ();
 				ECalComponentAlarmTrigger trigger;
 
@@ -987,38 +987,38 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 		const uint64_t *status = NULL;
 
 		/* NOTE: Exchange tasks are DATE values, not DATE-TIME values, but maybe someday, we could expect Exchange to support it;) */
-		if (get_mapi_SPropValue_array_date_timeval (&t, properties, PidLidTaskStartDate) == MAPI_E_SUCCESS)
+		if (exchange_mapi_util_find_array_datetime_namedid (&t, properties, conn, fid, PidLidTaskStartDate) == MAPI_E_SUCCESS)
 			icalcomponent_set_dtstart (ical_comp, icaltime_from_timet_with_zone (t.tv_sec, 1, default_zone));
-		if (get_mapi_SPropValue_array_date_timeval (&t, properties, PidLidTaskDueDate) == MAPI_E_SUCCESS)
+		if (exchange_mapi_util_find_array_datetime_namedid (&t, properties, conn, fid, PidLidTaskDueDate) == MAPI_E_SUCCESS)
 			icalcomponent_set_due (ical_comp, icaltime_from_timet_with_zone (t.tv_sec, 1, default_zone));
 
-		status = (const uint64_t *)find_mapi_SPropValue_data(properties, PidLidTaskStatus);
+		status = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidTaskStatus);
 		if (status) {
 			icalcomponent_set_status (ical_comp, get_taskstatus_from_prop(*status));
 			if (*status == olTaskComplete
-			&& get_mapi_SPropValue_array_date_timeval (&t, properties, PidLidTaskDateCompleted) == MAPI_E_SUCCESS) {
+			&& exchange_mapi_util_find_array_datetime_namedid (&t, properties, conn, fid, PidLidTaskDateCompleted) == MAPI_E_SUCCESS) {
 				prop = icalproperty_new_completed (icaltime_from_timet_with_zone (t.tv_sec, 1, default_zone));
 				icalcomponent_add_property (ical_comp, prop);
 			}
 		}
 
-		complete = (const double *)find_mapi_SPropValue_data(properties, PidLidPercentComplete);
+		complete = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidPercentComplete);
 		if (complete) {
 			prop = icalproperty_new_percentcomplete ((gint)(*complete * 100 + 1e-9));
 			icalcomponent_add_property (ical_comp, prop);
 		}
 
-		b = (const bool *)find_mapi_SPropValue_data(properties, PidLidTaskFRecurring);
+		b = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidTaskFRecurring);
 		if (b && *b) {
 			/* FIXME: Evolution does not support recurring tasks */
 			g_warning ("Encountered a recurring task.");
 		}
 
-		b = (const bool *)find_mapi_SPropValue_data(properties, PidLidReminderSet);
+		b = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidReminderSet);
 		if (b && *b) {
 			struct timeval abs;
 
-			if (get_mapi_SPropValue_array_date_timeval (&abs, properties, PidLidReminderTime) == MAPI_E_SUCCESS) {
+			if (exchange_mapi_util_find_array_datetime_namedid (&abs, properties, conn, fid, PidLidReminderTime) == MAPI_E_SUCCESS) {
 				ECalComponentAlarm *e_alarm = e_cal_component_alarm_new ();
 				ECalComponentAlarmTrigger trigger;
 
@@ -1264,9 +1264,9 @@ task_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem
 		{ PidLidTaskOwner, 0 },
 		{ PidLidTaskAssigner, 0 },
 		{ PidLidTaskFRecurring, 0 },
-		{ PidLidTaskRole, 0 },
 		{ PidLidTaskOwnership, 0 },
-		{ PidLidTaskAcceptanceState, 0 }
+		{ PidLidTaskAcceptanceState, 0 },
+		{ PidLidTaskRole, 0 }
 	};
 
 	if (!props)
@@ -1369,7 +1369,7 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 		} G_STMT_END
 
 	#define set_named_value(named_id, val) G_STMT_START { \
-		if (!exchange_mapi_utils_add_spropvalue_named_id (conn, fid, mem_ctx, values, n_values, named_id, val)) \
+		if (!exchange_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, named_id, val)) \
 			return FALSE;	\
 		} G_STMT_END
 
@@ -1387,7 +1387,7 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 									\
 		exchange_mapi_util_time_t_to_filetime (dtval, &filetime); \
 									\
-		if (!exchange_mapi_utils_add_spropvalue_named_id (conn, fid, mem_ctx, values, n_values, named_id, &filetime)) \
+		if (!exchange_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, named_id, &filetime)) \
 			return FALSE;	\
 		} G_STMT_END
 

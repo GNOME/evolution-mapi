@@ -260,7 +260,7 @@ mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 		} G_STMT_END
 
 	#define set_str_named_value(named_id, val) G_STMT_START { \
-		if (!exchange_mapi_utils_add_spropvalue_named_id (conn, fid, mem_ctx, values, n_values, named_id, val ? val : "")) \
+		if (!exchange_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, named_id, val ? val : "")) \
 			return FALSE;	\
 		} G_STMT_END
 
@@ -331,7 +331,7 @@ mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 
 		set_str_value (PR_MESSAGE_CLASS, IPM_DISTLIST);
 		u32 = 0xFFFFFFFF;
-		if (!exchange_mapi_utils_add_spropvalue_named_id (conn, fid, mem_ctx, values, n_values, PidLidFileUnderId, &u32))
+		if (!exchange_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, PidLidFileUnderId, &u32))
 			return FALSE;
 		set_str_named_con_value (PidLidFileUnder, E_CONTACT_FILE_AS);
 		set_str_named_con_value (PidLidDistributionListName, E_CONTACT_FILE_AS);
@@ -397,15 +397,15 @@ mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 		g_list_foreach (local, (GFunc)e_vcard_attribute_free, NULL);
 		g_list_free (local);
 
-		if (!exchange_mapi_utils_add_spropvalue_named_id (conn, fid, mem_ctx, values, n_values,
+		if (!exchange_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values,
 			PidLidDistributionListOneOffMembers, oneoff_members))
 			return FALSE;
 
-		if (!exchange_mapi_utils_add_spropvalue_named_id (conn, fid, mem_ctx, values, n_values,
+		if (!exchange_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values,
 			PidLidDistributionListMembers, members))
 			return FALSE;
 
-		if (!exchange_mapi_utils_add_spropvalue_named_id (conn, fid, mem_ctx, values, n_values,
+		if (!exchange_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values,
 			PidLidDistributionListChecksum, &crc32))
 			return FALSE;
 

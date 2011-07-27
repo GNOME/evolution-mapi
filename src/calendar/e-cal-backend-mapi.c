@@ -416,11 +416,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
 	cache_dir = e_cal_backend_get_cache_dir (E_CAL_BACKEND (cbmapi));
 
-//	exchange_mapi_debug_property_dump (array);
-
-	recurring = NULL;
-	/* FIXME: Evolution does not support recurring tasks */
-	recurring = (const bool *)find_mapi_SPropValue_data(array, PROP_TAG(PT_BOOLEAN, 0x8126));
+	recurring = exchange_mapi_util_find_array_namedid (array, item_data->conn, item_data->fid, PidLidTaskFRecurring);
 	if (recurring && *recurring) {
 		g_warning ("Encountered a recurring task.");
 		exchange_mapi_util_free_stream_list (&streams);
@@ -573,98 +569,6 @@ handle_deleted_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 }
 
 static gboolean
-mapi_cal_get_known_ids (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
-{
-	/* this is a list of all known calendar MAPI tag IDs;
-	   if you add new add it here too, otherwise it may not be fetched */
-	static uint32_t known_cal_mapi_ids[] = {
-		PR_7BIT_DISPLAY_NAME_UNICODE,
-		PR_ADDRTYPE_UNICODE,
-		PR_ATTACH_DATA_BIN,
-		PR_ATTACH_FILENAME_UNICODE,
-		PR_ATTACH_LONG_FILENAME_UNICODE,
-		PR_ATTACH_METHOD,
-		PR_BODY,
-		PR_BODY_UNICODE,
-		PR_CONVERSATION_TOPIC_UNICODE,
-		PR_CREATION_TIME,
-		PR_DISPLAY_NAME_UNICODE,
-		PR_DISPLAY_TYPE,
-		PR_END_DATE,
-		PR_FID,
-		PR_GIVEN_NAME_UNICODE,
-		PR_HTML,
-		PR_ICON_INDEX,
-		PR_IMPORTANCE,
-		PR_LAST_MODIFICATION_TIME,
-		PR_MESSAGE_CLASS,
-		PR_MESSAGE_FLAGS,
-		PR_MID,
-		PR_MSG_EDITOR_FORMAT,
-		PR_NORMALIZED_SUBJECT_UNICODE,
-		PR_OBJECT_TYPE,
-		PR_OWNER_APPT_ID,
-		PR_PRIORITY,
-		PR_PROCESSED,
-		PR_RCVD_REPRESENTING_ADDRTYPE_UNICODE,
-		PR_RCVD_REPRESENTING_EMAIL_ADDRESS_UNICODE,
-		PR_RCVD_REPRESENTING_NAME_UNICODE,
-		PR_RECIPIENT_DISPLAY_NAME_UNICODE,
-		PR_RECIPIENT_FLAGS,
-		PR_RECIPIENT_TRACKSTATUS,
-		PR_RECIPIENT_TYPE,
-		PR_RENDERING_POSITION,
-		PR_RESPONSE_REQUESTED,
-		PR_RTF_IN_SYNC,
-		PR_SENDER_ADDRTYPE_UNICODE,
-		PR_SENDER_EMAIL_ADDRESS_UNICODE,
-		PR_SENDER_NAME_UNICODE,
-		PR_SEND_INTERNET_ENCODING,
-		PR_SENSITIVITY,
-		PR_SENT_REPRESENTING_ADDRTYPE_UNICODE,
-		PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
-		PR_SENT_REPRESENTING_NAME_UNICODE,
-		PR_SMTP_ADDRESS_UNICODE,
-		PR_START_DATE,
-		PR_SUBJECT_UNICODE
-	};
-
-	/* do not make this array static, the function modifies it on run */
-	ResolveNamedIDsData known_nids[] = {
-		{ PidLidGlobalObjectId, 0 },
-		{ PidLidCleanGlobalObjectId, 0 },
-		{ PidLidAppointmentRecur, 0 },
-		{ PidLidAppointmentTimeZoneDefinitionStartDisplay, 0 },
-		{ PidLidAppointmentTimeZoneDefinitionEndDisplay, 0 },
-		{ PidLidTaskFRecurring, 0 },
-		{ PidLidAppointmentSubType, 0 },
-		{ PidLidRecurring, 0 },
-		{ PidLidReminderSet, 0 },
-		{ PidLidPercentComplete, 0 },
-		{ PidLidTaskStatus, 0 },
-		{ PidLidAppointmentSequence, 0 },
-		{ PidLidBusyStatus, 0 },
-		{ PidLidLocation, 0 },
-		{ PidLidTaskStartDate, 0 },
-		{ PidLidTaskDueDate, 0 },
-		{ PidLidTaskDateCompleted, 0 },
-		{ PidLidAppointmentStartWhole, 0 },
-		{ PidLidAppointmentEndWhole, 0 },
-		{ PidLidReminderTime, 0 },
-		{ PidLidReminderSignalTime, 0 },
-		{ PidLidExceptionReplaceTime, 0 },
-		{ PidNameKeywords, 0 }
-	};
-
-	g_return_val_if_fail (props != NULL, FALSE);
-
-	if (!exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, known_nids, G_N_ELEMENTS (known_nids)))
-		return FALSE;
-
-	return exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, known_cal_mapi_ids, G_N_ELEMENTS (known_cal_mapi_ids));
-}
-
-static gboolean
 mapi_cal_get_idlist (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
 {
 	static const uint32_t cal_IDList[] = {
@@ -745,62 +649,30 @@ get_deltas (gpointer handle)
 	gmtime_r (&current_time, &tm);
 	strftime (t_str, 26, "%Y-%m-%dT%H:%M:%SZ", &tm);
 
-//	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
-	/* FIXME: GetProps does not seem to work for tasks :-( */
-	if (kind == ICAL_VTODO_COMPONENT) {
-		if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
-			options |= MAPI_OPTIONS_USE_PFSTORE;
-			is_public = TRUE;
-			use_restriction = FALSE;
-		}
-
-		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
-						is_public ? NULL : mapi_cal_get_known_ids, NULL,
-						mapi_cal_get_changes_cb, cbmapi,
-						options, &mapi_error)) {
-			if (mapi_error) {
-				gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
-				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
-				g_free (msg);
-				g_error_free (mapi_error);
-			} else {
-				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
-			}
-
-//			e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
-			g_mutex_unlock (priv->updating_mutex);
-			if (mem_ctx)
-				talloc_free (mem_ctx);
-			return FALSE;
-		}
-	} else {
-		if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
-			options |= MAPI_OPTIONS_USE_PFSTORE;
-			is_public = TRUE;
-			use_restriction = FALSE;
-		}
-
-		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
-						is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
-						mapi_cal_get_changes_cb, cbmapi,
-						options, &mapi_error)) {
-			if (mapi_error) {
-				gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
-				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
-				g_free (msg);
-				g_error_free (mapi_error);
-			} else {
-				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
-			}
-
-			//e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
-			g_mutex_unlock (priv->updating_mutex);
-			if (mem_ctx)
-				talloc_free (mem_ctx);
-			return FALSE;
-		}
+	if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
+		options |= MAPI_OPTIONS_USE_PFSTORE;
+		is_public = TRUE;
+		use_restriction = FALSE;
 	}
-//	e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
+
+	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
+					is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
+					mapi_cal_get_changes_cb, cbmapi,
+					options, &mapi_error)) {
+		if (mapi_error) {
+			gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
+			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
+			g_free (msg);
+			g_error_free (mapi_error);
+		} else {
+			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
+		}
+
+		g_mutex_unlock (priv->updating_mutex);
+		if (mem_ctx)
+			talloc_free (mem_ctx);
+		return FALSE;
+	}
 
 	notify_view_completed (cbmapi);
 
@@ -899,53 +771,27 @@ get_deltas (gpointer handle)
 		g_slist_foreach (did.unknown_mids, (GFunc) g_free, NULL);
 		g_slist_free (did.unknown_mids);
 
-		if (kind == ICAL_VTODO_COMPONENT) {
-			if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
-				options |= MAPI_OPTIONS_USE_PFSTORE;
-				is_public = TRUE;
+		if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
+			options |= MAPI_OPTIONS_USE_PFSTORE;
+			is_public = TRUE;
+		}
+
+		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
+					is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
+					mapi_cal_get_changes_cb, cbmapi,
+					options, &mapi_error)) {
+			if (mapi_error) {
+				gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
+				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
+				g_free (msg);
+				g_error_free (mapi_error);
+			} else {
+				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
 			}
 
-			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
-						is_public ? NULL : mapi_cal_get_known_ids, NULL,
-						mapi_cal_get_changes_cb, cbmapi,
-						options, &mapi_error)) {
-
-				if (mapi_error) {
-					gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
-					e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
-					g_free (msg);
-					g_error_free (mapi_error);
-				} else {
-					e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
-				}
-
-				g_mutex_unlock (priv->updating_mutex);
-				g_free (or_res);
-				return FALSE;
-			}
-		} else {
-			if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
-				options |= MAPI_OPTIONS_USE_PFSTORE;
-				is_public = TRUE;
-			}
-
-			if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
-						is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
-						mapi_cal_get_changes_cb, cbmapi,
-						options, &mapi_error)) {
-				if (mapi_error) {
-					gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
-					e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
-					g_free (msg);
-					g_error_free (mapi_error);
-				} else {
-					e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
-				}
-
-				g_free (or_res);
-				g_mutex_unlock (priv->updating_mutex);
-				return FALSE;
-			}
+			g_free (or_res);
+			g_mutex_unlock (priv->updating_mutex);
+			return FALSE;
 		}
 		g_free (or_res);
 	}
@@ -1185,7 +1031,7 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 	switch (kind) {
 		case ICAL_VTODO_COMPONENT:
 			/* FIXME: Evolution does not support recurring tasks */
-			recurring = (const bool *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_BOOLEAN, 0x8126));
+			recurring = exchange_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidTaskFRecurring);
 			if (recurring && *recurring) {
 				g_warning ("Encountered a recurring task.");
 				exchange_mapi_util_free_stream_list (&streams);
@@ -1268,51 +1114,26 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 	gmtime_r (&current_time, &tm);
 	strftime (t_str, 26, "%Y-%m-%dT%H:%M:%SZ", &tm);
 
-//	e_file_cache_freeze_changes (E_FILE_CACHE (priv->cache));
-	/* FIXME: GetProps does not seem to work for tasks :-( */
-	if (kind == ICAL_VTODO_COMPONENT) {
-		if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
-			options |= MAPI_OPTIONS_USE_PFSTORE;
-			is_public = TRUE;
-		}
-
-		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
-						is_public ? NULL : mapi_cal_get_known_ids, NULL,
-						mapi_cal_cache_create_cb, cbmapi,
-						options, &mapi_error)) {
-			e_cal_backend_store_thaw_changes (priv->store);
-			g_mutex_lock (priv->mutex);
-			priv->populating_cache = FALSE;
-			g_mutex_unlock (priv->mutex);
-			mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to fetch items from a server"));
-			if (mapi_error)
-				g_error_free (mapi_error);
-
-			return FALSE;
-		}
-	} else {
-		if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
-			options |= MAPI_OPTIONS_USE_PFSTORE;
-			is_public = TRUE;
-		}
-
-		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
-						is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
-						mapi_cal_cache_create_cb, cbmapi,
-						options, &mapi_error)) {
-			e_cal_backend_store_thaw_changes (priv->store);
-			g_mutex_lock (priv->mutex);
-			priv->populating_cache = FALSE;
-			g_mutex_unlock (priv->mutex);
-
-			mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to fetch items from a server"));
-			if (mapi_error)
-				g_error_free (mapi_error);
-
-			return FALSE;
-		}
+	if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
+		options |= MAPI_OPTIONS_USE_PFSTORE;
+		is_public = TRUE;
 	}
-//	e_file_cache_thaw_changes (E_FILE_CACHE (priv->cache));
+
+	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
+					is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
+					mapi_cal_cache_create_cb, cbmapi,
+					options, &mapi_error)) {
+		e_cal_backend_store_thaw_changes (priv->store);
+		g_mutex_lock (priv->mutex);
+		priv->populating_cache = FALSE;
+		g_mutex_unlock (priv->mutex);
+
+		mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to fetch items from a server"));
+		if (mapi_error)
+			g_error_free (mapi_error);
+
+		return FALSE;
+	}
 
 	notify_view_completed (cbmapi);
 
@@ -1550,9 +1371,6 @@ mapi_cal_get_required_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC
 {
 	static uint32_t req_props_list[] = {
 		PR_OWNER_APPT_ID,
-		PROP_TAG(PT_LONG, 0x8201),
-		PROP_TAG(PT_BINARY, 0x0023),
-		PROP_TAG(PT_BINARY, 0x0003),
 		PR_SENT_REPRESENTING_NAME_UNICODE,
 		PR_SENT_REPRESENTING_ADDRTYPE_UNICODE,
 		PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
@@ -1561,7 +1379,17 @@ mapi_cal_get_required_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC
 		PR_SENDER_EMAIL_ADDRESS_UNICODE
 	};
 
+	/* do not make this array static, the function modifies it on run */
+	ResolveNamedIDsData nids[] = {
+		{ PidLidGlobalObjectId, 0 },
+		{ PidLidCleanGlobalObjectId, 0 },
+		{ PidLidAppointmentSequence, 0 }
+	};
+
 	g_return_val_if_fail (props != NULL, FALSE);
+
+	if (!exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids)))
+		return FALSE;
 
 	return exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, req_props_list, G_N_ELEMENTS (req_props_list));
 }
@@ -1576,11 +1404,11 @@ capture_req_props (FetchItemsCallbackData *item_data, gpointer data)
 	ui32 = (const uint32_t *)find_mapi_SPropValue_data(properties, PR_OWNER_APPT_ID);
 	if (ui32)
 		cbdata->appt_id = *ui32;
-	ui32 = (const uint32_t *)find_mapi_SPropValue_data(properties, PROP_TAG(PT_LONG, 0x8201));
+	ui32 = exchange_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidAppointmentSequence);
 	if (ui32)
 		cbdata->appt_seq = *ui32;
-	cbdata->cleanglobalid = exchange_mapi_util_copy_binary_r (find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0023)));
-	cbdata->globalid = exchange_mapi_util_copy_binary_r (find_mapi_SPropValue_data(properties, PROP_TAG(PT_BINARY, 0x0003)));
+	cbdata->cleanglobalid = (gpointer) exchange_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidCleanGlobalObjectId);
+	cbdata->globalid = (gpointer) exchange_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidGlobalObjectId);
 	cbdata->username = g_strdup (exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE));
 	cbdata->useridtype = g_strdup (exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE));
 	cbdata->userid = g_strdup (exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE));

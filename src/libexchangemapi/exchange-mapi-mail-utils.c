@@ -1621,7 +1621,7 @@ mapi_mail_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_t
 	}
 	
 	if (item->pid_name_content_type) {
-		if (!exchange_mapi_utils_add_spropvalue_named_id (conn, fid, mem_ctx, values, n_values, PidNameContentType, item->pid_name_content_type))
+		if (!exchange_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, PidNameContentType, item->pid_name_content_type))
 			return FALSE;
 	}
 

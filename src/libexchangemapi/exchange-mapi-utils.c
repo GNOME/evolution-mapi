@@ -255,6 +255,35 @@ exchange_mapi_util_find_array_namedid (struct mapi_SPropValue_array *properties,
 	return res;
 }
 
+enum MAPISTATUS
+exchange_mapi_util_find_array_datetime_propval (struct timeval *tv, struct mapi_SPropValue_array *properties, uint32_t proptag)
+{
+	g_return_val_if_fail (tv != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (properties != NULL, MAPI_E_INVALID_PARAMETER);
+
+	return get_mapi_SPropValue_array_date_timeval (tv, properties, proptag);
+}
+
+enum MAPISTATUS
+exchange_mapi_util_find_array_datetime_namedid (struct timeval *tv, struct mapi_SPropValue_array *properties, ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
+{
+	enum MAPISTATUS res = MAPI_E_NOT_FOUND;
+	uint32_t proptag;
+
+	g_return_val_if_fail (tv != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (properties != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (conn != NULL, MAPI_E_INVALID_PARAMETER);
+
+	proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
+	if (proptag != MAPI_E_RESERVED)
+		res = exchange_mapi_util_find_array_datetime_propval (tv, properties, proptag);
+
+	if (res == MAPI_E_NOT_FOUND)
+		res = exchange_mapi_util_find_array_datetime_propval (tv, properties, namedid);
+
+	return res;
+}
+
 ExchangeMAPIStream *
 exchange_mapi_util_find_stream (GSList *stream_list, uint32_t proptag)
 {
@@ -267,6 +296,27 @@ exchange_mapi_util_find_stream (GSList *stream_list, uint32_t proptag)
 	}
 
 	return NULL;
+}
+
+ExchangeMAPIStream *
+exchange_mapi_util_find_stream_namedid (GSList *stream_list, ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
+{
+	uint32_t proptag;
+	gconstpointer res = NULL;
+
+	g_return_val_if_fail (conn != NULL, NULL);
+
+	if (!stream_list)
+		return NULL;
+
+	proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
+	if (proptag != MAPI_E_RESERVED)
+		res = exchange_mapi_util_find_stream (stream_list, proptag);
+
+	if (!res)
+		res = exchange_mapi_util_find_stream (stream_list, namedid);
+
+	return (ExchangeMAPIStream *) res;
 }
 
 void
@@ -1058,25 +1108,14 @@ exchange_mapi_utils_add_spropvalue (TALLOC_CTX *mem_ctx, struct SPropValue **val
 	g_return_val_if_fail (values_array != NULL, FALSE);
 	g_return_val_if_fail (n_values != NULL, FALSE);
 
-	if ((prop_tag & 0xFFFF) == PT_DOUBLE) {
-		uint64_t zero = 0;
-
-		/* add an empty fake value and rewrite it */
-		*values_array = add_SPropValue (mem_ctx, *values_array, n_values, PROP_TAG(PT_LONG, 0x0001), &zero);
-
-		((*values_array)[(*n_values) - 1]).ulPropTag = prop_tag;
-		((*values_array)[(*n_values) - 1]).dwAlignPad = 0;
-		memcpy (&((*values_array)[(*n_values) - 1]).value.dbl, prop_value, 8);
-	} else {
-		*values_array = add_SPropValue (mem_ctx, *values_array, n_values, prop_tag, prop_value);
-	}
+	*values_array = add_SPropValue (mem_ctx, *values_array, n_values, prop_tag, prop_value);
 
 	return TRUE;
 }
 
 /* similar as exchange_mapi_utils_add_spropvalue, just here is not used prop_tag, but named id */
 gboolean
-exchange_mapi_utils_add_spropvalue_named_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values_array, uint32_t *n_values, uint32_t named_id, gconstpointer prop_value)
+exchange_mapi_utils_add_spropvalue_namedid (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values_array, uint32_t *n_values, uint32_t named_id, gconstpointer prop_value)
 {
 	uint32_t prop_tag;
 
