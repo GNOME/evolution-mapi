@@ -1773,23 +1773,35 @@ mapi_book_utils_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid,
 			value = (gpointer) get_proptag (mappings[i].mapi_id);
 		contact_type = mappings[i].contact_type & ELEMENT_TYPE_MASK;
 		if (mappings[i].element_type == PT_UNICODE && contact_type == ELEMENT_TYPE_SIMPLE) {
-			if (value)
-				e_contact_set (contact, mappings[i].field_id, value);
+			const gchar *str = value;
+			if (str && *str)
+				e_contact_set (contact, mappings[i].field_id, str);
 		} else if (contact_type == ELEMENT_TYPE_SIMPLE) {
 			if (value && mappings[i].element_type == PT_SYSTIME) {
 				const struct FILETIME *t = value;
-				gchar buff[129];
-				time_t time = exchange_mapi_util_filetime_to_time_t (t);
+				gchar *buff = NULL;
+				GTimeVal tv;
 
-				e_contact_set (contact, mappings[i].field_id, ctime_r (&time, buff));
+				tv.tv_sec = exchange_mapi_util_filetime_to_time_t (t);
+				tv.tv_usec = 0;
+				
+				buff = g_time_val_to_iso8601 (&tv);
+
+				if (buff)
+					e_contact_set (contact, mappings[i].field_id, buff);
+
+				g_free (buff);
 			}
 		} else if (contact_type == ELEMENT_TYPE_COMPLEX) {
 			if (mappings[i].field_id == E_CONTACT_IM_AIM) {
-				GList *list = g_list_append (NULL, value);
+				const gchar *str = value;
+				if (str && *str) {
+					GList *list = g_list_append (NULL, (gpointer) str);
 
-				e_contact_set (contact, mappings[i].field_id, list);
+					e_contact_set (contact, mappings[i].field_id, list);
 
-				g_list_free (list);
+					g_list_free (list);
+				}
 			} else if (mappings[i].field_id == E_CONTACT_BIRTH_DATE
 				   || mappings[i].field_id == E_CONTACT_ANNIVERSARY) {
 				const struct FILETIME *t = value;
@@ -1815,7 +1827,7 @@ mapi_book_utils_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid,
 				if (mappings[i].field_id == E_CONTACT_ADDRESS_HOME) {
 					contact_addr.address_format = NULL;
 					contact_addr.po = NULL;
-					contact_addr.street = (gchar *)value;
+					contact_addr.street = (gchar *) value;
 					contact_addr.ext = (gchar *) get_str_proptag (PR_HOME_ADDRESS_POST_OFFICE_BOX_UNICODE);
 					contact_addr.locality = (gchar *) get_str_proptag (PR_HOME_ADDRESS_CITY_UNICODE);
 					contact_addr.region = (gchar *) get_str_proptag (PR_HOME_ADDRESS_STATE_OR_PROVINCE_UNICODE);
@@ -1824,14 +1836,26 @@ mapi_book_utils_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid,
 				} else {
 					contact_addr.address_format = NULL;
 					contact_addr.po = NULL;
-					contact_addr.street = (gchar *)value;
+					contact_addr.street = (gchar *) value;
 					contact_addr.ext = (gchar *) get_str_proptag (PR_POST_OFFICE_BOX_UNICODE);
 					contact_addr.locality = (gchar *) get_str_proptag (PR_LOCALITY_UNICODE);
 					contact_addr.region = (gchar *) get_str_proptag (PR_STATE_OR_PROVINCE_UNICODE);
 					contact_addr.code = (gchar *) get_str_proptag (PR_POSTAL_CODE_UNICODE);
 					contact_addr.country = (gchar *) get_str_proptag (PR_COUNTRY_UNICODE);
 				}
-				e_contact_set (contact, mappings[i].field_id, &contact_addr);
+
+				#define is_set(x) ((x) && *(x))
+				if (is_set (contact_addr.address_format) ||
+				    is_set (contact_addr.po) ||
+				    is_set (contact_addr.street) ||
+				    is_set (contact_addr.ext) ||
+				    is_set (contact_addr.locality) ||
+				    is_set (contact_addr.region) ||
+				    is_set (contact_addr.code) ||
+				    is_set (contact_addr.country)) {
+					e_contact_set (contact, mappings[i].field_id, &contact_addr);
+				}
+				#undef is_set
 			}
 		}
 	}
