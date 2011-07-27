@@ -73,8 +73,6 @@ camel_mapi_store_summary_init (CamelMapiStoreSummary *mapi_store_summary)
 
 	store_summary = CAMEL_STORE_SUMMARY (mapi_store_summary);
 	store_summary->store_info_size = sizeof (CamelMapiStoreInfo);
-
-	mapi_store_summary->version = CAMEL_MAPI_STORE_SUMMARY_VERSION;
 }
 
 CamelMapiStoreSummary *
@@ -86,18 +84,13 @@ camel_mapi_store_summary_new (void)
 static gint
 summary_header_load(CamelStoreSummary *s, FILE *in)
 {
-	CamelMapiStoreSummary *summary = (CamelMapiStoreSummary *)s;
 	CamelStoreSummaryClass *store_summary_class;
 
 	store_summary_class = CAMEL_STORE_SUMMARY_CLASS (
 		camel_mapi_store_summary_parent_class);
 
-	/* TODO */
 	if (store_summary_class->summary_header_load (s, in) == -1)
-			/* || camel_file_util_decode_fixed_int32(in, &version) == -1) */
 		return -1;
-
-	summary->version = 0;
 
 	return 0;
 }
@@ -120,21 +113,37 @@ static CamelStoreInfo *
 store_info_load(CamelStoreSummary *s, FILE *in)
 {
 	CamelStoreSummaryClass *store_summary_class;
-	CamelMapiStoreInfo *si;
+	CamelStoreInfo *si;
+	CamelMapiStoreInfo *msi;
 
 	store_summary_class = CAMEL_STORE_SUMMARY_CLASS (
 		camel_mapi_store_summary_parent_class);
 
-	si = (CamelMapiStoreInfo *)store_summary_class->store_info_load(s, in);
+	si = store_summary_class->store_info_load(s, in);
 	if (si) {
-		if (camel_file_util_decode_string(in, &si->full_name) == -1
-		    || camel_file_util_decode_string(in, &si->folder_id) == -1
-		    || camel_file_util_decode_string(in, &si->parent_id) == -1) {
-			camel_store_summary_info_free(s, (CamelStoreInfo *)si);
+		msi = (CamelMapiStoreInfo *) si;
+		if (camel_file_util_decode_string(in, &msi->full_name) == -1
+		    || camel_file_util_decode_string(in, &msi->folder_id) == -1
+		    || camel_file_util_decode_string(in, &msi->parent_id) == -1) {
+			camel_store_summary_info_free (s, si);
 			si = NULL;
+		} else if (((si->flags >> 13) & (CAMEL_FOLDER_TYPE_MASK >> 13)) != 0) {
+			guint32 old_flags = si->flags;
+
+			si->flags = (si->flags & ((1 << 13) - 1));
+
+			if (old_flags & ((1 << 13) << 1))
+				si->flags |= CAMEL_MAPI_FOLDER_PUBLIC;
+			if (old_flags & ((1 << 13) << 2))
+				si->flags |= CAMEL_MAPI_FOLDER_PERSONAL;
+			if (old_flags & ((1 << 13) << 3))
+				si->flags |= CAMEL_MAPI_FOLDER_FORIEGN;
+			if (old_flags & ((1 << 13) << 4))
+				si->flags |= CAMEL_MAPI_FOLDER_MAIL;
 		}
 	}
-	return (CamelStoreInfo *)si;
+
+	return si;
 }
 
 static gint

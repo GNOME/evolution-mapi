@@ -26,8 +26,6 @@
 
 #include <camel/camel.h>
 
-#define CAMEL_MAPI_STORE_SUMMARY_VERSION (0)
-
 /* Standard GObject macros */
 #define CAMEL_TYPE_MAPI_STORE_SUMMARY \
 	(camel_mapi_store_summary_get_type ())
@@ -72,10 +70,6 @@ struct _CamelMapiStoreInfo {
 struct _CamelMapiStoreSummary {
 	CamelStoreSummary parent;
 	CamelMapiStoreSummaryPrivate *priv;
-
-	/* header info */
-	guint32 version;        /* version of base part of file */
-	guint32 capabilities;
 };
 
 struct _CamelMapiStoreSummaryClass {
