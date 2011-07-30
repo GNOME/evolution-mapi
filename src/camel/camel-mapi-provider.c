@@ -67,7 +67,7 @@ static CamelProvider mapi_provider = {
 
 	"Exchange MAPI",
 
-	N_("For accessing Microsoft Exchange/OpenChange servers using MAPI"),
+	N_("For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"),
 
 	"mail",
 
