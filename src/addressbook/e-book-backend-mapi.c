@@ -605,7 +605,7 @@ ebbm_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar
 
 	contact = e_book_backend_sqlitedb_get_vcard_string (priv->db,
 							    EMA_EBB_CACHE_FOLDERID,
-							    id, error);
+							    id, NULL, error);
 	if (contact)
 		*vcard = contact;
 	else
