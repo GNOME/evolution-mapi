@@ -821,7 +821,12 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 		}
 
 		if (get_mapi_SPropValue_array_date_timeval (&t, properties, PidLidAppointmentEndWhole) == MAPI_E_SUCCESS) {
-			icaltimezone *zone = dtend_tz_location ? icaltimezone_get_builtin_timezone (dtend_tz_location) : (icaltimezone *)default_zone;
+			icaltimezone *zone;
+
+			if (!dtend_tz_location)
+				dtend_tz_location = dtstart_tz_location;
+
+			zone = dtend_tz_location ? icaltimezone_get_builtin_timezone (dtend_tz_location) : (icaltimezone *) default_zone;
 			prop = icalproperty_new_dtend (icaltime_from_timet_with_zone (t.tv_sec, all_day, zone));
 			if (!all_day && zone && icaltimezone_get_tzid (zone)) {
 				icalproperty_add_parameter (prop, icalparameter_new_tzid (icaltimezone_get_tzid (zone)));
