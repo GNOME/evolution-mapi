@@ -1708,6 +1708,12 @@ mapi_folder_transfer_messages_to_sync (CamelFolder *source,
 	GSList *src_msg_ids = NULL;
 	gboolean success = TRUE;
 
+	if (CAMEL_IS_MAPI_FOLDER (source)) {
+		/* make sure changed flags are written into the server */
+		if (!mapi_folder_synchronize_sync (source, FALSE, cancellable, error))
+			return FALSE;
+	}
+
 	if (!CAMEL_IS_MAPI_FOLDER (source) || !CAMEL_IS_MAPI_FOLDER (destination) ||
 	    (CAMEL_MAPI_FOLDER (source)->type & CAMEL_MAPI_FOLDER_PUBLIC) != 0 ||
 	    (CAMEL_MAPI_FOLDER (destination)->type & CAMEL_MAPI_FOLDER_PUBLIC) != 0) {
