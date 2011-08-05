@@ -316,6 +316,18 @@ ebbm_build_cache_update_restriction (EBookBackendMAPI *ebma, TALLOC_CTX *mem_ctx
 	return restriction;
 }
 
+static gboolean
+unref_backend_idle_cb (gpointer data)
+{
+	EBookBackendMAPI *ebma = data;
+
+	g_return_val_if_fail (ebma != NULL, FALSE);
+
+	g_object_unref (ebma);
+
+	return FALSE;
+}
+
 static gpointer
 ebbm_update_cache_cb (gpointer data)
 {
@@ -404,6 +416,9 @@ ebbm_update_cache_cb (gpointer data)
 
 	/* indicate the thread is not running */
 	g_cancellable_cancel (priv->update_cache);
+
+	/* May unref it out of the thread, in case it's the last reference to it */
+	g_idle_add (unref_backend_idle_cb, ebma);
 
 	return NULL;
 }
@@ -588,8 +603,13 @@ ebbm_authenticate_user (EBookBackendMAPI *ebma, const gchar *user, const gchar *
 
 		ebbm_notify_connection_status (ebma, TRUE);
 
-		/* if (priv->marked_for_offline) */
+		/* if ( priv->marked_for_offline ) */ {
+			g_object_ref (ebma);
+
 			priv->update_cache_thread = g_thread_create (ebbm_update_cache_cb, ebma, TRUE, NULL);
+			if (!priv->update_cache_thread)
+				g_object_unref (ebma);
+		}
 		break;
 
 	default:
@@ -752,7 +772,8 @@ ebbm_book_view_thread (gpointer data)
 		g_error_free (error);
 
 	g_object_unref (bvtd->book_view);
-	g_object_unref (bvtd->ebma);
+	/* May unref it out of the thread, in case it's the last reference to it */
+	g_idle_add (unref_backend_idle_cb, bvtd->ebma);
 	g_free (bvtd);
 
 	return NULL;
@@ -1106,6 +1127,7 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 
 	if (op->book)
 		g_object_unref (op->book);
+	g_object_unref (ebma);
 	g_free (op);
 }
 
@@ -1123,6 +1145,7 @@ base_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, Operatio
 	priv = ebbm->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (ebbm);
 	if (book)
 		g_object_ref (book);
 
@@ -1148,6 +1171,7 @@ str_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, const gch
 	priv = ebbm->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (ebbm);
 	if (book)
 		g_object_ref (book);
 
@@ -1214,10 +1238,12 @@ ebbm_op_load_source (EBookBackend *backend, ESource *source, gboolean only_if_ex
 	em_operation_queue_push (priv->op_queue, op);
 	*/
 
+	g_object_ref (ebbm);
 	if (ebmac->op_load_source)
 		ebmac->op_load_source (ebbm, source, only_if_exists, error);
 	else
 		g_propagate_error (error, EDB_ERROR (NOT_SUPPORTED));
+	g_object_unref (ebbm);
 }
 
 static void
@@ -1236,6 +1262,7 @@ ebbm_op_remove_contacts (EBookBackend *backend, EDataBook *book, guint32 opid, G
 	priv = ebbm->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (ebbm);
 	if (book)
 		g_object_ref (book);
 
@@ -1267,6 +1294,8 @@ ebbm_op_start_book_view (EBookBackend *backend, EDataBookView *book_view)
 	priv = ebbm->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (ebbm);
+
 	op = g_new0 (OperationBookView, 1);
 	op->base.ot = OP_START_BOOK_VIEW;
 	op->base.book = NULL;
@@ -1293,6 +1322,8 @@ ebbm_op_stop_book_view (EBookBackend *backend, EDataBookView *book_view)
 	priv = ebbm->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (ebbm);
+
 	op = g_new0 (OperationBookView, 1);
 	op->base.ot = OP_STOP_BOOK_VIEW;
 	op->base.book = NULL;
@@ -1318,6 +1349,7 @@ ebbm_op_authenticate_user (EBookBackend *backend, EDataBook *book, guint32 opid,
 	priv = ebbm->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (ebbm);
 	if (book)
 		g_object_ref (book);
 
