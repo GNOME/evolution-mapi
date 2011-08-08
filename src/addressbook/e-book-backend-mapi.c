@@ -350,7 +350,7 @@ ebbm_update_cache_cb (gpointer data)
 		if (!error && !g_cancellable_is_cancelled (priv->update_cache)) {
 			GSList *cache_keys, *c;
 
-			cache_keys = e_book_backend_sqlitedb_search_uids (priv->db, EMA_EBB_CACHE_FOLDERID, NULL, NULL);
+			cache_keys = e_book_backend_sqlitedb_search_uids (priv->db, EMA_EBB_CACHE_FOLDERID, NULL, NULL, NULL);
 
 			for (c = cache_keys; c; c = c->next) {
 				const gchar *uid = c->data;
@@ -630,7 +630,7 @@ ebbm_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar
 
 	contact = e_book_backend_sqlitedb_get_vcard_string (priv->db,
 							    EMA_EBB_CACHE_FOLDERID,
-							    id, NULL, error);
+							    id, NULL, NULL, error);
 	if (contact)
 		*vcard = contact;
 	else
@@ -657,7 +657,7 @@ ebbm_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellable, const 
 	}
 
 	hits = e_book_backend_sqlitedb_search (priv->db, EMA_EBB_CACHE_FOLDERID,
-					       query, NULL, &err);
+					       query, NULL, NULL, NULL, &err);
 
 	for (l = hits; !err && l; l = l->next) {
 		EbSdbSearchData *sdata = (EbSdbSearchData *) l->data;
@@ -1441,7 +1441,7 @@ e_book_backend_mapi_update_view_by_cache (EBookBackendMAPI *ebma, EDataBookView 
 	g_return_if_fail (db != NULL);
 
 	hits = e_book_backend_sqlitedb_search (db, EMA_EBB_CACHE_FOLDERID,
-					       query, NULL, error);
+					       query, NULL, NULL, NULL, error);
 
 	for (l = hits; (!error || !*error) && l; l = l->next) {
 		EbSdbSearchData *sdata = (EbSdbSearchData *) l->data;

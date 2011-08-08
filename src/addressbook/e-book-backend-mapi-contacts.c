@@ -296,7 +296,7 @@ mapi_book_write_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 
 		uid = e_contact_get_const (mcd->contact, E_CONTACT_UID);
 		if (uid)
-			old_contact = e_book_backend_sqlitedb_get_contact (mcd->db, EMA_EBB_CACHE_FOLDERID, uid, NULL, &error);
+			old_contact = e_book_backend_sqlitedb_get_contact (mcd->db, EMA_EBB_CACHE_FOLDERID, uid, NULL, NULL, &error);
 
 		if (!error && old_contact) {
 			member_values = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
