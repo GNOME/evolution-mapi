@@ -670,7 +670,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 	struct timeval t;
 	ExchangeMAPIStream *body_stream;
 	const gchar *subject = NULL, *body = NULL;
-	const struct StringArray_r *categories_array;
+	const struct StringArrayW_r *categories_array;
 	const uint32_t *ui32;
 	const bool *b;
 	icalcomponent *ical_comp;
@@ -731,7 +731,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 		gint ii;
 
 		for (ii = 0; ii < categories_array->cValues; ii++) {
-			const gchar *category = categories_array->lppszA[ii];
+			const gchar *category = categories_array->lppszW[ii];
 
 			if (!category || !*category)
 				continue;
@@ -1471,11 +1471,11 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 	if (categories) {
 		gint ii;
 		GSList *c;
-		struct StringArray_r *categories_array;
+		struct StringArrayW_r *categories_array;
 
-		categories_array = talloc_zero (mem_ctx, struct StringArray_r);
+		categories_array = talloc_zero (mem_ctx, struct StringArrayW_r);
 		categories_array->cValues = g_slist_length (categories);
-		categories_array->lppszA = (const char **) talloc_zero_array (mem_ctx, gchar *, categories_array->cValues);
+		categories_array->lppszW = (const char **) talloc_zero_array (mem_ctx, gchar *, categories_array->cValues);
 
 		for (c = categories, ii = 0; c; c = c->next, ii++) {
 			const gchar *category = c->data;
@@ -1486,7 +1486,7 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 				continue;
 			}
 
-			categories_array->lppszA[ii] = talloc_strdup (mem_ctx, category);
+			categories_array->lppszW[ii] = talloc_strdup (mem_ctx, category);
 		}
 
 		set_named_value (PidNameKeywords, categories_array);
