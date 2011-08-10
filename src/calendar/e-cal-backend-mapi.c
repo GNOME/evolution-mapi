@@ -1407,8 +1407,8 @@ capture_req_props (FetchItemsCallbackData *item_data, gpointer data)
 	ui32 = exchange_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidAppointmentSequence);
 	if (ui32)
 		cbdata->appt_seq = *ui32;
-	cbdata->cleanglobalid = (gpointer) exchange_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidCleanGlobalObjectId);
-	cbdata->globalid = (gpointer) exchange_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidGlobalObjectId);
+	cbdata->cleanglobalid = exchange_mapi_util_copy_binary_r (exchange_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidCleanGlobalObjectId));
+	cbdata->globalid = exchange_mapi_util_copy_binary_r (exchange_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidGlobalObjectId));
 	cbdata->username = g_strdup (exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE));
 	cbdata->useridtype = g_strdup (exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE));
 	cbdata->userid = g_strdup (exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE));
@@ -2146,6 +2146,10 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 				exchange_mapi_cal_util_generate_globalobjectid (TRUE,  compuid, exception_repleace_time, ical_creation_time.year ? &creation_time : NULL, &cleanglobalid);
 			}
 
+			if (cbdata.globalid)
+				exchange_mapi_util_free_binary_r (cbdata.globalid);
+			if (cbdata.cleanglobalid)
+				exchange_mapi_util_free_binary_r (cbdata.cleanglobalid);
 			cbdata.globalid = &globalid;
 			cbdata.cleanglobalid = &cleanglobalid;
 
