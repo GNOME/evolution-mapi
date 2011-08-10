@@ -1221,13 +1221,63 @@ ecbm_connect (ECalBackendMAPI *cbmapi, GError **perror)
 }
 
 static void
+ecbm_connect_user (ECalBackend *backend, GCancellable *cancellable, const gchar *password, GError **perror)
+{
+	ECalBackendMAPI *cbmapi;
+	ECalBackendMAPIPrivate *priv;
+	ExchangeMapiConnection *old_conn;
+	GError *mapi_error = NULL;
+
+	g_static_mutex_lock (&auth_mutex);
+
+	cbmapi = E_CAL_BACKEND_MAPI (backend);
+	priv = cbmapi->priv;
+
+	old_conn = priv->conn;
+
+	priv->conn = exchange_mapi_connection_new (priv->profile, password, &mapi_error);
+	if (!priv->conn) {
+		priv->conn = exchange_mapi_connection_find (priv->profile);
+		if (priv->conn
+		    && !exchange_mapi_connection_connected (priv->conn)) {
+			exchange_mapi_connection_reconnect (priv->conn, password, &mapi_error);
+		}
+	}
+
+	if (old_conn)
+		g_object_unref (old_conn);
+
+	if (priv->conn && exchange_mapi_connection_connected (priv->conn)) {
+		/* Success */;
+	} else {
+		mapi_error_to_edc_error (perror, mapi_error, AuthenticationFailed, NULL);
+		if (mapi_error)
+			g_error_free (mapi_error);
+		g_static_mutex_unlock (&auth_mutex);
+		return;
+	}
+
+	if (mapi_error) {
+		mapi_error_to_edc_error (perror, mapi_error, AuthenticationFailed, NULL);
+		g_error_free (mapi_error);
+		g_static_mutex_unlock (&auth_mutex);
+		return;
+	}
+
+	g_static_mutex_unlock (&auth_mutex);
+
+	ecbm_connect (cbmapi, perror);
+}
+
+
+static void
 ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gboolean only_if_exists, GError **perror)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
 	ESource *esource;
 	const gchar *fid = NULL;
-	const gchar *cache_dir;
+	const gchar *cache_dir, *krb_sso = NULL;
 	uint32_t olFolder = 0;
 
 	if (e_cal_backend_is_opened (E_CAL_BACKEND (backend))) {
@@ -1312,58 +1362,29 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gbool
 	exchange_mapi_util_mapi_id_from_string (fid, &priv->fid);
 	priv->olFolder = olFolder;
 
+	krb_sso = e_source_get_property (esource, "kerberos");
 	g_mutex_unlock (priv->mutex);
 
 	e_cal_backend_notify_online (backend, TRUE);
 	e_cal_backend_notify_readonly (backend, priv->read_only);
-	e_cal_backend_notify_auth_required (backend, TRUE, NULL);
+
+	if (!krb_sso || !g_str_equal (krb_sso, "required")) {
+		e_cal_backend_notify_auth_required (backend, TRUE, NULL);
+	} else {
+		ecbm_connect_user (backend, cancellable, NULL, perror);
+		e_cal_backend_notify_opened (backend, NULL);
+	}
 }
 
 static void
 ecbm_authenticate_user (ECalBackend *backend, GCancellable *cancellable, ECredentials *credentials, GError **perror)
 {
-	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
-	ExchangeMapiConnection *old_conn;
-	GError *mapi_error = NULL;
+	const gchar *password;
 
 	g_static_mutex_lock (&auth_mutex);
-
-	cbmapi = E_CAL_BACKEND_MAPI (backend);
-	priv = cbmapi->priv;
-
-	old_conn = priv->conn;
-
-	priv->conn = exchange_mapi_connection_new (priv->profile, e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD), &mapi_error);
-	if (!priv->conn) {
-		priv->conn = exchange_mapi_connection_find (priv->profile);
-		if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
-			exchange_mapi_connection_reconnect (priv->conn, e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD), &mapi_error);
-	}
-
-	if (old_conn)
-		g_object_unref (old_conn);
-
-	if (priv->conn && exchange_mapi_connection_connected (priv->conn)) {
-		/* Success */;
-	} else {
-		mapi_error_to_edc_error (perror, mapi_error, AuthenticationFailed, NULL);
-		if (mapi_error)
-			g_error_free (mapi_error);
-		g_static_mutex_unlock (&auth_mutex);
-		return;
-	}
-
-	if (mapi_error) {
-		mapi_error_to_edc_error (perror, mapi_error, AuthenticationFailed, NULL);
-		g_error_free (mapi_error);
-		g_static_mutex_unlock (&auth_mutex);
-		return;
-	}
-
+	password = e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD);
 	g_static_mutex_unlock (&auth_mutex);
-
-	ecbm_connect (cbmapi, perror);
+	ecbm_connect_user (backend, cancellable, password, perror);
 }
 
 static gboolean
@@ -2459,7 +2480,9 @@ ecbm_set_online (ECalBackend *backend, gboolean is_online)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
+	ESource *esource = NULL;
 	gboolean re_open = FALSE;
+	const gchar *krb_sso = NULL;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
@@ -2470,14 +2493,18 @@ ecbm_set_online (ECalBackend *backend, gboolean is_online)
 
 	g_mutex_lock (priv->mutex);
 
+	esource = e_cal_backend_get_source (E_CAL_BACKEND (cbmapi));
+	krb_sso = e_source_get_property (esource, "kerberos");
 	re_open = (e_cal_backend_is_online (backend) ? 1 : 0) < (is_online ? 1 : 0);
 	e_cal_backend_notify_online (backend, is_online);
 
 	priv->mode_changed = TRUE;
 	if (is_online) {
 		priv->read_only = FALSE;
-		if (e_cal_backend_is_opened (backend) && re_open)
+		if (e_cal_backend_is_opened (backend) && re_open
+		    && ! (krb_sso && g_str_equal (krb_sso, "required"))) {
 			e_cal_backend_notify_auth_required (backend, TRUE, NULL);
+		}
 	} else {
 		priv->read_only = TRUE;
 	}

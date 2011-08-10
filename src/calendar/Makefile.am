@@ -5,7 +5,8 @@ AM_CPPFLAGS =					\
 	$(LIBEBACKEND_CFLAGS)			\
 	$(LIBECAL_CFLAGS)			\
 	$(LIBEDATACAL_CFLAGS)			\
-	$(LIBMAPI_CFLAGS)
+	$(LIBMAPI_CFLAGS) \
+	$(CAMEL_CFLAGS)
 
 ecal_backend_LTLIBRARIES = libecalbackendmapi.la
 
@@ -20,7 +21,8 @@ libecalbackendmapi_la_LIBADD =			\
 	$(LIBEBACKEND_LIBS)			\
 	$(LIBECAL_LIBS)				\
 	$(LIBEDATACAL_LIBS)			\
-	$(LIBMAPI_LIBS)
+	$(LIBMAPI_LIBS)				\
+	$(CAMEL_LIBS)
 
 libecalbackendmapi_la_LDFLAGS =			\
 	-module -avoid-version $(NO_UNDEFINED)

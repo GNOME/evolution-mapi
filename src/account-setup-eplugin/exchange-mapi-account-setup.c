@@ -108,7 +108,7 @@ tree_selection_changed (GtkTreeSelection *selection, GtkDialog *dialog)
 /* Callback for ProcessNetworkProfile. If we have more than one username,
  we need to let the user select. */
 static uint32_t
-create_profile_callback (struct SRowSet *rowset, gpointer data)
+create_profile_callback (struct SRowSet *rowset, gconstpointer data)
 {
 	struct SPropValue *lpProp_fullname, *lpProp_account;
 	gint response;
@@ -208,13 +208,32 @@ create_profile_callback (struct SRowSet *rowset, gpointer data)
 	return index;
 }
 
+static char*
+prompt_password(const gchar *user, const gchar *host, const gchar *key,
+		EMConfigTargetAccount *account)
+{
+	int pw_flags = E_PASSWORDS_REMEMBER_FOREVER|E_PASSWORDS_SECRET;
+	gchar *password, *title;
+	gboolean save;
+
+	password = e_passwords_get_password (NULL, key);
+	save = e_account_get_bool (account->modified_account,
+				   E_ACCOUNT_SOURCE_SAVE_PASSWD);
+	title = g_strdup_printf (_("Enter Password for %s@%s"), user, host);
+	password = e_passwords_ask_password (title, NULL, key, title, pw_flags,
+					     &save, NULL);
+	g_free (title);
+	return password;
+}
+
 static void
 validate_credentials (GtkWidget *widget, EConfig *config)
 {
 	EMConfigTargetAccount *target_account = (EMConfigTargetAccount *)(config->target);
 	CamelURL *url = NULL;
-	gchar *key = NULL, *password = NULL;
-	const gchar *domain_name = NULL;
+	gchar *key = NULL;
+	ExchangeMapiProfileData empd = { 0 };
+	GError *error = NULL;
 
 	if (!e_shell_get_online (e_shell_get_default ())) {
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Cannot create MAPI folders in offline mode."));
@@ -222,7 +241,6 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	}
 
 	url = camel_url_new (e_account_get_string (target_account->modified_account, E_ACCOUNT_SOURCE_URL), NULL);
-	domain_name = camel_url_get_param (url, "domain");
 
 	/* Silently remove domain part from a username when user enters it as such.
 	   This change will be visible in the UI on new edit open. */
@@ -235,32 +253,32 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 		g_free (tmp);
 	}
 
-	if (!url->user || !*url->user || !url->host || !*url->host || !domain_name || !*domain_name) {
+	exchange_mapi_util_profiledata_from_camelurl (&empd, url);
+	if (!empd.username || !*(empd.username)
+	    || !empd.server || !*(empd.server)
+	    || ((!empd.domain || !*(empd.domain))
+		&& !empd.krb_sso)) {
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Server, username and domain name cannot be empty. Please fill them with correct values."));
+		camel_url_free (url);
+		return;
+	} else if (empd.krb_sso && (!empd.krb_realm || !*(empd.krb_realm))) {
+		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Realm name cannot be empty when kerberos is selected. Please fill them with correct values."));
 		camel_url_free (url);
 		return;
 	}
 
 	key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
-	password = e_passwords_get_password (NULL, key);
-	if (!password || !*password) {
-		gboolean remember = e_account_get_bool (target_account->modified_account, E_ACCOUNT_SOURCE_SAVE_PASSWD);
-		gchar *title;
-
-		g_free (password);
-		title = g_strdup_printf (_("Enter Password for %s@%s"), url->user, url->host);
-		password = e_passwords_ask_password (title, NULL, key, title,
-						     E_PASSWORDS_REMEMBER_FOREVER|E_PASSWORDS_SECRET,
-						     &remember, NULL);
-		g_free (title);
+	if (empd.krb_sso) {
+		exchange_mapi_util_trigger_krb_auth (&empd, &error);
+	} else {
+		empd.password = prompt_password(empd.username, empd.server,
+						key, target_account);
 	}
 
-	/*Can there be a account without password ?*/
-	if (password && *password && domain_name && *domain_name && *url->user && *url->host) {
-		guint32 cp_flags = (camel_url_get_param (url, "ssl") && g_str_equal (camel_url_get_param (url, "ssl"), "1")) ? CREATE_PROFILE_FLAG_USE_SSL : CREATE_PROFILE_FLAG_NONE;
-		GError *error = NULL;
-		gboolean status = exchange_mapi_create_profile (url->user, password, domain_name, url->host, cp_flags,
-								(mapi_profile_callback_t) create_profile_callback, url->user,
+	if (COMPLETE_PROFILEDATA(&empd)) {
+		gboolean status = exchange_mapi_create_profile (&empd,
+								(mapi_profile_callback_t) create_profile_callback,
+								empd.username,
 								&error);
 		if (status) {
 			/* profile was created, try to connect to the server */
@@ -268,9 +286,10 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 			gchar *profname;
 
 			status = FALSE;
-			profname = exchange_mapi_util_profile_name (url->user, domain_name, url->host, FALSE);
+			profname = exchange_mapi_util_profile_name (&empd,
+								    FALSE);
 
-			conn = exchange_mapi_connection_new (profname, password, &error);
+			conn = exchange_mapi_connection_new (profname, empd.password, &error);
 			if (conn) {
 				status = exchange_mapi_connection_connected (conn);
 				g_object_unref (conn);
@@ -283,7 +302,8 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 			/* Things are successful */
 			gchar *profname = NULL, *uri = NULL;
 
-			profname = exchange_mapi_util_profile_name (url->user, domain_name, url->host, FALSE);
+			profname = exchange_mapi_util_profile_name (&empd,
+								    FALSE);
 			camel_url_set_param (url, "profile", profname);
 			g_free (profname);
 
@@ -305,14 +325,15 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 			g_free (e);
 		}
 
-		if (error)
-			g_error_free (error);
 	} else {
 		e_passwords_forget_password (NULL, key);
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Authentication failed."));
 	}
 
-	g_free (password);
+	if (error)
+		g_error_free (error);
+
+	g_free (empd.password);
 	g_free (key);
 	camel_url_free (url);
 }
@@ -342,6 +363,49 @@ domain_entry_changed(GtkWidget *entry, EConfig *config)
 }
 
 static void
+realm_entry_changed (GtkWidget *entry, EConfig *config)
+{
+	EMConfigTargetAccount *target = (EMConfigTargetAccount *)(config->target);
+	CamelURL *url = NULL;
+	const gchar *realm = NULL;
+	gchar *url_string = NULL;
+
+	url = camel_url_new (e_account_get_string(target->modified_account, E_ACCOUNT_SOURCE_URL), NULL);
+	realm = gtk_entry_get_text (GTK_ENTRY(entry));
+
+	if (realm && realm[0])
+		camel_url_set_param (url, "realm", realm);
+	else
+		camel_url_set_param (url, "realm", NULL);
+
+	url_string = camel_url_to_string (url, 0);
+	e_account_set_string (target->modified_account, E_ACCOUNT_SOURCE_URL, url_string);
+	e_account_set_string (target->modified_account, E_ACCOUNT_TRANSPORT_URL, url_string);
+	g_free (url_string);
+
+	camel_url_free (url);
+}
+
+static void
+krb_sso_check_toggled (GtkWidget *check, EConfig *config)
+{
+	EMConfigTargetAccount *target = (EMConfigTargetAccount *)(config->target);
+	CamelURL *url = NULL;
+	gchar *url_string = NULL;
+
+	url = camel_url_new (e_account_get_string (target->modified_account, E_ACCOUNT_SOURCE_URL), NULL);
+
+	camel_url_set_param (url, "kerberos", gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check)) ? "required" : NULL);
+
+	url_string = camel_url_to_string (url, 0);
+	e_account_set_string (target->modified_account, E_ACCOUNT_SOURCE_URL, url_string);
+	e_account_set_string (target->modified_account, E_ACCOUNT_TRANSPORT_URL, url_string);
+	g_free (url_string);
+
+	camel_url_free (url);
+}
+
+static void
 secure_check_toggled (GtkWidget *check, EConfig *config)
 {
 	EMConfigTargetAccount *target = (EMConfigTargetAccount *)(config->target);
@@ -358,6 +422,15 @@ secure_check_toggled (GtkWidget *check, EConfig *config)
 	g_free (url_string);
 
 	camel_url_free (url);
+}
+
+static void
+widget_sanitizer_cb (GtkToggleButton *button, GtkWidget *widget)
+{
+	g_return_if_fail (GTK_IS_TOGGLE_BUTTON (button));
+	g_return_if_fail (GTK_IS_WIDGET (button));
+
+	gtk_widget_set_sensitive (widget, gtk_toggle_button_get_active (button));
 }
 
 GtkWidget *
@@ -378,10 +451,14 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 	if (!g_ascii_strcasecmp (url->protocol, "mapi")) {
 		GtkWidget *label;
 		GtkWidget *domain_name;
+		GtkWidget *realm_name;
 		GtkWidget *auth_button;
 		GtkWidget *secure_conn;
+		GtkWidget *krb_sso;
 		const gchar *domain_value = camel_url_get_param (url, "domain");
+		const gchar *realm_value = camel_url_get_param (url, "realm");
 		const gchar *use_ssl = camel_url_get_param (url, "ssl");
+		const gchar *kerberos = camel_url_get_param (url, "kerberos");
 
 		g_object_get (data->parent, "n-rows", &row, NULL);
 
@@ -406,12 +483,37 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (hgrid), 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
 
 		row++;
-
 		secure_conn = gtk_check_button_new_with_mnemonic (_("_Use secure connection"));
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (secure_conn), use_ssl && g_str_equal (use_ssl, "1"));
 		g_signal_connect (secure_conn, "toggled", G_CALLBACK (secure_check_toggled), data->config);
 		gtk_widget_show (secure_conn);
 		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (secure_conn), 1, 2, row, row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
+
+		row++;
+		krb_sso = gtk_check_button_new_with_mnemonic (_("_Kerberos authentication"));
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (krb_sso), kerberos && g_str_equal (kerberos, "required"));
+		g_signal_connect (krb_sso, "toggled", G_CALLBACK (krb_sso_check_toggled), data->config);
+		gtk_widget_show (krb_sso);
+		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (krb_sso), 1, 2, row, row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
+
+		row++;
+		label = gtk_label_new_with_mnemonic (_("_Realm name:"));
+		gtk_widget_show (label);
+
+		realm_name = gtk_entry_new ();
+		gtk_label_set_mnemonic_widget (GTK_LABEL (label), realm_name);
+		if (realm_value && *realm_value)
+			gtk_entry_set_text (GTK_ENTRY (realm_name), realm_value);
+		gtk_widget_show (realm_name);
+		g_signal_connect (realm_name, "changed", G_CALLBACK(realm_entry_changed), data->config);
+		gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row + 1, 0, 0, 0, 0);
+		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (realm_name), 1, 2, row, row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
+
+		g_signal_connect (krb_sso, "toggled", G_CALLBACK (widget_sanitizer_cb), label);
+		g_signal_connect (krb_sso, "toggled", G_CALLBACK (widget_sanitizer_cb), realm_name);
+
+		widget_sanitizer_cb (GTK_TOGGLE_BUTTON (krb_sso), label);
+		widget_sanitizer_cb (GTK_TOGGLE_BUTTON (krb_sso), realm_name);
 	}
 
 	camel_url_free (url);
@@ -774,6 +876,7 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	EABConfigTargetSource *t = (EABConfigTargetSource *) target;
 	ESource *source = t->source;
 	gchar *uri_text, *r_uri, *sfid;
+	const gchar *kerberos = NULL;
 	ESourceGroup *grp;
 	ExchangeMapiConnection *conn;
 	mapi_id_t fid, pfid;
@@ -815,6 +918,13 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	e_source_set_property(source, "host", e_source_group_get_property (grp, "host"));
 	e_source_set_property(source, "profile", e_source_group_get_property (grp, "profile"));
 	e_source_set_property(source, "domain", e_source_group_get_property (grp, "domain"));
+	e_source_set_property(source, "realm", e_source_group_get_property (grp, "realm"));
+	kerberos = e_source_group_get_property (grp, "kerberos");
+	e_source_set_property(source, "kerberos", kerberos);
+	if (kerberos && g_str_equal (kerberos, "required")) {
+		e_source_set_property (source, "auth", NULL);
+		e_source_set_property (source, "auth-type", NULL);
+	}
 	e_source_set_relative_uri (source, g_strconcat (";",e_source_peek_name (source), NULL));
 
 	e_source_set_property (source, "completion", "true");
@@ -938,6 +1048,18 @@ exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 
 	tmp = e_source_group_get_property (group, "domain");
 	e_source_set_property (source, "domain", tmp);
+	g_free (tmp);
+
+	tmp = e_source_group_get_property (group, "realm");
+	e_source_set_property (source, "realm", tmp);
+	g_free (tmp);
+
+	tmp = e_source_group_get_property (group, "kerberos");
+	e_source_set_property (source, "kerberos", tmp);
+	if (tmp && g_str_equal (tmp, "required")) {
+		e_source_set_property (source, "auth", NULL);
+		e_source_set_property (source, "auth-type", NULL);
+	}
 	g_free (tmp);
 
 	tmp = exchange_mapi_util_mapi_id_to_string (fid);

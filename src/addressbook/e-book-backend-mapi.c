@@ -385,12 +385,70 @@ ebbm_update_cache_cb (gpointer data)
 }
 
 static void
+ebbm_connect_user (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *password, GError **error)
+{
+	EBookBackendMAPIPrivate *priv = ebma->priv;
+	GError *mapi_error = NULL;
+	ExchangeMapiConnection *old_conn;
+
+	if (!e_book_backend_is_online (E_BOOK_BACKEND (ebma))) {
+		ebbm_notify_connection_status (ebma, FALSE);
+	} else {
+		if (priv->update_cache_thread) {
+			g_cancellable_cancel (priv->update_cache);
+			g_thread_join (priv->update_cache_thread);
+			priv->update_cache_thread = NULL;
+		}
+
+		e_book_backend_mapi_lock_connection (ebma);
+
+		old_conn = priv->conn;
+		priv->conn = NULL;
+
+		priv->conn = exchange_mapi_connection_new (priv->profile,
+							   password,
+							   &mapi_error);
+		if (!priv->conn) {
+			priv->conn = exchange_mapi_connection_find (priv->profile);
+			if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
+				exchange_mapi_connection_reconnect (priv->conn, password, &mapi_error);
+		}
+
+		if (old_conn)
+			g_object_unref (old_conn);
+
+		if (!priv->conn || mapi_error) {
+			if (priv->conn) {
+				g_object_unref (priv->conn);
+				priv->conn = NULL;
+			}
+
+			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Cannot connect"));
+			e_book_backend_mapi_unlock_connection (ebma);
+
+			if (mapi_error)
+				g_error_free (mapi_error);
+
+			ebbm_notify_connection_status (ebma, FALSE);
+			return;
+		}
+
+		e_book_backend_mapi_unlock_connection (ebma);
+
+		ebbm_notify_connection_status (ebma, TRUE);
+
+		/* if (priv->marked_for_offline) */
+		priv->update_cache_thread = g_thread_create (ebbm_update_cache_cb, ebma, TRUE, NULL);
+	}
+}
+
+static void
 ebbm_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean only_if_exists, GError **perror)
 {
 	EBookBackendMAPIPrivate *priv = ebma->priv;
 	ESource *source = e_book_backend_get_source (E_BOOK_BACKEND (ebma));
 	const gchar *offline;
-	const gchar *cache_dir;
+	const gchar *cache_dir, *krb_sso;
 	GError *error = NULL;
 
 	if (e_book_backend_is_opened (E_BOOK_BACKEND (ebma))) {
@@ -443,7 +501,14 @@ ebbm_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean only_if_e
 	}
 
 	e_book_backend_notify_online (E_BOOK_BACKEND (ebma), TRUE);
-	e_book_backend_notify_auth_required (E_BOOK_BACKEND (ebma), TRUE, NULL);
+	krb_sso = e_source_get_property (source, "kerberos");
+	if (!krb_sso || !g_str_equal (krb_sso, "required")) {
+		e_book_backend_notify_auth_required (E_BOOK_BACKEND (ebma),
+						     TRUE, NULL);
+	} else {
+		ebbm_connect_user (ebma, cancellable, NULL, perror);
+		e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), NULL);
+	}
 }
 
 static void
@@ -520,66 +585,13 @@ ebbm_get_backend_property (EBookBackendMAPI *ebma, const gchar *prop_name, gchar
 static void
 ebbm_authenticate_user (EBookBackendMAPI *ebma, GCancellable *cancellable, ECredentials *credentials, GError **error)
 {
-	EBookBackendMAPIPrivate *priv = ebma->priv;
-	GError *mapi_error = NULL;
-	ExchangeMapiConnection *old_conn;
+	const gchar *password;
 
 	if (!e_book_backend_is_online (E_BOOK_BACKEND (ebma))) {
 		ebbm_notify_connection_status (ebma, FALSE);
 	} else {
-		if (priv->update_cache_thread) {
-			g_cancellable_cancel (priv->update_cache);
-			g_thread_join (priv->update_cache_thread);
-			priv->update_cache_thread = NULL;
-		}
-
-		e_book_backend_mapi_lock_connection (ebma);
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, error)) {
-			e_book_backend_mapi_unlock_connection (ebma);
-			return;
-		}
-
-		old_conn = priv->conn;
-		priv->conn = NULL;
-
-		priv->conn = exchange_mapi_connection_new (priv->profile, e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD), &mapi_error);
-		if (!priv->conn) {
-			priv->conn = exchange_mapi_connection_find (priv->profile);
-			if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
-				exchange_mapi_connection_reconnect (priv->conn, e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD), &mapi_error);
-		}
-
-		if (old_conn)
-			g_object_unref (old_conn);
-
-		if (!priv->conn || mapi_error) {
-			if (priv->conn) {
-				g_object_unref (priv->conn);
-				priv->conn = NULL;
-			}
-
-			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Cannot connect"));
-			e_book_backend_mapi_unlock_connection (ebma);
-
-			if (mapi_error)
-				g_error_free (mapi_error);
-
-			ebbm_notify_connection_status (ebma, FALSE);
-			return;
-		}
-
-		e_book_backend_mapi_unlock_connection (ebma);
-
-		ebbm_notify_connection_status (ebma, TRUE);
-
-		if (!g_cancellable_is_cancelled (cancellable) /* && priv->marked_for_offline */) {
-			g_object_ref (ebma);
-
-			priv->update_cache_thread = g_thread_create (ebbm_update_cache_cb, ebma, TRUE, NULL);
-			if (!priv->update_cache_thread)
-				g_object_unref (ebma);
-		}
+		password = e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD);
+		ebbm_connect_user (ebma, cancellable, password, error);
 	}
 }
 
@@ -588,11 +600,14 @@ ebbm_set_online (EBookBackend *backend, gboolean is_online)
 {
 	EBookBackendMAPI *ebma = E_BOOK_BACKEND_MAPI (backend);
 	EBookBackendMAPIPrivate *priv = ebma->priv;
+	ESource *esource;
+	const gchar *krb_sso = NULL;
 
 	e_book_backend_notify_online (backend, is_online);
 	if (e_book_backend_is_opened (backend)) {
 		e_book_backend_mapi_lock_connection (ebma);
 
+		esource = e_book_backend_get_source (E_BOOK_BACKEND (ebma));
 		if (!is_online) {
 			e_book_backend_notify_readonly (backend, TRUE);
 			ebbm_notify_connection_status (ebma, FALSE);
@@ -603,8 +618,19 @@ ebbm_set_online (EBookBackend *backend, gboolean is_online)
 			}
 		} else {
 			ebbm_notify_connection_status (ebma, TRUE);
-			if (!priv->conn)
-				e_book_backend_notify_auth_required (backend, TRUE, NULL);
+			if (!priv->conn) {
+				krb_sso = e_source_get_property (esource,
+								 "kerberos");
+				if (!krb_sso
+				    || !g_str_equal (krb_sso, "required")) {
+					e_book_backend_notify_auth_required (backend, TRUE, NULL);
+				} else {
+					ebbm_connect_user (ebma, NULL, NULL,
+							   NULL);
+					e_book_backend_notify_opened (backend,
+								      NULL);
+				}
+			}
 		}
 
 		e_book_backend_mapi_unlock_connection (ebma);

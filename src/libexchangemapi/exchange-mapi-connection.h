@@ -237,14 +237,23 @@ gboolean		exchange_mapi_connection_events_unsubscribe (ExchangeMapiConnection *c
 
 /* profile functions */
 
-enum {
-	CREATE_PROFILE_FLAG_NONE = 0,
-	CREATE_PROFILE_FLAG_USE_SSL = (1 << 0)
-};
+typedef struct {
+	const gchar *username;
+	gchar *password;
+	const gchar *domain;
+	const gchar *server;
+	gboolean use_ssl;
+	gboolean krb_sso;
+	const gchar *krb_realm;
+} ExchangeMapiProfileData;
 
-gboolean		exchange_mapi_create_profile (const gchar *username, const gchar *password,
-				       const gchar *domain, const gchar *server, guint32 flags,
-				       mapi_profile_callback_t cb, gpointer data, GError **perror);
+#define COMPLETE_PROFILEDATA(x) \
+	((x)->username && *(x)->username && (x)->server && *(x)->server \
+	 && (((x)->domain && *(x)->domain && (x)->password && *(x)->password) \
+	     || ((x)->krb_sso && (x)->krb_realm && *(x)->krb_realm)))
+
+gboolean		exchange_mapi_create_profile (ExchangeMapiProfileData *profile,
+				       mapi_profile_callback_t cb, gconstpointer data, GError **perror);
 
 gboolean		exchange_mapi_delete_profile (const gchar *profile, GError **perror);
 void			exchange_mapi_rename_profile (const gchar *old_name, const gchar *new_name);

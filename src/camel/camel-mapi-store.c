@@ -1634,56 +1634,75 @@ mapi_get_name(CamelService *service, gboolean brief)
 }
 
 static gboolean
+mapi_prompt_pass_creds (CamelService *service, CamelURL *url, const gchar *reason, GError **error) {
+	gchar *prompt;
+	guint32 prompt_flags = CAMEL_SESSION_PASSWORD_SECRET;
+	CamelSession *session = camel_service_get_session (service);
+
+	if (reason && *reason) {
+		/* We need to un-cache the password before prompting again */
+		prompt_flags |= CAMEL_SESSION_PASSWORD_REPROMPT;
+		g_free (url->passwd);
+		url->passwd = NULL;
+	}
+
+	/*To translators : First %s : is the error text or the reason
+	  for prompting the user if it is available.
+	 Second %s is : Username.
+	 Third %s is : Server host name.*/
+	prompt = g_strdup_printf (_("%s Please enter the MAPI password for %s@%s"),
+				  reason, url->user, url->host);
+	url->passwd =
+		camel_session_get_password (session, service,
+					    prompt, "password", prompt_flags, NULL);
+	g_free (prompt);
+
+	if (!url->passwd) {
+		g_set_error (
+			error, G_IO_ERROR,
+			G_IO_ERROR_CANCELLED,
+			_("You did not enter a password."));
+		return FALSE;
+	}
+	return TRUE;
+}
+
+static gboolean
 mapi_auth_loop (CamelService *service, GError **error)
 {
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
-	CamelSession *session;
 	CamelURL *url;
+	ExchangeMapiProfileData empd = { 0 };
 
 	gchar *errbuf = NULL;
-	gboolean authenticated = FALSE;
-	guint32 prompt_flags = CAMEL_SESSION_PASSWORD_SECRET;
+	gboolean authenticated = FALSE, ret, krb_requested = FALSE;
 
 	url = camel_service_get_camel_url (service);
-	session = camel_service_get_session (service);
+	exchange_mapi_util_profiledata_from_camelurl (&empd, url);
 
 	url->passwd = NULL;
 
 	while (!authenticated) {
 		GError *mapi_error = NULL;
 
-		if (errbuf) {
-			/* We need to un-cache the password before prompting again */
-			prompt_flags |= CAMEL_SESSION_PASSWORD_REPROMPT;
-			g_free (url->passwd);
-			url->passwd = NULL;
-		}
+		if (!url->passwd) {
+			const gchar *why = errbuf ? errbuf : "";
 
-		if (!url->passwd ) {
-			gchar *prompt;
+			if (empd.krb_sso) {
+				if (!krb_requested) {
+					ret = exchange_mapi_util_trigger_krb_auth (&empd, error);
+					krb_requested = TRUE;
+				}
+			} else {
+				ret = mapi_prompt_pass_creds (service, url,
+							      why, error);
+			}
 
-			/*To translators : First %s : is the error text or the reason
-			  for prompting the user if it is available.
-			 Second %s is : Username.
-			 Third %s is : Server host name.*/
-			prompt = g_strdup_printf (_("%s Please enter the MAPI password for %s@%s"),
-						  errbuf ? errbuf : "",
-						  url->user,
-						  url->host);
-			url->passwd =
-				camel_session_get_password (session, service,
-							    prompt, "password", prompt_flags, NULL);
-			g_free (prompt);
 			g_free (errbuf);
 			errbuf = NULL;
-
-			if (!url->passwd) {
-				g_set_error (
-					error, G_IO_ERROR,
-					G_IO_ERROR_CANCELLED,
-					_("You did not enter a password."));
-				return FALSE;
-			}
+		}
+		if (!ret || (error && *error)) {
+			return FALSE;
 		}
 
 		store->priv->conn = exchange_mapi_connection_new (store->priv->profile, url->passwd, &mapi_error);

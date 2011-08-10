@@ -41,6 +41,10 @@
 #define gmtime_r(tp,tmp) (gmtime(tp)?(*(tmp)=*gmtime(tp),(tmp)):0)
 #endif
 
+/* Used for callout to krb5-auth-dialog */
+#define KRB_DBUS_PATH               "/org/gnome/KrbAuthDialog"
+#define KRB_DBUS_INTERFACE          "org.gnome.KrbAuthDialog"
+
 inline gchar *
 exchange_mapi_util_mapi_id_to_string (mapi_id_t id)
 {
@@ -1020,10 +1024,93 @@ exchange_crlf_to_lf (const gchar *in)
 }
 
 /**
+ * exchange_mapi_util_profiledata_from_camelurl:
+ * @empd: destination for profile settings
+ * @url: CamelURL with account settings
+ *
+ * Sets the members of an ExchangeMapiProfileData instance to
+ * reflect the account settings listed in the corresponding
+ * CamelURL pointer.
+ *
+ * @note: no allocation is done, so do not free the CamelUrl pointer and
+ *        the respective underlying pointers until you no longer need the
+ *        profile data.
+ **/
+void
+exchange_mapi_util_profiledata_from_camelurl (ExchangeMapiProfileData *empd, const CamelURL *url)
+{
+	const gchar *use_ssl = NULL, *use_krb = NULL;
+	CamelURL *promise_its_const = (CamelURL*)url; /* :) */
+	empd->username = promise_its_const->user;
+	empd->server = promise_its_const->host;
+
+	use_ssl = camel_url_get_param (promise_its_const, "ssl");
+	empd->use_ssl = (use_ssl && g_str_equal (use_ssl, "1"));
+	empd->domain = camel_url_get_param (promise_its_const, "domain");
+	use_krb = camel_url_get_param (promise_its_const, "kerberos");
+	empd->krb_sso = (use_krb && g_str_equal (use_krb, "required"));
+	empd->krb_realm = camel_url_get_param (promise_its_const, "realm");
+}
+
+gboolean
+exchange_mapi_util_trigger_krb_auth (const ExchangeMapiProfileData *empd, GError **error) {
+	gint success = FALSE;
+	GError *local_error = NULL;
+	GDBusConnection *connection;
+	GDBusMessage *message, *reply;
+	gchar *name;
+
+	connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &local_error);
+	if (local_error) {
+		g_warning ("could not get system bus: %s\n",
+			   local_error->message);
+		g_propagate_error (error, local_error);
+		return FALSE;
+	}
+
+	g_dbus_connection_set_exit_on_close (connection, FALSE);
+	/* Create a new message on the KRB_DBUS_INTERFACE */
+	message = g_dbus_message_new_method_call (KRB_DBUS_INTERFACE,
+						  KRB_DBUS_PATH,
+						  KRB_DBUS_INTERFACE,
+						  "acquireTgt");
+	if (!message) {
+		g_object_unref (connection);
+		return FALSE;
+	}
+
+	/* Appends the data as an argument to the message */
+	name = g_strdup_printf ("%s@%s", empd->username, empd->krb_realm);
+	g_dbus_message_set_body (message, g_variant_new ("(s)", name));
+
+	/* Sends the message: Have a 300 sec wait timeout  */
+	reply = g_dbus_connection_send_message_with_reply_sync (connection, message, G_DBUS_SEND_MESSAGE_FLAGS_NONE, 300 * 1000, NULL, NULL, &local_error);
+	g_free (name);
+
+	if (local_error) {
+		g_warning ("%s: %s\n", G_STRFUNC, local_error->message);
+		g_propagate_error (error, local_error);
+	}
+
+	if (reply) {
+		GVariant *body = g_dbus_message_get_body (reply);
+		if (body) {
+			g_variant_get (body, "(b)", &success);
+		}
+		g_object_unref (reply);
+	}
+
+	/* Free the message */
+	g_object_unref (message);
+	g_object_unref (connection);
+
+	return success && !local_error;
+}
+
+
+/**
  * exchange_mapi_util_profile_name:
- * @username: User name of the profile
- * @domain: Domain name of the profile
- * @hostname: Server host name
+ * @empd: profile information used to construct the name
  * @migrate: whether migrate old profile name to a new one
  *
  * Constructs profile name from given parameters and
@@ -1031,18 +1118,20 @@ exchange_crlf_to_lf (const gchar *in)
  * rename old profile name string to a new name, if requested.
  **/
 gchar *
-exchange_mapi_util_profile_name (const gchar *username, const gchar *domain, const gchar *hostname, gboolean migrate)
+exchange_mapi_util_profile_name (const ExchangeMapiProfileData *empd, gboolean migrate)
 {
 	gchar *res;
 
-	res = g_strdup_printf ("%s@%s@%s", username, domain, hostname);
+	res = g_strdup_printf ("%s@%s@%s", empd->username, empd->domain,
+			       empd->server);
 	res = g_strcanon (res, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@.-", '_');
 
 	if (migrate) {
 		/* expects MAPIInitialize already called! */
 		gchar *old_name;
 
-		old_name = g_strdup_printf ("%s@%s", username, domain);
+		old_name = g_strdup_printf ("%s@%s", empd->username,
+					    empd->domain);
 		old_name = g_strcanon (old_name, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@", '_');
 
 		exchange_mapi_rename_profile (old_name, res);

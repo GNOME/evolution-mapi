@@ -43,7 +43,7 @@
 
 static void register_connection (ExchangeMapiConnection *conn);
 static void unregister_connection (ExchangeMapiConnection *conn);
-static gboolean mapi_profile_create (const gchar *username, const gchar *password, const gchar *domain, const gchar *server, guint32 flags, mapi_profile_callback_t callback, gpointer data, GError **perror, gboolean use_locking);
+static gboolean mapi_profile_create (const ExchangeMapiProfileData *empd, mapi_profile_callback_t callback, gconstpointer data, GError **perror, gboolean use_locking);
 static struct mapi_session *mapi_profile_load (const gchar *profname, const gchar *password, GError **perror);
 static void ema_global_lock (void);
 static void ema_global_unlock (void);
@@ -3623,6 +3623,7 @@ static gboolean
 try_create_profile_main_thread_cb (struct tcp_data *data)
 {
 	EAccountList *accounts;
+	ExchangeMapiProfileData empd = { 0 };
 	EIterator *iter;
 	GConfClient *gconf;
 
@@ -3634,17 +3635,17 @@ try_create_profile_main_thread_cb (struct tcp_data *data)
 		EAccount *account = E_ACCOUNT (e_iterator_get (iter));
 		if (account && account->source && account->source->url && g_ascii_strncasecmp (account->source->url, "mapi://", 7) == 0) {
 			CamelURL *url = camel_url_new (e_account_get_string (account, E_ACCOUNT_SOURCE_URL), NULL);
-			const gchar *domain_name;
+			exchange_mapi_util_profiledata_from_camelurl (&empd,
+								      url);
+			/* cast away the const, but promise not to touch it */
+			empd.password = (gchar*)data->password;
 
-			domain_name = camel_url_get_param (url, "domain");
-			if (data->password && *data->password && domain_name && *domain_name && url->user && *url->user && url->host && *url->host) {
-				gchar *profname = exchange_mapi_util_profile_name (url->user, domain_name, url->host, FALSE);
+			if (COMPLETE_PROFILEDATA(&empd)) {
+				gchar *profname = exchange_mapi_util_profile_name (&empd, FALSE);
 
 				if (profname && g_str_equal (profname, data->profname)) {
-					guint32 cp_flags = (camel_url_get_param (url, "ssl") && g_str_equal (camel_url_get_param (url, "ssl"), "1")) ? CREATE_PROFILE_FLAG_USE_SSL : CREATE_PROFILE_FLAG_NONE;
-
 					/* do not use locking here, because when this is called then other thread is holding the lock */
-					data->has_profile = mapi_profile_create (url->user, data->password, domain_name, url->host, cp_flags, NULL, NULL, NULL, FALSE);
+					data->has_profile = mapi_profile_create (&empd, NULL, NULL, NULL, FALSE);
 
 					g_free (profname);
 					camel_url_free (url);
@@ -3673,8 +3674,6 @@ try_create_profile (const gchar *profname, const gchar *password)
 
 	g_return_val_if_fail (profname != NULL, FALSE);
 	g_return_val_if_fail (*profname != 0, FALSE);
-	g_return_val_if_fail (password != NULL, FALSE);
-	g_return_val_if_fail (*password != 0, FALSE);
 
 	data.profname = profname;
 	data.password = password;
@@ -3841,9 +3840,8 @@ create_profile_fallback_callback (struct SRowSet *rowset, gconstpointer data)
 }
 
 static gboolean
-mapi_profile_create (const gchar *username, const gchar *password, const gchar *domain,
-		     const gchar *server, guint32 flags,
-		     mapi_profile_callback_t callback, gpointer data,
+mapi_profile_create (const ExchangeMapiProfileData *empd,
+		     mapi_profile_callback_t callback, gconstpointer data,
 		     GError **perror,
 		     gboolean use_locking)
 {
@@ -3855,17 +3853,18 @@ mapi_profile_create (const gchar *username, const gchar *password, const gchar *
 
 	if (!callback) {
 		callback = create_profile_fallback_callback;
-		data = (gpointer) username;
+		data = (gpointer) empd->username;
 	}
 
 	/*We need all the params before proceeding.*/
-	e_return_val_mapi_error_if_fail (username && *username && password && *password &&
-			      domain && *domain && server && *server, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (COMPLETE_PROFILEDATA(empd),
+					 MAPI_E_INVALID_PARAMETER, FALSE);
 
 	if (use_locking)
 		g_static_rec_mutex_lock (&profile_mutex);
 
-	g_debug ("Create profile with %s %s %s\n", username, domain, server);
+	g_debug ("Create profile with %s %s %s\n", empd->username,
+		 empd->domain, empd->server);
 
 	if (!ensure_mapi_init_called (perror)) {
 		if (use_locking)
@@ -3873,14 +3872,14 @@ mapi_profile_create (const gchar *username, const gchar *password, const gchar *
 		return FALSE;
 	}
 
-	profname = exchange_mapi_util_profile_name (username, domain, server, TRUE);
+	profname = exchange_mapi_util_profile_name (empd, TRUE);
 
 	/* Delete any existing profiles with the same profilename */
 	ms = DeleteProfile (mapi_ctx, profname);
 	/* don't bother to check error - it would be valid if we got an error */
 
-	ms = CreateProfile (mapi_ctx, profname, username, password,
-			    OC_PROFILE_NOPASSWORD);
+	ms = CreateProfile (mapi_ctx, profname, empd->username,
+			    empd->password, OC_PROFILE_NOPASSWORD);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "CreateProfile", ms);
 		goto cleanup;
@@ -3889,11 +3888,20 @@ mapi_profile_create (const gchar *username, const gchar *password, const gchar *
 	#define add_string_attr(_prof,_aname,_val)				\
 		mapi_profile_add_string_attr (mapi_ctx, _prof, _aname, _val)
 
-	add_string_attr (profname, "binding", server);
+	add_string_attr (profname, "binding", empd->server);
 	add_string_attr (profname, "workstation", workstation);
-	add_string_attr (profname, "domain", domain);
 
-	if ((flags & CREATE_PROFILE_FLAG_USE_SSL) != 0)
+	if (empd->krb_sso) {
+		/* note: domain and realm are intentially not added to
+		 *       the libmapi profile in the case of SSO enabled,
+		 *       as it changes the behavior, and breaks SSO support. */
+		add_string_attr (profname, "kerberos", "yes");
+	} else {
+		/* only add domain if !kerberos SSO */
+		add_string_attr (profname, "domain", empd->domain);
+	}
+
+	if (empd->use_ssl)
 		add_string_attr (profname, "seal", "true");
 
 	/* This is only convenient here and should be replaced at some point */
@@ -3905,7 +3913,7 @@ mapi_profile_create (const gchar *username, const gchar *password, const gchar *
 
 	/* Login now */
 	g_debug("Logging into the server... ");
-	ms = MapiLogonProvider (mapi_ctx, &session, profname, password,
+	ms = MapiLogonProvider (mapi_ctx, &session, profname, empd->password,
 				PROVIDER_ID_NSPI);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "MapiLogonProvider", ms);
@@ -3915,7 +3923,7 @@ mapi_profile_create (const gchar *username, const gchar *password, const gchar *
 	}
 	g_debug("MapiLogonProvider : succeeded \n");
 
-	ms = ProcessNetworkProfile (session, username, callback, data);
+	ms = ProcessNetworkProfile (session, empd->username, callback, data);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "ProcessNetworkProfile", ms);
 		g_debug ("Deleting profile %s ", profname);
@@ -3953,12 +3961,11 @@ mapi_profile_create (const gchar *username, const gchar *password, const gchar *
 }
 
 gboolean
-exchange_mapi_create_profile (const gchar *username, const gchar *password, const gchar *domain,
-			      const gchar *server, guint32 flags,
-			      mapi_profile_callback_t callback, gpointer data,
+exchange_mapi_create_profile (ExchangeMapiProfileData *empd,
+			      mapi_profile_callback_t callback, gconstpointer data,
 			      GError **perror)
 {
-	return mapi_profile_create (username, password, domain, server, flags, callback, data, perror, TRUE);
+	return mapi_profile_create (empd, callback, data, perror, TRUE);
 }
 
 gboolean
