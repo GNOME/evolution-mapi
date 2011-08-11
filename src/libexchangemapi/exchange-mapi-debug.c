@@ -713,139 +713,138 @@ exchange_mapi_debug_dump_properties (ExchangeMapiConnection *conn, mapi_id_t fid
 	g_return_if_fail (properties != NULL);
 
 	for (i = 0; i < properties->cValues; i++) {
-		for (i = 0; i < properties->cValues; i++) {
-			struct mapi_SPropValue *lpProp = &properties->lpProps[i];
-			const gchar *tmp =  get_proptag_name (lpProp->ulPropTag);
-			gchar t_str[26];
-			gint j = 0;
+		struct mapi_SPropValue *lpProp = &properties->lpProps[i];
+		const gchar *tmp =  get_proptag_name (lpProp->ulPropTag);
+		gchar t_str[26];
+		gint j = 0;
 
-			if (!tmp || !*tmp)
-				tmp = get_namedid_name (conn, fid, lpProp->ulPropTag);
+		if (!tmp || !*tmp)
+			tmp = get_namedid_name (conn, fid, lpProp->ulPropTag);
 
-			if (tmp && *tmp)
-				g_print ("\n%s \t",tmp);
-			else
-				g_print ("\n0x%08X \t", lpProp->ulPropTag);
-			switch (lpProp->ulPropTag & 0xFFFF) {
-			case PT_UNSPECIFIED:
-				g_print (" PT_UNSPECIFIED");
-				break;
-			case PT_NULL:
-				g_print (" PT_NULL");
-				break;
-			case PT_BOOLEAN:
-				g_print (" (bool) - %d", (bool) lpProp->value.b);
-				break;
-			case PT_I2:
-				g_print (" (uint16_t) - %d", lpProp->value.i);
-				break;
-			case PT_LONG:
-				g_print (" (long) - %u", lpProp->value.l);
-				break;
-			case PT_FLOAT:
-				g_print (" PT_FLOAT");
-				break;
-			case PT_DOUBLE:
-				g_print (" (double) -  %lf", (double)lpProp->value.dbl);
-				break;
-			case PT_CURRENCY:
-				g_print (" PT_CURRENCY");
-				break;
-			case PT_APPTIME:
-				g_print (" PT_APPTIME");
-			case PT_I8:
-				g_print (" (gint) - 0x%016" G_GINT64_MODIFIER "X", lpProp->value.d);
-				break;
-			case PT_SYSTIME: {
-					struct timeval t;
-					struct tm tm;
-					if (get_mapi_SPropValue_array_date_timeval (&t, properties, lpProp->ulPropTag) == MAPI_E_SUCCESS) {
-						gmtime_r (&(t.tv_sec), &tm);
-						strftime (t_str, 26, "%Y-%m-%dT%H:%M:%SZ", &tm);
-						g_print (" (struct FILETIME *) - %p\t (struct timeval) %s\t", &lpProp->value.ft, t_str);
-					}
+		if (tmp && *tmp)
+			g_print ("   %s   ",tmp);
+		else
+			g_print ("   0x%08X   ", lpProp->ulPropTag);
+		switch (lpProp->ulPropTag & 0xFFFF) {
+		case PT_UNSPECIFIED:
+			g_print (" PT_UNSPECIFIED");
+			break;
+		case PT_NULL:
+			g_print (" PT_NULL");
+			break;
+		case PT_BOOLEAN:
+			g_print (" (bool) - %d", (bool) lpProp->value.b);
+			break;
+		case PT_I2:
+			g_print (" (uint16_t) - %d", lpProp->value.i);
+			break;
+		case PT_LONG:
+			g_print (" (long) - %u", lpProp->value.l);
+			break;
+		case PT_FLOAT:
+			g_print (" PT_FLOAT");
+			break;
+		case PT_DOUBLE:
+			g_print (" (double) -  %lf", (double)lpProp->value.dbl);
+			break;
+		case PT_CURRENCY:
+			g_print (" PT_CURRENCY");
+			break;
+		case PT_APPTIME:
+			g_print (" PT_APPTIME");
+		case PT_I8:
+			g_print (" (gint) - 0x%016" G_GINT64_MODIFIER "X", lpProp->value.d);
+			break;
+		case PT_SYSTIME: {
+				struct timeval t;
+				struct tm tm;
+				if (get_mapi_SPropValue_array_date_timeval (&t, properties, lpProp->ulPropTag) == MAPI_E_SUCCESS) {
+					gmtime_r (&(t.tv_sec), &tm);
+					strftime (t_str, 26, "%Y-%m-%dT%H:%M:%SZ", &tm);
+					g_print (" (struct FILETIME *) - %p   (struct timeval) %s", &lpProp->value.ft, t_str);
 				}
-				break;
-			case PT_ERROR:
-				g_print (" (error) - "/* , lpProp->value.err */);
-				break;
-			case PT_STRING8:
-				g_print (" (string) - %s", lpProp->value.lpszA ? lpProp->value.lpszA : "null" );
-				break;
-			case PT_UNICODE:
-				if (lpProp)
-					g_print (" (unicodestring) - %s", lpProp->value.lpszW ? lpProp->value.lpszW : lpProp->value.lpszA ? lpProp->value.lpszA : "null");
-				break;
-			case PT_OBJECT:
-				g_print (" PT_OBJECT");
-				break;
-			case PT_CLSID:
-				g_print (" PT_CLSID");
-				break;
-			case PT_SVREID:
-				g_print (" PT_SVREID");
-				break;
-			case PT_SRESTRICT:
-				g_print (" PT_SRESTRICT");
-				break;
-			case PT_ACTIONS:
-				g_print (" PT_ACTIONS");
-				break;
-			case PT_BINARY:
-				g_print (" (struct SBinary_short *) - %p Binary data follows (size %d): \n", &lpProp->value.bin, lpProp->value.bin.cb);
-				dump_bin (lpProp->value.bin.lpb, lpProp->value.bin.cb, "     ");
-				break;
-			case PT_MV_STRING8:
-				g_print (" (struct mapi_SLPSTRArray *) (%d items)", lpProp->value.MVszA.cValues);
-				for (j = 0; j < lpProp->value.MVszA.cValues; j++) {
-					g_print ("\n   item[%d] = '%s'", j, lpProp->value.MVszA.strings[j].lppszA ? lpProp->value.MVszA.strings[j].lppszA : "[NULL]");
-				}
-				break;
-			case PT_MV_SHORT:
-				g_print (" PT_MV_SHORT");
-				break;
-			case PT_MV_LONG:
-				g_print (" PT_MV_LONG");
-				break;
-			case PT_MV_FLOAT:
-				g_print (" PT_MV_FLOAT");
-				break;
-			case PT_MV_DOUBLE:
-				g_print (" PT_MV_DOUBLE");
-				break;
-			case PT_MV_CURRENCY:
-				g_print (" PT_MV_CURRENCY");
-				break;
-			case PT_MV_APPTIME:
-				g_print (" PT_MV_APPTIME");
-				break;
-			case PT_MV_I8:
-				g_print (" PT_MV_I8");
-				break;
-			case PT_MV_UNICODE:
-				g_print (" PT_MV_UNICODE (%d items)", lpProp->value.MVszW.cValues);
-				for (j = 0; j < lpProp->value.MVszW.cValues; j++) {
-					g_print ("\n   item[%d] = '%s'", j, lpProp->value.MVszW.strings[j].lppszW ? lpProp->value.MVszW.strings[j].lppszW : "[NULL]");
-				}
-				break;
-			case PT_MV_SYSTIME:
-				g_print (" PT_MV_SYSTIME");
-				break;
-			case PT_MV_CLSID:
-				g_print (" PT_MV_CLSID");
-				break;
-			case PT_MV_BINARY:
-				g_print (" PT_MV_BINARY (%d items)", lpProp->value.MVbin.cValues);
-				for (j = 0; j < lpProp->value.MVbin.cValues; j++) {
-					g_print ("\n   item[%d] (size %d)\n", j, lpProp->value.MVbin.bin[j].cb);
-					dump_bin (lpProp->value.MVbin.bin[j].lpb, lpProp->value.MVbin.bin[j].cb, "     ");
-				}
-				g_print ("\n---");
-				break;
-			default:
-				g_print (" - Unknown type 0x%04X", lpProp->ulPropTag & 0xFFFF);
 			}
+			break;
+		case PT_ERROR:
+			g_print (" (error) - "/* , lpProp->value.err */);
+			break;
+		case PT_STRING8:
+			g_print (" (string) - %s", lpProp->value.lpszA ? lpProp->value.lpszA : "null");
+			break;
+		case PT_UNICODE:
+			if (lpProp)
+				g_print (" (unicodestring) - %s", lpProp->value.lpszW ? lpProp->value.lpszW : lpProp->value.lpszA ? lpProp->value.lpszA : "null");
+			break;
+		case PT_OBJECT:
+			g_print (" PT_OBJECT");
+			break;
+		case PT_CLSID:
+			g_print (" PT_CLSID");
+			break;
+		case PT_SVREID:
+			g_print (" PT_SVREID");
+			break;
+		case PT_SRESTRICT:
+			g_print (" PT_SRESTRICT");
+			break;
+		case PT_ACTIONS:
+			g_print (" PT_ACTIONS");
+			break;
+		case PT_BINARY:
+			g_print (" (struct SBinary_short *) - %p Binary data follows (size %d): \n", &lpProp->value.bin, lpProp->value.bin.cb);
+			dump_bin (lpProp->value.bin.lpb, lpProp->value.bin.cb, "        ");
+			break;
+		case PT_MV_STRING8:
+			g_print (" (struct mapi_SLPSTRArray *) (%d items)", lpProp->value.MVszA.cValues);
+			for (j = 0; j < lpProp->value.MVszA.cValues; j++) {
+				g_print ("\n      item[%d] = '%s'", j, lpProp->value.MVszA.strings[j].lppszA ? lpProp->value.MVszA.strings[j].lppszA : "[NULL]");
+			}
+			break;
+		case PT_MV_SHORT:
+			g_print (" PT_MV_SHORT");
+			break;
+		case PT_MV_LONG:
+			g_print (" PT_MV_LONG");
+			break;
+		case PT_MV_FLOAT:
+			g_print (" PT_MV_FLOAT");
+			break;
+		case PT_MV_DOUBLE:
+			g_print (" PT_MV_DOUBLE");
+			break;
+		case PT_MV_CURRENCY:
+			g_print (" PT_MV_CURRENCY");
+			break;
+		case PT_MV_APPTIME:
+			g_print (" PT_MV_APPTIME");
+			break;
+		case PT_MV_I8:
+			g_print (" PT_MV_I8");
+			break;
+		case PT_MV_UNICODE:
+			g_print (" PT_MV_UNICODE (%d items)", lpProp->value.MVszW.cValues);
+			for (j = 0; j < lpProp->value.MVszW.cValues; j++) {
+				g_print ("\n      item[%d] = '%s'", j, lpProp->value.MVszW.strings[j].lppszW ? lpProp->value.MVszW.strings[j].lppszW : "[NULL]");
+			}
+			break;
+		case PT_MV_SYSTIME:
+			g_print (" PT_MV_SYSTIME");
+			break;
+		case PT_MV_CLSID:
+			g_print (" PT_MV_CLSID");
+			break;
+		case PT_MV_BINARY:
+			g_print (" PT_MV_BINARY (%d items)", lpProp->value.MVbin.cValues);
+			for (j = 0; j < lpProp->value.MVbin.cValues; j++) {
+				g_print ("\n      item[%d] (size %d)\n", j, lpProp->value.MVbin.bin[j].cb);
+				dump_bin (lpProp->value.MVbin.bin[j].lpb, lpProp->value.MVbin.bin[j].cb, "        ");
+			}
+			break;
+		default:
+			g_print (" - Unknown type 0x%04X", lpProp->ulPropTag & 0xFFFF);
+			break;
 		}
+
+		g_print ("\n");
 	}
-	g_print ("\n");
 }
