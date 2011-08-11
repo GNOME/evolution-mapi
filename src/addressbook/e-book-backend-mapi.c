@@ -402,6 +402,11 @@ ebbm_connect_user (EBookBackendMAPI *ebma, GCancellable *cancellable, const gcha
 
 		e_book_backend_mapi_lock_connection (ebma);
 
+		if (g_cancellable_set_error_if_cancelled (cancellable, error)) {
+			e_book_backend_mapi_unlock_connection (ebma);
+			return;
+		}
+
 		old_conn = priv->conn;
 		priv->conn = NULL;
 
@@ -437,8 +442,13 @@ ebbm_connect_user (EBookBackendMAPI *ebma, GCancellable *cancellable, const gcha
 
 		ebbm_notify_connection_status (ebma, TRUE);
 
-		/* if (priv->marked_for_offline) */
-		priv->update_cache_thread = g_thread_create (ebbm_update_cache_cb, ebma, TRUE, NULL);
+		if (!g_cancellable_is_cancelled (cancellable) /* && priv->marked_for_offline */) {
+			g_object_ref (ebma);
+
+			priv->update_cache_thread = g_thread_create (ebbm_update_cache_cb, ebma, TRUE, NULL);
+			if (!priv->update_cache_thread)
+				g_object_unref (ebma);
+		}
 	}
 }
 
