@@ -271,7 +271,7 @@ exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_l
 			g_mapped_file_free (mapped_file);
 #endif
 		} else if (error) {
-			g_debug ("Could not map %s: %s \n", sfname_uri, error->message);
+			exchange_mapi_debug_print ("Could not map %s: %s \n", sfname_uri, error->message);
 			g_error_free (error);
 		}
 
@@ -477,10 +477,10 @@ set_attachments_to_cal_component (ECalComponent *comp, GSList *attach_list, cons
 		fd = g_open (filename, O_RDWR|O_CREAT|O_TRUNC|O_BINARY, 0600);
 		if (fd == -1) {
 			/* skip gracefully */
-			g_debug ("Could not open %s for writing \n", filename);
+			exchange_mapi_debug_print ("Could not open %s for writing \n", filename);
 		} else if (len && write (fd, attach, len) == -1) {
 			/* skip gracefully */
-			g_debug ("Attachment write failed \n");
+			exchange_mapi_debug_print ("Attachment write failed \n");
 		}
 		if (fd != -1) {
 			close (fd);

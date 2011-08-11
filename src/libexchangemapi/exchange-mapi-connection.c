@@ -53,8 +53,8 @@ static void ema_global_unlock (void);
 G_DEFINE_TYPE (ExchangeMapiConnection, exchange_mapi_connection, G_TYPE_OBJECT)
 
 /* These two macros require 'priv' variable of type ExchangeMapiConnectionPrivate */
-#define LOCK()		g_debug ("%s: %s: lock(session/global_lock)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_lock (&priv->session_lock); ema_global_lock();
-#define UNLOCK()	g_debug ("%s: %s: unlock(session/global_lock)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_unlock (&priv->session_lock); ema_global_unlock();
+#define LOCK()		exchange_mapi_debug_print ("%s: %s: lock(session/global_lock)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_lock (&priv->session_lock); ema_global_lock();
+#define UNLOCK()	exchange_mapi_debug_print ("%s: %s: unlock(session/global_lock)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_unlock (&priv->session_lock); ema_global_unlock();
 
 #define e_return_val_mapi_error_if_fail(expr, _code, _val)				\
 	G_STMT_START {									\
@@ -368,7 +368,7 @@ exchange_mapi_connection_new (const gchar *profile, const gchar *password, GErro
 
 	session = mapi_profile_load (profile, password, perror);
 	if (!session) {
-		g_debug ("%s: %s: Login failed ", G_STRLOC, G_STRFUNC);
+		exchange_mapi_debug_print ("%s: %s: Login failed ", G_STRLOC, G_STRFUNC);
 		return NULL;
 	}
 
@@ -397,7 +397,7 @@ exchange_mapi_connection_new (const gchar *profile, const gchar *password, GErro
 	priv->has_public_store = FALSE;
 	UNLOCK ();
 
-	g_debug ("%s: %s: Connected ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print ("%s: %s: Connected ", G_STRLOC, G_STRFUNC);
 
 	return conn;
 }
@@ -436,7 +436,7 @@ exchange_mapi_connection_reconnect (ExchangeMapiConnection *conn, const gchar *p
 
 	priv->session = mapi_profile_load (priv->profile, password, perror);
 	if (!priv->session) {
-		g_debug ("%s: %s: Login failed ", G_STRLOC, G_STRFUNC);
+		exchange_mapi_debug_print ("%s: %s: Login failed ", G_STRLOC, G_STRFUNC);
 		UNLOCK ();
 		return FALSE;
 	}
@@ -459,7 +459,7 @@ exchange_mapi_connection_reconnect (ExchangeMapiConnection *conn, const gchar *p
 
 	UNLOCK ();
 
-	g_debug ("%s: %s: Connected ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print ("%s: %s: Connected ", G_STRLOC, G_STRFUNC);
 
 	return priv->session != NULL;
 }
@@ -578,8 +578,8 @@ exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32
 	if (add_stream_from_properties (stream_list, properties, proptag, cpid))
 		return TRUE;
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-	g_debug("Attempt to read stream for proptag 0x%08X ", proptag);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("Attempt to read stream for proptag 0x%08X ", proptag);
 
 	mem_ctx = talloc_init ("ExchangeMAPI_ReadGenericStream");
 	mapi_object_init(&obj_stream);
@@ -648,7 +648,7 @@ exchange_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32
 		stream->proptag = proptag;
 		set_stream_value (stream, cpid, buf_data, off_data, FALSE);
 
-		g_debug("Attempt succeeded for proptag 0x%08X (after name conversion) ", stream->proptag);
+		exchange_mapi_debug_print("Attempt succeeded for proptag 0x%08X (after name conversion) ", stream->proptag);
 
 		*stream_list = g_slist_append (*stream_list, stream);
 	}
@@ -657,7 +657,7 @@ cleanup:
 	mapi_object_release(&obj_stream);
 	talloc_free (mem_ctx);
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return (ms == MAPI_E_SUCCESS);
 }
@@ -699,7 +699,7 @@ exchange_mapi_util_write_generic_streams (mapi_object_t *obj_message, GSList *st
 	enum MAPISTATUS	ms;
 	gboolean	status = TRUE;
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	for (l = stream_list; l; l = l->next) {
 		ExchangeMAPIStream	*stream = (ExchangeMAPIStream *) (l->data);
@@ -760,7 +760,7 @@ exchange_mapi_util_write_generic_streams (mapi_object_t *obj_message, GSList *st
 		mapi_object_release(&obj_stream);
 	}
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return status;
 }
@@ -812,7 +812,7 @@ exchange_mapi_util_modify_recipients (ExchangeMapiConnection *conn, TALLOC_CTX *
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	SPropTagArray = set_SPropTagArray(mem_ctx, 0xA,
 					  PR_ENTRYID,
@@ -855,7 +855,7 @@ exchange_mapi_util_modify_recipients (ExchangeMapiConnection *conn, TALLOC_CTX *
 		if (FlagList->aulPropTag[i] == MAPI_AMBIGUOUS) {
 			/* We should never get an ambiguous resolution as we use the email-id for resolving.
 			 * However, if we do still get an ambiguous entry, we can't handle it :-( */
-			g_debug ("%s: %s() - '%s' is ambiguous ", G_STRLOC, G_STRFUNC, recipient->email_id);
+			exchange_mapi_debug_print ("%s: %s() - '%s' is ambiguous ", G_STRLOC, G_STRFUNC, recipient->email_id);
 		} else if (FlagList->aulPropTag[i] == MAPI_UNRESOLVED) {
 			/* If the recipient is unresolved, consider it is a SMTP one */
 			SRowSet->aRow = talloc_realloc(mem_ctx, SRowSet->aRow, struct SRow, SRowSet->cRows + 1);
@@ -888,7 +888,7 @@ exchange_mapi_util_modify_recipients (ExchangeMapiConnection *conn, TALLOC_CTX *
 cleanup:
 	g_free (users);
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return TRUE;
 }
@@ -905,7 +905,7 @@ exchange_mapi_util_delete_attachments (mapi_object_t *obj_message, GError **perr
 	uint32_t		i_row_attach;
 	gboolean		status = TRUE;
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	mem_ctx = talloc_init ("ExchangeMAPI_DeleteAttachments");
 
@@ -964,7 +964,7 @@ cleanup:
 	mapi_object_release(&obj_tb_attach);
 	talloc_free (mem_ctx);
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return status;
 }
@@ -977,7 +977,7 @@ exchange_mapi_util_set_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 	enum MAPISTATUS	ms;
 	gboolean	status = FALSE;
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	if (remove_existing)
 		exchange_mapi_util_delete_attachments (obj_message, NULL);
@@ -1097,7 +1097,7 @@ exchange_mapi_util_set_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 		mapi_object_release(&obj_attach);
 	}
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return status;
 }
@@ -1187,7 +1187,7 @@ exchange_mapi_util_get_attachments (ExchangeMapiConnection *conn, mapi_id_t fid,
 	uint32_t		i_row_attach;
 	gboolean		status = TRUE;
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	mem_ctx = talloc_init ("ExchangeMAPI_GetAttachments");
 
@@ -1329,7 +1329,7 @@ cleanup:
 	mapi_object_release(&obj_tb_attach);
 	talloc_free (mem_ctx);
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return status;
 }
@@ -1438,7 +1438,7 @@ exchange_mapi_util_get_recipients (ExchangeMapiConnection *conn, mapi_object_t *
 	uint32_t		i_row_recip;
 	gboolean		status = TRUE;
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	/* fetch recipient table */
 	ms = GetRecipientTable (obj_message, &rows_recip, &proptags);
@@ -1500,7 +1500,7 @@ cleanup:
 	if (ms != MAPI_E_SUCCESS)
 		status = FALSE;
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return status;
 }
@@ -1552,7 +1552,7 @@ exchange_mapi_connection_check_restriction (ExchangeMapiConnection *conn, mapi_i
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, NULL);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, NULL);
 
-	g_debug("%s: Entering %s: folder-id %016" G_GINT64_MODIFIER "X ", G_STRLOC, G_STRFUNC, fid);
+	exchange_mapi_debug_print("%s: Entering %s: folder-id %016" G_GINT64_MODIFIER "X ", G_STRLOC, G_STRFUNC, fid);
 
 	LOCK ();
 	mem_ctx = talloc_init("ExchangeMAPI_CheckRestriction");
@@ -1635,7 +1635,7 @@ cleanup:
 	talloc_free (mem_ctx);
 	UNLOCK();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return mids;
 }
@@ -1659,7 +1659,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	g_debug("%s: Entering %s: folder-id %016" G_GINT64_MODIFIER "X ", G_STRLOC, G_STRFUNC, fid);
+	exchange_mapi_debug_print("%s: Entering %s: folder-id %016" G_GINT64_MODIFIER "X ", G_STRLOC, G_STRFUNC, fid);
 
 	LOCK ();
 	mem_ctx = talloc_init("ExchangeMAPI_FetchItems");
@@ -1887,7 +1887,7 @@ exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t 
 	talloc_free (mem_ctx);
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s: folder-id %016" G_GINT64_MODIFIER "X ", G_STRLOC, G_STRFUNC, fid);
+	exchange_mapi_debug_print("%s: Leaving %s: folder-id %016" G_GINT64_MODIFIER "X ", G_STRLOC, G_STRFUNC, fid);
 
 	return result;
 }
@@ -1911,7 +1911,7 @@ exchange_mapi_connection_fetch_object_props (ExchangeMapiConnection *conn, mapi_
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	g_debug("%s: Entering %s: folder %p message %p", G_STRLOC, G_STRFUNC, obj_folder, obj_message);
+	exchange_mapi_debug_print("%s: Entering %s: folder %p message %p", G_STRLOC, G_STRFUNC, obj_folder, obj_message);
 
 	LOCK ();
 	mem_ctx = talloc_init("ExchangeMAPI_FetchObjectProps");
@@ -2022,7 +2022,7 @@ cleanup:
 	talloc_free (mem_ctx);
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return result;
 }
@@ -2042,7 +2042,7 @@ exchange_mapi_connection_fetch_item (ExchangeMapiConnection *conn, mapi_id_t fid
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	g_debug("%s: Entering %s: folder-id %016" G_GINT64_MODIFIER "X message-id %016" G_GINT64_MODIFIER "X",
+	exchange_mapi_debug_print("%s: Entering %s: folder-id %016" G_GINT64_MODIFIER "X message-id %016" G_GINT64_MODIFIER "X",
 				G_STRLOC, G_STRFUNC, fid, mid);
 
 	LOCK ();
@@ -2072,7 +2072,7 @@ cleanup:
 	talloc_free (mem_ctx);
 	UNLOCK ();
 
-	g_debug ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return result;
 }
@@ -2090,7 +2090,7 @@ exchange_mapi_connection_create_folder (ExchangeMapiConnection *conn, uint32_t o
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, 0);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, 0);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
 	mapi_object_init(&obj_top);
@@ -2139,7 +2139,7 @@ exchange_mapi_connection_create_folder (ExchangeMapiConnection *conn, uint32_t o
 	}
 
 	fid = mapi_object_get_id (&obj_folder);
-	g_debug("Folder %s created with id %016" G_GINT64_MODIFIER "X ", name, fid);
+	exchange_mapi_debug_print("Folder %s created with id %016" G_GINT64_MODIFIER "X ", name, fid);
 
 	g_static_rec_mutex_lock (&priv->folders_lock);
 
@@ -2159,7 +2159,7 @@ cleanup:
 
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	/* Shouldn't we return (ExchangeMAPIFolder *) instead of a plain fid ? */
 	return fid;
@@ -2175,7 +2175,7 @@ exchange_mapi_connection_empty_folder (ExchangeMapiConnection *conn, mapi_id_t f
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
 	mapi_object_init (&obj_folder);
@@ -2193,7 +2193,7 @@ exchange_mapi_connection_empty_folder (ExchangeMapiConnection *conn, mapi_id_t f
 		goto cleanup;
 	}
 
-	g_debug("Folder with id %016" G_GINT64_MODIFIER "X was emptied ", fid);
+	exchange_mapi_debug_print("Folder with id %016" G_GINT64_MODIFIER "X was emptied ", fid);
 
 	result = TRUE;
 
@@ -2201,7 +2201,7 @@ cleanup:
 	mapi_object_release(&obj_folder);
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return result;
 }
@@ -2221,7 +2221,7 @@ exchange_mapi_connection_remove_folder (ExchangeMapiConnection *conn, mapi_id_t 
 
 	g_return_val_if_fail (fid != 0, FALSE);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	folder = NULL;
 	for (l = exchange_mapi_connection_peek_folders_list (conn); l; l = l->next) {
@@ -2255,7 +2255,7 @@ exchange_mapi_connection_remove_folder (ExchangeMapiConnection *conn, mapi_id_t 
 		goto cleanup;
 	}
 
-	g_debug("Folder with id %016" G_GINT64_MODIFIER "X was emptied ", fid);
+	exchange_mapi_debug_print("Folder with id %016" G_GINT64_MODIFIER "X was emptied ", fid);
 
 	/* Attempt to open the top/parent folder */
 	ms = open_folder (conn, 0, &folder->parent_folder_id, fid_options, &obj_top, perror);
@@ -2270,7 +2270,7 @@ exchange_mapi_connection_remove_folder (ExchangeMapiConnection *conn, mapi_id_t 
 		goto cleanup;
 	}
 
-	g_debug("Folder with id %016" G_GINT64_MODIFIER "X was deleted ", fid);
+	exchange_mapi_debug_print("Folder with id %016" G_GINT64_MODIFIER "X was deleted ", fid);
 
 	result = TRUE;
 
@@ -2286,7 +2286,7 @@ cleanup:
 
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return result;
 }
@@ -2303,7 +2303,7 @@ exchange_mapi_connection_rename_folder (ExchangeMapiConnection *conn, mapi_id_t 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
 	mem_ctx = talloc_init("ExchangeMAPI_RenameFolder");
@@ -2331,7 +2331,7 @@ cleanup:
 	talloc_free(mem_ctx);
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return result;
 }
@@ -2411,7 +2411,7 @@ exchange_mapi_connection_resolve_named_props (ExchangeMapiConnection *conn, mapi
 	e_return_val_mapi_error_if_fail (named_ids_n_elems > 0, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	g_debug ("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print ("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
 	if (priv->named_ids) {
@@ -2423,7 +2423,7 @@ exchange_mapi_connection_resolve_named_props (ExchangeMapiConnection *conn, mapi
 				ResolveNamedIDsData *data = &named_ids_list[i];
 				uint32_t propid;
 
-				propid = GPOINTER_TO_INT (g_hash_table_lookup (ids, GINT_TO_POINTER (data->pidlid_propid)));
+				propid = GPOINTER_TO_UINT (g_hash_table_lookup (ids, GUINT_TO_POINTER (data->pidlid_propid)));
 				if (propid) {
 					data->propid = propid;
 				} else {
@@ -2435,7 +2435,7 @@ exchange_mapi_connection_resolve_named_props (ExchangeMapiConnection *conn, mapi
 
 			if (!todo) {
 				UNLOCK ();
-				g_debug ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+				exchange_mapi_debug_print ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 				return TRUE;
 			}
 		}
@@ -2506,7 +2506,7 @@ exchange_mapi_connection_resolve_named_props (ExchangeMapiConnection *conn, mapi
 		for (i = 0; i < todo->len; i++) {
 			ResolveNamedIDsData *data = todo->pdata[i];
 
-			g_hash_table_insert (ids, GINT_TO_POINTER (data->pidlid_propid), GINT_TO_POINTER (data->propid));
+			g_hash_table_insert (ids, GUINT_TO_POINTER (data->pidlid_propid), GUINT_TO_POINTER (data->propid));
 		}
 	}
 
@@ -2520,7 +2520,7 @@ exchange_mapi_connection_resolve_named_props (ExchangeMapiConnection *conn, mapi
 
 	UNLOCK ();
 
-	g_debug ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return res;
 }
@@ -2539,7 +2539,7 @@ exchange_mapi_connection_resolve_named_prop (ExchangeMapiConnection *conn, mapi_
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, res);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, res);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
 
@@ -2548,10 +2548,10 @@ exchange_mapi_connection_resolve_named_prop (ExchangeMapiConnection *conn, mapi_
 		GHashTable *ids = g_hash_table_lookup (priv->named_ids, &i64);
 
 		if (ids) {
-			res = GPOINTER_TO_INT (g_hash_table_lookup (ids, GINT_TO_POINTER (pidlid_propid)));
+			res = GPOINTER_TO_UINT (g_hash_table_lookup (ids, GUINT_TO_POINTER (pidlid_propid)));
 			if (res != 0) {
 				UNLOCK ();
-				g_debug ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+				exchange_mapi_debug_print ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 				return res;
 			}
@@ -2597,7 +2597,7 @@ exchange_mapi_connection_resolve_named_prop (ExchangeMapiConnection *conn, mapi_
 			g_hash_table_insert (priv->named_ids, i64ptr, ids);
 		}
 
-		g_hash_table_insert (ids, GINT_TO_POINTER (pidlid_propid), GINT_TO_POINTER (res));
+		g_hash_table_insert (ids, GUINT_TO_POINTER (pidlid_propid), GUINT_TO_POINTER (res));
 	}
 
 cleanup:
@@ -2606,7 +2606,42 @@ cleanup:
 
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+
+	return res;
+}
+
+/* returns named id, aka PidLid/PidName for a given proptag, which might be previously
+   obtained as a result of exchange_mapi_connection_resolve_named_prop/s.
+   Returns MAPI_E_RESERVED when not found.
+*/
+uint32_t
+exchange_mapi_connection_unresolve_proptag_to_nameid (ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t proptag)
+{
+	uint32_t res = MAPI_E_RESERVED;
+	/* to have this used in the below macros */
+	GError **perror = NULL;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, res);
+
+	if (priv->named_ids) {
+		gint64 i64 = fid;
+		GHashTable *ids = g_hash_table_lookup (priv->named_ids, &i64);
+
+		if (ids) {
+			GHashTableIter iter;
+			gpointer stored_pidlid, stored_proptag, lookup_proptag = GUINT_TO_POINTER (proptag);
+			gboolean is_error = PT_ERROR == (proptag & 0xFFFF);
+
+			g_hash_table_iter_init (&iter, ids);
+			while (g_hash_table_iter_next (&iter, &stored_pidlid, &stored_proptag)) {
+				if (stored_proptag == lookup_proptag || (is_error && (GPOINTER_TO_UINT (stored_proptag) & ~0xFFFF) == (proptag & ~0xFFFF))) {
+					res = GPOINTER_TO_UINT (stored_pidlid);
+					break;
+				}
+			}
+		}
+	}
 
 	return res;
 }
@@ -2620,7 +2655,7 @@ exchange_mapi_connection_get_default_folder_id (ExchangeMapiConnection *conn, ui
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, 0);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, 0);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
 
@@ -2633,7 +2668,7 @@ exchange_mapi_connection_get_default_folder_id (ExchangeMapiConnection *conn, ui
 cleanup:
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return (ms == MAPI_E_SUCCESS ? fid : 0);
 }
@@ -2655,7 +2690,7 @@ exchange_mapi_connection_create_item (ExchangeMapiConnection *conn, uint32_t olF
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, 0);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, 0);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
 
@@ -2680,7 +2715,7 @@ exchange_mapi_connection_create_item (ExchangeMapiConnection *conn, uint32_t olF
 
 	/* Add regular props using callback */
 	if (build_props && !build_props (conn, fid, mem_ctx, &props, &propslen, bwp_data)) {
-		g_debug ("%s: (%s): build_props failed! propslen = %d ", G_STRLOC, G_STRFUNC, propslen);
+		exchange_mapi_debug_print ("%s: (%s): build_props failed! propslen = %d ", G_STRLOC, G_STRFUNC, propslen);
 		make_mapi_error (perror, "build_props", MAPI_E_CALL_FAILED);
 		goto cleanup;
 	}
@@ -2758,7 +2793,7 @@ cleanup:
 
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return mid;
 }
@@ -2780,7 +2815,7 @@ exchange_mapi_connection_modify_item (ExchangeMapiConnection *conn, uint32_t olF
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
 
@@ -2805,7 +2840,7 @@ exchange_mapi_connection_modify_item (ExchangeMapiConnection *conn, uint32_t olF
 
 	/* Add regular props using callback */
 	if (build_props && !build_props (conn, fid, mem_ctx, &props, &propslen, bwp_data)) {
-		g_debug ("%s: (%s): Could not build props ", G_STRLOC, G_STRFUNC);
+		exchange_mapi_debug_print ("%s: (%s): Could not build props ", G_STRLOC, G_STRFUNC);
 		make_mapi_error (perror, "build_props", MAPI_E_CALL_FAILED);
 		goto cleanup;
 	}
@@ -2861,7 +2896,7 @@ cleanup:
 
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return result;
 }
@@ -2880,7 +2915,7 @@ exchange_mapi_connection_set_flags (ExchangeMapiConnection *conn, uint32_t olFol
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
 	mem_ctx = talloc_init("ExchangeMAPI_SetFlags");
@@ -2910,7 +2945,7 @@ cleanup:
 
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return result;
 }
@@ -2973,13 +3008,13 @@ exchange_mapi_connection_copy_items (ExchangeMapiConnection *conn, mapi_id_t src
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, MAPI_E_INVALID_PARAMETER);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
 	ms = mapi_move_items (conn, src_fid, src_fid_options, dest_fid, dest_fid_options, mids, TRUE, perror);
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return ms == MAPI_E_SUCCESS;
 }
@@ -2992,13 +3027,13 @@ exchange_mapi_connection_move_items (ExchangeMapiConnection *conn, mapi_id_t src
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, MAPI_E_INVALID_PARAMETER);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
 	ms = mapi_move_items (conn, src_fid, src_fid_options, dest_fid, dest_fid_options, mids, FALSE, perror);
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return ms == MAPI_E_SUCCESS;
 }
@@ -3017,7 +3052,7 @@ exchange_mapi_connection_remove_items (ExchangeMapiConnection *conn, uint32_t ol
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
 
@@ -3051,7 +3086,7 @@ cleanup:
 
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return result;
 }
@@ -3144,7 +3179,7 @@ get_child_folders (TALLOC_CTX *mem_ctx, ExchangeMAPIFolderCategory folder_hier, 
 			if (!class)
 				class = IPF_NOTE;
 
-			g_debug("|---+ %-15s : (Container class: %s %016" G_GINT64_MODIFIER "X) UnRead : %d Total : %d size : %d",
+			exchange_mapi_debug_print("|---+ %-15s : (Container class: %s %016" G_GINT64_MODIFIER "X) UnRead : %d Total : %d size : %d",
 				name, class, *fid, unread ? *unread : 0, total ? *total : 0, folder_size ? *folder_size : 0);
 
 			folder = exchange_mapi_folder_new (name, class, folder_hier, *fid, pid ? *pid : folder_id,
@@ -3338,7 +3373,7 @@ exchange_mapi_connection_get_folders_list (ExchangeMapiConnection *conn, GSList 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
 
@@ -3404,7 +3439,7 @@ cleanup:
 
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return result;
 }
@@ -3421,7 +3456,7 @@ exchange_mapi_connection_get_pf_folders_list (ExchangeMapiConnection *conn, GSLi
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
 	mem_ctx = talloc_init("ExchangeMAPI_PF_GetFoldersList");
@@ -3447,7 +3482,7 @@ cleanup:
 
 	UNLOCK ();
 
-	g_debug("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return result;
 }
@@ -3693,18 +3728,6 @@ try_create_profile (const gchar *profname, const gchar *password)
 	return data.has_profile;
 }
 
-static void
-mapi_debug_logger (const gchar * domain, GLogLevelFlags level, const gchar * message, gpointer data)
-{
-	g_print ("[DEBUG] %s\n", message);
-}
-
-static void
-mapi_debug_logger_muted (const gchar * domain, GLogLevelFlags level, const gchar * message, gpointer data)
-{
-	/*Nothing here. Just a dummy function*/
-}
-
 static gboolean
 ensure_mapi_init_called (GError **perror)
 {
@@ -3783,13 +3806,7 @@ mapi_profile_load (const gchar *profname, const gchar *password, GError **perror
 
 	g_static_rec_mutex_lock (&profile_mutex);
 
-	/* Initialize libexchangemapi logger*/
-	if (g_getenv ("EXCHANGEMAPI_DEBUG")) {
-		g_log_set_handler (G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, mapi_debug_logger, NULL);
-	} else
-		g_log_set_handler (G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, mapi_debug_logger_muted, NULL);
-
-	g_debug("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	if (!ensure_mapi_init_called (perror))
 		goto cleanup;
@@ -3801,7 +3818,7 @@ mapi_profile_load (const gchar *profname, const gchar *password, GError **perror
 		SetMAPIDebugLevel (mapi_ctx, debug_log_level);
 	}
 
-	g_debug("Loading profile %s ", profname);
+	exchange_mapi_debug_print("Loading profile %s ", profname);
 
 	ms = MapiLogonEx (mapi_ctx, &session, profname, password);
 	if (ms == MAPI_E_NOT_FOUND && try_create_profile (profname, password))
@@ -3814,7 +3831,7 @@ mapi_profile_load (const gchar *profname, const gchar *password, GError **perror
 
  cleanup:
 	g_static_rec_mutex_unlock (&profile_mutex);
-	g_debug ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	exchange_mapi_debug_print ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return session;
 }
@@ -3863,7 +3880,7 @@ mapi_profile_create (const ExchangeMapiProfileData *empd,
 	if (use_locking)
 		g_static_rec_mutex_lock (&profile_mutex);
 
-	g_debug ("Create profile with %s %s %s\n", empd->username,
+	exchange_mapi_debug_print ("Create profile with %s %s %s\n", empd->username,
 		 empd->domain, empd->server);
 
 	if (!ensure_mapi_init_called (perror)) {
@@ -3912,25 +3929,25 @@ mapi_profile_create (const ExchangeMapiProfileData *empd,
 	#undef add_string_attr
 
 	/* Login now */
-	g_debug("Logging into the server... ");
+	exchange_mapi_debug_print("Logging into the server... ");
 	ms = MapiLogonProvider (mapi_ctx, &session, profname, empd->password,
 				PROVIDER_ID_NSPI);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "MapiLogonProvider", ms);
-		g_debug ("Deleting profile %s ", profname);
+		exchange_mapi_debug_print ("Deleting profile %s ", profname);
 		DeleteProfile (mapi_ctx, profname);
 		goto cleanup;
 	}
-	g_debug("MapiLogonProvider : succeeded \n");
+	exchange_mapi_debug_print("MapiLogonProvider : succeeded \n");
 
 	ms = ProcessNetworkProfile (session, empd->username, callback, data);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "ProcessNetworkProfile", ms);
-		g_debug ("Deleting profile %s ", profname);
+		exchange_mapi_debug_print ("Deleting profile %s ", profname);
 		DeleteProfile (mapi_ctx, profname);
 		goto cleanup;
 	}
-	g_debug("ProcessNetworkProfile : succeeded \n");
+	exchange_mapi_debug_print("ProcessNetworkProfile : succeeded \n");
 
 	result = TRUE;
 
@@ -3978,7 +3995,7 @@ exchange_mapi_delete_profile (const gchar *profile, GError **perror)
 	if (ensure_mapi_init_called (perror)) {
 		enum MAPISTATUS ms;
 
-		g_debug ("Deleting profile %s ", profile);
+		exchange_mapi_debug_print ("Deleting profile %s ", profile);
 
 		ms = DeleteProfile (mapi_ctx, profile);
 		if (ms == MAPI_E_SUCCESS) {

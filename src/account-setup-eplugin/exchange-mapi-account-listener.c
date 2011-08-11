@@ -1344,7 +1344,7 @@ exchange_mapi_account_listener_construct (ExchangeMAPIAccountListener *config_li
 		}
 	}
 
-	d(g_debug ("MAPI listener is constructed with %d listed MAPI accounts ", g_list_length (mapi_accounts)));
+	d(exchange_mapi_debug_print ("MAPI listener is constructed with %d listed MAPI accounts ", g_list_length (mapi_accounts)));
 
 	g_signal_connect (config_listener->priv->account_list, "account_added", G_CALLBACK (mapi_account_added), NULL);
 	g_signal_connect (config_listener->priv->account_list, "account_changed", G_CALLBACK (mapi_account_changed), NULL);

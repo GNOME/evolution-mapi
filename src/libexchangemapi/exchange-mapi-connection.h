@@ -215,6 +215,7 @@ GSList *		exchange_mapi_connection_peek_folders_list (ExchangeMapiConnection *co
 
 gboolean		exchange_mapi_connection_resolve_named_props (ExchangeMapiConnection *conn, mapi_id_t fid, ResolveNamedIDsData *named_ids_list, guint named_ids_n_elems, GError **perror);
 uint32_t		exchange_mapi_connection_resolve_named_prop (ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t pidlid_propid, GError **perror);
+uint32_t		exchange_mapi_connection_unresolve_proptag_to_nameid (ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t proptag);
 
 gchar *			exchange_mapi_connection_ex_to_smtp (ExchangeMapiConnection *conn, const gchar *ex_address, gchar **display_name, GError **perror);
 

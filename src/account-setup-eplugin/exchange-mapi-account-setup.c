@@ -76,7 +76,7 @@ free_mapi_listener ( void )
 gint
 e_plugin_lib_enable (EPlugin *ep, gint enable)
 {
-	d(g_debug ("Loading Exchange MAPI Plugin"));
+	d(exchange_mapi_debug_print ("Loading Exchange MAPI Plugin"));
 
 	if (!config_listener) {
 		config_listener = exchange_mapi_account_listener_new ();

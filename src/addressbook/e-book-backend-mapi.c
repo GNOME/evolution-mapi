@@ -171,7 +171,7 @@ ebbm_set_cache_time (EBookBackendMAPI *ebma, glong cache_seconds)
 	g_free (iso_time);
 
 	if (error) {
-		g_debug ("%s: Failed to set value: %s", G_STRFUNC, error->message);
+		exchange_mapi_debug_print ("%s: Failed to set value: %s", G_STRFUNC, error->message);
 		g_error_free (error);
 	}
 }

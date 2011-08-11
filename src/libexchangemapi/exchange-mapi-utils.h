@@ -24,6 +24,7 @@
 #ifndef EXCHANGE_MAPI_UTILS_H
 #define EXCHANGE_MAPI_UTILS_H 
 
+#include "exchange-mapi-debug.h"
 #include "exchange-mapi-connection.h"
 #include <camel/camel.h>
 
@@ -49,8 +50,6 @@ ExchangeMAPIStream *exchange_mapi_util_find_stream_namedid (GSList *stream_list,
 void exchange_mapi_util_free_attachment_list (GSList **attach_list);
 void exchange_mapi_util_free_recipient_list (GSList **recip_list);
 void exchange_mapi_util_free_stream_list (GSList **stream_list);
-
-void exchange_mapi_debug_property_dump (struct mapi_SPropValue_array *properties);
 
 void	 exchange_mapi_util_recip_entryid_generate_smtp (TALLOC_CTX *mem_ctx, struct Binary_r *entryid, const gchar *display_name, const gchar *email);
 void	 exchange_mapi_util_recip_entryid_generate_ex  (TALLOC_CTX *mem_ctx, struct Binary_r *entryid, const gchar *exchange_dn);

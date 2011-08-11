@@ -22,6 +22,8 @@ libexchangemapi_1_0_la_SOURCES =		\
 	exchange-mapi-folder.h			\
 	exchange-mapi-connection.c		\
 	exchange-mapi-connection.h		\
+	exchange-mapi-debug.c			\
+	exchange-mapi-debug.h			\
 	exchange-mapi-utils.c			\
 	exchange-mapi-utils.h			\
 	exchange-mapi-cal-utils.c		\
@@ -51,6 +53,7 @@ libexchangemapiinclude_HEADERS = 		\
 	exchange-mapi-defs.h			\
 	exchange-mapi-folder.h			\
 	exchange-mapi-connection.h		\
+	exchange-mapi-debug.h			\
 	exchange-mapi-utils.h			\
 	exchange-mapi-cal-utils.h		\
 	exchange-mapi-cal-tz-utils.h		\
