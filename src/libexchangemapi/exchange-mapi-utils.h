@@ -24,9 +24,9 @@
 #ifndef EXCHANGE_MAPI_UTILS_H
 #define EXCHANGE_MAPI_UTILS_H 
 
+#include "camel-mapi-settings.h"
 #include "exchange-mapi-debug.h"
 #include "exchange-mapi-connection.h"
-#include <camel/camel.h>
 
 gchar *  exchange_mapi_util_mapi_id_to_string (mapi_id_t id);
 gboolean exchange_mapi_util_mapi_id_from_string (const gchar *str, mapi_id_t *id);
@@ -58,7 +58,7 @@ gboolean exchange_mapi_util_recip_entryid_decode (ExchangeMapiConnection *conn, 
 gchar *exchange_lf_to_crlf (const gchar *in);
 gchar *exchange_crlf_to_lf (const gchar *in);
 
-void exchange_mapi_util_profiledata_from_camelurl (ExchangeMapiProfileData *empd, const CamelURL *url);
+void exchange_mapi_util_profiledata_from_settings (ExchangeMapiProfileData *empd, CamelMapiSettings *settings);
 gchar *exchange_mapi_util_profile_name (const ExchangeMapiProfileData *empd, gboolean migrate);
 gboolean exchange_mapi_util_trigger_krb_auth (const ExchangeMapiProfileData *empd, GError **error);
 

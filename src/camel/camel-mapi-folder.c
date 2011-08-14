@@ -1849,10 +1849,18 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 	CamelFolder	*folder = NULL;
 	CamelMapiFolder *mapi_folder;
 	CamelMapiStore  *mapi_store = (CamelMapiStore *) store;
+	CamelService    *service;
+	CamelSettings   *settings;
 
 	gchar *summary_file, *state_file;
 	const gchar *short_name;
 	CamelStoreInfo *si;
+	gboolean filter_inbox;
+
+	service = CAMEL_SERVICE (store);
+	settings = camel_service_get_settings (service);
+
+	filter_inbox = camel_store_settings_get_filter_inbox (CAMEL_STORE_SETTINGS (settings));
 
 	short_name = strrchr (folder_name, '/');
 	if (short_name)
@@ -1903,7 +1911,7 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 /*		return NULL; */
 /*	} */
 
-	if ((store->flags & CAMEL_STORE_FILTER_INBOX) != 0) {
+	if (filter_inbox) {
 		CamelFolderInfo *fi;
 
 		fi = camel_store_get_folder_info_sync (store, folder_name, 0, NULL, NULL);

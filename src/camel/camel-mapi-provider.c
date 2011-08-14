@@ -42,20 +42,20 @@ static gint mapi_url_equal (gconstpointer, gconstpointer);
 static CamelProviderConfEntry mapi_conf_entries[] = {
 	{ CAMEL_PROVIDER_CONF_SECTION_START, "mailcheck", NULL,
 	  N_("Checking for new mail") },
-	{ CAMEL_PROVIDER_CONF_CHECKBOX, "check_all", NULL,
+	{ CAMEL_PROVIDER_CONF_CHECKBOX, "check-all", NULL,
 	  N_("C_heck for new messages in all folders"), "1" },
 	{ CAMEL_PROVIDER_CONF_SECTION_END },
 
 	{ CAMEL_PROVIDER_CONF_SECTION_START, "generals", NULL,
 	  N_("Options") },
-	{ CAMEL_PROVIDER_CONF_CHECKBOX, "sync_offline", NULL,
+	{ CAMEL_PROVIDER_CONF_CHECKBOX, "stay-synchronized", NULL,
 	  N_("Automatically synchroni_ze account locally"), "0" },
-	{ CAMEL_PROVIDER_CONF_CHECKBOX, "filter", NULL,
+	{ CAMEL_PROVIDER_CONF_CHECKBOX, "filter-inbox", NULL,
 	  /* i18n: copy from evolution:camel-imap-provider.c */
 	  N_("_Apply filters to new messages in Inbox on this server"), "0" },
-	{ CAMEL_PROVIDER_CONF_CHECKBOX, "filter_junk", NULL,
+	{ CAMEL_PROVIDER_CONF_CHECKBOX, "filter-junk", NULL,
 	  N_("Check new messages for _Junk contents"), "0" },
-	{ CAMEL_PROVIDER_CONF_CHECKBOX, "filter_junk_inbox", "filter_junk",
+	{ CAMEL_PROVIDER_CONF_CHECKBOX, "filter-junk-inbox", "filter-junk",
 	  N_("Only check for Junk messag_es in the Inbox folder"), "0" },
 
 	{ CAMEL_PROVIDER_CONF_SECTION_END },

@@ -39,6 +39,7 @@
 #include <ctype.h>
 #include <errno.h>
 
+#include "camel-mapi-settings.h"
 #include "camel-mapi-store.h"
 #include "camel-mapi-folder.h"
 #include "camel-mapi-store-summary.h"
@@ -92,7 +93,9 @@ mapi_send_to_sync (CamelTransport *transport,
 	const gchar *namep;
 	const gchar *addressp;
 	mapi_id_t st = 0;
-	CamelURL *url;
+	CamelService *service;
+	CamelSettings *settings;
+	const gchar *profile;
 	GError *mapi_error = NULL;
 
 	if (!camel_internet_address_get((CamelInternetAddress *)from, 0, &namep, &addressp)) {
@@ -101,10 +104,11 @@ mapi_send_to_sync (CamelTransport *transport,
 
 	g_return_val_if_fail (CAMEL_IS_SERVICE (transport), FALSE);
 
-	url = camel_service_get_camel_url (CAMEL_SERVICE (transport));
-	g_return_val_if_fail (url != NULL, FALSE);
+	service = CAMEL_SERVICE (transport);
+	settings = camel_service_get_settings (service);
+	profile = camel_mapi_settings_get_profile (CAMEL_MAPI_SETTINGS (settings));
 
-	conn = exchange_mapi_connection_find (camel_url_get_param (url, "profile"));
+	conn = exchange_mapi_connection_find (profile);
 	if (!conn) {
 		g_set_error (
 			error, CAMEL_SERVICE_ERROR,

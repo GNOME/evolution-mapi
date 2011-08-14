@@ -824,32 +824,30 @@ exchange_crlf_to_lf (const gchar *in)
 }
 
 /**
- * exchange_mapi_util_profiledata_from_camelurl:
+ * exchange_mapi_util_profiledata_from_settings:
  * @empd: destination for profile settings
- * @url: CamelURL with account settings
+ * @settings: a #CamelMapiSettings
  *
  * Sets the members of an ExchangeMapiProfileData instance to
- * reflect the account settings listed in the corresponding
- * CamelURL pointer.
+ * reflect the account settings in @settings.
  *
- * @note: no allocation is done, so do not free the CamelUrl pointer and
- *        the respective underlying pointers until you no longer need the
+ * @note: no allocation is done, so do not finalize @settings and the
+ *        respective underlying pointers until you no longer need the
  *        profile data.
  **/
 void
-exchange_mapi_util_profiledata_from_camelurl (ExchangeMapiProfileData *empd, const CamelURL *url)
+exchange_mapi_util_profiledata_from_settings (ExchangeMapiProfileData *empd, CamelMapiSettings *settings)
 {
-	const gchar *use_ssl = NULL, *use_krb = NULL;
-	CamelURL *promise_its_const = (CamelURL*)url; /* :) */
-	empd->username = promise_its_const->user;
-	empd->server = promise_its_const->host;
+	CamelNetworkSettings *network_settings;
+	CamelNetworkSecurityMethod security_method;
 
-	use_ssl = camel_url_get_param (promise_its_const, "ssl");
-	empd->use_ssl = (use_ssl && g_str_equal (use_ssl, "1"));
-	empd->domain = camel_url_get_param (promise_its_const, "domain");
-	use_krb = camel_url_get_param (promise_its_const, "kerberos");
-	empd->krb_sso = (use_krb && g_str_equal (use_krb, "required"));
-	empd->krb_realm = camel_url_get_param (promise_its_const, "realm");
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+	security_method = camel_network_settings_get_security_method (network_settings);
+
+	empd->use_ssl = (security_method != CAMEL_NETWORK_SECURITY_METHOD_NONE);
+	empd->domain = camel_mapi_settings_get_domain (settings);
+	empd->krb_sso = camel_mapi_settings_get_kerberos (settings);
+	empd->krb_realm = camel_mapi_settings_get_realm (settings);
 }
 
 gboolean

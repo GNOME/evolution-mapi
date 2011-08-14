@@ -35,6 +35,7 @@
 
 #include "camel-mapi-store.h"
 #include "camel-mapi-folder.h"
+#include "camel-mapi-settings.h"
 #include "camel-mapi-store-summary.h"
 #include "camel-mapi-summary.h"
 #include "camel-mapi-notifications.h"
@@ -52,7 +53,6 @@
 #define d(x) printf("%s:%s:%s \n", G_STRLOC, G_STRFUNC, x)
 
 struct _CamelMapiStorePrivate {
-	gchar *profile;
 	ExchangeMapiConnection *conn;
 
 	gchar *base_url;
@@ -832,7 +832,6 @@ mapi_store_finalize (GObject *object)
 
 	priv = CAMEL_MAPI_STORE (object)->priv;
 
-	g_free (priv->profile);
 	g_free (priv->base_url);
 
 	if (priv->id_hash != NULL)
@@ -875,17 +874,19 @@ mapi_store_can_refresh_folder (CamelStore *store,
                                GError **error)
 {
 	CamelService *service;
-	CamelURL *url;
+	CamelSettings *settings;
+	gboolean check_all;
 
 	/* skip unselectable folders from automatic refresh */
 	if (info && (info->flags & CAMEL_FOLDER_NOSELECT) != 0)
 		return FALSE;
 
 	service = CAMEL_SERVICE (store);
-	url = camel_service_get_camel_url (service);
+	settings = camel_service_get_settings (service);
 
-	return CAMEL_STORE_CLASS(camel_mapi_store_parent_class)->can_refresh_folder (store, info, error) ||
-	      (camel_url_get_param (url, "check_all") != NULL);
+	check_all = camel_mapi_settings_get_check_all (CAMEL_MAPI_SETTINGS (settings));
+
+	return CAMEL_STORE_CLASS(camel_mapi_store_parent_class)->can_refresh_folder (store, info, error) || check_all;
 }
 
 static gboolean
@@ -1526,6 +1527,7 @@ camel_mapi_store_class_init (CamelMapiStoreClass *class)
 	object_class->constructed = mapi_store_constructed;
 
 	service_class = CAMEL_SERVICE_CLASS (class);
+	service_class->settings_type = CAMEL_TYPE_MAPI_SETTINGS;
 	service_class->get_name = mapi_get_name;
 	service_class->connect_sync = mapi_connect_sync;
 	service_class->disconnect_sync = mapi_disconnect_sync;
@@ -1568,7 +1570,6 @@ mapi_store_constructed (GObject *object)
 	CamelStore *store = CAMEL_STORE (object);
 	CamelMapiStorePrivate *priv = mapi_store->priv;
 	CamelService *service;
-	CamelURL *url;
 	const gchar *user_data_dir;
 	gchar *path = NULL;
 
@@ -1576,7 +1577,6 @@ mapi_store_constructed (GObject *object)
 	G_OBJECT_CLASS (camel_mapi_store_parent_class)->constructed (object);
 
 	service = CAMEL_SERVICE (object);
-	url = camel_service_get_camel_url (service);
 	user_data_dir = camel_service_get_user_data_dir (service);
 
 	/*store summary*/
@@ -1589,19 +1589,12 @@ mapi_store_constructed (GObject *object)
 	camel_store_summary_touch ((CamelStoreSummary *)mapi_store->summary);
 	camel_store_summary_load ((CamelStoreSummary *) mapi_store->summary);
 
-	/*user and profile*/
-	priv->profile = g_strdup (camel_url_get_param(url, "profile"));
-
 	/*base url*/
 	priv->base_url = camel_url_to_string (
 		camel_service_get_camel_url (service),
 		CAMEL_URL_HIDE_PASSWORD |
 		CAMEL_URL_HIDE_PARAMS |
 		CAMEL_URL_HIDE_AUTH);
-
-	/*filter*/
-	if (camel_url_get_param (url, "filter"))
-		store->flags |= CAMEL_STORE_FILTER_INBOX;
 
 	/*Hash Table*/
 	priv->id_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free); /* folder ID to folder Full name */
@@ -1672,13 +1665,23 @@ mapi_auth_loop (CamelService *service, GError **error)
 {
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
 	CamelURL *url;
+	CamelSettings *settings;
+	CamelMapiSettings *mapi_settings;
 	ExchangeMapiProfileData empd = { 0 };
 
 	gchar *errbuf = NULL;
 	gboolean authenticated = FALSE, ret, krb_requested = FALSE;
+	const gchar *profile;
 
 	url = camel_service_get_camel_url (service);
-	exchange_mapi_util_profiledata_from_camelurl (&empd, url);
+	settings = camel_service_get_settings (service);
+	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
+
+	empd.server = url->host;
+	empd.username = url->user;
+	exchange_mapi_util_profiledata_from_settings (&empd, mapi_settings);
+
+	profile = camel_mapi_settings_get_profile (mapi_settings);
 
 	url->passwd = NULL;
 
@@ -1705,7 +1708,7 @@ mapi_auth_loop (CamelService *service, GError **error)
 			return FALSE;
 		}
 
-		store->priv->conn = exchange_mapi_connection_new (store->priv->profile, url->passwd, &mapi_error);
+		store->priv->conn = exchange_mapi_connection_new (profile, url->passwd, &mapi_error);
 		if (!store->priv->conn || !exchange_mapi_connection_connected (store->priv->conn)) {
 			if (mapi_error) {
 				errbuf = g_strdup_printf (_("Unable to authenticate to Exchange MAPI server: %s"), mapi_error->message);
@@ -2077,18 +2080,6 @@ camel_mapi_store_folder_lookup (CamelMapiStore *mapi_store, const gchar *folder_
 	CamelMapiStorePrivate *priv = mapi_store->priv;
 
 	return g_hash_table_lookup (priv->id_hash, folder_id);
-}
-
-const gchar *
-camel_mapi_store_get_profile_name (CamelMapiStore *mapi_store)
-{
-	CamelMapiStorePrivate *priv;
-
-	g_return_val_if_fail (CAMEL_IS_MAPI_STORE (mapi_store), NULL);
-
-	priv = mapi_store->priv;
-
-	return priv->profile;
 }
 
 ExchangeMapiConnection *

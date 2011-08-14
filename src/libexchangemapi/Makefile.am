@@ -17,6 +17,8 @@ mapidata_DATA = 				\
 	tz-ical-to-mapi 
 
 libexchangemapi_1_0_la_SOURCES =		\
+	camel-mapi-settings.c			\
+	camel-mapi-settings.h			\
 	exchange-mapi-defs.h			\
 	exchange-mapi-folder.c			\
 	exchange-mapi-folder.h			\

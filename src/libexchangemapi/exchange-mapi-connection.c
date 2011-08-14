@@ -3670,8 +3670,18 @@ try_create_profile_main_thread_cb (struct tcp_data *data)
 		EAccount *account = E_ACCOUNT (e_iterator_get (iter));
 		if (account && account->source && account->source->url && g_ascii_strncasecmp (account->source->url, "mapi://", 7) == 0) {
 			CamelURL *url = camel_url_new (e_account_get_string (account, E_ACCOUNT_SOURCE_URL), NULL);
-			exchange_mapi_util_profiledata_from_camelurl (&empd,
-								      url);
+			CamelSettings *settings;
+			const gchar *url_string;
+
+			url_string = e_account_get_string (account, E_ACCOUNT_SOURCE_URL);
+			url = camel_url_new (url_string, NULL);
+
+			settings = g_object_new (CAMEL_TYPE_MAPI_SETTINGS, NULL);
+			camel_settings_load_from_url (settings, url);
+
+			empd.server = url->host;
+			empd.username = url->user;
+			exchange_mapi_util_profiledata_from_settings (&empd, CAMEL_MAPI_SETTINGS (settings));
 			/* cast away the const, but promise not to touch it */
 			empd.password = (gchar*)data->password;
 
@@ -3683,6 +3693,7 @@ try_create_profile_main_thread_cb (struct tcp_data *data)
 					data->has_profile = mapi_profile_create (&empd, NULL, NULL, NULL, FALSE);
 
 					g_free (profname);
+					g_object_unref (settings);
 					camel_url_free (url);
 					break;
 				}
@@ -3690,6 +3701,7 @@ try_create_profile_main_thread_cb (struct tcp_data *data)
 				g_free (profname);
 			}
 
+			g_object_unref (settings);
 			camel_url_free (url);
 		}
 	}

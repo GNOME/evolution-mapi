@@ -58,7 +58,7 @@
 
 G_DEFINE_TYPE (ExchangeMAPIAccountListener, exchange_mapi_account_listener, G_TYPE_OBJECT)
 
-static gboolean create_profile_entry (CamelURL *url, EAccount *account);
+static gboolean create_profile_entry (CamelURL *url, EAccount *account, CamelMapiSettings *settings);
 
 struct _ExchangeMAPIAccountListenerPrivate {
 	GConfClient *gconf_client;
@@ -226,15 +226,28 @@ find_source_by_fid (GSList *sources, const gchar *fid)
 #define ADDRESSBOOK_SOURCES     "/apps/evolution/addressbook/sources"
 
 static void
-add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType folder_type, CamelURL *url, mapi_id_t trash_fid)
+add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType folder_type, CamelURL *url, CamelSettings *settings, mapi_id_t trash_fid)
 {
+	CamelMapiSettings *mapi_settings;
 	ESourceList *source_list = NULL;
 	ESourceGroup *group = NULL;
-	const gchar *conf_key = NULL, *source_selection_key = NULL, *kerberos;
+	const gchar *conf_key = NULL, *source_selection_key = NULL;
 	GConfClient* client;
 	GSList *ids, *temp_list, *old_sources = NULL;
 	gchar *base_uri = NULL;
 	gboolean is_new_group = FALSE;
+	const gchar *profile;
+	const gchar *domain;
+	const gchar *realm;
+	const gchar *kerberos;
+	gboolean stay_synchronized;
+
+	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
+	profile = camel_mapi_settings_get_profile (mapi_settings);
+	domain = camel_mapi_settings_get_domain (mapi_settings);
+	realm = camel_mapi_settings_get_realm (mapi_settings);
+	kerberos = camel_mapi_settings_get_kerberos (mapi_settings) ? "required" : NULL;
+	stay_synchronized = camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (settings));
 
 	if (folder_type == MAPI_FOLDER_TYPE_APPOINTMENT) {
 		conf_key = CALENDAR_SOURCES;
@@ -271,10 +284,9 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 	e_source_group_set_property (group, "create_source", "yes");
 	e_source_group_set_property (group, "username", url->user);
 	e_source_group_set_property (group, "host", url->host);
-	e_source_group_set_property (group, "profile", camel_url_get_param (url, "profile"));
-	e_source_group_set_property (group, "domain", camel_url_get_param (url, "domain"));
-	e_source_group_set_property (group, "realm", camel_url_get_param (url, "realm"));
-	kerberos = camel_url_get_param (url, "kerberos");
+	e_source_group_set_property (group, "profile", profile);
+	e_source_group_set_property (group, "domain", domain);
+	e_source_group_set_property (group, "realm", realm);
 	e_source_group_set_property (group, "kerberos", kerberos);
 
 	/* We set these because on new folder creation - these are required. */
@@ -309,16 +321,15 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 		e_source_set_property (source, "auth-type", "plain/password");
 		e_source_set_property (source, "username", url->user);
 		e_source_set_property (source, "host", url->host);
-		e_source_set_property (source, "profile", camel_url_get_param (url, "profile"));
-		e_source_set_property (source, "domain", camel_url_get_param (url, "domain"));
-		e_source_set_property (source, "realm", camel_url_get_param (url, "realm"));
+		e_source_set_property (source, "profile", profile);
+		e_source_set_property (source, "domain", domain);
+		e_source_set_property (source, "realm", realm);
 		e_source_set_property (source, "folder-id", fid);
 		e_source_set_property (source, "public", "no");
 		SET_KRB_SSO(source, kerberos);
 
 		if (is_new_source)
-			e_source_set_property (source, "offline_sync",
-					camel_url_get_param (url, "offline_sync") ? "1" : "0");
+			e_source_set_property (source, "offline_sync", stay_synchronized ? "1" : "0");
 
 		if (folder->is_default)
 			e_source_set_property (source, "delete", "no");
@@ -383,6 +394,7 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 
 void exchange_mapi_add_esource (CamelURL *url, const gchar *folder_name, const gchar *fid, gint folder_type)
 {
+	CamelMapiSettings *settings;
 	ESourceList *source_list = NULL;
 	ESourceGroup *group = NULL;
 	const gchar *conf_key = NULL, *kerberos = NULL;
@@ -428,24 +440,28 @@ void exchange_mapi_add_esource (CamelURL *url, const gchar *folder_name, const g
 		}
 	}
 
+	settings = g_object_new (CAMEL_TYPE_MAPI_SETTINGS, NULL);
+	camel_settings_load_from_url (CAMEL_SETTINGS (settings), url);
+
 	relative_uri = g_strconcat (";", fid, NULL);
-	kerberos = camel_url_get_param (url, "kerberos");
+	kerberos = camel_mapi_settings_get_kerberos (settings) ? "required" : NULL;
 	source = e_source_new (folder_name, relative_uri);
 	e_source_set_property (source, "auth", "1");
 	e_source_set_property (source, "auth-type", "plain/password");
 	e_source_set_property (source, "username", url->user);
 	e_source_set_property (source, "host", url->host);
-	e_source_set_property (source, "profile", camel_url_get_param (url, "profile"));
-	e_source_set_property (source, "domain", camel_url_get_param (url, "domain"));
-	e_source_set_property (source, "realm", camel_url_get_param (url, "realm"));
+	e_source_set_property (source, "profile", camel_mapi_settings_get_profile (settings));
+	e_source_set_property (source, "domain", camel_mapi_settings_get_domain (settings));
+	e_source_set_property (source, "realm", camel_mapi_settings_get_realm (settings));
 	e_source_set_property (source, "folder-id", fid);
-	e_source_set_property (source, "offline_sync",
-				camel_url_get_param (url, "offline_sync") ? "1" : "0");
+	e_source_set_property (source, "offline_sync", camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (settings)) ? "1" : "0");
 	e_source_set_property (source, "public", "yes");
 	e_source_set_property (source, "delete", "yes");
 	SET_KRB_SSO(source, kerberos);
 
 	e_source_group_add_source (group, source, -1);
+
+	g_object_unref (settings);
 
 	g_object_unref (source);
 	g_free (relative_uri);
@@ -585,10 +601,16 @@ add_calendar_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid)
 	url = camel_url_new (account->source->url, NULL);
 
 	if (url) {
-		add_cal_esource (account, folders, MAPI_FOLDER_TYPE_APPOINTMENT, url, trash_fid);
-		add_cal_esource (account, folders, MAPI_FOLDER_TYPE_TASK, url, trash_fid);
-		add_cal_esource (account, folders, MAPI_FOLDER_TYPE_MEMO, url, trash_fid);
+		CamelSettings *settings;
 
+		settings = g_object_new (CAMEL_TYPE_MAPI_SETTINGS, NULL);
+		camel_settings_load_from_url (settings, url);
+
+		add_cal_esource (account, folders, MAPI_FOLDER_TYPE_APPOINTMENT, url, settings, trash_fid);
+		add_cal_esource (account, folders, MAPI_FOLDER_TYPE_TASK, url, settings, trash_fid);
+		add_cal_esource (account, folders, MAPI_FOLDER_TYPE_MEMO, url, settings, trash_fid);
+
+		g_object_unref (settings);
 		camel_url_free (url);
 	}
 }
@@ -636,6 +658,7 @@ static gboolean
 add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid)
 {
 	CamelURL *url;
+	CamelMapiSettings *settings;
 	ESourceList *list;
 	ESourceGroup *group;
 	ESource *source;
@@ -643,12 +666,25 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 	GSList *temp_list, *old_sources = NULL;
 	GConfClient* client;
 	gboolean is_new_group = FALSE;
-	const gchar *kerberos = NULL;
+	const gchar *profile;
+	const gchar *domain;
+	const gchar *realm;
+	const gchar *kerberos;
+	gboolean stay_synchronized;
 
 	url = camel_url_new (account->source->url, NULL);
 	if (url == NULL) {
 		return FALSE;
 	}
+
+	settings = g_object_new (CAMEL_TYPE_MAPI_SETTINGS, NULL);
+	camel_settings_load_from_url (CAMEL_SETTINGS (settings), url);
+
+	profile = camel_mapi_settings_get_profile (settings);
+	domain = camel_mapi_settings_get_domain (settings);
+	realm = camel_mapi_settings_get_realm (settings);
+	kerberos = camel_mapi_settings_get_kerberos (settings) ? "required" : NULL;
+	stay_synchronized = camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (settings));
 
 	base_uri = g_strdup_printf ("mapi://%s@%s/", url->user, url->host);
 	client = gconf_client_get_default ();
@@ -667,13 +703,12 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		is_new_group = TRUE;
 		old_sources = NULL;
 	}
-	kerberos = camel_url_get_param (url, "kerberos");
 	e_source_group_set_property (group, "user", NULL);
 	e_source_group_set_property (group, "username", url->user);
 	e_source_group_set_property (group, "host", url->host);
-	e_source_group_set_property (group, "profile", camel_url_get_param (url, "profile"));
-	e_source_group_set_property (group, "domain", camel_url_get_param (url, "domain"));
-	e_source_group_set_property (group, "realm", camel_url_get_param (url, "realm"));
+	e_source_group_set_property (group, "profile", profile);
+	e_source_group_set_property (group, "domain", domain);
+	e_source_group_set_property (group, "realm", realm);
 	e_source_group_set_property (group, "kerberos", kerberos);
 
 	for (temp_list = folders; temp_list != NULL; temp_list = g_slist_next (temp_list)) {
@@ -701,16 +736,15 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		e_source_set_property(source, "user", NULL);
 		e_source_set_property(source, "username", url->user);
 		e_source_set_property(source, "host", url->host);
-		e_source_set_property(source, "profile", camel_url_get_param (url, "profile"));
-		e_source_set_property(source, "domain", camel_url_get_param (url, "domain"));
-		e_source_set_property(source, "realm", camel_url_get_param (url, "realm"));
+		e_source_set_property(source, "profile", profile);
+		e_source_set_property(source, "domain", domain);
+		e_source_set_property(source, "realm", realm);
 		e_source_set_property(source, "folder-id", fid);
 		e_source_set_property (source, "public", "no");
 		SET_KRB_SSO(source, kerberos);
 
 		if (is_new_source) {
-			e_source_set_property (source, "offline_sync",
-					       camel_url_get_param (url, "offline_sync") ? "1" : "0");
+			e_source_set_property (source, "offline_sync", stay_synchronized ? "1" : "0");
 			e_source_set_property (source, "completion", "true");
 		}
 
@@ -765,11 +799,9 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		//FIXME: Offline handling
 		e_source_set_property(source, "user", NULL);
 		e_source_set_property(source, "username", url->user);
-		e_source_set_property(source, "host", camel_url_get_param (url, "ad_server"));
-		e_source_set_property(source, "view-limit", camel_url_get_param (url, "ad_limit"));
-		e_source_set_property(source, "profile", camel_url_get_param (url, "profile"));
-		e_source_set_property(source, "domain", camel_url_get_param (url, "domain"));
-		e_source_set_property(source, "realm", camel_url_get_param (url, "realm"));
+		e_source_set_property(source, "profile", profile);
+		e_source_set_property(source, "domain", domain);
+		e_source_set_property(source, "realm", realm);
 		SET_KRB_SSO(source, kerberos);
 
 		if (is_new_source) {
@@ -802,6 +834,8 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 
 	if (!e_source_list_sync (list, NULL))
 		g_warning ("%s: Failed to sync source list", G_STRFUNC);
+
+	g_object_unref (settings);
 
 	g_object_unref (group);
 	g_object_unref (list);
@@ -1008,23 +1042,31 @@ static void
 update_account_sources_async (gpointer worker_data, gboolean cancelled, gpointer user_data)
 {
 	CamelURL *url;
+	CamelSettings *settings;
 	ExchangeMapiConnection *conn;
 	EAccount *account = worker_data;
 	gboolean can_create_profile = GPOINTER_TO_INT (user_data) ? TRUE : FALSE;
+	const gchar *profile;
 
 	url = camel_url_new (account->source->url, NULL);
 	g_return_if_fail (url != NULL);
 
-	conn = exchange_mapi_connection_find (camel_url_get_param (url, "profile"));
+	settings = g_object_new (CAMEL_TYPE_MAPI_SETTINGS, NULL);
+	camel_settings_load_from_url (settings, url);
+
+	profile = camel_mapi_settings_get_profile (CAMEL_MAPI_SETTINGS (settings));
+
+	conn = exchange_mapi_connection_find (profile);
 	if (!conn && can_create_profile) {
 		/* connect to the server when not connected yet */
-		if (!create_profile_entry (url, account)) {
+		if (!create_profile_entry (url, account, CAMEL_MAPI_SETTINGS (settings))) {
 			camel_url_free (url);
+			g_object_unref (settings);
 			g_warning ("%s: Failed to create MAPI profile for '%s'", G_STRFUNC, account->name);
 			return;
 		}
 
-		conn = exchange_mapi_connection_find (camel_url_get_param (url, "profile"));
+		conn = exchange_mapi_connection_find (profile);
 	}
 
 	if (conn) {
@@ -1033,7 +1075,7 @@ update_account_sources_async (gpointer worker_data, gboolean cancelled, gpointer
 		struct create_sources_data *csd;
 
 		csd = g_new0 (struct create_sources_data, 1);
-		csd->profile_name = g_strdup (camel_url_get_param (url, "profile"));
+		csd->profile_name = g_strdup (profile);
 		csd->account = g_object_ref (account);
 
 		g_timeout_add_seconds (1, check_for_account_conn_cb, csd);
@@ -1041,6 +1083,7 @@ update_account_sources_async (gpointer worker_data, gboolean cancelled, gpointer
 
 	camel_url_free (url);
 	g_object_unref (account);
+	g_object_unref (settings);
 }
 
 static void
@@ -1124,7 +1167,7 @@ mapi_account_removed (EAccountList *account_listener, EAccount *account)
 }
 
 static gboolean
-create_profile_entry (CamelURL *url, EAccount *account)
+create_profile_entry (CamelURL *url, EAccount *account, CamelMapiSettings *settings)
 {
 	gboolean status = FALSE;
 	guint8 attempts = 0;
@@ -1133,7 +1176,9 @@ create_profile_entry (CamelURL *url, EAccount *account)
 	if (!e_shell_get_online (e_shell_get_default ()))
 		return FALSE;
 
-	exchange_mapi_util_profiledata_from_camelurl (&empd, url);
+	empd.server = url->host;
+	empd.username = url->user;
+	exchange_mapi_util_profiledata_from_settings (&empd, settings);
 
 	while (!status && attempts <= 3) {
 		gchar *key = NULL;
@@ -1199,7 +1244,7 @@ check_equal (const gchar *a, const gchar *b)
 static gboolean
 mapi_camel_url_equal (CamelURL *a, CamelURL *b)
 {
-	const gchar *params[] = { "profile", "domain", "realm", "kerberos", "ad_limit", "ad_server" };
+	const gchar *params[] = { "profile", "domain", "realm", "kerberos" };
 	guint n_params = G_N_ELEMENTS (params), i;
 	gboolean retval = TRUE;
 
@@ -1222,6 +1267,7 @@ mapi_account_changed_async (gpointer worker_data, gboolean cancelled, gpointer u
 	EAccountList *account_listener = worker_data;
 	EAccount *account = user_data;
 	ExchangeMapiProfileData empd = { 0 };
+	CamelSettings *settings;
 
 	g_return_if_fail (account_listener != NULL);
 	g_return_if_fail (account != NULL);
@@ -1236,18 +1282,23 @@ mapi_account_changed_async (gpointer worker_data, gboolean cancelled, gpointer u
 
 	new_url = camel_url_new (account->source->url, NULL);
 
+	settings = g_object_new (CAMEL_TYPE_MAPI_SETTINGS, NULL);
+	camel_settings_load_from_url (settings, new_url);
+
 	if (existing_account_info == NULL && isa_mapi_account) {
 		/* some account of other type is changed to MAPI */
-		if (create_profile_entry (new_url, account)) {
+		if (create_profile_entry (new_url, account, CAMEL_MAPI_SETTINGS (settings))) {
 			/* Things are successful */
 			gchar *profname = NULL, *uri = NULL;
 			ExchangeMAPIAccountListener *config_listener = exchange_mapi_accounts_peek_config_listener();
 
-			exchange_mapi_util_profiledata_from_camelurl (&empd,
-								      new_url);
+			empd.server = new_url->host;
+			empd.username = new_url->user;
+			exchange_mapi_util_profiledata_from_settings (&empd, CAMEL_MAPI_SETTINGS (settings));
 			profname = exchange_mapi_util_profile_name (&empd,
 								    FALSE);
-			camel_url_set_param(new_url, "profile", profname);
+			camel_mapi_settings_set_profile (CAMEL_MAPI_SETTINGS (settings), profname);
+			camel_settings_save_to_url (settings, new_url);
 			g_free (profname);
 
 			uri = camel_url_to_string(new_url, 0);
@@ -1274,14 +1325,17 @@ mapi_account_changed_async (gpointer worker_data, gboolean cancelled, gpointer u
 		} else if (!mapi_camel_url_equal (old_url, new_url) || (existing_account_info->enabled != account->enabled)) {
 		/* Some or all of the account info changed OR the account has been moved from a disabled state to enabled state */
 			mapi_account_removed (account_listener, account);
-			if (create_profile_entry (new_url, account)) {
+			if (create_profile_entry (new_url, account, CAMEL_MAPI_SETTINGS (settings))) {
 				/* Things are successful */
 				gchar *profname = NULL, *uri = NULL;
 				ExchangeMAPIAccountListener *config_listener = exchange_mapi_accounts_peek_config_listener();
 
-				exchange_mapi_util_profiledata_from_camelurl (&empd, new_url);
+				empd.server = new_url->host;
+				empd.username = new_url->user;
+				exchange_mapi_util_profiledata_from_settings (&empd, CAMEL_MAPI_SETTINGS (settings));
 				profname = exchange_mapi_util_profile_name (&empd, FALSE);
-				camel_url_set_param(new_url, "profile", profname);
+				camel_mapi_settings_set_profile (CAMEL_MAPI_SETTINGS (settings), profname);
+				camel_settings_save_to_url (settings, new_url);
 				g_free (profname);
 
 				uri = camel_url_to_string(new_url, 0);
@@ -1302,6 +1356,7 @@ mapi_account_changed_async (gpointer worker_data, gboolean cancelled, gpointer u
 	if (old_url)
 		camel_url_free (old_url);
 
+	g_object_unref (settings);
 	camel_url_free (new_url);
 
 	g_object_unref (account_listener);
