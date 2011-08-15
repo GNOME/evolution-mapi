@@ -1,3 +1,29 @@
+evolution-mapi 3.1.5 2011-08-15
+-------------------------------
+
+Bug Fixes:
+	Bug #654474 - Use EBookBackendSqliteDB as a book backend cache (Sean Finney)
+	Bug #620166 - Prefer named constants over property codes (Milan Crha)
+	Bug #655409 - Extra flags in CamelStoreInfo break folder type check (Milan Crha)
+	Bug #655824 - Use StartTimeZone when EndTimeZone is missing (Milan Crha)
+	Bug #655962 - Changed unread state forgotten on message move (Milan Crha)
+	Bug #638821 - Abort in e-addressbook-factory due to freed backend (Milan Crha)
+	Bug #592779 - Authenticate using Kerberos (Sean Finney)
+
+Miscellanous:
+	Do not return error when cannot convert quire into restriction (Milan Crha)
+	Do not set empty values to EContact and use iso time for REV attribute (Milan Crha)
+	Clarify user-visible Description string in Account Editor - evolution-mapi supports 2007, contrary to evolution-exchange (Andre Klapper)
+	Adapt to changes in evolution-data-server from bug #656058 (Milan Crha)
+	Fix read/write of PidNameKeywords property (Milan Crha)
+	Crash on calendar event modification (Milan Crha)
+
+Translations:
+	Marek Černocký (cs)
+	Mario Blättermann (de)
+	Daniel Mustieles (es)
+	Yuri Myasoedov (ru)
+
 evolution-mapi 3.1.4 2011-07-25
 -------------------------------
 
