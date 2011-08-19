@@ -678,15 +678,17 @@ exchange_mapi_cursor_change (GtkTreeView *treeview, ESource *source)
 	GtkTreeModel     *model;
 	GtkTreeIter       iter;
 	mapi_id_t pfid;
-	gchar *sfid=NULL;
+	gchar *sfid = NULL;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
-	gtk_tree_selection_get_selected(selection, &model, &iter);
-
-	gtk_tree_model_get (model, &iter, FID_COL, &pfid, -1);
-	sfid = exchange_mapi_util_mapi_id_to_string (pfid);
-	e_source_set_property (source, "parent-fid", sfid);
-	g_free (sfid);
+	if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
+		gtk_tree_model_get (model, &iter, FID_COL, &pfid, -1);
+		sfid = exchange_mapi_util_mapi_id_to_string (pfid);
+		e_source_set_property (source, "parent-fid", sfid);
+		g_free (sfid);
+	} else {
+		e_source_set_property (source, "parent-fid", NULL);
+	}
 }
 
 static GtkWidget *
