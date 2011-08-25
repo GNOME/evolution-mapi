@@ -856,6 +856,10 @@ exchange_mapi_util_modify_recipients (ExchangeMapiConnection *conn, TALLOC_CTX *
 			/* We should never get an ambiguous resolution as we use the email-id for resolving.
 			 * However, if we do still get an ambiguous entry, we can't handle it :-( */
 			exchange_mapi_debug_print ("%s: %s() - '%s' is ambiguous ", G_STRLOC, G_STRFUNC, recipient->email_id);
+			ms = MAPI_E_AMBIGUOUS_RECIP;
+			/* Translators: %s is replaced with an email address which was found ambiguous on a remote server */
+			g_set_error (perror, E_MAPI_ERROR, ms, _("Recipient '%s' is ambiguous"), recipient->email_id);
+			goto cleanup;
 		} else if (FlagList->aulPropTag[i] == MAPI_UNRESOLVED) {
 			/* If the recipient is unresolved, consider it is a SMTP one */
 			SRowSet->aRow = talloc_realloc(mem_ctx, SRowSet->aRow, struct SRow, SRowSet->cRows + 1);
@@ -890,7 +894,7 @@ cleanup:
 
 	exchange_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
-	return TRUE;
+	return ms == MAPI_E_SUCCESS;
 }
 
 static gboolean

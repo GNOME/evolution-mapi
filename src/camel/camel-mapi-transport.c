@@ -121,7 +121,7 @@ mapi_send_to_sync (CamelTransport *transport,
 	item = mapi_mime_message_to_mail_item (message, 0, from, cancellable, NULL);
 
 	/* send */
-	st = mapi_message_item_send (conn, item, error);
+	st = mapi_message_item_send (conn, item, &mapi_error);
 
 	g_object_unref (conn);
 
@@ -167,6 +167,7 @@ camel_mapi_transport_class_init (CamelMapiTransportClass *class)
 
 	service_class = CAMEL_SERVICE_CLASS (class);
 	service_class->get_name = mapi_transport_get_name;
+	service_class->settings_type = CAMEL_TYPE_MAPI_SETTINGS;
 
 	transport_class = CAMEL_TRANSPORT_CLASS (class);
 	transport_class->send_to_sync = mapi_send_to_sync;
