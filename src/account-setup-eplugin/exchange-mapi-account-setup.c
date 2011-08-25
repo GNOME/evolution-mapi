@@ -694,7 +694,7 @@ exchange_mapi_cursor_change (GtkTreeView *treeview, ESource *source)
 static GtkWidget *
 exchange_mapi_create (GtkWidget *parent, ESource *source, ExchangeMAPIFolderType folder_type)
 {
-	GtkWidget *vgrid, *label, *scroll, *tv;
+	GtkWidget *table, *label, *scroll, *tv;
 	gchar *uri_text, *profile = NULL;
 	ESourceGroup *group;
 	gint row;
@@ -730,19 +730,19 @@ exchange_mapi_create (GtkWidget *parent, ESource *source, ExchangeMAPIFolderType
 	if (conn)
 		g_object_unref (conn);
 
-	vgrid = g_object_new (GTK_TYPE_GRID, "column-homogeneous", FALSE, "column-spacing", 6, "orientation", GTK_ORIENTATION_VERTICAL, NULL);
+	table = g_object_new (GTK_TYPE_TABLE, NULL);
 
 	if (folder_type == MAPI_FOLDER_TYPE_CONTACT) {
-		gtk_container_add (GTK_CONTAINER (parent), vgrid);
+		gtk_container_add (GTK_CONTAINER (parent), table);
 	} else {
 		g_object_get (parent, "n-rows", &row, NULL);
-		gtk_table_attach (GTK_TABLE (parent), vgrid, 0, 2, row+1, row+2, GTK_FILL|GTK_EXPAND, 0, 0, 0);
+		gtk_table_attach (GTK_TABLE (parent), table, 0, 2, row, row + 1, GTK_FILL|GTK_EXPAND, 0, 0, 0);
 	}
 
 	label = gtk_label_new_with_mnemonic (_("_Location:"));
 	gtk_widget_show (label);
 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-	gtk_container_add (GTK_CONTAINER (vgrid), label);
+	gtk_table_attach (GTK_TABLE (table), label, 0, 1, 0, 1, GTK_FILL | GTK_EXPAND, 0, 0, 0);
 
 	rcell = gtk_cell_renderer_text_new ();
 	tvc = gtk_tree_view_column_new_with_attributes (acc, rcell, "text", NAME_COL, NULL);
@@ -765,10 +765,11 @@ exchange_mapi_create (GtkWidget *parent, ESource *source, ExchangeMAPIFolderType
 	g_signal_connect (G_OBJECT (tv), "cursor-changed", G_CALLBACK (exchange_mapi_cursor_change), source);
 	gtk_widget_show_all (scroll);
 
-	gtk_container_add (GTK_CONTAINER (vgrid), scroll);
+	gtk_table_attach (GTK_TABLE (table), scroll, 0, 1, 1, 2, GTK_FILL | GTK_EXPAND, 0, 0, 0);
 
-	gtk_widget_show_all (vgrid);
-	return vgrid;
+	gtk_widget_show_all (table);
+
+	return table;
 }
 
 GtkWidget *
