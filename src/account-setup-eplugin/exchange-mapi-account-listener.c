@@ -1280,6 +1280,9 @@ mapi_account_changed_async (gpointer worker_data, gboolean cancelled, gpointer u
 	if (existing_account_info)
 		old_url = camel_url_new (existing_account_info->source_url, NULL);
 
+	if (!isa_mapi_account && !existing_account_info)
+		return;
+
 	new_url = camel_url_new (account->source->url, NULL);
 
 	settings = g_object_new (CAMEL_TYPE_MAPI_SETTINGS, NULL);
