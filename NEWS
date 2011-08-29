@@ -1,3 +1,23 @@
+evolution-mapi 3.1.90 2011-08-29
+-------------------------------
+
+Bug Fixes:
+	Bug #651709 - Crash on deselect in new calendar folder tree (Milan Crha)
+	Bug #657309 - Cann't send mail (Milan Crha)
+
+Miscellanous:
+	Add CamelMapiSettings. (Matthew Barnes)
+	Adapt to new CamelSubscribable interface. (Matthew Barnes)
+	Stop authentication when user cancels password prompt in mailer (Milan Crha)
+	Too small folder tree in ESource preferences (Milan Crha)
+	Skip account changed signal for MAPI-unknown accounts (Milan Crha)
+
+Translations:
+	Marek Černocký (cs)
+	Yuri Myasoedov (ru)
+	Claude Paroz (fr)
+	Daniel Mustieles (es)
+
 evolution-mapi 3.1.5 2011-08-15
 -------------------------------
 
