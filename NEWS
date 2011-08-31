@@ -1,3 +1,16 @@
+evolution-mapi 3.0.3 2011-08-31
+-------------------------------
+
+Bug Fixes:
+	Bug #613209 - Crash after call of ResolveNames (Milan Crha)
+	Bug #653489 - QueryRows fails on exchange 2010 server (Milan Crha)
+	Bug #655824 - Use StartTimeZone when EndTimeZone is missing (Milan Crha)
+	Bug #655962 - Changed unread state forgotten on message move (Milan Crha)
+	Bug #638821 - Abort in e-addressbook-factory due to freed backend (Milan Crha)
+
+Miscellanous:
+	Remove invalid mapi_object_release() call (Sean Finney)
+
 evolution-mapi 3.0.2 2011-05-23
 -------------------------------
 
