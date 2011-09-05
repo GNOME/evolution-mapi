@@ -885,8 +885,15 @@ exchange_mapi_util_trigger_krb_auth (const ExchangeMapiProfileData *empd, GError
 	reply = g_dbus_connection_send_message_with_reply_sync (connection, message, G_DBUS_SEND_MESSAGE_FLAGS_NONE, 300 * 1000, NULL, NULL, &local_error);
 	g_free (name);
 
+	if (!local_error && reply) {
+		if (g_dbus_message_to_gerror (reply, &local_error)) {
+			g_object_unref (reply);
+			reply = NULL;
+		}
+	}
+
 	if (local_error) {
-		g_warning ("%s: %s\n", G_STRFUNC, local_error->message);
+		g_dbus_error_strip_remote_error (local_error);
 		g_propagate_error (error, local_error);
 	}
 
