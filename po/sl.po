@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi&keywords=I18N+L10N\n"
-"POT-Creation-Date: 2011-06-19 15:26+0000\n"
-"PO-Revision-Date: 2011-06-19 21:39+0100\n"
+"POT-Creation-Date: 2011-09-07 18:09+0000\n"
+"PO-Revision-Date: 2011-09-07 21:26+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: \n"
@@ -22,13 +22,13 @@ msgstr ""
 "X-Poedit-Country: SLOVENIA\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:735
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:737
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:791
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:793
 msgid "Global Address List"
 msgstr "Splošni seznam naslovov"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:1122
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:251
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:1193
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:257
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Vpišite geslo za %s@%s"
@@ -37,19 +37,19 @@ msgstr "Vpišite geslo za %s@%s"
 #. using GtkEntryCompletion in the username gtkentry. But plugins
 #. as of now does not have access to it
 #. TODO : Fix strings
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:175
 msgid "Select username"
 msgstr "Izbor uporabniškega imena"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:150
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:185
 msgid "Full name"
 msgstr "Polno ime"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:155
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:190
 msgid "Username"
 msgstr "Uporabniško ime"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:187
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:222
 msgid ""
 "There are more users with similar user name on a server.\n"
 "Please select that you would like to use from the below list."
@@ -57,61 +57,73 @@ msgstr ""
 "Na strežniku je vpisanih več uporabnikov z enakim uporabniškim imenom.\n"
 "Izberite med spodaj navedenimi možnostmi."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:220
-#: ../src/camel/camel-mapi-store.c:1043
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:275
+#: ../src/camel/camel-mapi-store.c:1034
 #, c-format
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "Ni mogoče ustvariti MAPI mape v načinu brez povezave."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:239
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:301
 msgid "Server, username and domain name cannot be empty. Please fill them with correct values."
 msgstr "Podatki o strežniku, uporabniškem imenu in imenu domene so obvezni. Izpolnite ustrezna polja."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:295
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:305
+msgid "Realm name cannot be empty when kerberos is selected. Please fill them with correct values."
+msgstr "Ime področja mora biti določeno, kadar je izbran kerberos. Izpolnite zahtevana polja."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:350
 msgid "Authentication finished successfully."
 msgstr "Overitev je uspela."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:301
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:312
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:356
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:365
 msgid "Authentication failed."
 msgstr "Overitev ni uspela."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:390
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:405
 msgid "_Domain name:"
 msgstr "Ime _domene:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:400
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:417
 msgid "_Authenticate"
 msgstr "_Overi"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:410
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:426
 msgid "_Use secure connection"
 msgstr "_Uporabi varno povezavo"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:545
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:440
+msgid "_Kerberos authentication"
+msgstr "Overitev _Kerberos"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:451
+msgid "_Realm name:"
+msgstr "Ime _področja:"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:605
 msgid "Personal Folders"
 msgstr "Osebne mape"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:680
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:742
 msgid "_Location:"
 msgstr "_Mesto:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:797
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:861
 #, c-format
 msgid "Failed to create address book '%s': %s"
 msgstr "Ustvarjanje imenika '%s' je spodletelo: %s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:800
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:864
 #, c-format
 msgid "Failed to create address book '%s'"
 msgstr "Ustvarjanje imenika '%s' je spodletelo"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:907
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:977
 #, c-format
 msgid "Failed to create calendar '%s': %s"
 msgstr "Ustvarjanje koledarja '%s' je spodletelo: %s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:910
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:980
 #, c-format
 msgid "Failed to create calendar '%s'"
 msgstr "Ustvarjanje koledarja '%s' je spodletelo"
@@ -129,7 +141,7 @@ msgid "Unable to retrieve folder size information"
 msgstr "Ni mogoče pridobiti podrobnosti o velikosti mape"
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:168
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:371
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:374
 msgid "Folder Size"
 msgstr "Velikost mape"
 
@@ -138,65 +150,64 @@ msgid "Fetching folder list…"
 msgstr "Pridobivanje seznama map ..."
 
 #. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:356
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:359
 msgid "Miscellaneous"
 msgstr "Razno"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:369
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:372
 msgid "View the size of all Exchange folders"
 msgstr "Ogled velikosti vseh map Exchange"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:382
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:385
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
 msgstr "Nastavitve Exchange"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:391
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:394
 msgid "Folder size"
 msgstr "Velikost mape"
 
-#: ../src/addressbook/e-book-backend-mapi.c:565
+#: ../src/addressbook/e-book-backend-mapi.c:431
 msgid "Cannot connect"
 msgstr "Ni se mogoče povezati"
 
-#: ../src/addressbook/e-book-backend-mapi.c:688
+#: ../src/addressbook/e-book-backend-mapi.c:733
 msgid "Searching"
 msgstr "Iskanje"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1923
+#: ../src/addressbook/e-book-backend-mapi.c:1974
 #: ../src/calendar/e-cal-backend-mapi.c:129
-#: ../src/camel/camel-mapi-folder.c:1759
-#: ../src/camel/camel-mapi-folder.c:1780
+#: ../src/camel/camel-mapi-folder.c:1764
+#: ../src/camel/camel-mapi-folder.c:1785
 msgid "Unknown error"
 msgstr "Neznana napaka"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:706
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:713
 #: ../src/calendar/e-cal-backend-mapi.c:277
 msgid "Failed to remove public folder"
 msgstr "Odstranjevanje javne mape je spodletelo"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:763
-#: ../src/calendar/e-cal-backend-mapi.c:1807
-#: ../src/calendar/e-cal-backend-mapi.c:2341
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:770
+#: ../src/calendar/e-cal-backend-mapi.c:1653
+#: ../src/calendar/e-cal-backend-mapi.c:2191
 msgid "Failed to create item on a server"
 msgstr "Ustvarjanje predmeta na strežniku je spodletelo"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:889
-#: ../src/calendar/e-cal-backend-mapi.c:2038
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:896
+#: ../src/calendar/e-cal-backend-mapi.c:1884
 msgid "Failed to modify item on a server"
 msgstr "Spreminjanje predmeta na strežniku je spodletelo"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1036
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1102
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1153
-#: ../src/calendar/e-cal-backend-mapi.c:1290
-#: ../src/calendar/e-cal-backend-mapi.c:1311
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1043
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1109
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1160
+#: ../src/calendar/e-cal-backend-mapi.c:1131
 msgid "Failed to fetch items from a server"
 msgstr "Pridobivanje predmeta na strežniku je spodletelo"
 
 #. Translators : This is used to cache the downloaded contacts from a server.
 #. %d is an index of the contact.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1054
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1061
 #, c-format
 msgid "Caching contact %d"
 msgstr "Predpomnjenje stika %d"
@@ -204,14 +215,14 @@ msgstr "Predpomnjenje stika %d"
 #. Translators : This is used to cache the downloaded contacts from a server.
 #. The first %d is an index of the contact,
 #. the second %d is total count of conacts on the server.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1058
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1065
 #, c-format
 msgid "Caching contact %d/%d"
 msgstr "Predpomnjenje stika %d/%d"
 
 #. Translators : This is used to cache the downloaded contacts from GAL.
 #. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:159
+#: ../src/addressbook/e-book-backend-mapi-gal.c:157
 #, c-format
 msgid "Caching GAL contact %d"
 msgstr "Predpomnjenje stika GAL %d"
@@ -219,13 +230,13 @@ msgstr "Predpomnjenje stika GAL %d"
 #. Translators : This is used to cache the downloaded contacts from GAL.
 #. The first %d is an index of the GAL entry,
 #. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:163
+#: ../src/addressbook/e-book-backend-mapi-gal.c:161
 #, c-format
 msgid "Caching GAL contact %d/%d"
 msgstr "Predpomnjenje stika GAL %d/%d"
 
-#: ../src/addressbook/e-book-backend-mapi-gal.c:213
-#: ../src/addressbook/e-book-backend-mapi-gal.c:261
+#: ../src/addressbook/e-book-backend-mapi-gal.c:211
+#: ../src/addressbook/e-book-backend-mapi-gal.c:259
 msgid "Failed to fetch GAL entries"
 msgstr "Pridobivanje vnosov GAL je spodletelo"
 
@@ -235,37 +246,33 @@ msgstr "Pridobivanje vnosov GAL je spodletelo"
 msgid "Loading items in folder %s"
 msgstr "Nalaganje predmetov v mapo %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:765
-#: ../src/calendar/e-cal-backend-mapi.c:791
-#: ../src/calendar/e-cal-backend-mapi.c:838
-#: ../src/calendar/e-cal-backend-mapi.c:917
-#: ../src/calendar/e-cal-backend-mapi.c:940
+#: ../src/calendar/e-cal-backend-mapi.c:663
+#: ../src/calendar/e-cal-backend-mapi.c:707
+#: ../src/calendar/e-cal-backend-mapi.c:784
 #, c-format
 msgid "Failed to fetch changes from a server: %s"
 msgstr "Pridobivanje sprememb na strežniku je spodletelo: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:770
-#: ../src/calendar/e-cal-backend-mapi.c:796
-#: ../src/calendar/e-cal-backend-mapi.c:843
-#: ../src/calendar/e-cal-backend-mapi.c:922
-#: ../src/calendar/e-cal-backend-mapi.c:945
+#: ../src/calendar/e-cal-backend-mapi.c:668
+#: ../src/calendar/e-cal-backend-mapi.c:712
+#: ../src/calendar/e-cal-backend-mapi.c:789
 msgid "Failed to fetch changes from a server"
 msgstr "Pridobivanje sprememb na strežniku je spodletelo"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1401
+#: ../src/calendar/e-cal-backend-mapi.c:1219
 msgid "Could not create thread for populating cache"
 msgstr "Ni mogoče ustvariti niti za polnjenje predpomnilnika"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1459
-#: ../src/calendar/e-cal-backend-mapi.c:1460
+#: ../src/calendar/e-cal-backend-mapi.c:1327
+#: ../src/calendar/e-cal-backend-mapi.c:1328
 msgid "Could not create cache file"
 msgstr "Ni mogoče ustvariti datoteke predpomnilnika"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1932
+#: ../src/calendar/e-cal-backend-mapi.c:1778
 msgid "Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server."
 msgstr "Podpora za spreminjanje ponavljajočih dogodkov še ni del programa. Na strežniku ni bilo spremembe."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2595
+#: ../src/calendar/e-cal-backend-mapi.c:2445
 msgid "Failed to get Free/Busy data"
 msgstr "Pridobivanje podatkov prostosti/zasedenosti je spodletelo"
 
@@ -290,63 +297,63 @@ msgstr "Odstranjevanje izbrisanih sporočil iz predpomnilnika v %s"
 msgid "Fetching summary information for new messages in %s"
 msgstr "Pridobivanje podrobnosti povzetkov novih sporočil v %s"
 
-#: ../src/camel/camel-mapi-folder.c:858
-#: ../src/camel/camel-mapi-folder.c:1371
-#: ../src/camel/camel-mapi-folder.c:1381
+#: ../src/camel/camel-mapi-folder.c:856
+#: ../src/camel/camel-mapi-folder.c:1370
+#: ../src/camel/camel-mapi-folder.c:1380
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Sporočilo ni na voljo v načinu brez povezave."
 
-#: ../src/camel/camel-mapi-folder.c:875
+#: ../src/camel/camel-mapi-folder.c:873
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Pridobivanje predmetov je spodletelo: %s"
 
-#: ../src/camel/camel-mapi-folder.c:880
+#: ../src/camel/camel-mapi-folder.c:878
 msgid "Fetching items failed"
 msgstr "Neuspešno branje predmetov"
 
-#: ../src/camel/camel-mapi-folder.c:1087
+#: ../src/camel/camel-mapi-folder.c:1085
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Ni mogoče pripeti sporočila v mapo '%s'"
 
-#: ../src/camel/camel-mapi-folder.c:1095
-#: ../src/camel/camel-mapi-folder.c:1146
+#: ../src/camel/camel-mapi-folder.c:1093
+#: ../src/camel/camel-mapi-folder.c:1144
 #, c-format
 msgid "Offline."
 msgstr "Nepovezano."
 
-#: ../src/camel/camel-mapi-folder.c:1226
+#: ../src/camel/camel-mapi-folder.c:1224
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "Praznjenje smeti je spodletelo: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1231
+#: ../src/camel/camel-mapi-folder.c:1229
 msgid "Failed to empty Trash"
 msgstr "Praznjenje smeti je spodletelo"
 
-#: ../src/camel/camel-mapi-folder.c:1331
+#: ../src/camel/camel-mapi-folder.c:1329
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Ni mogoče dobiti sporočila %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1332
+#: ../src/camel/camel-mapi-folder.c:1330
 msgid "No such message"
 msgstr "Ni takega sporočila"
 
-#: ../src/camel/camel-mapi-folder.c:1407
+#: ../src/camel/camel-mapi-folder.c:1406
 #, c-format
 msgid "Could not get message: %s"
 msgstr "Ni mogoče dobiti sporočila: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1413
-#: ../src/camel/camel-mapi-folder.c:1426
+#: ../src/camel/camel-mapi-folder.c:1412
+#: ../src/camel/camel-mapi-folder.c:1425
 #, c-format
 msgid "Could not get message"
 msgstr "Ni mogoče dobiti sporočila"
 
-#: ../src/camel/camel-mapi-folder.c:1874
+#: ../src/camel/camel-mapi-folder.c:1887
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Ni mogoče naložiti povzetka za %s"
@@ -381,8 +388,8 @@ msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Neželeno pošto preveri le v mapi _dohodnih sporočil"
 
 #: ../src/camel/camel-mapi-provider.c:70
-msgid "For accessing Microsoft Exchange/OpenChange servers using MAPI"
-msgstr "Za dostop do Microsoft Exchange / OpenChange strežnikov z uporabo MAPI protokola"
+msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
+msgstr "Za dostop do Microsoft Exchange / OpenChange strežnikov z uporabo protokola MAPI"
 
 #: ../src/camel/camel-mapi-provider.c:85
 msgid "Password"
@@ -392,75 +399,75 @@ msgstr "Geslo"
 msgid "This option will connect to the OpenChange server using a plaintext password."
 msgstr "Možnost omogoča vzpostavitev povezave s strežnikom OpenChange z uporabo besedilnega gesla."
 
-#: ../src/camel/camel-mapi-store.c:397
+#: ../src/camel/camel-mapi-store.c:403
 #, c-format
 msgid "Folder list not available in offline mode."
 msgstr "Seznam map ni razpoložljiv v načinu brez povezave."
 
-#: ../src/camel/camel-mapi-store.c:1050
+#: ../src/camel/camel-mapi-store.c:1041
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "Ni mogoče ustvariti nove mape '%s'"
 
-#: ../src/camel/camel-mapi-store.c:1064
+#: ../src/camel/camel-mapi-store.c:1055
 #, c-format
 msgid "Authentication failed"
 msgstr "Overitev ni uspela"
 
-#: ../src/camel/camel-mapi-store.c:1090
+#: ../src/camel/camel-mapi-store.c:1081
 #, c-format
 msgid "Cannot create folder '%s': %s"
 msgstr "Ni mogoče ustvariti mape '%s': %s"
 
-#: ../src/camel/camel-mapi-store.c:1095
+#: ../src/camel/camel-mapi-store.c:1086
 #, c-format
 msgid "Cannot create folder '%s'"
 msgstr "Ni mogoče ustvariti mape '%s'"
 
-#: ../src/camel/camel-mapi-store.c:1152
+#: ../src/camel/camel-mapi-store.c:1143
 #, c-format
 msgid "Cannot remove folder '%s': %s"
 msgstr "Ni mogoče odstraniti mape '%s': %s"
 
-#: ../src/camel/camel-mapi-store.c:1159
+#: ../src/camel/camel-mapi-store.c:1150
 #, c-format
 msgid "Cannot remove folder '%s'"
 msgstr "Ni mogoče odstraniti mape '%s'"
 
-#: ../src/camel/camel-mapi-store.c:1209
+#: ../src/camel/camel-mapi-store.c:1200
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
 msgstr "Ni mogoče preimenovati MAPI mape '%s'. Mapa ne obstaja."
 
-#: ../src/camel/camel-mapi-store.c:1221
+#: ../src/camel/camel-mapi-store.c:1212
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'."
 msgstr "Ni mogoče preimenovati privzete mape MAPI '%s' v '%s'."
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1248
-#: ../src/camel/camel-mapi-store.c:1273
-#: ../src/camel/camel-mapi-store.c:1335
+#: ../src/camel/camel-mapi-store.c:1239
+#: ../src/camel/camel-mapi-store.c:1264
+#: ../src/camel/camel-mapi-store.c:1326
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "Ni mogoče preimenovati mape MAPI '%s' v '%s'"
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
 #. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1266
-#: ../src/camel/camel-mapi-store.c:1329
+#: ../src/camel/camel-mapi-store.c:1257
+#: ../src/camel/camel-mapi-store.c:1320
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "Ni mogoče preimenovati mape MAPI `%s' v `%s': %s"
 
-#: ../src/camel/camel-mapi-store.c:1425
+#: ../src/camel/camel-mapi-store.c:1440
 #, c-format
 msgid "Folder '%s' not found"
 msgstr "Mape '%s' ni mogoče najti"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:1630
-#: ../src/camel/camel-mapi-transport.c:150
+#: ../src/camel/camel-mapi-store.c:1634
+#: ../src/camel/camel-mapi-transport.c:154
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI strežnik %s"
@@ -468,8 +475,8 @@ msgstr "Exchange MAPI strežnik %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:1634
-#: ../src/camel/camel-mapi-transport.c:153
+#: ../src/camel/camel-mapi-store.c:1638
+#: ../src/camel/camel-mapi-transport.c:157
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Exchange MAPI storitev za %s na %s"
@@ -478,50 +485,50 @@ msgstr "Exchange MAPI storitev za %s na %s"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:1672
+#: ../src/camel/camel-mapi-store.c:1659
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s vnesite MAPI geslo za %s@%s"
 
-#: ../src/camel/camel-mapi-store.c:1687
+#: ../src/camel/camel-mapi-store.c:1668
 #, c-format
 msgid "You did not enter a password."
 msgstr "Geslo ni bilo vneseno."
 
-#: ../src/camel/camel-mapi-store.c:1695
+#: ../src/camel/camel-mapi-store.c:1728
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server: %s"
 msgstr "Ni se mogoče overiti na Exchange MAPI strežnik: %s"
 
-#: ../src/camel/camel-mapi-store.c:1698
+#: ../src/camel/camel-mapi-store.c:1731
 msgid "Unable to authenticate to Exchange MAPI server"
 msgstr "Ni se mogoče overiti na Exchange MAPI strežnik"
 
-#: ../src/camel/camel-mapi-transport.c:112
-#: ../src/camel/camel-mapi-transport.c:133
+#: ../src/camel/camel-mapi-transport.c:116
+#: ../src/camel/camel-mapi-transport.c:137
 #, c-format
 msgid "Could not send message."
 msgstr "Ni mogoče poslati sporočila."
 
-#: ../src/camel/camel-mapi-transport.c:128
+#: ../src/camel/camel-mapi-transport.c:132
 #, c-format
 msgid "Could not send message: %s"
 msgstr "Ni mogoče poslati sporočila: %s"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1838
+#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1843
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Sprejeto:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1842
+#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1847
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "V obravnavi:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1846
+#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1851
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Zavrnjeno:"
@@ -588,7 +595,13 @@ msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3476
+#. Translators: %s is replaced with an email address which was found ambiguous on a remote server
+#: ../src/libexchangemapi/exchange-mapi-connection.c:861
+#, c-format
+msgid "Recipient '%s' is ambiguous"
+msgstr "Podatki prejemnika '%s' so dvoumni"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3477
 msgid "All Public Folders"
 msgstr "Vse javne mape"
 
