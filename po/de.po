@@ -11,8 +11,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N\n"
-"POT-Creation-Date: 2011-08-10 15:19+0000\n"
-"PO-Revision-Date: 2011-08-10 20:37+0100\n"
+"POT-Creation-Date: 2011-08-25 09:08+0000\n"
+"PO-Revision-Date: 2011-09-07 20:03+0100\n"
 "Last-Translator: Mario Blättermann <mariobl@freenet.de>\n"
 "Language-Team: Deutsch <gnome-de@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -22,13 +22,13 @@ msgstr ""
 "X-Poedit-Language: German\n"
 "X-Poedit-Country: GERMANY\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:757
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:759
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:791
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:793
 msgid "Global Address List"
 msgstr "Globale Adressliste"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:1148
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:222
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:1193
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:257
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Passwort eingeben für %s@%s"
@@ -37,19 +37,19 @@ msgstr "Passwort eingeben für %s@%s"
 #. using GtkEntryCompletion in the username gtkentry. But plugins
 #. as of now does not have access to it
 #. TODO : Fix strings
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:175
 msgid "Select username"
 msgstr "Benutzername wählen"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:150
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:185
 msgid "Full name"
 msgstr "Vollständiger Name"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:155
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:190
 msgid "Username"
 msgstr "Benutzername"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:187
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:222
 msgid ""
 "There are more users with similar user name on a server.\n"
 "Please select that you would like to use from the below list."
@@ -57,13 +57,13 @@ msgstr ""
 "Es gibt weitere Benutzer mit ähnlichen Benutzernamen auf dem Server.\n"
 "Bitte wählen Sie den gewünschten Namen aus der nachfolgenden Liste aus."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:239
-#: ../src/camel/camel-mapi-store.c:1040
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:275
+#: ../src/camel/camel-mapi-store.c:1034
 #, c-format
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "MAPI-Ordner können im Offline-Modus nicht erstellt werden."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:261
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:301
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -71,7 +71,7 @@ msgstr ""
 "Server, Benutzername und Domain-Name dürfen nicht leer sein. Bitte geben Sie "
 "die korrekten Werte ein."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:265
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:305
 msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
@@ -79,59 +79,59 @@ msgstr ""
 "Realm-Name darf nicht leer sein, wenn Kerberos ausgewählt ist. Bitte geben "
 "Sie die korrekten Werte ein."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:315
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:350
 msgid "Authentication finished successfully."
 msgstr "Legitimation erfolgreich abgeschlossen."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:321
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:330
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:356
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:365
 msgid "Authentication failed."
 msgstr "Legitimation gescheitert."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:467
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:405
 msgid "_Domain name:"
 msgstr "_Domain-Name:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:477
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:417
 msgid "_Authenticate"
 msgstr "_Legitimieren"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:486
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:426
 msgid "_Use secure connection"
 msgstr "_Sichere Verbindung verwenden"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:493
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:440
 msgid "_Kerberos authentication"
 msgstr "_Kerberos-Legitimierung"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:500
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:451
 msgid "_Realm name:"
 msgstr "_Realm-Name:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:647
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:605
 msgid "Personal Folders"
 msgstr "Persönliche Ordner"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:782
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:742
 msgid "_Location:"
 msgstr "_Ort:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:900
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:860
 #, c-format
 msgid "Failed to create address book '%s': %s"
 msgstr "Erstellen des Adressbuchs »%s« ist gescheitert: %s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:903
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:863
 #, c-format
 msgid "Failed to create address book '%s'"
 msgstr "Erstellen des Adressbuchs »%s« ist gescheitert"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:1016
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:976
 #, c-format
 msgid "Failed to create calendar '%s': %s"
 msgstr "Erstellen des Kalenders »%s« ist gescheitert: %s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:1019
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:979
 #, c-format
 msgid "Failed to create calendar '%s'"
 msgstr "Erstellen des Kalenders »%s« ist gescheitert"
@@ -175,15 +175,15 @@ msgstr "Exchange-Einstellungen"
 msgid "Folder size"
 msgstr "Ordnergröße"
 
-#: ../src/addressbook/e-book-backend-mapi.c:426
+#: ../src/addressbook/e-book-backend-mapi.c:431
 msgid "Cannot connect"
 msgstr "Verbinden nicht möglich"
 
-#: ../src/addressbook/e-book-backend-mapi.c:723
+#: ../src/addressbook/e-book-backend-mapi.c:733
 msgid "Searching"
 msgstr "Suchen"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1964
+#: ../src/addressbook/e-book-backend-mapi.c:1974
 #: ../src/calendar/e-cal-backend-mapi.c:129
 #: ../src/camel/camel-mapi-folder.c:1764 ../src/camel/camel-mapi-folder.c:1785
 msgid "Unknown error"
@@ -365,7 +365,7 @@ msgstr "Nachricht konnte nicht abgerufen werden: %s"
 msgid "Could not get message"
 msgstr "Nachricht konnte nicht abgerufen werden"
 
-#: ../src/camel/camel-mapi-folder.c:1879
+#: ../src/camel/camel-mapi-folder.c:1887
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Zusammenfassung für »%s« konnte nicht geladen werden"
@@ -415,73 +415,73 @@ msgstr ""
 "Diese Option erzeugt eine Verbindung zum OpenChange-Server über ein Klartext-"
 "Passwort."
 
-#: ../src/camel/camel-mapi-store.c:394
+#: ../src/camel/camel-mapi-store.c:403
 #, c-format
 msgid "Folder list not available in offline mode."
 msgstr "Ordnerliste ist im Offline-Modus nicht verfügbar."
 
-#: ../src/camel/camel-mapi-store.c:1047
+#: ../src/camel/camel-mapi-store.c:1041
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "Neuer Ordner »%s« konnte nicht angelegt werden."
 
-#: ../src/camel/camel-mapi-store.c:1061
+#: ../src/camel/camel-mapi-store.c:1055
 #, c-format
 msgid "Authentication failed"
 msgstr "Legitimation gescheitert"
 
-#: ../src/camel/camel-mapi-store.c:1087
+#: ../src/camel/camel-mapi-store.c:1081
 #, c-format
 msgid "Cannot create folder '%s': %s"
 msgstr "Ordner »%s« konnte nicht angelegt werden: %s"
 
-#: ../src/camel/camel-mapi-store.c:1092
+#: ../src/camel/camel-mapi-store.c:1086
 #, c-format
 msgid "Cannot create folder '%s'"
 msgstr "Ordner »%s« konnte nicht angelegt werden"
 
-#: ../src/camel/camel-mapi-store.c:1149
+#: ../src/camel/camel-mapi-store.c:1143
 #, c-format
 msgid "Cannot remove folder '%s': %s"
 msgstr "Ordner »%s« konnte nicht entfernt werden: %s"
 
-#: ../src/camel/camel-mapi-store.c:1156
+#: ../src/camel/camel-mapi-store.c:1150
 #, c-format
 msgid "Cannot remove folder '%s'"
 msgstr "Ordner »%s« konnte nicht entfernt werden"
 
-#: ../src/camel/camel-mapi-store.c:1206
+#: ../src/camel/camel-mapi-store.c:1200
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
 msgstr ""
 "MAPI-Ordner »%s« konnte nicht umbenannt werden. Der Ordner existiert nicht."
 
-#: ../src/camel/camel-mapi-store.c:1218
+#: ../src/camel/camel-mapi-store.c:1212
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'."
 msgstr "MAPI-Vorgabeordner »%s« konnte nicht in »%s« umbenannt werden."
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1245 ../src/camel/camel-mapi-store.c:1270
-#: ../src/camel/camel-mapi-store.c:1332
+#: ../src/camel/camel-mapi-store.c:1239 ../src/camel/camel-mapi-store.c:1264
+#: ../src/camel/camel-mapi-store.c:1326
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "MAPI-Ordner »%s« konnte nicht in »%s« umbenannt werden."
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
 #. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1263 ../src/camel/camel-mapi-store.c:1326
+#: ../src/camel/camel-mapi-store.c:1257 ../src/camel/camel-mapi-store.c:1320
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "MAPI-Ordner »%s« konnte nicht in »%s« umbenannt werden: %s"
 
-#: ../src/camel/camel-mapi-store.c:1422
+#: ../src/camel/camel-mapi-store.c:1440
 #, c-format
 msgid "Folder '%s' not found"
 msgstr "Ordner »%s« nicht gefunden"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:1627 ../src/camel/camel-mapi-transport.c:150
+#: ../src/camel/camel-mapi-store.c:1634 ../src/camel/camel-mapi-transport.c:154
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI-Server %s"
@@ -489,7 +489,7 @@ msgstr "Exchange MAPI-Server %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:1631 ../src/camel/camel-mapi-transport.c:153
+#: ../src/camel/camel-mapi-store.c:1638 ../src/camel/camel-mapi-transport.c:157
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Exchange MAPI-Dienst für %s auf %s"
@@ -498,32 +498,32 @@ msgstr "Exchange MAPI-Dienst für %s auf %s"
 #. for prompting the user if it is available.
 #. Second %s is : Username.
 #. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:1653
+#: ../src/camel/camel-mapi-store.c:1659
 #, c-format
 msgid "%s Please enter the MAPI password for %s@%s"
 msgstr "%s Bitte geben Sie das MAPI-Passwort für %s@%s ein"
 
-#: ../src/camel/camel-mapi-store.c:1664
+#: ../src/camel/camel-mapi-store.c:1668
 #, c-format
 msgid "You did not enter a password."
 msgstr "Sie haben kein Passwort eingegeben."
 
-#: ../src/camel/camel-mapi-store.c:1711
+#: ../src/camel/camel-mapi-store.c:1728
 #, c-format
 msgid "Unable to authenticate to Exchange MAPI server: %s"
 msgstr "Legitimation am Exchange MAPI-Server gescheitert: %s"
 
-#: ../src/camel/camel-mapi-store.c:1714
+#: ../src/camel/camel-mapi-store.c:1731
 msgid "Unable to authenticate to Exchange MAPI server"
 msgstr "Legitimation am Exchange MAPI-Server gescheitert"
 
-#: ../src/camel/camel-mapi-transport.c:112
-#: ../src/camel/camel-mapi-transport.c:133
+#: ../src/camel/camel-mapi-transport.c:116
+#: ../src/camel/camel-mapi-transport.c:137
 #, c-format
 msgid "Could not send message."
 msgstr "Nachricht konnte nicht gesendet werden."
 
-#: ../src/camel/camel-mapi-transport.c:128
+#: ../src/camel/camel-mapi-transport.c:132
 #, c-format
 msgid "Could not send message: %s"
 msgstr "Nachricht konnte nicht gesendet werden: %s"
@@ -609,6 +609,13 @@ msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3438
+#. Translators: %s is replaced with an email address which was found ambiguous on a remote server
+#: ../src/libexchangemapi/exchange-mapi-connection.c:861
+#, c-format
+msgid "Recipient '%s' is ambiguous"
+msgstr "Empfänger »%s« ist nicht eindeutig"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3477
 msgid "All Public Folders"
 msgstr "Alle öffentlichen Ordner"
+
