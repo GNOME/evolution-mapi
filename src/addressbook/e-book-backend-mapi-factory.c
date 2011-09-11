@@ -21,36 +21,79 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
 
-#include <libebackend/e-data-server-module.h>
 #include <libedata-book/e-book-backend-factory.h>
-
 #include "e-book-backend-mapi-contacts.h"
 #include "e-book-backend-mapi-gal.h"
 
-E_BOOK_BACKEND_FACTORY_SIMPLE (mapi,    MAPI,    e_book_backend_mapi_contacts_new)
-E_BOOK_BACKEND_FACTORY_SIMPLE (mapigal, MAPIGAL, e_book_backend_mapi_gal_new)
+typedef EBookBackendFactory EBookBackendMapiContactsFactory;
+typedef EBookBackendFactoryClass EBookBackendMapiContactsFactoryClass;
 
-static GType mapi_type[2];
+typedef EBookBackendFactory EBookBackendMapiGalFactory;
+typedef EBookBackendFactoryClass EBookBackendMapiGalFactoryClass;
 
-void
-eds_module_initialize (GTypeModule *module)
+/* Module Entry Points */
+void e_module_load (GTypeModule *type_module);
+void e_module_unload (GTypeModule *type_module);
+
+/* Forward Declarations */
+GType e_book_backend_mapi_contacts_factory_get_type ();
+GType e_book_backend_mapi_gal_factory_get_type ();
+
+G_DEFINE_DYNAMIC_TYPE (
+	EBookBackendMapiContactsFactory,
+	e_book_backend_mapi_contacts_factory,
+	E_TYPE_BOOK_BACKEND_FACTORY)
+
+G_DEFINE_DYNAMIC_TYPE (
+	EBookBackendMapiGalFactory,
+	e_book_backend_mapi_gal_factory,
+	E_TYPE_BOOK_BACKEND_FACTORY)
+
+static void
+e_book_backend_mapi_contacts_factory_class_init (EBookBackendFactoryClass *class)
 {
-	mapi_type[0] = _mapi_factory_get_type (module);
-	mapi_type[1] = _mapigal_factory_get_type (module);
+	class->factory_name = "mapi";
+	class->backend_type = E_TYPE_BOOK_BACKEND_MAPI_CONTACTS;
 }
 
-void
-eds_module_shutdown (void)
+static void
+e_book_backend_mapi_contacts_factory_class_finalize (EBookBackendFactoryClass *class)
 {
 }
 
-void
-eds_module_list_types (const GType **types, gint *num_types)
+static void
+e_book_backend_mapi_contacts_factory_init (EBookBackendFactory *factory)
 {
-	*types = mapi_type;
-	*num_types = G_N_ELEMENTS (mapi_type);
 }
+
+static void
+e_book_backend_mapi_gal_factory_class_init (EBookBackendFactoryClass *class)
+{
+	class->factory_name = "mapigal";
+	class->backend_type = E_TYPE_BOOK_BACKEND_MAPI_GAL;
+}
+
+static void
+e_book_backend_mapi_gal_factory_class_finalize (EBookBackendFactoryClass *class)
+{
+}
+
+static void
+e_book_backend_mapi_gal_factory_init (EBookBackendFactory *factory)
+{
+}
+
+G_MODULE_EXPORT void
+e_module_load (GTypeModule *type_module)
+{
+	e_book_backend_mapi_contacts_factory_register_type (type_module);
+	e_book_backend_mapi_gal_factory_register_type (type_module);
+}
+
+G_MODULE_EXPORT void
+e_module_unload (GTypeModule *type_module)
+{
+}
+

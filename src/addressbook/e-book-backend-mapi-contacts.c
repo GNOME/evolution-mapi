@@ -648,7 +648,7 @@ fetch_contacts_uids_cb (FetchItemsCallbackData *item_data, gpointer data)
 static void
 ebbm_contacts_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean only_if_exists, GError **perror)
 {
-	ESource *source = e_book_backend_get_source (E_BOOK_BACKEND (ebma));
+	ESource *source = e_backend_get_source (E_BACKEND (ebma));
 	EBookBackendMAPIContactsPrivate *priv = ((EBookBackendMAPIContacts *) ebma)->priv;
 	GError *err = NULL;
 

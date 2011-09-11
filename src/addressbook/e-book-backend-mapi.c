@@ -391,7 +391,7 @@ ebbm_connect_user (EBookBackendMAPI *ebma, GCancellable *cancellable, const gcha
 	GError *mapi_error = NULL;
 	ExchangeMapiConnection *old_conn;
 
-	if (!e_book_backend_is_online (E_BOOK_BACKEND (ebma))) {
+	if (!e_backend_get_online (E_BACKEND (ebma))) {
 		ebbm_notify_connection_status (ebma, FALSE);
 	} else {
 		if (priv->update_cache_thread) {
@@ -456,7 +456,7 @@ static void
 ebbm_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean only_if_exists, GError **perror)
 {
 	EBookBackendMAPIPrivate *priv = ebma->priv;
-	ESource *source = e_book_backend_get_source (E_BOOK_BACKEND (ebma));
+	ESource *source = e_backend_get_source (E_BACKEND (ebma));
 	const gchar *offline;
 	const gchar *cache_dir, *krb_sso;
 	GError *error = NULL;
@@ -493,10 +493,10 @@ ebbm_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean only_if_e
 
 	e_book_backend_notify_readonly (E_BOOK_BACKEND (ebma), TRUE);
 
-	ebbm_notify_connection_status (ebma, e_book_backend_is_online (E_BOOK_BACKEND (ebma)));
+	ebbm_notify_connection_status (ebma, e_backend_get_online (E_BACKEND (ebma)));
 
 	/* Either we are in Online mode or this is marked for offline */
-	if (!e_book_backend_is_online (E_BOOK_BACKEND (ebma)) &&
+	if (!e_backend_get_online (E_BACKEND (ebma)) &&
 	    !priv->marked_for_offline) {
 		g_propagate_error (perror, EDB_ERROR (OFFLINE_UNAVAILABLE));
 		e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), EDB_ERROR (OFFLINE_UNAVAILABLE));
@@ -504,7 +504,7 @@ ebbm_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean only_if_e
 	}
 
 	/* Once aunthentication in address book works this can be removed */
-	if (!e_book_backend_is_online (E_BOOK_BACKEND (ebma))) {
+	if (!e_backend_get_online (E_BACKEND (ebma))) {
 		e_book_backend_notify_online (E_BOOK_BACKEND (ebma), FALSE);
 		e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), NULL /* Success */);
 		return;
@@ -597,7 +597,7 @@ ebbm_authenticate_user (EBookBackendMAPI *ebma, GCancellable *cancellable, ECred
 {
 	const gchar *password;
 
-	if (!e_book_backend_is_online (E_BOOK_BACKEND (ebma))) {
+	if (!e_backend_get_online (E_BACKEND (ebma))) {
 		ebbm_notify_connection_status (ebma, FALSE);
 	} else {
 		password = e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD);
@@ -606,19 +606,22 @@ ebbm_authenticate_user (EBookBackendMAPI *ebma, GCancellable *cancellable, ECred
 }
 
 static void
-ebbm_set_online (EBookBackend *backend, gboolean is_online)
+ebbm_notify_online_cb (EBookBackend *backend, GParamSpec *pspec)
 {
 	EBookBackendMAPI *ebma = E_BOOK_BACKEND_MAPI (backend);
 	EBookBackendMAPIPrivate *priv = ebma->priv;
 	ESource *esource;
 	const gchar *krb_sso = NULL;
+	gboolean online;
 
-	e_book_backend_notify_online (backend, is_online);
+	online = e_backend_get_online (E_BACKEND (backend));
+
+	e_book_backend_notify_online (backend, online);
 	if (e_book_backend_is_opened (backend)) {
 		e_book_backend_mapi_lock_connection (ebma);
 
-		esource = e_book_backend_get_source (E_BOOK_BACKEND (ebma));
-		if (!is_online) {
+		esource = e_backend_get_source (E_BACKEND (ebma));
+		if (!online) {
 			e_book_backend_notify_readonly (backend, TRUE);
 			ebbm_notify_connection_status (ebma, FALSE);
 
@@ -1299,6 +1302,10 @@ e_book_backend_mapi_init (EBookBackendMAPI *ebma)
 
 	ebma->priv->update_cache = g_cancellable_new ();
 	ebma->priv->update_cache_thread = NULL;
+
+	g_signal_connect (
+		ebma, "notify::online",
+		G_CALLBACK (ebbm_notify_online_cb), NULL);
 }
 
 static void
@@ -1362,8 +1369,6 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 	backend_class->stop_book_view             = ebbm_op_stop_book_view;
 	backend_class->authenticate_user          = ebbm_op_authenticate_user;
 	backend_class->get_backend_property	  = ebbm_op_get_backend_property;
-	backend_class->set_online                 = ebbm_set_online;
-
 	klass->op_open				  = ebbm_open;
 	klass->op_remove                          = ebbm_remove;
 	klass->op_authenticate_user               = ebbm_authenticate_user;

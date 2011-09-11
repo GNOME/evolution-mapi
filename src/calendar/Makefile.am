@@ -12,7 +12,6 @@ ecal_backend_LTLIBRARIES = libecalbackendmapi.la
 
 libecalbackendmapi_la_SOURCES =			\
 	e-cal-backend-mapi-factory.c		\
-	e-cal-backend-mapi-factory.h		\
 	e-cal-backend-mapi.c			\
 	e-cal-backend-mapi.h
 

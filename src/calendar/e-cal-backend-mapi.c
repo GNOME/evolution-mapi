@@ -264,9 +264,9 @@ ecbm_remove (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, GEr
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
-	source = e_cal_backend_get_source (E_CAL_BACKEND (cbmapi));
+	source = e_backend_get_source (E_BACKEND (cbmapi));
 
-	if (!e_cal_backend_is_online (backend) || !priv->conn || !exchange_mapi_connection_connected (priv->conn)) {
+	if (!e_backend_get_online (E_BACKEND (backend)) || !priv->conn || !exchange_mapi_connection_connected (priv->conn)) {
 		g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
 		return;
 	}
@@ -341,7 +341,7 @@ notify_view_progress (ECalBackendMAPI *cbmapi, guint64 index, guint64 total)
 
 	/* To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server. */
 	progress_string = g_strdup_printf (_("Loading items in folder %s"),
-				e_source_peek_name (e_cal_backend_get_source (E_CAL_BACKEND (cbmapi))));
+				e_source_peek_name (e_backend_get_source (E_BACKEND (cbmapi))));
 
 	pd.msg = progress_string;
 
@@ -617,8 +617,8 @@ get_deltas (gpointer handle)
 	cbmapi = (ECalBackendMAPI *) handle;
 	priv= cbmapi->priv;
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
-	source = e_cal_backend_get_source (E_CAL_BACKEND (cbmapi));
-	if (!e_cal_backend_is_online (E_CAL_BACKEND (cbmapi)))
+	source = e_backend_get_source (E_BACKEND (cbmapi));
+	if (!e_backend_get_online (E_BACKEND (cbmapi)))
 		return FALSE;
 
 	g_mutex_lock (priv->updating_mutex);
@@ -1106,7 +1106,7 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 	priv->populating_cache = TRUE;
 	g_mutex_unlock (priv->mutex);
 
-	source = e_cal_backend_get_source (E_CAL_BACKEND (cbmapi));
+	source = e_backend_get_source (E_BACKEND (cbmapi));
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
 
 	itt_current = icaltime_current_time_with_zone (icaltimezone_get_utc_timezone ());
@@ -1288,7 +1288,7 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gbool
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
-	esource = e_cal_backend_get_source (E_CAL_BACKEND (cbmapi));
+	esource = e_backend_get_source (E_BACKEND (cbmapi));
 	fid = e_source_get_property (esource, "folder-id");
 	if (!(fid && *fid)) {
 		g_propagate_error (perror, EDC_ERROR_EX (OtherError, "No folder ID set"));
@@ -1332,7 +1332,7 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gbool
 	e_cal_backend_store_load (priv->store);
 
 	/* Not for remote */
-	if (!e_cal_backend_is_online (backend)) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		const gchar *display_contents = NULL;
 
 		cbmapi->priv->read_only = TRUE;
@@ -1574,7 +1574,7 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
 	e_return_data_cal_error_if_fail (new_object != NULL, InvalidArg);
 
-	if (!e_cal_backend_is_online (backend)) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
 		return;
 	}
@@ -1629,7 +1629,7 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	cbdata.get_tz_data = cbmapi;
 
 	/* Check if object exists */
-	if (e_cal_backend_is_online (backend)) {
+	if (e_backend_get_online (E_BACKEND (backend))) {
 		/* Create an appointment */
 		cbdata.comp = comp;
 		cbdata.is_modify = FALSE;
@@ -1769,7 +1769,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
 
-	if (!e_cal_backend_is_online (backend)) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
 		return;
 	}
@@ -1827,7 +1827,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) ecbm_internal_get_timezone;
 	cbdata.get_tz_data = cbmapi;
 
-	if (e_cal_backend_is_online (backend)) {
+	if (e_backend_get_online (E_BACKEND (backend))) {
 		/* when online, send the item to the server */
 		/* check if the object exists */
 		cache_comp = e_cal_backend_store_get_component (priv->store, uid, rid);
@@ -1927,7 +1927,7 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 
-	if (!e_cal_backend_is_online (backend)) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
 		return;
 	}
@@ -2028,7 +2028,7 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
 
-	if (!e_cal_backend_is_online (backend)) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
 		return;
 	}
@@ -2224,7 +2224,7 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
 
-	if (!e_cal_backend_is_online (backend)) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
 		return;
 	}
@@ -2476,32 +2476,29 @@ ecbm_start_view (ECalBackend *backend, EDataCalView *view)
 }
 
 static void
-ecbm_set_online (ECalBackend *backend, gboolean is_online)
+ecbm_notify_online_cb (ECalBackend *backend, GParamSpec *pspec)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
 	ESource *esource = NULL;
-	gboolean re_open = FALSE;
 	const gchar *krb_sso = NULL;
+	gboolean online;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
-	if ((e_cal_backend_is_online (backend) ? 1 : 0) == (is_online ? 1 : 0)) {
-		return;
-	}
+	online = e_backend_get_online (E_BACKEND (backend));
 
 	g_mutex_lock (priv->mutex);
 
-	esource = e_cal_backend_get_source (E_CAL_BACKEND (cbmapi));
+	esource = e_backend_get_source (E_BACKEND (cbmapi));
 	krb_sso = e_source_get_property (esource, "kerberos");
-	re_open = (e_cal_backend_is_online (backend) ? 1 : 0) < (is_online ? 1 : 0);
-	e_cal_backend_notify_online (backend, is_online);
+	e_cal_backend_notify_online (backend, online);
 
 	priv->mode_changed = TRUE;
-	if (is_online) {
+	if (online) {
 		priv->read_only = FALSE;
-		if (e_cal_backend_is_opened (backend) && re_open
+		if (e_cal_backend_is_opened (backend)
 		    && ! (krb_sso && g_str_equal (krb_sso, "required"))) {
 			e_cal_backend_notify_auth_required (backend, TRUE, NULL);
 		}
@@ -3457,7 +3454,6 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 	backend_class->start_view = ecbm_op_start_view;
 
 	/* functions done synchronously */
-	backend_class->set_online = ecbm_set_online;
 	backend_class->internal_get_timezone = ecbm_internal_get_timezone;
 }
 
@@ -3478,4 +3474,8 @@ e_cal_backend_mapi_init (ECalBackendMAPI *cbmapi)
 	priv->op_queue = em_operation_queue_new ((EMOperationQueueFunc) ecbm_operation_cb, cbmapi);
 
 	cbmapi->priv = priv;
+
+	g_signal_connect (
+		cbmapi, "notify::online",
+		G_CALLBACK (ecbm_notify_online_cb), NULL);
 }
