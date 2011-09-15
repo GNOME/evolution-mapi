@@ -1792,6 +1792,10 @@ mapi_folder_transfer_messages_to_sync (CamelFolder *source,
 	g_slist_foreach (src_msg_ids, (GFunc) g_free, NULL);
 	g_slist_free (src_msg_ids);
 
+	/* update the destination folder to notice new messages */
+	if (success)
+		success = mapi_folder_refresh_info_sync (destination, cancellable, error);
+
 	return success;
 }
 
