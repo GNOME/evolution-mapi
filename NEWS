@@ -1,3 +1,19 @@
+evolution-mapi 3.1.92 2011-09-19
+--------------------------------
+
+Bug Fixes:
+	Bug #659020 - Destination folder not updated after transfer_messages call (Milan Crha)
+
+Miscellanous:
+	Fix error reading from org.gnome.KrbAuthDialog.acquireTgt (Milan Crha)
+
+Translations:
+	Mario Blättermann (de)
+	Matej Urbančič (sl)
+	Marek Černocký (cs)
+	Piotr Drąg (pl)
+	Rudolfs Mazurs (lv)
+
 evolution-mapi 3.1.91 2011-09-05
 --------------------------------
 
