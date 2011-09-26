@@ -683,8 +683,11 @@ mapi_get_folder_info_offline (CamelStore *store, const gchar *top,
 		}
 
 		if (!subscription_list && !(si->flags & CAMEL_MAPI_FOLDER_MAIL) && si->flags & CAMEL_STORE_INFO_FOLDER_SUBSCRIBED &&
-												si->flags & CAMEL_MAPI_FOLDER_PUBLIC)
+												si->flags & CAMEL_MAPI_FOLDER_PUBLIC) {
+			camel_store_summary_info_free ((CamelStoreSummary *) mapi_store->summary, si);
 			continue;
+		}
+
 		if (!strcmp(name, camel_mapi_store_info_full_name (mapi_store->summary, si))
 		     || match_path (path, camel_mapi_store_info_full_name (mapi_store->summary, si))) {
 
@@ -705,6 +708,24 @@ mapi_get_folder_info_offline (CamelStore *store, const gchar *top,
 			fi->unread = si->unread;
 			fi->total = si->total;
 			fi->flags = si->flags;
+
+			if ((fi->flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_NORMAL) {
+				guint folder_type = mapi_folders_hash_table_type_lookup (mapi_store, fi->full_name);
+				switch (folder_type) {
+				case MAPI_FOLDER_TYPE_CONTACT:
+					fi->flags |= CAMEL_FOLDER_TYPE_CONTACTS;
+					break;
+				case MAPI_FOLDER_TYPE_APPOINTMENT:
+					fi->flags |= CAMEL_FOLDER_TYPE_EVENTS;
+					break;
+				case MAPI_FOLDER_TYPE_MEMO:
+					fi->flags |= CAMEL_FOLDER_TYPE_MEMOS;
+					break;
+				case MAPI_FOLDER_TYPE_TASK:
+					fi->flags |= CAMEL_FOLDER_TYPE_TASKS;
+					break;
+				}
+			}
 
 			g_ptr_array_add (folders, fi);
 		}
