@@ -55,8 +55,6 @@
 struct _CamelMapiStorePrivate {
 	ExchangeMapiConnection *conn;
 
-	gchar *base_url;
-
 	GHashTable *id_hash; /*get names from ids*/
 	GHashTable *name_hash;/*get ids from names*/
 	GHashTable *container_hash;
@@ -861,8 +859,6 @@ mapi_store_finalize (GObject *object)
 
 	priv = CAMEL_MAPI_STORE (object)->priv;
 
-	g_free (priv->base_url);
-
 	if (priv->id_hash != NULL)
 		g_hash_table_destroy (priv->id_hash);
 
@@ -1651,13 +1647,6 @@ mapi_store_constructed (GObject *object)
 
 	camel_store_summary_touch ((CamelStoreSummary *)mapi_store->summary);
 	camel_store_summary_load ((CamelStoreSummary *) mapi_store->summary);
-
-	/*base url*/
-	priv->base_url = camel_url_to_string (
-		camel_service_get_camel_url (service),
-		CAMEL_URL_HIDE_PASSWORD |
-		CAMEL_URL_HIDE_PARAMS |
-		CAMEL_URL_HIDE_AUTH);
 
 	/*Hash Table*/
 	priv->id_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free); /* folder ID to folder Full name */
