@@ -29,6 +29,7 @@
 #include <glib/gi18n-lib.h>
 #include <fcntl.h>
 #include <libecal/e-cal-util.h>
+#include <libedataserver/e-data-server-util.h>
 #include "exchange-mapi-cal-utils.h"
 
 #ifndef O_BINARY
@@ -208,9 +209,14 @@ exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_l
 	GSList *comp_attach_list = NULL, *new_attach_list = NULL;
 	GSList *l;
 	const gchar *uid;
+	gchar *safeuid;
 
 	e_cal_component_get_attachment_list (comp, &comp_attach_list);
 	e_cal_component_get_uid (comp, &uid);
+
+	safeuid = g_strdup (uid);
+	e_filename_make_safe (safeuid);
+	g_return_if_fail (safeuid != NULL);
 
 	for (l = comp_attach_list; l; l = l->next) {
 		gchar *sfname_uri = (gchar *) l->data;
@@ -230,8 +236,8 @@ exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_l
 			const gchar *split_name;
 			uint32_t flag;
 
-			if (g_str_has_prefix (filename, uid)) {
-				split_name = (filename + strlen (uid) + strlen ("-"));
+			if (g_str_has_prefix (filename, safeuid)) {
+				split_name = (filename + strlen (safeuid) + strlen ("-"));
 			} else {
 				split_name = filename;
 			}
@@ -280,9 +286,9 @@ exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_l
 
 	e_cal_component_set_attachment_list (comp, new_attach_list);
 
-	for (l = new_attach_list; l != NULL; l = l->next)
-		g_free (l->data);
+	g_slist_foreach (new_attach_list, (GFunc) g_free, NULL);
 	g_slist_free (new_attach_list);
+	g_free (safeuid);
 }
 
 #define RECIP_SENDABLE  0x1
@@ -441,10 +447,16 @@ set_attachments_to_cal_component (ECalComponent *comp, GSList *attach_list, cons
 {
 	GSList *comp_attach_list = NULL, *l;
 	const gchar *uid;
+	gchar *safeuid;
 
 	g_return_if_fail (comp != NULL);
 
 	e_cal_component_get_uid (comp, &uid);
+
+	safeuid = g_strdup (uid);
+	e_filename_make_safe (safeuid);
+	g_return_if_fail (safeuid != NULL);
+
 	for (l = attach_list; l; l = l->next) {
 		ExchangeMAPIAttachment *attach_item = (ExchangeMAPIAttachment *) (l->data);
 		ExchangeMAPIStream *stream;
@@ -464,7 +476,7 @@ set_attachments_to_cal_component (ECalComponent *comp, GSList *attach_list, cons
 		str = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval(attach_item->lpProps, PR_ATTACH_LONG_FILENAME_UNICODE);
 		if (!(str && *str))
 			str = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval(attach_item->lpProps, PR_ATTACH_FILENAME_UNICODE);
-		filename = g_strconcat (local_store_uri, G_DIR_SEPARATOR_S, uid, "-", str, NULL);
+		filename = g_strconcat (local_store_uri, G_DIR_SEPARATOR_S, safeuid, "-", str, NULL);
 		attach_file_url = g_filename_to_uri (filename, NULL, &error);
 	
 		if (!attach_file_url) {
@@ -492,6 +504,7 @@ set_attachments_to_cal_component (ECalComponent *comp, GSList *attach_list, cons
 	}
 
 	e_cal_component_set_attachment_list (comp, comp_attach_list);
+	g_free (safeuid);
 }
 
 static void
