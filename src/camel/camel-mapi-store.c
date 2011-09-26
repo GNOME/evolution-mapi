@@ -754,18 +754,17 @@ static gboolean
 mapi_forget_folder (CamelMapiStore *mapi_store, const gchar *folder_name, GError **error)
 {
 	CamelService *service;
-	const gchar *user_data_dir;
+	const gchar *user_cache_dir;
 	gchar *state_file;
 	gchar *folder_dir, *storage_path;
 	CamelFolderInfo *fi;
 
 	service = CAMEL_SERVICE (mapi_store);
-	user_data_dir = camel_service_get_user_data_dir (service);
+	user_cache_dir = camel_service_get_user_cache_dir (service);
 
-	storage_path = g_strdup_printf ("%s/folders", user_data_dir);
+	storage_path = g_build_filename (user_cache_dir, "folders", NULL);
 
-	/* Fixme Path - e_*-to_path */
-	folder_dir = g_strconcat (storage_path, "/", folder_name, NULL);
+	folder_dir = g_build_filename (storage_path, folder_name, NULL);
 	g_free (storage_path);
 
 	if (g_access(folder_dir, F_OK) != 0) {
@@ -773,7 +772,7 @@ mapi_forget_folder (CamelMapiStore *mapi_store, const gchar *folder_name, GError
 		return TRUE;
 	}
 
-	state_file = g_strdup_printf ("%s/cmeta", folder_dir);
+	state_file = g_build_filename (folder_dir, "cmeta", NULL);
 	g_unlink (state_file);
 	g_free (state_file);
 
@@ -930,7 +929,7 @@ mapi_store_get_folder_sync (CamelStore *store,
 	CamelService *service;
 	CamelStoreInfo *si;
 	CamelFolder *folder;
-	const gchar *user_data_dir;
+	const gchar *user_cache_dir;
 	gchar *storage_path;
 
 	si = camel_mapi_store_summary_full_name (mapi_store->summary, folder_name);
@@ -962,9 +961,9 @@ mapi_store_get_folder_sync (CamelStore *store,
 		camel_store_summary_info_free ((CamelStoreSummary *)mapi_store->summary, si);
 
 	service = CAMEL_SERVICE (store);
-	user_data_dir = camel_service_get_user_data_dir (service);
+	user_cache_dir = camel_service_get_user_cache_dir (service);
 
-	storage_path = g_strdup_printf ("%s/folders", user_data_dir);
+	storage_path = g_build_filename (user_cache_dir, "folders", NULL);
 	folder = camel_mapi_folder_new (store, folder_name, storage_path, flags, error);
 	g_free (storage_path);
 
@@ -1189,7 +1188,7 @@ mapi_store_rename_folder_sync (CamelStore *store,
 	CamelMapiStorePrivate  *priv = mapi_store->priv;
 	CamelStoreInfo *si = NULL;
 	CamelService *service;
-	const gchar *user_data_dir;
+	const gchar *user_cache_dir;
 	gchar *old_parent, *new_parent, *tmp;
 	gboolean move_cache = TRUE;
 	const gchar *old_fid_str, *new_parent_fid_str = NULL;
@@ -1197,7 +1196,7 @@ mapi_store_rename_folder_sync (CamelStore *store,
 	GError *local_error = NULL;
 
 	service = CAMEL_SERVICE (store);
-	user_data_dir = camel_service_get_user_data_dir (service);
+	user_cache_dir = camel_service_get_user_cache_dir (service);
 
 	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
@@ -1384,8 +1383,8 @@ mapi_store_rename_folder_sync (CamelStore *store,
 	if (move_cache) {
 		gchar *oldpath, *newpath;
 
-		oldpath = g_build_filename (user_data_dir, "folders", old_name, NULL);
-		newpath = g_build_filename (user_data_dir, "folders", new_name, NULL);
+		oldpath = g_build_filename (user_cache_dir, "folders", old_name, NULL);
+		newpath = g_build_filename (user_cache_dir, "folders", new_name, NULL);
 
 		if (g_file_test (oldpath, G_FILE_TEST_IS_DIR) && g_rename (oldpath, newpath) == -1 && errno != ENOENT) {
 			g_warning ("Could not rename message cache '%s' to '%s': %s: cache reset", oldpath, newpath, g_strerror (errno));
@@ -1543,6 +1542,34 @@ mapi_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 }
 
 static void
+mapi_migrate_to_user_cache_dir (CamelService *service)
+{
+	const gchar *user_data_dir, *user_cache_dir;
+
+	g_return_if_fail (service != NULL);
+	g_return_if_fail (CAMEL_IS_SERVICE (service));
+
+	user_data_dir = camel_service_get_user_data_dir (service);
+	user_cache_dir = camel_service_get_user_cache_dir (service);
+
+	g_return_if_fail (user_data_dir != NULL);
+	g_return_if_fail (user_cache_dir != NULL);
+
+	/* migrate only if the source directory exists and the destination doesn't */
+	if (g_file_test (user_data_dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) &&
+	    !g_file_test (user_cache_dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
+		gchar *parent_dir;
+
+		parent_dir = g_path_get_dirname (user_cache_dir);
+		g_mkdir_with_parents (parent_dir, S_IRWXU);
+		g_free (parent_dir);
+
+		if (g_rename (user_data_dir, user_cache_dir) == -1)
+			g_debug ("%s: Failed to migrate '%s' to '%s': %s", G_STRFUNC, user_data_dir, user_cache_dir, g_strerror (errno));
+	}
+}
+
+static void
 camel_mapi_store_class_init (CamelMapiStoreClass *class)
 {
 	GObjectClass *object_class;
@@ -1605,18 +1632,19 @@ mapi_store_constructed (GObject *object)
 	CamelStore *store = CAMEL_STORE (object);
 	CamelMapiStorePrivate *priv = mapi_store->priv;
 	CamelService *service;
-	const gchar *user_data_dir;
+	const gchar *user_cache_dir;
 	gchar *path = NULL;
 
 	/* Chain up to parent's constructed() method. */
 	G_OBJECT_CLASS (camel_mapi_store_parent_class)->constructed (object);
 
 	service = CAMEL_SERVICE (object);
-	user_data_dir = camel_service_get_user_data_dir (service);
+	mapi_migrate_to_user_cache_dir (service);
+
+	user_cache_dir = camel_service_get_user_cache_dir (service);
 
 	/*store summary*/
-	path = g_alloca (strlen (user_data_dir) + 32);
-	sprintf (path, "%s/.summary", user_data_dir);
+	path = g_build_filename (user_cache_dir, ".summary", NULL);
 
 	mapi_store->summary = camel_mapi_store_summary_new ();
 	camel_store_summary_set_filename ((CamelStoreSummary *)mapi_store->summary, path);
@@ -1640,7 +1668,9 @@ mapi_store_constructed (GObject *object)
 	store->flags &= ~CAMEL_STORE_VJUNK;
 	store->flags &= ~CAMEL_STORE_VTRASH;
 
-	store->flags |= CAMEL_STORE_REAL_JUNK_FOLDER;
+	store->flags |= CAMEL_STORE_REAL_JUNK_FOLDER | CAMEL_STORE_USE_CACHE_DIR;
+
+	g_free (path);
 }
 
 static char *
