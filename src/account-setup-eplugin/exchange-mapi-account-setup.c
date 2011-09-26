@@ -307,7 +307,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 		return;
 	}
 
-	key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
+	key = camel_url_to_string (url, CAMEL_URL_HIDE_PARAMS);
 	if (empd.krb_sso) {
 		exchange_mapi_util_trigger_krb_auth (&empd, &error);
 	} else {

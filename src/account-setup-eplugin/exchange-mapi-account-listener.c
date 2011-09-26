@@ -1148,7 +1148,7 @@ mapi_account_removed (EAccountList *account_listener, EAccount *account)
 	url = camel_url_new (info->source_url, NULL);
 	if (url != NULL) {
 		const gchar *profile = camel_url_get_param (url, "profile");
-		gchar *key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
+		gchar *key = camel_url_to_string (url, CAMEL_URL_HIDE_PARAMS);
 		GError *error = NULL;
 
 		exchange_mapi_delete_profile (profile, &error);
@@ -1183,7 +1183,7 @@ create_profile_entry (CamelURL *url, EAccount *account, CamelMapiSettings *setti
 	while (!status && attempts <= 3) {
 		gchar *key = NULL;
 
-		key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
+		key = camel_url_to_string (url, CAMEL_URL_HIDE_PARAMS);
 		if (!attempts && !empd.krb_sso)
 			empd.password = e_passwords_get_password (NULL, key);
 		if (!empd.password && !empd.krb_sso) {
