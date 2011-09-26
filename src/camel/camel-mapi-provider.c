@@ -106,7 +106,6 @@ camel_provider_module_init(void)
 	mapi_provider.authtypes = g_list_prepend (mapi_provider.authtypes, &camel_mapi_password_authtype);
 	mapi_provider.url_hash = mapi_url_hash;
 	mapi_provider.url_equal = mapi_url_equal;
-	mapi_provider.license = "LGPL";
 	mapi_provider.object_types[CAMEL_PROVIDER_STORE] = camel_mapi_store_get_type();
 	mapi_provider.object_types[CAMEL_PROVIDER_TRANSPORT] = camel_mapi_transport_get_type();
 
