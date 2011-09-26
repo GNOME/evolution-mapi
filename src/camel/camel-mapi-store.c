@@ -1694,13 +1694,15 @@ mapi_get_name(CamelService *service, gboolean brief)
 static gboolean
 mapi_prompt_pass_creds (CamelService *service, CamelURL *url, const gchar *reason, GError **error) {
 	gchar *prompt;
+	gchar *new_passwd;
+	const gchar *password;
 	guint32 prompt_flags = CAMEL_SESSION_PASSWORD_SECRET;
 	CamelSession *session = camel_service_get_session (service);
 
 	if (reason) {
 		/* We need to un-cache the password before prompting again */
 		prompt_flags |= CAMEL_SESSION_PASSWORD_REPROMPT;
-		camel_url_set_passwd (url, NULL);
+		camel_service_set_password (service, NULL);
 	}
 
 	/*To translators : First %s : is the error text or the reason
@@ -1708,10 +1710,19 @@ mapi_prompt_pass_creds (CamelService *service, CamelURL *url, const gchar *reaso
 	 Second %s is : Username.
 	 Third %s is : Server host name.*/
 	prompt = g_strdup_printf (_("%s Please enter the MAPI password for %s@%s"), reason ? reason : "", url->user, url->host);
-	url->passwd = camel_session_get_password (session, service, prompt, "password", prompt_flags, NULL);
+
+	/* XXX This is a tad awkward.  Maybe define a
+	 *     camel_service_ask_password() that calls
+	 *     camel_session_get_password() and caches
+	 *     the password itself? */
+	new_passwd = camel_session_get_password (session, service, prompt, "password", prompt_flags, NULL);
+	camel_service_set_password (service, new_passwd);
+	password = camel_service_get_password (service);
+	g_free (new_passwd);
+
 	g_free (prompt);
 
-	if (!url->passwd) {
+	if (password == NULL) {
 		if (error && !*error)
 			g_set_error (
 				error, G_IO_ERROR,
@@ -1746,12 +1757,15 @@ mapi_auth_loop (CamelService *service, GError **error)
 
 	profile = camel_mapi_settings_get_profile (mapi_settings);
 
-	url->passwd = NULL;
+	camel_service_set_password (service, NULL);
 
 	while (!authenticated) {
+		const gchar *password;
 		GError *mapi_error = NULL;
 
-		if (!url->passwd || errbuf) {
+		password = camel_service_get_password (service);
+
+		if (password == NULL || errbuf) {
 			const gchar *why = errbuf ? errbuf : NULL;
 
 			if (empd.krb_sso) {
@@ -1773,7 +1787,8 @@ mapi_auth_loop (CamelService *service, GError **error)
 			return FALSE;
 		}
 
-		store->priv->conn = exchange_mapi_connection_new (profile, url->passwd, &mapi_error);
+		password = camel_service_get_password (service);
+		store->priv->conn = exchange_mapi_connection_new (profile, password, &mapi_error);
 		if (!store->priv->conn || !exchange_mapi_connection_connected (store->priv->conn)) {
 			if (mapi_error) {
 				errbuf = g_strdup_printf (_("Unable to authenticate to Exchange MAPI server: %s"), mapi_error->message);
