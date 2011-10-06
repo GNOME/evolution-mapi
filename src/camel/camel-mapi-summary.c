@@ -39,13 +39,13 @@
 
 /*Prototypes*/
 static CamelFIRecord* mapi_summary_header_to_db (CamelFolderSummary *, GError **error);
-static gint mapi_summary_header_from_db (CamelFolderSummary *, CamelFIRecord *fir);
+static gboolean mapi_summary_header_from_db (CamelFolderSummary *, CamelFIRecord *fir);
 
 static CamelMessageInfo *mapi_message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir);
 static CamelMIRecord *mapi_message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info);
 
 static CamelMessageContentInfo * mapi_content_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir);
-static gint mapi_content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, CamelMIRecord *mir);
+static gboolean mapi_content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, CamelMIRecord *mir);
 
 /*End of Prototypes*/
 
@@ -105,10 +105,6 @@ camel_mapi_summary_class_init (CamelMapiSummaryClass *class)
 static void
 camel_mapi_summary_init (CamelMapiSummary *mapi_summary)
 {
-	CamelFolderSummary *summary = CAMEL_FOLDER_SUMMARY (mapi_summary);
-
-	/* Meta-summary - Overriding UID len */
-	summary->meta_summary->uid_len = 2048;
 }
 
 /**
@@ -126,19 +122,18 @@ camel_mapi_summary_new (CamelFolder *folder, const gchar *filename)
 	CamelFolderSummary *summary;
 	GError *local_error = NULL;
 
-	summary = g_object_new (CAMEL_TYPE_MAPI_SUMMARY, NULL);
+	summary = g_object_new (CAMEL_TYPE_MAPI_SUMMARY, "folder", folder, NULL);
 
-	summary->folder = folder;
 	camel_folder_summary_set_build_content (summary, TRUE);
 	camel_folder_summary_set_filename (summary, filename);
 
-	if (camel_folder_summary_load_from_db (summary, &local_error) == -1) {
+	if (!camel_folder_summary_load_from_db (summary, &local_error)) {
 		/* FIXME: Isn't this dangerous ? We clear the summary
 		if it cannot be loaded, for some random reason.
 		We need to pass the ex and find out why it is not loaded etc. ? */
-		camel_folder_summary_clear_db (summary);
-		g_warning ("Unable to load summary %s\n", local_error->message);
-		g_error_free (local_error);
+		camel_folder_summary_clear (summary, NULL);
+		g_warning ("Unable to load summary %s\n", local_error ? local_error->message : "Unknown error");
+		g_clear_error (&local_error);
 	}
 
 	return summary;
@@ -154,21 +149,24 @@ camel_mapi_summary_update_store_info_counts (CamelMapiSummary *mapi_summary)
 	summary = CAMEL_FOLDER_SUMMARY (mapi_summary);
 	g_return_if_fail (summary != NULL);
 
-	if (summary->folder) {
+	if (camel_folder_summary_get_folder (summary)) {
 		CamelMapiStore *mapi_store;
 
-		mapi_store = CAMEL_MAPI_STORE (camel_folder_get_parent_store (summary->folder));
+		mapi_store = CAMEL_MAPI_STORE (camel_folder_get_parent_store (camel_folder_summary_get_folder (summary)));
 		if (mapi_store && mapi_store->summary) {
 			CamelStoreInfo *si;
 			CamelStoreSummary *store_summary = CAMEL_STORE_SUMMARY (mapi_store->summary);
+			CamelFolder*folder;
 
 			g_return_if_fail (store_summary != NULL);
 
-			si = camel_store_summary_path (store_summary, camel_folder_get_full_name (summary->folder));
+			folder = camel_folder_summary_get_folder (summary);
+			si = camel_store_summary_path (store_summary, camel_folder_get_full_name (folder));
 			if (si) {
-				if (si->unread != summary->unread_count || si->total != summary->saved_count) {
-					si->unread = summary->unread_count;
-					si->total = summary->saved_count;
+				if (si->unread != camel_folder_summary_get_unread_count (summary) ||
+				    si->total != camel_folder_summary_get_saved_count (summary)) {
+					si->unread = camel_folder_summary_get_unread_count (summary);
+					si->total = camel_folder_summary_get_saved_count (summary);
 
 					camel_store_summary_touch (store_summary);
 				}
@@ -179,7 +177,7 @@ camel_mapi_summary_update_store_info_counts (CamelMapiSummary *mapi_summary)
 	}
 }
 
-static gint
+static gboolean
 mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
 {
 	CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (summary);
@@ -189,8 +187,8 @@ mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (
 		camel_mapi_summary_parent_class);
 
-	if (folder_summary_class->summary_header_from_db (summary, fir) == -1)
-		return -1;
+	if (!folder_summary_class->summary_header_from_db (summary, fir))
+		return FALSE;
 
 	part = fir->bdata;
 
@@ -202,7 +200,7 @@ mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
 		mapi_summary->sync_time_stamp = g_strdup (part);
 	}
 
-	return 0;
+	return TRUE;
 }
 
 static CamelFIRecord *
@@ -288,7 +286,7 @@ mapi_content_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 		return camel_folder_summary_content_info_new (s);
 }
 
-static gint
+static gboolean
 mapi_content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, CamelMIRecord *mir)
 {
 	CamelFolderSummaryClass *folder_summary_class;
@@ -301,7 +299,7 @@ mapi_content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, C
 		return folder_summary_class->content_info_to_db (s, info, mir);
 	} else {
 		mir->cinfo = g_strdup ("0");
-		return 0;
+		return TRUE;
 	}
 }
 
@@ -310,13 +308,14 @@ mapi_summary_clear (CamelFolderSummary *summary, gboolean uncache)
 {
 	CamelFolderChangeInfo *changes;
 	CamelMessageInfo *info;
-	gint i, count;
+	gint i;
 	const gchar *uid;
+	GPtrArray *known_uids;
 
 	changes = camel_folder_change_info_new ();
-	count = camel_folder_summary_count (summary);
-	for (i = 0; i < count; i++) {
-		if (!(info = camel_folder_summary_index (summary, i)))
+	known_uids = camel_folder_summary_get_array (summary);
+	for (i = 0; known_uids && i < known_uids->len; i++) {
+		if (!(info = camel_folder_summary_get (summary, g_ptr_array_index (known_uids, i))))
 			continue;
 
 		uid = camel_message_info_uid (info);
@@ -325,9 +324,10 @@ mapi_summary_clear (CamelFolderSummary *summary, gboolean uncache)
 		camel_message_info_free(info);
 	}
 
-	camel_folder_summary_clear_db (summary);
+	camel_folder_summary_free_array (known_uids);
+	camel_folder_summary_clear (summary, NULL);
 
 	if (camel_folder_change_info_changed (changes))
-		camel_folder_changed (summary->folder, changes);
+		camel_folder_changed (camel_folder_summary_get_folder (summary), changes);
 	camel_folder_change_info_free (changes);
 }

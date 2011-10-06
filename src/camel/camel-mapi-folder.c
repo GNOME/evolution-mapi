@@ -114,7 +114,7 @@ update_store_summary (CamelFolder *folder, GError **error)
 	CamelStoreSummary *store_summary;
 	CamelStoreInfo *si;
 	const gchar *full_name;
-	gint retval;
+	gboolean retval;
 
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
@@ -125,7 +125,7 @@ update_store_summary (CamelFolder *folder, GError **error)
 	if (si) {
 		guint32 unread, total;
 
-		unread = folder->summary->unread_count;
+		unread = camel_folder_summary_get_unread_count (folder->summary);
 		total = camel_folder_summary_count (folder->summary);
 
 		if (si->total != total || si->unread != unread) {
@@ -139,7 +139,7 @@ update_store_summary (CamelFolder *folder, GError **error)
 	retval = camel_folder_summary_save_to_db (folder->summary, error);
 	camel_store_summary_save (store_summary);
 
-	return (retval == 0);
+	return retval;
 }
 
 static gboolean
@@ -360,7 +360,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 		mi = NULL;
 		pmi = NULL;
 		msg_uid = exchange_mapi_util_mapi_ids_to_uid (item->fid, item->mid);
-		pmi = camel_folder_summary_uid (folder->summary, msg_uid);
+		pmi = camel_folder_summary_get (folder->summary, msg_uid);
 
 		if (pmi) {
 			exists = TRUE;
@@ -553,8 +553,8 @@ mapi_sync_deleted (CamelSession *session,
 	CamelStore *parent_store;
 	CamelServiceConnectionStatus status;
 	CamelService *service;
-
-	guint32 index, count, options = 0;
+	GPtrArray *known_uids = NULL;
+	guint32 index, options = 0;
 	GHashTable *server_messages = NULL;
 	const gchar *uid = NULL;
 	gboolean flags_changed = FALSE;
@@ -603,18 +603,18 @@ mapi_sync_deleted (CamelSession *session,
 
 	changes = camel_folder_change_info_new ();
 
-	count = camel_folder_summary_count (data->folder->summary);
 	camel_operation_push_message (
 		cancellable,
 		_("Removing deleted messages from cache in %s"),
 		camel_folder_get_display_name (data->folder));
 
-	/* Iterate over cache and check if the UID is in server*/
-	for (index = 0; index < count; index++) {
+	/* Iterate over cache and check if the UID is in server */
+	known_uids = camel_folder_summary_get_array (data->folder->summary);
+	for (index = 0; known_uids && index < known_uids->len; index++) {
 		guint32 msg_flags;
 
 		/* Iterate in a reverse order, thus removal will not hurt */
-		info = camel_folder_summary_index (data->folder->summary, count - index - 1);
+		info = camel_folder_summary_get (data->folder->summary, g_ptr_array_index (known_uids, index));
 		if (!info) continue; /*This is bad. *Should* not happen*/
 
 		uid = camel_message_info_uid (info);
@@ -647,7 +647,7 @@ mapi_sync_deleted (CamelSession *session,
 		camel_message_info_free (info);
 
 		/* Progress update */
-		camel_operation_progress (cancellable, (index * 100)/count); /* ;-) */
+		camel_operation_progress (cancellable, (index * 100) / known_uids->len);
 
 		/* Check if we have to stop */
 		if (g_cancellable_is_cancelled (cancellable) || camel_application_is_exiting) {
@@ -672,7 +672,9 @@ mapi_sync_deleted (CamelSession *session,
 
 	g_hash_table_destroy (server_messages);
 
-exit:
+ exit:
+	camel_folder_summary_free_array (known_uids);
+
 	if (data->need_refresh) {
 		CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (data->folder->summary);
 		if (mapi_summary) {
@@ -1001,7 +1003,7 @@ mapi_set_message_flags (CamelFolder *folder,
 
 	g_return_val_if_fail (folder->summary != NULL, FALSE);
 
-	info = camel_folder_summary_uid (folder->summary, uid);
+	info = camel_folder_summary_get (folder->summary, uid);
 	if (info == NULL)
 		return FALSE;
 
@@ -1014,11 +1016,19 @@ mapi_set_message_flags (CamelFolder *folder,
 static void
 mapi_folder_dispose (GObject *object)
 {
+	CamelStore *parent_store;
 	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (object);
 
 	if (mapi_folder->cache != NULL) {
 		g_object_unref (mapi_folder->cache);
 		mapi_folder->cache = NULL;
+	}
+
+	parent_store = camel_folder_get_parent_store (CAMEL_FOLDER (mapi_folder));
+	if (parent_store) {
+		camel_store_summary_disconnect_folder_summary (
+			(CamelStoreSummary *) ((CamelMapiStore *) parent_store)->summary,
+			CAMEL_FOLDER (mapi_folder)->summary);
 	}
 
 	/* Chain up to parent's dispose() method. */
@@ -1164,10 +1174,9 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 	CamelMessageInfo *info;
 	CamelFolderChangeInfo *changes;
 	CamelStore *parent_store;
-
 	mapi_id_t fid;
-
-	gint i, count;
+	GPtrArray *known_uids;
+	gint i;
 	gboolean delete = FALSE, status = FALSE;
 	gchar *folder_id;
 	GSList *deleted_items, *deleted_head;
@@ -1233,11 +1242,11 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 	}
 
 	changes = camel_folder_change_info_new ();
-	count = camel_folder_summary_count (folder->summary);
+	known_uids = camel_folder_summary_get_array (folder->summary);
 
 	/*Collect UIDs of deleted messages.*/
-	for (i = 0; i < count; i++) {
-		info = camel_folder_summary_index (folder->summary, i);
+	for (i = 0; known_uids && i < known_uids->len; i++) {
+		info = camel_folder_summary_get (folder->summary, g_ptr_array_index (known_uids, i));
 		minfo = (CamelMapiMessageInfo *) info;
 		if (minfo && (minfo->info.flags & CAMEL_MESSAGE_DELETED)) {
 			const gchar *uid = camel_message_info_uid (info);
@@ -1257,6 +1266,8 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 		}
 		camel_message_info_free (info);
 	}
+
+	camel_folder_summary_free_array (known_uids);
 
 	deleted_items_uid_head = deleted_items_uid;
 
@@ -1319,7 +1330,7 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 
 	/* see if it is there in cache */
 
-	mi = (CamelMapiMessageInfo *) camel_folder_summary_uid (folder->summary, uid);
+	mi = (CamelMapiMessageInfo *) camel_folder_summary_get (folder->summary, uid);
 	if (mi == NULL) {
 		/* Translators: The first %s is replaced with a message ID,
 		   the second %s is replaced with a detailed error string */
@@ -1485,13 +1496,13 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 	CamelFolderChangeInfo *changes = NULL;
 	CamelServiceConnectionStatus status;
 	CamelService *service;
-
+	GPtrArray *known_uids;
 	GSList *read_items = NULL, *unread_items = NULL, *to_free = NULL, *junk_items = NULL, *deleted_items = NULL, *l;
 	flags_diff_t diff, unset_flags;
 	const gchar *folder_id;
 	const gchar *full_name;
 	mapi_id_t fid, deleted_items_fid;
-	gint count, i;
+	gint i;
 	guint32 options =0;
 	gboolean is_junk_folder;
 	gboolean success;
@@ -1528,9 +1539,9 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 	camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
 	camel_folder_summary_prepare_fetch_all (folder->summary, NULL);
 
-	count = camel_folder_summary_count (folder->summary);
-	for (i=0; i < count; i++) {
-		info = camel_folder_summary_index (folder->summary, i);
+	known_uids = camel_folder_summary_get_array (folder->summary);
+	for (i = 0; known_uids && i < known_uids->len; i++) {
+		info = camel_folder_summary_get (folder->summary, g_ptr_array_index (known_uids, i));
 		mapi_info = (CamelMapiMessageInfo *) info;
 
 		if (mapi_info && (mapi_info->info.flags & CAMEL_MESSAGE_FOLDER_FLAGGED)) {
@@ -1587,6 +1598,7 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 			camel_message_info_free (info);
 	}
 
+	camel_folder_summary_free_array (known_uids);
 	camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
 
 	/*
@@ -1946,6 +1958,10 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 	} else {
 		g_warning ("%s: cannot find '%s' in known folders", G_STRFUNC, folder_name);
 	}
+
+	camel_store_summary_connect_folder_summary (
+		(CamelStoreSummary *) ((CamelMapiStore *) store)->summary,
+		folder_name, folder->summary);
 
 	return folder;
 }
