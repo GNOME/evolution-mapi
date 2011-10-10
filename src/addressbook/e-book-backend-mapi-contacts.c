@@ -720,7 +720,7 @@ ebbm_contacts_remove (EBookBackendMAPI *ebma, GCancellable *cancellable, GError 
 }
 
 static void
-ebbm_contacts_create_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *vcard, EContact **contact, GError **error)
+ebbm_contacts_create_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable, const GSList *vcards, GSList **added_contacts, GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
 	EBookBackendMAPIContactsPrivate *priv;
@@ -729,17 +729,23 @@ ebbm_contacts_create_contact (EBookBackendMAPI *ebma, GCancellable *cancellable,
 	GError *mapi_error = NULL;
 	mapi_id_t mid;
 	gchar *id;
+	EContact *contact;
 
 	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (vcard != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (contact != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+	e_return_data_book_error_if_fail (vcards != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+	e_return_data_book_error_if_fail (added_contacts != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	ebmac = E_BOOK_BACKEND_MAPI_CONTACTS (ebma);
 	e_return_data_book_error_if_fail (ebmac != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	priv = ebmac->priv;
 	e_return_data_book_error_if_fail (priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+
+	if (vcards->next) {
+		g_propagate_error (error, EDB_ERROR_EX (NOT_SUPPORTED, _("The backend does not support bulk additions")));
+		return;
+	}
 
 	e_book_backend_mapi_lock_connection (ebma);
 
@@ -750,15 +756,15 @@ ebbm_contacts_create_contact (EBookBackendMAPI *ebma, GCancellable *cancellable,
 		return;
 	}
 
-	*contact = e_contact_new_from_vcard (vcard);
-	if (!*contact) {
+	contact = e_contact_new_from_vcard (vcards->data);
+	if (!contact) {
 		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
 		e_book_backend_mapi_unlock_connection (ebma);
 		return;
 	}
 
 	e_book_backend_mapi_get_db (ebma, &mcd.db);
-	mcd.contact = *contact;
+	mcd.contact = contact;
 
 	mid = exchange_mapi_connection_create_item (conn, olFolderContacts, priv->fid,
 		mapi_book_write_props, &mcd,
@@ -772,18 +778,19 @@ ebbm_contacts_create_contact (EBookBackendMAPI *ebma, GCancellable *cancellable,
 		if (mapi_error)
 			g_error_free (mapi_error);
 
-		g_object_unref (*contact);
-		*contact = NULL;
+		g_object_unref (contact);
 		return;
 	}
 
 	id = exchange_mapi_util_mapi_ids_to_uid (priv->fid, mid);
 
 	/* UID of the contact is nothing but the concatenated string of hex id of folder and the message.*/
-	e_contact_set (*contact, E_CONTACT_UID, id);
-	e_contact_set (*contact, E_CONTACT_BOOK_URI, e_book_backend_mapi_get_book_uri (ebma));
+	e_contact_set (contact, E_CONTACT_UID, id);
+	e_contact_set (contact, E_CONTACT_BOOK_URI, e_book_backend_mapi_get_book_uri (ebma));
 
 	g_free (id);
+
+	*added_contacts = g_slist_append (NULL, contact);
 }
 
 static void
@@ -849,25 +856,31 @@ ebbm_contacts_remove_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 }
 
 static void
-ebbm_contacts_modify_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *vcard, EContact **contact, GError **error)
+ebbm_contacts_modify_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable, const GSList *vcards, GSList **modified_contacts, GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
 	EBookBackendMAPIContactsPrivate *priv;
 	ExchangeMapiConnection *conn;
 	MapiCreateitemData mcd;
+	EContact *contact;
 	GError *mapi_error = NULL;
 	mapi_id_t fid, mid;
 
 	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (vcard != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (contact != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+	e_return_data_book_error_if_fail (vcards != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+	e_return_data_book_error_if_fail (modified_contacts != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	ebmac = E_BOOK_BACKEND_MAPI_CONTACTS (ebma);
 	e_return_data_book_error_if_fail (ebmac != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	priv = ebmac->priv;
 	e_return_data_book_error_if_fail (priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+
+	if (vcards->next != NULL) {
+		g_propagate_error (error, EDB_ERROR_EX (NOT_SUPPORTED, _("The backend does not support bulk modifications")));
+		return;
+	}
 
 	e_book_backend_mapi_lock_connection (ebma);
 
@@ -878,17 +891,17 @@ ebbm_contacts_modify_contact (EBookBackendMAPI *ebma, GCancellable *cancellable,
 		return;
 	}
 
-	*contact = e_contact_new_from_vcard (vcard);
-	if (!*contact) {
+	contact = e_contact_new_from_vcard (vcards->data);
+	if (!contact) {
 		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
 		e_book_backend_mapi_unlock_connection (ebma);
 		return;
 	}
 
 	e_book_backend_mapi_get_db (ebma, &mcd.db);
-	mcd.contact = *contact;
+	mcd.contact = contact;
 
-	exchange_mapi_util_mapi_ids_from_uid (e_contact_get_const (*contact, E_CONTACT_UID), &fid, &mid);
+	exchange_mapi_util_mapi_ids_from_uid (e_contact_get_const (contact, E_CONTACT_UID), &fid, &mid);
 
 	if (!exchange_mapi_connection_modify_item (conn, olFolderContacts, priv->fid, mid,
 		mapi_book_write_props, &mcd, NULL, NULL, NULL, priv->is_public_folder ? MAPI_OPTIONS_USE_PFSTORE : 0, &mapi_error)) {
@@ -897,8 +910,9 @@ ebbm_contacts_modify_contact (EBookBackendMAPI *ebma, GCancellable *cancellable,
 		if (mapi_error)
 			g_error_free (mapi_error);
 
-		g_object_unref (*contact);
-		*contact = NULL;
+		g_object_unref (contact);
+	} else {
+		*modified_contacts = g_slist_append (NULL, contact);
 	}
 
 	e_book_backend_mapi_unlock_connection (ebma);
@@ -1182,9 +1196,9 @@ e_book_backend_mapi_contacts_class_init (EBookBackendMAPIContactsClass *klass)
 	/* Set the virtual methods. */
 	parent_class->op_open				= ebbm_contacts_open;
 	parent_class->op_remove				= ebbm_contacts_remove;
-	parent_class->op_create_contact			= ebbm_contacts_create_contact;
+	parent_class->op_create_contacts		= ebbm_contacts_create_contacts;
 	parent_class->op_remove_contacts		= ebbm_contacts_remove_contacts;
-	parent_class->op_modify_contact			= ebbm_contacts_modify_contact;
+	parent_class->op_modify_contacts		= ebbm_contacts_modify_contacts;
 	parent_class->op_get_contact			= ebbm_contacts_get_contact;
 	parent_class->op_get_contact_list		= ebbm_contacts_get_contact_list;
 

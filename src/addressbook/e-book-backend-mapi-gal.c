@@ -127,7 +127,7 @@ fetch_gal_uids_cb (ExchangeMapiConnection *conn, uint32_t row_index, uint32_t n_
 }
 
 static void
-ebbm_gal_create_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *vcard, EContact **contact, GError **error)
+ebbm_gal_create_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable, const GSList *vcards, GSList **added_contacts, GError **error)
 {
 	g_propagate_error (error, EDB_ERROR (PERMISSION_DENIED));
 }
@@ -139,7 +139,7 @@ ebbm_gal_remove_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable, con
 }
 
 static void
-ebbm_gal_modify_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *vcard, EContact **contact, GError **error)
+ebbm_gal_modify_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable, const GSList *vcards, GSList **modified_contacts, GError **error)
 {
 	g_propagate_error (error, EDB_ERROR (PERMISSION_DENIED));
 }
@@ -279,9 +279,9 @@ e_book_backend_mapi_gal_class_init (EBookBackendMAPIGALClass *klass)
 	parent_class = E_BOOK_BACKEND_MAPI_CLASS (klass);
 
 	/* Set the virtual methods. */
-	parent_class->op_create_contact		= ebbm_gal_create_contact;
+	parent_class->op_create_contacts	= ebbm_gal_create_contacts;
 	parent_class->op_remove_contacts	= ebbm_gal_remove_contacts;
-	parent_class->op_modify_contact		= ebbm_gal_modify_contact;
+	parent_class->op_modify_contacts	= ebbm_gal_modify_contacts;
 
 	parent_class->op_get_status_message	= ebbm_gal_get_status_message;
 	parent_class->op_fetch_contacts		= ebbm_gal_fetch_contacts;

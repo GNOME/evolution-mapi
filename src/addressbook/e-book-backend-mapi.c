@@ -33,6 +33,7 @@
 #include <glib/gi18n-lib.h>
 
 #include <libebook/e-contact.h>
+#include <libedataserver/e-data-server-util.h>
 #include <camel/camel.h>
 
 #include <em-operation-queue.h>
@@ -783,9 +784,9 @@ typedef enum {
 	OP_OPEN,
 	OP_REMOVE,
 
-	OP_CREATE_CONTACT,
+	OP_CREATE_CONTACTS,
 	OP_REMOVE_CONTACTS,
-	OP_MODIFY_CONTACT,
+	OP_MODIFY_CONTACTS,
 	OP_GET_CONTACT,
 	OP_GET_CONTACT_LIST,
 	OP_START_BOOK_VIEW,
@@ -823,8 +824,8 @@ typedef struct {
 typedef struct {
 	OperationBase base;
 
-	GSList *id_list;
-} OperationIDList;
+	GSList *str_slist;
+} OperationStrSlist;
 
 typedef struct {
 	OperationBase base;
@@ -874,37 +875,40 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 			e_data_book_respond_remove (op->book, op->opid, error);
 		}
 	} break;
-	case OP_CREATE_CONTACT: {
-		OperationStr *ops = (OperationStr *) op;
-		const gchar *vcard = ops->str;
+	case OP_CREATE_CONTACTS: {
+		OperationStrSlist *ops = (OperationStrSlist *) op;
 
 		if (!cancelled) {
-			EContact *contact = NULL;
+			GSList *added_contacts = NULL;
 
-			if (ebmac->op_create_contact)
-				ebmac->op_create_contact (ebma, op->cancellable, vcard, &contact, &error);
+			if (ebmac->op_create_contacts)
+				ebmac->op_create_contacts (ebma, op->cancellable, ops->str_slist, &added_contacts, &error);
 			else
 				error = EDB_ERROR (NOT_SUPPORTED);
 
-			if (contact && !error)
-				e_book_backend_mapi_notify_contact_update (ebma, NULL, contact, NULL, -1, -1, NULL);
+			if (added_contacts && !error) {
+				const GSList *l;
 
-			e_data_book_respond_create (op->book, op->opid, error, contact);
+				for (l = added_contacts; l; l = l->next) {
+					e_book_backend_mapi_notify_contact_update (ebma, NULL, E_CONTACT (l->data), NULL, -1, -1, NULL);
+				}
+			}
 
-			if (contact)
-				g_object_unref (contact);
+			e_data_book_respond_create_contacts (op->book, op->opid, error, added_contacts);
+
+			e_util_free_object_slist (added_contacts);
 		}
 
-		g_free (ops->str);
+		e_util_free_string_slist (ops->str_slist);
 	} break;
 	case OP_REMOVE_CONTACTS: {
-		OperationIDList *opil = (OperationIDList *) op;
+		OperationStrSlist *ops = (OperationStrSlist *) op;
 
 		if (!cancelled) {
 			GSList *removed_ids = NULL;
 
 			if (ebmac->op_remove_contacts)
-				ebmac->op_remove_contacts (ebma, op->cancellable, opil->id_list, &removed_ids, &error);
+				ebmac->op_remove_contacts (ebma, op->cancellable, ops->str_slist, &removed_ids, &error);
 			else
 				error = EDB_ERROR (NOT_SUPPORTED);
 
@@ -925,31 +929,33 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 			g_slist_free (removed_ids);
 		}
 
-		g_slist_foreach (opil->id_list, (GFunc) g_free, NULL);
-		g_slist_free (opil->id_list);
+		e_util_free_string_slist (ops->str_slist);
 	} break;
-	case OP_MODIFY_CONTACT: {
-		OperationStr *ops = (OperationStr *) op;
-		const gchar *vcard = ops->str;
+	case OP_MODIFY_CONTACTS: {
+		OperationStrSlist *ops = (OperationStrSlist *) op;
 
 		if (!cancelled) {
-			EContact *contact = NULL;
+			GSList *modified_contacts = NULL;
 
-			if (ebmac->op_modify_contact)
-				ebmac->op_modify_contact (ebma, op->cancellable, vcard, &contact, &error);
+			if (ebmac->op_modify_contacts)
+				ebmac->op_modify_contacts (ebma, op->cancellable, ops->str_slist, &modified_contacts, &error);
 			else
 				error = EDB_ERROR (NOT_SUPPORTED);
 
-			if (contact && !error)
-				e_book_backend_mapi_notify_contact_update (ebma, NULL, contact, NULL, -1, -1, NULL);
+			if (modified_contacts && !error) {
+				const GSList *l;
 
-			e_data_book_respond_modify (op->book, op->opid, error, contact);
+				for (l = modified_contacts; l; l = l->next) {
+					e_book_backend_mapi_notify_contact_update (ebma, NULL, E_CONTACT (l->data), NULL, -1, -1, NULL);
+				}
+			}
 
-			if (contact)
-				g_object_unref (contact);
+			e_data_book_respond_modify_contacts (op->book, op->opid, error, modified_contacts);
+
+			e_util_free_object_slist (modified_contacts);
 		}
 
-		g_free (ops->str);
+		e_util_free_string_slist (ops->str_slist);
 	} break;
 	case OP_GET_CONTACT: {
 		OperationStr *ops = (OperationStr *) op;
@@ -1119,6 +1125,42 @@ str_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, GCancella
 	em_operation_queue_push (priv->op_queue, op);
 }
 
+static void
+str_slist_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cancellable, const GSList *str_slist, OperationType ot)
+{
+	OperationStrSlist *op;
+	EBookBackendMAPI *ebbm;
+	EBookBackendMAPIPrivate *priv;
+	GSList *l;
+
+	g_return_if_fail (backend != NULL);
+	g_return_if_fail (E_IS_BOOK_BACKEND_MAPI (backend));
+	g_return_if_fail (str_slist != NULL);
+
+	ebbm = E_BOOK_BACKEND_MAPI (backend);
+	priv = ebbm->priv;
+	g_return_if_fail (priv != NULL);
+
+	g_object_ref (ebbm);
+	if (book)
+		g_object_ref (book);
+	if (cancellable)
+		g_object_ref (cancellable);
+
+	op = g_new0 (OperationStrSlist, 1);
+	op->base.ot = ot;
+	op->base.book = book;
+	op->base.opid = opid;
+	op->base.cancellable = cancellable;
+	op->str_slist = g_slist_copy ((GSList *) str_slist);
+
+	for (l = op->str_slist; l; l = l->next) {
+		l->data = g_strdup (l->data);
+	}
+
+	em_operation_queue_push (priv->op_queue, op);
+}
+
 #define BASE_OP_DEF(_func, _ot)								\
 static void										\
 _func (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cancellable)	\
@@ -1133,9 +1175,17 @@ _func (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cance
 	str_op_abstract (backend, book, opid, cancellable, str, _ot);		\
 }
 
+#define STR_SLIST_OP_DEF(_func, _ot)							\
+static void										\
+_func (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cancellable, const GSList *str_slist)	\
+{											\
+	str_slist_op_abstract (backend, book, opid, cancellable, str_slist, _ot);	\
+}
+
 BASE_OP_DEF (ebbm_op_remove, OP_REMOVE)
-STR_OP_DEF  (ebbm_op_create_contact, OP_CREATE_CONTACT)
-STR_OP_DEF  (ebbm_op_modify_contact, OP_MODIFY_CONTACT)
+STR_SLIST_OP_DEF (ebbm_op_create_contacts, OP_CREATE_CONTACTS)
+STR_SLIST_OP_DEF (ebbm_op_modify_contacts, OP_MODIFY_CONTACTS)
+STR_SLIST_OP_DEF (ebbm_op_remove_contacts, OP_REMOVE_CONTACTS)
 STR_OP_DEF  (ebbm_op_get_contact, OP_GET_CONTACT)
 STR_OP_DEF  (ebbm_op_get_contact_list, OP_GET_CONTACT_LIST)
 STR_OP_DEF  (ebbm_op_get_backend_property, OP_GET_BACKEND_PROPERTY)
@@ -1166,42 +1216,6 @@ ebbm_op_open (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable
 	op->base.opid = opid;
 	op->base.cancellable = cancellable;
 	op->only_if_exists = only_if_exists;
-
-	em_operation_queue_push (priv->op_queue, op);
-}
-
-static void
-ebbm_op_remove_contacts (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cancellable, const GSList *id_list)
-{
-	OperationIDList *op;
-	EBookBackendMAPI *ebbm;
-	EBookBackendMAPIPrivate *priv;
-	GSList *l;
-
-	g_return_if_fail (backend != NULL);
-	g_return_if_fail (E_IS_BOOK_BACKEND_MAPI (backend));
-	g_return_if_fail (id_list != NULL);
-
-	ebbm = E_BOOK_BACKEND_MAPI (backend);
-	priv = ebbm->priv;
-	g_return_if_fail (priv != NULL);
-
-	g_object_ref (ebbm);
-	if (book)
-		g_object_ref (book);
-	if (cancellable)
-		g_object_ref (cancellable);
-
-	op = g_new0 (OperationIDList, 1);
-	op->base.ot = OP_REMOVE_CONTACTS;
-	op->base.book = book;
-	op->base.opid = opid;
-	op->base.cancellable = cancellable;
-	op->id_list = g_slist_copy ((GSList *) id_list);
-
-	for (l = op->id_list; l; l = l->next) {
-		l->data = g_strdup (l->data);
-	}
 
 	em_operation_queue_push (priv->op_queue, op);
 }
@@ -1360,9 +1374,9 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 
 	backend_class->open			  = ebbm_op_open;
 	backend_class->remove			  = ebbm_op_remove;
-	backend_class->create_contact		  = ebbm_op_create_contact;
+	backend_class->create_contacts		  = ebbm_op_create_contacts;
 	backend_class->remove_contacts		  = ebbm_op_remove_contacts;
-	backend_class->modify_contact		  = ebbm_op_modify_contact;
+	backend_class->modify_contacts		  = ebbm_op_modify_contacts;
 	backend_class->get_contact                = ebbm_op_get_contact;
 	backend_class->get_contact_list           = ebbm_op_get_contact_list;
 	backend_class->start_book_view            = ebbm_op_start_book_view;
