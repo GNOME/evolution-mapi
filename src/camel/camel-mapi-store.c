@@ -81,6 +81,7 @@ static void mapi_store_constructed (GObject *object);
 static gchar	*mapi_get_name(CamelService *, gboolean );
 static gboolean	mapi_connect_sync(CamelService *, GCancellable *cancellable, GError **);
 static gboolean	mapi_disconnect_sync(CamelService *, gboolean , GCancellable *cancellable, GError **);
+static CamelAuthenticationResult mapi_authenticate_sync (CamelService *, const gchar *mechanism, GCancellable *, GError **);
 static GList	*mapi_query_auth_types_sync(CamelService *, GCancellable *cancellable, GError **);
 
 /* store methods */
@@ -1584,6 +1585,7 @@ camel_mapi_store_class_init (CamelMapiStoreClass *class)
 	service_class->get_name = mapi_get_name;
 	service_class->connect_sync = mapi_connect_sync;
 	service_class->disconnect_sync = mapi_disconnect_sync;
+	service_class->authenticate_sync = mapi_authenticate_sync;
 	service_class->query_auth_types_sync = mapi_query_auth_types_sync;
 
 	store_class = CAMEL_STORE_CLASS (class);
@@ -1681,125 +1683,16 @@ mapi_get_name(CamelService *service, gboolean brief)
 }
 
 static gboolean
-mapi_prompt_pass_creds (CamelService *service, CamelURL *url, const gchar *reason, GError **error) {
-	gchar *prompt;
-	gchar *new_passwd;
-	const gchar *password;
-	guint32 prompt_flags = CAMEL_SESSION_PASSWORD_SECRET;
-	CamelSession *session = camel_service_get_session (service);
-
-	if (reason) {
-		/* We need to un-cache the password before prompting again */
-		prompt_flags |= CAMEL_SESSION_PASSWORD_REPROMPT;
-		camel_service_set_password (service, NULL);
-	}
-
-	/*To translators : First %s : is the error text or the reason
-	  for prompting the user if it is available.
-	 Second %s is : Username.
-	 Third %s is : Server host name.*/
-	prompt = g_strdup_printf (_("%s Please enter the MAPI password for %s@%s"), reason ? reason : "", url->user, url->host);
-
-	/* XXX This is a tad awkward.  Maybe define a
-	 *     camel_service_ask_password() that calls
-	 *     camel_session_get_password() and caches
-	 *     the password itself? */
-	new_passwd = camel_session_get_password (session, service, prompt, "password", prompt_flags, NULL);
-	camel_service_set_password (service, new_passwd);
-	password = camel_service_get_password (service);
-	g_free (new_passwd);
-
-	g_free (prompt);
-
-	if (password == NULL) {
-		if (error && !*error)
-			g_set_error (
-				error, G_IO_ERROR,
-				G_IO_ERROR_CANCELLED,
-				_("You did not enter a password."));
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-static gboolean
-mapi_auth_loop (CamelService *service, GError **error)
-{
-	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
-	CamelURL *url;
-	CamelSettings *settings;
-	CamelMapiSettings *mapi_settings;
-	ExchangeMapiProfileData empd = { 0 };
-
-	gchar *errbuf = NULL;
-	gboolean authenticated = FALSE, ret = TRUE, krb_requested = FALSE;
-	const gchar *profile;
-
-	url = camel_service_get_camel_url (service);
-	settings = camel_service_get_settings (service);
-	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
-
-	empd.server = url->host;
-	empd.username = url->user;
-	exchange_mapi_util_profiledata_from_settings (&empd, mapi_settings);
-
-	profile = camel_mapi_settings_get_profile (mapi_settings);
-
-	camel_service_set_password (service, NULL);
-
-	while (!authenticated) {
-		const gchar *password;
-		GError *mapi_error = NULL;
-
-		password = camel_service_get_password (service);
-
-		if (password == NULL || errbuf) {
-			const gchar *why = errbuf ? errbuf : NULL;
-
-			if (empd.krb_sso) {
-				if (!krb_requested) {
-					ret = exchange_mapi_util_trigger_krb_auth (&empd, error);
-					krb_requested = TRUE;
-				} else {
-					ret = FALSE;
-				}
-			} else {
-				ret = mapi_prompt_pass_creds (service, url, why, error);
-			}
-
-			g_free (errbuf);
-			errbuf = NULL;
-		}
-
-		if (!ret || (error && *error)) {
-			return FALSE;
-		}
-
-		password = camel_service_get_password (service);
-		store->priv->conn = exchange_mapi_connection_new (profile, password, &mapi_error);
-		if (!store->priv->conn || !exchange_mapi_connection_connected (store->priv->conn)) {
-			if (mapi_error) {
-				errbuf = g_strdup_printf (_("Unable to authenticate to Exchange MAPI server: %s"), mapi_error->message);
-				g_error_free (mapi_error);
-			} else {
-				errbuf = g_strdup (_("Unable to authenticate to Exchange MAPI server"));
-			}
-		} else
-			authenticated = TRUE;
-
-	}
-	return TRUE;
-}
-
-static gboolean
 mapi_connect_sync (CamelService *service,
                    GCancellable *cancellable,
                    GError **error)
 {
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
 	CamelServiceConnectionStatus status;
+	CamelSession *session;
 	guint16 event_mask = 0;
+
+	session = camel_service_get_session (service);
 
 	status = camel_service_get_connection_status (service);
 	if (status == CAMEL_SERVICE_DISCONNECTED) {
@@ -1812,7 +1705,7 @@ mapi_connect_sync (CamelService *service,
 		return TRUE;
 	}
 
-	if (!mapi_auth_loop (service, error)) {
+	if (!camel_session_authenticate_sync (session, service, NULL, cancellable, error)) {
 		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		camel_service_disconnect_sync (service, TRUE, NULL);
 		return FALSE;
@@ -1868,6 +1761,67 @@ mapi_disconnect_sync (CamelService *service,
 	store->priv->folders_synced = FALSE;
 
 	return TRUE;
+}
+
+static CamelAuthenticationResult
+mapi_authenticate_sync (CamelService *service,
+                        const gchar *mechanism,
+                        GCancellable *cancellable,
+                        GError **error)
+{
+	CamelAuthenticationResult result;
+	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
+	CamelURL *url;
+	CamelSettings *settings;
+	CamelMapiSettings *mapi_settings;
+	ExchangeMapiProfileData empd = { 0 };
+	const gchar *profile;
+	const gchar *password;
+	GError *mapi_error = NULL;
+
+	url = camel_service_get_camel_url (service);
+	settings = camel_service_get_settings (service);
+	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
+
+	empd.server = url->host;
+	empd.username = url->user;
+	exchange_mapi_util_profiledata_from_settings (&empd, mapi_settings);
+
+	profile = camel_mapi_settings_get_profile (mapi_settings);
+
+	if (empd.krb_sso) {
+		if (exchange_mapi_util_trigger_krb_auth (&empd, error))
+			return CAMEL_AUTHENTICATION_ACCEPTED;
+		else
+			return CAMEL_AUTHENTICATION_ERROR;
+	}
+
+	password = camel_service_get_password (service);
+
+	if (password == NULL) {
+		g_set_error_literal (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_CANT_AUTHENTICATE,
+			_("Authentication password not available"));
+		return CAMEL_AUTHENTICATION_ERROR;
+	}
+
+	store->priv->conn = exchange_mapi_connection_new (profile, password, &mapi_error);
+	if (store->priv->conn && exchange_mapi_connection_connected (store->priv->conn)) {
+		result = CAMEL_AUTHENTICATION_ACCEPTED;
+	} else if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_LOGON_FAILED)) {
+		g_clear_error (&mapi_error);
+		result = CAMEL_AUTHENTICATION_REJECTED;
+	} else {
+		/* mapi_error should be set */
+		g_return_val_if_fail (
+			mapi_error != NULL,
+			CAMEL_AUTHENTICATION_ERROR);
+		g_propagate_error (error, mapi_error);
+		result = CAMEL_AUTHENTICATION_ERROR;
+	}
+
+	return result;
 }
 
 static GList *
