@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi.master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N\n"
-"POT-Creation-Date: 2011-08-25 09:08+0000\n"
-"PO-Revision-Date: 2011-08-26 11:27+0200\n"
+"POT-Creation-Date: 2011-10-15 15:01+0000\n"
+"PO-Revision-Date: 2011-10-19 18:10+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -55,7 +55,7 @@ msgstr ""
 "Seleccione en la siguiente lista el que quiere usar."
 
 #: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:275
-#: ../src/camel/camel-mapi-store.c:1034
+#: ../src/camel/camel-mapi-store.c:1051
 #, c-format
 msgid "Cannot create MAPI folders in offline mode."
 msgstr "No se pueden crear carpetas MAPI en modo desconectado."
@@ -113,22 +113,22 @@ msgstr "Carpetas personales"
 msgid "_Location:"
 msgstr "_Lugar:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:860
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:861
 #, c-format
 msgid "Failed to create address book '%s': %s"
 msgstr "Falló al crear la libreta de direcciones «%s»: %s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:863
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:864
 #, c-format
 msgid "Failed to create address book '%s'"
 msgstr "Falló al crear la libreta de direcciones «%s»"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:976
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:977
 #, c-format
 msgid "Failed to create calendar '%s': %s"
 msgstr "Falló al crear el calendario «%s»: %s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:979
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:980
 #, c-format
 msgid "Failed to create calendar '%s'"
 msgstr "Falló al crear el calendario «%s»"
@@ -172,17 +172,17 @@ msgstr "Configuración de Exchange"
 msgid "Folder size"
 msgstr "Tamaño de la carpeta"
 
-#: ../src/addressbook/e-book-backend-mapi.c:431
+#: ../src/addressbook/e-book-backend-mapi.c:432
 msgid "Cannot connect"
 msgstr "No se puede conectar"
 
-#: ../src/addressbook/e-book-backend-mapi.c:733
+#: ../src/addressbook/e-book-backend-mapi.c:737
 msgid "Searching"
 msgstr "Buscando"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1974
+#: ../src/addressbook/e-book-backend-mapi.c:1993
 #: ../src/calendar/e-cal-backend-mapi.c:129
-#: ../src/camel/camel-mapi-folder.c:1764 ../src/camel/camel-mapi-folder.c:1785
+#: ../src/camel/camel-mapi-folder.c:1776 ../src/camel/camel-mapi-folder.c:1797
 msgid "Unknown error"
 msgstr "Error desconocido"
 
@@ -191,27 +191,35 @@ msgstr "Error desconocido"
 msgid "Failed to remove public folder"
 msgstr "Falló al quitar la carpeta pública"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:770
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:746
+msgid "The backend does not support bulk additions"
+msgstr "El «backend» no soporta adiciones"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:776
 #: ../src/calendar/e-cal-backend-mapi.c:1653
 #: ../src/calendar/e-cal-backend-mapi.c:2191
 msgid "Failed to create item on a server"
 msgstr "Falló al crear el elemento en un servidor"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:896
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:881
+msgid "The backend does not support bulk modifications"
+msgstr "El «backend» no soporta adiciones"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:909
 #: ../src/calendar/e-cal-backend-mapi.c:1884
 msgid "Failed to modify item on a server"
 msgstr "Falló al modificar el elemento en un servidor"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1043
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1109
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1160
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1057
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1123
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1174
 #: ../src/calendar/e-cal-backend-mapi.c:1131
 msgid "Failed to fetch items from a server"
 msgstr "Falló al obtener los elementos de un servidor"
 
 #. Translators : This is used to cache the downloaded contacts from a server.
 #. %d is an index of the contact.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1061
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1075
 #, c-format
 msgid "Caching contact %d"
 msgstr "Cacheando contacto %d"
@@ -219,7 +227,7 @@ msgstr "Cacheando contacto %d"
 #. Translators : This is used to cache the downloaded contacts from a server.
 #. The first %d is an index of the contact,
 #. the second %d is total count of conacts on the server.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1065
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1079
 #, c-format
 msgid "Caching contact %d/%d"
 msgstr "Cacheando contacto %d/%d"
@@ -294,71 +302,71 @@ msgstr "Actualizando la caché de resumen local para los mensajes nuevos en %s"
 msgid "Retrieving message IDs from server for %s"
 msgstr "Obteniendo los ID de los mensajes del servidor para %s"
 
-#: ../src/camel/camel-mapi-folder.c:609
+#: ../src/camel/camel-mapi-folder.c:608
 #, c-format
 msgid "Removing deleted messages from cache in %s"
 msgstr "Quitando los borrados mensajes de la caché en %s"
 
 #. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:732
+#: ../src/camel/camel-mapi-folder.c:734
 #, c-format
 msgid "Fetching summary information for new messages in %s"
 msgstr "Obteniendo el resumen de información para los mensajes nuevos en %s"
 
-#: ../src/camel/camel-mapi-folder.c:856 ../src/camel/camel-mapi-folder.c:1370
-#: ../src/camel/camel-mapi-folder.c:1380
+#: ../src/camel/camel-mapi-folder.c:858 ../src/camel/camel-mapi-folder.c:1381
+#: ../src/camel/camel-mapi-folder.c:1391
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Este mensaje no está disponible en modo desconectado."
 
-#: ../src/camel/camel-mapi-folder.c:873
+#: ../src/camel/camel-mapi-folder.c:875
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Falló al obtener los elementos: %s"
 
-#: ../src/camel/camel-mapi-folder.c:878
+#: ../src/camel/camel-mapi-folder.c:880
 msgid "Fetching items failed"
 msgstr "Falló al obtener los elementos"
 
-#: ../src/camel/camel-mapi-folder.c:1085
+#: ../src/camel/camel-mapi-folder.c:1095
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "No se puede anexar el mensaje a la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-folder.c:1093 ../src/camel/camel-mapi-folder.c:1144
+#: ../src/camel/camel-mapi-folder.c:1103 ../src/camel/camel-mapi-folder.c:1154
 #, c-format
 msgid "Offline."
 msgstr "Desconectado."
 
-#: ../src/camel/camel-mapi-folder.c:1224
+#: ../src/camel/camel-mapi-folder.c:1233
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "Falló al vaciar la papelera: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1229
+#: ../src/camel/camel-mapi-folder.c:1238
 msgid "Failed to empty Trash"
 msgstr "Falló al vaciar la papelera"
 
-#: ../src/camel/camel-mapi-folder.c:1329
+#: ../src/camel/camel-mapi-folder.c:1340
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "No se puede obtener el mensaje %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1330
+#: ../src/camel/camel-mapi-folder.c:1341
 msgid "No such message"
 msgstr "No existe ese mensaje"
 
-#: ../src/camel/camel-mapi-folder.c:1406
+#: ../src/camel/camel-mapi-folder.c:1417
 #, c-format
 msgid "Could not get message: %s"
 msgstr "No se puede obtener el mensaje: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1412 ../src/camel/camel-mapi-folder.c:1425
+#: ../src/camel/camel-mapi-folder.c:1423 ../src/camel/camel-mapi-folder.c:1436
 #, c-format
 msgid "Could not get message"
 msgstr "No se puede obtener el mensaje"
 
-#: ../src/camel/camel-mapi-folder.c:1887
+#: ../src/camel/camel-mapi-folder.c:1903
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No se pudo cargar el resumen para %s"
@@ -409,72 +417,72 @@ msgstr ""
 "Esta opción conectará con el servidor OpenChange usando una contraseña en "
 "texto plano."
 
-#: ../src/camel/camel-mapi-store.c:403
+#: ../src/camel/camel-mapi-store.c:402
 #, c-format
 msgid "Folder list not available in offline mode."
 msgstr "La lista de carpetas no está disponible en modo desconectado."
 
-#: ../src/camel/camel-mapi-store.c:1041
+#: ../src/camel/camel-mapi-store.c:1058
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "No se puede crear la carpeta nueva «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1055
+#: ../src/camel/camel-mapi-store.c:1072
 #, c-format
 msgid "Authentication failed"
 msgstr "Falló la autenticación"
 
-#: ../src/camel/camel-mapi-store.c:1081
+#: ../src/camel/camel-mapi-store.c:1098
 #, c-format
 msgid "Cannot create folder '%s': %s"
 msgstr "No se puede crear la carpeta «%s»: %s"
 
-#: ../src/camel/camel-mapi-store.c:1086
+#: ../src/camel/camel-mapi-store.c:1103
 #, c-format
 msgid "Cannot create folder '%s'"
 msgstr "No se puede crear la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1143
+#: ../src/camel/camel-mapi-store.c:1160
 #, c-format
 msgid "Cannot remove folder '%s': %s"
 msgstr "No se puede quitar la carpeta «%s»: «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1150
+#: ../src/camel/camel-mapi-store.c:1167
 #, c-format
 msgid "Cannot remove folder '%s'"
 msgstr "No se puede quitar la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1200
+#: ../src/camel/camel-mapi-store.c:1217
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
 msgstr "No se puede renombrar la carpeta MAPI «%s». La carpeta no existe."
 
-#: ../src/camel/camel-mapi-store.c:1212
+#: ../src/camel/camel-mapi-store.c:1229
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'."
 msgstr "No se puede renombrar la carpeta predeterminada MAPI «%s» a «%s»."
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1239 ../src/camel/camel-mapi-store.c:1264
-#: ../src/camel/camel-mapi-store.c:1326
+#: ../src/camel/camel-mapi-store.c:1256 ../src/camel/camel-mapi-store.c:1281
+#: ../src/camel/camel-mapi-store.c:1343
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "No se puede renombrar la carpeta MAPI «%s» a «%s»."
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
 #. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1257 ../src/camel/camel-mapi-store.c:1320
+#: ../src/camel/camel-mapi-store.c:1274 ../src/camel/camel-mapi-store.c:1337
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "No se puede renombrar la carpeta MAPI «%s» a «%s»: %s"
 
-#: ../src/camel/camel-mapi-store.c:1440
+#: ../src/camel/camel-mapi-store.c:1457
 #, c-format
 msgid "Folder '%s' not found"
 msgstr "No se encontró el complemento «%s»"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:1634
+#: ../src/camel/camel-mapi-store.c:1676
 #: ../src/camel/camel-mapi-transport.c:154
 #, c-format
 msgid "Exchange MAPI server %s"
@@ -483,34 +491,16 @@ msgstr "Servidor MAPI Exchange %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:1638
+#: ../src/camel/camel-mapi-store.c:1680
 #: ../src/camel/camel-mapi-transport.c:157
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Servidor MAPI Exchange para %s en %s"
 
-#. To translators : First %s : is the error text or the reason
-#. for prompting the user if it is available.
-#. Second %s is : Username.
-#. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:1659
-#, c-format
-msgid "%s Please enter the MAPI password for %s@%s"
-msgstr "%s introduzca la contraseña MAPI para %s@%s"
-
-#: ../src/camel/camel-mapi-store.c:1668
-#, c-format
-msgid "You did not enter a password."
-msgstr "No introdujo una contraseña."
-
-#: ../src/camel/camel-mapi-store.c:1728
-#, c-format
-msgid "Unable to authenticate to Exchange MAPI server: %s"
-msgstr "No se puedo autenticar contra el servidor MAPI Exchange: %s"
-
-#: ../src/camel/camel-mapi-store.c:1731
-msgid "Unable to authenticate to Exchange MAPI server"
-msgstr "No se puedo autenticar contra el servidor MAPI Exchange"
+#: ../src/camel/camel-mapi-store.c:1805
+#| msgid "Authentication failed"
+msgid "Authentication password not available"
+msgstr "La contraseña de la autenticación no está disponible"
 
 #: ../src/camel/camel-mapi-transport.c:116
 #: ../src/camel/camel-mapi-transport.c:137
@@ -524,19 +514,19 @@ msgid "Could not send message: %s"
 msgstr "No se pudo enviar el mensaje: %s"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1843
+#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1856
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Aceptada:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1847
+#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1860
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Intentará asistir:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1851
+#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1864
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Rechazada:"
@@ -612,6 +602,18 @@ msgstr "El destinatario «%s» es ambiguo"
 #: ../src/libexchangemapi/exchange-mapi-connection.c:3477
 msgid "All Public Folders"
 msgstr "Todas las carpetas públicas"
+
+#~ msgid "%s Please enter the MAPI password for %s@%s"
+#~ msgstr "%s introduzca la contraseña MAPI para %s@%s"
+
+#~ msgid "You did not enter a password."
+#~ msgstr "No introdujo una contraseña."
+
+#~ msgid "Unable to authenticate to Exchange MAPI server: %s"
+#~ msgstr "No se puedo autenticar contra el servidor MAPI Exchange: %s"
+
+#~ msgid "Unable to authenticate to Exchange MAPI server"
+#~ msgstr "No se puedo autenticar contra el servidor MAPI Exchange"
 
 #~ msgid "Uknown error"
 #~ msgstr "Error desconocido"
