@@ -1,0 +1,589 @@
+# Esperanto translation for evolution-mapi.
+# Copyright (C) 2011 Free Software Foundation, Inc.
+# This file is distributed under the same license as the evolution-mapi package.
+# Kristjan SCHMIDT <kristjan.schmidt@googlemail.com>, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-mapi master\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-mapi&keywords=I18N+L10N\n"
+"POT-Creation-Date: 2011-10-19 16:26+0000\n"
+"PO-Revision-Date: 2011-10-19 19:17+0200\n"
+"Last-Translator: Kristjan SCHMIDT <kristjan.schmidt@googlemail.com>\n"
+"Language-Team: Esperanto <ubuntu-l10n-eo@lists.launchpad.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bits\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:791
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:793
+msgid "Global Address List"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:1193
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:257
+#, c-format
+msgid "Enter Password for %s@%s"
+msgstr "Enigi pasvorton de %s@%s"
+
+#. NOTE: A good way would be display the list of username entries
+#. using GtkEntryCompletion in the username gtkentry. But plugins
+#. as of now does not have access to it
+#. TODO : Fix strings
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:175
+msgid "Select username"
+msgstr "Elekti uzantonomon"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:185
+msgid "Full name"
+msgstr "Tuta nomo"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:190
+msgid "Username"
+msgstr "Uzantonomo"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:222
+msgid ""
+"There are more users with similar user name on a server.\n"
+"Please select that you would like to use from the below list."
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:275
+#: ../src/camel/camel-mapi-store.c:1051
+#, c-format
+msgid "Cannot create MAPI folders in offline mode."
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:301
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:305
+msgid ""
+"Realm name cannot be empty when kerberos is selected. Please fill them with "
+"correct values."
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:350
+msgid "Authentication finished successfully."
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:356
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:365
+msgid "Authentication failed."
+msgstr "La aŭtentokontrolo fiaskis."
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:405
+msgid "_Domain name:"
+msgstr "_Domajnnomo:"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:417
+msgid "_Authenticate"
+msgstr "_Aŭtentigi"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:426
+msgid "_Use secure connection"
+msgstr "_Uzi sekuran konekton"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:440
+msgid "_Kerberos authentication"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:451
+msgid "_Realm name:"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:605
+msgid "Personal Folders"
+msgstr "Personaj dosierujoj"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:742
+msgid "_Location:"
+msgstr "_Loko:"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:861
+#, c-format
+msgid "Failed to create address book '%s': %s"
+msgstr "Fiaskis krei adresaron '%s': %s"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:864
+#, c-format
+msgid "Failed to create address book '%s'"
+msgstr "Fiaskis krei adresaron '%s'"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:977
+#, c-format
+msgid "Failed to create calendar '%s': %s"
+msgstr "Fiaskis krei kalendaron '%s': %s"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:980
+#, c-format
+msgid "Failed to create calendar '%s'"
+msgstr "Fiaskis krei adresaron '%s'"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:100
+msgid "Folder"
+msgstr "Dosierujo"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:105
+msgid "Size"
+msgstr "Grando"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:128
+msgid "Unable to retrieve folder size information"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:168
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:374
+msgid "Folder Size"
+msgstr "Dosieruja grando"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:179
+msgid "Fetching folder list…"
+msgstr ""
+
+#. Miscellaneous settings
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:359
+msgid "Miscellaneous"
+msgstr "Diversaĵoj"
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:372
+msgid "View the size of all Exchange folders"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:385
+#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
+msgid "Exchange Settings"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:394
+msgid "Folder size"
+msgstr "Dosieruja grando"
+
+#: ../src/addressbook/e-book-backend-mapi.c:432
+msgid "Cannot connect"
+msgstr "Ne eblas konekti"
+
+#: ../src/addressbook/e-book-backend-mapi.c:737
+msgid "Searching"
+msgstr "Serĉante"
+
+#: ../src/addressbook/e-book-backend-mapi.c:1993
+#: ../src/calendar/e-cal-backend-mapi.c:129
+#: ../src/camel/camel-mapi-folder.c:1776 ../src/camel/camel-mapi-folder.c:1797
+msgid "Unknown error"
+msgstr "Nekonata eraro"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:713
+#: ../src/calendar/e-cal-backend-mapi.c:277
+msgid "Failed to remove public folder"
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:746
+msgid "The backend does not support bulk additions"
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:776
+#: ../src/calendar/e-cal-backend-mapi.c:1653
+#: ../src/calendar/e-cal-backend-mapi.c:2187
+msgid "Failed to create item on a server"
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:881
+msgid "The backend does not support bulk modifications"
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:909
+#: ../src/calendar/e-cal-backend-mapi.c:1884
+msgid "Failed to modify item on a server"
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1057
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1123
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1174
+#: ../src/calendar/e-cal-backend-mapi.c:1131
+msgid "Failed to fetch items from a server"
+msgstr ""
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. %d is an index of the contact.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1075
+#, c-format
+msgid "Caching contact %d"
+msgstr ""
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. The first %d is an index of the contact,
+#. the second %d is total count of conacts on the server.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1079
+#, c-format
+msgid "Caching contact %d/%d"
+msgstr ""
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. %d is an index of the GAL entry.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:157
+#, c-format
+msgid "Caching GAL contact %d"
+msgstr ""
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. The first %d is an index of the GAL entry,
+#. the second %d is total count of entries in GAL.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:161
+#, c-format
+msgid "Caching GAL contact %d/%d"
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-mapi-gal.c:211
+#: ../src/addressbook/e-book-backend-mapi-gal.c:259
+msgid "Failed to fetch GAL entries"
+msgstr ""
+
+#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
+#: ../src/calendar/e-cal-backend-mapi.c:343
+#, c-format
+msgid "Loading items in folder %s"
+msgstr ""
+
+#: ../src/calendar/e-cal-backend-mapi.c:663
+#: ../src/calendar/e-cal-backend-mapi.c:707
+#: ../src/calendar/e-cal-backend-mapi.c:784
+#, c-format
+msgid "Failed to fetch changes from a server: %s"
+msgstr ""
+
+#: ../src/calendar/e-cal-backend-mapi.c:668
+#: ../src/calendar/e-cal-backend-mapi.c:712
+#: ../src/calendar/e-cal-backend-mapi.c:789
+msgid "Failed to fetch changes from a server"
+msgstr ""
+
+#: ../src/calendar/e-cal-backend-mapi.c:1219
+msgid "Could not create thread for populating cache"
+msgstr ""
+
+#: ../src/calendar/e-cal-backend-mapi.c:1327
+#: ../src/calendar/e-cal-backend-mapi.c:1328
+msgid "Could not create cache file"
+msgstr ""
+
+#: ../src/calendar/e-cal-backend-mapi.c:1778
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+msgstr ""
+
+#: ../src/calendar/e-cal-backend-mapi.c:2438
+msgid "Failed to get Free/Busy data"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:344
+#, c-format
+msgid "Updating local summary cache for new messages in %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:578
+#, c-format
+msgid "Retrieving message IDs from server for %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:608
+#, c-format
+msgid "Removing deleted messages from cache in %s"
+msgstr ""
+
+#. TODO : Check for online state
+#: ../src/camel/camel-mapi-folder.c:734
+#, c-format
+msgid "Fetching summary information for new messages in %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:858 ../src/camel/camel-mapi-folder.c:1381
+#: ../src/camel/camel-mapi-folder.c:1391
+#, c-format
+msgid "This message is not available in offline mode."
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:875
+#, c-format
+msgid "Fetching items failed: %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:880
+msgid "Fetching items failed"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:1095
+#, c-format
+msgid "Cannot append message to folder '%s'"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:1103 ../src/camel/camel-mapi-folder.c:1154
+#, c-format
+msgid "Offline."
+msgstr "Nekonektite."
+
+#: ../src/camel/camel-mapi-folder.c:1233
+#, c-format
+msgid "Failed to empty Trash: %s"
+msgstr "Fiaskis vakigi rubujon: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1238
+msgid "Failed to empty Trash"
+msgstr "Fiaskis vakigi rubujon"
+
+#: ../src/camel/camel-mapi-folder.c:1340
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "Ne eblas akiri mesaĝon %s: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1341
+msgid "No such message"
+msgstr "Neniu tia mesaĝo"
+
+#: ../src/camel/camel-mapi-folder.c:1417
+#, c-format
+msgid "Could not get message: %s"
+msgstr "Ne eblas akiri mesaĝon: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1423 ../src/camel/camel-mapi-folder.c:1436
+#, c-format
+msgid "Could not get message"
+msgstr "Ne eblas akiri mesaĝon"
+
+#: ../src/camel/camel-mapi-folder.c:1903
+#, c-format
+msgid "Could not load summary for %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:44
+msgid "Checking for new mail"
+msgstr "Kontroli por novaj mesaĝoj"
+
+#: ../src/camel/camel-mapi-provider.c:46
+msgid "C_heck for new messages in all folders"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:50
+msgid "Options"
+msgstr "Opcioj"
+
+#: ../src/camel/camel-mapi-provider.c:52
+msgid "Automatically synchroni_ze account locally"
+msgstr ""
+
+#. i18n: copy from evolution:camel-imap-provider.c
+#: ../src/camel/camel-mapi-provider.c:55
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:57
+msgid "Check new messages for _Junk contents"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:59
+msgid "Only check for Junk messag_es in the Inbox folder"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:70
+msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:85
+msgid "Password"
+msgstr "Pasvorto"
+
+#: ../src/camel/camel-mapi-provider.c:86
+msgid ""
+"This option will connect to the OpenChange server using a plaintext password."
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:402
+#, c-format
+msgid "Folder list not available in offline mode."
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:1058
+#, c-format
+msgid "Cannot create new folder '%s'"
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:1072
+#, c-format
+msgid "Authentication failed"
+msgstr "Aŭtentokontrolo fiaskis"
+
+#: ../src/camel/camel-mapi-store.c:1098
+#, c-format
+msgid "Cannot create folder '%s': %s"
+msgstr "Ne eblas krei dosierujon '%s': %s"
+
+#: ../src/camel/camel-mapi-store.c:1103
+#, c-format
+msgid "Cannot create folder '%s'"
+msgstr "Ne eblas krei dosierujon '%s'"
+
+#: ../src/camel/camel-mapi-store.c:1160
+#, c-format
+msgid "Cannot remove folder '%s': %s"
+msgstr "Ne eblas forigi dosierujon '%s': %s"
+
+#: ../src/camel/camel-mapi-store.c:1167
+#, c-format
+msgid "Cannot remove folder '%s'"
+msgstr "Ne eblas forigi dosierujon '%s'"
+
+#: ../src/camel/camel-mapi-store.c:1217
+#, c-format
+msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:1229
+#, c-format
+msgid "Cannot rename MAPI default folder '%s' to '%s'."
+msgstr ""
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1256 ../src/camel/camel-mapi-store.c:1281
+#: ../src/camel/camel-mapi-store.c:1343
+#, c-format
+msgid "Cannot rename MAPI folder '%s' to '%s'"
+msgstr ""
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#. The last '%s' is a detailed error message.
+#: ../src/camel/camel-mapi-store.c:1274 ../src/camel/camel-mapi-store.c:1337
+#, c-format
+msgid "Cannot rename MAPI folder '%s' to '%s': %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:1457
+#, c-format
+msgid "Folder '%s' not found"
+msgstr "Ne trovis la dosierujon '%s'"
+
+#. Translators: The %s is replaced with a server's host name
+#: ../src/camel/camel-mapi-store.c:1676
+#: ../src/camel/camel-mapi-transport.c:154
+#, c-format
+msgid "Exchange MAPI server %s"
+msgstr ""
+
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#. Translators: The first %s is replaced with a user name, the second with a server's host name
+#: ../src/camel/camel-mapi-store.c:1680
+#: ../src/camel/camel-mapi-transport.c:157
+#, c-format
+msgid "Exchange MAPI service for %s on %s"
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:1805
+msgid "Authentication password not available"
+msgstr ""
+
+#: ../src/camel/camel-mapi-transport.c:116
+#: ../src/camel/camel-mapi-transport.c:137
+#, c-format
+msgid "Could not send message."
+msgstr "Ne eblis sendi mesaĝon."
+
+#: ../src/camel/camel-mapi-transport.c:132
+#, c-format
+msgid "Could not send message: %s"
+msgstr "Ne eblis sendi mesaĝon: %s"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1856
+msgctxt "MeetingResp"
+msgid "Accepted:"
+msgstr "Akceptite:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1860
+msgctxt "MeetingResp"
+msgid "Tentative:"
+msgstr ""
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/exchange-mapi-cal-utils.c:1864
+msgctxt "MeetingResp"
+msgid "Declined:"
+msgstr ""
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:105
+msgid "Failed to login into the server"
+msgstr "Fiaskis ensaluti en servilon"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:106
+msgid "Cannot create more sessions, session limit was reached"
+msgstr ""
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:107
+msgid "User cancelled operation"
+msgstr ""
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:108
+msgid "Unable to abort"
+msgstr ""
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:109
+msgid "Network error"
+msgstr "Reta eraro"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:110
+msgid "Disk error"
+msgstr ""
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:111
+msgid "Password change required"
+msgstr ""
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:112
+msgid "Password expired"
+msgstr "Pasvorto eksvalidiĝis"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:113
+msgid "Invalid workstation account"
+msgstr ""
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:114
+msgid "Invalid access time"
+msgstr "Nevalida alir-horo"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:115
+msgid "Account is disabled"
+msgstr "Konto estas elŝaltite"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:116
+msgid "End of session"
+msgstr "Fino de la seanco"
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:124
+#, c-format
+msgid "MAPI error %s (0x%x) occurred"
+msgstr ""
+
+#. Translators: The first '%s' is replaced with an error context,
+#. aka where the error occurred, the second '%s' is replaced with
+#. the error message.
+#: ../src/libexchangemapi/exchange-mapi-connection.c:134
+#, c-format
+msgctxt "EXCHANGEMAPI_ERROR"
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#. Translators: %s is replaced with an email address which was found ambiguous on a remote server
+#: ../src/libexchangemapi/exchange-mapi-connection.c:861
+#, c-format
+msgid "Recipient '%s' is ambiguous"
+msgstr ""
+
+#: ../src/libexchangemapi/exchange-mapi-connection.c:3477
+msgid "All Public Folders"
+msgstr ""
