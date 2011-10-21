@@ -1476,11 +1476,11 @@ mapi_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 		camel_subscribable_folder_subscribed (subscribable, fi);
 		camel_folder_info_free (fi);
 	} else {
-		CamelURL *url;
+		CamelService *service;
 		guint folder_type = mapi_folders_hash_table_type_lookup (mapi_store, folder_name);
 
-		url = camel_service_get_camel_url (CAMEL_SERVICE (mapi_store));
-		exchange_mapi_add_esource (url, use_folder_name, fid, folder_type);
+		service = CAMEL_SERVICE (mapi_store);
+		exchange_mapi_add_esource (service, use_folder_name, fid, folder_type);
 	}
 	camel_store_summary_info_free((CamelStoreSummary *)mapi_store->summary, si);
 	return TRUE;
@@ -1492,6 +1492,7 @@ mapi_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
                                     GCancellable *cancellable,
                                     GError **error)
 {
+	CamelService *service;
 	CamelFolderInfo *fi;
 	CamelStoreInfo *si;
 	gchar *parent_name = NULL;
@@ -1499,9 +1500,8 @@ mapi_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 	gchar *f_name = NULL;
 
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (subscribable);
-	CamelURL *url;
 
-	url = camel_service_get_camel_url (CAMEL_SERVICE (mapi_store));
+	service = CAMEL_SERVICE (mapi_store);
 	fid = camel_mapi_store_folder_id_lookup(mapi_store, folder_name);
 	si = camel_store_summary_path((CamelStoreSummary *)mapi_store->summary, folder_name);
 	if (si) {
@@ -1530,7 +1530,7 @@ mapi_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 		camel_folder_info_free (fi);
 	} else {
 		guint folder_type = mapi_folders_hash_table_type_lookup (mapi_store, use_folder_name);
-		exchange_mapi_remove_esource(url, folder_name, fid, folder_type);
+		exchange_mapi_remove_esource (service, folder_name, fid, folder_type);
 	}
 
 	camel_store_summary_info_free ((CamelStoreSummary *)mapi_store->summary, si);
@@ -1667,18 +1667,25 @@ mapi_store_constructed (GObject *object)
 static char *
 mapi_get_name(CamelService *service, gboolean brief)
 {
-	CamelURL *url;
+	CamelNetworkSettings *network_settings;
+	CamelSettings *settings;
+	const gchar *host;
+	const gchar *user;
 
-	url = camel_service_get_camel_url (service);
+	settings = camel_service_get_settings (service);
+
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+	host = camel_network_settings_get_host (network_settings);
+	user = camel_network_settings_get_user (network_settings);
 
 	if (brief) {
 		/* Translators: The %s is replaced with a server's host name */
-		return g_strdup_printf(_("Exchange MAPI server %s"), url->host);
+		return g_strdup_printf(_("Exchange MAPI server %s"), host);
 	} else {
 		/*To translators : Example string : Exchange MAPI service for
 		  _username_ on _server host name__*/
 		return g_strdup_printf(_("Exchange MAPI service for %s on %s"),
-				       url->user, url->host);
+				       user, host);
 	}
 }
 
@@ -1771,20 +1778,20 @@ mapi_authenticate_sync (CamelService *service,
 {
 	CamelAuthenticationResult result;
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
-	CamelURL *url;
 	CamelSettings *settings;
 	CamelMapiSettings *mapi_settings;
+	CamelNetworkSettings *network_settings;
 	ExchangeMapiProfileData empd = { 0 };
 	const gchar *profile;
 	const gchar *password;
 	GError *mapi_error = NULL;
 
-	url = camel_service_get_camel_url (service);
 	settings = camel_service_get_settings (service);
 	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
 
-	empd.server = url->host;
-	empd.username = url->user;
+	empd.server = camel_network_settings_get_host (network_settings);
+	empd.username = camel_network_settings_get_user (network_settings);
 	exchange_mapi_util_profiledata_from_settings (&empd, mapi_settings);
 
 	profile = camel_mapi_settings_get_profile (mapi_settings);

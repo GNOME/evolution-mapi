@@ -47,8 +47,8 @@ struct _ExchangeMAPIAccountListenerClass {
 	GObjectClass parent_class;
 };
 
-void				exchange_mapi_add_esource (CamelURL *url, const gchar *folder_name, const gchar *fid, gint folder_type);
-void				exchange_mapi_remove_esource (CamelURL *url, const gchar *folder_name, const gchar *fid, gint folder_type);
+void				exchange_mapi_add_esource (CamelService *service, const gchar *folder_name, const gchar *fid, gint folder_type);
+void				exchange_mapi_remove_esource (CamelService *service, const gchar *folder_name, const gchar *fid, gint folder_type);
 GType				exchange_mapi_account_listener_get_type (void);
 ExchangeMAPIAccountListener *	exchange_mapi_account_listener_new (void);
 

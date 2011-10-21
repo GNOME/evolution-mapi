@@ -392,9 +392,12 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 	g_object_unref (client);
 }
 
-void exchange_mapi_add_esource (CamelURL *url, const gchar *folder_name, const gchar *fid, gint folder_type)
+void exchange_mapi_add_esource (CamelService *service, const gchar *folder_name, const gchar *fid, gint folder_type)
 {
-	CamelMapiSettings *settings;
+	CamelNetworkSettings *network_settings;
+	CamelOfflineSettings *offline_settings;
+	CamelMapiSettings *mapi_settings;
+	CamelSettings *settings;
 	ESourceList *source_list = NULL;
 	ESourceGroup *group = NULL;
 	const gchar *conf_key = NULL, *kerberos = NULL;
@@ -403,9 +406,10 @@ void exchange_mapi_add_esource (CamelURL *url, const gchar *folder_name, const g
 	ESource *source = NULL;
 	gchar *relative_uri = NULL;
 	gchar *base_uri = NULL;
+	const gchar *host;
+	const gchar *user;
 
-	if (url == NULL)
-		return;
+	g_return_if_fail (CAMEL_IS_SERVICE (service));
 
 	if (folder_type == MAPI_FOLDER_TYPE_APPOINTMENT)
 		conf_key = CALENDAR_SOURCES;
@@ -422,9 +426,15 @@ void exchange_mapi_add_esource (CamelURL *url, const gchar *folder_name, const g
 		return;
 	}
 
+	settings = camel_service_get_settings (service);
+
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+	host = camel_network_settings_get_host (network_settings);
+	user = camel_network_settings_get_user (network_settings);
+
 	client = gconf_client_get_default ();
 	source_list = e_source_list_new_for_gconf (client, conf_key);
-	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, url->user, url->host);
+	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, user, host);
 	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
 	sources = e_source_group_peek_sources (group);
 	for (; sources != NULL; sources = g_slist_next (sources)) {
@@ -440,28 +450,26 @@ void exchange_mapi_add_esource (CamelURL *url, const gchar *folder_name, const g
 		}
 	}
 
-	settings = g_object_new (CAMEL_TYPE_MAPI_SETTINGS, NULL);
-	camel_settings_load_from_url (CAMEL_SETTINGS (settings), url);
+	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
+	offline_settings = CAMEL_OFFLINE_SETTINGS (settings);
 
 	relative_uri = g_strconcat (";", fid, NULL);
-	kerberos = camel_mapi_settings_get_kerberos (settings) ? "required" : NULL;
+	kerberos = camel_mapi_settings_get_kerberos (mapi_settings) ? "required" : NULL;
 	source = e_source_new (folder_name, relative_uri);
 	e_source_set_property (source, "auth", "1");
 	e_source_set_property (source, "auth-type", "plain/password");
-	e_source_set_property (source, "username", url->user);
-	e_source_set_property (source, "host", url->host);
-	e_source_set_property (source, "profile", camel_mapi_settings_get_profile (settings));
-	e_source_set_property (source, "domain", camel_mapi_settings_get_domain (settings));
-	e_source_set_property (source, "realm", camel_mapi_settings_get_realm (settings));
+	e_source_set_property (source, "username", user);
+	e_source_set_property (source, "host", host);
+	e_source_set_property (source, "profile", camel_mapi_settings_get_profile (mapi_settings));
+	e_source_set_property (source, "domain", camel_mapi_settings_get_domain (mapi_settings));
+	e_source_set_property (source, "realm", camel_mapi_settings_get_realm (mapi_settings));
 	e_source_set_property (source, "folder-id", fid);
-	e_source_set_property (source, "offline_sync", camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (settings)) ? "1" : "0");
+	e_source_set_property (source, "offline_sync", camel_offline_settings_get_stay_synchronized (offline_settings) ? "1" : "0");
 	e_source_set_property (source, "public", "yes");
 	e_source_set_property (source, "delete", "yes");
 	SET_KRB_SSO(source, kerberos);
 
 	e_source_group_add_source (group, source, -1);
-
-	g_object_unref (settings);
 
 	g_object_unref (source);
 	g_free (relative_uri);
@@ -477,17 +485,20 @@ void exchange_mapi_add_esource (CamelURL *url, const gchar *folder_name, const g
 	g_object_unref (client);
 }
 
-void exchange_mapi_remove_esource (CamelURL *url, const gchar * folder_name, const gchar *fid, gint folder_type)
+void exchange_mapi_remove_esource (CamelService *service, const gchar * folder_name, const gchar *fid, gint folder_type)
 {
+	CamelNetworkSettings *network_settings;
+	CamelSettings *settings;
 	ESourceList *source_list = NULL;
 	ESourceGroup *group = NULL;
 	const gchar *conf_key = NULL;
 	GConfClient* client;
 	GSList *sources=NULL;
 	gchar *base_uri = NULL;
+	const gchar *host;
+	const gchar *user;
 
-	if (url == NULL)
-		return;
+	g_return_if_fail (CAMEL_IS_SERVICE (service));
 
 	if (folder_type == MAPI_FOLDER_TYPE_APPOINTMENT)
 		conf_key = CALENDAR_SOURCES;
@@ -504,9 +515,15 @@ void exchange_mapi_remove_esource (CamelURL *url, const gchar * folder_name, con
 		return;
 	}
 
+	settings = camel_service_get_settings (service);
+
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+	host = camel_network_settings_get_host (network_settings);
+	user = camel_network_settings_get_user (network_settings);
+
 	client = gconf_client_get_default ();
 	source_list = e_source_list_new_for_gconf (client, conf_key);
-	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, url->user, url->host);
+	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, user, host);
 	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
 	sources = e_source_group_peek_sources (group);
 

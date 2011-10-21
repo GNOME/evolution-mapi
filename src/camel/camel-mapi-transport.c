@@ -145,17 +145,24 @@ mapi_send_to_sync (CamelTransport *transport,
 static gchar *
 mapi_transport_get_name(CamelService *service, gboolean brief)
 {
-	CamelURL *url;
+	CamelNetworkSettings *network_settings;
+	CamelSettings *settings;
+	const gchar *host;
+	const gchar *user;
 
-	url = camel_service_get_camel_url (service);
+	settings = camel_service_get_settings (service);
+
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+	host = camel_network_settings_get_host (network_settings);
+	user = camel_network_settings_get_user (network_settings);
 
 	if (brief) {
 		/* Translators: The %s is replaced with a server's host name */
-		return g_strdup_printf (_("Exchange MAPI server %s"), url->host);
+		return g_strdup_printf (_("Exchange MAPI server %s"), host);
 	} else {
 		/* Translators: The first %s is replaced with a user name, the second with a server's host name */
 		return g_strdup_printf (_("Exchange MAPI service for %s on %s"),
-					url->user, url->host);
+					user, host);
 	}
 }
 

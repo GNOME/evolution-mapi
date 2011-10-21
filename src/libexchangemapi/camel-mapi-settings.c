@@ -35,14 +35,18 @@ struct _CamelMapiSettingsPrivate {
 
 enum {
 	PROP_0,
+	PROP_AUTH_MECHANISM,
 	PROP_CHECK_ALL,
 	PROP_DOMAIN,
 	PROP_FILTER_JUNK,
 	PROP_FILTER_JUNK_INBOX,
+	PROP_HOST,
 	PROP_KERBEROS,
+	PROP_PORT,
 	PROP_PROFILE,
 	PROP_REALM,
-	PROP_SECURITY_METHOD
+	PROP_SECURITY_METHOD,
+	PROP_USER
 };
 
 G_DEFINE_TYPE_WITH_CODE (
@@ -54,11 +58,17 @@ G_DEFINE_TYPE_WITH_CODE (
 
 static void
 mapi_settings_set_property (GObject *object,
-                                 guint property_id,
-                                 const GValue *value,
-                                 GParamSpec *pspec)
+                            guint property_id,
+                            const GValue *value,
+                            GParamSpec *pspec)
 {
 	switch (property_id) {
+		case PROP_AUTH_MECHANISM:
+			camel_network_settings_set_auth_mechanism (
+				CAMEL_NETWORK_SETTINGS (object),
+				g_value_get_string (value));
+			return;
+
 		case PROP_CHECK_ALL:
 			camel_mapi_settings_set_check_all (
 				CAMEL_MAPI_SETTINGS (object),
@@ -83,10 +93,22 @@ mapi_settings_set_property (GObject *object,
 				g_value_get_boolean (value));
 			return;
 
+		case PROP_HOST:
+			camel_network_settings_set_host (
+				CAMEL_NETWORK_SETTINGS (object),
+				g_value_get_string (value));
+			return;
+
 		case PROP_KERBEROS:
 			camel_mapi_settings_set_kerberos (
 				CAMEL_MAPI_SETTINGS (object),
 				g_value_get_boolean (value));
+			return;
+
+		case PROP_PORT:
+			camel_network_settings_set_port (
+				CAMEL_NETWORK_SETTINGS (object),
+				g_value_get_uint (value));
 			return;
 
 		case PROP_PROFILE:
@@ -106,6 +128,12 @@ mapi_settings_set_property (GObject *object,
 				CAMEL_NETWORK_SETTINGS (object),
 				g_value_get_enum (value));
 			return;
+
+		case PROP_USER:
+			camel_network_settings_set_user (
+				CAMEL_NETWORK_SETTINGS (object),
+				g_value_get_string (value));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -113,11 +141,18 @@ mapi_settings_set_property (GObject *object,
 
 static void
 mapi_settings_get_property (GObject *object,
-                                 guint property_id,
-                                 GValue *value,
-                                 GParamSpec *pspec)
+                            guint property_id,
+                            GValue *value,
+                            GParamSpec *pspec)
 {
 	switch (property_id) {
+		case PROP_AUTH_MECHANISM:
+			g_value_set_string (
+				value,
+				camel_network_settings_get_auth_mechanism (
+				CAMEL_NETWORK_SETTINGS (object)));
+			return;
+
 		case PROP_CHECK_ALL:
 			g_value_set_boolean (
 				value,
@@ -146,11 +181,25 @@ mapi_settings_get_property (GObject *object,
 				CAMEL_MAPI_SETTINGS (object)));
 			return;
 
+		case PROP_HOST:
+			g_value_set_string (
+				value,
+				camel_network_settings_get_host (
+				CAMEL_NETWORK_SETTINGS (object)));
+			return;
+
 		case PROP_KERBEROS:
 			g_value_set_boolean (
 				value,
 				camel_mapi_settings_get_kerberos (
 				CAMEL_MAPI_SETTINGS (object)));
+			return;
+
+		case PROP_PORT:
+			g_value_set_uint (
+				value,
+				camel_network_settings_get_port (
+				CAMEL_NETWORK_SETTINGS (object)));
 			return;
 
 		case PROP_PROFILE:
@@ -171,6 +220,13 @@ mapi_settings_get_property (GObject *object,
 			g_value_set_enum (
 				value,
 				camel_network_settings_get_security_method (
+				CAMEL_NETWORK_SETTINGS (object)));
+			return;
+
+		case PROP_USER:
+			g_value_set_string (
+				value,
+				camel_network_settings_get_user (
 				CAMEL_NETWORK_SETTINGS (object)));
 			return;
 	}
@@ -202,6 +258,12 @@ camel_mapi_settings_class_init (CamelMapiSettingsClass *class)
 	object_class->set_property = mapi_settings_set_property;
 	object_class->get_property = mapi_settings_get_property;
 	object_class->finalize = mapi_settings_finalize;
+
+	/* Inherited from CamelNetworkSettings. */
+	g_object_class_override_property (
+		object_class,
+		PROP_AUTH_MECHANISM,
+		"auth-mechanism");
 
 	g_object_class_install_property (
 		object_class,
@@ -251,6 +313,12 @@ camel_mapi_settings_class_init (CamelMapiSettingsClass *class)
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
 
+	/* Inherited from CamelNetworkSettings. */
+	g_object_class_override_property (
+		object_class,
+		PROP_HOST,
+		"host");
+
 	g_object_class_install_property (
 		object_class,
 		PROP_KERBEROS,
@@ -262,6 +330,12 @@ camel_mapi_settings_class_init (CamelMapiSettingsClass *class)
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
+
+	/* Inherited from CamelNetworkSettings. */
+	g_object_class_override_property (
+		object_class,
+		PROP_PORT,
+		"port");
 
 	g_object_class_install_property (
 		object_class,
@@ -292,6 +366,12 @@ camel_mapi_settings_class_init (CamelMapiSettingsClass *class)
 		object_class,
 		PROP_SECURITY_METHOD,
 		"security-method");
+
+	/* Inherited from CamelNetworkSettings. */
+	g_object_class_override_property (
+		object_class,
+		PROP_USER,
+		"user");
 }
 
 static void

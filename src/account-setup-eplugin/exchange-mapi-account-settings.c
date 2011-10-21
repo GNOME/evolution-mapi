@@ -259,14 +259,13 @@ action_folder_size_cb (GtkAction *action,
 					store = camel_folder_get_parent_store (folder);
 			}
 
-			if (store && CAMEL_IS_SERVICE (store)) {
-				CamelService *service = CAMEL_SERVICE (store);
-				CamelURL *url;
+			if (CAMEL_IS_SERVICE (store)) {
+				CamelService *service;
+				CamelSettings *settings;
 
-				url = camel_service_get_camel_url (service);
-
-				if (url)
-					profile = g_strdup (camel_url_get_param (url, "profile"));
+				service = CAMEL_SERVICE (store);
+				settings = camel_service_get_settings (service);
+				g_object_get (settings, "profile", &profile, NULL);
 			}
 		}
 	}
