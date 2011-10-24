@@ -1306,16 +1306,54 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 }
 
 static CamelMimeMessage *
+mapi_folder_get_message_cached (CamelFolder *folder,
+				 const gchar *message_uid,
+				 GCancellable *cancellable)
+{
+	CamelMapiFolder *mapi_folder;
+	CamelMimeMessage *msg = NULL;
+	CamelStream *stream, *cache_stream;
+
+	mapi_folder = CAMEL_MAPI_FOLDER (folder);
+
+	if (!camel_folder_summary_check_uid (folder->summary, message_uid))
+		return NULL;
+
+	cache_stream  = camel_data_cache_get (mapi_folder->cache, "cache", message_uid, NULL);
+	stream = camel_stream_mem_new ();
+	if (cache_stream) {
+		GError *local_error = NULL;
+
+		msg = camel_mime_message_new ();
+
+		g_seekable_seek (G_SEEKABLE (stream), 0, G_SEEK_SET, NULL, NULL);
+		camel_stream_write_to_stream (cache_stream, stream, cancellable, NULL);
+		g_seekable_seek (G_SEEKABLE (stream), 0, G_SEEK_SET, NULL, NULL);
+		if (!camel_data_wrapper_construct_from_stream_sync ((CamelDataWrapper *) msg, stream, cancellable, &local_error)) {
+			g_object_unref (msg);
+			msg = NULL;
+		}
+
+		g_clear_error (&local_error);
+		g_object_unref (cache_stream);
+	}
+
+	g_object_unref (stream);
+
+	return msg;
+}
+
+static CamelMimeMessage *
 mapi_folder_get_message_sync (CamelFolder *folder,
                               const gchar *uid,
                               GCancellable *cancellable,
-                              GError **error )
+                              GError **error)
 {
 	CamelMimeMessage *msg = NULL;
 	CamelMapiFolder *mapi_folder;
 	CamelMapiStore *mapi_store;
 	CamelMapiMessageInfo *mi = NULL;
-	CamelStream *stream, *cache_stream;
+	CamelStream *cache_stream;
 	CamelStore *parent_store;
 	mapi_id_t id_folder;
 	mapi_id_t id_message;
@@ -1341,34 +1379,8 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 			_("No such message"));
 		return NULL;
 	}
-	cache_stream  = camel_data_cache_get (mapi_folder->cache, "cache", uid, NULL);
-	stream = camel_stream_mem_new ();
-	if (cache_stream) {
-		GError *local_error = NULL;
 
-		msg = camel_mime_message_new ();
-
-		g_seekable_seek (G_SEEKABLE (stream), 0, G_SEEK_SET, NULL, NULL);
-		camel_stream_write_to_stream (cache_stream, stream, cancellable, NULL);
-		g_seekable_seek (G_SEEKABLE (stream), 0, G_SEEK_SET, NULL, NULL);
-		if (!camel_data_wrapper_construct_from_stream_sync ((CamelDataWrapper *) msg, stream, cancellable, &local_error)) {
-			if (g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
-				g_object_unref (msg);
-				g_object_unref (cache_stream);
-				g_object_unref (stream);
-				camel_message_info_free (&mi->info);
-				return NULL;
-			} else {
-				/* Translators: The %s is replaced with a message ID */
-				g_prefix_error (error, "Cannot get message %s: ", uid);
-				g_object_unref (msg);
-				msg = NULL;
-			}
-		}
-		g_object_unref (cache_stream);
-	}
-	g_object_unref (stream);
-
+	msg = mapi_folder_get_message_cached (folder, uid, cancellable);
 	if (msg != NULL) {
 		camel_message_info_free (&mi->info);
 		return msg;
@@ -1833,6 +1845,7 @@ camel_mapi_folder_class_init (CamelMapiFolderClass *class)
 	folder_class->append_message_sync = mapi_folder_append_message_sync;
 	folder_class->expunge_sync = mapi_folder_expunge_sync;
 	folder_class->get_message_sync = mapi_folder_get_message_sync;
+	folder_class->get_message_cached = mapi_folder_get_message_cached;
 	folder_class->refresh_info_sync = mapi_folder_refresh_info_sync;
 	folder_class->synchronize_sync = mapi_folder_synchronize_sync;
 	folder_class->transfer_messages_to_sync = mapi_folder_transfer_messages_to_sync;
