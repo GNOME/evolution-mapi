@@ -1,3 +1,35 @@
+evolution-mapi 3.3.1 2011-10-24
+-------------------------------
+
+Bugs:
+	Bug #659555 - Add custom icons in a folder Subscription dialog (Milan Crha)
+	Bug #655252 - Need to escape the comp_uid part of a path (Milan Crha)
+	Bug #656473 - Store server folder cache in user's cache directory (Milan Crha)
+
+Miscellanous:
+	Post-release version bump (Milan Crha)
+	CamelMapiStore: Use camel_service_set_password(). (Matthew Barnes)
+	CamelMapiStore: Remove unused 'base_url' member. (Matthew Barnes)
+	Adapt to CamelURL API changes. (Matthew Barnes)
+	Adapt to libebackend changes. (Matthew Barnes)
+	CamelMapiProvider: Setting "license" field is unnecessary. (Matthew Barnes)
+	Adapt to camel-provider-1.2.pc going away. (Matthew Barnes)
+	Adapt to CamelFolderSummary API changes (Milan Crha)
+	Adapt to EBookBackend API changes (Milan Crha)
+	Adapt to Camel's new authentication API. (Matthew Barnes)
+	Adapt to recent ECalBackend API changes (Milan Crha)
+
+Translations:
+	Petr Kovar (cs)
+	Gabor Kelemen (hu)
+	Joe Hansen (da)
+	Daniel Nylander (sv)
+	Pavol Klačanský (sk)
+	Mario Blättermann (de)
+	Daniel Mustieles (es)
+	Kristjan SCHMIDT (eo)
+	Matej Urbančič (sl)
+
 evolution-mapi 3.2.0 2011-09-26
 -------------------------------
 
