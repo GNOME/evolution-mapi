@@ -141,10 +141,17 @@ typedef struct {
 	uint32_t propid;	/* resolved prop ID; equals to MAPI_E_RESERVED when not found or other error */
 } ResolveNamedIDsData;
 
+typedef struct {
+	mapi_id_t mid; /* message ID, from PR_MID */
+	uint32_t msg_flags; /* MAPI MSGFLAG_* bit OR, from PR_MESSAGE_FLAGS */
+	time_t last_modified; /* PR_LAST_MODIFICATION_TIME as UTC */
+} ListItemsData;
+
 typedef gboolean (*FetchCallback)	(FetchItemsCallbackData *item_data, gpointer data);
 typedef gboolean (*FetchGALCallback)	(ExchangeMapiConnection *conn, uint32_t row_index, uint32_t n_rows, struct SRow *aRow, gpointer data);
 typedef gboolean (*BuildWritePropsCB)	(ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data);
 typedef gboolean (*BuildReadPropsCB)	(ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
+typedef gboolean (*ListItemsCB)		(ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, const ListItemsData *item_data, guint32 item_index, guint32 items_total, gpointer user_data, GError **perror);
 
 struct _ExchangeMapiConnection {
 	GObject parent;
@@ -164,6 +171,9 @@ ExchangeMapiConnection *exchange_mapi_connection_find (const gchar *profile);
 gboolean		exchange_mapi_connection_reconnect (ExchangeMapiConnection *conn, const gchar *password, GError **perror);
 gboolean		exchange_mapi_connection_close (ExchangeMapiConnection *conn);
 gboolean		exchange_mapi_connection_connected (ExchangeMapiConnection *conn);
+
+gboolean		exchange_mapi_connection_list_items (ExchangeMapiConnection *conn, mapi_id_t fid, guint32 options,
+					ListItemsCB cb, gpointer user_data, GError **perror);
 
 gboolean		exchange_mapi_connection_fetch_object_props (
 					ExchangeMapiConnection *conn, mapi_object_t *obj_folder, mapi_id_t fid, mapi_id_t mid, mapi_object_t *obj_message,

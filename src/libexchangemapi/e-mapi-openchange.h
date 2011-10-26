@@ -1,3 +1,4 @@
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -13,23 +14,27 @@
  * License along with the program; if not, see <http://www.gnu.org/licenses/>
  *
  *
+ * Authors:
+ *    Milan Crha <mcrha@redhat.com>
+ *
  * Copyright (C) 2011 Red Hat, Inc. (www.redhat.com)
  *
  */
 
-/* debugging stuff for evolution-mapi */
+/* till it's available in OpenChange's API */
 
-#ifndef EXCHANGE_MAPI_DEBUG_H
-#define EXCHANGE_MAPI_DEBUG_H
+#ifndef E_MAPI_OPENCHANGE_H
+#define E_MAPI_OPENCHANGE_H
 
-#include "exchange-mapi-connection.h"
+#include <glib.h>
+
+#include <libmapi/libmapi.h>
 
 G_BEGIN_DECLS
 
-gboolean	exchange_mapi_debug_is_enabled (void);
-void		exchange_mapi_debug_print (const gchar *format, ...);
-void		exchange_mapi_debug_dump_properties (ExchangeMapiConnection *conn, mapi_id_t fid, struct mapi_SPropValue_array *properties, gint indent);
+enum MAPISTATUS e_mapi_nameid_lid_lookup_canonical (uint16_t lid, const char *OLEGUID, uint32_t *propTag);
+enum MAPISTATUS e_mapi_nameid_string_lookup_canonical(const char *Name, const char *OLEGUID, uint32_t *propTag);
 
 G_END_DECLS
 
-#endif /* EXCHANGE_MAPI_DEBUG_H */
+#endif /* E_MAPI_OPENCHANGE_H */

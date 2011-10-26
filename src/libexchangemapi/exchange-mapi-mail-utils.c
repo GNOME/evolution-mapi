@@ -73,7 +73,7 @@ fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 	g_return_val_if_fail (data != NULL, FALSE);
 
 	if (camel_debug_start("mapi:folder")) {
-		exchange_mapi_debug_dump_properties (item_data->conn, item_data->fid, item_data->properties);
+		exchange_mapi_debug_dump_properties (item_data->conn, item_data->fid, item_data->properties, 3);
 		camel_debug_end();
 	}
 

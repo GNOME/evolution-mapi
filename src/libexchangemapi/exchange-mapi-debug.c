@@ -51,16 +51,16 @@ exchange_mapi_debug_print (const gchar *format, ...)
 }
 
 static void
-dump_bin (const uint8_t *bin, uint32_t bin_sz, const gchar *line_prefix)
+dump_bin (const uint8_t *bin, uint32_t bin_sz, gint indent)
 {
 	gint k, l, last;
+
+	g_print ("%*s", indent, "");
 
 	if (!bin) {
 		g_print ("NULL");
 		return;
 	}
-
-	g_print ("%s", line_prefix);
 
 	last = 0;
 	for (k = 0; k < bin_sz; k++) {
@@ -78,7 +78,7 @@ dump_bin (const uint8_t *bin, uint32_t bin_sz, const gchar *line_prefix)
 			}
 
 			last = l;
-			g_print ("\n%s", line_prefix);
+			g_print ("\n%*s", indent, "");
 		} else if (k > 0 && (k % 8) == 0) {
 			g_print ("  ");
 		}
@@ -706,7 +706,7 @@ get_namedid_name (ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t proptag)
 }
 
 void
-exchange_mapi_debug_dump_properties (ExchangeMapiConnection *conn, mapi_id_t fid, struct mapi_SPropValue_array *properties)
+exchange_mapi_debug_dump_properties (ExchangeMapiConnection *conn, mapi_id_t fid, struct mapi_SPropValue_array *properties, gint indent)
 {
 	gint i = 0;
 
@@ -714,7 +714,7 @@ exchange_mapi_debug_dump_properties (ExchangeMapiConnection *conn, mapi_id_t fid
 
 	for (i = 0; i < properties->cValues; i++) {
 		struct mapi_SPropValue *lpProp = &properties->lpProps[i];
-		const gchar *tmp =  get_proptag_name (lpProp->ulPropTag);
+		const gchar *tmp = get_proptag_name (lpProp->ulPropTag);
 		gchar t_str[26];
 		gint j = 0;
 
@@ -722,9 +722,9 @@ exchange_mapi_debug_dump_properties (ExchangeMapiConnection *conn, mapi_id_t fid
 			tmp = get_namedid_name (conn, fid, lpProp->ulPropTag);
 
 		if (tmp && *tmp)
-			g_print ("   %s   ",tmp);
+			g_print ("%*s%s ", indent, "", tmp);
 		else
-			g_print ("   0x%08X   ", lpProp->ulPropTag);
+			g_print ("%*s0x%08X   ", indent, "", lpProp->ulPropTag);
 		switch (lpProp->ulPropTag & 0xFFFF) {
 		case PT_UNSPECIFIED:
 			g_print (" PT_UNSPECIFIED");
@@ -769,11 +769,11 @@ exchange_mapi_debug_dump_properties (ExchangeMapiConnection *conn, mapi_id_t fid
 			g_print (" (error) - "/* , lpProp->value.err */);
 			break;
 		case PT_STRING8:
-			g_print (" (string) - %s", lpProp->value.lpszA ? lpProp->value.lpszA : "null");
+			g_print (" (string) - '%s'", lpProp->value.lpszA ? lpProp->value.lpszA : "null");
 			break;
 		case PT_UNICODE:
 			if (lpProp)
-				g_print (" (unicodestring) - %s", lpProp->value.lpszW ? lpProp->value.lpszW : lpProp->value.lpszA ? lpProp->value.lpszA : "null");
+				g_print (" (unicodestring) - '%s'", lpProp->value.lpszW ? lpProp->value.lpszW : lpProp->value.lpszA ? lpProp->value.lpszA : "null");
 			break;
 		case PT_OBJECT:
 			g_print (" PT_OBJECT");
@@ -791,13 +791,13 @@ exchange_mapi_debug_dump_properties (ExchangeMapiConnection *conn, mapi_id_t fid
 			g_print (" PT_ACTIONS");
 			break;
 		case PT_BINARY:
-			g_print (" (struct SBinary_short *) - %p Binary data follows (size %d): \n", &lpProp->value.bin, lpProp->value.bin.cb);
-			dump_bin (lpProp->value.bin.lpb, lpProp->value.bin.cb, "        ");
+			g_print (" (struct SBinary_short *) - %p Binary data follows (size %d): %s", &lpProp->value.bin, lpProp->value.bin.cb, lpProp->value.bin.cb > 0 ? "\n" : "");
+			dump_bin (lpProp->value.bin.lpb, lpProp->value.bin.cb, indent + 3);
 			break;
 		case PT_MV_STRING8:
 			g_print (" (struct mapi_SLPSTRArray *) (%d items)", lpProp->value.MVszA.cValues);
 			for (j = 0; j < lpProp->value.MVszA.cValues; j++) {
-				g_print ("\n      item[%d] = '%s'", j, lpProp->value.MVszA.strings[j].lppszA ? lpProp->value.MVszA.strings[j].lppszA : "[NULL]");
+				g_print ("\n%*sitem[%d] = '%s'", indent + 2, "", j, lpProp->value.MVszA.strings[j].lppszA ? lpProp->value.MVszA.strings[j].lppszA : "[NULL]");
 			}
 			break;
 		case PT_MV_SHORT:
@@ -824,7 +824,7 @@ exchange_mapi_debug_dump_properties (ExchangeMapiConnection *conn, mapi_id_t fid
 		case PT_MV_UNICODE:
 			g_print (" PT_MV_UNICODE (%d items)", lpProp->value.MVszW.cValues);
 			for (j = 0; j < lpProp->value.MVszW.cValues; j++) {
-				g_print ("\n      item[%d] = '%s'", j, lpProp->value.MVszW.strings[j].lppszW ? lpProp->value.MVszW.strings[j].lppszW : "[NULL]");
+				g_print ("\n%*sitem[%d] = '%s'", indent + 2, "", j, lpProp->value.MVszW.strings[j].lppszW ? lpProp->value.MVszW.strings[j].lppszW : "[NULL]");
 			}
 			break;
 		case PT_MV_SYSTIME:
@@ -836,8 +836,8 @@ exchange_mapi_debug_dump_properties (ExchangeMapiConnection *conn, mapi_id_t fid
 		case PT_MV_BINARY:
 			g_print (" PT_MV_BINARY (%d items)", lpProp->value.MVbin.cValues);
 			for (j = 0; j < lpProp->value.MVbin.cValues; j++) {
-				g_print ("\n      item[%d] (size %d)\n", j, lpProp->value.MVbin.bin[j].cb);
-				dump_bin (lpProp->value.MVbin.bin[j].lpb, lpProp->value.MVbin.bin[j].cb, "        ");
+				g_print ("\n%*sitem[%d] (size %d)\n", indent + 2, "", j, lpProp->value.MVbin.bin[j].cb);
+				dump_bin (lpProp->value.MVbin.bin[j].lpb, lpProp->value.MVbin.bin[j].cb, indent + 3);
 			}
 			break;
 		default:

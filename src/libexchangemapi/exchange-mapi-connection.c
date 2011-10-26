@@ -37,6 +37,7 @@
 #include "exchange-mapi-folder.h"
 #include "exchange-mapi-utils.h"
 #include "exchange-mapi-mail-utils.h"
+#include "e-mapi-fast-transfer.h"
 #include <param.h>
 
 #define DEFAULT_PROF_NAME "mapi-profiles.ldb"
@@ -1644,6 +1645,143 @@ cleanup:
 	return mids;
 }
 
+typedef gboolean (*ForeachTableRowCB) (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SRow *srow, guint32 row_index, guint32 rows_total, gpointer user_data, GError **perror);
+
+static gboolean
+foreach_tablerow (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, mapi_object_t *obj_table, ForeachTableRowCB cb, gpointer user_data, GError **perror)
+{
+	enum MAPISTATUS ms;
+	struct SRowSet SRowSet;
+	uint32_t count, i, cursor_pos = 0;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (mem_ctx != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (obj_table != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	do {
+		/* Number of items in the container */
+		ms = QueryPosition (obj_table, &cursor_pos, &count);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "QueryPosition", ms);
+			break;
+		}
+
+		if (!count)
+			break;
+
+		/* Fill the table columns with data from the rows */
+		ms = QueryRows (obj_table, count, TBL_ADVANCE, &SRowSet);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "QueryRows", ms);
+			break;
+		}
+
+		for (i = 0; i < SRowSet.cRows && ms == MAPI_E_SUCCESS; i++) {
+			if (!cb (conn, fid, mem_ctx, &SRowSet.aRow[i], cursor_pos + i + 1, count, user_data, perror))
+				ms = MAPI_E_RESERVED;
+		}
+	} while (cursor_pos < count && ms == MAPI_E_SUCCESS);
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+struct ListItemsInternalData
+{
+	ListItemsCB cb;
+	gpointer user_data;
+};
+
+static gboolean
+list_items_internal_cb (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SRow *srow, guint32 row_index, guint32 rows_total, gpointer user_data, GError **perror)
+{
+	struct ListItemsInternalData *lii_data = user_data;
+	ListItemsData lid;
+	const mapi_id_t	*pmid;
+	const uint32_t *pmsg_flags;
+	struct SPropValue *last_modified;
+	struct timeval t;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (mem_ctx != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (srow != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	pmid = get_SPropValue_SRow_data (srow, PR_MID);
+	pmsg_flags = get_SPropValue_SRow_data (srow, PR_MESSAGE_FLAGS);
+	last_modified = get_SPropValue_SRow (srow, PR_LAST_MODIFICATION_TIME);
+
+	lid.mid = pmid ? *pmid : 0;
+	lid.msg_flags = pmsg_flags ? *pmsg_flags : 0;
+
+	if (last_modified && get_mapi_SPropValue_date_timeval (&t, *last_modified) == MAPI_E_SUCCESS)
+		lid.last_modified = t.tv_sec;
+	else
+		lid.last_modified = 0;
+
+	return lii_data->cb (conn, fid, mem_ctx, &lid, row_index, rows_total, lii_data->user_data, perror);
+}
+
+gboolean
+exchange_mapi_connection_list_items (ExchangeMapiConnection *conn, mapi_id_t fid, guint32 options, ListItemsCB cb, gpointer user_data, GError **perror)
+{
+	enum MAPISTATUS ms;
+	TALLOC_CTX *mem_ctx;
+	mapi_object_t obj_folder;
+	mapi_object_t obj_table;
+	gboolean result = FALSE;
+	struct SPropTagArray *propTagArray;
+	struct ListItemsInternalData lii_data;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	LOCK ();
+	mem_ctx = talloc_init ("ExchangeMAPI_ListItems");
+	mapi_object_init (&obj_folder);
+	mapi_object_init (&obj_table);
+
+	/* Attempt to open the folder */
+	ms = open_folder (conn, 0, &fid, options, &obj_folder, perror);
+	if (ms != MAPI_E_SUCCESS) {
+		goto cleanup;
+	}
+
+	/* Get a handle on the container */
+	ms = GetContentsTable (&obj_folder, &obj_table, TableFlags_UseUnicode, NULL);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "GetContentsTable", ms);
+		goto cleanup;
+	}
+
+	propTagArray = set_SPropTagArray (mem_ctx, 0x3,
+					  PR_MID,
+					  PR_MESSAGE_FLAGS,
+					  PR_LAST_MODIFICATION_TIME);
+
+	/* Set primary columns to be fetched */
+	ms = SetColumns (&obj_table, propTagArray);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "SetColumns", ms);
+		goto cleanup;
+	}
+
+	lii_data.cb = cb;
+	lii_data.user_data = user_data;
+
+	result = foreach_tablerow (conn, fid, mem_ctx, &obj_table, list_items_internal_cb, &lii_data, perror);
+
+ cleanup:
+	mapi_object_release (&obj_folder);
+	mapi_object_release (&obj_table);
+	talloc_free (mem_ctx);
+	UNLOCK ();
+
+	return result;
+}
+
 gboolean
 exchange_mapi_connection_fetch_items   (ExchangeMapiConnection *conn, mapi_id_t fid,
 					struct mapi_SRestriction *res, struct SSortOrderSet *sort_order,
@@ -2059,6 +2197,7 @@ exchange_mapi_connection_fetch_item (ExchangeMapiConnection *conn, mapi_id_t fid
 	if (ms != MAPI_E_SUCCESS) {
 		goto cleanup;
 	}
+
 	/* Open the item */
 	ms = OpenMessage (&obj_folder, fid, mid, &obj_message, 0x0);
 	if (ms != MAPI_E_SUCCESS) {

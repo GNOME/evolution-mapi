@@ -159,7 +159,7 @@ fetch_items_summary_cb (FetchItemsCallbackData *item_data, gpointer data)
 	MailItem *item = g_new0(MailItem , 1);
 
 	if (camel_debug_start("mapi:folder")) {
-		exchange_mapi_debug_dump_properties (item_data->conn, item_data->fid, item_data->properties);
+		exchange_mapi_debug_dump_properties (item_data->conn, item_data->fid, item_data->properties, 3);
 		camel_debug_end();
 	}
 
