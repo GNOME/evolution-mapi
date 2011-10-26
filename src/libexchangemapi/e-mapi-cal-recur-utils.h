@@ -21,18 +21,18 @@
  *
  */
 
-#ifndef EXCHANGE_MAPI_CAL_RECUR_UTILS_H
-#define EXCHANGE_MAPI_CAL_RECUR_UTILS_H
+#ifndef E_MAPI_CAL_RECUR_UTILS_H
+#define E_MAPI_CAL_RECUR_UTILS_H
 
 #include <glib.h>
 
-#include "exchange-mapi-cal-utils.h"
+#include "e-mapi-cal-utils.h"
 
 G_BEGIN_DECLS
 
-gboolean	exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList **extra_detached, icaltimezone *recur_zone);
+gboolean	e_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList **extra_detached, icaltimezone *recur_zone);
 
-GByteArray *	exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps);
+GByteArray *	e_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps);
 
 G_END_DECLS
 

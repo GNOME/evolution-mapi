@@ -29,9 +29,9 @@
 #include <libedata-book/e-data-book-view.h>
 
 #include <libedata-book/e-book-backend-sqlitedb.h>
-#include "exchange-mapi-connection.h"
-#include "exchange-mapi-defs.h"
-#include "exchange-mapi-utils.h"
+#include "e-mapi-connection.h"
+#include "e-mapi-defs.h"
+#include "e-mapi-utils.h"
 
 G_BEGIN_DECLS
 
@@ -93,7 +93,7 @@ gboolean e_book_backend_mapi_debug_enabled (void);
 const gchar *e_book_backend_mapi_get_book_uri (EBookBackendMAPI *ebma);
 void e_book_backend_mapi_lock_connection (EBookBackendMAPI *ebma);
 void e_book_backend_mapi_unlock_connection (EBookBackendMAPI *ebma);
-ExchangeMapiConnection *e_book_backend_mapi_get_connection (EBookBackendMAPI *ebma);
+EMapiConnection *e_book_backend_mapi_get_connection (EBookBackendMAPI *ebma);
 void e_book_backend_mapi_get_db (EBookBackendMAPI *ebma, EBookBackendSqliteDB **db);
 gboolean e_book_backend_mapi_book_view_is_running (EBookBackendMAPI *ebma, EDataBookView *book_view);
 void e_book_backend_mapi_update_view_by_cache (EBookBackendMAPI *ebma, EDataBookView *book_view, GError **error);
@@ -124,10 +124,10 @@ void mapi_error_to_edb_error (GError **perror, const GError *mapi_error, EDataBo
 #define GET_UIDS_ONLY     (GINT_TO_POINTER(2))
 
 /* data is one of GET_ALL_KNOWN_IDS or GET_UIDS_ONLY */
-gboolean mapi_book_utils_get_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
+gboolean mapi_book_utils_get_prop_list (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
 
 /* only one of mapi_properties and aRow can be set */
-EContact *mapi_book_utils_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid, const gchar *book_uri, struct mapi_SPropValue_array *mapi_properties, struct SRow *aRow);
+EContact *mapi_book_utils_contact_from_props (EMapiConnection *conn, mapi_id_t fid, const gchar *book_uri, struct mapi_SPropValue_array *mapi_properties, struct SRow *aRow);
 
 G_END_DECLS
 

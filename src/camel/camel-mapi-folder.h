@@ -26,7 +26,7 @@
 
 #include <camel/camel.h>
 #include <libmapi/libmapi.h>
-#include <exchange-mapi-connection.h>
+#include <e-mapi-connection.h>
 
 /* Standard GObject macros */
 #define CAMEL_TYPE_MAPI_FOLDER \

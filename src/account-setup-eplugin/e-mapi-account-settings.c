@@ -35,9 +35,9 @@
 #include <e-util/e-dialog-utils.h>
 #include <e-util/e-plugin-ui.h>
 
-#include <exchange-mapi-folder.h>
-#include <exchange-mapi-connection.h>
-#include <exchange-mapi-utils.h>
+#include <e-mapi-folder.h>
+#include <e-mapi-connection.h>
+#include <e-mapi-utils.h>
 
 #include <shell/e-shell-sidebar.h>
 #include <shell/e-shell-view.h>
@@ -47,14 +47,14 @@
 #include <mail/em-config.h>
 #include <mail/em-folder-tree.h>
 
-#include "exchange-mapi-account-listener.h"
+#include "e-mapi-account-listener.h"
 
 #define FOLDERSIZE_MENU_ITEM 0
 
 gboolean  e_plugin_ui_init (GtkUIManager *ui_manager,
 			    EShellView *shell_view);
 
-GtkWidget *org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data);
+GtkWidget *org_gnome_e_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data);
 
 enum {
 	COL_FOLDERSIZE_NAME = 0,
@@ -70,7 +70,7 @@ typedef struct
 	gchar *profile;
 
 	GSList *folder_list;
-	ExchangeMapiConnection *conn;
+	EMapiConnection *conn;
 } FolderSizeDialogData;
 
 static gboolean
@@ -110,7 +110,7 @@ fill_folder_size_dialog_cb (gpointer data)
 
 		/* Populate model with data */
 		while (dialog_data->folder_list) {
-			ExchangeMAPIFolder *folder = (ExchangeMAPIFolder *) dialog_data->folder_list->data;
+			EMapiFolder *folder = (EMapiFolder *) dialog_data->folder_list->data;
 			gchar *folder_size = g_format_size_for_display (folder->size);
 
 			gtk_list_store_append (store, &iter);
@@ -146,9 +146,9 @@ mapi_settings_get_folder_size (gpointer data)
 	FolderSizeDialogData *dialog_data = (FolderSizeDialogData *)data;
 
 	dialog_data->folder_list = NULL;
-	dialog_data->conn = exchange_mapi_connection_find (dialog_data->profile);
-	if (dialog_data->conn && exchange_mapi_connection_connected (dialog_data->conn))
-		dialog_data->folder_list = exchange_mapi_connection_peek_folders_list (dialog_data->conn);
+	dialog_data->conn = e_mapi_connection_find (dialog_data->profile);
+	if (dialog_data->conn && e_mapi_connection_connected (dialog_data->conn))
+		dialog_data->folder_list = e_mapi_connection_peek_folders_list (dialog_data->conn);
 
 	g_timeout_add (100, fill_folder_size_dialog_cb, dialog_data);
 
@@ -326,7 +326,7 @@ folder_size_actions_update_cb (EShellView *shell_view, GtkActionEntry *entries)
 
 /* used only in Account Editor */
 GtkWidget *
-org_gnome_exchange_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
+org_gnome_e_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 {
 	EMConfigTargetAccount *target_account;
 	CamelURL *url;

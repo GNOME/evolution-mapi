@@ -21,17 +21,17 @@
  *
  */
 
-#ifndef EXCHANGE_MAPI_CAL_UTILS_H
-#define EXCHANGE_MAPI_CAL_UTILS_H
+#ifndef E_MAPI_CAL_UTILS_H
+#define E_MAPI_CAL_UTILS_H
 
 #include <libecal/e-cal-component.h>
 
-#include "exchange-mapi-connection.h"
-#include "exchange-mapi-defs.h"
-#include "exchange-mapi-utils.h"
+#include "e-mapi-connection.h"
+#include "e-mapi-defs.h"
+#include "e-mapi-utils.h"
 
-#include "exchange-mapi-cal-tz-utils.h"
-#include "exchange-mapi-cal-recur-utils.h"
+#include "e-mapi-cal-tz-utils.h"
+#include "e-mapi-cal-recur-utils.h"
 
 G_BEGIN_DECLS
 
@@ -76,34 +76,34 @@ struct cal_cbdata {
 };
 
 void
-exchange_mapi_cal_util_fetch_organizer (ECalComponent *comp, GSList **recip_list);
+e_mapi_cal_util_fetch_organizer (ECalComponent *comp, GSList **recip_list);
 void
-exchange_mapi_cal_util_fetch_recipients (ECalComponent *comp, GSList **recip_list);
+e_mapi_cal_util_fetch_recipients (ECalComponent *comp, GSList **recip_list);
 void
-exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_list, const gchar *local_store_uri);
+e_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_list, const gchar *local_store_uri);
 
 ECalComponent *
-exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id_t fid, icalcomponent_kind kind, const gchar *mid, struct mapi_SPropValue_array *properties,
+e_mapi_cal_util_mapi_props_to_comp (EMapiConnection *conn, mapi_id_t fid, icalcomponent_kind kind, const gchar *mid, struct mapi_SPropValue_array *properties,
 					   GSList *streams, GSList *recipients, GSList *attachments,
 					   const gchar *local_store_uri, const icaltimezone *default_zone, gboolean is_reply, GSList **detached_components);
 
 void
-exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *uid, const struct timeval *exception_replace_time, const struct FILETIME *creation_time, struct Binary_r *sb);
+e_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *uid, const struct timeval *exception_replace_time, const struct FILETIME *creation_time, struct Binary_r *sb);
 
 gchar *
-exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, mapi_id_t fid, mapi_id_t mid, mapi_object_t *obj_message, const gchar *msg_class,
+e_mapi_cal_util_camel_helper (EMapiConnection *conn, mapi_id_t fid, mapi_id_t mid, mapi_object_t *obj_message, const gchar *msg_class,
 				   GSList *streams, GSList *recipients, GSList *attachments);
 
 uint32_t
-exchange_mapi_cal_util_get_new_appt_id (ExchangeMapiConnection *conn, mapi_id_t fid);
+e_mapi_cal_util_get_new_appt_id (EMapiConnection *conn, mapi_id_t fid);
 
-gboolean exchange_mapi_cal_utils_add_named_ids (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gint pkind);
-gboolean exchange_mapi_cal_utils_get_props_cb (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
-gboolean exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data);
+gboolean e_mapi_cal_utils_add_named_ids (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gint pkind);
+gboolean e_mapi_cal_utils_get_props_cb (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
+gboolean e_mapi_cal_utils_write_props_cb (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data);
 
-gboolean exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, const GSList *users, time_t start, time_t end, GSList **freebusy, GError **mapi_error);
+gboolean e_mapi_cal_utils_get_free_busy_data (EMapiConnection *conn, const GSList *users, time_t start, time_t end, GSList **freebusy, GError **mapi_error);
 
-gchar *exchange_mapi_cal_utils_get_icomp_x_prop (icalcomponent *comp, const gchar *key);
+gchar *e_mapi_cal_utils_get_icomp_x_prop (icalcomponent *comp, const gchar *key);
 
 G_END_DECLS
 

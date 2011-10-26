@@ -19,17 +19,17 @@
 
 /* debugging stuff for evolution-mapi */
 
-#ifndef EXCHANGE_MAPI_DEBUG_H
-#define EXCHANGE_MAPI_DEBUG_H
+#ifndef E_MAPI_DEBUG_H
+#define E_MAPI_DEBUG_H
 
-#include "exchange-mapi-connection.h"
+#include "e-mapi-connection.h"
 
 G_BEGIN_DECLS
 
-gboolean	exchange_mapi_debug_is_enabled (void);
-void		exchange_mapi_debug_print (const gchar *format, ...);
-void		exchange_mapi_debug_dump_properties (ExchangeMapiConnection *conn, mapi_id_t fid, struct mapi_SPropValue_array *properties, gint indent);
+gboolean	e_mapi_debug_is_enabled (void);
+void		e_mapi_debug_print (const gchar *format, ...);
+void		e_mapi_debug_dump_properties (EMapiConnection *conn, mapi_id_t fid, struct mapi_SPropValue_array *properties, gint indent);
 
 G_END_DECLS
 
-#endif /* EXCHANGE_MAPI_DEBUG_H */
+#endif /* E_MAPI_DEBUG_H */

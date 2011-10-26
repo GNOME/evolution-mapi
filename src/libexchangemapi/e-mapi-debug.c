@@ -19,10 +19,10 @@
 
 #include <stdarg.h>
 
-#include "exchange-mapi-debug.h"
+#include "e-mapi-debug.h"
 
 gboolean
-exchange_mapi_debug_is_enabled (void)
+e_mapi_debug_is_enabled (void)
 {
 	static gchar enabled = -1;
 
@@ -33,13 +33,13 @@ exchange_mapi_debug_is_enabled (void)
 }
 
 void
-exchange_mapi_debug_print (const gchar *format, ...)
+e_mapi_debug_print (const gchar *format, ...)
 {
 	va_list args;
 
 	g_return_if_fail (format != NULL);
 
-	if (!exchange_mapi_debug_is_enabled ())
+	if (!e_mapi_debug_is_enabled ())
 		return;
 
 	va_start (args, format);
@@ -110,10 +110,10 @@ dump_bin (const uint8_t *bin, uint32_t bin_sz, gint indent)
 }
 
 static const gchar *
-get_namedid_name (ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t proptag)
+get_namedid_name (EMapiConnection *conn, mapi_id_t fid, uint32_t proptag)
 {
 	if (conn)
-		proptag = exchange_mapi_connection_unresolve_proptag_to_nameid (conn, fid, proptag);
+		proptag = e_mapi_connection_unresolve_proptag_to_nameid (conn, fid, proptag);
 
 	if (proptag == MAPI_E_RESERVED)
 		return NULL;
@@ -706,7 +706,7 @@ get_namedid_name (ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t proptag)
 }
 
 void
-exchange_mapi_debug_dump_properties (ExchangeMapiConnection *conn, mapi_id_t fid, struct mapi_SPropValue_array *properties, gint indent)
+e_mapi_debug_dump_properties (EMapiConnection *conn, mapi_id_t fid, struct mapi_SPropValue_array *properties, gint indent)
 {
 	gint i = 0;
 

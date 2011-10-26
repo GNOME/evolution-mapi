@@ -25,7 +25,7 @@
 #include <config.h>
 #endif
 
-#include "exchange-mapi-cal-tz-utils.h"
+#include "e-mapi-cal-tz-utils.h"
 
 #define d(x) 
 
@@ -37,14 +37,14 @@ static GHashTable *mapi_to_ical = NULL;
 static GHashTable *ical_to_mapi = NULL;
 
 const gchar *
-exchange_mapi_cal_tz_util_get_mapi_equivalent (const gchar *ical_tz_location)
+e_mapi_cal_tz_util_get_mapi_equivalent (const gchar *ical_tz_location)
 {
 	const gchar *retval = NULL;
 
 	g_return_val_if_fail ((ical_tz_location && *ical_tz_location), NULL);
 
 	g_static_rec_mutex_lock(&mutex);
-	if (!exchange_mapi_cal_tz_util_populate()) {
+	if (!e_mapi_cal_tz_util_populate()) {
 		g_static_rec_mutex_unlock(&mutex);
 		return NULL;
 	}
@@ -59,14 +59,14 @@ exchange_mapi_cal_tz_util_get_mapi_equivalent (const gchar *ical_tz_location)
 }
 
 const gchar *
-exchange_mapi_cal_tz_util_get_ical_equivalent (const gchar *mapi_tz_location)
+e_mapi_cal_tz_util_get_ical_equivalent (const gchar *mapi_tz_location)
 {
 	const gchar *retval = NULL;
 
 	g_return_val_if_fail ((mapi_tz_location && *mapi_tz_location), NULL);
 
 	g_static_rec_mutex_lock(&mutex);
-	if (!exchange_mapi_cal_tz_util_populate()) {
+	if (!e_mapi_cal_tz_util_populate()) {
 		g_static_rec_mutex_unlock(&mutex);
 		return NULL;
 	}
@@ -81,7 +81,7 @@ exchange_mapi_cal_tz_util_get_ical_equivalent (const gchar *mapi_tz_location)
 }
 
 void
-exchange_mapi_cal_tz_util_destroy ()
+e_mapi_cal_tz_util_destroy (void)
 {
 	g_static_rec_mutex_lock(&mutex);
 	if (!(mapi_to_ical && ical_to_mapi)) {
@@ -119,7 +119,7 @@ file_contents_to_hashtable (const gchar *contents, GHashTable *table)
 }
 
 gboolean
-exchange_mapi_cal_tz_util_populate ()
+e_mapi_cal_tz_util_populate (void)
 {
 	gchar *mtoi_fn = NULL, *itom_fn = NULL;
 	GMappedFile *mtoi_mf = NULL, *itom_mf = NULL;
@@ -176,7 +176,7 @@ exchange_mapi_cal_tz_util_populate ()
 	if (!(g_hash_table_size (mapi_to_ical) && g_hash_table_size (ical_to_mapi))) {
 		g_warning ("Exchange MAPI timezone files are not valid.");
 
-		exchange_mapi_cal_tz_util_destroy ();
+		e_mapi_cal_tz_util_destroy ();
 
 #if GLIB_CHECK_VERSION(2,21,3)
 		g_mapped_file_unref (mtoi_mf);
@@ -198,7 +198,7 @@ exchange_mapi_cal_tz_util_populate ()
 	g_mapped_file_free (itom_mf);
 #endif
 
-	d(exchange_mapi_cal_tz_util_dump ());
+	d(e_mapi_cal_tz_util_dump ());
 
 	g_static_rec_mutex_unlock(&mutex);
 
@@ -206,7 +206,7 @@ exchange_mapi_cal_tz_util_populate ()
 }
 
 static void
-exchange_mapi_cal_tz_util_dump_ical_tzs ()
+e_mapi_cal_tz_util_dump_ical_tzs (void)
 {
 	guint i;
 	icalarray *zones;
@@ -241,14 +241,14 @@ exchange_mapi_cal_tz_util_dump_ical_tzs ()
 }
 
 void
-exchange_mapi_cal_tz_util_dump ()
+e_mapi_cal_tz_util_dump (void)
 {
 	guint i;
 	GList *keys, *values, *l, *m;
 
 	g_static_rec_mutex_lock(&mutex);
 
-	exchange_mapi_cal_tz_util_dump_ical_tzs ();
+	e_mapi_cal_tz_util_dump_ical_tzs ();
 
 	if (!(mapi_to_ical && ical_to_mapi)) {
 		g_static_rec_mutex_unlock(&mutex);
@@ -286,168 +286,6 @@ exchange_mapi_cal_tz_util_dump ()
 	g_static_rec_mutex_unlock(&mutex);
 }
 
-#if 0
-const WORD TZRULE_FLAG_RECUR_CURRENT_TZREG  = 0x0001; // see dispidApptTZDefRecur
-const WORD TZRULE_FLAG_EFFECTIVE_TZREG      = 0x0002;
-
-// Allocates return value with new.
-// clean up with delete[].
-TZDEFINITION* BinToTZDEFINITION(ULONG cbDef, LPBYTE lpbDef)
-{
-    if (!lpbDef) return NULL;
-
-    // Update this if parsing code is changed!
-    // this checks the size up to the flags member
-    if (cbDef < 2*sizeof(BYTE) + 2*sizeof(WORD)) return NULL;
-
-    TZDEFINITION tzDef;
-    TZRULE* lpRules = NULL;
-    LPBYTE lpPtr = lpbDef;
-    WORD cchKeyName = 0;
-    WCHAR* szKeyName = NULL;
-    WORD i = 0;
-
-    BYTE bMajorVersion = *((BYTE*)lpPtr);
-    lpPtr += sizeof(BYTE);
-    BYTE bMinorVersion = *((BYTE*)lpPtr);
-    lpPtr += sizeof(BYTE);
-
-    // We only understand TZ_BIN_VERSION_MAJOR
-    if (TZ_BIN_VERSION_MAJOR != bMajorVersion) return NULL;
-
-    // We only understand if >= TZ_BIN_VERSION_MINOR
-    if (TZ_BIN_VERSION_MINOR > bMinorVersion) return NULL;
-
-    WORD cbHeader = *((WORD*)lpPtr);
-    lpPtr += sizeof(WORD);
-
-    tzDef.wFlags = *((WORD*)lpPtr);
-    lpPtr += sizeof(WORD);
-
-    if (TZDEFINITION_FLAG_VALID_GUID & tzDef.wFlags)
-    {
-        if (lpbDef + cbDef - lpPtr < sizeof(GUID)) return NULL;
-        tzDef.guidTZID = *((GUID*)lpPtr);
-        lpPtr += sizeof(GUID);
-    }
-
-    if (TZDEFINITION_FLAG_VALID_KEYNAME & tzDef.wFlags)
-    {
-        if (lpbDef + cbDef - lpPtr < sizeof(WORD)) return NULL;
-        cchKeyName = *((WORD*)lpPtr);
-        lpPtr += sizeof(WORD);
-        if (cchKeyName)
-        {
-            if (lpbDef + cbDef - lpPtr < (BYTE)sizeof(WORD)*cchKeyName) return NULL;
-            szKeyName = (WCHAR*)lpPtr;
-            lpPtr += cchKeyName*sizeof(WORD);
-        }
-    }
-
-    if (lpbDef+ cbDef - lpPtr < sizeof(WORD)) return NULL;
-    tzDef.cRules = *((WORD*)lpPtr);
-    lpPtr += sizeof(WORD);
-
-    /* FIXME: parse rules */
-    if (tzDef.cRules) tzDef.cRules = 0;
-#if 0
-    if (tzDef.cRules)
-    {
-        lpRules = new TZRULE[tzDef.cRules];
-        if (!lpRules) return NULL;
-
-        LPBYTE lpNextRule = lpPtr;
-        BOOL bRuleOK = false;
-
-        for (i = 0;i < tzDef.cRules;i++)
-        {
-            bRuleOK = false;
-            lpPtr = lpNextRule;
-
-            if (lpbDef + cbDef - lpPtr <
-                2*sizeof(BYTE) + 2*sizeof(WORD) + 3*sizeof(long) + 2*sizeof(SYSTEMTIME)) return NULL;
-            bRuleOK = true;
-            BYTE bRuleMajorVersion = *((BYTE*)lpPtr);
-            lpPtr += sizeof(BYTE);
-            BYTE bRuleMinorVersion = *((BYTE*)lpPtr);
-            lpPtr += sizeof(BYTE);
-
-            // We only understand TZ_BIN_VERSION_MAJOR
-            if (TZ_BIN_VERSION_MAJOR != bRuleMajorVersion) return NULL;
-
-            // We only understand if >= TZ_BIN_VERSION_MINOR
-            if (TZ_BIN_VERSION_MINOR > bRuleMinorVersion) return NULL;
-
-            WORD cbRule = *((WORD*)lpPtr);
-            lpPtr += sizeof(WORD);
-
-            lpNextRule = lpPtr + cbRule;
-
-            lpRules[i].wFlags = *((WORD*)lpPtr);
-            lpPtr += sizeof(WORD);
-
-            lpRules[i].stStart = *((SYSTEMTIME*)lpPtr);
-            lpPtr += sizeof(SYSTEMTIME);
-
-            lpRules[i].TZReg.lBias = *((long*)lpPtr);
-            lpPtr += sizeof(long);
-            lpRules[i].TZReg.lStandardBias = *((long*)lpPtr);
-            lpPtr += sizeof(long);
-            lpRules[i].TZReg.lDaylightBias = *((long*)lpPtr);
-            lpPtr += sizeof(long);
-
-            lpRules[i].TZReg.stStandardDate = *((SYSTEMTIME*)lpPtr);
-            lpPtr += sizeof(SYSTEMTIME);
-            lpRules[i].TZReg.stDaylightDate = *((SYSTEMTIME*)lpPtr);
-            lpPtr += sizeof(SYSTEMTIME);
-        }
-        if (!bRuleOK)
-        {
-            delete[] lpRules;
-            return NULL;
-        }
-    }
-#endif
-    // Now we've read everything - allocate a structure and copy it in
-    gsize cbTZDef = sizeof(TZDEFINITION) +
-        sizeof(WCHAR)*(cchKeyName+1) +
-        sizeof(TZRULE)*tzDef.cRules;
-
-    TZDEFINITION* ptzDef = (TZDEFINITION*) malloc (cbTZDef);
-
-    if (ptzDef)
-    {
-        // Copy main struct over
-        *ptzDef = tzDef;
-        lpPtr = (LPBYTE) ptzDef;
-        lpPtr += sizeof(TZDEFINITION);
-
-        if (szKeyName)
-        {
-            ptzDef->pwszKeyName = (WCHAR*)lpPtr;
-            memcpy(lpPtr,szKeyName,cchKeyName*sizeof(WCHAR));
-            ptzDef->pwszKeyName[cchKeyName] = 0;
-            lpPtr += (cchKeyName+1)*sizeof(WCHAR);
-        }
-
-        if (ptzDef -> cRules)
-        {
-            ptzDef -> rgRules = (TZRULE*)lpPtr;
-            for (i = 0;i < ptzDef -> cRules;i++)
-            {
-                ptzDef -> rgRules[i] = lpRules[i];
-            }
-        }
-    }
-//    delete[] lpRules;
-
-   free (ptzDef);
-   ptzDef = NULL;
-
-    return ptzDef;
-}
-#endif
-
 #define TZDEFINITION_FLAG_VALID_GUID     0x0001 // the guid is valid
 #define TZDEFINITION_FLAG_VALID_KEYNAME  0x0002 // the keyname is valid
 #define TZ_MAX_RULES          1024 
@@ -455,7 +293,7 @@ TZDEFINITION* BinToTZDEFINITION(ULONG cbDef, LPBYTE lpbDef)
 #define TZ_BIN_VERSION_MINOR  0x01 
 
 void
-exchange_mapi_cal_util_mapi_tz_to_bin (const gchar *mapi_tzid, struct Binary_r *sb)
+e_mapi_cal_util_mapi_tz_to_bin (const gchar *mapi_tzid, struct Binary_r *sb)
 {
 	GByteArray *ba;
 	guint8 flag8;
@@ -506,7 +344,7 @@ exchange_mapi_cal_util_mapi_tz_to_bin (const gchar *mapi_tzid, struct Binary_r *
 }
 
 gchar *
-exchange_mapi_cal_util_bin_to_mapi_tz (GByteArray *ba)
+e_mapi_cal_util_bin_to_mapi_tz (GByteArray *ba)
 {
 	guint8 flag8;
 	guint16 flag16, cbHeader = 0;
@@ -683,7 +521,7 @@ nth_day_of_month (int year, int month, int wday, int ordinal)
 
 /* return the most-correct PidLidTimeZone value w.r.t. OXOCAL 2.2.5.6. */
 int
-exchange_mapi_cal_util_mapi_tz_pidlidtimezone (icaltimezone *ictz)
+e_mapi_cal_util_mapi_tz_pidlidtimezone (icaltimezone *ictz)
 {
 	gboolean tz_dst_now = FALSE, tz_has_dst = FALSE;
 	int i, utc_offset = 0, best_index = 0, best_score = -1;

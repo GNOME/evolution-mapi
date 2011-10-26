@@ -36,36 +36,36 @@
 #include <libedataserver/e-account.h>
 #include <e-util/e-dialog-utils.h>
 #include "mail/em-config.h"
-#include "exchange-mapi-account-setup.h"
+#include "e-mapi-account-setup.h"
 #include <addressbook/gui/widgets/eab-config.h>
 #include <calendar/gui/e-cal-config.h>
 #include <shell/e-shell.h>
 
-#include <exchange-mapi-folder.h>
-#include <exchange-mapi-connection.h>
-#include <exchange-mapi-utils.h>
+#include <e-mapi-folder.h>
+#include <e-mapi-connection.h>
+#include <e-mapi-utils.h>
 
 #define d(x)
 
 gint e_plugin_lib_enable (EPlugin *ep, gint enable);
 
 /* Account Setup */
-GtkWidget *org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData *data);
-gboolean org_gnome_exchange_mapi_check_options(EPlugin *epl, EConfigHookPageCheckData *data);
+GtkWidget *org_gnome_e_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData *data);
+gboolean org_gnome_e_mapi_check_options(EPlugin *epl, EConfigHookPageCheckData *data);
 
 /* New Addressbook/CAL */
-GtkWidget *exchange_mapi_create_addressbook (EPlugin *epl, EConfigHookItemFactoryData *data);
-GtkWidget *exchange_mapi_create_calendar (EPlugin *epl, EConfigHookItemFactoryData *data);
+GtkWidget *e_mapi_create_addressbook (EPlugin *epl, EConfigHookItemFactoryData *data);
+GtkWidget *e_mapi_create_calendar (EPlugin *epl, EConfigHookItemFactoryData *data);
 
 /* New Addressbook */
-gboolean exchange_mapi_book_check (EPlugin *epl, EConfigHookPageCheckData *data);
-void exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target);
+gboolean e_mapi_book_check (EPlugin *epl, EConfigHookPageCheckData *data);
+void e_mapi_book_commit (EPlugin *epl, EConfigTarget *target);
 
 /* New calendar/task list/memo list */
-gboolean exchange_mapi_cal_check (EPlugin *epl, EConfigHookPageCheckData *data);
-void exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target);
+gboolean e_mapi_cal_check (EPlugin *epl, EConfigHookPageCheckData *data);
+void e_mapi_cal_commit (EPlugin *epl, EConfigTarget *target);
 
-static ExchangeMAPIAccountListener *config_listener = NULL;
+static EMapiAccountListener *config_listener = NULL;
 
 static void
 free_mapi_listener ( void )
@@ -76,18 +76,18 @@ free_mapi_listener ( void )
 gint
 e_plugin_lib_enable (EPlugin *ep, gint enable)
 {
-	d(exchange_mapi_debug_print ("Loading Exchange MAPI Plugin"));
+	d(e_mapi_debug_print ("Loading Exchange MAPI Plugin"));
 
 	if (!config_listener) {
-		config_listener = exchange_mapi_account_listener_new ();
+		config_listener = e_mapi_account_listener_new ();
 		g_atexit ( free_mapi_listener );
 	}
 
 	return 0;
 }
 
-ExchangeMAPIAccountListener *
-exchange_mapi_accounts_peek_config_listener ()
+EMapiAccountListener *
+e_mapi_accounts_peek_config_listener ()
 {
 	return config_listener;
 }
@@ -267,7 +267,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	EMConfigTargetAccount *target_account = (EMConfigTargetAccount *)(config->target);
 	CamelURL *url = NULL;
 	gchar *key = NULL;
-	ExchangeMapiProfileData empd = { 0 };
+	EMapiProfileData empd = { 0 };
 	CamelMapiSettings *mapi_settings;
 	GError *error = NULL;
 
@@ -292,7 +292,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 
 	empd.server = url->host;
 	empd.username = url->user;
-	exchange_mapi_util_profiledata_from_settings (&empd, mapi_settings);
+	e_mapi_util_profiledata_from_settings (&empd, mapi_settings);
 
 	if (!empd.username || !*(empd.username)
 	    || !empd.server || !*(empd.server)
@@ -309,29 +309,29 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 
 	key = camel_url_to_string (url, CAMEL_URL_HIDE_PARAMS);
 	if (empd.krb_sso) {
-		exchange_mapi_util_trigger_krb_auth (&empd, &error);
+		e_mapi_util_trigger_krb_auth (&empd, &error);
 	} else {
 		empd.password = prompt_password(empd.username, empd.server,
 						key, target_account);
 	}
 
 	if (COMPLETE_PROFILEDATA(&empd)) {
-		gboolean status = exchange_mapi_create_profile (&empd,
+		gboolean status = e_mapi_create_profile (&empd,
 								(mapi_profile_callback_t) create_profile_callback,
 								empd.username,
 								&error);
 		if (status) {
 			/* profile was created, try to connect to the server */
-			ExchangeMapiConnection *conn;
+			EMapiConnection *conn;
 			gchar *profname;
 
 			status = FALSE;
-			profname = exchange_mapi_util_profile_name (&empd,
+			profname = e_mapi_util_profile_name (&empd,
 								    FALSE);
 
-			conn = exchange_mapi_connection_new (profname, empd.password, &error);
+			conn = e_mapi_connection_new (profname, empd.password, &error);
 			if (conn) {
-				status = exchange_mapi_connection_connected (conn);
+				status = e_mapi_connection_connected (conn);
 				g_object_unref (conn);
 			}
 
@@ -342,7 +342,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 			/* Things are successful */
 			gchar *profname = NULL;
 
-			profname = exchange_mapi_util_profile_name (&empd,
+			profname = e_mapi_util_profile_name (&empd,
 								    FALSE);
 			camel_mapi_settings_set_profile (mapi_settings, profname);
 			g_free (profname);
@@ -374,7 +374,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 }
 
 GtkWidget *
-org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData *data)
+org_gnome_e_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData *data)
 {
 	EMConfigTargetAccount *target_account;
 	CamelSettings *settings;
@@ -480,7 +480,7 @@ org_gnome_exchange_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData 
 }
 
 gboolean
-org_gnome_exchange_mapi_check_options(EPlugin *epl, EConfigHookPageCheckData *data)
+org_gnome_e_mapi_check_options(EPlugin *epl, EConfigHookPageCheckData *data)
 {
 	EMConfigTargetAccount *target = (EMConfigTargetAccount *)(data->config->target);
 	gboolean status = TRUE;
@@ -514,7 +514,7 @@ enum {
 };
 
 static gboolean
-check_node (GtkTreeStore *ts, ExchangeMAPIFolder *folder, GtkTreeIter iter)
+check_node (GtkTreeStore *ts, EMapiFolder *folder, GtkTreeIter iter)
 {
 	GtkTreeModel *ts_model;
 	mapi_id_t fid;
@@ -545,7 +545,7 @@ check_node (GtkTreeStore *ts, ExchangeMAPIFolder *folder, GtkTreeIter iter)
 }
 
 static void
-add_to_store (GtkTreeStore *ts, ExchangeMAPIFolder *folder)
+add_to_store (GtkTreeStore *ts, EMapiFolder *folder)
 {
 	GtkTreeModel *ts_model;
 	GtkTreeIter iter;
@@ -561,7 +561,7 @@ add_to_store (GtkTreeStore *ts, ExchangeMAPIFolder *folder)
 }
 
 static void
-traverse_tree (GtkTreeModel *model, GtkTreeIter iter, ExchangeMAPIFolderType folder_type, gboolean *pany_sub_used)
+traverse_tree (GtkTreeModel *model, GtkTreeIter iter, EMapiFolderType folder_type, gboolean *pany_sub_used)
 {
 	gboolean any_sub_used = FALSE;
 	gboolean has_next = TRUE;
@@ -569,7 +569,7 @@ traverse_tree (GtkTreeModel *model, GtkTreeIter iter, ExchangeMAPIFolderType fol
 	do {
 		gboolean sub_used = FALSE;
 		GtkTreeIter next = iter;
-		ExchangeMAPIFolder *folder = NULL;
+		EMapiFolder *folder = NULL;
 
 		has_next = gtk_tree_model_iter_next (model, &next);
 
@@ -581,7 +581,7 @@ traverse_tree (GtkTreeModel *model, GtkTreeIter iter, ExchangeMAPIFolderType fol
 		}
 
 		gtk_tree_model_get (model, &iter, FOLDER_COL, &folder, -1);
-		if (folder && (exchange_mapi_folder_get_type (folder) == folder_type || (folder_type == MAPI_FOLDER_TYPE_MEMO && exchange_mapi_folder_get_type (folder) == MAPI_FOLDER_TYPE_JOURNAL))) {
+		if (folder && (e_mapi_folder_get_type (folder) == folder_type || (folder_type == MAPI_FOLDER_TYPE_MEMO && e_mapi_folder_get_type (folder) == MAPI_FOLDER_TYPE_JOURNAL))) {
 			sub_used = TRUE;
 		}
 
@@ -598,7 +598,7 @@ traverse_tree (GtkTreeModel *model, GtkTreeIter iter, ExchangeMAPIFolderType fol
 }
 
 static void
-add_folders (GSList *folders, GtkTreeStore *ts, ExchangeMAPIFolderType folder_type)
+add_folders (GSList *folders, GtkTreeStore *ts, EMapiFolderType folder_type)
 {
 	GSList *tmp = folders;
 	GtkTreeIter iter;
@@ -608,7 +608,7 @@ add_folders (GSList *folders, GtkTreeStore *ts, ExchangeMAPIFolderType folder_ty
 	gtk_tree_store_append (ts, &iter, NULL);
 	gtk_tree_store_set (ts, &iter, NAME_COL, node, -1);
 	while (tmp) {
-		ExchangeMAPIFolder *folder = tmp->data;
+		EMapiFolder *folder = tmp->data;
 		add_to_store (ts, folder);
 		tmp = tmp->next;
 	}
@@ -632,11 +632,11 @@ select_folder (GtkTreeModel *model, mapi_id_t fid, GtkWidget *tree_view)
 		return;
 
 	while (!found && can) {
-		ExchangeMAPIFolder *folder = NULL;
+		EMapiFolder *folder = NULL;
 
 		gtk_tree_model_get (model, &iter, FOLDER_COL, &folder, -1);
 
-		if (folder && exchange_mapi_folder_get_fid (folder) == fid) {
+		if (folder && e_mapi_folder_get_fid (folder) == fid) {
 			gtk_tree_selection_select_iter (gtk_tree_view_get_selection (GTK_TREE_VIEW (tree_view)), &iter);
 			found = TRUE;
 			break;
@@ -672,7 +672,7 @@ select_folder (GtkTreeModel *model, mapi_id_t fid, GtkWidget *tree_view)
 }
 
 static void
-exchange_mapi_cursor_change (GtkTreeView *treeview, ESource *source)
+e_mapi_cursor_change (GtkTreeView *treeview, ESource *source)
 {
 	GtkTreeSelection *selection;
 	GtkTreeModel     *model;
@@ -683,7 +683,7 @@ exchange_mapi_cursor_change (GtkTreeView *treeview, ESource *source)
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
 	if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
 		gtk_tree_model_get (model, &iter, FID_COL, &pfid, -1);
-		sfid = exchange_mapi_util_mapi_id_to_string (pfid);
+		sfid = e_mapi_util_mapi_id_to_string (pfid);
 		e_source_set_property (source, "parent-fid", sfid);
 		g_free (sfid);
 	} else {
@@ -692,7 +692,7 @@ exchange_mapi_cursor_change (GtkTreeView *treeview, ESource *source)
 }
 
 static GtkWidget *
-exchange_mapi_create (GtkWidget *parent, ESource *source, ExchangeMAPIFolderType folder_type)
+e_mapi_create (GtkWidget *parent, ESource *source, EMapiFolderType folder_type)
 {
 	GtkWidget *table, *label, *scroll, *tv;
 	gchar *uri_text, *profile = NULL;
@@ -703,7 +703,7 @@ exchange_mapi_create (GtkWidget *parent, ESource *source, ExchangeMAPIFolderType
 	GtkTreeViewColumn *tvc;
 	const gchar *acc;
 	GSList *folders;
-	ExchangeMapiConnection *conn;
+	EMapiConnection *conn;
 	mapi_id_t fid = 0;
 
 	uri_text = e_source_get_uri (source);
@@ -718,10 +718,10 @@ exchange_mapi_create (GtkWidget *parent, ESource *source, ExchangeMAPIFolderType
 		profile = e_source_group_get_property (group, "profile");
 		e_source_set_property (source, "profile", profile);
 	}
-	conn = exchange_mapi_connection_find (profile);
+	conn = e_mapi_connection_find (profile);
 	g_free (profile);
-	if (conn && exchange_mapi_connection_connected (conn))
-		folders = exchange_mapi_connection_peek_folders_list (conn);
+	if (conn && e_mapi_connection_connected (conn))
+		folders = e_mapi_connection_peek_folders_list (conn);
 	acc = e_source_group_peek_name (group);
 	ts = gtk_tree_store_new (NUM_COLS, G_TYPE_STRING, G_TYPE_INT64, G_TYPE_POINTER);
 
@@ -752,7 +752,7 @@ exchange_mapi_create (GtkWidget *parent, ESource *source, ExchangeMAPIFolderType
 	gtk_tree_view_expand_all (GTK_TREE_VIEW (tv));
 
 	if (e_source_get_property (source, "folder-id")) {
-		exchange_mapi_util_mapi_id_from_string (e_source_get_property (source, "folder-id"), &fid);
+		e_mapi_util_mapi_id_from_string (e_source_get_property (source, "folder-id"), &fid);
 		select_folder (GTK_TREE_MODEL (ts), fid, tv);
 	}
 
@@ -762,7 +762,7 @@ exchange_mapi_create (GtkWidget *parent, ESource *source, ExchangeMAPIFolderType
 	g_object_set (scroll, "height-request", 150, NULL);
 	gtk_container_add (GTK_CONTAINER (scroll), tv);
 	gtk_label_set_mnemonic_widget (GTK_LABEL (label), tv);
-	g_signal_connect (G_OBJECT (tv), "cursor-changed", G_CALLBACK (exchange_mapi_cursor_change), source);
+	g_signal_connect (G_OBJECT (tv), "cursor-changed", G_CALLBACK (e_mapi_cursor_change), source);
 	gtk_widget_show_all (scroll);
 
 	gtk_table_attach (GTK_TABLE (table), scroll, 0, 1, 1, 2, GTK_FILL | GTK_EXPAND, 0, 0, 0);
@@ -773,18 +773,18 @@ exchange_mapi_create (GtkWidget *parent, ESource *source, ExchangeMAPIFolderType
 }
 
 GtkWidget *
-exchange_mapi_create_addressbook (EPlugin *epl, EConfigHookItemFactoryData *data)
+e_mapi_create_addressbook (EPlugin *epl, EConfigHookItemFactoryData *data)
 {
 	EABConfigTargetSource *t = (EABConfigTargetSource *) data->target;
 
-	return exchange_mapi_create (data->parent, t->source, MAPI_FOLDER_TYPE_CONTACT);
+	return e_mapi_create (data->parent, t->source, MAPI_FOLDER_TYPE_CONTACT);
 }
 
 GtkWidget *
-exchange_mapi_create_calendar (EPlugin *epl, EConfigHookItemFactoryData *data)
+e_mapi_create_calendar (EPlugin *epl, EConfigHookItemFactoryData *data)
 {
 	ECalConfigTargetSource *t = (ECalConfigTargetSource *) data->target;
-	ExchangeMAPIFolderType folder_type;
+	EMapiFolderType folder_type;
 
 	switch (t->source_type) {
 	case E_CAL_CLIENT_SOURCE_TYPE_EVENTS:
@@ -800,11 +800,11 @@ exchange_mapi_create_calendar (EPlugin *epl, EConfigHookItemFactoryData *data)
 		g_return_val_if_reached (NULL);
 	}
 
-	return exchange_mapi_create (data->parent, t->source, folder_type);
+	return e_mapi_create (data->parent, t->source, folder_type);
 }
 
 gboolean
-exchange_mapi_book_check (EPlugin *epl, EConfigHookPageCheckData *data)
+e_mapi_book_check (EPlugin *epl, EConfigHookPageCheckData *data)
 {
 	EABConfigTargetSource *t = (EABConfigTargetSource *) data->target;
 	ESource *source = t->source;
@@ -832,14 +832,14 @@ exchange_mapi_book_check (EPlugin *epl, EConfigHookPageCheckData *data)
 }
 
 void
-exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
+e_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 {
 	EABConfigTargetSource *t = (EABConfigTargetSource *) target;
 	ESource *source = t->source;
 	gchar *uri_text, *r_uri, *sfid;
 	const gchar *kerberos = NULL;
 	ESourceGroup *grp;
-	ExchangeMapiConnection *conn;
+	EMapiConnection *conn;
 	mapi_id_t fid, pfid;
 	GError *mapi_error = NULL;
 
@@ -847,13 +847,13 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	if (uri_text && g_ascii_strncasecmp (uri_text, MAPI_URI_PREFIX, MAPI_PREFIX_LENGTH))
 		return;
 
-	exchange_mapi_util_mapi_id_from_string (e_source_get_property (source, "parent-fid"), &pfid);
+	e_mapi_util_mapi_id_from_string (e_source_get_property (source, "parent-fid"), &pfid);
 
 	/* the profile should be already connected */
-	conn = exchange_mapi_connection_find (e_source_get_property (source, "profile"));
+	conn = e_mapi_connection_find (e_source_get_property (source, "profile"));
 	g_return_if_fail (conn != NULL);
 
-	fid = exchange_mapi_connection_create_folder (conn, olFolderContacts, pfid, 0, e_source_peek_name (source), &mapi_error);
+	fid = e_mapi_connection_create_folder (conn, olFolderContacts, pfid, 0, e_source_peek_name (source), &mapi_error);
 	g_object_unref (conn);
 
 	if (!fid) {
@@ -867,7 +867,7 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 		return;
 	}
 
-	sfid = exchange_mapi_util_mapi_id_to_string (fid);
+	sfid = e_mapi_util_mapi_id_to_string (fid);
 	r_uri = g_strconcat (";", sfid, NULL);
 	e_source_set_relative_uri (source, r_uri);
 
@@ -892,7 +892,7 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	e_source_set_property (source, "public", "no");
 	e_source_set_property (source, "folder-id", sfid);
 
-	// Update the folder list in the plugin and ExchangeMAPIFolder
+	// Update the folder list in the plugin and EMapiFolder
 	g_free (r_uri);
 	g_free (sfid);
 
@@ -901,7 +901,7 @@ exchange_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 
 /* New calendar/task list/memo list */
 gboolean
-exchange_mapi_cal_check (EPlugin *epl, EConfigHookPageCheckData *data)
+e_mapi_cal_check (EPlugin *epl, EConfigHookPageCheckData *data)
 {
 	ECalConfigTargetSource *t = (ECalConfigTargetSource *)(data->target);
 	ESource *source = t->source;
@@ -930,9 +930,9 @@ exchange_mapi_cal_check (EPlugin *epl, EConfigHookPageCheckData *data)
 }
 
 void
-exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
+e_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 {
-	ExchangeMapiConnection *conn;
+	EMapiConnection *conn;
 	ECalConfigTargetSource *t = (ECalConfigTargetSource *) target;
 	ESourceGroup *group;
 	ESource *source = t->source;
@@ -957,19 +957,19 @@ exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 			type = olFolderNotes;
 			break;
 		default:
-			g_warning ("%s: %s: Unknown ExchangeMAPIFolderType\n", G_STRLOC, G_STRFUNC);
+			g_warning ("%s: %s: Unknown EMapiFolderType\n", G_STRLOC, G_STRFUNC);
 			return;
 	}
 
 	/* FIXME: Offline handling */
 
-	exchange_mapi_util_mapi_id_from_string (e_source_get_property (source, "parent-fid"), &pfid);
+	e_mapi_util_mapi_id_from_string (e_source_get_property (source, "parent-fid"), &pfid);
 
 	/* the profile should be already connected */
-	conn = exchange_mapi_connection_find (e_source_get_property (source, "profile"));
+	conn = e_mapi_connection_find (e_source_get_property (source, "profile"));
 	g_return_if_fail (conn != NULL);
 
-	fid = exchange_mapi_connection_create_folder (conn, type, pfid, 0, e_source_peek_name (source), &mapi_error);
+	fid = e_mapi_connection_create_folder (conn, type, pfid, 0, e_source_peek_name (source), &mapi_error);
 	g_object_unref (conn);
 
 	if (!fid) {
@@ -983,7 +983,7 @@ exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 		return;
 	}
 
-	sfid = exchange_mapi_util_mapi_id_to_string (fid);
+	sfid = e_mapi_util_mapi_id_to_string (fid);
 	tmp = g_strconcat (";", sfid, NULL);
 	e_source_set_relative_uri (source, tmp);
 	g_free (tmp);
@@ -1023,7 +1023,7 @@ exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 	}
 	g_free (tmp);
 
-	tmp = exchange_mapi_util_mapi_id_to_string (fid);
+	tmp = e_mapi_util_mapi_id_to_string (fid);
 	e_source_set_property (source, "folder-id", tmp);
 	g_free (tmp);
 
@@ -1043,6 +1043,6 @@ exchange_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 	e_source_set_property (source, "acl-owner-email", tmp);
 	g_free (tmp);
 
-	// Update the folder list in the plugin and ExchangeMAPIFolder
+	// Update the folder list in the plugin and EMapiFolder
 	return;
 }

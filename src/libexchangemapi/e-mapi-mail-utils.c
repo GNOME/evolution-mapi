@@ -23,10 +23,10 @@
 
 #include <camel/camel.h>
 
-#include "exchange-mapi-defs.h"
-#include "exchange-mapi-utils.h"
-#include "exchange-mapi-cal-utils.h"
-#include "exchange-mapi-mail-utils.h"
+#include "e-mapi-defs.h"
+#include "e-mapi-utils.h"
+#include "e-mapi-cal-utils.h"
+#include "e-mapi-mail-utils.h"
 
 extern gint camel_application_is_exiting;
 
@@ -46,9 +46,9 @@ mail_item_free (MailItem *item)
 	g_free (item->header.content_class);
 	g_free (item->header.transport_headers);
 
-	exchange_mapi_util_free_attachment_list (&item->attachments);
-	exchange_mapi_util_free_stream_list (&item->generic_streams);
-	exchange_mapi_util_free_recipient_list (&item->recipients);
+	e_mapi_util_free_attachment_list (&item->attachments);
+	e_mapi_util_free_stream_list (&item->generic_streams);
+	e_mapi_util_free_recipient_list (&item->recipients);
 
 	g_free (item->msg_class);
 	g_free (item->pid_name_content_type);
@@ -73,11 +73,11 @@ fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 	g_return_val_if_fail (data != NULL, FALSE);
 
 	if (camel_debug_start("mapi:folder")) {
-		exchange_mapi_debug_dump_properties (item_data->conn, item_data->fid, item_data->properties, 3);
+		e_mapi_debug_dump_properties (item_data->conn, item_data->fid, item_data->properties, 3);
 		camel_debug_end();
 	}
 
-	content_class_pid = exchange_mapi_connection_resolve_named_prop (item_data->conn, item_data->fid, PidNameContentClass, NULL);
+	content_class_pid = e_mapi_connection_resolve_named_prop (item_data->conn, item_data->fid, PidNameContentClass, NULL);
 	if (content_class_pid == MAPI_E_RESERVED)
 		content_class_pid = 0;
 
@@ -118,7 +118,7 @@ fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 	item->is_cal = FALSE;
 	if (msg_class && g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_PREFIX)) {
-		guint8 *appointment_body_str = (guint8 *) exchange_mapi_cal_util_camel_helper (item_data->conn, item_data->fid, item_data->mid, NULL, msg_class,
+		guint8 *appointment_body_str = (guint8 *) e_mapi_cal_util_camel_helper (item_data->conn, item_data->fid, item_data->mid, NULL, msg_class,
 												item_data->streams, item_data->recipients, item_data->attachments);
 
 		if (appointment_body_str && *appointment_body_str) {
@@ -136,19 +136,19 @@ fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 	if (!item->is_cal) {
 		/* always prefer unicode version, as that can be properly read */
-		if (!(body = exchange_mapi_util_find_stream (item_data->streams, PR_BODY_UNICODE)))
-			body = exchange_mapi_util_find_stream (item_data->streams, PR_BODY);
+		if (!(body = e_mapi_util_find_stream (item_data->streams, PR_BODY_UNICODE)))
+			body = e_mapi_util_find_stream (item_data->streams, PR_BODY);
 
 		if (body)
 			item->msg.body_parts = g_slist_append (item->msg.body_parts, body);
 
-		body = exchange_mapi_util_find_stream (item_data->streams, PR_HTML);
+		body = e_mapi_util_find_stream (item_data->streams, PR_HTML);
 		if (body)
 			item->msg.body_parts = g_slist_append (item->msg.body_parts, body);
 	}
 
 	if (delivery_date) {
-		item->header.recieved_time = exchange_mapi_util_filetime_to_time_t (delivery_date);
+		item->header.recieved_time = e_mapi_util_filetime_to_time_t (delivery_date);
 	}
 
 	if (flags && (*flags & MSGFLAG_READ) != 0)
@@ -251,7 +251,7 @@ fetch_read_item_common_data (MailItem *item, uint32_t propTag, gconstpointer pro
 }
 
 gboolean
-mapi_mail_get_item_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
+mapi_mail_get_item_prop_list (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
 {
 	static const uint32_t item_props[] = {
 		PR_FID,
@@ -311,10 +311,10 @@ mapi_mail_get_item_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLO
 
 	g_return_val_if_fail (props != NULL, FALSE);
 
-	if (!exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, item_props, G_N_ELEMENTS (item_props)))
+	if (!e_mapi_utils_add_props_to_props_array (mem_ctx, props, item_props, G_N_ELEMENTS (item_props)))
 		return FALSE;
 
-	return exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
+	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
 }
 
 static gboolean
@@ -335,7 +335,7 @@ name_is_email_user (const gchar *name, const gchar *email_id)
 }
 
 static void
-mapi_mime_set_recipient_list (ExchangeMapiConnection *conn, CamelMimeMessage *msg, MailItem *item)
+mapi_mime_set_recipient_list (EMapiConnection *conn, CamelMimeMessage *msg, MailItem *item)
 {
 	GSList *l = NULL;
 	CamelInternetAddress *to_addr, *cc_addr, *bcc_addr;
@@ -360,19 +360,19 @@ mapi_mime_set_recipient_list (ExchangeMapiConnection *conn, CamelMimeMessage *ms
 
 		/*Name is probably available in one of these props.*/
 		name = recip->display_name;
-		name = name ? name : exchange_mapi_util_find_row_propval (aRow, PR_DISPLAY_NAME_UNICODE);
-		name = name ? name : exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
+		name = name ? name : e_mapi_util_find_row_propval (aRow, PR_DISPLAY_NAME_UNICODE);
+		name = name ? name : e_mapi_util_find_row_propval (aRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
 		if (!name) {
-			name = exchange_mapi_util_find_row_propval (aRow, PR_7BIT_DISPLAY_NAME_UNICODE);
+			name = e_mapi_util_find_row_propval (aRow, PR_7BIT_DISPLAY_NAME_UNICODE);
 			if (name && !strchr (name, '@')) {
 				gchar *to_free;
 
-				to_free = exchange_mapi_connection_ex_to_smtp (conn, recip->email_id, &display_name, NULL);
+				to_free = e_mapi_connection_ex_to_smtp (conn, recip->email_id, &display_name, NULL);
 				g_free (to_free);
 			}
 		}
 
-		type = (uint32_t *) exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_TYPE);
+		type = (uint32_t *) e_mapi_util_find_row_propval (aRow, PR_RECIPIENT_TYPE);
 
 		if (!display_name && name && (!recip->email_id || !name_is_email_user (name, recip->email_id)))
 			display_name = g_strdup (name);
@@ -422,7 +422,7 @@ mapi_mime_set_recipient_list (ExchangeMapiConnection *conn, CamelMimeMessage *ms
 }
 
 static void
-mapi_mime_set_msg_headers (ExchangeMapiConnection *conn, CamelMimeMessage *msg, MailItem *item)
+mapi_mime_set_msg_headers (EMapiConnection *conn, CamelMimeMessage *msg, MailItem *item)
 {
 	gchar *temp_str = NULL;
 	time_t recieved_time;
@@ -480,7 +480,7 @@ mapi_mime_set_msg_headers (ExchangeMapiConnection *conn, CamelMimeMessage *msg, 
 		if ((item->header.from_type != NULL) && !g_utf8_collate (item->header.from_type, "EX")) {
 			gchar *from_email;
 
-			from_email = exchange_mapi_connection_ex_to_smtp (conn, item->header.from_email, NULL, NULL);
+			from_email = e_mapi_connection_ex_to_smtp (conn, item->header.from_email, NULL, NULL);
 			g_free (item->header.from_email);
 			item->header.from_email = from_email;
 		}
@@ -675,7 +675,7 @@ static gboolean
 is_apple_attachment (ExchangeMAPIAttachment *attach, guint32 *data_len, guint32 *resource_len)
 {
 	gboolean is_apple = FALSE;
-	ExchangeMAPIStream *enc_stream = exchange_mapi_util_find_stream (attach->streams, PR_ATTACH_ENCODING);
+	ExchangeMAPIStream *enc_stream = e_mapi_util_find_stream (attach->streams, PR_ATTACH_ENCODING);
 	guint8 apple_enc_magic[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x14, 0x03, 0x0B, 0x01 };
 
 	if (enc_stream && enc_stream->value && enc_stream->value->len == G_N_ELEMENTS (apple_enc_magic)) {
@@ -686,7 +686,7 @@ is_apple_attachment (ExchangeMAPIAttachment *attach, guint32 *data_len, guint32 
 			is_apple = apple_enc_magic[idx] == enc_stream->value->data[idx];
 		}
 	} else {
-		const struct Binary_r *bin = exchange_mapi_util_find_SPropVal_array_propval (attach->lpProps, PR_ATTACH_ENCODING);
+		const struct Binary_r *bin = e_mapi_util_find_SPropVal_array_propval (attach->lpProps, PR_ATTACH_ENCODING);
 		if (bin && bin->cb == G_N_ELEMENTS (apple_enc_magic)) {
 			gint idx;
 
@@ -699,7 +699,7 @@ is_apple_attachment (ExchangeMAPIAttachment *attach, guint32 *data_len, guint32 
 
 	if (is_apple) {
 		/* check boundaries too */
-		ExchangeMAPIStream *data_stream = exchange_mapi_util_find_stream (attach->streams, PR_ATTACH_DATA_BIN);
+		ExchangeMAPIStream *data_stream = e_mapi_util_find_stream (attach->streams, PR_ATTACH_DATA_BIN);
 
 		is_apple = data_stream && data_stream->value && data_stream->value->len > 128;
 
@@ -721,7 +721,7 @@ is_apple_attachment (ExchangeMAPIAttachment *attach, guint32 *data_len, guint32 
 /*Takes raw attachment streams and converts to MIME Parts. Parts are added to
   either inline / non-inline lists.*/
 static void
-mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, const gchar *msg_class, GSList *attachments, GSList **inline_attachs, GSList **noninline)
+mapi_mime_classify_attachments (EMapiConnection *conn, mapi_id_t fid, const gchar *msg_class, GSList *attachments, GSList **inline_attachs, GSList **noninline)
 {
 	/* SMIME encrypted are without ending dot */
 	gboolean is_smime = msg_class && strstr (msg_class, ".SMIME.") > msg_class;
@@ -736,7 +736,7 @@ mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, con
 		gboolean is_apple;
 		guint32 apple_data_len = 0, apple_resource_len = 0;
 
-		stream = exchange_mapi_util_find_stream (attach->streams, PR_ATTACH_DATA_BIN);
+		stream = e_mapi_util_find_stream (attach->streams, PR_ATTACH_DATA_BIN);
 
 		if (!stream || stream->value->len <= 0) {
 			continue;
@@ -745,11 +745,11 @@ mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, con
 		is_apple = is_apple_attachment (attach, &apple_data_len, &apple_resource_len);
 
 		/*Content-Type*/
-		ui32 = (const uint32_t *) exchange_mapi_util_find_SPropVal_array_propval (attach->lpProps, PR_ATTACH_METHOD);
+		ui32 = (const uint32_t *) e_mapi_util_find_SPropVal_array_propval (attach->lpProps, PR_ATTACH_METHOD);
 		if (ui32 && *ui32 == ATTACH_EMBEDDED_MSG) {
 			mime_type = "message/rfc822";
 		} else {
-			mime_type = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval (attach->lpProps, PR_ATTACH_MIME_TAG);
+			mime_type = (const gchar *) e_mapi_util_find_SPropVal_array_propval (attach->lpProps, PR_ATTACH_MIME_TAG);
 			if (!mime_type)
 				mime_type = "application/octet-stream";
 		}
@@ -762,11 +762,11 @@ mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, con
 
 		part = camel_mime_part_new ();
 
-		filename = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps,
+		filename = (const gchar *) e_mapi_util_find_SPropVal_array_propval(attach->lpProps,
 											 PR_ATTACH_LONG_FILENAME_UNICODE);
 
 		if (!(filename && *filename))
-			filename = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps,
+			filename = (const gchar *) e_mapi_util_find_SPropVal_array_propval(attach->lpProps,
 												 PR_ATTACH_FILENAME_UNICODE);
 		camel_mime_part_set_filename (part, filename);
 		camel_content_type_set_param (((CamelDataWrapper *) part)->mime_type, "name", filename);
@@ -784,11 +784,11 @@ mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, con
 			camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
 
 			strm = NULL;
-			proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, PidNameAttachmentMacInfo, NULL);
+			proptag = e_mapi_connection_resolve_named_prop (conn, fid, PidNameAttachmentMacInfo, NULL);
 			if (proptag != MAPI_E_RESERVED)
-				strm = exchange_mapi_util_find_stream (attach->streams, proptag);
+				strm = e_mapi_util_find_stream (attach->streams, proptag);
 			if (!strm)
-				strm = exchange_mapi_util_find_stream (attach->streams, PidNameAttachmentMacInfo);
+				strm = e_mapi_util_find_stream (attach->streams, PidNameAttachmentMacInfo);
 
 			if (strm && strm->value && strm->value->len > 0) {
 				camel_mime_part_set_content (part, (const gchar *) strm->value->data, strm->value->len, mime_type);
@@ -828,7 +828,7 @@ mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, con
 			camel_mime_part_set_filename (part, (apple_filename && *apple_filename) ? apple_filename : filename);
 			g_free (apple_filename);
 
-			mime_type = exchange_mapi_util_find_SPropVal_array_namedid (attach->lpProps, conn, fid, PidNameAttachmentMacContentType);
+			mime_type = e_mapi_util_find_SPropVal_array_namedid (attach->lpProps, conn, fid, PidNameAttachmentMacContentType);
 			if (!mime_type)
 				mime_type = "application/octet-stream";
 
@@ -879,7 +879,7 @@ mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, con
 		}
 
 		/*Content-ID*/
-		content_id = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval(attach->lpProps,
+		content_id = (const gchar *) e_mapi_util_find_SPropVal_array_propval(attach->lpProps,
 											   PR_ATTACH_CONTENT_ID);
 		/* TODO : Add disposition */
 		if (content_id && !is_apple && !is_smime) {
@@ -891,7 +891,7 @@ mapi_mime_classify_attachments (ExchangeMapiConnection *conn, mapi_id_t fid, con
 }
 
 CamelMimeMessage *
-mapi_mail_item_to_mime_message (ExchangeMapiConnection *conn, MailItem *item)
+mapi_mail_item_to_mime_message (EMapiConnection *conn, MailItem *item)
 {
 	CamelMimeMessage *msg = NULL;
 	CamelMultipart *multipart_body = NULL;
@@ -986,7 +986,7 @@ mail_item_add_recipient (const gchar *recipients, OlMailRecipientType type, GSLi
 	recipient->email_id = recipients;
 
 	/* this memory should be freed somewhere, perhaps in the existing
-	 * exchange_mapi_util_free_recipient_list() */
+	 * e_mapi_util_free_recipient_list() */
 	recipient->in.req_cValues = 2;
 	recipient->in.req_lpProps = g_new0 (struct SPropValue, recipient->in.req_cValues + 1);
 
@@ -1603,7 +1603,7 @@ mapi_mime_message_to_mail_item (CamelMimeMessage *message, gint32 message_camel_
 }
 
 gboolean
-mapi_mail_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data)
+mapi_mail_utils_create_item_build_props (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data)
 {
 
 	MailItem *item = (MailItem *) data;
@@ -1612,7 +1612,7 @@ mapi_mail_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_t
 	uint32_t cpid;
 
 	#define set_value(hex, val) G_STMT_START { \
-		if (!exchange_mapi_utils_add_spropvalue (mem_ctx, values, n_values, hex, val)) \
+		if (!e_mapi_utils_add_spropvalue (mem_ctx, values, n_values, hex, val)) \
 			return FALSE;	\
 		} G_STMT_END
 
@@ -1621,7 +1621,7 @@ mapi_mail_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_t
 	}
 	
 	if (item->pid_name_content_type) {
-		if (!exchange_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, PidNameContentType, item->pid_name_content_type))
+		if (!e_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, PidNameContentType, item->pid_name_content_type))
 			return FALSE;
 	}
 
@@ -1647,7 +1647,7 @@ mapi_mail_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_t
 	if (item->header.recieved_time != 0) {
 		struct FILETIME msg_date = { 0 };
 
-		exchange_mapi_util_time_t_to_filetime (item->header.recieved_time, &msg_date);
+		e_mapi_util_time_t_to_filetime (item->header.recieved_time, &msg_date);
 
 		set_value (PR_MESSAGE_DELIVERY_TIME, &msg_date);
 	}

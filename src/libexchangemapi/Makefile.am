@@ -16,32 +16,32 @@ mapidata_DATA = 				\
 	tz-mapi-to-ical 			\
 	tz-ical-to-mapi 
 
-libexchangemapi_1_0_la_SOURCES =		\
-	camel-mapi-settings.c			\
-	camel-mapi-settings.h			\
-	e-mapi-fast-transfer.h			\
-	e-mapi-fast-transfer.c			\
-	e-mapi-openchange.h			\
-	e-mapi-openchange.c			\
-	exchange-mapi-defs.h			\
-	exchange-mapi-folder.c			\
-	exchange-mapi-folder.h			\
-	exchange-mapi-connection.c		\
-	exchange-mapi-connection.h		\
-	exchange-mapi-debug.c			\
-	exchange-mapi-debug.h			\
-	exchange-mapi-utils.c			\
-	exchange-mapi-utils.h			\
-	exchange-mapi-cal-utils.c		\
-	exchange-mapi-cal-utils.h		\
-	exchange-mapi-cal-tz-utils.c		\
-	exchange-mapi-cal-tz-utils.h		\
-	exchange-mapi-cal-recur-utils.c		\
-	exchange-mapi-cal-recur-utils.h		\
-	exchange-mapi-mail-utils.c		\
-	exchange-mapi-mail-utils.h		\
-	em-operation-queue.c			\
-	em-operation-queue.h
+libexchangemapi_1_0_la_SOURCES =	\
+	camel-mapi-settings.c		\
+	camel-mapi-settings.h		\
+	e-mapi-fast-transfer.h		\
+	e-mapi-fast-transfer.c		\
+	e-mapi-openchange.h		\
+	e-mapi-openchange.c		\
+	e-mapi-defs.h			\
+	e-mapi-folder.c			\
+	e-mapi-folder.h			\
+	e-mapi-connection.c		\
+	e-mapi-connection.h		\
+	e-mapi-debug.c			\
+	e-mapi-debug.h			\
+	e-mapi-utils.c			\
+	e-mapi-utils.h			\
+	e-mapi-cal-utils.c		\
+	e-mapi-cal-utils.h		\
+	e-mapi-cal-tz-utils.c		\
+	e-mapi-cal-tz-utils.h		\
+	e-mapi-cal-recur-utils.c	\
+	e-mapi-cal-recur-utils.h	\
+	e-mapi-mail-utils.c		\
+	e-mapi-mail-utils.h		\
+	e-mapi-operation-queue.c	\
+	e-mapi-operation-queue.h
 
 
 libexchangemapi_1_0_la_LIBADD =			\
@@ -55,17 +55,19 @@ libexchangemapi_1_0_la_LDFLAGS = $(NO_UNDEFINED)
 
 libexchangemapiincludedir = $(edataserver_privincludedir)/mapi
 
-libexchangemapiinclude_HEADERS = 		\
-	exchange-mapi-defs.h			\
-	exchange-mapi-folder.h			\
-	exchange-mapi-connection.h		\
-	exchange-mapi-debug.h			\
-	exchange-mapi-utils.h			\
-	exchange-mapi-cal-utils.h		\
-	exchange-mapi-cal-tz-utils.h		\
-	exchange-mapi-cal-recur-utils.h		\
-	exchange-mapi-mail-utils.h		\
-	em-operation-queue.h
+libexchangemapiinclude_HEADERS = 	\
+	e-mapi-defs.h			\
+	e-mapi-folder.h			\
+	e-mapi-connection.h		\
+	e-mapi-debug.h			\
+	e-mapi-fast-transfer.h		\
+	e-mapi-utils.h			\
+	e-mapi-cal-utils.h		\
+	e-mapi-cal-tz-utils.h		\
+	e-mapi-cal-recur-utils.h	\
+	e-mapi-mail-utils.h		\
+	e-mapi-openchange.h		\
+	e-mapi-operation-queue.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libexchangemapi-$(EVO_MAPI_API_VERSION).pc

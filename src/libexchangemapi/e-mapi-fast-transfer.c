@@ -25,8 +25,8 @@
 #include <config.h>
 #endif
 
-#include "exchange-mapi-connection.h"
-#include "exchange-mapi-debug.h"
+#include "e-mapi-connection.h"
+#include "e-mapi-debug.h"
 
 #include "e-mapi-fast-transfer.h"
 #include "e-mapi-openchange.h"
@@ -35,7 +35,7 @@ struct _EMapiFXParserClosure;
 typedef struct _EMapiFXParserClosure EMapiFXParserClosure;
 
 struct _EMapiFXParserClosure {
-	ExchangeMapiConnection *conn;
+	EMapiConnection *conn;
 	mapi_id_t fid;
 	TALLOC_CTX *mem_ctx;
 	EMapiFastTransferCB cb;
@@ -202,18 +202,18 @@ e_mapi_message_dump (EMapiMessage *message, gint indent, gboolean with_propertie
 		return;
 
 	if (with_properties)
-		exchange_mapi_debug_dump_properties (NULL, 0, &message->properties, indent + 3);
+		e_mapi_debug_dump_properties (NULL, 0, &message->properties, indent + 3);
 
 	for (index = 0, recipient = message->recipients; recipient; index++, recipient = recipient->next) {
 		g_print ("%*sRecipient[%d]:\n", indent + 2, "", index);
 		if (with_properties)
-			exchange_mapi_debug_dump_properties (NULL, 0, &recipient->properties, indent + 3);
+			e_mapi_debug_dump_properties (NULL, 0, &recipient->properties, indent + 3);
 	}
 
 	for (index = 0, attachment = message->attachments; attachment; index++, attachment = attachment->next) {
 		g_print ("%*sAttachment[%d]:\n", indent + 2, "", index);
 		if (with_properties)
-			exchange_mapi_debug_dump_properties (NULL, 0, &attachment->properties, indent + 3);
+			e_mapi_debug_dump_properties (NULL, 0, &attachment->properties, indent + 3);
 		if (attachment->embeded_message) {
 			g_print ("%*sEmbeded message:\n", indent + 3, "");
 			e_mapi_message_dump (attachment->embeded_message, indent + 5, with_properties);
@@ -443,7 +443,7 @@ parse_property_cb (struct SPropValue prop, void *closure)
 }
 
 static enum MAPISTATUS
-e_mapi_fast_transfer_internal (ExchangeMapiConnection *conn,
+e_mapi_fast_transfer_internal (EMapiConnection *conn,
 			       mapi_id_t fid,
 			       TALLOC_CTX *mem_ctx,
 			       EMapiFastTransferCB cb,
@@ -514,7 +514,7 @@ e_mapi_fast_transfer_internal (ExchangeMapiConnection *conn,
 }
 
 enum MAPISTATUS
-e_mapi_fast_transfer_objects (ExchangeMapiConnection *conn,
+e_mapi_fast_transfer_objects (EMapiConnection *conn,
 			      mapi_id_t fid,
 			      TALLOC_CTX *mem_ctx,
 			      mapi_object_t *obj_folder,
@@ -544,7 +544,7 @@ e_mapi_fast_transfer_objects (ExchangeMapiConnection *conn,
 }
 
 enum MAPISTATUS
-e_mapi_fast_transfer_object (ExchangeMapiConnection *conn,
+e_mapi_fast_transfer_object (EMapiConnection *conn,
 			     mapi_id_t fid,
 			     TALLOC_CTX *mem_ctx,
 			     mapi_object_t *obj_message,

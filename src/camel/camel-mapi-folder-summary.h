@@ -21,34 +21,34 @@
  *
  */
 
-#ifndef CAMEL_MAPI_SUMMARY_H
-#define CAMEL_MAPI_SUMMARY_H
+#ifndef CAMEL_MAPI_FOLDER_SUMMARY_H
+#define CAMEL_MAPI_FOLDER_SUMMARY_H
 
 #include <camel/camel.h>
 
 /* Standard GObject macros */
-#define CAMEL_TYPE_MAPI_SUMMARY \
-	(camel_mapi_summary_get_type ())
-#define CAMEL_MAPI_SUMMARY(obj) \
+#define CAMEL_TYPE_MAPI_FOLDER_SUMMARY \
+	(camel_mapi_folder_summary_get_type ())
+#define CAMEL_MAPI_FOLDER_SUMMARY(obj) \
 	(G_TYPE_CHECK_INSTANCE_CAST \
-	((obj), CAMEL_TYPE_MAPI_SUMMARY, CamelMapiSummary))
-#define CAMEL_MAPI_SUMMARY_CLASS(cls) \
+	((obj), CAMEL_TYPE_MAPI_FOLDER_SUMMARY, CamelMapiFolderSummary))
+#define CAMEL_MAPI_FOLDER_SUMMARY_CLASS(cls) \
 	(G_TYPE_CHECK_CLASS_CAST \
-	((cls), CAMEL_TYPE_MAPI_SUMMARY, CamelMapiSummaryClass)
-#define CAMEL_IS_MAPI_SUMMARY(obj) \
+	((cls), CAMEL_TYPE_MAPI_FOLDER_SUMMARY, CamelMapiFolderSummaryClass)
+#define CAMEL_IS_MAPI_FOLDER_SUMMARY(obj) \
 	(G_TYPE_CHECK_INSTANCE_TYPE \
-	((obj), CAMEL_TYPE_MAPI_SUMMARY))
-#define CAMEL_IS_MAPI_SUMMARY_CLASS(cls) \
+	((obj), CAMEL_TYPE_MAPI_FOLDER_SUMMARY))
+#define CAMEL_IS_MAPI_FOLDER_SUMMARY_CLASS(cls) \
 	(G_TYPE_CHECK_CLASS_TYPE \
-	((cls), CAMEL_TYPE_MAPI_SUMMARY))
-#define CAMEL_MAPI_SUMMARY_GET_CLASS(obj) \
+	((cls), CAMEL_TYPE_MAPI_FOLDER_SUMMARY))
+#define CAMEL_MAPI_FOLDER_SUMMARY_GET_CLASS(obj) \
 	(G_TYPE_INSTANCE_GET_CLASS \
-	((obj), CAMEL_TYPE_MAPI_SUMMARY, CamelMapiSummaryClass))
+	((obj), CAMEL_TYPE_MAPI_FOLDER_SUMMARY, CamelMapiFolderSummaryClass))
 
 G_BEGIN_DECLS
 
-typedef struct _CamelMapiSummary CamelMapiSummary;
-typedef struct _CamelMapiSummaryClass CamelMapiSummaryClass;
+typedef struct _CamelMapiFolderSummary CamelMapiFolderSummary;
+typedef struct _CamelMapiFolderSummaryClass CamelMapiFolderSummaryClass;
 typedef struct _CamelMapiMessageInfo CamelMapiMessageInfo;
 typedef struct _CamelMapiMessageContentInfo CamelMapiMessageContentInfo;
 
@@ -68,7 +68,7 @@ struct _CamelMapiMessageContentInfo {
 	CamelMessageContentInfo info;
 };
 
-struct _CamelMapiSummary {
+struct _CamelMapiFolderSummary {
 	CamelFolderSummary parent;
 
 	gchar *sync_time_stamp;
@@ -76,17 +76,17 @@ struct _CamelMapiSummary {
 	guint32 validity;
 };
 
-struct _CamelMapiSummaryClass {
+struct _CamelMapiFolderSummaryClass {
 	CamelFolderSummaryClass parent_class;
 };
 
-GType camel_mapi_summary_get_type (void);
+GType camel_mapi_folder_summary_get_type (void);
 
-CamelFolderSummary *camel_mapi_summary_new (struct _CamelFolder *folder, const gchar *filename);
+CamelFolderSummary *camel_mapi_folder_summary_new (struct _CamelFolder *folder, const gchar *filename);
 
 void mapi_summary_clear (CamelFolderSummary *summary, gboolean uncache);
-void camel_mapi_summary_update_store_info_counts (CamelMapiSummary *mapi_summary);
+void camel_mapi_folder_summary_update_store_info_counts (CamelMapiFolderSummary *mapi_summary);
 
 G_END_DECLS
 
-#endif /* CAMEL_MAPI_SUMMARY_H*/
+#endif /* CAMEL_MAPI_FOLDER_SUMMARY_H*/

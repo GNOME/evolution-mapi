@@ -25,8 +25,10 @@
 /* NOTE: Some of the enumerations are commented out since they conflict
  *       with libmapi/mapidefs.h */
 
-#ifndef EXCHANGE_MAPI_DEFS_H
-#define EXCHANGE_MAPI_DEFS_H
+#ifndef E_MAPI_DEFS_H
+#define E_MAPI_DEFS_H
+
+#include <glib.h>
 
 G_BEGIN_DECLS
 

@@ -16,17 +16,17 @@ AM_CPPFLAGS = -I.. 				\
 libcamelmapi_la_SOURCES = 			\
 	camel-mapi-provider.c			\
 	camel-mapi-folder.c                	\
+	camel-mapi-folder-summary.c		\
         camel-mapi-store.c	                \
 	camel-mapi-store-summary.c         	\
-	camel-mapi-summary.c	         	\
 	camel-mapi-notifications.c		\
 	camel-mapi-transport.c			
 
 noinst_HEADERS =         			\
 	camel-mapi-folder.h			\
+	camel-mapi-folder-summary.h		\
 	camel-mapi-store.h			\
 	camel-mapi-store-summary.h         	\
-	camel-mapi-summary.h	         	\
 	camel-mapi-transport.h			\
 	camel-mapi-notifications.h		\
 	camel-mapi-private.h

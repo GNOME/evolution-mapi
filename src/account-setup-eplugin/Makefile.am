@@ -14,12 +14,12 @@ plugin_DATA = org-gnome-exchange-mapi.eplug
 
 plugin_LTLIBRARIES = liborg-gnome-exchange-mapi.la
 
-liborg_gnome_exchange_mapi_la_SOURCES = 		\
-	exchange-mapi-account-setup.c			\
-	exchange-mapi-account-setup.h			\
-	exchange-mapi-account-settings.c		\
-	exchange-mapi-account-listener.c		\
-	exchange-mapi-account-listener.h
+liborg_gnome_exchange_mapi_la_SOURCES = 	\
+	e-mapi-account-setup.c			\
+	e-mapi-account-setup.h			\
+	e-mapi-account-settings.c		\
+	e-mapi-account-listener.c		\
+	e-mapi-account-listener.h
 
 liborg_gnome_exchange_mapi_la_LIBADD = 			\
 	$(top_builddir)/src/libexchangemapi/libexchangemapi-1.0.la \

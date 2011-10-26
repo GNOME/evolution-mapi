@@ -25,15 +25,15 @@
 #include <config.h>
 #endif
 
-#include "exchange-mapi-connection.h"
-#include "exchange-mapi-folder.h"
+#include "e-mapi-connection.h"
+#include "e-mapi-folder.h"
 
 #define d(x)
 
-static ExchangeMAPIFolderType
+static EMapiFolderType
 container_class_to_type (const gchar *type)
 {
-	ExchangeMAPIFolderType folder_type = MAPI_FOLDER_TYPE_UNKNOWN;;
+	EMapiFolderType folder_type = MAPI_FOLDER_TYPE_UNKNOWN;;
 
 	if (!strcmp (type, IPF_APPOINTMENT))
 		folder_type = MAPI_FOLDER_TYPE_APPOINTMENT;
@@ -54,12 +54,12 @@ container_class_to_type (const gchar *type)
 	return folder_type;
 }
 
-ExchangeMAPIFolder *
-exchange_mapi_folder_new (const gchar *folder_name, const gchar *container_class, ExchangeMAPIFolderCategory category, mapi_id_t folder_id, mapi_id_t parent_folder_id, uint32_t child_count, uint32_t unread_count, uint32_t total)
+EMapiFolder *
+e_mapi_folder_new (const gchar *folder_name, const gchar *container_class, EMapiFolderCategory category, mapi_id_t folder_id, mapi_id_t parent_folder_id, uint32_t child_count, uint32_t unread_count, uint32_t total)
 {
-	ExchangeMAPIFolder *folder;
+	EMapiFolder *folder;
 
-	folder = g_new0 (ExchangeMAPIFolder, 1);
+	folder = g_new0 (EMapiFolder, 1);
 	folder->is_default = FALSE;
 	folder->folder_name = g_strdup (folder_name);
 	folder->container_class = container_class_to_type (container_class);
@@ -73,14 +73,14 @@ exchange_mapi_folder_new (const gchar *folder_name, const gchar *container_class
 	return folder;
 }
 
-ExchangeMAPIFolder *
-exchange_mapi_folder_copy (ExchangeMAPIFolder *src)
+EMapiFolder *
+e_mapi_folder_copy (EMapiFolder *src)
 {
-	ExchangeMAPIFolder *res;
+	EMapiFolder *res;
 
 	g_return_val_if_fail (src != NULL, NULL);
 
-	res = g_new0 (ExchangeMAPIFolder, 1);
+	res = g_new0 (EMapiFolder, 1);
 	*res = *src;
 	
 	res->owner_name = g_strdup (src->owner_name);
@@ -93,7 +93,7 @@ exchange_mapi_folder_copy (ExchangeMAPIFolder *src)
 }
 
 void
-exchange_mapi_folder_free (ExchangeMAPIFolder *folder)
+e_mapi_folder_free (EMapiFolder *folder)
 {
 	if (folder) {
 		g_free (folder->folder_name);
@@ -101,70 +101,70 @@ exchange_mapi_folder_free (ExchangeMAPIFolder *folder)
 	}
 }
 
-ExchangeMAPIFolderType
-exchange_mapi_container_class (gchar *type)
+EMapiFolderType
+e_mapi_container_class (gchar *type)
 {
 	return container_class_to_type (type);
 }
 
 const gchar *
-exchange_mapi_folder_get_name (ExchangeMAPIFolder *folder)
+e_mapi_folder_get_name (EMapiFolder *folder)
 {
 	return folder->folder_name;
 }
 
 guint64
-exchange_mapi_folder_get_fid (ExchangeMAPIFolder *folder)
+e_mapi_folder_get_fid (EMapiFolder *folder)
 {
 	return folder->folder_id;
 }
 
 guint64
-exchange_mapi_folder_get_parent_id (ExchangeMAPIFolder *folder)
+e_mapi_folder_get_parent_id (EMapiFolder *folder)
 {
 	return folder->parent_folder_id;
 }
 
 gboolean
-exchange_mapi_folder_is_root (ExchangeMAPIFolder *folder)
+e_mapi_folder_is_root (EMapiFolder *folder)
 {
 	return (folder->parent_folder_id == 0);
 }
 
-ExchangeMAPIFolderType
-exchange_mapi_folder_get_type (ExchangeMAPIFolder *folder)
+EMapiFolderType
+e_mapi_folder_get_type (EMapiFolder *folder)
 {
 	return folder->container_class;
 }
 
 guint32
-exchange_mapi_folder_get_unread_count (ExchangeMAPIFolder *folder)
+e_mapi_folder_get_unread_count (EMapiFolder *folder)
 {
 	return folder->unread_count;
 }
 
 guint32
-exchange_mapi_folder_get_total_count (ExchangeMAPIFolder *folder)
+e_mapi_folder_get_total_count (EMapiFolder *folder)
 {
 	return folder->total;
 }
 
 GSList *
-exchange_mapi_folder_copy_list (GSList *folder_list)
+e_mapi_folder_copy_list (GSList *folder_list)
 {
 	GSList *res, *ii;
 	
 	res = g_slist_copy (folder_list);
 	for (ii = res; ii; ii = ii->next) {
-		ii->data = exchange_mapi_folder_copy (ii->data);
+		ii->data = e_mapi_folder_copy (ii->data);
 	}
 
 	return res;
 }
 
 void
-exchange_mapi_folder_free_list (GSList *folder_list)
+e_mapi_folder_free_list (GSList *folder_list)
 {
-	g_slist_foreach (folder_list, (GFunc) exchange_mapi_folder_free, NULL);
+	g_slist_foreach (folder_list, (GFunc) e_mapi_folder_free, NULL);
 	g_slist_free (folder_list);
 }

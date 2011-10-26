@@ -28,8 +28,8 @@
 
 #include <camel/camel.h>
 
-#include <exchange-mapi-connection.h>
-#include <exchange-mapi-folder.h>
+#include <e-mapi-connection.h>
+#include <e-mapi-folder.h>
 
 /* Standard GObject macros */
 #define CAMEL_TYPE_MAPI_STORE \
@@ -99,7 +99,7 @@ const gchar * mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const 
 
 void camel_mapi_store_unset_notification_data (CamelMapiStore *mstore);
 
-ExchangeMapiConnection *camel_mapi_store_get_exchange_connection (CamelMapiStore *mapi_store);
+EMapiConnection *camel_mapi_store_get_exchange_connection (CamelMapiStore *mapi_store);
 
 G_END_DECLS
 

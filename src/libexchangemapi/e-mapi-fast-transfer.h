@@ -28,7 +28,7 @@
 #include <glib-object.h>
 
 #include <libmapi/libmapi.h>
-#include "exchange-mapi-connection.h"
+#include "e-mapi-connection.h"
 
 G_BEGIN_DECLS
 
@@ -40,7 +40,7 @@ typedef struct _EMapiMessage EMapiMessage;
 typedef struct _EMapiRecipient EMapiRecipient;
 typedef struct _EMapiAttachment EMapiAttachment;
 
-typedef gboolean (*EMapiFastTransferCB) (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, /* const */ EMapiMessage *message, guint32 msg_index, guint32 msg_total, gpointer user_data, GError **perror);
+typedef gboolean (*EMapiFastTransferCB) (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, /* const */ EMapiMessage *message, guint32 msg_index, guint32 msg_total, gpointer user_data, GError **perror);
 
 struct _EMapiRecipient
 {
@@ -77,7 +77,7 @@ void			e_mapi_message_dump		(EMapiMessage *message,
 							 gint indent,
 							 gboolean with_properties);
 
-enum MAPISTATUS		e_mapi_fast_transfer_objects	(ExchangeMapiConnection *conn,
+enum MAPISTATUS		e_mapi_fast_transfer_objects	(EMapiConnection *conn,
 							 mapi_id_t fid,
 							 TALLOC_CTX *mem_ctx,
 							 mapi_object_t *obj_folder,
@@ -93,7 +93,7 @@ typedef enum {
 	E_MAPI_FAST_TRANSFER_FLAG_ALL		= E_MAPI_FAST_TRANSFER_FLAG_ATTACHMENTS | E_MAPI_FAST_TRANSFER_FLAG_RECIPIENTS
 } EMapiFastTransferFlags;
 
-enum MAPISTATUS		e_mapi_fast_transfer_object	(ExchangeMapiConnection *conn,
+enum MAPISTATUS		e_mapi_fast_transfer_object	(EMapiConnection *conn,
 							 mapi_id_t fid,
 							 TALLOC_CTX *mem_ctx,
 							 mapi_object_t *obj_message,

@@ -21,15 +21,15 @@
  *
  */
 
-#ifndef EXCHANGE_MAPI_ACCOUNT_SETUP_H
-#define EXCHANGE_MAPI_ACCOUNT_SETUP_H
+#ifndef E_MAPI_ACCOUNT_SETUP_H
+#define E_MAPI_ACCOUNT_SETUP_H
 
-#include "exchange-mapi-account-listener.h"
+#include "e-mapi-account-listener.h"
 
 #define MAPI_URI_PREFIX   "mapi://" 
 #define MAPI_PREFIX_LENGTH 7
 
-ExchangeMAPIAccountListener *
-exchange_mapi_accounts_peek_config_listener (void);
+EMapiAccountListener *
+e_mapi_accounts_peek_config_listener (void);
 
-#endif /* EXCHANGE_MAPI_ACCOUNT_SETUP_H */
+#endif /* E_MAPI_ACCOUNT_SETUP_H */

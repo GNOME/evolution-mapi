@@ -38,10 +38,10 @@
 #include "camel-mapi-store.h"
 #include "camel-mapi-folder.h"
 #include "camel-mapi-store-summary.h"
-#include "camel-mapi-summary.h"
+#include "camel-mapi-folder-summary.h"
 #include "camel-mapi-notifications.h"
 
-#include <exchange-mapi-utils.h>
+#include <e-mapi-utils.h>
 
 #define d_notifications(x) (camel_debug ("mapi:notifications") ? (x) : 0)
 
@@ -78,7 +78,7 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 	/* FIXME : Continue only if we are handling a mail object.*/
 	if (0) return;
 
-	folder_id = exchange_mapi_util_mapi_id_to_string (new_mail_notif->FID);
+	folder_id = e_mapi_util_mapi_id_to_string (new_mail_notif->FID);
 
 	/* Get the folder object */
 
@@ -210,7 +210,7 @@ mapi_push_notification_listener_thread (gpointer data)
 	struct mapi_push_notification_data *thread_data = data;
 	CamelMapiStore *mapi_store = (CamelMapiStore *) thread_data->event_data;
 	struct mapi_notify_continue_callback_data *cb_data = g_new0 (struct mapi_notify_continue_callback_data, 1);
-	ExchangeMapiConnection *conn;
+	EMapiConnection *conn;
 
 	g_return_val_if_fail (data != NULL, NULL);
 
@@ -232,14 +232,14 @@ mapi_push_notification_listener_thread (gpointer data)
 
 	g_object_ref (conn);
 
-	if (exchange_mapi_connection_events_init (conn, NULL)) {
-		exchange_mapi_connection_events_subscribe (conn, thread_data->event_options, thread_data->event_mask,
+	if (e_mapi_connection_events_init (conn, NULL)) {
+		e_mapi_connection_events_subscribe (conn, thread_data->event_options, thread_data->event_mask,
 						&thread_data->connection, mapi_notifications_filter,
 						thread_data->event_data, NULL);
 
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-		exchange_mapi_connection_events_monitor (conn, cb_data); /*Blocking call. Don't hold locks here*/
-		exchange_mapi_connection_events_unsubscribe (conn, thread_data->connection, NULL);
+		e_mapi_connection_events_monitor (conn, cb_data); /*Blocking call. Don't hold locks here*/
+		e_mapi_connection_events_unsubscribe (conn, thread_data->connection, NULL);
 	} else
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 

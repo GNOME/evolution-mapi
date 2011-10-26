@@ -30,7 +30,7 @@
 #include <fcntl.h>
 #include <libecal/e-cal-util.h>
 #include <libedataserver/e-data-server-util.h>
-#include "exchange-mapi-cal-utils.h"
+#include "e-mapi-cal-utils.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -43,9 +43,9 @@
 
 #define d(x) 
 
-static gboolean appt_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props);
-static gboolean task_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props);
-static gboolean note_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props);
+static gboolean appt_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props);
+static gboolean task_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props);
+static gboolean note_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props);
 
 static icalparameter_role
 get_role_from_type (OlMailRecipientType type)
@@ -204,7 +204,7 @@ get_imp_prop_from_priority (gint priority)
 }
 
 void
-exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_list, const gchar *local_store_uri)
+e_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_list, const gchar *local_store_uri)
 {
 	GSList *comp_attach_list = NULL, *new_attach_list = NULL;
 	GSList *l;
@@ -277,7 +277,7 @@ exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_l
 			g_mapped_file_free (mapped_file);
 #endif
 		} else if (error) {
-			exchange_mapi_debug_print ("Could not map %s: %s \n", sfname_uri, error->message);
+			e_mapi_debug_print ("Could not map %s: %s \n", sfname_uri, error->message);
 			g_error_free (error);
 		}
 
@@ -295,7 +295,7 @@ exchange_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_l
 #define RECIP_ORGANIZER 0x2
 
 void
-exchange_mapi_cal_util_fetch_organizer (ECalComponent *comp, GSList **recip_list)
+e_mapi_cal_util_fetch_organizer (ECalComponent *comp, GSList **recip_list)
 {
 	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (comp);
 	icalproperty *org_prop = NULL;
@@ -362,7 +362,7 @@ exchange_mapi_cal_util_fetch_organizer (ECalComponent *comp, GSList **recip_list
 }
 
 void
-exchange_mapi_cal_util_fetch_recipients (ECalComponent *comp, GSList **recip_list)
+e_mapi_cal_util_fetch_recipients (ECalComponent *comp, GSList **recip_list)
 {
 	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (comp);
 	icalproperty *org_prop = NULL, *att_prop = NULL;
@@ -466,16 +466,16 @@ set_attachments_to_cal_component (ECalComponent *comp, GSList *attach_list, cons
 		guint len;
 		gint fd = -1;
 
-		stream = exchange_mapi_util_find_stream (attach_item->streams, PR_ATTACH_DATA_BIN);
+		stream = e_mapi_util_find_stream (attach_item->streams, PR_ATTACH_DATA_BIN);
 		if (!stream)
 			continue;
 
 		attach = (const gchar *)stream->value->data;
 		len = stream->value->len;
 
-		str = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval(attach_item->lpProps, PR_ATTACH_LONG_FILENAME_UNICODE);
+		str = (const gchar *) e_mapi_util_find_SPropVal_array_propval(attach_item->lpProps, PR_ATTACH_LONG_FILENAME_UNICODE);
 		if (!(str && *str))
-			str = (const gchar *) exchange_mapi_util_find_SPropVal_array_propval(attach_item->lpProps, PR_ATTACH_FILENAME_UNICODE);
+			str = (const gchar *) e_mapi_util_find_SPropVal_array_propval(attach_item->lpProps, PR_ATTACH_FILENAME_UNICODE);
 		filename = g_strconcat (local_store_uri, G_DIR_SEPARATOR_S, safeuid, "-", str, NULL);
 		attach_file_url = g_filename_to_uri (filename, NULL, &error);
 	
@@ -489,10 +489,10 @@ set_attachments_to_cal_component (ECalComponent *comp, GSList *attach_list, cons
 		fd = g_open (filename, O_RDWR|O_CREAT|O_TRUNC|O_BINARY, 0600);
 		if (fd == -1) {
 			/* skip gracefully */
-			exchange_mapi_debug_print ("Could not open %s for writing \n", filename);
+			e_mapi_debug_print ("Could not open %s for writing \n", filename);
 		} else if (len && write (fd, attach, len) == -1) {
 			/* skip gracefully */
-			exchange_mapi_debug_print ("Attachment write failed \n");
+			e_mapi_debug_print ("Attachment write failed \n");
 		}
 		if (fd != -1) {
 			close (fd);
@@ -533,9 +533,9 @@ ical_attendees_from_props (icalcomponent *ical_comp, GSList *recipients, gboolea
 			/* CN */
 			str = recip->display_name;
 			if (!str || !*str)
-				str = (const gchar *) exchange_mapi_util_find_row_propval (&recip->out_SRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
+				str = (const gchar *) e_mapi_util_find_row_propval (&recip->out_SRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
 			if (!str)
-				str = (const gchar *) exchange_mapi_util_find_row_propval (&recip->out_SRow, PR_DISPLAY_NAME_UNICODE);
+				str = (const gchar *) e_mapi_util_find_row_propval (&recip->out_SRow, PR_DISPLAY_NAME_UNICODE);
 			if (str) {
 				param = icalparameter_new_cn (str);
 				icalproperty_add_parameter (prop, param);
@@ -546,9 +546,9 @@ ical_attendees_from_props (icalcomponent *ical_comp, GSList *recipients, gboolea
 			/* CN */
 			str = recip->display_name;
 			if (!str || !*str)
-				str = (const gchar *) exchange_mapi_util_find_row_propval (&recip->out_SRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
+				str = (const gchar *) e_mapi_util_find_row_propval (&recip->out_SRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
 			if (!str)
-				str = (const gchar *) exchange_mapi_util_find_row_propval (&recip->out_SRow, PR_DISPLAY_NAME_UNICODE);
+				str = (const gchar *) e_mapi_util_find_row_propval (&recip->out_SRow, PR_DISPLAY_NAME_UNICODE);
 			if (str) {
 				param = icalparameter_new_cn (str);
 				icalproperty_add_parameter (prop, param);
@@ -590,7 +590,7 @@ static const uint8_t GID_START_SEQ[] = {
    creation_time is a value of PR_CREATION_TIME
 */
 void
-exchange_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *uid, const struct timeval *exception_replace_time, const struct FILETIME *creation_time, struct Binary_r *sb)
+e_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *uid, const struct timeval *exception_replace_time, const struct FILETIME *creation_time, struct Binary_r *sb)
 {
 	GByteArray *ba;
 	guint32 val32;
@@ -675,7 +675,7 @@ globalid_to_string (GByteArray *ba)
 }
 
 ECalComponent *
-exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id_t fid, icalcomponent_kind kind, const gchar *mid, struct mapi_SPropValue_array *properties,
+e_mapi_cal_util_mapi_props_to_comp (EMapiConnection *conn, mapi_id_t fid, icalcomponent_kind kind, const gchar *mid, struct mapi_SPropValue_array *properties,
 					   GSList *streams, GSList *recipients, GSList *attachments,
 					   const gchar *local_store_uri, const icaltimezone *default_zone, gboolean is_reply, GSList **detached_components)
 {
@@ -707,17 +707,17 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 
 	utc_zone = icaltimezone_get_utc_timezone ();
 
-	subject = (const gchar *)exchange_mapi_util_find_array_propval(properties, PR_SUBJECT_UNICODE);
+	subject = (const gchar *)e_mapi_util_find_array_propval(properties, PR_SUBJECT_UNICODE);
 	if (!subject)
-		subject = (const gchar *)exchange_mapi_util_find_array_propval(properties, PR_NORMALIZED_SUBJECT_UNICODE);
+		subject = (const gchar *)e_mapi_util_find_array_propval(properties, PR_NORMALIZED_SUBJECT_UNICODE);
 	if (!subject)
-		subject = (const gchar *)exchange_mapi_util_find_array_propval(properties, PR_CONVERSATION_TOPIC_UNICODE);
+		subject = (const gchar *)e_mapi_util_find_array_propval(properties, PR_CONVERSATION_TOPIC_UNICODE);
 	if (!subject)
 		subject = "";
 
-	body = (const gchar *)exchange_mapi_util_find_array_propval(properties, PR_BODY_UNICODE);
+	body = (const gchar *)e_mapi_util_find_array_propval(properties, PR_BODY_UNICODE);
 	if (!body) {
-		body_stream = exchange_mapi_util_find_stream (streams, PR_HTML);
+		body_stream = e_mapi_util_find_stream (streams, PR_HTML);
 		body = body_stream ? (const gchar *) body_stream->value->data : "";
 	}
 
@@ -738,7 +738,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 	icalcomponent_set_summary (ical_comp, subject);
 	icalcomponent_set_description (ical_comp, body);
 
-	categories_array = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidNameKeywords);
+	categories_array = e_mapi_util_find_array_namedid (properties, conn, fid, PidNameKeywords);
 	if (categories_array) {
 		GSList *categories = NULL;
 		gint ii;
@@ -764,7 +764,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 		ExchangeMAPIStream *stream;
 
 		/* GlobalObjectId */
-		stream = exchange_mapi_util_find_stream_namedid (streams, conn, fid, PidLidGlobalObjectId);
+		stream = e_mapi_util_find_stream_namedid (streams, conn, fid, PidLidGlobalObjectId);
 		if (stream) {
 			gchar *value = globalid_to_string (stream->value);
 			prop = icalproperty_new_x (value);
@@ -785,7 +785,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 
 		ui32 = find_mapi_SPropValue_data(properties, PR_OWNER_APPT_ID);
 		if (ui32) {
-			gchar *value = exchange_mapi_util_mapi_id_to_string ((mapi_id_t) (*ui32));
+			gchar *value = e_mapi_util_mapi_id_to_string ((mapi_id_t) (*ui32));
 
 			prop = icalproperty_new_x (value);
 			icalproperty_set_x_name (prop, "X-EVOLUTION-MAPI-OWNER-APPT-ID");
@@ -794,7 +794,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 		}
 
 		/* AppointmentSequence */
-		ui32 = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidAppointmentSequence);
+		ui32 = e_mapi_util_find_array_namedid (properties, conn, fid, PidLidAppointmentSequence);
 		if (ui32) {
 			gchar *value = g_strdup_printf ("%d", *ui32);
 			prop = icalproperty_new_x (value);
@@ -803,21 +803,21 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 			g_free (value);
 		}
 
-		location = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidLocation);
+		location = e_mapi_util_find_array_namedid (properties, conn, fid, PidLidLocation);
 		if (location && *location)
 			icalcomponent_set_location (ical_comp, location);
 
-		b = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidAppointmentSubType);;
+		b = e_mapi_util_find_array_namedid (properties, conn, fid, PidLidAppointmentSubType);;
 		all_day = b && *b;
 
-		stream = exchange_mapi_util_find_stream_namedid (streams, conn, fid, PidLidAppointmentTimeZoneDefinitionStartDisplay);
+		stream = e_mapi_util_find_stream_namedid (streams, conn, fid, PidLidAppointmentTimeZoneDefinitionStartDisplay);
 		if (stream) {
-			gchar *buf = exchange_mapi_cal_util_bin_to_mapi_tz (stream->value);
-			dtstart_tz_location = exchange_mapi_cal_tz_util_get_ical_equivalent (buf);
+			gchar *buf = e_mapi_cal_util_bin_to_mapi_tz (stream->value);
+			dtstart_tz_location = e_mapi_cal_tz_util_get_ical_equivalent (buf);
 			g_free (buf);
 		}
 
-		if (exchange_mapi_util_find_array_datetime_namedid (&t, properties, conn, fid, PidLidAppointmentStartWhole) == MAPI_E_SUCCESS) {
+		if (e_mapi_util_find_array_datetime_namedid (&t, properties, conn, fid, PidLidAppointmentStartWhole) == MAPI_E_SUCCESS) {
 			icaltimezone *zone = dtstart_tz_location ? icaltimezone_get_builtin_timezone (dtstart_tz_location) : (icaltimezone *)default_zone;
 			prop = icalproperty_new_dtstart (icaltime_from_timet_with_zone (t.tv_sec, all_day, zone));
 			if (!all_day && zone && icaltimezone_get_tzid (zone)) {
@@ -827,14 +827,14 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 			icalcomponent_add_property (ical_comp, prop);
 		}
 
-		stream = exchange_mapi_util_find_stream_namedid (streams, conn, fid, PidLidAppointmentTimeZoneDefinitionEndDisplay);
+		stream = e_mapi_util_find_stream_namedid (streams, conn, fid, PidLidAppointmentTimeZoneDefinitionEndDisplay);
 		if (stream) {
-			gchar *buf = exchange_mapi_cal_util_bin_to_mapi_tz (stream->value);
-			dtend_tz_location = exchange_mapi_cal_tz_util_get_ical_equivalent (buf);
+			gchar *buf = e_mapi_cal_util_bin_to_mapi_tz (stream->value);
+			dtend_tz_location = e_mapi_cal_tz_util_get_ical_equivalent (buf);
 			g_free (buf);
 		}
 
-		if (exchange_mapi_util_find_array_datetime_namedid (&t, properties, conn, fid, PidLidAppointmentEndWhole) == MAPI_E_SUCCESS) {
+		if (e_mapi_util_find_array_datetime_namedid (&t, properties, conn, fid, PidLidAppointmentEndWhole) == MAPI_E_SUCCESS) {
 			icaltimezone *zone;
 
 			if (!dtend_tz_location)
@@ -849,7 +849,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 			icalcomponent_add_property (ical_comp, prop);
 		}
 
-		ui32 = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidBusyStatus);
+		ui32 = e_mapi_util_find_array_namedid (properties, conn, fid, PidLidBusyStatus);
 		if (ui32) {
 			prop = icalproperty_new_transp (get_transp_from_prop (*ui32));
 			icalcomponent_add_property (ical_comp, prop);
@@ -861,9 +861,9 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 			if (is_reply) {
 				if (icalcomponent_get_first_property (ical_comp, ICAL_ORGANIZER_PROPERTY) == NULL) {
 					gchar *val, *to_free = NULL;
-					const gchar *name = exchange_mapi_util_find_array_propval (properties, PR_RCVD_REPRESENTING_NAME_UNICODE);
-					const gchar *email_type = exchange_mapi_util_find_array_propval (properties, PR_RCVD_REPRESENTING_ADDRTYPE_UNICODE);
-					const gchar *email = exchange_mapi_util_find_array_propval (properties, PR_RCVD_REPRESENTING_EMAIL_ADDRESS_UNICODE);
+					const gchar *name = e_mapi_util_find_array_propval (properties, PR_RCVD_REPRESENTING_NAME_UNICODE);
+					const gchar *email_type = e_mapi_util_find_array_propval (properties, PR_RCVD_REPRESENTING_ADDRTYPE_UNICODE);
+					const gchar *email = e_mapi_util_find_array_propval (properties, PR_RCVD_REPRESENTING_EMAIL_ADDRESS_UNICODE);
 
 					if (!name)
 						name = "";
@@ -873,7 +873,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 						email = "";
 
 					if (g_str_equal (email_type, "EX")) {
-						to_free = exchange_mapi_connection_ex_to_smtp (conn, email, NULL, NULL);
+						to_free = e_mapi_connection_ex_to_smtp (conn, email, NULL, NULL);
 						email = to_free;
 					}
 
@@ -893,9 +893,9 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 				if (icalcomponent_get_first_property (ical_comp, ICAL_ATTENDEE_PROPERTY) == NULL) {
 					const uint32_t *ui32;
 					gchar *val, *to_free = NULL;
-					const gchar *name = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE);
-					const gchar *email_type = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE);
-					const gchar *email = exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
+					const gchar *name = e_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE);
+					const gchar *email_type = e_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE);
+					const gchar *email = e_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
 
 					if (!name)
 						name = "";
@@ -905,7 +905,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 						email = "";
 
 					if (g_str_equal (email_type, "EX")) {
-						to_free = exchange_mapi_connection_ex_to_smtp (conn, email, NULL, NULL);
+						to_free = e_mapi_connection_ex_to_smtp (conn, email, NULL, NULL);
 						email = to_free;
 					}
 
@@ -917,7 +917,7 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 					param = icalparameter_new_cn (name);
 					icalproperty_add_parameter (prop, param);
 
-					ui32 = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidResponseStatus);
+					ui32 = e_mapi_util_find_array_namedid (properties, conn, fid, PidLidResponseStatus);
 					param = icalparameter_new_partstat (get_partstat_from_trackstatus (ui32 ? *ui32 : olResponseNone));
 					icalproperty_add_parameter (prop, param);
 
@@ -927,18 +927,18 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 				}
 			} else if (icalcomponent_get_first_property (ical_comp, ICAL_ORGANIZER_PROPERTY) == NULL) {
 				gchar *val, *sender_free = NULL, *sent_free = NULL;
-				const gchar *sender_email_type = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE);
-				const gchar *sender_email = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE);
-				const gchar *sent_name = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE);
-				const gchar *sent_email_type = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE);
-				const gchar *sent_email = (const gchar *) exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
+				const gchar *sender_email_type = (const gchar *) e_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE);
+				const gchar *sender_email = (const gchar *) e_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE);
+				const gchar *sent_name = (const gchar *) e_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE);
+				const gchar *sent_email_type = (const gchar *) e_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE);
+				const gchar *sent_email = (const gchar *) e_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
 
 				if (!g_utf8_collate (sender_email_type, "EX")) {
-					sender_free = exchange_mapi_connection_ex_to_smtp (conn, sender_email, NULL, NULL);
+					sender_free = e_mapi_connection_ex_to_smtp (conn, sender_email, NULL, NULL);
 					sender_email = sender_free;
 				}
 				if (!g_utf8_collate (sent_email_type, "EX")) {
-					sent_free = exchange_mapi_connection_ex_to_smtp (conn, sent_email, NULL, NULL);
+					sent_free = e_mapi_connection_ex_to_smtp (conn, sent_email, NULL, NULL);
 					sent_email = sent_free;
 				}
 
@@ -963,28 +963,28 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 			}
 		}
 
-		b = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidRecurring);
+		b = e_mapi_util_find_array_namedid (properties, conn, fid, PidLidRecurring);
 		if (b && *b) {
-			stream = exchange_mapi_util_find_stream_namedid (streams, conn, fid, PidLidAppointmentRecur);
+			stream = e_mapi_util_find_stream_namedid (streams, conn, fid, PidLidAppointmentRecur);
 			if (stream) {
 				icaltimezone *recur_zone;
 				const gchar *recur_tz_location;
 
-				recur_tz_location = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidTimeZoneDescription);
+				recur_tz_location = e_mapi_util_find_array_namedid (properties, conn, fid, PidLidTimeZoneDescription);
 				if (recur_tz_location)
-					recur_tz_location = exchange_mapi_cal_tz_util_get_ical_equivalent (recur_tz_location);
+					recur_tz_location = e_mapi_cal_tz_util_get_ical_equivalent (recur_tz_location);
 				recur_zone = recur_tz_location ? icaltimezone_get_builtin_timezone (recur_tz_location) : (icaltimezone *) default_zone;
 
-				exchange_mapi_cal_util_bin_to_rrule (stream->value, comp, detached_components, recur_zone);
+				e_mapi_cal_util_bin_to_rrule (stream->value, comp, detached_components, recur_zone);
 			}
 		}
 
-		b = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidReminderSet);
+		b = e_mapi_util_find_array_namedid (properties, conn, fid, PidLidReminderSet);
 		if (b && *b) {
 			struct timeval start, displaytime;
 
-			if ((exchange_mapi_util_find_array_datetime_namedid (&start, properties, conn, fid, PidLidReminderTime) == MAPI_E_SUCCESS)
-			 && (exchange_mapi_util_find_array_datetime_namedid (&displaytime, properties, conn, fid, PidLidReminderSignalTime) == MAPI_E_SUCCESS)) {
+			if ((e_mapi_util_find_array_datetime_namedid (&start, properties, conn, fid, PidLidReminderTime) == MAPI_E_SUCCESS)
+			 && (e_mapi_util_find_array_datetime_namedid (&displaytime, properties, conn, fid, PidLidReminderSignalTime) == MAPI_E_SUCCESS)) {
 				ECalComponentAlarm *e_alarm = e_cal_component_alarm_new ();
 				ECalComponentAlarmTrigger trigger;
 
@@ -1005,38 +1005,38 @@ exchange_mapi_cal_util_mapi_props_to_comp (ExchangeMapiConnection *conn, mapi_id
 		const uint64_t *status = NULL;
 
 		/* NOTE: Exchange tasks are DATE values, not DATE-TIME values, but maybe someday, we could expect Exchange to support it;) */
-		if (exchange_mapi_util_find_array_datetime_namedid (&t, properties, conn, fid, PidLidTaskStartDate) == MAPI_E_SUCCESS)
+		if (e_mapi_util_find_array_datetime_namedid (&t, properties, conn, fid, PidLidTaskStartDate) == MAPI_E_SUCCESS)
 			icalcomponent_set_dtstart (ical_comp, icaltime_from_timet_with_zone (t.tv_sec, 1, default_zone));
-		if (exchange_mapi_util_find_array_datetime_namedid (&t, properties, conn, fid, PidLidTaskDueDate) == MAPI_E_SUCCESS)
+		if (e_mapi_util_find_array_datetime_namedid (&t, properties, conn, fid, PidLidTaskDueDate) == MAPI_E_SUCCESS)
 			icalcomponent_set_due (ical_comp, icaltime_from_timet_with_zone (t.tv_sec, 1, default_zone));
 
-		status = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidTaskStatus);
+		status = e_mapi_util_find_array_namedid (properties, conn, fid, PidLidTaskStatus);
 		if (status) {
 			icalcomponent_set_status (ical_comp, get_taskstatus_from_prop(*status));
 			if (*status == olTaskComplete
-			&& exchange_mapi_util_find_array_datetime_namedid (&t, properties, conn, fid, PidLidTaskDateCompleted) == MAPI_E_SUCCESS) {
+			&& e_mapi_util_find_array_datetime_namedid (&t, properties, conn, fid, PidLidTaskDateCompleted) == MAPI_E_SUCCESS) {
 				prop = icalproperty_new_completed (icaltime_from_timet_with_zone (t.tv_sec, 1, default_zone));
 				icalcomponent_add_property (ical_comp, prop);
 			}
 		}
 
-		complete = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidPercentComplete);
+		complete = e_mapi_util_find_array_namedid (properties, conn, fid, PidLidPercentComplete);
 		if (complete) {
 			prop = icalproperty_new_percentcomplete ((gint)(*complete * 100 + 1e-9));
 			icalcomponent_add_property (ical_comp, prop);
 		}
 
-		b = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidTaskFRecurring);
+		b = e_mapi_util_find_array_namedid (properties, conn, fid, PidLidTaskFRecurring);
 		if (b && *b) {
 			/* FIXME: Evolution does not support recurring tasks */
 			g_warning ("Encountered a recurring task.");
 		}
 
-		b = exchange_mapi_util_find_array_namedid (properties, conn, fid, PidLidReminderSet);
+		b = e_mapi_util_find_array_namedid (properties, conn, fid, PidLidReminderSet);
 		if (b && *b) {
 			struct timeval abs;
 
-			if (exchange_mapi_util_find_array_datetime_namedid (&abs, properties, conn, fid, PidLidReminderTime) == MAPI_E_SUCCESS) {
+			if (e_mapi_util_find_array_datetime_namedid (&abs, properties, conn, fid, PidLidReminderTime) == MAPI_E_SUCCESS) {
 				ECalComponentAlarm *e_alarm = e_cal_component_alarm_new ();
 				ECalComponentAlarmTrigger trigger;
 
@@ -1103,12 +1103,12 @@ fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 	if (!comp) {
 		/* read component from a mail, if not found in the calendar */
 		if (mid)
-			smid = exchange_mapi_util_mapi_id_to_string (mid);
+			smid = e_mapi_util_mapi_id_to_string (mid);
 		else if (item_data->mid)
-			smid = exchange_mapi_util_mapi_id_to_string (item_data->mid);
+			smid = e_mapi_util_mapi_id_to_string (item_data->mid);
 		else
 			smid = e_cal_component_gen_uid();
-		comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, fccd->kind, smid,
+		comp = e_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, fccd->kind, smid,
 							item_data->properties, item_data->streams, item_data->recipients,
 							item_data->attachments, filepath, NULL, fccd->method == ICAL_METHOD_REPLY,
 							&detached_recurrences);
@@ -1134,9 +1134,9 @@ fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 		g_object_unref (comp);
 	g_slist_free (detached_recurrences);
 
-	exchange_mapi_util_free_stream_list (&item_data->streams);
-	exchange_mapi_util_free_recipient_list (&item_data->recipients);
-	exchange_mapi_util_free_attachment_list (&item_data->attachments);
+	e_mapi_util_free_stream_list (&item_data->streams);
+	e_mapi_util_free_recipient_list (&item_data->recipients);
+	e_mapi_util_free_attachment_list (&item_data->attachments);
 
 	fccd->result_data = str;
 
@@ -1144,7 +1144,7 @@ fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
 }
 
 gchar *
-exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, mapi_id_t orig_fid, mapi_id_t orig_mid, mapi_object_t *obj_message, const gchar *msg_class,
+e_mapi_cal_util_camel_helper (EMapiConnection *conn, mapi_id_t orig_fid, mapi_id_t orig_mid, mapi_object_t *obj_message, const gchar *msg_class,
 				   GSList *streams, GSList *recipients, GSList *attachments)
 {
 	struct fetch_camel_cal_data fccd = { 0 };
@@ -1168,13 +1168,13 @@ exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, mapi_id_t ori
 		return NULL;
 
 	if (obj_message)
-		exchange_mapi_connection_fetch_object_props (conn, NULL, orig_fid, orig_mid, obj_message,
-					exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (fccd.kind),
+		e_mapi_connection_fetch_object_props (conn, NULL, orig_fid, orig_mid, obj_message,
+					e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (fccd.kind),
 					fetch_camel_cal_comp_cb, &fccd,
 					MAPI_OPTIONS_FETCH_ALL, NULL);
 	else
-		exchange_mapi_connection_fetch_item (conn, orig_fid, orig_mid,
-					exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (fccd.kind),
+		e_mapi_connection_fetch_item (conn, orig_fid, orig_mid,
+					e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (fccd.kind),
 					fetch_camel_cal_comp_cb, &fccd,
 					MAPI_OPTIONS_FETCH_ALL, NULL);
 
@@ -1183,7 +1183,7 @@ exchange_mapi_cal_util_camel_helper (ExchangeMapiConnection *conn, mapi_id_t ori
 
 /* call with props = NULL to fetch named ids into the connection cache */
 gboolean
-exchange_mapi_cal_utils_add_named_ids (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gint pkind)
+e_mapi_cal_utils_add_named_ids (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gint pkind)
 {
 	/* do not make this array static, the function modifies it on run */
 	ResolveNamedIDsData common_nids[] = {
@@ -1204,9 +1204,9 @@ exchange_mapi_cal_utils_add_named_ids (ExchangeMapiConnection *conn, mapi_id_t f
 	icalcomponent_kind kind = pkind;
 
 	if (!props) {
-		if (!exchange_mapi_connection_resolve_named_props (conn, fid, common_nids, G_N_ELEMENTS (common_nids), NULL))
+		if (!e_mapi_connection_resolve_named_props (conn, fid, common_nids, G_N_ELEMENTS (common_nids), NULL))
 			return FALSE;
-	} else if (!exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, common_nids, G_N_ELEMENTS (common_nids)))
+	} else if (!e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, common_nids, G_N_ELEMENTS (common_nids)))
 		return FALSE;
 
 	if (kind == ICAL_VEVENT_COMPONENT)
@@ -1222,7 +1222,7 @@ exchange_mapi_cal_utils_add_named_ids (ExchangeMapiConnection *conn, mapi_id_t f
 #define DEFAULT_APPT_REMINDER_MINS 15
 
 static gboolean
-appt_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props)
+appt_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props)
 {
 	/* do not make this array static, the function modifies it on run */
 	ResolveNamedIDsData nids[] = {
@@ -1259,15 +1259,15 @@ appt_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem
 	};
 
 	if (!props)
-		return exchange_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), NULL);
+		return e_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), NULL);
 
-	return exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
+	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
 }
 
 #define DEFAULT_TASK_REMINDER_MINS 1080
 
 static gboolean
-task_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props)
+task_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props)
 {
 	/* do not make this array static, the function modifies it on run */
 	ResolveNamedIDsData nids[] = {
@@ -1288,13 +1288,13 @@ task_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem
 	};
 
 	if (!props)
-		return exchange_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), NULL);
+		return e_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), NULL);
 
-	return exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
+	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
 }
 
 static gboolean
-note_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props)
+note_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props)
 {
 	/* do not make this array static, the function modifies it on run */
 	ResolveNamedIDsData nids[] = {
@@ -1304,9 +1304,9 @@ note_build_name_id (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem
 	};
 
 	if (!props)
-		return exchange_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), NULL);
+		return e_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), NULL);
 
-	return exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
+	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
 }
 
 /* retrieves timezone location from a timezone ID */
@@ -1343,7 +1343,7 @@ get_tzid_location (const gchar *tzid, struct cal_cbdata *cbdata)
 #define SECS_IN_MINUTE 60
 
 gboolean
-exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data)
+e_mapi_cal_utils_write_props_cb (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data)
 {
 	struct cal_cbdata *cbdata = (struct cal_cbdata *) data;
 	ECalComponent *comp;
@@ -1369,7 +1369,7 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 		case ICAL_VEVENT_COMPONENT:
 		case ICAL_VTODO_COMPONENT:
 		case ICAL_VJOURNAL_COMPONENT:
-			if (!exchange_mapi_cal_utils_add_named_ids (conn, fid, mem_ctx, NULL, cbdata->kind))
+			if (!e_mapi_cal_utils_add_named_ids (conn, fid, mem_ctx, NULL, cbdata->kind))
 				return FALSE;
 			break;
 		default:
@@ -1382,30 +1382,30 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 	g_return_val_if_fail (kind == cbdata->kind, FALSE);
 
 	#define set_value(hex, val) G_STMT_START { \
-		if (!exchange_mapi_utils_add_spropvalue (mem_ctx, values, n_values, hex, val)) \
+		if (!e_mapi_utils_add_spropvalue (mem_ctx, values, n_values, hex, val)) \
 			return FALSE;	\
 		} G_STMT_END
 
 	#define set_named_value(named_id, val) G_STMT_START { \
-		if (!exchange_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, named_id, val)) \
+		if (!e_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, named_id, val)) \
 			return FALSE;	\
 		} G_STMT_END
 
 	#define set_datetime_value(hex, dtval) G_STMT_START {		\
 		struct FILETIME	filetime;				\
 									\
-		exchange_mapi_util_time_t_to_filetime (dtval, &filetime); \
+		e_mapi_util_time_t_to_filetime (dtval, &filetime); \
 									\
-		if (!exchange_mapi_utils_add_spropvalue (mem_ctx, values, n_values, hex, &filetime)) \
+		if (!e_mapi_utils_add_spropvalue (mem_ctx, values, n_values, hex, &filetime)) \
 			return FALSE;	\
 		} G_STMT_END
 
 	#define set_named_datetime_value(named_id, dtval) G_STMT_START { \
 		struct FILETIME	filetime;				\
 									\
-		exchange_mapi_util_time_t_to_filetime (dtval, &filetime); \
+		e_mapi_util_time_t_to_filetime (dtval, &filetime); \
 									\
-		if (!exchange_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, named_id, &filetime)) \
+		if (!e_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, named_id, &filetime)) \
 			return FALSE;	\
 		} G_STMT_END
 
@@ -1647,9 +1647,9 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 		set_named_datetime_value (PidLidClipStart, tt);
 
 		/* Start TZ */
-		mapi_tzid = exchange_mapi_cal_tz_util_get_mapi_equivalent ((dtstart_tz_location && *dtstart_tz_location) ? dtstart_tz_location : "UTC");
+		mapi_tzid = e_mapi_cal_tz_util_get_mapi_equivalent ((dtstart_tz_location && *dtstart_tz_location) ? dtstart_tz_location : "UTC");
 		if (mapi_tzid && *mapi_tzid) {
-			exchange_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &start_tz);
+			e_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &start_tz);
 			set_named_value (PidLidAppointmentTimeZoneDefinitionStartDisplay, &start_tz);
 		}
 		set_named_value (PidLidTimeZoneDescription, mapi_tzid ? mapi_tzid : "");
@@ -1661,9 +1661,9 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 		set_named_datetime_value (PidLidClipEnd, tt);
 
 		/* End TZ */
-		mapi_tzid = exchange_mapi_cal_tz_util_get_mapi_equivalent ((dtend_tz_location && *dtend_tz_location) ? dtend_tz_location : "UTC");
+		mapi_tzid = e_mapi_cal_tz_util_get_mapi_equivalent ((dtend_tz_location && *dtend_tz_location) ? dtend_tz_location : "UTC");
 		if (mapi_tzid && *mapi_tzid) {
-			exchange_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &end_tz);
+			e_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &end_tz);
 			set_named_value (PidLidAppointmentTimeZoneDefinitionEndDisplay, &end_tz);
 		}
 
@@ -1678,7 +1678,7 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 				zone_location = get_tzid_location ("*default-zone*", cbdata);
 
 			ictz = icaltimezone_get_builtin_timezone (zone_location);
-			pltz = exchange_mapi_cal_util_mapi_tz_pidlidtimezone (ictz);
+			pltz = e_mapi_cal_util_mapi_tz_pidlidtimezone (ictz);
 			set_named_value (PidLidTimeZone, &pltz);
 		}
 
@@ -1714,11 +1714,11 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 		if (!flag32) {
 			gchar *propval;
 
-			propval = exchange_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-OWNER-APPT-ID");
+			propval = e_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-OWNER-APPT-ID");
 			if (propval && *propval) {
 				mapi_id_t as_id = 0;
 
-				if (exchange_mapi_util_mapi_id_from_string (propval, &as_id))
+				if (e_mapi_util_mapi_id_from_string (propval, &as_id))
 					flag32 = (uint32_t) as_id;
 			}
 
@@ -1999,7 +1999,7 @@ exchange_mapi_cal_utils_write_props_cb (ExchangeMapiConnection *conn, mapi_id_t 
 }
 
 uint32_t
-exchange_mapi_cal_util_get_new_appt_id (ExchangeMapiConnection *conn, mapi_id_t fid)
+e_mapi_cal_util_get_new_appt_id (EMapiConnection *conn, mapi_id_t fid)
 {
 	struct mapi_SRestriction res;
 	struct SPropValue sprop;
@@ -2020,7 +2020,7 @@ exchange_mapi_cal_util_get_new_appt_id (ExchangeMapiConnection *conn, mapi_id_t 
 			cast_mapi_SPropValue (mem_ctx,
 					      &(res.res.resProperty.lpProp),
 					      &sprop);
-			ids = exchange_mapi_connection_check_restriction (conn, fid, 0, &res, NULL);
+			ids = e_mapi_connection_check_restriction (conn, fid, 0, &res, NULL);
 			if (ids) {
 				GSList *l;
 				for (l = ids; l; l = l->next)
@@ -2162,7 +2162,7 @@ populate_freebusy_data (struct Binary_r *bin, uint32_t month, uint32_t year, GSL
 }
 
 gboolean
-exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, const GSList *users, time_t start, time_t end, GSList **freebusy, GError **mapi_error)
+e_mapi_cal_utils_get_free_busy_data (EMapiConnection *conn, const GSList *users, time_t start, time_t end, GSList **freebusy, GError **mapi_error)
 {
 	struct SRow		aRow;
 	enum MAPISTATUS		ms;
@@ -2189,7 +2189,7 @@ exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, const 
 
 	*freebusy = NULL;
 
-	if (!exchange_mapi_connection_get_public_folder (conn, &obj_store, mapi_error)) {
+	if (!e_mapi_connection_get_public_folder (conn, &obj_store, mapi_error)) {
 		return FALSE;
 	}
 
@@ -2275,7 +2275,7 @@ exchange_mapi_cal_utils_get_free_busy_data (ExchangeMapiConnection *conn, const 
 
 /* beware, the 'data' pointer is an integer of the event kind */
 gboolean
-exchange_mapi_cal_utils_get_props_cb (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
+e_mapi_cal_utils_get_props_cb (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
 {
 	static const uint32_t cal_GetPropsList[] = {
 		PR_FID,
@@ -2315,14 +2315,14 @@ exchange_mapi_cal_utils_get_props_cb (ExchangeMapiConnection *conn, mapi_id_t fi
 	g_return_val_if_fail (mem_ctx != NULL, FALSE);
 	g_return_val_if_fail (props != NULL, FALSE);
 
-	if (!exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, cal_GetPropsList, G_N_ELEMENTS (cal_GetPropsList)))
+	if (!e_mapi_utils_add_props_to_props_array (mem_ctx, props, cal_GetPropsList, G_N_ELEMENTS (cal_GetPropsList)))
 		return FALSE;
 
-	return exchange_mapi_cal_utils_add_named_ids (conn, fid, mem_ctx, props, GPOINTER_TO_INT (data));
+	return e_mapi_cal_utils_add_named_ids (conn, fid, mem_ctx, props, GPOINTER_TO_INT (data));
 }
 
 gchar *
-exchange_mapi_cal_utils_get_icomp_x_prop (icalcomponent *comp, const gchar *key)
+e_mapi_cal_utils_get_icomp_x_prop (icalcomponent *comp, const gchar *key)
 {
 	icalproperty *xprop;
 

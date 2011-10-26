@@ -45,8 +45,8 @@
 #include "camel-mapi-store-summary.h"
 #define d(x)
 
-#include <exchange-mapi-defs.h>
-#include "exchange-mapi-mail-utils.h"
+#include <e-mapi-defs.h>
+#include "e-mapi-mail-utils.h"
 
 #define STREAM_SIZE 4000
 
@@ -58,7 +58,7 @@ G_DEFINE_TYPE (CamelMapiTransport, camel_mapi_transport, CAMEL_TYPE_TRANSPORT)
 
 /*CreateItem would return the MID of the new message or '0' if we fail.*/
 static mapi_id_t
-mapi_message_item_send (ExchangeMapiConnection *conn, MailItem *item, GError **perror)
+mapi_message_item_send (EMapiConnection *conn, MailItem *item, GError **perror)
 {
 	guint64 fid = 0;
 	mapi_id_t mid = 0;
@@ -73,7 +73,7 @@ mapi_message_item_send (ExchangeMapiConnection *conn, MailItem *item, GError **p
 
 	#undef unset
 
-	mid = exchange_mapi_connection_create_item (conn, olFolderSentMail, fid,
+	mid = e_mapi_connection_create_item (conn, olFolderSentMail, fid,
 					 mapi_mail_utils_create_item_build_props, item,
 					 item->recipients, item->attachments, item->generic_streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE, perror);
 
@@ -88,7 +88,7 @@ mapi_send_to_sync (CamelTransport *transport,
                    GCancellable *cancellable,
                    GError **error)
 {
-	ExchangeMapiConnection *conn;
+	EMapiConnection *conn;
 	MailItem *item = NULL;
 	const gchar *namep;
 	const gchar *addressp;
@@ -108,7 +108,7 @@ mapi_send_to_sync (CamelTransport *transport,
 	settings = camel_service_get_settings (service);
 	profile = camel_mapi_settings_get_profile (CAMEL_MAPI_SETTINGS (settings));
 
-	conn = exchange_mapi_connection_find (profile);
+	conn = e_mapi_connection_find (profile);
 	if (!conn) {
 		g_set_error (
 			error, CAMEL_SERVICE_ERROR,

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef EXCHANGE_MAPI_MAIL_UTILS_H
-#define EXCHANGE_MAPI_MAIL_UTILS_H 
+#ifndef E_MAPI_MAIL_UTILS_H
+#define E_MAPI_MAIL_UTILS_H 
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -29,7 +29,7 @@
 
 #include <libmapi/libmapi.h>
 
-#include <exchange-mapi-connection.h>
+#include <e-mapi-connection.h>
 
 typedef enum  {
 	PART_TYPE_PLAIN_TEXT=1,
@@ -87,14 +87,14 @@ gboolean fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointe
 /* returns TRUE when filled an entry in the MailItem based on the propTag and its value */
 gboolean fetch_read_item_common_data (MailItem *item, uint32_t propTag, gconstpointer prop_data);
 
-gboolean mapi_mail_get_item_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
+gboolean mapi_mail_get_item_prop_list (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
 
 struct _CamelMimeMessage;
-struct _CamelMimeMessage *mapi_mail_item_to_mime_message (ExchangeMapiConnection *conn, MailItem *item);
+struct _CamelMimeMessage *mapi_mail_item_to_mime_message (EMapiConnection *conn, MailItem *item);
 
 struct _CamelAddress;
 MailItem *mapi_mime_message_to_mail_item (struct _CamelMimeMessage *message, gint32 message_camel_flags, struct _CamelAddress *from, GCancellable *cancellable, GError **error);
 /* uses MailItem * as 'data' pointer */
-gboolean  mapi_mail_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data);
+gboolean  mapi_mail_utils_create_item_build_props (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data);
 
-#endif /* EXCHANGE_MAPI_MAIL_UTILS */
+#endif /* E_MAPI_MAIL_UTILS */

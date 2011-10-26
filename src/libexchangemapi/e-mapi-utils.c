@@ -28,8 +28,8 @@
 #include <glib.h>
 #include <gio/gio.h>
 
-#include "exchange-mapi-utils.h"
-#include "exchange-mapi-mail-utils.h"
+#include "e-mapi-utils.h"
+#include "e-mapi-mail-utils.h"
 
 #ifdef G_OS_WIN32
 /* Undef the similar macro from pthread.h, it doesn't check if
@@ -46,13 +46,13 @@
 #define KRB_DBUS_INTERFACE          "org.gnome.KrbAuthDialog"
 
 inline gchar *
-exchange_mapi_util_mapi_id_to_string (mapi_id_t id)
+e_mapi_util_mapi_id_to_string (mapi_id_t id)
 {
 	return g_strdup_printf ("%016" G_GINT64_MODIFIER "X", id);
 }
 
 inline gboolean
-exchange_mapi_util_mapi_id_from_string (const gchar *str, mapi_id_t *id)
+e_mapi_util_mapi_id_from_string (const gchar *str, mapi_id_t *id)
 {
 	gint n = 0;
 
@@ -66,13 +66,13 @@ exchange_mapi_util_mapi_id_from_string (const gchar *str, mapi_id_t *id)
  * Specifically, it is in this format: ("%016" G_GINT64_MODIFIER "X%016" G_GINT64_MODIFIER "X", fid, mid).
  */
 inline gchar *
-exchange_mapi_util_mapi_ids_to_uid (mapi_id_t fid, mapi_id_t mid)
+e_mapi_util_mapi_ids_to_uid (mapi_id_t fid, mapi_id_t mid)
 {
 	return g_strdup_printf ("%016" G_GINT64_MODIFIER "X%016" G_GINT64_MODIFIER "X", fid, mid);
 }
 
 inline gboolean
-exchange_mapi_util_mapi_ids_from_uid (const gchar *str, mapi_id_t *fid, mapi_id_t *mid)
+e_mapi_util_mapi_ids_from_uid (const gchar *str, mapi_id_t *fid, mapi_id_t *mid)
 {
 	gint n = 0;
 
@@ -96,7 +96,7 @@ exchange_mapi_util_mapi_ids_from_uid (const gchar *str, mapi_id_t *fid, mapi_id_
  * return an 'int' or a 'systime', they should prefer get_SPropValue.
  */
 gconstpointer
-exchange_mapi_util_find_SPropVal_array_propval (struct SPropValue *values, uint32_t proptag)
+e_mapi_util_find_SPropVal_array_propval (struct SPropValue *values, uint32_t proptag)
 {
 	if (((proptag & 0xFFFF) == PT_STRING8) ||
 	    ((proptag & 0xFFFF) == PT_UNICODE)) {
@@ -123,7 +123,7 @@ exchange_mapi_util_find_SPropVal_array_propval (struct SPropValue *values, uint3
 }
 
 gconstpointer
-exchange_mapi_util_find_SPropVal_array_namedid (struct SPropValue *values, ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
+e_mapi_util_find_SPropVal_array_namedid (struct SPropValue *values, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
 {
 	uint32_t proptag;
 	gconstpointer res = NULL;
@@ -131,12 +131,12 @@ exchange_mapi_util_find_SPropVal_array_namedid (struct SPropValue *values, Excha
 	g_return_val_if_fail (values != NULL, NULL);
 	g_return_val_if_fail (conn != NULL, NULL);
 
-	proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
+	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
 	if (proptag != MAPI_E_RESERVED)
-		res = exchange_mapi_util_find_SPropVal_array_propval (values, proptag);
+		res = e_mapi_util_find_SPropVal_array_propval (values, proptag);
 
 	if (!res)
-		res = exchange_mapi_util_find_SPropVal_array_propval (values, namedid);
+		res = e_mapi_util_find_SPropVal_array_propval (values, namedid);
 
 	return res;
 }
@@ -155,7 +155,7 @@ exchange_mapi_util_find_SPropVal_array_namedid (struct SPropValue *values, Excha
  * return an 'int' or a 'systime', they should prefer find_SPropValue_data.
  */
 gconstpointer
-exchange_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag)
+e_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag)
 {
 	if (((proptag & 0xFFFF) == PT_STRING8) ||
 	    ((proptag & 0xFFFF) == PT_UNICODE)) {
@@ -182,7 +182,7 @@ exchange_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag)
 }
 
 gconstpointer
-exchange_mapi_util_find_row_namedid (struct SRow *aRow, ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
+e_mapi_util_find_row_namedid (struct SRow *aRow, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
 {
 	uint32_t proptag;
 	gconstpointer res = NULL;
@@ -190,12 +190,12 @@ exchange_mapi_util_find_row_namedid (struct SRow *aRow, ExchangeMapiConnection *
 	g_return_val_if_fail (aRow != NULL, NULL);
 	g_return_val_if_fail (conn != NULL, NULL);
 
-	proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
+	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
 	if (proptag != MAPI_E_RESERVED)
-		res = exchange_mapi_util_find_row_propval (aRow, proptag);
+		res = e_mapi_util_find_row_propval (aRow, proptag);
 
 	if (!res)
-		res = exchange_mapi_util_find_row_propval (aRow, namedid);
+		res = e_mapi_util_find_row_propval (aRow, namedid);
 
 	return res;
 }
@@ -214,7 +214,7 @@ exchange_mapi_util_find_row_namedid (struct SRow *aRow, ExchangeMapiConnection *
  * return an 'int' or a 'systime', they should prefer find_mapi_SPropValue_data.
  */
 gconstpointer
-exchange_mapi_util_find_array_propval (struct mapi_SPropValue_array *properties, uint32_t proptag)
+e_mapi_util_find_array_propval (struct mapi_SPropValue_array *properties, uint32_t proptag)
 {
 	if (((proptag & 0xFFFF) == PT_STRING8) ||
 	    ((proptag & 0xFFFF) == PT_UNICODE)) {
@@ -241,7 +241,7 @@ exchange_mapi_util_find_array_propval (struct mapi_SPropValue_array *properties,
 }
 
 gconstpointer
-exchange_mapi_util_find_array_namedid (struct mapi_SPropValue_array *properties, ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
+e_mapi_util_find_array_namedid (struct mapi_SPropValue_array *properties, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
 {
 	uint32_t proptag;
 	gconstpointer res = NULL;
@@ -249,18 +249,18 @@ exchange_mapi_util_find_array_namedid (struct mapi_SPropValue_array *properties,
 	g_return_val_if_fail (properties != NULL, NULL);
 	g_return_val_if_fail (conn != NULL, NULL);
 
-	proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
+	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
 	if (proptag != MAPI_E_RESERVED)
-		res = exchange_mapi_util_find_array_propval (properties, proptag);
+		res = e_mapi_util_find_array_propval (properties, proptag);
 
 	if (!res)
-		res = exchange_mapi_util_find_array_propval (properties, namedid);
+		res = e_mapi_util_find_array_propval (properties, namedid);
 
 	return res;
 }
 
 enum MAPISTATUS
-exchange_mapi_util_find_array_datetime_propval (struct timeval *tv, struct mapi_SPropValue_array *properties, uint32_t proptag)
+e_mapi_util_find_array_datetime_propval (struct timeval *tv, struct mapi_SPropValue_array *properties, uint32_t proptag)
 {
 	g_return_val_if_fail (tv != NULL, MAPI_E_INVALID_PARAMETER);
 	g_return_val_if_fail (properties != NULL, MAPI_E_INVALID_PARAMETER);
@@ -269,7 +269,7 @@ exchange_mapi_util_find_array_datetime_propval (struct timeval *tv, struct mapi_
 }
 
 enum MAPISTATUS
-exchange_mapi_util_find_array_datetime_namedid (struct timeval *tv, struct mapi_SPropValue_array *properties, ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
+e_mapi_util_find_array_datetime_namedid (struct timeval *tv, struct mapi_SPropValue_array *properties, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
 {
 	enum MAPISTATUS res = MAPI_E_NOT_FOUND;
 	uint32_t proptag;
@@ -278,18 +278,18 @@ exchange_mapi_util_find_array_datetime_namedid (struct timeval *tv, struct mapi_
 	g_return_val_if_fail (properties != NULL, MAPI_E_INVALID_PARAMETER);
 	g_return_val_if_fail (conn != NULL, MAPI_E_INVALID_PARAMETER);
 
-	proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
+	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
 	if (proptag != MAPI_E_RESERVED)
-		res = exchange_mapi_util_find_array_datetime_propval (tv, properties, proptag);
+		res = e_mapi_util_find_array_datetime_propval (tv, properties, proptag);
 
 	if (res == MAPI_E_NOT_FOUND)
-		res = exchange_mapi_util_find_array_datetime_propval (tv, properties, namedid);
+		res = e_mapi_util_find_array_datetime_propval (tv, properties, namedid);
 
 	return res;
 }
 
 ExchangeMAPIStream *
-exchange_mapi_util_find_stream (GSList *stream_list, uint32_t proptag)
+e_mapi_util_find_stream (GSList *stream_list, uint32_t proptag)
 {
 	GSList *l = stream_list;
 
@@ -303,7 +303,7 @@ exchange_mapi_util_find_stream (GSList *stream_list, uint32_t proptag)
 }
 
 ExchangeMAPIStream *
-exchange_mapi_util_find_stream_namedid (GSList *stream_list, ExchangeMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
+e_mapi_util_find_stream_namedid (GSList *stream_list, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
 {
 	uint32_t proptag;
 	gconstpointer res = NULL;
@@ -313,18 +313,18 @@ exchange_mapi_util_find_stream_namedid (GSList *stream_list, ExchangeMapiConnect
 	if (!stream_list)
 		return NULL;
 
-	proptag = exchange_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
+	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
 	if (proptag != MAPI_E_RESERVED)
-		res = exchange_mapi_util_find_stream (stream_list, proptag);
+		res = e_mapi_util_find_stream (stream_list, proptag);
 
 	if (!res)
-		res = exchange_mapi_util_find_stream (stream_list, namedid);
+		res = e_mapi_util_find_stream (stream_list, namedid);
 
 	return (ExchangeMAPIStream *) res;
 }
 
 void
-exchange_mapi_util_free_attachment_list (GSList **attach_list)
+e_mapi_util_free_attachment_list (GSList **attach_list)
 {
 	GSList *l = *attach_list;
 
@@ -338,7 +338,7 @@ exchange_mapi_util_free_attachment_list (GSList **attach_list)
 			mail_item_free (attachment->mail);
 		} else {
 			g_free (attachment->lpProps);
-			exchange_mapi_util_free_stream_list (&(attachment->streams));
+			e_mapi_util_free_stream_list (&(attachment->streams));
 		}
 
 		g_free (attachment);
@@ -349,7 +349,7 @@ exchange_mapi_util_free_attachment_list (GSList **attach_list)
 }
 
 void
-exchange_mapi_util_free_recipient_list (GSList **recip_list)
+e_mapi_util_free_recipient_list (GSList **recip_list)
 {
 	GSList *l = *recip_list;
 
@@ -373,7 +373,7 @@ exchange_mapi_util_free_recipient_list (GSList **recip_list)
 }
 
 void
-exchange_mapi_util_free_stream_list (GSList **stream_list)
+e_mapi_util_free_stream_list (GSList **stream_list)
 {
 	GSList *l = *stream_list;
 
@@ -392,7 +392,7 @@ exchange_mapi_util_free_stream_list (GSList **stream_list)
 }
 
 static void
-exchange_mapi_util_bin_append_uint16 (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const uint16_t val)
+e_mapi_util_bin_append_uint16 (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const uint16_t val)
 {
 	uint8_t *ptr = NULL;
 
@@ -406,7 +406,7 @@ exchange_mapi_util_bin_append_uint16 (TALLOC_CTX *mem_ctx, struct Binary_r *bin,
 }
 
 static void
-exchange_mapi_util_bin_append_uint32 (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const uint32_t val)
+e_mapi_util_bin_append_uint32 (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const uint32_t val)
 {
 	uint8_t *ptr = NULL;
 
@@ -482,7 +482,7 @@ bin_decode_string (const uint8_t *ptr, uint32_t sz, gchar **str, gboolean is_uni
 }
 
 static void
-exchange_mapi_util_bin_append_string (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const gchar *val)
+e_mapi_util_bin_append_string (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const gchar *val)
 {
 	gsize len = strlen (val);
 	gchar *ptr = NULL;
@@ -496,7 +496,7 @@ exchange_mapi_util_bin_append_string (TALLOC_CTX *mem_ctx, struct Binary_r *bin,
 }
 
 static void
-exchange_mapi_util_bin_append_val (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const uint8_t *val, gsize len)
+e_mapi_util_bin_append_val (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const uint8_t *val, gsize len)
 {
 	uint8_t *ptr = NULL;
 
@@ -509,7 +509,7 @@ exchange_mapi_util_bin_append_val (TALLOC_CTX *mem_ctx, struct Binary_r *bin, co
 }
 
 static void
-exchange_mapi_util_bin_append_unicode (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const gchar *val)
+e_mapi_util_bin_append_unicode (TALLOC_CTX *mem_ctx, struct Binary_r *bin, const gchar *val)
 {
 	gunichar2 *utf16;
 	glong written = 0;
@@ -517,7 +517,7 @@ exchange_mapi_util_bin_append_unicode (TALLOC_CTX *mem_ctx, struct Binary_r *bin
 	utf16 = g_utf8_to_utf16 (val, -1, NULL, &written, NULL);
 	g_return_if_fail (utf16 != NULL);
 
-	exchange_mapi_util_bin_append_val (mem_ctx, bin, (uint8_t *)utf16, (written + 1) * 2);
+	e_mapi_util_bin_append_val (mem_ctx, bin, (uint8_t *)utf16, (written + 1) * 2);
 
 	g_free (utf16);
 }
@@ -532,7 +532,7 @@ static const uint8_t MAPI_ONE_OFF_UID[] = {
 #define MAPI_ONE_OFF_MYSTERY_FLAG 0x1000
 
 /**
- * exchange_mapi_util_recip_entryid_generate_smtp:
+ * e_mapi_util_recip_entryid_generate_smtp:
  * @entryid: entry ID to be filled
  * @display_name: the display name of the user
  * @email: the email address
@@ -544,17 +544,17 @@ static const uint8_t MAPI_ONE_OFF_UID[] = {
  * Return value: the recipient ENTRYID
  **/
 void
-exchange_mapi_util_recip_entryid_generate_smtp (TALLOC_CTX *mem_ctx, struct Binary_r *entryid, const gchar *display_name, const gchar *email)
+e_mapi_util_recip_entryid_generate_smtp (TALLOC_CTX *mem_ctx, struct Binary_r *entryid, const gchar *display_name, const gchar *email)
 {
 	g_return_if_fail (entryid != NULL);
 
-	exchange_mapi_util_bin_append_uint32 (mem_ctx, entryid, 0);
-	exchange_mapi_util_bin_append_val (mem_ctx, entryid, MAPI_ONE_OFF_UID, sizeof(MAPI_ONE_OFF_UID));
-	exchange_mapi_util_bin_append_uint16 (mem_ctx, entryid, 0);
-	exchange_mapi_util_bin_append_uint16 (mem_ctx, entryid, MAPI_ONE_OFF_NO_RICH_INFO | MAPI_ONE_OFF_MYSTERY_FLAG | MAPI_ONE_OFF_UNICODE);
-	exchange_mapi_util_bin_append_unicode (mem_ctx, entryid, display_name);
-	exchange_mapi_util_bin_append_unicode (mem_ctx, entryid, "SMTP");
-	exchange_mapi_util_bin_append_unicode (mem_ctx, entryid, email);
+	e_mapi_util_bin_append_uint32 (mem_ctx, entryid, 0);
+	e_mapi_util_bin_append_val (mem_ctx, entryid, MAPI_ONE_OFF_UID, sizeof(MAPI_ONE_OFF_UID));
+	e_mapi_util_bin_append_uint16 (mem_ctx, entryid, 0);
+	e_mapi_util_bin_append_uint16 (mem_ctx, entryid, MAPI_ONE_OFF_NO_RICH_INFO | MAPI_ONE_OFF_MYSTERY_FLAG | MAPI_ONE_OFF_UNICODE);
+	e_mapi_util_bin_append_unicode (mem_ctx, entryid, display_name);
+	e_mapi_util_bin_append_unicode (mem_ctx, entryid, "SMTP");
+	e_mapi_util_bin_append_unicode (mem_ctx, entryid, email);
 }
 
 static const uint8_t MAPI_LOCAL_UID[] = {
@@ -563,7 +563,7 @@ static const uint8_t MAPI_LOCAL_UID[] = {
 };
 
 /**
- * exchange_mapi_util_recip_entryid_generate_ex:
+ * e_mapi_util_recip_entryid_generate_ex:
  * @exchange_dn: the Exchange 5.5-style DN of the local user
  *
  * Constructs an ENTRYID value that can be used as a MAPI
@@ -571,13 +571,13 @@ static const uint8_t MAPI_LOCAL_UID[] = {
  * corresponding to the local user identified by @exchange_dn.
  **/
 void
-exchange_mapi_util_recip_entryid_generate_ex (TALLOC_CTX *mem_ctx, struct Binary_r *entryid, const gchar *exchange_dn)
+e_mapi_util_recip_entryid_generate_ex (TALLOC_CTX *mem_ctx, struct Binary_r *entryid, const gchar *exchange_dn)
 {
-	exchange_mapi_util_bin_append_uint32 (mem_ctx, entryid, 0);
-	exchange_mapi_util_bin_append_val (mem_ctx, entryid, MAPI_LOCAL_UID, sizeof(MAPI_LOCAL_UID));
-	exchange_mapi_util_bin_append_uint16 (mem_ctx, entryid, 1);
-	exchange_mapi_util_bin_append_uint16 (mem_ctx, entryid, 0);
-	exchange_mapi_util_bin_append_string (mem_ctx, entryid, exchange_dn);
+	e_mapi_util_bin_append_uint32 (mem_ctx, entryid, 0);
+	e_mapi_util_bin_append_val (mem_ctx, entryid, MAPI_LOCAL_UID, sizeof(MAPI_LOCAL_UID));
+	e_mapi_util_bin_append_uint16 (mem_ctx, entryid, 1);
+	e_mapi_util_bin_append_uint16 (mem_ctx, entryid, 0);
+	e_mapi_util_bin_append_string (mem_ctx, entryid, exchange_dn);
 }
 
 static gboolean
@@ -720,7 +720,7 @@ recip_entryid_decode_ex (const struct Binary_r *entryid, gchar **exchange_dn)
 }
 
 /**
- * exchange_mapi_util_recip_entryid_decode:
+ * e_mapi_util_recip_entryid_decode:
  * @conn: ExchangeMapiCOnnection to resolve names, if required
  * @entryid: recipient's ENTRYID to decode
  * @display_name: (out): stored display name, if any; can be NULL
@@ -729,7 +729,7 @@ recip_entryid_decode_ex (const struct Binary_r *entryid, gchar **exchange_dn)
  * Returns: Whether was able to decode recipient information from the @entryid.
  **/
 gboolean
-exchange_mapi_util_recip_entryid_decode (ExchangeMapiConnection *conn, const struct Binary_r *entryid, gchar **display_name, gchar **email)
+e_mapi_util_recip_entryid_decode (EMapiConnection *conn, const struct Binary_r *entryid, gchar **display_name, gchar **email)
 {
 	gchar *dispnm = NULL, *exchange_dn = NULL;
 
@@ -751,7 +751,7 @@ exchange_mapi_util_recip_entryid_decode (ExchangeMapiConnection *conn, const str
 	}
 
 	if (recip_entryid_decode_ex (entryid, &exchange_dn)) {
-		*email = exchange_mapi_connection_ex_to_smtp (conn, exchange_dn, display_name, NULL);
+		*email = e_mapi_connection_ex_to_smtp (conn, exchange_dn, display_name, NULL);
 		g_free (exchange_dn);
 
 		return *email != NULL;
@@ -824,11 +824,11 @@ exchange_crlf_to_lf (const gchar *in)
 }
 
 /**
- * exchange_mapi_util_profiledata_from_settings:
+ * e_mapi_util_profiledata_from_settings:
  * @empd: destination for profile settings
  * @settings: a #CamelMapiSettings
  *
- * Sets the members of an ExchangeMapiProfileData instance to
+ * Sets the members of an EMapiProfileData instance to
  * reflect the account settings in @settings.
  *
  * @note: no allocation is done, so do not finalize @settings and the
@@ -836,7 +836,7 @@ exchange_crlf_to_lf (const gchar *in)
  *        profile data.
  **/
 void
-exchange_mapi_util_profiledata_from_settings (ExchangeMapiProfileData *empd, CamelMapiSettings *settings)
+e_mapi_util_profiledata_from_settings (EMapiProfileData *empd, CamelMapiSettings *settings)
 {
 	CamelNetworkSettings *network_settings;
 	CamelNetworkSecurityMethod security_method;
@@ -851,7 +851,7 @@ exchange_mapi_util_profiledata_from_settings (ExchangeMapiProfileData *empd, Cam
 }
 
 gboolean
-exchange_mapi_util_trigger_krb_auth (const ExchangeMapiProfileData *empd, GError **error) {
+e_mapi_util_trigger_krb_auth (const EMapiProfileData *empd, GError **error) {
 	gint success = FALSE;
 	GError *local_error = NULL;
 	GDBusConnection *connection;
@@ -914,7 +914,7 @@ exchange_mapi_util_trigger_krb_auth (const ExchangeMapiProfileData *empd, GError
 
 
 /**
- * exchange_mapi_util_profile_name:
+ * e_mapi_util_profile_name:
  * @empd: profile information used to construct the name
  * @migrate: whether migrate old profile name to a new one
  *
@@ -923,7 +923,7 @@ exchange_mapi_util_trigger_krb_auth (const ExchangeMapiProfileData *empd, GError
  * rename old profile name string to a new name, if requested.
  **/
 gchar *
-exchange_mapi_util_profile_name (const ExchangeMapiProfileData *empd, gboolean migrate)
+e_mapi_util_profile_name (const EMapiProfileData *empd, gboolean migrate)
 {
 	gchar *res;
 
@@ -939,7 +939,7 @@ exchange_mapi_util_profile_name (const ExchangeMapiProfileData *empd, gboolean m
 					    empd->domain);
 		old_name = g_strcanon (old_name, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@", '_');
 
-		exchange_mapi_rename_profile (old_name, res);
+		e_mapi_rename_profile (old_name, res);
 
 		g_free (old_name);
 	}
@@ -951,7 +951,7 @@ exchange_mapi_util_profile_name (const ExchangeMapiProfileData *empd, gboolean m
  * Adds prop_ids to props array. props should be created within the given mem_ctx.
  **/
 gboolean
-exchange_mapi_utils_add_props_to_props_array (TALLOC_CTX *mem_ctx, struct SPropTagArray *props, const uint32_t *prop_ids, guint prop_ids_n_elems)
+e_mapi_utils_add_props_to_props_array (TALLOC_CTX *mem_ctx, struct SPropTagArray *props, const uint32_t *prop_ids, guint prop_ids_n_elems)
 {
 	guint i;
 
@@ -969,7 +969,7 @@ exchange_mapi_utils_add_props_to_props_array (TALLOC_CTX *mem_ctx, struct SPropT
 
 /* Beware, the named_ids_list array is modified */
 gboolean
-exchange_mapi_utils_add_named_ids_to_props_array (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, ResolveNamedIDsData *named_ids_list, guint named_ids_n_elems)
+e_mapi_utils_add_named_ids_to_props_array (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, ResolveNamedIDsData *named_ids_list, guint named_ids_n_elems)
 {
 	guint i;
 
@@ -980,7 +980,7 @@ exchange_mapi_utils_add_named_ids_to_props_array (ExchangeMapiConnection *conn, 
 	g_return_val_if_fail (named_ids_list != NULL, FALSE);
 	g_return_val_if_fail (named_ids_n_elems > 0, FALSE);
 
-	if (!exchange_mapi_connection_resolve_named_props (conn, fid, named_ids_list, named_ids_n_elems, NULL))
+	if (!e_mapi_connection_resolve_named_props (conn, fid, named_ids_list, named_ids_n_elems, NULL))
 		return FALSE;
 
 	for (i = 0; i < named_ids_n_elems; i++) {
@@ -996,7 +996,7 @@ exchange_mapi_utils_add_named_ids_to_props_array (ExchangeMapiConnection *conn, 
  * *n_values holds number of items stored in the array, and will be increased by one.
  **/
 gboolean
-exchange_mapi_utils_add_spropvalue (TALLOC_CTX *mem_ctx, struct SPropValue **values_array, uint32_t *n_values, uint32_t prop_tag, gconstpointer prop_value)
+e_mapi_utils_add_spropvalue (TALLOC_CTX *mem_ctx, struct SPropValue **values_array, uint32_t *n_values, uint32_t prop_tag, gconstpointer prop_value)
 {
 	g_return_val_if_fail (mem_ctx != NULL, FALSE);
 	g_return_val_if_fail (values_array != NULL, FALSE);
@@ -1007,9 +1007,9 @@ exchange_mapi_utils_add_spropvalue (TALLOC_CTX *mem_ctx, struct SPropValue **val
 	return TRUE;
 }
 
-/* similar as exchange_mapi_utils_add_spropvalue, just here is not used prop_tag, but named id */
+/* similar as e_mapi_utils_add_spropvalue, just here is not used prop_tag, but named id */
 gboolean
-exchange_mapi_utils_add_spropvalue_namedid (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values_array, uint32_t *n_values, uint32_t named_id, gconstpointer prop_value)
+e_mapi_utils_add_spropvalue_namedid (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values_array, uint32_t *n_values, uint32_t named_id, gconstpointer prop_value)
 {
 	uint32_t prop_tag;
 
@@ -1019,16 +1019,16 @@ exchange_mapi_utils_add_spropvalue_namedid (ExchangeMapiConnection *conn, mapi_i
 	g_return_val_if_fail (values_array != NULL, FALSE);
 	g_return_val_if_fail (n_values != NULL, FALSE);
 
-	prop_tag = exchange_mapi_connection_resolve_named_prop (conn, fid, named_id, NULL);
+	prop_tag = e_mapi_connection_resolve_named_prop (conn, fid, named_id, NULL);
 	if (prop_tag == MAPI_E_RESERVED)
 		return FALSE;
 
-	return exchange_mapi_utils_add_spropvalue (mem_ctx, values_array, n_values, prop_tag, prop_value);
+	return e_mapi_utils_add_spropvalue (mem_ctx, values_array, n_values, prop_tag, prop_value);
 }
 
 /* the first call should be with crc32 set to 0 */
 uint32_t
-exchange_mapi_utils_push_crc32 (uint32_t crc32, uint8_t *bytes, uint32_t n_bytes)
+e_mapi_utils_push_crc32 (uint32_t crc32, uint8_t *bytes, uint32_t n_bytes)
 {
 	static uint32_t crc_32_tab[] = { /* CRC polynomial 0xedb88320 */
 		0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -1090,9 +1090,9 @@ exchange_mapi_utils_push_crc32 (uint32_t crc32, uint8_t *bytes, uint32_t n_bytes
 	return crc32;
 }
 
-/* copies a Binary_r, which should be freed with exchange_mapi_util_free_binary_r() */
+/* copies a Binary_r, which should be freed with e_mapi_util_free_binary_r() */
 struct Binary_r *
-exchange_mapi_util_copy_binary_r (const struct Binary_r *bin)
+e_mapi_util_copy_binary_r (const struct Binary_r *bin)
 {
 	struct Binary_r *res;
 
@@ -1107,9 +1107,9 @@ exchange_mapi_util_copy_binary_r (const struct Binary_r *bin)
 	return res;
 }
 
-/* frees Binary_r previously allocated by exchange_mapi_util_copy_binary_r() */
+/* frees Binary_r previously allocated by e_mapi_util_copy_binary_r() */
 void
-exchange_mapi_util_free_binary_r (struct Binary_r *bin)
+e_mapi_util_free_binary_r (struct Binary_r *bin)
 {
 	if (!bin)
 		return;
@@ -1119,7 +1119,7 @@ exchange_mapi_util_free_binary_r (struct Binary_r *bin)
 }
 
 time_t
-exchange_mapi_util_filetime_to_time_t (const struct FILETIME *filetime)
+e_mapi_util_filetime_to_time_t (const struct FILETIME *filetime)
 {
 	NTTIME nt;
 
@@ -1137,7 +1137,7 @@ exchange_mapi_util_filetime_to_time_t (const struct FILETIME *filetime)
 }
 
 void
-exchange_mapi_util_time_t_to_filetime (const time_t tt, struct FILETIME *filetime)
+e_mapi_util_time_t_to_filetime (const time_t tt, struct FILETIME *filetime)
 {
 	NTTIME nt;
 

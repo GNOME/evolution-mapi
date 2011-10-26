@@ -36,10 +36,10 @@
 #include <libedataserver/e-data-server-util.h>
 #include <camel/camel.h>
 
-#include <em-operation-queue.h>
+#include <e-mapi-operation-queue.h>
 
-#include "exchange-mapi-utils.h"
-#include "exchange-mapi-defs.h"
+#include "e-mapi-utils.h"
+#include "e-mapi-defs.h"
 
 #include "e-book-backend-mapi.h"
 
@@ -47,10 +47,10 @@ G_DEFINE_TYPE (EBookBackendMAPI, e_book_backend_mapi, E_TYPE_BOOK_BACKEND)
 
 struct _EBookBackendMAPIPrivate
 {
-	EMOperationQueue *op_queue;
+	EMapiOperationQueue *op_queue;
 
 	GMutex *conn_lock;
-	ExchangeMapiConnection *conn;
+	EMapiConnection *conn;
 	gchar *profile;
 	gchar *book_uri;
 	gboolean marked_for_offline;
@@ -172,7 +172,7 @@ ebbm_set_cache_time (EBookBackendMAPI *ebma, glong cache_seconds)
 	g_free (iso_time);
 
 	if (error) {
-		exchange_mapi_debug_print ("%s: Failed to set value: %s", G_STRFUNC, error->message);
+		e_mapi_debug_print ("%s: Failed to set value: %s", G_STRFUNC, error->message);
 		g_error_free (error);
 	}
 }
@@ -390,7 +390,7 @@ ebbm_connect_user (EBookBackendMAPI *ebma, GCancellable *cancellable, const gcha
 {
 	EBookBackendMAPIPrivate *priv = ebma->priv;
 	GError *mapi_error = NULL;
-	ExchangeMapiConnection *old_conn;
+	EMapiConnection *old_conn;
 
 	if (!e_backend_get_online (E_BACKEND (ebma))) {
 		ebbm_notify_connection_status (ebma, FALSE);
@@ -411,13 +411,13 @@ ebbm_connect_user (EBookBackendMAPI *ebma, GCancellable *cancellable, const gcha
 		old_conn = priv->conn;
 		priv->conn = NULL;
 
-		priv->conn = exchange_mapi_connection_new (priv->profile,
+		priv->conn = e_mapi_connection_new (priv->profile,
 							   password,
 							   &mapi_error);
 		if (!priv->conn) {
-			priv->conn = exchange_mapi_connection_find (priv->profile);
-			if (priv->conn && !exchange_mapi_connection_connected (priv->conn))
-				exchange_mapi_connection_reconnect (priv->conn, password, &mapi_error);
+			priv->conn = e_mapi_connection_find (priv->profile);
+			if (priv->conn && !e_mapi_connection_connected (priv->conn))
+				e_mapi_connection_reconnect (priv->conn, password, &mapi_error);
 		}
 
 		if (old_conn)
@@ -1092,7 +1092,7 @@ base_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, GCancell
 	op->opid = opid;
 	op->cancellable = cancellable;
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 static void
@@ -1122,7 +1122,7 @@ str_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, GCancella
 	op->base.cancellable = cancellable;
 	op->str = g_strdup (str);
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 static void
@@ -1158,7 +1158,7 @@ str_slist_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, GCa
 		l->data = g_strdup (l->data);
 	}
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 #define BASE_OP_DEF(_func, _ot)								\
@@ -1217,7 +1217,7 @@ ebbm_op_open (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable
 	op->base.cancellable = cancellable;
 	op->only_if_exists = only_if_exists;
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 static void
@@ -1245,7 +1245,7 @@ ebbm_op_start_book_view (EBookBackend *backend, EDataBookView *book_view)
 
 	g_hash_table_insert (priv->running_book_views, book_view, GINT_TO_POINTER(1));
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 static void
@@ -1273,7 +1273,7 @@ ebbm_op_stop_book_view (EBookBackend *backend, EDataBookView *book_view)
 
 	g_hash_table_remove (priv->running_book_views, book_view);
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 static void
@@ -1302,7 +1302,7 @@ ebbm_op_authenticate_user (EBookBackend *backend, GCancellable *cancellable, ECr
 	op->base.cancellable = cancellable;
 	op->credentials = e_credentials_new_clone (credentials);
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 static void
@@ -1310,7 +1310,7 @@ e_book_backend_mapi_init (EBookBackendMAPI *ebma)
 {
 	ebma->priv = G_TYPE_INSTANCE_GET_PRIVATE (ebma, E_TYPE_BOOK_BACKEND_MAPI, EBookBackendMAPIPrivate);
 
-	ebma->priv->op_queue = em_operation_queue_new ((EMOperationQueueFunc) ebbm_operation_cb, ebma);
+	ebma->priv->op_queue = e_mapi_operation_queue_new ((EMapiOperationQueueFunc) ebbm_operation_cb, ebma);
 	ebma->priv->running_book_views = g_hash_table_new (g_direct_hash, g_direct_equal);
 	ebma->priv->conn_lock = g_mutex_new ();
 
@@ -1440,7 +1440,7 @@ e_book_backend_mapi_unlock_connection (EBookBackendMAPI *ebma)
 	g_mutex_unlock (ebma->priv->conn_lock);
 }
 
-ExchangeMapiConnection *
+EMapiConnection *
 e_book_backend_mapi_get_connection (EBookBackendMAPI *ebma)
 {
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma), NULL);
@@ -1645,7 +1645,7 @@ e_book_backend_mapi_cache_get (EBookBackendMAPI *ebma, const gchar *key)
 
 /* 'data' is one of GET_ALL_KNOWN_IDS or GET_UIDS_ONLY */
 gboolean
-mapi_book_utils_get_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
+mapi_book_utils_get_prop_list (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
 {
 	/* this is a list of all known book MAPI tag IDs;
 	   if you add new add it here too, otherwise it may not be fetched */
@@ -1726,16 +1726,16 @@ mapi_book_utils_get_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALL
 	g_return_val_if_fail (props != NULL, FALSE);
 
 	if (data == GET_UIDS_ONLY)
-		return exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, uids_only_ids, G_N_ELEMENTS (uids_only_ids));
+		return e_mapi_utils_add_props_to_props_array (mem_ctx, props, uids_only_ids, G_N_ELEMENTS (uids_only_ids));
 
-	if (data == GET_ALL_KNOWN_IDS && !exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids)))
+	if (data == GET_ALL_KNOWN_IDS && !e_mapi_utils_add_props_to_props_array (mem_ctx, props, known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids)))
 		return FALSE;
 
 	/* called with fid = 0 from GAL */
 	if (!fid)
-		fid = exchange_mapi_connection_get_default_folder_id (conn, olFolderContacts, NULL);
+		fid = e_mapi_connection_get_default_folder_id (conn, olFolderContacts, NULL);
 
-	return exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
+	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
 }
 
 static gchar *
@@ -1763,7 +1763,7 @@ not_null (gconstpointer ptr)
 
 /* This is not setting E_CONTACT_UID */
 EContact *
-mapi_book_utils_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid, const gchar *book_uri, struct mapi_SPropValue_array *mapi_properties, struct SRow *aRow)
+mapi_book_utils_contact_from_props (EMapiConnection *conn, mapi_id_t fid, const gchar *book_uri, struct mapi_SPropValue_array *mapi_properties, struct SRow *aRow)
 {
 	EContact *contact = e_contact_new ();
 	gint i;
@@ -1771,9 +1771,9 @@ mapi_book_utils_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid,
 	if (book_uri)
 		e_contact_set (contact, E_CONTACT_BOOK_URI, book_uri);
 
-	#define get_proptag(proptag) (aRow ? exchange_mapi_util_find_row_propval (aRow, proptag) : exchange_mapi_util_find_array_propval (mapi_properties, proptag))
+	#define get_proptag(proptag) (aRow ? e_mapi_util_find_row_propval (aRow, proptag) : e_mapi_util_find_array_propval (mapi_properties, proptag))
 	#define get_str_proptag(proptag) not_null (get_proptag (proptag))
-	#define get_namedid(nid) (aRow ? exchange_mapi_util_find_row_namedid (aRow, conn, fid, nid) : exchange_mapi_util_find_array_namedid (mapi_properties, conn, fid, nid))
+	#define get_namedid(nid) (aRow ? e_mapi_util_find_row_namedid (aRow, conn, fid, nid) : e_mapi_util_find_array_namedid (mapi_properties, conn, fid, nid))
 	#define get_str_namedid(nid) not_null (get_namedid (nid))
 
 	if (g_str_equal (get_str_proptag (PR_MESSAGE_CLASS), IPM_DISTLIST)) {
@@ -1804,7 +1804,7 @@ mapi_book_utils_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid,
 
 			br.lpb = members->bin[i].lpb;
 			br.cb = members->bin[i].cb;
-			if (exchange_mapi_util_recip_entryid_decode (conn, &br, &display_name, &email)) {
+			if (e_mapi_util_recip_entryid_decode (conn, &br, &display_name, &email)) {
 				EVCardAttribute *attr;
 				gchar *value;
 				CamelInternetAddress *addr;
@@ -1874,7 +1874,7 @@ mapi_book_utils_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid,
 				gchar *buff = NULL;
 				GTimeVal tv;
 
-				tv.tv_sec = exchange_mapi_util_filetime_to_time_t (t);
+				tv.tv_sec = e_mapi_util_filetime_to_time_t (t);
 				tv.tv_usec = 0;
 				
 				buff = g_time_val_to_iso8601 (&tv);
@@ -1902,7 +1902,7 @@ mapi_book_utils_contact_from_props (ExchangeMapiConnection *conn, mapi_id_t fid,
 				if (value) {
 					EContactDate date = {0};
 
-					time = exchange_mapi_util_filetime_to_time_t (t);
+					time = e_mapi_util_filetime_to_time_t (t);
 					tmtime = gmtime (&time);
 
 					date.day = tmtime->tm_mday;

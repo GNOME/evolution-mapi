@@ -39,16 +39,16 @@ get_uid_from_row (struct SRow *aRow, uint32_t row_index, mapi_id_t fid)
 
 	g_return_val_if_fail (aRow != NULL, NULL);
 
-	str = exchange_mapi_util_find_row_propval (aRow, PR_EMAIL_ADDRESS_UNICODE);
+	str = e_mapi_util_find_row_propval (aRow, PR_EMAIL_ADDRESS_UNICODE);
 	if (str && *str)
 		suid = g_strdup (str);
 
 	if (!suid) {
 		const mapi_id_t *midptr;
 
-		midptr = exchange_mapi_util_find_row_propval (aRow, PR_MID);
+		midptr = e_mapi_util_find_row_propval (aRow, PR_MID);
 
-		suid = exchange_mapi_util_mapi_ids_to_uid (fid, midptr ? *midptr : row_index);
+		suid = e_mapi_util_mapi_ids_to_uid (fid, midptr ? *midptr : row_index);
 	}
 
 	return suid;
@@ -63,7 +63,7 @@ struct FetchGalData
 };
 
 static gboolean
-fetch_gal_cb (ExchangeMapiConnection *conn, uint32_t row_index, uint32_t n_rows, struct SRow *aRow, gpointer data)
+fetch_gal_cb (EMapiConnection *conn, uint32_t row_index, uint32_t n_rows, struct SRow *aRow, gpointer data)
 {
 	struct FetchGalData *fgd = data;
 	struct timeval *last_modification = NULL, tv = { 0 };
@@ -110,7 +110,7 @@ struct FetchGalUidsData
 };
 
 static gboolean
-fetch_gal_uids_cb (ExchangeMapiConnection *conn, uint32_t row_index, uint32_t n_rows, struct SRow *aRow, gpointer data)
+fetch_gal_uids_cb (EMapiConnection *conn, uint32_t row_index, uint32_t n_rows, struct SRow *aRow, gpointer data)
 {
 	gchar *uid;
 	struct FetchGalUidsData *fgud = data;
@@ -167,7 +167,7 @@ ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restr
 {
 	GError *mapi_error = NULL;
 	struct FetchGalData fgd = { 0 };
-	ExchangeMapiConnection *conn;
+	EMapiConnection *conn;
 	gchar *last_fetch;
 	gboolean fetch_successful;
 
@@ -201,9 +201,9 @@ ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restr
 	fgd.ebma = ebma;
 	fgd.book_view = book_view;
 	fgd.notify_contact_data = notify_contact_data;
-	fgd.fid = exchange_mapi_connection_get_default_folder_id (conn, olFolderContacts, NULL);
+	fgd.fid = e_mapi_connection_get_default_folder_id (conn, olFolderContacts, NULL);
 
-	fetch_successful = exchange_mapi_connection_fetch_gal (conn, restriction,
+	fetch_successful = e_mapi_connection_fetch_gal (conn, restriction,
 		mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 		fetch_gal_cb, &fgd, &mapi_error);
 
@@ -230,7 +230,7 @@ ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restr
 static void
 ebbm_gal_fetch_known_uids (EBookBackendMAPI *ebma, GCancellable *cancelled, GHashTable *uids, GError **error)
 {
-	ExchangeMapiConnection *conn;
+	EMapiConnection *conn;
 	GError *mapi_error = NULL;
 	struct FetchGalUidsData fgud = { 0 };
 
@@ -249,9 +249,9 @@ ebbm_gal_fetch_known_uids (EBookBackendMAPI *ebma, GCancellable *cancelled, GHas
 
 	fgud.cancelled = cancelled;
 	fgud.uids = uids;
-	fgud.fid = exchange_mapi_connection_get_default_folder_id (conn, olFolderContacts, NULL);
+	fgud.fid = e_mapi_connection_get_default_folder_id (conn, olFolderContacts, NULL);
 
-	exchange_mapi_connection_fetch_gal (conn, NULL,
+	e_mapi_connection_fetch_gal (conn, NULL,
 		mapi_book_utils_get_prop_list, GET_UIDS_ONLY,
 		fetch_gal_uids_cb, &fgud, &mapi_error);
 

@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef EXCHANGE_MAPI_FOLDER_H
-#define EXCHANGE_MAPI_FOLDER_H
+#ifndef E_MAPI_FOLDER_H
+#define E_MAPI_FOLDER_H
 
 #include <glib.h>
 
@@ -37,15 +37,15 @@ typedef enum  {
 	MAPI_FOLDER_TYPE_TASK,
 	MAPI_FOLDER_TYPE_NOTE_HOMEPAGE,
 	MAPI_FOLDER_TYPE_UNKNOWN
-} ExchangeMAPIFolderType;
+} EMapiFolderType;
 
 typedef enum {
 	MAPI_PERSONAL_FOLDER,
 	MAPI_FAVOURITE_FOLDER,
 	MAPI_FOREIGN_FOLDER
-} ExchangeMAPIFolderCategory;
+} EMapiFolderCategory;
 
-typedef struct _ExchangeMAPIFolder {
+typedef struct _EMapiFolder {
 	/* We'll need this separation of 'owner' and 'user' when we do delegation */
 	gchar *owner_name;
 	gchar *owner_email;
@@ -57,8 +57,8 @@ typedef struct _ExchangeMAPIFolder {
 	guint32 default_type;
 
 	gchar *folder_name;
-	ExchangeMAPIFolderType container_class;
-	ExchangeMAPIFolderCategory category;
+	EMapiFolderType container_class;
+	EMapiFolderCategory category;
 	mapi_id_t folder_id;
 	mapi_id_t parent_folder_id;
 	guint32 child_count;
@@ -70,26 +70,29 @@ typedef struct _ExchangeMAPIFolder {
 	gpointer reserved1;
 	gpointer reserved2;
 	gpointer reserved3;
-} ExchangeMAPIFolder;
+} EMapiFolder;
 
-ExchangeMAPIFolder *
-exchange_mapi_folder_new (const gchar *folder_name, const gchar *container_class,
-			  ExchangeMAPIFolderCategory catgory,
-			  mapi_id_t folder_id, mapi_id_t parent_folder_id,
-			  uint32_t child_count, uint32_t unread_count, uint32_t total);
-ExchangeMAPIFolder *exchange_mapi_folder_copy (ExchangeMAPIFolder *src);
-void exchange_mapi_folder_free (ExchangeMAPIFolder *folder);
-ExchangeMAPIFolderType exchange_mapi_container_class (gchar *type);
+EMapiFolder *		e_mapi_folder_new		(const gchar *folder_name,
+							 const gchar *container_class,
+							 EMapiFolderCategory catgory,
+							 mapi_id_t folder_id,
+							 mapi_id_t parent_folder_id,
+							 uint32_t child_count,
+							 uint32_t unread_count,
+							 uint32_t total);
+EMapiFolder *		e_mapi_folder_copy		(EMapiFolder *src);
+void			e_mapi_folder_free		(EMapiFolder *folder);
+EMapiFolderType		e_mapi_container_class		(gchar *type);
 
-const gchar * exchange_mapi_folder_get_name (ExchangeMAPIFolder *folder);
-guint64 exchange_mapi_folder_get_fid (ExchangeMAPIFolder *folder);
-guint64 exchange_mapi_folder_get_parent_id (ExchangeMAPIFolder *folder);
-ExchangeMAPIFolderType exchange_mapi_folder_get_type (ExchangeMAPIFolder *folder);
-guint32 exchange_mapi_folder_get_unread_count (ExchangeMAPIFolder *folder);
-guint32 exchange_mapi_folder_get_total_count (ExchangeMAPIFolder *folder);
-gboolean exchange_mapi_folder_is_root (ExchangeMAPIFolder *folder);
+const gchar *		e_mapi_folder_get_name		(EMapiFolder *folder);
+mapi_id_t		e_mapi_folder_get_fid		(EMapiFolder *folder);
+mapi_id_t		e_mapi_folder_get_parent_id	(EMapiFolder *folder);
+EMapiFolderType		e_mapi_folder_get_type		(EMapiFolder *folder);
+guint32			e_mapi_folder_get_unread_count	(EMapiFolder *folder);
+guint32			e_mapi_folder_get_total_count	(EMapiFolder *folder);
+gboolean		e_mapi_folder_is_root		(EMapiFolder *folder);
 
-GSList *exchange_mapi_folder_copy_list (GSList *folder_list);
-void exchange_mapi_folder_free_list (GSList *folder_list);
+GSList *		e_mapi_folder_copy_list		(GSList *folder_list);
+void			e_mapi_folder_free_list		(GSList *folder_list);
 
 #endif

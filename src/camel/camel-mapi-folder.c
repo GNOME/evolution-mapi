@@ -31,17 +31,17 @@
 #include <glib.h>
 
 #include <libmapi/libmapi.h>
-#include <exchange-mapi-defs.h>
-#include <exchange-mapi-utils.h>
-#include <exchange-mapi-folder.h>
-#include <exchange-mapi-cal-utils.h>
-#include "exchange-mapi-mail-utils.h"
+#include <e-mapi-defs.h>
+#include <e-mapi-utils.h>
+#include <e-mapi-folder.h>
+#include <e-mapi-cal-utils.h>
+#include "e-mapi-mail-utils.h"
 
 #include "camel-mapi-store.h"
 #include "camel-mapi-store-summary.h"
 #include "camel-mapi-folder.h"
 #include "camel-mapi-private.h"
-#include "camel-mapi-summary.h"
+#include "camel-mapi-folder-summary.h"
 
 #define DEBUG_FN( ) printf("----%p %s\n", g_thread_self(), G_STRFUNC);
 #define SUMMARY_FETCH_BATCH_COUNT 150
@@ -159,7 +159,7 @@ fetch_items_summary_cb (FetchItemsCallbackData *item_data, gpointer data)
 	MailItem *item = g_new0(MailItem , 1);
 
 	if (camel_debug_start("mapi:folder")) {
-		exchange_mapi_debug_dump_properties (item_data->conn, item_data->fid, item_data->properties, 3);
+		e_mapi_debug_dump_properties (item_data->conn, item_data->fid, item_data->properties, 3);
 		camel_debug_end();
 	}
 
@@ -193,11 +193,11 @@ fetch_items_summary_cb (FetchItemsCallbackData *item_data, gpointer data)
 	/* item->header.from = camel_internet_address_format_address (from_name, from_email); */
 
 	if (delivery_date) {
-		item->header.recieved_time = exchange_mapi_util_filetime_to_time_t (delivery_date);
+		item->header.recieved_time = e_mapi_util_filetime_to_time_t (delivery_date);
 	}
 
 	if (last_modification_time) {
-		item_modification_time.tv_sec = exchange_mapi_util_filetime_to_time_t (last_modification_time);
+		item_modification_time.tv_sec = e_mapi_util_filetime_to_time_t (last_modification_time);
 		item_modification_time.tv_usec = 0;
 	}
 
@@ -359,7 +359,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 		/************************ First populate summary *************************/
 		mi = NULL;
 		pmi = NULL;
-		msg_uid = exchange_mapi_util_mapi_ids_to_uid (item->fid, item->mid);
+		msg_uid = e_mapi_util_mapi_ids_to_uid (item->fid, item->mid);
 		pmi = camel_folder_summary_get (folder->summary, msg_uid);
 
 		if (pmi) {
@@ -384,7 +384,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 			guint32 count_to = 0, count_cc =0;
 			gchar *to = NULL, *cc = NULL;
 
-			mi->info.uid = exchange_mapi_util_mapi_ids_to_uid(item->fid, item->mid);
+			mi->info.uid = e_mapi_util_mapi_ids_to_uid(item->fid, item->mid);
 			mi->info.subject = camel_pstring_strdup(item->header.subject);
 			mi->info.date_sent = mi->info.date_received = item->header.recieved_time;
 			mi->info.size = (guint32) item->header.size;
@@ -405,13 +405,13 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 				/* Build a SRow structure */
 				aRow = &recip->out_SRow;
 
-				type = (uint32_t *) exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_TYPE);
+				type = (uint32_t *) e_mapi_util_find_row_propval (aRow, PR_RECIPIENT_TYPE);
 
 				if (type) {
 					name = recip->display_name;
-					name = name ? name : exchange_mapi_util_find_row_propval (aRow, PR_DISPLAY_NAME_UNICODE);
-					name = name ? name : exchange_mapi_util_find_row_propval (aRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
-					name = name ? name : exchange_mapi_util_find_row_propval (aRow, PR_7BIT_DISPLAY_NAME_UNICODE);
+					name = name ? name : e_mapi_util_find_row_propval (aRow, PR_DISPLAY_NAME_UNICODE);
+					name = name ? name : e_mapi_util_find_row_propval (aRow, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
+					name = name ? name : e_mapi_util_find_row_propval (aRow, PR_7BIT_DISPLAY_NAME_UNICODE);
 					display_name = name ? name : recip->email_id;
 					formatted_id = camel_internet_address_format_address(display_name, recip->email_id ? recip->email_id : "");
 
@@ -448,7 +448,7 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 				gchar *from_email;
 
 				camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-				from_email = exchange_mapi_connection_ex_to_smtp (camel_mapi_store_get_exchange_connection (mapi_store), item->header.from_email, NULL, NULL);
+				from_email = e_mapi_connection_ex_to_smtp (camel_mapi_store_get_exchange_connection (mapi_store), item->header.from_email, NULL, NULL);
 				camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 				g_free (item->header.from_email);
@@ -519,7 +519,7 @@ deleted_items_sync_cb (FetchItemsCallbackData *item_data, gpointer data)
 {
 	guint32 msg_flags = CAMEL_MESSAGE_FOLDER_FLAGGED; /* to not have 0 in the hash table */
 	GHashTable *uids = data;
-	gchar *msg_uid = exchange_mapi_util_mapi_ids_to_uid (item_data->fid,
+	gchar *msg_uid = e_mapi_util_mapi_ids_to_uid (item_data->fid,
 							     item_data->mid);
 
 	if ((item_data->msg_flags & MSGFLAG_READ) != 0)
@@ -586,7 +586,7 @@ mapi_sync_deleted (CamelSession *session,
 	server_messages = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
 	/*Get the UID list from server.*/
-	exchange_mapi_connection_fetch_items (camel_mapi_store_get_exchange_connection (mapi_store), data->folder_id, NULL, NULL,
+	e_mapi_connection_fetch_items (camel_mapi_store_get_exchange_connection (mapi_store), data->folder_id, NULL, NULL,
 					       NULL, NULL,
 					       deleted_items_sync_cb, server_messages,
 					       options | MAPI_OPTIONS_DONT_OPEN_MESSAGE, NULL);
@@ -663,7 +663,7 @@ mapi_sync_deleted (CamelSession *session,
 
 	if (camel_folder_change_info_changed (changes)) {
 		if (flags_changed)
-			camel_mapi_summary_update_store_info_counts (CAMEL_MAPI_SUMMARY (CAMEL_FOLDER (mapi_folder)->summary));
+			camel_mapi_folder_summary_update_store_info_counts (CAMEL_MAPI_FOLDER_SUMMARY (CAMEL_FOLDER (mapi_folder)->summary));
 		camel_folder_changed (data->folder, changes);
 	}
 	camel_folder_change_info_free (changes);
@@ -676,7 +676,7 @@ mapi_sync_deleted (CamelSession *session,
 	camel_folder_summary_free_array (known_uids);
 
 	if (data->need_refresh) {
-		CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (data->folder->summary);
+		CamelMapiFolderSummary *mapi_summary = CAMEL_MAPI_FOLDER_SUMMARY (data->folder->summary);
 		if (mapi_summary) {
 			camel_service_lock (CAMEL_SERVICE (parent_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 			g_free (mapi_summary->sync_time_stamp);
@@ -696,7 +696,7 @@ mapi_sync_deleted_data_free (SyncDeletedData *data)
 }
 
 static gboolean
-mapi_camel_get_summary_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
+mapi_camel_get_summary_list (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
 {
 	static const uint32_t summary_prop_list[] = {
 		PR_INTERNET_CPID,
@@ -719,7 +719,7 @@ mapi_camel_get_summary_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC
 
 	g_return_val_if_fail (props != NULL, FALSE);
 
-	return exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, summary_prop_list, G_N_ELEMENTS (summary_prop_list));
+	return e_mapi_utils_add_props_to_props_array (mem_ctx, props, summary_prop_list, G_N_ELEMENTS (summary_prop_list));
 }
 
 gboolean
@@ -735,7 +735,7 @@ camel_mapi_folder_fetch_summary (CamelStore *store, CamelFolder *folder, const m
 
 	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
-	status = exchange_mapi_connection_fetch_items  (camel_mapi_store_get_exchange_connection (mapi_store), fid, res, sort,
+	status = e_mapi_connection_fetch_items  (camel_mapi_store_get_exchange_connection (mapi_store), fid, res, sort,
 							mapi_camel_get_summary_list, NULL,
 							fetch_items_summary_cb, fetch_data,
 							options, mapi_error);
@@ -753,7 +753,7 @@ mapi_refresh_folder(CamelFolder *folder, GCancellable *cancellable, GError **err
 
 	CamelMapiStore *mapi_store;
 	CamelMapiFolder *mapi_folder;
-	CamelMapiSummary *mapi_summary;
+	CamelMapiFolderSummary *mapi_summary;
 	CamelService *service;
 	CamelSession *session;
 	CamelStore *parent_store;
@@ -775,7 +775,7 @@ mapi_refresh_folder(CamelFolder *folder, GCancellable *cancellable, GError **err
 
 	mapi_folder = CAMEL_MAPI_FOLDER (folder);
 	mapi_store = CAMEL_MAPI_STORE (parent_store);
-	mapi_summary = CAMEL_MAPI_SUMMARY (folder->summary);
+	mapi_summary = CAMEL_MAPI_FOLDER_SUMMARY (folder->summary);
 
 	is_proxy = parent_store->flags & CAMEL_STORE_PROXY;
 
@@ -848,7 +848,7 @@ mapi_refresh_folder(CamelFolder *folder, GCancellable *cancellable, GError **err
 		sort->aSort[0].ulPropTag = PR_LAST_MODIFICATION_TIME;
 		sort->aSort[0].ulOrder = TABLE_SORT_ASCEND;
 
-		exchange_mapi_util_mapi_id_from_string (folder_id, &temp_folder_id);
+		e_mapi_util_mapi_id_from_string (folder_id, &temp_folder_id);
 
 		if (!camel_mapi_store_connected (mapi_store, NULL)) {
 			/*BUG : Fix exception string.*/
@@ -1116,7 +1116,7 @@ mapi_folder_append_message_sync (CamelFolder *folder,
 
 	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store, full_name);
 
-	exchange_mapi_util_mapi_id_from_string (folder_id, &fid);
+	e_mapi_util_mapi_id_from_string (folder_id, &fid);
 
 	/* Convert MIME to Item */
 	from = (CamelAddress *) camel_mime_message_get_from (message);
@@ -1125,7 +1125,7 @@ mapi_folder_append_message_sync (CamelFolder *folder,
 	if (item == NULL)
 		return FALSE;
 
-	mid = exchange_mapi_connection_create_item (camel_mapi_store_get_exchange_connection (mapi_store), -1, fid,
+	mid = e_mapi_connection_create_item (camel_mapi_store_get_exchange_connection (mapi_store), -1, fid,
 					 mapi_mail_utils_create_item_build_props, item,
 					 item->recipients, item->attachments,
 					 item->generic_streams, MAPI_OPTIONS_DONT_SUBMIT, &mapi_error);
@@ -1168,7 +1168,7 @@ mapi_folder_append_message_sync (CamelFolder *folder,
 	}
 
 	if (appended_uid)
-		*appended_uid = exchange_mapi_util_mapi_ids_to_uid(fid, mid);
+		*appended_uid = e_mapi_util_mapi_ids_to_uid(fid, mid);
 
 	return TRUE;
 }
@@ -1203,7 +1203,7 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 	mapi_store = CAMEL_MAPI_STORE (parent_store);
 
 	folder_id =  g_strdup (camel_mapi_store_folder_id_lookup (mapi_store, full_name));
-	exchange_mapi_util_mapi_id_from_string (folder_id, &fid);
+	e_mapi_util_mapi_id_from_string (folder_id, &fid);
 
 	if ((mapi_folder->type & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH) {
 		GError *mapi_error = NULL;
@@ -1230,7 +1230,7 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 		g_ptr_array_free (folders, TRUE);
 
 		camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-		status = exchange_mapi_connection_empty_folder (camel_mapi_store_get_exchange_connection (mapi_store), fid, 0, &mapi_error);
+		status = e_mapi_connection_empty_folder (camel_mapi_store_get_exchange_connection (mapi_store), fid, 0, &mapi_error);
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 		if (status) {
@@ -1262,7 +1262,7 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 			const gchar *uid = camel_message_info_uid (info);
 			mapi_id_t *mid = g_new0 (mapi_id_t, 1);
 
-			if (!exchange_mapi_util_mapi_ids_from_uid (uid, &fid, mid))
+			if (!e_mapi_util_mapi_ids_from_uid (uid, &fid, mid))
 				continue;
 
 			if (deleted_items)
@@ -1284,7 +1284,7 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 	if (deleted_items) {
 		camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
-		status = exchange_mapi_connection_remove_items (camel_mapi_store_get_exchange_connection (mapi_store), 0, fid, 0, deleted_items, NULL);
+		status = e_mapi_connection_remove_items (camel_mapi_store_get_exchange_connection (mapi_store), 0, fid, 0, deleted_items, NULL);
 
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
@@ -1418,14 +1418,14 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 	options = MAPI_OPTIONS_FETCH_ALL | MAPI_OPTIONS_FETCH_BODY_STREAM |
 		MAPI_OPTIONS_GETBESTBODY | MAPI_OPTIONS_FETCH_RECIPIENTS;
 
-	exchange_mapi_util_mapi_ids_from_uid (uid, &id_folder, &id_message);
+	e_mapi_util_mapi_ids_from_uid (uid, &id_folder, &id_message);
 
 	if (((CamelMapiFolder *)folder)->type & CAMEL_MAPI_FOLDER_PUBLIC) {
 		options |= MAPI_OPTIONS_USE_PFSTORE;
 	}
 
 	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-	exchange_mapi_connection_fetch_item (camel_mapi_store_get_exchange_connection (mapi_store), id_folder, id_message,
+	e_mapi_connection_fetch_item (camel_mapi_store_get_exchange_connection (mapi_store), id_folder, id_message,
 					mapi_mail_get_item_prop_list, NULL,
 					fetch_props_to_mail_item_cb, &item,
 					options, &mapi_error);
@@ -1547,7 +1547,7 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 		options |= MAPI_OPTIONS_USE_PFSTORE;
 
 	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store, full_name);
-	exchange_mapi_util_mapi_id_from_string (folder_id, &fid);
+	e_mapi_util_mapi_id_from_string (folder_id, &fid);
 
 	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 	if (!camel_mapi_store_connected (mapi_store, NULL)) {
@@ -1577,7 +1577,7 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 			flags= camel_message_info_flags (info);
 
 			/* Why are we getting so much noise here :-/ */
-			if (!exchange_mapi_util_mapi_ids_from_uid (uid, &temp_fid, mid)) {
+			if (!e_mapi_util_mapi_ids_from_uid (uid, &temp_fid, mid)) {
 				camel_message_info_free (info);
 				g_free (mid);
 				continue;
@@ -1631,13 +1631,13 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 
 	if (read_items) {
 		camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-		exchange_mapi_connection_set_flags (camel_mapi_store_get_exchange_connection (mapi_store), 0, fid, options, read_items, 0, NULL);
+		e_mapi_connection_set_flags (camel_mapi_store_get_exchange_connection (mapi_store), 0, fid, options, read_items, 0, NULL);
 		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 	}
 
 	if (unread_items) {
 		camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-		exchange_mapi_connection_set_flags (camel_mapi_store_get_exchange_connection (mapi_store), 0, fid, options, unread_items, CLEAR_READ_FLAG, NULL);
+		e_mapi_connection_set_flags (camel_mapi_store_get_exchange_connection (mapi_store), 0, fid, options, unread_items, CLEAR_READ_FLAG, NULL);
 		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 	}
 
@@ -1645,12 +1645,12 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 	if (deleted_items) {
 		camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		if ((mapi_folder->type & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH) {
-			exchange_mapi_connection_remove_items (camel_mapi_store_get_exchange_connection (mapi_store), 0, fid, options, deleted_items, NULL);
+			e_mapi_connection_remove_items (camel_mapi_store_get_exchange_connection (mapi_store), 0, fid, options, deleted_items, NULL);
 		} else {
 			GError *err = NULL;
 
-			exchange_mapi_util_mapi_id_from_string (camel_mapi_store_system_folder_fid (mapi_store, olFolderDeletedItems), &deleted_items_fid);
-			exchange_mapi_connection_move_items (camel_mapi_store_get_exchange_connection (mapi_store), fid, options, deleted_items_fid, 0, deleted_items, &err);
+			e_mapi_util_mapi_id_from_string (camel_mapi_store_system_folder_fid (mapi_store, olFolderDeletedItems), &deleted_items_fid);
+			e_mapi_connection_move_items (camel_mapi_store_get_exchange_connection (mapi_store), fid, options, deleted_items_fid, 0, deleted_items, &err);
 
 			if (err) {
 				g_warning ("%s: Failed to move deleted items: %s", G_STRFUNC, err->message);
@@ -1666,8 +1666,8 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 		GError *err = NULL;
 
 		camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-		exchange_mapi_util_mapi_id_from_string (camel_mapi_store_system_folder_fid (mapi_store, olFolderJunk), &junk_fid);
-		exchange_mapi_connection_move_items (camel_mapi_store_get_exchange_connection (mapi_store), fid, options, junk_fid, 0, junk_items, &err);
+		e_mapi_util_mapi_id_from_string (camel_mapi_store_system_folder_fid (mapi_store, olFolderJunk), &junk_fid);
+		e_mapi_connection_move_items (camel_mapi_store_get_exchange_connection (mapi_store), fid, options, junk_fid, 0, junk_items, &err);
 		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 		/* in junk_items are only emails which are not deleted */
@@ -1774,16 +1774,16 @@ mapi_folder_transfer_messages_to_sync (CamelFolder *source,
 		return FALSE;
 
 	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store, source_full_name);
-	exchange_mapi_util_mapi_id_from_string (folder_id, &src_fid);
+	e_mapi_util_mapi_id_from_string (folder_id, &src_fid);
 	src_fid_options = (CAMEL_MAPI_FOLDER (source)->type & CAMEL_MAPI_FOLDER_PUBLIC) != 0 ? MAPI_OPTIONS_USE_PFSTORE : 0;
 
 	folder_id = camel_mapi_store_folder_id_lookup (mapi_store, destination_full_name);
-	exchange_mapi_util_mapi_id_from_string (folder_id, &dest_fid);
+	e_mapi_util_mapi_id_from_string (folder_id, &dest_fid);
 	dest_fid_options = (CAMEL_MAPI_FOLDER (destination)->type & CAMEL_MAPI_FOLDER_PUBLIC) != 0 ? MAPI_OPTIONS_USE_PFSTORE : 0;
 
 	for (i=0; i < uids->len; i++) {
 		mapi_id_t *mid = g_new0 (mapi_id_t, 1); /* FIXME : */
-		if (!exchange_mapi_util_mapi_ids_from_uid (g_ptr_array_index (uids, i), &src_fid, mid))
+		if (!e_mapi_util_mapi_ids_from_uid (g_ptr_array_index (uids, i), &src_fid, mid))
 			continue;
 
 		src_msg_ids = g_slist_prepend (src_msg_ids, mid);
@@ -1792,7 +1792,7 @@ mapi_folder_transfer_messages_to_sync (CamelFolder *source,
 	if (delete_originals) {
 		GError *err = NULL;
 
-		if (!exchange_mapi_connection_move_items (camel_mapi_store_get_exchange_connection (mapi_store), src_fid, src_fid_options, dest_fid, dest_fid_options, src_msg_ids, &err)) {
+		if (!e_mapi_connection_move_items (camel_mapi_store_get_exchange_connection (mapi_store), src_fid, src_fid_options, dest_fid, dest_fid_options, src_msg_ids, &err)) {
 			g_set_error (
 				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 				"%s", err ? err->message : _("Unknown error"));
@@ -1813,7 +1813,7 @@ mapi_folder_transfer_messages_to_sync (CamelFolder *source,
 	} else {
 		GError *err = NULL;
 
-		if (!exchange_mapi_connection_copy_items (camel_mapi_store_get_exchange_connection (mapi_store), src_fid, src_fid_options, dest_fid, dest_fid_options, src_msg_ids, &err)) {
+		if (!e_mapi_connection_copy_items (camel_mapi_store_get_exchange_connection (mapi_store), src_fid, src_fid_options, dest_fid, dest_fid_options, src_msg_ids, &err)) {
 			g_set_error (
 				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 				"%s", err ? err->message : _("Unknown error"));
@@ -1916,7 +1916,7 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 
 	summary_file = g_strdup_printf ("%s/%s/summary",folder_dir, folder_name);
 
-	folder->summary = camel_mapi_summary_new(folder, summary_file);
+	folder->summary = camel_mapi_folder_summary_new (folder, summary_file);
 	g_free(summary_file);
 
 	if (!folder->summary) {

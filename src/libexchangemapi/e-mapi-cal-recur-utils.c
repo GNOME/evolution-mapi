@@ -25,7 +25,7 @@
 #include <config.h>
 #endif
 
-#include "exchange-mapi-cal-recur-utils.h"
+#include "e-mapi-cal-recur-utils.h"
 #include <libecal/e-cal-util.h>
 
 /* Reader/Writer versions */
@@ -699,7 +699,7 @@ check_calendar_type (guint16 type)
 }
 
 gboolean
-exchange_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList **extra_detached, icaltimezone *recur_zone)
+e_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList **extra_detached, icaltimezone *recur_zone)
 {
 	struct icalrecurrencetype rt;
 	struct ema_AppointmentRecurrencePattern arp;
@@ -1115,7 +1115,7 @@ compare_guint32 (gconstpointer a, gconstpointer b, gpointer user_data)
 }
 
 GByteArray *
-exchange_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps)
+e_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps)
 {
 	struct icalrecurrencetype *rt;
 	gint i;

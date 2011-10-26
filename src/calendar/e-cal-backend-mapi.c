@@ -33,10 +33,10 @@
 #include <libedata-cal/e-cal-backend-file-store.h>
 #include <libedataserver/e-xml-hash-utils.h>
 
-#include <exchange-mapi-connection.h>
-#include <exchange-mapi-cal-utils.h>
-#include <exchange-mapi-utils.h>
-#include <em-operation-queue.h>
+#include <e-mapi-connection.h>
+#include <e-mapi-cal-utils.h>
+#include <e-mapi-utils.h>
+#include <e-mapi-operation-queue.h>
 
 #include "e-cal-backend-mapi.h"
 
@@ -68,12 +68,12 @@ typedef struct {
 
 /* Private part of the CalBackendMAPI structure */
 struct _ECalBackendMAPIPrivate {
-	EMOperationQueue *op_queue;
+	EMapiOperationQueue *op_queue;
 
 	mapi_id_t		fid;
 	uint32_t		olFolder;
 	gchar			*profile;
-	ExchangeMapiConnection  *conn;
+	EMapiConnection  *conn;
 
 	/* These fields are entirely for access rights */
 	gchar			*owner_name;
@@ -266,14 +266,14 @@ ecbm_remove (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, GEr
 
 	source = e_backend_get_source (E_BACKEND (cbmapi));
 
-	if (!e_backend_get_online (E_BACKEND (backend)) || !priv->conn || !exchange_mapi_connection_connected (priv->conn)) {
+	if (!e_backend_get_online (E_BACKEND (backend)) || !priv->conn || !e_mapi_connection_connected (priv->conn)) {
 		g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
 		return;
 	}
 	if (g_strcmp0 (e_source_get_property (source, "public"), "yes") != 0) {
 		GError *mapi_error = NULL;
 
-		if (!exchange_mapi_connection_remove_folder (priv->conn, priv->fid, 0, &mapi_error)) {
+		if (!e_mapi_connection_remove_folder (priv->conn, priv->fid, 0, &mapi_error)) {
 			mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to remove public folder"));
 			if (mapi_error)
 				g_error_free (mapi_error);
@@ -416,20 +416,20 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
 	cache_dir = e_cal_backend_get_cache_dir (E_CAL_BACKEND (cbmapi));
 
-	recurring = exchange_mapi_util_find_array_namedid (array, item_data->conn, item_data->fid, PidLidTaskFRecurring);
+	recurring = e_mapi_util_find_array_namedid (array, item_data->conn, item_data->fid, PidLidTaskFRecurring);
 	if (recurring && *recurring) {
 		g_warning ("Encountered a recurring task.");
-		exchange_mapi_util_free_stream_list (&streams);
-		exchange_mapi_util_free_recipient_list (&recipients);
-		exchange_mapi_util_free_attachment_list (&attachments);
+		e_mapi_util_free_stream_list (&streams);
+		e_mapi_util_free_recipient_list (&recipients);
+		e_mapi_util_free_attachment_list (&attachments);
 		return TRUE;
 	}
 
-	tmp = exchange_mapi_util_mapi_id_to_string (mid);
+	tmp = e_mapi_util_mapi_id_to_string (mid);
 	cache_comp = e_cal_backend_store_get_component (priv->store, tmp, NULL);
 
 	if (cache_comp == NULL) {
-		ECalComponent *comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, kind, tmp, array,
+		ECalComponent *comp = e_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, kind, tmp, array,
 									streams, recipients, attachments,
 									cache_dir, icaltimezone_get_utc_timezone (), FALSE, &detached);
 
@@ -469,7 +469,7 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 				e_cal_component_commit_sequence (cache_comp);
 				cache_comp_str = e_cal_component_get_as_string (cache_comp);
 
-				comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, kind, tmp, array,
+				comp = e_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, kind, tmp, array,
 									streams, recipients, attachments,
 									cache_dir, icaltimezone_get_utc_timezone (), FALSE, NULL);
 
@@ -489,9 +489,9 @@ mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
 	}
 
 	g_free (tmp);
-	exchange_mapi_util_free_stream_list (&streams);
-	exchange_mapi_util_free_recipient_list (&recipients);
-	exchange_mapi_util_free_attachment_list (&attachments);
+	e_mapi_util_free_stream_list (&streams);
+	e_mapi_util_free_recipient_list (&recipients);
+	e_mapi_util_free_attachment_list (&attachments);
 
 	notify_view_progress (cbmapi, item_data->index, item_data->total);
 
@@ -525,7 +525,7 @@ handle_deleted_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 	g_return_val_if_fail (did != NULL, FALSE);
 
-	tmp = exchange_mapi_util_mapi_id_to_string (mid);
+	tmp = e_mapi_util_mapi_id_to_string (mid);
 	cache_comp_uid = g_slist_find_custom (did->cache_ids, tmp, (GCompareFunc) (g_ascii_strcasecmp));
 	if (cache_comp_uid != NULL) {
 		ECalBackendMAPIPrivate *priv = did->cbmapi->priv;
@@ -569,7 +569,7 @@ handle_deleted_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 }
 
 static gboolean
-mapi_cal_get_idlist (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
+mapi_cal_get_idlist (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
 {
 	static const uint32_t cal_IDList[] = {
 		PR_FID,
@@ -579,7 +579,7 @@ mapi_cal_get_idlist (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *me
 
 	g_return_val_if_fail (props != NULL, FALSE);
 
-	return exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, cal_IDList, G_N_ELEMENTS (cal_IDList));
+	return e_mapi_utils_add_props_to_props_array (mem_ctx, props, cal_IDList, G_N_ELEMENTS (cal_IDList));
 }
 
 /* Simple workflow for fetching deltas:
@@ -655,8 +655,8 @@ get_deltas (gpointer handle)
 		use_restriction = FALSE;
 	}
 
-	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
-					is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
+	if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
+					is_public ? NULL : e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 					mapi_cal_get_changes_cb, cbmapi,
 					options, &mapi_error)) {
 		if (mapi_error) {
@@ -699,7 +699,7 @@ get_deltas (gpointer handle)
 	if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0)
 		options = MAPI_OPTIONS_USE_PFSTORE;
 
-	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
+	if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 						mapi_cal_get_idlist, NULL,
 						handle_deleted_items_cb, &did,
 						options, &mapi_error)) {
@@ -776,8 +776,8 @@ get_deltas (gpointer handle)
 			is_public = TRUE;
 		}
 
-		if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
-					is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
+		if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
+					is_public ? NULL : e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 					mapi_cal_get_changes_cb, cbmapi,
 					options, &mapi_error)) {
 			if (mapi_error) {
@@ -1026,17 +1026,17 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
 	cache_dir = e_cal_backend_get_cache_dir (E_CAL_BACKEND (cbmapi));
 
-//	exchange_mapi_debug_property_dump (properties);
+//	e_mapi_debug_property_dump (properties);
 
 	switch (kind) {
 		case ICAL_VTODO_COMPONENT:
 			/* FIXME: Evolution does not support recurring tasks */
-			recurring = exchange_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidTaskFRecurring);
+			recurring = e_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidTaskFRecurring);
 			if (recurring && *recurring) {
 				g_warning ("Encountered a recurring task.");
-				exchange_mapi_util_free_stream_list (&streams);
-				exchange_mapi_util_free_recipient_list (&recipients);
-				exchange_mapi_util_free_attachment_list (&attachments);
+				e_mapi_util_free_stream_list (&streams);
+				e_mapi_util_free_recipient_list (&recipients);
+				e_mapi_util_free_attachment_list (&attachments);
 				return TRUE;
 			}
 			break;
@@ -1047,8 +1047,8 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 			return FALSE;
 	}
 
-	tmp = exchange_mapi_util_mapi_id_to_string (mid);
-	comp = exchange_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, kind, tmp, properties,
+	tmp = e_mapi_util_mapi_id_to_string (mid);
+	comp = e_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, kind, tmp, properties,
 							streams, recipients, attachments,
 							cache_dir, icaltimezone_get_utc_timezone (), FALSE, &detached);
 	g_free (tmp);
@@ -1072,9 +1072,9 @@ mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
 	}
 	g_slist_free (detached);
 
-	exchange_mapi_util_free_stream_list (&streams);
-	exchange_mapi_util_free_recipient_list (&recipients);
-	exchange_mapi_util_free_attachment_list (&attachments);
+	e_mapi_util_free_stream_list (&streams);
+	e_mapi_util_free_recipient_list (&recipients);
+	e_mapi_util_free_attachment_list (&attachments);
 
 	notify_view_progress (cbmapi, item_data->index, item_data->total);
 
@@ -1119,8 +1119,8 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 		is_public = TRUE;
 	}
 
-	if (!exchange_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
-					is_public ? NULL : exchange_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
+	if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
+					is_public ? NULL : e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 					mapi_cal_cache_create_cb, cbmapi,
 					options, &mapi_error)) {
 		e_cal_backend_store_thaw_changes (priv->store);
@@ -1191,7 +1191,7 @@ ecbm_connect (ECalBackendMAPI *cbmapi, GError **perror)
 		return;
 	}
 
-	if (!priv->conn || !exchange_mapi_connection_connected (priv->conn)) {
+	if (!priv->conn || !e_mapi_connection_connected (priv->conn)) {
 		g_propagate_error (perror, EDC_ERROR (AuthenticationFailed));
 		return;
 	}
@@ -1225,7 +1225,7 @@ ecbm_connect_user (ECalBackend *backend, GCancellable *cancellable, const gchar 
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
-	ExchangeMapiConnection *old_conn;
+	EMapiConnection *old_conn;
 	GError *mapi_error = NULL;
 
 	g_static_mutex_lock (&auth_mutex);
@@ -1235,19 +1235,19 @@ ecbm_connect_user (ECalBackend *backend, GCancellable *cancellable, const gchar 
 
 	old_conn = priv->conn;
 
-	priv->conn = exchange_mapi_connection_new (priv->profile, password, &mapi_error);
+	priv->conn = e_mapi_connection_new (priv->profile, password, &mapi_error);
 	if (!priv->conn) {
-		priv->conn = exchange_mapi_connection_find (priv->profile);
+		priv->conn = e_mapi_connection_find (priv->profile);
 		if (priv->conn
-		    && !exchange_mapi_connection_connected (priv->conn)) {
-			exchange_mapi_connection_reconnect (priv->conn, password, &mapi_error);
+		    && !e_mapi_connection_connected (priv->conn)) {
+			e_mapi_connection_reconnect (priv->conn, password, &mapi_error);
 		}
 	}
 
 	if (old_conn)
 		g_object_unref (old_conn);
 
-	if (priv->conn && exchange_mapi_connection_connected (priv->conn)) {
+	if (priv->conn && e_mapi_connection_connected (priv->conn)) {
 		/* Success */;
 	} else {
 		mapi_error_to_edc_error (perror, mapi_error, AuthenticationFailed, NULL);
@@ -1359,7 +1359,7 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gbool
 	priv->owner_name = g_strdup (e_source_get_property (esource, "acl-owner-name"));
 	priv->owner_email = g_strdup (e_source_get_property (esource, "acl-owner-email"));
 
-	exchange_mapi_util_mapi_id_from_string (fid, &priv->fid);
+	e_mapi_util_mapi_id_from_string (fid, &priv->fid);
 	priv->olFolder = olFolder;
 
 	krb_sso = e_source_get_property (esource, "kerberos");
@@ -1388,7 +1388,7 @@ ecbm_authenticate_user (ECalBackend *backend, GCancellable *cancellable, ECreden
 }
 
 static gboolean
-mapi_cal_get_required_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
+mapi_cal_get_required_props (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
 {
 	static uint32_t req_props_list[] = {
 		PR_OWNER_APPT_ID,
@@ -1409,10 +1409,10 @@ mapi_cal_get_required_props (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC
 
 	g_return_val_if_fail (props != NULL, FALSE);
 
-	if (!exchange_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids)))
+	if (!e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids)))
 		return FALSE;
 
-	return exchange_mapi_utils_add_props_to_props_array (mem_ctx, props, req_props_list, G_N_ELEMENTS (req_props_list));
+	return e_mapi_utils_add_props_to_props_array (mem_ctx, props, req_props_list, G_N_ELEMENTS (req_props_list));
 }
 
 static gboolean
@@ -1425,17 +1425,17 @@ capture_req_props (FetchItemsCallbackData *item_data, gpointer data)
 	ui32 = (const uint32_t *)find_mapi_SPropValue_data(properties, PR_OWNER_APPT_ID);
 	if (ui32)
 		cbdata->appt_id = *ui32;
-	ui32 = exchange_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidAppointmentSequence);
+	ui32 = e_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidAppointmentSequence);
 	if (ui32)
 		cbdata->appt_seq = *ui32;
-	cbdata->cleanglobalid = exchange_mapi_util_copy_binary_r (exchange_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidCleanGlobalObjectId));
-	cbdata->globalid = exchange_mapi_util_copy_binary_r (exchange_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidGlobalObjectId));
-	cbdata->username = g_strdup (exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE));
-	cbdata->useridtype = g_strdup (exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE));
-	cbdata->userid = g_strdup (exchange_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE));
-	cbdata->ownername = g_strdup (exchange_mapi_util_find_array_propval (properties, PR_SENDER_NAME_UNICODE));
-	cbdata->owneridtype = g_strdup (exchange_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE));
-	cbdata->ownerid = g_strdup (exchange_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE));
+	cbdata->cleanglobalid = e_mapi_util_copy_binary_r (e_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidCleanGlobalObjectId));
+	cbdata->globalid = e_mapi_util_copy_binary_r (e_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidGlobalObjectId));
+	cbdata->username = g_strdup (e_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE));
+	cbdata->useridtype = g_strdup (e_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE));
+	cbdata->userid = g_strdup (e_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE));
+	cbdata->ownername = g_strdup (e_mapi_util_find_array_propval (properties, PR_SENDER_NAME_UNICODE));
+	cbdata->owneridtype = g_strdup (e_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE));
+	cbdata->ownerid = g_strdup (e_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE));
 
 	return TRUE;
 }
@@ -1448,12 +1448,12 @@ get_comp_mid (icalcomponent *icalcomp, mapi_id_t *mid)
 	g_return_if_fail (icalcomp != NULL);
 	g_return_if_fail (mid != NULL);
 
-	x_mid = exchange_mapi_cal_utils_get_icomp_x_prop (icalcomp, "X-EVOLUTION-MAPI-MID");
+	x_mid = e_mapi_cal_utils_get_icomp_x_prop (icalcomp, "X-EVOLUTION-MAPI-MID");
 	if (x_mid) {
-		exchange_mapi_util_mapi_id_from_string (x_mid, mid);
+		e_mapi_util_mapi_id_from_string (x_mid, mid);
 		g_free (x_mid);
 	} else {
-		exchange_mapi_util_mapi_id_from_string (icalcomponent_get_uid (icalcomp), mid);
+		e_mapi_util_mapi_id_from_string (icalcomponent_get_uid (icalcomp), mid);
 	}
 }
 
@@ -1475,21 +1475,21 @@ get_server_data (ECalBackendMAPI *cbmapi, ECalComponent *comp, struct cal_cbdata
 	icalcomp = e_cal_component_get_icalcomponent (comp);
 	uid = icalcomponent_get_uid (icalcomp);
 	get_comp_mid (icalcomp, &mid);
-	if (exchange_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
+	if (e_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
 					mapi_cal_get_required_props, NULL,
 					capture_req_props, cbdata,
 					MAPI_OPTIONS_FETCH_GENERIC_STREAMS, NULL))
 
 		return;
 
-	proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidCleanGlobalObjectId, NULL);
+	proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidCleanGlobalObjectId, NULL);
 	if (proptag == MAPI_E_RESERVED) proptag = PidLidCleanGlobalObjectId;
 
 	res.rt = RES_PROPERTY;
 	res.res.resProperty.relop = RELOP_EQ;
 	res.res.resProperty.ulPropTag = proptag;
 
-	propval = exchange_mapi_cal_utils_get_icomp_x_prop (icalcomp, "X-EVOLUTION-MAPI-GLOBALID");
+	propval = e_mapi_cal_utils_get_icomp_x_prop (icalcomp, "X-EVOLUTION-MAPI-GLOBALID");
 	if (propval && *propval) {
 		gsize len = 0;
 
@@ -1501,8 +1501,8 @@ get_server_data (ECalBackendMAPI *cbmapi, ECalComponent *comp, struct cal_cbdata
 
 		e_cal_component_get_dtstamp (comp, &ical_creation_time);
 
-		exchange_mapi_util_time_t_to_filetime (icaltime_as_timet (ical_creation_time), &creation_time);
-		exchange_mapi_cal_util_generate_globalobjectid (TRUE, uid, NULL, ical_creation_time.year ? &creation_time : NULL, &sb);
+		e_mapi_util_time_t_to_filetime (icaltime_as_timet (ical_creation_time), &creation_time);
+		e_mapi_cal_util_generate_globalobjectid (TRUE, uid, NULL, ical_creation_time.year ? &creation_time : NULL, &sb);
 	}
 	g_free (propval);
 
@@ -1510,7 +1510,7 @@ get_server_data (ECalBackendMAPI *cbmapi, ECalComponent *comp, struct cal_cbdata
 	set_SPropValue_proptag (&sprop, proptag, (gconstpointer ) &sb);
 	cast_mapi_SPropValue (mem_ctx, &(res.res.resProperty.lpProp), &sprop);
 
-	exchange_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
+	e_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 					mapi_cal_get_required_props, NULL,
 					capture_req_props, cbdata,
 					MAPI_OPTIONS_FETCH_GENERIC_STREAMS, NULL);
@@ -1527,8 +1527,8 @@ free_server_data (struct cal_cbdata *cbdata)
 
 	#define do_free(_func, _val) _func (_val); _val = NULL
 
-	do_free (exchange_mapi_util_free_binary_r, cbdata->cleanglobalid);
-	do_free (exchange_mapi_util_free_binary_r, cbdata->globalid);
+	do_free (e_mapi_util_free_binary_r, cbdata->cleanglobalid);
+	do_free (e_mapi_util_free_binary_r, cbdata->globalid);
 	do_free (g_free, cbdata->username);
 	do_free (g_free, cbdata->useridtype);
 	do_free (g_free, cbdata->userid);
@@ -1601,11 +1601,11 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 	/* FIXME: [WIP] Add support for recurrences */
 	if (e_cal_component_has_recurrences (comp)) {
-		GByteArray *ba = exchange_mapi_cal_util_rrule_to_bin (comp, NULL);
+		GByteArray *ba = e_mapi_cal_util_rrule_to_bin (comp, NULL);
 		if (ba) {
 			ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 			stream->value = ba;
-			stream->proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, NULL);
+			stream->proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, NULL);
 			if (stream->proptag != MAPI_E_RESERVED)
 				streams = g_slist_append (streams, stream);
 		}
@@ -1613,10 +1613,10 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 	/* FIXME: [WIP] Add support for meetings/assigned tasks */
 	if (e_cal_component_has_attendees (comp))
-		exchange_mapi_cal_util_fetch_recipients (comp, &recipients);
+		e_mapi_cal_util_fetch_recipients (comp, &recipients);
 
 	if (e_cal_component_has_attachments (comp))
-		exchange_mapi_cal_util_fetch_attachments (comp, &attachments, cache_dir);
+		e_mapi_cal_util_fetch_attachments (comp, &attachments, cache_dir);
 
 	cbdata.kind = kind;
 	cbdata.username = (gchar *) ecbm_get_user_name (cbmapi);
@@ -1636,27 +1636,27 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		cbdata.msgflags = MSGFLAG_READ;
 		cbdata.meeting_type = (recipients != NULL) ? MEETING_OBJECT : NOT_A_MEETING;
 		cbdata.resp = (recipients != NULL) ? olResponseOrganized : olResponseNone;
-		cbdata.appt_id = exchange_mapi_cal_util_get_new_appt_id (priv->conn, priv->fid);
+		cbdata.appt_id = e_mapi_cal_util_get_new_appt_id (priv->conn, priv->fid);
 		cbdata.appt_seq = 0;
 		cbdata.globalid = NULL;
 		cbdata.cleanglobalid = NULL;
 
-		mid = exchange_mapi_connection_create_item (priv->conn, priv->olFolder, priv->fid,
-						exchange_mapi_cal_utils_write_props_cb, &cbdata,
+		mid = e_mapi_connection_create_item (priv->conn, priv->olFolder, priv->fid,
+						e_mapi_cal_utils_write_props_cb, &cbdata,
 						recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT, &mapi_error);
 		g_free (cbdata.props);
 		if (!mid) {
 			g_object_unref (comp);
-			exchange_mapi_util_free_recipient_list (&recipients);
-			exchange_mapi_util_free_stream_list (&streams);
-			exchange_mapi_util_free_attachment_list (&attachments);
+			e_mapi_util_free_recipient_list (&recipients);
+			e_mapi_util_free_stream_list (&streams);
+			e_mapi_util_free_attachment_list (&attachments);
 			mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to create item on a server"));
 			if (mapi_error)
 				g_error_free (mapi_error);
 			return;
 		}
 
-		tmp = exchange_mapi_util_mapi_id_to_string (mid);
+		tmp = e_mapi_util_mapi_id_to_string (mid);
 		e_cal_component_set_uid (comp, tmp);
 		if (uid)
 			*uid = tmp;
@@ -1668,9 +1668,9 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		*new_icalcomp = icalcomponent_new_clone (e_cal_component_get_icalcomponent (comp));
 		e_cal_backend_notify_component_created (E_CAL_BACKEND (cbmapi), *new_icalcomp);
 	} else {
-		exchange_mapi_util_free_recipient_list (&recipients);
-		exchange_mapi_util_free_stream_list (&streams);
-		exchange_mapi_util_free_attachment_list (&attachments);
+		e_mapi_util_free_recipient_list (&recipients);
+		e_mapi_util_free_stream_list (&streams);
+		e_mapi_util_free_attachment_list (&attachments);
 		g_propagate_error (error, EDC_ERROR (UnsupportedMethod));
 		return;
 	}
@@ -1679,9 +1679,9 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		g_cond_signal (priv->dlock->cond);
 
 	g_object_unref (comp);
-	exchange_mapi_util_free_recipient_list (&recipients);
-	exchange_mapi_util_free_stream_list (&streams);
-	exchange_mapi_util_free_attachment_list (&attachments);
+	e_mapi_util_free_recipient_list (&recipients);
+	e_mapi_util_free_stream_list (&streams);
+	e_mapi_util_free_attachment_list (&attachments);
 }
 
 static gboolean
@@ -1804,21 +1804,21 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 	/* FIXME: [WIP] Add support for recurrences */
 	if (e_cal_component_has_recurrences (comp)) {
-		GByteArray *ba = exchange_mapi_cal_util_rrule_to_bin (comp, NULL);
+		GByteArray *ba = e_mapi_cal_util_rrule_to_bin (comp, NULL);
 		if (ba) {
 			ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 			stream->value = ba;
-			stream->proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, NULL);
+			stream->proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, NULL);
 			if (stream->proptag != MAPI_E_RESERVED)
 				streams = g_slist_append (streams, stream);
 		}
 	}
 
 	if (e_cal_component_has_attendees (comp))
-		exchange_mapi_cal_util_fetch_recipients (comp, &recipients);
+		e_mapi_cal_util_fetch_recipients (comp, &recipients);
 
 	if (e_cal_component_has_attachments (comp))
-		exchange_mapi_cal_util_fetch_attachments (comp, &attachments, cache_dir);
+		e_mapi_cal_util_fetch_attachments (comp, &attachments, cache_dir);
 
 	e_cal_component_get_uid (comp, &uid);
 //	rid = e_cal_component_get_recurid_as_string (comp);
@@ -1839,9 +1839,9 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		if (!cache_comp) {
 			g_message ("CRITICAL : Could not find the object in cache");
 			g_object_unref (comp);
-			exchange_mapi_util_free_recipient_list (&recipients);
-			exchange_mapi_util_free_stream_list (&streams);
-			exchange_mapi_util_free_attachment_list (&attachments);
+			e_mapi_util_free_recipient_list (&recipients);
+			e_mapi_util_free_stream_list (&streams);
+			e_mapi_util_free_attachment_list (&attachments);
 			g_propagate_error (error, EDC_ERROR (ObjectNotFound));
 			return;
 		}
@@ -1869,17 +1869,17 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 			cbdata.meeting_type = (recipients != NULL) ? MEETING_OBJECT_RCVD : NOT_A_MEETING;
 		}
 
-		status = exchange_mapi_connection_modify_item (priv->conn, priv->olFolder, priv->fid, mid,
-						exchange_mapi_cal_utils_write_props_cb, &cbdata,
+		status = e_mapi_connection_modify_item (priv->conn, priv->olFolder, priv->fid, mid,
+						e_mapi_cal_utils_write_props_cb, &cbdata,
 						recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT, &mapi_error);
 		g_free (cbdata.props);
 		free_server_data (&cbdata);
 		if (!status) {
 			g_object_unref (comp);
 			g_object_unref (cache_comp);
-			exchange_mapi_util_free_recipient_list (&recipients);
-			exchange_mapi_util_free_stream_list (&streams);
-			exchange_mapi_util_free_attachment_list (&attachments);
+			e_mapi_util_free_recipient_list (&recipients);
+			e_mapi_util_free_stream_list (&streams);
+			e_mapi_util_free_attachment_list (&attachments);
 
 			mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to modify item on a server"));
 			if (mapi_error)
@@ -1889,9 +1889,9 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	} else {
 		g_object_unref (comp);
 		g_object_unref (cache_comp);
-		exchange_mapi_util_free_recipient_list (&recipients);
-		exchange_mapi_util_free_stream_list (&streams);
-		exchange_mapi_util_free_attachment_list (&attachments);
+		e_mapi_util_free_recipient_list (&recipients);
+		e_mapi_util_free_stream_list (&streams);
+		e_mapi_util_free_attachment_list (&attachments);
 		g_propagate_error (error, EDC_ERROR (UnsupportedMethod));
 		return;
 	}
@@ -1904,9 +1904,9 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 	g_object_unref (comp);
 	g_object_unref (cache_comp);
-	exchange_mapi_util_free_recipient_list (&recipients);
-	exchange_mapi_util_free_stream_list (&streams);
-	exchange_mapi_util_free_attachment_list (&attachments);
+	e_mapi_util_free_recipient_list (&recipients);
+	e_mapi_util_free_stream_list (&streams);
+	e_mapi_util_free_attachment_list (&attachments);
 }
 
 static void
@@ -1972,7 +1972,7 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 			list = g_slist_prepend (list, (gpointer) data);
 		/* } */
 
-		if (exchange_mapi_connection_remove_items (priv->conn, priv->olFolder, priv->fid, 0, list, &ri_error)) {
+		if (e_mapi_connection_remove_items (priv->conn, priv->olFolder, priv->fid, 0, list, &ri_error)) {
 			for (l = comp_list; l; l = l->next) {
 				ECalComponent *comp = E_CAL_COMPONENT (l->data);
 				ECalComponentId *id = e_cal_component_get_id (comp);
@@ -2060,18 +2060,18 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 
 			/* FIXME: Add support for recurrences */
 			if (e_cal_component_has_recurrences (comp)) {
-				GByteArray *ba = exchange_mapi_cal_util_rrule_to_bin (comp, NULL);
+				GByteArray *ba = e_mapi_cal_util_rrule_to_bin (comp, NULL);
 				if (ba) {
 					ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 					stream->value = ba;
-					stream->proptag = exchange_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, NULL);
+					stream->proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, NULL);
 					if (stream->proptag != MAPI_E_RESERVED)
 						streams = g_slist_append (streams, stream);
 				}
 			}
 
 			if (e_cal_component_has_attachments (comp))
-				exchange_mapi_cal_util_fetch_attachments (comp, &attachments, cache_dir);
+				e_mapi_cal_util_fetch_attachments (comp, &attachments, cache_dir);
 
 			cbdata.kind = kind;
 			cbdata.comp = comp;
@@ -2083,26 +2083,26 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 				cbdata.meeting_type = MEETING_REQUEST;
 				cbdata.resp = olResponseNotResponded;
 				if (e_cal_component_has_attendees (comp))
-					exchange_mapi_cal_util_fetch_recipients (comp, &recipients);
+					e_mapi_cal_util_fetch_recipients (comp, &recipients);
 				break;
 			case ICAL_METHOD_CANCEL :
 				cbdata.meeting_type = MEETING_CANCEL;
 				cbdata.resp = olResponseNotResponded;
 				if (e_cal_component_has_attendees (comp))
-					exchange_mapi_cal_util_fetch_recipients (comp, &recipients);
+					e_mapi_cal_util_fetch_recipients (comp, &recipients);
 				break;
 			case ICAL_METHOD_REPLY:
 			case ICAL_METHOD_RESPONSE :
 				cbdata.meeting_type = MEETING_RESPONSE;
 				cbdata.resp = find_my_response (cbmapi, comp);
 				if (e_cal_component_has_organizer (comp))
-					exchange_mapi_cal_util_fetch_organizer (comp, &recipients);
+					e_mapi_cal_util_fetch_organizer (comp, &recipients);
 				break;
 			default :
 				cbdata.meeting_type = NOT_A_MEETING;
 				cbdata.resp = olResponseNone;
 				if (e_cal_component_has_attendees (comp))
-					exchange_mapi_cal_util_fetch_organizer (comp, &recipients);
+					e_mapi_cal_util_fetch_organizer (comp, &recipients);
 				break;
 			}
 
@@ -2119,13 +2119,13 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 			e_cal_component_get_uid (comp, &compuid);
 
 			e_cal_component_get_dtstamp (comp, &ical_creation_time);
-			exchange_mapi_util_time_t_to_filetime (icaltime_as_timet (ical_creation_time), &creation_time);
+			e_mapi_util_time_t_to_filetime (icaltime_as_timet (ical_creation_time), &creation_time);
 
-			propval = exchange_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-EXREPTIME");
+			propval = e_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-EXREPTIME");
 			if (propval && *propval) {
 				mapi_id_t val64 = 0;
 
-				if (exchange_mapi_util_mapi_id_from_string (propval, &val64)) {
+				if (e_mapi_util_mapi_id_from_string (propval, &val64)) {
 					memcpy (&ex_rep_time, &val64, 8);
 					exception_repleace_time = &ex_rep_time;
 				}
@@ -2134,7 +2134,7 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 
 			/* inherit GlobalID from the source object, if available */
 			if (e_cal_component_get_icalcomponent (comp)) {
-				propval = exchange_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-GLOBALID");
+				propval = e_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-GLOBALID");
 				if (propval && *propval) {
 					gsize len = 0;
 
@@ -2159,19 +2159,19 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 			}
 
 			if (compuid) {
-				exchange_mapi_cal_util_generate_globalobjectid (FALSE, compuid, exception_repleace_time, ical_creation_time.year ? &creation_time : NULL, &globalid);
-				exchange_mapi_cal_util_generate_globalobjectid (TRUE,  compuid, exception_repleace_time, ical_creation_time.year ? &creation_time : NULL, &cleanglobalid);
+				e_mapi_cal_util_generate_globalobjectid (FALSE, compuid, exception_repleace_time, ical_creation_time.year ? &creation_time : NULL, &globalid);
+				e_mapi_cal_util_generate_globalobjectid (TRUE,  compuid, exception_repleace_time, ical_creation_time.year ? &creation_time : NULL, &cleanglobalid);
 			}
 
 			if (cbdata.globalid)
-				exchange_mapi_util_free_binary_r (cbdata.globalid);
+				e_mapi_util_free_binary_r (cbdata.globalid);
 			if (cbdata.cleanglobalid)
-				exchange_mapi_util_free_binary_r (cbdata.cleanglobalid);
+				e_mapi_util_free_binary_r (cbdata.cleanglobalid);
 			cbdata.globalid = &globalid;
 			cbdata.cleanglobalid = &cleanglobalid;
 
-			mid = exchange_mapi_connection_create_item (priv->conn, olFolderSentMail, 0,
-							exchange_mapi_cal_utils_write_props_cb, &cbdata,
+			mid = e_mapi_connection_create_item (priv->conn, olFolderSentMail, 0,
+							e_mapi_cal_utils_write_props_cb, &cbdata,
 							recipients, attachments, streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE, &mapi_error);
 			cbdata.globalid = NULL;
 			cbdata.cleanglobalid = NULL;
@@ -2182,8 +2182,8 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 
 			if (!mid) {
 				g_object_unref (comp);
-				exchange_mapi_util_free_recipient_list (&recipients);
-				exchange_mapi_util_free_attachment_list (&attachments);
+				e_mapi_util_free_recipient_list (&recipients);
+				e_mapi_util_free_attachment_list (&attachments);
 				mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to create item on a server"));
 				if (mapi_error)
 					g_error_free (mapi_error);
@@ -2191,8 +2191,8 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 			}
 
 			g_object_unref (comp);
-			exchange_mapi_util_free_recipient_list (&recipients);
-			exchange_mapi_util_free_attachment_list (&attachments);
+			e_mapi_util_free_recipient_list (&recipients);
+			e_mapi_util_free_attachment_list (&attachments);
 
 			subcomp = icalcomponent_get_next_component (icalcomp,
 								    e_cal_backend_get_kind (E_CAL_BACKEND (backend)));
@@ -2434,7 +2434,7 @@ ecbm_get_free_busy (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		return;
 	}
 
-	if (!exchange_mapi_cal_utils_get_free_busy_data (priv->conn, users, start, end, freebusy, &mapi_error)) {
+	if (!e_mapi_cal_utils_get_free_busy_data (priv->conn, users, start, end, freebusy, &mapi_error)) {
 		mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to get Free/Busy data"));
 
 		if (mapi_error)
@@ -3025,7 +3025,7 @@ base_op_abstract (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellabl
 	op->opid = opid;
 	op->cancellable = cancellable;
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 static void
@@ -3054,7 +3054,7 @@ str_op_abstract (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable
 	op->base.cancellable = cancellable;
 	op->str = g_strdup (str);
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 static void
@@ -3084,7 +3084,7 @@ str2_op_abstract (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellabl
 	op->str1 = g_strdup (str1);
 	op->str2 = g_strdup (str2);
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 #define BASE_OP_DEF(_func, _ot)										\
@@ -3134,7 +3134,7 @@ ecbm_op_open (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *c
 	op->base.cancellable = cancellable;
 	op->only_if_exists = only_if_exists;
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 static void
@@ -3161,7 +3161,7 @@ ecbm_op_authenticate_user (ECalBackend *backend, GCancellable *cancellable, ECre
 	op->base.cancellable = cancellable;
 	op->credentials = e_credentials_new_clone (credentials);
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 STR_OP_DEF (ecbm_op_get_backend_property, OP_GET_BACKEND_PROPERTY)
@@ -3197,7 +3197,7 @@ ecbm_op_modify_object (ECalBackend *backend, EDataCal *cal, guint32 opid, GCance
 	op->calobj = g_strdup (calobj);
 	op->mod = mod;
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 static void
@@ -3228,7 +3228,7 @@ ecbm_op_remove_object (ECalBackend *backend, EDataCal *cal, guint32 opid, GCance
 	op->rid = g_strdup (rid);
 	op->mod = mod;
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 static void
@@ -3259,7 +3259,7 @@ ecbm_op_discard_alarm (ECalBackend *backend, EDataCal *cal, guint32 opid, GCance
 	op->rid = g_strdup (rid);
 	op->auid = g_strdup (auid);
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 STR_OP_DEF  (ecbm_op_receive_objects, OP_RECEIVE_OBJECTS)
@@ -3288,7 +3288,7 @@ ecbm_op_start_view (ECalBackend *backend, EDataCalView *view)
 	op->base.ot = OP_START_VIEW;
 	op->view = g_object_ref (view);
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 static void
@@ -3319,7 +3319,7 @@ ecbm_op_get_free_busy (ECalBackend *backend, EDataCal *cal, guint32 opid, GCance
 	op->start = start;
 	op->end = end;
 
-	em_operation_queue_push (priv->op_queue, op);
+	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 static void
@@ -3468,7 +3468,7 @@ e_cal_backend_mapi_init (ECalBackendMAPI *cbmapi)
 	priv->mutex = g_mutex_new ();
 	priv->updating_mutex = g_mutex_new ();
 	priv->populating_cache = FALSE;
-	priv->op_queue = em_operation_queue_new ((EMOperationQueueFunc) ecbm_operation_cb, cbmapi);
+	priv->op_queue = e_mapi_operation_queue_new ((EMapiOperationQueueFunc) ecbm_operation_cb, cbmapi);
 
 	cbmapi->priv = priv;
 

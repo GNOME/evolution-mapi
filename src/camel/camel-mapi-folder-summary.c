@@ -32,10 +32,10 @@
 #include <sys/stat.h>
 
 #include "camel-mapi-folder.h"
-#include "camel-mapi-summary.h"
+#include "camel-mapi-folder-summary.h"
 #include "camel-mapi-store.h"
 
-#define CAMEL_MAPI_SUMMARY_VERSION (1)
+#define CAMEL_MAPI_FOLDER_SUMMARY_VERSION (1)
 
 /*Prototypes*/
 static CamelFIRecord* mapi_summary_header_to_db (CamelFolderSummary *, GError **error);
@@ -49,17 +49,17 @@ static gboolean mapi_content_info_to_db (CamelFolderSummary *s, CamelMessageCont
 
 /*End of Prototypes*/
 
-G_DEFINE_TYPE (CamelMapiSummary, camel_mapi_summary, CAMEL_TYPE_FOLDER_SUMMARY)
+G_DEFINE_TYPE (CamelMapiFolderSummary, camel_mapi_folder_summary, CAMEL_TYPE_FOLDER_SUMMARY)
 
 static void
 mapi_summary_finalize (GObject *object)
 {
-	CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (object);
+	CamelMapiFolderSummary *mapi_summary = CAMEL_MAPI_FOLDER_SUMMARY (object);
 
 	g_free (mapi_summary->sync_time_stamp);
 
 	/* Chain up to parent's finalize() method. */
-	G_OBJECT_CLASS (camel_mapi_summary_parent_class)->finalize (object);
+	G_OBJECT_CLASS (camel_mapi_folder_summary_parent_class)->finalize (object);
 }
 
 static CamelMessageInfo *
@@ -70,7 +70,7 @@ mapi_message_info_clone(CamelFolderSummary *s, const CamelMessageInfo *mi)
 	CamelFolderSummaryClass *folder_summary_class;
 
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (
-		camel_mapi_summary_parent_class);
+		camel_mapi_folder_summary_parent_class);
 
 	to = (CamelMapiMessageInfo *)folder_summary_class->message_info_clone(s, mi);
 	to->server_flags = from->server_flags;
@@ -82,7 +82,7 @@ mapi_message_info_clone(CamelFolderSummary *s, const CamelMessageInfo *mi)
 }
 
 static void
-camel_mapi_summary_class_init (CamelMapiSummaryClass *class)
+camel_mapi_folder_summary_class_init (CamelMapiFolderSummaryClass *class)
 {
 	GObjectClass *object_class;
 	CamelFolderSummaryClass *folder_summary_class;
@@ -103,26 +103,26 @@ camel_mapi_summary_class_init (CamelMapiSummaryClass *class)
 }
 
 static void
-camel_mapi_summary_init (CamelMapiSummary *mapi_summary)
+camel_mapi_folder_summary_init (CamelMapiFolderSummary *mapi_summary)
 {
 }
 
 /**
- * camel_mapi_summary_new:
+ * camel_mapi_folder_summary_new:
  * @filename: the file to store the summary in.
  *
- * This will create a new CamelMapiSummary object and read in the
+ * This will create a new CamelMapiFolderSummary object and read in the
  * summary data from disk, if it exists.
  *
- * Return value: A new CamelMapiSummary object.
+ * Return value: A new CamelMapiFolderSummary object.
  **/
 CamelFolderSummary *
-camel_mapi_summary_new (CamelFolder *folder, const gchar *filename)
+camel_mapi_folder_summary_new (CamelFolder *folder, const gchar *filename)
 {
 	CamelFolderSummary *summary;
 	GError *local_error = NULL;
 
-	summary = g_object_new (CAMEL_TYPE_MAPI_SUMMARY, "folder", folder, NULL);
+	summary = g_object_new (CAMEL_TYPE_MAPI_FOLDER_SUMMARY, "folder", folder, NULL);
 
 	camel_folder_summary_set_build_content (summary, TRUE);
 	camel_folder_summary_set_filename (summary, filename);
@@ -140,7 +140,7 @@ camel_mapi_summary_new (CamelFolder *folder, const gchar *filename)
 }
 
 void
-camel_mapi_summary_update_store_info_counts (CamelMapiSummary *mapi_summary)
+camel_mapi_folder_summary_update_store_info_counts (CamelMapiFolderSummary *mapi_summary)
 {
 	CamelFolderSummary *summary;
 
@@ -180,12 +180,12 @@ camel_mapi_summary_update_store_info_counts (CamelMapiSummary *mapi_summary)
 static gboolean
 mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
 {
-	CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY (summary);
+	CamelMapiFolderSummary *mapi_summary = CAMEL_MAPI_FOLDER_SUMMARY (summary);
 	CamelFolderSummaryClass *folder_summary_class;
 	gchar *part;
 
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (
-		camel_mapi_summary_parent_class);
+		camel_mapi_folder_summary_parent_class);
 
 	if (!folder_summary_class->summary_header_from_db (summary, fir))
 		return FALSE;
@@ -206,21 +206,21 @@ mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
 static CamelFIRecord *
 mapi_summary_header_to_db (CamelFolderSummary *summary, GError **error)
 {
-	CamelMapiSummary *mapi_summary = CAMEL_MAPI_SUMMARY(summary);
+	CamelMapiFolderSummary *mapi_summary = CAMEL_MAPI_FOLDER_SUMMARY(summary);
 	CamelFolderSummaryClass *folder_summary_class;
 	struct _CamelFIRecord *fir;
 
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (
-		camel_mapi_summary_parent_class);
+		camel_mapi_folder_summary_parent_class);
 
 	fir = folder_summary_class->summary_header_to_db (summary, error);
 
 	if (!fir)
 		return NULL;
 
-	fir->bdata = g_strdup_printf ("%d %s", CAMEL_MAPI_SUMMARY_VERSION, mapi_summary->sync_time_stamp);
+	fir->bdata = g_strdup_printf ("%d %s", CAMEL_MAPI_FOLDER_SUMMARY_VERSION, mapi_summary->sync_time_stamp);
 
-	camel_mapi_summary_update_store_info_counts (mapi_summary);
+	camel_mapi_folder_summary_update_store_info_counts (mapi_summary);
 
 	return fir;
 }
@@ -232,7 +232,7 @@ mapi_message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 	CamelMessageInfo *info;
 
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (
-		camel_mapi_summary_parent_class);
+		camel_mapi_folder_summary_parent_class);
 
 	info = folder_summary_class->message_info_from_db (s, mir);
 	if (info) {
@@ -256,7 +256,7 @@ mapi_message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info)
 	struct _CamelMIRecord *mir;
 
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (
-		camel_mapi_summary_parent_class);
+		camel_mapi_folder_summary_parent_class);
 
 	mir = folder_summary_class->message_info_to_db (s, info);
 	if (mir)
@@ -273,7 +273,7 @@ mapi_content_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 	guint32 type=0;
 
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (
-		camel_mapi_summary_parent_class);
+		camel_mapi_folder_summary_parent_class);
 
 	if (part)
 		type = bdata_extract_digit (&part);
@@ -292,7 +292,7 @@ mapi_content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, C
 	CamelFolderSummaryClass *folder_summary_class;
 
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (
-		camel_mapi_summary_parent_class);
+		camel_mapi_folder_summary_parent_class);
 
 	if (info->type) {
 		mir->cinfo = g_strdup ("1");

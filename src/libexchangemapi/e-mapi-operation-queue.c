@@ -23,7 +23,7 @@
 #endif
 
 #include <stdio.h>
-#include "em-operation-queue.h"
+#include "e-mapi-operation-queue.h"
 
 static void thread_func_cb (gpointer data, gpointer pqueue);
 
@@ -32,29 +32,29 @@ static void thread_func_cb (gpointer data, gpointer pqueue);
 
 /* GObject foo - begin */
 
-G_DEFINE_TYPE (EMOperationQueue, em_operation_queue, G_TYPE_OBJECT)
+G_DEFINE_TYPE (EMapiOperationQueue, e_mapi_operation_queue, G_TYPE_OBJECT)
 
-struct _EMOperationQueuePrivate
+struct _EMapiOperationQueuePrivate
 {
 	GMutex *lock;
 	GThreadPool *pool;
-	EMOperationQueueFunc worker_cb;
+	EMapiOperationQueueFunc worker_cb;
 	gpointer user_data;
 	GSList *ops;
 };
 
 static void
-em_operation_queue_dispose (GObject *object)
+e_mapi_operation_queue_dispose (GObject *object)
 {
-	EMOperationQueue *queue = EM_OPERATION_QUEUE (object);
-	EMOperationQueuePrivate *priv;
+	EMapiOperationQueue *queue = E_MAPI_OPERATION_QUEUE (object);
+	EMapiOperationQueuePrivate *priv;
 
 	g_return_if_fail (queue != NULL);
 
 	priv = queue->priv;
 
 	if (priv) {
-		em_operation_queue_cancel_all (queue);
+		e_mapi_operation_queue_cancel_all (queue);
 
 		LOCK ();
 		if (priv->ops) {
@@ -70,30 +70,30 @@ em_operation_queue_dispose (GObject *object)
 		g_mutex_free (priv->lock);
 	}
 
-	if (G_OBJECT_CLASS (em_operation_queue_parent_class)->dispose)
-		G_OBJECT_CLASS (em_operation_queue_parent_class)->dispose (object);
+	if (G_OBJECT_CLASS (e_mapi_operation_queue_parent_class)->dispose)
+		G_OBJECT_CLASS (e_mapi_operation_queue_parent_class)->dispose (object);
 }
 
 static void
-em_operation_queue_class_init (EMOperationQueueClass *klass)
+e_mapi_operation_queue_class_init (EMapiOperationQueueClass *klass)
 {
 	GObjectClass *object_class;
 
-	g_type_class_add_private (klass, sizeof (EMOperationQueuePrivate));
+	g_type_class_add_private (klass, sizeof (EMapiOperationQueuePrivate));
 
 	object_class = G_OBJECT_CLASS (klass);
-	object_class->dispose = em_operation_queue_dispose;
+	object_class->dispose = e_mapi_operation_queue_dispose;
 }
 
 static void
-em_operation_queue_init (EMOperationQueue *queue)
+e_mapi_operation_queue_init (EMapiOperationQueue *queue)
 {
-	EMOperationQueuePrivate *priv;
+	EMapiOperationQueuePrivate *priv;
 
 	g_return_if_fail (queue != NULL);
-	g_return_if_fail (EM_IS_OPERATION_QUEUE (queue));
+	g_return_if_fail (E_MAPI_IS_OPERATION_QUEUE (queue));
 
-	queue->priv = G_TYPE_INSTANCE_GET_PRIVATE (queue, EM_TYPE_OPERATION_QUEUE, EMOperationQueuePrivate);
+	queue->priv = G_TYPE_INSTANCE_GET_PRIVATE (queue, E_MAPI_TYPE_OPERATION_QUEUE, EMapiOperationQueuePrivate);
 	priv = queue->priv;
 	g_return_if_fail (priv != NULL);
 
@@ -115,13 +115,13 @@ struct OPData
 static void
 thread_func_cb (gpointer data, gpointer pqueue)
 {
-	EMOperationQueue *queue = pqueue;
-	EMOperationQueuePrivate *priv;
+	EMapiOperationQueue *queue = pqueue;
+	EMapiOperationQueuePrivate *priv;
 	struct OPData *op = data;
 	gpointer worker_data = NULL;
 	gboolean cancelled = TRUE;
 
-	g_return_if_fail (EM_IS_OPERATION_QUEUE (queue));
+	g_return_if_fail (E_MAPI_IS_OPERATION_QUEUE (queue));
 	g_return_if_fail (op != NULL);
 
 	priv = queue->priv;
@@ -147,15 +147,15 @@ thread_func_cb (gpointer data, gpointer pqueue)
 	g_free (op);
 }
 
-EMOperationQueue *
-em_operation_queue_new (EMOperationQueueFunc worker_cb, gpointer user_data)
+EMapiOperationQueue *
+e_mapi_operation_queue_new (EMapiOperationQueueFunc worker_cb, gpointer user_data)
 {
-	EMOperationQueue *queue;
-	EMOperationQueuePrivate *priv;
+	EMapiOperationQueue *queue;
+	EMapiOperationQueuePrivate *priv;
 
 	g_return_val_if_fail (worker_cb != NULL, NULL);
 
-	queue = g_object_new (EM_TYPE_OPERATION_QUEUE, NULL);
+	queue = g_object_new (E_MAPI_TYPE_OPERATION_QUEUE, NULL);
 
 	priv = queue->priv;
 	g_return_val_if_fail (priv != NULL, NULL);
@@ -167,13 +167,13 @@ em_operation_queue_new (EMOperationQueueFunc worker_cb, gpointer user_data)
 }
 
 void
-em_operation_queue_push (EMOperationQueue *queue, gpointer worker_data)
+e_mapi_operation_queue_push (EMapiOperationQueue *queue, gpointer worker_data)
 {
-	EMOperationQueuePrivate *priv;
+	EMapiOperationQueuePrivate *priv;
 	struct OPData *op;
 
 	g_return_if_fail (queue != NULL);
-	g_return_if_fail (EM_IS_OPERATION_QUEUE (queue));
+	g_return_if_fail (E_MAPI_IS_OPERATION_QUEUE (queue));
 
 	priv = queue->priv;
 	g_return_if_fail (priv != NULL);
@@ -191,14 +191,14 @@ em_operation_queue_push (EMOperationQueue *queue, gpointer worker_data)
 }
 
 gboolean
-em_operation_queue_cancel (EMOperationQueue *queue, gpointer worker_data)
+e_mapi_operation_queue_cancel (EMapiOperationQueue *queue, gpointer worker_data)
 {
-	EMOperationQueuePrivate *priv;
+	EMapiOperationQueuePrivate *priv;
 	gboolean found = FALSE;
 	GSList *l;
 
 	g_return_val_if_fail (queue != NULL, FALSE);
-	g_return_val_if_fail (EM_IS_OPERATION_QUEUE (queue), FALSE);
+	g_return_val_if_fail (E_MAPI_IS_OPERATION_QUEUE (queue), FALSE);
 
 	priv = queue->priv;
 	g_return_val_if_fail (priv != NULL, FALSE);
@@ -222,14 +222,14 @@ em_operation_queue_cancel (EMOperationQueue *queue, gpointer worker_data)
 }
 
 gboolean
-em_operation_queue_cancel_all (EMOperationQueue *queue)
+e_mapi_operation_queue_cancel_all (EMapiOperationQueue *queue)
 {
-	EMOperationQueuePrivate *priv;
+	EMapiOperationQueuePrivate *priv;
 	gboolean found_any = FALSE;
 	GSList *l;
 
 	g_return_val_if_fail (queue != NULL, FALSE);
-	g_return_val_if_fail (EM_IS_OPERATION_QUEUE (queue), FALSE);
+	g_return_val_if_fail (E_MAPI_IS_OPERATION_QUEUE (queue), FALSE);
 
 	priv = queue->priv;
 	g_return_val_if_fail (priv != NULL, FALSE);
@@ -254,13 +254,13 @@ em_operation_queue_cancel_all (EMOperationQueue *queue)
 }
 
 gint
-em_operation_queue_length (EMOperationQueue *queue)
+e_mapi_operation_queue_length (EMapiOperationQueue *queue)
 {
-	EMOperationQueuePrivate *priv;
+	EMapiOperationQueuePrivate *priv;
 	gint len;
 
 	g_return_val_if_fail (queue != NULL, -1);
-	g_return_val_if_fail (EM_IS_OPERATION_QUEUE (queue), -1);
+	g_return_val_if_fail (E_MAPI_IS_OPERATION_QUEUE (queue), -1);
 
 	priv = queue->priv;
 	g_return_val_if_fail (priv != NULL, -1);
@@ -276,8 +276,8 @@ struct async_queue_data
 {
 	gpointer worker_data;
 	gpointer user_data;
-	EMOperationQueueFunc worker_cb;
-	EMOperationQueueFunc done_cb;
+	EMapiOperationQueueFunc worker_cb;
+	EMapiOperationQueueFunc done_cb;
 
 	gboolean cancelled;
 };
@@ -316,14 +316,14 @@ async_queue_worker_cb (gpointer worker_data, gboolean cancelled, gpointer user_d
 		g_free (data);
 }
 
-EMOperationQueue *
-em_async_queue_new (void)
+EMapiOperationQueue *
+e_mapi_async_queue_new (void)
 {
-	return em_operation_queue_new (async_queue_worker_cb, NULL);
+	return e_mapi_operation_queue_new (async_queue_worker_cb, NULL);
 }
 
 void
-em_async_queue_push (EMOperationQueue *queue, gpointer worker_data, gpointer user_data, EMOperationQueueFunc worker_cb, EMOperationQueueFunc done_cb)
+e_mapi_async_queue_push (EMapiOperationQueue *queue, gpointer worker_data, gpointer user_data, EMapiOperationQueueFunc worker_cb, EMapiOperationQueueFunc done_cb)
 {
 	struct async_queue_data *data;
 
@@ -335,5 +335,5 @@ em_async_queue_push (EMOperationQueue *queue, gpointer worker_data, gpointer use
 	data->worker_cb = worker_cb;
 	data->done_cb = done_cb;
 
-	em_operation_queue_push (queue, data);
+	e_mapi_operation_queue_push (queue, data);
 }
