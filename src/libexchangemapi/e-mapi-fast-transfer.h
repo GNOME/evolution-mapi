@@ -32,15 +32,21 @@
 
 G_BEGIN_DECLS
 
-struct _EMapiMessage;
+struct _EMapiObject;
 struct _EMapiRecipient;
 struct _EMapiAttachment;
 
-typedef struct _EMapiMessage EMapiMessage;
+typedef struct _EMapiObject EMapiObject;
 typedef struct _EMapiRecipient EMapiRecipient;
 typedef struct _EMapiAttachment EMapiAttachment;
 
-typedef gboolean (*EMapiFastTransferCB) (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, /* const */ EMapiMessage *message, guint32 msg_index, guint32 msg_total, gpointer user_data, GError **perror);
+typedef gboolean	(*EMapiFastTransferCB)		(EMapiConnection *conn,
+							 TALLOC_CTX *mem_ctx,
+							 /* const */ EMapiObject *object,
+							 guint32 obj_index,
+							 guint32 obj_total,
+							 gpointer user_data,
+							 GError **perror);
 
 struct _EMapiRecipient
 {
@@ -52,17 +58,17 @@ struct _EMapiRecipient
 struct _EMapiAttachment
 {
 	struct mapi_SPropValue_array properties;
-	EMapiMessage *embeded_message;
+	EMapiObject *embeded_object;
 
 	EMapiAttachment *next;
 };
 
-struct _EMapiMessage {
+struct _EMapiObject {
 	struct mapi_SPropValue_array properties;
 	EMapiRecipient *recipients; /* NULL when none */
 	EMapiAttachment *attachments; /* NULL when none */
 
-	EMapiMessage *parent; /* chain up to parent's message, if this is embeded attachment */
+	EMapiObject *parent; /* chain up to parent's object, if this is embeded attachment */
 };
 
 EMapiRecipient *	e_mapi_recipient_new		(TALLOC_CTX *mem_ctx);
@@ -71,14 +77,10 @@ void			e_mapi_recipient_free		(EMapiRecipient *recipient);
 EMapiAttachment *	e_mapi_attachment_new		(TALLOC_CTX *mem_ctx);
 void			e_mapi_attachment_free		(EMapiAttachment *attachment);
 
-EMapiMessage *		e_mapi_message_new		(TALLOC_CTX *mem_ctx);
-void			e_mapi_message_free		(EMapiMessage *message);
-void			e_mapi_message_dump		(EMapiMessage *message,
-							 gint indent,
-							 gboolean with_properties);
+EMapiObject *		e_mapi_object_new		(TALLOC_CTX *mem_ctx);
+void			e_mapi_object_free		(EMapiObject *object);
 
 enum MAPISTATUS		e_mapi_fast_transfer_objects	(EMapiConnection *conn,
-							 mapi_id_t fid,
 							 TALLOC_CTX *mem_ctx,
 							 mapi_object_t *obj_folder,
 							 mapi_id_array_t *ids,
@@ -94,9 +96,8 @@ typedef enum {
 } EMapiFastTransferFlags;
 
 enum MAPISTATUS		e_mapi_fast_transfer_object	(EMapiConnection *conn,
-							 mapi_id_t fid,
 							 TALLOC_CTX *mem_ctx,
-							 mapi_object_t *obj_message,
+							 mapi_object_t *object,
 							 guint32 transfer_flags, /* bit OR of EMapiFastTransferFlags */
 							 EMapiFastTransferCB cb,
 							 gpointer cb_user_data,

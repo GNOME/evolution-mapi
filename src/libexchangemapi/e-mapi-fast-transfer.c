@@ -36,7 +36,6 @@ typedef struct _EMapiFXParserClosure EMapiFXParserClosure;
 
 struct _EMapiFXParserClosure {
 	EMapiConnection *conn;
-	mapi_id_t fid;
 	TALLOC_CTX *mem_ctx;
 	EMapiFastTransferCB cb;
 	gpointer cb_user_data;
@@ -44,18 +43,18 @@ struct _EMapiFXParserClosure {
 
 	uint32_t next_proptag_is_nameid;
 	uint32_t next_nameid_proptag;
-	guint32 message_index;
-	guint32 messages_total;
+	guint32 object_index;
+	guint32 objects_total;
 
 	/* in what section it is now */
 	uint32_t marker;
 	/* where to store read properties */
 	struct mapi_SPropValue_array *current_properties;
-	/* what message is currently read (can be embeded message or the below message */
-	EMapiMessage *current_message;
+	/* what object is currently read (can be embeded object or the below object */
+	EMapiObject *current_object;
 
-	/* main message properties */
-	EMapiMessage *message;
+	/* main object properties */
+	EMapiObject *object;
 };
 
 EMapiRecipient *
@@ -95,7 +94,7 @@ e_mapi_attachment_new (TALLOC_CTX *mem_ctx)
 
 	attachment->properties.cValues = 0;
 	attachment->properties.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, 1);
-	attachment->embeded_message = NULL;
+	attachment->embeded_object = NULL;
 	attachment->next = NULL;
 
 	g_assert (attachment->properties.lpProps != NULL);
@@ -109,40 +108,40 @@ e_mapi_attachment_free (EMapiAttachment *attachment)
 	if (!attachment)
 		return;
 
-	e_mapi_message_free (attachment->embeded_message);
+	e_mapi_object_free (attachment->embeded_object);
 	talloc_free (attachment->properties.lpProps);
 	talloc_free (attachment);
 }
 
-EMapiMessage *
-e_mapi_message_new (TALLOC_CTX *mem_ctx)
+EMapiObject *
+e_mapi_object_new (TALLOC_CTX *mem_ctx)
 {
-	EMapiMessage *message;
+	EMapiObject *object;
 
-	message = talloc_zero (mem_ctx, EMapiMessage);
-	g_assert (message != NULL);
+	object = talloc_zero (mem_ctx, EMapiObject);
+	g_assert (object != NULL);
 
-	message->properties.cValues = 0;
-	message->properties.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, 1);
-	message->recipients = NULL;
-	message->attachments = NULL;
-	message->parent = NULL;
+	object->properties.cValues = 0;
+	object->properties.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, 1);
+	object->recipients = NULL;
+	object->attachments = NULL;
+	object->parent = NULL;
 
-	g_assert (message->properties.lpProps != NULL);
+	g_assert (object->properties.lpProps != NULL);
 
-	return message;
+	return object;
 }
 
 void
-e_mapi_message_free (EMapiMessage *message)
+e_mapi_object_free (EMapiObject *object)
 {
 	EMapiRecipient *recipient;
 	EMapiAttachment *attachment;
 
-	if (!message)
+	if (!object)
 		return;
 
-	recipient = message->recipients;
+	recipient = object->recipients;
 	while (recipient) {
 		EMapiRecipient *r = recipient;
 
@@ -150,7 +149,7 @@ e_mapi_message_free (EMapiMessage *message)
 		e_mapi_recipient_free (r);
 	}
 
-	attachment = message->attachments;
+	attachment = object->attachments;
 	while (attachment) {
 		EMapiAttachment *a = attachment;
 
@@ -158,78 +157,46 @@ e_mapi_message_free (EMapiMessage *message)
 		e_mapi_attachment_free (a);
 	}
 
-	talloc_free (message->properties.lpProps);
-	talloc_free (message);
+	talloc_free (object->properties.lpProps);
+	talloc_free (object);
 }
 
 static void
-e_mapi_message_finish_read (EMapiMessage *message)
+e_mapi_object_finish_read (EMapiObject *object)
 {
 	EMapiRecipient *rprev, *rtail, *rnext;
 	EMapiAttachment *aprev, *atail, *anext;
 
-	if (!message)
+	if (!object)
 		return;
 
 	/* reverse order of recipients and attachments */
 	rprev = NULL;
-	for (rtail = message->recipients; rtail; rtail = rnext) {
+	for (rtail = object->recipients; rtail; rtail = rnext) {
 		rnext = rtail->next;
 		rtail->next = rprev;
 		rprev = rtail;
 	}
-	message->recipients = rprev;
+	object->recipients = rprev;
 
 	aprev = NULL;
-	for (atail = message->attachments; atail; atail = anext) {
+	for (atail = object->attachments; atail; atail = anext) {
 		anext = atail->next;
 		atail->next = aprev;
 		aprev = atail;
 	}
-	message->attachments = aprev;
-}
-
-void
-e_mapi_message_dump (EMapiMessage *message, gint indent, gboolean with_properties)
-{
-	EMapiRecipient *recipient;
-	EMapiAttachment *attachment;
-	gint index;
-
-	g_print ("%*sEMapiMessage: %p (parent:%p)\n", indent, "", message, message->parent);
-
-	if (!message)
-		return;
-
-	if (with_properties)
-		e_mapi_debug_dump_properties (NULL, 0, &message->properties, indent + 3);
-
-	for (index = 0, recipient = message->recipients; recipient; index++, recipient = recipient->next) {
-		g_print ("%*sRecipient[%d]:\n", indent + 2, "", index);
-		if (with_properties)
-			e_mapi_debug_dump_properties (NULL, 0, &recipient->properties, indent + 3);
-	}
-
-	for (index = 0, attachment = message->attachments; attachment; index++, attachment = attachment->next) {
-		g_print ("%*sAttachment[%d]:\n", indent + 2, "", index);
-		if (with_properties)
-			e_mapi_debug_dump_properties (NULL, 0, &attachment->properties, indent + 3);
-		if (attachment->embeded_message) {
-			g_print ("%*sEmbeded message:\n", indent + 3, "");
-			e_mapi_message_dump (attachment->embeded_message, indent + 5, with_properties);
-		}
-	}
+	object->attachments = aprev;
 }
 
 static gboolean
-process_parsed_message (EMapiFXParserClosure *data)
+process_parsed_object (EMapiFXParserClosure *data)
 {
 	g_return_val_if_fail (data != NULL, FALSE);
 	g_return_val_if_fail (data->conn != NULL, FALSE);
 	g_return_val_if_fail (data->cb != NULL, FALSE);
-	g_return_val_if_fail (data->message != NULL, FALSE);
+	g_return_val_if_fail (data->object != NULL, FALSE);
 
-	return data->cb (data->conn, data->fid, data->mem_ctx, data->message, data->message_index, data->messages_total, data->cb_user_data, data->perror);
+	return data->cb (data->conn, data->mem_ctx, data->object, data->object_index, data->objects_total, data->cb_user_data, data->perror);
 }
 
 static enum MAPISTATUS
@@ -241,36 +208,36 @@ parse_marker_cb (uint32_t marker, void *closure)
 	/* g_print ("\tMarker: %s (0x%08x)\n", get_proptag_name (marker), marker); */
 	switch (marker) {
 		case PidTagStartMessage:
-			if (data->message) {
-				g_debug ("%s: PidTagStartMessage: out of order, previous message not finished yet", G_STRFUNC);
-				e_mapi_message_finish_read (data->message);
-				stop = !process_parsed_message (data);
-				e_mapi_message_free (data->message);
-				data->message = NULL;
-				data->current_message = NULL;
+			if (data->object) {
+				g_debug ("%s: PidTagStartMessage: out of order, previous object not finished yet", G_STRFUNC);
+				e_mapi_object_finish_read (data->object);
+				stop = !process_parsed_object (data);
+				e_mapi_object_free (data->object);
+				data->object = NULL;
+				data->current_object = NULL;
 				data->current_properties = NULL;
 			}
 
 			if (stop)
 				return MAPI_E_USER_CANCEL;
 
-			/* new message parsing */
-			data->message_index++;
-			data->message = e_mapi_message_new (data->mem_ctx);
-			data->current_message = data->message;
-			data->current_properties = &data->message->properties;
+			/* new object parsing */
+			data->object_index++;
+			data->object = e_mapi_object_new (data->mem_ctx);
+			data->current_object = data->object;
+			data->current_properties = &data->object->properties;
 			data->marker = marker;
 			break;
 		case PidTagEndMessage:
-			if (!data->message) {
-				g_debug ("%s: PidTagEndMessage no message started", G_STRFUNC);
+			if (!data->object) {
+				g_debug ("%s: PidTagEndMessage no object started", G_STRFUNC);
 			} else {
-				e_mapi_message_finish_read (data->message);
-				stop = !process_parsed_message (data);
+				e_mapi_object_finish_read (data->object);
+				stop = !process_parsed_object (data);
 
-				e_mapi_message_free (data->message);
-				data->message = NULL;
-				data->current_message = NULL;
+				e_mapi_object_free (data->object);
+				data->object = NULL;
+				data->current_object = NULL;
 				data->current_properties = NULL;
 
 				if (stop)
@@ -279,16 +246,16 @@ parse_marker_cb (uint32_t marker, void *closure)
 			data->marker = 0;
 			break;
 		case PidTagStartRecip:
-			if (!data->current_message) {
-				g_debug ("%s: PidTagStartRecip no message started", G_STRFUNC);
+			if (!data->current_object) {
+				g_debug ("%s: PidTagStartRecip no object started", G_STRFUNC);
 			} else {
 				EMapiRecipient *recipient;
 
 				recipient = e_mapi_recipient_new (data->mem_ctx);
 
 				/* they are stored in reverse order, but reverted before passing to a caller */
-				recipient->next = data->current_message->recipients;
-				data->current_message->recipients = recipient;
+				recipient->next = data->current_object->recipients;
+				data->current_object->recipients = recipient;
 
 				data->current_properties = &recipient->properties;
 			}
@@ -299,16 +266,16 @@ parse_marker_cb (uint32_t marker, void *closure)
 			data->marker = 0;
 			break;
 		case PidTagNewAttach:
-			if (!data->current_message) {
-				g_debug ("%s: PidTagNewAttach no message started", G_STRFUNC);
+			if (!data->current_object) {
+				g_debug ("%s: PidTagNewAttach no object started", G_STRFUNC);
 			} else {
 				EMapiAttachment *attachment;
 
 				attachment = e_mapi_attachment_new (data->mem_ctx);
 
 				/* they are stored in reverse order, but reverted before passing to a caller */
-				attachment->next = data->current_message->attachments;
-				data->current_message->attachments = attachment;
+				attachment->next = data->current_object->attachments;
+				data->current_object->attachments = attachment;
 
 				data->current_properties = &attachment->properties;
 			}
@@ -319,32 +286,32 @@ parse_marker_cb (uint32_t marker, void *closure)
 			data->marker = 0;
 			break;
 		case PidTagStartEmbed:
-			if (!data->current_message) {
-				g_debug ("%s: PidTagStartEmbed no message started", G_STRFUNC);
-			} else if (!data->current_message->attachments) {
+			if (!data->current_object) {
+				g_debug ("%s: PidTagStartEmbed no object started", G_STRFUNC);
+			} else if (!data->current_object->attachments) {
 				g_debug ("%s: PidTagStartEmbed no attachment started", G_STRFUNC);
-			} else if (data->current_message->attachments->embeded_message) {
-				g_debug ("%s: PidTagStartEmbed attachment has embeded message already", G_STRFUNC);
+			} else if (data->current_object->attachments->embeded_object) {
+				g_debug ("%s: PidTagStartEmbed attachment has embeded object already", G_STRFUNC);
 			} else {
-				EMapiMessage *message;
+				EMapiObject *object;
 
-				message = e_mapi_message_new (data->mem_ctx);
+				object = e_mapi_object_new (data->mem_ctx);
 
-				message->parent = data->current_message;
-				data->current_message->attachments->embeded_message = message;
-				data->current_message = message;
-				data->current_properties = &message->properties;
+				object->parent = data->current_object;
+				data->current_object->attachments->embeded_object = object;
+				data->current_object = object;
+				data->current_properties = &object->properties;
 			}
 			data->marker = marker;
 			break;
 		case PidTagEndEmbed:
-			if (!data->current_message) {
-				g_debug ("%s: PidTagEndEmbed no message started", G_STRFUNC);
-			} else if (!data->current_message->parent) {
-				g_debug ("%s: PidTagEndEmbed no parent message", G_STRFUNC);
+			if (!data->current_object) {
+				g_debug ("%s: PidTagEndEmbed no object started", G_STRFUNC);
+			} else if (!data->current_object->parent) {
+				g_debug ("%s: PidTagEndEmbed no parent object", G_STRFUNC);
 			} else {
-				e_mapi_message_finish_read (data->current_message);
-				data->current_message = data->current_message->parent;
+				e_mapi_object_finish_read (data->current_object);
+				data->current_object = data->current_object->parent;
 				data->current_properties = NULL;
 			}
 			data->marker = 0;
@@ -383,7 +350,7 @@ parse_namedprop_cb (uint32_t proptag, struct MAPINAMEID nameid, void *closure)
 
 	talloc_free (guid);
 
-	if (lid != MAPI_E_RESERVED) {
+	if (lid != MAPI_E_RESERVED && (lid & 0xFFFF) == (proptag & 0xFFFF)) {
 		data->next_proptag_is_nameid = proptag;
 		data->next_nameid_proptag = lid;
 	}
@@ -444,11 +411,10 @@ parse_property_cb (struct SPropValue prop, void *closure)
 
 static enum MAPISTATUS
 e_mapi_fast_transfer_internal (EMapiConnection *conn,
-			       mapi_id_t fid,
 			       TALLOC_CTX *mem_ctx,
 			       EMapiFastTransferCB cb,
 			       gpointer cb_user_data,
-			       gint messages_total,
+			       gint objects_total,
 			       gboolean expect_start_message,
 			       mapi_object_t *fasttransfer_ctx,
 			       GError **perror)
@@ -460,7 +426,6 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 	EMapiFXParserClosure data = { 0 };
 
 	data.conn = conn;
-	data.fid = fid;
 	data.mem_ctx = talloc_new (mem_ctx);
 	data.cb = cb;
 	data.cb_user_data = cb_user_data;
@@ -468,18 +433,18 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 
 	data.next_proptag_is_nameid = MAPI_E_RESERVED;
 	data.next_nameid_proptag = MAPI_E_RESERVED;
-	data.message_index = 0;
-	data.messages_total = messages_total;
+	data.object_index = 0;
+	data.objects_total = objects_total;
 	data.marker = 0;
 	data.current_properties = NULL;
-	data.current_message = NULL;
-	data.message = NULL;
+	data.current_object = NULL;
+	data.object = NULL;
 
 	if (!expect_start_message) {
-		data.message_index++;
-		data.message = e_mapi_message_new (data.mem_ctx);
-		data.current_message = data.message;
-		data.current_properties = &data.message->properties;
+		data.object_index++;
+		data.object = e_mapi_object_new (data.mem_ctx);
+		data.current_object = data.object;
+		data.current_properties = &data.object->properties;
 		data.marker = PidTagStartMessage;
 	}
 		
@@ -499,12 +464,12 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 		fxparser_parse (parser, &transferdata);
 	} while ((transferStatus == TransferStatus_Partial) || (transferStatus == TransferStatus_NoRoom));
 
-	if (data.message) {
-		e_mapi_message_finish_read (data.message);
-		if (ms == MAPI_E_SUCCESS && !process_parsed_message (&data))
+	if (data.object) {
+		e_mapi_object_finish_read (data.object);
+		if (ms == MAPI_E_SUCCESS && !process_parsed_object (&data))
 			ms = MAPI_E_USER_CANCEL;
 
-		e_mapi_message_free (data.message);
+		e_mapi_object_free (data.object);
 	}
 
 	talloc_free (parser);
@@ -515,7 +480,6 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 
 enum MAPISTATUS
 e_mapi_fast_transfer_objects (EMapiConnection *conn,
-			      mapi_id_t fid,
 			      TALLOC_CTX *mem_ctx,
 			      mapi_object_t *obj_folder,
 			      mapi_id_array_t *ids,
@@ -529,11 +493,8 @@ e_mapi_fast_transfer_objects (EMapiConnection *conn,
 	mapi_object_init (&fasttransfer_ctx);
 
 	ms = FXCopyMessages (obj_folder, ids, FastTransferCopyMessage_BestBody, FastTransfer_Unicode, &fasttransfer_ctx);
-	if (ms != MAPI_E_SUCCESS) {
-		return ms;
-	}
-
-	ms = e_mapi_fast_transfer_internal (conn, fid, mem_ctx, cb, cb_user_data, ids->count, TRUE, &fasttransfer_ctx, perror);
+	if (ms == MAPI_E_SUCCESS)
+		ms = e_mapi_fast_transfer_internal (conn, mem_ctx, cb, cb_user_data, ids->count, TRUE, &fasttransfer_ctx, perror);
 
 	mapi_object_release (&fasttransfer_ctx);
 
@@ -545,9 +506,8 @@ e_mapi_fast_transfer_objects (EMapiConnection *conn,
 
 enum MAPISTATUS
 e_mapi_fast_transfer_object (EMapiConnection *conn,
-			     mapi_id_t fid,
 			     TALLOC_CTX *mem_ctx,
-			     mapi_object_t *obj_message,
+			     mapi_object_t *object,
 			     guint32 transfer_flags, /* bit or of EMapiFastTransferFlags */
 			     EMapiFastTransferCB cb,
 			     gpointer cb_user_data,
@@ -576,12 +536,9 @@ e_mapi_fast_transfer_object (EMapiConnection *conn,
 	if (!excludes)
 		excludes = talloc_zero (mem_ctx, struct SPropTagArray);
 
-	ms = FXCopyTo (obj_message, 0, FastTransferCopyTo_BestBody, FastTransfer_Unicode, excludes, &fasttransfer_ctx);
-	if (ms != MAPI_E_SUCCESS) {
-		return ms;
-	}
-
-	ms = e_mapi_fast_transfer_internal (conn, fid, mem_ctx, cb, cb_user_data, 1, FALSE, &fasttransfer_ctx, perror);
+	ms = FXCopyTo (object, 0, FastTransferCopyTo_BestBody, FastTransfer_Unicode, excludes, &fasttransfer_ctx);
+	if (ms == MAPI_E_SUCCESS)
+		ms = e_mapi_fast_transfer_internal (conn, mem_ctx, cb, cb_user_data, 1, FALSE, &fasttransfer_ctx, perror);
 
 	mapi_object_release (&fasttransfer_ctx);
 	talloc_free (excludes);

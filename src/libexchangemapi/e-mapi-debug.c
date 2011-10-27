@@ -848,3 +848,35 @@ e_mapi_debug_dump_properties (EMapiConnection *conn, mapi_id_t fid, struct mapi_
 		g_print ("\n");
 	}
 }
+
+void
+e_mapi_debug_dump_object (EMapiObject *object, gboolean with_properties, gint indent)
+{
+	EMapiRecipient *recipient;
+	EMapiAttachment *attachment;
+	gint index;
+
+	g_print ("%*sEMapiObject: %p (parent:%p)\n", indent, "", object, object->parent);
+
+	if (!object)
+		return;
+
+	if (with_properties)
+		e_mapi_debug_dump_properties (NULL, 0, &object->properties, indent + 3);
+
+	for (index = 0, recipient = object->recipients; recipient; index++, recipient = recipient->next) {
+		g_print ("%*sRecipient[%d]:\n", indent + 2, "", index);
+		if (with_properties)
+			e_mapi_debug_dump_properties (NULL, 0, &recipient->properties, indent + 3);
+	}
+
+	for (index = 0, attachment = object->attachments; attachment; index++, attachment = attachment->next) {
+		g_print ("%*sAttachment[%d]:\n", indent + 2, "", index);
+		if (with_properties)
+			e_mapi_debug_dump_properties (NULL, 0, &attachment->properties, indent + 3);
+		if (attachment->embeded_object) {
+			g_print ("%*sEmbeded object:\n", indent + 3, "");
+			e_mapi_debug_dump_object (attachment->embeded_object, indent + 5, with_properties);
+		}
+	}
+}
