@@ -147,11 +147,33 @@ typedef struct {
 	time_t last_modified; /* PR_LAST_MODIFICATION_TIME as UTC */
 } ListItemsData;
 
-typedef gboolean (*FetchCallback)	(FetchItemsCallbackData *item_data, gpointer data);
-typedef gboolean (*FetchGALCallback)	(EMapiConnection *conn, uint32_t row_index, uint32_t n_rows, struct SRow *aRow, gpointer data);
-typedef gboolean (*BuildWritePropsCB)	(EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data);
-typedef gboolean (*BuildReadPropsCB)	(EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
-typedef gboolean (*ListItemsCB)		(EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, const ListItemsData *item_data, guint32 item_index, guint32 items_total, gpointer user_data, GError **perror);
+typedef gboolean (*FetchCallback)		(FetchItemsCallbackData *item_data, gpointer data);
+typedef gboolean (*FetchGALCallback)		(EMapiConnection *conn, uint32_t row_index, uint32_t n_rows, struct SRow *aRow, gpointer data);
+typedef gboolean (*BuildWritePropsCB)		(EMapiConnection *conn,
+						 mapi_id_t fid,
+						 TALLOC_CTX *mem_ctx,
+						 struct SPropValue **values,
+						 uint32_t *n_values,
+						 gpointer data);
+typedef gboolean (*BuildReadPropsCB)		(EMapiConnection *conn,
+						 mapi_id_t fid,
+						 TALLOC_CTX *mem_ctx,
+						 struct SPropTagArray *props,
+						 gpointer data);
+typedef gboolean (*ListItemsCB)			(EMapiConnection *conn,
+						 mapi_id_t fid,
+						 TALLOC_CTX *mem_ctx,
+						 const ListItemsData *item_data,
+						 guint32 item_index,
+						 guint32 items_total,
+						 gpointer user_data,
+						 GError **perror);
+typedef gboolean (*GetFolderPropertiesCB)	(EMapiConnection *conn,
+						 mapi_id_t fid,
+						 TALLOC_CTX *mem_ctx,
+						 /* const */ struct mapi_SPropValue_array *properties,
+						 gpointer user_data,
+						 GError **perror);
 
 struct _EMapiConnection {
 	GObject parent;
@@ -171,6 +193,11 @@ EMapiConnection *e_mapi_connection_find (const gchar *profile);
 gboolean		e_mapi_connection_reconnect (EMapiConnection *conn, const gchar *password, GError **perror);
 gboolean		e_mapi_connection_close (EMapiConnection *conn);
 gboolean		e_mapi_connection_connected (EMapiConnection *conn);
+
+gboolean		e_mapi_connection_get_folder_properties (EMapiConnection *conn, mapi_id_t fid, guint32 options,
+					BuildReadPropsCB brp_cb, gpointer brp_cb_user_data,
+					GetFolderPropertiesCB cb, gpointer cb_user_data,
+					GError **perror);
 
 gboolean		e_mapi_connection_list_items (EMapiConnection *conn, mapi_id_t fid, guint32 options,
 					ListItemsCB cb, gpointer user_data, GError **perror);

@@ -1542,6 +1542,90 @@ open_folder (EMapiConnection *conn, uint32_t olFolder, mapi_id_t *fid, guint32 f
 	return ms;
 }
 
+gboolean
+e_mapi_connection_get_folder_properties (EMapiConnection *conn,
+					 mapi_id_t fid,
+					 guint32 options,
+					 BuildReadPropsCB brp_cb,
+					 gpointer brp_cb_user_data,
+					 GetFolderPropertiesCB cb,
+					 gpointer cb_user_data,
+					 GError **perror)
+{
+	enum MAPISTATUS ms;
+	TALLOC_CTX *mem_ctx;
+	mapi_object_t obj_folder;
+	struct SPropTagArray *spropTagArray = NULL;
+	struct mapi_SPropValue_array *properties = NULL;
+	gboolean res = FALSE;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	LOCK ();
+	mem_ctx = talloc_init ("EMAPI_GetFolderProperties");
+	mapi_object_init (&obj_folder);
+
+	/* Attempt to open the folder */
+	ms = open_folder (conn, 0, &fid, options, &obj_folder, perror);
+	if (ms != MAPI_E_SUCCESS) {
+		goto cleanup;
+	}
+
+	spropTagArray = set_SPropTagArray (mem_ctx, 1, PR_FID);
+	if (brp_cb) {
+		if (!brp_cb (conn, fid, mem_ctx, spropTagArray, brp_cb_user_data)) {
+			goto cleanup;
+		}
+	} else {
+		talloc_free (spropTagArray);
+		spropTagArray = NULL;
+	}
+
+	properties = talloc_zero (mem_ctx, struct mapi_SPropValue_array);
+	if (spropTagArray && spropTagArray->cValues) {
+		struct SPropValue *lpProps;
+		uint32_t prop_count = 0, k, ll;
+
+		lpProps = talloc_zero (mem_ctx, struct SPropValue);
+
+		ms = GetProps (&obj_folder, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, spropTagArray, &lpProps, &prop_count);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "GetProps", ms);
+			goto cleanup;
+		}
+
+		/* Conversion from SPropValue to mapi_SPropValue. (no padding here) */
+		properties->cValues = prop_count;
+		properties->lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, prop_count + 1);
+		for (k = 0, ll = 0; k < prop_count; k++, ll++) {
+			if (may_skip_property (lpProps[k].ulPropTag)) {
+				ll--;
+				properties->cValues--;
+			} else {
+				cast_mapi_SPropValue (mem_ctx, &properties->lpProps[ll], &lpProps[k]);
+			}
+		}
+	} else {
+		ms = GetPropsAll (&obj_folder, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, properties);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "GetPropsAll", ms);
+			goto cleanup;
+		}
+	}
+
+	res = cb (conn, fid, mem_ctx, properties, cb_user_data, perror);
+
+ cleanup:
+	mapi_object_release (&obj_folder);
+	talloc_free (spropTagArray);
+	talloc_free (properties);
+	talloc_free (mem_ctx);
+	UNLOCK();
+
+	return res;
+}
+
 GSList *
 e_mapi_connection_check_restriction (EMapiConnection *conn, mapi_id_t fid, guint32 fid_options, struct mapi_SRestriction *res, GError **perror)
 {
