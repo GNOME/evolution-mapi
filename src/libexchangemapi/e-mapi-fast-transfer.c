@@ -422,7 +422,7 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 	enum MAPISTATUS ms;
 	enum TransferStatus transferStatus;
 	uint16_t stepCount = -1, totalCount = -1;
-	struct fx_parser_context *parser;
+	struct e_mapi_fx_parser_context *parser;
 	EMapiFXParserClosure data = { 0 };
 
 	data.conn = conn;
@@ -448,11 +448,11 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 		data.marker = PidTagStartMessage;
 	}
 		
-	parser = fxparser_init (data.mem_ctx, &data);
-	fxparser_set_marker_callback (parser, parse_marker_cb);
-	fxparser_set_delprop_callback (parser, parse_delprop_cb);
-	fxparser_set_namedprop_callback (parser, parse_namedprop_cb);
-	fxparser_set_property_callback (parser, parse_property_cb);
+	parser = e_mapi_fxparser_init (data.mem_ctx, &data);
+	e_mapi_fxparser_set_marker_callback (parser, parse_marker_cb);
+	e_mapi_fxparser_set_delprop_callback (parser, parse_delprop_cb);
+	e_mapi_fxparser_set_namedprop_callback (parser, parse_namedprop_cb);
+	e_mapi_fxparser_set_property_callback (parser, parse_property_cb);
 
 	do {
 		DATA_BLOB transferdata;
@@ -461,7 +461,9 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 		if (ms != MAPI_E_SUCCESS)
 			break;
 
-		fxparser_parse (parser, &transferdata);
+		ms = e_mapi_fxparser_parse (parser, &transferdata);
+		if (ms != MAPI_E_SUCCESS)
+			break;
 	} while ((transferStatus == TransferStatus_Partial) || (transferStatus == TransferStatus_NoRoom));
 
 	if (data.object) {

@@ -35,6 +35,19 @@ G_BEGIN_DECLS
 enum MAPISTATUS e_mapi_nameid_lid_lookup_canonical (uint16_t lid, const char *OLEGUID, uint32_t *propTag);
 enum MAPISTATUS e_mapi_nameid_string_lookup_canonical(const char *Name, const char *OLEGUID, uint32_t *propTag);
 
+struct e_mapi_fx_parser_context;
+typedef enum MAPISTATUS (*e_mapi_fxparser_marker_callback_t)(uint32_t, void *);
+typedef enum MAPISTATUS (*e_mapi_fxparser_delprop_callback_t)(uint32_t, void *);
+typedef enum MAPISTATUS (*e_mapi_fxparser_namedprop_callback_t)(uint32_t, struct MAPINAMEID, void *);
+typedef enum MAPISTATUS (*e_mapi_fxparser_property_callback_t)(struct SPropValue, void *);
+
+struct e_mapi_fx_parser_context *e_mapi_fxparser_init(TALLOC_CTX *, void *);
+void e_mapi_fxparser_set_marker_callback(struct e_mapi_fx_parser_context *, e_mapi_fxparser_marker_callback_t);
+void e_mapi_fxparser_set_delprop_callback(struct e_mapi_fx_parser_context *, e_mapi_fxparser_delprop_callback_t);
+void e_mapi_fxparser_set_namedprop_callback(struct e_mapi_fx_parser_context *, e_mapi_fxparser_namedprop_callback_t);
+void e_mapi_fxparser_set_property_callback(struct e_mapi_fx_parser_context *, e_mapi_fxparser_property_callback_t);
+enum MAPISTATUS e_mapi_fxparser_parse(struct e_mapi_fx_parser_context *, DATA_BLOB *);
+
 G_END_DECLS
 
 #endif /* E_MAPI_OPENCHANGE_H */

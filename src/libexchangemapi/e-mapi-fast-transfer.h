@@ -40,6 +40,7 @@ typedef struct _EMapiObject EMapiObject;
 typedef struct _EMapiRecipient EMapiRecipient;
 typedef struct _EMapiAttachment EMapiAttachment;
 
+/* returns whether continue in transfer of the next object */
 typedef gboolean	(*EMapiFastTransferCB)		(EMapiConnection *conn,
 							 TALLOC_CTX *mem_ctx,
 							 /* const */ EMapiObject *object,
