@@ -50,19 +50,11 @@
 	(G_TYPE_INSTANCE_GET_CLASS \
 	((obj), CAMEL_TYPE_MAPI_STORE, CamelMapiStoreClass))
 
-#define CAMEL_MAPI_FOLDER_PUBLIC (CAMEL_FOLDER_FLAGS_LAST << 1)
-#define CAMEL_MAPI_FOLDER_PERSONAL (CAMEL_FOLDER_FLAGS_LAST << 2)
-#define CAMEL_MAPI_FOLDER_FORIEGN (CAMEL_FOLDER_FLAGS_LAST << 3)
-#define CAMEL_MAPI_FOLDER_MAIL (CAMEL_FOLDER_FLAGS_LAST << 4)
-
 #define DISPLAY_NAME_FAVOURITES _("Favorites")
 #define DISPLAY_NAME_ALL_PUBLIC_FOLDERS _("All Public Folders")
 
 G_BEGIN_DECLS
 
-/**
- * definition of CamelMAPIStore
- */
 typedef struct _CamelMapiStore CamelMapiStore;
 typedef struct _CamelMapiStoreClass CamelMapiStoreClass;
 typedef struct _CamelMapiStorePrivate CamelMapiStorePrivate;
@@ -70,36 +62,25 @@ typedef struct _CamelMapiStorePrivate CamelMapiStorePrivate;
 struct _CamelMapiStore{
 	CamelOfflineStore parent_object;
 
-	struct _CamelMapiStoreSummary *summary;
+	CamelStoreSummary *summary;
 	CamelMapiStorePrivate *priv;
-/*	gchar			*base_url; */
-/*	CamelURL		*camel_url; */
-/*	CamelFolderInfo		*fi; */
-/*	GHashTable		*folders; */
-/*	GMutex			*folders_lock; */
-/*	GMutex			*connect_lock; */
 };
 
 struct _CamelMapiStoreClass {
 	CamelOfflineStoreClass parent_class;
 };
 
-/**
- * PROTOTYPES
- */
+GType		camel_mapi_store_get_type		(void);
+gboolean	camel_mapi_store_connected		(CamelMapiStore *mapi_store, GError **error);
 
-GType camel_mapi_store_get_type(void);
-gboolean camel_mapi_store_connected(CamelMapiStore *, GError **);
+const gchar *	camel_mapi_store_folder_id_lookup (CamelMapiStore *mapi_store, const gchar *folder_name);
+const gchar *	camel_mapi_store_folder_lookup (CamelMapiStore *mapi_store, const gchar *folder_id);
+const gchar *	camel_mapi_store_system_folder_fid (CamelMapiStore *mapi_store, guint folder_type);
+const gchar *	mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid, gboolean use_cache);
 
-const gchar * camel_mapi_store_folder_id_lookup (CamelMapiStore *mapi_store, const gchar *folder_name);
-const gchar * camel_mapi_store_folder_lookup (CamelMapiStore *mapi_store, const gchar *folder_id);
-const gchar *camel_mapi_store_system_folder_fid (CamelMapiStore *mapi_store, guint folder_type);
-const gchar *camel_mapi_store_folder_id_lookup_offline (CamelMapiStore *mapi_store, const gchar *folder_name);
-const gchar * mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid, gboolean use_cache);
+void		camel_mapi_store_unset_notification_data (CamelMapiStore *mstore);
 
-void camel_mapi_store_unset_notification_data (CamelMapiStore *mstore);
-
-EMapiConnection *camel_mapi_store_get_exchange_connection (CamelMapiStore *mapi_store);
+EMapiConnection *	camel_mapi_store_get_connection (CamelMapiStore *mapi_store);
 
 G_END_DECLS
 

@@ -53,18 +53,26 @@ typedef struct _CamelMapiStoreSummaryPrivate CamelMapiStoreSummaryPrivate;
 
 typedef struct _CamelMapiStoreInfo CamelMapiStoreInfo;
 
+enum CamelMapiStoreFolderFlags {
+	CAMEL_MAPI_STORE_FOLDER_FLAG_PERSONAL	= 1 << 0,
+	CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC	= 1 << 1,
+	CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN	= 1 << 2,
+	CAMEL_MAPI_STORE_FOLDER_FLAG_MAIL	= 1 << 3
+};
+
 enum {
-	CAMEL_MAPI_STORE_INFO_FULL_NAME = CAMEL_STORE_INFO_LAST,
-	CAMEL_MAPI_STORE_INFO_FOLDER_ID,
-	CAMEL_MAPI_STORE_INFO_PARENT_ID,
+	CAMEL_MAPI_STORE_INFO_FOREIGN_USER_NAME = CAMEL_STORE_INFO_LAST,
 	CAMEL_MAPI_STORE_INFO_LAST
 };
 
 struct _CamelMapiStoreInfo {
 	CamelStoreInfo info;
-	gchar *full_name;
-	gchar *folder_id;
-	gchar *parent_id;
+	mapi_id_t folder_mid;
+	mapi_id_t parent_mid;
+	guint32 camel_folder_flags; /* CamelFolderInfo::flags */
+	guint32 mapi_folder_flags; /* bit-or of CamelMapiStoreFolderFlags */
+	gchar *foreign_user_name; /* only if CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN is set */
+	time_t last_modified; /* when was the folder last modified */
 };
 
 struct _CamelMapiStoreSummary {
@@ -76,19 +84,18 @@ struct _CamelMapiStoreSummaryClass {
 	CamelStoreSummaryClass summary_class;
 };
 
-GType                        camel_mapi_store_summary_get_type      (void);
-CamelMapiStoreSummary      *camel_mapi_store_summary_new        (void);
-CamelStoreInfo *camel_mapi_store_summary_full_name(CamelMapiStoreSummary *s, const gchar *full_name);
-CamelMapiStoreInfo *camel_mapi_store_summary_add_from_full(CamelMapiStoreSummary *s, const gchar *full, gchar dir_sep,
-							   const gchar *folder_id, const gchar *parent_id);
-
-gchar *camel_mapi_store_summary_full_to_path(CamelMapiStoreSummary *s, const gchar *full_name, gchar dir_sep);
-gchar *camel_mapi_store_summary_path_to_full(CamelMapiStoreSummary *s, const gchar *path, gchar dir_sep);
-gchar *camel_mapi_store_summary_full_from_path(CamelMapiStoreSummary *s, const gchar *path);
-
-#define camel_mapi_store_info_full_name(s, i) (camel_store_info_string((CamelStoreSummary *)s, (const CamelStoreInfo *)i, CAMEL_MAPI_STORE_INFO_FULL_NAME))
-#define camel_mapi_store_info_folder_id(s, i) (camel_store_info_string((CamelStoreSummary *)s, (const CamelStoreInfo *)i, CAMEL_MAPI_STORE_INFO_FOLDER_ID))
-#define camel_mapi_store_info_parent_id(s, i) (camel_store_info_string((CamelStoreSummary *)s, (const CamelStoreInfo *)i, CAMEL_MAPI_STORE_INFO_PARENT_ID))
+GType			camel_mapi_store_summary_get_type	(void);
+CamelStoreSummary *	camel_mapi_store_summary_new		(void);
+CamelStoreInfo *	camel_mapi_store_summary_add_from_full	(CamelStoreSummary *s,
+								 const gchar *path,
+								 mapi_id_t folder_mid,
+								 mapi_id_t parent_mid,
+								 guint32 camel_folder_flags, /* CamelFolderInfo::flags */
+								 guint32 mapi_folder_flags, /* bit-or of CamelMapiStoreFolderFlags */
+								 const gchar *foreign_user_name, /* only if CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN is set */
+								 time_t last_modified);
+CamelStoreInfo *	camel_mapi_store_summary_get_folder_id	(CamelStoreSummary *s,
+								 mapi_id_t folder_mid);
 
 G_END_DECLS
 

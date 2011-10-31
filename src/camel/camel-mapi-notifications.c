@@ -67,9 +67,8 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 	CamelFolder *folder = NULL;
 	CamelStore *parent_store;
 	gint info_count = -1;
-	CamelStoreInfo *info;
-	CamelMapiStoreInfo *mapi_info;
-	const gchar *folder_id;
+	CamelStoreInfo *si;
+	CamelMapiStoreInfo *msi;
 	const gchar *folder_name = NULL;
 
 	g_return_if_fail (store != NULL);
@@ -78,25 +77,23 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 	/* FIXME : Continue only if we are handling a mail object.*/
 	if (0) return;
 
-	folder_id = e_mapi_util_mapi_id_to_string (new_mail_notif->FID);
-
 	/* Get the folder object */
 
 	/*Note : using store info to retrive full_name*/
-	info_count = camel_store_summary_count ((CamelStoreSummary *)store->summary) - 1;
+	info_count = camel_store_summary_count (store->summary) - 1;
 	while (info_count >= 0) {
-		info = camel_store_summary_index ((CamelStoreSummary *)store->summary, info_count);
-		mapi_info = (CamelMapiStoreInfo *)info;
-		if (info && !g_strcmp0 (mapi_info->folder_id, folder_id)) {
-			folder_name = mapi_info->full_name;
+		si = camel_store_summary_index (store->summary, info_count);
+		msi = (CamelMapiStoreInfo *) si;
+		if (si && msi->folder_mid == new_mail_notif->FID) {
+			folder_name = camel_store_info_path (store->summary, si);
+			info_count = 0;
 		}
-		if (info)
-			camel_store_summary_info_free ((CamelStoreSummary *)store->summary, info);
+		if (si)
+			camel_store_summary_info_free (store->summary, si);
 		info_count--;
 	}
 
-	folder = camel_store_get_folder_sync (
-		(CamelStore *)store, folder_name, 0, NULL, NULL);
+	folder = camel_store_get_folder_sync ((CamelStore *) store, folder_name, 0, NULL, NULL);
 
 	/* Abort on failure*/
 	if (!folder)
@@ -124,8 +121,8 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 	camel_folder_summary_touch (folder->summary);
 	/* mapi_sync_summary */
 	camel_folder_summary_save_to_db (folder->summary, NULL);
-	camel_store_summary_touch ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary);
-	camel_store_summary_save ((CamelStoreSummary *)((CamelMapiStore *)parent_store)->summary);
+	camel_store_summary_touch (((CamelMapiStore *)parent_store)->summary);
+	camel_store_summary_save (((CamelMapiStore *)parent_store)->summary);
 
 	camel_folder_changed (folder, fetch_data->changes);
 
@@ -224,7 +221,7 @@ mapi_push_notification_listener_thread (gpointer data)
 
 	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
-	conn = camel_mapi_store_get_exchange_connection (mapi_store);
+	conn = camel_mapi_store_get_connection (mapi_store);
 	if (!conn) {
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		g_return_val_if_reached (NULL);

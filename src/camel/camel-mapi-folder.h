@@ -66,7 +66,9 @@ struct _CamelMapiFolder {
 	CamelOfflineJournal *journal;
 	CamelDataCache *cache;
 
-	guint32 type;
+	/* copied from CamelMapiStoreInfo */
+	guint32 mapi_folder_flags;
+	guint32 camel_folder_flags;
 
 	guint need_rescan:1;
 	guint need_refresh:1;

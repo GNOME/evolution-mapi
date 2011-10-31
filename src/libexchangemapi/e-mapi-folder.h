@@ -65,6 +65,7 @@ typedef struct _EMapiFolder {
 	guint32 unread_count;
 	guint32 total;
 	guint32 size;
+	time_t last_modified;
 
 	/* reserved */
 	gpointer reserved1;
@@ -79,7 +80,8 @@ EMapiFolder *		e_mapi_folder_new		(const gchar *folder_name,
 							 mapi_id_t parent_folder_id,
 							 uint32_t child_count,
 							 uint32_t unread_count,
-							 uint32_t total);
+							 uint32_t total,
+							 time_t last_modified);
 EMapiFolder *		e_mapi_folder_copy		(EMapiFolder *src);
 void			e_mapi_folder_free		(EMapiFolder *folder);
 EMapiFolderType		e_mapi_container_class		(gchar *type);
