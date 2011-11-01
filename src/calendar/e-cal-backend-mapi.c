@@ -273,7 +273,7 @@ ecbm_remove (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, GEr
 	if (g_strcmp0 (e_source_get_property (source, "public"), "yes") != 0) {
 		GError *mapi_error = NULL;
 
-		if (!e_mapi_connection_remove_folder (priv->conn, priv->fid, 0, &mapi_error)) {
+		if (!e_mapi_connection_remove_folder (priv->conn, priv->fid, 0, cancellable, &mapi_error)) {
 			mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to remove public folder"));
 			if (mapi_error)
 				g_error_free (mapi_error);
@@ -397,7 +397,10 @@ put_component_to_store (ECalBackendMAPI *cbmapi,
 }
 
 static gboolean
-mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data, gpointer data)
+mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data,
+			 gpointer data,
+			 GCancellable *cancellable,
+			 GError **perror)
 {
 	struct mapi_SPropValue_array *array = item_data->properties;
 	const mapi_id_t mid = item_data->mid;
@@ -515,7 +518,10 @@ struct deleted_items_data {
 };
 
 static gboolean
-handle_deleted_items_cb (FetchItemsCallbackData *item_data, gpointer data)
+handle_deleted_items_cb (FetchItemsCallbackData *item_data,
+			 gpointer data,
+			 GCancellable *cancellable,
+			 GError **perror)
 {
 	const mapi_id_t mid = item_data->mid;
 	struct deleted_items_data *did = data;
@@ -569,7 +575,13 @@ handle_deleted_items_cb (FetchItemsCallbackData *item_data, gpointer data)
 }
 
 static gboolean
-mapi_cal_get_idlist (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
+mapi_cal_get_idlist (EMapiConnection *conn,
+		     mapi_id_t fid,
+		     TALLOC_CTX *mem_ctx,
+		     struct SPropTagArray *props,
+		     gpointer data,
+		     GCancellable *cancellable,
+		     GError **perror)
 {
 	static const uint32_t cal_IDList[] = {
 		PR_FID,
@@ -658,7 +670,7 @@ get_deltas (gpointer handle)
 	if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
 					is_public ? NULL : e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 					mapi_cal_get_changes_cb, cbmapi,
-					options, &mapi_error)) {
+					options, NULL, &mapi_error)) {
 		if (mapi_error) {
 			gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
 			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
@@ -702,7 +714,7 @@ get_deltas (gpointer handle)
 	if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 						mapi_cal_get_idlist, NULL,
 						handle_deleted_items_cb, &did,
-						options, &mapi_error)) {
+						options, NULL, &mapi_error)) {
 		if (mapi_error) {
 			gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
 			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
@@ -779,7 +791,7 @@ get_deltas (gpointer handle)
 		if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 					is_public ? NULL : e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 					mapi_cal_get_changes_cb, cbmapi,
-					options, &mapi_error)) {
+					options, NULL, &mapi_error)) {
 			if (mapi_error) {
 				gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
 				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
@@ -1008,7 +1020,10 @@ start_fetch_deltas (gpointer data)
 }
 
 static gboolean
-mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data, gpointer data)
+mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data,
+			  gpointer data,
+			  GCancellable *cancellable,
+			  GError **perror)
 {
 	struct mapi_SPropValue_array *properties = item_data->properties;
 	const mapi_id_t mid = item_data->mid;
@@ -1122,7 +1137,7 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 	if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
 					is_public ? NULL : e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 					mapi_cal_cache_create_cb, cbmapi,
-					options, &mapi_error)) {
+					options, NULL, &mapi_error)) {
 		e_cal_backend_store_thaw_changes (priv->store);
 		g_mutex_lock (priv->mutex);
 		priv->populating_cache = FALSE;
@@ -1235,12 +1250,12 @@ ecbm_connect_user (ECalBackend *backend, GCancellable *cancellable, const gchar 
 
 	old_conn = priv->conn;
 
-	priv->conn = e_mapi_connection_new (priv->profile, password, &mapi_error);
+	priv->conn = e_mapi_connection_new (priv->profile, password, cancellable, &mapi_error);
 	if (!priv->conn) {
 		priv->conn = e_mapi_connection_find (priv->profile);
 		if (priv->conn
 		    && !e_mapi_connection_connected (priv->conn)) {
-			e_mapi_connection_reconnect (priv->conn, password, &mapi_error);
+			e_mapi_connection_reconnect (priv->conn, password, cancellable, &mapi_error);
 		}
 	}
 
@@ -1388,7 +1403,13 @@ ecbm_authenticate_user (ECalBackend *backend, GCancellable *cancellable, ECreden
 }
 
 static gboolean
-mapi_cal_get_required_props (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
+mapi_cal_get_required_props (EMapiConnection *conn,
+			     mapi_id_t fid,
+			     TALLOC_CTX *mem_ctx,
+			     struct SPropTagArray *props,
+			     gpointer data,
+			     GCancellable *cancellable,
+			     GError **perror)
 {
 	static uint32_t req_props_list[] = {
 		PR_OWNER_APPT_ID,
@@ -1409,14 +1430,17 @@ mapi_cal_get_required_props (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *m
 
 	g_return_val_if_fail (props != NULL, FALSE);
 
-	if (!e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids)))
+	if (!e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids), cancellable, perror))
 		return FALSE;
 
 	return e_mapi_utils_add_props_to_props_array (mem_ctx, props, req_props_list, G_N_ELEMENTS (req_props_list));
 }
 
 static gboolean
-capture_req_props (FetchItemsCallbackData *item_data, gpointer data)
+capture_req_props (FetchItemsCallbackData *item_data,
+		   gpointer data,
+		   GCancellable *cancellable,
+		   GError **perror)
 {
 	struct mapi_SPropValue_array *properties = item_data->properties;
 	struct cal_cbdata *cbdata = (struct cal_cbdata *) data;
@@ -1478,11 +1502,11 @@ get_server_data (ECalBackendMAPI *cbmapi, ECalComponent *comp, struct cal_cbdata
 	if (e_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
 					mapi_cal_get_required_props, NULL,
 					capture_req_props, cbdata,
-					MAPI_OPTIONS_FETCH_GENERIC_STREAMS, NULL))
+					MAPI_OPTIONS_FETCH_GENERIC_STREAMS, NULL, NULL))
 
 		return;
 
-	proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidCleanGlobalObjectId, NULL);
+	proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidCleanGlobalObjectId, NULL, NULL);
 	if (proptag == MAPI_E_RESERVED) proptag = PidLidCleanGlobalObjectId;
 
 	res.rt = RES_PROPERTY;
@@ -1513,7 +1537,7 @@ get_server_data (ECalBackendMAPI *cbmapi, ECalComponent *comp, struct cal_cbdata
 	e_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
 					mapi_cal_get_required_props, NULL,
 					capture_req_props, cbdata,
-					MAPI_OPTIONS_FETCH_GENERIC_STREAMS, NULL);
+					MAPI_OPTIONS_FETCH_GENERIC_STREAMS, NULL, NULL);
 
 	talloc_free (mem_ctx);
 }
@@ -1605,7 +1629,7 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		if (ba) {
 			ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 			stream->value = ba;
-			stream->proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, NULL);
+			stream->proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, cancellable, NULL);
 			if (stream->proptag != MAPI_E_RESERVED)
 				streams = g_slist_append (streams, stream);
 		}
@@ -1643,7 +1667,7 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 		mid = e_mapi_connection_create_item (priv->conn, priv->olFolder, priv->fid,
 						e_mapi_cal_utils_write_props_cb, &cbdata,
-						recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT, &mapi_error);
+						recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT, cancellable, &mapi_error);
 		g_free (cbdata.props);
 		if (!mid) {
 			g_object_unref (comp);
@@ -1808,7 +1832,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		if (ba) {
 			ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 			stream->value = ba;
-			stream->proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, NULL);
+			stream->proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, cancellable, NULL);
 			if (stream->proptag != MAPI_E_RESERVED)
 				streams = g_slist_append (streams, stream);
 		}
@@ -1821,7 +1845,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		e_mapi_cal_util_fetch_attachments (comp, &attachments, cache_dir);
 
 	e_cal_component_get_uid (comp, &uid);
-//	rid = e_cal_component_get_recurid_as_string (comp);
+	/* rid = e_cal_component_get_recurid_as_string (comp); */
 
 	cbdata.kind = kind;
 	cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) ecbm_internal_get_timezone;
@@ -1871,7 +1895,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 		status = e_mapi_connection_modify_item (priv->conn, priv->olFolder, priv->fid, mid,
 						e_mapi_cal_utils_write_props_cb, &cbdata,
-						recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT, &mapi_error);
+						recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT, cancellable, &mapi_error);
 		g_free (cbdata.props);
 		free_server_data (&cbdata);
 		if (!status) {
@@ -1972,7 +1996,7 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 			list = g_slist_prepend (list, (gpointer) data);
 		/* } */
 
-		if (e_mapi_connection_remove_items (priv->conn, priv->olFolder, priv->fid, 0, list, &ri_error)) {
+		if (e_mapi_connection_remove_items (priv->conn, priv->olFolder, priv->fid, 0, list, cancellable, &ri_error)) {
 			for (l = comp_list; l; l = l->next) {
 				ECalComponent *comp = E_CAL_COMPONENT (l->data);
 				ECalComponentId *id = e_cal_component_get_id (comp);
@@ -2064,7 +2088,7 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 				if (ba) {
 					ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
 					stream->value = ba;
-					stream->proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, NULL);
+					stream->proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, cancellable, NULL);
 					if (stream->proptag != MAPI_E_RESERVED)
 						streams = g_slist_append (streams, stream);
 				}
@@ -2172,7 +2196,7 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 
 			mid = e_mapi_connection_create_item (priv->conn, olFolderSentMail, 0,
 							e_mapi_cal_utils_write_props_cb, &cbdata,
-							recipients, attachments, streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE, &mapi_error);
+							recipients, attachments, streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE, cancellable, &mapi_error);
 			cbdata.globalid = NULL;
 			cbdata.cleanglobalid = NULL;
 			free_server_data (&cbdata);
@@ -2434,7 +2458,7 @@ ecbm_get_free_busy (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		return;
 	}
 
-	if (!e_mapi_cal_utils_get_free_busy_data (priv->conn, users, start, end, freebusy, &mapi_error)) {
+	if (!e_mapi_cal_utils_get_free_busy_data (priv->conn, users, start, end, freebusy, cancellable, &mapi_error)) {
 		mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to get Free/Busy data"));
 
 		if (mapi_error)

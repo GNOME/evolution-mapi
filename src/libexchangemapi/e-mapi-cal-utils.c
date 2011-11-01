@@ -43,9 +43,9 @@
 
 #define d(x) 
 
-static gboolean appt_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props);
-static gboolean task_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props);
-static gboolean note_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props);
+static gboolean appt_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, GCancellable *cancellable, GError **perror);
+static gboolean task_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, GCancellable *cancellable, GError **perror);
+static gboolean note_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, GCancellable *cancellable, GError **perror);
 
 static icalparameter_role
 get_role_from_type (OlMailRecipientType type)
@@ -873,7 +873,7 @@ e_mapi_cal_util_mapi_props_to_comp (EMapiConnection *conn, mapi_id_t fid, icalco
 						email = "";
 
 					if (g_str_equal (email_type, "EX")) {
-						to_free = e_mapi_connection_ex_to_smtp (conn, email, NULL, NULL);
+						to_free = e_mapi_connection_ex_to_smtp (conn, email, NULL, NULL, NULL);
 						email = to_free;
 					}
 
@@ -905,7 +905,7 @@ e_mapi_cal_util_mapi_props_to_comp (EMapiConnection *conn, mapi_id_t fid, icalco
 						email = "";
 
 					if (g_str_equal (email_type, "EX")) {
-						to_free = e_mapi_connection_ex_to_smtp (conn, email, NULL, NULL);
+						to_free = e_mapi_connection_ex_to_smtp (conn, email, NULL, NULL, NULL);
 						email = to_free;
 					}
 
@@ -934,11 +934,11 @@ e_mapi_cal_util_mapi_props_to_comp (EMapiConnection *conn, mapi_id_t fid, icalco
 				const gchar *sent_email = (const gchar *) e_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
 
 				if (!g_utf8_collate (sender_email_type, "EX")) {
-					sender_free = e_mapi_connection_ex_to_smtp (conn, sender_email, NULL, NULL);
+					sender_free = e_mapi_connection_ex_to_smtp (conn, sender_email, NULL, NULL, NULL);
 					sender_email = sender_free;
 				}
 				if (!g_utf8_collate (sent_email_type, "EX")) {
-					sent_free = e_mapi_connection_ex_to_smtp (conn, sent_email, NULL, NULL);
+					sent_free = e_mapi_connection_ex_to_smtp (conn, sent_email, NULL, NULL, NULL);
 					sent_email = sent_free;
 				}
 
@@ -1086,7 +1086,10 @@ struct fetch_camel_cal_data {
 };
 
 static gboolean
-fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data, gpointer data)
+fetch_camel_cal_comp_cb (FetchItemsCallbackData *item_data,
+			 gpointer data,
+			 GCancellable *cancellable,
+			 GError **perror)
 {
 	struct fetch_camel_cal_data *fccd = data;
 	ECalComponent *comp = NULL;
@@ -1171,19 +1174,25 @@ e_mapi_cal_util_camel_helper (EMapiConnection *conn, mapi_id_t orig_fid, mapi_id
 		e_mapi_connection_fetch_object_props (conn, NULL, orig_fid, orig_mid, obj_message,
 					e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (fccd.kind),
 					fetch_camel_cal_comp_cb, &fccd,
-					MAPI_OPTIONS_FETCH_ALL, NULL);
+					MAPI_OPTIONS_FETCH_ALL, NULL, NULL);
 	else
 		e_mapi_connection_fetch_item (conn, orig_fid, orig_mid,
 					e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (fccd.kind),
 					fetch_camel_cal_comp_cb, &fccd,
-					MAPI_OPTIONS_FETCH_ALL, NULL);
+					MAPI_OPTIONS_FETCH_ALL, NULL, NULL);
 
 	return fccd.result_data;
 }
 
 /* call with props = NULL to fetch named ids into the connection cache */
 gboolean
-e_mapi_cal_utils_add_named_ids (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gint pkind)
+e_mapi_cal_utils_add_named_ids (EMapiConnection *conn,
+				mapi_id_t fid,
+				TALLOC_CTX *mem_ctx,
+				struct SPropTagArray *props,
+				gint pkind,
+				GCancellable *cancellable,
+				GError **perror)
 {
 	/* do not make this array static, the function modifies it on run */
 	ResolveNamedIDsData common_nids[] = {
@@ -1204,17 +1213,17 @@ e_mapi_cal_utils_add_named_ids (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX
 	icalcomponent_kind kind = pkind;
 
 	if (!props) {
-		if (!e_mapi_connection_resolve_named_props (conn, fid, common_nids, G_N_ELEMENTS (common_nids), NULL))
+		if (!e_mapi_connection_resolve_named_props (conn, fid, common_nids, G_N_ELEMENTS (common_nids), cancellable, perror))
 			return FALSE;
-	} else if (!e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, common_nids, G_N_ELEMENTS (common_nids)))
+	} else if (!e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, common_nids, G_N_ELEMENTS (common_nids), cancellable, perror))
 		return FALSE;
 
 	if (kind == ICAL_VEVENT_COMPONENT)
-		return appt_build_name_id (conn, fid, mem_ctx, props);
+		return appt_build_name_id (conn, fid, mem_ctx, props, cancellable, perror);
 	else if (kind == ICAL_VTODO_COMPONENT)
-		return task_build_name_id (conn, fid, mem_ctx, props);
+		return task_build_name_id (conn, fid, mem_ctx, props, cancellable, perror);
 	else if (kind == ICAL_VJOURNAL_COMPONENT)
-		return note_build_name_id (conn, fid, mem_ctx, props);
+		return note_build_name_id (conn, fid, mem_ctx, props, cancellable, perror);
 
 	return TRUE;
 }
@@ -1222,7 +1231,12 @@ e_mapi_cal_utils_add_named_ids (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX
 #define DEFAULT_APPT_REMINDER_MINS 15
 
 static gboolean
-appt_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props)
+appt_build_name_id (EMapiConnection *conn,
+		    mapi_id_t fid,
+		    TALLOC_CTX *mem_ctx,
+		    struct SPropTagArray *props,
+		    GCancellable *cancellable,
+		    GError **perror)
 {
 	/* do not make this array static, the function modifies it on run */
 	ResolveNamedIDsData nids[] = {
@@ -1259,15 +1273,20 @@ appt_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, s
 	};
 
 	if (!props)
-		return e_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), NULL);
+		return e_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), cancellable, perror);
 
-	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
+	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids), cancellable, perror);
 }
 
 #define DEFAULT_TASK_REMINDER_MINS 1080
 
 static gboolean
-task_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props)
+task_build_name_id (EMapiConnection *conn,
+		    mapi_id_t fid,
+		    TALLOC_CTX *mem_ctx,
+		    struct SPropTagArray *props,
+		    GCancellable *cancellable,
+		    GError **perror)
 {
 	/* do not make this array static, the function modifies it on run */
 	ResolveNamedIDsData nids[] = {
@@ -1288,13 +1307,18 @@ task_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, s
 	};
 
 	if (!props)
-		return e_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), NULL);
+		return e_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), cancellable, perror);
 
-	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
+	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids), cancellable, perror);
 }
 
 static gboolean
-note_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props)
+note_build_name_id (EMapiConnection *conn,
+		    mapi_id_t fid,
+		    TALLOC_CTX *mem_ctx,
+		    struct SPropTagArray *props,
+		    GCancellable *cancellable,
+		    GError **perror)
 {
 	/* do not make this array static, the function modifies it on run */
 	ResolveNamedIDsData nids[] = {
@@ -1304,9 +1328,9 @@ note_build_name_id (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, s
 	};
 
 	if (!props)
-		return e_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), NULL);
+		return e_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), cancellable, perror);
 
-	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
+	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids), cancellable, perror);
 }
 
 /* retrieves timezone location from a timezone ID */
@@ -1343,7 +1367,14 @@ get_tzid_location (const gchar *tzid, struct cal_cbdata *cbdata)
 #define SECS_IN_MINUTE 60
 
 gboolean
-e_mapi_cal_utils_write_props_cb (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data)
+e_mapi_cal_utils_write_props_cb (EMapiConnection *conn,
+				 mapi_id_t fid,
+				 TALLOC_CTX *mem_ctx,
+				 struct SPropValue **values,
+				 uint32_t *n_values,
+				 gpointer data,
+				 GCancellable *cancellable,
+				 GError **perror)
 {
 	struct cal_cbdata *cbdata = (struct cal_cbdata *) data;
 	ECalComponent *comp;
@@ -1369,7 +1400,7 @@ e_mapi_cal_utils_write_props_cb (EMapiConnection *conn, mapi_id_t fid, TALLOC_CT
 		case ICAL_VEVENT_COMPONENT:
 		case ICAL_VTODO_COMPONENT:
 		case ICAL_VJOURNAL_COMPONENT:
-			if (!e_mapi_cal_utils_add_named_ids (conn, fid, mem_ctx, NULL, cbdata->kind))
+			if (!e_mapi_cal_utils_add_named_ids (conn, fid, mem_ctx, NULL, cbdata->kind, cancellable, perror))
 				return FALSE;
 			break;
 		default:
@@ -1387,7 +1418,7 @@ e_mapi_cal_utils_write_props_cb (EMapiConnection *conn, mapi_id_t fid, TALLOC_CT
 		} G_STMT_END
 
 	#define set_named_value(named_id, val) G_STMT_START { \
-		if (!e_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, named_id, val)) \
+		if (!e_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, named_id, val, cancellable, perror)) \
 			return FALSE;	\
 		} G_STMT_END
 
@@ -1405,7 +1436,7 @@ e_mapi_cal_utils_write_props_cb (EMapiConnection *conn, mapi_id_t fid, TALLOC_CT
 									\
 		e_mapi_util_time_t_to_filetime (dtval, &filetime); \
 									\
-		if (!e_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, named_id, &filetime)) \
+		if (!e_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, named_id, &filetime, cancellable, perror)) \
 			return FALSE;	\
 		} G_STMT_END
 
@@ -2020,7 +2051,7 @@ e_mapi_cal_util_get_new_appt_id (EMapiConnection *conn, mapi_id_t fid)
 			cast_mapi_SPropValue (mem_ctx,
 					      &(res.res.resProperty.lpProp),
 					      &sprop);
-			ids = e_mapi_connection_check_restriction (conn, fid, 0, &res, NULL);
+			ids = e_mapi_connection_check_restriction (conn, fid, 0, &res, NULL, NULL);
 			if (ids) {
 				GSList *l;
 				for (l = ids; l; l = l->next)
@@ -2162,7 +2193,7 @@ populate_freebusy_data (struct Binary_r *bin, uint32_t month, uint32_t year, GSL
 }
 
 gboolean
-e_mapi_cal_utils_get_free_busy_data (EMapiConnection *conn, const GSList *users, time_t start, time_t end, GSList **freebusy, GError **mapi_error)
+e_mapi_cal_utils_get_free_busy_data (EMapiConnection *conn, const GSList *users, time_t start, time_t end, GSList **freebusy, GCancellable *cancellable, GError **mapi_error)
 {
 	struct SRow		aRow;
 	enum MAPISTATUS		ms;
@@ -2189,7 +2220,7 @@ e_mapi_cal_utils_get_free_busy_data (EMapiConnection *conn, const GSList *users,
 
 	*freebusy = NULL;
 
-	if (!e_mapi_connection_get_public_folder (conn, &obj_store, mapi_error)) {
+	if (!e_mapi_connection_get_public_folder (conn, &obj_store, cancellable, mapi_error)) {
 		return FALSE;
 	}
 
@@ -2275,7 +2306,13 @@ e_mapi_cal_utils_get_free_busy_data (EMapiConnection *conn, const GSList *users,
 
 /* beware, the 'data' pointer is an integer of the event kind */
 gboolean
-e_mapi_cal_utils_get_props_cb (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
+e_mapi_cal_utils_get_props_cb (EMapiConnection *conn,
+			       mapi_id_t fid,
+			       TALLOC_CTX *mem_ctx,
+			       struct SPropTagArray *props,
+			       gpointer data,
+			       GCancellable *cancellable,
+			       GError **perror)
 {
 	static const uint32_t cal_GetPropsList[] = {
 		PR_FID,
@@ -2318,7 +2355,7 @@ e_mapi_cal_utils_get_props_cb (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX 
 	if (!e_mapi_utils_add_props_to_props_array (mem_ctx, props, cal_GetPropsList, G_N_ELEMENTS (cal_GetPropsList)))
 		return FALSE;
 
-	return e_mapi_cal_utils_add_named_ids (conn, fid, mem_ctx, props, GPOINTER_TO_INT (data));
+	return e_mapi_cal_utils_add_named_ids (conn, fid, mem_ctx, props, GPOINTER_TO_INT (data), cancellable, perror);
 }
 
 gchar *

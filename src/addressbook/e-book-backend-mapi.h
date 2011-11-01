@@ -84,7 +84,7 @@ typedef struct
 	/* function to fetch list of known uids (strings) on the server;
 	   it's used to synchronize local cache with deleted items;
 	   uids has the uid key, as a newly allocated string; value should be GINT_TO_POINTER(1) always */
-	void (*op_fetch_known_uids) (EBookBackendMAPI *ebma, GCancellable *cancelled, GHashTable *uids, GError **error);
+	void (*op_fetch_known_uids) (EBookBackendMAPI *ebma, GCancellable *cancellable, GHashTable *uids, GError **error);
 } EBookBackendMAPIClass;
 
 GType e_book_backend_mapi_get_type (void);
@@ -124,7 +124,13 @@ void mapi_error_to_edb_error (GError **perror, const GError *mapi_error, EDataBo
 #define GET_UIDS_ONLY     (GINT_TO_POINTER(2))
 
 /* data is one of GET_ALL_KNOWN_IDS or GET_UIDS_ONLY */
-gboolean mapi_book_utils_get_prop_list (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
+gboolean mapi_book_utils_get_prop_list (EMapiConnection *conn,
+					mapi_id_t fid,
+					TALLOC_CTX *mem_ctx,
+					struct SPropTagArray *props,
+					gpointer data,
+					GCancellable *cancellable,
+					GError **perror);
 
 /* only one of mapi_properties and aRow can be set */
 EContact *mapi_book_utils_contact_from_props (EMapiConnection *conn, mapi_id_t fid, const gchar *book_uri, struct mapi_SPropValue_array *mapi_properties, struct SRow *aRow);

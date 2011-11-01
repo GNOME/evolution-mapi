@@ -62,11 +62,33 @@ void e_mapi_util_profiledata_from_settings (EMapiProfileData *empd, CamelMapiSet
 gchar *e_mapi_util_profile_name (const EMapiProfileData *empd, gboolean migrate);
 gboolean e_mapi_util_trigger_krb_auth (const EMapiProfileData *empd, GError **error);
 
-gboolean e_mapi_utils_add_props_to_props_array (TALLOC_CTX *mem_ctx, struct SPropTagArray *props, const uint32_t *prop_ids, guint prop_ids_n_elems);
-gboolean e_mapi_utils_add_named_ids_to_props_array (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, ResolveNamedIDsData *named_ids_list, guint named_ids_n_elems);
+gboolean	e_mapi_utils_add_props_to_props_array		(TALLOC_CTX *mem_ctx,
+								 struct SPropTagArray *props,
+								 const uint32_t *prop_ids,
+								 guint prop_ids_n_elems);
+gboolean	e_mapi_utils_add_named_ids_to_props_array	(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 TALLOC_CTX *mem_ctx,
+								 struct SPropTagArray *props,
+								 ResolveNamedIDsData *named_ids_list,
+								 guint named_ids_n_elems,
+								 GCancellable *cancellable,
+								 GError **perror);
 
-gboolean e_mapi_utils_add_spropvalue (TALLOC_CTX *mem_ctx, struct SPropValue **values_array, uint32_t *n_values, uint32_t prop_tag, gconstpointer prop_value);
-gboolean e_mapi_utils_add_spropvalue_namedid (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values_array, uint32_t *n_values, uint32_t named_id, gconstpointer prop_value);
+gboolean	e_mapi_utils_add_spropvalue			(TALLOC_CTX *mem_ctx,
+								 struct SPropValue **values_array,
+								 uint32_t *n_values,
+								 uint32_t prop_tag,
+								 gconstpointer prop_value);
+gboolean	e_mapi_utils_add_spropvalue_namedid		(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 TALLOC_CTX *mem_ctx,
+								 struct SPropValue **values_array,
+								 uint32_t *n_values,
+								 uint32_t named_id,
+								 gconstpointer prop_value,
+								 GCancellable *cancellable,
+								 GError **perror);
 
 uint32_t e_mapi_utils_push_crc32 (uint32_t crc32, uint8_t *bytes, uint32_t n_bytes);
 

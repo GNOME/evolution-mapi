@@ -1006,7 +1006,7 @@ update_sources_cb (gpointer data, gboolean cancelled, gpointer user_data)
 	e_mapi_connection_peek_folders_list (conn);
 
 	if (trash_id)
-		*trash_id = e_mapi_connection_get_default_folder_id (conn, olFolderDeletedItems, NULL);
+		*trash_id = e_mapi_connection_get_default_folder_id (conn, olFolderDeletedItems, NULL, NULL);
 }
 
 static void
@@ -1218,8 +1218,7 @@ create_profile_entry (CamelURL *url, EAccount *account, CamelMapiSettings *setti
 		if (empd.password || empd.krb_sso) {
 			GError *error = NULL;
 
-			status = e_mapi_create_profile (&empd, NULL,
-							       NULL, &error);
+			status = e_mapi_create_profile (&empd, NULL, NULL, NULL, &error);
 			if (status) {
 				/* profile was created, try to connect to the server */
 				EMapiConnection *conn;
@@ -1228,7 +1227,7 @@ create_profile_entry (CamelURL *url, EAccount *account, CamelMapiSettings *setti
 				status = FALSE;
 				profname = e_mapi_util_profile_name (&empd, FALSE);
 
-				conn = e_mapi_connection_new (profname, empd.password, &error);
+				conn = e_mapi_connection_new (profname, empd.password, NULL, &error);
 				if (conn) {
 					status = e_mapi_connection_connected (conn);
 					g_object_unref (conn);

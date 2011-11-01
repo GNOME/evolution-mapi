@@ -131,7 +131,7 @@ e_mapi_util_find_SPropVal_array_namedid (struct SPropValue *values, EMapiConnect
 	g_return_val_if_fail (values != NULL, NULL);
 	g_return_val_if_fail (conn != NULL, NULL);
 
-	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
+	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL, NULL);
 	if (proptag != MAPI_E_RESERVED)
 		res = e_mapi_util_find_SPropVal_array_propval (values, proptag);
 
@@ -190,7 +190,7 @@ e_mapi_util_find_row_namedid (struct SRow *aRow, EMapiConnection *conn, mapi_id_
 	g_return_val_if_fail (aRow != NULL, NULL);
 	g_return_val_if_fail (conn != NULL, NULL);
 
-	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
+	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL, NULL);
 	if (proptag != MAPI_E_RESERVED)
 		res = e_mapi_util_find_row_propval (aRow, proptag);
 
@@ -249,7 +249,7 @@ e_mapi_util_find_array_namedid (struct mapi_SPropValue_array *properties, EMapiC
 	g_return_val_if_fail (properties != NULL, NULL);
 	g_return_val_if_fail (conn != NULL, NULL);
 
-	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
+	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL, NULL);
 	if (proptag != MAPI_E_RESERVED)
 		res = e_mapi_util_find_array_propval (properties, proptag);
 
@@ -278,7 +278,7 @@ e_mapi_util_find_array_datetime_namedid (struct timeval *tv, struct mapi_SPropVa
 	g_return_val_if_fail (properties != NULL, MAPI_E_INVALID_PARAMETER);
 	g_return_val_if_fail (conn != NULL, MAPI_E_INVALID_PARAMETER);
 
-	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
+	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL, NULL);
 	if (proptag != MAPI_E_RESERVED)
 		res = e_mapi_util_find_array_datetime_propval (tv, properties, proptag);
 
@@ -313,7 +313,7 @@ e_mapi_util_find_stream_namedid (GSList *stream_list, EMapiConnection *conn, map
 	if (!stream_list)
 		return NULL;
 
-	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL);
+	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL, NULL);
 	if (proptag != MAPI_E_RESERVED)
 		res = e_mapi_util_find_stream (stream_list, proptag);
 
@@ -751,7 +751,7 @@ e_mapi_util_recip_entryid_decode (EMapiConnection *conn, const struct Binary_r *
 	}
 
 	if (recip_entryid_decode_ex (entryid, &exchange_dn)) {
-		*email = e_mapi_connection_ex_to_smtp (conn, exchange_dn, display_name, NULL);
+		*email = e_mapi_connection_ex_to_smtp (conn, exchange_dn, display_name, NULL, NULL);
 		g_free (exchange_dn);
 
 		return *email != NULL;
@@ -951,7 +951,10 @@ e_mapi_util_profile_name (const EMapiProfileData *empd, gboolean migrate)
  * Adds prop_ids to props array. props should be created within the given mem_ctx.
  **/
 gboolean
-e_mapi_utils_add_props_to_props_array (TALLOC_CTX *mem_ctx, struct SPropTagArray *props, const uint32_t *prop_ids, guint prop_ids_n_elems)
+e_mapi_utils_add_props_to_props_array (TALLOC_CTX *mem_ctx,
+				       struct SPropTagArray *props,
+				       const uint32_t *prop_ids,
+				       guint prop_ids_n_elems)
 {
 	guint i;
 
@@ -969,7 +972,14 @@ e_mapi_utils_add_props_to_props_array (TALLOC_CTX *mem_ctx, struct SPropTagArray
 
 /* Beware, the named_ids_list array is modified */
 gboolean
-e_mapi_utils_add_named_ids_to_props_array (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, ResolveNamedIDsData *named_ids_list, guint named_ids_n_elems)
+e_mapi_utils_add_named_ids_to_props_array (EMapiConnection *conn,
+					   mapi_id_t fid,
+					   TALLOC_CTX *mem_ctx,
+					   struct SPropTagArray *props,
+					   ResolveNamedIDsData *named_ids_list,
+					   guint named_ids_n_elems,
+					   GCancellable *cancellable,
+					   GError **perror)
 {
 	guint i;
 
@@ -980,7 +990,7 @@ e_mapi_utils_add_named_ids_to_props_array (EMapiConnection *conn, mapi_id_t fid,
 	g_return_val_if_fail (named_ids_list != NULL, FALSE);
 	g_return_val_if_fail (named_ids_n_elems > 0, FALSE);
 
-	if (!e_mapi_connection_resolve_named_props (conn, fid, named_ids_list, named_ids_n_elems, NULL))
+	if (!e_mapi_connection_resolve_named_props (conn, fid, named_ids_list, named_ids_n_elems, cancellable, perror))
 		return FALSE;
 
 	for (i = 0; i < named_ids_n_elems; i++) {
@@ -996,7 +1006,11 @@ e_mapi_utils_add_named_ids_to_props_array (EMapiConnection *conn, mapi_id_t fid,
  * *n_values holds number of items stored in the array, and will be increased by one.
  **/
 gboolean
-e_mapi_utils_add_spropvalue (TALLOC_CTX *mem_ctx, struct SPropValue **values_array, uint32_t *n_values, uint32_t prop_tag, gconstpointer prop_value)
+e_mapi_utils_add_spropvalue (TALLOC_CTX *mem_ctx,
+			     struct SPropValue **values_array,
+			     uint32_t *n_values,
+			     uint32_t prop_tag,
+			     gconstpointer prop_value)
 {
 	g_return_val_if_fail (mem_ctx != NULL, FALSE);
 	g_return_val_if_fail (values_array != NULL, FALSE);
@@ -1009,7 +1023,15 @@ e_mapi_utils_add_spropvalue (TALLOC_CTX *mem_ctx, struct SPropValue **values_arr
 
 /* similar as e_mapi_utils_add_spropvalue, just here is not used prop_tag, but named id */
 gboolean
-e_mapi_utils_add_spropvalue_namedid (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values_array, uint32_t *n_values, uint32_t named_id, gconstpointer prop_value)
+e_mapi_utils_add_spropvalue_namedid (EMapiConnection *conn,
+				     mapi_id_t fid,
+				     TALLOC_CTX *mem_ctx,
+				     struct SPropValue **values_array,
+				     uint32_t *n_values,
+				     uint32_t named_id,
+				     gconstpointer prop_value,
+				     GCancellable *cancellable,
+				     GError **perror)
 {
 	uint32_t prop_tag;
 
@@ -1019,7 +1041,7 @@ e_mapi_utils_add_spropvalue_namedid (EMapiConnection *conn, mapi_id_t fid, TALLO
 	g_return_val_if_fail (values_array != NULL, FALSE);
 	g_return_val_if_fail (n_values != NULL, FALSE);
 
-	prop_tag = e_mapi_connection_resolve_named_prop (conn, fid, named_id, NULL);
+	prop_tag = e_mapi_connection_resolve_named_prop (conn, fid, named_id, cancellable, perror);
 	if (prop_tag == MAPI_E_RESERVED)
 		return FALSE;
 

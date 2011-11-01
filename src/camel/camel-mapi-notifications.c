@@ -229,14 +229,14 @@ mapi_push_notification_listener_thread (gpointer data)
 
 	g_object_ref (conn);
 
-	if (e_mapi_connection_events_init (conn, NULL)) {
+	if (e_mapi_connection_events_init (conn, NULL, NULL)) {
 		e_mapi_connection_events_subscribe (conn, thread_data->event_options, thread_data->event_mask,
 						&thread_data->connection, mapi_notifications_filter,
-						thread_data->event_data, NULL);
+						thread_data->event_data, NULL, NULL);
 
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		e_mapi_connection_events_monitor (conn, cb_data); /*Blocking call. Don't hold locks here*/
-		e_mapi_connection_events_unsubscribe (conn, thread_data->connection, NULL);
+		e_mapi_connection_events_unsubscribe (conn, thread_data->connection, NULL, NULL);
 	} else
 		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 

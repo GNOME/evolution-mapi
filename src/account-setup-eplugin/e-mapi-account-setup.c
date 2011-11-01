@@ -319,7 +319,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 		gboolean status = e_mapi_create_profile (&empd,
 								(mapi_profile_callback_t) create_profile_callback,
 								empd.username,
-								&error);
+								NULL, &error);
 		if (status) {
 			/* profile was created, try to connect to the server */
 			EMapiConnection *conn;
@@ -329,7 +329,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 			profname = e_mapi_util_profile_name (&empd,
 								    FALSE);
 
-			conn = e_mapi_connection_new (profname, empd.password, &error);
+			conn = e_mapi_connection_new (profname, empd.password, NULL, &error);
 			if (conn) {
 				status = e_mapi_connection_connected (conn);
 				g_object_unref (conn);
@@ -853,7 +853,7 @@ e_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	conn = e_mapi_connection_find (e_source_get_property (source, "profile"));
 	g_return_if_fail (conn != NULL);
 
-	fid = e_mapi_connection_create_folder (conn, olFolderContacts, pfid, 0, e_source_peek_name (source), &mapi_error);
+	fid = e_mapi_connection_create_folder (conn, olFolderContacts, pfid, 0, e_source_peek_name (source), NULL, &mapi_error);
 	g_object_unref (conn);
 
 	if (!fid) {
@@ -969,7 +969,7 @@ e_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 	conn = e_mapi_connection_find (e_source_get_property (source, "profile"));
 	g_return_if_fail (conn != NULL);
 
-	fid = e_mapi_connection_create_folder (conn, type, pfid, 0, e_source_peek_name (source), &mapi_error);
+	fid = e_mapi_connection_create_folder (conn, type, pfid, 0, e_source_peek_name (source), NULL, &mapi_error);
 	g_object_unref (conn);
 
 	if (!fid) {

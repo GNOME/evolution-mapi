@@ -58,7 +58,10 @@ G_DEFINE_TYPE (CamelMapiTransport, camel_mapi_transport, CAMEL_TYPE_TRANSPORT)
 
 /*CreateItem would return the MID of the new message or '0' if we fail.*/
 static mapi_id_t
-mapi_message_item_send (EMapiConnection *conn, MailItem *item, GError **perror)
+mapi_message_item_send (EMapiConnection *conn,
+			MailItem *item,
+			GCancellable *cancellable,
+			GError **perror)
 {
 	guint64 fid = 0;
 	mapi_id_t mid = 0;
@@ -75,7 +78,7 @@ mapi_message_item_send (EMapiConnection *conn, MailItem *item, GError **perror)
 
 	mid = e_mapi_connection_create_item (conn, olFolderSentMail, fid,
 					 mapi_mail_utils_create_item_build_props, item,
-					 item->recipients, item->attachments, item->generic_streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE, perror);
+					 item->recipients, item->attachments, item->generic_streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE, cancellable, perror);
 
 	return mid;
 }
@@ -121,7 +124,7 @@ mapi_send_to_sync (CamelTransport *transport,
 	item = mapi_mime_message_to_mail_item (message, 0, from, cancellable, NULL);
 
 	/* send */
-	st = mapi_message_item_send (conn, item, &mapi_error);
+	st = mapi_message_item_send (conn, item, cancellable, &mapi_error);
 
 	g_object_unref (conn);
 

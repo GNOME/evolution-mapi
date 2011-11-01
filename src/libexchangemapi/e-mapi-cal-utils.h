@@ -97,11 +97,36 @@ e_mapi_cal_util_camel_helper (EMapiConnection *conn, mapi_id_t fid, mapi_id_t mi
 uint32_t
 e_mapi_cal_util_get_new_appt_id (EMapiConnection *conn, mapi_id_t fid);
 
-gboolean e_mapi_cal_utils_add_named_ids (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gint pkind);
-gboolean e_mapi_cal_utils_get_props_cb (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
-gboolean e_mapi_cal_utils_write_props_cb (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data);
+gboolean	e_mapi_cal_utils_add_named_ids			(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 TALLOC_CTX *mem_ctx,
+								 struct SPropTagArray *props,
+								 gint pkind,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean	e_mapi_cal_utils_get_props_cb			(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 TALLOC_CTX *mem_ctx,
+								 struct SPropTagArray *props,
+								 gpointer data,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean	e_mapi_cal_utils_write_props_cb			(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 TALLOC_CTX *mem_ctx,
+								 struct SPropValue **values,
+								 uint32_t *n_values,
+								 gpointer data,
+								 GCancellable *cancellable,
+								 GError **perror);
 
-gboolean e_mapi_cal_utils_get_free_busy_data (EMapiConnection *conn, const GSList *users, time_t start, time_t end, GSList **freebusy, GError **mapi_error);
+gboolean	e_mapi_cal_utils_get_free_busy_data		(EMapiConnection *conn,
+								 const GSList *users,
+								 time_t start,
+								 time_t end,
+								 GSList **freebusy,
+								 GCancellable *cancellable,
+								 GError **mapi_error);
 
 gchar *e_mapi_cal_utils_get_icomp_x_prop (icalcomponent *comp, const gchar *key);
 

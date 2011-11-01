@@ -57,7 +57,10 @@ mail_item_free (MailItem *item)
 }
 
 gboolean
-fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
+fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data,
+			     gpointer data,
+			     GCancellable *cancellable,
+			     GError **perror)
 {
 	long *flags = NULL;
 	struct FILETIME *delivery_date = NULL;
@@ -77,7 +80,7 @@ fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 		camel_debug_end();
 	}
 
-	content_class_pid = e_mapi_connection_resolve_named_prop (item_data->conn, item_data->fid, PidNameContentClass, NULL);
+	content_class_pid = e_mapi_connection_resolve_named_prop (item_data->conn, item_data->fid, PidNameContentClass, cancellable, perror);
 	if (content_class_pid == MAPI_E_RESERVED)
 		content_class_pid = 0;
 
@@ -251,7 +254,13 @@ fetch_read_item_common_data (MailItem *item, uint32_t propTag, gconstpointer pro
 }
 
 gboolean
-mapi_mail_get_item_prop_list (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
+mapi_mail_get_item_prop_list (EMapiConnection *conn,
+			      mapi_id_t fid,
+			      TALLOC_CTX *mem_ctx,
+			      struct SPropTagArray *props,
+			      gpointer data,
+			      GCancellable *cancellable,
+			      GError **perror)
 {
 	static const uint32_t item_props[] = {
 		PR_FID,
@@ -314,7 +323,7 @@ mapi_mail_get_item_prop_list (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *
 	if (!e_mapi_utils_add_props_to_props_array (mem_ctx, props, item_props, G_N_ELEMENTS (item_props)))
 		return FALSE;
 
-	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
+	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids), cancellable, perror);
 }
 
 static gboolean
@@ -367,7 +376,7 @@ mapi_mime_set_recipient_list (EMapiConnection *conn, CamelMimeMessage *msg, Mail
 			if (name && !strchr (name, '@')) {
 				gchar *to_free;
 
-				to_free = e_mapi_connection_ex_to_smtp (conn, recip->email_id, &display_name, NULL);
+				to_free = e_mapi_connection_ex_to_smtp (conn, recip->email_id, &display_name, NULL, NULL);
 				g_free (to_free);
 			}
 		}
@@ -480,7 +489,7 @@ mapi_mime_set_msg_headers (EMapiConnection *conn, CamelMimeMessage *msg, MailIte
 		if ((item->header.from_type != NULL) && !g_utf8_collate (item->header.from_type, "EX")) {
 			gchar *from_email;
 
-			from_email = e_mapi_connection_ex_to_smtp (conn, item->header.from_email, NULL, NULL);
+			from_email = e_mapi_connection_ex_to_smtp (conn, item->header.from_email, NULL, NULL, NULL);
 			g_free (item->header.from_email);
 			item->header.from_email = from_email;
 		}
@@ -784,7 +793,7 @@ mapi_mime_classify_attachments (EMapiConnection *conn, mapi_id_t fid, const gcha
 			camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
 
 			strm = NULL;
-			proptag = e_mapi_connection_resolve_named_prop (conn, fid, PidNameAttachmentMacInfo, NULL);
+			proptag = e_mapi_connection_resolve_named_prop (conn, fid, PidNameAttachmentMacInfo, NULL, NULL);
 			if (proptag != MAPI_E_RESERVED)
 				strm = e_mapi_util_find_stream (attach->streams, proptag);
 			if (!strm)
@@ -1603,7 +1612,14 @@ mapi_mime_message_to_mail_item (CamelMimeMessage *message, gint32 message_camel_
 }
 
 gboolean
-mapi_mail_utils_create_item_build_props (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data)
+mapi_mail_utils_create_item_build_props (EMapiConnection *conn,
+					 mapi_id_t fid,
+					 TALLOC_CTX *mem_ctx,
+					 struct SPropValue **values,
+					 uint32_t *n_values,
+					 gpointer data,
+					 GCancellable *cancellable,
+					 GError **perror)
 {
 
 	MailItem *item = (MailItem *) data;
@@ -1621,7 +1637,7 @@ mapi_mail_utils_create_item_build_props (EMapiConnection *conn, mapi_id_t fid, T
 	}
 	
 	if (item->pid_name_content_type) {
-		if (!e_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, PidNameContentType, item->pid_name_content_type))
+		if (!e_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, PidNameContentType, item->pid_name_content_type, cancellable, perror))
 			return FALSE;
 	}
 

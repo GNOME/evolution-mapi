@@ -27,6 +27,7 @@
 
 #include <glib.h>
 #include <glib-object.h>
+#include <gio/gio.h>
 
 #include <libmapi/libmapi.h>
 
@@ -147,19 +148,32 @@ typedef struct {
 	time_t last_modified; /* PR_LAST_MODIFICATION_TIME as UTC */
 } ListItemsData;
 
-typedef gboolean (*FetchCallback)		(FetchItemsCallbackData *item_data, gpointer data);
-typedef gboolean (*FetchGALCallback)		(EMapiConnection *conn, uint32_t row_index, uint32_t n_rows, struct SRow *aRow, gpointer data);
+typedef gboolean (*FetchCallback)		(FetchItemsCallbackData *item_data,
+						 gpointer data,
+						 GCancellable *cancellable,
+						 GError **perror);
+typedef gboolean (*FetchGALCallback)		(EMapiConnection *conn,
+						 uint32_t row_index,
+						 uint32_t n_rows,
+						 struct SRow *aRow,
+						 gpointer data,
+						 GCancellable *cancellable,
+						 GError **perror);
 typedef gboolean (*BuildWritePropsCB)		(EMapiConnection *conn,
 						 mapi_id_t fid,
 						 TALLOC_CTX *mem_ctx,
 						 struct SPropValue **values,
 						 uint32_t *n_values,
-						 gpointer data);
+						 gpointer data,
+						 GCancellable *cancellable,
+						 GError **perror);
 typedef gboolean (*BuildReadPropsCB)		(EMapiConnection *conn,
 						 mapi_id_t fid,
 						 TALLOC_CTX *mem_ctx,
 						 struct SPropTagArray *props,
-						 gpointer data);
+						 gpointer data,
+						 GCancellable *cancellable,
+						 GError **perror);
 typedef gboolean (*ListItemsCB)			(EMapiConnection *conn,
 						 mapi_id_t fid,
 						 TALLOC_CTX *mem_ctx,
@@ -167,12 +181,21 @@ typedef gboolean (*ListItemsCB)			(EMapiConnection *conn,
 						 guint32 item_index,
 						 guint32 items_total,
 						 gpointer user_data,
+						 GCancellable *cancellable,
 						 GError **perror);
 typedef gboolean (*GetFolderPropertiesCB)	(EMapiConnection *conn,
 						 mapi_id_t fid,
 						 TALLOC_CTX *mem_ctx,
 						 /* const */ struct mapi_SPropValue_array *properties,
 						 gpointer user_data,
+						 GCancellable *cancellable,
+						 GError **perror);
+
+typedef gboolean (*ProgressNotifyCB)		(EMapiConnection *conn,
+						 guint32 item_index,
+						 guint32 items_total,
+						 gpointer user_data,
+						 GCancellable *cancellable,
 						 GError **perror);
 
 struct _EMapiConnection {
@@ -187,93 +210,244 @@ struct _EMapiConnectionClass {
 	/* signals */
 };
 
-GType			e_mapi_connection_get_type (void);
-EMapiConnection *e_mapi_connection_new (const gchar *profile, const gchar *password, GError **perror);
-EMapiConnection *e_mapi_connection_find (const gchar *profile);
-gboolean		e_mapi_connection_reconnect (EMapiConnection *conn, const gchar *password, GError **perror);
-gboolean		e_mapi_connection_close (EMapiConnection *conn);
-gboolean		e_mapi_connection_connected (EMapiConnection *conn);
+GType			e_mapi_connection_get_type		(void);
+EMapiConnection *	e_mapi_connection_new			(const gchar *profile,
+								 const gchar *password,
+								 GCancellable *cancellable,
+								 GError **perror);
+EMapiConnection *	e_mapi_connection_find			(const gchar *profile);
+gboolean		e_mapi_connection_reconnect		(EMapiConnection *conn,
+								 const gchar *password,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean		e_mapi_connection_close			(EMapiConnection *conn);
+gboolean		e_mapi_connection_connected		(EMapiConnection *conn);
 
-gboolean		e_mapi_connection_get_folder_properties (EMapiConnection *conn, mapi_id_t fid, guint32 options,
-					BuildReadPropsCB brp_cb, gpointer brp_cb_user_data,
-					GetFolderPropertiesCB cb, gpointer cb_user_data,
-					GError **perror);
+gboolean		e_mapi_connection_get_folder_properties	(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 guint32 options,
+								 BuildReadPropsCB brp_cb,
+								 gpointer brp_cb_user_data,
+								 GetFolderPropertiesCB cb,
+								 gpointer cb_user_data,
+								 GCancellable *cancellable,
+								 GError **perror);
 
-gboolean		e_mapi_connection_list_items (EMapiConnection *conn, mapi_id_t fid, guint32 options,
-					struct mapi_SRestriction *restrictions,
-					ListItemsCB cb, gpointer user_data,
-					GError **perror);
+gboolean		e_mapi_connection_list_items		(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 guint32 options,
+								 struct mapi_SRestriction *restrictions,
+								 ListItemsCB cb,
+								 gpointer user_data,
+								 GCancellable *cancellable,
+								 GError **perror);
 
-gboolean		e_mapi_connection_fetch_object_props (
-					EMapiConnection *conn, mapi_object_t *obj_folder, mapi_id_t fid, mapi_id_t mid, mapi_object_t *obj_message,
-					BuildReadPropsCB build_props, gpointer brp_data,
-					FetchCallback cb, gpointer data,
-					guint32 options, GError **perror);
+gboolean		e_mapi_connection_fetch_object_props	(EMapiConnection *conn,
+								 mapi_object_t *obj_folder,
+								 mapi_id_t fid,
+								 mapi_id_t mid,
+								 mapi_object_t *obj_message,
+								 BuildReadPropsCB build_props,
+								 gpointer brp_data,
+								 FetchCallback cb,
+								 gpointer data,
+								 guint32 options,
+								 GCancellable *cancellable,
+								 GError **perror);
 
-gboolean		e_mapi_connection_fetch_item (EMapiConnection *conn, mapi_id_t fid, mapi_id_t mid,
-					BuildReadPropsCB build_props, gpointer brp_data,
-					FetchCallback cb, gpointer data,
-					guint32 options, GError **perror);
+gboolean		e_mapi_connection_fetch_item		(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 mapi_id_t mid,
+								 BuildReadPropsCB build_props,
+								 gpointer brp_data,
+								 FetchCallback cb,
+								 gpointer data,
+								 guint32 options,
+								 GCancellable *cancellable,
+								 GError **perror);
 
-gboolean		e_mapi_connection_fetch_items (EMapiConnection *conn, mapi_id_t fid,
-					struct mapi_SRestriction *res, struct SSortOrderSet *sort_order,
-					BuildReadPropsCB build_props, gpointer brp_data,
-					FetchCallback cb, gpointer data,
-					guint32 options, GError **perror);
+gboolean		e_mapi_connection_fetch_items		(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 struct mapi_SRestriction *res,
+								 struct SSortOrderSet *sort_order,
+								 BuildReadPropsCB build_props,
+								 gpointer brp_data,
+								 FetchCallback cb,
+								 gpointer data,
+								 guint32 options,
+								 GCancellable *cancellable,
+								 GError **perror);
 
-gboolean		e_mapi_connection_fetch_gal (EMapiConnection *conn, struct mapi_SRestriction *restrictions,
-					BuildReadPropsCB build_props, gpointer brp_data,
-					FetchGALCallback cb, gpointer data, GError **perror);
+gboolean		e_mapi_connection_fetch_gal		(EMapiConnection *conn,
+								 struct mapi_SRestriction *restrictions,
+								 BuildReadPropsCB build_props,
+								 gpointer brp_data,
+								 FetchGALCallback cb,
+								 gpointer data,
+								 GCancellable *cancellable,
+								 GError **perror);
 
-gboolean		e_mapi_connection_get_public_folder (EMapiConnection *conn, mapi_object_t *obj_object, GError **perror);
+gboolean		e_mapi_connection_get_public_folder	(EMapiConnection *conn,
+								 mapi_object_t *obj_object,
+								 GCancellable *cancellable,
+								 GError **perror);
 
-mapi_id_t		e_mapi_connection_create_folder (EMapiConnection *conn, uint32_t olFolder, mapi_id_t pfid, guint32 fid_options, const gchar *name, GError **perror);
-gboolean		e_mapi_connection_remove_folder (EMapiConnection *conn, mapi_id_t fid, guint32 fid_options, GError **perror);
-gboolean		e_mapi_connection_empty_folder (EMapiConnection *conn, mapi_id_t fid, guint32 fid_options, GError **perror);
-gboolean		e_mapi_connection_rename_folder (EMapiConnection *conn, mapi_id_t fid, guint32 fid_options, const gchar *new_name, GError **perror);
-gboolean		e_mapi_connection_move_folder (EMapiConnection *conn, mapi_id_t src_fid, mapi_id_t src_parent_fid, guint32 src_fid_options, mapi_id_t des_fid, guint32 des_fid_options, const gchar *new_name, GError **perror);
-GSList *		e_mapi_connection_check_restriction (EMapiConnection *conn, mapi_id_t fid, guint32 fid_options, struct mapi_SRestriction *res, GError **perror);
-mapi_id_t		e_mapi_connection_get_default_folder_id (EMapiConnection *conn, uint32_t olFolder, GError **perror);
-mapi_id_t		e_mapi_connection_create_item (EMapiConnection *conn, uint32_t olFolder, mapi_id_t fid,
-					BuildWritePropsCB build_props, gpointer bwp_data,
-					GSList *recipients, GSList *attachments, GSList *generic_streams,
-					uint32_t options, GError **perror);
+mapi_id_t		e_mapi_connection_create_folder		(EMapiConnection *conn,
+								 uint32_t olFolder,
+								 mapi_id_t pfid,
+								 guint32 fid_options,
+								 const gchar *name,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean		e_mapi_connection_remove_folder		(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 guint32 fid_options,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean		e_mapi_connection_empty_folder		(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 guint32 fid_options,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean		e_mapi_connection_rename_folder		(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 guint32 fid_options,
+								 const gchar *new_name,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean		e_mapi_connection_move_folder		(EMapiConnection *conn,
+								 mapi_id_t src_fid,
+								 mapi_id_t src_parent_fid,
+								 guint32 src_fid_options,
+								 mapi_id_t des_fid,
+								 guint32 des_fid_options,
+								 const gchar *new_name,
+								 GCancellable *cancellable,
+								 GError **perror);
+GSList *		e_mapi_connection_check_restriction	(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 guint32 fid_options,
+								 struct mapi_SRestriction *res,
+								 GCancellable *cancellable,
+								 GError **perror);
+mapi_id_t		e_mapi_connection_get_default_folder_id	(EMapiConnection *conn,
+								 uint32_t olFolder,
+								 GCancellable *cancellable,
+								 GError **perror);
+mapi_id_t		e_mapi_connection_create_item		(EMapiConnection *conn,
+								 uint32_t olFolder,
+								 mapi_id_t fid,
+								 BuildWritePropsCB build_props,
+								 gpointer bwp_data,
+								 GSList *recipients,
+								 GSList *attachments,
+								 GSList *generic_streams,
+								 uint32_t options,
+								 GCancellable *cancellable,
+								 GError **perror);
 
-gboolean		e_mapi_connection_modify_item (EMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, mapi_id_t mid,
-					BuildWritePropsCB build_props, gpointer bwp_data,
-					GSList *recipients, GSList *attachments, GSList *generic_streams,
-					uint32_t options, GError **perror);
+gboolean		e_mapi_connection_modify_item		(EMapiConnection *conn,
+								 uint32_t olFolder,
+								 mapi_id_t fid,
+								 mapi_id_t mid,
+								 BuildWritePropsCB build_props,
+								 gpointer bwp_data,
+								 GSList *recipients,
+								 GSList *attachments,
+								 GSList *generic_streams,
+								 uint32_t options,
+								 GCancellable *cancellable,
+								 GError **perror);
 
-gboolean		e_mapi_connection_set_flags (EMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, guint32 fid_options, GSList *mid_list, uint32_t flag, GError **perror);
-gboolean		e_mapi_connection_remove_items (EMapiConnection *conn, uint32_t olFolder, mapi_id_t fid, guint32 fid_options, GSList *mids, GError **perror);
-gboolean		e_mapi_connection_copy_items (EMapiConnection *conn, mapi_id_t src_fid, guint32 src_fid_options, mapi_id_t dest_fid, guint32 dest_fid_options, GSList *mids, GError **perror);
-gboolean		e_mapi_connection_move_items (EMapiConnection *conn, mapi_id_t src_fid, guint32 src_fid_options, mapi_id_t dest_fid, guint32 dest_fid_options, GSList *mids, GError **perror);
-gboolean		e_mapi_connection_get_folders_list (EMapiConnection *conn, GSList **mapi_folders, GError **perror);
-gboolean		e_mapi_connection_get_pf_folders_list (EMapiConnection *conn, GSList **mapi_folders, GError **perror);
-GSList *		e_mapi_connection_peek_folders_list (EMapiConnection *conn);
+gboolean		e_mapi_connection_set_flags		(EMapiConnection *conn,
+								 uint32_t olFolder,
+								 mapi_id_t fid,
+								 guint32 fid_options,
+								 GSList *mid_list,
+								 uint32_t flag,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean		e_mapi_connection_remove_items		(EMapiConnection *conn,
+								 uint32_t olFolder,
+								 mapi_id_t fid,
+								 guint32 fid_options,
+								 GSList *mids,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean		e_mapi_connection_copy_items		(EMapiConnection *conn,
+								 mapi_id_t src_fid,
+								 guint32 src_fid_options,
+								 mapi_id_t dest_fid,
+								 guint32 dest_fid_options,
+								 GSList *mids,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean		e_mapi_connection_move_items		(EMapiConnection *conn,
+								 mapi_id_t src_fid,
+								 guint32 src_fid_options,
+								 mapi_id_t dest_fid,
+								 guint32 dest_fid_options,
+								 GSList *mids,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean		e_mapi_connection_get_folders_list	(EMapiConnection *conn,
+								 GSList **mapi_folders,
+								 ProgressNotifyCB cb,
+								 gpointer cb_user_data,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean		e_mapi_connection_get_pf_folders_list	(EMapiConnection *conn,
+								 GSList **mapi_folders,
+								 ProgressNotifyCB cb,
+								 gpointer cb_user_data,
+								 GCancellable *cancellable,
+								 GError **perror);
+GSList *		e_mapi_connection_peek_folders_list	(EMapiConnection *conn);
 
-gboolean		e_mapi_connection_resolve_named_props (EMapiConnection *conn, mapi_id_t fid, ResolveNamedIDsData *named_ids_list, guint named_ids_n_elems, GError **perror);
-uint32_t		e_mapi_connection_resolve_named_prop (EMapiConnection *conn, mapi_id_t fid, uint32_t pidlid_propid, GError **perror);
-uint32_t		e_mapi_connection_unresolve_proptag_to_nameid (EMapiConnection *conn, mapi_id_t fid, uint32_t proptag);
+gboolean		e_mapi_connection_resolve_named_props	(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 ResolveNamedIDsData *named_ids_list,
+								 guint named_ids_n_elems,
+								 GCancellable *cancellable,
+								 GError **perror);
+uint32_t		e_mapi_connection_resolve_named_prop	(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 uint32_t pidlid_propid,
+								 GCancellable *cancellable,
+								 GError **perror);
+uint32_t		e_mapi_connection_unresolve_proptag_to_nameid
+								(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 uint32_t proptag);
 
-gchar *			e_mapi_connection_ex_to_smtp (EMapiConnection *conn, const gchar *ex_address, gchar **display_name, GError **perror);
+gchar *			e_mapi_connection_ex_to_smtp		(EMapiConnection *conn,
+								 const gchar *ex_address,
+								 gchar **display_name,
+								 GCancellable *cancellable,
+								 GError **perror);
 
 /* Push notifications APIs */
 typedef gboolean (*exchange_check_continue) (void);
 
-gboolean		e_mapi_connection_events_init (EMapiConnection *conn, GError **perror);
-gboolean		e_mapi_connection_events_monitor (EMapiConnection *conn, struct mapi_notify_continue_callback_data *cb_data);
+gboolean		e_mapi_connection_events_init		(EMapiConnection *conn,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean		e_mapi_connection_events_monitor	(EMapiConnection *conn,
+								 struct mapi_notify_continue_callback_data *cb_data);
 
-gboolean		e_mapi_connection_events_subscribe (EMapiConnection *conn, guint32 options,
-					guint16 event_mask, guint32 *events_conn_id,
-					mapi_notify_callback_t callback, gpointer data, GError **perror);
+gboolean		e_mapi_connection_events_subscribe	(EMapiConnection *conn,
+								 guint32 options,
+								 guint16 event_mask,
+								 guint32 *events_conn_id,
+								 mapi_notify_callback_t callback,
+								 gpointer data,
+								 GCancellable *cancellable,
+								 GError **perror);
 
-gboolean		e_mapi_connection_events_subscribe_and_monitor (EMapiConnection *conn, mapi_id_t *obj_id, guint32 options,
-					guint16 event_mask, guint32 *events_conn_id,
-					gboolean use_store, mapi_notify_callback_t callback,
-					gpointer data);
-
-gboolean		e_mapi_connection_events_unsubscribe (EMapiConnection *conn, guint32 events_conn_id, GError **perror);
+gboolean		e_mapi_connection_events_unsubscribe	(EMapiConnection *conn,
+								 guint32 events_conn_id,
+								 GCancellable *cancellable,
+								 GError **perror);
 
 /* profile functions */
 
@@ -292,15 +466,22 @@ typedef struct {
 	 && (((x)->domain && *(x)->domain && (x)->password && *(x)->password) \
 	     || ((x)->krb_sso && (x)->krb_realm && *(x)->krb_realm)))
 
-gboolean		e_mapi_create_profile (EMapiProfileData *profile,
-				       mapi_profile_callback_t cb, gconstpointer data, GError **perror);
+gboolean		e_mapi_create_profile			(EMapiProfileData *profile,
+								 mapi_profile_callback_t cb,
+								 gconstpointer data,
+								 GCancellable *cancellable,
+								 GError **perror);
 
-gboolean		e_mapi_delete_profile (const gchar *profile, GError **perror);
-void			e_mapi_rename_profile (const gchar *old_name, const gchar *new_name);
+gboolean		e_mapi_delete_profile			(const gchar *profile,
+								 GError **perror);
+void			e_mapi_rename_profile			(const gchar *old_name,
+								 const gchar *new_name);
 
 /* utility functions */
 
-void make_mapi_error (GError **perror, const gchar *context, enum MAPISTATUS mapi_status);
+void			make_mapi_error				(GError **perror,
+								 const gchar *context,
+								 enum MAPISTATUS mapi_status);
 
 G_END_DECLS
 

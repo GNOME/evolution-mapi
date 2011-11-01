@@ -63,7 +63,13 @@ struct FetchGalData
 };
 
 static gboolean
-fetch_gal_cb (EMapiConnection *conn, uint32_t row_index, uint32_t n_rows, struct SRow *aRow, gpointer data)
+fetch_gal_cb (EMapiConnection *conn,
+	      uint32_t row_index,
+	      uint32_t n_rows,
+	      struct SRow *aRow,
+	      gpointer data,
+	      GCancellable *cancellable,
+	      GError **perror)
 {
 	struct FetchGalData *fgd = data;
 	struct timeval *last_modification = NULL, tv = { 0 };
@@ -104,13 +110,19 @@ fetch_gal_cb (EMapiConnection *conn, uint32_t row_index, uint32_t n_rows, struct
 
 struct FetchGalUidsData
 {
-	GCancellable *cancelled;
+	GCancellable *cancellable;
 	GHashTable *uids;
 	mapi_id_t fid; /* folder ID of contacts */
 };
 
 static gboolean
-fetch_gal_uids_cb (EMapiConnection *conn, uint32_t row_index, uint32_t n_rows, struct SRow *aRow, gpointer data)
+fetch_gal_uids_cb (EMapiConnection *conn,
+		   uint32_t row_index,
+		   uint32_t n_rows,
+		   struct SRow *aRow,
+		   gpointer data,
+		   GCancellable *cancellable,
+		   GError **perror)
 {
 	gchar *uid;
 	struct FetchGalUidsData *fgud = data;
@@ -123,7 +135,7 @@ fetch_gal_uids_cb (EMapiConnection *conn, uint32_t row_index, uint32_t n_rows, s
 	if (uid)
 		g_hash_table_insert (fgud->uids, uid, GINT_TO_POINTER (1));
 
-	return !g_cancellable_is_cancelled (fgud->cancelled);
+	return !g_cancellable_is_cancelled (fgud->cancellable);
 }
 
 static void
@@ -201,11 +213,11 @@ ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restr
 	fgd.ebma = ebma;
 	fgd.book_view = book_view;
 	fgd.notify_contact_data = notify_contact_data;
-	fgd.fid = e_mapi_connection_get_default_folder_id (conn, olFolderContacts, NULL);
+	fgd.fid = e_mapi_connection_get_default_folder_id (conn, olFolderContacts, NULL, NULL);
 
 	fetch_successful = e_mapi_connection_fetch_gal (conn, restriction,
 		mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
-		fetch_gal_cb, &fgd, &mapi_error);
+		fetch_gal_cb, &fgd, NULL, &mapi_error);
 
 	if (mapi_error) {
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch GAL entries"));
@@ -228,14 +240,14 @@ ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restr
 }
 
 static void
-ebbm_gal_fetch_known_uids (EBookBackendMAPI *ebma, GCancellable *cancelled, GHashTable *uids, GError **error)
+ebbm_gal_fetch_known_uids (EBookBackendMAPI *ebma, GCancellable *cancellable, GHashTable *uids, GError **error)
 {
 	EMapiConnection *conn;
 	GError *mapi_error = NULL;
 	struct FetchGalUidsData fgud = { 0 };
 
 	g_return_if_fail (ebma != NULL);
-	g_return_if_fail (cancelled != NULL);
+	g_return_if_fail (cancellable != NULL);
 	g_return_if_fail (uids != NULL);
 
 	e_book_backend_mapi_lock_connection (ebma);
@@ -247,13 +259,13 @@ ebbm_gal_fetch_known_uids (EBookBackendMAPI *ebma, GCancellable *cancelled, GHas
 		return;
 	}
 
-	fgud.cancelled = cancelled;
+	fgud.cancellable = cancellable;
 	fgud.uids = uids;
-	fgud.fid = e_mapi_connection_get_default_folder_id (conn, olFolderContacts, NULL);
+	fgud.fid = e_mapi_connection_get_default_folder_id (conn, olFolderContacts, cancellable, NULL);
 
 	e_mapi_connection_fetch_gal (conn, NULL,
 		mapi_book_utils_get_prop_list, GET_UIDS_ONLY,
-		fetch_gal_uids_cb, &fgud, &mapi_error);
+		fetch_gal_uids_cb, &fgud, cancellable, &mapi_error);
 
 	if (mapi_error) {
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch GAL entries"));

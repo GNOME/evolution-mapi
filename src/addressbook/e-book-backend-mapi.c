@@ -413,11 +413,12 @@ ebbm_connect_user (EBookBackendMAPI *ebma, GCancellable *cancellable, const gcha
 
 		priv->conn = e_mapi_connection_new (priv->profile,
 							   password,
+							   cancellable,
 							   &mapi_error);
 		if (!priv->conn) {
 			priv->conn = e_mapi_connection_find (priv->profile);
 			if (priv->conn && !e_mapi_connection_connected (priv->conn))
-				e_mapi_connection_reconnect (priv->conn, password, &mapi_error);
+				e_mapi_connection_reconnect (priv->conn, password, cancellable, &mapi_error);
 		}
 
 		if (old_conn)
@@ -1645,7 +1646,13 @@ e_book_backend_mapi_cache_get (EBookBackendMAPI *ebma, const gchar *key)
 
 /* 'data' is one of GET_ALL_KNOWN_IDS or GET_UIDS_ONLY */
 gboolean
-mapi_book_utils_get_prop_list (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data)
+mapi_book_utils_get_prop_list (EMapiConnection *conn,
+			       mapi_id_t fid,
+			       TALLOC_CTX *mem_ctx,
+			       struct SPropTagArray *props,
+			       gpointer data,
+			       GCancellable *cancellable,
+			       GError **perror)
 {
 	/* this is a list of all known book MAPI tag IDs;
 	   if you add new add it here too, otherwise it may not be fetched */
@@ -1733,9 +1740,9 @@ mapi_book_utils_get_prop_list (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX 
 
 	/* called with fid = 0 from GAL */
 	if (!fid)
-		fid = e_mapi_connection_get_default_folder_id (conn, olFolderContacts, NULL);
+		fid = e_mapi_connection_get_default_folder_id (conn, olFolderContacts, cancellable, NULL);
 
-	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids));
+	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids), cancellable, perror);
 }
 
 static gchar *

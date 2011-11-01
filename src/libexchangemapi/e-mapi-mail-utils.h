@@ -82,19 +82,35 @@ typedef struct _MailItem {
 void mail_item_free (MailItem *item);
 
 /* fetch callback, the 'data' is pointer to a MailItem pointer, where new MailItem will be placed */
-gboolean fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data);
+gboolean fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data,
+				      gpointer data,
+				      GCancellable *cancellable,
+				      GError **perror);
 
 /* returns TRUE when filled an entry in the MailItem based on the propTag and its value */
 gboolean fetch_read_item_common_data (MailItem *item, uint32_t propTag, gconstpointer prop_data);
 
-gboolean mapi_mail_get_item_prop_list (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropTagArray *props, gpointer data);
+gboolean mapi_mail_get_item_prop_list (EMapiConnection *conn,
+				       mapi_id_t fid,
+				       TALLOC_CTX *mem_ctx,
+				       struct SPropTagArray *props, gpointer data,
+				       GCancellable *cancellable,
+				       GError **perror);
 
 struct _CamelMimeMessage;
 struct _CamelMimeMessage *mapi_mail_item_to_mime_message (EMapiConnection *conn, MailItem *item);
 
 struct _CamelAddress;
 MailItem *mapi_mime_message_to_mail_item (struct _CamelMimeMessage *message, gint32 message_camel_flags, struct _CamelAddress *from, GCancellable *cancellable, GError **error);
+
 /* uses MailItem * as 'data' pointer */
-gboolean  mapi_mail_utils_create_item_build_props (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SPropValue **values, uint32_t *n_values, gpointer data);
+gboolean  mapi_mail_utils_create_item_build_props (EMapiConnection *conn,
+						   mapi_id_t fid,
+						   TALLOC_CTX *mem_ctx,
+						   struct SPropValue **values,
+						   uint32_t *n_values,
+						   gpointer data,
+						   GCancellable *cancellable,
+						   GError **perror);
 
 #endif /* E_MAPI_MAIL_UTILS */
