@@ -55,7 +55,7 @@ container_class_to_type (const gchar *type)
 }
 
 EMapiFolder *
-e_mapi_folder_new (const gchar *folder_name, const gchar *container_class, EMapiFolderCategory category, mapi_id_t folder_id, mapi_id_t parent_folder_id, uint32_t child_count, uint32_t unread_count, uint32_t total, time_t last_modified)
+e_mapi_folder_new (const gchar *folder_name, const gchar *container_class, EMapiFolderCategory category, mapi_id_t folder_id, mapi_id_t parent_folder_id, uint32_t child_count, uint32_t unread_count, uint32_t total)
 {
 	EMapiFolder *folder;
 
@@ -69,7 +69,6 @@ e_mapi_folder_new (const gchar *folder_name, const gchar *container_class, EMapi
 	folder->unread_count = unread_count;
 	folder->total = total;
 	folder->category = category;
-	folder->last_modified = last_modified;
 
 	return folder;
 }

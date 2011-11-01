@@ -485,8 +485,7 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GError **error)
 						info->flags,
 						folder->category == MAPI_PERSONAL_FOLDER ? CAMEL_MAPI_STORE_FOLDER_FLAG_PERSONAL:
 						CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC,
-						NULL,
-						folder->last_modified);
+						NULL);
 				if (msi == NULL)
 					continue;
 
@@ -516,8 +515,7 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GError **error)
 						e_mapi_folder_get_parent_id (folder),
 						info->flags,
 						CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC,
-						NULL,
-						folder->last_modified);
+						NULL);
 
 				if (msi)
 					camel_store_summary_info_ref (store->summary, (CamelStoreInfo *) msi);
@@ -976,7 +974,8 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 		   one every single question on the folder info */
 		if ((flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST) != 0 ||
 		    (!(flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED)) ||
-		    (top && *top && !camel_mapi_store_folder_id_lookup (mapi_store, top))) {
+		    (top && *top && !camel_mapi_store_folder_id_lookup (mapi_store, top)) ||
+		    camel_store_summary_count (mapi_store->summary) <= 1) {
 			CamelServiceConnectionStatus status;
 
 			status = camel_service_get_connection_status (service);
@@ -1076,8 +1075,7 @@ mapi_store_create_folder_sync (CamelStore *store,
 			parent_fid,
 			root->flags,
 			CAMEL_MAPI_STORE_FOLDER_FLAG_PERSONAL,
-			NULL,
-			0);
+			NULL);
 
 		camel_store_summary_save (mapi_store->summary);
 

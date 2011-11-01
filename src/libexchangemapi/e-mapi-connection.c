@@ -2373,7 +2373,7 @@ e_mapi_connection_create_folder (EMapiConnection *conn, uint32_t olFolder, mapi_
 	/* we should also update folder list locally */
 	if (fid != 0 && priv->folders != NULL) {
 		EMapiFolder *folder = NULL;
-		folder = e_mapi_folder_new (name, type, MAPI_PERSONAL_FOLDER, fid, pfid, 0, 0, 0, 0);
+		folder = e_mapi_folder_new (name, type, MAPI_PERSONAL_FOLDER, fid, pfid, 0, 0, 0);
 		if (folder)
 			priv->folders = g_slist_append (priv->folders, folder);
 	}
@@ -3353,7 +3353,7 @@ get_child_folders (TALLOC_CTX *mem_ctx, EMapiFolderCategory folder_hier, mapi_ob
 		goto cleanup;
 	}
 
-	SPropTagArray = set_SPropTagArray(mem_ctx, 9,
+	SPropTagArray = set_SPropTagArray(mem_ctx, 8,
 					  PR_FID,
 					  PR_PARENT_FID,
 					  PR_CONTAINER_CLASS,
@@ -3361,8 +3361,7 @@ get_child_folders (TALLOC_CTX *mem_ctx, EMapiFolderCategory folder_hier, mapi_ob
 					  PR_CONTENT_UNREAD,
 					  PR_CONTENT_COUNT,
 					  PR_MESSAGE_SIZE,
-					  PR_FOLDER_CHILD_COUNT,
-					  PR_LAST_MODIFICATION_TIME);
+					  PR_FOLDER_CHILD_COUNT);
 
 	ms = SetColumns (&obj_table, SPropTagArray);
 	if (ms != MAPI_E_SUCCESS) {
@@ -3403,16 +3402,6 @@ get_child_folders (TALLOC_CTX *mem_ctx, EMapiFolderCategory folder_hier, mapi_ob
 			const uint32_t *total = e_mapi_util_find_row_propval (&rowset.aRow[i], PR_CONTENT_COUNT);
 			const uint32_t *child = e_mapi_util_find_row_propval (&rowset.aRow[i], PR_FOLDER_CHILD_COUNT);
 			const uint32_t *folder_size = e_mapi_util_find_row_propval (&rowset.aRow[i], PR_MESSAGE_SIZE);
-			time_t last_modified;
-			struct SPropValue *last_modified_prop;
-			struct timeval t;
-
-			last_modified_prop = get_SPropValue_SRowSet (&rowset, PR_LAST_MODIFICATION_TIME);
-
-			if (last_modified_prop && get_mapi_SPropValue_date_timeval (&t, *last_modified_prop) == MAPI_E_SUCCESS)
-				last_modified = t.tv_sec;
-			else
-				last_modified = 0;
 
 			if (!klass)
 				klass = IPF_NOTE;
@@ -3421,7 +3410,7 @@ get_child_folders (TALLOC_CTX *mem_ctx, EMapiFolderCategory folder_hier, mapi_ob
 				name, klass, *fid, unread ? *unread : 0, total ? *total : 0, folder_size ? *folder_size : 0);
 
 			folder = e_mapi_folder_new (name, klass, folder_hier, *fid, pid ? *pid : folder_id,
-							   child ? *child : 0, unread ? *unread : 0, total ? *total : 0, last_modified);
+							   child ? *child : 0, unread ? *unread : 0, total ? *total : 0);
 
 			folder->size = folder_size ? *folder_size : 0;
 
@@ -3653,7 +3642,7 @@ e_mapi_connection_get_folders_list (EMapiConnection *conn, GSList **mapi_folders
 
 	/* FIXME: May have to get the child folders count? Do we need/use it? */
 	folder = e_mapi_folder_new (mailbox_name, IPF_NOTE,
-					   MAPI_PERSONAL_FOLDER, mailbox_id, 0, 0, 0 ,0, 0);
+					   MAPI_PERSONAL_FOLDER, mailbox_id, 0, 0, 0 ,0);
 	folder->is_default = true;
 	folder->default_type = olFolderTopInformationStore; /*Is this correct ?*/
 	folder->size = mailbox_size ? *mailbox_size : 0;
@@ -3708,7 +3697,7 @@ e_mapi_connection_get_pf_folders_list (EMapiConnection *conn, GSList **mapi_fold
 		goto cleanup;
 	}
 
-	folder = e_mapi_folder_new (_("All Public Folders"), IPF_NOTE, 0, mailbox_id, 0, 0, 0, 0, 0);
+	folder = e_mapi_folder_new (_("All Public Folders"), IPF_NOTE, 0, mailbox_id, 0, 0, 0, 0);
 	folder->is_default = true;
 	folder->default_type = olPublicFoldersAllPublicFolders;
 	*mapi_folders = g_slist_prepend (*mapi_folders, folder);
