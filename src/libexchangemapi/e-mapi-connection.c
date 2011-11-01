@@ -1808,7 +1808,7 @@ list_items_internal_cb (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ct
 }
 
 gboolean
-e_mapi_connection_list_items (EMapiConnection *conn, mapi_id_t fid, guint32 options, ListItemsCB cb, gpointer user_data, GError **perror)
+e_mapi_connection_list_items (EMapiConnection *conn, mapi_id_t fid, guint32 options, struct mapi_SRestriction *restrictions, ListItemsCB cb, gpointer user_data, GError **perror)
 {
 	enum MAPISTATUS ms;
 	TALLOC_CTX *mem_ctx;
@@ -1850,6 +1850,15 @@ e_mapi_connection_list_items (EMapiConnection *conn, mapi_id_t fid, guint32 opti
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "SetColumns", ms);
 		goto cleanup;
+	}
+
+	if (restrictions) {
+		/* Applying any restriction that are set. */
+		ms = Restrict (&obj_table, restrictions, NULL);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "Restrict", ms);
+			goto cleanup;
+		}
 	}
 
 	lii_data.cb = cb;

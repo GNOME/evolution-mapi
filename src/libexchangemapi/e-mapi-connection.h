@@ -200,7 +200,9 @@ gboolean		e_mapi_connection_get_folder_properties (EMapiConnection *conn, mapi_i
 					GError **perror);
 
 gboolean		e_mapi_connection_list_items (EMapiConnection *conn, mapi_id_t fid, guint32 options,
-					ListItemsCB cb, gpointer user_data, GError **perror);
+					struct mapi_SRestriction *restrictions,
+					ListItemsCB cb, gpointer user_data,
+					GError **perror);
 
 gboolean		e_mapi_connection_fetch_object_props (
 					EMapiConnection *conn, mapi_object_t *obj_folder, mapi_id_t fid, mapi_id_t mid, mapi_object_t *obj_message,
