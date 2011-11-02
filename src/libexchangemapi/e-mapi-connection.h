@@ -470,16 +470,20 @@ typedef struct {
 	 && (((x)->domain && *(x)->domain && (x)->password && *(x)->password) \
 	     || ((x)->krb_sso && (x)->krb_realm && *(x)->krb_realm)))
 
-gboolean		e_mapi_create_profile			(EMapiProfileData *profile,
+gboolean		e_mapi_create_profile			(struct mapi_context *mapi_ctx,
+								 EMapiProfileData *profile,
 								 mapi_profile_callback_t cb,
 								 gconstpointer data,
 								 GCancellable *cancellable,
 								 GError **perror);
 
-gboolean		e_mapi_delete_profile			(const gchar *profile,
+gboolean		e_mapi_delete_profile			(struct mapi_context *mapi_ctx,
+								 const gchar *profile,
 								 GError **perror);
-void			e_mapi_rename_profile			(const gchar *old_name,
-								 const gchar *new_name);
+void			e_mapi_rename_profile			(struct mapi_context *mapi_ctx,
+								 const gchar *old_name,
+								 const gchar *new_name,
+								 GError **perror);
 
 /* utility functions */
 

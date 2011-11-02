@@ -28,6 +28,8 @@
 #include <glib.h>
 #include <gio/gio.h>
 
+#include <libedataserver/e-data-server-util.h>
+
 #include "e-mapi-utils.h"
 #include "e-mapi-mail-utils.h"
 
@@ -40,6 +42,8 @@
 /* The gmtime() in Microsoft's C library is MT-safe */
 #define gmtime_r(tp,tmp) (gmtime(tp)?(*(tmp)=*gmtime(tp),(tmp)):0)
 #endif
+
+#define DEFAULT_PROF_NAME "mapi-profiles.ldb"
 
 /* Used for callout to krb5-auth-dialog */
 #define KRB_DBUS_PATH               "/org/gnome/KrbAuthDialog"
@@ -915,6 +919,7 @@ e_mapi_util_trigger_krb_auth (const EMapiProfileData *empd, GError **error) {
 
 /**
  * e_mapi_util_profile_name:
+ * @mapi_ctx: a mapi context; can be NULL if @migrate is FALSE
  * @empd: profile information used to construct the name
  * @migrate: whether migrate old profile name to a new one
  *
@@ -923,23 +928,23 @@ e_mapi_util_trigger_krb_auth (const EMapiProfileData *empd, GError **error) {
  * rename old profile name string to a new name, if requested.
  **/
 gchar *
-e_mapi_util_profile_name (const EMapiProfileData *empd, gboolean migrate)
+e_mapi_util_profile_name (struct mapi_context *mapi_ctx, const EMapiProfileData *empd, gboolean migrate)
 {
 	gchar *res;
 
-	res = g_strdup_printf ("%s@%s@%s", empd->username, empd->domain,
-			       empd->server);
+	res = g_strdup_printf ("%s@%s@%s", empd->username, empd->domain, empd->server);
 	res = g_strcanon (res, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@.-", '_');
 
 	if (migrate) {
 		/* expects MAPIInitialize already called! */
 		gchar *old_name;
 
-		old_name = g_strdup_printf ("%s@%s", empd->username,
-					    empd->domain);
+		g_return_val_if_fail (mapi_ctx != NULL, res);
+
+		old_name = g_strdup_printf ("%s@%s", empd->username, empd->domain);
 		old_name = g_strcanon (old_name, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@", '_');
 
-		e_mapi_rename_profile (old_name, res);
+		e_mapi_rename_profile (mapi_ctx, old_name, res, NULL);
 
 		g_free (old_name);
 	}
@@ -1172,4 +1177,81 @@ e_mapi_util_time_t_to_filetime (const time_t tt, struct FILETIME *filetime)
 	filetime->dwLowDateTime = nt & 0xFFFFFFFF;
 	nt = nt >> 32;
 	filetime->dwHighDateTime = nt & 0xFFFFFFFF;
+}
+
+static void
+manage_global_lock (gboolean lock)
+{
+	static GStaticRecMutex global_lock = G_STATIC_REC_MUTEX_INIT;
+
+	if (lock)
+		g_static_rec_mutex_lock (&global_lock);
+	else
+		g_static_rec_mutex_unlock (&global_lock);
+}
+
+void
+e_mapi_utils_global_lock (void)
+{
+	manage_global_lock (TRUE);
+}
+
+void
+e_mapi_utils_global_unlock (void)
+{
+	manage_global_lock (FALSE);
+}
+
+gboolean
+e_mapi_utils_create_mapi_context (struct mapi_context **mapi_ctx, GError **perror)
+{
+	const gchar *user_data_dir;
+	gchar *profpath;
+	enum MAPISTATUS ms;
+
+	g_return_val_if_fail (mapi_ctx != NULL, FALSE);
+
+	e_mapi_utils_global_lock ();
+
+	*mapi_ctx = NULL;
+	user_data_dir = e_get_user_data_dir ();
+	profpath = g_build_filename (user_data_dir, DEFAULT_PROF_NAME, NULL);
+
+	if (!g_file_test (profpath, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR)) {
+		/* Create a ProfileStore */
+		ms = CreateProfileStore (profpath, LIBMAPI_LDIF_DIR);
+		if (ms != MAPI_E_SUCCESS && (ms != MAPI_E_NO_ACCESS || !g_file_test (profpath, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))) {
+			make_mapi_error (perror, "CreateProfileStore", ms);
+			g_free (profpath);
+
+			e_mapi_utils_global_unlock ();
+			return FALSE;
+		}
+	}
+
+	ms = MAPIInitialize (mapi_ctx, profpath);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "MAPIInitialize", ms);
+		g_free (profpath);
+
+		e_mapi_utils_global_unlock ();
+		return FALSE;
+	}
+
+	g_free (profpath);
+
+	e_mapi_utils_global_unlock ();
+
+	return TRUE;
+}
+
+void
+e_mapi_utils_destroy_mapi_context (struct mapi_context *mapi_ctx)
+{
+	if (!mapi_ctx)
+		return;
+
+	e_mapi_utils_global_lock ();
+	MAPIUninitialize (mapi_ctx);
+	e_mapi_utils_global_unlock ();
 }

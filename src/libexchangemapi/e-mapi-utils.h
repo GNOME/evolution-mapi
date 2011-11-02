@@ -59,7 +59,9 @@ gchar *exchange_lf_to_crlf (const gchar *in);
 gchar *exchange_crlf_to_lf (const gchar *in);
 
 void e_mapi_util_profiledata_from_settings (EMapiProfileData *empd, CamelMapiSettings *settings);
-gchar *e_mapi_util_profile_name (const EMapiProfileData *empd, gboolean migrate);
+gchar *		e_mapi_util_profile_name			(struct mapi_context *mapi_ctx,
+								 const EMapiProfileData *empd,
+								 gboolean migrate);
 gboolean e_mapi_util_trigger_krb_auth (const EMapiProfileData *empd, GError **error);
 
 gboolean	e_mapi_utils_add_props_to_props_array		(TALLOC_CTX *mem_ctx,
@@ -97,5 +99,10 @@ void e_mapi_util_free_binary_r (struct Binary_r *bin);
 
 time_t e_mapi_util_filetime_to_time_t (const struct FILETIME *filetime);
 void e_mapi_util_time_t_to_filetime (const time_t tt, struct FILETIME *filetime);
+
+void		e_mapi_utils_global_lock			(void);
+void		e_mapi_utils_global_unlock			(void);
+gboolean	e_mapi_utils_create_mapi_context		(struct mapi_context **mapi_ctx, GError **perror);
+void		e_mapi_utils_destroy_mapi_context		(struct mapi_context *mapi_ctx);
 
 #endif

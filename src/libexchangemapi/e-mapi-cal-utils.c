@@ -2332,7 +2332,7 @@ e_mapi_cal_utils_get_free_busy_data (EMapiConnection *conn, const GSList *users,
 		e_cal_component_commit_sequence (comp);
 		*freebusy = g_slist_append (*freebusy, e_cal_component_get_as_string (comp));
 		g_object_unref (comp);
-		MAPIFreeBuffer(aRow.lpProps);
+		talloc_free (aRow.lpProps);
 	}
 
 	return TRUE;

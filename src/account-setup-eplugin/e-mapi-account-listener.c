@@ -1166,9 +1166,14 @@ mapi_account_removed (EAccountList *account_listener, EAccount *account)
 	if (url != NULL) {
 		const gchar *profile = camel_url_get_param (url, "profile");
 		gchar *key = camel_url_to_string (url, CAMEL_URL_HIDE_PARAMS);
+		struct mapi_context *mapi_ctx = NULL;
 		GError *error = NULL;
 
-		e_mapi_delete_profile (profile, &error);
+		if (e_mapi_utils_create_mapi_context (&mapi_ctx, &error)) {
+			e_mapi_delete_profile (mapi_ctx, profile, &error);
+			e_mapi_utils_destroy_mapi_context (mapi_ctx);
+		}
+
 		e_passwords_forget_password (NULL, key);
 
 		g_free (key);
@@ -1189,10 +1194,18 @@ create_profile_entry (CamelURL *url, EAccount *account, CamelMapiSettings *setti
 	gboolean status = FALSE;
 	guint8 attempts = 0;
 	EMapiProfileData empd = { 0 };
+	struct mapi_context *mapi_ctx = NULL;
+	GError *error = NULL;
 
 	if (!e_shell_get_online (e_shell_get_default ()))
 		return FALSE;
 
+	if (!e_mapi_utils_create_mapi_context (&mapi_ctx, &error)) {
+		g_warning ("%s: Failed to create mapi context: %s", G_STRFUNC, error ? error->message : "Unknown error");
+		g_clear_error (&error);
+		return FALSE;
+	}
+	
 	empd.server = url->host;
 	empd.username = url->user;
 	e_mapi_util_profiledata_from_settings (&empd, settings);
@@ -1218,14 +1231,14 @@ create_profile_entry (CamelURL *url, EAccount *account, CamelMapiSettings *setti
 		if (empd.password || empd.krb_sso) {
 			GError *error = NULL;
 
-			status = e_mapi_create_profile (&empd, NULL, NULL, NULL, &error);
+			status = e_mapi_create_profile (mapi_ctx, &empd, NULL, NULL, NULL, &error);
 			if (status) {
 				/* profile was created, try to connect to the server */
 				EMapiConnection *conn;
 				gchar *profname;
 
 				status = FALSE;
-				profname = e_mapi_util_profile_name (&empd, FALSE);
+				profname = e_mapi_util_profile_name (mapi_ctx, &empd, FALSE);
 
 				conn = e_mapi_connection_new (profname, empd.password, NULL, &error);
 				if (conn) {
@@ -1244,6 +1257,8 @@ create_profile_entry (CamelURL *url, EAccount *account, CamelMapiSettings *setti
 
 		++attempts;
 	}
+
+	e_mapi_utils_destroy_mapi_context (mapi_ctx);
 
 	return status;
 }
@@ -1314,8 +1329,7 @@ mapi_account_changed_async (gpointer worker_data, gboolean cancelled, gpointer u
 			empd.server = new_url->host;
 			empd.username = new_url->user;
 			e_mapi_util_profiledata_from_settings (&empd, CAMEL_MAPI_SETTINGS (settings));
-			profname = e_mapi_util_profile_name (&empd,
-								    FALSE);
+			profname = e_mapi_util_profile_name (NULL, &empd, FALSE);
 			camel_mapi_settings_set_profile (CAMEL_MAPI_SETTINGS (settings), profname);
 			camel_settings_save_to_url (settings, new_url);
 			g_free (profname);
@@ -1352,7 +1366,7 @@ mapi_account_changed_async (gpointer worker_data, gboolean cancelled, gpointer u
 				empd.server = new_url->host;
 				empd.username = new_url->user;
 				e_mapi_util_profiledata_from_settings (&empd, CAMEL_MAPI_SETTINGS (settings));
-				profname = e_mapi_util_profile_name (&empd, FALSE);
+				profname = e_mapi_util_profile_name (NULL, &empd, FALSE);
 				camel_mapi_settings_set_profile (CAMEL_MAPI_SETTINGS (settings), profname);
 				camel_settings_save_to_url (settings, new_url);
 				g_free (profname);

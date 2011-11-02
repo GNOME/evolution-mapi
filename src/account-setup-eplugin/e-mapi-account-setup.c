@@ -316,18 +316,18 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	}
 
 	if (COMPLETE_PROFILEDATA(&empd)) {
-		gboolean status = e_mapi_create_profile (&empd,
-								(mapi_profile_callback_t) create_profile_callback,
-								empd.username,
-								NULL, &error);
+		gboolean status;
+		struct mapi_context *mapi_ctx = NULL;
+
+		status = e_mapi_utils_create_mapi_context (&mapi_ctx, &error);
+		status = status && e_mapi_create_profile (mapi_ctx, &empd, (mapi_profile_callback_t) create_profile_callback, empd.username, NULL, &error);
 		if (status) {
 			/* profile was created, try to connect to the server */
 			EMapiConnection *conn;
 			gchar *profname;
 
 			status = FALSE;
-			profname = e_mapi_util_profile_name (&empd,
-								    FALSE);
+			profname = e_mapi_util_profile_name (mapi_ctx, &empd, FALSE);
 
 			conn = e_mapi_connection_new (profname, empd.password, NULL, &error);
 			if (conn) {
@@ -342,8 +342,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 			/* Things are successful */
 			gchar *profname = NULL;
 
-			profname = e_mapi_util_profile_name (&empd,
-								    FALSE);
+			profname = e_mapi_util_profile_name (mapi_ctx, &empd, FALSE);
 			camel_mapi_settings_set_profile (mapi_settings, profname);
 			g_free (profname);
 
@@ -360,6 +359,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 			g_free (e);
 		}
 
+		e_mapi_utils_destroy_mapi_context (mapi_ctx);
 	} else {
 		e_passwords_forget_password (NULL, key);
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Authentication failed."));

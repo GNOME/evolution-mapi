@@ -40,22 +40,18 @@
 #include "e-mapi-fast-transfer.h"
 #include <param.h>
 
-#define DEFAULT_PROF_NAME "mapi-profiles.ldb"
-
 static void register_connection (EMapiConnection *conn);
 static void unregister_connection (EMapiConnection *conn);
-static gboolean mapi_profile_create (const EMapiProfileData *empd, mapi_profile_callback_t callback, gconstpointer data, GCancellable *cancellable, GError **perror, gboolean use_locking);
-static struct mapi_session *mapi_profile_load (const gchar *profname, const gchar *password, GCancellable *cancellable, GError **perror);
-static void ema_global_lock (void);
-static void ema_global_unlock (void);
+static gboolean mapi_profile_create (struct mapi_context *mapi_ctx, const EMapiProfileData *empd, mapi_profile_callback_t callback, gconstpointer data, GCancellable *cancellable, GError **perror, gboolean use_locking);
+static struct mapi_session *mapi_profile_load (struct mapi_context *mapi_ctx, const gchar *profname, const gchar *password, GCancellable *cancellable, GError **perror);
 
 /* GObject foo - begin */
 
 G_DEFINE_TYPE (EMapiConnection, e_mapi_connection, G_TYPE_OBJECT)
 
 /* These two macros require 'priv' variable of type EMapiConnectionPrivate */
-#define LOCK()		e_mapi_debug_print ("%s: %s: lock(session/global_lock)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_lock (&priv->session_lock); ema_global_lock();
-#define UNLOCK()	e_mapi_debug_print ("%s: %s: unlock(session/global_lock)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_unlock (&priv->session_lock); ema_global_unlock();
+#define LOCK()		e_mapi_debug_print ("%s: %s: lock(session & global)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_lock (&priv->session_lock); e_mapi_utils_global_lock ();
+#define UNLOCK()	e_mapi_debug_print ("%s: %s: unlock(session & global)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_unlock (&priv->session_lock); e_mapi_utils_global_unlock ();
 
 #define e_return_val_mapi_error_if_fail(expr, _code, _val)				\
 	G_STMT_START {									\
@@ -144,9 +140,8 @@ make_mapi_error (GError **perror, const gchar *context, enum MAPISTATUS mapi_sta
 	g_propagate_error (perror, error);
 }
 
-struct mapi_context *mapi_ctx = NULL;
-
 struct _EMapiConnectionPrivate {
+	struct mapi_context *mapi_ctx;
 	struct mapi_session *session;
 	GStaticRecMutex session_lock;
 
@@ -238,6 +233,9 @@ e_mapi_connection_finalize (GObject *object)
 		UNLOCK ();
 		g_static_rec_mutex_free (&priv->session_lock);
 		g_static_rec_mutex_free (&priv->folders_lock);
+
+		e_mapi_utils_destroy_mapi_context (priv->mapi_ctx);
+		priv->mapi_ctx = NULL;
 	}
 
 	if (G_OBJECT_CLASS (e_mapi_connection_parent_class)->finalize)
@@ -364,14 +362,18 @@ e_mapi_connection_new (const gchar *profile, const gchar *password, GCancellable
 {
 	EMapiConnection *conn;
 	EMapiConnectionPrivate *priv;
+	struct mapi_context *mapi_ctx = NULL;
 	struct mapi_session *session;
 	enum MAPISTATUS ms;
 
 	e_return_val_mapi_error_if_fail (profile != NULL, MAPI_E_INVALID_PARAMETER, NULL);
 
-	session = mapi_profile_load (profile, password, cancellable, perror);
+	if (!e_mapi_utils_create_mapi_context (&mapi_ctx, perror))
+		return NULL;
+
+	session = mapi_profile_load (mapi_ctx, profile, password, cancellable, perror);
 	if (!session) {
-		e_mapi_debug_print ("%s: %s: Login failed ", G_STRLOC, G_STRFUNC);
+		e_mapi_utils_destroy_mapi_context (mapi_ctx);
 		return NULL;
 	}
 
@@ -381,6 +383,7 @@ e_mapi_connection_new (const gchar *profile, const gchar *password, GCancellable
 
 	LOCK ();
 	mapi_object_init (&priv->msg_store);
+	priv->mapi_ctx = mapi_ctx;
 	priv->session = session;
 
 	/* Open the message store and keep it opened for all the life-time for this connection */
@@ -443,7 +446,7 @@ e_mapi_connection_reconnect (EMapiConnection *conn, const gchar *password, GCanc
 	if (priv->session)
 		e_mapi_connection_close (conn);
 
-	priv->session = mapi_profile_load (priv->profile, password, cancellable, perror);
+	priv->session = mapi_profile_load (priv->mapi_ctx, priv->profile, password, cancellable, perror);
 	if (!priv->session) {
 		e_mapi_debug_print ("%s: %s: Login failed ", G_STRLOC, G_STRFUNC);
 		UNLOCK ();
@@ -1298,7 +1301,7 @@ e_mapi_util_get_attachments (EMapiConnection *conn,
 					if ((lpProps->ulPropTag & 0xFFFF) == PT_UNICODE)
 						attachment->lpProps[az] = *lpProps;
 				}
-				MAPIFreeBuffer (tags);
+				talloc_free (tags);
 			}
 
 			az++;
@@ -1407,21 +1410,21 @@ e_mapi_connection_fetch_gal (EMapiConnection *conn,
 			break;
 		}
 		if (aRowSet->cRows) {
-			ema_global_unlock ();
+			e_mapi_utils_global_unlock ();
 			for (i = 0; i < aRowSet->cRows; i++, count++) {
 				if (!cb (conn, count, n_rows, &aRowSet->aRow[i], data, cancellable, perror)) {
 					ms = MAPI_E_RESERVED;
 					break;
 				}
 			}
-			ema_global_lock ();
+			e_mapi_utils_global_lock ();
 		} else {
-			MAPIFreeBuffer (aRowSet);
+			talloc_free (aRowSet);
 			break;
 		}
 
 		ulFlags = TABLE_CUR;
-		MAPIFreeBuffer (aRowSet);
+		talloc_free (aRowSet);
 	}
 
 	talloc_free (mem_ctx);
@@ -2118,9 +2121,9 @@ e_mapi_connection_fetch_items  (EMapiConnection *conn,
 				item_data->total = count; //Total entries in the table.
 				item_data->index = cursor_pos + i; //cursor_pos + current_table_index
 
-				ema_global_unlock ();
+				e_mapi_utils_global_unlock ();
 				cb_retval = cb (item_data, data, cancellable, perror);
-				ema_global_lock ();
+				e_mapi_utils_global_lock ();
 
 				g_free (item_data);
 			} else {
@@ -2149,7 +2152,7 @@ e_mapi_connection_fetch_items  (EMapiConnection *conn,
 
  cleanup:
 	if (propsTagArray)
-		MAPIFreeBuffer (propsTagArray);
+		talloc_free (propsTagArray);
 	mapi_object_release(&obj_folder);
 	mapi_object_release(&obj_table);
 	talloc_free (mem_ctx);
@@ -2315,10 +2318,10 @@ e_mapi_connection_fetch_object_props (EMapiConnection *conn,
 		item_data->recipients = recip_list;
 		item_data->attachments = attach_list;
 
-		ema_global_unlock ();
 		/* NOTE: stream_list, recipient_list and attach_list should be freed by the callback */
+		e_mapi_utils_global_unlock ();
 		cb (item_data, data, cancellable, perror);
-		ema_global_lock ();
+		e_mapi_utils_global_lock ();
 
 		g_free (item_data);
 	} else {
@@ -3520,7 +3523,7 @@ mapi_move_items (EMapiConnection *conn,
 		mapi_id_array_t msg_id_array;
 		gint count = 0;
 
-		mapi_id_array_init (mapi_ctx, &msg_id_array);
+		mapi_id_array_init (conn->priv->mapi_ctx, &msg_id_array);
 
 		for (l = mid_list; l != NULL && count < 500; l = g_slist_next (l), count++)
 			mapi_id_array_add_id (&msg_id_array, *((mapi_id_t *)l->data));
@@ -3799,7 +3802,7 @@ get_child_folders (EMapiConnection *conn,
 	ms = foreach_tablerow (conn, folder_id, mem_ctx, &obj_table, get_folder_hierarchy_cb, &gfh, cancellable, perror);
 
  cleanup:
-	MAPIFreeBuffer (spropTagArray);
+	talloc_free (spropTagArray);
 	mapi_object_release (&obj_folder);
 	mapi_object_release (&obj_table);
 
@@ -4022,7 +4025,7 @@ e_mapi_connection_get_folders_list (EMapiConnection *conn,
 
 	lpProps = talloc_zero(mem_ctx, struct SPropValue);
 	ms = GetProps (&priv->msg_store, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, SPropTagArray, &lpProps, &count);
-	MAPIFreeBuffer(SPropTagArray);
+	talloc_free (SPropTagArray);
 
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "GetProps", ms);
@@ -4322,8 +4325,12 @@ e_mapi_connection_events_monitor (EMapiConnection *conn, struct mapi_notify_cont
 
 struct tcp_data
 {
+	struct mapi_context *mapi_ctx;
 	const gchar *profname;
 	const gchar *password;
+	GCancellable *cancellable;
+	GError **perror;
+
 	EFlag *eflag;
 	gboolean has_profile;
 };
@@ -4360,11 +4367,11 @@ try_create_profile_main_thread_cb (struct tcp_data *data)
 			empd.password = (gchar*)data->password;
 
 			if (COMPLETE_PROFILEDATA(&empd)) {
-				gchar *profname = e_mapi_util_profile_name (&empd, FALSE);
+				gchar *profname = e_mapi_util_profile_name (data->mapi_ctx, &empd, FALSE);
 
 				if (profname && g_str_equal (profname, data->profname)) {
 					/* do not use locking here, because when this is called then other thread is holding the lock */
-					data->has_profile = mapi_profile_create (&empd, NULL, NULL, NULL, NULL, FALSE);
+					data->has_profile = mapi_profile_create (data->mapi_ctx, &empd, NULL, NULL, NULL, data->perror, FALSE);
 
 					g_free (profname);
 					g_object_unref (settings);
@@ -4389,17 +4396,21 @@ try_create_profile_main_thread_cb (struct tcp_data *data)
 }
 
 static gboolean
-try_create_profile (const gchar *profname, const gchar *password)
+try_create_profile (struct mapi_context *mapi_ctx, const gchar *profname, const gchar *password, GCancellable *cancellable, GError **perror)
 {
 	struct tcp_data data;
 
+	g_return_val_if_fail (mapi_ctx != NULL, FALSE);
 	g_return_val_if_fail (profname != NULL, FALSE);
 	g_return_val_if_fail (*profname != 0, FALSE);
 
+	data.mapi_ctx = mapi_ctx;
 	data.profname = profname;
 	data.password = password;
 	data.eflag = e_flag_new ();
 	data.has_profile = FALSE;
+	data.cancellable = cancellable;
+	data.perror = perror;
 
 	if (!g_main_context_is_owner (g_main_context_default ())) {
 		/* function called from other than main thread */
@@ -4414,88 +4425,19 @@ try_create_profile (const gchar *profname, const gchar *password)
 	return data.has_profile;
 }
 
-static gboolean
-ensure_mapi_init_called (GError **perror)
-{
-	static gboolean called = FALSE;
-	static GStaticMutex mutex = G_STATIC_MUTEX_INIT;
-	const gchar *user_data_dir;
-	gchar *profpath;
-	enum MAPISTATUS ms;
-
-	g_static_mutex_lock (&mutex);
-	if (called) {
-		g_static_mutex_unlock (&mutex);
-		return TRUE;
-	}
-
-	user_data_dir = e_get_user_data_dir ();
-	profpath = g_build_filename (user_data_dir, DEFAULT_PROF_NAME, NULL);
-
-	if (!g_file_test (profpath, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR)) {
-		/* Create a ProfileStore */
-		ms = CreateProfileStore (profpath, LIBMAPI_LDIF_DIR);
-		if (ms != MAPI_E_SUCCESS && (ms != MAPI_E_NO_ACCESS || !g_file_test (profpath, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))) {
-			make_mapi_error (perror, "CreateProfileStore", ms);
-			g_free (profpath);
-
-			g_static_mutex_unlock (&mutex);
-			return FALSE;
-		}
-	}
-
-	ms = MAPIInitialize (&mapi_ctx, profpath);
-	if (ms == MAPI_E_SESSION_LIMIT) {
-		/* do nothing, the profile store is already initialized */
-		/* but this shouldn't happen */
-	} else if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "MAPIInitialize", ms);
-		g_free (profpath);
-
-		g_static_mutex_unlock (&mutex);
-		return FALSE;
-	}
-
-	g_free (profpath);
-
-	called = TRUE;
-	g_static_mutex_unlock (&mutex);
-
-	return TRUE;
-}
-
-/* used when dealing with profiles */
-static GStaticRecMutex profile_mutex = G_STATIC_REC_MUTEX_INIT;
-
-/* because openchange/samba4 is not thread safe */
-static void
-ema_global_lock (void)
-{
-	g_static_rec_mutex_lock (&profile_mutex);
-}
-
-/* because openchange/samba4 is not thread safe */
-static void
-ema_global_unlock (void)
-{
-	g_static_rec_mutex_unlock (&profile_mutex);
-}
-
 static struct mapi_session *
-mapi_profile_load (const gchar *profname, const gchar *password, GCancellable *cancellable, GError **perror)
+mapi_profile_load (struct mapi_context *mapi_ctx, const gchar *profname, const gchar *password, GCancellable *cancellable, GError **perror)
 {
 	enum MAPISTATUS	ms = MAPI_E_SUCCESS;
 	struct mapi_session *session = NULL;
 	guint32 debug_log_level = 0;
 
+	e_return_val_mapi_error_if_fail (mapi_ctx != NULL, MAPI_E_INVALID_PARAMETER, NULL);
 	e_return_val_mapi_error_if_fail (profname != NULL, MAPI_E_INVALID_PARAMETER, NULL);
 
-	g_static_rec_mutex_lock (&profile_mutex);
+	e_mapi_utils_global_lock ();
 
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-
-	if (!ensure_mapi_init_called (perror))
-		goto cleanup;
 
 	/* Initialize libmapi logger*/
 	if (g_getenv ("MAPI_DEBUG")) {
@@ -4507,7 +4449,7 @@ mapi_profile_load (const gchar *profname, const gchar *password, GCancellable *c
 	e_mapi_debug_print("Loading profile %s ", profname);
 
 	ms = MapiLogonEx (mapi_ctx, &session, profname, password);
-	if (ms == MAPI_E_NOT_FOUND && try_create_profile (profname, password))
+	if (ms == MAPI_E_NOT_FOUND && try_create_profile (mapi_ctx, profname, password, cancellable, perror))
 		ms = MapiLogonEx (mapi_ctx, &session, profname, password);
 
 	if (ms != MAPI_E_SUCCESS) {
@@ -4516,7 +4458,7 @@ mapi_profile_load (const gchar *profname, const gchar *password, GCancellable *c
 	}
 
  cleanup:
-	g_static_rec_mutex_unlock (&profile_mutex);
+	e_mapi_utils_global_unlock ();
 	e_mapi_debug_print ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
 	return session;
@@ -4543,7 +4485,8 @@ create_profile_fallback_callback (struct SRowSet *rowset, gconstpointer data)
 }
 
 static gboolean
-mapi_profile_create (const EMapiProfileData *empd,
+mapi_profile_create (struct mapi_context *mapi_ctx,
+		     const EMapiProfileData *empd,
 		     mapi_profile_callback_t callback, gconstpointer data,
 		     GCancellable *cancellable,
 		     GError **perror,
@@ -4555,6 +4498,8 @@ mapi_profile_create (const EMapiProfileData *empd,
 	gchar *profname = NULL;
 	struct mapi_session *session = NULL;
 
+	e_return_val_mapi_error_if_fail (mapi_ctx != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
 	if (!callback) {
 		callback = create_profile_fallback_callback;
 		data = (gpointer) empd->username;
@@ -4565,18 +4510,12 @@ mapi_profile_create (const EMapiProfileData *empd,
 					 MAPI_E_INVALID_PARAMETER, FALSE);
 
 	if (use_locking)
-		g_static_rec_mutex_lock (&profile_mutex);
+		e_mapi_utils_global_lock ();
 
 	e_mapi_debug_print ("Create profile with %s %s %s\n", empd->username,
 		 empd->domain, empd->server);
 
-	if (!ensure_mapi_init_called (perror)) {
-		if (use_locking)
-			g_static_rec_mutex_unlock (&profile_mutex);
-		return FALSE;
-	}
-
-	profname = e_mapi_util_profile_name (empd, TRUE);
+	profname = e_mapi_util_profile_name (mapi_ctx, empd, TRUE);
 
 	/* Delete any existing profiles with the same profilename */
 	ms = DeleteProfile (mapi_ctx, profname);
@@ -4662,58 +4601,64 @@ mapi_profile_create (const EMapiProfileData *empd,
 	}*/
 
 	if (use_locking)
-		g_static_rec_mutex_unlock (&profile_mutex);
+		e_mapi_utils_global_unlock ();
 
 	return result;
 }
 
 gboolean
-e_mapi_create_profile (EMapiProfileData *empd,
+e_mapi_create_profile (struct mapi_context *mapi_ctx,
+		       EMapiProfileData *empd,
 		       mapi_profile_callback_t callback,
 		       gconstpointer data,
 		       GCancellable *cancellable,
 		       GError **perror)
 {
-	return mapi_profile_create (empd, callback, data, cancellable, perror, TRUE);
+	return mapi_profile_create (mapi_ctx, empd, callback, data, cancellable, perror, TRUE);
 }
 
 gboolean
-e_mapi_delete_profile (const gchar *profile, GError **perror)
+e_mapi_delete_profile (struct mapi_context *mapi_ctx,
+		       const gchar *profile,
+		       GError **perror)
 {
 	gboolean result = FALSE;
+	enum MAPISTATUS ms;
 
-	g_static_rec_mutex_lock (&profile_mutex);
+	e_return_val_mapi_error_if_fail (mapi_ctx != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	if (ensure_mapi_init_called (perror)) {
-		enum MAPISTATUS ms;
+	e_mapi_utils_global_lock ();
 
-		e_mapi_debug_print ("Deleting profile %s ", profile);
+	e_mapi_debug_print ("Deleting profile %s ", profile);
 
-		ms = DeleteProfile (mapi_ctx, profile);
-		if (ms == MAPI_E_SUCCESS) {
-			result = TRUE;
-		} else {
-			make_mapi_error (perror, "DeleteProfile", ms);
-		}
+	ms = DeleteProfile (mapi_ctx, profile);
+	if (ms == MAPI_E_SUCCESS || ms == MAPI_E_NOT_FOUND) {
+		result = TRUE;
+	} else {
+		make_mapi_error (perror, "DeleteProfile", ms);
 	}
 
-	g_static_rec_mutex_unlock (&profile_mutex);
+	e_mapi_utils_global_unlock ();
 
 	return result;
 }
 
 void
-e_mapi_rename_profile (const gchar *old_name, const gchar *new_name)
+e_mapi_rename_profile (struct mapi_context *mapi_ctx,
+		       const gchar *old_name,
+		       const gchar *new_name,
+		       GError **perror)
 {
+	g_return_if_fail (mapi_ctx != NULL);
 	g_return_if_fail (old_name != NULL);
 	g_return_if_fail (new_name != NULL);
 
 	/* do not use locking here, it's called with a lock held already */
-	/* g_static_rec_mutex_lock (&profile_mutex); */
+	/* e_mapi_utils_global_lock (); */
 
 	RenameProfile (mapi_ctx, old_name, new_name);
 
-	/* g_static_rec_mutex_unlock (&profile_mutex); */
+	/* e_mapi_utils_global_unlock (); */
 }
 
 /* profile related functions - end */
