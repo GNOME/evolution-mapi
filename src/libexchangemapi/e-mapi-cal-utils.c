@@ -2029,37 +2029,71 @@ e_mapi_cal_utils_write_props_cb (EMapiConnection *conn,
 	return TRUE;
 }
 
+static gboolean
+emcu_build_restriction (EMapiConnection *conn,
+			mapi_id_t fid,
+			TALLOC_CTX *mem_ctx,
+			struct mapi_SRestriction **restrictions,
+			gpointer user_data,
+			GCancellable *cancellable,
+			GError **perror)
+{
+	struct mapi_SRestriction *restriction;
+	struct SPropValue sprop;
+	uint32_t *id = user_data;
+
+	g_return_val_if_fail (conn != NULL, FALSE);
+	g_return_val_if_fail (mem_ctx != NULL, FALSE);
+	g_return_val_if_fail (restrictions != NULL, FALSE);
+	g_return_val_if_fail (id != NULL, FALSE);
+
+	restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
+	g_return_val_if_fail (restriction != NULL, FALSE);
+
+	restriction->rt = RES_PROPERTY;
+	restriction->res.resProperty.relop = RELOP_EQ;
+	restriction->res.resProperty.ulPropTag = PR_OWNER_APPT_ID;
+
+	set_SPropValue_proptag (&sprop, PR_OWNER_APPT_ID, id);
+	cast_mapi_SPropValue (mem_ctx, &(restriction->res.resProperty.lpProp), &sprop);
+
+	*restrictions = restriction;
+
+	return TRUE;
+}
+
+static gboolean
+emcu_check_id_exists_cb (EMapiConnection *conn,
+			 mapi_id_t fid,
+			 TALLOC_CTX *mem_ctx,
+			 const ListItemsData *item_data,
+			 guint32 item_index,
+			 guint32 items_total,
+			 gpointer user_data,
+			 GCancellable *cancellable,
+			 GError **perror)
+{
+	gboolean *unused = user_data;
+
+	g_return_val_if_fail (unused != NULL, FALSE);
+
+	*unused = FALSE;
+
+	return FALSE;
+}
+
 uint32_t
 e_mapi_cal_util_get_new_appt_id (EMapiConnection *conn, mapi_id_t fid)
 {
-	struct mapi_SRestriction res;
-	struct SPropValue sprop;
 	uint32_t id;
-	gboolean found = FALSE;
+	gboolean unused = TRUE;
 
-	res.rt = RES_PROPERTY;
-	res.res.resProperty.relop = RELOP_EQ;
-	res.res.resProperty.ulPropTag = PR_OWNER_APPT_ID;
-
-	while (!found) {
+	while (!unused) {
 		id = g_random_int ();
 		if (id) {
-			GSList *ids = NULL;
-			TALLOC_CTX *mem_ctx = talloc_init ("ExchangeMAPI_get_new_appt_id");
-
-			set_SPropValue_proptag (&sprop, PR_OWNER_APPT_ID, (gconstpointer ) &id);
-			cast_mapi_SPropValue (mem_ctx,
-					      &(res.res.resProperty.lpProp),
-					      &sprop);
-			ids = e_mapi_connection_check_restriction (conn, fid, 0, &res, NULL, NULL);
-			if (ids) {
-				GSList *l;
-				for (l = ids; l; l = l->next)
-					g_free (l->data);
-			} else
-				found = TRUE;
-
-			talloc_free (mem_ctx);
+			unused = TRUE;
+			if (!e_mapi_connection_list_items (conn, fid, 0, emcu_build_restriction, &id, emcu_check_id_exists_cb, &unused, NULL, NULL))
+				break;
 		}
 	};
 

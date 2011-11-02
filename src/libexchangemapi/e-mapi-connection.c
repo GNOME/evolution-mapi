@@ -1358,7 +1358,8 @@ e_mapi_util_get_attachments (EMapiConnection *conn,
 
 gboolean
 e_mapi_connection_fetch_gal (EMapiConnection *conn,
-			     struct mapi_SRestriction *restrictions,
+			     BuildRestrictionsCB build_rs_cb,
+			     gpointer build_rs_cb_data,
 			     BuildReadPropsCB build_props,
 			     gpointer brp_data,
 			     FetchGALCallback cb,
@@ -1663,129 +1664,6 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 	return res;
 }
 
-GSList *
-e_mapi_connection_check_restriction (EMapiConnection *conn,
-				     mapi_id_t fid,
-				     guint32 fid_options,
-				     struct mapi_SRestriction *res,
-				     GCancellable *cancellable,
-				     GError **perror)
-{
-	enum MAPISTATUS ms;
-	TALLOC_CTX *mem_ctx;
-	mapi_object_t obj_folder;
-	mapi_object_t obj_table;
-	struct SPropTagArray *SPropTagArray, *GetPropsTagArray;
-	struct SRowSet SRowSet;
-	uint32_t count, i;
-	GSList *mids = NULL;
-
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, NULL);
-	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, NULL);
-
-	e_mapi_debug_print("%s: Entering %s: folder-id %016" G_GINT64_MODIFIER "X ", G_STRLOC, G_STRFUNC, fid);
-
-	LOCK ();
-	mem_ctx = talloc_init("ExchangeMAPI_CheckRestriction");
-	mapi_object_init(&obj_folder);
-	mapi_object_init(&obj_table);
-
-	/* Attempt to open the folder */
-	ms = open_folder (conn, 0, &fid, fid_options, &obj_folder, perror);
-	if (ms != MAPI_E_SUCCESS) {
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
-		goto cleanup;
-
-	/* Get a handle on the container */
-	ms = GetContentsTable (&obj_folder, &obj_table, 0, NULL);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "GetContentsTable", ms);
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
-		goto cleanup;
-
-	GetPropsTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
-	GetPropsTagArray->cValues = 0;
-
-	// FIXME : Why are we fetching all these props ?
-
-	SPropTagArray = set_SPropTagArray(mem_ctx, 0xA,
-					  PR_FID,
-					  PR_MID,
-					  PR_INST_ID,
-					  PR_INSTANCE_NUM,
-					  PR_SUBJECT_UNICODE,
-					  PR_MESSAGE_CLASS,
-					  PR_LAST_MODIFICATION_TIME,
-					  PR_HASATTACH,
-					  PR_RULE_MSG_PROVIDER,
-					  PR_RULE_MSG_NAME);
-
-	/* Set primary columns to be fetched */
-	ms = SetColumns (&obj_table, SPropTagArray);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "SetColumns", ms);
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
-		goto cleanup;
-
-	if (res) {
-		/* Applying any restriction that are set. */
-		ms = Restrict (&obj_table, res, NULL);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "Restrict", ms);
-			goto cleanup;
-		}
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror))
-			goto cleanup;
-	}
-
-	/* Number of items in the container */
-	ms = QueryPosition (&obj_table, NULL, &count);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "GetRowCount", ms);
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
-		goto cleanup;
-
-	if (!count)
-		goto cleanup;
-
-	/* Fill the table columns with data from the rows */
-	ms = QueryRows (&obj_table, count, TBL_ADVANCE, &SRowSet);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "QueryRows", ms);
-		goto cleanup;
-	}
-
-	for (i = 0; i < SRowSet.cRows; i++) {
-		mapi_id_t *pmid = (mapi_id_t *) get_SPropValue_SRow_data(&SRowSet.aRow[i], PR_MID);
-		struct id_list *id_list = g_new0 (struct id_list, 1);
-		id_list->id = *pmid;
-		mids = g_slist_prepend (mids, id_list);
-	}
-
- cleanup:
-	mapi_object_release(&obj_folder);
-	mapi_object_release(&obj_table);
-	talloc_free (mem_ctx);
-	UNLOCK();
-
-	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-	return mids;
-}
-
 typedef gboolean (*ForeachTableRowCB) (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SRow *srow, guint32 row_index, guint32 rows_total, gpointer user_data, GCancellable *cancellable, GError **perror);
 
 static enum MAPISTATUS
@@ -1888,7 +1766,8 @@ gboolean
 e_mapi_connection_list_items (EMapiConnection *conn,
 			      mapi_id_t fid,
 			      guint32 options,
-			      struct mapi_SRestriction *restrictions,
+			      BuildRestrictionsCB build_rs_cb,
+			      gpointer build_rs_cb_data,
 			      ListItemsCB cb,
 			      gpointer user_data,
 			      GCancellable *cancellable,
@@ -1945,17 +1824,27 @@ e_mapi_connection_list_items (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	if (restrictions) {
-		/* Applying any restriction that are set. */
-		ms = Restrict (&obj_table, restrictions, NULL);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "Restrict", ms);
+	if (build_rs_cb) {
+		struct mapi_SRestriction *restrictions = NULL;
+
+		if (!build_rs_cb (conn, fid, mem_ctx, &restrictions, build_rs_cb_data, cancellable, perror)) {
+			ms = MAPI_E_CALL_FAILED;
+			make_mapi_error (perror, "build_restrictions", ms);
 			goto cleanup;
 		}
 
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
+		if (restrictions) {
+			/* Applying any restriction that are set. */
+			ms = Restrict (&obj_table, restrictions, NULL);
+			if (ms != MAPI_E_SUCCESS) {
+				make_mapi_error (perror, "Restrict", ms);
+				goto cleanup;
+			}
+
+			if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+				ms = MAPI_E_USER_CANCEL;
+				goto cleanup;
+			}
 		}
 	}
 
@@ -1976,7 +1865,8 @@ e_mapi_connection_list_items (EMapiConnection *conn,
 gboolean
 e_mapi_connection_fetch_items  (EMapiConnection *conn,
 				mapi_id_t fid,
-				struct mapi_SRestriction *res,
+				BuildRestrictionsCB build_rs_cb,
+				gpointer build_rs_cb_data,
 				struct SSortOrderSet *sort_order,
 				BuildReadPropsCB build_props,
 				gpointer brp_data,
@@ -2047,17 +1937,27 @@ e_mapi_connection_fetch_items  (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	if (res) {
-		/* Applying any restriction that are set. */
-		ms = Restrict (&obj_table, res, NULL);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "Restrict", ms);
+	if (build_rs_cb) {
+		struct mapi_SRestriction *restrictions = NULL;
+
+		if (!build_rs_cb (conn, fid, mem_ctx, &restrictions, build_rs_cb_data, cancellable, perror)) {
+			ms = MAPI_E_CALL_FAILED;
+			make_mapi_error (perror, "build_restrictions", ms);
 			goto cleanup;
 		}
 
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
+		if (restrictions) {
+			/* Applying any restriction that are set. */
+			ms = Restrict (&obj_table, restrictions, NULL);
+			if (ms != MAPI_E_SUCCESS) {
+				make_mapi_error (perror, "Restrict", ms);
+				goto cleanup;
+			}
+
+			if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+				ms = MAPI_E_USER_CANCEL;
+				goto cleanup;
+			}
 		}
 	}
 

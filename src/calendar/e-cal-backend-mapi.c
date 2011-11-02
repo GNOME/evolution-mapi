@@ -594,6 +594,86 @@ mapi_cal_get_idlist (EMapiConnection *conn,
 	return e_mapi_utils_add_props_to_props_array (mem_ctx, props, cal_IDList, G_N_ELEMENTS (cal_IDList));
 }
 
+static gboolean
+ecbm_build_last_modification_restriction (EMapiConnection *conn,
+					  mapi_id_t fid,
+					  TALLOC_CTX *mem_ctx,
+					  struct mapi_SRestriction **restrictions,
+					  gpointer user_data,
+					  GCancellable *cancellable,
+					  GError **perror)
+{
+	icaltimetype *itt_cache = user_data;
+
+	g_return_val_if_fail (restrictions != NULL, FALSE);
+
+	if (itt_cache && !icaltime_is_null_time (*itt_cache)) {
+		struct mapi_SRestriction *restriction;
+		struct SPropValue sprop;
+		struct timeval t;
+
+		restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
+		g_return_val_if_fail (restriction != NULL, FALSE);
+
+		restriction->rt = RES_PROPERTY;
+		restriction->res.resProperty.relop = RELOP_GE;
+		restriction->res.resProperty.ulPropTag = PR_LAST_MODIFICATION_TIME;
+
+		t.tv_sec = icaltime_as_timet_with_zone (*itt_cache, icaltimezone_get_utc_timezone ());
+		t.tv_usec = 0;
+		set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
+		cast_mapi_SPropValue (mem_ctx, &(restriction->res.resProperty.lpProp), &sprop);
+
+		*restrictions = restriction;
+	}
+
+	return TRUE;
+}
+
+static gboolean
+ecbm_build_restriction_unknown_mids (EMapiConnection *conn,
+				     mapi_id_t fid,
+				     TALLOC_CTX *mem_ctx,
+				     struct mapi_SRestriction **restrictions,
+				     gpointer user_data,
+				     GCancellable *cancellable,
+				     GError **perror)
+{
+	GSList *unknown_mids = user_data, *iter;
+	gint ii;
+
+	g_return_val_if_fail (restrictions != NULL, FALSE);
+
+	if (unknown_mids) {
+		struct mapi_SRestriction *restriction;
+		struct mapi_SRestriction_or *or_res;
+
+		or_res = talloc_zero_array (mem_ctx, struct mapi_SRestriction_or, g_slist_length (unknown_mids));
+		g_return_val_if_fail (or_res != NULL, FALSE);
+
+		for (ii = 0, iter = unknown_mids; iter; ii++, iter = iter->next) {
+			mapi_id_t *pmid = iter->data;
+
+			or_res[ii].rt = RES_PROPERTY;
+			or_res[ii].res.resProperty.relop = RELOP_EQ;
+			or_res[ii].res.resProperty.ulPropTag = PR_MID;
+			or_res[ii].res.resProperty.lpProp.ulPropTag = PR_MID;
+			or_res[ii].res.resProperty.lpProp.value.dbl = *pmid;
+		}
+
+		restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
+		g_return_val_if_fail (restriction != NULL, FALSE);
+
+		restriction->rt = RES_OR;
+		restriction->res.resOr.cRes = g_slist_length (unknown_mids);
+		restriction->res.resOr.res = or_res;
+
+		*restrictions = restriction;
+	}
+
+	return TRUE;
+}
+
 /* Simple workflow for fetching deltas:
  * Poke cache for server_utc_time -> if exists, fetch all items modified after that time,
  * note current time before fetching and update cache with the same after fetching.
@@ -613,14 +693,12 @@ get_deltas (gpointer handle)
 	gchar *time_string = NULL;
 	gchar t_str [26];
 	const gchar *serv_time;
-	struct mapi_SRestriction res;
-	gboolean use_restriction = FALSE;
+	gboolean use_restriction = TRUE;
 	GSList *ls = NULL;
 	struct deleted_items_data did;
 	ESource *source = NULL;
 	guint32 options= MAPI_OPTIONS_FETCH_ALL;
 	gboolean is_public = FALSE;
-	TALLOC_CTX *mem_ctx = NULL;
 	GError *mapi_error = NULL;
 
 	if (!handle)
@@ -639,23 +717,6 @@ get_deltas (gpointer handle)
 	if (serv_time)
 		itt_cache = icaltime_from_string (serv_time);
 
-	if (!icaltime_is_null_time (itt_cache)) {
-		struct SPropValue sprop;
-		struct timeval t;
-
-		mem_ctx = talloc_init ("ExchangeMAPI_get_deltas_cal");
-		use_restriction = TRUE;
-		res.rt = RES_PROPERTY;
-		res.res.resProperty.relop = RELOP_GE;
-		res.res.resProperty.ulPropTag = PR_LAST_MODIFICATION_TIME;
-
-		t.tv_sec = icaltime_as_timet_with_zone (itt_cache, icaltimezone_get_utc_timezone ());
-		t.tv_usec = 0;
-		set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
-		cast_mapi_SPropValue (mem_ctx, &(res.res.resProperty.lpProp),
-				      &sprop);
-	}
-
 	itt_current = icaltime_current_time_with_zone (icaltimezone_get_utc_timezone ());
 	current_time = icaltime_as_timet_with_zone (itt_current, icaltimezone_get_utc_timezone ());
 	gmtime_r (&current_time, &tm);
@@ -667,7 +728,7 @@ get_deltas (gpointer handle)
 		use_restriction = FALSE;
 	}
 
-	if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? &res : NULL, NULL,
+	if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? ecbm_build_last_modification_restriction : NULL, &itt_cache, NULL,
 					is_public ? NULL : e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 					mapi_cal_get_changes_cb, cbmapi,
 					options, NULL, &mapi_error)) {
@@ -681,8 +742,6 @@ get_deltas (gpointer handle)
 		}
 
 		g_mutex_unlock (priv->updating_mutex);
-		if (mem_ctx)
-			talloc_free (mem_ctx);
 		return FALSE;
 	}
 
@@ -692,10 +751,6 @@ get_deltas (gpointer handle)
 	e_cal_backend_store_put_key_value (priv->store, SERVER_UTC_TIME, time_string);
 	g_free (time_string);
 
-	if (mem_ctx) {
-		talloc_free (mem_ctx);
-		mem_ctx = NULL;
-	}
 	/* handle deleted items here by going over the entire cache and
 	 * checking for deleted items.*/
 
@@ -711,7 +766,7 @@ get_deltas (gpointer handle)
 	if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0)
 		options = MAPI_OPTIONS_USE_PFSTORE;
 
-	if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
+	if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL, NULL,
 						mapi_cal_get_idlist, NULL,
 						handle_deleted_items_cb, &did,
 						options, NULL, &mapi_error)) {
@@ -762,36 +817,18 @@ get_deltas (gpointer handle)
 	g_slist_free (did.cache_ids);
 
 	if (did.unknown_mids) {
-		gint i;
-		struct mapi_SRestriction_or *or_res = g_new0 (struct mapi_SRestriction_or, g_slist_length (did.unknown_mids));
-
-		for (i = 0, ls = did.unknown_mids; ls; i++, ls = ls->next) {
-			mapi_id_t *pmid = ls->data;
-
-			or_res[i].rt = RES_PROPERTY;
-			or_res[i].res.resProperty.relop = RELOP_EQ;
-			or_res[i].res.resProperty.ulPropTag = PR_MID;
-			or_res[i].res.resProperty.lpProp.ulPropTag = PR_MID;
-			or_res[i].res.resProperty.lpProp.value.dbl = *pmid;
-		}
-
-		memset (&res, 0, sizeof (struct mapi_SRestriction));
-		res.rt = RES_OR;
-		res.res.resOr.cRes = g_slist_length (did.unknown_mids);
-		res.res.resOr.res = or_res;
-
-		g_slist_foreach (did.unknown_mids, (GFunc) g_free, NULL);
-		g_slist_free (did.unknown_mids);
-
 		if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
 			options |= MAPI_OPTIONS_USE_PFSTORE;
 			is_public = TRUE;
 		}
 
-		if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
+		if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, ecbm_build_restriction_unknown_mids, did.unknown_mids, NULL,
 					is_public ? NULL : e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 					mapi_cal_get_changes_cb, cbmapi,
 					options, NULL, &mapi_error)) {
+			g_slist_foreach (did.unknown_mids, (GFunc) g_free, NULL);
+			g_slist_free (did.unknown_mids);
+
 			if (mapi_error) {
 				gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
 				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
@@ -801,11 +838,11 @@ get_deltas (gpointer handle)
 				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
 			}
 
-			g_free (or_res);
 			g_mutex_unlock (priv->updating_mutex);
 			return FALSE;
 		}
-		g_free (or_res);
+		g_slist_foreach (did.unknown_mids, (GFunc) g_free, NULL);
+		g_slist_free (did.unknown_mids);
 	}
 
 	g_mutex_unlock (priv->updating_mutex);
@@ -1134,7 +1171,7 @@ populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
 		is_public = TRUE;
 	}
 
-	if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL,
+	if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL, NULL,
 					is_public ? NULL : e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
 					mapi_cal_cache_create_cb, cbmapi,
 					options, NULL, &mapi_error)) {
@@ -1481,39 +1518,37 @@ get_comp_mid (icalcomponent *icalcomp, mapi_id_t *mid)
 	}
 }
 
-/* should call free_server_data() before done with cbdata */
-static void
-get_server_data (ECalBackendMAPI *cbmapi, ECalComponent *comp, struct cal_cbdata *cbdata)
+static gboolean
+ecbm_build_global_id_restriction (EMapiConnection *conn,
+				  mapi_id_t fid,
+				  TALLOC_CTX *mem_ctx,
+				  struct mapi_SRestriction **restrictions,
+				  gpointer user_data,
+				  GCancellable *cancellable,
+				  GError **perror)
 {
-	ECalBackendMAPIPrivate *priv = cbmapi->priv;
-	icalcomponent *icalcomp;
-	const gchar *uid;
-	mapi_id_t mid;
-	struct mapi_SRestriction res;
-	struct SPropValue sprop;
+	ECalComponent *comp = user_data;
 	struct Binary_r sb;
-	uint32_t proptag = 0x0;
+	struct SPropValue sprop;
+	struct mapi_SRestriction *restriction;
 	gchar *propval;
-	TALLOC_CTX *mem_ctx;
+	uint32_t proptag;
 
-	icalcomp = e_cal_component_get_icalcomponent (comp);
-	uid = icalcomponent_get_uid (icalcomp);
-	get_comp_mid (icalcomp, &mid);
-	if (e_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
-					mapi_cal_get_required_props, NULL,
-					capture_req_props, cbdata,
-					MAPI_OPTIONS_FETCH_GENERIC_STREAMS, NULL, NULL))
+	g_return_val_if_fail (restrictions != NULL, FALSE);
+	g_return_val_if_fail (comp != NULL, FALSE);
 
-		return;
+	proptag = e_mapi_connection_resolve_named_prop (conn, fid, PidLidCleanGlobalObjectId, cancellable, perror);
+	if (proptag == MAPI_E_RESERVED)
+		proptag = PidLidCleanGlobalObjectId;
 
-	proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidCleanGlobalObjectId, NULL, NULL);
-	if (proptag == MAPI_E_RESERVED) proptag = PidLidCleanGlobalObjectId;
+	restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
+	g_return_val_if_fail (restriction != NULL, FALSE);
 
-	res.rt = RES_PROPERTY;
-	res.res.resProperty.relop = RELOP_EQ;
-	res.res.resProperty.ulPropTag = proptag;
+	restriction->rt = RES_PROPERTY;
+	restriction->res.resProperty.relop = RELOP_EQ;
+	restriction->res.resProperty.ulPropTag = proptag;
 
-	propval = e_mapi_cal_utils_get_icomp_x_prop (icalcomp, "X-EVOLUTION-MAPI-GLOBALID");
+	propval = e_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-GLOBALID");
 	if (propval && *propval) {
 		gsize len = 0;
 
@@ -1522,6 +1557,9 @@ get_server_data (ECalBackendMAPI *cbmapi, ECalComponent *comp, struct cal_cbdata
 	} else {
 		struct icaltimetype ical_creation_time = { 0 };
 		struct FILETIME creation_time = { 0 };
+		const gchar *uid;
+
+		uid = icalcomponent_get_uid (e_cal_component_get_icalcomponent (comp));
 
 		e_cal_component_get_dtstamp (comp, &ical_creation_time);
 
@@ -1530,16 +1568,36 @@ get_server_data (ECalBackendMAPI *cbmapi, ECalComponent *comp, struct cal_cbdata
 	}
 	g_free (propval);
 
-	mem_ctx = talloc_init ("ExchangeMAPI_cal_get_server_data");
-	set_SPropValue_proptag (&sprop, proptag, (gconstpointer ) &sb);
-	cast_mapi_SPropValue (mem_ctx, &(res.res.resProperty.lpProp), &sprop);
+	set_SPropValue_proptag (&sprop, proptag, &sb);
+	cast_mapi_SPropValue (mem_ctx, &(restriction->res.resProperty.lpProp), &sprop);
 
-	e_mapi_connection_fetch_items (priv->conn, priv->fid, &res, NULL,
+	*restrictions = restriction;
+
+	return TRUE;
+}
+
+/* should call free_server_data() before done with cbdata */
+static void
+get_server_data (ECalBackendMAPI *cbmapi, ECalComponent *comp, struct cal_cbdata *cbdata)
+{
+	ECalBackendMAPIPrivate *priv = cbmapi->priv;
+	icalcomponent *icalcomp;
+	mapi_id_t mid;
+
+	icalcomp = e_cal_component_get_icalcomponent (comp);
+	get_comp_mid (icalcomp, &mid);
+
+	if (e_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
+					mapi_cal_get_required_props, NULL,
+					capture_req_props, cbdata,
+					MAPI_OPTIONS_FETCH_GENERIC_STREAMS, NULL, NULL))
+
+		return;
+
+	e_mapi_connection_fetch_items (priv->conn, priv->fid, ecbm_build_global_id_restriction, comp, NULL,
 					mapi_cal_get_required_props, NULL,
 					capture_req_props, cbdata,
 					MAPI_OPTIONS_FETCH_GENERIC_STREAMS, NULL, NULL);
-
-	talloc_free (mem_ctx);
 }
 
 /* frees data members allocated in get_server_data(), not the cbdata itself */

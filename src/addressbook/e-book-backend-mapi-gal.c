@@ -175,7 +175,7 @@ ebbm_gal_get_status_message (EBookBackendMAPI *ebma, gint index, gint total)
 }
 
 static void
-ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restriction, EDataBookView *book_view, gpointer notify_contact_data, GError **error)
+ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, BuildRestrictionsCB build_rs_cb, gpointer build_rs_cb_data, EDataBookView *book_view, gpointer notify_contact_data, GError **error)
 {
 	GError *mapi_error = NULL;
 	struct FetchGalData fgd = { 0 };
@@ -215,7 +215,7 @@ ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restr
 	fgd.notify_contact_data = notify_contact_data;
 	fgd.fid = e_mapi_connection_get_default_folder_id (conn, olFolderContacts, NULL, NULL);
 
-	fetch_successful = e_mapi_connection_fetch_gal (conn, restriction,
+	fetch_successful = e_mapi_connection_fetch_gal (conn, build_rs_cb, build_rs_cb_data,
 		mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 		fetch_gal_cb, &fgd, NULL, &mapi_error);
 
@@ -263,7 +263,7 @@ ebbm_gal_fetch_known_uids (EBookBackendMAPI *ebma, GCancellable *cancellable, GH
 	fgud.uids = uids;
 	fgud.fid = e_mapi_connection_get_default_folder_id (conn, olFolderContacts, cancellable, NULL);
 
-	e_mapi_connection_fetch_gal (conn, NULL,
+	e_mapi_connection_fetch_gal (conn, NULL, NULL,
 		mapi_book_utils_get_prop_list, GET_UIDS_ONLY,
 		fetch_gal_uids_cb, &fgud, cancellable, &mapi_error);
 

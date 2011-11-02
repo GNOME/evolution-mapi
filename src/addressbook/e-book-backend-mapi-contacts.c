@@ -57,14 +57,24 @@ struct _EBookBackendMAPIContactsPrivate
 };
 
 static gboolean
-build_restriction_emails_contains (struct mapi_SRestriction *res, const gchar *query)
+build_restriction_emails_contains (EMapiConnection *conn,
+				   mapi_id_t fid,
+				   TALLOC_CTX *mem_ctx,
+				   struct mapi_SRestriction **restrictions,
+				   gpointer user_data,
+				   GCancellable *cancellable,
+				   GError **perror)
 {
-	gchar *email=NULL, *tmp, *tmp1;
+	struct mapi_SRestriction *restriction;
+	const gchar *query = user_data;
+	gchar *email = NULL, *to_free, *tmp, *tmp1;
+
+	g_return_val_if_fail (query != NULL, FALSE);
 
 	/* This currently supports "email foo@bar.soo" */
-	tmp = strdup (query);
+	to_free = strdup (query);
 
-	tmp = strstr (tmp, "email");
+	tmp = strstr (to_free, "email");
 	if (tmp ) {
 		tmp = strchr (tmp, '\"');
 		if (tmp && ++tmp) {
@@ -80,14 +90,28 @@ build_restriction_emails_contains (struct mapi_SRestriction *res, const gchar *q
 		}
 	}
 
-	if (email==NULL || !strchr (email, '@'))
+	if (email == NULL || !strchr (email, '@')) {
+		g_free (to_free);
 		return FALSE;
+	}
 
-	res->rt = RES_PROPERTY;
-	res->res.resProperty.relop = RES_PROPERTY;
-	res->res.resProperty.ulPropTag = PROP_TAG(PT_UNICODE, 0x801f); /* EMAIL */
-	res->res.resProperty.lpProp.ulPropTag = PROP_TAG(PT_UNICODE, 0x801f); /* EMAIL*/
-	res->res.resProperty.lpProp.value.lpszA = email;
+	if (!restrictions) {
+		g_free (to_free);
+		return TRUE;
+	}
+
+	restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
+	g_return_val_if_fail (restriction != NULL, FALSE);
+
+	restriction->rt = RES_PROPERTY;
+	restriction->res.resProperty.relop = RES_PROPERTY;
+	restriction->res.resProperty.ulPropTag = PROP_TAG(PT_UNICODE, 0x801f); /* EMAIL */
+	restriction->res.resProperty.lpProp.ulPropTag = PROP_TAG(PT_UNICODE, 0x801f); /* EMAIL*/
+	restriction->res.resProperty.lpProp.value.lpszA = talloc_strdup (mem_ctx, email);
+
+	*restrictions = restriction;
+
+	g_free (to_free);
 
 	return TRUE;
 }
@@ -1019,7 +1043,6 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellabl
 	guint32 options;
 	struct CreateContactListData ccld = { 0 };
 	GError *mapi_error = NULL;
-	struct mapi_SRestriction res;
 	gboolean get_all;
 
 	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
@@ -1063,14 +1086,14 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellabl
 	ccld.vCards = vCards;
 
 	get_all = g_ascii_strcasecmp (query, "(contains \"x-evolution-any-field\" \"\")") == 0;
-	if (!get_all && !build_restriction_emails_contains (&res, query)) {
+	if (!get_all && !build_restriction_emails_contains (NULL, 0, NULL, NULL, (gpointer) query, NULL, NULL)) {
 		e_book_backend_mapi_unlock_connection (ebma);
 		/* g_propagate_error (error, EDB_ERROR (OTHER_ERROR)); */
 
 		return;
 	}
 
-	if (!e_mapi_connection_fetch_items (conn, priv->fid, get_all ? NULL : &res, NULL,
+	if (!e_mapi_connection_fetch_items (conn, priv->fid, get_all ? NULL : build_restriction_emails_contains, (gpointer) query, NULL,
 		priv->is_public_folder ? NULL : mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 		create_contact_list_cb, &ccld, options, cancellable, &mapi_error)) {
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch items from a server"));
@@ -1100,7 +1123,7 @@ ebbm_contacts_get_status_message (EBookBackendMAPI *ebma, gint index, gint total
 }
 
 static void
-ebbm_contacts_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restriction, EDataBookView *book_view, gpointer notify_contact_data, GError **error)
+ebbm_contacts_fetch_contacts (EBookBackendMAPI *ebma, BuildRestrictionsCB build_rs_cb, gpointer build_rs_cb_data, EDataBookView *book_view, gpointer notify_contact_data, GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
 	EBookBackendMAPIContactsPrivate *priv;
@@ -1136,7 +1159,7 @@ ebbm_contacts_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *
 	if (priv->is_public_folder)
 		options |= MAPI_OPTIONS_USE_PFSTORE;
 
-	if (!e_mapi_connection_fetch_items (conn, priv->fid, restriction, NULL,
+	if (!e_mapi_connection_fetch_items (conn, priv->fid, build_rs_cb, build_rs_cb_data, NULL,
 		mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 		fetch_contacts_cb, &fcd, options, NULL, &mapi_error)) {
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch items from a server"));
@@ -1185,7 +1208,7 @@ ebbm_contacts_fetch_known_uids (EBookBackendMAPI *ebma, GCancellable *cancellabl
 	fcud.cancellable = cancellable;
 	fcud.uids = uids;
 
-	e_mapi_connection_fetch_items (conn, priv->fid, NULL, NULL,
+	e_mapi_connection_fetch_items (conn, priv->fid, NULL, NULL, NULL,
 		mapi_book_utils_get_prop_list, GET_UIDS_ONLY,
 		fetch_contacts_uids_cb, &fcud, options, cancellable, &mapi_error);
 

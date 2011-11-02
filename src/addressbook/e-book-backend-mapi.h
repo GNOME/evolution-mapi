@@ -79,7 +79,7 @@ typedef struct
 	/* function called to populate cache or similar operations;
 	   restriction and book_view can be NULL, call e_book_backend_mapi_notify_contact_update for each
 	   fetched contact with this book_view and notify_contact_data */
-	void (*op_fetch_contacts) (EBookBackendMAPI *ebma, struct mapi_SRestriction *restriction, EDataBookView *book_view, gpointer notify_contact_data, GError **error);
+	void (*op_fetch_contacts) (EBookBackendMAPI *ebma, BuildRestrictionsCB build_rs_cb, gpointer build_rs_cb_data, EDataBookView *book_view, gpointer notify_contact_data, GError **error);
 
 	/* function to fetch list of known uids (strings) on the server;
 	   it's used to synchronize local cache with deleted items;

@@ -235,7 +235,7 @@ ebbm_notify_connection_status (EBookBackendMAPI *ebma, gboolean is_online)
 }
 
 static void
-ebbm_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restriction, EDataBookView *book_view, glong *last_modification_secs, GError **error)
+ebbm_fetch_contacts (EBookBackendMAPI *ebma, BuildRestrictionsCB build_rs_cb, gpointer build_rs_cb_data, EDataBookView *book_view, glong *last_modification_secs, GError **error)
 {
 	EBookBackendMAPIClass *ebmac;
 	struct FetchContactsData notify_data = { 0 };
@@ -248,48 +248,10 @@ ebbm_fetch_contacts (EBookBackendMAPI *ebma, struct mapi_SRestriction *restricti
 	g_return_if_fail (ebmac != NULL);
 	g_return_if_fail (ebmac->op_fetch_contacts != NULL);
 
-	ebmac->op_fetch_contacts (ebma, restriction, book_view, &notify_data, error);
+	ebmac->op_fetch_contacts (ebma, build_rs_cb, build_rs_cb_data, book_view, &notify_data, error);
 
 	if (last_modification_secs && *last_modification_secs < notify_data.last_modification)
 		*last_modification_secs = notify_data.last_modification;
-}
-
-static struct mapi_SRestriction *
-ebbm_build_cache_update_restriction (EBookBackendMAPI *ebma, TALLOC_CTX *mem_ctx)
-{
-	struct mapi_SRestriction *restriction;
-	EBookBackendMAPIPrivate *priv;
-	struct SPropValue sprop;
-	struct timeval t = { 0 };
-	glong last_update_secs = 0;
-
-	g_return_val_if_fail (ebma != NULL, NULL);
-	g_return_val_if_fail (mem_ctx != NULL, NULL);
-	g_return_val_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma), NULL);
-
-	priv = ebma->priv;
-	g_return_val_if_fail (priv != NULL, NULL);
-	g_return_val_if_fail (priv->db != NULL, NULL);
-
-	if (!ebbm_get_cache_time (ebma, &last_update_secs) || last_update_secs <= 0)
-		return NULL;
-
-	restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
-	g_assert (restriction != NULL);
-
-	restriction->rt = RES_PROPERTY;
-	restriction->res.resProperty.relop = RELOP_GE;
-	restriction->res.resProperty.ulPropTag = PR_LAST_MODIFICATION_TIME;
-
-	t.tv_sec = last_update_secs;
-	t.tv_usec = 0;
-
-	set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
-
-	cast_mapi_SPropValue (mem_ctx, &(restriction->res.resProperty.lpProp),
-			      &sprop);
-
-	return restriction;
 }
 
 static gboolean
@@ -302,6 +264,52 @@ unref_backend_idle_cb (gpointer data)
 	g_object_unref (ebma);
 
 	return FALSE;
+}
+
+static gboolean
+ebbm_build_cache_update_restriction (EMapiConnection *conn,
+				     mapi_id_t fid,
+				     TALLOC_CTX *mem_ctx,
+				     struct mapi_SRestriction **restrictions,
+				     gpointer user_data,
+				     GCancellable *cancellable,
+				     GError **perror)
+{
+	EBookBackendMAPI *ebma = user_data;
+	struct mapi_SRestriction *restriction;
+	EBookBackendMAPIPrivate *priv;
+	struct SPropValue sprop;
+	struct timeval t = { 0 };
+	glong last_update_secs = 0;
+
+	g_return_val_if_fail (ebma != NULL, FALSE);
+	g_return_val_if_fail (mem_ctx != NULL, FALSE);
+	g_return_val_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma), FALSE);
+	g_return_val_if_fail (restrictions != NULL, FALSE);
+
+	priv = ebma->priv;
+	g_return_val_if_fail (priv != NULL, FALSE);
+	g_return_val_if_fail (priv->db != NULL, FALSE);
+
+	if (!ebbm_get_cache_time (ebma, &last_update_secs) || last_update_secs <= 0)
+		return TRUE;
+
+	restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
+	g_return_val_if_fail (restriction != NULL, FALSE);
+
+	restriction->rt = RES_PROPERTY;
+	restriction->res.resProperty.relop = RELOP_GE;
+	restriction->res.resProperty.ulPropTag = PR_LAST_MODIFICATION_TIME;
+
+	t.tv_sec = last_update_secs;
+	t.tv_usec = 0;
+
+	set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
+	cast_mapi_SPropValue (mem_ctx, &(restriction->res.resProperty.lpProp), &sprop);
+
+	*restrictions = restriction;
+
+	return TRUE;
 }
 
 static gpointer
@@ -327,20 +335,12 @@ ebbm_update_cache_cb (gpointer data)
 	g_cancellable_reset (priv->update_cache);
 
 	if (!g_cancellable_is_cancelled (priv->update_cache) && ebmac->op_fetch_contacts) {
-		TALLOC_CTX *mem_ctx;
-		struct mapi_SRestriction *restriction;
-
-		mem_ctx = talloc_init (G_STRFUNC);
-		restriction = ebbm_build_cache_update_restriction (ebma, mem_ctx);
-
 		/* get time stored in a cache, to always use the latest last modification time */
 		if (!ebbm_get_cache_time (ebma, &last_modification_secs))
 			last_modification_secs = 0;
 
-		ebbm_fetch_contacts (ebma, restriction, NULL, &last_modification_secs, &error);
+		ebbm_fetch_contacts (ebma, ebbm_build_cache_update_restriction, ebma, NULL, &last_modification_secs, &error);
 		e_book_backend_sqlitedb_set_is_populated (priv->db, EMA_EBB_CACHE_FOLDERID, error != NULL, NULL);
-
-		talloc_free (mem_ctx);
 	}
 
 	if (!error && !g_cancellable_is_cancelled (priv->update_cache) && ebmac->op_fetch_known_uids) {
@@ -751,7 +751,7 @@ ebbm_book_view_thread (gpointer data)
 			/* todo: create restriction based on the book_view */
 			if (!error) {
 				g_cancellable_reset (priv->update_cache);
-				ebbm_fetch_contacts (bvtd->ebma, NULL, bvtd->book_view, NULL, &error);
+				ebbm_fetch_contacts (bvtd->ebma, NULL, NULL, bvtd->book_view, NULL, &error);
 				g_cancellable_cancel (priv->update_cache);
 			}
 

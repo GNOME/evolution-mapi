@@ -592,7 +592,7 @@ mapi_sync_deleted (CamelSession *session,
 	server_messages = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
 	/*Get the UID list from server.*/
-	e_mapi_connection_fetch_items (camel_mapi_store_get_connection (mapi_store), data->folder_id, NULL, NULL,
+	e_mapi_connection_fetch_items (camel_mapi_store_get_connection (mapi_store), data->folder_id, NULL, NULL, NULL,
 					       NULL, NULL,
 					       deleted_items_sync_cb, server_messages,
 					       options | MAPI_OPTIONS_DONT_OPEN_MESSAGE, cancellable, NULL);
@@ -735,7 +735,7 @@ mapi_camel_get_summary_list (EMapiConnection *conn,
 }
 
 gboolean
-camel_mapi_folder_fetch_summary (CamelStore *store, CamelFolder *folder, const mapi_id_t fid, struct mapi_SRestriction *res,
+camel_mapi_folder_fetch_summary (CamelStore *store, CamelFolder *folder, const mapi_id_t fid, BuildRestrictionsCB build_rs_cb, gpointer build_rs_cb_data,
 				 struct SSortOrderSet *sort, fetch_items_data *fetch_data, guint32 options, GCancellable *cancellable, GError **mapi_error)
 {
 	gboolean status;
@@ -747,7 +747,7 @@ camel_mapi_folder_fetch_summary (CamelStore *store, CamelFolder *folder, const m
 
 	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
-	status = e_mapi_connection_fetch_items  (camel_mapi_store_get_connection (mapi_store), fid, res, sort,
+	status = e_mapi_connection_fetch_items  (camel_mapi_store_get_connection (mapi_store), fid, build_rs_cb, build_rs_cb_data, sort,
 							mapi_camel_get_summary_list, NULL,
 							fetch_items_summary_cb, fetch_data,
 							options, cancellable, mapi_error);
@@ -757,6 +757,47 @@ camel_mapi_folder_fetch_summary (CamelStore *store, CamelFolder *folder, const m
 	camel_operation_pop_message (cancellable);
 
 	return status;
+}
+
+static gboolean
+cmf_build_last_modify_restriction (EMapiConnection *conn,
+				   mapi_id_t fid,
+				   TALLOC_CTX *mem_ctx,
+				   struct mapi_SRestriction **restrictions,
+				   gpointer user_data,
+				   GCancellable *cancellable,
+				   GError **perror)
+{
+	const gchar *sync_time_stamp = user_data;
+	GTimeVal last_modification_time;
+
+	g_return_val_if_fail (restrictions != NULL, FALSE);
+
+	if (sync_time_stamp && *sync_time_stamp &&
+	    g_time_val_from_iso8601 (sync_time_stamp,
+				     &last_modification_time)) {
+		struct mapi_SRestriction *restriction;
+		struct SPropValue sprop;
+		struct timeval t;
+
+		restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
+		g_return_val_if_fail (restriction != NULL, FALSE);
+
+		restriction->rt = RES_PROPERTY;
+		restriction->res.resProperty.relop = RELOP_GE;
+		restriction->res.resProperty.ulPropTag = PR_LAST_MODIFICATION_TIME;
+
+		t.tv_sec = last_modification_time.tv_sec;
+		t.tv_usec = last_modification_time.tv_usec;
+
+		set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
+		cast_mapi_SPropValue (mem_ctx, &(restriction->res.resProperty.lpProp), &sprop);
+
+		*restrictions = restriction;
+
+	}
+
+	return TRUE;
 }
 
 gboolean
@@ -775,8 +816,6 @@ mapi_refresh_folder(CamelFolder *folder, GCancellable *cancellable, GError **err
 	gboolean status;
 	gboolean success = TRUE;
 
-	TALLOC_CTX *mem_ctx = NULL;
-	struct mapi_SRestriction *res = NULL;
 	struct SSortOrderSet *sort = NULL;
 	fetch_items_data *fetch_data = g_new0 (fetch_items_data, 1);
 	const gchar *folder_id = NULL;
@@ -825,31 +864,11 @@ mapi_refresh_folder(CamelFolder *folder, GCancellable *cancellable, GError **err
 		guint32 options = 0;
 		GError *mapi_error = NULL;
 
-		if (mapi_summary->sync_time_stamp && *mapi_summary->sync_time_stamp &&
-		    g_time_val_from_iso8601 (mapi_summary->sync_time_stamp,
-					     &fetch_data->last_modification_time)) {
-			struct SPropValue sprop;
-			struct timeval t;
+		if (mapi_summary->sync_time_stamp && *mapi_summary->sync_time_stamp)
+			g_time_val_from_iso8601 (mapi_summary->sync_time_stamp,
+						 &fetch_data->last_modification_time);
 
-			mem_ctx = talloc_init ("ExchangeMAPI_mapi_refresh_folder");
-			res = g_new0 (struct mapi_SRestriction, 1);
-			res->rt = RES_PROPERTY;
-			/*RELOP_GE acts more like >=. Few extra items are being fetched.*/
-			res->res.resProperty.relop = RELOP_GE;
-			res->res.resProperty.ulPropTag = PR_LAST_MODIFICATION_TIME;
-
-			t.tv_sec = fetch_data->last_modification_time.tv_sec;
-			t.tv_usec = fetch_data->last_modification_time.tv_usec;
-
-			//Creation time ?
-			set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
-			cast_mapi_SPropValue (mem_ctx,
-					      &(res->res.resProperty.lpProp),
-					      &sprop);
-
-		}
-
-		/*Initialize other fetch_data fields*/
+	        /*Initialize other fetch_data fields*/
 		fetch_data->changes = camel_folder_change_info_new ();
 		fetch_data->folder = folder;
 
@@ -877,7 +896,8 @@ mapi_refresh_folder(CamelFolder *folder, GCancellable *cancellable, GError **err
 		if (((CamelMapiFolder *)folder)->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC)
 			options |= MAPI_OPTIONS_USE_PFSTORE;
 
-		status = camel_mapi_folder_fetch_summary ((CamelStore *)mapi_store, folder, temp_folder_id, res, sort,
+		status = camel_mapi_folder_fetch_summary ((CamelStore *)mapi_store, folder, temp_folder_id,
+							  cmf_build_last_modify_restriction, mapi_summary->sync_time_stamp, sort,
 							  fetch_data, options, cancellable, &mapi_error);
 
 		if (!status) {
@@ -928,9 +948,6 @@ end1:
 	g_slist_foreach (fetch_data->items_list, (GFunc) mail_item_free, NULL);
 	g_slist_free (fetch_data->items_list);
 	g_free (fetch_data);
-
-	if (mem_ctx)
-		talloc_free (mem_ctx);
 
 	return success;
 }
