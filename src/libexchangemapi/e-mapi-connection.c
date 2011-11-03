@@ -49,9 +49,13 @@ static struct mapi_session *mapi_profile_load (struct mapi_context *mapi_ctx, co
 
 G_DEFINE_TYPE (EMapiConnection, e_mapi_connection, G_TYPE_OBJECT)
 
+
+#define global_lock() e_mapi_utils_global_lock ()
+#define global_unlock() e_mapi_utils_global_unlock ()
+
 /* These two macros require 'priv' variable of type EMapiConnectionPrivate */
-#define LOCK()		e_mapi_debug_print ("%s: %s: lock(session & global)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_lock (&priv->session_lock); e_mapi_utils_global_lock ();
-#define UNLOCK()	e_mapi_debug_print ("%s: %s: unlock(session & global)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_unlock (&priv->session_lock); e_mapi_utils_global_unlock ();
+#define LOCK()		e_mapi_debug_print ("%s: %s: lock(session & global)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_lock (&priv->session_lock); global_lock ();
+#define UNLOCK()	e_mapi_debug_print ("%s: %s: unlock(session & global)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_unlock (&priv->session_lock); global_unlock ();
 
 #define e_return_val_mapi_error_if_fail(expr, _code, _val)				\
 	G_STMT_START {									\
@@ -573,10 +577,9 @@ add_stream_from_properties (GSList **stream_list, struct mapi_SPropValue_array *
 }
 
 static gboolean
-e_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32_t *cpid, uint32_t proptag, GSList **stream_list, struct mapi_SPropValue_array *properties, GError **perror)
+e_mapi_util_read_generic_stream (TALLOC_CTX *mem_ctx, mapi_object_t *obj_message, const uint32_t *cpid, uint32_t proptag, GSList **stream_list, struct mapi_SPropValue_array *properties, GError **perror)
 {
 	enum MAPISTATUS	ms;
-	TALLOC_CTX	*mem_ctx;
 	mapi_object_t	obj_stream;
 	uint16_t	cn_read = 0, max_read;
 	uint32_t	off_data = 0;
@@ -598,7 +601,6 @@ e_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32_t *cpi
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 	e_mapi_debug_print("Attempt to read stream for proptag 0x%08X ", proptag);
 
-	mem_ctx = talloc_init ("ExchangeMAPI_ReadGenericStream");
 	mapi_object_init(&obj_stream);
 
 	/* get a stream on specified proptag */
@@ -672,7 +674,6 @@ e_mapi_util_read_generic_stream (mapi_object_t *obj_message, const uint32_t *cpi
 
 cleanup:
 	mapi_object_release(&obj_stream);
-	talloc_free (mem_ctx);
 
 	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
@@ -680,7 +681,7 @@ cleanup:
 }
 
 static void
-e_mapi_util_read_body_stream (mapi_object_t *obj_message, GSList **stream_list, struct mapi_SPropValue_array *properties, gboolean by_best_body)
+e_mapi_util_read_body_stream (TALLOC_CTX *mem_ctx, mapi_object_t *obj_message, GSList **stream_list, struct mapi_SPropValue_array *properties, gboolean by_best_body)
 {
 	const uint32_t *cpid = e_mapi_util_find_array_propval (properties, PR_INTERNET_CPID);
 	gboolean can_html = FALSE, has_body = FALSE, has_body_unicode;
@@ -699,13 +700,13 @@ e_mapi_util_read_body_stream (mapi_object_t *obj_message, GSList **stream_list, 
 	}
 
 	if (can_html)
-		e_mapi_util_read_generic_stream (obj_message, cpid, PR_HTML, stream_list, properties, NULL);
+		e_mapi_util_read_generic_stream (mem_ctx, obj_message, cpid, PR_HTML, stream_list, properties, NULL);
 
 	if (!has_body_unicode)
-		has_body_unicode = e_mapi_util_read_generic_stream (obj_message, cpid, PR_BODY_UNICODE, stream_list, properties, NULL);
+		has_body_unicode = e_mapi_util_read_generic_stream (mem_ctx, obj_message, cpid, PR_BODY_UNICODE, stream_list, properties, NULL);
 
 	if (!has_body && !has_body_unicode)
-		e_mapi_util_read_generic_stream (obj_message, cpid, PR_BODY, stream_list, properties, NULL);
+		e_mapi_util_read_generic_stream (mem_ctx, obj_message, cpid, PR_BODY, stream_list, properties, NULL);
 }
 
 /* Returns TRUE if all streams were written succcesfully, else returns FALSE */
@@ -915,10 +916,9 @@ cleanup:
 }
 
 static gboolean
-e_mapi_util_delete_attachments (mapi_object_t *obj_message, GError **perror)
+e_mapi_util_delete_attachments (TALLOC_CTX *mem_ctx, mapi_object_t *obj_message, GError **perror)
 {
 	enum MAPISTATUS		ms;
-	TALLOC_CTX		*mem_ctx;
 	mapi_object_t		obj_tb_attach;
 	struct SPropTagArray	*proptags;
 	struct SRowSet		rows_attach;
@@ -927,8 +927,6 @@ e_mapi_util_delete_attachments (mapi_object_t *obj_message, GError **perror)
 	gboolean		status = TRUE;
 
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-
-	mem_ctx = talloc_init ("ExchangeMAPI_DeleteAttachments");
 
 	proptags = set_SPropTagArray(mem_ctx, 0x4,
 				     PR_ATTACH_NUM,
@@ -983,7 +981,6 @@ cleanup:
 	if (ms != MAPI_E_SUCCESS)
 		status = FALSE;
 	mapi_object_release(&obj_tb_attach);
-	talloc_free (mem_ctx);
 
 	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
@@ -1001,7 +998,7 @@ e_mapi_util_set_attachments (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *m
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	if (remove_existing)
-		e_mapi_util_delete_attachments (obj_message, NULL);
+		e_mapi_util_delete_attachments (mem_ctx, obj_message, NULL);
 
 	for (l = attach_list; l; l = l->next) {
 		ExchangeMAPIAttachment *attachment = (ExchangeMAPIAttachment *) (l->data);
@@ -1199,12 +1196,12 @@ may_skip_property (uint32_t proptag)
 static gboolean
 e_mapi_util_get_attachments (EMapiConnection *conn,
 			     mapi_id_t fid,
+			     TALLOC_CTX *mem_ctx,
 			     mapi_object_t *obj_message,
 			     GSList **attach_list,
 			     GError **perror)
 {
 	enum MAPISTATUS		ms;
-	TALLOC_CTX		*mem_ctx;
 	mapi_object_t		obj_tb_attach;
 	struct SPropTagArray	*proptags;
 	struct SRowSet		rows_attach;
@@ -1213,8 +1210,6 @@ e_mapi_util_get_attachments (EMapiConnection *conn,
 	gboolean		status = TRUE;
 
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-
-	mem_ctx = talloc_init ("ExchangeMAPI_GetAttachments");
 
 	proptags = set_SPropTagArray(mem_ctx, 0x5,
 				     PR_ATTACH_NUM,
@@ -1310,13 +1305,13 @@ e_mapi_util_get_attachments (EMapiConnection *conn,
 		/* just to get all the other streams */
 		for (z = 0; z < properties.cValues; z++) {
 			if ((properties.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY) {
-				e_mapi_util_read_generic_stream (&obj_attach, e_mapi_util_find_array_propval (&properties, PR_INTERNET_CPID), properties.lpProps[z].ulPropTag, &(attachment->streams), &properties, NULL);
+				e_mapi_util_read_generic_stream (mem_ctx, &obj_attach, e_mapi_util_find_array_propval (&properties, PR_INTERNET_CPID), properties.lpProps[z].ulPropTag, &(attachment->streams), &properties, NULL);
 			}
 		}
 
 		ui32 = (const uint32_t *) get_SPropValue_SRow_data(&rows_attach.aRow[i_row_attach], PR_ATTACH_METHOD);
 		if (ui32 && *ui32 == ATTACH_BY_VALUE) {
-			e_mapi_util_read_generic_stream (&obj_attach, e_mapi_util_find_array_propval (&properties, PR_INTERNET_CPID), PR_ATTACH_DATA_BIN, &(attachment->streams), &properties, NULL);
+			e_mapi_util_read_generic_stream (mem_ctx, &obj_attach, e_mapi_util_find_array_propval (&properties, PR_INTERNET_CPID), PR_ATTACH_DATA_BIN, &(attachment->streams), &properties, NULL);
 		} else if (ui32 && *ui32 == ATTACH_EMBEDDED_MSG) {
 			mapi_object_t obj_emb_msg;
 
@@ -1352,7 +1347,6 @@ e_mapi_util_get_attachments (EMapiConnection *conn,
 	if (ms != MAPI_E_SUCCESS)
 		status = FALSE;
 	mapi_object_release(&obj_tb_attach);
-	talloc_free (mem_ctx);
 
 	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
@@ -1381,7 +1375,7 @@ e_mapi_connection_fetch_gal (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (build_props != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	mem_ctx = talloc_init ("ExchangeMAPI_FetchGAL");
+	mem_ctx = talloc_new (priv->session);
 
 	LOCK ();
 
@@ -1410,14 +1404,14 @@ e_mapi_connection_fetch_gal (EMapiConnection *conn,
 			break;
 		}
 		if (aRowSet->cRows) {
-			e_mapi_utils_global_unlock ();
+			global_unlock ();
 			for (i = 0; i < aRowSet->cRows; i++, count++) {
 				if (!cb (conn, count, n_rows, &aRowSet->aRow[i], data, cancellable, perror)) {
 					ms = MAPI_E_RESERVED;
 					break;
 				}
 			}
-			e_mapi_utils_global_lock ();
+			global_lock ();
 		} else {
 			talloc_free (aRowSet);
 			break;
@@ -1466,7 +1460,7 @@ e_mapi_connection_get_public_folder (EMapiConnection *conn,
 
 /* Returns TRUE if all recipients were read succcesfully, else returns FALSE */
 static gboolean
-e_mapi_util_get_recipients (EMapiConnection *conn, mapi_object_t *obj_message, GSList **recip_list, GError **perror)
+e_mapi_util_get_recipients (EMapiConnection *conn, TALLOC_CTX *mem_ctx, mapi_object_t *obj_message, GSList **recip_list, GError **perror)
 {
 	enum MAPISTATUS		ms;
 	struct SPropTagArray	proptags;
@@ -1488,7 +1482,7 @@ e_mapi_util_get_recipients (EMapiConnection *conn, mapi_object_t *obj_message, G
 		gchar *display_name = NULL, *email = NULL;
 		const struct Binary_r *entryid;
 
-		recipient->mem_ctx = talloc_init ("ExchangeMAPI_GetRecipients");
+		recipient->mem_ctx = talloc_new (conn->priv->session);
 
 		entryid = e_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_RECIPIENT_ENTRYID);
 		if (entryid && e_mapi_util_recip_entryid_decode (conn, entryid, &display_name, &email) && email) {
@@ -1595,7 +1589,7 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
 	LOCK ();
-	mem_ctx = talloc_init ("EMAPI_GetFolderProperties");
+	mem_ctx = talloc_new (priv->session);
 	mapi_object_init (&obj_folder);
 
 	/* Attempt to open the folder */
@@ -1788,7 +1782,7 @@ e_mapi_connection_list_items (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
 	LOCK ();
-	mem_ctx = talloc_init ("ExchangeMAPI_ListItems");
+	mem_ctx = talloc_new (priv->session);
 	mapi_object_init (&obj_folder);
 	mapi_object_init (&obj_table);
 
@@ -1894,7 +1888,7 @@ e_mapi_connection_fetch_items  (EMapiConnection *conn,
 	e_mapi_debug_print("%s: Entering %s: folder-id %016" G_GINT64_MODIFIER "X ", G_STRLOC, G_STRFUNC, fid);
 
 	LOCK ();
-	mem_ctx = talloc_init("ExchangeMAPI_FetchItems");
+	mem_ctx = talloc_new (priv->session);
 	mapi_object_init(&obj_folder);
 	mapi_object_init(&obj_table);
 
@@ -2078,16 +2072,16 @@ e_mapi_connection_fetch_items  (EMapiConnection *conn,
 			}
 
 			if (has_attach && *has_attach && (MAPI_OPTIONS_FETCH_ATTACHMENTS & options)) {
-				e_mapi_util_get_attachments (conn, fid, &obj_message, &attach_list, NULL);
+				e_mapi_util_get_attachments (conn, fid, mem_ctx, &obj_message, &attach_list, NULL);
 			}
 
 			if (options & MAPI_OPTIONS_FETCH_RECIPIENTS) {
-				e_mapi_util_get_recipients (conn, &obj_message, &recip_list, perror);
+				e_mapi_util_get_recipients (conn, mem_ctx, &obj_message, &recip_list, perror);
 			}
 
 			/* get the main body stream no matter what */
 			if (options & MAPI_OPTIONS_FETCH_BODY_STREAM) {
-				e_mapi_util_read_body_stream (&obj_message, &stream_list, &properties_array, (options & MAPI_OPTIONS_GETBESTBODY) != 0);
+				e_mapi_util_read_body_stream (mem_ctx, &obj_message, &stream_list, &properties_array, (options & MAPI_OPTIONS_GETBESTBODY) != 0);
 			}
 
  relax:
@@ -2102,7 +2096,7 @@ e_mapi_connection_fetch_items  (EMapiConnection *conn,
 						/* just to get all the other streams */
 						for (z = 0; z < properties_array.cValues; z++) {
 							if ((properties_array.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY)
-								e_mapi_util_read_generic_stream (&obj_message, cpid, properties_array.lpProps[z].ulPropTag, &stream_list, &properties_array, NULL);
+								e_mapi_util_read_generic_stream (mem_ctx, &obj_message, cpid, properties_array.lpProps[z].ulPropTag, &stream_list, &properties_array, NULL);
 						}
 					}
 				}
@@ -2121,9 +2115,9 @@ e_mapi_connection_fetch_items  (EMapiConnection *conn,
 				item_data->total = count; //Total entries in the table.
 				item_data->index = cursor_pos + i; //cursor_pos + current_table_index
 
-				e_mapi_utils_global_unlock ();
+				global_unlock ();
 				cb_retval = cb (item_data, data, cancellable, perror);
-				e_mapi_utils_global_lock ();
+				global_lock ();
 
 				g_free (item_data);
 			} else {
@@ -2193,7 +2187,7 @@ e_mapi_connection_fetch_object_props (EMapiConnection *conn,
 	e_mapi_debug_print("%s: Entering %s: folder %p message %p", G_STRLOC, G_STRFUNC, obj_folder, obj_message);
 
 	LOCK ();
-	mem_ctx = talloc_init("ExchangeMAPI_FetchObjectProps");
+	mem_ctx = talloc_new (priv->session);
 
 	if (build_props) {
 		propsTagArray = set_SPropTagArray (mem_ctx, 0x3,
@@ -2255,7 +2249,7 @@ e_mapi_connection_fetch_object_props (EMapiConnection *conn,
 		const bool *has_attach = e_mapi_util_find_array_propval (&properties_array, PR_HASATTACH);
 
 		if (has_attach && *has_attach)
-			e_mapi_util_get_attachments (conn, fid, obj_message, &attach_list, NULL);
+			e_mapi_util_get_attachments (conn, fid, mem_ctx, obj_message, &attach_list, NULL);
 
 		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 			ms = MAPI_E_USER_CANCEL;
@@ -2265,7 +2259,7 @@ e_mapi_connection_fetch_object_props (EMapiConnection *conn,
 
 	/* Fetch recipients */
 	if (options & MAPI_OPTIONS_FETCH_RECIPIENTS) {
-		e_mapi_util_get_recipients (conn, obj_message, &recip_list, NULL);
+		e_mapi_util_get_recipients (conn, mem_ctx, obj_message, &recip_list, NULL);
 
 		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 			ms = MAPI_E_USER_CANCEL;
@@ -2275,7 +2269,7 @@ e_mapi_connection_fetch_object_props (EMapiConnection *conn,
 
 	/* get the main body stream no matter what */
 	if (options & MAPI_OPTIONS_FETCH_BODY_STREAM) {
-		e_mapi_util_read_body_stream (obj_message, &stream_list, &properties_array, (options & MAPI_OPTIONS_GETBESTBODY) != 0);
+		e_mapi_util_read_body_stream (mem_ctx, obj_message, &stream_list, &properties_array, (options & MAPI_OPTIONS_GETBESTBODY) != 0);
 
 		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 			ms = MAPI_E_USER_CANCEL;
@@ -2290,7 +2284,7 @@ e_mapi_connection_fetch_object_props (EMapiConnection *conn,
 			/* just to get all the other streams */
 			for (z = 0; z < properties_array.cValues; z++) {
 				if ((properties_array.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY) {
-					e_mapi_util_read_generic_stream (obj_message, e_mapi_util_find_array_propval (&properties_array, PR_INTERNET_CPID), properties_array.lpProps[z].ulPropTag, &stream_list, &properties_array, NULL);
+					e_mapi_util_read_generic_stream (mem_ctx, obj_message, e_mapi_util_find_array_propval (&properties_array, PR_INTERNET_CPID), properties_array.lpProps[z].ulPropTag, &stream_list, &properties_array, NULL);
 				}
 
 				if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
@@ -2319,9 +2313,9 @@ e_mapi_connection_fetch_object_props (EMapiConnection *conn,
 		item_data->attachments = attach_list;
 
 		/* NOTE: stream_list, recipient_list and attach_list should be freed by the callback */
-		e_mapi_utils_global_unlock ();
+		global_unlock ();
 		cb (item_data, data, cancellable, perror);
-		e_mapi_utils_global_lock ();
+		global_lock ();
 
 		g_free (item_data);
 	} else {
@@ -2366,7 +2360,7 @@ e_mapi_connection_fetch_item (EMapiConnection *conn,
 				G_STRLOC, G_STRFUNC, fid, mid);
 
 	LOCK ();
-	mem_ctx = talloc_init("ExchangeMAPI_FetchItem");
+	mem_ctx = talloc_new (priv->session);
 	mapi_object_init(&obj_folder);
 	mapi_object_init(&obj_message);
 
@@ -2681,7 +2675,7 @@ e_mapi_connection_rename_folder (EMapiConnection *conn,
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
-	mem_ctx = talloc_init("ExchangeMAPI_RenameFolder");
+	mem_ctx = talloc_new (priv->session);
 	mapi_object_init(&obj_folder);
 
 	/* Open the folder to be renamed */
@@ -2849,7 +2843,7 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 		}
 	}
 
-	mem_ctx = talloc_init ("ExchangeMAPI_ResolveNamedProps");
+	mem_ctx = talloc_new (priv->session);
 	mapi_object_init (&obj_folder);
 
 	nameid = mapi_nameid_new (mem_ctx);
@@ -2987,7 +2981,7 @@ e_mapi_connection_resolve_named_prop (EMapiConnection *conn,
 		}
 	}
 
-	mem_ctx = talloc_init("ExchangeMAPI_ResolveNamedProp");
+	mem_ctx = talloc_new (priv->session);
 	mapi_object_init(&obj_folder);
 
 	nameid = mapi_nameid_new(mem_ctx);
@@ -3136,7 +3130,7 @@ e_mapi_connection_create_item  (EMapiConnection *conn,
 
 	LOCK ();
 
-	mem_ctx = talloc_init("ExchangeMAPI_CreateItem");
+	mem_ctx = talloc_new (priv->session);
 	mapi_object_init(&obj_folder);
 	mapi_object_init(&obj_message);
 
@@ -3302,7 +3296,7 @@ e_mapi_connection_modify_item  (EMapiConnection *conn,
 
 	LOCK ();
 
-	mem_ctx = talloc_init("ExchangeMAPI_ModifyItem");
+	mem_ctx = talloc_new (priv->session);
 	mapi_object_init(&obj_folder);
 	mapi_object_init(&obj_message);
 
@@ -3368,7 +3362,7 @@ e_mapi_connection_modify_item  (EMapiConnection *conn,
 			goto cleanup;
 		}
 	} else {
-		e_mapi_util_delete_attachments (&obj_message, NULL);
+		e_mapi_util_delete_attachments (mem_ctx, &obj_message, NULL);
 	}
 
 	/* Set recipients if any */
@@ -3441,7 +3435,7 @@ e_mapi_connection_set_flags (EMapiConnection *conn,
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
-	mem_ctx = talloc_init("ExchangeMAPI_SetFlags");
+	mem_ctx = talloc_new (priv->session);
 	mapi_object_init(&obj_folder);
 
 	id_messages = talloc_array(mem_ctx, mapi_id_t, g_slist_length (mids));
@@ -3627,7 +3621,7 @@ e_mapi_connection_remove_items (EMapiConnection *conn,
 
 	LOCK ();
 
-	mem_ctx = talloc_init("ExchangeMAPI_RemoveItems");
+	mem_ctx = talloc_new (priv->session);
 	mapi_object_init(&obj_folder);
 
 	id_messages = talloc_array(mem_ctx, mapi_id_t, g_slist_length (mids));
@@ -4009,7 +4003,7 @@ e_mapi_connection_get_folders_list (EMapiConnection *conn,
 
 	LOCK ();
 
-	mem_ctx = talloc_init("ExchangeMAPI_GetFoldersList");
+	mem_ctx = talloc_new (priv->session);
 
 	/* Build the array of Mailbox properties we want to fetch */
 	SPropTagArray = set_SPropTagArray(mem_ctx, 0x4,
@@ -4111,7 +4105,7 @@ e_mapi_connection_get_pf_folders_list (EMapiConnection *conn,
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
-	mem_ctx = talloc_init("ExchangeMAPI_PF_GetFoldersList");
+	mem_ctx = talloc_new (priv->session);
 
 	if (!ensure_public_store (priv, perror))
 		goto cleanup;
@@ -4195,7 +4189,7 @@ e_mapi_connection_ex_to_smtp (EMapiConnection *conn,
 	str_array[0] = ex_address;
 	str_array[1] = NULL;
 
-	mem_ctx = talloc_init("ExchangeMAPI_EXtoSMTP");
+	mem_ctx = talloc_new (priv->session);
 
 	LOCK ();
 
