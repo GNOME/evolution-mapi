@@ -39,6 +39,7 @@ struct _EMapiFXParserClosure {
 	TALLOC_CTX *mem_ctx;
 	EMapiFastTransferCB cb;
 	gpointer cb_user_data;
+	GCancellable *cancellable;
 	GError **perror;
 
 	uint32_t next_proptag_is_nameid;
@@ -196,7 +197,7 @@ process_parsed_object (EMapiFXParserClosure *data)
 	g_return_val_if_fail (data->cb != NULL, FALSE);
 	g_return_val_if_fail (data->object != NULL, FALSE);
 
-	return data->cb (data->conn, data->mem_ctx, data->object, data->object_index, data->objects_total, data->cb_user_data, data->perror);
+	return data->cb (data->conn, data->mem_ctx, data->object, data->object_index, data->objects_total, data->cb_user_data, data->cancellable, data->perror);
 }
 
 static enum MAPISTATUS
@@ -417,6 +418,7 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 			       gint objects_total,
 			       gboolean expect_start_message,
 			       mapi_object_t *fasttransfer_ctx,
+			       GCancellable *cancellable,
 			       GError **perror)
 {
 	enum MAPISTATUS ms;
@@ -429,6 +431,7 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 	data.mem_ctx = talloc_new (mem_ctx);
 	data.cb = cb;
 	data.cb_user_data = cb_user_data;
+	data.cancellable = cancellable;
 	data.perror = perror;
 
 	data.next_proptag_is_nameid = MAPI_E_RESERVED;
@@ -464,6 +467,11 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 		ms = e_mapi_fxparser_parse (parser, &transferdata);
 		if (ms != MAPI_E_SUCCESS)
 			break;
+
+		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+			ms = MAPI_E_USER_CANCEL;
+			break;
+		}
 	} while ((transferStatus == TransferStatus_Partial) || (transferStatus == TransferStatus_NoRoom));
 
 	if (data.object) {
@@ -487,6 +495,7 @@ e_mapi_fast_transfer_objects (EMapiConnection *conn,
 			      mapi_id_array_t *ids,
 			      EMapiFastTransferCB cb,
 			      gpointer cb_user_data,
+			      GCancellable *cancellable,
 			      GError **perror)
 {
 	enum MAPISTATUS ms;
@@ -496,7 +505,7 @@ e_mapi_fast_transfer_objects (EMapiConnection *conn,
 
 	ms = FXCopyMessages (obj_folder, ids, FastTransferCopyMessage_BestBody, FastTransfer_Unicode, &fasttransfer_ctx);
 	if (ms == MAPI_E_SUCCESS)
-		ms = e_mapi_fast_transfer_internal (conn, mem_ctx, cb, cb_user_data, ids->count, TRUE, &fasttransfer_ctx, perror);
+		ms = e_mapi_fast_transfer_internal (conn, mem_ctx, cb, cb_user_data, ids->count, TRUE, &fasttransfer_ctx, cancellable, perror);
 
 	mapi_object_release (&fasttransfer_ctx);
 
@@ -513,6 +522,7 @@ e_mapi_fast_transfer_object (EMapiConnection *conn,
 			     guint32 transfer_flags, /* bit or of EMapiFastTransferFlags */
 			     EMapiFastTransferCB cb,
 			     gpointer cb_user_data,
+			     GCancellable *cancellable,
 			     GError **perror)
 {
 	enum MAPISTATUS ms;
@@ -540,7 +550,7 @@ e_mapi_fast_transfer_object (EMapiConnection *conn,
 
 	ms = FXCopyTo (object, 0, FastTransferCopyTo_BestBody, FastTransfer_Unicode, excludes, &fasttransfer_ctx);
 	if (ms == MAPI_E_SUCCESS)
-		ms = e_mapi_fast_transfer_internal (conn, mem_ctx, cb, cb_user_data, 1, FALSE, &fasttransfer_ctx, perror);
+		ms = e_mapi_fast_transfer_internal (conn, mem_ctx, cb, cb_user_data, 1, FALSE, &fasttransfer_ctx, cancellable, perror);
 
 	mapi_object_release (&fasttransfer_ctx);
 	talloc_free (excludes);

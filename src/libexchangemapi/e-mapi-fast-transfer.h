@@ -26,6 +26,7 @@
 
 #include <glib.h>
 #include <glib-object.h>
+#include <gio/gio.h>
 
 #include <libmapi/libmapi.h>
 #include "e-mapi-connection.h"
@@ -47,6 +48,7 @@ typedef gboolean	(*EMapiFastTransferCB)		(EMapiConnection *conn,
 							 guint32 obj_index,
 							 guint32 obj_total,
 							 gpointer user_data,
+							 GCancellable *cancellable,
 							 GError **perror);
 
 struct _EMapiRecipient
@@ -87,6 +89,7 @@ enum MAPISTATUS		e_mapi_fast_transfer_objects	(EMapiConnection *conn,
 							 mapi_id_array_t *ids,
 							 EMapiFastTransferCB cb,
 							 gpointer cb_user_data,
+							 GCancellable *cancellable,
 							 GError **perror);
 
 typedef enum {
@@ -102,6 +105,7 @@ enum MAPISTATUS		e_mapi_fast_transfer_object	(EMapiConnection *conn,
 							 guint32 transfer_flags, /* bit OR of EMapiFastTransferFlags */
 							 EMapiFastTransferCB cb,
 							 gpointer cb_user_data,
+							 GCancellable *cancellable,
 							 GError **perror);
 
 G_END_DECLS
