@@ -2066,7 +2066,7 @@ static gboolean
 emcu_check_id_exists_cb (EMapiConnection *conn,
 			 mapi_id_t fid,
 			 TALLOC_CTX *mem_ctx,
-			 const ListItemsData *item_data,
+			 const ListObjectsData *item_data,
 			 guint32 item_index,
 			 guint32 items_total,
 			 gpointer user_data,
@@ -2092,7 +2092,7 @@ e_mapi_cal_util_get_new_appt_id (EMapiConnection *conn, mapi_id_t fid)
 		id = g_random_int ();
 		if (id) {
 			unused = TRUE;
-			if (!e_mapi_connection_list_items (conn, fid, 0, emcu_build_restriction, &id, emcu_check_id_exists_cb, &unused, NULL, NULL))
+			if (!e_mapi_connection_list_objects (conn, fid, 0, emcu_build_restriction, &id, emcu_check_id_exists_cb, &unused, NULL, NULL))
 				break;
 		}
 	};

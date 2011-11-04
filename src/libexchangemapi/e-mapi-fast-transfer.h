@@ -33,61 +33,11 @@
 
 G_BEGIN_DECLS
 
-struct _EMapiObject;
-struct _EMapiRecipient;
-struct _EMapiAttachment;
-
-typedef struct _EMapiObject EMapiObject;
-typedef struct _EMapiRecipient EMapiRecipient;
-typedef struct _EMapiAttachment EMapiAttachment;
-
-/* returns whether continue in transfer of the next object */
-typedef gboolean	(*EMapiFastTransferCB)		(EMapiConnection *conn,
-							 TALLOC_CTX *mem_ctx,
-							 /* const */ EMapiObject *object,
-							 guint32 obj_index,
-							 guint32 obj_total,
-							 gpointer user_data,
-							 GCancellable *cancellable,
-							 GError **perror);
-
-struct _EMapiRecipient
-{
-	struct mapi_SPropValue_array properties;
-
-	EMapiRecipient *next;
-};
-
-struct _EMapiAttachment
-{
-	struct mapi_SPropValue_array properties;
-	EMapiObject *embeded_object;
-
-	EMapiAttachment *next;
-};
-
-struct _EMapiObject {
-	struct mapi_SPropValue_array properties;
-	EMapiRecipient *recipients; /* NULL when none */
-	EMapiAttachment *attachments; /* NULL when none */
-
-	EMapiObject *parent; /* chain up to parent's object, if this is embeded attachment */
-};
-
-EMapiRecipient *	e_mapi_recipient_new		(TALLOC_CTX *mem_ctx);
-void			e_mapi_recipient_free		(EMapiRecipient *recipient);
-
-EMapiAttachment *	e_mapi_attachment_new		(TALLOC_CTX *mem_ctx);
-void			e_mapi_attachment_free		(EMapiAttachment *attachment);
-
-EMapiObject *		e_mapi_object_new		(TALLOC_CTX *mem_ctx);
-void			e_mapi_object_free		(EMapiObject *object);
-
 enum MAPISTATUS		e_mapi_fast_transfer_objects	(EMapiConnection *conn,
 							 TALLOC_CTX *mem_ctx,
 							 mapi_object_t *obj_folder,
 							 mapi_id_array_t *ids,
-							 EMapiFastTransferCB cb,
+							 TransferObjectCB cb,
 							 gpointer cb_user_data,
 							 GCancellable *cancellable,
 							 GError **perror);
@@ -103,7 +53,7 @@ enum MAPISTATUS		e_mapi_fast_transfer_object	(EMapiConnection *conn,
 							 TALLOC_CTX *mem_ctx,
 							 mapi_object_t *object,
 							 guint32 transfer_flags, /* bit OR of EMapiFastTransferFlags */
-							 EMapiFastTransferCB cb,
+							 TransferObjectCB cb,
 							 gpointer cb_user_data,
 							 GCancellable *cancellable,
 							 GError **perror);

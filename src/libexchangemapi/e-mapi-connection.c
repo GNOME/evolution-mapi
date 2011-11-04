@@ -1715,25 +1715,25 @@ foreach_tablerow (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, map
 	return ms;
 }
 
-struct ListItemsInternalData
+struct ListObjectsInternalData
 {
-	ListItemsCB cb;
+	ListObjectsCB cb;
 	gpointer user_data;
 };
 
 static gboolean
-list_items_internal_cb (EMapiConnection *conn,
-			mapi_id_t fid,
-			TALLOC_CTX *mem_ctx,
-			struct SRow *srow,
-			guint32 row_index,
-			guint32 rows_total,
-			gpointer user_data,
-			GCancellable *cancellable,
-			GError **perror)
+list_objects_internal_cb (EMapiConnection *conn,
+			  mapi_id_t fid,
+			  TALLOC_CTX *mem_ctx,
+			  struct SRow *srow,
+			  guint32 row_index,
+			  guint32 rows_total,
+			  gpointer user_data,
+			  GCancellable *cancellable,
+			  GError **perror)
 {
-	struct ListItemsInternalData *lii_data = user_data;
-	ListItemsData lid;
+	struct ListObjectsInternalData *loi_data = user_data;
+	ListObjectsData lod;
 	const mapi_id_t	*pmid;
 	const uint32_t *pmsg_flags;
 	struct SPropValue *last_modified;
@@ -1748,34 +1748,34 @@ list_items_internal_cb (EMapiConnection *conn,
 	pmsg_flags = get_SPropValue_SRow_data (srow, PR_MESSAGE_FLAGS);
 	last_modified = get_SPropValue_SRow (srow, PR_LAST_MODIFICATION_TIME);
 
-	lid.mid = pmid ? *pmid : 0;
-	lid.msg_flags = pmsg_flags ? *pmsg_flags : 0;
+	lod.mid = pmid ? *pmid : 0;
+	lod.msg_flags = pmsg_flags ? *pmsg_flags : 0;
 
 	if (last_modified && get_mapi_SPropValue_date_timeval (&t, *last_modified) == MAPI_E_SUCCESS)
-		lid.last_modified = t.tv_sec;
+		lod.last_modified = t.tv_sec;
 	else
-		lid.last_modified = 0;
+		lod.last_modified = 0;
 
-	return lii_data->cb (conn, fid, mem_ctx, &lid, row_index, rows_total, lii_data->user_data, cancellable, perror);
+	return loi_data->cb (conn, fid, mem_ctx, &lod, row_index, rows_total, loi_data->user_data, cancellable, perror);
 }
 
 gboolean
-e_mapi_connection_list_items (EMapiConnection *conn,
-			      mapi_id_t fid,
-			      guint32 options,
-			      BuildRestrictionsCB build_rs_cb,
-			      gpointer build_rs_cb_data,
-			      ListItemsCB cb,
-			      gpointer user_data,
-			      GCancellable *cancellable,
-			      GError **perror)
+e_mapi_connection_list_objects (EMapiConnection *conn,
+				mapi_id_t fid,
+				guint32 options,
+				BuildRestrictionsCB build_rs_cb,
+				gpointer build_rs_cb_data,
+				ListObjectsCB cb,
+				gpointer user_data,
+				GCancellable *cancellable,
+				GError **perror)
 {
 	enum MAPISTATUS ms;
 	TALLOC_CTX *mem_ctx;
 	mapi_object_t obj_folder;
 	mapi_object_t obj_table;
 	struct SPropTagArray *propTagArray;
-	struct ListItemsInternalData lii_data;
+	struct ListObjectsInternalData loi_data;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
@@ -1845,14 +1845,76 @@ e_mapi_connection_list_items (EMapiConnection *conn,
 		}
 	}
 
-	lii_data.cb = cb;
-	lii_data.user_data = user_data;
+	loi_data.cb = cb;
+	loi_data.user_data = user_data;
 
-	ms = foreach_tablerow (conn, fid, mem_ctx, &obj_table, list_items_internal_cb, &lii_data, cancellable, perror);
+	ms = foreach_tablerow (conn, fid, mem_ctx, &obj_table, list_objects_internal_cb, &loi_data, cancellable, perror);
 
  cleanup:
 	mapi_object_release (&obj_folder);
 	mapi_object_release (&obj_table);
+	talloc_free (mem_ctx);
+	UNLOCK ();
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+gboolean
+e_mapi_connection_transfer_objects (EMapiConnection *conn,
+				    mapi_id_t fid,
+				    guint32 options,
+				    const GSList *mids,
+				    TransferObjectCB cb,
+				    gpointer cb_user_data,
+				    GCancellable *cancellable,
+				    GError **perror)
+{
+	enum MAPISTATUS ms;
+	TALLOC_CTX *mem_ctx;
+	mapi_object_t obj_folder;
+	mapi_id_array_t ids;
+	const GSList *iter;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	LOCK ();
+	mem_ctx = talloc_new (priv->session);
+	mapi_object_init (&obj_folder);
+
+	ms = mapi_id_array_init (priv->mapi_ctx, &ids);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "mapi_id_array_init", ms);
+		goto cleanup;
+	}
+
+	for (iter = mids; iter; iter = iter->next) {
+		mapi_id_t *pmid = iter->data;
+
+		if (pmid)
+			mapi_id_array_add_id (&ids, *pmid);
+	}
+
+	/* Attempt to open the folder */
+	ms = open_folder (conn, 0, &fid, options, &obj_folder, perror);
+	if (ms != MAPI_E_SUCCESS) {
+		mapi_id_array_release (&ids);
+		goto cleanup;
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		mapi_id_array_release (&ids);
+		goto cleanup;
+	}
+
+	ms = e_mapi_fast_transfer_objects (conn, mem_ctx, &obj_folder, &ids, cb, cb_user_data, cancellable, perror);
+
+	mapi_id_array_release (&ids);
+
+ cleanup:
+	mapi_object_release (&obj_folder);
 	talloc_free (mem_ctx);
 	UNLOCK ();
 

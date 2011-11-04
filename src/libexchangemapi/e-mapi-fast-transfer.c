@@ -37,7 +37,7 @@ typedef struct _EMapiFXParserClosure EMapiFXParserClosure;
 struct _EMapiFXParserClosure {
 	EMapiConnection *conn;
 	TALLOC_CTX *mem_ctx;
-	EMapiFastTransferCB cb;
+	TransferObjectCB cb;
 	gpointer cb_user_data;
 	GCancellable *cancellable;
 	GError **perror;
@@ -413,7 +413,7 @@ parse_property_cb (struct SPropValue prop, void *closure)
 static enum MAPISTATUS
 e_mapi_fast_transfer_internal (EMapiConnection *conn,
 			       TALLOC_CTX *mem_ctx,
-			       EMapiFastTransferCB cb,
+			       TransferObjectCB cb,
 			       gpointer cb_user_data,
 			       gint objects_total,
 			       gboolean expect_start_message,
@@ -493,7 +493,7 @@ e_mapi_fast_transfer_objects (EMapiConnection *conn,
 			      TALLOC_CTX *mem_ctx,
 			      mapi_object_t *obj_folder,
 			      mapi_id_array_t *ids,
-			      EMapiFastTransferCB cb,
+			      TransferObjectCB cb,
 			      gpointer cb_user_data,
 			      GCancellable *cancellable,
 			      GError **perror)
@@ -520,7 +520,7 @@ e_mapi_fast_transfer_object (EMapiConnection *conn,
 			     TALLOC_CTX *mem_ctx,
 			     mapi_object_t *object,
 			     guint32 transfer_flags, /* bit or of EMapiFastTransferFlags */
-			     EMapiFastTransferCB cb,
+			     TransferObjectCB cb,
 			     gpointer cb_user_data,
 			     GCancellable *cancellable,
 			     GError **perror)

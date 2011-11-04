@@ -146,8 +146,49 @@ typedef struct {
 	mapi_id_t mid; /* message ID, from PR_MID */
 	uint32_t msg_flags; /* MAPI MSGFLAG_* bit OR, from PR_MESSAGE_FLAGS */
 	time_t last_modified; /* PR_LAST_MODIFICATION_TIME as UTC */
-} ListItemsData;
+} ListObjectsData;
 
+struct _EMapiObject;
+struct _EMapiRecipient;
+struct _EMapiAttachment;
+
+typedef struct _EMapiObject EMapiObject;
+typedef struct _EMapiRecipient EMapiRecipient;
+typedef struct _EMapiAttachment EMapiAttachment;
+
+struct _EMapiRecipient
+{
+	struct mapi_SPropValue_array properties;
+
+	EMapiRecipient *next;
+};
+
+struct _EMapiAttachment
+{
+	struct mapi_SPropValue_array properties;
+	EMapiObject *embeded_object;
+
+	EMapiAttachment *next;
+};
+
+struct _EMapiObject {
+	struct mapi_SPropValue_array properties;
+	EMapiRecipient *recipients; /* NULL when none */
+	EMapiAttachment *attachments; /* NULL when none */
+
+	EMapiObject *parent; /* chain up to parent's object, if this is embeded attachment */
+};
+
+EMapiRecipient *	e_mapi_recipient_new	(TALLOC_CTX *mem_ctx);
+void			e_mapi_recipient_free	(EMapiRecipient *recipient);
+
+EMapiAttachment *	e_mapi_attachment_new	(TALLOC_CTX *mem_ctx);
+void			e_mapi_attachment_free	(EMapiAttachment *attachment);
+
+EMapiObject *		e_mapi_object_new	(TALLOC_CTX *mem_ctx);
+void			e_mapi_object_free	(EMapiObject *object);
+
+/* callbacks return whether to continue in transfer of the next object */
 typedef gboolean (*FetchCallback)		(FetchItemsCallbackData *item_data,
 						 gpointer data,
 						 GCancellable *cancellable,
@@ -181,12 +222,20 @@ typedef gboolean (*BuildRestrictionsCB)		(EMapiConnection *conn,
 						 gpointer user_data,
 						 GCancellable *cancellable,
 						 GError **perror);
-typedef gboolean (*ListItemsCB)			(EMapiConnection *conn,
+typedef gboolean (*ListObjectsCB)		(EMapiConnection *conn,
 						 mapi_id_t fid,
 						 TALLOC_CTX *mem_ctx,
-						 const ListItemsData *item_data,
+						 const ListObjectsData *item_data,
 						 guint32 item_index,
 						 guint32 items_total,
+						 gpointer user_data,
+						 GCancellable *cancellable,
+						 GError **perror);
+typedef gboolean (*TransferObjectCB)		(EMapiConnection *conn,
+						 TALLOC_CTX *mem_ctx,
+						 /* const */ EMapiObject *object,
+						 guint32 obj_index,
+						 guint32 obj_total,
 						 gpointer user_data,
 						 GCancellable *cancellable,
 						 GError **perror);
@@ -240,13 +289,22 @@ gboolean		e_mapi_connection_get_folder_properties	(EMapiConnection *conn,
 								 GCancellable *cancellable,
 								 GError **perror);
 
-gboolean		e_mapi_connection_list_items		(EMapiConnection *conn,
+gboolean		e_mapi_connection_list_objects		(EMapiConnection *conn,
 								 mapi_id_t fid,
 								 guint32 options,
 								 BuildRestrictionsCB build_rs_cb,
 								 gpointer build_rs_cb_data,
-								 ListItemsCB cb,
+								 ListObjectsCB cb,
 								 gpointer user_data,
+								 GCancellable *cancellable,
+								 GError **perror);
+
+gboolean		e_mapi_connection_transfer_objects	(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 guint32 options,
+								 const GSList *mids,
+								 TransferObjectCB cb,
+								 gpointer cb_user_data,
 								 GCancellable *cancellable,
 								 GError **perror);
 
