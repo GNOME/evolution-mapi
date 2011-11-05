@@ -231,7 +231,7 @@ fetch_items_summary_cb (FetchItemsCallbackData *item_data,
 	if (item_data->total > 0)
                camel_operation_progress (NULL, (item_data->index * 100)/item_data->total);
 
-	if (camel_operation_cancel_check (NULL) || camel_application_is_exiting)
+	if (camel_application_is_exiting)
 		return FALSE;
 
 	return TRUE;
@@ -540,7 +540,7 @@ deleted_items_sync_cb (FetchItemsCallbackData *item_data,
 		camel_operation_progress (NULL, (item_data->index * 100)/item_data->total);
 
 	/* Check if we have to stop */
-	if (camel_operation_cancel_check (NULL) || camel_application_is_exiting)
+	if (camel_application_is_exiting)
 		return FALSE;
 
 	return TRUE;
