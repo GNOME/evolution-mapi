@@ -245,30 +245,32 @@ create_profile_callback (struct SRowSet *rowset, gconstpointer data)
 
 static char*
 prompt_password(const gchar *user, const gchar *host, const gchar *key,
-		EMConfigTargetAccount *account)
+		EMConfigTargetSettings *account)
 {
 	int pw_flags = E_PASSWORDS_REMEMBER_FOREVER|E_PASSWORDS_SECRET;
 	gchar *password, *title;
-	gboolean save;
+	gboolean save = TRUE;
 
-	password = e_passwords_get_password (NULL, key);
-	save = e_account_get_bool (account->modified_account,
-				   E_ACCOUNT_SOURCE_SAVE_PASSWD);
 	title = g_strdup_printf (_("Enter Password for %s@%s"), user, host);
 	password = e_passwords_ask_password (title, NULL, key, title, pw_flags,
 					     &save, NULL);
 	g_free (title);
+
 	return password;
 }
 
 static void
 validate_credentials (GtkWidget *widget, EConfig *config)
 {
-	EMConfigTargetAccount *target_account = (EMConfigTargetAccount *)(config->target);
+	EMConfigTargetSettings *target_account = (EMConfigTargetSettings *)(config->target);
 	CamelURL *url = NULL;
 	gchar *key = NULL;
 	EMapiProfileData empd = { 0 };
+	CamelSettings *settings;
 	CamelMapiSettings *mapi_settings;
+	CamelNetworkSettings *network_settings;
+	const gchar *host;
+	const gchar *user;
 	GError *error = NULL;
 
 	if (!e_shell_get_online (e_shell_get_default ())) {
@@ -276,22 +278,25 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 		return;
 	}
 
-	url = camel_url_new (e_account_get_string (target_account->modified_account, E_ACCOUNT_SOURCE_URL), NULL);
-	mapi_settings = CAMEL_MAPI_SETTINGS (target_account->settings);
+	settings = target_account->storage_settings;
+	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+
+	host = camel_network_settings_get_host (network_settings);
+	user = camel_network_settings_get_user (network_settings);
 
 	/* Silently remove domain part from a username when user enters it as such.
 	   This change will be visible in the UI on new edit open. */
-	if (url->user && strchr (url->user, '\\')) {
-		gchar *tmp, *at;
+	if (user != NULL && strchr (user, '\\') != NULL) {
+		gchar *at;
 
-		at = strrchr (url->user, '\\') + 1;
-		tmp = g_strdup (at);
-		camel_url_set_user (url, tmp);
-		g_free (tmp);
+		at = strrchr (user, '\\') + 1;
+		camel_network_settings_set_user (network_settings, at);
+		user = camel_network_settings_get_user (network_settings);
 	}
 
-	empd.server = url->host;
-	empd.username = url->user;
+	empd.server = host;
+	empd.username = user;
 	e_mapi_util_profiledata_from_settings (&empd, mapi_settings);
 
 	if (!empd.username || !*(empd.username)
@@ -299,15 +304,17 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	    || ((!empd.domain || !*(empd.domain))
 		&& !empd.krb_sso)) {
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Server, username and domain name cannot be empty. Please fill them with correct values."));
-		camel_url_free (url);
 		return;
 	} else if (empd.krb_sso && (!empd.krb_realm || !*(empd.krb_realm))) {
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Realm name cannot be empty when kerberos is selected. Please fill them with correct values."));
-		camel_url_free (url);
 		return;
 	}
 
+	url = g_malloc0 (sizeof (CamelURL));
+	camel_settings_save_to_url (settings, url);
 	key = camel_url_to_string (url, CAMEL_URL_HIDE_PARAMS);
+	camel_url_free (url);
+
 	if (empd.krb_sso) {
 		e_mapi_util_trigger_krb_auth (&empd, &error);
 	} else {
@@ -370,137 +377,127 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 
 	g_free (empd.password);
 	g_free (key);
-	camel_url_free (url);
 }
 
 GtkWidget *
 org_gnome_e_mapi_account_setup (EPlugin *epl, EConfigHookItemFactoryData *data)
 {
-	EMConfigTargetAccount *target_account;
+	EMConfigTargetSettings *target_account;
 	CamelSettings *settings;
-	CamelURL *url;
 	GtkWidget *hgrid = NULL;
+	GtkWidget *label;
+	GtkWidget *domain_name;
+	GtkWidget *realm_name;
+	GtkWidget *auth_button;
+	GtkWidget *secure_conn;
+	GtkWidget *krb_sso;
 	gint row;
 
-	target_account = (EMConfigTargetAccount *)data->config->target;
-	settings = target_account->settings;
-	url = camel_url_new(e_account_get_string(target_account->modified_account, E_ACCOUNT_SOURCE_URL), NULL);
+	target_account = (EMConfigTargetSettings *)data->config->target;
+	settings = target_account->storage_settings;
 
-	/* is NULL on New Account creation */
-	if (url == NULL)
+	if (!CAMEL_IS_MAPI_SETTINGS (settings))
 		return NULL;
 
-	if (!g_ascii_strcasecmp (url->protocol, "mapi")) {
-		GtkWidget *label;
-		GtkWidget *domain_name;
-		GtkWidget *realm_name;
-		GtkWidget *auth_button;
-		GtkWidget *secure_conn;
-		GtkWidget *krb_sso;
+	g_object_get (data->parent, "n-rows", &row, NULL);
 
-		g_object_get (data->parent, "n-rows", &row, NULL);
+	/* Domain name & Authenticate Button */
+	hgrid = g_object_new (GTK_TYPE_GRID, "column-homogeneous", FALSE, "column-spacing", 6, "orientation", GTK_ORIENTATION_HORIZONTAL, NULL);
+	label = gtk_label_new_with_mnemonic (_("_Domain name:"));
+	gtk_widget_show (label);
 
-		/* Domain name & Authenticate Button */
-		hgrid = g_object_new (GTK_TYPE_GRID, "column-homogeneous", FALSE, "column-spacing", 6, "orientation", GTK_ORIENTATION_HORIZONTAL, NULL);
-		label = gtk_label_new_with_mnemonic (_("_Domain name:"));
-		gtk_widget_show (label);
+	domain_name = gtk_entry_new ();
+	gtk_label_set_mnemonic_widget (GTK_LABEL (label), domain_name);
+	gtk_container_add (GTK_CONTAINER (hgrid), domain_name);
+	g_object_bind_property (
+		settings, "domain",
+		domain_name, "text",
+		G_BINDING_BIDIRECTIONAL |
+		G_BINDING_SYNC_CREATE);
 
-		domain_name = gtk_entry_new ();
-		gtk_label_set_mnemonic_widget (GTK_LABEL (label), domain_name);
-		gtk_container_add (GTK_CONTAINER (hgrid), domain_name);
-		g_object_bind_property (
-			settings, "domain",
-			domain_name, "text",
-			G_BINDING_BIDIRECTIONAL |
-			G_BINDING_SYNC_CREATE);
+	auth_button = gtk_button_new_with_mnemonic (_("_Authenticate"));
+	gtk_container_add (GTK_CONTAINER (hgrid), auth_button);
+	g_signal_connect (auth_button, "clicked",  G_CALLBACK (validate_credentials), data->config);
 
-		auth_button = gtk_button_new_with_mnemonic (_("_Authenticate"));
-		gtk_container_add (GTK_CONTAINER (hgrid), auth_button);
-		g_signal_connect (auth_button, "clicked",  G_CALLBACK (validate_credentials), data->config);
+	gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row+1, 0, 0, 0, 0);
+	gtk_widget_show_all (GTK_WIDGET (hgrid));
+	gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (hgrid), 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
 
-		gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row+1, 0, 0, 0, 0);
-		gtk_widget_show_all (GTK_WIDGET (hgrid));
-		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (hgrid), 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
+	row++;
+	secure_conn = gtk_check_button_new_with_mnemonic (_("_Use secure connection"));
+	gtk_widget_show (secure_conn);
+	gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (secure_conn), 1, 2, row, row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
 
-		row++;
-		secure_conn = gtk_check_button_new_with_mnemonic (_("_Use secure connection"));
-		gtk_widget_show (secure_conn);
-		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (secure_conn), 1, 2, row, row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
+	g_object_bind_property_full (
+		settings, "security-method",
+		secure_conn, "active",
+		G_BINDING_BIDIRECTIONAL |
+		G_BINDING_SYNC_CREATE,
+		transform_security_method_to_boolean,
+		transform_boolean_to_security_method,
+		NULL, (GDestroyNotify) NULL);
 
-		g_object_bind_property_full (
-			settings, "security-method",
-			secure_conn, "active",
-			G_BINDING_BIDIRECTIONAL |
-			G_BINDING_SYNC_CREATE,
-			transform_security_method_to_boolean,
-			transform_boolean_to_security_method,
-			NULL, (GDestroyNotify) NULL);
+	row++;
+	krb_sso = gtk_check_button_new_with_mnemonic (_("_Kerberos authentication"));
 
-		row++;
-		krb_sso = gtk_check_button_new_with_mnemonic (_("_Kerberos authentication"));
+	g_object_bind_property (
+		settings, "kerberos",
+		krb_sso, "active",
+		G_BINDING_BIDIRECTIONAL |
+		G_BINDING_SYNC_CREATE);
+	gtk_widget_show (krb_sso);
+	gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (krb_sso), 1, 2, row, row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
 
-		g_object_bind_property (
-			settings, "kerberos",
-			krb_sso, "active",
-			G_BINDING_BIDIRECTIONAL |
-			G_BINDING_SYNC_CREATE);
-		gtk_widget_show (krb_sso);
-		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (krb_sso), 1, 2, row, row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
+	row++;
+	label = gtk_label_new_with_mnemonic (_("_Realm name:"));
+	gtk_widget_show (label);
 
-		row++;
-		label = gtk_label_new_with_mnemonic (_("_Realm name:"));
-		gtk_widget_show (label);
+	g_object_bind_property (
+		settings, "kerberos",
+		label, "sensitive",
+		G_BINDING_SYNC_CREATE);
 
-		g_object_bind_property (
-			settings, "kerberos",
-			label, "sensitive",
-			G_BINDING_SYNC_CREATE);
+	realm_name = gtk_entry_new ();
+	gtk_label_set_mnemonic_widget (GTK_LABEL (label), realm_name);
+	gtk_widget_show (realm_name);
 
-		realm_name = gtk_entry_new ();
-		gtk_label_set_mnemonic_widget (GTK_LABEL (label), realm_name);
-		gtk_widget_show (realm_name);
+	g_object_bind_property (
+		settings, "realm",
+		realm_name, "text",
+		G_BINDING_BIDIRECTIONAL |
+		G_BINDING_SYNC_CREATE);
 
-		g_object_bind_property (
-			settings, "realm",
-			realm_name, "text",
-			G_BINDING_BIDIRECTIONAL |
-			G_BINDING_SYNC_CREATE);
+	g_object_bind_property (
+		settings, "kerberos",
+		realm_name, "sensitive",
+		G_BINDING_SYNC_CREATE);
 
-		g_object_bind_property (
-			settings, "kerberos",
-			realm_name, "sensitive",
-			G_BINDING_SYNC_CREATE);
+	gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row + 1, 0, 0, 0, 0);
+	gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (realm_name), 1, 2, row, row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
 
-		gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row + 1, 0, 0, 0, 0);
-		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (realm_name), 1, 2, row, row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
-	}
-
-	camel_url_free (url);
 	return hgrid;
 }
 
 gboolean
 org_gnome_e_mapi_check_options(EPlugin *epl, EConfigHookPageCheckData *data)
 {
-	EMConfigTargetAccount *target = (EMConfigTargetAccount *)(data->config->target);
+	EMConfigTargetSettings *target = (EMConfigTargetSettings *)(data->config->target);
+	CamelMapiSettings *mapi_settings;
 	gboolean status = TRUE;
 
+	if (!CAMEL_IS_MAPI_SETTINGS (target->storage_settings))
+		return TRUE;
+
+	mapi_settings = CAMEL_MAPI_SETTINGS (target->storage_settings);
+
 	if (data->pageid != NULL && g_ascii_strcasecmp (data->pageid, "10.receive") == 0) {
-		CamelURL *url = camel_url_new (e_account_get_string(target->modified_account,
-								    E_ACCOUNT_SOURCE_URL), NULL);
+		const gchar *profile = NULL;
 
-		if (url && url->protocol && g_ascii_strcasecmp (url->protocol, "mapi") == 0) {
-			const gchar *profile = NULL;
+		/* We assume that if the profile is set, then the setting is valid. */
+		profile = camel_mapi_settings_get_profile (mapi_settings);
 
-			/* We assume that if the profile is set, then the setting is valid. */
-			profile = camel_mapi_settings_get_profile (CAMEL_MAPI_SETTINGS (target->settings));
-
-			/* Profile not set. Do not proceed with account creation.*/
-			status = (profile != NULL && *profile != '\0');
-		}
-
-		if (url)
-			camel_url_free(url);
+		/* Profile not set. Do not proceed with account creation.*/
+		status = (profile != NULL && *profile != '\0');
 	}
 
 	return status;

@@ -10,7 +10,7 @@
 
 		<hook class="org.gnome.evolution.mail.config:1.0">
 			<group 
-				target="account" 
+				target="settings" 
 				id="org.gnome.evolution.mail.config.accountWizard" 
 				check="org_gnome_e_mapi_check_options">
 				<item 
@@ -21,7 +21,7 @@
 		</hook>
 		<hook class="org.gnome.evolution.mail.config:1.0">
 			<group 
-				target="account" 
+				target="settings" 
 				id="org.gnome.evolution.mail.config.accountAssistant" 
 				check="org_gnome_e_mapi_check_options">
 				<item 
@@ -32,7 +32,7 @@
 		</hook>
 		<hook class="org.gnome.evolution.mail.config:1.0">
 			<group 
-				target="account" 
+				target="settings" 
 				id="org.gnome.evolution.mail.config.accountEditor" 
 				check="org_gnome_e_mapi_check_options">
 				<item 
@@ -43,7 +43,7 @@
 		</hook>
 		<hook class="org.gnome.evolution.mail.config:1.0">
       		      <group 
-			 target="account" 
+			 target="settings" 
 			 id="org.gnome.evolution.mail.config.accountEditor"
 			 check="org_gnome_e_mapi_check_options">
 			<item type="page" 

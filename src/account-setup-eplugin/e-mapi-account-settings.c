@@ -209,19 +209,13 @@ mapi_settings_run_folder_size_dialog (const gchar *profile, gpointer data)
 }
 
 static void
-folder_size_clicked (GtkButton *button, EAccount *account)
+folder_size_clicked (GtkButton *button,
+                     CamelMapiSettings *mapi_settings)
 {
-	CamelURL *url;
+	const gchar *profile;
 
-	g_return_if_fail (account != NULL);
-	g_return_if_fail (E_IS_ACCOUNT (account));
-
-	url = camel_url_new (e_account_get_string (account,  E_ACCOUNT_SOURCE_URL), NULL);
-	g_return_if_fail (url != NULL);
-
-	mapi_settings_run_folder_size_dialog (camel_url_get_param (url, "profile"), NULL);
-
-	camel_url_free (url);
+	profile = camel_mapi_settings_get_profile (mapi_settings);
+	mapi_settings_run_folder_size_dialog (profile, NULL);
 }
 
 static void
@@ -328,9 +322,7 @@ folder_size_actions_update_cb (EShellView *shell_view, GtkActionEntry *entries)
 GtkWidget *
 org_gnome_e_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 {
-	EMConfigTargetAccount *target_account;
-	CamelURL *url;
-	const gchar *source_url;
+	EMConfigTargetSettings *target_account;
 	GtkGrid *vsettings;
 
 	/* Miscelleneous setting */
@@ -340,16 +332,15 @@ org_gnome_e_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 	GtkLabel *lbl_fsize;
 	GtkButton *btn_fsize;
 
-	target_account = (EMConfigTargetAccount *)data->config->target;
+	target_account = (EMConfigTargetSettings *)data->config->target;
 
-	source_url = e_account_get_string (target_account->modified_account,  E_ACCOUNT_SOURCE_URL);
-
-	url = camel_url_new(source_url, NULL);
-	if (url == NULL || strcmp(url->protocol, "mapi") != 0) {
-		if (url)
-			camel_url_free(url);
+	if (!CAMEL_IS_MAPI_SETTINGS (target_account->storage_settings))
 		return NULL;
-	}
+
+	/* Verify the storage and transport settings are shared. */
+	g_warn_if_fail (
+		target_account->storage_settings ==
+		target_account->transport_settings);
 
 	vsettings = GTK_GRID (g_object_new (GTK_TYPE_GRID, "column-homogeneous", FALSE, "column-spacing", 6, "orientation", GTK_ORIENTATION_VERTICAL, NULL));
 	gtk_container_set_border_width (GTK_CONTAINER (vsettings), 12);
@@ -371,7 +362,7 @@ org_gnome_e_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 					      _("View the size of all Exchange folders"), NULL);
 	gtk_misc_set_alignment (GTK_MISC (lbl_fsize), 0, 0.5);
 	btn_fsize = (GtkButton*) g_object_new (GTK_TYPE_BUTTON, "label", _("Folder Size"), NULL);
-	g_signal_connect (btn_fsize, "clicked", G_CALLBACK (folder_size_clicked), target_account->modified_account);
+	g_signal_connect (btn_fsize, "clicked", G_CALLBACK (folder_size_clicked), target_account->storage_settings);
 	gtk_table_attach_defaults (tbl_misc, GTK_WIDGET (lbl_fsize), 0, 1, 0, 1);
 	gtk_table_attach (tbl_misc, GTK_WIDGET (btn_fsize), 1, 2, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
 
