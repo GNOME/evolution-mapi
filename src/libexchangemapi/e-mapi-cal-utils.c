@@ -2087,15 +2087,21 @@ e_mapi_cal_util_get_new_appt_id (EMapiConnection *conn, mapi_id_t fid)
 {
 	uint32_t id;
 	gboolean unused = TRUE;
+	mapi_object_t obj_folder;
+
+	if (!e_mapi_connection_open_personal_folder (conn, fid, &obj_folder, NULL, NULL))
+		return g_random_int ();
 
 	while (!unused) {
 		id = g_random_int ();
 		if (id) {
 			unused = TRUE;
-			if (!e_mapi_connection_list_objects (conn, fid, 0, emcu_build_restriction, &id, emcu_check_id_exists_cb, &unused, NULL, NULL))
+			if (!e_mapi_connection_list_objects (conn, &obj_folder, emcu_build_restriction, &id, emcu_check_id_exists_cb, &unused, NULL, NULL))
 				break;
 		}
-	};
+	}
+
+	e_mapi_connection_close_folder (conn, &obj_folder, NULL, NULL);
 
 	return id;
 }

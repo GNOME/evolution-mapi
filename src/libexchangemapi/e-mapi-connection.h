@@ -279,9 +279,31 @@ gboolean		e_mapi_connection_reconnect		(EMapiConnection *conn,
 gboolean		e_mapi_connection_close			(EMapiConnection *conn);
 gboolean		e_mapi_connection_connected		(EMapiConnection *conn);
 
-gboolean		e_mapi_connection_get_folder_properties	(EMapiConnection *conn,
+gboolean		e_mapi_connection_open_default_folder	(EMapiConnection *conn,
+								 uint32_t olFolderIdentifier,
+								 mapi_object_t *obj_folder, /* out */
+								 GCancellable *cancellable,
+								 GError **perror);
+
+gboolean		e_mapi_connection_open_personal_folder	(EMapiConnection *conn,
 								 mapi_id_t fid,
-								 guint32 options,
+								 mapi_object_t *obj_folder, /* out */
+								 GCancellable *cancellable,
+								 GError **perror);
+
+gboolean		e_mapi_connection_open_public_folder	(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 mapi_object_t *obj_folder, /* out */
+								 GCancellable *cancellable,
+								 GError **perror);
+
+gboolean		e_mapi_connection_close_folder		(EMapiConnection *conn,
+								 mapi_object_t *obj_folder,
+								 GCancellable *cancellable,
+								 GError **perror);
+
+gboolean		e_mapi_connection_get_folder_properties	(EMapiConnection *conn,
+								 mapi_object_t *obj_folder,
 								 BuildReadPropsCB brp_cb,
 								 gpointer brp_cb_user_data,
 								 GetFolderPropertiesCB cb,
@@ -290,8 +312,7 @@ gboolean		e_mapi_connection_get_folder_properties	(EMapiConnection *conn,
 								 GError **perror);
 
 gboolean		e_mapi_connection_list_objects		(EMapiConnection *conn,
-								 mapi_id_t fid,
-								 guint32 options,
+								 mapi_object_t *obj_folder,
 								 BuildRestrictionsCB build_rs_cb,
 								 gpointer build_rs_cb_data,
 								 ListObjectsCB cb,
@@ -300,8 +321,7 @@ gboolean		e_mapi_connection_list_objects		(EMapiConnection *conn,
 								 GError **perror);
 
 gboolean		e_mapi_connection_transfer_objects	(EMapiConnection *conn,
-								 mapi_id_t fid,
-								 guint32 options,
+								 mapi_object_t *obj_folder,
 								 const GSList *mids,
 								 TransferObjectCB cb,
 								 gpointer cb_user_data,
