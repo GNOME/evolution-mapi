@@ -54,10 +54,6 @@ G_DEFINE_TYPE (CamelMapiFolderSummary, camel_mapi_folder_summary, CAMEL_TYPE_FOL
 static void
 mapi_summary_finalize (GObject *object)
 {
-	CamelMapiFolderSummary *mapi_summary = CAMEL_MAPI_FOLDER_SUMMARY (object);
-
-	g_free (mapi_summary->sync_time_stamp);
-
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_mapi_folder_summary_parent_class)->finalize (object);
 }
@@ -74,6 +70,7 @@ mapi_message_info_clone(CamelFolderSummary *s, const CamelMessageInfo *mi)
 
 	to = (CamelMapiMessageInfo *)folder_summary_class->message_info_clone(s, mi);
 	to->server_flags = from->server_flags;
+	to->last_modified = from->last_modified;
 
 	/* FIXME: parent clone should do this */
 	to->info.content = camel_folder_summary_content_info_new(s);
@@ -105,6 +102,7 @@ camel_mapi_folder_summary_class_init (CamelMapiFolderSummaryClass *class)
 static void
 camel_mapi_folder_summary_init (CamelMapiFolderSummary *mapi_summary)
 {
+	mapi_summary->latest_last_modify = 0;
 }
 
 /**
@@ -124,7 +122,7 @@ camel_mapi_folder_summary_new (CamelFolder *folder, const gchar *filename)
 
 	summary = g_object_new (CAMEL_TYPE_MAPI_FOLDER_SUMMARY, "folder", folder, NULL);
 
-	camel_folder_summary_set_build_content (summary, TRUE);
+	camel_folder_summary_set_build_content (summary, FALSE);
 	camel_folder_summary_set_filename (summary, filename);
 
 	if (!camel_folder_summary_load_from_db (summary, &local_error)) {
@@ -137,44 +135,6 @@ camel_mapi_folder_summary_new (CamelFolder *folder, const gchar *filename)
 	}
 
 	return summary;
-}
-
-void
-camel_mapi_folder_summary_update_store_info_counts (CamelMapiFolderSummary *mapi_summary)
-{
-	CamelFolderSummary *summary;
-
-	g_return_if_fail (mapi_summary != NULL);
-
-	summary = CAMEL_FOLDER_SUMMARY (mapi_summary);
-	g_return_if_fail (summary != NULL);
-
-	if (camel_folder_summary_get_folder (summary)) {
-		CamelMapiStore *mapi_store;
-
-		mapi_store = CAMEL_MAPI_STORE (camel_folder_get_parent_store (camel_folder_summary_get_folder (summary)));
-		if (mapi_store && mapi_store->summary) {
-			CamelStoreInfo *si;
-			CamelStoreSummary *store_summary = CAMEL_STORE_SUMMARY (mapi_store->summary);
-			CamelFolder*folder;
-
-			g_return_if_fail (store_summary != NULL);
-
-			folder = camel_folder_summary_get_folder (summary);
-			si = camel_store_summary_path (store_summary, camel_folder_get_full_name (folder));
-			if (si) {
-				if (si->unread != camel_folder_summary_get_unread_count (summary) ||
-				    si->total != camel_folder_summary_get_saved_count (summary)) {
-					si->unread = camel_folder_summary_get_unread_count (summary);
-					si->total = camel_folder_summary_get_saved_count (summary);
-
-					camel_store_summary_touch (store_summary);
-				}
-
-				camel_store_summary_info_free (store_summary, si);
-			}
-		}
-	}
 }
 
 static gboolean
@@ -195,18 +155,12 @@ mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
 	if (part)
 		mapi_summary->version = bdata_extract_digit (&part);
 
-	if (part && *part && part++) {
-		g_free (mapi_summary->sync_time_stamp);
-		mapi_summary->sync_time_stamp = g_strdup (part);
-	}
-
 	return TRUE;
 }
 
 static CamelFIRecord *
 mapi_summary_header_to_db (CamelFolderSummary *summary, GError **error)
 {
-	CamelMapiFolderSummary *mapi_summary = CAMEL_MAPI_FOLDER_SUMMARY(summary);
 	CamelFolderSummaryClass *folder_summary_class;
 	struct _CamelFIRecord *fir;
 
@@ -218,9 +172,7 @@ mapi_summary_header_to_db (CamelFolderSummary *summary, GError **error)
 	if (!fir)
 		return NULL;
 
-	fir->bdata = g_strdup_printf ("%d %s", CAMEL_MAPI_FOLDER_SUMMARY_VERSION, mapi_summary->sync_time_stamp);
-
-	camel_mapi_folder_summary_update_store_info_counts (mapi_summary);
+	fir->bdata = g_strdup_printf ("%d", CAMEL_MAPI_FOLDER_SUMMARY_VERSION);
 
 	return fir;
 }
@@ -242,6 +194,7 @@ mapi_message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 
 			m_info = (CamelMapiMessageInfo *) info;
 			m_info->server_flags = bdata_extract_digit (&part);
+			m_info->last_modified = bdata_extract_digit (&part);
 		}
 	}
 
@@ -260,7 +213,7 @@ mapi_message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info)
 
 	mir = folder_summary_class->message_info_to_db (s, info);
 	if (mir)
-		mir->bdata = g_strdup_printf ("%u", m_info->server_flags);
+		mir->bdata = g_strdup_printf ("%u %u", m_info->server_flags, (guint32) m_info->last_modified);
 
 	return mir;
 }

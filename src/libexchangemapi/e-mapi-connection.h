@@ -328,6 +328,14 @@ gboolean		e_mapi_connection_transfer_objects	(EMapiConnection *conn,
 								 GCancellable *cancellable,
 								 GError **perror);
 
+gboolean		e_mapi_connection_transfer_summary	(EMapiConnection *conn,
+								 mapi_object_t *obj_folder,
+								 const GSList *mids,
+								 TransferObjectCB cb,
+								 gpointer cb_user_data,
+								 GCancellable *cancellable,
+								 GError **perror);
+
 gboolean		e_mapi_connection_fetch_object_props	(EMapiConnection *conn,
 								 mapi_object_t *obj_folder,
 								 mapi_id_t fid,

@@ -67,8 +67,8 @@ enum {
 
 struct _CamelMapiStoreInfo {
 	CamelStoreInfo info;
-	mapi_id_t folder_mid;
-	mapi_id_t parent_mid;
+	mapi_id_t folder_id;
+	mapi_id_t parent_id;
 	guint32 camel_folder_flags; /* CamelFolderInfo::flags */
 	guint32 mapi_folder_flags; /* bit-or of CamelMapiStoreFolderFlags */
 	gchar *foreign_user_name; /* only if CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN is set */
@@ -87,13 +87,13 @@ GType			camel_mapi_store_summary_get_type	(void);
 CamelStoreSummary *	camel_mapi_store_summary_new		(void);
 CamelStoreInfo *	camel_mapi_store_summary_add_from_full	(CamelStoreSummary *s,
 								 const gchar *path,
-								 mapi_id_t folder_mid,
-								 mapi_id_t parent_mid,
+								 mapi_id_t folder_id,
+								 mapi_id_t parent_id,
 								 guint32 camel_folder_flags, /* CamelFolderInfo::flags */
 								 guint32 mapi_folder_flags, /* bit-or of CamelMapiStoreFolderFlags */
 								 const gchar *foreign_user_name); /* only if CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN is set */
 CamelStoreInfo *	camel_mapi_store_summary_get_folder_id	(CamelStoreSummary *s,
-								 mapi_id_t folder_mid);
+								 mapi_id_t folder_id);
 
 G_END_DECLS
 

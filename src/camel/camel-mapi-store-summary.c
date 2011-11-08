@@ -138,8 +138,8 @@ store_info_load (CamelStoreSummary *s, FILE *in)
 		    || camel_file_util_decode_uint32 (in, &msi->camel_folder_flags) == -1
 		    || camel_file_util_decode_uint32 (in, &msi->mapi_folder_flags) == -1
 		    || camel_file_util_decode_string (in, &msi->foreign_user_name) == -1
-		    || !e_mapi_util_mapi_id_from_string (folder_id_str, &msi->folder_mid)
-		    || !e_mapi_util_mapi_id_from_string (parent_id_str, &msi->parent_mid)) {
+		    || !e_mapi_util_mapi_id_from_string (folder_id_str, &msi->folder_id)
+		    || !e_mapi_util_mapi_id_from_string (parent_id_str, &msi->parent_id)) {
 			camel_store_summary_info_free (s, si);
 			si = NULL;
 		} else {
@@ -166,8 +166,8 @@ store_info_save (CamelStoreSummary *s, FILE *out, CamelStoreInfo *si)
 
 	store_summary_class = CAMEL_STORE_SUMMARY_CLASS (camel_mapi_store_summary_parent_class);
 
-	folder_id_str = e_mapi_util_mapi_id_to_string (msi->folder_mid);
-	parent_id_str = e_mapi_util_mapi_id_to_string (msi->parent_mid);
+	folder_id_str = e_mapi_util_mapi_id_to_string (msi->folder_id);
+	parent_id_str = e_mapi_util_mapi_id_to_string (msi->parent_id);
 
 	if (store_summary_class->store_info_save (s, out, si) == -1
 	    || camel_file_util_encode_string (out, folder_id_str) == -1
@@ -229,8 +229,8 @@ camel_mapi_store_summary_new (void)
 CamelStoreInfo *
 camel_mapi_store_summary_add_from_full (CamelStoreSummary *s,
 					const gchar *path,
-					mapi_id_t folder_mid,
-					mapi_id_t parent_mid,
+					mapi_id_t folder_id,
+					mapi_id_t parent_id,
 					guint32 camel_folder_flags,
 					guint32 mapi_folder_flags,
 					const gchar *foreign_user_name)
@@ -247,8 +247,8 @@ camel_mapi_store_summary_add_from_full (CamelStoreSummary *s,
 	if (si) {
 		CamelMapiStoreInfo *msi = (CamelMapiStoreInfo *) si;
 
-		msi->folder_mid = folder_mid;
-		msi->parent_mid = parent_mid;
+		msi->folder_id = folder_id;
+		msi->parent_id = parent_id;
 		msi->camel_folder_flags = camel_folder_flags;
 		msi->mapi_folder_flags = mapi_folder_flags;
 		msi->foreign_user_name = g_strdup ((foreign_user_name && *foreign_user_name) ? foreign_user_name : "");
@@ -259,7 +259,7 @@ camel_mapi_store_summary_add_from_full (CamelStoreSummary *s,
 
 /* free the returned pointer with camel_store_summary_info_free(), if not NULL */
 CamelStoreInfo *
-camel_mapi_store_summary_get_folder_id (CamelStoreSummary *s, mapi_id_t folder_mid)
+camel_mapi_store_summary_get_folder_id (CamelStoreSummary *s, mapi_id_t folder_id)
 {
 	gint ii, count;
 
@@ -271,7 +271,7 @@ camel_mapi_store_summary_get_folder_id (CamelStoreSummary *s, mapi_id_t folder_m
 		if (si == NULL)
 			continue;
 
-		if (msi->folder_mid == folder_mid)
+		if (msi->folder_id == folder_id)
 			return si;
 
 		camel_store_summary_info_free (s, si);

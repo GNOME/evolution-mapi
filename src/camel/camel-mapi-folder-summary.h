@@ -52,16 +52,11 @@ typedef struct _CamelMapiFolderSummaryClass CamelMapiFolderSummaryClass;
 typedef struct _CamelMapiMessageInfo CamelMapiMessageInfo;
 typedef struct _CamelMapiMessageContentInfo CamelMapiMessageContentInfo;
 
-/* extra summary flags*/
-enum {
-	CAMEL_GW_MESSAGE_JUNK = 1<<17,
-	CAMEL_GW_MESSAGE_NOJUNK = 1<<18,
-};
-
 struct _CamelMapiMessageInfo {
 	CamelMessageInfoBase info;
 
 	guint32 server_flags;
+	time_t last_modified; /* PidTagLastModificationTime of this message */
 };
 
 struct _CamelMapiMessageContentInfo {
@@ -71,7 +66,7 @@ struct _CamelMapiMessageContentInfo {
 struct _CamelMapiFolderSummary {
 	CamelFolderSummary parent;
 
-	gchar *sync_time_stamp;
+	time_t latest_last_modify;
 	guint32 version;
 	guint32 validity;
 };

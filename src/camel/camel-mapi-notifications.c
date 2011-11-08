@@ -57,40 +57,9 @@ struct mapi_push_notification_data {
 	GThread *thread;
 };
 
-static gboolean
-cmn_build_mid_restriction (EMapiConnection *conn,
-			   mapi_id_t fid,
-			   TALLOC_CTX *mem_ctx,
-			   struct mapi_SRestriction **restrictions,
-			   gpointer user_data,
-			   GCancellable *cancellable,
-			   GError **perror)
-{
-	mapi_id_t *pmid = user_data;
-	struct mapi_SRestriction *restriction;
-
-	g_return_val_if_fail (pmid != NULL, FALSE);
-	g_return_val_if_fail (restrictions != NULL, FALSE);
-
-	restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
-	g_return_val_if_fail (restriction != NULL, FALSE);
-
-	restriction->rt = RES_PROPERTY;
-	restriction->res.resProperty.relop = RES_PROPERTY;
-	restriction->res.resProperty.ulPropTag = PR_MID;
-	restriction->res.resProperty.lpProp.ulPropTag = PR_MID;
-	restriction->res.resProperty.lpProp.value.dbl = *pmid;
-
-	*restrictions = restriction;
-
-	return TRUE;
-}
-
 static void
 process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *new_mail_notif)
 {
-	guint32 options = 0;
-	fetch_items_data *fetch_data;
 	CamelFolder *folder = NULL;
 	CamelStore *parent_store;
 	gint info_count = -1;
@@ -111,7 +80,7 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 	while (info_count >= 0) {
 		si = camel_store_summary_index (store->summary, info_count);
 		msi = (CamelMapiStoreInfo *) si;
-		if (si && msi->folder_mid == new_mail_notif->FID) {
+		if (si && msi->folder_id == new_mail_notif->FID) {
 			folder_name = camel_store_info_path (store->summary, si);
 			info_count = 0;
 		}
@@ -128,12 +97,8 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 
 	parent_store = camel_folder_get_parent_store (folder);
 
-	fetch_data = g_new0 (fetch_items_data, 1);
-	fetch_data->changes = camel_folder_change_info_new ();
-	fetch_data->folder = folder;
-
 	camel_service_lock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-	camel_mapi_folder_fetch_summary ((CamelStore *)store, folder, new_mail_notif->FID, cmn_build_mid_restriction, &new_mail_notif->MID, NULL, fetch_data, options, NULL, NULL);
+	camel_mapi_folder_fetch_summary (folder, NULL, NULL);
 	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	camel_folder_summary_touch (folder->summary);
@@ -141,10 +106,6 @@ process_mapi_new_mail_notif (CamelMapiStore *store, struct NewMailNotification *
 	camel_folder_summary_save_to_db (folder->summary, NULL);
 	camel_store_summary_touch (((CamelMapiStore *)parent_store)->summary);
 	camel_store_summary_save (((CamelMapiStore *)parent_store)->summary);
-
-	camel_folder_changed (folder, fetch_data->changes);
-
-	camel_folder_change_info_free (fetch_data->changes);
 }
 
 static gint

@@ -2213,6 +2213,7 @@ e_mapi_connection_transfer_objects (EMapiConnection *conn,
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
 	LOCK ();
 	mem_ctx = talloc_new (priv->session);
@@ -2239,6 +2240,180 @@ e_mapi_connection_transfer_objects (EMapiConnection *conn,
 	ms = e_mapi_fast_transfer_objects (conn, mem_ctx, obj_folder, &ids, cb, cb_user_data, cancellable, perror);
 
 	mapi_id_array_release (&ids);
+
+ cleanup:
+	talloc_free (mem_ctx);
+	UNLOCK ();
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+struct GetSummaryData {
+	guint32 obj_index;
+	guint32 obj_total;
+	struct SPropValue *lpProps;
+	uint32_t prop_count;
+	TransferObjectCB cb;
+	gpointer cb_user_data;
+};
+
+static gboolean
+internal_get_summary_cb (EMapiConnection *conn,
+			 TALLOC_CTX *mem_ctx,
+			 /* const */ EMapiObject *object,
+			 guint32 obj_index,
+			 guint32 obj_total,
+			 gpointer user_data,
+			 GCancellable *cancellable,
+			 GError **perror)
+{
+	struct GetSummaryData *gsd = user_data;
+
+	g_return_val_if_fail (gsd != NULL, FALSE);
+	g_return_val_if_fail (gsd->cb != NULL, FALSE);
+	g_return_val_if_fail (object != NULL, FALSE);
+
+	/* also include properties received from GetProps,
+	   as those like PR_MID are not included by default */
+	if (gsd->lpProps && gsd->prop_count > 0) {
+		uint32_t ii;
+
+		for (ii = 0; ii < gsd->prop_count; ii++) {
+			/* skip errors and already included properties */
+			if ((gsd->lpProps[ii].ulPropTag & 0xFFFF) == PT_ERROR
+			    || e_mapi_util_find_array_propval (&object->properties, gsd->lpProps[ii].ulPropTag))
+				continue;
+
+			object->properties.cValues++;
+			object->properties.lpProps = talloc_realloc (mem_ctx,
+					    object->properties.lpProps,
+					    struct mapi_SPropValue,
+					    object->properties.cValues + 1);
+			cast_mapi_SPropValue (mem_ctx, &object->properties.lpProps[object->properties.cValues - 1], &gsd->lpProps[ii]);
+			object->properties.lpProps[object->properties.cValues].ulPropTag = 0;
+		}
+	}
+
+	return gsd->cb (conn, mem_ctx, object, gsd->obj_index, gsd->obj_total, gsd->cb_user_data, cancellable, perror);
+}
+
+/* transfers items summary, which is either PR_TRANSPORT_MESSAGE_HEADERS_UNICODE or
+   the object without attachment */
+gboolean
+e_mapi_connection_transfer_summary (EMapiConnection *conn,
+				    mapi_object_t *obj_folder,
+				    const GSList *mids,
+				    TransferObjectCB cb,
+				    gpointer cb_user_data,
+				    GCancellable *cancellable,
+				    GError **perror)
+{
+	enum MAPISTATUS ms;
+	TALLOC_CTX *mem_ctx;
+	const GSList *iter;
+	guint32 index, total;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	LOCK ();
+	mem_ctx = talloc_new (priv->session);
+
+	ms = MAPI_E_SUCCESS;
+	total = g_slist_length ((GSList *) mids);
+	for (iter = mids, index = 0; iter && ms == MAPI_E_SUCCESS; iter = iter->next, index++) {
+		mapi_id_t *pmid = iter->data;
+
+		if (pmid) {
+			mapi_object_t obj_message;
+			struct SPropTagArray *tags;
+			struct SPropValue *lpProps = NULL;
+			uint32_t prop_count = 0, ii;
+
+			mapi_object_init (&obj_message);
+
+			ms = OpenMessage (obj_folder, mapi_object_get_id (obj_folder), *pmid, &obj_message, 0);
+			if (ms != MAPI_E_SUCCESS && ms != MAPI_E_NOT_FOUND) {
+				make_mapi_error (perror, "OpenMessage", ms);
+				goto cleanup;
+			}
+
+			tags = set_SPropTagArray (mem_ctx, 6,
+				PR_FID,
+				PR_MID,
+				PR_MESSAGE_FLAGS,
+				PR_LAST_MODIFICATION_TIME,
+				PR_MESSAGE_CLASS,
+				PR_TRANSPORT_MESSAGE_HEADERS_UNICODE);
+
+			ms = GetProps (&obj_message, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, tags, &lpProps, &prop_count);
+			if (ms == MAPI_E_SUCCESS) {
+				ms = MAPI_E_NOT_FOUND;
+				if (lpProps && prop_count > 0) {
+					const gchar *headers = e_mapi_util_find_SPropVal_array_propval (lpProps, PR_TRANSPORT_MESSAGE_HEADERS_UNICODE);
+
+					if (headers && *headers) {
+						EMapiObject *object;
+
+						ms = MAPI_E_SUCCESS;
+
+						object = e_mapi_object_new (mem_ctx);
+						for (ii = 0; ii < prop_count; ii++) {
+							object->properties.cValues++;
+							object->properties.lpProps = talloc_realloc (mem_ctx,
+									    object->properties.lpProps,
+									    struct mapi_SPropValue,
+									    object->properties.cValues + 1);
+							cast_mapi_SPropValue (mem_ctx, &object->properties.lpProps[object->properties.cValues - 1], &lpProps[ii]);
+							object->properties.lpProps[object->properties.cValues].ulPropTag = 0;
+						}
+
+						if (!cb (conn, mem_ctx, object, index, total, cb_user_data, cancellable, perror)) {
+							ms = MAPI_E_USER_CANCEL;
+							e_mapi_object_free (object);
+							mapi_object_release (&obj_message);
+							goto cleanup;
+						}
+
+						e_mapi_object_free (object);
+					}
+				}
+			}
+
+			if (ms == MAPI_E_NOT_FOUND) {
+				struct GetSummaryData gsd;
+
+				gsd.obj_index = index;
+				gsd.obj_total = total;
+				gsd.lpProps = lpProps;
+				gsd.prop_count = prop_count;
+				gsd.cb = cb;
+				gsd.cb_user_data = cb_user_data;
+
+				ms = e_mapi_fast_transfer_object (conn, mem_ctx, &obj_message, E_MAPI_FAST_TRANSFER_FLAG_RECIPIENTS, internal_get_summary_cb, &gsd, cancellable, perror);
+				if (ms != MAPI_E_SUCCESS) {
+					make_mapi_error (perror, "transfer_object", ms);
+					mapi_object_release (&obj_message);
+					goto cleanup;
+				}
+			}
+
+			mapi_object_release (&obj_message);
+			talloc_free (tags);
+		}
+
+		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+			ms = MAPI_E_USER_CANCEL;
+			goto cleanup;
+		}
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
 
  cleanup:
 	talloc_free (mem_ctx);

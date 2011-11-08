@@ -61,6 +61,8 @@ struct _CamelMapiFolder {
 	CamelOfflineFolder parent;
 	CamelMapiFolderPrivate *priv;
 
+	mapi_id_t folder_id;
+
 	CamelFolderSearch *search;
 
 	CamelOfflineJournal *journal;
@@ -94,8 +96,7 @@ camel_mapi_folder_new(CamelStore *store, const gchar *folder_name, const gchar *
 
 void mapi_update_summary ( CamelFolder *folder, GList *item_list,GError **error);
 gboolean mapi_refresh_folder(CamelFolder *folder, GCancellable *cancellable, GError **error);
-gboolean camel_mapi_folder_fetch_summary (CamelStore *store, CamelFolder *folder, const mapi_id_t fid, BuildRestrictionsCB build_rs_cb, gpointer build_rs_cb_data,
-					  struct SSortOrderSet *sort, fetch_items_data *fetch_data, guint32 options, GCancellable *cancellable, GError **mapi_error);
+gboolean camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable, GError **mapi_error);
 
 G_END_DECLS
 

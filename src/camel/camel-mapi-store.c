@@ -769,7 +769,7 @@ mapi_rename_folder_infos (CamelMapiStore *mapi_store, const gchar *old_name, con
 		if (full_name && g_str_has_prefix (full_name, old_name) && !g_str_equal (full_name, old_name) &&
 		    full_name [olen] == '/' && full_name [olen + 1] != '\0') {
 			/* it's a subfolder of old_name */
-			mapi_id_t fid = ((CamelMapiStoreInfo *)si)->folder_mid;
+			mapi_id_t fid = ((CamelMapiStoreInfo *)si)->folder_id;
 
 			if (fid) {
 				gchar *new_full_name;
@@ -943,12 +943,14 @@ mapi_update_folder_info_cb (CamelSession *session,
 
 	name = camel_service_get_name (service, TRUE);
 	camel_operation_push_message (cancellable, _("Scanning folders in '%s'"), name);
-	g_free (name);
 
 	status = camel_service_get_connection_status (service);
 	if (camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
-		if (status == CAMEL_SERVICE_DISCONNECTED)
+		if (status == CAMEL_SERVICE_DISCONNECTED) {
+			camel_operation_push_message (cancellable, _("Connecting to '%s'"), name);
 			camel_service_connect_sync (service, NULL);
+			camel_operation_pop_message (cancellable); 
+		}
 
 		/* update folders from the server only when asking for the top most or the 'top' is not known;
 		   otherwise believe the local cache, because folders sync is pretty slow operation to be done
@@ -962,6 +964,7 @@ mapi_update_folder_info_cb (CamelSession *session,
 		}
 	}
 
+	g_free (name);
 	camel_operation_pop_message (cancellable); 
 
 	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
@@ -982,6 +985,10 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	if (camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
+		CamelServiceConnectionStatus status;
+
+		status = camel_service_get_connection_status (service);
+
 		/* update folders from the server only when asking for the top most or the 'top' is not known;
 		   otherwise believe the local cache, because folders sync is pretty slow operation to be done
 		   one every single question on the folder info */
@@ -989,10 +996,6 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 		    (!(flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED)) ||
 		    (top && *top && !camel_mapi_store_folder_id_lookup (mapi_store, top)) ||
 		    camel_store_summary_count (mapi_store->summary) <= 1) {
-			CamelServiceConnectionStatus status;
-
-			status = camel_service_get_connection_status (service);
-
 			if (status == CAMEL_SERVICE_DISCONNECTED)
 				camel_service_connect_sync (service, NULL);
 
@@ -1003,6 +1006,8 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 				}
 			}
 		} else if (!mapi_store->priv->folders_synced) {
+			mapi_store->priv->folders_synced = TRUE;
+
 			camel_session_submit_job (
 				camel_service_get_session (CAMEL_SERVICE (store)),
 				mapi_update_folder_info_cb,
@@ -1379,7 +1384,7 @@ mapi_store_rename_folder_sync (CamelStore *store,
 
 		camel_store_info_set_string (mapi_store->summary, si, CAMEL_STORE_INFO_PATH, new_name);
 		if (new_parent_fid_str && e_mapi_util_mapi_id_from_string (new_parent_fid_str, &new_parent_fid))
-			((CamelMapiStoreInfo *) si)->parent_mid = new_parent_fid;
+			((CamelMapiStoreInfo *) si)->parent_id = new_parent_fid;
 		camel_store_summary_info_free (mapi_store->summary, si);
 		camel_store_summary_touch (mapi_store->summary);
 	}
@@ -1704,6 +1709,7 @@ mapi_connect_sync (CamelService *service,
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
 	CamelServiceConnectionStatus status;
 	CamelSession *session;
+	gchar *name;
 	guint16 event_mask = 0;
 
 	session = camel_service_get_session (service);
@@ -1719,11 +1725,18 @@ mapi_connect_sync (CamelService *service,
 		return TRUE;
 	}
 
+	name = camel_service_get_name (service, TRUE);
+	camel_operation_push_message (cancellable, _("Connecting to '%s'"), name);
+	g_free (name);
+
 	if (!camel_session_authenticate_sync (session, service, NULL, cancellable, error)) {
+		camel_operation_pop_message (cancellable);
 		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		camel_service_disconnect_sync (service, TRUE, NULL);
 		return FALSE;
 	}
+
+	camel_operation_pop_message (cancellable);
 
 	camel_offline_store_set_online_sync (
 		CAMEL_OFFLINE_STORE (store), TRUE, cancellable, NULL);
@@ -1950,8 +1963,8 @@ mapi_folders_update_hash_tables_from_cache (CamelMapiStore *store)
 		if (msi == NULL)
 			continue;
 
-		fid = e_mapi_util_mapi_id_to_string (msi->folder_mid);
-		pid = e_mapi_util_mapi_id_to_string (msi->parent_mid);
+		fid = e_mapi_util_mapi_id_to_string (msi->folder_id);
+		pid = e_mapi_util_mapi_id_to_string (msi->parent_id);
 
 		mapi_update_folder_hash_tables (store, camel_store_info_path (summary, msi), fid, pid);
 
