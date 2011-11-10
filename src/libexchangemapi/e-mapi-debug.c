@@ -867,16 +867,16 @@ e_mapi_debug_dump_object (EMapiObject *object, gboolean with_properties, gint in
 	for (index = 0, recipient = object->recipients; recipient; index++, recipient = recipient->next) {
 		g_print ("%*sRecipient[%d]:\n", indent + 2, "", index);
 		if (with_properties)
-			e_mapi_debug_dump_properties (NULL, 0, &recipient->properties, indent + 3);
+			e_mapi_debug_dump_properties (NULL, 0, &recipient->properties, indent + 5);
 	}
 
 	for (index = 0, attachment = object->attachments; attachment; index++, attachment = attachment->next) {
 		g_print ("%*sAttachment[%d]:\n", indent + 2, "", index);
 		if (with_properties)
 			e_mapi_debug_dump_properties (NULL, 0, &attachment->properties, indent + 3);
-		if (attachment->embeded_object) {
-			g_print ("%*sEmbeded object:\n", indent + 3, "");
-			e_mapi_debug_dump_object (attachment->embeded_object, indent + 5, with_properties);
+		if (attachment->embedded_object) {
+			g_print ("%*sEmbedded object:\n", indent + 3, "");
+			e_mapi_debug_dump_object (attachment->embedded_object, with_properties, indent + 5);
 		}
 	}
 }

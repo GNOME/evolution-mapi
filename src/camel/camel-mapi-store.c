@@ -926,50 +926,6 @@ mapi_store_get_folder_sync (CamelStore *store,
 	return folder;
 }
 
-static void
-mapi_update_folder_info_cb (CamelSession *session,
-			    GCancellable *cancellable,
-			    gpointer store,
-			    GError **error)
-{
-	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
-	CamelServiceConnectionStatus status;
-	CamelService *service;
-	gchar *name;
-
-	service = CAMEL_SERVICE (store);
-
-	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-
-	name = camel_service_get_name (service, TRUE);
-	camel_operation_push_message (cancellable, _("Scanning folders in '%s'"), name);
-
-	status = camel_service_get_connection_status (service);
-	if (camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
-		if (status == CAMEL_SERVICE_DISCONNECTED) {
-			camel_operation_push_message (cancellable, _("Connecting to '%s'"), name);
-			camel_service_connect_sync (service, NULL);
-			camel_operation_pop_message (cancellable); 
-		}
-
-		/* update folders from the server only when asking for the top most or the 'top' is not known;
-		   otherwise believe the local cache, because folders sync is pretty slow operation to be done
-		   one every single question on the folder info */
-		status = camel_service_get_connection_status (service);
-		if (check_for_connection (service, NULL) || status == CAMEL_SERVICE_CONNECTING) {
-			if (mapi_folders_sync (mapi_store, CAMEL_STORE_FOLDER_INFO_RECURSIVE, cancellable, error)) {
-				camel_store_summary_touch (mapi_store->summary);
-				camel_store_summary_save (mapi_store->summary);
-			}
-		}
-	}
-
-	g_free (name);
-	camel_operation_pop_message (cancellable); 
-
-	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-}
-
 static CamelFolderInfo*
 mapi_store_get_folder_info_sync (CamelStore *store,
                                  const gchar *top,
@@ -995,24 +951,31 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 		if ((flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST) != 0 ||
 		    (!(flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED)) ||
 		    (top && *top && !camel_mapi_store_folder_id_lookup (mapi_store, top)) ||
-		    camel_store_summary_count (mapi_store->summary) <= 1) {
-			if (status == CAMEL_SERVICE_DISCONNECTED)
+		    camel_store_summary_count (mapi_store->summary) <= 1 ||
+		    !mapi_store->priv->folders_synced) {
+			if (status == CAMEL_SERVICE_DISCONNECTED) {
+				gchar *name = camel_service_get_name (service, TRUE);
+
+				camel_operation_push_message (cancellable, _("Connecting to '%s'"), name);
 				camel_service_connect_sync (service, NULL);
+				camel_operation_pop_message (cancellable);
+
+				g_free (name);
+			}
 
 			if (check_for_connection (service, NULL) || status == CAMEL_SERVICE_CONNECTING) {
+				gboolean first_check = !mapi_store->priv->folders_synced;
+
 				if (!mapi_folders_sync (mapi_store, flags, cancellable, error)) {
 					camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 					return NULL;
 				}
-			}
-		} else if (!mapi_store->priv->folders_synced) {
-			mapi_store->priv->folders_synced = TRUE;
 
-			camel_session_submit_job (
-				camel_service_get_session (CAMEL_SERVICE (store)),
-				mapi_update_folder_info_cb,
-				g_object_ref (store),
-				g_object_unref);
+				if (first_check) {
+					camel_store_summary_touch (mapi_store->summary);
+					camel_store_summary_save (mapi_store->summary);
+				}
+			}
 		}
 	}
 

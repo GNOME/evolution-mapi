@@ -95,7 +95,7 @@ e_mapi_attachment_new (TALLOC_CTX *mem_ctx)
 
 	attachment->properties.cValues = 0;
 	attachment->properties.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, 1);
-	attachment->embeded_object = NULL;
+	attachment->embedded_object = NULL;
 	attachment->next = NULL;
 
 	g_assert (attachment->properties.lpProps != NULL);
@@ -109,7 +109,7 @@ e_mapi_attachment_free (EMapiAttachment *attachment)
 	if (!attachment)
 		return;
 
-	e_mapi_object_free (attachment->embeded_object);
+	e_mapi_object_free (attachment->embedded_object);
 	talloc_free (attachment->properties.lpProps);
 	talloc_free (attachment);
 }
@@ -291,15 +291,15 @@ parse_marker_cb (uint32_t marker, void *closure)
 				g_debug ("%s: PidTagStartEmbed no object started", G_STRFUNC);
 			} else if (!data->current_object->attachments) {
 				g_debug ("%s: PidTagStartEmbed no attachment started", G_STRFUNC);
-			} else if (data->current_object->attachments->embeded_object) {
-				g_debug ("%s: PidTagStartEmbed attachment has embeded object already", G_STRFUNC);
+			} else if (data->current_object->attachments->embedded_object) {
+				g_debug ("%s: PidTagStartEmbed attachment has embedded object already", G_STRFUNC);
 			} else {
 				EMapiObject *object;
 
 				object = e_mapi_object_new (data->mem_ctx);
 
 				object->parent = data->current_object;
-				data->current_object->attachments->embeded_object = object;
+				data->current_object->attachments->embedded_object = object;
 				data->current_object = object;
 				data->current_properties = &object->properties;
 			}
@@ -554,6 +554,36 @@ e_mapi_fast_transfer_object (EMapiConnection *conn,
 
 	mapi_object_release (&fasttransfer_ctx);
 	talloc_free (excludes);
+
+	if (perror && !*perror && ms != MAPI_E_SUCCESS)
+		make_mapi_error (perror, G_STRFUNC, ms);
+
+	return ms;
+}
+
+enum MAPISTATUS
+e_mapi_fast_transfer_properties	(EMapiConnection *conn,
+				 TALLOC_CTX *mem_ctx,
+				 mapi_object_t *object,
+				 struct SPropTagArray *tags,
+				 TransferObjectCB cb,
+				 gpointer cb_user_data,
+				 GCancellable *cancellable,
+				 GError **perror)
+{
+	enum MAPISTATUS ms;
+	mapi_object_t fasttransfer_ctx;
+
+	g_return_val_if_fail (tags != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (tags->cValues > 0, MAPI_E_INVALID_PARAMETER);
+
+	mapi_object_init (&fasttransfer_ctx);
+
+	ms = FXCopyProperties (object, 0, 0, FastTransfer_Unicode, tags, &fasttransfer_ctx);
+	if (ms == MAPI_E_SUCCESS)
+		ms = e_mapi_fast_transfer_internal (conn, mem_ctx, cb, cb_user_data, 1, FALSE, &fasttransfer_ctx, cancellable, perror);
+
+	mapi_object_release (&fasttransfer_ctx);
 
 	if (perror && !*perror && ms != MAPI_E_SUCCESS)
 		make_mapi_error (perror, G_STRFUNC, ms);

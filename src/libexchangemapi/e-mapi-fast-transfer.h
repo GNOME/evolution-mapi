@@ -58,6 +58,15 @@ enum MAPISTATUS		e_mapi_fast_transfer_object	(EMapiConnection *conn,
 							 GCancellable *cancellable,
 							 GError **perror);
 
+enum MAPISTATUS		e_mapi_fast_transfer_properties	(EMapiConnection *conn,
+							 TALLOC_CTX *mem_ctx,
+							 mapi_object_t *object,
+							 struct SPropTagArray *tags,
+							 TransferObjectCB cb,
+							 gpointer cb_user_data,
+							 GCancellable *cancellable,
+							 GError **perror);
+
 G_END_DECLS
 
 #endif /* E_MAPI_FAST_TRANSFER_H */

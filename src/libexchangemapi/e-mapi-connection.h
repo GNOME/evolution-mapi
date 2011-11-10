@@ -166,7 +166,7 @@ struct _EMapiRecipient
 struct _EMapiAttachment
 {
 	struct mapi_SPropValue_array properties;
-	EMapiObject *embeded_object;
+	EMapiObject *embedded_object;
 
 	EMapiAttachment *next;
 };
@@ -323,6 +323,14 @@ gboolean		e_mapi_connection_list_objects		(EMapiConnection *conn,
 gboolean		e_mapi_connection_transfer_objects	(EMapiConnection *conn,
 								 mapi_object_t *obj_folder,
 								 const GSList *mids,
+								 TransferObjectCB cb,
+								 gpointer cb_user_data,
+								 GCancellable *cancellable,
+								 GError **perror);
+
+gboolean		e_mapi_connection_transfer_object	(EMapiConnection *conn,
+								 mapi_object_t *obj_folder,
+								 mapi_id_t message_id,
 								 TransferObjectCB cb,
 								 gpointer cb_user_data,
 								 GCancellable *cancellable,

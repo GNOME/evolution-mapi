@@ -344,12 +344,11 @@ e_mapi_cal_util_mapi_tz_to_bin (const gchar *mapi_tzid, struct Binary_r *sb)
 }
 
 gchar *
-e_mapi_cal_util_bin_to_mapi_tz (GByteArray *ba)
+e_mapi_cal_util_bin_to_mapi_tz (const guint8 *lpb, guint32 cb)
 {
 	guint8 flag8;
 	guint16 flag16, cbHeader = 0;
-	guint8 *ptr = ba->data;
-//	guint len = ba->len;
+	const guint8 *ptr = lpb;
 	gchar *buf = NULL;
 
 	d(g_message ("New timezone stream.. Length: %d bytes.. Info follows:", ba->len));

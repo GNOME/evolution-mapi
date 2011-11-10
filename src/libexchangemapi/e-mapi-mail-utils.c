@@ -22,6 +22,7 @@
 #endif
 
 #include <camel/camel.h>
+#include <libecal/e-cal-util.h>
 
 #include "e-mapi-defs.h"
 #include "e-mapi-utils.h"
@@ -973,6 +974,779 @@ mapi_mail_item_to_mime_message (EMapiConnection *conn, MailItem *item)
 	g_object_unref (multipart_body);
 	g_slist_free (inline_attachs);
 	g_slist_free (noninline_attachs);
+
+	return msg;
+}
+
+void
+e_mapi_mail_utils_decode_email_address (EMapiConnection *conn,
+					struct mapi_SPropValue_array *properties,
+					const uint32_t *name_proptags,
+					guint name_proptags_len,
+					const uint32_t *smtp_proptags,
+					guint smtp_proptags_len,
+					uint32_t email_type_proptag,
+					uint32_t email_proptag,
+					gchar **name,
+					gchar **email)
+{
+	gint ii;
+	const gchar *cname = NULL, *cemail = NULL;
+
+	g_return_if_fail (conn != NULL);
+	g_return_if_fail (properties != NULL);
+	g_return_if_fail (name_proptags_len == 0 || name_proptags != NULL);
+	g_return_if_fail (smtp_proptags_len == 0 || smtp_proptags != NULL);
+	g_return_if_fail (name != NULL);
+	g_return_if_fail (email != NULL);
+
+	*name = NULL;
+	*email = NULL;
+
+	for (ii = 0; ii < name_proptags_len && !cname; ii++) {
+		cname = e_mapi_util_find_array_propval (properties, name_proptags[ii]);
+	}
+
+	for (ii = 0; ii < smtp_proptags_len && !cemail; ii++) {
+		cemail = e_mapi_util_find_array_propval (properties, smtp_proptags[ii]);
+	}
+
+	if (!cemail) {
+		const gchar *addr_type = e_mapi_util_find_array_propval (properties, email_type_proptag);
+		const gchar *email_addr = e_mapi_util_find_array_propval (properties, email_proptag);
+
+		if (addr_type && g_ascii_strcasecmp (addr_type, "EX") == 0 && email_addr)
+			*email = e_mapi_connection_ex_to_smtp (conn, email_addr, name, NULL, NULL);
+		else if (addr_type && g_ascii_strcasecmp (addr_type, "SMTP") == 0)
+			cemail = email_addr;
+	}
+
+	if (!*email) {
+		*name = g_strdup (cname);
+		*email = g_strdup (cemail);
+	}
+}
+
+void
+e_mapi_mail_utils_decode_email_address1 (EMapiConnection *conn,
+					 struct mapi_SPropValue_array *properties,
+					 uint32_t name_proptag,
+					 uint32_t email_proptag,
+					 uint32_t email_type_proptag,
+					 gchar **name,
+					 gchar **email)
+{
+	uint32_t names[1];
+
+	names[0] = name_proptag;
+
+	e_mapi_mail_utils_decode_email_address (conn, properties, names, 1, NULL, 0, email_type_proptag, email_proptag, name, email);
+}
+
+void
+e_mapi_mail_utils_decode_recipients (EMapiConnection *conn,
+				     EMapiRecipient *recipients,
+				     CamelAddress *to_addr,
+				     CamelAddress *cc_addr,
+				     CamelAddress *bcc_addr)
+{
+	const uint32_t name_proptags[] = {
+		PROP_TAG (PT_UNICODE, 0x6001), /* PidTagNickname for Recipients table */
+		PidTagNickname,
+		PidTagDisplayName,
+		PidTagRecipientDisplayName,
+		PidTag7BitDisplayName
+	};
+
+	const uint32_t email_proptags[] = {
+		PidTagPrimarySmtpAddress,
+		PidTagSmtpAddress
+	};
+
+	EMapiRecipient *recipient;
+
+	g_return_if_fail (conn != NULL);
+	g_return_if_fail (to_addr != NULL);
+	g_return_if_fail (cc_addr != NULL);
+	g_return_if_fail (bcc_addr != NULL);
+
+	for (recipient = recipients; recipient; recipient = recipient->next) {
+		const uint32_t *recip_type = e_mapi_util_find_array_propval (&recipient->properties, PidTagRecipientType);
+		gchar *name = NULL, *email = NULL;
+		CamelAddress *addr = NULL;
+
+		if (!recip_type)
+			continue;
+
+		switch (*recip_type) {
+		case MAPI_TO:
+			addr = to_addr;
+			break;
+		case MAPI_CC:
+			addr = cc_addr;
+			break;
+		case MAPI_BCC:
+			addr = bcc_addr;
+			break;
+		default:
+			break;
+		}
+
+		if (!addr)
+			continue;
+
+		e_mapi_mail_utils_decode_email_address (conn, &recipient->properties,
+					name_proptags, G_N_ELEMENTS (name_proptags),
+					email_proptags, G_N_ELEMENTS (email_proptags),
+					PidTagAddressType, PidTagEmailAddress,
+					&name, &email);
+
+		camel_internet_address_add (CAMEL_INTERNET_ADDRESS (addr), name, email ? email : "");
+
+		g_free (name);
+		g_free (email);
+	}
+}
+
+static void
+build_body_part_content (CamelMimePart *part, EMapiObject *object, uint32_t proptag)
+{
+	gconstpointer value;
+
+	g_return_if_fail (part != NULL);
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (proptag == PidTagHtml || proptag == PidTagBody);
+
+	camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_8BIT);
+
+	value = e_mapi_util_find_array_propval (&object->properties, proptag);
+	if (value) {
+		const gchar *type = NULL;
+		gchar *buff = NULL, *in_utf8;
+		const uint32_t *pcpid = e_mapi_util_find_array_propval (&object->properties, PidTagInternetCodepage);
+
+		if (proptag == PidTagBody) {
+			type = "text/plain";
+		} else {
+			type = "text/html";
+		}
+
+		proptag = e_mapi_util_find_array_proptag (&object->properties, proptag);
+		if (pcpid && *pcpid && (proptag & 0xFFFF) != PT_UNICODE) {
+			uint32_t cpid = *pcpid;
+	
+			if (cpid == 20127)
+				buff = g_strdup_printf ("%s; charset=\"us-ascii\"", type);
+			else if (cpid >= 28591 && cpid <= 28599)
+				buff = g_strdup_printf ("%s; charset=\"ISO-8859-%d\"", type, cpid % 10);
+			else if (cpid == 28603)
+				buff = g_strdup_printf ("%s; charset=\"ISO-8859-13\"", type);
+			else if (cpid == 28605)
+				buff = g_strdup_printf ("%s; charset=\"ISO-8859-15\"", type);
+			else if (cpid == 65000)
+				buff = g_strdup_printf ("%s; charset=\"UTF-7\"", type);
+			else if (cpid == 65001)
+				buff = g_strdup_printf ("%s; charset=\"UTF-8\"", type);
+			else
+				buff = g_strdup_printf ("%s; charset=\"CP%d\"", type, cpid);
+			type = buff;
+		}
+
+		in_utf8 = NULL;
+
+		if (proptag == PidTagHtml) {
+			const struct SBinary_short *html_bin = value;
+
+			if (e_mapi_utils_ensure_utf8_string (proptag, pcpid, html_bin->lpb, html_bin->cb, &in_utf8))
+				camel_mime_part_set_content (part, in_utf8, strlen (in_utf8), type);
+			else
+				camel_mime_part_set_content (part, (const gchar *) html_bin->lpb, html_bin->cb, type);
+			
+		} else {
+			const gchar *str = value;
+
+			if (e_mapi_utils_ensure_utf8_string (proptag, pcpid, (const guint8 *) str, strlen (str), &in_utf8))
+				str = in_utf8;
+
+			camel_mime_part_set_content (part, str, strlen (str), type);
+		}
+
+		g_free (in_utf8);
+		g_free (buff);
+	} else
+		camel_mime_part_set_content (part, " ", strlen (" "), "text/plain");
+}
+
+static gboolean
+is_apple_attach (EMapiAttachment *attach, guint32 *data_len, guint32 *resource_len)
+{
+	gboolean is_apple = FALSE;
+	const struct SBinary_short *encoding_bin = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachEncoding);
+	guint8 apple_enc_magic[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x14, 0x03, 0x0B, 0x01 };
+
+	if (encoding_bin && encoding_bin->lpb && encoding_bin->cb == G_N_ELEMENTS (apple_enc_magic)) {
+		gint idx;
+
+		is_apple = TRUE;
+		for (idx = 0; idx < encoding_bin->cb && is_apple; idx++) {
+			is_apple = apple_enc_magic[idx] == encoding_bin->lpb[idx];
+		}
+	}
+
+	if (is_apple) {
+		/* check boundaries too */
+		const struct SBinary_short *data_bin = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachDataBinary);
+
+		is_apple = data_bin && data_bin->lpb && data_bin->cb > 128;
+
+		if (is_apple) {
+			const guint8 *bin = data_bin->lpb;
+
+			/* in big-endian format */
+			*data_len = (bin[83] << 24) | (bin[84] << 16) | (bin[85] << 8) | (bin[86]);
+			*resource_len = (bin[87] << 24) | (bin[88] << 16) | (bin[89] << 8) | (bin[90]);
+
+			/* +/- mod 128 (but the first 128 is a header length) */
+			is_apple = 128 + *data_len + *resource_len <= data_bin->cb && bin[1] < 64;
+		}
+	}
+
+	return is_apple;
+}
+
+static void
+classify_attachments (EMapiConnection *conn, EMapiAttachment *attachments, const gchar *msg_class, GSList **inline_attachments, GSList **noninline_attachments)
+{
+	EMapiAttachment *attach;
+	gboolean is_smime = msg_class && strstr (msg_class, ".SMIME.") > msg_class;
+
+	g_return_if_fail (inline_attachments != NULL);
+	g_return_if_fail (noninline_attachments != NULL);
+
+	for (attach = attachments; attach != NULL; attach = attach->next) {
+		const gchar *filename, *mime_type, *content_id = NULL;
+		CamelContentType *content_type;
+		CamelMimePart *part;
+		const uint32_t *ui32;
+		const struct SBinary_short *data_bin;
+		gboolean is_apple;
+		guint32 apple_data_len = 0, apple_resource_len = 0;
+
+		data_bin = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachDataBinary);
+		if (!data_bin && !attach->embedded_object) {
+			g_debug ("%s: Skipping attachment without data and without embedded object", G_STRFUNC);
+			continue;
+		}
+
+		is_apple = is_apple_attach (attach, &apple_data_len, &apple_resource_len);
+
+		/* Content-Type */
+		ui32 = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachMethod);
+		if (ui32 && *ui32 == ATTACH_EMBEDDED_MSG) {
+			mime_type = "message/rfc822";
+		} else {
+			mime_type = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachMimeTag);
+			if (!mime_type)
+				mime_type = "application/octet-stream";
+		}
+
+		if (is_apple) {
+			mime_type = "application/applefile";
+		} else if (strstr (mime_type, "apple") != NULL) {
+			mime_type = "application/octet-stream";
+		}
+
+		part = camel_mime_part_new ();
+
+		filename = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachLongFilename);
+		if (!filename || !*filename)
+			filename = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachFilename);
+		camel_mime_part_set_filename (part, filename);
+		camel_content_type_set_param (((CamelDataWrapper *) part)->mime_type, "name", filename);
+
+		if (is_apple) {
+			CamelMultipart *mp;
+			gchar *apple_filename;
+			const struct SBinary_short *mac_info_bin;
+
+			mp = camel_multipart_new ();
+			camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (mp), "multipart/appledouble");
+			camel_multipart_set_boundary (mp, NULL);
+
+			camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
+
+			mac_info_bin = e_mapi_util_find_array_propval (&attach->properties, PidNameAttachmentMacInfo);
+			if (mac_info_bin && mac_info_bin->lpb && mac_info_bin->cb > 0) {
+				camel_mime_part_set_content (part, (const gchar *) mac_info_bin->lpb, mac_info_bin->cb, mime_type);
+			} else {
+				/* RFC 1740 */
+				guint8 header[] = {
+					0x00, 0x05, 0x16, 0x07, /* magic */
+					0x00, 0x02, 0x00, 0x00, /* version */
+					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* filler */
+					0x00, 0x01, /* number of entries */
+					0x00, 0x00, 0x00, 0x02, /* entry ID - resource fork */
+					0x00, 0x00, 0x00, 0x26, /* entry offset - 38th byte*/
+					0x00, 0x00, 0x00, 0x00  /* entry length */
+				};
+
+				GByteArray *arr = g_byte_array_sized_new (apple_resource_len + G_N_ELEMENTS (header));
+
+				header[34] = (apple_resource_len >> 24) & 0xFF;
+				header[35] = (apple_resource_len >> 16) & 0xFF;
+				header[36] = (apple_resource_len >>  8) & 0xFF;
+				header[37] = (apple_resource_len      ) & 0xFF;
+
+				g_byte_array_append (arr, header, G_N_ELEMENTS (header));
+				g_byte_array_append (arr, data_bin->lpb + 128 + apple_data_len + (apple_data_len % 128), apple_resource_len);
+
+				camel_mime_part_set_content (part, (const gchar *) arr->data, arr->len, mime_type);
+
+				g_byte_array_free (arr, TRUE);
+			}
+
+			camel_multipart_add_part (mp, part);
+			g_object_unref (part);
+
+			part = camel_mime_part_new ();
+
+			apple_filename = g_strndup ((const gchar *) data_bin->lpb + 2, data_bin->lpb[1]);
+			camel_mime_part_set_filename (part, (apple_filename && *apple_filename) ? apple_filename : filename);
+			g_free (apple_filename);
+
+			mime_type = e_mapi_util_find_array_propval (&attach->properties, PidNameAttachmentMacContentType);
+			if (!mime_type)
+				mime_type = "application/octet-stream";
+
+			camel_mime_part_set_content (part, (const gchar *) data_bin->lpb + 128, apple_data_len, mime_type);
+			camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
+			camel_multipart_add_part (mp, part);
+			g_object_unref (part);
+
+			part = camel_mime_part_new ();
+			camel_medium_set_content (CAMEL_MEDIUM (part), CAMEL_DATA_WRAPPER (mp));
+			g_object_unref (mp);
+		} else if (is_smime) {
+			CamelMimeParser *parser;
+			CamelStream *mem;
+
+			mem = camel_stream_mem_new ();
+			camel_stream_write (mem, (const gchar *) data_bin->lpb, data_bin->cb, NULL, NULL);
+			g_seekable_seek (G_SEEKABLE (mem), 0, G_SEEK_SET, NULL, NULL);
+
+			parser = camel_mime_parser_new ();
+			camel_mime_parser_scan_from (parser, FALSE);
+			camel_mime_parser_scan_pre_from (parser, FALSE);
+			camel_mime_parser_init_with_stream (parser, mem, NULL);
+
+			if (camel_mime_parser_step (parser, NULL, NULL) == CAMEL_MIME_PARSER_STATE_HEADER
+			    && camel_mime_parser_content_type (parser) != NULL) {
+				g_object_unref (part);
+				part = camel_mime_part_new ();
+
+				camel_data_wrapper_set_mime_type_field (CAMEL_DATA_WRAPPER (part), camel_mime_parser_content_type (parser));
+				camel_mime_part_construct_content_from_parser (part, parser, NULL, NULL);
+			} else {
+				is_smime = FALSE;
+			}
+
+			g_object_unref (parser);
+			g_object_unref (mem);
+		} 
+
+		if (!is_smime && !is_apple) {
+			if (ui32 && *ui32 == ATTACH_EMBEDDED_MSG && attach->embedded_object) {
+				CamelMimeMessage *embedded_msg;
+
+				embedded_msg = e_mapi_mail_utils_object_to_message (conn, attach->embedded_object);
+				if (embedded_msg) {
+					CamelStream *mem = camel_stream_mem_new ();
+					GByteArray *data;
+
+					data = g_byte_array_new ();
+
+					mem = camel_stream_mem_new ();
+					camel_stream_mem_set_byte_array (CAMEL_STREAM_MEM (mem), data);
+					camel_data_wrapper_write_to_stream_sync (
+						CAMEL_DATA_WRAPPER (embedded_msg), mem, NULL, NULL);
+
+					g_object_unref (mem);
+					g_object_unref (embedded_msg);
+
+					camel_mime_part_set_content (part, (const gchar *) data->data, data->len, mime_type);
+
+					g_byte_array_free (data, TRUE);
+				} else {
+					camel_mime_part_set_content (part, (const gchar *) data_bin->lpb, data_bin->cb, mime_type);
+				}
+			} else {
+				camel_mime_part_set_content (part, (const gchar *) data_bin->lpb, data_bin->cb, mime_type);
+			}
+
+			content_type = camel_mime_part_get_content_type (part);
+			if (content_type && camel_content_type_is (content_type, "text", "*"))
+				camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_QUOTEDPRINTABLE);
+			else if (!ui32 || *ui32 != ATTACH_EMBEDDED_MSG)
+				camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
+		}
+
+		/* Content-ID */
+		content_id = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachContentId);
+
+		/* TODO : Add disposition */
+		if (content_id && !is_apple && !is_smime) {
+			camel_mime_part_set_content_id (part, content_id);
+			*inline_attachments = g_slist_append (*inline_attachments, part);
+		} else
+			*noninline_attachments = g_slist_append (*noninline_attachments, part);
+	}
+}
+
+static void
+add_multipart_attachments (CamelMultipart *multipart, GSList *attachments)
+{
+	CamelMimePart *part;
+	while (attachments) {
+		part = attachments->data;
+		camel_multipart_add_part (multipart, part);
+		attachments = attachments->next;
+	}
+}
+
+static CamelMultipart *
+build_multipart_related (EMapiObject *object, GSList *inline_attachments)
+{
+	CamelMimePart *part;
+	CamelMultipart *m_related = camel_multipart_new ();
+	camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (m_related), "multipart/related");
+	camel_multipart_set_boundary (m_related, NULL);
+
+	if (e_mapi_util_find_array_propval (&object->properties, PidTagHtml)) {
+		part = camel_mime_part_new ();
+		build_body_part_content (part, object, PidTagHtml);
+		camel_multipart_add_part (m_related, part);
+		g_object_unref (part);
+	} else if (e_mapi_util_find_array_propval (&object->properties, PidTagBody)) {
+		part = camel_mime_part_new ();
+		build_body_part_content (part, object, PidTagBody);
+		camel_multipart_add_part (m_related, part);
+		g_object_unref (part);
+	}
+
+	add_multipart_attachments (m_related, inline_attachments);
+
+	return m_related;
+}
+
+static CamelMultipart *
+build_multipart_alternative (EMapiObject *object, GSList *inline_attachments)
+{
+	CamelMimePart *part;
+	CamelMultipart *m_alternative;
+
+	m_alternative = camel_multipart_new ();
+	camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (m_alternative), "multipart/alternative");
+	camel_multipart_set_boundary (m_alternative, NULL);
+
+	if (e_mapi_util_find_array_propval (&object->properties, PidTagBody)) {
+		part = camel_mime_part_new ();
+		build_body_part_content (part, object, PidTagBody);
+		camel_multipart_add_part (m_alternative, part);
+		g_object_unref (part);
+	}
+
+	if (e_mapi_util_find_array_propval (&object->properties, PidTagHtml)) {
+		part = camel_mime_part_new ();
+		if (inline_attachments) {
+			CamelMultipart *m_related;
+
+			m_related = build_multipart_related (object, inline_attachments);
+			camel_medium_set_content (CAMEL_MEDIUM (part), CAMEL_DATA_WRAPPER (m_related));
+			g_object_unref (m_related);
+		} else {
+			build_body_part_content (part, object, PidTagHtml);
+		}
+		camel_multipart_add_part (m_alternative, part);
+		g_object_unref (part);
+	}
+
+	return m_alternative;
+}
+
+static CamelMultipart *
+build_multipart_mixed (CamelMultipart *content, GSList *attachments)
+{
+	CamelMimePart *part = camel_mime_part_new ();
+	CamelMultipart *m_mixed = camel_multipart_new ();
+	camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (m_mixed), "multipart/mixed");
+	camel_multipart_set_boundary (m_mixed, NULL);
+
+	camel_medium_set_content (CAMEL_MEDIUM (part), CAMEL_DATA_WRAPPER (content));
+	camel_multipart_add_part (m_mixed, part);
+
+	add_multipart_attachments (m_mixed, attachments);
+
+	return m_mixed;
+}
+
+static gchar *
+build_ical_string (EMapiConnection *conn,
+		   EMapiObject *object,
+		   const gchar *msg_class)
+{
+	gchar *ical_string = NULL, *use_uid;
+	icalcomponent_kind ical_kind = ICAL_NO_COMPONENT;
+	icalproperty_method ical_method = ICAL_METHOD_NONE;
+	const uint64_t *pmid;
+	ECalComponent *comp;
+	icalcomponent *icalcomp;
+	GSList *detached_components = NULL, *iter;
+
+	g_return_val_if_fail (conn != NULL, NULL);
+	g_return_val_if_fail (object != NULL, NULL);
+	g_return_val_if_fail (msg_class != NULL, NULL);
+
+	if (!g_ascii_strcasecmp (msg_class, IPM_SCHEDULE_MEETING_REQUEST)) {
+		ical_method = ICAL_METHOD_REQUEST;
+		ical_kind = ICAL_VEVENT_COMPONENT;
+	} else if (!g_ascii_strcasecmp (msg_class, IPM_SCHEDULE_MEETING_CANCELED)) {
+		ical_method = ICAL_METHOD_CANCEL;
+		ical_kind = ICAL_VEVENT_COMPONENT;
+	} else if (g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_RESP_PREFIX)) {
+		ical_method = ICAL_METHOD_REPLY;
+		ical_kind = ICAL_VEVENT_COMPONENT;
+	} else {
+		return NULL;
+	}
+
+	pmid = e_mapi_util_find_array_propval (&object->properties, PidTagMid);
+	if (pmid)
+		use_uid = e_mapi_util_mapi_id_to_string (*pmid);
+	else
+		use_uid = e_cal_component_gen_uid ();
+
+	comp = e_mapi_cal_util_object_to_comp (conn, object, ical_kind, ical_method == ICAL_METHOD_REPLY, NULL, use_uid, &detached_components);
+
+	g_free (use_uid);
+
+	if (!comp)
+		return NULL;
+
+	icalcomp = e_cal_util_new_top_level ();
+	icalcomponent_set_method (icalcomp, ical_method);
+	if (comp)
+		icalcomponent_add_component (icalcomp,
+			icalcomponent_new_clone (e_cal_component_get_icalcomponent (comp)));
+	for (iter = detached_components; iter; iter = g_slist_next (iter)) {
+		icalcomponent_add_component (icalcomp,
+				icalcomponent_new_clone (e_cal_component_get_icalcomponent (iter->data)));
+	}
+
+	ical_string = icalcomponent_as_ical_string_r (icalcomp);
+
+	icalcomponent_free (icalcomp);
+	g_slist_free_full (detached_components, g_object_unref);
+	g_object_unref (comp);
+
+	return ical_string;
+}
+
+CamelMimeMessage *
+e_mapi_mail_utils_object_to_message (EMapiConnection *conn, /* const */ EMapiObject *object)
+{
+	CamelMimeMessage *msg;
+	CamelMultipart *multipart_body = NULL;
+	GSList *inline_attachments, *noninline_attachments;
+	gboolean build_alternative, build_related, build_calendar;
+	const gchar *str, *msg_class;
+	gboolean skip_set_content = FALSE;
+	gchar *ical_string = NULL;
+
+	g_return_val_if_fail (conn != NULL, NULL);
+	g_return_val_if_fail (object != NULL, NULL);
+
+	msg = camel_mime_message_new ();
+
+	str = e_mapi_util_find_array_propval (&object->properties, PidTagTransportMessageHeaders);
+	if (str && *str) {
+		CamelMimePart *part = camel_mime_part_new ();
+		CamelStream *stream;
+		CamelMimeParser *parser;
+
+		stream = camel_stream_mem_new_with_buffer (str, strlen (str));
+		parser = camel_mime_parser_new ();
+		camel_mime_parser_init_with_stream (parser, stream, NULL);
+		camel_mime_parser_scan_from (parser, FALSE);
+		g_object_unref (stream);
+
+		if (camel_mime_part_construct_from_parser_sync (part, parser, NULL, NULL)) {
+			struct _camel_header_raw *h;
+
+			for (h = part->headers; h; h = h->next) {
+				const gchar *value = h->value;
+
+				/* skip all headers describing content of a message,
+				   because it's overwritten on message decomposition */
+				if (g_ascii_strncasecmp (h->name, "Content", 7) == 0)
+					continue;
+
+				while (value && camel_mime_is_lwsp (*value))
+					value++;
+
+				camel_medium_add_header (CAMEL_MEDIUM (msg), h->name, value);
+			}
+		}
+
+		g_object_unref (parser);
+		g_object_unref (part);
+	} else {
+		CamelInternetAddress *to_addr, *cc_addr, *bcc_addr;
+		const struct FILETIME *delivery_time;
+		gchar *name, *email;
+
+		to_addr = camel_internet_address_new ();
+		cc_addr = camel_internet_address_new ();
+		bcc_addr = camel_internet_address_new ();
+
+		e_mapi_mail_utils_decode_recipients (conn, object->recipients, (CamelAddress *) to_addr, (CamelAddress *) cc_addr, (CamelAddress *) bcc_addr);
+
+		camel_mime_message_set_recipients (msg, CAMEL_RECIPIENT_TYPE_TO, to_addr);
+		camel_mime_message_set_recipients (msg, CAMEL_RECIPIENT_TYPE_CC, cc_addr);
+		camel_mime_message_set_recipients (msg, CAMEL_RECIPIENT_TYPE_BCC, bcc_addr);
+
+		g_object_unref (to_addr);
+		g_object_unref (cc_addr);
+		g_object_unref (bcc_addr);
+
+		delivery_time = e_mapi_util_find_array_propval (&object->properties, PidTagMessageDeliveryTime);
+		if (delivery_time) {
+			time_t received_time, actual_time;
+			gint offset = 0;
+
+			received_time = e_mapi_util_filetime_to_time_t (delivery_time);
+			actual_time = camel_header_decode_date (ctime (&received_time), &offset);
+			camel_mime_message_set_date (msg, actual_time, offset);
+		}
+
+		str = e_mapi_util_find_array_propval (&object->properties, PidTagSubject);
+		if (str)
+			camel_mime_message_set_subject (msg, str);
+
+		name = NULL;
+		email = NULL;
+
+		e_mapi_mail_utils_decode_email_address1 (conn, &object->properties,
+			PidTagSentRepresentingName,
+			PidTagSentRepresentingEmailAddress,
+			PidTagSentRepresentingAddressType,
+			&name, &email);
+
+		if (email && *email) {
+			CamelInternetAddress *addr;
+
+			addr = camel_internet_address_new();
+			camel_internet_address_add (addr, name, email);
+			camel_mime_message_set_from (msg, addr);
+		}
+		
+		g_free (name);
+		g_free (email);
+
+		/* Threading */
+		str = e_mapi_util_find_array_propval (&object->properties, PidTagInternetMessageId);
+		if (str)
+			camel_medium_add_header (CAMEL_MEDIUM (msg), "Message-ID", str);
+
+		str = e_mapi_util_find_array_propval (&object->properties, PidTagInternetReferences);
+		if (str)
+			camel_medium_add_header (CAMEL_MEDIUM (msg), "References", str);
+
+		str = e_mapi_util_find_array_propval (&object->properties, PidTagInReplyToId);
+		if (str)
+			camel_medium_add_header (CAMEL_MEDIUM (msg), "In-Reply-To", str);
+	}
+
+	str = e_mapi_util_find_array_propval (&object->properties, PidNameContentClass);
+	if (str)
+		camel_medium_add_header (CAMEL_MEDIUM (msg), "Content-class", str);
+
+	inline_attachments = NULL;
+	noninline_attachments = NULL;
+	msg_class = e_mapi_util_find_array_propval (&object->properties, PidTagMessageClass);
+	classify_attachments (conn, object->attachments, msg_class, &inline_attachments, &noninline_attachments);
+
+	build_calendar = msg_class && g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_PREFIX);
+	if (build_calendar) {
+		ical_string = build_ical_string (conn, object, msg_class);
+		if (!ical_string)
+			build_calendar = FALSE;
+	}
+
+	build_alternative = !build_calendar
+		&& e_mapi_util_find_array_propval (&object->properties, PidTagHtml)
+		&& e_mapi_util_find_array_propval (&object->properties, PidTagBody);
+	build_related = !build_calendar && !build_alternative && inline_attachments;
+
+	if (build_calendar) {
+		g_return_val_if_fail (ical_string != NULL, msg);
+
+		camel_mime_part_set_content (CAMEL_MIME_PART (msg), ical_string, strlen (ical_string), "text/calendar");
+	} else if (build_alternative) {
+		multipart_body = build_multipart_alternative (object, inline_attachments);
+	} else if (build_related) {
+		multipart_body = build_multipart_related (object, inline_attachments);
+	} else if (noninline_attachments) {
+		/* Simple multipart/mixed */
+		CamelMimePart *part = camel_mime_part_new ();
+
+		multipart_body = camel_multipart_new ();
+		camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (multipart_body), "multipart/mixed");
+		camel_multipart_set_boundary (multipart_body, NULL);
+		if (e_mapi_util_find_array_propval (&object->properties, PidTagHtml))
+			build_body_part_content (part, object, PidTagHtml);
+		else
+			build_body_part_content (part, object, PidTagBody);
+		camel_multipart_add_part (multipart_body, part);
+		g_object_unref (part);
+	} else {
+		/* Flat message */
+		if (e_mapi_util_find_array_propval (&object->properties, PidTagHtml))
+			build_body_part_content (CAMEL_MIME_PART (msg), object, PidTagHtml);
+		else
+			build_body_part_content (CAMEL_MIME_PART (msg), object, PidTagBody);
+	}
+
+	if (noninline_attachments) { /* multipart/mixed */
+		if (build_alternative || build_related || build_calendar) {
+			multipart_body = build_multipart_mixed (multipart_body, noninline_attachments);
+		} else if (g_slist_length (noninline_attachments) == 1 && msg_class && strstr (msg_class, ".SMIME") > msg_class) {
+			CamelMimePart *part = noninline_attachments->data;
+
+			skip_set_content = TRUE;
+
+			camel_medium_set_content (CAMEL_MEDIUM (msg), CAMEL_DATA_WRAPPER (part));
+
+			if (!strstr (msg_class, ".SMIME.")) {
+				/* encrypted */
+				camel_medium_set_content (CAMEL_MEDIUM (msg), camel_medium_get_content (CAMEL_MEDIUM (part)));
+				camel_mime_part_set_encoding (CAMEL_MIME_PART (msg), camel_mime_part_get_encoding (part));
+			} else {
+				/* signed */
+				camel_medium_set_content (CAMEL_MEDIUM (msg), CAMEL_DATA_WRAPPER (part));
+			}
+		} else {
+			add_multipart_attachments (multipart_body, noninline_attachments);
+		}
+	}
+
+	if (!skip_set_content && multipart_body)
+		camel_medium_set_content (CAMEL_MEDIUM (msg), CAMEL_DATA_WRAPPER (multipart_body));
+
+	if (multipart_body)
+		g_object_unref (multipart_body);
+	g_slist_free_full (inline_attachments, g_object_unref);
+	g_slist_free_full (noninline_attachments, g_object_unref);
+	g_free (ical_string);
 
 	return msg;
 }

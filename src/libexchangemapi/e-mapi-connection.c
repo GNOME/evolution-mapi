@@ -2195,6 +2195,269 @@ e_mapi_connection_list_objects (EMapiConnection *conn,
 	return ms == MAPI_E_SUCCESS;
 }
 
+static gboolean
+has_embedded_message_with_html (EMapiObject *object)
+{
+	EMapiAttachment *attach;
+
+	if (!object)
+		return FALSE;
+
+	for (attach = object->attachments; attach; attach = attach->next) {
+		if (!attach->embedded_object)
+			continue;
+
+		if (e_mapi_util_find_array_propval (&attach->embedded_object->properties, PidTagHtml) &&
+		    !e_mapi_util_find_array_propval (&attach->embedded_object->properties, PidTagBody))
+			return TRUE;
+
+		if (has_embedded_message_with_html (attach->embedded_object))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+static gboolean
+get_additional_properties_cb (EMapiConnection *conn,
+			      TALLOC_CTX *mem_ctx,
+			      /* const */ EMapiObject *object,
+			      guint32 obj_index,
+			      guint32 obj_total,
+			      gpointer user_data,
+			      GCancellable *cancellable,
+			      GError **perror)
+{
+	uint32_t ii;
+	EMapiObject *dest_object = user_data;
+
+	g_return_val_if_fail (object != NULL, FALSE);
+	g_return_val_if_fail (dest_object != NULL, FALSE);
+
+	for (ii = 0; ii < object->properties.cValues; ii++) {
+		uint32_t proptag = object->properties.lpProps[ii].ulPropTag;
+
+		if ((proptag & 0xFFFF) == PT_ERROR
+		    || e_mapi_util_find_array_propval (&dest_object->properties, proptag))
+			continue;
+
+		dest_object->properties.cValues++;
+		dest_object->properties.lpProps = talloc_realloc (mem_ctx,
+				    dest_object->properties.lpProps,
+				    struct mapi_SPropValue,
+				    dest_object->properties.cValues + 1);
+		dest_object->properties.lpProps[dest_object->properties.cValues - 1] = object->properties.lpProps[ii];
+
+		#define steal_ptr(x) (x) = talloc_steal (dest_object, (x))
+		switch (proptag & 0xFFFF) {
+		case PT_BOOLEAN:
+		case PT_I2:
+		case PT_LONG:
+		case PT_DOUBLE:
+		case PT_I8:
+		case PT_SYSTIME:
+			break;
+		case PT_STRING8:
+			steal_ptr (dest_object->properties.lpProps[dest_object->properties.cValues - 1].value.lpszA);
+			break;
+		case PT_UNICODE:
+			steal_ptr (dest_object->properties.lpProps[dest_object->properties.cValues - 1].value.lpszW);
+			break;
+		default:
+			g_debug ("%s: Do not know how to steal property type 0x%x, skipping it", G_STRFUNC, proptag & 0xFFFF);
+			dest_object->properties.cValues--;
+			break;
+		}
+		#undef steal_ptr
+
+		dest_object->properties.lpProps[dest_object->properties.cValues].ulPropTag = 0;
+	}
+
+	return TRUE;
+}
+
+static void
+traverse_attachments_for_body (EMapiConnection *conn,
+			       TALLOC_CTX *mem_ctx,
+			       EMapiObject *object,
+			       mapi_object_t *obj_message,
+			       GCancellable *cancellable,
+			       GError **perror)
+{
+	EMapiAttachment *attach;
+
+	g_return_if_fail (conn != NULL);
+	g_return_if_fail (mem_ctx != NULL);
+	g_return_if_fail (obj_message != NULL);
+
+	if (!has_embedded_message_with_html (object))
+		return;
+
+	for (attach = object->attachments; attach && !g_cancellable_is_cancelled (cancellable); attach = attach->next) {
+		if (attach->embedded_object) {
+			const uint32_t *pattach_num;
+			mapi_object_t obj_attach;
+			mapi_object_t obj_embedded;
+			gboolean have_embedded = FALSE;
+
+			pattach_num = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachNumber);
+			if (!pattach_num)
+				continue;
+
+			mapi_object_init (&obj_attach);
+			mapi_object_init (&obj_embedded);
+
+			if (e_mapi_util_find_array_propval (&attach->embedded_object->properties, PidTagHtml) &&
+			    !e_mapi_util_find_array_propval (&attach->embedded_object->properties, PidTagBody)) {
+				struct SPropTagArray *tags;
+
+				if (OpenAttach (obj_message, *pattach_num, &obj_attach) != MAPI_E_SUCCESS)
+					continue;
+
+				if (OpenEmbeddedMessage (&obj_attach, &obj_embedded, MAPI_READONLY) != MAPI_E_SUCCESS) {
+					mapi_object_release (&obj_attach);
+					continue;
+				}
+
+				have_embedded = TRUE;
+
+				tags = set_SPropTagArray (mem_ctx, 1, PidTagBody);
+
+				e_mapi_fast_transfer_properties (conn, mem_ctx, &obj_embedded, tags, get_additional_properties_cb, attach->embedded_object, cancellable, perror);
+
+				talloc_free (tags);
+			}
+
+			if (has_embedded_message_with_html (attach->embedded_object)) {
+				if (!have_embedded) {
+					if (OpenAttach (obj_message, *pattach_num, &obj_attach) != MAPI_E_SUCCESS)
+						continue;
+
+					if (OpenEmbeddedMessage (&obj_attach, &obj_embedded, MAPI_READONLY) != MAPI_E_SUCCESS) {
+						mapi_object_release (&obj_attach);
+						continue;
+					}
+
+					have_embedded = TRUE;
+				}
+
+				traverse_attachments_for_body (conn, mem_ctx, attach->embedded_object, &obj_embedded, cancellable, perror);
+			}
+
+			mapi_object_release (&obj_embedded);
+			mapi_object_release (&obj_attach);
+		}
+	}
+}
+
+struct EnsureAdditionalPropertiesData
+{
+	TransferObjectCB cb;
+	gpointer cb_user_data;
+	mapi_object_t *obj_folder;
+};
+
+static gboolean
+ensure_additional_properties_cb (EMapiConnection *conn,
+				 TALLOC_CTX *mem_ctx,
+				 /* const */ EMapiObject *object,
+				 guint32 obj_index,
+				 guint32 obj_total,
+				 gpointer user_data,
+				 GCancellable *cancellable,
+				 GError **perror)
+{
+	struct ap_data {
+		uint32_t orig_proptag, use_proptag;
+	} additional_properties[] = {
+		{ PidTagBody, MAPI_E_RESERVED },
+		{ PidNameContentClass, MAPI_E_RESERVED }
+	};
+	struct EnsureAdditionalPropertiesData *eap = user_data;
+	gboolean need_any = FALSE, need_attachments;
+	uint32_t ii;
+
+	g_return_val_if_fail (eap != NULL, FALSE);
+	g_return_val_if_fail (eap->cb != NULL, FALSE);
+	g_return_val_if_fail (object != NULL, FALSE);
+
+	for (ii = 0; ii < G_N_ELEMENTS (additional_properties); ii++) {
+		uint32_t prop = additional_properties[ii].orig_proptag;
+
+		if (!e_mapi_util_find_array_propval (&object->properties, prop)) {
+			if (((prop >> 16) & 0xFFFF) >= 0x8000) {
+				prop = e_mapi_connection_resolve_named_prop (conn, mapi_object_get_id (eap->obj_folder), prop, cancellable, NULL);
+			}
+		} else {
+			prop = MAPI_E_RESERVED;
+		}
+
+		additional_properties[ii].use_proptag = prop;
+		need_any = need_any || prop != MAPI_E_RESERVED;
+	}
+
+	need_attachments = has_embedded_message_with_html (object);
+
+	/* Fast-transfer transfers only Html or Body, never both */
+	if (need_any || need_attachments) {
+		const mapi_id_t *mid;
+
+		mid = e_mapi_util_find_array_propval (&object->properties, PidTagMid);
+		if (mid && *mid) {
+			mapi_object_t obj_message;
+			
+			mapi_object_init (&obj_message);
+
+			if (OpenMessage (eap->obj_folder, mapi_object_get_id (eap->obj_folder), *mid, &obj_message, 0) == MAPI_E_SUCCESS) {
+				struct SPropTagArray *tags = NULL;
+
+				for (ii = 0; ii < G_N_ELEMENTS (additional_properties); ii++) {
+					uint32_t prop = additional_properties[ii].use_proptag;
+
+					if (prop == MAPI_E_RESERVED)
+						continue;
+
+					if (!tags)
+						tags = set_SPropTagArray (mem_ctx, 1, prop);
+					else
+						SPropTagArray_add (mem_ctx, tags, prop);
+				}
+
+				if (tags) {
+					uint32_t jj = object->properties.cValues;
+
+					e_mapi_fast_transfer_properties	(conn, mem_ctx, &obj_message, tags, get_additional_properties_cb, object, cancellable, perror);
+
+					while (jj < object->properties.cValues) {
+						for (ii = 0; ii < G_N_ELEMENTS (additional_properties); ii++) {
+							uint32_t proptag = object->properties.lpProps[jj].ulPropTag;
+
+							if (additional_properties[ii].use_proptag == proptag ||
+							    (((proptag & 0xFFFF) == PT_STRING8 || (proptag & 0xFFFF) == PT_UNICODE) &&
+							        (proptag & ~0xFFFF) == (additional_properties[ii].use_proptag & ~0xFFFF))) {
+								/* string8 and unicode properties are interchangeable in the union, luckily */
+								object->properties.lpProps[jj].ulPropTag = additional_properties[ii].orig_proptag;
+								break;
+							}
+						}
+
+						jj++;
+					}
+
+					talloc_free (tags);
+				}
+
+				if (need_attachments)
+					traverse_attachments_for_body (conn, mem_ctx, object, &obj_message, cancellable, perror);
+			}
+
+			mapi_object_release (&obj_message);
+		}
+	}
+
+	return eap->cb (conn, mem_ctx, object, obj_index, obj_total, eap->cb_user_data, cancellable, perror);
+}
+
 /* deals with named IDs transparently, thus it's OK to check with PidLid and PidName constants only */
 gboolean
 e_mapi_connection_transfer_objects (EMapiConnection *conn,
@@ -2209,6 +2472,7 @@ e_mapi_connection_transfer_objects (EMapiConnection *conn,
 	TALLOC_CTX *mem_ctx;
 	mapi_id_array_t ids;
 	const GSList *iter;
+	struct EnsureAdditionalPropertiesData eap;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
@@ -2237,7 +2501,11 @@ e_mapi_connection_transfer_objects (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	ms = e_mapi_fast_transfer_objects (conn, mem_ctx, obj_folder, &ids, cb, cb_user_data, cancellable, perror);
+	eap.cb = cb;
+	eap.cb_user_data = cb_user_data;
+	eap.obj_folder = obj_folder;
+
+	ms = e_mapi_fast_transfer_objects (conn, mem_ctx, obj_folder, &ids, ensure_additional_properties_cb, &eap, cancellable, perror);
 
 	mapi_id_array_release (&ids);
 
@@ -2246,6 +2514,25 @@ e_mapi_connection_transfer_objects (EMapiConnection *conn,
 	UNLOCK ();
 
 	return ms == MAPI_E_SUCCESS;
+}
+
+gboolean
+e_mapi_connection_transfer_object (EMapiConnection *conn,
+				   mapi_object_t *obj_folder,
+				   mapi_id_t message_id,
+				   TransferObjectCB cb,
+				   gpointer cb_user_data,
+				   GCancellable *cancellable,
+				   GError **perror)
+{
+	GSList *mids;
+	gboolean res;
+
+	mids = g_slist_append (NULL, &message_id);
+	res = e_mapi_connection_transfer_objects (conn, obj_folder, mids, cb, cb_user_data, cancellable, perror);
+	g_slist_free (mids);
+
+	return res;
 }
 
 struct GetSummaryData {

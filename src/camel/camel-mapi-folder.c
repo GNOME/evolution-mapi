@@ -377,6 +377,48 @@ mapi_utils_do_flags_diff (flags_diff_t *diff, guint32 old, guint32 _new)
 	diff->bits = _new & diff->changed;
 }
 
+static void
+add_message_to_cache (CamelMapiFolder *mapi_folder, const gchar *uid, CamelMimeMessage **msg, GCancellable *cancellable)
+{
+	CamelFolder *folder;
+	CamelStream *cache_stream;
+
+	g_return_if_fail (mapi_folder != NULL);
+	g_return_if_fail (msg != NULL);
+	g_return_if_fail (*msg != NULL);
+
+	folder = CAMEL_FOLDER (mapi_folder);
+	g_return_if_fail (folder != NULL);
+
+	camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+
+	if ((cache_stream = camel_data_cache_add (mapi_folder->cache, "cache", uid, NULL))) {
+		if (camel_data_wrapper_write_to_stream_sync ((CamelDataWrapper *) (*msg), cache_stream, cancellable, NULL) == -1
+		    || camel_stream_flush (cache_stream, cancellable, NULL) == -1) {
+			camel_data_cache_remove (mapi_folder->cache, "cache", uid, NULL);
+		} else {
+			CamelMimeMessage *msg2;
+
+			/* workaround to get message back from cache, as that one is properly
+			   encoded with attachments and so on. Not sure what's going wrong when
+			   composing message in memory, but when they are read from the cache
+			   they appear properly in the UI. */
+			msg2 = camel_mime_message_new ();
+			g_seekable_seek (G_SEEKABLE (cache_stream), 0, G_SEEK_SET, NULL, NULL);
+			if (!camel_data_wrapper_construct_from_stream_sync (CAMEL_DATA_WRAPPER (msg2), cache_stream, cancellable, NULL)) {
+				g_object_unref (msg2);
+			} else {
+				g_object_unref (*msg);
+				*msg = msg2;
+			}
+		}
+
+		g_object_unref (cache_stream);
+	}
+
+	camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+}
+
 static gboolean
 build_last_modify_restriction (EMapiConnection *conn,
 		               mapi_id_t fid,
@@ -518,6 +560,114 @@ remove_removed_uids_cb (gpointer uid_str, gpointer value, gpointer user_data)
 }
 
 static gboolean
+gather_object_offline_cb (EMapiConnection *conn,
+			  TALLOC_CTX *mem_ctx,
+			  /* const */ EMapiObject *object,
+			  guint32 obj_index,
+			  guint32 obj_total,
+			  gpointer user_data,
+			  GCancellable *cancellable,
+			  GError **perror)
+{
+	struct GatherObjectSummaryData *gos = user_data;
+	CamelMimeMessage *msg;
+
+	g_return_val_if_fail (gos != NULL, FALSE);
+	g_return_val_if_fail (gos->folder != NULL, FALSE);
+	g_return_val_if_fail (object != NULL, FALSE);
+
+	msg = e_mapi_mail_utils_object_to_message (conn, object);
+	if (msg) {
+		gchar *uid_str;
+		const mapi_id_t *pmid;
+		const uint32_t *pmsg_flags;
+		const struct FILETIME *last_modified;
+		uint32_t msg_flags;
+		CamelMessageInfo *info;
+		gboolean is_new;
+
+		pmid = e_mapi_util_find_array_propval (&object->properties, PR_MID);
+		pmsg_flags = e_mapi_util_find_array_propval (&object->properties, PR_MESSAGE_FLAGS);
+		last_modified = e_mapi_util_find_array_propval (&object->properties, PR_LAST_MODIFICATION_TIME);
+
+		if (!pmid) {
+			g_debug ("%s: Received message [%d/%d] without PR_MID", G_STRFUNC, obj_index, obj_total);
+			e_mapi_debug_dump_object (object, TRUE, 3);
+			return TRUE;
+		}
+
+		if (!last_modified) {
+			g_debug ("%s: Received message [%d/%d] without PR_LAST_MODIFICATION_TIME", G_STRFUNC, obj_index, obj_total);
+			e_mapi_debug_dump_object (object, TRUE, 3);
+		}
+
+		uid_str = e_mapi_util_mapi_id_to_string (*pmid);
+		if (!uid_str)
+			return FALSE;
+
+		msg_flags = pmsg_flags ? *pmsg_flags : 0;
+
+		is_new = !camel_folder_summary_check_uid (gos->folder->summary, uid_str);
+		if (!is_new)
+			camel_folder_summary_remove_uid (gos->folder->summary, uid_str);
+
+		info = camel_folder_summary_info_new_from_message (gos->folder->summary, msg, NULL);
+		if (info) {
+			CamelMapiMessageInfo *minfo = (CamelMapiMessageInfo *) info;
+			guint32 flags = 0, mask = CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ATTACHMENTS;
+
+			minfo->info.uid = camel_pstring_strdup (uid_str);
+
+			if (last_modified) {
+				minfo->last_modified = e_mapi_util_filetime_to_time_t (last_modified);
+			} else {
+				minfo->last_modified = 0;
+			}
+
+			if ((msg_flags & MSGFLAG_READ) != 0)
+				flags |= CAMEL_MESSAGE_SEEN;
+			if ((msg_flags & MSGFLAG_HASATTACH) != 0)
+				flags |= CAMEL_MESSAGE_ATTACHMENTS;
+
+			if ((camel_message_info_flags (info) & mask) != flags) {
+				if (is_new)
+					minfo->info.flags = flags;
+				else
+					camel_message_info_set_flags (info, mask, flags);
+				minfo->server_flags = camel_message_info_flags (info);
+				minfo->info.dirty = TRUE;
+			}
+
+			if (is_new) {
+				camel_folder_summary_add (gos->folder->summary, info);
+				camel_folder_change_info_add_uid (gos->changes, camel_message_info_uid (info));
+				camel_folder_change_info_recent_uid (gos->changes, camel_message_info_uid (info));
+
+				camel_message_info_ref (info);
+			} else {
+				camel_folder_change_info_change_uid (gos->changes, camel_message_info_uid (info));
+			}
+
+			add_message_to_cache (CAMEL_MAPI_FOLDER (gos->folder), uid_str, &msg, cancellable);
+
+			camel_message_info_free (info);
+		} else {
+			g_debug ("%s: Failed to create message info from message", G_STRFUNC);
+		}
+
+		g_free (uid_str);
+		g_object_unref (msg);
+	} else {
+		g_debug ("%s: Failed to create message from object", G_STRFUNC);
+	}
+
+	if (obj_total > 0)
+		camel_operation_progress (cancellable, obj_index * 100 / obj_total);
+
+	return TRUE;
+}
+
+static gboolean
 gather_object_summary_cb (EMapiConnection *conn,
 			  TALLOC_CTX *mem_ctx,
 			  /* const */ EMapiObject *object,
@@ -594,11 +744,10 @@ gather_object_summary_cb (EMapiConnection *conn,
 		if (!info) {
 			CamelMapiMessageInfo *minfo;
 			const gchar *subject, *message_id, *references, *in_reply_to, *display_to, *display_cc;
-			const gchar *from_addr_type, *from_name, *from_email;
 			const struct FILETIME *delivery_time;
 			const uint32_t *msg_size;
-			EMapiRecipient *recipient;
-			gchar *to = NULL, *cc = NULL, *formatted_addr;
+			gchar *formatted_addr, *from_name, *from_email;
+			CamelAddress *to_addr, *cc_addr, *bcc_addr;
 
 			subject = e_mapi_util_find_array_propval (&object->properties, PR_SUBJECT_UNICODE);
 			delivery_time = e_mapi_util_find_array_propval (&object->properties, PR_MESSAGE_DELIVERY_TIME);
@@ -608,9 +757,6 @@ gather_object_summary_cb (EMapiConnection *conn,
 			in_reply_to = e_mapi_util_find_array_propval (&object->properties, PR_IN_REPLY_TO_ID);
 			display_to = e_mapi_util_find_array_propval (&object->properties, PR_DISPLAY_TO_UNICODE);
 			display_cc = e_mapi_util_find_array_propval (&object->properties, PR_DISPLAY_CC_UNICODE);
-			from_addr_type = e_mapi_util_find_array_propval (&object->properties, PR_SENT_REPRESENTING_ADDRTYPE);
-			from_name = e_mapi_util_find_array_propval (&object->properties, PR_SENT_REPRESENTING_NAME_UNICODE);
-			from_email = e_mapi_util_find_array_propval (&object->properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE);
 
 			info = camel_message_info_new (gos->folder->summary);
 			minfo = (CamelMapiMessageInfo *) info;
@@ -626,78 +772,51 @@ gather_object_summary_cb (EMapiConnection *conn,
 				mapi_set_message_references (minfo, references, in_reply_to);
 
 			/* Recipients */
-			for (recipient = object->recipients; recipient; recipient = recipient->next) {
-				const uint32_t *recip_type = e_mapi_util_find_array_propval (&recipient->properties, PR_RECIPIENT_TYPE);
-				const gchar *name, *email;
-				gchar **dest = NULL;
+			to_addr = (CamelAddress *) camel_internet_address_new ();
+			cc_addr = (CamelAddress *) camel_internet_address_new ();
+			bcc_addr = (CamelAddress *) camel_internet_address_new ();
 
-				if (!recip_type)
-					continue;
+			e_mapi_mail_utils_decode_recipients (conn, object->recipients, to_addr, cc_addr, bcc_addr);
 
-				switch (*recip_type) {
-				case MAPI_TO:
-					dest = &to;
-					break;
-				case MAPI_CC:
-					dest = &cc;
-					break;
-				default:
-					break;
-				}
-
-				if (!dest)
-					continue;
-
-				/* PidTagNickname for Recipients table */
-				name = e_mapi_util_find_array_propval (&recipient->properties, PROP_TAG (PT_UNICODE, 0x6001));
-				name = name ? name : e_mapi_util_find_array_propval (&recipient->properties, PidTagNickname);
-				name = name ? name : e_mapi_util_find_array_propval (&recipient->properties, PR_DISPLAY_NAME_UNICODE);
-				name = name ? name : e_mapi_util_find_array_propval (&recipient->properties, PR_RECIPIENT_DISPLAY_NAME_UNICODE);
-				name = name ? name : e_mapi_util_find_array_propval (&recipient->properties, PR_7BIT_DISPLAY_NAME_UNICODE);
-
-				email = e_mapi_util_find_array_propval (&recipient->properties, PidTagPrimarySmtpAddress);
-				email = email ? email : e_mapi_util_find_array_propval (&recipient->properties, PidTagSmtpAddress);
-
-				formatted_addr = camel_internet_address_format_address (name, email ? email : "");
-				if (*dest) {
-					gchar *tmp = *dest;
-					*dest = g_strconcat (*dest, ", ", formatted_addr, NULL);
-					g_free (formatted_addr);
-					g_free (tmp);
-				} else {
-					*dest = formatted_addr;
-				}
+			if (camel_address_length (to_addr) > 0) {
+				formatted_addr = camel_address_format (to_addr);
+				minfo->info.to = camel_pstring_strdup (formatted_addr);
+				g_free (formatted_addr);
+			} else {
+				minfo->info.to = camel_pstring_strdup (display_to);
 			}
 
-			minfo->info.to = to ? camel_pstring_strdup (to) : camel_pstring_strdup (display_to);
-			minfo->info.cc = cc ? camel_pstring_strdup (cc) : camel_pstring_strdup (display_cc);
-
-			if (from_addr_type && g_ascii_strcasecmp (from_addr_type, "EX") == 0) {
-				gchar *email = NULL, *name = NULL;
-
-				email = e_mapi_connection_ex_to_smtp (conn, from_email, &name, cancellable, perror);
-				if (email && *email) {
-					gchar *from = camel_internet_address_format_address (name, email);
-
-					minfo->info.from = camel_pstring_strdup (from);
-
-					g_free (from);
-				} else if (from_name && *from_name) {
-					minfo->info.from = camel_pstring_strdup (from_name);
-				}
-
-				g_free (name);
-				g_free (email);
-			} else if (from_email) {
-				gchar *from = camel_internet_address_format_address (from_name, from_email);
-
-				minfo->info.from = camel_pstring_strdup (from);
-
-				g_free (from);
+			if (camel_address_length (cc_addr) > 0) {
+				formatted_addr = camel_address_format (cc_addr);
+				minfo->info.cc = camel_pstring_strdup (formatted_addr);
+				g_free (formatted_addr);
+			} else {
+				minfo->info.cc = camel_pstring_strdup (display_cc);
 			}
 
-			g_free (to);
-			g_free (cc);
+			g_object_unref (to_addr);
+			g_object_unref (cc_addr);
+			g_object_unref (bcc_addr);
+
+			from_name = NULL;
+			from_email = NULL;
+
+			e_mapi_mail_utils_decode_email_address1 (conn, &object->properties,
+				PR_SENT_REPRESENTING_NAME_UNICODE,
+				PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
+				PR_SENT_REPRESENTING_ADDRTYPE,
+				&from_name, &from_email);
+
+			if (from_email && *from_email) {
+				formatted_addr = camel_internet_address_format_address (from_name, from_email);
+
+				minfo->info.from = camel_pstring_strdup (formatted_addr);
+
+				g_free (formatted_addr);
+			}
+			
+			g_free (from_name);
+			g_free (from_email);
 		}
 	}
 
@@ -770,10 +889,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 		camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (settings)) ||
 		camel_offline_folder_get_offline_sync (CAMEL_OFFLINE_FOLDER (folder));
 
-	if (full_download)
-		camel_operation_push_message (cancellable, _("Downloading messages in folder '%s'"), camel_folder_get_display_name (folder));
-	else
-		camel_operation_push_message (cancellable, _("Refreshing folder '%s'"), camel_folder_get_display_name (folder));
+	camel_operation_push_message (cancellable, _("Refreshing folder '%s'"), camel_folder_get_display_name (folder));
 
 	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
@@ -829,7 +945,15 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 		if (gco.removed_uids)
 			g_hash_table_foreach (gco.removed_uids, remove_removed_uids_cb, &gos);
 
-		status = e_mapi_connection_transfer_summary (conn, &obj_folder, uids, gather_object_summary_cb, &gos, cancellable, mapi_error);
+		if (full_download) {
+			camel_operation_push_message (cancellable, _("Downloading messages in folder '%s'"), camel_folder_get_display_name (folder));
+
+			status = e_mapi_connection_transfer_objects (conn, &obj_folder, uids, gather_object_offline_cb, &gos, cancellable, mapi_error);
+
+			camel_operation_pop_message (cancellable);
+		} else {
+			status = e_mapi_connection_transfer_summary (conn, &obj_folder, uids, gather_object_summary_cb, &gos, cancellable, mapi_error);
+		}
 
 		g_slist_free (uids);
 
@@ -1370,6 +1494,29 @@ mapi_folder_get_message_cached (CamelFolder *folder,
 	return msg;
 }
 
+static gboolean
+transfer_mail_object_cb (EMapiConnection *conn,
+			 TALLOC_CTX *mem_ctx,
+			 /* const */ EMapiObject *object,
+			 guint32 obj_index,
+			 guint32 obj_total,
+			 gpointer user_data,
+			 GCancellable *cancellable,
+			 GError **perror)
+{
+	CamelMimeMessage **pmessage = user_data;
+
+	g_return_val_if_fail (object != NULL, FALSE);
+	g_return_val_if_fail (pmessage != NULL, FALSE);
+
+	*pmessage = e_mapi_mail_utils_object_to_message (conn, object);
+
+	if (obj_total > 0)
+		camel_operation_progress (cancellable, obj_index * 100 / obj_total);
+
+	return TRUE;
+}
+
 static CamelMimeMessage *
 mapi_folder_get_message_sync (CamelFolder *folder,
                               const gchar *uid,
@@ -1380,11 +1527,11 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 	CamelMapiFolder *mapi_folder;
 	CamelMapiStore *mapi_store;
 	CamelMapiMessageInfo *mi = NULL;
-	CamelStream *cache_stream;
 	CamelStore *parent_store;
 	mapi_id_t id_message;
-	MailItem *item = NULL;
-	guint32 options = 0;
+	EMapiConnection *conn;
+	mapi_object_t obj_folder;
+	gboolean success;
 	GError *mapi_error = NULL;
 
 	parent_store = camel_folder_get_parent_store (folder);
@@ -1431,23 +1578,22 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 		return NULL;
 	}
 
-	options = MAPI_OPTIONS_FETCH_ALL | MAPI_OPTIONS_FETCH_BODY_STREAM |
-		MAPI_OPTIONS_GETBESTBODY | MAPI_OPTIONS_FETCH_RECIPIENTS;
-
 	e_mapi_util_mapi_id_from_string (uid, &id_message);
 
-	if (((CamelMapiFolder *)folder)->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC) {
-		options |= MAPI_OPTIONS_USE_PFSTORE;
+	conn = camel_mapi_store_get_connection (mapi_store);
+
+	if (mapi_folder->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC)
+		success = e_mapi_connection_open_public_folder (conn, mapi_folder->folder_id, &obj_folder, cancellable, &mapi_error);
+	else
+		success = e_mapi_connection_open_personal_folder (conn, mapi_folder->folder_id, &obj_folder, cancellable, &mapi_error);
+
+	if (success) {
+		success = e_mapi_connection_transfer_object (conn, &obj_folder, id_message, transfer_mail_object_cb, &msg, cancellable, &mapi_error);
+
+		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, NULL);
 	}
 
-	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-	e_mapi_connection_fetch_item (camel_mapi_store_get_connection (mapi_store), mapi_folder->folder_id, id_message,
-					mapi_mail_get_item_prop_list, NULL,
-					fetch_props_to_mail_item_cb, &item,
-					options, cancellable, &mapi_error);
-	camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-
-	if (item == NULL) {
+	if (!msg) {
 		if (mapi_error) {
 			g_set_error (
 				error, CAMEL_SERVICE_ERROR,
@@ -1464,45 +1610,7 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 		return NULL;
 	}
 
-	msg = mapi_mail_item_to_mime_message (camel_mapi_store_get_connection (mapi_store), item);
-	mail_item_free (item);
-
-	if (!msg) {
-		g_set_error (
-			error, CAMEL_SERVICE_ERROR,
-			CAMEL_SERVICE_ERROR_INVALID,
-			_("Could not get message"));
-		camel_message_info_free (&mi->info);
-
-		return NULL;
-	}
-
-	/* add to cache */
-	camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
-	if ((cache_stream = camel_data_cache_add (mapi_folder->cache, "cache", uid, NULL))) {
-		if (camel_data_wrapper_write_to_stream_sync ((CamelDataWrapper *) msg, cache_stream, cancellable, NULL) == -1
-				|| camel_stream_flush (cache_stream, cancellable, NULL) == -1) {
-			camel_data_cache_remove (mapi_folder->cache, "cache", uid, NULL);
-		} else {
-			CamelMimeMessage *msg2;
-
-			/* workaround to get message back from cache, as that one is properly
-			   encoded with attachments and so on. Not sure what's going wrong when
-			   composing message in memory, but when they are read from the cache
-			   they appear properly in the UI. */
-			msg2 = camel_mime_message_new ();
-			g_seekable_seek (G_SEEKABLE (cache_stream), 0, G_SEEK_SET, NULL, NULL);
-			if (!camel_data_wrapper_construct_from_stream_sync (CAMEL_DATA_WRAPPER (msg2), cache_stream, cancellable, NULL)) {
-				g_object_unref (msg2);
-			} else {
-				g_object_unref (msg);
-				msg = msg2;
-			}
-		}
-		g_object_unref (cache_stream);
-	}
-
-	camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+	add_message_to_cache (mapi_folder, uid, &msg, cancellable);
 
 	camel_message_info_free (&mi->info);
 

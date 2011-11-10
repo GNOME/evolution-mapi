@@ -699,7 +699,7 @@ check_calendar_type (guint16 type)
 }
 
 gboolean
-e_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList **extra_detached, icaltimezone *recur_zone)
+e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp, GSList **extra_detached, icaltimezone *recur_zone)
 {
 	struct icalrecurrencetype rt;
 	struct ema_AppointmentRecurrencePattern arp;
@@ -708,11 +708,15 @@ e_mapi_cal_util_bin_to_rrule (GByteArray *ba, ECalComponent *comp, GSList **extr
 	gint i;
 	ptrdiff_t off = 0;
 	GSList *exdate_list = NULL;
+	GByteArray fake_ba;
+
+	fake_ba.data = (guint8 *) lpb;
+	fake_ba.len = cb;
 
 	icalrecurrencetype_clear (&rt);
 
 	memset(&arp, 0, sizeof (struct ema_AppointmentRecurrencePattern));
-	if (! gba_to_arp (ba, &off, &arp))
+	if (! gba_to_arp (&fake_ba, &off, &arp))
 		goto cleanup;
 
 	rp = &arp.RecurrencePattern;

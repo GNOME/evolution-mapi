@@ -34,12 +34,13 @@ gboolean e_mapi_util_mapi_id_from_string (const gchar *str, mapi_id_t *id);
 gchar *  e_mapi_util_mapi_ids_to_uid (mapi_id_t fid, mapi_id_t mid);
 gboolean e_mapi_util_mapi_ids_from_uid (const gchar *str, mapi_id_t *fid, mapi_id_t *mid);
 
-gconstpointer e_mapi_util_find_SPropVal_array_propval (struct SPropValue *values, uint32_t proptag);
-gconstpointer e_mapi_util_find_SPropVal_array_namedid (struct SPropValue *values, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid);
-gconstpointer e_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag);
-gconstpointer e_mapi_util_find_row_namedid (struct SRow *aRow, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid);
-gconstpointer e_mapi_util_find_array_propval (struct mapi_SPropValue_array *properties, uint32_t proptag);
-gconstpointer e_mapi_util_find_array_namedid (struct mapi_SPropValue_array *properties, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid);
+gconstpointer	e_mapi_util_find_SPropVal_array_propval (struct SPropValue *values, uint32_t proptag);
+gconstpointer	e_mapi_util_find_SPropVal_array_namedid (struct SPropValue *values, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid);
+gconstpointer	e_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag);
+gconstpointer	e_mapi_util_find_row_namedid (struct SRow *aRow, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid);
+gconstpointer	e_mapi_util_find_array_propval (struct mapi_SPropValue_array *properties, uint32_t proptag);
+gconstpointer	e_mapi_util_find_array_namedid (struct mapi_SPropValue_array *properties, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid);
+uint32_t	e_mapi_util_find_array_proptag (struct mapi_SPropValue_array *properties, uint32_t proptag);
 
 enum MAPISTATUS e_mapi_util_find_array_datetime_propval (struct timeval *tv, struct mapi_SPropValue_array *properties, uint32_t proptag);
 enum MAPISTATUS e_mapi_util_find_array_datetime_namedid (struct timeval *tv, struct mapi_SPropValue_array *properties, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid);
@@ -91,6 +92,11 @@ gboolean	e_mapi_utils_add_spropvalue_namedid		(EMapiConnection *conn,
 								 gconstpointer prop_value,
 								 GCancellable *cancellable,
 								 GError **perror);
+gboolean	e_mapi_utils_ensure_utf8_string			(uint32_t proptag,
+								 const uint32_t *cpid,
+								 const guint8 *buf_data,
+								 guint32 buf_len,
+								 gchar **out_utf8);
 
 uint32_t e_mapi_utils_push_crc32 (uint32_t crc32, uint8_t *bytes, uint32_t n_bytes);
 

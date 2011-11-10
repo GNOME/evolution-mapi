@@ -263,6 +263,31 @@ e_mapi_util_find_array_namedid (struct mapi_SPropValue_array *properties, EMapiC
 	return res;
 }
 
+uint32_t
+e_mapi_util_find_array_proptag (struct mapi_SPropValue_array *properties, uint32_t proptag)
+{
+	g_return_val_if_fail (properties != NULL, proptag);
+
+	if ((proptag & 0xFFFF) == PT_STRING8 ||
+	    (proptag & 0xFFFF) == PT_UNICODE) {
+		gint ii;
+		uint32_t tag1, tag2;
+
+		tag1 = (proptag & 0xFFFF0000) | PT_STRING8;
+		tag2 = (proptag & 0xFFFF0000) | PT_UNICODE;
+
+		for (ii = 0; ii < properties->cValues; ii++) {
+			uint32_t tag = properties->lpProps[ii].ulPropTag;
+			if (tag == tag1 || tag == tag2) {
+				proptag = tag;
+				break;
+			}
+		}
+	}
+
+	return proptag;
+}
+
 enum MAPISTATUS
 e_mapi_util_find_array_datetime_propval (struct timeval *tv, struct mapi_SPropValue_array *properties, uint32_t proptag)
 {
@@ -1254,4 +1279,42 @@ e_mapi_utils_destroy_mapi_context (struct mapi_context *mapi_ctx)
 	e_mapi_utils_global_lock ();
 	MAPIUninitialize (mapi_ctx);
 	e_mapi_utils_global_unlock ();
+}
+
+gboolean
+e_mapi_utils_ensure_utf8_string (uint32_t proptag,
+				 const uint32_t *cpid,
+				 const guint8 *buf_data,
+				 guint32 buf_len,
+				 gchar **out_utf8)
+{
+	g_return_val_if_fail (buf_data != NULL, FALSE);
+	g_return_val_if_fail (out_utf8 != NULL, FALSE);
+
+	if (proptag != PidTagHtml && (proptag & 0xFFFF) != PT_UNICODE)
+		return FALSE;
+
+	*out_utf8 = NULL;
+
+	if ((cpid && (*cpid == 1200 || *cpid == 1201)) || (buf_len > 5 && buf_data[3] == '\0')) {
+		/* this is special, get the CPID and transform to utf8 when it's utf16 */
+		gsize written = 0;
+		gchar *in_utf8;
+
+		/* skip Unicode marker, if there */
+		if (buf_len >= 2 && buf_data[0] == 0xFF && buf_data[1] == 0xFE)
+			in_utf8 = g_convert ((const gchar *) buf_data + 2, buf_len - 2, "UTF-8", "UTF-16", NULL, &written, NULL);
+		else
+			in_utf8 = g_convert ((const gchar *) buf_data, buf_len, "UTF-8", "UTF-16", NULL, &written, NULL);
+
+		if (in_utf8 && written > 0) {
+			*out_utf8 = g_strndup (in_utf8, written);
+			g_free (in_utf8);
+		}
+	}
+
+	if (!*out_utf8)
+		*out_utf8 = g_strndup ((const gchar *) buf_data, buf_len);
+
+	return TRUE;
 }

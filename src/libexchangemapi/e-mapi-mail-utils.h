@@ -97,10 +97,36 @@ gboolean mapi_mail_get_item_prop_list (EMapiConnection *conn,
 				       GCancellable *cancellable,
 				       GError **perror);
 
+struct _CamelAddress;
 struct _CamelMimeMessage;
+
 struct _CamelMimeMessage *mapi_mail_item_to_mime_message (EMapiConnection *conn, MailItem *item);
 
-struct _CamelAddress;
+struct _CamelMimeMessage *e_mapi_mail_utils_object_to_message	(EMapiConnection *conn,
+								 /* const */ EMapiObject *object);
+void			e_mapi_mail_utils_decode_email_address	(EMapiConnection *conn,
+								 struct mapi_SPropValue_array *properties,
+								 const uint32_t *name_proptags,
+								 guint name_proptags_len,
+								 const uint32_t *email_proptags,
+								 guint email_proptags_len,
+								 uint32_t email_type_proptag,
+								 uint32_t email_proptag,
+								 gchar **name,
+								 gchar **email);
+void			e_mapi_mail_utils_decode_email_address1	(EMapiConnection *conn,
+								 struct mapi_SPropValue_array *properties,
+								 uint32_t name_proptag,
+								 uint32_t email_proptag,
+								 uint32_t email_type_proptag,
+								 gchar **name,
+								 gchar **email);
+void			e_mapi_mail_utils_decode_recipients	(EMapiConnection *conn,
+								 EMapiRecipient *recipients,
+								 struct _CamelAddress *to,
+								 struct _CamelAddress *cc,
+								 struct _CamelAddress *bcc);
+
 MailItem *mapi_mime_message_to_mail_item (struct _CamelMimeMessage *message, gint32 message_camel_flags, struct _CamelAddress *from, GCancellable *cancellable, GError **error);
 
 /* uses MailItem * as 'data' pointer */
