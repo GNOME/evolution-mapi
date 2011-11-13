@@ -1998,7 +1998,7 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 	CamelService    *service;
 	CamelSettings   *settings;
 
-	gchar *summary_file, *state_file;
+	gchar *state_file;
 	const gchar *short_name;
 	CamelStoreInfo *si;
 	gboolean filter_inbox;
@@ -2021,10 +2021,7 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 
 	mapi_folder = CAMEL_MAPI_FOLDER(folder);
 
-	summary_file = g_strdup_printf ("%s/%s/summary",folder_dir, folder_name);
-
-	folder->summary = camel_mapi_folder_summary_new (folder, summary_file);
-	g_free(summary_file);
+	folder->summary = camel_mapi_folder_summary_new (folder);
 
 	if (!folder->summary) {
 		g_object_unref (CAMEL_OBJECT (folder));

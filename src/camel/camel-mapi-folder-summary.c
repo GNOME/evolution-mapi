@@ -107,7 +107,6 @@ camel_mapi_folder_summary_init (CamelMapiFolderSummary *mapi_summary)
 
 /**
  * camel_mapi_folder_summary_new:
- * @filename: the file to store the summary in.
  *
  * This will create a new CamelMapiFolderSummary object and read in the
  * summary data from disk, if it exists.
@@ -115,7 +114,7 @@ camel_mapi_folder_summary_init (CamelMapiFolderSummary *mapi_summary)
  * Return value: A new CamelMapiFolderSummary object.
  **/
 CamelFolderSummary *
-camel_mapi_folder_summary_new (CamelFolder *folder, const gchar *filename)
+camel_mapi_folder_summary_new (CamelFolder *folder)
 {
 	CamelFolderSummary *summary;
 	GError *local_error = NULL;
@@ -123,7 +122,6 @@ camel_mapi_folder_summary_new (CamelFolder *folder, const gchar *filename)
 	summary = g_object_new (CAMEL_TYPE_MAPI_FOLDER_SUMMARY, "folder", folder, NULL);
 
 	camel_folder_summary_set_build_content (summary, FALSE);
-	camel_folder_summary_set_filename (summary, filename);
 
 	if (!camel_folder_summary_load_from_db (summary, &local_error)) {
 		/* FIXME: Isn't this dangerous ? We clear the summary

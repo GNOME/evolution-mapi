@@ -77,7 +77,7 @@ struct _CamelMapiFolderSummaryClass {
 
 GType camel_mapi_folder_summary_get_type (void);
 
-CamelFolderSummary *camel_mapi_folder_summary_new (struct _CamelFolder *folder, const gchar *filename);
+CamelFolderSummary *camel_mapi_folder_summary_new (struct _CamelFolder *folder);
 
 void mapi_summary_clear (CamelFolderSummary *summary, gboolean uncache);
 void camel_mapi_folder_summary_update_store_info_counts (CamelMapiFolderSummary *mapi_summary);
