@@ -1956,12 +1956,15 @@ mapi_error_to_edb_error (GError **perror, const GError *mapi_error, EDataBookSta
 	if (!perror)
 		return;
 
-	if (code == E_DATA_BOOK_STATUS_OTHER_ERROR && mapi_error) {
+	if (code == E_DATA_BOOK_STATUS_OTHER_ERROR && mapi_error && mapi_error->domain == E_MAPI_ERROR) {
 		/* Change error to more accurate only with OTHER_ERROR */
 		switch (mapi_error->code) {
 		case MAPI_E_PASSWORD_CHANGE_REQUIRED:
 		case MAPI_E_PASSWORD_EXPIRED:
 			code = E_DATA_BOOK_STATUS_AUTHENTICATION_REQUIRED;
+			break;
+		case MAPI_E_NETWORK_ERROR:
+			code = E_DATA_BOOK_STATUS_REPOSITORY_OFFLINE;
 			break;
 		default:
 			break;

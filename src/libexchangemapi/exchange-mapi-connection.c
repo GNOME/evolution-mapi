@@ -33,6 +33,8 @@
 #include <libedataserver/e-data-server-util.h>
 #include <libedataserver/e-flag.h>
 
+#include <tevent.h>
+
 #include "exchange-mapi-connection.h"
 #include "exchange-mapi-folder.h"
 #include "exchange-mapi-utils.h"
@@ -3650,6 +3652,67 @@ exchange_mapi_connection_events_monitor (ExchangeMapiConnection *conn, struct ma
 
 /* profile related functions - begin */
 
+extern const struct ndr_interface_table ndr_table_exchange_ds_rfr; /* from openchange's ndr_exchange.h */
+
+static enum MAPISTATUS
+test_server_availability (struct mapi_context *mapi_ctx,
+			  const gchar *profname,
+			  const gchar *password)
+{
+	enum MAPISTATUS	ms = MAPI_E_LOGON_FAILED;
+	TALLOC_CTX *mem_ctx;
+	struct mapi_profile *profile;
+	gchar *binding_str;
+	struct dcerpc_pipe *pipe;
+	struct tevent_context	*ev;
+	NTSTATUS status;
+
+	mem_ctx = talloc_new (mapi_ctx->mem_ctx);
+	profile = talloc_zero (mem_ctx, struct mapi_profile);
+	if (!profile) {
+		talloc_free (mem_ctx);
+		return MAPI_E_NOT_ENOUGH_RESOURCES;
+	}
+
+	ms = OpenProfile (mapi_ctx, profile, profname, password);
+	if (ms != MAPI_E_SUCCESS)
+		goto cleanup;
+
+	ms = LoadProfile (mapi_ctx, profile);
+	if (ms != MAPI_E_SUCCESS)
+		goto cleanup;
+
+	binding_str = talloc_asprintf (mem_ctx, "ncacn_ip_tcp:%s[", profile->server);
+
+	/* If seal option is enabled in the profile */
+	if (profile->seal == true) {
+		binding_str = talloc_strdup_append (binding_str, "seal,");
+	}
+
+	/* If localaddress parameter is available in the profile */
+	if (profile->localaddr) {
+		binding_str = talloc_asprintf_append (binding_str, "localaddress=%s,", profile->localaddr);
+	}
+
+	binding_str = talloc_strdup_append (binding_str, "]");
+	ev = tevent_context_init (mem_ctx);
+
+	status = dcerpc_pipe_connect (mem_ctx, &pipe, binding_str, &ndr_table_exchange_ds_rfr, profile->credentials, ev, mapi_ctx->lp_ctx); 
+
+	if (!NT_STATUS_IS_OK (status))
+		exchange_mapi_debug_print ("%s: Failed to connect to remote server: %s %s\n", G_STRFUNC, binding_str, nt_errstr (status));
+
+	if (NT_STATUS_EQUAL (status, NT_STATUS_OBJECT_NAME_NOT_FOUND))
+		ms = MAPI_E_NETWORK_ERROR;
+
+	talloc_free (binding_str);
+
+ cleanup:
+	talloc_free (mem_ctx);
+
+	return ms;
+}
+
 struct tcp_data
 {
 	const gchar *profname;
@@ -3839,6 +3902,9 @@ mapi_profile_load (const gchar *profname, const gchar *password, GError **perror
 	ms = MapiLogonEx (mapi_ctx, &session, profname, password);
 	if (ms == MAPI_E_NOT_FOUND && try_create_profile (profname, password))
 		ms = MapiLogonEx (mapi_ctx, &session, profname, password);
+
+	if (ms == MAPI_E_LOGON_FAILED)
+		ms = test_server_availability (mapi_ctx, profname, password);
 
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "MapiLogonEx", ms);

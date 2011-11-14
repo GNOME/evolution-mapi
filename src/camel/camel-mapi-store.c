@@ -1724,7 +1724,14 @@ mapi_auth_loop (CamelService *service, GError **error)
 
 		store->priv->conn = exchange_mapi_connection_new (profile, url->passwd, &mapi_error);
 		if (!store->priv->conn || !exchange_mapi_connection_connected (store->priv->conn)) {
-			if (mapi_error) {
+			if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR)) {
+				g_set_error_literal (
+					error, CAMEL_SERVICE_ERROR,
+					CAMEL_SERVICE_ERROR_UNAVAILABLE,
+					mapi_error->message);
+				g_error_free (mapi_error);
+				return FALSE;
+			} else if (mapi_error) {
 				errbuf = g_strdup_printf (_("Unable to authenticate to Exchange MAPI server: %s"), mapi_error->message);
 				g_error_free (mapi_error);
 			} else {

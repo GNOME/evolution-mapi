@@ -350,6 +350,9 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeMAPIFolderType fold
 		e_source_set_property (source, "acl-owner-name", account->id->name);
 		e_source_set_property (source, "acl-owner-email", account->id->address);
 
+		if (folder_type != MAPI_FOLDER_TYPE_APPOINTMENT)
+			e_source_set_property (source, "alarm", "never");
+
 		if (is_new_source)
 			e_source_group_add_source (group, source, -1);
 
