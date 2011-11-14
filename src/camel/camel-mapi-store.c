@@ -1802,6 +1802,12 @@ mapi_authenticate_sync (CamelService *service,
 	} else if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_LOGON_FAILED)) {
 		g_clear_error (&mapi_error);
 		result = CAMEL_AUTHENTICATION_REJECTED;
+	} else if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR)) {
+		g_set_error_literal (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			mapi_error->message);
+		result = CAMEL_AUTHENTICATION_ERROR;
 	} else {
 		/* mapi_error should be set */
 		g_return_val_if_fail (

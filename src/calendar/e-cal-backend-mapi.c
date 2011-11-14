@@ -111,12 +111,15 @@ mapi_error_to_edc_error (GError **perror, const GError *mapi_error, EDataCalCall
 	if (!perror)
 		return;
 
-	if (code == OtherError && mapi_error) {
+	if (code == OtherError && mapi_error && mapi_error->domain == E_MAPI_ERROR) {
 		/* Change error to more accurate only with OtherError */
 		switch (mapi_error->code) {
 		case MAPI_E_PASSWORD_CHANGE_REQUIRED:
 		case MAPI_E_PASSWORD_EXPIRED:
 			code = AuthenticationRequired;
+			break;
+		case MAPI_E_NETWORK_ERROR:
+			code = RepositoryOffline;
 			break;
 		default:
 			break;
@@ -1302,7 +1305,7 @@ ecbm_connect_user (ECalBackend *backend, GCancellable *cancellable, const gchar 
 	if (priv->conn && e_mapi_connection_connected (priv->conn)) {
 		/* Success */;
 	} else {
-		mapi_error_to_edc_error (perror, mapi_error, AuthenticationFailed, NULL);
+		mapi_error_to_edc_error (perror, mapi_error, g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR) ? OtherError : AuthenticationFailed, NULL);
 		if (mapi_error)
 			g_error_free (mapi_error);
 		g_static_mutex_unlock (&auth_mutex);
