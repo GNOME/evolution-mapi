@@ -108,7 +108,32 @@ void e_mapi_util_time_t_to_filetime (const time_t tt, struct FILETIME *filetime)
 
 void		e_mapi_utils_global_lock			(void);
 void		e_mapi_utils_global_unlock			(void);
-gboolean	e_mapi_utils_create_mapi_context		(struct mapi_context **mapi_ctx, GError **perror);
+gboolean	e_mapi_utils_create_mapi_context		(struct mapi_context **mapi_ctx,
+								 GError **perror);
 void		e_mapi_utils_destroy_mapi_context		(struct mapi_context *mapi_ctx);
 
+gboolean	e_mapi_utils_build_last_modify_restriction	(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 TALLOC_CTX *mem_ctx,
+								 struct mapi_SRestriction **restrictions,
+								 gpointer user_data,
+								 GCancellable *cancellable,
+								 GError **perror);
+struct FolderBasicPropertiesData
+{
+	mapi_id_t fid;
+	time_t last_modified;
+	guint32 obj_total;
+};
+
+gboolean	e_mapi_utils_get_folder_basic_properties_cb	(EMapiConnection *conn,
+								 mapi_id_t fid,
+								 TALLOC_CTX *mem_ctx,
+								 /* const */ struct mapi_SPropValue_array *properties,
+								 gpointer user_data, /* struct FolderBasicPropertiesData * */
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean	e_mapi_utils_copy_to_mapi_SPropValue		(TALLOC_CTX *mem_ctx,
+								 struct mapi_SPropValue *mapi_sprop, 
+								 struct SPropValue *sprop);
 #endif

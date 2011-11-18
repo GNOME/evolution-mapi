@@ -40,6 +40,8 @@
 #include "e-mapi-utils.h"
 #include "e-mapi-mail-utils.h"
 #include "e-mapi-fast-transfer.h"
+#include "e-mapi-openchange.h"
+
 #include <param.h>
 
 static void register_connection (EMapiConnection *conn);
@@ -1711,7 +1713,7 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
 		goto cleanup;
 
-	spropTagArray = set_SPropTagArray (mem_ctx, 1, PR_FID);
+	spropTagArray = set_SPropTagArray (mem_ctx, 3, PidTagFolderId, PidTagLastModificationTime, PidTagContentCount);
 	if (brp_cb) {
 		if (!brp_cb (conn, mapi_object_get_id (obj_folder), mem_ctx, spropTagArray, brp_cb_user_data, cancellable, perror)) {
 			goto cleanup;
@@ -1809,7 +1811,7 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 			}
 		}
 	} else {
-		ms = GetPropsAll (obj_folder, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, properties);
+		ms = GetPropsAll (obj_folder, MAPI_UNICODE, properties);
 		if (ms != MAPI_E_SUCCESS) {
 			make_mapi_error (perror, "GetPropsAll", ms);
 			goto cleanup;
@@ -1904,6 +1906,7 @@ list_objects_internal_cb (EMapiConnection *conn,
 	struct ListObjectsInternalData *loi_data = user_data;
 	ListObjectsData lod;
 	const mapi_id_t	*pmid;
+	const gchar *msg_class;
 	const uint32_t *pmsg_flags;
 	struct SPropValue *last_modified;
 	struct timeval t;
@@ -1913,11 +1916,13 @@ list_objects_internal_cb (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (mem_ctx != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (srow != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	pmid = get_SPropValue_SRow_data (srow, PR_MID);
-	pmsg_flags = get_SPropValue_SRow_data (srow, PR_MESSAGE_FLAGS);
-	last_modified = get_SPropValue_SRow (srow, PR_LAST_MODIFICATION_TIME);
+	pmid = get_SPropValue_SRow_data (srow, PidTagMid);
+	msg_class = get_SPropValue_SRow_data (srow, PidTagMessageClass);
+	pmsg_flags = get_SPropValue_SRow_data (srow, PidTagMessageFlags);
+	last_modified = get_SPropValue_SRow (srow, PidTagLastModificationTime);
 
 	lod.mid = pmid ? *pmid : 0;
+	lod.msg_class = msg_class;
 	lod.msg_flags = pmsg_flags ? *pmsg_flags : 0;
 
 	if (last_modified && get_mapi_SPropValue_date_timeval (&t, *last_modified) == MAPI_E_SUCCESS)
@@ -2136,10 +2141,11 @@ e_mapi_connection_list_objects (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	propTagArray = set_SPropTagArray (mem_ctx, 0x3,
-					  PR_MID,
-					  PR_MESSAGE_FLAGS,
-					  PR_LAST_MODIFICATION_TIME);
+	propTagArray = set_SPropTagArray (mem_ctx, 0x4,
+					  PidTagMid,
+					  PidTagMessageClass,
+					  PidTagMessageFlags,
+					  PidTagLastModificationTime);
 
 	/* Set primary columns to be fetched */
 	ms = SetColumns (&obj_table, propTagArray);
@@ -2357,6 +2363,7 @@ struct EnsureAdditionalPropertiesData
 	TransferObjectCB cb;
 	gpointer cb_user_data;
 	mapi_object_t *obj_folder;
+	guint32 downloaded;
 };
 
 static gboolean
@@ -2457,7 +2464,501 @@ ensure_additional_properties_cb (EMapiConnection *conn,
 		}
 	}
 
+	eap->downloaded++;
+
 	return eap->cb (conn, mem_ctx, object, obj_index, obj_total, eap->cb_user_data, cancellable, perror);
+}
+
+static enum MAPISTATUS
+fetch_object_property_as_stream (EMapiConnection *conn,
+				 TALLOC_CTX *mem_ctx,
+				 mapi_object_t *obj_message,
+				 uint32_t proptag,
+				 struct SBinary_short *bin,
+				 GCancellable *cancellable,
+				 GError **perror)
+{
+	enum MAPISTATUS ms;
+	mapi_object_t obj_stream;
+	uint32_t buf_size, max_read;
+	uint16_t off_data, cn_read;
+	gboolean done = FALSE;
+
+	g_return_val_if_fail (conn != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (mem_ctx != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (obj_message != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (bin != NULL, MAPI_E_INVALID_PARAMETER);
+
+	mapi_object_init (&obj_stream);
+
+	ms = OpenStream (obj_message, proptag, STREAM_ACCESS_READ, &obj_stream);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "OpenStream", ms);
+		goto cleanup;
+	}
+
+	bin->cb = 0;
+
+	ms = GetStreamSize (&obj_stream, &buf_size);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "GetStreamSize", ms);
+		goto cleanup;
+	}
+
+	bin->cb = buf_size;
+	bin->lpb = talloc_size (mem_ctx, bin->cb + 1);
+	if (!bin->lpb || !bin->cb)
+		goto cleanup;
+
+	/* determine max_read first, to read by chunks as long as possible */
+	off_data = 0;
+	max_read = buf_size > STREAM_MAX_READ_SIZE ? STREAM_MAX_READ_SIZE : buf_size;
+	do {
+		ms = ReadStream (&obj_stream, (bin->lpb) + off_data, max_read, &cn_read);
+		if (ms == MAPI_E_SUCCESS) {
+			if (cn_read == 0) {
+				done = TRUE;
+			} else {
+				off_data += cn_read;
+				if (off_data >= buf_size)
+					done = TRUE;
+			}
+			break;
+		}
+
+		if (ms == 0x2c80)
+			max_read = max_read >> 1;
+		else
+			max_read = STREAM_MAX_READ_SIZE_DF;
+
+		if (max_read < STREAM_MAX_READ_SIZE_DF)
+			max_read = STREAM_MAX_READ_SIZE_DF;
+	} while (ms == 0x2c80); /* an error when max_read is too large? */
+
+	while (!done) {
+		ms = ReadStream (&obj_stream, bin->lpb + off_data, max_read, &cn_read);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "ReadStream", ms);
+			done = TRUE;
+		} else if (cn_read == 0) {
+			done = TRUE;
+		} else {
+			off_data += cn_read;
+			if (off_data >= buf_size)
+				done = TRUE;
+		}
+	}
+
+ cleanup:
+	mapi_object_release (&obj_stream);
+
+	return ms;
+}
+
+static enum MAPISTATUS
+e_mapi_connection_fetch_object_internal (EMapiConnection *conn,
+					 TALLOC_CTX *mem_ctx,
+					 mapi_object_t *obj_message,
+					 struct EnsureAdditionalPropertiesData *eap,
+					 EMapiObject **out_object,
+					 GCancellable *cancellable,
+					 GError **perror);
+
+struct FetchObjectAttachmentData
+{
+	mapi_object_t *obj_message;
+	struct EnsureAdditionalPropertiesData *eap;
+	EMapiObject *object; /* to add attachments to */
+};
+
+static gboolean
+fetch_object_attachment_cb (EMapiConnection *conn,
+			    mapi_id_t fid,
+			    TALLOC_CTX *mem_ctx,
+			    struct SRow *srow,
+			    guint32 row_index,
+			    guint32 rows_total,
+			    gpointer user_data,
+			    GCancellable *cancellable,
+			    GError **perror)
+{
+	enum MAPISTATUS ms;
+	struct FetchObjectAttachmentData *foa = user_data;
+	EMapiAttachment *attachment = NULL;
+	mapi_object_t obj_attach;
+	const uint32_t *attach_num, *attach_method;
+
+	g_return_val_if_fail (conn != NULL, FALSE);
+	g_return_val_if_fail (mem_ctx != NULL, FALSE);
+	g_return_val_if_fail (srow != NULL, FALSE);
+	g_return_val_if_fail (user_data != NULL, FALSE);
+	g_return_val_if_fail (foa->obj_message != NULL, FALSE);
+	g_return_val_if_fail (foa->object != NULL, FALSE);
+
+	mapi_object_init (&obj_attach);
+
+	attach_num = e_mapi_util_find_row_propval (srow, PidTagAttachNumber);
+	if (!attach_num)
+		return FALSE;
+
+	ms = OpenAttach (foa->obj_message, *attach_num, &obj_attach);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "OpenAttach", ms);
+		goto cleanup;
+	}
+
+	attachment = e_mapi_attachment_new (foa->object);
+
+	ms = GetPropsAll (&obj_attach, MAPI_UNICODE, &attachment->properties);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "Attachment::GetPropsAll", ms);
+		goto cleanup;
+	}
+
+	attach_method = e_mapi_util_find_row_propval (srow, PidTagAttachMethod);
+	if (attach_method && *attach_method == ATTACH_BY_VALUE) {
+		if (!e_mapi_util_find_array_propval (&attachment->properties, PidTagAttachDataBinary)) {
+			struct SBinary_short bin;
+
+			ms = fetch_object_property_as_stream (conn, mem_ctx, &obj_attach, PidTagAttachDataBinary, &bin, cancellable, perror);
+			if (ms != MAPI_E_SUCCESS) {
+				make_mapi_error (perror, "Attachment::fetch PidTagAttachDataBinary", ms);
+				goto cleanup;
+			}
+
+			attachment->properties.cValues++;
+			attachment->properties.lpProps = talloc_realloc (mem_ctx,
+									 attachment->properties.lpProps,
+									 struct mapi_SPropValue,
+									 attachment->properties.cValues + 1);
+			attachment->properties.lpProps[attachment->properties.cValues - 1].ulPropTag = PidTagAttachDataBinary;
+			attachment->properties.lpProps[attachment->properties.cValues - 1].value.bin = bin;
+			attachment->properties.lpProps[attachment->properties.cValues].ulPropTag = 0;
+		}
+	} else if (attach_method && *attach_method == ATTACH_EMBEDDED_MSG) {
+		mapi_object_t obj_emb_msg;
+
+		mapi_object_init (&obj_emb_msg);
+
+		if (OpenEmbeddedMessage (&obj_attach, &obj_emb_msg, MAPI_READONLY) == MAPI_E_SUCCESS) {
+			e_mapi_connection_fetch_object_internal (conn, mem_ctx, &obj_emb_msg, foa->eap, &attachment->embedded_object, cancellable, perror);
+		}
+
+		mapi_object_release (&obj_emb_msg);
+	}
+
+ cleanup:
+	mapi_object_release (&obj_attach);
+
+	if (ms == MAPI_E_SUCCESS) {
+		if (!foa->object->attachments) {
+			foa->object->attachments = attachment;
+		} else {
+			EMapiAttachment *attach = foa->object->attachments;
+			while (attach->next)
+				attach = attach->next;
+			attach->next = attachment;
+		}
+	} else {
+		e_mapi_attachment_free (attachment);
+	}
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+static enum MAPISTATUS
+e_mapi_connection_fetch_object_internal (EMapiConnection *conn,
+					 TALLOC_CTX *mem_ctx,
+					 mapi_object_t *obj_message,
+					 struct EnsureAdditionalPropertiesData *eap,
+					 EMapiObject **out_object,
+					 GCancellable *cancellable,
+					 GError **perror)
+{
+	enum MAPISTATUS ms;
+	EMapiObject *object;
+	uint16_t ui16, uj16, np_count = 0, *np_propID = NULL;
+	uint32_t ui32;
+	struct MAPINAMEID *np_nameid = NULL;
+	const bool *has_attachments;
+	struct SPropTagArray recipient_proptags;
+	struct SRowSet recipient_rows;
+	mapi_object_t attach_table;
+
+	g_return_val_if_fail (conn != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (mem_ctx != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (obj_message != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (eap != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (out_object != NULL, MAPI_E_INVALID_PARAMETER);
+
+	mapi_object_init (&attach_table);
+
+	object = e_mapi_object_new (mem_ctx);
+
+	ms = GetPropsAll (obj_message, MAPI_UNICODE, &object->properties);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "GetPropsAll", ms);
+		goto cleanup;
+	}
+
+	/* to transform named ids to their PidLid or PidName tags, like the fast-transfer does */
+	ms = QueryNamedProperties (obj_message, 0, NULL, &np_count, &np_propID, &np_nameid);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "QueryNamedProperties", ms);
+		goto cleanup;
+	}
+
+	if (np_count && np_propID && np_nameid) {
+		for (ui16 = 0; ui16 < np_count; ui16++) {
+			uint32_t proptag = np_propID[ui16];
+
+			for (uj16 = 0; uj16 < object->properties.cValues; uj16++) {
+				if (object->properties.lpProps[uj16].ulPropTag == proptag) {
+					uint32_t lid = MAPI_E_RESERVED;
+					char *guid;
+
+					guid = GUID_string (mem_ctx, &(np_nameid[ui16].lpguid));
+
+					if (np_nameid[ui16].ulKind == MNID_ID) {
+						if (e_mapi_nameid_lid_lookup_canonical (np_nameid[ui16].kind.lid, guid, &lid) != MAPI_E_SUCCESS)
+							lid = MAPI_E_RESERVED;
+					} else if (np_nameid[ui16].ulKind == MNID_STRING) {
+						if (e_mapi_nameid_string_lookup_canonical (np_nameid[ui16].kind.lpwstr.Name, guid, &lid) != MAPI_E_SUCCESS)
+							lid = MAPI_E_RESERVED;
+					}
+
+					talloc_free (guid);
+
+					if (lid != MAPI_E_RESERVED && (lid & 0xFFFF) == (proptag & 0xFFFF)) {
+						object->properties.lpProps[uj16].ulPropTag = lid;
+					}
+
+					break;
+				}
+			}
+		}
+	}
+
+	talloc_free (np_propID);
+	talloc_free (np_nameid);
+
+	/* ensure certain properties */
+	if (!e_mapi_util_find_array_propval (&object->properties, PidTagHtml)) {
+		uint8_t best_body = 0;
+
+		if (GetBestBody (obj_message, &best_body) == MAPI_E_SUCCESS && best_body == olEditorHTML) {
+			struct SBinary_short bin;
+
+			ms = fetch_object_property_as_stream (conn, mem_ctx, obj_message, PidTagHtml, &bin, cancellable, perror);
+			if (ms != MAPI_E_SUCCESS) {
+				make_mapi_error (perror, "Object::fetch PidTagHtml", ms);
+				goto cleanup;
+			}
+
+			object->properties.cValues++;
+			object->properties.lpProps = talloc_realloc (mem_ctx,
+								     object->properties.lpProps,
+								     struct mapi_SPropValue,
+								     object->properties.cValues + 1);
+			object->properties.lpProps[object->properties.cValues - 1].ulPropTag = PidTagHtml;
+			object->properties.lpProps[object->properties.cValues - 1].value.bin = bin;
+			object->properties.lpProps[object->properties.cValues].ulPropTag = 0;
+		}
+	}
+
+	if (!e_mapi_util_find_array_propval (&object->properties, PidTagBody)) {
+		struct SBinary_short bin;
+
+		if (fetch_object_property_as_stream (conn, mem_ctx, obj_message, PidTagBody, &bin, cancellable, NULL) == MAPI_E_SUCCESS) {
+			object->properties.cValues++;
+			object->properties.lpProps = talloc_realloc (mem_ctx,
+								     object->properties.lpProps,
+								     struct mapi_SPropValue,
+								     object->properties.cValues + 1);
+			object->properties.lpProps[object->properties.cValues - 1].ulPropTag = PidTagBody;
+			if (bin.cb > 0 && bin.lpb[bin.cb - 1] == 0)
+				object->properties.lpProps[object->properties.cValues - 1].value.lpszW = (const char *) talloc_steal (object, bin.lpb);
+			else
+				object->properties.lpProps[object->properties.cValues - 1].value.lpszW = talloc_strndup (object, (char *) bin.lpb, bin.cb);
+			object->properties.lpProps[object->properties.cValues].ulPropTag = 0;
+		}
+	}
+
+	if (!e_mapi_util_find_array_propval (&object->properties, PidNameContentClass)) {
+		uint32_t prop = PidNameContentClass;
+
+		prop = e_mapi_connection_resolve_named_prop (conn, mapi_object_get_id (eap->obj_folder), prop, cancellable, NULL);
+		if (prop != MAPI_E_RESERVED) {
+			struct SPropTagArray *tags;
+			struct SPropValue *lpProps = NULL;
+			uint32_t prop_count = 0;
+
+			tags = set_SPropTagArray (mem_ctx, 1, prop);
+
+			if (GetProps (obj_message, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, tags, &lpProps, &prop_count) == MAPI_E_SUCCESS && lpProps) {
+				if (lpProps[0].ulPropTag == prop) {
+					object->properties.cValues++;
+					object->properties.lpProps = talloc_realloc (mem_ctx,
+										     object->properties.lpProps,
+										     struct mapi_SPropValue,
+										     object->properties.cValues + 1);
+					object->properties.lpProps[object->properties.cValues - 1].ulPropTag = PidNameContentClass;
+					object->properties.lpProps[object->properties.cValues - 1].value.lpszW = talloc_strdup (object, lpProps[0].value.lpszW);
+					object->properties.lpProps[object->properties.cValues].ulPropTag = 0;
+				}
+			}
+
+			talloc_free (tags);
+			talloc_free (lpProps);
+		}
+	}
+
+	/* fetch attachments */
+	has_attachments = e_mapi_util_find_array_propval (&object->properties, PidTagHasAttachments);
+	if (has_attachments && *has_attachments) {
+		struct SPropTagArray *attach_columns;
+		struct FetchObjectAttachmentData foa;
+
+		ms = GetAttachmentTable (obj_message, &attach_table);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "GetAttachmentTable", ms);
+			goto cleanup;
+		}
+
+		attach_columns = set_SPropTagArray (mem_ctx, 1, PidTagAttachNumber);
+		ms = SetColumns (&attach_table, attach_columns);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "AttachTable::SetColumns", ms);
+			talloc_free (attach_columns);
+			goto cleanup;
+		}
+		talloc_free (attach_columns);
+
+		foa.obj_message = obj_message;
+		foa.eap = eap;
+		foa.object = object;
+
+		ms = foreach_tablerow (conn, mapi_object_get_id (eap->obj_folder), mem_ctx, &attach_table, fetch_object_attachment_cb, &foa, cancellable, perror);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "AttachTable::foreach_tablerow", ms);
+			goto cleanup;
+		}
+	}
+
+	/* get recipients */
+	ms = GetRecipientTable (obj_message, &recipient_rows, &recipient_proptags);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "GetRecipientTable", ms);
+		goto cleanup;
+	}
+
+	if (recipient_rows.cRows > 0) {
+		uint32_t uj32, uk32;
+		EMapiRecipient *first_recipient = NULL;
+
+		for (ui32 = 0; ui32 < recipient_rows.cRows; ui32++) {
+			struct SRow *row = &recipient_rows.aRow[ui32];
+			EMapiRecipient *recipient;
+
+			recipient = e_mapi_recipient_new (object);
+			recipient->properties.cValues = row->cValues;
+			recipient->properties.lpProps = talloc_zero_array (recipient, struct mapi_SPropValue, recipient->properties.cValues + 1);
+
+			for (uj32 = 0, uk32 = 0; uj32 < row->cValues; uj32++, uk32++) {
+				if (may_skip_property (row->lpProps[uj32].ulPropTag) ||
+				    !e_mapi_utils_copy_to_mapi_SPropValue (recipient, &recipient->properties.lpProps[uk32], &row->lpProps[uj32])) {
+					uk32--;
+					recipient->properties.cValues--;
+					recipient->properties.lpProps[recipient->properties.cValues].ulPropTag = 0;
+				}
+			}
+
+			recipient->properties.lpProps[recipient->properties.cValues].ulPropTag = 0;
+		}
+
+		object->recipients = first_recipient;
+	}
+
+ cleanup:
+	mapi_object_release (&attach_table);
+
+	if (ms == MAPI_E_SUCCESS) {
+		*out_object = object;
+	} else {
+		*out_object = NULL;
+		e_mapi_object_free (object);
+	}
+
+	return ms;
+}
+
+static enum MAPISTATUS
+e_mapi_connection_fetch_objects_internal (EMapiConnection *conn,
+					  TALLOC_CTX *mem_ctx,
+					  mapi_id_array_t *ids,
+					  struct EnsureAdditionalPropertiesData *eap,
+					  GCancellable *cancellable,
+					  GError **perror)
+{
+	enum MAPISTATUS ms;
+	guint32 idx;
+	mapi_container_list_t *element;
+
+	g_return_val_if_fail (conn != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (mem_ctx != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (ids != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (eap != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (eap->obj_folder != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (eap->downloaded < ids->count, MAPI_E_INVALID_PARAMETER);
+
+	for (idx = 0, element = ids->lpContainerList; idx < ids->count && idx < eap->downloaded && element; idx++) {
+		element = element->next;
+	}
+
+	g_return_val_if_fail (idx < ids->count, MAPI_E_INVALID_PARAMETER);
+
+	ms = MAPI_E_SUCCESS;
+	while (element && ms == MAPI_E_SUCCESS) {
+		mapi_object_t obj_message;
+		EMapiObject *object = NULL;
+		GError *local_error = NULL;
+
+		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+			ms = MAPI_E_USER_CANCEL;
+			break;
+		}
+
+		mapi_object_init (&obj_message);
+
+		ms = OpenMessage (eap->obj_folder, mapi_object_get_id (eap->obj_folder), element->id, &obj_message, 0 /* read-only */);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "OpenMessage", ms);
+			mapi_object_release (&obj_message);
+			break;
+		}
+
+		/* silently skip broken objects */
+		ms = e_mapi_connection_fetch_object_internal (conn, mem_ctx, &obj_message, eap, &object, cancellable, &local_error);
+		if (ms == MAPI_E_SUCCESS) {
+			if (!eap->cb (conn, mem_ctx, object, eap->downloaded, ids->count, eap->cb_user_data, cancellable, perror)) {
+				ms = MAPI_E_USER_CANCEL;
+				make_mapi_error (perror, "Object processing", ms);
+			}
+		} else {
+			e_mapi_debug_print ("%s: Skipping object %016" G_GINT64_MODIFIER "X because its fetch failed: %s",
+				G_STRFUNC, element->id, local_error ? local_error->message : mapi_get_errstr (ms));
+			ms = MAPI_E_SUCCESS;
+		}
+
+		e_mapi_object_free (object);
+		mapi_object_release (&obj_message);
+
+		eap->downloaded++;
+
+		element = element->next;
+	}
+
+	return ms;
 }
 
 /* deals with named IDs transparently, thus it's OK to check with PidLid and PidName constants only */
@@ -2506,8 +3007,20 @@ e_mapi_connection_transfer_objects (EMapiConnection *conn,
 	eap.cb = cb;
 	eap.cb_user_data = cb_user_data;
 	eap.obj_folder = obj_folder;
+	eap.downloaded = 0;
 
 	ms = e_mapi_fast_transfer_objects (conn, mem_ctx, obj_folder, &ids, ensure_additional_properties_cb, &eap, cancellable, perror);
+	if (ms == MAPI_E_CALL_FAILED) {
+		/* err, fallback to slow transfer, probably FXGetBuffer failed;
+		   see http://tracker.openchange.org/issues/378
+		*/
+
+		g_clear_error (perror);
+
+		e_mapi_debug_print ("%s: Failed to fast-transfer, fallback to slow fetch from %d of %d objects\n", G_STRFUNC, eap.downloaded, ids.count);
+
+		ms = e_mapi_connection_fetch_objects_internal (conn, mem_ctx, &ids, &eap, cancellable, perror);
+	}
 
 	mapi_id_array_release (&ids);
 

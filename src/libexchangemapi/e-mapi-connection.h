@@ -143,9 +143,10 @@ typedef struct {
 } ResolveNamedIDsData;
 
 typedef struct {
-	mapi_id_t mid; /* message ID, from PR_MID */
-	uint32_t msg_flags; /* MAPI MSGFLAG_* bit OR, from PR_MESSAGE_FLAGS */
-	time_t last_modified; /* PR_LAST_MODIFICATION_TIME as UTC */
+	mapi_id_t mid; /* message ID, from PidTagMid */
+	const gchar *msg_class; /* PidTagMessageClass */
+	uint32_t msg_flags; /* MAPI MSGFLAG_* bit OR, from PidTagMessageFlags */
+	time_t last_modified; /* PidTagLastModificationTime as UTC */
 } ListObjectsData;
 
 struct _EMapiObject;
@@ -225,9 +226,9 @@ typedef gboolean (*BuildRestrictionsCB)		(EMapiConnection *conn,
 typedef gboolean (*ListObjectsCB)		(EMapiConnection *conn,
 						 mapi_id_t fid,
 						 TALLOC_CTX *mem_ctx,
-						 const ListObjectsData *item_data,
-						 guint32 item_index,
-						 guint32 items_total,
+						 const ListObjectsData *object_data,
+						 guint32 obj_index,
+						 guint32 obj_total,
 						 gpointer user_data,
 						 GCancellable *cancellable,
 						 GError **perror);

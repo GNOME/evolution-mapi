@@ -55,9 +55,6 @@
 #define EDC_ERROR(_code) e_data_cal_create_error (_code, NULL)
 #define EDC_ERROR_EX(_code, _msg) e_data_cal_create_error (_code, _msg)
 
-#define SERVER_UTC_TIME "server_utc_time"
-#define CACHE_MARKER "populated"
-
 G_DEFINE_TYPE (ECalBackendMAPI, e_cal_backend_mapi, E_TYPE_CAL_BACKEND)
 
 typedef struct {
@@ -73,7 +70,7 @@ struct _ECalBackendMAPIPrivate {
 	mapi_id_t		fid;
 	uint32_t		olFolder;
 	gchar			*profile;
-	EMapiConnection  *conn;
+	EMapiConnection *conn;
 
 	/* These fields are entirely for access rights */
 	gchar			*owner_name;
@@ -87,7 +84,6 @@ struct _ECalBackendMAPIPrivate {
 	gboolean		read_only;
 	gchar			*uri;
 	gboolean		mode_changed;
-	gboolean		populating_cache; /* whether in populate_cache */
 	GMutex			*updating_mutex;
 
 	/* timeout handler for syncing sendoptions */
@@ -97,6 +93,10 @@ struct _ECalBackendMAPIPrivate {
 	guint			timeout_id;
 	GThread			*dthread;
 	SyncDelta		*dlock;
+
+	time_t last_refresh;
+	gint last_obj_total;
+	GCancellable *cancellable;
 };
 
 #define CACHE_REFRESH_INTERVAL 600000
@@ -137,6 +137,23 @@ mapi_error_to_edc_error (GError **perror, const GError *mapi_error, EDataCalCall
 }
 
 /* **** UTILITY FUNCTIONS **** */
+
+static void
+get_comp_mid (icalcomponent *icalcomp, mapi_id_t *mid)
+{
+	gchar *x_mid;
+
+	g_return_if_fail (icalcomp != NULL);
+	g_return_if_fail (mid != NULL);
+
+	x_mid = e_mapi_cal_utils_get_icomp_x_prop (icalcomp, "X-EVOLUTION-MAPI-MID");
+	if (x_mid) {
+		e_mapi_util_mapi_id_from_string (x_mid, mid);
+		g_free (x_mid);
+	} else {
+		e_mapi_util_mapi_id_from_string (icalcomponent_get_uid (icalcomp), mid);
+	}
+}
 
 static const gchar *
 ecbm_get_owner_name (ECalBackendMAPI *cbmapi)
@@ -333,12 +350,16 @@ view_progress_cb (EDataCalView *view, gpointer user_data)
 }
 
 static void
-notify_view_progress (ECalBackendMAPI *cbmapi, guint64 index, guint64 total)
+notify_view_progress (ECalBackendMAPI *cbmapi, guint index, guint total)
 {
 	struct EMAPIProgressData pd = { 0 };
 	gchar *progress_string;
 
-	pd.percent = ((gfloat) index/total) * 100;
+	if (total > 0)
+		pd.percent = index * 100 / total;
+	else
+		pd.percent = -1;
+
 	if (pd.percent > 100)
 		pd.percent = 99;
 
@@ -399,457 +420,403 @@ put_component_to_store (ECalBackendMAPI *cbmapi,
 	e_cal_backend_store_put_component_with_time_range (priv->store, comp, time_start, time_end);
 }
 
-static gboolean
-mapi_cal_get_changes_cb (FetchItemsCallbackData *item_data,
-			 gpointer data,
-			 GCancellable *cancellable,
-			 GError **perror)
+#define notify_error(_mmapi_backend, _merror, _mformat)					\
+	G_STMT_START {									\
+		notify_error_ex (_mmapi_backend,					\
+				 &(_merror),						\
+				 _mformat,						\
+				 (_merror) ? (_merror)->message : _("Unknown error"));	\
+	} G_STMT_END
+
+static void notify_error_ex (ECalBackendMAPI *mapi_backend, GError **perror, const gchar *format, ...) G_GNUC_PRINTF (3, 4);
+
+static void
+notify_error_ex (ECalBackendMAPI *mapi_backend, GError **perror, const gchar *format, ...)
 {
-	struct mapi_SPropValue_array *array = item_data->properties;
-	const mapi_id_t mid = item_data->mid;
-	GSList *streams = item_data->streams;
-	GSList *recipients = item_data->recipients;
-	GSList *attachments = item_data->attachments;
-	GSList *detached = NULL, *d_i = NULL;
-	ECalBackendMAPI *cbmapi	= data;
-	ECalBackendMAPIPrivate *priv = cbmapi->priv;
-	icalcomponent_kind kind;
-	gchar *tmp = NULL;
-	ECalComponent *cache_comp = NULL;
-	const gchar *cache_dir;
-	const bool *recurring;
+	gchar *msg;
+	va_list args;
 
-	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
-	cache_dir = e_cal_backend_get_cache_dir (E_CAL_BACKEND (cbmapi));
+	g_return_if_fail (mapi_backend != NULL);
+	g_return_if_fail (format != NULL);
 
-	recurring = e_mapi_util_find_array_namedid (array, item_data->conn, item_data->fid, PidLidTaskFRecurring);
-	if (recurring && *recurring) {
-		g_warning ("Encountered a recurring task.");
-		e_mapi_util_free_stream_list (&streams);
-		e_mapi_util_free_recipient_list (&recipients);
-		e_mapi_util_free_attachment_list (&attachments);
+	if (perror && (
+	    g_error_matches (*perror, G_IO_ERROR, G_IO_ERROR_CANCELLED) ||
+	    g_error_matches (*perror, E_MAPI_ERROR, MAPI_E_USER_CANCEL)))
+		return;
+
+	va_start (args, format);
+	msg = g_strdup_vprintf (format, args);
+	va_end (args);
+
+	e_cal_backend_notify_error (E_CAL_BACKEND (mapi_backend), msg);
+	g_free (msg);
+
+	g_clear_error (perror);
+}
+
+static void
+free_component_slist (gpointer ptr)
+{
+	g_slist_free_full (ptr, g_object_unref);
+}
+
+static void
+drop_removed_comps_cb (gpointer pmid, gpointer slist, gpointer pcbmapi)
+{
+	ECalBackendMAPI *cbmapi = pcbmapi;
+	ECalBackend *backend;
+	GSList *iter;
+
+	g_return_if_fail (pcbmapi != NULL);
+
+	backend = E_CAL_BACKEND (cbmapi);
+	g_return_if_fail (backend != NULL);
+
+	for (iter = slist; iter; iter = iter->next) {
+		ECalComponent *comp = iter->data;
+		ECalComponentId *id;
+
+		if (!comp) {
+			g_debug ("%s: NULL component in list", G_STRFUNC);
+			continue;
+		}
+
+		id = e_cal_component_get_id (comp);
+		if (!id) {
+			g_debug ("%s: Failed to get component's ID", G_STRFUNC);
+			continue;
+		}
+
+		if (e_cal_backend_store_remove_component (cbmapi->priv->store, id->uid, id->rid)) {
+			e_cal_backend_notify_component_removed (backend, id, e_cal_component_get_icalcomponent (comp), NULL);
+		}
+
+		e_cal_component_free_id (id);
+	}
+}
+
+struct ListCalendarObjectsData
+{
+	GSList *changed_mids;		/* newly allocated mapi_id_t *; these will be fetched again */
+	GHashTable *known_comps;	/* reffed ECalComponent-s from the cache; those left will be removed;
+					   key is 'mapi_id_t *', the mid;
+					   value is GSList of the component and its detached instances
+					*/
+	time_t latest_modified;
+};
+
+static gboolean
+list_calendar_objects_cb (EMapiConnection *conn,
+			  mapi_id_t fid,
+			  TALLOC_CTX *mem_ctx,
+			  const ListObjectsData *object_data,
+			  guint32 obj_index,
+			  guint32 obj_total,
+			  gpointer user_data,
+			  GCancellable *cancellable,
+			  GError **perror)
+{
+	struct ListCalendarObjectsData *lco = user_data;
+	GSList *slist;
+	gboolean need_update = FALSE;
+
+	g_return_val_if_fail (object_data != NULL, FALSE);
+	g_return_val_if_fail (lco != NULL, FALSE);
+
+	if (object_data->msg_class &&
+	    g_ascii_strcasecmp (object_data->msg_class, "IPM.Note") == 0) {
 		return TRUE;
 	}
 
-	tmp = e_mapi_util_mapi_id_to_string (mid);
-	cache_comp = e_cal_backend_store_get_component (priv->store, tmp, NULL);
+	if (lco->latest_modified < object_data->last_modified)
+		lco->latest_modified = object_data->last_modified;
 
-	if (cache_comp == NULL) {
-		ECalComponent *comp = e_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, kind, tmp, array,
-									streams, recipients, attachments,
-									cache_dir, icaltimezone_get_utc_timezone (), FALSE, &detached);
-
-		detached = g_slist_prepend (detached, comp);
-
-		for (d_i = detached; d_i; d_i = g_slist_next (d_i)) {
-			comp = d_i->data;
-
-			if (E_IS_CAL_COMPONENT (comp)) {
-				gchar *comp_str;
-
-				e_cal_component_commit_sequence (comp);
-				put_component_to_store (cbmapi, comp);
-
-				comp_str = e_cal_component_get_as_string (comp);
-				e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), comp_str);
-				g_free (comp_str);
-			}
-
-			g_object_unref (comp);
-		}
-		g_slist_free (detached);
+	slist = g_hash_table_lookup (lco->known_comps, &object_data->mid);
+	if (!slist) {
+		/* it's a new component on the server */
+		need_update = TRUE;
 	} else {
-		struct timeval t;
+		/* known component, which might change */
+		ECalComponent *comp = slist->data;
+		struct icaltimetype *last_mod = NULL;
 
-		if (get_mapi_SPropValue_array_date_timeval (&t, array, PR_LAST_MODIFICATION_TIME) == MAPI_E_SUCCESS) {
-			struct icaltimetype itt, *cache_comp_lm = NULL;
+		/* pretty bad, but do not avoid fetching of other objects */
+		g_return_val_if_fail (comp != NULL, TRUE);
 
-			itt = icaltime_from_timet_with_zone (t.tv_sec, 0, 0);
-			icaltime_set_timezone (&itt, icaltimezone_get_utc_timezone ());
+		e_cal_component_get_last_modified (comp, &last_mod);
 
-			e_cal_component_get_last_modified (cache_comp, &cache_comp_lm);
-			if (!cache_comp_lm || (icaltime_compare (itt, *cache_comp_lm) != 0)) {
-				ECalComponent *comp;
-				gchar *cache_comp_str = NULL, *modif_comp_str = NULL;
-
-				e_cal_component_commit_sequence (cache_comp);
-				cache_comp_str = e_cal_component_get_as_string (cache_comp);
-
-				comp = e_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, kind, tmp, array,
-									streams, recipients, attachments,
-									cache_dir, icaltimezone_get_utc_timezone (), FALSE, NULL);
-
-				e_cal_component_commit_sequence (comp);
-				modif_comp_str = e_cal_component_get_as_string (comp);
-
-				put_component_to_store (cbmapi, comp);
-				e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbmapi), cache_comp_str, modif_comp_str);
-
-				g_object_unref (comp);
-				g_free (cache_comp_str);
-				g_free (modif_comp_str);
-			}
-			g_object_unref (cache_comp);
-			g_free (cache_comp_lm);
+		if (!last_mod ||
+		    icaltime_compare (icaltime_from_timet_with_zone (object_data->last_modified, 0, icaltimezone_get_utc_timezone ()), *last_mod) != 0) {
+			need_update = TRUE;
 		}
+
+		if (last_mod)
+			e_cal_component_free_icaltimetype (last_mod);
+
+		g_hash_table_remove (lco->known_comps, &object_data->mid);
 	}
 
-	g_free (tmp);
-	e_mapi_util_free_stream_list (&streams);
-	e_mapi_util_free_recipient_list (&recipients);
-	e_mapi_util_free_attachment_list (&attachments);
+	if (need_update) {
+		mapi_id_t *pmid;
 
-	notify_view_progress (cbmapi, item_data->index, item_data->total);
+		pmid = g_new0 (mapi_id_t, 1);
+		*pmid = object_data->mid;
+
+		lco->changed_mids = g_slist_prepend (lco->changed_mids, pmid);
+	}
+
+	return TRUE;
+}
+
+static gboolean
+transfer_calendar_objects_cb (EMapiConnection *conn,
+			      TALLOC_CTX *mem_ctx,
+			      /* const */ EMapiObject *object,
+			      guint32 obj_index,
+			      guint32 obj_total,
+			      gpointer user_data,
+			      GCancellable *cancellable,
+			      GError **perror)
+{
+	ECalBackendMAPI *cbmapi = user_data;
+	ECalBackend *backend;
+	ECalComponent *comp;
+	const mapi_id_t *pmid;
+	gchar *use_uid;
+	GSList *comps = NULL, *iter;
+
+	g_return_val_if_fail (cbmapi != NULL, FALSE);
+	g_return_val_if_fail (object != NULL, FALSE);
+
+	backend = E_CAL_BACKEND (cbmapi);
+	g_return_val_if_fail (backend != NULL, FALSE);
+
+	pmid = e_mapi_util_find_array_propval (&object->properties, PidTagMid);
+	if (pmid)
+		use_uid = e_mapi_util_mapi_id_to_string (*pmid);
+	else
+		use_uid = e_cal_component_gen_uid ();
+
+	comp = e_mapi_cal_util_object_to_comp (conn, object,
+		e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi)), FALSE,
+		e_cal_backend_get_cache_dir (E_CAL_BACKEND (cbmapi)),
+		use_uid, &comps);
+
+	g_free (use_uid);
+
+	if (comp)
+		comps = g_slist_prepend (comps, comp);
+
+	for (iter = comps; iter; iter = iter->next) {
+		ECalComponentId *id;
+		ECalComponent *old_comp;
+
+		comp = iter->data;
+		if (!comp)
+			continue;
+
+		e_cal_component_commit_sequence (comp);
+
+		id = e_cal_component_get_id (comp);
+		if (!id) {
+			g_debug ("%s: Failed to get component's ID", G_STRFUNC);
+			continue;
+		}
+
+		old_comp = e_cal_backend_store_get_component (cbmapi->priv->store, id->uid, id->rid);
+		if (old_comp) {
+			mapi_id_t old_mid, new_mid;
+
+			get_comp_mid (e_cal_component_get_icalcomponent (old_comp), &old_mid);
+			get_comp_mid (e_cal_component_get_icalcomponent (comp), &new_mid);
+
+			if (new_mid && old_mid && new_mid != old_mid) {
+				use_uid = e_mapi_util_mapi_id_to_string (new_mid);
+				e_cal_component_set_uid (comp, use_uid);
+				g_free (use_uid);
+
+				e_cal_component_free_id (id);
+				id = e_cal_component_get_id (comp);
+				if (!id) {
+					g_debug ("%s: Failed to re-get component's ID", G_STRFUNC);
+					continue;
+				}
+
+				old_comp = e_cal_backend_store_get_component (cbmapi->priv->store, id->uid, id->rid);
+			}
+		}
+
+		put_component_to_store (cbmapi, comp);
+
+		if (old_comp) {
+			e_cal_backend_notify_component_modified	(backend, e_cal_component_get_icalcomponent (old_comp), e_cal_component_get_icalcomponent (comp));
+			g_object_unref (old_comp);
+		} else {
+			e_cal_backend_notify_component_created (E_CAL_BACKEND (cbmapi), e_cal_component_get_icalcomponent (comp));
+		}
+
+		e_cal_component_free_id (id);
+	}
+
+	g_slist_free_full (comps, g_object_unref);
+
+	notify_view_progress (cbmapi, obj_index, obj_total);
 
 	return TRUE;
 }
 
 static void
-copy_strings_in_slist (GSList *slist)
+copy_to_known_comps (gpointer key, gpointer value, gpointer user_data)
 {
-	GSList *l;
+	mapi_id_t *pmid = key, *pmidcopy;
+	GSList *comps = value;
+	GHashTable *known_comps = user_data;
 
-	for (l = slist; l; l = l->next) {
-		l->data = g_strdup (l->data);
-	}
-}
+	g_return_if_fail (pmid != NULL);
+	g_return_if_fail (known_comps != NULL);
 
-struct deleted_items_data {
-	ECalBackendMAPI *cbmapi;
-	GSList *cache_ids;
-	GSList *unknown_mids; /* MIDs of items not in the cache */
-};
+	pmidcopy = g_new0 (mapi_id_t, 1);
+	*pmidcopy = *pmid;
 
-static gboolean
-handle_deleted_items_cb (FetchItemsCallbackData *item_data,
-			 gpointer data,
-			 GCancellable *cancellable,
-			 GError **perror)
-{
-	const mapi_id_t mid = item_data->mid;
-	struct deleted_items_data *did = data;
-	gchar *tmp = NULL;
-	GSList *cache_comp_uid = NULL;
-	gboolean need_refetch = FALSE;
-
-	g_return_val_if_fail (did != NULL, FALSE);
-
-	tmp = e_mapi_util_mapi_id_to_string (mid);
-	cache_comp_uid = g_slist_find_custom (did->cache_ids, tmp, (GCompareFunc) (g_ascii_strcasecmp));
-	if (cache_comp_uid != NULL) {
-		ECalBackendMAPIPrivate *priv = did->cbmapi->priv;
-		ECalComponent *comp;
-
-		comp = e_cal_backend_store_get_component (priv->store, cache_comp_uid->data, NULL);
-		if (comp) {
-			struct icaltimetype *last_mod = NULL;
-			struct timeval t;
-
-			e_cal_component_get_last_modified (comp, &last_mod);
-			if (!last_mod) {
-				need_refetch = TRUE;
-			} else if (get_mapi_SPropValue_array_date_timeval (&t, item_data->properties, PR_LAST_MODIFICATION_TIME) == MAPI_E_SUCCESS
-			    && icaltime_compare (icaltime_from_timet_with_zone (t.tv_sec, 0, icaltimezone_get_utc_timezone ()), *last_mod) != 0) {
-				need_refetch = TRUE;
-			}
-
-			if (last_mod)
-				e_cal_component_free_icaltimetype (last_mod);
-
-			g_object_unref (comp);
-		}
-
-		g_free (cache_comp_uid->data);
-		did->cache_ids = g_slist_remove_link (did->cache_ids, cache_comp_uid);
-	} else {
-		/* fetch it, as it is not in the cache */
-		need_refetch = TRUE;
-	}
-
-	if (need_refetch) {
-		mapi_id_t *nmid = g_new (mapi_id_t, 1);
-
-		*nmid = mid;
-		did->unknown_mids = g_slist_prepend (did->unknown_mids, nmid);
-	}
-
-	g_free (tmp);
-	return TRUE;
+	/* stealing 'comps' pointer here */
+	g_hash_table_insert (known_comps, pmidcopy, comps);
 }
 
 static gboolean
-mapi_cal_get_idlist (EMapiConnection *conn,
-		     mapi_id_t fid,
-		     TALLOC_CTX *mem_ctx,
-		     struct SPropTagArray *props,
-		     gpointer data,
-		     GCancellable *cancellable,
-		     GError **perror)
+update_local_cache (ECalBackendMAPI *cbmapi, GCancellable *cancellable)
 {
-	static const uint32_t cal_IDList[] = {
-		PR_FID,
-		PR_MID,
-		PR_LAST_MODIFICATION_TIME
-	};
-
-	g_return_val_if_fail (props != NULL, FALSE);
-
-	return e_mapi_utils_add_props_to_props_array (mem_ctx, props, cal_IDList, G_N_ELEMENTS (cal_IDList));
-}
-
-static gboolean
-ecbm_build_last_modification_restriction (EMapiConnection *conn,
-					  mapi_id_t fid,
-					  TALLOC_CTX *mem_ctx,
-					  struct mapi_SRestriction **restrictions,
-					  gpointer user_data,
-					  GCancellable *cancellable,
-					  GError **perror)
-{
-	icaltimetype *itt_cache = user_data;
-
-	g_return_val_if_fail (restrictions != NULL, FALSE);
-
-	if (itt_cache && !icaltime_is_null_time (*itt_cache)) {
-		struct mapi_SRestriction *restriction;
-		struct SPropValue sprop;
-		struct timeval t;
-
-		restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
-		g_return_val_if_fail (restriction != NULL, FALSE);
-
-		restriction->rt = RES_PROPERTY;
-		restriction->res.resProperty.relop = RELOP_GE;
-		restriction->res.resProperty.ulPropTag = PR_LAST_MODIFICATION_TIME;
-
-		t.tv_sec = icaltime_as_timet_with_zone (*itt_cache, icaltimezone_get_utc_timezone ());
-		t.tv_usec = 0;
-		set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
-		cast_mapi_SPropValue (mem_ctx, &(restriction->res.resProperty.lpProp), &sprop);
-
-		*restrictions = restriction;
-	}
-
-	return TRUE;
-}
-
-static gboolean
-ecbm_build_restriction_unknown_mids (EMapiConnection *conn,
-				     mapi_id_t fid,
-				     TALLOC_CTX *mem_ctx,
-				     struct mapi_SRestriction **restrictions,
-				     gpointer user_data,
-				     GCancellable *cancellable,
-				     GError **perror)
-{
-	GSList *unknown_mids = user_data, *iter;
-	gint ii;
-
-	g_return_val_if_fail (restrictions != NULL, FALSE);
-
-	if (unknown_mids) {
-		struct mapi_SRestriction *restriction;
-		struct mapi_SRestriction_or *or_res;
-
-		or_res = talloc_zero_array (mem_ctx, struct mapi_SRestriction_or, g_slist_length (unknown_mids));
-		g_return_val_if_fail (or_res != NULL, FALSE);
-
-		for (ii = 0, iter = unknown_mids; iter; ii++, iter = iter->next) {
-			mapi_id_t *pmid = iter->data;
-
-			or_res[ii].rt = RES_PROPERTY;
-			or_res[ii].res.resProperty.relop = RELOP_EQ;
-			or_res[ii].res.resProperty.ulPropTag = PR_MID;
-			or_res[ii].res.resProperty.lpProp.ulPropTag = PR_MID;
-			or_res[ii].res.resProperty.lpProp.value.dbl = *pmid;
-		}
-
-		restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
-		g_return_val_if_fail (restriction != NULL, FALSE);
-
-		restriction->rt = RES_OR;
-		restriction->res.resOr.cRes = g_slist_length (unknown_mids);
-		restriction->res.resOr.res = or_res;
-
-		*restrictions = restriction;
-	}
-
-	return TRUE;
-}
-
-/* Simple workflow for fetching deltas:
- * Poke cache for server_utc_time -> if exists, fetch all items modified after that time,
- * note current time before fetching and update cache with the same after fetching.
- * If server_utc_time does not exist OR is invalid, fetch all items
- * (we anyway process the results only if last_modified has changed).
- */
-
-static gboolean
-get_deltas (gpointer handle)
-{
-	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
-	icalcomponent_kind kind;
-	icaltimetype itt_current, itt_cache = icaltime_null_time();
-	time_t current_time;
-	struct tm tm;
-	gchar *time_string = NULL;
-	gchar t_str [26];
-	const gchar *serv_time;
-	gboolean use_restriction = TRUE;
-	GSList *ls = NULL;
-	struct deleted_items_data did;
+	EMapiConnection *conn;
 	ESource *source = NULL;
-	guint32 options= MAPI_OPTIONS_FETCH_ALL;
-	gboolean is_public = FALSE;
+	struct ListCalendarObjectsData lco;
+	GSList *iter, *components;
+	mapi_object_t obj_folder;
+	gboolean success;
 	GError *mapi_error = NULL;
+	GHashTable *comps_by_mids;
+	gboolean partial_update;
+	struct FolderBasicPropertiesData fbp;
 
-	if (!handle)
-		return FALSE;
-
-	cbmapi = (ECalBackendMAPI *) handle;
-	priv= cbmapi->priv;
-	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
+	priv = cbmapi->priv;
 	source = e_backend_get_source (E_BACKEND (cbmapi));
 	if (!e_backend_get_online (E_BACKEND (cbmapi)))
 		return FALSE;
 
 	g_mutex_lock (priv->updating_mutex);
 
-	serv_time = e_cal_backend_store_get_key_value (priv->store, SERVER_UTC_TIME);
-	if (serv_time)
-		itt_cache = icaltime_from_string (serv_time);
-
-	itt_current = icaltime_current_time_with_zone (icaltimezone_get_utc_timezone ());
-	current_time = icaltime_as_timet_with_zone (itt_current, icaltimezone_get_utc_timezone ());
-	gmtime_r (&current_time, &tm);
-	strftime (t_str, 26, "%Y-%m-%dT%H:%M:%SZ", &tm);
+	conn = g_object_ref (priv->conn);
 
 	if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
-		options |= MAPI_OPTIONS_USE_PFSTORE;
-		is_public = TRUE;
-		use_restriction = FALSE;
+		success = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+	} else {
+		success = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
 	}
 
-	if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, use_restriction ? ecbm_build_last_modification_restriction : NULL, &itt_cache, NULL,
-					is_public ? NULL : e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
-					mapi_cal_get_changes_cb, cbmapi,
-					options, NULL, &mapi_error)) {
-		if (mapi_error) {
-			gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
-			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
-			g_free (msg);
-			g_error_free (mapi_error);
-		} else {
-			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
-		}
-
-		g_mutex_unlock (priv->updating_mutex);
-		return FALSE;
+	if (!success) {
+		notify_error (cbmapi, mapi_error, _("Failed to open folder: %s"));
+		goto cleanup;
 	}
 
-	notify_view_completed (cbmapi);
-
-	time_string = g_strdup (t_str);
-	e_cal_backend_store_put_key_value (priv->store, SERVER_UTC_TIME, time_string);
-	g_free (time_string);
-
-	/* handle deleted items here by going over the entire cache and
-	 * checking for deleted items.*/
-
-	/* e_cal_backend_cache_get_keys returns a list of all the keys.
-	 * The items in the list are pointers to internal data,
-	 * so should not be freed, only the list should. */
-	did.cbmapi = cbmapi;
-	did.cache_ids = e_cal_backend_store_get_component_ids (priv->store);
-	did.unknown_mids = NULL;
-	copy_strings_in_slist (did.cache_ids);
-	options = 0;
-
-	if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0)
-		options = MAPI_OPTIONS_USE_PFSTORE;
-
-	if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL, NULL,
-						mapi_cal_get_idlist, NULL,
-						handle_deleted_items_cb, &did,
-						options, NULL, &mapi_error)) {
-		if (mapi_error) {
-			gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
-			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
-			g_free (msg);
-			g_error_free (mapi_error);
-		} else {
-			e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
-		}
-
-		g_slist_foreach (did.cache_ids, (GFunc) g_free, NULL);
-		g_slist_free (did.cache_ids);
-		g_mutex_unlock (priv->updating_mutex);
-		return FALSE;
+	success = e_mapi_connection_get_folder_properties (conn, &obj_folder, NULL, NULL,
+					 e_mapi_utils_get_folder_basic_properties_cb, &fbp,
+					 cancellable, &mapi_error);
+	if (!success) {
+		notify_error (cbmapi, mapi_error, _("Failed to get folder properties: %s"));
+		e_mapi_connection_close_folder (conn, &obj_folder, NULL, NULL);
+		goto cleanup;
 	}
 
-	options = MAPI_OPTIONS_FETCH_ALL;
-	e_cal_backend_store_freeze_changes (priv->store);
-	for (ls = did.cache_ids; ls; ls = g_slist_next (ls)) {
-		ECalComponent *comp = NULL;
-		icalcomponent *icalcomp = NULL;
+	comps_by_mids = g_hash_table_new_full (g_int64_hash, g_int64_equal, g_free, NULL);
 
-		comp = e_cal_backend_store_get_component (priv->store, (const gchar *) ls->data, NULL);
+	components = e_cal_backend_store_get_components (priv->store);
+	for (iter = components; iter; iter = iter->next) {
+		ECalComponent *comp = iter->data;
+		mapi_id_t mid, *pmid;
+		GSList *comps;
 
 		if (!comp)
 			continue;
 
-		icalcomp = e_cal_component_get_icalcomponent (comp);
-		if (kind == icalcomponent_isa (icalcomp)) {
-			gchar *comp_str = NULL;
-			ECalComponentId *id = e_cal_component_get_id (comp);
+		get_comp_mid (e_cal_component_get_icalcomponent (comp), &mid);
 
-			comp_str = e_cal_component_get_as_string (comp);
-			e_cal_backend_notify_object_removed (E_CAL_BACKEND (cbmapi),
-					id, comp_str, NULL);
-			e_cal_backend_store_remove_component (priv->store, (const gchar *) id->uid, id->rid);
+		pmid = g_new0 (mapi_id_t, 1);
+		*pmid = mid;
 
-			e_cal_component_free_id (id);
-			g_free (comp_str);
-		}
-		g_object_unref (comp);
+		comps = g_slist_prepend (g_hash_table_lookup (comps_by_mids, pmid), comp);
+		g_hash_table_insert (comps_by_mids, pmid, comps);
 	}
-	e_cal_backend_store_thaw_changes (priv->store);
+	/* doesn't call unref, because the hash table holds the components */
+	g_slist_free (components);
 
-	g_slist_foreach (did.cache_ids, (GFunc) g_free, NULL);
-	g_slist_free (did.cache_ids);
+	lco.changed_mids = NULL;
+	lco.known_comps = g_hash_table_new_full (g_int64_hash, g_int64_equal, g_free, free_component_slist);
+	lco.latest_modified = priv->last_refresh;
 
-	if (did.unknown_mids) {
-		if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
-			options |= MAPI_OPTIONS_USE_PFSTORE;
-			is_public = TRUE;
-		}
+	g_hash_table_foreach (comps_by_mids, copy_to_known_comps, lco.known_comps);
+	g_hash_table_destroy (comps_by_mids);
+	comps_by_mids = NULL;
 
-		if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, ecbm_build_restriction_unknown_mids, did.unknown_mids, NULL,
-					is_public ? NULL : e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
-					mapi_cal_get_changes_cb, cbmapi,
-					options, NULL, &mapi_error)) {
-			g_slist_foreach (did.unknown_mids, (GFunc) g_free, NULL);
-			g_slist_free (did.unknown_mids);
+	partial_update = priv->last_refresh > 0 && fbp.obj_total == priv->last_obj_total;
+	success = e_mapi_connection_list_objects (conn, &obj_folder,
+		partial_update ? e_mapi_utils_build_last_modify_restriction : NULL, &priv->last_refresh,
+		list_calendar_objects_cb, &lco,
+		cancellable, &mapi_error);
+	if (!success) {
+		notify_error (cbmapi, mapi_error, _("Failed to list objects: %s"));
 
-			if (mapi_error) {
-				gchar *msg = g_strdup_printf (_("Failed to fetch changes from a server: %s"), mapi_error->message);
-				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), msg);
-				g_free (msg);
-				g_error_free (mapi_error);
-			} else {
-				e_cal_backend_notify_error (E_CAL_BACKEND (cbmapi), _("Failed to fetch changes from a server"));
-			}
+		e_mapi_connection_close_folder (conn, &obj_folder, NULL, NULL);
 
-			g_mutex_unlock (priv->updating_mutex);
-			return FALSE;
-		}
-		g_slist_foreach (did.unknown_mids, (GFunc) g_free, NULL);
-		g_slist_free (did.unknown_mids);
+		g_slist_free_full (lco.changed_mids, g_free);
+		g_hash_table_destroy (lco.known_comps);
+
+		goto cleanup;
 	}
 
+	e_cal_backend_store_freeze_changes (priv->store);
+
+	if (!partial_update)
+		g_hash_table_foreach (lco.known_comps, drop_removed_comps_cb, cbmapi);
+	g_hash_table_destroy (lco.known_comps);
+	lco.known_comps = NULL;
+
+	if (lco.changed_mids) {
+		success = e_mapi_connection_transfer_objects (conn, &obj_folder,
+			lco.changed_mids,
+			transfer_calendar_objects_cb, cbmapi,
+			cancellable, &mapi_error);
+
+		e_cal_backend_store_thaw_changes (priv->store);
+
+		if (!success) {
+			notify_error (cbmapi, mapi_error, _("Failed to transfer objects: %s"));
+
+			e_mapi_connection_close_folder (conn, &obj_folder, NULL, NULL);
+
+			g_slist_free_full (lco.changed_mids, g_free);
+
+			goto cleanup;
+		}
+
+		g_slist_free_full (lco.changed_mids, g_free);
+	} else {
+		e_cal_backend_store_thaw_changes (priv->store);
+	}
+
+	priv->last_obj_total = fbp.obj_total;
+	priv->last_refresh = lco.latest_modified;
+
+	success = e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
+	if (!success) {
+		notify_error (cbmapi, mapi_error, _("Failed to close folder: %s"));
+
+		goto cleanup;
+	}
+
+ cleanup:
+	g_object_unref (conn);
 	g_mutex_unlock (priv->updating_mutex);
-	return TRUE;
+
+	return success;
 }
 
 static void
@@ -874,7 +841,7 @@ ecbm_get_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable,
 		 * also not on the server to prevent for a race condition where we
 		 * might otherwise mistakenly generate a new UID */
 		g_mutex_unlock (priv->mutex);
-		get_deltas (cbmapi);
+		update_local_cache (cbmapi, cancellable);
 		g_mutex_lock (priv->mutex);
 		comp = e_cal_backend_store_get_component (priv->store, uid, rid);
 	}
@@ -912,8 +879,6 @@ ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 	priv = cbmapi->priv;
 
 	g_mutex_lock (priv->mutex);
-
-//	d(g_message (G_STRLOC ": Getting object list (%s)", sexp));
 
 	if (!strcmp (sexp, "#t"))
 		search_needed = FALSE;
@@ -978,23 +943,27 @@ delta_thread (gpointer data)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
+	GCancellable *cancellable;
 	GTimeVal timeout;
 
 	cbmapi = (ECalBackendMAPI *)(data);
 	g_return_val_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), NULL);
 
 	priv = cbmapi->priv;
+	cancellable = g_object_ref (priv->cancellable);
 
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
 
-	while (TRUE)	{
-		gboolean succeeded = get_deltas (cbmapi);
+	while (!g_cancellable_is_cancelled (cancellable)) {
+		update_local_cache (cbmapi, cancellable);
 
 		g_mutex_lock (priv->dlock->mutex);
 
-		if (!succeeded || priv->dlock->exit)
+		if (priv->dlock->exit)
 			break;
+
+		notify_view_completed (cbmapi);
 
 		g_get_current_time (&timeout);
 		g_time_val_add (&timeout, get_cache_refresh_interval () * 1000);
@@ -1006,24 +975,28 @@ delta_thread (gpointer data)
 		g_mutex_unlock (priv->dlock->mutex);
 	}
 
+	g_object_unref (cancellable);
 	g_mutex_unlock (priv->dlock->mutex);
 	priv->dthread = NULL;
+
 	return NULL;
 }
 
-static gboolean
-fetch_deltas (ECalBackendMAPI *cbmapi)
+static void
+run_delta_thread (ECalBackendMAPI *cbmapi)
 {
 	ECalBackendMAPIPrivate *priv;
 	GError *error = NULL;
 
-	g_return_val_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), FALSE);
+	g_return_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi));
 
 	priv = cbmapi->priv;
 
 	/* If the thread is already running just return back */
-	if (priv->dthread)
-		return FALSE;
+	if (priv->dthread) {
+		g_cond_signal (priv->dlock->cond);
+		return;
+	}
 
 	if (!priv->dlock) {
 		priv->dlock = g_new0 (SyncDelta, 1);
@@ -1037,207 +1010,12 @@ fetch_deltas (ECalBackendMAPI *cbmapi)
 		g_warning (G_STRLOC ": %s", error->message);
 		g_error_free (error);
 	}
-
-	return TRUE;
-}
-
-static gboolean
-start_fetch_deltas (gpointer data)
-{
-	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
-
-	cbmapi = (ECalBackendMAPI *)(data);
-	g_return_val_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), FALSE);
-
-	priv = cbmapi->priv;
-
-	fetch_deltas (cbmapi);
-
-	priv->timeout_id = 0;
-
-	return FALSE;
-}
-
-static gboolean
-mapi_cal_cache_create_cb (FetchItemsCallbackData *item_data,
-			  gpointer data,
-			  GCancellable *cancellable,
-			  GError **perror)
-{
-	struct mapi_SPropValue_array *properties = item_data->properties;
-	const mapi_id_t mid = item_data->mid;
-	GSList *streams = item_data->streams;
-	GSList *recipients = item_data->recipients;
-	GSList *attachments = item_data->attachments;
-	GSList *detached = NULL, *d_i = NULL;
-	ECalBackendMAPI *cbmapi	= E_CAL_BACKEND_MAPI (data);
-	icalcomponent_kind kind;
-        ECalComponent *comp = NULL;
-	gchar *tmp = NULL;
-	const bool *recurring = NULL;
-	const gchar *cache_dir;
-
-	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
-	cache_dir = e_cal_backend_get_cache_dir (E_CAL_BACKEND (cbmapi));
-
-//	e_mapi_debug_property_dump (properties);
-
-	switch (kind) {
-		case ICAL_VTODO_COMPONENT:
-			/* FIXME: Evolution does not support recurring tasks */
-			recurring = e_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidTaskFRecurring);
-			if (recurring && *recurring) {
-				g_warning ("Encountered a recurring task.");
-				e_mapi_util_free_stream_list (&streams);
-				e_mapi_util_free_recipient_list (&recipients);
-				e_mapi_util_free_attachment_list (&attachments);
-				return TRUE;
-			}
-			break;
-		case ICAL_VEVENT_COMPONENT  :
-		case ICAL_VJOURNAL_COMPONENT:
-			break;
-		default:
-			return FALSE;
-	}
-
-	tmp = e_mapi_util_mapi_id_to_string (mid);
-	comp = e_mapi_cal_util_mapi_props_to_comp (item_data->conn, item_data->fid, kind, tmp, properties,
-							streams, recipients, attachments,
-							cache_dir, icaltimezone_get_utc_timezone (), FALSE, &detached);
-	g_free (tmp);
-
-	detached = g_slist_prepend (detached, comp);
-	for (d_i = detached; d_i; d_i = g_slist_next (d_i)) {
-		comp = d_i->data;
-
-		if (E_IS_CAL_COMPONENT (comp)) {
-			gchar *comp_str;
-
-			e_cal_component_commit_sequence (comp);
-			put_component_to_store (cbmapi, comp);
-
-			comp_str = e_cal_component_get_as_string (comp);
-			e_cal_backend_notify_object_created (E_CAL_BACKEND (cbmapi), comp_str);
-			g_free (comp_str);
-		}
-
-		g_object_unref (comp);
-	}
-	g_slist_free (detached);
-
-	e_mapi_util_free_stream_list (&streams);
-	e_mapi_util_free_recipient_list (&recipients);
-	e_mapi_util_free_attachment_list (&attachments);
-
-	notify_view_progress (cbmapi, item_data->index, item_data->total);
-
-	return TRUE;
-}
-
-static gboolean
-populate_cache (ECalBackendMAPI *cbmapi, GError **perror)
-{
-	ECalBackendMAPIPrivate *priv;
-	ESource *source = NULL;
-	icalcomponent_kind kind;
-	icaltimetype itt_current;
-	time_t current_time;
-	struct tm tm;
-	gchar *time_string = NULL;
-	gchar t_str [26];
-	guint32 options= MAPI_OPTIONS_FETCH_ALL;
-	gboolean is_public = FALSE;
-	GError *mapi_error = NULL;
-
-	priv = cbmapi->priv;
-
-	g_mutex_lock (priv->mutex);
-	if (priv->populating_cache) {
-		g_mutex_unlock (priv->mutex);
-		return TRUE; /* Success */
-	}
-	priv->populating_cache = TRUE;
-	g_mutex_unlock (priv->mutex);
-
-	source = e_backend_get_source (E_BACKEND (cbmapi));
-	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
-
-	itt_current = icaltime_current_time_with_zone (icaltimezone_get_utc_timezone ());
-	current_time = icaltime_as_timet_with_zone (itt_current, icaltimezone_get_utc_timezone ());
-	gmtime_r (&current_time, &tm);
-	strftime (t_str, 26, "%Y-%m-%dT%H:%M:%SZ", &tm);
-
-	if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
-		options |= MAPI_OPTIONS_USE_PFSTORE;
-		is_public = TRUE;
-	}
-
-	if (!e_mapi_connection_fetch_items (priv->conn, priv->fid, NULL, NULL, NULL,
-					is_public ? NULL : e_mapi_cal_utils_get_props_cb, GINT_TO_POINTER (kind),
-					mapi_cal_cache_create_cb, cbmapi,
-					options, NULL, &mapi_error)) {
-		e_cal_backend_store_thaw_changes (priv->store);
-		g_mutex_lock (priv->mutex);
-		priv->populating_cache = FALSE;
-		g_mutex_unlock (priv->mutex);
-
-		mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to fetch items from a server"));
-		if (mapi_error)
-			g_error_free (mapi_error);
-
-		return FALSE;
-	}
-
-	notify_view_completed (cbmapi);
-
-	time_string = g_strdup (t_str);
-	e_cal_backend_store_put_key_value (priv->store, SERVER_UTC_TIME, time_string);
-
-	g_free (time_string);
-
-	e_cal_backend_store_put_key_value (priv->store, CACHE_MARKER, "1");
-
-	g_mutex_lock (priv->mutex);
-	priv->populating_cache = FALSE;
-	g_mutex_unlock (priv->mutex);
-
-	return TRUE;
-}
-
-static gpointer
-cache_init (ECalBackendMAPI *cbmapi)
-{
-	ECalBackendMAPIPrivate *priv = cbmapi->priv;
-
-	if (!e_cal_backend_store_get_key_value (priv->store, CACHE_MARKER)) {
-		/* Populate the cache for the first time.*/
-		if (!populate_cache (cbmapi, NULL)) {
-			g_warning (G_STRLOC ": Could not populate the cache");
-			/*FIXME  why dont we do a notify here */
-			return NULL;
-		} else {
-			/*  Set delta fetch timeout */
-			priv->timeout_id = g_timeout_add (get_cache_refresh_interval (), start_fetch_deltas, (gpointer) cbmapi);
-
-			return NULL;
-		}
-	}
-
-	g_mutex_lock (priv->mutex);
-	fetch_deltas (cbmapi);
-	g_mutex_unlock (priv->mutex);
-
-	return NULL;
 }
 
 static void
 ecbm_connect (ECalBackendMAPI *cbmapi, GError **perror)
 {
 	ECalBackendMAPIPrivate *priv;
-	GThread *thread;
-	GError *error = NULL;
 
 	priv = cbmapi->priv;
 
@@ -1252,27 +1030,16 @@ ecbm_connect (ECalBackendMAPI *cbmapi, GError **perror)
 	}
 
 	/* We have established a connection */
-	if (priv->store && priv->fid && e_cal_backend_store_put_key_value (priv->store, CACHE_MARKER, "1")) {
+	if (priv->store && priv->fid) {
 		e_cal_backend_notify_online (E_CAL_BACKEND (cbmapi), TRUE);
 
 		if (priv->mode_changed && !priv->dthread) {
 			priv->mode_changed = FALSE;
-			fetch_deltas (cbmapi);
+			run_delta_thread (cbmapi);
 		}
-
-		/* FIXME: put server UTC time in cache */
-		return /* Success */;
 	}
 
 	priv->mode_changed = FALSE;
-
-	/* spawn a new thread for caching the calendar items */
-	thread = g_thread_create ((GThreadFunc) cache_init, cbmapi, FALSE, &error);
-	if (!thread) {
-		g_warning (G_STRLOC ": %s", error->message);
-		g_error_free (error);
-		g_propagate_error (perror, EDC_ERROR_EX (OtherError, _("Could not create thread for populating cache")));
-	}
 }
 
 static void
@@ -1502,23 +1269,6 @@ capture_req_props (FetchItemsCallbackData *item_data,
 	cbdata->ownerid = g_strdup (e_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE));
 
 	return TRUE;
-}
-
-static void
-get_comp_mid (icalcomponent *icalcomp, mapi_id_t *mid)
-{
-	gchar *x_mid;
-
-	g_return_if_fail (icalcomp != NULL);
-	g_return_if_fail (mid != NULL);
-
-	x_mid = e_mapi_cal_utils_get_icomp_x_prop (icalcomp, "X-EVOLUTION-MAPI-MID");
-	if (x_mid) {
-		e_mapi_util_mapi_id_from_string (x_mid, mid);
-		g_free (x_mid);
-	} else {
-		e_mapi_util_mapi_id_from_string (icalcomponent_get_uid (icalcomp), mid);
-	}
 }
 
 static gboolean
@@ -1760,8 +1510,7 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		return;
 	}
 
-	if (!fetch_deltas(cbmapi))
-		g_cond_signal (priv->dlock->cond);
+	run_delta_thread (cbmapi);
 
 	g_object_unref (comp);
 	e_mapi_util_free_recipient_list (&recipients);
@@ -1917,7 +1666,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		/* check if the object exists */
 		cache_comp = e_cal_backend_store_get_component (priv->store, uid, rid);
 		if (!cache_comp) {
-			get_deltas (cbmapi);
+			update_local_cache (cbmapi, cancellable);
 			cache_comp = e_cal_backend_store_get_component (priv->store, uid, rid);
 		}
 
@@ -2582,6 +2331,9 @@ ecbm_notify_online_cb (ECalBackend *backend, GParamSpec *pspec)
 		}
 	} else {
 		priv->read_only = TRUE;
+
+		g_object_unref (priv->conn);
+		priv->conn = NULL;
 	}
 
 	e_cal_backend_notify_readonly (backend, priv->read_only);
@@ -3408,6 +3160,28 @@ ecbm_op_get_free_busy (ECalBackend *backend, EDataCal *cal, guint32 opid, GCance
 }
 
 static void
+ecbm_dispose (GObject *object)
+{
+	ECalBackendMAPI *cbmapi;
+	ECalBackendMAPIPrivate *priv;
+
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (E_IS_CAL_BACKEND_MAPI (object));
+
+	cbmapi = E_CAL_BACKEND_MAPI (object);
+	priv = cbmapi->priv;
+
+	if (priv && priv->cancellable) {
+		g_cancellable_cancel (priv->cancellable);
+		g_object_unref (priv->cancellable);
+		priv->cancellable = NULL;
+	}
+
+	if (G_OBJECT_CLASS (e_cal_backend_mapi_parent_class)->dispose)
+		(* G_OBJECT_CLASS (e_cal_backend_mapi_parent_class)->dispose) (object);
+}
+
+static void
 ecbm_finalize (GObject *object)
 {
 	ECalBackendMAPI *cbmapi;
@@ -3514,6 +3288,7 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 	backend_class = (ECalBackendClass *) class;
 
 	object_class->finalize = ecbm_finalize;
+	object_class->dispose = ecbm_dispose;
 
 	/* functions done asynchronously */
 	backend_class->get_backend_property = ecbm_op_get_backend_property;
@@ -3552,8 +3327,10 @@ e_cal_backend_mapi_init (ECalBackendMAPI *cbmapi)
 	/* create the mutex for thread safety */
 	priv->mutex = g_mutex_new ();
 	priv->updating_mutex = g_mutex_new ();
-	priv->populating_cache = FALSE;
 	priv->op_queue = e_mapi_operation_queue_new ((EMapiOperationQueueFunc) ecbm_operation_cb, cbmapi);
+	priv->last_refresh = -1;
+	priv->last_obj_total = -1;
+	priv->cancellable = g_cancellable_new ();
 
 	cbmapi->priv = priv;
 

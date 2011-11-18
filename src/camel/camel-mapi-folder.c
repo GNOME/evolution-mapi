@@ -419,43 +419,6 @@ add_message_to_cache (CamelMapiFolder *mapi_folder, const gchar *uid, CamelMimeM
 	camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
 }
 
-static gboolean
-build_last_modify_restriction (EMapiConnection *conn,
-		               mapi_id_t fid,
-			       TALLOC_CTX *mem_ctx,
-			       struct mapi_SRestriction **restrictions,
-			       gpointer user_data,
-			       GCancellable *cancellable,
-			       GError **perror)
-{
-	const time_t *latest_last_modify = user_data;
-	struct mapi_SRestriction *restriction = NULL;
-
-	g_return_val_if_fail (restrictions != NULL, FALSE);
-
-	if (latest_last_modify && *latest_last_modify > 0) {
-		struct SPropValue sprop;
-		struct timeval t;
-
-		restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
-		g_return_val_if_fail (restriction != NULL, FALSE);
-
-		restriction->rt = RES_PROPERTY;
-		restriction->res.resProperty.relop = RELOP_GT;
-		restriction->res.resProperty.ulPropTag = PR_LAST_MODIFICATION_TIME;
-
-		t.tv_sec = *latest_last_modify;
-		t.tv_usec = 0;
-
-		set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
-		cast_mapi_SPropValue (mem_ctx, &(restriction->res.resProperty.lpProp), &sprop);
-	}
-
-	*restrictions = restriction;
-
-	return TRUE;
-}
-
 struct GatherChangedObjectsData
 {
 	CamelFolderSummary *summary;
@@ -924,7 +887,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 
 	if (status) {
 		status = e_mapi_connection_list_objects (conn, &obj_folder,
-			full_download ? NULL : build_last_modify_restriction, &mapi_summary->latest_last_modify,
+			full_download ? NULL : e_mapi_utils_build_last_modify_restriction, &mapi_summary->latest_last_modify,
 			gather_changed_objects_to_slist, &gco, cancellable, mapi_error);
 	}
 

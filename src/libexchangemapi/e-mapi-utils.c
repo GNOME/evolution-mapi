@@ -1318,3 +1318,189 @@ e_mapi_utils_ensure_utf8_string (uint32_t proptag,
 
 	return TRUE;
 }
+
+/* takes pointer to a time_t and populates restrictions
+   with a restriction on PidTagLastModificationTime
+*/
+gboolean
+e_mapi_utils_build_last_modify_restriction (EMapiConnection *conn,
+					    mapi_id_t fid,
+					    TALLOC_CTX *mem_ctx,
+					    struct mapi_SRestriction **restrictions,
+					    gpointer user_data,
+					    GCancellable *cancellable,
+					    GError **perror)
+{
+	const time_t *latest_last_modify = user_data;
+	struct mapi_SRestriction *restriction = NULL;
+
+	g_return_val_if_fail (restrictions != NULL, FALSE);
+
+	if (latest_last_modify && *latest_last_modify > 0) {
+		struct SPropValue sprop;
+		struct timeval t;
+
+		restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
+		g_return_val_if_fail (restriction != NULL, FALSE);
+
+		restriction->rt = RES_PROPERTY;
+		restriction->res.resProperty.relop = RELOP_GT;
+		restriction->res.resProperty.ulPropTag = PidTagLastModificationTime;
+
+		t.tv_sec = *latest_last_modify;
+		t.tv_usec = 0;
+
+		set_SPropValue_proptag_date_timeval (&sprop, PidTagLastModificationTime, &t);
+		cast_mapi_SPropValue (mem_ctx, &(restriction->res.resProperty.lpProp), &sprop);
+	}
+
+	*restrictions = restriction;
+
+	return TRUE;
+}
+
+gboolean
+e_mapi_utils_get_folder_basic_properties_cb (EMapiConnection *conn,
+					     mapi_id_t fid,
+					     TALLOC_CTX *mem_ctx,
+					     /* const */ struct mapi_SPropValue_array *properties,
+					     gpointer user_data,
+					     GCancellable *cancellable,
+					     GError **perror)
+{
+	struct FolderBasicPropertiesData *fbp = user_data;
+	const mapi_id_t *pfid;
+	const struct FILETIME *plast_modified;
+	const uint32_t *pcontent_count;
+
+	g_return_val_if_fail (properties != NULL, FALSE);
+	g_return_val_if_fail (user_data != NULL, FALSE);
+
+	pfid = e_mapi_util_find_array_propval (properties, PidTagFolderId);
+	plast_modified = e_mapi_util_find_array_propval (properties, PidTagLastModificationTime);
+	pcontent_count = e_mapi_util_find_array_propval (properties, PidTagContentCount);
+
+	if (pfid)
+		fbp->fid = *pfid;
+	else
+		fbp->fid = 0;
+
+	if (pcontent_count)
+		fbp->obj_total = *pcontent_count;
+	else
+		fbp->obj_total = 0;
+
+	if (plast_modified)
+		fbp->last_modified = e_mapi_util_filetime_to_time_t (plast_modified);
+	else
+		fbp->last_modified = 0;
+
+	return TRUE;
+}
+
+gboolean
+e_mapi_utils_copy_to_mapi_SPropValue (TALLOC_CTX *mem_ctx,
+				      struct mapi_SPropValue *mapi_sprop, 
+				      struct SPropValue *sprop)
+{
+	mapi_sprop->ulPropTag = sprop->ulPropTag;
+
+	switch (sprop->ulPropTag & 0xFFFF) {
+	case PT_BOOLEAN:
+		mapi_sprop->value.b = sprop->value.b;
+		return TRUE;
+	case PT_I2:
+		mapi_sprop->value.i = sprop->value.i;
+		return TRUE;
+	case PT_LONG:
+		mapi_sprop->value.l = sprop->value.l;
+		return TRUE;
+	case PT_DOUBLE:
+		memcpy (&mapi_sprop->value.dbl, (uint8_t *) &sprop->value.dbl, 8);
+		return TRUE;
+	case PT_I8:
+		mapi_sprop->value.d = sprop->value.d;
+		return TRUE;
+	case PT_STRING8:
+		mapi_sprop->value.lpszA = talloc_strdup (mem_ctx, sprop->value.lpszA);
+		return TRUE;
+	case PT_UNICODE:
+		mapi_sprop->value.lpszW = talloc_strdup (mem_ctx, sprop->value.lpszW);
+		return TRUE;
+	case PT_SYSTIME:
+		mapi_sprop->value.ft.dwLowDateTime = sprop->value.ft.dwLowDateTime;
+		mapi_sprop->value.ft.dwHighDateTime = sprop->value.ft.dwHighDateTime;
+		return TRUE;
+	case PT_BINARY:
+		mapi_sprop->value.bin.cb = sprop->value.bin.cb;
+		mapi_sprop->value.bin.lpb = talloc_memdup (mem_ctx, sprop->value.bin.lpb, sprop->value.bin.cb);
+		return TRUE;
+        case PT_ERROR:
+                mapi_sprop->value.err = sprop->value.err;
+                return TRUE;
+	case PT_CLSID:
+	{
+		DATA_BLOB	b;
+
+		b.data = sprop->value.lpguid->ab;
+		b.length = 16;
+
+		GUID_from_ndr_blob (&b, &mapi_sprop->value.lpguid);
+
+		return TRUE;
+	}
+	case PT_SVREID:
+		mapi_sprop->value.bin.cb = sprop->value.bin.cb;
+		mapi_sprop->value.bin.lpb = talloc_memdup (mem_ctx, sprop->value.bin.lpb, sprop->value.bin.cb);
+		return TRUE;
+	case PT_MV_STRING8:
+	{
+		uint32_t i;
+
+		mapi_sprop->value.MVszA.cValues = sprop->value.MVszA.cValues;
+		mapi_sprop->value.MVszA.strings = talloc_array (mem_ctx, struct mapi_LPSTR, mapi_sprop->value.MVszA.cValues);
+		for (i = 0; i < mapi_sprop->value.MVszA.cValues; i++) {
+			mapi_sprop->value.MVszA.strings[i].lppszA = talloc_strdup (mem_ctx, sprop->value.MVszA.lppszA[i]);
+		}
+		return TRUE;
+	}
+	case PT_MV_UNICODE:
+	{
+		uint32_t i;
+
+		mapi_sprop->value.MVszW.cValues = sprop->value.MVszW.cValues;
+		mapi_sprop->value.MVszW.strings = talloc_array (mem_ctx, struct mapi_LPWSTR, mapi_sprop->value.MVszW.cValues);
+		for (i = 0; i < mapi_sprop->value.MVszW.cValues; i++) {
+			mapi_sprop->value.MVszW.strings[i].lppszW = talloc_strdup (mem_ctx, sprop->value.MVszW.lppszW[i]);
+		}
+		return TRUE;
+	}
+	case PT_MV_BINARY:
+	{
+		uint32_t i;
+
+		mapi_sprop->value.MVbin.cValues = sprop->value.MVbin.cValues;
+		mapi_sprop->value.MVbin.bin = talloc_array (mem_ctx, struct SBinary_short, mapi_sprop->value.MVbin.cValues);
+		for (i = 0; i < mapi_sprop->value.MVbin.cValues; i++) {
+			mapi_sprop->value.MVbin.bin[i].cb = sprop->value.MVbin.lpbin[i].cb;
+			mapi_sprop->value.MVbin.bin[i].lpb = talloc_memdup (mem_ctx, sprop->value.MVbin.lpbin[i].lpb, sprop->value.MVbin.lpbin[i].cb);
+		}
+		return TRUE;
+	}
+	case PT_MV_LONG:
+	{
+		uint32_t i;
+
+		mapi_sprop->value.MVl.cValues = sprop->value.MVl.cValues;
+		mapi_sprop->value.MVl.lpl = talloc_array (mem_ctx, uint32_t, mapi_sprop->value.MVl.cValues);
+		for (i = 0; i < mapi_sprop->value.MVl.cValues; i++) {
+			mapi_sprop->value.MVl.lpl[i] = sprop->value.MVl.lpl[i];
+		}
+		return TRUE;
+	}
+        default:
+		break;
+	}
+
+	return FALSE;
+}

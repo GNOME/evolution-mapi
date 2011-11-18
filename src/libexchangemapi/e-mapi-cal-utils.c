@@ -2067,9 +2067,9 @@ static gboolean
 emcu_check_id_exists_cb (EMapiConnection *conn,
 			 mapi_id_t fid,
 			 TALLOC_CTX *mem_ctx,
-			 const ListObjectsData *item_data,
-			 guint32 item_index,
-			 guint32 items_total,
+			 const ListObjectsData *object_data,
+			 guint32 obj_index,
+			 guint32 obj_total,
 			 gpointer user_data,
 			 GCancellable *cancellable,
 			 GError **perror)

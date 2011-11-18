@@ -992,6 +992,7 @@ e_mapi_mail_utils_decode_email_address (EMapiConnection *conn,
 {
 	gint ii;
 	const gchar *cname = NULL, *cemail = NULL;
+	const gchar *addr_type, *email_addr;
 
 	g_return_if_fail (conn != NULL);
 	g_return_if_fail (properties != NULL);
@@ -1007,18 +1008,18 @@ e_mapi_mail_utils_decode_email_address (EMapiConnection *conn,
 		cname = e_mapi_util_find_array_propval (properties, name_proptags[ii]);
 	}
 
+	addr_type = e_mapi_util_find_array_propval (properties, email_type_proptag);
+	email_addr = e_mapi_util_find_array_propval (properties, email_proptag);
+
+	if (addr_type && g_ascii_strcasecmp (addr_type, "SMTP") == 0)
+		cemail = email_addr;
+
 	for (ii = 0; ii < smtp_proptags_len && !cemail; ii++) {
 		cemail = e_mapi_util_find_array_propval (properties, smtp_proptags[ii]);
 	}
 
-	if (!cemail) {
-		const gchar *addr_type = e_mapi_util_find_array_propval (properties, email_type_proptag);
-		const gchar *email_addr = e_mapi_util_find_array_propval (properties, email_proptag);
-
-		if (addr_type && g_ascii_strcasecmp (addr_type, "EX") == 0 && email_addr)
-			*email = e_mapi_connection_ex_to_smtp (conn, email_addr, name, NULL, NULL);
-		else if (addr_type && g_ascii_strcasecmp (addr_type, "SMTP") == 0)
-			cemail = email_addr;
+	if (!cemail && addr_type && g_ascii_strcasecmp (addr_type, "EX") == 0 && email_addr) {
+		*email = e_mapi_connection_ex_to_smtp (conn, email_addr, name, NULL, NULL);
 	}
 
 	if (!*email) {
