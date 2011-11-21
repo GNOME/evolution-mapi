@@ -85,6 +85,8 @@ struct _ECalBackendMAPIPrivate {
 	gchar			*uri;
 	gboolean		mode_changed;
 	GMutex			*updating_mutex;
+	GMutex			*is_updating_mutex;
+	gboolean		is_updating;
 
 	/* timeout handler for syncing sendoptions */
 	guint			sendoptions_sync_timeout;
@@ -702,6 +704,10 @@ update_local_cache (ECalBackendMAPI *cbmapi, GCancellable *cancellable)
 	if (!e_backend_get_online (E_BACKEND (cbmapi)))
 		return FALSE;
 
+	g_mutex_lock (priv->is_updating_mutex);
+	priv->is_updating = TRUE;
+	g_mutex_unlock (priv->is_updating_mutex);
+
 	g_mutex_lock (priv->updating_mutex);
 
 	conn = g_object_ref (priv->conn);
@@ -815,6 +821,12 @@ update_local_cache (ECalBackendMAPI *cbmapi, GCancellable *cancellable)
  cleanup:
 	g_object_unref (conn);
 	g_mutex_unlock (priv->updating_mutex);
+
+	g_mutex_lock (priv->is_updating_mutex);
+	priv->is_updating = FALSE;
+	g_mutex_unlock (priv->is_updating_mutex);
+
+	notify_view_completed (cbmapi);
 
 	return success;
 }
@@ -962,8 +974,6 @@ delta_thread (gpointer data)
 
 		if (priv->dlock->exit)
 			break;
-
-		notify_view_completed (cbmapi);
 
 		g_get_current_time (&timeout);
 		g_time_val_add (&timeout, get_cache_refresh_interval () * 1000);
@@ -2281,8 +2291,13 @@ ecbm_get_free_busy (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 static void
 ecbm_start_view (ECalBackend *backend, EDataCalView *view)
 {
+	ECalBackendMAPI *cbmapi;
+	ECalBackendMAPIPrivate *priv;
         GSList *objects = NULL;
 	GError *err = NULL;
+
+	cbmapi = E_CAL_BACKEND_MAPI (backend);
+	priv = cbmapi->priv;
 
         ecbm_get_object_list (backend, NULL, NULL, e_data_cal_view_get_text (view), &objects, &err);
         if (err) {
@@ -2299,7 +2314,10 @@ ecbm_start_view (ECalBackend *backend, EDataCalView *view)
 		g_slist_free (objects);
 	}
 
-	e_data_cal_view_notify_complete (view, NULL /* Success */);
+	g_mutex_lock (priv->is_updating_mutex);
+	if (!priv->is_updating)
+		e_data_cal_view_notify_complete (view, NULL /* Success */);
+	g_mutex_unlock (priv->is_updating_mutex);
 }
 
 static void
@@ -3225,6 +3243,11 @@ ecbm_finalize (GObject *object)
 		priv->updating_mutex = NULL;
 	}
 
+	if (priv->is_updating_mutex) {
+		g_mutex_free (priv->is_updating_mutex);
+		priv->is_updating_mutex = NULL;
+	}
+
 	if (priv->store) {
 		g_object_unref (priv->store);
 		priv->store = NULL;
@@ -3327,6 +3350,8 @@ e_cal_backend_mapi_init (ECalBackendMAPI *cbmapi)
 	/* create the mutex for thread safety */
 	priv->mutex = g_mutex_new ();
 	priv->updating_mutex = g_mutex_new ();
+	priv->is_updating_mutex = g_mutex_new ();
+	priv->is_updating = FALSE;
 	priv->op_queue = e_mapi_operation_queue_new ((EMapiOperationQueueFunc) ecbm_operation_cb, cbmapi);
 	priv->last_refresh = -1;
 	priv->last_obj_total = -1;
