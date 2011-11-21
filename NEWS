@@ -1,3 +1,26 @@
+evolution-mapi 3.3.2 2011-11-21
+-------------------------------
+
+Bugs:
+	Bug #664016 - Password prompt for Notes, Tasks, etc. on login (Milan Crha)
+
+Miscellanous:
+	Implement CamelFolder::get_message_cached() (Milan Crha)
+	Adapt to CamelNetworkSettings changes. (Matthew Barnes)
+	Various changes around Fast-Transfer implementation (Milan Crha)
+	Updated POTFILES.in (Piotr Drąg)
+	Use one mapi_context for each EMapiConnection (Milan Crha)
+	Avoid usage of talloc_init() (Milan Crha)
+	camel_operation_cancel_check(NULL) returns FALSE. (Matthew Barnes)
+	Adapt to Evolution's EMConfig API changes. (Matthew Barnes)
+	Different approach for CamelMapiFolder's summary fetching (Milan Crha)
+	Adapt to CamelFolderSummary changes. (Matthew Barnes)
+
+Translations:
+	Daniel Mustieles (es)
+	Marek Černocký (cs)
+	Mario Blättermann (de)
+
 evolution-mapi 3.3.1 2011-10-24
 -------------------------------
 
