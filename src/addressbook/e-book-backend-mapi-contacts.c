@@ -555,137 +555,152 @@ struct FetchContactItemData
 };
 
 static gboolean
-fetch_contact_item_cb (FetchItemsCallbackData *item_data,
-		       gpointer data,
-		       GCancellable *cancellable,
-		       GError **perror)
+transfer_contact_cb (EMapiConnection *conn,
+		     TALLOC_CTX *mem_ctx,
+		     /* const */ EMapiObject *object,
+		     guint32 obj_index,
+		     guint32 obj_total,
+		     gpointer user_data,
+		     GCancellable *cancellable,
+		     GError **perror)
 {
-	struct FetchContactItemData *fcid = data;
+	struct FetchContactItemData *fcid = user_data;
 
-	g_return_val_if_fail (data != NULL, FALSE);
+	g_return_val_if_fail (fcid != NULL, FALSE);
 	g_return_val_if_fail (fcid->ebma != NULL, FALSE);
+	g_return_val_if_fail (object != NULL, FALSE);
 
-	fcid->contact = mapi_book_utils_contact_from_props (item_data->conn, item_data->fid, e_book_backend_mapi_get_book_uri (fcid->ebma), item_data->properties, NULL);
+	fcid->contact = mapi_book_utils_contact_from_props (conn, E_BOOK_BACKEND_MAPI_CONTACTS (fcid->ebma)->priv->fid, e_book_backend_mapi_get_book_uri (fcid->ebma), &object->properties, NULL);
 
 	if (fcid->contact) {
-		gchar *suid = e_mapi_util_mapi_ids_to_uid (item_data->fid, item_data->mid);
+		const mapi_id_t *pmid;
 
-		/* UID of the contact is nothing but the concatenated string of hex id of folder and the message.*/
-		e_contact_set (fcid->contact, E_CONTACT_UID, suid);
+		pmid = e_mapi_util_find_array_propval (&object->properties, PidTagMid);
+		if (pmid) {
+			gchar *suid = e_mapi_util_mapi_id_to_string (*pmid);
 
-		if (!e_book_backend_mapi_notify_contact_update (fcid->ebma, NULL, fcid->contact, NULL, item_data->index, item_data->total, NULL)) {
+			/* UID of the contact is nothing but the concatenated string of hex id of folder and the message.*/
+			e_contact_set (fcid->contact, E_CONTACT_UID, suid);
+
+			if (!e_book_backend_mapi_notify_contact_update (fcid->ebma, NULL, fcid->contact, obj_index, obj_total, NULL)) {
+				g_free (suid);
+				return FALSE;
+			}
+
 			g_free (suid);
-			return FALSE;
+		} else {
+			g_debug ("%s: No PidTagMid found", G_STRFUNC);
 		}
-
-		g_free (suid);
 	}
 
 	return TRUE;
 }
 
-struct CreateContactListData
-{
-	EBookBackendMAPI *ebma;
-	GSList **vCards;
-};
-
 static gboolean
-create_contact_list_cb (FetchItemsCallbackData *item_data,
-			gpointer data,
+gather_contact_mids_cb (EMapiConnection *conn,
+			mapi_id_t fid,
+			TALLOC_CTX *mem_ctx,
+			const ListObjectsData *object_data,
+			guint32 obj_index,
+			guint32 obj_total,
+			gpointer user_data,
 			GCancellable *cancellable,
 			GError **perror)
 {
-	struct CreateContactListData *ccld = data;
-	EContact *contact;
+	GSList *pmids = user_data;
+	mapi_id_t *pmid;
 
-	g_return_val_if_fail (data != NULL, FALSE);
-	g_return_val_if_fail (ccld->ebma != NULL, FALSE);
-	g_return_val_if_fail (ccld->vCards != NULL, FALSE);
+	g_return_val_if_fail (object_data != NULL, FALSE);
+	g_return_val_if_fail (pmids != NULL, FALSE);
 
-	contact = mapi_book_utils_contact_from_props (item_data->conn, item_data->fid, e_book_backend_mapi_get_book_uri (ccld->ebma), item_data->properties, NULL);
-	if (contact) {
-		gchar *suid = e_mapi_util_mapi_ids_to_uid (item_data->fid, item_data->mid);
+	pmid = g_new0 (mapi_id_t, 1);
+	*pmid = object_data->mid;
 
-		e_contact_set (contact, E_CONTACT_UID, suid);
-
-		*ccld->vCards = g_slist_prepend (*ccld->vCards, e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30));
-
-		e_book_backend_mapi_notify_contact_update (ccld->ebma, NULL, contact, NULL, -1, -1, NULL);
-
-		g_object_unref (contact);
-		g_free (suid);
-	}
+	pmids = g_slist_prepend (pmids, pmid);
 
 	return TRUE;
 }
 
-struct FetchContactsData
+struct TransferContactsData
 {
 	EBookBackendMAPI *ebma;
 	EDataBookView *book_view;
 	gpointer notify_contact_data;
+	GSList **cards;
 };
 
 static gboolean
-fetch_contacts_cb (FetchItemsCallbackData *item_data,
-		   gpointer data,
-		   GCancellable *cancellable,
-		   GError **perror)
+transfer_contacts_cb (EMapiConnection *conn,
+		      TALLOC_CTX *mem_ctx,
+		      /* const */ EMapiObject *object,
+		      guint32 obj_index,
+		      guint32 obj_total,
+		      gpointer user_data,
+		      GCancellable *cancellable,
+		      GError **perror)
 {
-	struct FetchContactsData *fcd = data;
+	struct TransferContactsData *tcd = user_data;
 	EContact *contact;
 
-	g_return_val_if_fail (data != NULL, FALSE);
-	g_return_val_if_fail (fcd->ebma != NULL, FALSE);
-	g_return_val_if_fail (fcd->ebma->priv != NULL, FALSE);
+	g_return_val_if_fail (tcd != NULL, FALSE);
+	g_return_val_if_fail (object != NULL, FALSE);
+	g_return_val_if_fail (tcd->ebma != NULL, FALSE);
 
-	contact = mapi_book_utils_contact_from_props (item_data->conn, item_data->fid, e_book_backend_mapi_get_book_uri (fcd->ebma), item_data->properties, NULL);
-
+	contact = mapi_book_utils_contact_from_props (conn, E_BOOK_BACKEND_MAPI_CONTACTS (tcd->ebma)->priv->fid, e_book_backend_mapi_get_book_uri (tcd->ebma), &object->properties, NULL);
 	if (contact) {
-		gchar *suid;
-		struct timeval *last_modification = NULL, tv = { 0 };
+		const mapi_id_t *pmid;
 
-		suid = e_mapi_util_mapi_ids_to_uid (item_data->fid, item_data->mid);
-		e_contact_set (contact, E_CONTACT_UID, suid);
-		g_free (suid);
+		pmid = e_mapi_util_find_array_propval (&object->properties, PidTagMid);
+		if (pmid) {
+			gchar *suid = e_mapi_util_mapi_id_to_string (*pmid);
 
-		if (get_mapi_SPropValue_array_date_timeval (&tv, item_data->properties, PR_LAST_MODIFICATION_TIME) == MAPI_E_SUCCESS)
-			last_modification = &tv;
+			e_contact_set (contact, E_CONTACT_UID, suid);
+			g_free (suid);
 
-		if (!e_book_backend_mapi_notify_contact_update (fcd->ebma, fcd->book_view, contact, last_modification, item_data->index, item_data->total, fcd->notify_contact_data)) {
+			if (tcd->cards)
+				*tcd->cards = g_slist_prepend (*tcd->cards, e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30));
+
+			if (!e_book_backend_mapi_notify_contact_update (tcd->ebma, tcd->book_view, contact, obj_index, obj_total, tcd->notify_contact_data)) {
+				g_object_unref (contact);
+				return FALSE;
+			}
+
 			g_object_unref (contact);
-			return FALSE;
+		} else {
+			g_debug ("%s: No PidTagMid found", G_STRFUNC);
 		}
-
-		g_object_unref (contact);
+	} else {
+		g_debug ("%s: [%d/%d] Failed to transform to contact", G_STRFUNC, obj_index, obj_total);
 	}
 
 	return TRUE;
 }
 
-struct FetchContactsUidsData
-{
-	GCancellable *cancellable;
-	GHashTable *uids;
-};
-
 static gboolean
-fetch_contacts_uids_cb (FetchItemsCallbackData *item_data,
-			gpointer data,
-			GCancellable *cancellable,
-			GError **perror)
+gather_known_uids_cb (EMapiConnection *conn,
+		      mapi_id_t fid,
+		      TALLOC_CTX *mem_ctx,
+		      const ListObjectsData *object_data,
+		      guint32 obj_index,
+		      guint32 obj_total,
+		      gpointer user_data,
+		      GCancellable *cancellable,
+		      GError **perror)
 {
-	struct FetchContactsUidsData *fcud = data;
+	struct ListKnownUidsData *lku = user_data;
 	gchar *suid;
 
-	g_return_val_if_fail (data != NULL, FALSE);
+	g_return_val_if_fail (lku != NULL, FALSE);
+	g_return_val_if_fail (lku->uid_to_rev != NULL, FALSE);
 
-	suid = e_mapi_util_mapi_ids_to_uid (item_data->fid, item_data->mid);
-	if (suid)
-		g_hash_table_insert (fcud->uids, suid, GINT_TO_POINTER (1));
+	suid = e_mapi_util_mapi_id_to_string (object_data->mid);
+	if (suid) {
+		g_hash_table_insert (lku->uid_to_rev, suid, mapi_book_utils_timet_to_string (object_data->last_modified));
+		if (lku->latest_last_modify < object_data->last_modified)
+			lku->latest_last_modify = object_data->last_modified;
+	}
 
-	return !g_cancellable_is_cancelled (fcud->cancellable);
+	return TRUE;
 }
 
 static void
@@ -825,7 +840,7 @@ ebbm_contacts_create_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 		return;
 	}
 
-	id = e_mapi_util_mapi_ids_to_uid (priv->fid, mid);
+	id = e_mapi_util_mapi_id_to_string (mid);
 
 	/* UID of the contact is nothing but the concatenated string of hex id of folder and the message.*/
 	e_contact_set (contact, E_CONTACT_UID, id);
@@ -868,16 +883,18 @@ ebbm_contacts_remove_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 
 	to_remove = NULL;
 	for (l = id_list; l; l = l->next) {
-		mapi_id_t mid, fid;
+		mapi_id_t mid;
 		const gchar *uid = l->data;
 		struct id_list *idl = g_new0 (struct id_list, 1);
 
-		e_mapi_util_mapi_ids_from_uid (uid, &fid, &mid);
+		if (e_mapi_util_mapi_id_from_string (uid, &mid)) {
+			idl->id = mid;
+			to_remove = g_slist_prepend (to_remove, idl);
 
-		idl->id = mid;
-		to_remove = g_slist_prepend (to_remove, idl);
-
-		*removed_ids = g_slist_prepend (*removed_ids, g_strdup (uid));
+			*removed_ids = g_slist_prepend (*removed_ids, g_strdup (uid));
+		} else {
+			g_debug ("%s: Failed to decode MID from '%s'", G_STRFUNC, uid);
+		}
 	}
 
 	e_mapi_connection_remove_items (conn, olFolderContacts, priv->fid, priv->is_public_folder ? MAPI_OPTIONS_USE_PFSTORE : 0, to_remove, cancellable, &mapi_error);
@@ -907,7 +924,7 @@ ebbm_contacts_modify_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 	MapiCreateitemData mcd;
 	EContact *contact;
 	GError *mapi_error = NULL;
-	mapi_id_t fid, mid;
+	mapi_id_t mid;
 
 	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
@@ -944,18 +961,20 @@ ebbm_contacts_modify_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 	e_book_backend_mapi_get_db (ebma, &mcd.db);
 	mcd.contact = contact;
 
-	e_mapi_util_mapi_ids_from_uid (e_contact_get_const (contact, E_CONTACT_UID), &fid, &mid);
+	if (e_mapi_util_mapi_id_from_string (e_contact_get_const (contact, E_CONTACT_UID), &mid)) {
+		if (!e_mapi_connection_modify_item (conn, olFolderContacts, priv->fid, mid,
+			mapi_book_write_props, &mcd, NULL, NULL, NULL, priv->is_public_folder ? MAPI_OPTIONS_USE_PFSTORE : 0, cancellable, &mapi_error)) {
 
-	if (!e_mapi_connection_modify_item (conn, olFolderContacts, priv->fid, mid,
-		mapi_book_write_props, &mcd, NULL, NULL, NULL, priv->is_public_folder ? MAPI_OPTIONS_USE_PFSTORE : 0, cancellable, &mapi_error)) {
+			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to modify item on a server"));
+			if (mapi_error)
+				g_error_free (mapi_error);
 
-		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to modify item on a server"));
-		if (mapi_error)
-			g_error_free (mapi_error);
-
-		g_object_unref (contact);
+			g_object_unref (contact);
+		} else {
+			*modified_contacts = g_slist_append (NULL, contact);
+		}
 	} else {
-		*modified_contacts = g_slist_append (NULL, contact);
+		g_debug ("%s: Failed to decode MID from '%s'", G_STRFUNC, (const gchar *) e_contact_get_const (contact, E_CONTACT_UID));
 	}
 
 	e_book_backend_mapi_unlock_connection (ebma);
@@ -967,9 +986,10 @@ ebbm_contacts_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, co
 	EBookBackendMAPIContacts *ebmac;
 	EBookBackendMAPIContactsPrivate *priv;
 	EMapiConnection *conn;
-	mapi_id_t fid, mid;
-	guint32 options;
+	mapi_id_t mid;
+	mapi_object_t obj_folder;
 	struct FetchContactItemData fcid = { 0 };
+	gboolean status;
 	GError *mapi_error = NULL;
 
 	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
@@ -1004,18 +1024,26 @@ ebbm_contacts_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, co
 		return;
 	}
 
-	options = MAPI_OPTIONS_FETCH_ALL;
 	if (priv->is_public_folder)
-		options |= MAPI_OPTIONS_USE_PFSTORE;
+		status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+	else
+		status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
 
-	fcid.ebma = ebma;
-	fcid.contact = NULL;
-	e_mapi_util_mapi_ids_from_uid (id, &fid, &mid);
+	if (status) {
+		status = e_mapi_util_mapi_id_from_string (id, &mid);
+		if (!status) {
+			g_debug ("%s: Failed to decode MID from '%s'", G_STRFUNC, id);
+		}
+	}
 
-	e_mapi_connection_fetch_item (conn, priv->fid, mid,
-		priv->is_public_folder ? NULL : mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
-		fetch_contact_item_cb, &fcid,
-		options, cancellable, &mapi_error);
+	if (status) {
+		fcid.ebma = ebma;
+		fcid.contact = NULL;
+
+		e_mapi_connection_transfer_object (conn, &obj_folder, mid, transfer_contact_cb, &fcid, cancellable, &mapi_error);
+	}
+
+	e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
 
 	if (fcid.contact) {
 		*vcard =  e_vcard_to_string (E_VCARD (fcid.contact), EVC_FORMAT_VCARD_30);
@@ -1040,10 +1068,11 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellabl
 	EBookBackendMAPIContacts *ebmac;
 	EBookBackendMAPIContactsPrivate *priv;
 	EMapiConnection *conn;
-	guint32 options;
-	struct CreateContactListData ccld = { 0 };
 	GError *mapi_error = NULL;
-	gboolean get_all;
+	gboolean get_all, status;
+	mapi_object_t obj_folder;
+	GSList *mids = NULL;
+	struct TransferContactsData tcd = { 0 };
 
 	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
@@ -1068,10 +1097,6 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellabl
 	if (*vCards)
 		return;
 
-	options = MAPI_OPTIONS_FETCH_ALL;
-	if (priv->is_public_folder)
-		options |= MAPI_OPTIONS_USE_PFSTORE;
-
 	e_book_backend_mapi_lock_connection (ebma);
 
 	conn = e_book_backend_mapi_get_connection (ebma);
@@ -1082,8 +1107,8 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellabl
 		return;
 	}
 
-	ccld.ebma = ebma;
-	ccld.vCards = vCards;
+	tcd.ebma = ebma;
+	tcd.cards = vCards;
 
 	get_all = g_ascii_strcasecmp (query, "(contains \"x-evolution-any-field\" \"\")") == 0;
 	if (!get_all && !build_restriction_emails_contains (NULL, 0, NULL, NULL, (gpointer) query, NULL, NULL)) {
@@ -1093,9 +1118,26 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellabl
 		return;
 	}
 
-	if (!e_mapi_connection_fetch_items (conn, priv->fid, get_all ? NULL : build_restriction_emails_contains, (gpointer) query, NULL,
-		priv->is_public_folder ? NULL : mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
-		create_contact_list_cb, &ccld, options, cancellable, &mapi_error)) {
+	if (priv->is_public_folder)
+		status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+	else
+		status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+
+	if (status) {
+		status = e_mapi_connection_list_objects (conn, &obj_folder,
+							 get_all ? NULL : build_restriction_emails_contains, (gpointer) query,
+							 gather_contact_mids_cb, &mids,
+							 cancellable, &mapi_error);
+
+		if (mids)
+			status = e_mapi_connection_transfer_objects (conn, &obj_folder, mids, transfer_contacts_cb, &tcd, cancellable, &mapi_error);
+
+		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
+
+		g_slist_free_full (mids, g_free);
+	}
+
+	if (!status) {
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch items from a server"));
 		if (mapi_error)
 			g_error_free (mapi_error);
@@ -1123,13 +1165,131 @@ ebbm_contacts_get_status_message (EBookBackendMAPI *ebma, gint index, gint total
 }
 
 static void
-ebbm_contacts_fetch_contacts (EBookBackendMAPI *ebma, BuildRestrictionsCB build_rs_cb, gpointer build_rs_cb_data, EDataBookView *book_view, gpointer notify_contact_data, GError **error)
+ebbm_contacts_get_contacts_count (EBookBackendMAPI *ebma,
+				  guint32 *obj_total,
+				  GCancellable *cancellable,
+				  GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
 	EBookBackendMAPIContactsPrivate *priv;
 	EMapiConnection *conn;
-	guint32 options;
-	struct FetchContactsData fcd = { 0 };
+	gboolean status;
+	mapi_object_t obj_folder;
+	GError *mapi_error = NULL;
+
+	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+	e_return_data_book_error_if_fail (obj_total != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+
+	ebmac = E_BOOK_BACKEND_MAPI_CONTACTS (ebma);
+	e_return_data_book_error_if_fail (ebmac != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+	e_return_data_book_error_if_fail (ebmac->priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+
+	priv = ebmac->priv;
+
+	e_book_backend_mapi_lock_connection (ebma);
+
+	conn = e_book_backend_mapi_get_connection (ebma);
+	if (!conn) {
+		e_book_backend_mapi_unlock_connection (ebma);
+		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+		return;
+	}
+
+	if (priv->is_public_folder)
+		status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+	else
+		status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+
+	if (status) {
+		struct FolderBasicPropertiesData fbp = { 0 };
+
+		status = e_mapi_connection_get_folder_properties (conn, &obj_folder, NULL, NULL,
+			e_mapi_utils_get_folder_basic_properties_cb, &fbp,
+			cancellable, &mapi_error);
+		if (status)
+			*obj_total = fbp.obj_total;
+		
+		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
+	}
+
+	if (mapi_error) {
+		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to count server contacts"));
+		g_error_free (mapi_error);
+	}
+
+	e_book_backend_mapi_unlock_connection (ebma);
+}
+
+static void
+ebbm_contacts_list_known_uids (EBookBackendMAPI *ebma,
+			       BuildRestrictionsCB build_rs_cb,
+			       gpointer build_rs_cb_data,
+			       struct ListKnownUidsData *lku,
+			       GCancellable *cancellable,
+			       GError **error)
+{
+	EBookBackendMAPIContacts *ebmac;
+	EBookBackendMAPIContactsPrivate *priv;
+	EMapiConnection *conn;
+	gboolean status;
+	mapi_object_t obj_folder;
+	GError *mapi_error = NULL;
+
+	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
+	e_return_data_book_error_if_fail (lku != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+	e_return_data_book_error_if_fail (lku->uid_to_rev != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+
+	ebmac = E_BOOK_BACKEND_MAPI_CONTACTS (ebma);
+	e_return_data_book_error_if_fail (ebmac != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+	e_return_data_book_error_if_fail (ebmac->priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+
+	priv = ebmac->priv;
+
+	e_book_backend_mapi_lock_connection (ebma);
+
+	conn = e_book_backend_mapi_get_connection (ebma);
+	if (!conn) {
+		e_book_backend_mapi_unlock_connection (ebma);
+		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+		return;
+	}
+
+	if (priv->is_public_folder)
+		status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+	else
+		status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+
+	if (status) {
+		status = e_mapi_connection_list_objects (conn, &obj_folder, build_rs_cb, build_rs_cb_data,
+							 gather_known_uids_cb, lku,
+							 cancellable, &mapi_error);
+
+		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
+	}
+
+	if (mapi_error) {
+		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to list items from a server"));
+		g_error_free (mapi_error);
+	}
+
+	e_book_backend_mapi_unlock_connection (ebma);
+}
+
+static void
+ebbm_contacts_transfer_contacts (EBookBackendMAPI *ebma,
+				 const GSList *uids,
+				 EDataBookView *book_view,
+				 gpointer notify_contact_data,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	EBookBackendMAPIContacts *ebmac;
+	EBookBackendMAPIContactsPrivate *priv;
+	EMapiConnection *conn;
+	struct TransferContactsData tcd = { 0 };
+	mapi_object_t obj_folder;
+	gboolean status;
 	GError *mapi_error = NULL;
 
 	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
@@ -1151,70 +1311,45 @@ ebbm_contacts_fetch_contacts (EBookBackendMAPI *ebma, BuildRestrictionsCB build_
 		return;
 	}
 
-	fcd.ebma = ebma;
-	fcd.book_view = book_view;
-	fcd.notify_contact_data = notify_contact_data;
+	tcd.ebma = ebma;
+	tcd.book_view = book_view;
+	tcd.notify_contact_data = notify_contact_data;
 
-	options = MAPI_OPTIONS_FETCH_ALL;
 	if (priv->is_public_folder)
-		options |= MAPI_OPTIONS_USE_PFSTORE;
+		status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+	else
+		status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
 
-	if (!e_mapi_connection_fetch_items (conn, priv->fid, build_rs_cb, build_rs_cb_data, NULL,
-		mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
-		fetch_contacts_cb, &fcd, options, NULL, &mapi_error)) {
-		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch items from a server"));
+	if (status) {
+		GSList *mids = NULL;
+		const GSList *iter;
+
+		for (iter = uids; iter; iter = iter->next) {
+			const gchar *uid_str = iter->data;
+			mapi_id_t mid, *pmid;
+
+			if (!uid_str || !e_mapi_util_mapi_id_from_string (uid_str, &mid))
+				continue;
+
+			pmid = g_new0 (mapi_id_t, 1);
+			*pmid = mid;
+
+			mids = g_slist_prepend (mids, pmid);
+		}
+
+		if (mids)
+			status = e_mapi_connection_transfer_objects (conn, &obj_folder, mids, transfer_contacts_cb, &tcd, cancellable, &mapi_error);
+
+		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
+
+		g_slist_free_full (mids, g_free);
+	}
+
+	if (!status) {
+		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to transfer contacts from a server"));
 
 		if (mapi_error)
 			g_error_free (mapi_error);
-	}
-
-	e_book_backend_mapi_unlock_connection (ebma);
-}
-
-static void
-ebbm_contacts_fetch_known_uids (EBookBackendMAPI *ebma, GCancellable *cancellable, GHashTable *uids, GError **error)
-{
-	EBookBackendMAPIContacts *ebmac;
-	EBookBackendMAPIContactsPrivate *priv;
-	EMapiConnection *conn;
-	GError *mapi_error = NULL;
-	struct FetchContactsUidsData fcud = { 0 };
-	guint32 options;
-
-	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (cancellable != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (uids != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
-	ebmac = E_BOOK_BACKEND_MAPI_CONTACTS (ebma);
-	e_return_data_book_error_if_fail (ebmac != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (ebmac->priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
-	priv = ebmac->priv;
-
-	e_book_backend_mapi_lock_connection (ebma);
-
-	conn = e_book_backend_mapi_get_connection (ebma);
-	if (!conn) {
-		e_book_backend_mapi_unlock_connection (ebma);
-		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
-		return;
-	}
-
-	options = MAPI_OPTIONS_DONT_OPEN_MESSAGE;
-	if (priv->is_public_folder)
-		options |= MAPI_OPTIONS_USE_PFSTORE;
-
-	fcud.cancellable = cancellable;
-	fcud.uids = uids;
-
-	e_mapi_connection_fetch_items (conn, priv->fid, NULL, NULL, NULL,
-		mapi_book_utils_get_prop_list, GET_UIDS_ONLY,
-		fetch_contacts_uids_cb, &fcud, options, cancellable, &mapi_error);
-
-	if (mapi_error) {
-		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch items from a server"));
-		g_error_free (mapi_error);
 	}
 
 	e_book_backend_mapi_unlock_connection (ebma);
@@ -1246,8 +1381,9 @@ e_book_backend_mapi_contacts_class_init (EBookBackendMAPIContactsClass *klass)
 
 	parent_class->op_connection_status_changed	= ebbm_contacts_connection_status_changed;
 	parent_class->op_get_status_message		= ebbm_contacts_get_status_message;
-	parent_class->op_fetch_contacts			= ebbm_contacts_fetch_contacts;
-	parent_class->op_fetch_known_uids		= ebbm_contacts_fetch_known_uids;
+	parent_class->op_get_contacts_count		= ebbm_contacts_get_contacts_count;
+	parent_class->op_list_known_uids		= ebbm_contacts_list_known_uids;
+	parent_class->op_transfer_contacts		= ebbm_contacts_transfer_contacts;
 }
 
 EBookBackend *

@@ -32,7 +32,7 @@ struct _EBookBackendMAPIGALPrivate
 };
 
 static gchar *
-get_uid_from_row (struct SRow *aRow, uint32_t row_index, mapi_id_t fid)
+get_uid_from_row (struct SRow *aRow, uint32_t row_index)
 {
 	gchar *suid = NULL;
 	const gchar *str;
@@ -48,7 +48,7 @@ get_uid_from_row (struct SRow *aRow, uint32_t row_index, mapi_id_t fid)
 
 		midptr = e_mapi_util_find_row_propval (aRow, PR_MID);
 
-		suid = e_mapi_util_mapi_ids_to_uid (fid, midptr ? *midptr : row_index);
+		suid = e_mapi_util_mapi_id_to_string (midptr ? *midptr : row_index);
 	}
 
 	return suid;
@@ -72,8 +72,6 @@ fetch_gal_cb (EMapiConnection *conn,
 	      GError **perror)
 {
 	struct FetchGalData *fgd = data;
-	struct timeval *last_modification = NULL, tv = { 0 };
-	struct SPropValue *spropval;
 	EContact *contact;
 
 	g_return_val_if_fail (conn != NULL, FALSE);
@@ -89,16 +87,12 @@ fetch_gal_cb (EMapiConnection *conn,
 	if (!e_contact_get_const (contact, E_CONTACT_UID)) {
 		gchar *suid;
 
-		suid = get_uid_from_row (aRow, row_index, fgd->fid);
+		suid = get_uid_from_row (aRow, row_index);
 		e_contact_set (contact, E_CONTACT_UID, suid);
 		g_free (suid);
 	}
 
-	spropval = get_SPropValue_SRow (aRow, PR_LAST_MODIFICATION_TIME);
-	if (spropval && get_mapi_SPropValue_date_timeval (&tv, *spropval) == MAPI_E_SUCCESS)
-		last_modification = &tv;
-
-	if (!e_book_backend_mapi_notify_contact_update (fgd->ebma, fgd->book_view, contact, last_modification, row_index, n_rows, fgd->notify_contact_data)) {
+	if (!e_book_backend_mapi_notify_contact_update (fgd->ebma, fgd->book_view, contact, row_index, n_rows, fgd->notify_contact_data)) {
 		g_object_unref (contact);
 		return FALSE;
 	}
@@ -108,34 +102,37 @@ fetch_gal_cb (EMapiConnection *conn,
 	return TRUE;
 }
 
-struct FetchGalUidsData
-{
-	GCancellable *cancellable;
-	GHashTable *uids;
-	mapi_id_t fid; /* folder ID of contacts */
-};
-
 static gboolean
-fetch_gal_uids_cb (EMapiConnection *conn,
-		   uint32_t row_index,
-		   uint32_t n_rows,
-		   struct SRow *aRow,
-		   gpointer data,
-		   GCancellable *cancellable,
-		   GError **perror)
+list_gal_uids_cb (EMapiConnection *conn,
+		  uint32_t row_index,
+		  uint32_t n_rows,
+		  struct SRow *aRow,
+		  gpointer user_data,
+		  GCancellable *cancellable,
+		  GError **perror)
 {
 	gchar *uid;
-	struct FetchGalUidsData *fgud = data;
+	struct ListKnownUidsData *lku = user_data;
 
 	g_return_val_if_fail (conn != NULL, FALSE);
 	g_return_val_if_fail (aRow != NULL, FALSE);
-	g_return_val_if_fail (data != NULL, FALSE);
+	g_return_val_if_fail (lku != NULL, FALSE);
 
-	uid = get_uid_from_row (aRow, row_index, fgud->fid);
-	if (uid)
-		g_hash_table_insert (fgud->uids, uid, GINT_TO_POINTER (1));
+	uid = get_uid_from_row (aRow, row_index);
+	if (uid) {
+		const struct FILETIME *ft;
+		time_t tt;
 
-	return !g_cancellable_is_cancelled (fgud->cancellable);
+		ft = e_mapi_util_find_row_propval (aRow, PidTagLastModificationTime);
+		tt = ft ? e_mapi_util_filetime_to_time_t (ft) : 1;
+
+		if (lku->latest_last_modify < tt)
+			lku->latest_last_modify = tt;
+
+		g_hash_table_insert (lku->uid_to_rev, uid, mapi_book_utils_timet_to_string (tt));
+	}
+
+	return !g_cancellable_is_cancelled (cancellable);
 }
 
 static void
@@ -175,7 +172,12 @@ ebbm_gal_get_status_message (EBookBackendMAPI *ebma, gint index, gint total)
 }
 
 static void
-ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, BuildRestrictionsCB build_rs_cb, gpointer build_rs_cb_data, EDataBookView *book_view, gpointer notify_contact_data, GError **error)
+ebbm_gal_transfer_contacts (EBookBackendMAPI *ebma,
+			    const GSList *uids,
+			    EDataBookView *book_view,
+			    gpointer notify_contact_data,
+			    GCancellable *cancellable,
+			    GError **error)
 {
 	GError *mapi_error = NULL;
 	struct FetchGalData fgd = { 0 };
@@ -215,7 +217,7 @@ ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, BuildRestrictionsCB build_rs_cb
 	fgd.notify_contact_data = notify_contact_data;
 	fgd.fid = e_mapi_connection_get_default_folder_id (conn, olFolderContacts, NULL, NULL);
 
-	fetch_successful = e_mapi_connection_fetch_gal (conn, build_rs_cb, build_rs_cb_data,
+	fetch_successful = e_mapi_connection_fetch_gal (conn, NULL, NULL,
 		mapi_book_utils_get_prop_list, GET_ALL_KNOWN_IDS,
 		fetch_gal_cb, &fgd, NULL, &mapi_error);
 
@@ -240,15 +242,32 @@ ebbm_gal_fetch_contacts (EBookBackendMAPI *ebma, BuildRestrictionsCB build_rs_cb
 }
 
 static void
-ebbm_gal_fetch_known_uids (EBookBackendMAPI *ebma, GCancellable *cancellable, GHashTable *uids, GError **error)
+ebbm_gal_get_contacts_count (EBookBackendMAPI *ebma,
+			     guint32 *obj_total,
+			     GCancellable *cancellable,
+			     GError **error)
+{
+	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+	e_return_data_book_error_if_fail (obj_total != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
+
+	/* just a fake value, to check by ids */
+	*obj_total = -1;
+}
+
+static void
+ebbm_gal_list_known_uids (EBookBackendMAPI *ebma,
+			  BuildRestrictionsCB build_rs_cb,
+			  gpointer build_rs_cb_data,
+			  struct ListKnownUidsData *lku,
+			  GCancellable *cancellable,
+			  GError **error)
 {
 	EMapiConnection *conn;
 	GError *mapi_error = NULL;
-	struct FetchGalUidsData fgud = { 0 };
 
 	g_return_if_fail (ebma != NULL);
-	g_return_if_fail (cancellable != NULL);
-	g_return_if_fail (uids != NULL);
+	g_return_if_fail (lku != NULL);
+	g_return_if_fail (lku->uid_to_rev != NULL);
 
 	e_book_backend_mapi_lock_connection (ebma);
 
@@ -259,13 +278,9 @@ ebbm_gal_fetch_known_uids (EBookBackendMAPI *ebma, GCancellable *cancellable, GH
 		return;
 	}
 
-	fgud.cancellable = cancellable;
-	fgud.uids = uids;
-	fgud.fid = e_mapi_connection_get_default_folder_id (conn, olFolderContacts, cancellable, NULL);
-
 	e_mapi_connection_fetch_gal (conn, NULL, NULL,
 		mapi_book_utils_get_prop_list, GET_UIDS_ONLY,
-		fetch_gal_uids_cb, &fgud, cancellable, &mapi_error);
+		list_gal_uids_cb, lku, cancellable, &mapi_error);
 
 	if (mapi_error) {
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch GAL entries"));
@@ -296,8 +311,9 @@ e_book_backend_mapi_gal_class_init (EBookBackendMAPIGALClass *klass)
 	parent_class->op_modify_contacts	= ebbm_gal_modify_contacts;
 
 	parent_class->op_get_status_message	= ebbm_gal_get_status_message;
-	parent_class->op_fetch_contacts		= ebbm_gal_fetch_contacts;
-	parent_class->op_fetch_known_uids	= ebbm_gal_fetch_known_uids;
+	parent_class->op_get_contacts_count	= ebbm_gal_get_contacts_count;
+	parent_class->op_list_known_uids	= ebbm_gal_list_known_uids;
+	parent_class->op_transfer_contacts	= ebbm_gal_transfer_contacts;
 }
 
 /**

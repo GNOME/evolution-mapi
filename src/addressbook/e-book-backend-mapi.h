@@ -50,6 +50,12 @@ typedef struct
 	EBookBackendMAPIPrivate *priv;
 } EBookBackendMAPI;
 
+struct ListKnownUidsData
+{
+	GHashTable *uid_to_rev;
+	time_t latest_last_modify;
+};
+
 typedef struct
 {
 	EBookBackendClass parent_class;
@@ -74,17 +80,21 @@ typedef struct
 	/* function called for each new book_view, in a separate thread;
 	   this function is optional, contacts from cache are always processed
 	   before this function call */
-	void (*op_book_view_thread) (EBookBackendMAPI *ebma, EDataBookView *book_view, GError **error);
+	void (*op_book_view_thread) (EBookBackendMAPI *ebma, EDataBookView *book_view, GCancellable *cancellable, GError **error);
 
-	/* function called to populate cache or similar operations;
-	   restriction and book_view can be NULL, call e_book_backend_mapi_notify_contact_update for each
-	   fetched contact with this book_view and notify_contact_data */
-	void (*op_fetch_contacts) (EBookBackendMAPI *ebma, BuildRestrictionsCB build_rs_cb, gpointer build_rs_cb_data, EDataBookView *book_view, gpointer notify_contact_data, GError **error);
+	/* gets current count of contacts in the folder corresponding to the backend */
+	void (*op_get_contacts_count) (EBookBackendMAPI *ebma, guint32 *obj_total, GCancellable *cancellable, GError **error);
 
 	/* function to fetch list of known uids (strings) on the server;
-	   it's used to synchronize local cache with deleted items;
-	   uids has the uid key, as a newly allocated string; value should be GINT_TO_POINTER(1) always */
-	void (*op_fetch_known_uids) (EBookBackendMAPI *ebma, GCancellable *cancellable, GHashTable *uids, GError **error);
+	   it's used to synchronize local cache with available items;
+	   uids has the uid key, as a newly allocated string;
+	   value is a revision (REV) field value as newly allocated string */
+	void (*op_list_known_uids) (EBookBackendMAPI *ebma, BuildRestrictionsCB build_rs_cb, gpointer build_rs_cb_data, struct ListKnownUidsData *lku, GCancellable *cancellable, GError **error);
+
+	/* function called to populate cache or similar operations;
+	   book_view can be NULL, call e_book_backend_mapi_notify_contact_update for each
+	   transferred contact with this book_view and notify_contact_data */
+	void (*op_transfer_contacts) (EBookBackendMAPI *ebma, const GSList *uids, EDataBookView *book_view, gpointer notify_contact_data, GCancellable *cancellable, GError **error);
 } EBookBackendMAPIClass;
 
 GType e_book_backend_mapi_get_type (void);
@@ -98,7 +108,7 @@ void e_book_backend_mapi_get_db (EBookBackendMAPI *ebma, EBookBackendSqliteDB **
 gboolean e_book_backend_mapi_book_view_is_running (EBookBackendMAPI *ebma, EDataBookView *book_view);
 void e_book_backend_mapi_update_view_by_cache (EBookBackendMAPI *ebma, EDataBookView *book_view, GError **error);
 gboolean e_book_backend_mapi_is_marked_for_offline (EBookBackendMAPI *ebma);
-gboolean e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView *book_view, EContact *contact, const struct timeval *pr_last_modification_time, gint index, gint total, gpointer notify_contact_data);
+gboolean e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView *book_view, EContact *contact, gint index, gint total, gpointer notify_contact_data);
 void e_book_backend_mapi_notify_contact_removed (EBookBackendMAPI *ebma, const gchar *uid);
 void   e_book_backend_mapi_cache_set (EBookBackendMAPI *ebma, const gchar *key, const gchar *value);
 gchar *e_book_backend_mapi_cache_get (EBookBackendMAPI *ebma, const gchar *key);
@@ -134,6 +144,10 @@ gboolean mapi_book_utils_get_prop_list (EMapiConnection *conn,
 
 /* only one of mapi_properties and aRow can be set */
 EContact *mapi_book_utils_contact_from_props (EMapiConnection *conn, mapi_id_t fid, const gchar *book_uri, struct mapi_SPropValue_array *mapi_properties, struct SRow *aRow);
+
+/* converts time_t to string, suitable for E_CONTACT_REV field value;
+   free returned pointer with g_free() */
+gchar *mapi_book_utils_timet_to_string (time_t tt);
 
 G_END_DECLS
 

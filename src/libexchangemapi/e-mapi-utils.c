@@ -66,26 +66,6 @@ e_mapi_util_mapi_id_from_string (const gchar *str, mapi_id_t *id)
 	return (n == 1);
 }
 
-/* NOTE: We use the UID as a combination of the folder-id and the message-id.
- * Specifically, it is in this format: ("%016" G_GINT64_MODIFIER "X%016" G_GINT64_MODIFIER "X", fid, mid).
- */
-inline gchar *
-e_mapi_util_mapi_ids_to_uid (mapi_id_t fid, mapi_id_t mid)
-{
-	return g_strdup_printf ("%016" G_GINT64_MODIFIER "X%016" G_GINT64_MODIFIER "X", fid, mid);
-}
-
-inline gboolean
-e_mapi_util_mapi_ids_from_uid (const gchar *str, mapi_id_t *fid, mapi_id_t *mid)
-{
-	gint n = 0;
-
-	if (str && *str)
-		n = sscanf (str, "%016" G_GINT64_MODIFIER "X%016" G_GINT64_MODIFIER "X", fid, mid);
-
-	return (n == 2);
-}
-
 /*
  * Retrieve the property value for a given SPropValue and property tag.
  *

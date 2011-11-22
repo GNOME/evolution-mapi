@@ -57,9 +57,13 @@ struct _EBookBackendMAPIPrivate
 
 	GThread *update_cache_thread;
 	GCancellable *update_cache;
+	time_t last_update_cache;
 
 	EBookBackendSqliteDB *db;
 	GHashTable *running_book_views;
+
+	guint32 last_server_contact_count;
+	time_t last_modify_time;
 };
 
 #define ELEMENT_TYPE_MASK   0xF /* mask where the real type of the element is stored */
@@ -124,60 +128,6 @@ static const struct field_element_mapping {
 	};
 
 static gboolean
-ebbm_get_cache_time (EBookBackendMAPI *ebma, glong *cache_seconds)
-{
-	GError *error = NULL;
-	GTimeVal tv = { 0 };
-	gchar *last_update;
-	gboolean ret = TRUE;
-
-	g_return_val_if_fail (ebma != NULL, FALSE);
-	g_return_val_if_fail (ebma->priv != NULL, FALSE);
-	g_return_val_if_fail (ebma->priv->db != NULL, FALSE);
-	g_return_val_if_fail (cache_seconds != NULL, FALSE);
-
-	last_update = e_book_backend_sqlitedb_get_sync_data (ebma->priv->db, EMA_EBB_CACHE_FOLDERID, &error);
-	ret = !error && last_update && g_time_val_from_iso8601 (last_update, &tv);
-	if (error)
-		g_error_free (error);
-	g_free (last_update);
-
-	if (ret)
-		*cache_seconds = tv.tv_sec;
-
-	return ret;
-}
-
-static void
-ebbm_set_cache_time (EBookBackendMAPI *ebma, glong cache_seconds)
-{
-	GError *error = NULL;
-	gchar *iso_time = NULL;
-
-	g_return_if_fail (ebma != NULL);
-	g_return_if_fail (ebma->priv != NULL);
-	g_return_if_fail (ebma->priv->db != NULL);
-
-	if (cache_seconds > 0) {
-		GTimeVal tv = { 0 };
-
-		tv.tv_sec = cache_seconds;
-		iso_time = g_time_val_to_iso8601 (&tv);
-	}
-
-	e_book_backend_sqlitedb_set_sync_data (ebma->priv->db,
-					       EMA_EBB_CACHE_FOLDERID,
-					       iso_time ? iso_time : "0",
-					       &error);
-	g_free (iso_time);
-
-	if (error) {
-		e_mapi_debug_print ("%s: Failed to set value: %s", G_STRFUNC, error->message);
-		g_error_free (error);
-	}
-}
-
-static gboolean
 pick_view_cb (EDataBookView *view, gpointer user_data)
 {
 	EDataBookView **pick = user_data;
@@ -213,12 +163,6 @@ complete_views (EBookBackendMAPI *ebma)
 	e_book_backend_foreach_view (E_BOOK_BACKEND (ebma), complete_view_cb, NULL);
 }
 
-struct FetchContactsData
-{
-	glong last_notification;
-	glong last_modification;
-};
-
 static void
 ebbm_notify_connection_status (EBookBackendMAPI *ebma, gboolean is_online)
 {
@@ -235,10 +179,14 @@ ebbm_notify_connection_status (EBookBackendMAPI *ebma, gboolean is_online)
 }
 
 static void
-ebbm_fetch_contacts (EBookBackendMAPI *ebma, BuildRestrictionsCB build_rs_cb, gpointer build_rs_cb_data, EDataBookView *book_view, glong *last_modification_secs, GError **error)
+ebbm_transfer_contacts (EBookBackendMAPI *ebma,
+			const GSList *uids,
+			EDataBookView *book_view,
+			GCancellable *cancellable,
+			GError **error)
 {
 	EBookBackendMAPIClass *ebmac;
-	struct FetchContactsData notify_data = { 0 };
+	glong last_notification = 0;
 
 	g_return_if_fail (ebma != NULL);
 	g_return_if_fail (ebma->priv != NULL);
@@ -246,12 +194,9 @@ ebbm_fetch_contacts (EBookBackendMAPI *ebma, BuildRestrictionsCB build_rs_cb, gp
 
 	ebmac = E_BOOK_BACKEND_MAPI_GET_CLASS (ebma);
 	g_return_if_fail (ebmac != NULL);
-	g_return_if_fail (ebmac->op_fetch_contacts != NULL);
+	g_return_if_fail (ebmac->op_transfer_contacts != NULL);
 
-	ebmac->op_fetch_contacts (ebma, build_rs_cb, build_rs_cb_data, book_view, &notify_data, error);
-
-	if (last_modification_secs && *last_modification_secs < notify_data.last_modification)
-		*last_modification_secs = notify_data.last_modification;
+	ebmac->op_transfer_contacts (ebma, uids, book_view, &last_notification, cancellable, error);
 }
 
 static gboolean
@@ -266,59 +211,17 @@ unref_backend_idle_cb (gpointer data)
 	return FALSE;
 }
 
-static gboolean
-ebbm_build_cache_update_restriction (EMapiConnection *conn,
-				     mapi_id_t fid,
-				     TALLOC_CTX *mem_ctx,
-				     struct mapi_SRestriction **restrictions,
-				     gpointer user_data,
-				     GCancellable *cancellable,
-				     GError **perror)
-{
-	EBookBackendMAPI *ebma = user_data;
-	struct mapi_SRestriction *restriction;
-	EBookBackendMAPIPrivate *priv;
-	struct SPropValue sprop;
-	struct timeval t = { 0 };
-	glong last_update_secs = 0;
-
-	g_return_val_if_fail (ebma != NULL, FALSE);
-	g_return_val_if_fail (mem_ctx != NULL, FALSE);
-	g_return_val_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma), FALSE);
-	g_return_val_if_fail (restrictions != NULL, FALSE);
-
-	priv = ebma->priv;
-	g_return_val_if_fail (priv != NULL, FALSE);
-	g_return_val_if_fail (priv->db != NULL, FALSE);
-
-	if (!ebbm_get_cache_time (ebma, &last_update_secs) || last_update_secs <= 0)
-		return TRUE;
-
-	restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
-	g_return_val_if_fail (restriction != NULL, FALSE);
-
-	restriction->rt = RES_PROPERTY;
-	restriction->res.resProperty.relop = RELOP_GE;
-	restriction->res.resProperty.ulPropTag = PR_LAST_MODIFICATION_TIME;
-
-	t.tv_sec = last_update_secs;
-	t.tv_usec = 0;
-
-	set_SPropValue_proptag_date_timeval (&sprop, PR_LAST_MODIFICATION_TIME, &t);
-	cast_mapi_SPropValue (mem_ctx, &(restriction->res.resProperty.lpProp), &sprop);
-
-	*restrictions = restriction;
-
-	return TRUE;
-}
-
 static gpointer
 ebbm_update_cache_cb (gpointer data)
 {
 	EBookBackendMAPI *ebma = (EBookBackendMAPI *) data;
 	EBookBackendMAPIPrivate *priv;
 	EBookBackendMAPIClass *ebmac;
-	glong last_modification_secs = 0;
+	guint32 server_stored_contacts = 0;
+	GHashTable *local_known_uids, *server_known_uids;
+	time_t restr_tt = 0;
+	gboolean partial_update = FALSE;
+	GCancellable *cancellable;
 	GError *error = NULL;
 
 	g_return_val_if_fail (ebma != NULL, NULL);
@@ -332,45 +235,74 @@ ebbm_update_cache_cb (gpointer data)
 	ebmac = E_BOOK_BACKEND_MAPI_GET_CLASS (ebma);
 	g_return_val_if_fail (ebmac != NULL, NULL);
 
-	g_cancellable_reset (priv->update_cache);
+	cancellable = priv->update_cache;
+	g_cancellable_reset (cancellable);
 
-	if (!g_cancellable_is_cancelled (priv->update_cache) && ebmac->op_fetch_contacts) {
-		/* get time stored in a cache, to always use the latest last modification time */
-		if (!ebbm_get_cache_time (ebma, &last_modification_secs))
-			last_modification_secs = 0;
+	local_known_uids = e_book_backend_sqlitedb_get_uids_and_rev (priv->db, EMA_EBB_CACHE_FOLDERID, &error);
+	server_known_uids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
-		ebbm_fetch_contacts (ebma, ebbm_build_cache_update_restriction, ebma, NULL, &last_modification_secs, &error);
-		e_book_backend_sqlitedb_set_is_populated (priv->db, EMA_EBB_CACHE_FOLDERID, error != NULL, NULL);
+	if (!error && !g_cancellable_is_cancelled (cancellable) && ebmac->op_get_contacts_count) {
+		ebmac->op_get_contacts_count (ebma, &server_stored_contacts, cancellable, &error);
 	}
 
-	if (!error && !g_cancellable_is_cancelled (priv->update_cache) && ebmac->op_fetch_known_uids) {
-		GHashTable *uids = g_hash_table_new_full (g_str_hash, g_str_equal, (GDestroyNotify) g_free, NULL);
+	if (!error && !g_cancellable_is_cancelled (cancellable) && ebmac->op_list_known_uids) {
+		struct ListKnownUidsData lku;
 
-		ebmac->op_fetch_known_uids (ebma, priv->update_cache, uids, &error);
+		restr_tt = priv->last_modify_time && server_stored_contacts == g_hash_table_size (local_known_uids) ? priv->last_modify_time + 1 : 0;
+		partial_update = restr_tt > 0;
 
-		if (!error && !g_cancellable_is_cancelled (priv->update_cache)) {
-			GSList *cache_keys, *c;
+		lku.uid_to_rev = server_known_uids;
+		lku.latest_last_modify = priv->last_modify_time;
 
-			cache_keys = e_book_backend_sqlitedb_search_uids (priv->db, EMA_EBB_CACHE_FOLDERID, NULL, NULL, NULL);
+		ebmac->op_list_known_uids (ebma, partial_update ? e_mapi_utils_build_last_modify_restriction : NULL, &restr_tt, &lku, cancellable, &error);
 
-			for (c = cache_keys; c; c = c->next) {
-				const gchar *uid = c->data;
+		restr_tt = lku.latest_last_modify;
+	}
 
-				if (!uid || g_hash_table_lookup (uids, uid))
+	if (!error && !g_cancellable_is_cancelled (cancellable) && ebmac->op_transfer_contacts && local_known_uids) {
+		GSList *uids = NULL;
+		GHashTableIter iter;
+		gpointer key, value;
+
+		g_hash_table_iter_init (&iter, server_known_uids);
+		while (g_hash_table_iter_next (&iter, &key, &value)) {
+			const gchar *uid = key, *rev = value, *local_rev;
+
+			local_rev = g_hash_table_lookup (local_known_uids, uid);
+			if (g_strcmp0 (local_rev, rev) != 0) {
+				uids = g_slist_prepend (uids, (gpointer) uid);
+			}
+
+			g_hash_table_remove (local_known_uids, uid);
+		}
+
+		if (uids)
+			ebbm_transfer_contacts (ebma, uids, NULL, cancellable, &error);
+
+		if (!error && !g_cancellable_is_cancelled (cancellable) && !partial_update) {
+			g_hash_table_iter_init (&iter, local_known_uids);
+			while (g_hash_table_iter_next (&iter, &key, &value)) {
+				const gchar *uid = key;
+
+				if (!uid)
 					continue;
 
 				e_book_backend_mapi_notify_contact_removed (ebma, uid);
 			}
-
-			ebbm_set_cache_time (ebma, last_modification_secs);
-
-			g_slist_foreach (cache_keys, (GFunc) g_free, NULL);
-			g_slist_free (cache_keys);
 		}
 
-		g_hash_table_destroy (uids);
+		priv->last_server_contact_count = server_stored_contacts;
+		priv->last_modify_time = restr_tt;
+
+		/* has borrowed data from server_known_uids */
+		g_slist_free (uids);
 	}
 
+	priv->last_update_cache = time(NULL);
+
+	g_hash_table_destroy (server_known_uids);
+	if (local_known_uids)
+		g_hash_table_destroy (local_known_uids);
 	if (error)
 		g_error_free (error);
 
@@ -383,6 +315,34 @@ ebbm_update_cache_cb (gpointer data)
 	g_idle_add (unref_backend_idle_cb, ebma);
 
 	return NULL;
+}
+
+static void
+ebbm_maybe_invoke_cache_update (EBookBackendMAPI *ebma)
+{
+	EBookBackendMAPIPrivate *priv;
+
+	g_return_if_fail (ebma != NULL);
+	g_return_if_fail (ebma->priv != NULL);
+
+	priv = ebma->priv;
+
+	if (priv->update_cache_thread) {
+		if (!g_cancellable_is_cancelled (priv->update_cache))
+			return;
+
+		g_thread_join (priv->update_cache_thread);
+		priv->update_cache_thread = NULL;
+	}
+
+	/* do not update more often than each 10 minutes */
+	if (time (NULL) - priv->last_update_cache >= 60 * 10) {
+		g_object_ref (ebma);
+
+		priv->update_cache_thread = g_thread_create (ebbm_update_cache_cb, ebma, TRUE, NULL);
+		if (!priv->update_cache_thread)
+			g_object_unref (ebma);
+	}
 }
 
 static void
@@ -445,11 +405,7 @@ ebbm_connect_user (EBookBackendMAPI *ebma, GCancellable *cancellable, const gcha
 		ebbm_notify_connection_status (ebma, TRUE);
 
 		if (!g_cancellable_is_cancelled (cancellable) /* && priv->marked_for_offline */) {
-			g_object_ref (ebma);
-
-			priv->update_cache_thread = g_thread_create (ebbm_update_cache_cb, ebma, TRUE, NULL);
-			if (!priv->update_cache_thread)
-				g_object_unref (ebma);
+			ebbm_maybe_invoke_cache_update (ebma);
 		}
 	}
 }
@@ -745,19 +701,9 @@ ebbm_book_view_thread (gpointer data)
 
 		ebmac = E_BOOK_BACKEND_MAPI_GET_CLASS (bvtd->ebma);
 		if (ebmac && ebmac->op_book_view_thread)
-			ebmac->op_book_view_thread (bvtd->ebma, bvtd->book_view, &error);
+			ebmac->op_book_view_thread (bvtd->ebma, bvtd->book_view, priv->update_cache, &error);
 
-		if (!error && !e_book_backend_sqlitedb_get_is_populated (priv->db, EMA_EBB_CACHE_FOLDERID, &error)) {
-			/* todo: create restriction based on the book_view */
-			if (!error) {
-				g_cancellable_reset (priv->update_cache);
-				ebbm_fetch_contacts (bvtd->ebma, NULL, NULL, bvtd->book_view, NULL, &error);
-				g_cancellable_cancel (priv->update_cache);
-			}
-
-			if (!error)
-				e_book_backend_sqlitedb_set_is_populated (priv->db, EMA_EBB_CACHE_FOLDERID, TRUE, &error);
-		}
+		ebbm_maybe_invoke_cache_update (bvtd->ebma);
 	}
 
 	if (error && g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
@@ -891,7 +837,7 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 				const GSList *l;
 
 				for (l = added_contacts; l; l = l->next) {
-					e_book_backend_mapi_notify_contact_update (ebma, NULL, E_CONTACT (l->data), NULL, -1, -1, NULL);
+					e_book_backend_mapi_notify_contact_update (ebma, NULL, E_CONTACT (l->data), -1, -1, NULL);
 				}
 			}
 
@@ -947,7 +893,7 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 				const GSList *l;
 
 				for (l = modified_contacts; l; l = l->next) {
-					e_book_backend_mapi_notify_contact_update (ebma, NULL, E_CONTACT (l->data), NULL, -1, -1, NULL);
+					e_book_backend_mapi_notify_contact_update (ebma, NULL, E_CONTACT (l->data), -1, -1, NULL);
 				}
 			}
 
@@ -1317,6 +1263,9 @@ e_book_backend_mapi_init (EBookBackendMAPI *ebma)
 
 	ebma->priv->update_cache = g_cancellable_new ();
 	ebma->priv->update_cache_thread = NULL;
+	ebma->priv->last_update_cache = 0;
+	ebma->priv->last_server_contact_count = 0;
+	ebma->priv->last_modify_time = 0;
 
 	g_signal_connect (
 		ebma, "notify::online",
@@ -1371,30 +1320,31 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 
 	g_type_class_add_private (klass, sizeof (EBookBackendMAPIPrivate));
 
-	object_class->dispose                     = ebbm_dispose;
+	object_class->dispose			= ebbm_dispose;
 
-	backend_class->open			  = ebbm_op_open;
-	backend_class->remove			  = ebbm_op_remove;
-	backend_class->create_contacts		  = ebbm_op_create_contacts;
-	backend_class->remove_contacts		  = ebbm_op_remove_contacts;
-	backend_class->modify_contacts		  = ebbm_op_modify_contacts;
-	backend_class->get_contact                = ebbm_op_get_contact;
-	backend_class->get_contact_list           = ebbm_op_get_contact_list;
-	backend_class->start_book_view            = ebbm_op_start_book_view;
-	backend_class->stop_book_view             = ebbm_op_stop_book_view;
-	backend_class->authenticate_user          = ebbm_op_authenticate_user;
-	backend_class->get_backend_property	  = ebbm_op_get_backend_property;
-	klass->op_open				  = ebbm_open;
-	klass->op_remove                          = ebbm_remove;
-	klass->op_authenticate_user               = ebbm_authenticate_user;
-	klass->op_get_contact                     = ebbm_get_contact;
-	klass->op_get_contact_list                = ebbm_get_contact_list;
+	backend_class->open			= ebbm_op_open;
+	backend_class->remove			= ebbm_op_remove;
+	backend_class->create_contacts		= ebbm_op_create_contacts;
+	backend_class->remove_contacts		= ebbm_op_remove_contacts;
+	backend_class->modify_contacts		= ebbm_op_modify_contacts;
+	backend_class->get_contact		= ebbm_op_get_contact;
+	backend_class->get_contact_list		= ebbm_op_get_contact_list;
+	backend_class->start_book_view		= ebbm_op_start_book_view;
+	backend_class->stop_book_view		= ebbm_op_stop_book_view;
+	backend_class->authenticate_user	= ebbm_op_authenticate_user;
+	backend_class->get_backend_property	= ebbm_op_get_backend_property;
+	klass->op_open				= ebbm_open;
+	klass->op_remove			= ebbm_remove;
+	klass->op_authenticate_user		= ebbm_authenticate_user;
+	klass->op_get_contact			= ebbm_get_contact;
+	klass->op_get_contact_list		= ebbm_get_contact_list;
 
-	klass->op_connection_status_changed       = NULL;
-	klass->op_get_status_message              = NULL;
-	klass->op_book_view_thread                = NULL;
-	klass->op_fetch_contacts                  = NULL;
-	klass->op_fetch_known_uids                = NULL;
+	klass->op_connection_status_changed	= NULL;
+	klass->op_get_status_message		= NULL;
+	klass->op_book_view_thread		= NULL;
+	klass->op_get_contacts_count		= NULL;
+	klass->op_list_known_uids		= NULL;
+	klass->op_transfer_contacts		= NULL;
 }
 
 gboolean
@@ -1529,14 +1479,14 @@ get_current_time_ms (void)
 	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 
-/* called from op_fetch_contacts - book_view and notify_contact_data are taken from there;
-   notify_contact_data is a pointer to FetchContactsData, if not NULL;
+/* called from op_transfer_contacts - book_view and notify_contact_data are taken from there;
+   notify_contact_data is a pointer to glong last_notification, if not NULL;
    returns whether can continue with fetching */
 gboolean
-e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView *pbook_view, EContact *contact, const struct timeval *pr_last_modification_time, gint index, gint total, gpointer notify_contact_data)
+e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView *pbook_view, EContact *contact, gint index, gint total, gpointer notify_contact_data)
 {
 	EBookBackendMAPIPrivate *priv;
-	struct FetchContactsData *fcd = notify_contact_data;
+	glong *last_notification = notify_contact_data;
 	EDataBookView *book_view = pbook_view;
 	GError *error = NULL;
 
@@ -1553,13 +1503,13 @@ e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView
 		book_view = ebbm_pick_book_view (ebma);
 
 	if (book_view) {
-		guint32 current_time;
+		glong current_time;
 
 		if (!e_book_backend_mapi_book_view_is_running (ebma, book_view))
 			return FALSE;
 
 		current_time = get_current_time_ms ();
-		if (index > 0 && fcd && current_time - fcd->last_notification > 333) {
+		if (index > 0 && last_notification && current_time - *last_notification > 333) {
 			gchar *status_msg = NULL;
 			EBookBackendMAPIClass *ebmac = E_BOOK_BACKEND_MAPI_GET_CLASS (ebma);
 
@@ -1571,7 +1521,7 @@ e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView
 
 			g_free (status_msg);
 
-			fcd->last_notification = current_time;
+			*last_notification = current_time;
 		}
 	}
 
@@ -1583,14 +1533,11 @@ e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView
 					     FALSE, &error);
 	if (!error) {
 		e_book_backend_notify_update (E_BOOK_BACKEND (ebma), contact);
-
-		if (fcd && pr_last_modification_time) {
-			if (fcd->last_modification < pr_last_modification_time->tv_sec)
-				fcd->last_modification = pr_last_modification_time->tv_sec;
-		}
 		return TRUE;
 	}
+
 	g_error_free (error);
+
 	return FALSE;
 }
 
@@ -1708,9 +1655,10 @@ mapi_book_utils_get_prop_list (EMapiConnection *conn,
 	};
 
 	static uint32_t uids_only_ids[] = {
-		PR_FID,
-		PR_MID,
-		PR_EMAIL_ADDRESS_UNICODE
+		PidTagFolderId,
+		PidTagMid,
+		PidTagLastModificationTime,
+		PidTagEmailAddress
 	};
 
 	/* do not make this array static, the function modifies it on run */
@@ -1879,13 +1827,8 @@ mapi_book_utils_contact_from_props (EMapiConnection *conn, mapi_id_t fid, const 
 			if (value && mappings[i].element_type == PT_SYSTIME) {
 				const struct FILETIME *t = value;
 				gchar *buff = NULL;
-				GTimeVal tv;
 
-				tv.tv_sec = e_mapi_util_filetime_to_time_t (t);
-				tv.tv_usec = 0;
-				
-				buff = g_time_val_to_iso8601 (&tv);
-
+				buff = mapi_book_utils_timet_to_string (e_mapi_util_filetime_to_time_t (t));
 				if (buff)
 					e_contact_set (contact, mappings[i].field_id, buff);
 
@@ -2005,4 +1948,15 @@ mapi_error_to_edb_error (GError **perror, const GError *mapi_error, EDataBookSta
 	g_propagate_error (perror, e_data_book_create_error (code, err_msg ? err_msg : mapi_error->message));
 
 	g_free (err_msg);
+}
+
+gchar *
+mapi_book_utils_timet_to_string (time_t tt)
+{
+	GTimeVal tv;
+
+	tv.tv_sec = tt;
+	tv.tv_usec = 0;
+
+	return g_time_val_to_iso8601 (&tv);
 }

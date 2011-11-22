@@ -31,9 +31,6 @@
 gchar *  e_mapi_util_mapi_id_to_string (mapi_id_t id);
 gboolean e_mapi_util_mapi_id_from_string (const gchar *str, mapi_id_t *id);
 
-gchar *  e_mapi_util_mapi_ids_to_uid (mapi_id_t fid, mapi_id_t mid);
-gboolean e_mapi_util_mapi_ids_from_uid (const gchar *str, mapi_id_t *fid, mapi_id_t *mid);
-
 gconstpointer	e_mapi_util_find_SPropVal_array_propval (struct SPropValue *values, uint32_t proptag);
 gconstpointer	e_mapi_util_find_SPropVal_array_namedid (struct SPropValue *values, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid);
 gconstpointer	e_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag);
@@ -116,7 +113,7 @@ gboolean	e_mapi_utils_build_last_modify_restriction	(EMapiConnection *conn,
 								 mapi_id_t fid,
 								 TALLOC_CTX *mem_ctx,
 								 struct mapi_SRestriction **restrictions,
-								 gpointer user_data,
+								 gpointer user_data, /* const time_t * */
 								 GCancellable *cancellable,
 								 GError **perror);
 struct FolderBasicPropertiesData
