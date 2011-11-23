@@ -2590,7 +2590,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 	ECalComponent *comp = NULL;
 	struct timeval t;
 	const gchar *str;
-	const struct mapi_SPLSTRArrayW *categories_array;
+	const struct mapi_SLPSTRArrayW *categories_array;
 	const struct SBinary_short *bin;
 	const uint32_t *ui32;
 	const bool *b;
