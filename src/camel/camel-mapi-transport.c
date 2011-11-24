@@ -107,6 +107,34 @@ mapi_send_to_sync (CamelTransport *transport,
 	service = CAMEL_SERVICE (transport);
 	settings = camel_service_get_settings (service);
 	profile = camel_mapi_settings_get_profile (CAMEL_MAPI_SETTINGS (settings));
+	if (!profile) {
+		/* try to find corresponding CamelStore with profile name filled */
+		const gchar *my_uid = camel_service_get_uid (service);
+		CamelSession *session = camel_service_get_session (service);
+		GList *services, *s;
+
+		services = camel_session_list_services (session);
+		for (s = services; s && my_uid && !profile; s = s->next) {
+			CamelService *store = s->data;
+			const gchar *store_uid;
+
+			if (!CAMEL_IS_STORE (store))
+				continue;
+
+			store_uid = camel_service_get_uid (store);
+			if (!store_uid)
+				continue;
+
+			if (g_strcmp0 (my_uid, store_uid) == 0 ||
+			    g_str_has_prefix (my_uid, store_uid) ||
+			    g_str_has_prefix (store_uid, my_uid)) {
+				settings = camel_service_get_settings (store);
+				profile = camel_mapi_settings_get_profile (CAMEL_MAPI_SETTINGS (settings));
+			}
+		}
+
+		g_list_free (services);
+	}
 
 	conn = exchange_mapi_connection_find (profile);
 	if (!conn) {
