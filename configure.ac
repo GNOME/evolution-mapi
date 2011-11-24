@@ -53,11 +53,7 @@ dnl ***********************
 dnl Compiler Warning Flags
 dnl ***********************
 AS_COMPILER_FLAGS(WARNING_FLAGS,
-	"-DPANGO_DISABLE_DEPRECATED
-	-DGDK_DISABLE_DEPRECATED
-	-DGDK_PIXBUF_DISABLE_DEPRECATED
-	-DGNOME_DISABLE_DEPRECATED
-	-DGSEAL_ENABLE
+	"-DGSEAL_ENABLE
 	-DE_BOOK_DISABLE_DEPRECATED
 	-DE_CAL_DISABLE_DEPRECATED
 	-Wall -Wextra
@@ -72,9 +68,6 @@ AS_COMPILER_FLAGS(WARNING_FLAGS,
 	-Wundef -Wwrite-strings")
 AC_SUBST(WARNING_FLAGS)
 
-dnl When evo will stop using GtkHBox/GtkVBox
-dnl	-DGTK_DISABLE_DEPRECATED
-dnl
 dnl Other useful compiler warnings for test builds only.
 dnl These may produce warnings we have no control over.
 dnl
