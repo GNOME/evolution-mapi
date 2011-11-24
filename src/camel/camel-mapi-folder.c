@@ -423,7 +423,7 @@ struct GatherChangedObjectsData
 {
 	CamelFolderSummary *summary;
 	mapi_id_t fid;
-	GSList *to_update;
+	GSList *to_update; /* mapi_id_t * */
 	GHashTable *removed_uids;
 	time_t latest_last_modify;
 };
@@ -440,7 +440,6 @@ gather_changed_objects_to_slist (EMapiConnection *conn,
 				 GError **perror)
 {
 	struct GatherChangedObjectsData *gco = user_data;
-	ListObjectsData *copy;
 	gchar *uid_str;
 	gboolean update = FALSE;
 
@@ -485,10 +484,11 @@ gather_changed_objects_to_slist (EMapiConnection *conn,
 	}
 
 	if (update) {
-		copy = g_new0 (ListObjectsData, 1);
-		*copy = *object_data;
+		mapi_id_t *pmid = g_new0 (mapi_id_t, 1);
 
-		gco->to_update = g_slist_prepend (gco->to_update, copy);
+		*pmid = object_data->mid;
+
+		gco->to_update = g_slist_prepend (gco->to_update, pmid);
 	}
 
 	if (gco->latest_last_modify < object_data->last_modified)
@@ -598,8 +598,9 @@ gather_object_offline_cb (EMapiConnection *conn,
 				else
 					camel_message_info_set_flags (info, mask, flags);
 				minfo->server_flags = camel_message_info_flags (info);
-				minfo->info.dirty = TRUE;
 			}
+
+			minfo->info.dirty = TRUE;
 
 			if (is_new) {
 				camel_folder_summary_add (gos->folder->summary, info);
@@ -804,8 +805,9 @@ gather_object_summary_cb (EMapiConnection *conn,
 			else
 				camel_message_info_set_flags (info, mask, flags);
 			minfo->server_flags = camel_message_info_flags (info);
-			minfo->info.dirty = TRUE;
 		}
+
+		minfo->info.dirty = TRUE;
 
 		if (is_new) {
 			camel_folder_summary_add (gos->folder->summary, info);
@@ -901,15 +903,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 	}
 
 	if (status && gco.to_update) {
-		GSList *uids = NULL, *iter;
 		struct GatherObjectSummaryData gos;
-
-		for (iter = gco.to_update; iter; iter = iter->next) {
-			ListObjectsData *data = iter->data;
-
-			if (data)
-				uids = g_slist_prepend (uids, &data->mid);
-		}
 
 		gos.folder = folder;
 		gos.changes = camel_folder_change_info_new ();
@@ -920,14 +914,12 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 		if (full_download) {
 			camel_operation_push_message (cancellable, _("Downloading messages in folder '%s'"), camel_folder_get_display_name (folder));
 
-			status = e_mapi_connection_transfer_objects (conn, &obj_folder, uids, gather_object_offline_cb, &gos, cancellable, mapi_error);
+			status = e_mapi_connection_transfer_objects (conn, &obj_folder, gco.to_update, gather_object_offline_cb, &gos, cancellable, mapi_error);
 
 			camel_operation_pop_message (cancellable);
 		} else {
-			status = e_mapi_connection_transfer_summary (conn, &obj_folder, uids, gather_object_summary_cb, &gos, cancellable, mapi_error);
+			status = e_mapi_connection_transfer_summary (conn, &obj_folder, gco.to_update, gather_object_summary_cb, &gos, cancellable, mapi_error);
 		}
-
-		g_slist_free (uids);
 
 		if (camel_folder_change_info_changed (gos.changes))
 			camel_folder_changed (folder, gos.changes);
