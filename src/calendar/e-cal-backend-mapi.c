@@ -490,7 +490,7 @@ drop_removed_comps_cb (gpointer pmid, gpointer slist, gpointer pcbmapi)
 		}
 
 		if (e_cal_backend_store_remove_component (cbmapi->priv->store, id->uid, id->rid)) {
-			e_cal_backend_notify_component_removed (backend, id, e_cal_component_get_icalcomponent (comp), NULL);
+			e_cal_backend_notify_component_removed (backend, id, comp, NULL);
 		}
 
 		e_cal_component_free_id (id);
@@ -651,10 +651,10 @@ transfer_calendar_objects_cb (EMapiConnection *conn,
 		put_component_to_store (cbmapi, comp);
 
 		if (old_comp) {
-			e_cal_backend_notify_component_modified	(backend, e_cal_component_get_icalcomponent (old_comp), e_cal_component_get_icalcomponent (comp));
+			e_cal_backend_notify_component_modified	(backend, old_comp, comp);
 			g_object_unref (old_comp);
 		} else {
-			e_cal_backend_notify_component_created (E_CAL_BACKEND (cbmapi), e_cal_component_get_icalcomponent (comp));
+			e_cal_backend_notify_component_created (E_CAL_BACKEND (cbmapi), comp);
 		}
 
 		e_cal_component_free_id (id);
@@ -921,9 +921,8 @@ ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 		}
 	}
 
+	g_slist_free_full (components, g_object_unref);
 	g_object_unref (cbsexp);
-	g_slist_foreach (components, (GFunc) g_object_unref, NULL);
-	g_slist_free (components);
 	g_mutex_unlock (priv->mutex);
 }
 
@@ -1392,7 +1391,7 @@ free_server_data (struct cal_cbdata *cbdata)
 static icaltimezone *ecbm_internal_get_timezone (ECalBackend *backend, const gchar *tzid);
 
 static void
-ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *calobj, gchar **uid, icalcomponent **new_icalcomp, GError **error)
+ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *calobj, gchar **uid, ECalComponent **new_ecalcomp, GError **error)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
@@ -1417,7 +1416,7 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
-	e_return_data_cal_error_if_fail (new_icalcomp != NULL, InvalidArg);
+	e_return_data_cal_error_if_fail (new_ecalcomp != NULL, InvalidArg);
 
 	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
@@ -1510,8 +1509,8 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 		e_cal_component_commit_sequence (comp);
 		put_component_to_store (cbmapi, comp);
-		*new_icalcomp = icalcomponent_new_clone (e_cal_component_get_icalcomponent (comp));
-		e_cal_backend_notify_component_created (E_CAL_BACKEND (cbmapi), *new_icalcomp);
+		*new_ecalcomp = e_cal_component_clone (comp);
+		e_cal_backend_notify_component_created (E_CAL_BACKEND (cbmapi), *new_ecalcomp);
 	} else {
 		e_mapi_util_free_recipient_list (&recipients);
 		e_mapi_util_free_stream_list (&streams);
@@ -1583,7 +1582,7 @@ find_my_response (ECalBackendMAPI *cbmapi, ECalComponent *comp)
 }
 
 static void
-ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *calobj, CalObjModType mod, icalcomponent **old_icalcomp, icalcomponent **new_icalcomp, GError **error)
+ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *calobj, CalObjModType mod, ECalComponent **old_ecalcomp, ECalComponent **new_ecalcomp, GError **error)
 {
 	ECalBackendMAPI *cbmapi;
         ECalBackendMAPIPrivate *priv;
@@ -1603,7 +1602,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	const gchar *cache_dir;
 	GError *mapi_error = NULL;
 
-	*old_icalcomp = *new_icalcomp = NULL;
+	*old_ecalcomp = *new_ecalcomp = NULL;
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
@@ -1740,11 +1739,11 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		return;
 	}
 
-	*old_icalcomp = icalcomponent_new_clone (e_cal_component_get_icalcomponent (cache_comp));
-	*new_icalcomp = icalcomponent_new_clone (e_cal_component_get_icalcomponent (comp));
+	*old_ecalcomp = e_cal_component_clone (cache_comp);
+	*new_ecalcomp = e_cal_component_clone (comp);
 
 	put_component_to_store (cbmapi, comp);
-	e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbmapi), *old_icalcomp, *new_icalcomp);
+	e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbmapi), *old_ecalcomp, *new_ecalcomp);
 
 	g_object_unref (comp);
 	g_object_unref (cache_comp);
@@ -1756,7 +1755,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 static void
 ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable,
 				  const gchar *uid, const gchar *rid, CalObjModType mod,
-				  icalcomponent **old_icalcomp, icalcomponent **new_icalcomp, GError **error)
+				  ECalComponent **old_ecalcomp, ECalComponent **new_ecalcomp, GError **error)
 {
 	ECalBackendMAPI *cbmapi;
         ECalBackendMAPIPrivate *priv;
@@ -1765,7 +1764,7 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	mapi_id_t mid;
 	GError *err = NULL;
 
-	*old_icalcomp = *new_icalcomp = NULL;
+	*old_ecalcomp = *new_ecalcomp = NULL;
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
@@ -1803,7 +1802,7 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		time_rid = icaltime_from_string (rid);
 		e_cal_util_remove_instances (icalcomp, time_rid, mod);
 		new_calobj = icalcomponent_as_ical_string_r (icalcomp);
-		ecbm_modify_object (backend, cal, cancellable, new_calobj, CALOBJ_MOD_ALL, old_icalcomp, new_icalcomp, &err);
+		ecbm_modify_object (backend, cal, cancellable, new_calobj, CALOBJ_MOD_ALL, old_ecalcomp, new_ecalcomp, &err);
 		g_free (new_calobj);
 	} else {
 		GSList *list=NULL, *l, *comp_list = e_cal_backend_store_get_components_by_uid (priv->store, uid);
@@ -1823,13 +1822,14 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 				e_cal_backend_store_remove_component (priv->store, id->uid, id->rid);
 				if (!id->rid || !g_str_equal (id->rid, rid))
-					e_cal_backend_notify_object_removed (E_CAL_BACKEND (cbmapi), id, e_cal_component_get_as_string (comp), NULL);
+					e_cal_backend_notify_component_removed (E_CAL_BACKEND (cbmapi), id, comp, NULL);
 				e_cal_component_free_id (id);
 
 				g_object_unref (comp);
 			}
-			*old_icalcomp = icalparser_parse_string (calobj);
-			*new_icalcomp = NULL;
+
+			*old_ecalcomp = e_cal_component_new_from_icalcomponent (icalparser_parse_string (calobj));
+			*new_ecalcomp = NULL;
 			err = NULL; /* Success */
 		} else
 			mapi_error_to_edc_error (&err, ri_error, OtherError, "Cannot remove items from a server");
@@ -2085,7 +2085,7 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 			gchar *rid = NULL;
 			const gchar *uid;
 			gchar *comp_str;
-			icalcomponent *old_icalcomp = NULL, *new_icalcomp = NULL;
+			ECalComponent *old_ecalcomp = NULL, *new_ecalcomp = NULL;
 
 			e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
 
@@ -2106,11 +2106,11 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 				if (err) {
 					g_clear_error (&err);
 					comp_str = e_cal_component_get_as_string (comp);
-					ecbm_create_object (backend, cal, cancellable, comp_str, NULL, &new_icalcomp, &err);
+					ecbm_create_object (backend, cal, cancellable, comp_str, NULL, &new_ecalcomp, &err);
 				} else {
 					g_free (comp_str);
 					comp_str = e_cal_component_get_as_string (comp);
-					ecbm_modify_object (backend, cal, cancellable, comp_str, CALOBJ_MOD_ALL, &old_icalcomp, &new_icalcomp, &err);
+					ecbm_modify_object (backend, cal, cancellable, comp_str, CALOBJ_MOD_ALL, &old_ecalcomp, &new_ecalcomp, &err);
 				}
 				g_free (comp_str);
 
@@ -2118,7 +2118,7 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 					stop = TRUE;
 				break;
 			case ICAL_METHOD_CANCEL :
-				ecbm_remove_object (backend, cal, cancellable, uid, rid, CALOBJ_MOD_THIS, &old_icalcomp, &new_icalcomp, &err);
+				ecbm_remove_object (backend, cal, cancellable, uid, rid, CALOBJ_MOD_THIS, &old_ecalcomp, &new_ecalcomp, &err);
 				if (err)
 					stop = TRUE;
 				break;
@@ -2156,13 +2156,13 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 					}
 
 					if (any_changed) {
-						old_icalcomp = NULL;
-						new_icalcomp = NULL;
+						old_ecalcomp = NULL;
+						new_ecalcomp = NULL;
 
 						e_cal_component_set_attendee_list (cache_comp, cache_attendees);
 
 						comp_str = e_cal_component_get_as_string (cache_comp);
-						ecbm_modify_object (backend, cal, cancellable, comp_str, CALOBJ_MOD_ALL, &old_icalcomp, &new_icalcomp, &err);
+						ecbm_modify_object (backend, cal, cancellable, comp_str, CALOBJ_MOD_ALL, &old_ecalcomp, &new_ecalcomp, &err);
 
 						g_free (comp_str);
 					}
@@ -2183,10 +2183,10 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 			g_free (rid);
 			g_object_unref (comp);
 
-			if (old_icalcomp)
-				icalcomponent_free (old_icalcomp);
-			if (new_icalcomp)
-				icalcomponent_free (new_icalcomp);
+			if (old_ecalcomp)
+				g_object_unref (old_ecalcomp);
+			if (new_ecalcomp)
+				g_object_unref (new_ecalcomp);
 
 			subcomp = icalcomponent_get_next_component (icalcomp,
 								    e_cal_backend_get_kind (E_CAL_BACKEND (backend)));
@@ -2293,26 +2293,54 @@ ecbm_start_view (ECalBackend *backend, EDataCalView *view)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
-        GSList *objects = NULL;
+	GSList *components, *l;
+	ECalBackendSExp *cbsexp;
+	const gchar *sexp;
+	gboolean search_needed = TRUE;
+	time_t occur_start = -1, occur_end = -1;
+	gboolean prunning_by_time;
 	GError *err = NULL;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
-        ecbm_get_object_list (backend, NULL, NULL, e_data_cal_view_get_text (view), &objects, &err);
-        if (err) {
+	g_mutex_lock (priv->mutex);
+
+	cbsexp = e_data_cal_view_get_object_sexp (view);
+
+	if (!cbsexp) {
+		g_mutex_unlock (priv->mutex);
+
+		err = EDC_ERROR (InvalidQuery);
 		e_data_cal_view_notify_complete (view, err);
 		g_error_free (err);
-                return;
+
+		return;
 	}
 
-	/* notify listeners of all objects */
-	if (objects) {
-		e_data_cal_view_notify_objects_added (view, objects);
-		/* free memory */
-		g_slist_foreach (objects, (GFunc) g_free, NULL);
-		g_slist_free (objects);
+	sexp = e_data_cal_view_get_text (view);
+	if (!sexp || !strcmp (sexp, "#t"))
+		search_needed = FALSE;
+
+	prunning_by_time = e_cal_backend_sexp_evaluate_occur_times (cbsexp, &occur_start, &occur_end);
+
+	components = prunning_by_time ?
+		e_cal_backend_store_get_components_occuring_in_range (priv->store, occur_start, occur_end)
+		: e_cal_backend_store_get_components (priv->store);
+
+	for (l = components; l != NULL; l = l->next) {
+		ECalComponent *comp = E_CAL_COMPONENT (l->data);
+		if (e_cal_backend_get_kind (E_CAL_BACKEND (backend)) ==
+				icalcomponent_isa (e_cal_component_get_icalcomponent (comp))) {
+			if ((!search_needed) ||
+					(e_cal_backend_sexp_match_comp (cbsexp, comp, E_CAL_BACKEND (backend)))) {
+				e_data_cal_view_notify_components_added_1 (view, comp);
+			}
+		}
 	}
+
+	g_slist_free_full (components, g_object_unref);
+	g_mutex_unlock (priv->mutex);
 
 	g_mutex_lock (priv->is_updating_mutex);
 	if (!priv->is_updating)
@@ -2567,17 +2595,17 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 
 		if (!cancelled) {
 			gchar *uid = NULL;
-			icalcomponent *modified_icalcomp = NULL;
+			ECalComponent *new_ecalcomp = NULL;
 
-			ecbm_create_object (backend, op->cal, op->cancellable, calobj, &uid, &modified_icalcomp, &error);
+			ecbm_create_object (backend, op->cal, op->cancellable, calobj, &uid, &new_ecalcomp, &error);
 
-			e_data_cal_respond_create_object (op->cal, op->opid, error, uid, modified_icalcomp);
+			e_data_cal_respond_create_object (op->cal, op->opid, error, uid, new_ecalcomp);
 
 			/* free memory */
 			g_free (uid);
 
-			if (modified_icalcomp)
-				icalcomponent_free (modified_icalcomp);
+			if (new_ecalcomp)
+				g_object_unref (new_ecalcomp);
 		}
 
 		g_free (ops->str);
@@ -2586,19 +2614,19 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 		OperationModify *opm = (OperationModify *) op;
 
 		if (!cancelled) {
-			icalcomponent *old_icalcomp = NULL, *new_icalcomp = NULL;
+			ECalComponent *old_ecalcomp = NULL, *new_ecalcomp = NULL;
 
-			ecbm_modify_object (backend, op->cal, op->cancellable, opm->calobj, opm->mod, &old_icalcomp, &new_icalcomp, &error);
+			ecbm_modify_object (backend, op->cal, op->cancellable, opm->calobj, opm->mod, &old_ecalcomp, &new_ecalcomp, &error);
 
-			if (!new_icalcomp)
-				new_icalcomp = icalparser_parse_string (opm->calobj);
+			if (!new_ecalcomp)
+				new_ecalcomp = e_cal_component_new_from_icalcomponent (icalparser_parse_string (opm->calobj));
 
-			e_data_cal_respond_modify_object (op->cal, op->opid, error, old_icalcomp, new_icalcomp);
+			e_data_cal_respond_modify_object (op->cal, op->opid, error, old_ecalcomp, new_ecalcomp);
 
-			if (old_icalcomp)
-				icalcomponent_free (old_icalcomp);
-			if (new_icalcomp)
-				icalcomponent_free (new_icalcomp);
+			if (old_ecalcomp)
+				g_object_unref (old_ecalcomp);
+			if (new_ecalcomp)
+				g_object_unref (new_ecalcomp);
 		}
 
 		g_free (opm->calobj);
@@ -2607,9 +2635,9 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 		OperationRemove *opr = (OperationRemove *) op;
 
 		if (!cancelled) {
-			icalcomponent *old_icalcomp = NULL, *new_icalcomp;
+			ECalComponent *old_ecalcomp = NULL, *new_ecalcomp = NULL;
 
-			ecbm_remove_object (backend, op->cal, op->cancellable, opr->uid, opr->rid, opr->mod, &old_icalcomp, &new_icalcomp, &error);
+			ecbm_remove_object (backend, op->cal, op->cancellable, opr->uid, opr->rid, opr->mod, &old_ecalcomp, &new_ecalcomp, &error);
 
 			if (!error) {
 				ECalComponentId *id = g_new0 (ECalComponentId, 1);
@@ -2618,16 +2646,16 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 				if (opr->mod == CALOBJ_MOD_THIS)
 					id->rid = g_strdup (opr->rid);
 
-				e_data_cal_respond_remove_object (op->cal, op->opid, error, id, old_icalcomp, new_icalcomp);
+				e_data_cal_respond_remove_object (op->cal, op->opid, error, id, old_ecalcomp, new_ecalcomp);
 
 				e_cal_component_free_id (id);
 			} else
-				e_data_cal_respond_remove_object (op->cal, op->opid, error, NULL, old_icalcomp, new_icalcomp);
+				e_data_cal_respond_remove_object (op->cal, op->opid, error, NULL, old_ecalcomp, new_ecalcomp);
 
-			if (old_icalcomp)
-				icalcomponent_free (old_icalcomp);
-			if (new_icalcomp)
-				icalcomponent_free (new_icalcomp);
+			if (old_ecalcomp)
+				g_object_unref (old_ecalcomp);
+			if (new_ecalcomp)
+				g_object_unref (new_ecalcomp);
 		}
 
 		g_free (opr->uid);
