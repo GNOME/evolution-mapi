@@ -1925,6 +1925,11 @@ mapi_error_to_edb_error (GError **perror, const GError *mapi_error, EDataBookSta
 	if (!perror)
 		return;
 
+	if (g_error_matches (mapi_error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+		g_propagate_error (perror, g_error_copy (mapi_error));
+		return;
+	}
+
 	if (code == E_DATA_BOOK_STATUS_OTHER_ERROR && mapi_error && mapi_error->domain == E_MAPI_ERROR) {
 		/* Change error to more accurate only with OTHER_ERROR */
 		switch (mapi_error->code) {

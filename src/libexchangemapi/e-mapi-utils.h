@@ -103,6 +103,9 @@ void e_mapi_util_free_binary_r (struct Binary_r *bin);
 time_t e_mapi_util_filetime_to_time_t (const struct FILETIME *filetime);
 void e_mapi_util_time_t_to_filetime (const time_t tt, struct FILETIME *filetime);
 
+gboolean	e_mapi_utils_propagate_cancelled_error		(const GError *mapi_error,
+								 GError **error);
+
 void		e_mapi_utils_global_lock			(void);
 void		e_mapi_utils_global_unlock			(void);
 gboolean	e_mapi_utils_create_mapi_context		(struct mapi_context **mapi_ctx,

@@ -1013,9 +1013,10 @@ mapi_refresh_folder (CamelFolder *folder, GCancellable *cancellable, GError **er
 
 	if (!status) {
 		if (mapi_error) {
-			g_set_error (
-				error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_INVALID,
-				_("Fetching items failed: %s"), mapi_error->message);
+			if (!e_mapi_utils_propagate_cancelled_error (mapi_error, error))
+				g_set_error (
+					error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_INVALID,
+					_("Fetching items failed: %s"), mapi_error->message);
 			g_error_free (mapi_error);
 		} else {
 			g_set_error_literal (
@@ -1273,7 +1274,8 @@ mapi_folder_append_message_sync (CamelFolder *folder,
 
 	if (!mid) {
 		if (mapi_error) {
-			g_set_error_literal (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC, mapi_error->message);
+			if (!e_mapi_utils_propagate_cancelled_error (mapi_error, error))
+				g_set_error_literal (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC, mapi_error->message);
 			g_error_free (mapi_error);
 		} else {
 			g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC, _("Offline."));
@@ -1346,9 +1348,10 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 			mapi_summary_clear (folder->summary, TRUE);
 			camel_folder_thaw (folder);
 		} else if (mapi_error) {
-			g_set_error (
-				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				_("Failed to empty Trash: %s"), mapi_error->message);
+			if (!e_mapi_utils_propagate_cancelled_error (mapi_error, error))
+				g_set_error (
+					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+					_("Failed to empty Trash: %s"), mapi_error->message);
 			g_error_free (mapi_error);
 		} else {
 			g_set_error_literal (
@@ -1561,10 +1564,10 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 
 	if (!msg) {
 		if (mapi_error) {
-			g_set_error (
-				error, CAMEL_SERVICE_ERROR,
-				CAMEL_SERVICE_ERROR_INVALID,
-				_("Could not get message: %s"), mapi_error->message);
+			if (!e_mapi_utils_propagate_cancelled_error (mapi_error, error))
+				g_set_error (
+					error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_INVALID,
+					_("Could not get message: %s"), mapi_error->message);
 			g_error_free (mapi_error);
 		} else {
 			g_set_error (
@@ -1866,11 +1869,11 @@ mapi_folder_transfer_messages_to_sync (CamelFolder *source,
 		GError *err = NULL;
 
 		if (!e_mapi_connection_move_items (camel_mapi_store_get_connection (mapi_store), src_mapi_folder->folder_id, src_fid_options, des_mapi_folder->folder_id, dest_fid_options, src_msg_ids, cancellable, &err)) {
-			g_set_error (
-				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				"%s", err ? err->message : _("Unknown error"));
-			if (err)
-				g_error_free (err);
+			if (!e_mapi_utils_propagate_cancelled_error (err, error))
+				g_set_error (
+					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+					"%s", err ? err->message : _("Unknown error"));
+			g_clear_error (&err);
 			success = FALSE;
 		} else {
 			changes = camel_folder_change_info_new ();
@@ -1887,11 +1890,11 @@ mapi_folder_transfer_messages_to_sync (CamelFolder *source,
 		GError *err = NULL;
 
 		if (!e_mapi_connection_copy_items (camel_mapi_store_get_connection (mapi_store), src_mapi_folder->folder_id, src_fid_options, des_mapi_folder->folder_id, dest_fid_options, src_msg_ids, cancellable, &err)) {
-			g_set_error (
-				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				"%s", err ? err->message : _("Unknown error"));
-			if (err)
-				g_error_free (err);
+			if (!e_mapi_utils_propagate_cancelled_error (err, error))
+				g_set_error (
+					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+					"%s", err ? err->message : _("Unknown error"));
+			g_clear_error (&err);
 			success = FALSE;
 		}
 	}

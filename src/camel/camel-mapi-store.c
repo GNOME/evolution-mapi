@@ -1068,9 +1068,10 @@ mapi_store_create_folder_sync (CamelStore *store,
 		camel_subscribable_folder_subscribed (CAMEL_SUBSCRIBABLE (store), root);
 	} else {
 		if (mapi_error) {
-			g_set_error (
-				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				_("Cannot create folder '%s': %s"), folder_name, mapi_error->message);
+			if (!e_mapi_utils_propagate_cancelled_error (mapi_error, error))
+				g_set_error (
+					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+					_("Cannot create folder '%s': %s"), folder_name, mapi_error->message);
 			g_error_free (mapi_error);
 		} else {
 			g_set_error (
@@ -1130,10 +1131,11 @@ mapi_store_delete_folder_sync (CamelStore *store,
 		success = FALSE;
 
 		if (local_error) {
-			g_set_error (
-				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				_("Cannot remove folder '%s': %s"),
-				folder_name, local_error->message);
+			if (!e_mapi_utils_propagate_cancelled_error (local_error, error))
+				g_set_error (
+					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+					_("Cannot remove folder '%s': %s"),
+					folder_name, local_error->message);
 
 			g_error_free (local_error);
 		} else {
@@ -1242,12 +1244,13 @@ mapi_store_rename_folder_sync (CamelStore *store,
 		/* renaming in the same folder, thus no MoveFolder necessary */
 		if (!e_mapi_connection_rename_folder (priv->conn, old_fid, 0, tmp ? tmp : new_name, cancellable, &local_error)) {
 			if (local_error) {
-				g_set_error (
-					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-					/* Translators: '%s to %s' is current name of the folder and new name of the folder.
-					   The last '%s' is a detailed error message. */
-					_("Cannot rename MAPI folder '%s' to '%s': %s"),
-					old_name, new_name, local_error->message);
+				if (!e_mapi_utils_propagate_cancelled_error (local_error, error))
+					g_set_error (
+						error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+						/* Translators: '%s to %s' is current name of the folder and new name of the folder.
+						   The last '%s' is a detailed error message. */
+						_("Cannot rename MAPI folder '%s' to '%s': %s"),
+						old_name, new_name, local_error->message);
 				g_error_free (local_error);
 			} else {
 				g_set_error (
@@ -1307,10 +1310,11 @@ mapi_store_rename_folder_sync (CamelStore *store,
 			   !e_mapi_connection_move_folder (priv->conn, old_fid, old_parent_fid, 0, new_parent_fid, 0, tmp, cancellable, &local_error)) {
 			camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 			if (local_error) {
-				g_set_error (
-					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-					_("Cannot rename MAPI folder '%s' to '%s': %s"),
-					old_name, new_name, local_error->message);
+				if (!e_mapi_utils_propagate_cancelled_error (local_error, error))
+					g_set_error (
+						error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+						_("Cannot rename MAPI folder '%s' to '%s': %s"),
+						old_name, new_name, local_error->message);
 				g_error_free (local_error);
 			} else {
 				g_set_error (
@@ -1813,7 +1817,10 @@ mapi_authenticate_sync (CamelService *service,
 		g_return_val_if_fail (
 			mapi_error != NULL,
 			CAMEL_AUTHENTICATION_ERROR);
-		g_propagate_error (error, mapi_error);
+		if (!e_mapi_utils_propagate_cancelled_error (mapi_error, error))
+			g_propagate_error (error, mapi_error);
+		else
+			g_clear_error (&mapi_error);
 		result = CAMEL_AUTHENTICATION_ERROR;
 	}
 

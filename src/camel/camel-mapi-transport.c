@@ -47,6 +47,7 @@
 
 #include <e-mapi-defs.h>
 #include "e-mapi-mail-utils.h"
+#include "e-mapi-utils.h"
 
 #define STREAM_SIZE 4000
 
@@ -158,9 +159,10 @@ mapi_send_to_sync (CamelTransport *transport,
 
 	if (st == 0) {
 		if (mapi_error) {
-			g_set_error (
-				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				_("Could not send message: %s"), mapi_error->message);
+			if (!e_mapi_utils_propagate_cancelled_error (mapi_error, error))
+				g_set_error (
+					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+					_("Could not send message: %s"), mapi_error->message);
 			g_error_free (mapi_error);
 		} else {
 			g_set_error (

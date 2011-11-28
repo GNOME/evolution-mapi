@@ -1184,6 +1184,19 @@ e_mapi_util_time_t_to_filetime (const time_t tt, struct FILETIME *filetime)
 	filetime->dwHighDateTime = nt & 0xFFFFFFFF;
 }
 
+gboolean
+e_mapi_utils_propagate_cancelled_error (const GError *mapi_error,
+					GError **error)
+{
+	if (!g_error_matches (mapi_error, G_IO_ERROR, G_IO_ERROR_CANCELLED) &&
+	    !g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_USER_CANCEL))
+		return FALSE;
+
+	g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_CANCELLED, mapi_error->message);
+
+	return TRUE;
+}
+
 static void
 manage_global_lock (gboolean lock)
 {
