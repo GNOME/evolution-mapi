@@ -1916,8 +1916,7 @@ list_objects_internal_cb (EMapiConnection *conn,
 	const mapi_id_t	*pmid;
 	const gchar *msg_class;
 	const uint32_t *pmsg_flags;
-	struct SPropValue *last_modified;
-	struct timeval t;
+	const struct FILETIME *last_modified;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
@@ -1927,16 +1926,12 @@ list_objects_internal_cb (EMapiConnection *conn,
 	pmid = get_SPropValue_SRow_data (srow, PidTagMid);
 	msg_class = get_SPropValue_SRow_data (srow, PidTagMessageClass);
 	pmsg_flags = get_SPropValue_SRow_data (srow, PidTagMessageFlags);
-	last_modified = get_SPropValue_SRow (srow, PidTagLastModificationTime);
+	last_modified = get_SPropValue_SRow_data (srow, PidTagLastModificationTime);
 
 	lod.mid = pmid ? *pmid : 0;
 	lod.msg_class = msg_class;
 	lod.msg_flags = pmsg_flags ? *pmsg_flags : 0;
-
-	if (last_modified && get_mapi_SPropValue_date_timeval (&t, *last_modified) == MAPI_E_SUCCESS)
-		lod.last_modified = t.tv_sec;
-	else
-		lod.last_modified = 0;
+	lod.last_modified = last_modified ? e_mapi_util_filetime_to_time_t (last_modified) : 0;
 
 	return loi_data->cb (conn, fid, mem_ctx, &lod, row_index, rows_total, loi_data->user_data, cancellable, perror);
 }
