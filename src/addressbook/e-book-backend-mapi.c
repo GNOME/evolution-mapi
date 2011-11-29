@@ -34,6 +34,7 @@
 
 #include <libebook/e-contact.h>
 #include <libedataserver/e-data-server-util.h>
+#include <libedataserver/e-sexp.h>
 #include <camel/camel.h>
 
 #include <e-mapi-operation-queue.h>
@@ -75,8 +76,8 @@ struct _EBookBackendMAPIPrivate
 
 static const struct field_element_mapping {
 		EContactField field_id;
-		gint element_type;
-		gint mapi_id;
+		uint32_t element_type;
+		uint32_t mapi_id;
 		gint contact_type;
 	} mappings [] = {
 
@@ -1964,4 +1965,411 @@ mapi_book_utils_timet_to_string (time_t tt)
 	tv.tv_usec = 0;
 
 	return g_time_val_to_iso8601 (&tv);
+}
+
+struct EMapiSExpParserData
+{
+	TALLOC_CTX *mem_ctx;
+	/* parser results in ints, indexes to res_parts */
+	GPtrArray *res_parts;
+};
+
+static ESExpResult *
+term_eval_and (struct _ESExp *f,
+	       gint argc,
+	       struct _ESExpResult **argv,
+	       gpointer user_data)
+{
+	struct EMapiSExpParserData *esp = user_data;
+	ESExpResult *r;
+	gint ii, jj, valid = 0;
+
+	r = e_sexp_result_new (f, ESEXP_RES_INT);
+	r->value.number = -1;
+
+	for (ii = 0; ii < argc; ii++) {
+		if (argv[ii]->type == ESEXP_RES_INT &&
+		    argv[ii]->value.number >= 0 && 
+		    argv[ii]->value.number < esp->res_parts->len) {
+			jj = argv[ii]->value.number;
+			valid++;
+		}
+	}
+
+	if (valid == 1) {
+		r->value.number = jj;
+	} else if (valid > 0) {
+		struct mapi_SRestriction *res = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
+		g_return_val_if_fail (res != NULL, NULL);
+
+		res->rt = RES_AND;
+		res->res.resAnd.cRes = valid;
+		res->res.resAnd.res = talloc_zero_array (esp->mem_ctx, struct mapi_SRestriction_and, res->res.resAnd.cRes + 1);
+
+		jj = 0;
+
+		for (ii = 0; ii < argc; ii++) {
+			if (argv[ii]->type == ESEXP_RES_INT &&
+			    argv[ii]->value.number >= 0 && 
+			    argv[ii]->value.number < esp->res_parts->len) {
+				struct mapi_SRestriction *subres = g_ptr_array_index (esp->res_parts, argv[ii]->value.number);
+
+				res->res.resAnd.res[jj].rt = subres->rt;
+				res->res.resAnd.res[jj].res = subres->res;
+
+				jj++;
+			}
+		}
+
+		g_ptr_array_add (esp->res_parts, res);
+		r->value.number = esp->res_parts->len - 1;
+	}
+
+	return r;
+}
+
+static ESExpResult *
+term_eval_or (struct _ESExp *f,
+	      gint argc,
+	      struct _ESExpResult **argv,
+	      gpointer user_data)
+{
+	struct EMapiSExpParserData *esp = user_data;
+	ESExpResult *r;
+	gint ii, jj = -1, valid = 0;
+
+	r = e_sexp_result_new (f, ESEXP_RES_INT);
+	r->value.number = -1;
+
+	for (ii = 0; ii < argc; ii++) {
+		if (argv[ii]->type == ESEXP_RES_INT &&
+		    argv[ii]->value.number >= 0 && 
+		    argv[ii]->value.number < esp->res_parts->len) {
+			jj = argv[ii]->value.number;
+			valid++;
+		    }
+	}
+
+	if (valid == 1) {
+		r->value.number = jj;
+	} else if (valid > 0) {
+		struct mapi_SRestriction *res = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
+		g_return_val_if_fail (res != NULL, NULL);
+
+		res->rt = RES_OR;
+		res->res.resOr.cRes = valid;
+		res->res.resOr.res = talloc_zero_array (esp->mem_ctx, struct mapi_SRestriction_or, res->res.resOr.cRes + 1);
+
+		jj = 0;
+
+		for (ii = 0; ii < argc; ii++) {
+			if (argv[ii]->type == ESEXP_RES_INT &&
+			    argv[ii]->value.number >= 0 && 
+			    argv[ii]->value.number < esp->res_parts->len) {
+				struct mapi_SRestriction *subres = g_ptr_array_index (esp->res_parts, argv[ii]->value.number);
+
+				res->res.resOr.res[jj].rt = subres->rt;
+				res->res.resOr.res[jj].res = subres->res;
+
+				jj++;
+			}
+		}
+
+		g_ptr_array_add (esp->res_parts, res);
+		r->value.number = esp->res_parts->len - 1;
+	}
+
+	return r;
+}
+
+static ESExpResult *
+term_eval_not (struct _ESExp *f,
+	       gint argc,
+	       struct _ESExpResult **argv,
+	       gpointer user_data)
+{
+	struct EMapiSExpParserData *esp = user_data;
+	ESExpResult *r;
+
+	r = e_sexp_result_new (f, ESEXP_RES_INT);
+	r->value.number = -1;
+
+	#ifdef HAVE_RES_NOT_SUPPORTED
+	if (argc == 1 && argv[0]->type == ESEXP_RES_INT) {
+		gint idx = argv[0]->value.number;
+
+		if (idx >= 0 && idx < esp->res_parts->len) {
+			struct mapi_SRestriction *res = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
+			g_return_val_if_fail (res != NULL, NULL);
+
+			res->rt = RES_NOT;
+			res->res.resNot.res = g_ptr_array_index (esp->res_parts, idx);
+
+			g_ptr_array_add (esp->res_parts, res);
+			r->value.number = esp->res_parts->len - 1;
+		}
+	}
+	#endif
+
+	return r;
+}
+
+static uint32_t
+get_proptag_from_field_name (const gchar *field_name, gboolean is_contact_field)
+{
+	EContactField cfid;
+	gint ii;
+
+	if (is_contact_field)
+		cfid = e_contact_field_id (field_name);
+	else
+		cfid = e_contact_field_id_from_vcard (field_name);
+
+	for (ii = 0; ii < G_N_ELEMENTS (mappings); ii++) {
+		if (mappings[ii].field_id == cfid) {
+			return mappings[ii].mapi_id;
+		}
+	}
+
+	return MAPI_E_RESERVED;
+}
+
+static ESExpResult *
+func_eval_text_compare (struct _ESExp *f,
+			gint argc,
+			struct _ESExpResult **argv,
+			gpointer user_data,
+			uint32_t fuzzy)
+{
+	struct EMapiSExpParserData *esp = user_data;
+	ESExpResult *r;
+
+	r = e_sexp_result_new (f, ESEXP_RES_INT);
+	r->value.number = -1;
+
+	if (argc == 2
+	    && argv[0]->type == ESEXP_RES_STRING
+	    && argv[1]->type == ESEXP_RES_STRING) {
+		const gchar *propname = argv[0]->value.string;
+		const gchar *propvalue = argv[1]->value.string;
+
+		if (propname && propvalue && g_ascii_strcasecmp (propname, "x-evolution-any-field") != 0) {
+			uint32_t proptag = get_proptag_from_field_name (propname, TRUE);
+
+			if (proptag != MAPI_E_RESERVED && ((proptag & 0xFFFF) == PT_UNICODE || (proptag & 0xFFFF) == PT_STRING8)) {
+				struct mapi_SRestriction *res = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
+				g_return_val_if_fail (res != NULL, NULL);
+
+				res->rt = RES_CONTENT;
+				res->res.resContent.fuzzy = fuzzy | FL_IGNORECASE;
+				res->res.resContent.ulPropTag = proptag;
+				res->res.resContent.lpProp.ulPropTag = proptag;
+				res->res.resContent.lpProp.value.lpszW = talloc_strdup (esp->mem_ctx, propvalue);
+
+				g_ptr_array_add (esp->res_parts, res);
+				r->value.number = esp->res_parts->len - 1;
+			} else if (g_ascii_strcasecmp (propname, "email") == 0) {
+				struct mapi_SRestriction *res = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
+				g_return_val_if_fail (res != NULL, NULL);
+
+				res->rt = RES_OR;
+				res->res.resOr.cRes = 3;
+				res->res.resOr.res = talloc_zero_array (esp->mem_ctx, struct mapi_SRestriction_or, res->res.resOr.cRes + 1);
+
+				proptag = get_proptag_from_field_name ("email_1", TRUE);
+				res->res.resOr.res[0].rt = RES_CONTENT;
+				res->res.resOr.res[0].res.resContent.fuzzy = fuzzy | FL_IGNORECASE;
+				res->res.resOr.res[0].res.resContent.ulPropTag = proptag;
+				res->res.resOr.res[0].res.resContent.lpProp.ulPropTag = proptag;
+				res->res.resOr.res[0].res.resContent.lpProp.value.lpszW = talloc_strdup (esp->mem_ctx, propvalue);
+
+				proptag = get_proptag_from_field_name ("email_2", TRUE);
+				res->res.resOr.res[1].rt = RES_CONTENT;
+				res->res.resOr.res[1].res.resContent.fuzzy = fuzzy | FL_IGNORECASE;
+				res->res.resOr.res[1].res.resContent.ulPropTag = proptag;
+				res->res.resOr.res[1].res.resContent.lpProp.ulPropTag = proptag;
+				res->res.resOr.res[1].res.resContent.lpProp.value.lpszW = talloc_strdup (esp->mem_ctx, propvalue);
+
+				proptag = get_proptag_from_field_name ("email_3", TRUE);
+				res->res.resOr.res[2].rt = RES_CONTENT;
+				res->res.resOr.res[2].res.resContent.fuzzy = fuzzy | FL_IGNORECASE;
+				res->res.resOr.res[2].res.resContent.ulPropTag = proptag;
+				res->res.resOr.res[2].res.resContent.lpProp.ulPropTag = proptag;
+				res->res.resOr.res[2].res.resContent.lpProp.value.lpszW = talloc_strdup (esp->mem_ctx, propvalue);
+
+				g_ptr_array_add (esp->res_parts, res);
+				r->value.number = esp->res_parts->len - 1;
+			}
+		}
+	}
+
+	return r;
+}
+
+static ESExpResult *
+func_eval_contains (struct _ESExp *f,
+		    gint argc,
+		    struct _ESExpResult **argv,
+		    gpointer user_data)
+{
+	return func_eval_text_compare (f, argc, argv, user_data, FL_SUBSTRING);
+}
+
+static ESExpResult *
+func_eval_is (struct _ESExp *f,
+	      gint argc,
+	      struct _ESExpResult **argv,
+	      gpointer user_data)
+{
+	return func_eval_text_compare (f, argc, argv, user_data, FL_FULLSTRING);
+}
+static ESExpResult *
+func_eval_beginswith (struct _ESExp *f,
+		      gint argc,
+		      struct _ESExpResult **argv,
+		      gpointer user_data)
+{
+	return func_eval_text_compare (f, argc, argv, user_data, FL_PREFIX);
+}
+static ESExpResult *
+func_eval_endswith (struct _ESExp *f,
+		    gint argc,
+		    struct _ESExpResult **argv,
+		    gpointer user_data)
+{
+	/* no suffix, thus at least substring is used */
+	return func_eval_text_compare (f, argc, argv, user_data, FL_SUBSTRING);
+}
+
+static ESExpResult *
+func_eval_field_exists (struct _ESExp *f,
+			gint argc,
+			struct _ESExpResult **argv,
+			gpointer user_data,
+			gboolean is_contact_field)
+{
+	struct EMapiSExpParserData *esp = user_data;
+	ESExpResult *r;
+
+	r = e_sexp_result_new (f, ESEXP_RES_INT);
+	r->value.number = -1;
+
+	if (argc == 1 && argv[0]->type == ESEXP_RES_STRING) {
+		const gchar *propname = argv[0]->value.string;
+		uint32_t proptag = get_proptag_from_field_name (propname, is_contact_field);
+
+		if (proptag != MAPI_E_RESERVED) {
+			struct mapi_SRestriction *res = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
+			g_return_val_if_fail (res != NULL, NULL);
+
+			res->rt = RES_EXIST;
+			res->res.resExist.ulPropTag = proptag;
+
+			g_ptr_array_add (esp->res_parts, res);
+			r->value.number = esp->res_parts->len - 1;
+		} else if (g_ascii_strcasecmp (propname, "email") == 0) {
+			struct mapi_SRestriction *res = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
+			g_return_val_if_fail (res != NULL, NULL);
+
+			res->rt = RES_OR;
+			res->res.resOr.cRes = 3;
+			res->res.resOr.res = talloc_zero_array (esp->mem_ctx, struct mapi_SRestriction_or, res->res.resOr.cRes + 1);
+
+			res->res.resOr.res[0].rt = RES_EXIST;
+			res->res.resOr.res[0].res.resExist.ulPropTag = get_proptag_from_field_name ("email_1", TRUE);
+
+			res->res.resOr.res[1].rt = RES_EXIST;
+			res->res.resOr.res[1].res.resExist.ulPropTag = get_proptag_from_field_name ("email_2", TRUE);
+
+			res->res.resOr.res[2].rt = RES_EXIST;
+			res->res.resOr.res[2].res.resExist.ulPropTag = get_proptag_from_field_name ("email_3", TRUE);
+
+			g_ptr_array_add (esp->res_parts, res);
+			r->value.number = esp->res_parts->len - 1;
+		}
+	}
+
+	return r;
+}
+
+static ESExpResult *
+func_eval_exists (struct _ESExp *f,
+		  gint argc,
+		  struct _ESExpResult **argv,
+		  gpointer user_data)
+{
+	return func_eval_field_exists (f, argc, argv, user_data, TRUE);
+}
+
+static ESExpResult *
+func_eval_exists_vcard (struct _ESExp *f,
+			gint argc,
+			struct _ESExpResult **argv,
+			gpointer user_data)
+{
+	return func_eval_field_exists (f, argc, argv, user_data, FALSE);
+}
+
+struct mapi_SRestriction *
+mapi_book_utils_sexp_to_restriction (TALLOC_CTX *mem_ctx, const gchar *sexp_query)
+{
+	/* 'builtin' functions */
+	static const struct {
+		const gchar *name;
+		ESExpFunc *func;
+		gint type;		/* set to 1 if a function can perform shortcut evaluation, or
+					   doesn't execute everything, 0 otherwise */
+	} check_symbols[] = {
+		{ "and", 		term_eval_and,		0 },
+		{ "or", 		term_eval_or,		0 },
+		{ "not", 		term_eval_not,		0 },
+
+		{ "contains",		func_eval_contains,	0 },
+		{ "is",			func_eval_is,		0 },
+		{ "beginswith",		func_eval_beginswith,	0 },
+		{ "endswith",		func_eval_endswith,	0 },
+		{ "exists",		func_eval_exists,	0 },
+		{ "exists_vcard",	func_eval_exists_vcard,	0 }
+	};
+
+	gint i;
+	ESExp *sexp;
+	ESExpResult *r;
+	struct EMapiSExpParserData esp;
+	struct mapi_SRestriction *restriction;
+
+	g_return_val_if_fail (sexp_query != NULL, NULL);
+
+	esp.mem_ctx = mem_ctx;
+	sexp = e_sexp_new ();
+
+	for (i = 0; i < G_N_ELEMENTS (check_symbols); i++) {
+		if (check_symbols[i].type == 1) {
+			e_sexp_add_ifunction (sexp, 0, check_symbols[i].name,
+					      (ESExpIFunc *) check_symbols[i].func, &esp);
+		} else {
+			e_sexp_add_function (sexp, 0, check_symbols[i].name,
+					     check_symbols[i].func, &esp);
+		}
+	}
+
+	e_sexp_input_text (sexp, sexp_query, strlen (sexp_query));
+	if (e_sexp_parse (sexp) == -1) {
+		e_sexp_unref (sexp);
+		return NULL;
+	}
+
+	esp.res_parts = g_ptr_array_new ();
+	r = e_sexp_eval (sexp);
+
+	restriction = NULL;
+	if (r && r->type == ESEXP_RES_INT && r->value.number >= 0 && r->value.number < esp.res_parts->len)
+		restriction = g_ptr_array_index (esp.res_parts, r->value.number);
+
+	e_sexp_result_free (sexp, r);
+
+	e_sexp_unref (sexp);
+	g_ptr_array_free (esp.res_parts, TRUE);
+
+	return restriction;
 }

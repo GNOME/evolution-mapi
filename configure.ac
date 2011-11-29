@@ -134,7 +134,7 @@ AC_SUBST(LIBMAPI_CFLAGS)
 AC_SUBST(LIBMAPI_LIBS)
 
 dnl ****************************
-dnl Check for struct StringArrayW_r function
+dnl Check for struct StringArrayW_r availability
 dnl ****************************
 AC_MSG_CHECKING([libmapi struct StringArrayW_r])
 save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
@@ -151,7 +151,7 @@ LIBS=$save_libs
 AC_MSG_RESULT([$ac_cv_have_saw])
 
 dnl ****************************
-dnl Check for struct mapi_SLPSTRArrayW function
+dnl Check for struct mapi_SLPSTRArrayW availability
 dnl ****************************
 AC_MSG_CHECKING([libmapi struct mapi_SLPSTRArrayW])
 save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
@@ -166,6 +166,21 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM(
 CFLAGS=$save_cflags
 LIBS=$save_libs
 AC_MSG_RESULT([$ac_cv_have_msaw])
+
+dnl ****************************
+dnl Check for struct mapi_SNotRestriction availability
+dnl see http://tracker.openchange.org/issues/377
+dnl ****************************
+AC_MSG_CHECKING([libmapi struct mapi_SNotRestriction])
+save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
+save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
+AC_LINK_IFELSE([AC_LANG_PROGRAM(
+	[[#include <libmapi/libmapi.h>]],
+	[[struct mapi_SNotRestriction snot; snot.res->rt = RES_NOT]])],
+	[AC_DEFINE(HAVE_RES_NOT_SUPPORTED, 1, [libmapi supports RES_NOT restrictions]) ac_cv_have_rns=yes],[ac_cv_have_rns=no])
+CFLAGS=$save_cflags
+LIBS=$save_libs
+AC_MSG_RESULT([$ac_cv_have_rns])
 
 dnl ****************************
 dnl Expose version information

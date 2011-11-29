@@ -57,7 +57,7 @@ struct _EBookBackendMAPIContactsPrivate
 };
 
 static gboolean
-build_restriction_emails_contains (EMapiConnection *conn,
+build_restriction_from_sexp_query (EMapiConnection *conn,
 				   mapi_id_t fid,
 				   TALLOC_CTX *mem_ctx,
 				   struct mapi_SRestriction **restrictions,
@@ -65,134 +65,14 @@ build_restriction_emails_contains (EMapiConnection *conn,
 				   GCancellable *cancellable,
 				   GError **perror)
 {
-	struct mapi_SRestriction *restriction;
-	const gchar *query = user_data;
-	gchar *email = NULL, *to_free, *tmp, *tmp1;
+	const gchar *sexp_query = user_data;
 
-	g_return_val_if_fail (query != NULL, FALSE);
+	g_return_val_if_fail (sexp_query != NULL, FALSE);
 
-	/* This currently supports "email foo@bar.soo" */
-	to_free = strdup (query);
-
-	tmp = strstr (to_free, "email");
-	if (tmp ) {
-		tmp = strchr (tmp, '\"');
-		if (tmp && ++tmp) {
-			tmp = strchr (tmp, '\"');
-			if (tmp && ++tmp) {
-				tmp1 = tmp;
-				tmp1 = strchr (tmp1, '\"');
-				if (tmp1) {
-					*tmp1 = 0;
-					email = tmp;
-				}
-			}
-		}
-	}
-
-	if (email == NULL || !strchr (email, '@')) {
-		g_free (to_free);
-		return FALSE;
-	}
-
-	if (!restrictions) {
-		g_free (to_free);
-		return TRUE;
-	}
-
-	restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
-	g_return_val_if_fail (restriction != NULL, FALSE);
-
-	restriction->rt = RES_PROPERTY;
-	restriction->res.resProperty.relop = RES_PROPERTY;
-	restriction->res.resProperty.ulPropTag = PROP_TAG(PT_UNICODE, 0x801f); /* EMAIL */
-	restriction->res.resProperty.lpProp.ulPropTag = PROP_TAG(PT_UNICODE, 0x801f); /* EMAIL*/
-	restriction->res.resProperty.lpProp.value.lpszA = talloc_strdup (mem_ctx, email);
-
-	*restrictions = restriction;
-
-	g_free (to_free);
+	*restrictions = mapi_book_utils_sexp_to_restriction (mem_ctx, sexp_query);
 
 	return TRUE;
 }
-
-#if 0
-static gboolean
-build_multiple_restriction_emails_contains (EMapiConnection *conn, mapi_id_t fid, struct mapi_SRestriction *res,
-					    struct mapi_SRestriction_or *or_res,
-					    const gchar *query, gchar **to_free)
-{
-	gchar *email=NULL, *tmp, *tmp1;
-	//Number of restriction to apply
-	guint res_count = 6;
-
-	g_return_val_if_fail (to_free != NULL, FALSE);
-
-	/* This currently supports "email foo@bar.soo" */
-	*to_free = strdup (query);
-
-	tmp = strstr (*to_free, "email");
-	if (tmp ) {
-		tmp = strchr (tmp, '\"');
-		if (tmp && ++tmp) {
-			tmp = strchr (tmp, '\"');
-			if (tmp && ++tmp) {
-				tmp1 = tmp;
-				tmp1 = strchr (tmp1, '\"');
-				if (tmp1) {
-					*tmp1 = 0;
-					email = tmp;
-				}
-			}
-		}
-	}
-
-	if (email==NULL || !strchr (email, '@')) {
-		g_free (*to_free);
-		*to_free = NULL;
-
-		return FALSE;
-	}
-
-	or_res[0].rt = RES_CONTENT;
-	or_res[0].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[0].res.resContent.ulPropTag = PR_EMS_AB_MANAGER_T_UNICODE;
-	or_res[0].res.resContent.lpProp.value.lpszA = email;
-
-	or_res[1].rt = RES_CONTENT;
-	or_res[1].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[1].res.resContent.ulPropTag = PR_DISPLAY_NAME_UNICODE;
-	or_res[1].res.resContent.lpProp.value.lpszA = email;
-
-	or_res[2].rt = RES_CONTENT;
-	or_res[2].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[2].res.resContent.ulPropTag = PR_GIVEN_NAME_UNICODE;
-	or_res[2].res.resContent.lpProp.value.lpszA = email;
-
-	or_res[3].rt = RES_CONTENT;
-	or_res[3].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[3].res.resContent.ulPropTag = e_mapi_connection_resolve_named_prop (conn, fid, PidLidEmail1OriginalDisplayName, NULL, NULL);
-	or_res[3].res.resContent.lpProp.value.lpszA = email;
-
-	or_res[4].rt = RES_CONTENT;
-	or_res[4].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[4].res.resContent.ulPropTag = e_mapi_connection_resolve_named_prop (conn, fid, PidLidEmail2OriginalDisplayName, NULL, NULL);
-	or_res[4].res.resContent.lpProp.value.lpszA = email;
-
-	or_res[5].rt = RES_CONTENT;
-	or_res[5].res.resContent.fuzzy = FL_FULLSTRING | FL_IGNORECASE;
-	or_res[5].res.resContent.ulPropTag = e_mapi_connection_resolve_named_prop (conn, fid, PidLidEmail3OriginalDisplayName, NULL, NULL);
-	or_res[5].res.resContent.lpProp.value.lpszA = email;
-
-	res = g_new0 (struct mapi_SRestriction, 1);
-
-	res->rt = RES_OR;
-	res->res.resOr.cRes = res_count;
-	res->res.resOr.res = or_res;
-
-	return TRUE;
-}
-#endif
 
 static uint32_t
 string_to_bin (TALLOC_CTX *mem_ctx, const gchar *str, uint8_t **lpb)
@@ -1069,7 +949,7 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellabl
 	EBookBackendMAPIContactsPrivate *priv;
 	EMapiConnection *conn;
 	GError *mapi_error = NULL;
-	gboolean get_all, status;
+	gboolean status;
 	mapi_object_t obj_folder;
 	GSList *mids = NULL;
 	struct TransferContactsData tcd = { 0 };
@@ -1110,14 +990,6 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellabl
 	tcd.ebma = ebma;
 	tcd.cards = vCards;
 
-	get_all = g_ascii_strcasecmp (query, "(contains \"x-evolution-any-field\" \"\")") == 0;
-	if (!get_all && !build_restriction_emails_contains (NULL, 0, NULL, NULL, (gpointer) query, NULL, NULL)) {
-		e_book_backend_mapi_unlock_connection (ebma);
-		/* g_propagate_error (error, EDB_ERROR (OTHER_ERROR)); */
-
-		return;
-	}
-
 	if (priv->is_public_folder)
 		status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
 	else
@@ -1125,7 +997,7 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellabl
 
 	if (status) {
 		status = e_mapi_connection_list_objects (conn, &obj_folder,
-							 get_all ? NULL : build_restriction_emails_contains, (gpointer) query,
+							 build_restriction_from_sexp_query, (gpointer) query,
 							 gather_contact_mids_cb, &mids,
 							 cancellable, &mapi_error);
 

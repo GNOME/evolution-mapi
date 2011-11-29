@@ -149,6 +149,10 @@ EContact *mapi_book_utils_contact_from_props (EMapiConnection *conn, mapi_id_t f
    free returned pointer with g_free() */
 gchar *mapi_book_utils_timet_to_string (time_t tt);
 
+/* converts sexp_query into mapi_SRestriction, which is completely
+   allocated on the given mem_ctx */
+struct mapi_SRestriction *mapi_book_utils_sexp_to_restriction (TALLOC_CTX *mem_ctx, const gchar *sexp_query);
+
 G_END_DECLS
 
 #endif /* __E_BOOK_BACKEND_MAPI_H__ */

@@ -1980,9 +1980,11 @@ gather_mapi_SRestriction_named_ids (struct mapi_SRestriction *restriction,
 			gather_mapi_SRestriction_named_ids ((struct mapi_SRestriction *) &(restriction->res.resOr.res[i]), named_ids_list, named_ids_len);
 		}
 		break;
-	/*case RES_NOT:
+	#ifdef HAVE_RES_NOT_SUPPORTED
+	case RES_NOT:
 		gather_mapi_SRestriction_named_ids ((struct mapi_SRestriction *) restriction->res.resNot.res, named_ids_list, named_ids_len);
-		break;*/
+		break;
+	#endif
 	case RES_CONTENT:
 		maybe_add_named_id_tag (restriction->res.resContent.ulPropTag, named_ids_list, named_ids_len);
 		maybe_add_named_id_tag (restriction->res.resContent.lpProp.ulPropTag, named_ids_list, named_ids_len);
@@ -2048,9 +2050,11 @@ replace_mapi_SRestriction_named_ids (struct mapi_SRestriction *restriction,
 			replace_mapi_SRestriction_named_ids ((struct mapi_SRestriction *) &(restriction->res.resOr.res[i]), named_ids_list, named_ids_len);
 		}
 		break;
-	/*case RES_NOT:
+	#ifdef HAVE_RES_NOT_SUPPORTED
+	case RES_NOT:
 		replace_mapi_SRestriction_named_ids (restriction->res.resNot.res, named_ids_list, named_ids_len);
-		break;*/
+		break;
+	#endif
 	case RES_CONTENT:
 		maybe_replace_named_id_tag (&restriction->res.resContent.ulPropTag, named_ids_list, named_ids_len);
 		maybe_replace_named_id_tag (&restriction->res.resContent.lpProp.ulPropTag, named_ids_list, named_ids_len);
