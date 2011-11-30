@@ -353,6 +353,33 @@ add_cal_esource (EAccount *account, GSList *folders, EMapiFolderType folder_type
 		if (folder_type != MAPI_FOLDER_TYPE_APPOINTMENT)
 			e_source_set_property (source, "alarm", "never");
 
+		if (is_new_source || !e_source_peek_color_spec (source)) {
+			static gint color_mover = 0;
+			static gint color_indexer = -1;
+			const guint32 colors[] = {
+				0x1464ae, /* dark blue */
+				0x14ae64, /* dark green */
+				0xae1464, /* dark red */
+				0
+			};
+			guint32 color;
+			gchar *color_str;
+
+			color_indexer++;
+			if (colors[color_indexer] == 0) {
+				color_mover += 1;
+				color_indexer = 0;
+			}
+
+			color = colors[color_indexer];
+			color = (color & ~(0xFF << (color_indexer * 8))) |
+				(((((color >> (color_indexer * 8)) & 0xFF) + (0x33 * color_mover)) % 0xFF) << (color_indexer * 8));
+
+			color_str = g_strdup_printf ("#%06x", color);
+			e_source_set_color_spec (source, color_str);
+			g_free (color_str);
+		}
+
 		if (is_new_source)
 			e_source_group_add_source (group, source, -1);
 
