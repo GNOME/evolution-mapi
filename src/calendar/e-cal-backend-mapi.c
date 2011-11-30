@@ -70,6 +70,7 @@ struct _ECalBackendMAPIPrivate {
 	mapi_id_t		fid;
 	uint32_t		olFolder;
 	gchar			*profile;
+	gboolean is_public_folder;
 	EMapiConnection *conn;
 
 	/* These fields are entirely for access rights */
@@ -286,18 +287,15 @@ ecbm_remove (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, GEr
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
-	ESource *source = NULL;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
-
-	source = e_backend_get_source (E_BACKEND (cbmapi));
 
 	if (!e_backend_get_online (E_BACKEND (backend)) || !priv->conn || !e_mapi_connection_connected (priv->conn)) {
 		g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
 		return;
 	}
-	if (g_strcmp0 (e_source_get_property (source, "public"), "yes") != 0) {
+	if (!priv->is_public_folder) {
 		GError *mapi_error = NULL;
 
 		if (!e_mapi_connection_remove_folder (priv->conn, priv->fid, 0, cancellable, &mapi_error)) {
@@ -694,7 +692,6 @@ update_local_cache (ECalBackendMAPI *cbmapi, GCancellable *cancellable)
 {
 	ECalBackendMAPIPrivate *priv;
 	EMapiConnection *conn;
-	ESource *source = NULL;
 	struct ListCalendarObjectsData lco;
 	GSList *iter, *components;
 	mapi_object_t obj_folder;
@@ -705,7 +702,6 @@ update_local_cache (ECalBackendMAPI *cbmapi, GCancellable *cancellable)
 	struct FolderBasicPropertiesData fbp;
 
 	priv = cbmapi->priv;
-	source = e_backend_get_source (E_BACKEND (cbmapi));
 	if (!e_backend_get_online (E_BACKEND (cbmapi)))
 		return FALSE;
 
@@ -717,7 +713,7 @@ update_local_cache (ECalBackendMAPI *cbmapi, GCancellable *cancellable)
 
 	conn = g_object_ref (priv->conn);
 
-	if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0) {
+	if (priv->is_public_folder) {
 		success = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
 	} else {
 		success = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
@@ -1057,6 +1053,74 @@ ecbm_connect (ECalBackendMAPI *cbmapi, GError **perror)
 }
 
 static void
+ecbm_server_notification_cb (EMapiConnection *conn,
+			     guint event_mask,
+			     gpointer event_data,
+			     gpointer user_data)
+{
+	ECalBackendMAPI *cbmapi = user_data;
+	ECalBackendMAPIPrivate *priv;
+	mapi_id_t update_folder1 = 0, update_folder2 = 0;
+
+	g_return_if_fail (cbmapi != NULL);
+
+	switch (event_mask) {
+	case fnevNewMail:
+	case fnevNewMail | fnevMbit: {
+		struct NewMailNotification *newmail = event_data;
+
+		if (newmail)
+			update_folder1 = newmail->FID;
+		} break;
+	case fnevObjectCreated:
+	case fnevMbit | fnevObjectCreated: {
+		struct MessageCreatedNotification *msgcreated = event_data;
+
+		if (msgcreated)
+			update_folder1 = msgcreated->FID;
+		} break;
+	case fnevObjectModified:
+	case fnevMbit | fnevObjectModified: {
+		struct MessageModifiedNotification *msgmodified = event_data;
+
+		if (msgmodified)
+			update_folder1 = msgmodified->FID;
+		} break;
+	case fnevObjectDeleted:
+	case fnevMbit | fnevObjectDeleted: {
+		struct MessageDeletedNotification *msgdeleted = event_data;
+
+		if (msgdeleted)
+			update_folder1 = msgdeleted->FID;
+		} break;
+	case fnevObjectMoved:
+	case fnevMbit | fnevObjectMoved: {
+		struct MessageMoveCopyNotification *msgmoved = event_data;
+
+		if (msgmoved) {
+			update_folder1 = msgmoved->OldFID;
+			update_folder2 = msgmoved->FID;
+		}
+		} break;
+	case fnevObjectCopied:
+	case fnevMbit | fnevObjectCopied: {
+		struct MessageMoveCopyNotification *msgcopied = event_data;
+
+		if (msgcopied) {
+			update_folder1 = msgcopied->OldFID;
+			update_folder2 = msgcopied->FID;
+		}
+		} break;
+	default:
+		break;
+	}
+
+	priv = cbmapi->priv;
+	if (priv->fid == update_folder1 || priv->fid == update_folder2)
+		run_delta_thread (cbmapi);
+}
+
+static void
 ecbm_connect_user (ECalBackend *backend, GCancellable *cancellable, const gchar *password, GError **perror)
 {
 	ECalBackendMAPI *cbmapi;
@@ -1084,7 +1148,29 @@ ecbm_connect_user (ECalBackend *backend, GCancellable *cancellable, const gchar 
 		g_object_unref (old_conn);
 
 	if (priv->conn && e_mapi_connection_connected (priv->conn)) {
-		/* Success */;
+		/* Success */
+		ESource *source;
+
+		source = e_backend_get_source (E_BACKEND (cbmapi));
+		if (source && g_strcmp0 (e_source_get_property (source, "server-notification"), "true") == 0) {
+			mapi_object_t obj_folder;
+			gboolean status;
+
+			if (priv->is_public_folder)
+				status = e_mapi_connection_open_public_folder (priv->conn, priv->fid, &obj_folder, NULL, NULL);
+			else
+				status = e_mapi_connection_open_personal_folder (priv->conn, priv->fid, &obj_folder, NULL, NULL);
+
+			if (status) {
+				e_mapi_connection_enable_notifications (priv->conn, &obj_folder,
+					fnevObjectCreated | fnevObjectModified | fnevObjectDeleted | fnevObjectMoved | fnevObjectCopied,
+					NULL, NULL);
+
+				e_mapi_connection_close_folder (priv->conn, &obj_folder, NULL, NULL);
+			}
+
+			g_signal_connect (priv->conn, "server-notification", G_CALLBACK (ecbm_server_notification_cb), cbmapi);
+		}
 	} else {
 		mapi_error_to_edc_error (perror, mapi_error, g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR) ? OtherError : AuthenticationFailed, NULL);
 		if (mapi_error)
@@ -1197,6 +1283,7 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gbool
 
 	e_mapi_util_mapi_id_from_string (fid, &priv->fid);
 	priv->olFolder = olFolder;
+	priv->is_public_folder = g_strcmp0 (e_source_get_property (esource, "public"), "yes") == 0;
 
 	krb_sso = e_source_get_property (esource, "kerberos");
 	g_mutex_unlock (priv->mutex);

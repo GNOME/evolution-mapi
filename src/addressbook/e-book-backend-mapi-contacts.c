@@ -584,6 +584,74 @@ gather_known_uids_cb (EMapiConnection *conn,
 }
 
 static void
+ebbmc_server_notification_cb (EMapiConnection *conn,
+			      guint event_mask,
+			      gpointer event_data,
+			      gpointer user_data)
+{
+	EBookBackendMAPI *ebma = user_data;
+	EBookBackendMAPIContactsPrivate *priv;
+	mapi_id_t update_folder1 = 0, update_folder2 = 0;
+
+	g_return_if_fail (ebma != NULL);
+
+	switch (event_mask) {
+	case fnevNewMail:
+	case fnevNewMail | fnevMbit: {
+		struct NewMailNotification *newmail = event_data;
+
+		if (newmail)
+			update_folder1 = newmail->FID;
+		} break;
+	case fnevObjectCreated:
+	case fnevMbit | fnevObjectCreated: {
+		struct MessageCreatedNotification *msgcreated = event_data;
+
+		if (msgcreated)
+			update_folder1 = msgcreated->FID;
+		} break;
+	case fnevObjectModified:
+	case fnevMbit | fnevObjectModified: {
+		struct MessageModifiedNotification *msgmodified = event_data;
+
+		if (msgmodified)
+			update_folder1 = msgmodified->FID;
+		} break;
+	case fnevObjectDeleted:
+	case fnevMbit | fnevObjectDeleted: {
+		struct MessageDeletedNotification *msgdeleted = event_data;
+
+		if (msgdeleted)
+			update_folder1 = msgdeleted->FID;
+		} break;
+	case fnevObjectMoved:
+	case fnevMbit | fnevObjectMoved: {
+		struct MessageMoveCopyNotification *msgmoved = event_data;
+
+		if (msgmoved) {
+			update_folder1 = msgmoved->OldFID;
+			update_folder2 = msgmoved->FID;
+		}
+		} break;
+	case fnevObjectCopied:
+	case fnevMbit | fnevObjectCopied: {
+		struct MessageMoveCopyNotification *msgcopied = event_data;
+
+		if (msgcopied) {
+			update_folder1 = msgcopied->OldFID;
+			update_folder2 = msgcopied->FID;
+		}
+		} break;
+	default:
+		break;
+	}
+
+	priv = ((EBookBackendMAPIContacts *) ebma)->priv;
+	if (priv->fid == update_folder1 || priv->fid == update_folder2)
+		e_book_backend_mapi_refresh_cache (ebma);
+}
+
+static void
 ebbm_contacts_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean only_if_exists, GError **perror)
 {
 	ESource *source = e_backend_get_source (E_BACKEND (ebma));
@@ -612,7 +680,45 @@ ebbm_contacts_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean 
 static void
 ebbm_contacts_connection_status_changed (EBookBackendMAPI *ebma, gboolean is_online)
 {
+	ESource *source;
+	EBookBackendMAPIContactsPrivate *priv = ((EBookBackendMAPIContacts *) ebma)->priv;
+
 	e_book_backend_notify_readonly (E_BOOK_BACKEND (ebma), !is_online);
+
+	if (!is_online)
+		return;
+
+	source = e_backend_get_source (E_BACKEND (ebma));
+	if (source && g_strcmp0 (e_source_get_property (source, "server-notification"), "true") == 0) {
+		EMapiConnection *conn;
+		mapi_object_t obj_folder;
+		gboolean status;
+
+		e_book_backend_mapi_lock_connection (ebma);
+
+		conn = e_book_backend_mapi_get_connection (ebma);
+		if (!conn) {
+			e_book_backend_mapi_unlock_connection (ebma);
+			return;
+		}
+
+		if (priv->is_public_folder)
+			status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, NULL, NULL);
+		else
+			status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, NULL, NULL);
+
+		if (status) {
+			e_mapi_connection_enable_notifications (conn, &obj_folder,
+				fnevObjectCreated | fnevObjectModified | fnevObjectDeleted | fnevObjectMoved | fnevObjectCopied,
+				NULL, NULL);
+
+			e_mapi_connection_close_folder (conn, &obj_folder, NULL, NULL);
+		}
+
+		g_signal_connect (conn, "server-notification", G_CALLBACK (ebbmc_server_notification_cb), ebma);
+
+		e_book_backend_mapi_unlock_connection (ebma);
+	}
 }
 
 static void

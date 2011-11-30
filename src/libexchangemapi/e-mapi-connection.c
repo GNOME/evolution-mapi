@@ -172,7 +172,69 @@ struct _EMapiConnectionPrivate {
 
 	GHashTable *named_ids;		/* cache of named ids; key is a folder ID, value is a hash table
 					   of named_id to prop_id in that respective folder */
+
+	GHashTable *known_notifications;/* mapi_id_t * -> uint32_t for Unsubscribe call */
+	GThread *notification_thread;
+	EFlag *notification_flag;
+	enum MAPISTATUS	register_notification_result; /* MAPI_E_RESERVED if not called yet */
+	gint notification_poll_seconds; /* delay between polls, in seconds */
 };
+
+enum {
+	SERVER_NOTIFICATION,
+	LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL];
+
+static gboolean
+stop_notification (EMapiConnectionPrivate *priv,
+		   uint32_t conn_id,
+		   GCancellable *cancellable,
+		   GError **perror)
+{
+	enum MAPISTATUS ms;
+
+	e_return_val_mapi_error_if_fail (priv != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	LOCK ();
+
+	ms = Unsubscribe (priv->session, conn_id);
+	if (ms != MAPI_E_SUCCESS)
+		make_mapi_error (perror, "Unsubscribe", ms);
+
+	UNLOCK ();
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+static void
+call_stop_notification (gpointer key,
+			gpointer value,
+			gpointer user_data)
+{
+	stop_notification (user_data, GPOINTER_TO_UINT (value), NULL, NULL);
+}
+
+static void
+stop_all_notifications (EMapiConnectionPrivate *priv)
+{
+	g_return_if_fail (priv != NULL);
+
+	if (!priv->notification_thread)
+		return;
+
+	LOCK ();
+	if (priv->session)
+		g_hash_table_foreach (priv->known_notifications, call_stop_notification, priv);
+	g_hash_table_remove_all (priv->known_notifications);
+	e_flag_set (priv->notification_flag);
+	UNLOCK ();
+
+	g_thread_join (priv->notification_thread);
+	priv->notification_thread = NULL;
+}
 
 /* should have session_lock locked already, when calling this function */
 static void
@@ -228,11 +290,26 @@ ensure_public_store (EMapiConnectionPrivate *priv, GError **perror)
 }
 
 static void
-e_mapi_connection_finalize (GObject *object)
+e_mapi_connection_dispose (GObject *object)
 {
 	EMapiConnectionPrivate *priv;
 
 	unregister_connection (E_MAPI_CONNECTION (object));
+
+	priv = E_MAPI_CONNECTION (object)->priv;
+
+	if (priv) {
+		stop_all_notifications (priv);
+	}
+
+	if (G_OBJECT_CLASS (e_mapi_connection_parent_class)->dispose)
+		G_OBJECT_CLASS (e_mapi_connection_parent_class)->dispose (object);
+}
+
+static void
+e_mapi_connection_finalize (GObject *object)
+{
+	EMapiConnectionPrivate *priv;
 
 	priv = E_MAPI_CONNECTION (object)->priv;
 
@@ -252,6 +329,12 @@ e_mapi_connection_finalize (GObject *object)
 
 		e_mapi_utils_destroy_mapi_context (priv->mapi_ctx);
 		priv->mapi_ctx = NULL;
+
+		g_hash_table_destroy (priv->known_notifications);
+		priv->known_notifications = NULL;
+
+		e_flag_free (priv->notification_flag);
+		priv->notification_flag = NULL;
 	}
 
 	if (G_OBJECT_CLASS (e_mapi_connection_parent_class)->finalize)
@@ -266,7 +349,17 @@ e_mapi_connection_class_init (EMapiConnectionClass *klass)
 	g_type_class_add_private (klass, sizeof (EMapiConnectionPrivate));
 
 	object_class = G_OBJECT_CLASS (klass);
+	object_class->dispose = e_mapi_connection_dispose;
 	object_class->finalize = e_mapi_connection_finalize;
+
+	signals[SERVER_NOTIFICATION] = g_signal_new (
+		"server-notification",
+		G_OBJECT_CLASS_TYPE (object_class),
+		G_SIGNAL_RUN_FIRST | G_SIGNAL_DETAILED | G_SIGNAL_ACTION,
+		0, NULL, NULL,
+		g_cclosure_marshal_VOID__UINT_POINTER,
+		G_TYPE_NONE, 2,
+		G_TYPE_UINT, G_TYPE_POINTER);
 }
 
 static void
@@ -284,6 +377,18 @@ e_mapi_connection_init (EMapiConnection *conn)
 	conn->priv->folders = NULL;
 
 	conn->priv->named_ids = g_hash_table_new_full (g_int64_hash, g_int64_equal, g_free, (GDestroyNotify) g_hash_table_destroy);
+
+	conn->priv->known_notifications = g_hash_table_new_full (g_int64_hash, g_int64_equal, g_free, NULL);
+	conn->priv->notification_thread = NULL;
+	conn->priv->notification_flag = e_flag_new ();
+	conn->priv->register_notification_result = MAPI_E_RESERVED;
+	conn->priv->notification_poll_seconds = 60;
+
+	if (g_getenv ("MAPI_SERVER_POLL")) {
+		conn->priv->notification_poll_seconds = atoi (g_getenv ("MAPI_SERVER_POLL"));
+		if (conn->priv->notification_poll_seconds < 1)
+			conn->priv->notification_poll_seconds = 60;
+	}
 
 	register_connection (conn);
 }
@@ -316,7 +421,7 @@ unregister_connection (EMapiConnection *conn)
 	G_LOCK (known_connections);
 	if (!g_slist_find (known_connections, conn)) {
 		G_UNLOCK (known_connections);
-		g_return_if_reached ();
+		return;
 	}
 
 	known_connections = g_slist_remove (known_connections, conn);
@@ -5593,98 +5698,185 @@ e_mapi_connection_ex_to_smtp (EMapiConnection *conn,
 	return smtp_addr;
 }
 
-gboolean
-e_mapi_connection_events_init (EMapiConnection *conn,
-			       GCancellable *cancellable,
-			       GError **perror)
+static gint
+emit_server_notification_signal (uint16_t event_type, gpointer event_data, gpointer user_data)
 {
-	enum MAPISTATUS ms;
+	EMapiConnection *conn = user_data;
+	guint uint_event_type = event_type;
 
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
-	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	g_signal_emit (conn, signals[SERVER_NOTIFICATION], 0, uint_event_type, event_data);
 
-	LOCK ();
-	ms = RegisterNotification (priv->session, 0);
-	UNLOCK ();
-
-	if (ms != MAPI_E_SUCCESS)
-		make_mapi_error (perror, "RegisterNotification", ms);
-
-	return ms == MAPI_E_SUCCESS;
+	return MAPI_E_SUCCESS;
 }
 
-gboolean
-e_mapi_connection_events_subscribe (EMapiConnection *conn,
-				    guint32 options,
-				    guint16 event_mask,
-				    guint32 *events_conn_id,
-				    mapi_notify_callback_t callback,
-				    gpointer data,
-				    GCancellable *cancellable,
-				    GError **perror)
+static gpointer
+e_mapi_connection_notification_thread (gpointer user_data)
 {
-	enum MAPISTATUS	ms = MAPI_E_CALL_FAILED;
-	gboolean use_store = ((options & MAPI_EVENTS_USE_STORE) ||
-			      (options & MAPI_EVENTS_USE_PF_STORE));
+	EMapiConnection *conn = user_data;
+	EMapiConnectionPrivate *priv;
+
+	g_return_val_if_fail (conn != NULL, NULL);
+	g_return_val_if_fail (conn->priv != NULL, NULL);
+	g_return_val_if_fail (conn->priv->session != NULL, NULL);
+
+	priv = conn->priv;
+
+	while (g_hash_table_size (priv->known_notifications) > 0) {
+		GTimeVal tv;
+
+		LOCK ();
+		/* this returns MAPI_E_INVALID_PARAMETER when there
+		   is no pending notification
+		*/
+		DispatchNotifications (priv->session);
+		UNLOCK ();
+
+		/* poll not so often */
+		g_get_current_time (&tv);
+		g_time_val_add (&tv, G_USEC_PER_SEC * priv->notification_poll_seconds);
+
+		e_flag_clear (priv->notification_flag);
+		e_flag_timed_wait (priv->notification_flag, &tv);
+	}
+
+	return NULL;
+}
+
+/* enables server notifications on a folder, or on a whole store, if obj_folder is NULL.
+   the event_mask can be 0 to obtain all notifications;
+   Pair function for this is e_mapi_connection_disable_notifications().
+   The notification is received to the caller with the "server-notification" signal.
+   Note that the signal is used for each notification, without distinction on the enable
+   object.
+*/
+gboolean
+e_mapi_connection_enable_notifications (EMapiConnection *conn,
+					mapi_object_t *obj_folder,
+					uint32_t event_mask,
+					GCancellable *cancellable,
+					GError **perror)
+{
+	enum MAPISTATUS	ms;
+	mapi_id_t fid = 0;
+	uint32_t conn_id;
+	gint64 i64;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
 	LOCK ();
 
-	if (options & MAPI_EVENTS_USE_STORE) {
-		ms = Subscribe (&priv->msg_store, events_conn_id, event_mask, use_store, (mapi_notify_callback_t) callback, data);
-	} else if (options & MAPI_EVENTS_USE_PF_STORE) {
-		if (!ensure_public_store (priv, perror)) {
-			UNLOCK ();
-			return FALSE;
-		}
+	if (event_mask == 0)
+		event_mask = fnevNewMail |
+			     fnevObjectCreated |
+			     fnevObjectDeleted |
+			     fnevObjectModified |
+			     fnevObjectMoved;
 
-		ms = Subscribe (&priv->public_store, events_conn_id, event_mask, use_store, (mapi_notify_callback_t) callback, data);
-	} else if (options & MAPI_EVENTS_FOLDER) {
-		/* TODO */
+	if (obj_folder)
+		fid = mapi_object_get_id (obj_folder);
+
+	i64 = (gint64) fid;
+	conn_id = GPOINTER_TO_UINT (g_hash_table_lookup (priv->known_notifications, &i64));
+	if (conn_id) {
+		stop_notification (priv, conn_id, cancellable, perror);
+		g_hash_table_remove (priv->known_notifications, &i64);
+	}
+
+	if (priv->register_notification_result == MAPI_E_RESERVED)
+		priv->register_notification_result = RegisterNotification (priv->session, fnevNewMail |
+			     fnevObjectCreated |
+			     fnevObjectDeleted |
+			     fnevObjectModified |
+			     fnevObjectMoved);
+
+	if (priv->register_notification_result != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "RegisterNotification", priv->register_notification_result);
+		UNLOCK ();
+
+		return FALSE;
+	}
+
+	conn_id = 0;
+	ms = Subscribe (obj_folder ? obj_folder : &priv->msg_store, &conn_id, event_mask, obj_folder == NULL, emit_server_notification_signal, conn);
+	if (ms == MAPI_E_SUCCESS) {
+		gint64 *pi64;
+
+		pi64 = g_new0 (gint64, 1);
+		*pi64 = i64;
+
+		g_hash_table_insert (priv->known_notifications, pi64, GUINT_TO_POINTER (conn_id));
+
+		if (priv->notification_thread) {
+			e_flag_set (priv->notification_flag);
+		} else {
+			priv->notification_thread = g_thread_create (e_mapi_connection_notification_thread, conn, TRUE, NULL);
+		}
+	} else {
+		make_mapi_error (perror, "Subscribe", ms);
 	}
 
 	UNLOCK ();
 
-	if (ms != MAPI_E_SUCCESS)
-		make_mapi_error (perror, "Subscribe", ms);
-
-	return (ms == MAPI_E_SUCCESS);
+	return ms == MAPI_E_SUCCESS;
 }
 
 gboolean
-e_mapi_connection_events_unsubscribe (EMapiConnection *conn, guint32 events_conn_id, GCancellable *cancellable, GError **perror)
+e_mapi_connection_disable_notifications	(EMapiConnection *conn,
+					 mapi_object_t *obj_folder,
+					 GCancellable *cancellable,
+					 GError **perror)
 {
-	enum MAPISTATUS	ms;
+	mapi_id_t fid = 0;
+	uint32_t conn_id;
+	gint64 i64;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
 	LOCK ();
-	ms = Unsubscribe (priv->session, events_conn_id);
+
+	if (!priv->notification_thread) {
+		/* no notifications started, just return */
+		UNLOCK ();
+
+		return TRUE;
+	}
+
+	if (priv->register_notification_result != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "RegisterNotification", priv->register_notification_result);
+		UNLOCK ();
+
+		return FALSE;
+	}
+
+	if (obj_folder)
+		fid = mapi_object_get_id (obj_folder);
+
+	i64 = (gint64) fid;
+	conn_id = GPOINTER_TO_UINT (g_hash_table_lookup (priv->known_notifications, &i64));
+	if (conn_id) {
+		gboolean stopped = stop_notification (priv, conn_id, cancellable, perror);
+		g_hash_table_remove (priv->known_notifications, &i64);
+
+		if (!stopped) {
+			UNLOCK ();
+			return FALSE;
+		}
+	} else {
+		make_mapi_error (perror, "e_mapi_connection_disable_notifications", MAPI_E_NOT_FOUND);
+		UNLOCK ();
+
+		return FALSE;
+	}
+
+	if (g_hash_table_size (priv->known_notifications) == 0) {
+		stop_all_notifications (priv);
+	}
+
 	UNLOCK ();
 
-	if (ms != MAPI_E_SUCCESS)
-		make_mapi_error (perror, "Unsubscribe", ms);
-
-	return (ms == MAPI_E_SUCCESS);
-}
-
-/* Note : Blocking infinite loop. */
-gboolean
-e_mapi_connection_events_monitor (EMapiConnection *conn, struct mapi_notify_continue_callback_data *cb_data)
-{
-	enum MAPISTATUS	ms;
-	/* to have this used in the below macros */
-	GError **perror = NULL;
-
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
-	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
-
-	ms = MonitorNotification (priv->session, NULL, cb_data);
-
-	return ms == MAPI_E_SUCCESS;
+	return TRUE;
 }
 
 /* profile related functions - begin */

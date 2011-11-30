@@ -40,12 +40,16 @@
 #include "camel-mapi-store.h"
 #include "camel-mapi-store-summary.h"
 #include "camel-mapi-folder.h"
-#include "camel-mapi-private.h"
 #include "camel-mapi-folder-summary.h"
 
 #define DEBUG_FN( ) printf("----%p %s\n", g_thread_self(), G_STRFUNC);
 #define SUMMARY_FETCH_BATCH_COUNT 150
 #define d(x)
+
+#define CAMEL_MAPI_FOLDER_LOCK(f, l) \
+	(g_static_mutex_lock(&((CamelMapiFolder *)f)->priv->l))
+#define CAMEL_MAPI_FOLDER_UNLOCK(f, l) \
+	(g_static_mutex_unlock(&((CamelMapiFolder *)f)->priv->l))
 
 extern gint camel_application_is_exiting;
 
@@ -460,7 +464,8 @@ gather_changed_objects_to_slist (EMapiConnection *conn,
 		if (info) {
 			CamelMapiMessageInfo *minfo = (CamelMapiMessageInfo *) info;
 
-			if (minfo->last_modified != object_data->last_modified) {
+			if (minfo->last_modified != object_data->last_modified
+			    && (object_data->msg_flags & MSGFLAG_UNMODIFIED) == 0) {
 				update = TRUE;
 			} else {
 				guint32 mask = CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ATTACHMENTS, flags = 0;

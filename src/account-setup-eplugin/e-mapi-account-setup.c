@@ -35,6 +35,7 @@
 #include <libedataserverui/e-passwords.h>
 #include <libedataserver/e-account.h>
 #include <e-util/e-dialog-utils.h>
+#include <e-util/e-plugin-util.h>
 #include "mail/em-config.h"
 #include "e-mapi-account-setup.h"
 #include <addressbook/gui/widgets/eab-config.h>
@@ -707,6 +708,8 @@ e_mapi_create (GtkWidget *parent, ESource *source, EMapiFolderType folder_type)
 	if (uri_text && g_ascii_strncasecmp (uri_text, MAPI_URI_PREFIX, MAPI_PREFIX_LENGTH)) {
 		return NULL;
 	}
+
+	e_plugin_util_add_check (parent, _("Lis_ten for server notifications"), source, "server-notification", "true", NULL);
 
 	folders = NULL;
 	group = e_source_peek_group (source);

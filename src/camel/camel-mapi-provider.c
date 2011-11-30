@@ -57,6 +57,8 @@ static CamelProviderConfEntry mapi_conf_entries[] = {
 	  N_("Check new messages for _Junk contents"), "0" },
 	{ CAMEL_PROVIDER_CONF_CHECKBOX, "filter-junk-inbox", "filter-junk",
 	  N_("Only check for Junk messag_es in the Inbox folder"), "0" },
+	{ CAMEL_PROVIDER_CONF_CHECKBOX, "listen-notifications", NULL,
+	  N_("Lis_ten for server notifications"), "0" },
 
 	{ CAMEL_PROVIDER_CONF_SECTION_END },
 	{ CAMEL_PROVIDER_CONF_END }

@@ -526,25 +526,15 @@ gchar *			e_mapi_connection_ex_to_smtp		(EMapiConnection *conn,
 								 GError **perror);
 
 /* Push notifications APIs */
-typedef gboolean (*exchange_check_continue) (void);
 
-gboolean		e_mapi_connection_events_init		(EMapiConnection *conn,
-								 GCancellable *cancellable,
-								 GError **perror);
-gboolean		e_mapi_connection_events_monitor	(EMapiConnection *conn,
-								 struct mapi_notify_continue_callback_data *cb_data);
-
-gboolean		e_mapi_connection_events_subscribe	(EMapiConnection *conn,
-								 guint32 options,
-								 guint16 event_mask,
-								 guint32 *events_conn_id,
-								 mapi_notify_callback_t callback,
-								 gpointer data,
+gboolean		e_mapi_connection_enable_notifications	(EMapiConnection *conn,
+								 mapi_object_t *obj_folder,
+								 uint32_t event_mask,
 								 GCancellable *cancellable,
 								 GError **perror);
 
-gboolean		e_mapi_connection_events_unsubscribe	(EMapiConnection *conn,
-								 guint32 events_conn_id,
+gboolean		e_mapi_connection_disable_notifications	(EMapiConnection *conn,
+								 mapi_object_t *obj_folder,
 								 GCancellable *cancellable,
 								 GError **perror);
 

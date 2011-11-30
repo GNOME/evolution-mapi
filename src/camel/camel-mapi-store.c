@@ -25,10 +25,16 @@
 #include <config.h>
 #endif
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/types.h>
 #include <errno.h>
+
+#include <libmapi/libmapi.h>
 
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
@@ -38,18 +44,10 @@
 #include "camel-mapi-settings.h"
 #include "camel-mapi-store-summary.h"
 #include "camel-mapi-folder-summary.h"
-#include "camel-mapi-notifications.h"
 #include "account-setup-eplugin/e-mapi-account-listener.h"
 #include <e-mapi-utils.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <libmapi/libmapi.h>
-#include <param.h>
-
-#define d(x) printf("%s:%s:%s \n", G_STRLOC, G_STRFUNC, x)
+#define d(x)
 
 struct _CamelMapiStorePrivate {
 	EMapiConnection *conn;
@@ -61,7 +59,12 @@ struct _CamelMapiStorePrivate {
 	GHashTable *default_folders; /*Default Type : Folder ID*/
 
 	gboolean folders_synced; /* whether were synced folder list already */
-	gpointer notification_data; /* pointer to a notification data; can be only one */
+
+	GStaticRecMutex updates_lock;
+	GCancellable *updates_cancellable; /* cancelled on dispose or disconnect */
+	GSList *update_folder_names; /* gchar *foldername */
+	guint update_folder_id;
+	guint update_folder_list_id;
 };
 
 /* Forward Declarations */
@@ -82,6 +85,7 @@ static gboolean	mapi_connect_sync(CamelService *, GCancellable *cancellable, GEr
 static gboolean	mapi_disconnect_sync(CamelService *, gboolean , GCancellable *cancellable, GError **);
 static CamelAuthenticationResult mapi_authenticate_sync (CamelService *, const gchar *mechanism, GCancellable *, GError **);
 static GList	*mapi_query_auth_types_sync(CamelService *, GCancellable *cancellable, GError **);
+static void camel_mapi_store_server_notification_cb (EMapiConnection *conn, guint event_mask, gpointer event_data, gpointer user_data);
 
 /* store methods */
 static CamelFolderInfo * mapi_build_folder_info(CamelMapiStore *mapi_store, const gchar *parent_name, const gchar *folder_name);
@@ -797,13 +801,52 @@ mapi_rename_folder_infos (CamelMapiStore *mapi_store, const gchar *old_name, con
 }
 
 static void
+stop_pending_updates (CamelMapiStore *mapi_store)
+{
+	CamelMapiStorePrivate *priv;
+
+	g_return_if_fail (mapi_store != NULL);
+	g_return_if_fail (mapi_store->priv != NULL);
+
+	priv = mapi_store->priv;
+
+	g_static_rec_mutex_lock (&priv->updates_lock);
+	if (priv->updates_cancellable) {
+		g_cancellable_cancel (priv->updates_cancellable);
+		g_object_unref (priv->updates_cancellable);
+		priv->updates_cancellable = NULL;
+	}
+
+	if (priv->update_folder_names) {
+		g_slist_free_full (priv->update_folder_names, g_free);
+		priv->update_folder_names = NULL;
+	}
+
+	if (priv->update_folder_id) {
+		g_source_remove (priv->update_folder_id);
+		priv->update_folder_id = 0;
+	}
+
+	if (priv->update_folder_list_id) {
+		g_source_remove (priv->update_folder_list_id);
+		priv->update_folder_list_id = 0;
+	}
+
+	g_static_rec_mutex_unlock (&priv->updates_lock);
+}
+
+static void
 mapi_store_dispose (GObject *object)
 {
 	CamelMapiStorePrivate *priv;
 
 	priv = CAMEL_MAPI_STORE (object)->priv;
 
+	stop_pending_updates (CAMEL_MAPI_STORE (object));
+
 	if (priv->conn != NULL) {
+		g_signal_handlers_disconnect_by_func (priv->conn, camel_mapi_store_server_notification_cb, object);
+
 		g_object_unref (priv->conn);
 		priv->conn = NULL;
 	}
@@ -832,6 +875,8 @@ mapi_store_finalize (GObject *object)
 		g_hash_table_destroy (priv->default_folders);
 	if (priv->container_hash != NULL)
 		g_hash_table_destroy (priv->container_hash);
+
+	g_static_rec_mutex_free (&priv->updates_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_mapi_store_parent_class)->finalize (object);
@@ -1600,6 +1645,12 @@ static void
 camel_mapi_store_init (CamelMapiStore *mapi_store)
 {
 	mapi_store->priv = G_TYPE_INSTANCE_GET_PRIVATE (mapi_store, CAMEL_TYPE_MAPI_STORE, CamelMapiStorePrivate);
+
+	g_static_rec_mutex_init (&mapi_store->priv->updates_lock);
+	mapi_store->priv->updates_cancellable = NULL;
+	mapi_store->priv->update_folder_names = NULL;
+	mapi_store->priv->update_folder_id = 0;
+	mapi_store->priv->update_folder_list_id = 0;
 }
 
 /* service methods */
@@ -1677,7 +1728,6 @@ mapi_connect_sync (CamelService *service,
 	CamelServiceConnectionStatus status;
 	CamelSession *session;
 	gchar *name;
-	guint16 event_mask = 0;
 
 	session = camel_service_get_session (service);
 
@@ -1708,28 +1758,11 @@ mapi_connect_sync (CamelService *service,
 	camel_offline_store_set_online_sync (
 		CAMEL_OFFLINE_STORE (store), TRUE, cancellable, NULL);
 
-	/* Start event monitor */
-	event_mask = fnevNewMail | fnevObjectCreated | fnevObjectDeleted |
-		fnevObjectModified | fnevObjectMoved | fnevObjectCopied;
-
-	/* use MAPI_LISTEN_NOTIFY=1 to enable notifications */
-	if (!store->priv->notification_data && g_getenv ("MAPI_LISTEN_NOTIFY") != NULL)
-		store->priv->notification_data = camel_mapi_notification_listener_start (store, event_mask, MAPI_EVENTS_USE_STORE);
-
 	camel_store_summary_save (store->summary);
 
 	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	return TRUE;
-}
-
-void
-camel_mapi_store_unset_notification_data (CamelMapiStore *mstore)
-{
-	g_return_if_fail (mstore != NULL);
-	g_return_if_fail (CAMEL_IS_MAPI_STORE (mstore));
-
-	mstore->priv->notification_data = NULL;
 }
 
 static gboolean
@@ -1740,13 +1773,12 @@ mapi_disconnect_sync (CamelService *service,
 {
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
 
-	/* Disconnect from event monitor */
-	if (store->priv->notification_data) {
-		camel_mapi_notification_listener_stop (store, store->priv->notification_data);
-		store->priv->notification_data = NULL;
-	}
+	stop_pending_updates (store);
 
 	if (store->priv->conn) {
+		g_signal_handlers_disconnect_by_func (store->priv->conn, camel_mapi_store_server_notification_cb, store);
+		e_mapi_connection_disable_notifications (store->priv->conn, NULL, cancellable, error);
+
 		/* Close the mapi subsystem */
 		g_object_unref (store->priv->conn);
 		store->priv->conn = NULL;
@@ -1755,6 +1787,335 @@ mapi_disconnect_sync (CamelService *service,
 	store->priv->folders_synced = FALSE;
 
 	return TRUE;
+}
+
+struct ScheduleUpdateData
+{
+	GCancellable *cancellable;
+	CamelMapiStore *mapi_store;
+	GSList *foldernames;
+	guint expected_id;
+};
+
+static void
+free_schedule_update_data (gpointer ptr)
+{
+	struct ScheduleUpdateData *sud = ptr;
+
+	if (!sud)
+		return;
+
+	if (sud->cancellable)
+		g_object_unref (sud->cancellable);
+	g_slist_free_full (sud->foldernames, g_free);
+	g_free (sud);
+}
+
+static gpointer
+camel_mapi_folder_update_thread (gpointer user_data)
+{
+	struct ScheduleUpdateData *sud = user_data;
+	CamelMapiStore *mapi_store;
+	GSList *fn;
+
+	g_return_val_if_fail (sud != NULL, NULL);
+
+	mapi_store = g_object_ref (sud->mapi_store);
+
+	for (fn = sud->foldernames; fn && !g_cancellable_is_cancelled (sud->cancellable); fn = fn->next) {
+		const gchar *foldername = fn->data;
+		CamelFolder *folder;
+
+		if (!foldername)
+			continue;
+
+		folder = camel_store_get_folder_sync (CAMEL_STORE (mapi_store), foldername, 0, sud->cancellable, NULL);
+		if (folder) {
+			camel_folder_refresh_info_sync (folder, sud->cancellable, NULL);
+			g_object_unref (folder);
+		}
+	}
+
+	if (!g_cancellable_is_cancelled (sud->cancellable) &&
+	    !mapi_store->priv->folders_synced)
+		mapi_folders_sync (sud->mapi_store, CAMEL_STORE_FOLDER_INFO_RECURSIVE | CAMEL_STORE_FOLDER_INFO_SUBSCRIBED, sud->cancellable, NULL);
+
+	g_object_unref (mapi_store);
+
+	free_schedule_update_data (sud);
+
+	return NULL;
+}
+
+static void
+run_update_thread (CamelMapiStore *mapi_store,
+		   GCancellable *cancellable,
+		   GSList *foldernames)
+{
+	struct ScheduleUpdateData *sud;
+
+	g_return_if_fail (mapi_store != NULL);
+	g_return_if_fail (cancellable != NULL);
+
+	sud = g_new0 (struct ScheduleUpdateData, 1);
+	sud->mapi_store = mapi_store;
+	sud->cancellable = g_object_ref (cancellable);
+	sud->foldernames = foldernames;
+
+	g_thread_create (camel_mapi_folder_update_thread, sud, FALSE, NULL);
+}
+
+static gboolean
+folder_update_cb (gpointer user_data)
+{
+	struct ScheduleUpdateData *sud = user_data;
+	GSList *foldernames;
+
+	g_return_val_if_fail (sud != NULL, FALSE);
+
+	if (g_cancellable_is_cancelled (sud->cancellable))
+		return FALSE;
+
+	g_return_val_if_fail (sud->mapi_store != NULL, FALSE);
+	g_return_val_if_fail (sud->mapi_store->priv != NULL, FALSE);
+
+	g_static_rec_mutex_lock (&sud->mapi_store->priv->updates_lock);
+	if (sud->expected_id != sud->mapi_store->priv->update_folder_id) {
+		g_static_rec_mutex_unlock (&sud->mapi_store->priv->updates_lock);
+		return FALSE;
+	}
+
+	foldernames = sud->mapi_store->priv->update_folder_names;
+	sud->mapi_store->priv->update_folder_names = NULL;
+	sud->mapi_store->priv->update_folder_id = 0;
+
+	if (!g_cancellable_is_cancelled (sud->cancellable))
+		run_update_thread (sud->mapi_store, sud->cancellable, foldernames);
+	else
+		g_slist_free_full (foldernames, g_free);
+
+	g_static_rec_mutex_unlock (&sud->mapi_store->priv->updates_lock);
+
+	return FALSE;
+}
+
+static void
+schedule_folder_update (CamelMapiStore *mapi_store, mapi_id_t fid)
+{
+	gchar *fidstr;
+	const gchar *foldername;
+	struct ScheduleUpdateData *sud;
+	CamelStoreInfo *si;
+	CamelMapiStoreInfo *msi;
+
+	g_return_if_fail (mapi_store != NULL);
+	g_return_if_fail (mapi_store->priv != NULL);
+
+	si = camel_mapi_store_summary_get_folder_id (mapi_store->summary, fid);
+	if (!si)
+		return;
+
+	msi = (CamelMapiStoreInfo *) si;
+	if ((msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_MAIL) == 0) {
+		camel_store_summary_info_free (mapi_store->summary, si);
+		return;
+	}
+
+	camel_store_summary_info_free (mapi_store->summary, si);
+
+	fidstr = e_mapi_util_mapi_id_to_string (fid);
+	if (!fidstr)
+		return;
+
+	foldername = camel_mapi_store_folder_lookup (mapi_store, fidstr);
+	g_free (fidstr);
+
+	if (!foldername)
+		return;
+
+	g_static_rec_mutex_lock (&mapi_store->priv->updates_lock);
+	if (!mapi_store->priv->updates_cancellable ||
+	    g_slist_find_custom (mapi_store->priv->update_folder_names, foldername, (GCompareFunc) g_ascii_strcasecmp) != 0) {
+		g_static_rec_mutex_unlock (&mapi_store->priv->updates_lock);
+		return;
+	}
+
+	sud = g_new0 (struct ScheduleUpdateData, 1);
+	sud->cancellable = g_object_ref (mapi_store->priv->updates_cancellable);
+	sud->mapi_store = mapi_store;
+
+	mapi_store->priv->update_folder_names = g_slist_prepend (mapi_store->priv->update_folder_names, g_strdup (foldername));
+	if (mapi_store->priv->update_folder_id)
+		g_source_remove (mapi_store->priv->update_folder_id);
+	mapi_store->priv->update_folder_id = g_timeout_add_seconds_full (G_PRIORITY_LOW, 5, folder_update_cb, sud, free_schedule_update_data);
+	sud->expected_id = mapi_store->priv->update_folder_id;
+
+	g_static_rec_mutex_unlock (&mapi_store->priv->updates_lock);
+}
+
+static gboolean
+folder_list_update_cb (gpointer user_data)
+{
+	struct ScheduleUpdateData *sud = user_data;
+
+	g_return_val_if_fail (sud != NULL, FALSE);
+
+	if (g_cancellable_is_cancelled (sud->cancellable))
+		return FALSE;
+
+	g_return_val_if_fail (sud->mapi_store != NULL, FALSE);
+	g_return_val_if_fail (sud->mapi_store->priv != NULL, FALSE);
+
+	g_static_rec_mutex_lock (&sud->mapi_store->priv->updates_lock);
+	if (sud->expected_id != sud->mapi_store->priv->update_folder_list_id) {
+		g_static_rec_mutex_unlock (&sud->mapi_store->priv->updates_lock);
+		return FALSE;
+	}
+
+	sud->mapi_store->priv->folders_synced = FALSE;
+	sud->mapi_store->priv->update_folder_list_id = 0;
+
+	if (!g_cancellable_is_cancelled (sud->cancellable))
+		run_update_thread (sud->mapi_store, sud->cancellable, NULL);
+
+	g_static_rec_mutex_unlock (&sud->mapi_store->priv->updates_lock);
+
+	return FALSE;
+}
+
+static void
+schedule_folder_list_update (CamelMapiStore *mapi_store)
+{
+	struct ScheduleUpdateData *sud;
+
+	g_return_if_fail (mapi_store != NULL);
+	g_return_if_fail (mapi_store->priv != NULL);
+
+	g_static_rec_mutex_lock (&mapi_store->priv->updates_lock);
+	if (!mapi_store->priv->updates_cancellable) {
+		g_static_rec_mutex_unlock (&mapi_store->priv->updates_lock);
+		return;
+	}
+
+	sud = g_new0 (struct ScheduleUpdateData, 1);
+	sud->cancellable = g_object_ref (mapi_store->priv->updates_cancellable);
+	sud->mapi_store = mapi_store;
+
+	if (mapi_store->priv->update_folder_list_id)
+		g_source_remove (mapi_store->priv->update_folder_list_id);
+	mapi_store->priv->update_folder_list_id = g_timeout_add_seconds_full (G_PRIORITY_LOW, 5, folder_list_update_cb, sud, free_schedule_update_data);
+	sud->expected_id = mapi_store->priv->update_folder_list_id;
+
+	g_static_rec_mutex_unlock (&mapi_store->priv->updates_lock);
+}
+
+static void
+camel_mapi_store_server_notification_cb (EMapiConnection *conn,
+					 guint event_mask,
+					 gpointer event_data,
+					 gpointer user_data)
+{
+	CamelMapiStore *mapi_store = user_data;
+	mapi_id_t update_folder1 = 0, update_folder2 = 0;
+	gboolean update_folder_list = FALSE;
+
+	g_return_if_fail (mapi_store != NULL);
+	g_return_if_fail (mapi_store->priv != NULL);
+
+	switch (event_mask) {
+	/* -- Folder Events -- */
+	case fnevObjectCreated:
+		d (printf ("Event : Folder Created\n"));
+		d (mapidump_foldercreated (event_data, "\t"));
+		update_folder_list = TRUE;
+		break;
+	case fnevObjectDeleted:
+		d (printf ("Event : Folder Deleted\n"));
+		d (mapidump_folderdeleted (event_data, "\t"));
+		update_folder_list = TRUE;
+		break;
+	case fnevObjectMoved:
+		d (printf ("Event : Folder Moved\n"));
+		d (mapidump_foldermoved (event_data, "\t"));
+		update_folder_list = TRUE;
+		break;
+	case fnevObjectCopied:
+		d (printf ("Event : Folder Copied\n"));
+		d (mapidump_foldercopied (event_data, "\t"));
+		update_folder_list = TRUE;
+		break;
+
+	/* -- Message Events -- */
+	case fnevNewMail:
+	case fnevNewMail | fnevMbit: {
+		struct NewMailNotification *newmail = event_data;
+
+		d (printf ("Event : New mail\n"));
+		d (mapidump_newmail (event_data, "\t"));
+
+		if (newmail)
+			update_folder1 = newmail->FID;
+		} break;
+	case fnevMbit | fnevObjectCreated: {
+		struct MessageCreatedNotification *msgcreated = event_data;
+
+		d (printf ("Event : Message created\n"));
+		d (mapidump_messagecreated (event_data, "\t"));
+
+		if (msgcreated)
+			update_folder1 = msgcreated->FID;
+		} break;
+	case fnevMbit | fnevObjectModified: {
+		struct MessageModifiedNotification *msgmodified = event_data;
+
+		d (printf ("Event : Message modified\n"));
+		d (mapidump_messagemodified (event_data, "\t"));
+
+		if (msgmodified)
+			update_folder1 = msgmodified->FID;
+		} break;
+	case fnevMbit | fnevObjectDeleted: {
+		struct MessageDeletedNotification *msgdeleted = event_data;
+
+		d (printf ("Event : Message deleted\n"));
+		d (mapidump_messagedeleted (event_data, "\t"));
+
+		if (msgdeleted)
+			update_folder1 = msgdeleted->FID;
+		} break;
+	case fnevMbit | fnevObjectMoved: {
+		struct MessageMoveCopyNotification *msgmoved = event_data;
+
+		d (printf ("Event : Message moved\n"));
+		d (mapidump_messagemoved (event_data, "\t"));
+
+		if (msgmoved) {
+			update_folder1 = msgmoved->OldFID;
+			update_folder2 = msgmoved->FID;
+		}
+		} break;
+	case fnevMbit | fnevObjectCopied: {
+		struct MessageMoveCopyNotification *msgcopied = event_data;
+
+		d (printf ("Event : Message copied\n"));
+		d (mapidump_messagecopied (event_data, "\t"));
+
+		if (msgcopied) {
+			update_folder1 = msgcopied->OldFID;
+			update_folder2 = msgcopied->FID;
+		}
+		} break;
+	default:
+		/* Unsupported  */
+		break;
+	}
+
+	if (update_folder1 > 0)
+		schedule_folder_update (mapi_store, update_folder1);
+	if (update_folder2 > 0)
+		schedule_folder_update (mapi_store, update_folder2);
+	if (update_folder_list)
+		schedule_folder_list_update (mapi_store);
 }
 
 static CamelAuthenticationResult
@@ -1803,6 +2164,14 @@ mapi_authenticate_sync (CamelService *service,
 	store->priv->conn = e_mapi_connection_new (profile, password, cancellable, &mapi_error);
 	if (store->priv->conn && e_mapi_connection_connected (store->priv->conn)) {
 		result = CAMEL_AUTHENTICATION_ACCEPTED;
+
+		if (!store->priv->updates_cancellable)
+			store->priv->updates_cancellable = g_cancellable_new ();
+
+		g_signal_connect (store->priv->conn, "server-notification", G_CALLBACK (camel_mapi_store_server_notification_cb), store);
+
+		if (camel_mapi_settings_get_listen_notifications (mapi_settings))
+			e_mapi_connection_enable_notifications (store->priv->conn, NULL, 0, NULL, NULL);
 	} else if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_LOGON_FAILED)) {
 		g_clear_error (&mapi_error);
 		result = CAMEL_AUTHENTICATION_REJECTED;

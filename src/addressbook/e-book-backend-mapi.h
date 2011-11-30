@@ -112,6 +112,7 @@ gboolean e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDat
 void e_book_backend_mapi_notify_contact_removed (EBookBackendMAPI *ebma, const gchar *uid);
 void   e_book_backend_mapi_cache_set (EBookBackendMAPI *ebma, const gchar *key, const gchar *value);
 gchar *e_book_backend_mapi_cache_get (EBookBackendMAPI *ebma, const gchar *key);
+void e_book_backend_mapi_refresh_cache (EBookBackendMAPI *ebma);
 
 /* utility functions/macros */
 

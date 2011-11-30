@@ -86,6 +86,11 @@ void		camel_mapi_settings_set_profile	(CamelMapiSettings *settings,
 const gchar *	camel_mapi_settings_get_realm	(CamelMapiSettings *settings);
 void		camel_mapi_settings_set_realm	(CamelMapiSettings *settings,
 						 const gchar *realm);
+gboolean	camel_mapi_settings_get_listen_notifications
+						(CamelMapiSettings *settings);
+void		camel_mapi_settings_set_listen_notifications
+						(CamelMapiSettings *settings,
+						 gboolean listen_notifications);
 
 G_END_DECLS
 

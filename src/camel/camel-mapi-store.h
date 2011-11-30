@@ -78,8 +78,6 @@ const gchar *	camel_mapi_store_folder_lookup (CamelMapiStore *mapi_store, const 
 const gchar *	camel_mapi_store_system_folder_fid (CamelMapiStore *mapi_store, guint folder_type);
 const gchar *	mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid, gboolean use_cache);
 
-void		camel_mapi_store_unset_notification_data (CamelMapiStore *mstore);
-
 EMapiConnection *	camel_mapi_store_get_connection (CamelMapiStore *mapi_store);
 
 G_END_DECLS

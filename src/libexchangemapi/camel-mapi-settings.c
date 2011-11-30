@@ -27,6 +27,7 @@ struct _CamelMapiSettingsPrivate {
 	gboolean filter_junk;
 	gboolean filter_junk_inbox;
 	gboolean kerberos;
+	gboolean listen_notifications;
 
 	gchar *domain;
 	gchar *profile;
@@ -46,7 +47,8 @@ enum {
 	PROP_PROFILE,
 	PROP_REALM,
 	PROP_SECURITY_METHOD,
-	PROP_USER
+	PROP_USER,
+	PROP_LISTEN_NOTIFICATIONS
 };
 
 G_DEFINE_TYPE_WITH_CODE (
@@ -134,6 +136,13 @@ mapi_settings_set_property (GObject *object,
 				CAMEL_NETWORK_SETTINGS (object),
 				g_value_get_string (value));
 			return;
+
+		case PROP_LISTEN_NOTIFICATIONS:
+			camel_mapi_settings_set_listen_notifications (
+				CAMEL_MAPI_SETTINGS (object),
+				g_value_get_boolean (value));
+			return;
+
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -228,6 +237,13 @@ mapi_settings_get_property (GObject *object,
 				value,
 				camel_network_settings_get_user (
 				CAMEL_NETWORK_SETTINGS (object)));
+			return;
+
+		case PROP_LISTEN_NOTIFICATIONS:
+			g_value_set_boolean (
+				value,
+				camel_mapi_settings_get_listen_notifications (
+				CAMEL_MAPI_SETTINGS (object)));
 			return;
 	}
 
@@ -357,6 +373,18 @@ camel_mapi_settings_class_init (CamelMapiSettingsClass *class)
 			"Realm",
 			"Kerberos realm",
 			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_LISTEN_NOTIFICATIONS,
+		g_param_spec_boolean (
+			"listen-notifications",
+			"Listen Notifications",
+			"Whether to listen for server notifications",
+			FALSE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
@@ -522,4 +550,23 @@ camel_mapi_settings_set_realm (CamelMapiSettings *settings,
 	settings->priv->realm = g_strdup (realm);
 
 	g_object_notify (G_OBJECT (settings), "realm");
+}
+
+gboolean
+camel_mapi_settings_get_listen_notifications (CamelMapiSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_MAPI_SETTINGS (settings), FALSE);
+
+	return settings->priv->listen_notifications;
+}
+
+void
+camel_mapi_settings_set_listen_notifications (CamelMapiSettings *settings,
+					      gboolean listen_notifications)
+{
+	g_return_if_fail (CAMEL_IS_MAPI_SETTINGS (settings));
+
+	settings->priv->listen_notifications = listen_notifications;
+
+	g_object_notify (G_OBJECT (settings), "listen-notifications");
 }
