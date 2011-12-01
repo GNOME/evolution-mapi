@@ -479,6 +479,8 @@ gather_changed_objects_to_slist (EMapiConnection *conn,
 					camel_message_info_set_flags (info, mask, flags);
 					minfo->server_flags = camel_message_info_flags (info);
 					minfo->info.dirty = TRUE;
+
+					camel_folder_summary_touch (gco->summary);
 				}
 			}
 
@@ -606,6 +608,7 @@ gather_object_offline_cb (EMapiConnection *conn,
 			}
 
 			minfo->info.dirty = TRUE;
+			camel_folder_summary_touch (gos->folder->summary);
 
 			if (is_new) {
 				camel_folder_summary_add (gos->folder->summary, info);
@@ -813,6 +816,7 @@ gather_object_summary_cb (EMapiConnection *conn,
 		}
 
 		minfo->info.dirty = TRUE;
+		camel_folder_summary_touch (gos->folder->summary);
 
 		if (is_new) {
 			camel_folder_summary_add (gos->folder->summary, info);
@@ -958,6 +962,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 		mapi_summary->last_obj_total = fbp.obj_total;
 	}
 
+	camel_folder_summary_save_to_db (folder->summary, NULL);
 	camel_folder_thaw (folder);
 
 	return status;
@@ -1138,7 +1143,10 @@ static void
 mapi_folder_dispose (GObject *object)
 {
 	CamelStore *parent_store;
+	CamelFolder *folder = CAMEL_FOLDER (object);
 	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (object);
+
+	camel_folder_summary_save_to_db (folder->summary, NULL);
 
 	if (mapi_folder->cache != NULL) {
 		g_object_unref (mapi_folder->cache);
