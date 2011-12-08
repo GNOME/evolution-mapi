@@ -2123,7 +2123,6 @@ term_eval_not (struct _ESExp *f,
 	       struct _ESExpResult **argv,
 	       gpointer user_data)
 {
-	struct EMapiSExpParserData *esp = user_data;
 	ESExpResult *r;
 
 	r = e_sexp_result_new (f, ESEXP_RES_INT);
@@ -2131,9 +2130,10 @@ term_eval_not (struct _ESExp *f,
 
 	#ifdef HAVE_RES_NOT_SUPPORTED
 	if (argc == 1 && argv[0]->type == ESEXP_RES_INT) {
+		struct EMapiSExpParserData *esp = user_data;
 		gint idx = argv[0]->value.number;
 
-		if (idx >= 0 && idx < esp->res_parts->len) {
+		if (esp && idx >= 0 && idx < esp->res_parts->len) {
 			struct mapi_SRestriction *res = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
 			g_return_val_if_fail (res != NULL, NULL);
 
