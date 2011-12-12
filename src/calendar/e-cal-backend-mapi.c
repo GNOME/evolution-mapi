@@ -1311,63 +1311,59 @@ ecbm_authenticate_user (ECalBackend *backend, GCancellable *cancellable, ECreden
 }
 
 static gboolean
-mapi_cal_get_required_props (EMapiConnection *conn,
-			     mapi_id_t fid,
-			     TALLOC_CTX *mem_ctx,
-			     struct SPropTagArray *props,
-			     gpointer data,
-			     GCancellable *cancellable,
-			     GError **perror)
+ecbm_capture_req_props (EMapiConnection *conn,
+			TALLOC_CTX *mem_ctx,
+			/* const */ EMapiObject *object,
+			guint32 obj_index,
+			guint32 obj_total,
+			gpointer user_data,
+			GCancellable *cancellable,
+			GError **perror)
 {
-	static uint32_t req_props_list[] = {
-		PR_OWNER_APPT_ID,
-		PR_SENT_REPRESENTING_NAME_UNICODE,
-		PR_SENT_REPRESENTING_ADDRTYPE_UNICODE,
-		PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
-		PR_SENDER_NAME_UNICODE,
-		PR_SENDER_ADDRTYPE_UNICODE,
-		PR_SENDER_EMAIL_ADDRESS_UNICODE
-	};
+	struct cal_cbdata *cbdata = user_data;
+	const uint32_t *ui32;
 
-	/* do not make this array static, the function modifies it on run */
-	ResolveNamedIDsData nids[] = {
-		{ PidLidGlobalObjectId, 0 },
-		{ PidLidCleanGlobalObjectId, 0 },
-		{ PidLidAppointmentSequence, 0 }
-	};
+	g_return_val_if_fail (object != NULL, FALSE);
+	g_return_val_if_fail (cbdata != NULL, FALSE);
 
-	g_return_val_if_fail (props != NULL, FALSE);
+	ui32 = e_mapi_util_find_array_propval (&object->properties, PidTagOwnerAppointmentId);
+	if (ui32)
+		cbdata->appt_id = *ui32;
+	ui32 = e_mapi_util_find_array_propval (&object->properties, PidLidAppointmentSequence);
+	if (ui32)
+		cbdata->appt_seq = *ui32;
 
-	if (!e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids), cancellable, perror))
-		return FALSE;
+	cbdata->cleanglobalid = e_mapi_util_copy_binary_r (e_mapi_util_find_array_propval (&object->properties, PidLidCleanGlobalObjectId));
+	cbdata->globalid = e_mapi_util_copy_binary_r (e_mapi_util_find_array_propval (&object->properties, PidLidGlobalObjectId));
 
-	return e_mapi_utils_add_props_to_props_array (mem_ctx, props, req_props_list, G_N_ELEMENTS (req_props_list));
+	cbdata->username = g_strdup (e_mapi_util_find_array_propval (&object->properties, PidTagSentRepresentingName));
+	cbdata->useridtype = g_strdup (e_mapi_util_find_array_propval (&object->properties, PidTagSentRepresentingAddressType));
+	cbdata->userid = g_strdup (e_mapi_util_find_array_propval (&object->properties, PidTagSentRepresentingEmailAddress));
+
+	cbdata->ownername = g_strdup (e_mapi_util_find_array_propval (&object->properties, PidTagSenderName));
+	cbdata->owneridtype = g_strdup (e_mapi_util_find_array_propval (&object->properties, PidTagSenderAddressType));
+	cbdata->ownerid = g_strdup (e_mapi_util_find_array_propval (&object->properties, PidTagSenderEmailAddress));
+
+	return TRUE;
 }
 
 static gboolean
-capture_req_props (FetchItemsCallbackData *item_data,
-		   gpointer data,
-		   GCancellable *cancellable,
-		   GError **perror)
+ecbm_list_for_one_mid_cb (EMapiConnection *conn,
+		          mapi_id_t fid,
+			  TALLOC_CTX *mem_ctx,
+			  const ListObjectsData *object_data,
+			  guint32 obj_index,
+			  guint32 obj_total,
+			  gpointer user_data,
+			  GCancellable *cancellable,
+			  GError **perror)
 {
-	struct mapi_SPropValue_array *properties = item_data->properties;
-	struct cal_cbdata *cbdata = (struct cal_cbdata *) data;
-	const uint32_t *ui32;
+	mapi_id_t *pmid = user_data;
 
-	ui32 = (const uint32_t *)find_mapi_SPropValue_data(properties, PR_OWNER_APPT_ID);
-	if (ui32)
-		cbdata->appt_id = *ui32;
-	ui32 = e_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidAppointmentSequence);
-	if (ui32)
-		cbdata->appt_seq = *ui32;
-	cbdata->cleanglobalid = e_mapi_util_copy_binary_r (e_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidCleanGlobalObjectId));
-	cbdata->globalid = e_mapi_util_copy_binary_r (e_mapi_util_find_array_namedid (properties, item_data->conn, item_data->fid, PidLidGlobalObjectId));
-	cbdata->username = g_strdup (e_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_NAME_UNICODE));
-	cbdata->useridtype = g_strdup (e_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_ADDRTYPE_UNICODE));
-	cbdata->userid = g_strdup (e_mapi_util_find_array_propval (properties, PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE));
-	cbdata->ownername = g_strdup (e_mapi_util_find_array_propval (properties, PR_SENDER_NAME_UNICODE));
-	cbdata->owneridtype = g_strdup (e_mapi_util_find_array_propval (properties, PR_SENDER_ADDRTYPE_UNICODE));
-	cbdata->ownerid = g_strdup (e_mapi_util_find_array_propval (properties, PR_SENDER_EMAIL_ADDRESS_UNICODE));
+	g_return_val_if_fail (pmid != NULL, FALSE);
+	g_return_val_if_fail (object_data != NULL, FALSE);
+
+	*pmid = object_data->mid;
 
 	return TRUE;
 }
@@ -1432,26 +1428,42 @@ ecbm_build_global_id_restriction (EMapiConnection *conn,
 
 /* should call free_server_data() before done with cbdata */
 static void
-get_server_data (ECalBackendMAPI *cbmapi, ECalComponent *comp, struct cal_cbdata *cbdata)
+get_server_data (ECalBackendMAPI *cbmapi,
+		 ECalComponent *comp,
+		 struct cal_cbdata *cbdata,
+		 GCancellable *cancellable)
 {
 	ECalBackendMAPIPrivate *priv = cbmapi->priv;
 	icalcomponent *icalcomp;
 	mapi_id_t mid;
+	mapi_object_t obj_folder;
+	GError *error = NULL;
 
 	icalcomp = e_cal_component_get_icalcomponent (comp);
 	get_comp_mid (icalcomp, &mid);
 
-	if (e_mapi_connection_fetch_item (priv->conn, priv->fid, mid,
-					mapi_cal_get_required_props, NULL,
-					capture_req_props, cbdata,
-					MAPI_OPTIONS_FETCH_GENERIC_STREAMS, NULL, NULL))
-
+	if (!e_mapi_connection_open_personal_folder (priv->conn, priv->fid, &obj_folder, cancellable, NULL))
 		return;
 
-	e_mapi_connection_fetch_items (priv->conn, priv->fid, ecbm_build_global_id_restriction, comp, NULL,
-					mapi_cal_get_required_props, NULL,
-					capture_req_props, cbdata,
-					MAPI_OPTIONS_FETCH_GENERIC_STREAMS, NULL, NULL);
+	if (!e_mapi_connection_transfer_object (priv->conn, &obj_folder, mid, ecbm_capture_req_props, cbdata, cancellable, &error)) {
+		if (!g_error_matches (error, E_MAPI_ERROR, MAPI_E_NOT_FOUND)) {
+			g_clear_error (&error);
+			e_mapi_connection_close_folder (priv->conn, &obj_folder, cancellable, NULL);
+			return;
+		}
+
+		/* try to find by global-id, if not found by MID */
+		g_clear_error (&error);
+	}
+
+	if (e_mapi_connection_list_objects (priv->conn, &obj_folder,
+					    ecbm_build_global_id_restriction, comp,
+					    ecbm_list_for_one_mid_cb, &mid,
+					    cancellable, NULL)) {
+		e_mapi_connection_transfer_object (priv->conn, &obj_folder, mid, ecbm_capture_req_props, cbdata, cancellable, NULL);
+	}
+
+	e_mapi_connection_close_folder (priv->conn, &obj_folder, cancellable, NULL);
 }
 
 /* frees data members allocated in get_server_data(), not the cbdata itself */
@@ -1787,7 +1799,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		cbdata.msgflags = MSGFLAG_READ;
 		cbdata.is_modify = TRUE;
 
-		get_server_data (cbmapi, comp, &cbdata);
+		get_server_data (cbmapi, comp, &cbdata, cancellable);
 		if (modifier_is_organizer(cbmapi, comp)) {
 			cbdata.meeting_type = (recipients != NULL) ? MEETING_OBJECT : NOT_A_MEETING;
 			cbdata.resp = (recipients != NULL) ? olResponseOrganized : olResponseNone;
@@ -2042,7 +2054,7 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 				break;
 			}
 
-			get_server_data (cbmapi, comp, &cbdata);
+			get_server_data (cbmapi, comp, &cbdata, cancellable);
 			free_and_dupe_str (cbdata.username, ecbm_get_user_name (cbmapi));
 			free_and_dupe_str (cbdata.useridtype, "SMTP");
 			free_and_dupe_str (cbdata.userid, ecbm_get_user_email (cbmapi));
