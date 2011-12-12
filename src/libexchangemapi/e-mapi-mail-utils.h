@@ -104,6 +104,15 @@ struct _CamelMimeMessage *mapi_mail_item_to_mime_message (EMapiConnection *conn,
 
 struct _CamelMimeMessage *e_mapi_mail_utils_object_to_message	(EMapiConnection *conn,
 								 /* const */ EMapiObject *object);
+
+gboolean		e_mapi_mail_utils_message_to_object	(struct _CamelMimeMessage *message,
+								 guint32 message_camel_flags,
+								 EMapiCreateFlags create_flags,
+								 EMapiObject **pobject,
+								 TALLOC_CTX *mem_ctx,
+								 GCancellable *cancellable,
+								 GError **perror);
+
 void			e_mapi_mail_utils_decode_email_address	(EMapiConnection *conn,
 								 struct mapi_SPropValue_array *properties,
 								 const uint32_t *name_proptags,

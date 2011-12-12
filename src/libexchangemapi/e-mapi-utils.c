@@ -1058,6 +1058,43 @@ e_mapi_utils_add_spropvalue_namedid (EMapiConnection *conn,
 	return e_mapi_utils_add_spropvalue (mem_ctx, values_array, n_values, prop_tag, prop_value);
 }
 
+gboolean
+e_mapi_utils_add_property (struct mapi_SPropValue_array *properties,
+			   uint32_t proptag,
+			   gconstpointer propvalue,
+			   TALLOC_CTX *mem_ctx)
+{
+	uint32_t ii;
+	struct SPropValue sprop = { 0 };
+
+	g_return_val_if_fail (properties != NULL, FALSE);
+	g_return_val_if_fail (proptag != 0, FALSE);
+	g_return_val_if_fail (propvalue != NULL, FALSE);
+	g_return_val_if_fail (mem_ctx != NULL, FALSE);
+
+	sprop.ulPropTag = proptag;
+	g_return_val_if_fail (set_SPropValue (&sprop, propvalue), FALSE);
+
+	for (ii = 0; ii < properties->cValues; ii++) {
+		if (properties->lpProps[ii].ulPropTag == proptag) {
+			cast_mapi_SPropValue (mem_ctx, &(properties->lpProps[ii]), &sprop);
+			break;
+		}
+	}
+
+	if (ii == properties->cValues) {
+		properties->cValues++;
+		properties->lpProps = talloc_realloc (mem_ctx,
+			properties->lpProps,
+			struct mapi_SPropValue,
+			properties->cValues + 1);
+		cast_mapi_SPropValue (mem_ctx, &(properties->lpProps[properties->cValues - 1]), &sprop);
+		properties->lpProps[properties->cValues].ulPropTag = 0;
+	}
+
+	return TRUE;
+}
+
 /* the first call should be with crc32 set to 0 */
 uint32_t
 e_mapi_utils_push_crc32 (uint32_t crc32, uint8_t *bytes, uint32_t n_bytes)

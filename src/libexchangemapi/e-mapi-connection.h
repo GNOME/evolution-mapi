@@ -180,14 +180,23 @@ struct _EMapiObject {
 	EMapiObject *parent; /* chain up to parent's object, if this is embeded attachment */
 };
 
-EMapiRecipient *	e_mapi_recipient_new	(TALLOC_CTX *mem_ctx);
-void			e_mapi_recipient_free	(EMapiRecipient *recipient);
+EMapiRecipient *	e_mapi_recipient_new		(TALLOC_CTX *mem_ctx);
+void			e_mapi_recipient_free		(EMapiRecipient *recipient);
 
-EMapiAttachment *	e_mapi_attachment_new	(TALLOC_CTX *mem_ctx);
-void			e_mapi_attachment_free	(EMapiAttachment *attachment);
+EMapiAttachment *	e_mapi_attachment_new		(TALLOC_CTX *mem_ctx);
+void			e_mapi_attachment_free		(EMapiAttachment *attachment);
 
-EMapiObject *		e_mapi_object_new	(TALLOC_CTX *mem_ctx);
-void			e_mapi_object_free	(EMapiObject *object);
+EMapiObject *		e_mapi_object_new		(TALLOC_CTX *mem_ctx);
+void			e_mapi_object_free		(EMapiObject *object);
+void			e_mapi_object_add_recipient	(EMapiObject *object,
+							 EMapiRecipient *recipient);
+void			e_mapi_object_add_attachment	(EMapiObject *object,
+							 EMapiAttachment *attachment);
+
+typedef enum {
+	E_MAPI_CREATE_FLAG_NONE		= 0,
+	E_MAPI_CREATE_FLAG_SUBMIT	= 1 << 0
+} EMapiCreateFlags;
 
 /* callbacks return whether to continue in transfer of the next object */
 typedef gboolean (*FetchCallback)		(FetchItemsCallbackData *item_data,
@@ -240,6 +249,12 @@ typedef gboolean (*TransferObjectCB)		(EMapiConnection *conn,
 						 gpointer user_data,
 						 GCancellable *cancellable,
 						 GError **perror);
+typedef gboolean (*WriteObjectCB)		(EMapiConnection *conn,
+						 TALLOC_CTX *mem_ctx,
+						 EMapiObject **object, /* out */
+						 gpointer user_data,
+						 GCancellable *cancellable,
+						 GError **perror);
 typedef gboolean (*GetFolderPropertiesCB)	(EMapiConnection *conn,
 						 mapi_id_t fid,
 						 TALLOC_CTX *mem_ctx,
@@ -247,7 +262,6 @@ typedef gboolean (*GetFolderPropertiesCB)	(EMapiConnection *conn,
 						 gpointer user_data,
 						 GCancellable *cancellable,
 						 GError **perror);
-
 typedef gboolean (*ProgressNotifyCB)		(EMapiConnection *conn,
 						 guint32 item_index,
 						 guint32 items_total,
@@ -342,6 +356,23 @@ gboolean		e_mapi_connection_transfer_summary	(EMapiConnection *conn,
 								 const GSList *mids,
 								 TransferObjectCB cb,
 								 gpointer cb_user_data,
+								 GCancellable *cancellable,
+								 GError **perror);
+
+gboolean		e_mapi_connection_create_object		(EMapiConnection *conn,
+								 mapi_object_t *obj_folder,
+								 uint32_t flags, /* bit-or of EMapiCreateFlags */
+								 WriteObjectCB write_object_cb,
+								 gpointer woc_data,
+								 mapi_id_t *out_mid,
+								 GCancellable *cancellable,
+								 GError **perror);
+
+gboolean		e_mapi_connection_modify_object		(EMapiConnection *conn,
+								 mapi_object_t *obj_folder,
+								 mapi_id_t mid,
+								 WriteObjectCB write_object_cb,
+								 gpointer woc_data,
 								 GCancellable *cancellable,
 								 GError **perror);
 

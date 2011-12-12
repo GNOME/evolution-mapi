@@ -257,7 +257,9 @@ mapi_settings_finalize (GObject *object)
 
 	priv = CAMEL_MAPI_SETTINGS_GET_PRIVATE (object);
 
+	g_free (priv->domain);
 	g_free (priv->profile);
+	g_free (priv->realm);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_mapi_settings_parent_class)->finalize (object);

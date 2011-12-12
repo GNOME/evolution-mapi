@@ -89,6 +89,10 @@ gboolean	e_mapi_utils_add_spropvalue_namedid		(EMapiConnection *conn,
 								 gconstpointer prop_value,
 								 GCancellable *cancellable,
 								 GError **perror);
+gboolean	e_mapi_utils_add_property			(struct mapi_SPropValue_array *properties,
+								 uint32_t proptag,
+								 gconstpointer propvalue,
+								 TALLOC_CTX *mem_ctx);
 gboolean	e_mapi_utils_ensure_utf8_string			(uint32_t proptag,
 								 const uint32_t *cpid,
 								 const guint8 *buf_data,

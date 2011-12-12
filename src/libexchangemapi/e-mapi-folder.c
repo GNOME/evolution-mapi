@@ -96,6 +96,10 @@ void
 e_mapi_folder_free (EMapiFolder *folder)
 {
 	if (folder) {
+		g_free (folder->owner_name);
+		g_free (folder->owner_email);
+		g_free (folder->user_name);
+		g_free (folder->user_email);
 		g_free (folder->folder_name);
 		g_free (folder);
 	}

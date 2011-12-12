@@ -29,6 +29,8 @@
 #include "e-mapi-cal-utils.h"
 #include "e-mapi-mail-utils.h"
 
+#define STREAM_SIZE 4000
+
 extern gint camel_application_is_exiting;
 
 void
@@ -1361,7 +1363,7 @@ classify_attachments (EMapiConnection *conn, EMapiAttachment *attachments, const
 
 				embedded_msg = e_mapi_mail_utils_object_to_message (conn, attach->embedded_object);
 				if (embedded_msg) {
-					CamelStream *mem = camel_stream_mem_new ();
+					CamelStream *mem;
 					GByteArray *data;
 
 					data = g_byte_array_new ();
@@ -1484,6 +1486,7 @@ build_multipart_mixed (CamelMultipart *content, GSList *attachments)
 
 	camel_medium_set_content (CAMEL_MEDIUM (part), CAMEL_DATA_WRAPPER (content));
 	camel_multipart_add_part (m_mixed, part);
+	g_object_unref (part);
 
 	add_multipart_attachments (m_mixed, attachments);
 
@@ -1752,7 +1755,671 @@ e_mapi_mail_utils_object_to_message (EMapiConnection *conn, /* const */ EMapiObj
 	return msg;
 }
 
-#define STREAM_SIZE 4000
+static void
+e_mapi_mail_add_recipients (EMapiObject *object,
+			    CamelInternetAddress *addresses,
+			    OlMailRecipientType recip_type)
+{
+	gint ii;
+	const gchar *name = NULL, *email = NULL;
+
+	g_return_if_fail (object != NULL);
+
+	for (ii = 0; addresses && camel_internet_address_get (addresses, ii, &name, &email); ii++) {
+		EMapiRecipient *recipient;
+		uint32_t ui32 = 0;
+		bool bl;
+
+		recipient = e_mapi_recipient_new (object);
+		e_mapi_object_add_recipient (object, recipient);
+
+		#define set_value(pt,vl) {								\
+			if (!e_mapi_utils_add_property (&recipient->properties, pt, vl, recipient)) {	\
+				g_warning ("%s: Faield to set property 0x%x", G_STRFUNC, pt);		\
+													\
+				return;									\
+			}										\
+		}
+
+		#define set_str_value(pt,st) set_value (pt, talloc_strdup (recipient, st))
+
+		ui32 = recip_type;
+		set_value (PidTagRecipientType, &ui32);
+
+		if (!name || !*name)
+			name = email;
+
+		if (name && *name) {
+			set_str_value (PidTagDisplayName, name);
+			set_str_value (PidTagRecipientDisplayName, name);
+		}
+		if (email && *email) {
+			set_str_value (PidTagAddressType, "SMTP");
+			set_str_value (PidTagEmailAddress, email);
+
+			set_str_value (PidTagSmtpAddress, email);
+			set_str_value (PidTagPrimarySmtpAddress, email);
+		}
+
+		ui32 = 0;
+		set_value (PidTagSendInternetEncoding, &ui32);
+
+		ui32 = DT_MAILUSER;
+		set_value (PidTagDisplayType, &ui32);
+
+		ui32 = MAPI_MAILUSER;
+		set_value (PidTagObjectType, &ui32);
+
+		bl = false;
+		set_value (PidTagSendRichInfo, &bl);
+
+		#undef set_value
+		#undef set_str_value
+
+		name = NULL;
+		email = NULL;
+	}
+}
+
+static CamelStream *
+get_content_stream (CamelMimePart *part, GCancellable *cancellable)
+{
+	CamelStream *content_stream;
+	CamelStream *filter_stream = NULL;
+	CamelMimeFilterWindows *windows = NULL;
+	CamelDataWrapper *dw;
+
+	g_return_val_if_fail (part != NULL, NULL);
+
+	dw = camel_medium_get_content (CAMEL_MEDIUM (part));
+	g_return_val_if_fail (dw != NULL, NULL);
+
+	content_stream = camel_stream_mem_new();
+
+	if (camel_mime_part_get_content_type (part)) {
+		const gchar *charset = camel_content_type_param (camel_mime_part_get_content_type (part), "charset");
+
+		if (charset && *charset && g_ascii_strcasecmp (charset, "utf8") != 0 && g_ascii_strcasecmp (charset, "utf-8") != 0) {
+			if (g_ascii_strncasecmp (charset, "iso-8859-", 9) == 0) {
+				CamelStream *null;
+
+				/* Since a few Windows mailers like to claim they sent
+				 * out iso-8859-# encoded text when they really sent
+				 * out windows-cp125#, do some simple sanity checking
+				 * before we move on... */
+
+				null = camel_stream_null_new ();
+				filter_stream = camel_stream_filter_new (null);
+				g_object_unref (null);
+
+				windows = (CamelMimeFilterWindows *)camel_mime_filter_windows_new (charset);
+				camel_stream_filter_add (
+					CAMEL_STREAM_FILTER (filter_stream),
+					CAMEL_MIME_FILTER (windows));
+
+				camel_data_wrapper_decode_to_stream_sync (
+					dw, (CamelStream *)filter_stream, cancellable, NULL);
+				camel_stream_flush ((CamelStream *)filter_stream, cancellable, NULL);
+				g_object_unref (filter_stream);
+
+				charset = camel_mime_filter_windows_real_charset (windows);
+			}
+
+			if (charset && *charset) {
+				CamelMimeFilter *filter;
+
+				filter_stream = camel_stream_filter_new (content_stream);
+
+				if ((filter = camel_mime_filter_charset_new (charset, "UTF-8"))) {
+					camel_stream_filter_add (
+						CAMEL_STREAM_FILTER (filter_stream),
+						CAMEL_MIME_FILTER (filter));
+					g_object_unref (filter);
+				} else {
+					g_object_unref (filter_stream);
+					filter_stream = NULL;
+				}
+			}
+		}
+	}
+
+	if (filter_stream) {
+		camel_data_wrapper_decode_to_stream_sync (dw, (CamelStream *) filter_stream, cancellable, NULL);
+		camel_stream_flush (filter_stream, cancellable, NULL);
+		g_object_unref (filter_stream);
+	} else {
+		camel_data_wrapper_decode_to_stream_sync (dw, (CamelStream *) content_stream, cancellable, NULL);
+	}
+
+	if (windows)
+		g_object_unref (windows);
+
+	g_seekable_seek (G_SEEKABLE (content_stream), 0, G_SEEK_SET, NULL, NULL);
+
+	return content_stream;
+}
+
+static void
+e_mapi_mail_content_stream_to_bin (CamelStream *content_stream,
+				   struct SBinary_short *bin,
+				   TALLOC_CTX *mem_ctx,
+				   GCancellable *cancellable)
+{
+	guint8 *buf;
+	guint32	read_size;
+
+	g_return_if_fail (content_stream != NULL);
+	g_return_if_fail (bin != NULL);
+	g_return_if_fail (mem_ctx != NULL);
+
+	buf = g_new0 (guint8 , STREAM_SIZE);
+
+	bin->cb = 0;
+	bin->lpb = NULL;
+
+	g_seekable_seek (G_SEEKABLE (content_stream), 0, G_SEEK_SET, NULL, NULL);
+	while (read_size = camel_stream_read (content_stream, (gchar *) buf, STREAM_SIZE, cancellable, NULL), read_size > 0) {
+		bin->lpb = talloc_realloc (mem_ctx, bin->lpb, uint8_t, bin->cb + read_size);
+		memcpy (bin->lpb + bin->cb, buf, read_size);
+		bin->cb += read_size;
+	}
+
+	g_free (buf);
+}
+
+#define set_attach_value(pt,vl) {						\
+	if (!e_mapi_utils_add_property (&attach->properties, pt, vl, attach)) {	\
+		g_warning ("%s: Failed to set property 0x%x", G_STRFUNC, pt);	\
+		return FALSE;							\
+	}									\
+}
+
+#define set_attach_str_value(pt,st) set_attach_value (pt, talloc_strdup (attach, st))
+
+static gboolean
+e_mapi_mail_add_attach (EMapiObject *object,
+			CamelMimePart *part,
+			CamelStream *content_stream,
+			GCancellable *cancellable)
+{
+	EMapiAttachment *attach;
+	CamelContentType *content_type;
+	const gchar *content_id;
+	const gchar *filename;
+	struct SBinary_short bin;
+	uint32_t ui32;
+
+	g_return_val_if_fail (object != NULL, FALSE);
+	g_return_val_if_fail (part != NULL, FALSE);
+	g_return_val_if_fail (content_stream != NULL, FALSE);
+
+	attach = e_mapi_attachment_new (object);
+	e_mapi_object_add_attachment (object, attach);
+
+	ui32 = ATTACH_BY_VALUE;
+	set_attach_value (PidTagAttachMethod, &ui32);
+	ui32 = -1;
+	set_attach_value (PidTagRenderingPosition, &ui32);
+
+	filename = camel_mime_part_get_filename (part);
+	if (filename) {
+		set_attach_str_value (PidTagAttachFilename, filename);
+		set_attach_str_value (PidTagAttachLongFilename, filename);
+	}
+
+	content_id = camel_mime_part_get_content_id (part);
+	if (content_id)
+		set_attach_str_value (PidTagAttachContentId, content_id);
+
+	content_type  = camel_mime_part_get_content_type (part);
+	if (content_type) {
+		gchar *ct = camel_content_type_simple (content_type);
+		if (ct)
+			set_attach_str_value (PidTagAttachMimeTag, ct);
+		g_free (ct);
+	}
+
+	e_mapi_mail_content_stream_to_bin (content_stream, &bin, attach, cancellable);
+	set_attach_value (PidTagAttachDataBinary, &bin);
+
+	return TRUE;
+}
+
+static gboolean
+e_mapi_mail_add_body (EMapiObject *object,
+		      CamelStream *content_stream,
+		      uint32_t proptag,
+		      GCancellable *cancellable)
+{
+	struct SBinary_short bin = { 0 };
+	gchar *str;
+
+	e_mapi_mail_content_stream_to_bin (content_stream, &bin, object, cancellable);
+	str = talloc_strndup (object, (const gchar *) bin.lpb, bin.cb);
+	talloc_free (bin.lpb);
+
+	if ((proptag & 0xFFFF) == PT_BINARY) {
+		bin.lpb = (uint8_t *) (str ? str : "");
+		bin.cb = strlen ((const gchar *) bin.lpb) + 1;
+		/* include trailing zero ................ ^^^ */
+
+		return e_mapi_utils_add_property (&object->properties, proptag, &bin, object);
+	} else if (str) {
+		if (!e_mapi_utils_add_property (&object->properties, proptag, str, object))
+			return FALSE;
+	} else {
+		return e_mapi_utils_add_property (&object->properties, proptag, talloc_strdup (object, ""), object);
+	}
+
+	return TRUE;
+}
+
+static gboolean
+e_mapi_mail_do_smime_encrypted (EMapiObject *object,
+				CamelMedium *message,
+				gchar **pmsg_class,
+				gchar **ppid_name_content_type,
+				GCancellable *cancellable)
+{
+	EMapiAttachment *attach;
+	CamelStream *content_stream;
+	CamelDataWrapper *dw;
+	CamelContentType *type;
+	uint32_t ui32;
+	struct SBinary_short bin;
+	gchar *content_type_str;
+
+	g_return_val_if_fail (object != NULL, FALSE);
+	g_return_val_if_fail (message != NULL, FALSE);
+	g_return_val_if_fail (pmsg_class != NULL, FALSE);
+	g_return_val_if_fail (ppid_name_content_type != NULL, FALSE);
+
+	g_free (*pmsg_class);
+	*pmsg_class = g_strdup ("IPM.Note.SMIME");
+
+	type = camel_data_wrapper_get_mime_type_field (CAMEL_DATA_WRAPPER (message));
+	dw = camel_medium_get_content (message);
+	content_type_str = camel_content_type_format (type);
+
+	g_free (*ppid_name_content_type);
+	*ppid_name_content_type = content_type_str; /* will be freed within the caller */
+
+	content_stream = camel_stream_mem_new ();
+	camel_data_wrapper_decode_to_stream_sync (dw, (CamelStream *) content_stream, cancellable, NULL);
+
+	attach = e_mapi_attachment_new (object);
+	e_mapi_object_add_attachment (object, attach);
+
+	ui32 = ATTACH_BY_VALUE;
+	set_attach_value (PidTagAttachMethod, &ui32);
+	ui32 = -1;
+	set_attach_value (PidTagRenderingPosition, &ui32);
+	set_attach_str_value (PidTagAttachMimeTag, content_type_str);
+	set_attach_str_value (PidTagAttachFilename, "SMIME.txt");
+	set_attach_str_value (PidTagAttachLongFilename, "SMIME.txt");
+	set_attach_str_value (PidTagDisplayName, "SMIME.txt");
+
+	e_mapi_mail_content_stream_to_bin (content_stream, &bin, attach, cancellable);
+	set_attach_value (PidTagAttachDataBinary, &bin);
+
+	g_object_unref (content_stream);
+
+	return TRUE;
+}
+
+static gboolean
+e_mapi_mail_do_smime_signed (EMapiObject *object,
+			     CamelMultipart *multipart,
+			     gchar **pmsg_class,
+			     GCancellable *cancellable)
+{
+	EMapiAttachment *attach;
+	CamelMimePart *content, *signature;
+	CamelStream *content_stream;
+	CamelContentType *type;
+	CamelDataWrapper *dw;
+	uint32_t ui32;
+	struct SBinary_short bin;
+	gchar *content_type_str;
+
+	g_free (*pmsg_class);
+	*pmsg_class = g_strdup ("IPM.Note.SMIME.MultipartSigned");
+
+	content = camel_multipart_get_part (multipart, CAMEL_MULTIPART_SIGNED_CONTENT);
+	signature = camel_multipart_get_part (multipart, CAMEL_MULTIPART_SIGNED_SIGNATURE);
+
+	g_return_val_if_fail (content != NULL, FALSE);
+	g_return_val_if_fail (signature != NULL, FALSE);
+
+	content_stream = get_content_stream (content, cancellable);
+	type = camel_mime_part_get_content_type (content);
+
+	if (camel_content_type_is (type, "text", "plain")) {
+		e_mapi_mail_add_body (object, content_stream, PidTagBody, cancellable);
+	} else if (camel_content_type_is (type, "text", "html")) {
+		e_mapi_mail_add_body (object, content_stream, PidTagHtml, cancellable);
+	} else {
+		e_mapi_mail_add_attach (object, content, content_stream, cancellable);
+	}
+
+	if (content_stream)
+		g_object_unref (content_stream);
+
+	content_stream = camel_stream_mem_new ();
+	dw = CAMEL_DATA_WRAPPER (multipart);
+	type = camel_data_wrapper_get_mime_type_field (dw);
+	content_type_str = camel_content_type_format (type);
+
+	#define wstr(str) camel_stream_write (content_stream, str, strlen (str), cancellable, NULL)
+	wstr("Content-Type: ");
+	wstr(content_type_str);
+	wstr("\n\n");
+	#undef wstr
+
+	g_free (content_type_str);
+
+	camel_data_wrapper_write_to_stream_sync (dw, (CamelStream *) content_stream, cancellable, NULL);
+
+	attach = e_mapi_attachment_new (object);
+	e_mapi_object_add_attachment (object, attach);
+
+	ui32 = ATTACH_BY_VALUE;
+	set_attach_value (PidTagAttachMethod, &ui32);
+	ui32 = -1;
+	set_attach_value (PidTagRenderingPosition, &ui32);
+	set_attach_str_value (PidTagAttachMimeTag, "multipart/signed");
+	set_attach_str_value (PidTagAttachFilename, "SMIME.txt");
+	set_attach_str_value (PidTagAttachLongFilename, "SMIME.txt");
+	set_attach_str_value (PidTagDisplayName, "SMIME.txt");
+
+	e_mapi_mail_content_stream_to_bin (content_stream, &bin, attach, cancellable);
+	set_attach_value (PidTagAttachDataBinary, &bin);
+
+	g_object_unref (content_stream);
+
+	return TRUE;
+}
+
+static gboolean
+e_mapi_mail_do_multipart (EMapiObject *object,
+			  CamelMultipart *mp,
+			  gboolean *is_first,
+			  GCancellable *cancellable)
+{
+	CamelDataWrapper *dw;
+	CamelStream *content_stream;
+	CamelContentType *type;
+	CamelMimePart *part;
+	gint nn, ii;
+
+	g_return_val_if_fail (is_first != NULL, FALSE);
+
+	nn = camel_multipart_get_number (mp);
+	for (ii = 0; ii < nn; ii++) {
+		/* getting part */
+		part = camel_multipart_get_part (mp, ii);
+		if (!part)
+			continue;
+
+		dw = camel_medium_get_content (CAMEL_MEDIUM (part));
+		if (CAMEL_IS_MULTIPART (dw)) {
+			/* recursive */
+			if (!e_mapi_mail_do_multipart (object, CAMEL_MULTIPART (dw), is_first, cancellable))
+				return FALSE;
+			continue;
+		}
+
+		if (CAMEL_IS_MIME_MESSAGE (dw)) {
+			CamelMimeMessage *message;
+			EMapiObject *embedded = NULL;
+			EMapiAttachment *attach;
+
+			attach = e_mapi_attachment_new (object);
+			message = CAMEL_MIME_MESSAGE (dw);
+			if (e_mapi_mail_utils_message_to_object (message, 0, E_MAPI_CREATE_FLAG_NONE, &embedded, attach, cancellable, NULL)) {
+				uint32_t ui32;
+				const gchar *str;
+
+				e_mapi_object_add_attachment (object, attach);
+				attach->embedded_object = embedded;
+				embedded->parent = object;
+
+				ui32 = ATTACH_EMBEDDED_MSG;
+				set_attach_value (PidTagAttachMethod, &ui32);
+				ui32 = 0;
+				set_attach_value (PidTagRenderingPosition, &ui32);
+				set_attach_str_value (PidTagAttachMimeTag, "message/rfc822");
+
+				str = camel_mime_message_get_subject (message);
+				if (str)
+					set_attach_str_value (PidTagAttachFilename, str);
+				continue;
+			} else {
+				e_mapi_attachment_free (attach);
+			}
+		}
+
+		content_stream = get_content_stream (part, cancellable);
+		type = camel_mime_part_get_content_type (part);
+
+		if (ii == 0 && (*is_first) && camel_content_type_is (type, "text", "plain")) {
+			e_mapi_mail_add_body (object, content_stream, PidTagBody, cancellable);
+			*is_first = FALSE;
+		} else if (camel_content_type_is (type, "text", "html")) {
+			e_mapi_mail_add_body (object, content_stream, PidTagHtml, cancellable);
+		} else {
+			e_mapi_mail_add_attach (object, part, content_stream, cancellable);
+		}
+
+		if (content_stream)
+			g_object_unref (content_stream);
+	}
+
+	return TRUE;
+}
+
+#undef set_attach_value
+#undef set_attach_str_value
+
+gboolean
+e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
+				     guint32 message_camel_flags,
+				     EMapiCreateFlags create_flags,
+				     EMapiObject **pobject,
+				     TALLOC_CTX *mem_ctx,
+				     GCancellable *cancellable,
+				     GError **perror)
+{
+	EMapiObject *object;
+	CamelContentType *content_type;
+	CamelInternetAddress *addresses;
+	const gchar *namep = NULL, *addressp = NULL;
+	const gchar *str;
+	gchar *msg_class = NULL;
+	gchar *pid_name_content_type = NULL;
+	gint ii = 0;
+	uint32_t ui32;
+	bool bl;
+
+	g_return_val_if_fail (message != NULL, FALSE);
+	g_return_val_if_fail (pobject != NULL, FALSE);
+	g_return_val_if_fail (*pobject == NULL, FALSE);
+	g_return_val_if_fail (mem_ctx != NULL, FALSE);
+
+	content_type = camel_data_wrapper_get_mime_type_field (CAMEL_DATA_WRAPPER (message));
+	g_return_val_if_fail (content_type != NULL, FALSE);
+
+	/* headers */
+	if ((create_flags & E_MAPI_CREATE_FLAG_SUBMIT) == 0) {
+		/* though invalid, then possible, to pass in a message without any 'from' */
+		CamelInternetAddress *from = camel_mime_message_get_from (message);
+		if (!from || !camel_internet_address_get (from, 0, &namep, &addressp))
+			namep = NULL;
+	}
+
+	object = e_mapi_object_new (mem_ctx);
+
+	#define set_value(pt,vl) {							\
+		if (!e_mapi_utils_add_property (&object->properties, pt, vl, object)) {	\
+			e_mapi_object_free (object);					\
+			g_free (msg_class);						\
+			g_free (pid_name_content_type);					\
+											\
+			g_warning ("%s: Faield to set property 0x%x", G_STRFUNC, pt);	\
+											\
+			return FALSE;							\
+		}									\
+	}
+
+	#define set_str_value(pt,st) set_value (pt, talloc_strdup (object, st))
+
+	ui32 = 65001; /* UTF8 - also used with PR_HTML */
+	set_value (PidTagInternetCodepage, &ui32);
+
+	if ((create_flags & E_MAPI_CREATE_FLAG_SUBMIT) == 0) {
+		ui32 = 0;
+		if (message_camel_flags & CAMEL_MESSAGE_SEEN)
+			ui32 |= MSGFLAG_READ;
+		if (message_camel_flags & CAMEL_MESSAGE_ATTACHMENTS)
+			ui32 |= MSGFLAG_HASATTACH;
+	} else {
+		ui32 = MSGFLAG_UNSENT;
+	}
+	set_value (PidTagMessageFlags, &ui32);
+
+	bl = false;
+	set_value (PidTagSendRichInfo, &bl);
+
+	/* PidTagConversationTopic and PidTagNormalizedSubject, together with PidTagSubjectPrefix
+	   are computed from PidTagSubject by a server */
+	str = camel_mime_message_get_subject (message);
+	if (str)
+		set_str_value (PidTagSubject, str);
+
+	/* some properties may not be set when submitting a message */
+	if ((create_flags & E_MAPI_CREATE_FLAG_SUBMIT) == 0) {
+		time_t msg_time = 0;
+		gint msg_time_offset = 0;
+		GArray *headers;
+
+		if (namep && *namep)
+			set_str_value (PidTagSentRepresentingName, namep);
+
+		if (addressp && *addressp) {
+			set_str_value (PidTagSentRepresentingAddressType, "SMTP");
+			set_str_value (PidTagSentRepresentingEmailAddress, addressp);
+		}
+
+		msg_time = camel_mime_message_get_date (message, &msg_time_offset);
+		if (msg_time == CAMEL_MESSAGE_DATE_CURRENT)
+			msg_time = camel_mime_message_get_date_received (message, &msg_time_offset);
+		if (msg_time != 0) {
+			struct FILETIME msg_date = { 0 };
+
+			e_mapi_util_time_t_to_filetime (msg_time, &msg_date);
+
+			set_value (PidTagMessageDeliveryTime, &msg_date);
+		}
+
+		headers = camel_medium_get_headers (CAMEL_MEDIUM (message));
+		if (headers) {
+			GString *hstr = g_string_new ("");
+
+			for (ii = 0; ii < headers->len; ii++) {
+				CamelMediumHeader *h = &g_array_index (headers, CamelMediumHeader, ii);
+
+				if (!h->name || !*h->name || g_ascii_strncasecmp (h->name, "X-Evolution", 11) == 0)
+					continue;
+
+				g_string_append_printf (hstr, "%s: %s\n", h->name, h->value ? h->value : "");
+			}
+
+			camel_medium_free_headers (CAMEL_MEDIUM (message), headers);
+
+			if (hstr->len && hstr->str)
+				set_str_value (PidTagTransportMessageHeaders, hstr->str);
+
+			g_string_free (hstr, TRUE);
+		}
+	}
+
+	str = camel_medium_get_header ((CamelMedium *) message, "References");
+	if (str)
+		set_str_value (PidTagInternetReferences, str);
+
+	str = camel_medium_get_header ((CamelMedium *) message, "In-Reply-To");
+	if (str)
+		set_str_value (PidTagInReplyToId, str);
+
+	str = camel_medium_get_header ((CamelMedium *) message, "Message-ID");
+	if (str)
+		set_str_value (PidTagInternetMessageId, str);
+
+	addresses = camel_mime_message_get_recipients (message, CAMEL_RECIPIENT_TYPE_TO);
+	e_mapi_mail_add_recipients (object, addresses, olTo);
+
+	addresses = camel_mime_message_get_recipients (message, CAMEL_RECIPIENT_TYPE_CC);
+	e_mapi_mail_add_recipients (object, addresses, olCC);
+
+	addresses = camel_mime_message_get_recipients (message, CAMEL_RECIPIENT_TYPE_BCC);
+	e_mapi_mail_add_recipients (object, addresses, olBCC);
+
+	if (camel_content_type_is (content_type, "application", "x-pkcs7-mime") ||
+	    camel_content_type_is (content_type, "application", "pkcs7-mime")) {
+		e_mapi_mail_do_smime_encrypted (object, CAMEL_MEDIUM (message), &msg_class, &pid_name_content_type, cancellable);
+	} else {
+		CamelDataWrapper *dw = NULL;
+		CamelStream *content_stream;
+		CamelMultipart *multipart;
+
+		/* contents body */
+		dw = camel_medium_get_content (CAMEL_MEDIUM (message));
+		if (CAMEL_IS_MULTIPART (dw)) {
+			gboolean is_first = TRUE;
+
+			multipart = CAMEL_MULTIPART (dw);
+
+			if (CAMEL_IS_MULTIPART_SIGNED (multipart) && camel_multipart_get_number (multipart) == 2) {
+				e_mapi_mail_do_smime_signed (object, multipart, &msg_class, cancellable);
+			} else {
+				e_mapi_mail_do_multipart (object, multipart, &is_first, cancellable);
+			}
+		} else if (dw) {
+			CamelContentType *type;
+			CamelMimePart *part = CAMEL_MIME_PART (message);
+
+			content_stream = get_content_stream (part, cancellable);
+			type = camel_data_wrapper_get_mime_type_field (dw);
+
+			if (camel_content_type_is (type, "text", "plain")) {
+				e_mapi_mail_add_body (object, content_stream, PidTagBody, cancellable);
+			} else if (camel_content_type_is (type, "text", "html")) {
+				e_mapi_mail_add_body (object, content_stream, PidTagHtml, cancellable);
+			} else {
+				e_mapi_mail_add_attach (object, part, content_stream, cancellable);
+			}
+
+			if (content_stream)
+				g_object_unref (content_stream);
+		}
+	}
+
+	if (msg_class)
+		set_str_value (PidTagMessageClass, msg_class);
+
+	if (pid_name_content_type)
+		set_str_value (PidNameContentType, pid_name_content_type);
+
+	g_free (msg_class);
+	g_free (pid_name_content_type);
+
+	*pobject = object;
+
+	#undef set_value
+	#undef set_str_value
+
+	return TRUE;
+}
 
 static void
 mail_item_add_recipient (const gchar *recipients, OlMailRecipientType type, GSList **recipient_list)
@@ -1970,81 +2637,6 @@ mail_item_add_attach (MailItem *item, CamelMimePart *part, CamelStream *content_
 	g_free (buf);
 
 	return TRUE;
-}
-
-static CamelStream *
-get_content_stream (CamelMimePart *part, GCancellable *cancellable)
-{
-	CamelStream *content_stream;
-	CamelStream *filter_stream = NULL;
-	CamelMimeFilterWindows *windows = NULL;
-	CamelDataWrapper *dw;
-
-	g_return_val_if_fail (part != NULL, NULL);
-
-	dw = camel_medium_get_content (CAMEL_MEDIUM (part));
-	g_return_val_if_fail (dw != NULL, NULL);
-
-	content_stream = camel_stream_mem_new();
-
-	if (camel_mime_part_get_content_type (part)) {
-		const gchar *charset = camel_content_type_param (camel_mime_part_get_content_type (part), "charset");
-
-		if (charset && *charset && g_ascii_strcasecmp (charset, "utf8") != 0 && g_ascii_strcasecmp (charset, "utf-8") != 0) {
-			if (g_ascii_strncasecmp (charset, "iso-8859-", 9) == 0) {
-				CamelStream *null;
-
-				/* Since a few Windows mailers like to claim they sent
-				 * out iso-8859-# encoded text when they really sent
-				 * out windows-cp125#, do some simple sanity checking
-				 * before we move on... */
-
-				null = camel_stream_null_new ();
-				filter_stream = camel_stream_filter_new (null);
-				g_object_unref (null);
-
-				windows = (CamelMimeFilterWindows *)camel_mime_filter_windows_new (charset);
-				camel_stream_filter_add (
-					CAMEL_STREAM_FILTER (filter_stream),
-					CAMEL_MIME_FILTER (windows));
-
-				camel_data_wrapper_decode_to_stream_sync (
-					dw, (CamelStream *)filter_stream, cancellable, NULL);
-				camel_stream_flush ((CamelStream *)filter_stream, cancellable, NULL);
-				g_object_unref (filter_stream);
-
-				charset = camel_mime_filter_windows_real_charset (windows);
-			}
-
-			if (charset && *charset) {
-				CamelMimeFilter *filter;
-
-				filter_stream = camel_stream_filter_new (content_stream);
-
-				if ((filter = camel_mime_filter_charset_new (charset, "UTF-8"))) {
-					camel_stream_filter_add (
-						CAMEL_STREAM_FILTER (filter_stream),
-						CAMEL_MIME_FILTER (filter));
-					g_object_unref (filter);
-				} else {
-					g_object_unref (filter_stream);
-					filter_stream = NULL;
-				}
-			}
-		}
-	}
-
-	if (filter_stream) {
-		camel_data_wrapper_decode_to_stream_sync (dw, (CamelStream *) filter_stream, cancellable, NULL);
-		camel_stream_flush (filter_stream, cancellable, NULL);
-		g_object_unref (filter_stream);
-	} else {
-		camel_data_wrapper_decode_to_stream_sync (dw, (CamelStream *) content_stream, cancellable, NULL);
-	}
-
-	g_seekable_seek (G_SEEKABLE (content_stream), 0, G_SEEK_SET, NULL, NULL);
-
-	return content_stream;
 }
 
 static void

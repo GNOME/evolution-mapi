@@ -162,6 +162,48 @@ e_mapi_object_free (EMapiObject *object)
 	talloc_free (object);
 }
 
+void
+e_mapi_object_add_recipient (EMapiObject *object,
+			     EMapiRecipient *recipient)
+{
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (recipient != NULL);
+	g_return_if_fail (recipient->next == NULL);
+
+	if (!object->recipients) {
+		object->recipients = recipient;
+	} else {
+		EMapiRecipient *recip = object->recipients;
+
+		while (recip->next) {
+			recip = recip->next;
+		}
+
+		recip->next = recipient;
+	}
+}
+
+void
+e_mapi_object_add_attachment (EMapiObject *object,
+			      EMapiAttachment *attachment)
+{
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (attachment != NULL);
+	g_return_if_fail (attachment->next == NULL);
+
+	if (!object->attachments) {
+		object->attachments = attachment;
+	} else {
+		EMapiAttachment *attach = object->attachments;
+
+		while (attach->next) {
+			attach = attach->next;
+		}
+
+		attach->next = attachment;
+	}
+}
+
 static void
 e_mapi_object_finish_read (EMapiObject *object)
 {

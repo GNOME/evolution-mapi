@@ -887,6 +887,7 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 	g_object_unref (group);
 	g_object_unref (list);
 	g_object_unref (client);
+	camel_url_free (url);
 	g_free (base_uri);
 
 	return TRUE;

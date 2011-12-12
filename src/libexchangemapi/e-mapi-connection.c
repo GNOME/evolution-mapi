@@ -42,7 +42,10 @@
 #include "e-mapi-fast-transfer.h"
 #include "e-mapi-openchange.h"
 
-#include <param.h>
+//#include <param.h>
+/* how many bytes can be written within one property with SetProps() call;
+   if its size exceeds this limit, it's converted into an EMapiStreamedProp */
+#define MAX_PROPERTY_WRITE_SIZE	2048
 
 static void register_connection (EMapiConnection *conn);
 static void unregister_connection (EMapiConnection *conn);
@@ -2115,7 +2118,7 @@ gather_mapi_SRestriction_named_ids (struct mapi_SRestriction *restriction,
 }
 
 static void
-maybe_replace_named_id_tag (enum MAPITAGS *pproptag,
+maybe_replace_named_id_tag (uint32_t *pproptag,
 			    const ResolveNamedIDsData *named_ids_list,
 			    guint named_ids_len)
 {
@@ -2123,6 +2126,9 @@ maybe_replace_named_id_tag (enum MAPITAGS *pproptag,
 
 	g_return_if_fail (pproptag != NULL);
 	g_return_if_fail (named_ids_list != NULL);
+
+	if ((((*pproptag) >> 16) & 0xFFFF) < 0x8000)
+		return;
 
 	for (i = 0; i < named_ids_len; i++) {
 		if ((*pproptag) == named_ids_list[i].propid ||
@@ -2140,9 +2146,16 @@ replace_mapi_SRestriction_named_ids (struct mapi_SRestriction *restriction,
 				     guint named_ids_len)
 {
 	guint i;
+	uint32_t proptag;
 
 	g_return_if_fail (restriction != NULL);
 	g_return_if_fail (named_ids_list != NULL);
+
+	#define check_proptag(x) {								\
+			proptag = x;								\
+			maybe_replace_named_id_tag (&proptag, named_ids_list, named_ids_len);	\
+			x = proptag;								\
+		}
 
 	switch (restriction->rt) {
 	case RES_AND:
@@ -2161,27 +2174,29 @@ replace_mapi_SRestriction_named_ids (struct mapi_SRestriction *restriction,
 		break;
 	#endif
 	case RES_CONTENT:
-		maybe_replace_named_id_tag (&restriction->res.resContent.ulPropTag, named_ids_list, named_ids_len);
-		maybe_replace_named_id_tag (&restriction->res.resContent.lpProp.ulPropTag, named_ids_list, named_ids_len);
+		check_proptag (restriction->res.resContent.ulPropTag);
+		check_proptag (restriction->res.resContent.lpProp.ulPropTag);
 		break;
 	case RES_PROPERTY:
-		maybe_replace_named_id_tag (&restriction->res.resProperty.ulPropTag, named_ids_list, named_ids_len);
-		maybe_replace_named_id_tag (&restriction->res.resProperty.lpProp.ulPropTag, named_ids_list, named_ids_len);
+		check_proptag (restriction->res.resProperty.ulPropTag);
+		check_proptag (restriction->res.resProperty.lpProp.ulPropTag);
 		break;
 	case RES_COMPAREPROPS:
-		maybe_replace_named_id_tag (&restriction->res.resCompareProps.ulPropTag1, named_ids_list, named_ids_len);
-		maybe_replace_named_id_tag (&restriction->res.resCompareProps.ulPropTag2, named_ids_list, named_ids_len);
+		check_proptag (restriction->res.resCompareProps.ulPropTag1);
+		check_proptag (restriction->res.resCompareProps.ulPropTag2);
 		break;
 	case RES_BITMASK:
-		maybe_replace_named_id_tag (&restriction->res.resBitmask.ulPropTag, named_ids_list, named_ids_len);
+		check_proptag (restriction->res.resBitmask.ulPropTag);
 		break;
 	case RES_SIZE:
-		maybe_replace_named_id_tag (&restriction->res.resSize.ulPropTag, named_ids_list, named_ids_len);
+		check_proptag (restriction->res.resSize.ulPropTag);
 		break;
 	case RES_EXIST:
-		maybe_replace_named_id_tag (&restriction->res.resExist.ulPropTag, named_ids_list, named_ids_len);
+		check_proptag (restriction->res.resExist.ulPropTag);
 		break;
 	}
+
+	#undef check_proptag
 }
 
 static gboolean
@@ -3324,13 +3339,940 @@ e_mapi_connection_transfer_summary (EMapiConnection *conn,
 		}
 	}
 
+ cleanup:
+	talloc_free (mem_ctx);
+	UNLOCK ();
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+typedef struct {
+	uint32_t proptag;
+	uint32_t cb;
+	const uint8_t *lpb; /* taken from the original mapi prop, no need to copy the memory */
+} EMapiStreamedProp;
+
+static gboolean
+convert_mapi_props_to_props (EMapiConnection *conn,
+			     mapi_object_t *obj_folder,
+			     const struct mapi_SPropValue_array *mapi_props,
+			     struct SPropValue **props,
+			     uint32_t *propslen,
+			     EMapiStreamedProp **streams, /* can be NULL for no streaming */
+			     guint *streamslen, /* can be NULL only if streams is NULL; is ignored if streams is NULL */
+			     TALLOC_CTX *mem_ctx,
+			     GCancellable *cancellable,
+			     GError **perror)
+{
+	uint16_t ii;
+	ResolveNamedIDsData *named_ids_list = NULL;
+	guint named_ids_len = 0;
+	gboolean res = TRUE;
+
+	e_return_val_mapi_error_if_fail (conn != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (mapi_props != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (props != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (propslen != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (mem_ctx != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	if (streams) {
+		e_return_val_mapi_error_if_fail (streamslen != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	}
+
+	for (ii = 0; ii < mapi_props->cValues; ii++) {
+		gboolean processed = FALSE;
+		uint32_t proptag = mapi_props->lpProps[ii].ulPropTag;
+		gconstpointer propdata = get_mapi_SPropValue_data (&mapi_props->lpProps[ii]);
+
+		maybe_add_named_id_tag (proptag, &named_ids_list, &named_ids_len);
+
+		if (streams && propdata) {
+			/* copy anything longer than 1KB as streams; this doesn't count total packet size needed,
+			   but because this is usually useful only for PidTagBody, PidTagHtml, which are there
+			   only once, then no big deal
+			*/
+
+			uint32_t sz;
+			const gchar *str;
+			const struct SBinary_short *bin;
+
+			#define addstream() {										\
+					if (!*streams) {								\
+						*streams = g_new0 (EMapiStreamedProp, 1);				\
+						*streamslen = 0;							\
+					} else {									\
+						*streams = g_renew (EMapiStreamedProp, *streams, *streamslen + 1);	\
+					}										\
+															\
+					(*streams)[*streamslen].proptag = proptag;					\
+					(*streams)[*streamslen].cb = 0;							\
+					(*streams)[*streamslen].lpb = NULL;						\
+					(*streamslen) += 1;								\
+				}
+
+			switch (proptag & 0xFFFF) {
+			case PT_BINARY:
+				bin = propdata;
+				if (bin->cb > MAX_PROPERTY_WRITE_SIZE) {
+					addstream ();
+					(*streams)[(*streamslen) - 1].cb = bin->cb;
+					(*streams)[(*streamslen) - 1].lpb = bin->lpb;
+					processed = TRUE;
+				}
+				break;
+			case PT_STRING8:
+				str = propdata;
+				sz = get_mapi_property_size (&mapi_props->lpProps[ii]);
+				if (sz > MAX_PROPERTY_WRITE_SIZE) {
+					addstream ();
+					(*streams)[(*streamslen) - 1].cb = sz;
+					(*streams)[(*streamslen) - 1].lpb = (uint8_t *) str;
+					processed = TRUE;
+				}
+				break;
+			case PT_UNICODE:
+				str = propdata;
+				sz = get_mapi_property_size (&mapi_props->lpProps[ii]);
+				if (sz > MAX_PROPERTY_WRITE_SIZE) {
+					gchar *in_unicode;
+					gsize written = 0;
+
+					addstream ();
+
+					in_unicode = g_convert (str, strlen (str), "UTF-16", "UTF-8", NULL, &written, NULL);
+					if (in_unicode && written > 0) {
+						uint8_t *bytes = talloc_zero_size (mem_ctx, written + 2);
+
+						/* skip Unicode marker, if there */
+						if (written >= 2 && (const guchar) in_unicode[0] == 0xFF && (const guchar) in_unicode[1] == 0xFE) {
+							memcpy (bytes, in_unicode + 2, written - 2);
+							written -= 2;
+						} else
+							memcpy (bytes, in_unicode, written);
+
+						/* null-terminated unicode string */
+						(*streams)[(*streamslen) - 1].lpb = bytes;
+						(*streams)[(*streamslen) - 1].cb = written + 2;
+					}
+					g_free (in_unicode);
+					processed = TRUE;
+				}
+				break;
+			}
+
+			#undef addstream
+		}
+
+		if (!processed)
+			e_mapi_utils_add_spropvalue (mem_ctx, props, propslen, proptag, propdata);
+	}
+
+	if (named_ids_list) {
+		res = e_mapi_connection_resolve_named_props (conn, mapi_object_get_id (obj_folder), named_ids_list, named_ids_len, cancellable, perror);
+
+		if (res && *props) {
+			for (ii = 0; ii < *propslen; ii++) {
+				uint32_t proptag = (*props)[ii].ulPropTag;
+
+				maybe_replace_named_id_tag (&proptag, named_ids_list, named_ids_len);
+
+				(*props)[ii].ulPropTag = proptag;
+			}
+		}
+
+		if (res && streams) {
+			for (ii = 0; ii < *streamslen; ii++) {
+				maybe_replace_named_id_tag (&((*streams)[ii].proptag), named_ids_list, named_ids_len);
+			}
+		}
+	}
+
+	g_free (named_ids_list);
+
+	return res;
+}
+
+static gboolean
+write_streamed_prop (EMapiConnection *conn,
+		     mapi_object_t *obj_object,
+		     const EMapiStreamedProp *stream,
+		     GCancellable *cancellable,
+		     GError **perror)
+{
+	enum MAPISTATUS	ms;
+	uint32_t total_written;
+	gboolean done = FALSE;
+	mapi_object_t obj_stream;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (obj_object != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (stream != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	LOCK ();
+
+	mapi_object_init (&obj_stream);
+
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 		ms = MAPI_E_USER_CANCEL;
 		goto cleanup;
 	}
 
+	/* OpenStream on required proptag */
+	ms = OpenStream (obj_object, stream->proptag, STREAM_ACCESS_READWRITE, &obj_stream);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "OpenStream", ms);
+		goto cleanup;
+	}
+
+	/* Set the stream size */
+	ms = SetStreamSize (&obj_stream, stream->cb);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "SetStreamSize", ms);
+		goto cleanup;
+	}
+
+	total_written = 0;
+	/* Write stream */
+	while (!done) {
+		uint16_t cn_written = 0;
+		DATA_BLOB blob;
+
+		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+			ms = MAPI_E_USER_CANCEL;
+			goto cleanup;
+		}
+
+		blob.length = (stream->cb - total_written) < STREAM_MAX_WRITE_SIZE ?
+			      (stream->cb - total_written) : STREAM_MAX_WRITE_SIZE;
+		blob.data = (uint8_t *) (stream->lpb + total_written);
+
+		ms = WriteStream (&obj_stream, &blob, &cn_written);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "WriteStream", ms);
+			done = TRUE;
+		} else if (cn_written == 0) {
+			done = TRUE;
+		} else {
+			total_written += cn_written;
+			if (total_written >= stream->cb)
+				done = TRUE;
+		}
+	}
+
+	if (ms == MAPI_E_SUCCESS) {
+		/* Commit the stream */
+		ms = CommitStream (&obj_stream);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "CommitStream", ms);
+			goto cleanup;
+		}
+	}
+
  cleanup:
+	mapi_object_release (&obj_stream);
+
+	UNLOCK ();
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+static gboolean
+update_props_on_object (EMapiConnection *conn,
+			mapi_object_t *obj_folder,
+			mapi_object_t *obj_object,
+			const struct mapi_SPropValue_array *properties,
+			TALLOC_CTX *mem_ctx,
+			GCancellable *cancellable,
+			GError **perror)
+{
+	enum MAPISTATUS	ms;
+	struct SPropValue *props = NULL;
+	uint32_t propslen = 0;
+	EMapiStreamedProp *streams = NULL;
+	guint streamslen = 0;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	LOCK ();
+
+	if (!convert_mapi_props_to_props (conn, obj_folder, properties, &props, &propslen, &streams, &streamslen, mem_ctx, cancellable, perror)) {
+		ms = MAPI_E_CALL_FAILED;
+		make_mapi_error (perror, "convert_mapi_props_to_props", ms);
+		goto cleanup;
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	if (props) {
+		/* set properties for the item */
+		ms = SetProps (obj_object, MAPI_PROPS_SKIP_NAMEDID_CHECK, props, propslen);
+
+		talloc_free (props);
+
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "SetProps", ms);
+			goto cleanup;
+		}
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	if (streams) {
+		guint ii;
+
+		for (ii = 0; ii < streamslen; ii++) {
+			if (!write_streamed_prop (conn, obj_object, &streams[ii], cancellable, perror)) {
+				ms = MAPI_E_CALL_FAILED;
+				make_mapi_error (perror, "write_streamed_prop", ms);
+				break;
+			}
+
+			if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+				ms = MAPI_E_USER_CANCEL;
+				break;
+			}
+		}
+
+		g_free (streams);
+	}
+ cleanup:
+	UNLOCK ();
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+static gboolean
+update_recipient_properties (EMapiConnection *conn,
+			     mapi_object_t *obj_folder,
+			     struct SRow *aRow,
+			     EMapiRecipient *recipient,
+			     gboolean is_resolved,
+			     TALLOC_CTX *mem_ctx,
+			     GCancellable *cancellable,
+			     GError **perror)
+{
+	struct SPropValue *props = NULL;
+	uint32_t propslen = 0, ii;
+
+	g_return_val_if_fail (recipient != NULL, FALSE);
+
+	if (!convert_mapi_props_to_props (conn, obj_folder, &recipient->properties, &props, &propslen, NULL, NULL, mem_ctx, cancellable, perror))
+		return FALSE;
+
+	for (ii = 0; ii < propslen; ii++) {
+		/* do not overwrite all properties, if recipient was resolved properly */
+		if (!is_resolved
+		    || props[ii].ulPropTag == PidTagRecipientType
+		    || props[ii].ulPropTag == PidTagSendInternetEncoding)
+			SRow_addprop (aRow, props[ii]);
+	}
+
+	return TRUE;
+}
+
+static gboolean
+delete_object_recipients (EMapiConnection *conn,
+			  mapi_object_t *obj_folder,
+			  mapi_object_t *obj_object,
+			  TALLOC_CTX *mem_ctx,
+			  GCancellable *cancellable,
+			  GError **perror)
+{
+	enum MAPISTATUS	ms;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	LOCK ();
+
+	ms = RemoveAllRecipients (obj_object);
+	if (ms != MAPI_E_SUCCESS)
+		make_mapi_error (perror, "RemoveAllRecipients", ms);
+
+	UNLOCK ();
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+static gboolean
+add_object_recipients (EMapiConnection *conn,
+		       mapi_object_t *obj_folder,
+		       mapi_object_t *obj_message,
+		       EMapiRecipient *recipients,
+		       TALLOC_CTX *mem_ctx,
+		       GCancellable *cancellable,
+		       GError **perror)
+{
+	const uint32_t required_tags[] = {PidTagEntryId,
+					  PidTagDisplayName,
+					  PidTagObjectType,
+					  PidTagDisplayType,
+					  PidTagTransmittableDisplayName,
+					  PidTagEmailAddress,
+					  PidTagAddressType,
+					  PidTagSendRichInfo,
+					  PidTag7BitDisplayName/*,
+					  PidTagPrimarySmtpAddress*/};
+	enum MAPISTATUS	ms;
+	struct SPropTagArray *tags;
+	struct SRowSet *rows = NULL;
+	struct PropertyTagArray_r *flagList = NULL;
+	ResolveNamedIDsData *named_ids_list = NULL;
+	guint named_ids_len = 0;
+	const gchar **users = NULL;
+	EMapiRecipient *recipient;
+	EMapiRecipient **recips;
+	uint32_t ii, jj, count = 0;
+	GHashTable *all_proptags;
+	GHashTableIter iter;
+	gpointer key, value;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	count = 0;
+	for (recipient = recipients, ii = 0; recipient; recipient = recipient->next, ii++) {
+		if (!e_mapi_util_find_array_propval (&recipient->properties, PidTagPrimarySmtpAddress)
+		    && !e_mapi_util_find_array_propval (&recipient->properties, PidTagDisplayName))
+			g_debug ("%s: Cannot get email or display name for a recipient %d, skipping it", G_STRFUNC, ii);
+		else
+			count++;
+	}
+
+	if (!count)
+		return TRUE;
+
+	LOCK ();
+
+	all_proptags = g_hash_table_new (g_direct_hash, g_direct_equal);
+	users = g_new0 (const gchar *, count + 1);
+	recips = g_new0 (EMapiRecipient *, count + 1);
+
+	for (ii = 0; ii < G_N_ELEMENTS (required_tags); ii++) {
+		g_hash_table_insert (all_proptags, GUINT_TO_POINTER (required_tags[ii]), GUINT_TO_POINTER (1));
+	}
+
+	for (ii = 0, jj = 0, recipient = recipients; ii < count && recipient != NULL; ii++, recipient = recipient->next) {
+		users[ii] = e_mapi_util_find_array_propval (&recipient->properties, PidTagPrimarySmtpAddress);
+		if (!users[ii])
+			users[ii] = e_mapi_util_find_array_propval (&recipient->properties, PidTagDisplayName);
+		if (!users[ii]) {
+			ii--;
+		} else {
+			uint32_t kk;
+
+			recips[jj] = recipient;
+			jj++;
+
+			for (kk = 0; kk < recipient->properties.cValues; kk++) {
+				g_hash_table_insert (all_proptags, GUINT_TO_POINTER (recipient->properties.lpProps[kk].ulPropTag), GUINT_TO_POINTER (1));
+			}
+		}
+	}
+
+	/* Attempt to resolve names from the server */
+	tags = NULL;
+	g_hash_table_iter_init (&iter, all_proptags);
+	while (g_hash_table_iter_next (&iter, &key, &value)) {
+		uint32_t proptag = GPOINTER_TO_UINT (key);
+
+		maybe_add_named_id_tag (proptag, &named_ids_list, &named_ids_len);
+
+		if (!tags)
+			tags = set_SPropTagArray (mem_ctx, 1, proptag);
+		else
+			SPropTagArray_add (mem_ctx, tags, proptag);
+	}
+
+	if (named_ids_list) {
+		if (!e_mapi_connection_resolve_named_props (conn, mapi_object_get_id (obj_folder), named_ids_list, named_ids_len, cancellable, perror)) {
+			ms = MAPI_E_CALL_FAILED;
+			make_mapi_error (perror, "e_mapi_connection_resolve_named_props", ms);
+			goto cleanup;
+		}
+
+		for (ii = 0; ii < tags->cValues; ii++) {
+			uint32_t proptag = tags->aulPropTag[ii];
+
+			maybe_replace_named_id_tag (&proptag, named_ids_list, named_ids_len);
+
+			tags->aulPropTag[ii] = proptag;
+		}
+	}
+
+	ms = ResolveNames (priv->session, users, tags, &rows, &flagList, MAPI_UNICODE);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "ResolveNames", ms);
+		goto cleanup;
+	}
+
+	g_assert (count == flagList->cValues);
+
+	if (!rows) /* This happens when there are ZERO RESOLVED recipients */
+		rows = talloc_zero (mem_ctx, struct SRowSet);
+
+	for (ii = 0, jj = 0; ii < count; ii++) {
+		recipient = recips[ii];
+
+		if (flagList->aulPropTag[ii] == MAPI_AMBIGUOUS) {
+			/* We should never get an ambiguous resolution as we use the email-id for resolving.
+			 * However, if we do still get an ambiguous entry, we can't handle it :-( */
+			ms = MAPI_E_AMBIGUOUS_RECIP;
+			/* Translators: %s is replaced with an email address which was found ambiguous on a remote server */
+			g_set_error (perror, E_MAPI_ERROR, ms, _("Recipient '%s' is ambiguous"), users[ii]);
+			goto cleanup;
+		} else if (flagList->aulPropTag[ii] == MAPI_UNRESOLVED) {
+			uint32_t last;
+
+			/* If the recipient is unresolved, consider it is a SMTP one */
+			rows->aRow = talloc_realloc (mem_ctx, rows->aRow, struct SRow, rows->cRows + 1);
+			last = rows->cRows;
+			rows->aRow[last].cValues = 0;
+			rows->aRow[last].lpProps = talloc_zero (mem_ctx, struct SPropValue);
+			if (!update_recipient_properties (conn, obj_folder, &rows->aRow[last], recipient, FALSE, mem_ctx, cancellable, perror)) {
+				ms = MAPI_E_CALL_FAILED;
+				goto cleanup;
+			}
+			rows->cRows += 1;
+		} else if (flagList->aulPropTag[ii] == MAPI_RESOLVED) {
+			if (!update_recipient_properties (conn, obj_folder, &rows->aRow[jj], recipient, TRUE, mem_ctx, cancellable, perror)) {
+				ms = MAPI_E_CALL_FAILED;
+				goto cleanup;
+			}
+			jj += 1;
+		}
+	}
+
+	/* Modify the recipient table */
+	ms = ModifyRecipients (obj_message, rows);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "ModifyRecipients", ms);
+		goto cleanup;
+	}
+
+ cleanup:
+	UNLOCK ();
+
+	g_free (users);
+	g_free (recips);
+	g_free (named_ids_list);
+	g_hash_table_destroy (all_proptags);
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+static gboolean
+delete_attachment_cb (EMapiConnection *conn,
+		      mapi_id_t fid,
+		      TALLOC_CTX *mem_ctx,
+		      struct SRow *srow,
+		      guint32 row_index,
+		      guint32 rows_total,
+		      gpointer user_data,
+		      GCancellable *cancellable,
+		      GError **perror)
+{
+	const uint32_t *attach_num;
+	mapi_object_t *obj_object = user_data;
+	enum MAPISTATUS ms;
+
+	g_return_val_if_fail (obj_object != NULL, FALSE);
+
+	attach_num = e_mapi_util_find_row_propval (srow, PidTagAttachNumber);
+	g_return_val_if_fail (attach_num != NULL, FALSE);
+
+	ms = DeleteAttach (obj_object, *attach_num);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "DeleteAttach", ms);
+	}
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+static gboolean
+delete_object_attachments (EMapiConnection *conn,
+			   mapi_object_t *obj_folder,
+			   mapi_object_t *obj_object,
+			   TALLOC_CTX *mem_ctx,
+			   GCancellable *cancellable,
+			   GError **perror)
+{
+	enum MAPISTATUS ms;
+	mapi_object_t obj_table;
+	struct SPropTagArray *proptags;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+
+	LOCK ();
+
+	mapi_object_init (&obj_table);
+
+	/* open attachment table */
+	ms = GetAttachmentTable (obj_object, &obj_table);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "GetAttachmentTable", ms);
+		goto cleanup;
+	}
+
+	proptags = set_SPropTagArray (mem_ctx, 1, PidTagAttachNumber);
+
+	ms = SetColumns (&obj_table, proptags);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "SetColumns", ms);
+		goto cleanup;
+	}
+
+	ms = foreach_tablerow (conn, mapi_object_get_id (obj_folder), mem_ctx, &obj_table, delete_attachment_cb, obj_object, cancellable, perror);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "foreach_tablerow", ms);
+	}
+
+ cleanup:
+	mapi_object_release (&obj_table);
+
+	UNLOCK ();
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+static gboolean update_message_with_object (EMapiConnection *conn,
+					    mapi_object_t *obj_folder,
+					    mapi_object_t *obj_message,
+					    EMapiObject *object,
+					    TALLOC_CTX *mem_ctx,
+					    GCancellable *cancellable,
+					    GError **perror);
+
+static gboolean
+add_object_attachments (EMapiConnection *conn,
+			mapi_object_t *obj_folder,
+			mapi_object_t *obj_message,
+			EMapiAttachment *attachments,
+			TALLOC_CTX *mem_ctx,
+			GCancellable *cancellable,
+			GError **perror)
+{
+	enum MAPISTATUS ms = MAPI_E_SUCCESS;
+	EMapiAttachment *attachment;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (obj_message != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (mem_ctx != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	LOCK ();
+
+	for (attachment = attachments; attachment && ms == MAPI_E_SUCCESS; attachment = attachment->next) {
+		mapi_object_t obj_attach;
+
+		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+			ms = MAPI_E_USER_CANCEL;
+			break;
+		}
+
+		mapi_object_init (&obj_attach);
+
+		ms = CreateAttach (obj_message, &obj_attach);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "CreateAttach", ms);
+			goto cleanup;
+		}
+
+		if (!update_props_on_object (conn, obj_folder, &obj_attach, &attachment->properties, mem_ctx, cancellable, perror)) {
+			ms = MAPI_E_CALL_FAILED;
+			make_mapi_error (perror, "update_props_on_object", ms);
+			goto cleanup;
+		}
+
+		if (attachment->embedded_object) {
+			mapi_object_t obj_emb_msg;
+
+			mapi_object_init (&obj_emb_msg);
+
+			ms = OpenEmbeddedMessage (&obj_attach, &obj_emb_msg, MAPI_CREATE);
+			if (ms != MAPI_E_SUCCESS) {
+				make_mapi_error (perror, "OpenEmbeddedMessage", ms);
+				goto cleanup;
+			}
+
+			if (!update_message_with_object (conn, obj_folder, &obj_emb_msg, attachment->embedded_object, mem_ctx, cancellable, perror)) {
+				ms = MAPI_E_CALL_FAILED;
+				make_mapi_error (perror, "SaveChangesMessage", ms);
+				mapi_object_release (&obj_emb_msg);
+				goto cleanup;
+			}
+
+			ms = SaveChangesMessage (&obj_attach, &obj_emb_msg, KeepOpenReadOnly);
+			if (ms != MAPI_E_SUCCESS) {
+				make_mapi_error (perror, "SaveChangesMessage", ms);
+				mapi_object_release (&obj_emb_msg);
+				goto cleanup;
+			}
+
+			mapi_object_release (&obj_emb_msg);
+		}
+
+		ms = SaveChangesAttachment (obj_message, &obj_attach, KeepOpenReadWrite);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "SaveChangesAttachment", ms);
+			goto cleanup;
+		}
+
+	 cleanup:
+		mapi_object_release (&obj_attach);
+	}
+
+	UNLOCK ();
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+static gboolean
+update_message_with_object (EMapiConnection *conn,
+			    mapi_object_t *obj_folder,
+			    mapi_object_t *obj_message,
+			    EMapiObject *object,
+			    TALLOC_CTX *mem_ctx,
+			    GCancellable *cancellable,
+			    GError **perror)
+{
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (obj_message != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (object != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	if (!update_props_on_object (conn, obj_folder, obj_message, &object->properties, mem_ctx, cancellable, perror))
+		return FALSE;
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
+		return FALSE;
+
+	/* do not touch recipients if not set */
+	if (object->recipients) {
+		/* remove current recipients... */
+		if (!delete_object_recipients (conn, obj_folder, obj_message, mem_ctx, cancellable, perror))
+			return FALSE;
+
+		if (g_cancellable_set_error_if_cancelled (cancellable, perror))
+			return FALSE;
+
+		/* ... and add new */
+		if (!add_object_recipients (conn, obj_folder, obj_message, object->recipients, mem_ctx, cancellable, perror))
+			return FALSE;
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
+		return FALSE;
+
+	/* remove current attachments... */
+	if (!delete_object_attachments (conn, obj_folder, obj_message, mem_ctx, cancellable, perror))
+		return FALSE;
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
+		return FALSE;
+
+	/* ... and add new */
+	if (object->attachments && !add_object_attachments (conn, obj_folder, obj_message, object->attachments, mem_ctx, cancellable, perror))
+		return FALSE;
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
+		return FALSE;
+
+	return TRUE;
+}
+
+gboolean
+e_mapi_connection_create_object (EMapiConnection *conn,
+				 mapi_object_t *obj_folder,
+				 uint32_t flags, /* bit-or of EMapiCreateFlags */
+				 WriteObjectCB write_object_cb,
+				 gpointer woc_data,
+				 mapi_id_t *out_mid,
+				 GCancellable *cancellable,
+				 GError **perror)
+{
+	enum MAPISTATUS ms;
+	TALLOC_CTX *mem_ctx;
+	EMapiObject *object = NULL;
+	mapi_object_t obj_message;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (write_object_cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (out_mid != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	LOCK ();
+
+	*out_mid = 0;
+
+	mem_ctx = talloc_new (priv->session);
+	mapi_object_init (&obj_message);
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	if (!write_object_cb (conn, mem_ctx, &object, woc_data, cancellable, perror) || !object) {
+		ms = MAPI_E_CALL_FAILED;
+		make_mapi_error (perror, "write_object_cb", ms);
+		goto cleanup;
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	ms = CreateMessage (obj_folder, &obj_message);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "CreateMessage", ms);
+		goto cleanup;
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	if (!update_message_with_object (conn, obj_folder, &obj_message, object, mem_ctx, cancellable, perror)) {
+		ms = MAPI_E_CALL_FAILED;
+		make_mapi_error (perror, "update_message_with_object", ms);
+		goto cleanup;
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	ms = SaveChangesMessage (obj_folder, &obj_message, KeepOpenReadWrite);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "SaveChangesMessage", ms);
+		goto cleanup;
+	}
+
+	if ((flags & E_MAPI_CREATE_FLAG_SUBMIT) != 0) {
+		/* Mark message as ready to be sent */
+		ms = SubmitMessage (&obj_message);
+		if (ms != MAPI_E_SUCCESS) {
+			mapi_id_t mid;
+			make_mapi_error (perror, "SubmitMessage", ms);
+
+			/*
+			The code is storing message right to Sent items instead of Outbox,
+			because fetching PR_ENTRYID or PR_IPM_SENTMAIL_ENTRYID didn't seem
+			to work in time of doing this change.
+
+			For more information and other possible (correct) approaches see:
+			https://bugzilla.gnome.org/show_bug.cgi?id=561794
+			*/
+			mid = mapi_object_get_id (&obj_message);
+
+			mapi_object_release (&obj_message);
+			/* to not release a message object twice */
+			mapi_object_init (&obj_message);
+
+			ms = DeleteMessage (obj_folder, &mid, 1);
+			if (ms != MAPI_E_SUCCESS) {
+				make_mapi_error (perror, "DeleteMessage", ms);
+			}
+
+			goto cleanup;
+		}
+	}
+
+	*out_mid = mapi_object_get_id (&obj_message);
+
+ cleanup:
+	e_mapi_object_free (object);
+	mapi_object_release (&obj_message);
 	talloc_free (mem_ctx);
+
+	UNLOCK ();
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+gboolean
+e_mapi_connection_modify_object (EMapiConnection *conn,
+				 mapi_object_t *obj_folder,
+				 mapi_id_t mid,
+				 WriteObjectCB write_object_cb,
+				 gpointer woc_data,
+				 GCancellable *cancellable,
+				 GError **perror)
+{
+	enum MAPISTATUS ms;
+	TALLOC_CTX *mem_ctx;
+	EMapiObject *object = NULL;
+	mapi_object_t obj_message;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (write_object_cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (mid != 0, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	LOCK ();
+
+	mem_ctx = talloc_new (priv->session);
+	mapi_object_init (&obj_message);
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	if (!write_object_cb (conn, mem_ctx, &object, woc_data, cancellable, perror)) {
+		ms = MAPI_E_CALL_FAILED;
+		make_mapi_error (perror, "write_object_cb", ms);
+		goto cleanup;
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	ms = OpenMessage (obj_folder, mapi_object_get_id (obj_folder), mid, &obj_message, MAPI_MODIFY);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "OpenMessage", ms);
+		goto cleanup;
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	if (!update_message_with_object (conn, obj_folder, &obj_message, object, mem_ctx, cancellable, perror)) {
+		ms = MAPI_E_CALL_FAILED;
+		make_mapi_error (perror, "update_message_with_object", ms);
+		goto cleanup;
+	}
+
+	ms = SaveChangesMessage (obj_folder, &obj_message, KeepOpenReadOnly);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "SaveChangesMessage", ms);
+		goto cleanup;
+	}
+
+ cleanup:
+	e_mapi_object_free (object);
+	mapi_object_release (&obj_message);
+	talloc_free (mem_ctx);
+
 	UNLOCK ();
 
 	return ms == MAPI_E_SUCCESS;
@@ -5441,14 +6383,14 @@ static void
 set_owner_name (gpointer data, gpointer user_data)
 {
 	EMapiFolder *folder = (EMapiFolder *)(data);
-	folder->owner_name = (gchar *)(user_data);
+	folder->owner_name = g_strdup (user_data);
 }
 
 static void
 set_user_name (gpointer data, gpointer user_data)
 {
 	EMapiFolder *folder = (EMapiFolder *)(data);
-	folder->user_name = (gchar *)(user_data);
+	folder->user_name = g_strdup (user_data);
 }
 
 gboolean

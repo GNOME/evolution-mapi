@@ -51,37 +51,24 @@
 
 #define STREAM_SIZE 4000
 
-CamelStore *get_store(void);
-
-void	set_store(CamelStore *);
-
 G_DEFINE_TYPE (CamelMapiTransport, camel_mapi_transport, CAMEL_TYPE_TRANSPORT)
 
-/*CreateItem would return the MID of the new message or '0' if we fail.*/
-static mapi_id_t
-mapi_message_item_send (EMapiConnection *conn,
-			MailItem *item,
-			GCancellable *cancellable,
-			GError **perror)
+static gboolean
+convert_message_to_object_cb (EMapiConnection *conn,
+			      TALLOC_CTX *mem_ctx,
+			      EMapiObject **object, /* out */
+			      gpointer user_data,
+			      GCancellable *cancellable,
+			      GError **perror)
 {
-	guint64 fid = 0;
-	mapi_id_t mid = 0;
+	CamelMimeMessage *message = user_data;
 
-	#define unset(x) g_free (x); x = NULL
+	g_return_val_if_fail (conn != NULL, FALSE);
+	g_return_val_if_fail (mem_ctx != NULL, FALSE);
+	g_return_val_if_fail (object != NULL, FALSE);
+	g_return_val_if_fail (message != NULL, FALSE);
 
-	item->header.flags = MSGFLAG_UNSENT;
-	unset (item->header.from);
-	unset (item->header.from_email);
-	unset (item->header.transport_headers);
-	item->header.recieved_time = 0;
-
-	#undef unset
-
-	mid = e_mapi_connection_create_item (conn, olFolderSentMail, fid,
-					 mapi_mail_utils_create_item_build_props, item,
-					 item->recipients, item->attachments, item->generic_streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE, cancellable, perror);
-
-	return mid;
+	return e_mapi_mail_utils_message_to_object (message, 0, E_MAPI_CREATE_FLAG_SUBMIT, object, mem_ctx, cancellable, perror);
 }
 
 static gboolean
@@ -93,10 +80,10 @@ mapi_send_to_sync (CamelTransport *transport,
                    GError **error)
 {
 	EMapiConnection *conn;
-	MailItem *item = NULL;
 	const gchar *namep;
 	const gchar *addressp;
-	mapi_id_t st = 0;
+	mapi_id_t mid = 0;
+	mapi_object_t obj_folder;
 	CamelService *service;
 	CamelSettings *settings;
 	const gchar *profile;
@@ -149,15 +136,15 @@ mapi_send_to_sync (CamelTransport *transport,
 		return FALSE;
 	}
 
-	/* Convert MIME to MailItem, attacment lists and recipient list.*/
-	item = mapi_mime_message_to_mail_item (message, 0, from, cancellable, NULL);
+	if (e_mapi_connection_open_default_folder (conn, olFolderSentMail, &obj_folder, cancellable, error)) {
+		e_mapi_connection_create_object (conn, &obj_folder, E_MAPI_CREATE_FLAG_SUBMIT, convert_message_to_object_cb, message, &mid, cancellable, error);
 
-	/* send */
-	st = mapi_message_item_send (conn, item, cancellable, &mapi_error);
+		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, error);
+	}
 
 	g_object_unref (conn);
 
-	if (st == 0) {
+	if (mid == 0) {
 		if (mapi_error) {
 			if (!e_mapi_utils_propagate_cancelled_error (mapi_error, error))
 				g_set_error (
@@ -216,6 +203,4 @@ camel_mapi_transport_class_init (CamelMapiTransportClass *class)
 static void
 camel_mapi_transport_init (CamelMapiTransport *transport)
 {
-
 }
-
