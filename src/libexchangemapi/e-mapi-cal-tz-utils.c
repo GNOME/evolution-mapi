@@ -293,7 +293,9 @@ e_mapi_cal_tz_util_dump (void)
 #define TZ_BIN_VERSION_MINOR  0x01 
 
 void
-e_mapi_cal_util_mapi_tz_to_bin (const gchar *mapi_tzid, struct Binary_r *sb)
+e_mapi_cal_util_mapi_tz_to_bin (const gchar *mapi_tzid,
+				struct SBinary_short *bin,
+				TALLOC_CTX *mem_ctx)
 {
 	GByteArray *ba;
 	guint8 flag8;
@@ -333,14 +335,14 @@ e_mapi_cal_util_mapi_tz_to_bin (const gchar *mapi_tzid, struct Binary_r *sb)
 
 	/* Rules may now be appended here */
 
-	sb->lpb = ba->data;
-	sb->cb = ba->len;
+	bin->cb = ba->len;
+	bin->lpb = talloc_memdup (mem_ctx, ba->data, ba->len);
 
 	d(g_message ("New timezone stream.. Length: %d bytes.. Hex-data follows:", ba->len));
 	d(for (i = 0; i < ba->len; i++)
 		g_print("0x%.2X ", ba->data[i]));
 
-	g_byte_array_free (ba, FALSE);
+	g_byte_array_free (ba, TRUE);
 }
 
 gchar *

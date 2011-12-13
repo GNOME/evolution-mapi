@@ -1775,13 +1775,11 @@ e_mapi_mail_add_recipients (EMapiObject *object,
 
 		#define set_value(pt,vl) {								\
 			if (!e_mapi_utils_add_property (&recipient->properties, pt, vl, recipient)) {	\
-				g_warning ("%s: Faield to set property 0x%x", G_STRFUNC, pt);		\
+				g_warning ("%s: Failed to set property 0x%x", G_STRFUNC, pt);		\
 													\
 				return;									\
 			}										\
 		}
-
-		#define set_str_value(pt,st) set_value (pt, talloc_strdup (recipient, st))
 
 		ui32 = recip_type;
 		set_value (PidTagRecipientType, &ui32);
@@ -1790,15 +1788,15 @@ e_mapi_mail_add_recipients (EMapiObject *object,
 			name = email;
 
 		if (name && *name) {
-			set_str_value (PidTagDisplayName, name);
-			set_str_value (PidTagRecipientDisplayName, name);
+			set_value (PidTagDisplayName, name);
+			set_value (PidTagRecipientDisplayName, name);
 		}
 		if (email && *email) {
-			set_str_value (PidTagAddressType, "SMTP");
-			set_str_value (PidTagEmailAddress, email);
+			set_value (PidTagAddressType, "SMTP");
+			set_value (PidTagEmailAddress, email);
 
-			set_str_value (PidTagSmtpAddress, email);
-			set_str_value (PidTagPrimarySmtpAddress, email);
+			set_value (PidTagSmtpAddress, email);
+			set_value (PidTagPrimarySmtpAddress, email);
 		}
 
 		ui32 = 0;
@@ -1814,7 +1812,6 @@ e_mapi_mail_add_recipients (EMapiObject *object,
 		set_value (PidTagSendRichInfo, &bl);
 
 		#undef set_value
-		#undef set_str_value
 
 		name = NULL;
 		email = NULL;
@@ -1934,8 +1931,6 @@ e_mapi_mail_content_stream_to_bin (CamelStream *content_stream,
 	}									\
 }
 
-#define set_attach_str_value(pt,st) set_attach_value (pt, talloc_strdup (attach, st))
-
 static gboolean
 e_mapi_mail_add_attach (EMapiObject *object,
 			CamelMimePart *part,
@@ -1963,19 +1958,19 @@ e_mapi_mail_add_attach (EMapiObject *object,
 
 	filename = camel_mime_part_get_filename (part);
 	if (filename) {
-		set_attach_str_value (PidTagAttachFilename, filename);
-		set_attach_str_value (PidTagAttachLongFilename, filename);
+		set_attach_value (PidTagAttachFilename, filename);
+		set_attach_value (PidTagAttachLongFilename, filename);
 	}
 
 	content_id = camel_mime_part_get_content_id (part);
 	if (content_id)
-		set_attach_str_value (PidTagAttachContentId, content_id);
+		set_attach_value (PidTagAttachContentId, content_id);
 
 	content_type  = camel_mime_part_get_content_type (part);
 	if (content_type) {
 		gchar *ct = camel_content_type_simple (content_type);
 		if (ct)
-			set_attach_str_value (PidTagAttachMimeTag, ct);
+			set_attach_value (PidTagAttachMimeTag, ct);
 		g_free (ct);
 	}
 
@@ -2005,10 +2000,14 @@ e_mapi_mail_add_body (EMapiObject *object,
 
 		return e_mapi_utils_add_property (&object->properties, proptag, &bin, object);
 	} else if (str) {
-		if (!e_mapi_utils_add_property (&object->properties, proptag, str, object))
+		if (!e_mapi_utils_add_property (&object->properties, proptag, str, object)) {
+			talloc_free (str);
 			return FALSE;
+		}
+
+		talloc_free (str);
 	} else {
-		return e_mapi_utils_add_property (&object->properties, proptag, talloc_strdup (object, ""), object);
+		return e_mapi_utils_add_property (&object->properties, proptag, "", object);
 	}
 
 	return TRUE;
@@ -2054,10 +2053,10 @@ e_mapi_mail_do_smime_encrypted (EMapiObject *object,
 	set_attach_value (PidTagAttachMethod, &ui32);
 	ui32 = -1;
 	set_attach_value (PidTagRenderingPosition, &ui32);
-	set_attach_str_value (PidTagAttachMimeTag, content_type_str);
-	set_attach_str_value (PidTagAttachFilename, "SMIME.txt");
-	set_attach_str_value (PidTagAttachLongFilename, "SMIME.txt");
-	set_attach_str_value (PidTagDisplayName, "SMIME.txt");
+	set_attach_value (PidTagAttachMimeTag, content_type_str);
+	set_attach_value (PidTagAttachFilename, "SMIME.txt");
+	set_attach_value (PidTagAttachLongFilename, "SMIME.txt");
+	set_attach_value (PidTagDisplayName, "SMIME.txt");
 
 	e_mapi_mail_content_stream_to_bin (content_stream, &bin, attach, cancellable);
 	set_attach_value (PidTagAttachDataBinary, &bin);
@@ -2127,10 +2126,10 @@ e_mapi_mail_do_smime_signed (EMapiObject *object,
 	set_attach_value (PidTagAttachMethod, &ui32);
 	ui32 = -1;
 	set_attach_value (PidTagRenderingPosition, &ui32);
-	set_attach_str_value (PidTagAttachMimeTag, "multipart/signed");
-	set_attach_str_value (PidTagAttachFilename, "SMIME.txt");
-	set_attach_str_value (PidTagAttachLongFilename, "SMIME.txt");
-	set_attach_str_value (PidTagDisplayName, "SMIME.txt");
+	set_attach_value (PidTagAttachMimeTag, "multipart/signed");
+	set_attach_value (PidTagAttachFilename, "SMIME.txt");
+	set_attach_value (PidTagAttachLongFilename, "SMIME.txt");
+	set_attach_value (PidTagDisplayName, "SMIME.txt");
 
 	e_mapi_mail_content_stream_to_bin (content_stream, &bin, attach, cancellable);
 	set_attach_value (PidTagAttachDataBinary, &bin);
@@ -2188,11 +2187,11 @@ e_mapi_mail_do_multipart (EMapiObject *object,
 				set_attach_value (PidTagAttachMethod, &ui32);
 				ui32 = 0;
 				set_attach_value (PidTagRenderingPosition, &ui32);
-				set_attach_str_value (PidTagAttachMimeTag, "message/rfc822");
+				set_attach_value (PidTagAttachMimeTag, "message/rfc822");
 
 				str = camel_mime_message_get_subject (message);
 				if (str)
-					set_attach_str_value (PidTagAttachFilename, str);
+					set_attach_value (PidTagAttachFilename, str);
 				continue;
 			} else {
 				e_mapi_attachment_free (attach);
@@ -2219,7 +2218,6 @@ e_mapi_mail_do_multipart (EMapiObject *object,
 }
 
 #undef set_attach_value
-#undef set_attach_str_value
 
 gboolean
 e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
@@ -2265,13 +2263,11 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 			g_free (msg_class);						\
 			g_free (pid_name_content_type);					\
 											\
-			g_warning ("%s: Faield to set property 0x%x", G_STRFUNC, pt);	\
+			g_warning ("%s: Failed to set property 0x%x", G_STRFUNC, pt);	\
 											\
 			return FALSE;							\
 		}									\
 	}
-
-	#define set_str_value(pt,st) set_value (pt, talloc_strdup (object, st))
 
 	ui32 = 65001; /* UTF8 - also used with PR_HTML */
 	set_value (PidTagInternetCodepage, &ui32);
@@ -2294,7 +2290,7 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 	   are computed from PidTagSubject by a server */
 	str = camel_mime_message_get_subject (message);
 	if (str)
-		set_str_value (PidTagSubject, str);
+		set_value (PidTagSubject, str);
 
 	/* some properties may not be set when submitting a message */
 	if ((create_flags & E_MAPI_CREATE_FLAG_SUBMIT) == 0) {
@@ -2303,11 +2299,11 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 		GArray *headers;
 
 		if (namep && *namep)
-			set_str_value (PidTagSentRepresentingName, namep);
+			set_value (PidTagSentRepresentingName, namep);
 
 		if (addressp && *addressp) {
-			set_str_value (PidTagSentRepresentingAddressType, "SMTP");
-			set_str_value (PidTagSentRepresentingEmailAddress, addressp);
+			set_value (PidTagSentRepresentingAddressType, "SMTP");
+			set_value (PidTagSentRepresentingEmailAddress, addressp);
 		}
 
 		msg_time = camel_mime_message_get_date (message, &msg_time_offset);
@@ -2337,7 +2333,7 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 			camel_medium_free_headers (CAMEL_MEDIUM (message), headers);
 
 			if (hstr->len && hstr->str)
-				set_str_value (PidTagTransportMessageHeaders, hstr->str);
+				set_value (PidTagTransportMessageHeaders, hstr->str);
 
 			g_string_free (hstr, TRUE);
 		}
@@ -2345,15 +2341,15 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 
 	str = camel_medium_get_header ((CamelMedium *) message, "References");
 	if (str)
-		set_str_value (PidTagInternetReferences, str);
+		set_value (PidTagInternetReferences, str);
 
 	str = camel_medium_get_header ((CamelMedium *) message, "In-Reply-To");
 	if (str)
-		set_str_value (PidTagInReplyToId, str);
+		set_value (PidTagInReplyToId, str);
 
 	str = camel_medium_get_header ((CamelMedium *) message, "Message-ID");
 	if (str)
-		set_str_value (PidTagInternetMessageId, str);
+		set_value (PidTagInternetMessageId, str);
 
 	addresses = camel_mime_message_get_recipients (message, CAMEL_RECIPIENT_TYPE_TO);
 	e_mapi_mail_add_recipients (object, addresses, olTo);
@@ -2405,10 +2401,10 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 	}
 
 	if (msg_class)
-		set_str_value (PidTagMessageClass, msg_class);
+		set_value (PidTagMessageClass, msg_class);
 
 	if (pid_name_content_type)
-		set_str_value (PidNameContentType, pid_name_content_type);
+		set_value (PidNameContentType, pid_name_content_type);
 
 	g_free (msg_class);
 	g_free (pid_name_content_type);
@@ -2416,7 +2412,6 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 	*pobject = object;
 
 	#undef set_value
-	#undef set_str_value
 
 	return TRUE;
 }

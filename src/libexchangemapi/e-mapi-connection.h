@@ -251,7 +251,7 @@ typedef gboolean (*TransferObjectCB)		(EMapiConnection *conn,
 						 GError **perror);
 typedef gboolean (*WriteObjectCB)		(EMapiConnection *conn,
 						 TALLOC_CTX *mem_ctx,
-						 EMapiObject **object, /* out */
+						 EMapiObject **pobject, /* out */
 						 gpointer user_data,
 						 GCancellable *cancellable,
 						 GError **perror);

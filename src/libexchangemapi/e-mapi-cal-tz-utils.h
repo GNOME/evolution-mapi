@@ -35,7 +35,9 @@ const gchar *	e_mapi_cal_tz_util_get_ical_equivalent	(const gchar *mapi_tz_locat
 gboolean	e_mapi_cal_tz_util_populate		(void);
 void		e_mapi_cal_tz_util_destroy		(void);
 void		e_mapi_cal_tz_util_dump			(void);
-void		e_mapi_cal_util_mapi_tz_to_bin		(const gchar *mapi_tzid, struct Binary_r *sb);
+void		e_mapi_cal_util_mapi_tz_to_bin		(const gchar *mapi_tzid,
+							 struct SBinary_short *bin,
+							 TALLOC_CTX *mem_ctx);
 int		e_mapi_cal_util_mapi_tz_pidlidtimezone	(icaltimezone *ictz);
 gchar *		e_mapi_cal_util_bin_to_mapi_tz		(const guint8 *lpb, guint32 cb);
 

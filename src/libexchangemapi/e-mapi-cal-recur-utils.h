@@ -30,9 +30,15 @@
 
 G_BEGIN_DECLS
 
-gboolean	e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp, GSList **extra_detached, icaltimezone *recur_zone);
+gboolean	e_mapi_cal_util_bin_to_rrule	(const guint8 *lpb,
+						 guint32 cb,
+						 ECalComponent *comp,
+						 GSList **extra_detached,
+						 icaltimezone *recur_zone);
 
-GByteArray *	e_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps);
+gboolean	e_mapi_cal_util_rrule_to_bin	(ECalComponent *comp,
+						 struct SBinary_short *bin,
+						 TALLOC_CTX *mem_ctx);
 
 G_END_DECLS
 

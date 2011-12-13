@@ -1635,7 +1635,7 @@ e_mapi_cal_utils_write_props_cb (EMapiConnection *conn,
 
 	if (kind == ICAL_VEVENT_COMPONENT) {
 		const gchar *mapi_tzid;
-		struct Binary_r start_tz, end_tz;
+		struct SBinary_short start_tz, end_tz;
 
 		set_named_value (PidLidAppointmentMessageClass, IPM_APPOINTMENT);
 
@@ -1681,7 +1681,7 @@ e_mapi_cal_utils_write_props_cb (EMapiConnection *conn,
 		/* Start TZ */
 		mapi_tzid = e_mapi_cal_tz_util_get_mapi_equivalent ((dtstart_tz_location && *dtstart_tz_location) ? dtstart_tz_location : "UTC");
 		if (mapi_tzid && *mapi_tzid) {
-			e_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &start_tz);
+			e_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &start_tz, mem_ctx);
 			set_named_value (PidLidAppointmentTimeZoneDefinitionStartDisplay, &start_tz);
 		}
 		set_named_value (PidLidTimeZoneDescription, mapi_tzid ? mapi_tzid : "");
@@ -1695,7 +1695,7 @@ e_mapi_cal_utils_write_props_cb (EMapiConnection *conn,
 		/* End TZ */
 		mapi_tzid = e_mapi_cal_tz_util_get_mapi_equivalent ((dtend_tz_location && *dtend_tz_location) ? dtend_tz_location : "UTC");
 		if (mapi_tzid && *mapi_tzid) {
-			e_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &end_tz);
+			e_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &end_tz, mem_ctx);
 			set_named_value (PidLidAppointmentTimeZoneDefinitionEndDisplay, &end_tz);
 		}
 
@@ -2027,6 +2027,11 @@ e_mapi_cal_utils_write_props_cb (EMapiConnection *conn,
 		set_named_value (PidLidNoteHeight, &flag32);
 	}
 
+	#undef set_value
+	#undef set_named_value
+	#undef set_datetime_value
+	#undef set_named_datetime_value
+
 	return TRUE;
 }
 
@@ -2087,7 +2092,7 @@ uint32_t
 e_mapi_cal_util_get_new_appt_id (EMapiConnection *conn, mapi_id_t fid)
 {
 	uint32_t id;
-	gboolean unused = TRUE;
+	gboolean unused = FALSE;
 	mapi_object_t obj_folder;
 
 	if (!e_mapi_connection_open_personal_folder (conn, fid, &obj_folder, NULL, NULL))
@@ -2520,7 +2525,10 @@ populate_ical_attendees (EMapiConnection *conn,
 }
 
 static void
-set_attachments_to_comp (EMapiConnection *conn, EMapiAttachment *attachments, ECalComponent *comp, const gchar *local_store_path)
+set_attachments_to_comp (EMapiConnection *conn,
+			 EMapiAttachment *attachments,
+			 ECalComponent *comp,
+			 const gchar *local_store_path)
 {
 	GSList *comp_attach_list = NULL;
 	EMapiAttachment *attach;
@@ -3017,4 +3025,918 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 	e_cal_component_rescan (comp);
 
 	return comp;
+}
+
+static void
+e_mapi_cal_utils_add_organizer (EMapiObject *object,
+				ECalComponent *comp)
+{
+	icalcomponent *icalcomp;
+	icalproperty *org_prop = NULL;
+	const gchar *org = NULL;
+
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (comp != NULL);
+
+	icalcomp = e_cal_component_get_icalcomponent (comp);
+	org_prop = icalcomponent_get_first_property (icalcomp, ICAL_ORGANIZER_PROPERTY);
+	org = icalproperty_get_organizer (org_prop);
+	if (org && *org) {
+		EMapiRecipient *recipient;
+		uint32_t ui32 = 0;
+		const gchar *str = NULL, *email;
+		icalparameter *param;
+
+		recipient = e_mapi_recipient_new (object);
+		e_mapi_object_add_recipient (object, recipient);
+
+		#define set_value(pt,vl) {								\
+			if (!e_mapi_utils_add_property (&recipient->properties, pt, vl, recipient)) {	\
+				g_warning ("%s: Failed to set property 0x%x", G_STRFUNC, pt);		\
+													\
+				return;									\
+			}										\
+		}
+
+		if (g_ascii_strncasecmp (org, "mailto:", 7) == 0)
+			email = org + 7;
+		else
+			email = org;
+
+		set_value (PidTagAddressType, "SMTP");
+		set_value (PidTagEmailAddress, email);
+
+		set_value (PidTagSmtpAddress, email);
+		set_value (PidTagPrimarySmtpAddress, email);
+
+		ui32 = 0;
+		set_value (PidTagSendInternetEncoding, &ui32);
+
+		ui32 = RECIP_SENDABLE | RECIP_ORGANIZER;
+		set_value (PidTagRecipientFlags, &ui32);
+
+		ui32 = olResponseNone;
+		set_value (PidTagRecipientTrackStatus, &ui32);
+
+		ui32 = olTo;
+		set_value (PidTagRecipientType, &ui32);
+
+		param = icalproperty_get_first_parameter (org_prop, ICAL_CN_PARAMETER);
+		str = icalparameter_get_cn (param);
+		str = (str && *str) ? str : email;
+		set_value (PidTagRecipientDisplayName, str);
+		set_value (PidTagDisplayName, str);
+
+		ui32 = DT_MAILUSER;
+		set_value (PidTagDisplayType, &ui32);
+
+		ui32 = MAPI_MAILUSER;
+		set_value (PidTagObjectType, &ui32);
+
+		#undef set_value
+	}
+}
+
+static void
+e_mapi_cal_utils_add_recipients (EMapiObject *object,
+				 ECalComponent *comp)
+{
+	icalcomponent *icalcomp;
+	icalproperty *org_prop = NULL, *att_prop = NULL;
+	const gchar *org = NULL;
+
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (comp != NULL);
+
+	if (!e_cal_component_has_attendees (comp))
+		return;
+
+	icalcomp = e_cal_component_get_icalcomponent (comp);
+	org_prop = icalcomponent_get_first_property (icalcomp, ICAL_ORGANIZER_PROPERTY);
+	org = icalproperty_get_organizer (org_prop);
+	if (!org)
+		org = "";
+
+	att_prop = icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY);
+	while (att_prop) {
+		EMapiRecipient *recipient;
+		uint32_t ui32 = 0;
+		const gchar *str = NULL, *email;
+		icalparameter *param;
+
+		str = icalproperty_get_attendee (att_prop);
+		if (!str || g_ascii_strcasecmp (str, org) == 0) {
+			att_prop = icalcomponent_get_next_property (icalcomp, ICAL_ATTENDEE_PROPERTY);
+			continue;
+		}
+
+		recipient = e_mapi_recipient_new (object);
+		e_mapi_object_add_recipient (object, recipient);
+
+		#define set_value(pt,vl) {								\
+			if (!e_mapi_utils_add_property (&recipient->properties, pt, vl, recipient)) {	\
+				g_warning ("%s: Failed to set property 0x%x", G_STRFUNC, pt);		\
+													\
+				return;									\
+			}										\
+		}
+
+		if (g_ascii_strncasecmp (str, "mailto:", 7) == 0)
+			email = str + 7;
+		else
+			email = str;
+
+		set_value (PidTagAddressType, "SMTP");
+		set_value (PidTagEmailAddress, email);
+
+		set_value (PidTagSmtpAddress, email);
+		set_value (PidTagPrimarySmtpAddress, email);
+
+		ui32 = 0;
+		set_value (PidTagSendInternetEncoding, &ui32);
+
+		ui32 = RECIP_SENDABLE | (g_ascii_strcasecmp (str, org) == 0 ? RECIP_ORGANIZER : 0);
+		set_value (PidTagRecipientFlags, &ui32);
+
+		param = icalproperty_get_first_parameter (att_prop, ICAL_PARTSTAT_PARAMETER);
+		ui32 = get_trackstatus_from_partstat (icalparameter_get_partstat (param));
+		set_value (PidTagRecipientTrackStatus, &ui32);
+
+		param = icalproperty_get_first_parameter (att_prop, ICAL_ROLE_PARAMETER);
+		ui32 = get_type_from_role (icalparameter_get_role (param));
+		set_value (PidTagRecipientType, &ui32);
+
+		param = icalproperty_get_first_parameter (att_prop, ICAL_CN_PARAMETER);
+		str = icalparameter_get_cn (param);
+		str = (str && *str) ? str : email;
+		set_value (PidTagRecipientDisplayName, str);
+		set_value (PidTagDisplayName, str);
+
+		ui32 = DT_MAILUSER;
+		set_value (PidTagDisplayType, &ui32);
+
+		ui32 = MAPI_MAILUSER;
+		set_value (PidTagObjectType, &ui32);
+
+		#undef set_value
+
+		att_prop = icalcomponent_get_next_property (icalcomp, ICAL_ATTENDEE_PROPERTY);
+	}
+}
+
+static void
+e_mapi_cal_utils_add_attachments (EMapiObject *object,
+				  ECalComponent *comp)
+{
+	GSList *comp_attach_list = NULL;
+	GSList *l;
+	const gchar *uid;
+	gchar *safeuid;
+
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (comp != NULL);
+
+	if (!e_cal_component_has_attachments (comp))
+		return;
+
+	e_cal_component_get_attachment_list (comp, &comp_attach_list);
+	e_cal_component_get_uid (comp, &uid);
+
+	safeuid = g_strdup (uid);
+	e_filename_make_safe (safeuid);
+	g_return_if_fail (safeuid != NULL);
+
+	for (l = comp_attach_list; l; l = l->next) {
+		gchar *sfname_uri = (gchar *) l->data;
+		gchar *sfname = NULL, *filename = NULL;
+		GMappedFile *mapped_file;
+		GError *error = NULL;
+
+		sfname = g_filename_from_uri (sfname_uri, NULL, NULL);
+		mapped_file = g_mapped_file_new (sfname, FALSE, &error);
+		filename = g_path_get_basename (sfname);
+
+		if (mapped_file) {
+			EMapiAttachment *attachment;
+			guint8 *attach = (guint8 *) g_mapped_file_get_contents (mapped_file);
+			guint filelength = g_mapped_file_get_length (mapped_file);
+			const gchar *split_name;
+			uint32_t ui32;
+			struct SBinary_short bin;
+
+			if (g_str_has_prefix (filename, safeuid)) {
+				split_name = (filename + strlen (safeuid) + strlen ("-"));
+			} else {
+				split_name = filename;
+			}
+
+			attachment = e_mapi_attachment_new (object);
+			e_mapi_object_add_attachment (object, attachment);
+
+			#define set_value(pt,vl) {								\
+				if (!e_mapi_utils_add_property (&attachment->properties, pt, vl, attachment)) {	\
+					g_warning ("%s: Failed to set property 0x%x", G_STRFUNC, pt);		\
+														\
+					return;									\
+				}										\
+			}
+
+			ui32 = ATTACH_BY_VALUE;
+			set_value (PidTagAttachMethod, &ui32);
+
+			/* MSDN Documentation: When the supplied offset is -1 (0xFFFFFFFF), the
+			 * attachment is not rendered using the PR_RENDERING_POSITION property.
+			 * All values other than -1 indicate the position within PR_BODY at which
+			 * the attachment is to be rendered.
+			 */
+			ui32 = -1;
+			set_value (PidTagRenderingPosition, &ui32);
+
+			set_value (PidTagAttachFilename, split_name);
+			set_value (PidTagAttachLongFilename, split_name);
+
+			bin.cb = filelength;
+			bin.lpb = talloc_memdup (attachment, attach, bin.cb);
+			set_value (PidTagAttachDataBinary, &bin);
+
+			#undef set_value
+
+#if GLIB_CHECK_VERSION(2,21,3)
+			g_mapped_file_unref (mapped_file);
+#else
+			g_mapped_file_free (mapped_file);
+#endif
+		} else if (error) {
+			e_mapi_debug_print ("Could not map %s: %s \n", sfname_uri, error->message);
+			g_error_free (error);
+		}
+
+		g_free (filename);
+	}
+
+	g_free (safeuid);
+}
+
+gboolean
+e_mapi_cal_utils_comp_to_object (EMapiConnection *conn,
+				 TALLOC_CTX *mem_ctx,
+				 EMapiObject **pobject, /* out */
+				 gpointer user_data,
+				 GCancellable *cancellable,
+				 GError **perror)
+{
+	struct cal_cbdata *cbdata = (struct cal_cbdata *) user_data;
+	ECalComponent *comp;
+	icalcomponent *ical_comp;
+	icalcomponent_kind kind;
+	uint32_t flag32;
+	bool b;
+	icalproperty *prop;
+	struct icaltimetype dtstart, dtend, utc_dtstart, utc_dtend, all_day_dtstart = {0}, all_day_dtend = {0};
+	const icaltimezone *utc_zone;
+	const gchar *dtstart_tz_location, *dtend_tz_location, *text = NULL;
+	time_t tt;
+	gboolean is_all_day;
+	GSList *categories = NULL;
+	EMapiObject *object;
+
+	g_return_val_if_fail (conn != NULL, FALSE);
+	g_return_val_if_fail (mem_ctx != NULL, FALSE);
+	g_return_val_if_fail (cbdata != NULL, FALSE);
+	g_return_val_if_fail (pobject != NULL, FALSE);
+
+	switch (cbdata->kind) {
+		case ICAL_VEVENT_COMPONENT:
+		case ICAL_VTODO_COMPONENT:
+		case ICAL_VJOURNAL_COMPONENT:
+			break;
+		default:
+			return FALSE;
+	}
+
+	comp = cbdata->comp;
+	ical_comp = e_cal_component_get_icalcomponent (comp);
+	kind = icalcomponent_isa (ical_comp);
+	g_return_val_if_fail (kind == cbdata->kind, FALSE);
+
+	object = e_mapi_object_new (mem_ctx);
+	*pobject = object;
+
+	#define set_value(hex, val) G_STMT_START { \
+		if (!e_mapi_utils_add_property (&object->properties, hex, val, object)) \
+			return FALSE;	\
+		} G_STMT_END
+
+	#define set_timet_value(hex, dtval) G_STMT_START {		\
+		struct FILETIME	filetime;				\
+									\
+		e_mapi_util_time_t_to_filetime (dtval, &filetime); 	\
+		set_value (hex, &filetime); 				\
+		} G_STMT_END
+
+	utc_zone = icaltimezone_get_utc_timezone ();
+
+	dtstart = icalcomponent_get_dtstart (ical_comp);
+
+	/* For VEVENTs */
+	if (icalcomponent_get_first_property (ical_comp, ICAL_DTEND_PROPERTY) != 0)
+		dtend = icalcomponent_get_dtend (ical_comp);
+	/* For VTODOs */
+	else if (icalcomponent_get_first_property (ical_comp, ICAL_DUE_PROPERTY) != 0)
+		dtend = icalcomponent_get_due (ical_comp);
+	else
+		dtend = icalcomponent_get_dtstart (ical_comp);
+
+	dtstart_tz_location = get_tzid_location (icaltime_get_tzid (dtstart), cbdata);
+	dtend_tz_location = get_tzid_location (icaltime_get_tzid (dtend), cbdata);
+
+	is_all_day = kind == ICAL_VEVENT_COMPONENT && icaltime_is_date (dtstart) && icaltime_is_date (dtend);
+	if (is_all_day) {
+		const gchar *def_location;
+		icaltimezone *use_zone = NULL;
+
+		/* all-day events expect times not in UTC but in local time;
+		   if this differs from the server timezone, then the event
+		   is shown spread among (two) days */
+		def_location = get_tzid_location ("*default-zone*", cbdata);
+		if (def_location && *def_location)
+			use_zone = icaltimezone_get_builtin_timezone (def_location);
+
+		if (!use_zone)
+			use_zone = (icaltimezone *) utc_zone;
+
+		dtstart.is_date = 0;
+		dtstart.hour = 0;
+		dtstart.minute = 0;
+		dtstart.second = 0;
+		all_day_dtstart = icaltime_convert_to_zone (dtstart, use_zone);
+		dtstart.is_date = 1;
+		all_day_dtstart = icaltime_convert_to_zone (all_day_dtstart, (icaltimezone *) utc_zone);
+
+		dtend.is_date = 0;
+		dtend.hour = 0;
+		dtend.minute = 0;
+		dtend.second = 0;
+		all_day_dtend = icaltime_convert_to_zone (dtend, use_zone);
+		dtend.is_date = 1;
+		all_day_dtend = icaltime_convert_to_zone (all_day_dtend, (icaltimezone *) utc_zone);
+	}
+
+	utc_dtstart = icaltime_convert_to_zone (dtstart, (icaltimezone *)utc_zone);
+	utc_dtend = icaltime_convert_to_zone (dtend, (icaltimezone *)utc_zone);
+
+	text = icalcomponent_get_summary (ical_comp);
+	if (!(text && *text))
+		text = "";
+	set_value (PidTagSubject, text);
+	set_value (PidTagNormalizedSubject, text);
+	if (cbdata->appt_seq == 0)
+		set_value (PidTagConversationTopic, text);
+	text = NULL;
+
+	/* we don't support HTML event/task/memo editor */
+	flag32 = olEditorText;
+	set_value (PidTagMessageEditorFormat, &flag32);
+
+	/* it'd be better to convert, then set it in unicode */
+	text = icalcomponent_get_description (ical_comp);
+	if (!(text && *text) || !g_utf8_validate (text, -1, NULL))
+		text = "";
+	set_value (PidTagBody, text);
+	text = NULL;
+
+	e_cal_component_get_categories_list (comp, &categories);
+	if (categories) {
+		gint ii;
+		GSList *c;
+		struct StringArrayW_r categories_array;
+
+		categories_array.cValues = g_slist_length (categories);
+		categories_array.lppszW = (const char **) talloc_zero_array (mem_ctx, gchar *, categories_array.cValues);
+
+		for (c = categories, ii = 0; c; c = c->next, ii++) {
+			const gchar *category = c->data;
+
+			if (!category || !*category) {
+				ii--;
+				categories_array.cValues--;
+				continue;
+			}
+
+			categories_array.lppszW[ii] = talloc_strdup (mem_ctx, category);
+		}
+
+		set_value (PidNameKeywords, &categories_array);
+
+		e_cal_component_free_categories_list (categories);
+	}
+
+	/* Priority and Importance */
+	prop = icalcomponent_get_first_property (ical_comp, ICAL_PRIORITY_PROPERTY);
+	flag32 = prop ? get_prio_prop_from_priority (icalproperty_get_priority (prop)) : PRIORITY_NORMAL;
+	set_value (PidTagPriority, &flag32);
+	flag32 = prop ? get_imp_prop_from_priority (icalproperty_get_priority (prop)) : IMPORTANCE_NORMAL;
+	set_value (PidTagImportance, &flag32);
+
+	if (cbdata->ownername && cbdata->owneridtype && cbdata->ownerid) {
+		set_value (PidTagSentRepresentingName, cbdata->ownername);
+		set_value (PidTagSentRepresentingAddressType, cbdata->owneridtype);
+		set_value (PidTagSentRepresentingEmailAddress, cbdata->ownerid);
+	}
+
+	if (cbdata->username && cbdata->useridtype && cbdata->userid) {
+		set_value (PidTagSenderName, cbdata->username);
+		set_value (PidTagSenderAddressType, cbdata->useridtype);
+		set_value (PidTagSenderEmailAddress, cbdata->userid);
+	}
+
+	flag32 = cbdata->msgflags;
+	set_value (PidTagMessageFlags, &flag32);
+
+	flag32 = 0x0;
+	b = e_cal_component_has_alarms (comp);
+	if (b) {
+		/* We know there would be only a single alarm of type:DISPLAY [static properties of the backend] */
+		GList *alarm_uids = e_cal_component_get_alarm_uids (comp);
+		ECalComponentAlarm *alarm = e_cal_component_get_alarm (comp, (const gchar *)(alarm_uids->data));
+		ECalComponentAlarmAction action;
+		e_cal_component_alarm_get_action (alarm, &action);
+		if (action == E_CAL_COMPONENT_ALARM_DISPLAY) {
+			ECalComponentAlarmTrigger trigger;
+			gint dur_int = 0;
+			e_cal_component_alarm_get_trigger (alarm, &trigger);
+			switch (trigger.type) {
+			case E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START :
+				dur_int = (icaldurationtype_as_int (trigger.u.rel_duration)) / SECS_IN_MINUTE;
+			/* we cannot set an alarm to popup after the start of an appointment on Exchange */
+				flag32 = (dur_int < 0) ? -(dur_int) : 0;
+				break;
+			default :
+				break;
+			}
+		}
+		e_cal_component_alarm_free (alarm);
+		cal_obj_uid_list_free (alarm_uids);
+	}
+	if (!flag32)
+		switch (kind) {
+			case ICAL_VEVENT_COMPONENT:
+				flag32 = DEFAULT_APPT_REMINDER_MINS;
+				break;
+			case ICAL_VTODO_COMPONENT:
+				flag32 = DEFAULT_TASK_REMINDER_MINS;
+				break;
+			default:
+				break;
+		}
+	set_value (PidLidReminderSet, &b);
+	set_value (PidLidReminderDelta, &flag32);
+	tt = icaltime_as_timet (utc_dtstart);
+	set_timet_value (PidLidReminderTime, tt);
+	tt = icaltime_as_timet (utc_dtstart) - (flag32 * SECS_IN_MINUTE);
+	/* ReminderNextTime: FIXME for recurrence */
+	set_timet_value (PidLidReminderSignalTime, tt);
+
+	/* Sensitivity, Private */
+	flag32 = olNormal;	/* default */
+	b = 0;			/* default */
+	prop = icalcomponent_get_first_property (ical_comp, ICAL_CLASS_PROPERTY);
+	if (prop)
+		flag32 = get_prop_from_class (icalproperty_get_class (prop));
+	if (flag32 == olPrivate || flag32 == olConfidential)
+		b = 1;
+	set_value (PidTagSensitivity, &flag32);
+	set_value (PidLidPrivate, &b);
+
+	tt = icaltime_as_timet (is_all_day ? all_day_dtstart : utc_dtstart);
+	set_timet_value (PidLidCommonStart, tt);
+	set_timet_value (PidTagStartDate, tt);
+
+	tt = icaltime_as_timet (is_all_day ? all_day_dtend : utc_dtend);
+	set_timet_value (PidLidCommonEnd, tt);
+	set_timet_value (PidTagEndDate, tt);
+
+	b = 1;
+	set_value (PidTagResponseRequested, &b);
+
+	/* PR_OWNER_APPT_ID needs to be set in certain cases only */
+	/* PR_ICON_INDEX needs to be set appropriately */
+
+	b = 0;
+	set_value (PidTagRtfInSync, &b);
+
+	if (kind == ICAL_VEVENT_COMPONENT) {
+		const gchar *mapi_tzid;
+		struct SBinary_short start_tz, end_tz;
+
+		set_value (PidLidAppointmentMessageClass, IPM_APPOINTMENT);
+
+		/* Busy Status */
+		flag32 = olBusy;
+		prop = icalcomponent_get_first_property (ical_comp, ICAL_TRANSP_PROPERTY);
+		if (prop)
+			flag32 = get_prop_from_transp (icalproperty_get_transp (prop));
+		if (cbdata->meeting_type == MEETING_CANCEL)
+			flag32 = olFree;
+		set_value (PidLidIntendedBusyStatus, &flag32);
+
+		if (cbdata->meeting_type == MEETING_REQUEST || cbdata->meeting_type == MEETING_REQUEST_RCVD) {
+			flag32 = olTentative;
+			set_value (PidLidBusyStatus, &flag32);
+		} else if (cbdata->meeting_type == MEETING_CANCEL) {
+			flag32 = olFree;
+			set_value (PidLidBusyStatus, &flag32);
+		} else
+			set_value (PidLidBusyStatus, &flag32);
+
+		/* Location */
+		text = icalcomponent_get_location (ical_comp);
+		if (!(text && *text))
+			text = "";
+		set_value (PidLidLocation, text);
+		set_value (PidLidWhere, text);
+		text = NULL;
+		/* Auto-Location is always FALSE - Evolution doesn't work that way */
+		b = 0;
+		set_value (PidLidAutoFillLocation, &b);
+
+		/* All-day event */
+		b = is_all_day ? 1 : 0;
+		set_value (PidLidAppointmentSubType, &b);
+
+		/* Start */
+		tt = icaltime_as_timet (is_all_day ? all_day_dtstart : utc_dtstart);
+		set_timet_value (PidLidAppointmentStartWhole, tt);
+		/* FIXME: for recurrence */
+		set_timet_value (PidLidClipStart, tt);
+
+		/* Start TZ */
+		mapi_tzid = e_mapi_cal_tz_util_get_mapi_equivalent ((dtstart_tz_location && *dtstart_tz_location) ? dtstart_tz_location : "UTC");
+		if (mapi_tzid && *mapi_tzid) {
+			e_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &start_tz, object);
+			set_value (PidLidAppointmentTimeZoneDefinitionStartDisplay, &start_tz);
+		}
+		set_value (PidLidTimeZoneDescription, mapi_tzid ? mapi_tzid : "");
+
+		/* End */
+		tt = icaltime_as_timet (is_all_day ? all_day_dtend : utc_dtend);
+		set_timet_value (PidLidAppointmentEndWhole, tt);
+		/* FIXME: for recurrence */
+		set_timet_value (PidLidClipEnd, tt);
+
+		/* End TZ */
+		mapi_tzid = e_mapi_cal_tz_util_get_mapi_equivalent ((dtend_tz_location && *dtend_tz_location) ? dtend_tz_location : "UTC");
+		if (mapi_tzid && *mapi_tzid) {
+			e_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &end_tz, object);
+			set_value (PidLidAppointmentTimeZoneDefinitionEndDisplay, &end_tz);
+		}
+
+		/* Recurrences also need to have this rather arbitrary index set
+		   to properly determine SDT/DST and appear in OWA (Bug #629057). */
+		if (e_cal_component_has_recurrences (comp)) {
+			uint64_t pltz;
+			icaltimezone *ictz;
+			const gchar *zone_location = dtstart_tz_location;
+
+			if (!zone_location)
+				zone_location = get_tzid_location ("*default-zone*", cbdata);
+
+			ictz = icaltimezone_get_builtin_timezone (zone_location);
+			pltz = e_mapi_cal_util_mapi_tz_pidlidtimezone (ictz);
+			set_value (PidLidTimeZone, &pltz);
+		}
+
+		/* Duration */
+		flag32 = icaldurationtype_as_int (icaltime_subtract (dtend, dtstart));
+		flag32 /= MINUTES_IN_HOUR;
+		set_value (PidLidAppointmentDuration, &flag32);
+
+		if (e_cal_component_has_recurrences (comp)) {
+			GSList *rrule_list = NULL;
+			struct icalrecurrencetype *rt = NULL;
+
+			e_cal_component_get_rrule_list (comp, &rrule_list);
+			rt = (struct icalrecurrencetype *)(rrule_list->data);
+
+			if (rt->freq == ICAL_DAILY_RECURRENCE)
+				flag32 = rectypeDaily;
+			else if (rt->freq == ICAL_WEEKLY_RECURRENCE)
+				flag32 = rectypeWeekly;
+			else if (rt->freq == ICAL_MONTHLY_RECURRENCE)
+				flag32 = rectypeMonthly;
+			else if (rt->freq == ICAL_YEARLY_RECURRENCE)
+				flag32 = rectypeYearly;
+			else
+				flag32 = rectypeNone;
+
+			e_cal_component_free_recur_list (rrule_list);
+		} else
+			flag32 = rectypeNone;
+		set_value (PidLidRecurrenceType, &flag32);
+
+		flag32 = cbdata->appt_id;
+		if (!flag32) {
+			gchar *propval;
+
+			propval = e_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-OWNER-APPT-ID");
+			if (propval && *propval) {
+				mapi_id_t as_id = 0;
+
+				if (e_mapi_util_mapi_id_from_string (propval, &as_id))
+					flag32 = (uint32_t) as_id;
+			}
+
+			g_free (propval);
+		}
+		set_value (PidTagOwnerAppointmentId, &flag32);
+
+		flag32 = cbdata->appt_seq;
+		set_value (PidLidAppointmentSequence, &flag32);
+
+		if (cbdata->cleanglobalid) {
+			set_value (PidLidCleanGlobalObjectId, cbdata->cleanglobalid);
+		}
+
+		if (cbdata->globalid) {
+			set_value (PidLidGlobalObjectId, cbdata->globalid);
+		}
+
+		flag32 = cbdata->resp;
+		set_value (PidLidResponseStatus, &flag32);
+
+		switch (cbdata->meeting_type) {
+		case MEETING_OBJECT :
+			set_value (PidTagMessageClass, IPM_APPOINTMENT);
+
+			flag32 = e_cal_component_has_recurrences (comp) ? RecurMeet : SingleMeet;
+			set_value (PidTagIconIndex, &flag32);
+
+			flag32 = 0x0171;
+			set_value (PidLidSideEffects, &flag32);
+
+			flag32 = asfMeeting;
+			set_value (PidLidAppointmentStateFlags, &flag32);
+
+			flag32 = mtgRequest;
+			set_value (PidLidMeetingType, &flag32);
+
+			b = 1;
+			set_value (PidLidFInvited, &b);
+
+			break;
+		case MEETING_OBJECT_RCVD :
+			set_value (PidTagMessageClass, IPM_APPOINTMENT);
+
+			flag32 = e_cal_component_has_recurrences (comp) ? RecurMeet : SingleMeet;
+			set_value (PidTagIconIndex, (gconstpointer ) &flag32);
+
+			flag32 = 0x0171;
+			set_value (PidLidSideEffects, &flag32);
+
+			flag32 = asfMeeting | asfReceived;
+			set_value (PidLidAppointmentStateFlags, &flag32);
+
+			flag32 = mtgRequest;
+			set_value (PidLidMeetingType, &flag32);
+
+			b = 1;
+			set_value (PidLidFInvited, &b);
+
+			break;
+		case MEETING_REQUEST :
+			set_value (PidTagMessageClass, IPM_SCHEDULE_MEETING_REQUEST);
+
+			flag32 = 0xFFFFFFFF;  /* no idea why this has to be -1, but that's what the docs say */
+			set_value (PidTagIconIndex, &flag32);
+
+			flag32 = 0x1C61;
+			set_value (PidLidSideEffects, &flag32);
+
+			flag32 = asfMeeting | asfReceived;
+			set_value (PidLidAppointmentStateFlags, &flag32);
+
+			flag32 = (cbdata->appt_seq == 0) ? mtgRequest : mtgFull;
+			set_value (PidLidMeetingType, &flag32);
+
+			b = 1;
+			set_value (PidLidFInvited, &b);
+
+			break;
+		case MEETING_REQUEST_RCVD :
+			set_value (PidTagMessageClass, IPM_APPOINTMENT);
+
+			flag32 = e_cal_component_has_recurrences (comp) ? RecurMeet : SingleMeet;
+			set_value (PidTagIconIndex, &flag32);
+
+			flag32 = 0x0171;
+			set_value (PidLidSideEffects, &flag32);
+
+			flag32 = asfMeeting | asfReceived;
+			set_value (PidLidAppointmentStateFlags, &flag32);
+
+			flag32 = mtgRequest;
+			set_value (PidLidMeetingType, &flag32);
+
+			b = 1;
+			set_value (PidLidFInvited, &b);
+
+			break;
+		case MEETING_CANCEL :
+			set_value (PidTagMessageClass, IPM_SCHEDULE_MEETING_CANCELED);
+
+			flag32 = 0xFFFFFFFF;  /* no idea why this has to be -1, but that's what the docs say */
+			set_value (PidTagIconIndex, &flag32);
+
+			flag32 = 0x1C61;
+			set_value (PidLidSideEffects, &flag32);
+
+			flag32 = asfMeeting | asfReceived | asfCanceled;
+			set_value (PidLidAppointmentStateFlags, &flag32);
+
+			flag32 = mtgEmpty;
+			set_value (PidLidMeetingType, &flag32);
+
+			b = 1;
+			set_value (PidLidFInvited, &b);
+
+			break;
+		case MEETING_RESPONSE :
+			#define prefix_subject(prefix) {					\
+				const gchar *summary;						\
+												\
+				summary = icalcomponent_get_summary (ical_comp);		\
+				if (!(summary && *summary))					\
+					summary = "";						\
+												\
+				summary = talloc_asprintf (mem_ctx, "%s %s", prefix, summary);	\
+												\
+				set_value (PidTagSubject, summary);				\
+				set_value (PidTagNormalizedSubject, summary);			\
+				if (cbdata->appt_seq == 0)					\
+					set_value (PidTagConversationTopic, summary);		\
+			}
+			if (cbdata->resp == olResponseAccepted) {
+				/* Translators: This is a meeting response prefix which will be shown in a message Subject */
+				prefix_subject (C_("MeetingResp", "Accepted:"));
+				text = IPM_SCHEDULE_MEETING_RESP_POS;
+			} else if (cbdata->resp == olResponseTentative) {
+				/* Translators: This is a meeting response prefix which will be shown in a message Subject */
+				prefix_subject (C_("MeetingResp", "Tentative:"));
+				text = IPM_SCHEDULE_MEETING_RESP_TENT;
+			} else if (cbdata->resp == olResponseDeclined) {
+				/* Translators: This is a meeting response prefix which will be shown in a message Subject */
+				prefix_subject (C_("MeetingResp", "Declined:"));
+				text = IPM_SCHEDULE_MEETING_RESP_NEG;
+			} else {
+				text = "";
+			}
+			#undef prefix_subject
+			set_value (PidTagMessageClass, text);
+			text = NULL;
+
+			flag32 = 0xFFFFFFFF;  /* no idea why this has to be -1, but that's what the docs say */
+			set_value (PidTagIconIndex, &flag32);
+
+			flag32 = 0x1C61;
+			set_value (PidLidSideEffects, &flag32);
+
+			flag32 = asfNone;
+			set_value (PidLidAppointmentStateFlags, &flag32);
+
+			flag32 = mtgEmpty;
+			set_value (PidLidMeetingType, &flag32);
+
+			break;
+		case NOT_A_MEETING :
+		default :
+			set_value (PidTagMessageClass, IPM_APPOINTMENT);
+
+			flag32 = e_cal_component_has_recurrences (comp) ? RecurAppt : SingleAppt;
+			set_value (PidTagIconIndex, &flag32);
+
+			flag32 = 0x0171;
+			set_value (PidLidSideEffects, &flag32);
+
+			flag32 = 0;
+			set_value (PidLidAppointmentStateFlags, &flag32);
+
+			b = 0;
+			set_value (PidLidFInvited, &b);
+
+			break;
+		}
+
+		b = e_cal_component_has_recurrences (comp);
+		set_value (PidLidRecurring, &b);
+		set_value (PidLidIsRecurring, &b);
+
+		if (b) {
+			struct SBinary_short bin;
+
+			if (e_mapi_cal_util_rrule_to_bin (comp, &bin, object)) {
+				set_value (PidLidAppointmentRecur, &bin);
+			}
+		}
+
+		/* FIXME: Modified exceptions */
+		b = e_cal_component_has_exceptions (comp) && FALSE; b = 0;
+		set_value (PidLidIsException, &b);
+
+		/* Counter Proposal for appointments : not supported */
+		b = 1;
+		set_value (PidLidAppointmentNotAllowPropose, &b);
+		b = 0;
+		set_value (PidLidAppointmentCounterProposal, &b);
+
+	} else if (kind == ICAL_VTODO_COMPONENT) {
+		gdouble d;
+
+		set_value (PidTagMessageClass, IPM_TASK);
+
+		/* Context menu flags */ /* FIXME: for assigned tasks */
+		flag32 = 0x0110;
+		set_value (PidLidSideEffects, &flag32);
+
+		/* Status, Percent complete, IsComplete */
+		flag32 = olTaskNotStarted;	/* default */
+		b = 0;				/* default */
+		d = 0.0;
+		prop = icalcomponent_get_first_property (ical_comp, ICAL_PERCENTCOMPLETE_PROPERTY);
+		if (prop)
+			d = 0.01 * icalproperty_get_percentcomplete (prop);
+
+		flag32 = get_prop_from_taskstatus (icalcomponent_get_status (ical_comp));
+		if (flag32 == olTaskComplete) {
+			b = 1;
+			d = 1.0;
+		}
+
+		set_value (PidLidTaskStatus, &flag32);
+		set_value (PidLidPercentComplete, &d);
+		set_value (PidLidTaskComplete, &b);
+
+		/* Date completed */
+		if (b) {
+			struct icaltimetype completed;
+			prop = icalcomponent_get_first_property (ical_comp, ICAL_COMPLETED_PROPERTY);
+			completed = icalproperty_get_completed (prop);
+
+			completed.hour = completed.minute = completed.second = 0; completed.is_date = completed.is_utc = 1;
+			tt = icaltime_as_timet (completed);
+			set_timet_value (PidLidTaskDateCompleted, tt);
+		}
+
+		/* Start */
+		dtstart.hour = dtstart.minute = dtstart.second = 0; dtstart.is_date = dtstart.is_utc = 1;
+		tt = icaltime_as_timet (dtstart);
+		if (!icaltime_is_null_time (dtstart)) {
+			set_timet_value (PidLidTaskStartDate, tt);
+		}
+
+		/* Due */
+		dtend.hour = dtend.minute = dtend.second = 0; dtend.is_date = dtend.is_utc = 1;
+		tt = icaltime_as_timet (dtend);
+		if (!icaltime_is_null_time (dtend)) {
+			set_timet_value (PidLidTaskDueDate, tt);
+		}
+
+		/* FIXME: Evolution does not support recurring tasks */
+		b = 0;
+		set_value (PidLidTaskFRecurring, &b);
+
+	} else if (kind == ICAL_VJOURNAL_COMPONENT) {
+		uint32_t color = olYellow;
+
+		set_value (PidTagMessageClass, IPM_STICKYNOTE);
+
+		/* Context menu flags */
+		flag32 = 0x0110;
+		set_value (PidLidSideEffects, &flag32);
+
+		flag32 = 0x0300 + color;
+		set_value (PidTagIconIndex, &flag32);
+
+		flag32 = color;
+		set_value (PidLidNoteColor, &flag32);
+
+		/* some random value */
+		flag32 = 0x00FF;
+		set_value (PidLidNoteWidth, &flag32);
+
+		/* some random value */
+		flag32 = 0x00FF;
+		set_value (PidLidNoteHeight, &flag32);
+	}
+
+	#undef set_value
+	#undef set_timet_value
+
+	if (cbdata->meeting_type == MEETING_RESPONSE || cbdata->meeting_type == NOT_A_MEETING)
+		e_mapi_cal_utils_add_organizer (object, comp);
+	else
+		e_mapi_cal_utils_add_recipients (object, comp);
+
+	e_mapi_cal_utils_add_attachments (object, comp);
+
+	return TRUE;
 }

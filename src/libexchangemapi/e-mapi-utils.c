@@ -1072,6 +1072,11 @@ e_mapi_utils_add_property (struct mapi_SPropValue_array *properties,
 	g_return_val_if_fail (propvalue != NULL, FALSE);
 	g_return_val_if_fail (mem_ctx != NULL, FALSE);
 
+	/* make copy of string properties */
+	if ((proptag & 0xFFFF) == PT_STRING8 ||
+	    (proptag & 0xFFFF) == PT_UNICODE)
+		propvalue = talloc_strdup (mem_ctx, (const gchar *) propvalue);
+
 	sprop.ulPropTag = proptag;
 	g_return_val_if_fail (set_SPropValue (&sprop, propvalue), FALSE);
 

@@ -1504,19 +1504,14 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	ECalComponent *comp;
 	mapi_id_t mid = 0;
 	gchar *tmp = NULL;
-	GSList *recipients = NULL;
-	GSList *attachments = NULL;
-	GSList *streams = NULL;
 	struct cal_cbdata cbdata = { 0 };
 	struct icaltimetype current;
-	const gchar *cache_dir;
 	GError *mapi_error = NULL;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
-	cache_dir = e_cal_backend_get_cache_dir (E_CAL_BACKEND (backend));
 
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
@@ -1547,25 +1542,6 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	e_cal_component_set_created (comp, &current);
 	e_cal_component_set_last_modified (comp, &current);
 
-	/* FIXME: [WIP] Add support for recurrences */
-	if (e_cal_component_has_recurrences (comp)) {
-		GByteArray *ba = e_mapi_cal_util_rrule_to_bin (comp, NULL);
-		if (ba) {
-			ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
-			stream->value = ba;
-			stream->proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, cancellable, NULL);
-			if (stream->proptag != MAPI_E_RESERVED)
-				streams = g_slist_append (streams, stream);
-		}
-	}
-
-	/* FIXME: [WIP] Add support for meetings/assigned tasks */
-	if (e_cal_component_has_attendees (comp))
-		e_mapi_cal_util_fetch_recipients (comp, &recipients);
-
-	if (e_cal_component_has_attachments (comp))
-		e_mapi_cal_util_fetch_attachments (comp, &attachments, cache_dir);
-
 	cbdata.kind = kind;
 	cbdata.username = (gchar *) ecbm_get_user_name (cbmapi);
 	cbdata.useridtype = (gchar *) "SMTP";
@@ -1578,26 +1554,37 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 	/* Check if object exists */
 	if (e_backend_get_online (E_BACKEND (backend))) {
+		gboolean status;
+		mapi_object_t obj_folder;
+		gboolean has_attendees = e_cal_component_has_attendees (comp);
+
 		/* Create an appointment */
 		cbdata.comp = comp;
 		cbdata.is_modify = FALSE;
 		cbdata.msgflags = MSGFLAG_READ;
-		cbdata.meeting_type = (recipients != NULL) ? MEETING_OBJECT : NOT_A_MEETING;
-		cbdata.resp = (recipients != NULL) ? olResponseOrganized : olResponseNone;
+		cbdata.meeting_type = has_attendees ? MEETING_OBJECT : NOT_A_MEETING;
+		cbdata.resp = has_attendees ? olResponseOrganized : olResponseNone;
 		cbdata.appt_id = e_mapi_cal_util_get_new_appt_id (priv->conn, priv->fid);
 		cbdata.appt_seq = 0;
 		cbdata.globalid = NULL;
 		cbdata.cleanglobalid = NULL;
 
-		mid = e_mapi_connection_create_item (priv->conn, priv->olFolder, priv->fid,
-						e_mapi_cal_utils_write_props_cb, &cbdata,
-						recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT, cancellable, &mapi_error);
-		g_free (cbdata.props);
+		if (priv->is_public_folder) {
+			status = e_mapi_connection_open_public_folder (priv->conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+		} else {
+			status = e_mapi_connection_open_personal_folder (priv->conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+		}
+
+		if (status) {
+			e_mapi_connection_create_object (priv->conn, &obj_folder, E_MAPI_CREATE_FLAG_NONE,
+							 e_mapi_cal_utils_comp_to_object, &cbdata,
+							 &mid, cancellable, &mapi_error);
+
+			e_mapi_connection_close_folder (priv->conn, &obj_folder, cancellable, &mapi_error);
+		}
+
 		if (!mid) {
 			g_object_unref (comp);
-			e_mapi_util_free_recipient_list (&recipients);
-			e_mapi_util_free_stream_list (&streams);
-			e_mapi_util_free_attachment_list (&attachments);
 			mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to create item on a server"));
 			if (mapi_error)
 				g_error_free (mapi_error);
@@ -1616,19 +1603,14 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		*new_ecalcomp = e_cal_component_clone (comp);
 		e_cal_backend_notify_component_created (E_CAL_BACKEND (cbmapi), *new_ecalcomp);
 	} else {
-		e_mapi_util_free_recipient_list (&recipients);
-		e_mapi_util_free_stream_list (&streams);
-		e_mapi_util_free_attachment_list (&attachments);
 		g_propagate_error (error, EDC_ERROR (UnsupportedMethod));
+		g_object_unref (comp);
 		return;
 	}
 
 	run_delta_thread (cbmapi);
 
 	g_object_unref (comp);
-	e_mapi_util_free_recipient_list (&recipients);
-	e_mapi_util_free_stream_list (&streams);
-	e_mapi_util_free_attachment_list (&attachments);
 }
 
 static gboolean
@@ -1696,14 +1678,10 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	gboolean status;
 	mapi_id_t mid;
 	const gchar *uid = NULL, *rid = NULL;
-	GSList *recipients = NULL;
-	GSList *streams = NULL;
-	GSList *attachments = NULL;
 	struct cal_cbdata cbdata = { 0 };
 	gboolean no_increment = FALSE;
 	icalproperty *prop;
 	struct icaltimetype current;
-	const gchar *cache_dir;
 	GError *mapi_error = NULL;
 
 	*old_ecalcomp = *new_ecalcomp = NULL;
@@ -1711,7 +1689,6 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	priv = cbmapi->priv;
 
 	kind = e_cal_backend_get_kind (backend);
-	cache_dir = e_cal_backend_get_cache_dir (backend);
 
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
@@ -1749,24 +1726,6 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	current = icaltime_current_time_with_zone (icaltimezone_get_utc_timezone ());
 	e_cal_component_set_last_modified (comp, &current);
 
-	/* FIXME: [WIP] Add support for recurrences */
-	if (e_cal_component_has_recurrences (comp)) {
-		GByteArray *ba = e_mapi_cal_util_rrule_to_bin (comp, NULL);
-		if (ba) {
-			ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
-			stream->value = ba;
-			stream->proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, cancellable, NULL);
-			if (stream->proptag != MAPI_E_RESERVED)
-				streams = g_slist_append (streams, stream);
-		}
-	}
-
-	if (e_cal_component_has_attendees (comp))
-		e_mapi_cal_util_fetch_recipients (comp, &recipients);
-
-	if (e_cal_component_has_attachments (comp))
-		e_mapi_cal_util_fetch_attachments (comp, &attachments, cache_dir);
-
 	e_cal_component_get_uid (comp, &uid);
 	/* rid = e_cal_component_get_recurid_as_string (comp); */
 
@@ -1775,6 +1734,9 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	cbdata.get_tz_data = cbmapi;
 
 	if (e_backend_get_online (E_BACKEND (backend))) {
+		gboolean has_attendees = e_cal_component_has_attendees (comp);
+		mapi_object_t obj_folder;
+
 		/* when online, send the item to the server */
 		/* check if the object exists */
 		cache_comp = e_cal_backend_store_get_component (priv->store, uid, rid);
@@ -1786,9 +1748,6 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		if (!cache_comp) {
 			g_message ("CRITICAL : Could not find the object in cache");
 			g_object_unref (comp);
-			e_mapi_util_free_recipient_list (&recipients);
-			e_mapi_util_free_stream_list (&streams);
-			e_mapi_util_free_attachment_list (&attachments);
 			g_propagate_error (error, EDC_ERROR (ObjectNotFound));
 			return;
 		}
@@ -1801,8 +1760,8 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 		get_server_data (cbmapi, comp, &cbdata, cancellable);
 		if (modifier_is_organizer(cbmapi, comp)) {
-			cbdata.meeting_type = (recipients != NULL) ? MEETING_OBJECT : NOT_A_MEETING;
-			cbdata.resp = (recipients != NULL) ? olResponseOrganized : olResponseNone;
+			cbdata.meeting_type = has_attendees ? MEETING_OBJECT : NOT_A_MEETING;
+			cbdata.resp = has_attendees ? olResponseOrganized : olResponseNone;
 			if (!no_increment)
 				cbdata.appt_seq += 1;
 			free_and_dupe_str (cbdata.username, ecbm_get_user_name (cbmapi));
@@ -1812,21 +1771,28 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 			free_and_dupe_str (cbdata.owneridtype, "SMTP");
 			free_and_dupe_str (cbdata.ownerid, ecbm_get_owner_email (cbmapi));
 		} else {
-			cbdata.resp = (recipients != NULL) ? find_my_response(cbmapi, comp) : olResponseNone;
-			cbdata.meeting_type = (recipients != NULL) ? MEETING_OBJECT_RCVD : NOT_A_MEETING;
+			cbdata.resp = has_attendees ? find_my_response(cbmapi, comp) : olResponseNone;
+			cbdata.meeting_type = has_attendees ? MEETING_OBJECT_RCVD : NOT_A_MEETING;
 		}
 
-		status = e_mapi_connection_modify_item (priv->conn, priv->olFolder, priv->fid, mid,
-						e_mapi_cal_utils_write_props_cb, &cbdata,
-						recipients, attachments, streams, MAPI_OPTIONS_DONT_SUBMIT, cancellable, &mapi_error);
-		g_free (cbdata.props);
+		if (priv->is_public_folder) {
+			status = e_mapi_connection_open_public_folder (priv->conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+		} else {
+			status = e_mapi_connection_open_personal_folder (priv->conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+		}
+
+		if (status) {
+			status = e_mapi_connection_modify_object (priv->conn, &obj_folder, mid, 
+								  e_mapi_cal_utils_comp_to_object, &cbdata,
+								  cancellable, &mapi_error);
+
+			status = e_mapi_connection_close_folder (priv->conn, &obj_folder, cancellable, &mapi_error) && status;
+		}
+
 		free_server_data (&cbdata);
 		if (!status) {
 			g_object_unref (comp);
 			g_object_unref (cache_comp);
-			e_mapi_util_free_recipient_list (&recipients);
-			e_mapi_util_free_stream_list (&streams);
-			e_mapi_util_free_attachment_list (&attachments);
 
 			mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to modify item on a server"));
 			if (mapi_error)
@@ -1836,9 +1802,6 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	} else {
 		g_object_unref (comp);
 		g_object_unref (cache_comp);
-		e_mapi_util_free_recipient_list (&recipients);
-		e_mapi_util_free_stream_list (&streams);
-		e_mapi_util_free_attachment_list (&attachments);
 		g_propagate_error (error, EDC_ERROR (UnsupportedMethod));
 		return;
 	}
@@ -1851,9 +1814,6 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 	g_object_unref (comp);
 	g_object_unref (cache_comp);
-	e_mapi_util_free_recipient_list (&recipients);
-	e_mapi_util_free_stream_list (&streams);
-	e_mapi_util_free_attachment_list (&attachments);
 }
 
 static void
@@ -1960,14 +1920,12 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 	ECalBackendMAPIPrivate *priv;
 	icalcomponent_kind kind;
 	icalcomponent *icalcomp;
-	const gchar *cache_dir;
 	GError *mapi_error = NULL;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
-	cache_dir = e_cal_backend_get_cache_dir (E_CAL_BACKEND (backend));
 
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
@@ -1994,32 +1952,15 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 			ECalComponent *comp = e_cal_component_new ();
 			struct cal_cbdata cbdata = { 0 };
 			mapi_id_t mid = 0;
-			GSList *recipients = NULL;
-			GSList *attachments = NULL;
-			GSList *streams = NULL;
 			const gchar *compuid;
 			gchar *propval;
 			struct Binary_r globalid = { 0 }, cleanglobalid = { 0 };
 			struct timeval *exception_repleace_time = NULL, ex_rep_time = { 0 };
 			struct FILETIME creation_time = { 0 };
 			struct icaltimetype ical_creation_time = { 0 };
+			mapi_object_t obj_folder;
 
 			e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
-
-			/* FIXME: Add support for recurrences */
-			if (e_cal_component_has_recurrences (comp)) {
-				GByteArray *ba = e_mapi_cal_util_rrule_to_bin (comp, NULL);
-				if (ba) {
-					ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
-					stream->value = ba;
-					stream->proptag = e_mapi_connection_resolve_named_prop (priv->conn, priv->fid, PidLidAppointmentRecur, cancellable, NULL);
-					if (stream->proptag != MAPI_E_RESERVED)
-						streams = g_slist_append (streams, stream);
-				}
-			}
-
-			if (e_cal_component_has_attachments (comp))
-				e_mapi_cal_util_fetch_attachments (comp, &attachments, cache_dir);
 
 			cbdata.kind = kind;
 			cbdata.comp = comp;
@@ -2030,27 +1971,19 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 			case ICAL_METHOD_REQUEST :
 				cbdata.meeting_type = MEETING_REQUEST;
 				cbdata.resp = olResponseNotResponded;
-				if (e_cal_component_has_attendees (comp))
-					e_mapi_cal_util_fetch_recipients (comp, &recipients);
 				break;
 			case ICAL_METHOD_CANCEL :
 				cbdata.meeting_type = MEETING_CANCEL;
 				cbdata.resp = olResponseNotResponded;
-				if (e_cal_component_has_attendees (comp))
-					e_mapi_cal_util_fetch_recipients (comp, &recipients);
 				break;
 			case ICAL_METHOD_REPLY:
 			case ICAL_METHOD_RESPONSE :
 				cbdata.meeting_type = MEETING_RESPONSE;
 				cbdata.resp = find_my_response (cbmapi, comp);
-				if (e_cal_component_has_organizer (comp))
-					e_mapi_cal_util_fetch_organizer (comp, &recipients);
 				break;
 			default :
 				cbdata.meeting_type = NOT_A_MEETING;
 				cbdata.resp = olResponseNone;
-				if (e_cal_component_has_attendees (comp))
-					e_mapi_cal_util_fetch_organizer (comp, &recipients);
 				break;
 			}
 
@@ -2118,20 +2051,23 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 			cbdata.globalid = &globalid;
 			cbdata.cleanglobalid = &cleanglobalid;
 
-			mid = e_mapi_connection_create_item (priv->conn, olFolderSentMail, 0,
-							e_mapi_cal_utils_write_props_cb, &cbdata,
-							recipients, attachments, streams, MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE, cancellable, &mapi_error);
+			mid = 0;
+			if (e_mapi_connection_open_default_folder (priv->conn, olFolderSentMail, &obj_folder, cancellable, &mapi_error)) {
+				e_mapi_connection_create_object (priv->conn, &obj_folder, E_MAPI_CREATE_FLAG_SUBMIT,
+								 e_mapi_cal_utils_comp_to_object, &cbdata,
+								 &mid, cancellable, &mapi_error);
+
+				e_mapi_connection_close_folder (priv->conn, &obj_folder, cancellable, &mapi_error);
+			}
+
 			cbdata.globalid = NULL;
 			cbdata.cleanglobalid = NULL;
 			free_server_data (&cbdata);
-			g_free (cbdata.props);
 			g_free (globalid.lpb);
 			g_free (cleanglobalid.lpb);
 
 			if (!mid) {
 				g_object_unref (comp);
-				e_mapi_util_free_recipient_list (&recipients);
-				e_mapi_util_free_attachment_list (&attachments);
 				mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to create item on a server"));
 				if (mapi_error)
 					g_error_free (mapi_error);
@@ -2139,8 +2075,6 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 			}
 
 			g_object_unref (comp);
-			e_mapi_util_free_recipient_list (&recipients);
-			e_mapi_util_free_attachment_list (&attachments);
 
 			subcomp = icalcomponent_get_next_component (icalcomp,
 								    e_cal_backend_get_kind (E_CAL_BACKEND (backend)));
@@ -2358,11 +2292,8 @@ ecbm_add_timezone (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 		zone = icaltimezone_new ();
 		icaltimezone_set_component (zone, tz_comp);
 
-		if (e_cal_backend_store_put_timezone (priv->store, zone) == FALSE) {
-			icaltimezone_free (zone, 1);
-			g_propagate_error (error, EDC_ERROR_EX (OtherError, "Cannot push timezone to cache"));
-			return;
-		}
+		e_cal_backend_store_put_timezone (priv->store, zone);
+
 		icaltimezone_free (zone, 1);
 	}
 }

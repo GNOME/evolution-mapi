@@ -1118,8 +1118,10 @@ compare_guint32 (gconstpointer a, gconstpointer b, gpointer user_data)
 	return (*((guint32 *) a) - *((guint32 *) b));
 }
 
-GByteArray *
-e_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps)
+gboolean
+e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
+			      struct SBinary_short *bin,
+			      TALLOC_CTX *mem_ctx)
 {
 	struct icalrecurrencetype *rt;
 	gint i;
@@ -1128,8 +1130,12 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps)
 	struct ema_AppointmentRecurrencePattern arp;
 	struct ema_RecurrencePattern *rp; /* Convenience ptr */
 
+	g_return_val_if_fail (comp != NULL, FALSE);
+	g_return_val_if_fail (bin != NULL, FALSE);
+	g_return_val_if_fail (mem_ctx != NULL, FALSE);
+
 	if (!e_cal_component_has_recurrences (comp))
-		return NULL;
+		return FALSE;
 
 	e_cal_component_get_rrule_list (comp, &rrule_list);
 	e_cal_component_get_exdate_list (comp, &exdate_list);
@@ -1357,16 +1363,21 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp, GSList *modified_comps)
 	/* Reserved Block 2 Size */
 	arp_to_gba(&arp, ba);
 
-cleanup:
+ cleanup:
 	free_arp_contents(&arp);
 	e_cal_component_free_exdate_list (exdate_list);
 	e_cal_component_free_recur_list (rrule_list);
 
-	g_print ("\n== ICAL to MAPI == The recurrence blob data is as follows:\n");
+	/*g_print ("\n== ICAL to MAPI == The recurrence blob data is as follows:\n");
 	for (i = 0; i < ba->len; ++i)
 		g_print ("0x%02X ", ba->data[i]);
-	g_print("\n== End of stream ==\n");
+	g_print("\n== End of stream ==\n");*/
 
-	return ba;
+	bin->cb = ba->len;
+	bin->lpb = talloc_memdup (mem_ctx, ba->data, ba->len);
+
+	g_byte_array_free (ba, TRUE);
+
+	return TRUE;
 }
 

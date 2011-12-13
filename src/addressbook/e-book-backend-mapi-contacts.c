@@ -130,59 +130,27 @@ cmp_member_id (gconstpointer a, gconstpointer b, gpointer ht)
 typedef struct {
 	EContact *contact;
 	EBookBackendSqliteDB *db;
-} MapiCreateitemData;
+} EMapiCreateitemData;
 
 static gboolean
-mapi_book_write_props (EMapiConnection *conn,
-		       mapi_id_t fid,
-		       TALLOC_CTX *mem_ctx,
-		       struct SPropValue **values,
-		       uint32_t *n_values,
-		       gpointer data,
-		       GCancellable *cancellable,
-		       GError **perror)
+ebbm_contact_to_object (EMapiConnection *conn,
+			TALLOC_CTX *mem_ctx,
+			EMapiObject **pobject, /* out */
+			gpointer user_data,
+			GCancellable *cancellable,
+			GError **perror)
 {
-	/* Do not make this array static, below function modifies it.
-	   The array is used to just ensure named ids are known later. */
-	ResolveNamedIDsData nids[] = {
-		{ PidLidDistributionListName, 0 },
-		{ PidLidDistributionListOneOffMembers, 0 },
-		{ PidLidDistributionListMembers, 0 },
-		{ PidLidDistributionListChecksum, 0 },
-		{ PidLidFileUnder, 0 },
-		{ PidLidFileUnderId, 0 },
-		{ PidLidEmail1OriginalDisplayName, 0 },
-		{ PidLidEmail1EmailAddress, 0 },
-		{ PidLidEmail2EmailAddress, 0 },
-		{ PidLidEmail3EmailAddress, 0 },
-		{ PidLidHtml, 0 },
-		{ PidLidInstantMessagingAddress, 0 },
-		{ PidLidHomeAddress, 0 },
-		{ PidLidWorkAddress, 0 },
-		{ PidLidEmail2OriginalDisplayName, 0 },
-		{ PidLidEmail3OriginalDisplayName, 0 }
-	};
+	EMapiCreateitemData *mcd = user_data;
+	EMapiObject *object;
 
-	MapiCreateitemData *mcd = data;
-
-	#define set_str_value(hex, val) G_STMT_START { \
-		if (!e_mapi_utils_add_spropvalue (mem_ctx, values, n_values, hex, val ? val : "")) \
+	#define set_value(hex, val) G_STMT_START { \
+		if (!e_mapi_utils_add_property (&object->properties, hex, val, object)) \
 			return FALSE;	\
 		} G_STMT_END
 
-	#define set_str_named_value(named_id, val) G_STMT_START { \
-		if (!e_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, named_id, val ? val : "", cancellable, perror)) \
-			return FALSE;	\
-		} G_STMT_END
-
-	#define set_str_con_value(hex, field_id) G_STMT_START { \
+	#define set_con_value(hex, field_id) G_STMT_START { \
 		if (e_contact_get (mcd->contact, field_id)) { \
-			set_str_value (hex, e_contact_get (mcd->contact, field_id)); \
-		} } G_STMT_END
-
-	#define set_str_named_con_value(named_id, field_id) G_STMT_START { \
-		if (e_contact_get (mcd->contact, field_id)) { \
-			set_str_named_value (named_id, e_contact_get (mcd->contact, field_id)); \
+			set_value (hex, e_contact_get (mcd->contact, field_id)); \
 		} } G_STMT_END
 
 	g_return_val_if_fail (mcd != NULL, FALSE);
@@ -190,18 +158,17 @@ mapi_book_write_props (EMapiConnection *conn,
 	g_return_val_if_fail (mcd->db != NULL, FALSE);
 	g_return_val_if_fail (conn != NULL, FALSE);
 	g_return_val_if_fail (mem_ctx != NULL, FALSE);
-	g_return_val_if_fail (values != NULL, FALSE);
-	g_return_val_if_fail (n_values != NULL, FALSE);
+	g_return_val_if_fail (pobject != NULL, FALSE);
 
-	if (!e_mapi_connection_resolve_named_props (conn, fid, nids, G_N_ELEMENTS (nids), cancellable, perror))
-		return FALSE;
+	object = e_mapi_object_new (mem_ctx);
+	*pobject = object;
 
 	if (GPOINTER_TO_INT (e_contact_get (mcd->contact, E_CONTACT_IS_LIST))) {
 		const gchar *uid = NULL;
 		EContact *old_contact = NULL;
 		GList *local, *l;
 		struct BinaryArray_r *members, *oneoff_members;
-		uint32_t list_size = 0, u32, crc32 = 0;
+		uint32_t u32, crc32 = 0;
 		GHashTable *member_values = NULL, *member_ids = NULL;
 		GError *error = NULL;
 
@@ -240,14 +207,13 @@ mapi_book_write_props (EMapiConnection *conn,
 		if (error)
 			g_error_free (error);
 
-		set_str_value (PR_MESSAGE_CLASS, IPM_DISTLIST);
+		set_value (PidTagMessageClass, IPM_DISTLIST);
 		u32 = 0xFFFFFFFF;
-		if (!e_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values, PidLidFileUnderId, &u32, cancellable, perror))
-			return FALSE;
-		set_str_named_con_value (PidLidFileUnder, E_CONTACT_FILE_AS);
-		set_str_named_con_value (PidLidDistributionListName, E_CONTACT_FILE_AS);
-		set_str_con_value (PR_DISPLAY_NAME_UNICODE, E_CONTACT_FILE_AS);
-		set_str_con_value (PR_NORMALIZED_SUBJECT_UNICODE, E_CONTACT_FILE_AS);
+		set_value (PidLidFileUnderId, &u32);
+		set_con_value (PidLidFileUnder, E_CONTACT_FILE_AS);
+		set_con_value (PidLidDistributionListName, E_CONTACT_FILE_AS);
+		set_con_value (PidTagDisplayName, E_CONTACT_FILE_AS);
+		set_con_value (PidTagNormalizedSubject, E_CONTACT_FILE_AS);
 
 		local = e_contact_get_attributes (mcd->contact, E_CONTACT_EMAIL);
 		if (member_ids)
@@ -292,7 +258,6 @@ mapi_book_write_props (EMapiConnection *conn,
 					e_mapi_util_recip_entryid_generate_smtp (mem_ctx, &oneoff_members->lpbin[oneoff_members->cValues], nm ? nm : "", eml);
 					oneoff_members->cValues++;
 
-					list_size += MAX (oneoff_members->lpbin[oneoff_members->cValues - 1].cb, members->lpbin[members->cValues - 1].cb);
 					crc32 = e_mapi_utils_push_crc32 (crc32, members->lpbin[members->cValues - 1].lpb, members->lpbin[members->cValues - 1].cb);
 				}
 			}
@@ -308,63 +273,51 @@ mapi_book_write_props (EMapiConnection *conn,
 		g_list_foreach (local, (GFunc)e_vcard_attribute_free, NULL);
 		g_list_free (local);
 
-		if (!e_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values,
-			PidLidDistributionListOneOffMembers, oneoff_members, cancellable, perror))
-			return FALSE;
-
-		if (!e_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values,
-			PidLidDistributionListMembers, members, cancellable, perror))
-			return FALSE;
-
-		if (!e_mapi_utils_add_spropvalue_namedid (conn, fid, mem_ctx, values, n_values,
-			PidLidDistributionListChecksum, &crc32, cancellable, perror))
-			return FALSE;
-
-		/* list_size shouldn't exceed 15000 bytes, is so, use a stream instead of those properties above, but for now... */
-		if (list_size > 15000)
-			return FALSE;
+		set_value (PidLidDistributionListOneOffMembers, oneoff_members);
+		set_value (PidLidDistributionListMembers, members);
+		set_value (PidLidDistributionListChecksum, &crc32);
 
 		return TRUE;
 	}
 
-	set_str_value (PR_MESSAGE_CLASS, IPM_CONTACT);
-	set_str_named_con_value (PidLidFileUnder, E_CONTACT_FILE_AS);
+	set_value (PidTagMessageClass, IPM_CONTACT);
+	set_con_value (PidLidFileUnder, E_CONTACT_FILE_AS);
 
-	set_str_con_value (PR_DISPLAY_NAME_UNICODE, E_CONTACT_FULL_NAME);
-	set_str_con_value (PR_NORMALIZED_SUBJECT_UNICODE, E_CONTACT_FILE_AS);
-	set_str_named_con_value (PidLidEmail1OriginalDisplayName, E_CONTACT_EMAIL_1);
-	/*set_str_named_con_value (PidLidEmail1EmailAddress, E_CONTACT_EMAIL_1);*/
+	set_con_value (PidTagDisplayName, E_CONTACT_FULL_NAME);
+	set_con_value (PidTagNormalizedSubject, E_CONTACT_FILE_AS);
+	set_con_value (PidLidEmail1OriginalDisplayName, E_CONTACT_EMAIL_1);
+	/*set_con_value (PidLidEmail1EmailAddress, E_CONTACT_EMAIL_1);*/
 
-	/*set_str_con_value (0x8083001e, E_CONTACT_EMAIL_1);*/
-	set_str_named_con_value (PidLidEmail2EmailAddress, E_CONTACT_EMAIL_2);
+	/*set_con_value (0x8083001e, E_CONTACT_EMAIL_1);*/
+	set_con_value (PidLidEmail2EmailAddress, E_CONTACT_EMAIL_2);
 
-	set_str_named_con_value (PidLidEmail3EmailAddress, E_CONTACT_EMAIL_3);
-	/*set_str_named_con_value (PidLidEmail3OriginalDisplayName, E_CONTACT_EMAIL_3);*/
+	set_con_value (PidLidEmail3EmailAddress, E_CONTACT_EMAIL_3);
+	/*set_con_value (PidLidEmail3OriginalDisplayName, E_CONTACT_EMAIL_3);*/
 
-	set_str_named_con_value (PidLidHtml, E_CONTACT_HOMEPAGE_URL);
-	set_str_named_con_value (PidLidFreeBusyLocation, E_CONTACT_FREEBUSY_URL);
+	set_con_value (PidLidHtml, E_CONTACT_HOMEPAGE_URL);
+	set_con_value (PidLidFreeBusyLocation, E_CONTACT_FREEBUSY_URL);
 
-	set_str_con_value (PR_OFFICE_TELEPHONE_NUMBER_UNICODE, E_CONTACT_PHONE_BUSINESS);
-	set_str_con_value (PR_HOME_TELEPHONE_NUMBER_UNICODE, E_CONTACT_PHONE_HOME);
-	set_str_con_value (PR_MOBILE_TELEPHONE_NUMBER_UNICODE, E_CONTACT_PHONE_MOBILE);
-	set_str_con_value (PR_HOME_FAX_NUMBER_UNICODE, E_CONTACT_PHONE_HOME_FAX);
-	set_str_con_value (PR_BUSINESS_FAX_NUMBER_UNICODE, E_CONTACT_PHONE_BUSINESS_FAX);
-	set_str_con_value (PR_PAGER_TELEPHONE_NUMBER_UNICODE, E_CONTACT_PHONE_PAGER);
-	set_str_con_value (PR_ASSISTANT_TELEPHONE_NUMBER_UNICODE, E_CONTACT_PHONE_ASSISTANT);
-	set_str_con_value (PR_COMPANY_MAIN_PHONE_NUMBER_UNICODE, E_CONTACT_PHONE_COMPANY);
+	set_con_value (PidTagBusinessTelephoneNumber, E_CONTACT_PHONE_BUSINESS);
+	set_con_value (PidTagHomeTelephoneNumber, E_CONTACT_PHONE_HOME);
+	set_con_value (PidTagMobileTelephoneNumber, E_CONTACT_PHONE_MOBILE);
+	set_con_value (PidTagHomeFaxNumber, E_CONTACT_PHONE_HOME_FAX);
+	set_con_value (PidTagBusinessFaxNumber, E_CONTACT_PHONE_BUSINESS_FAX);
+	set_con_value (PidTagPagerTelephoneNumber, E_CONTACT_PHONE_PAGER);
+	set_con_value (PidTagAssistantTelephoneNumber, E_CONTACT_PHONE_ASSISTANT);
+	set_con_value (PidTagCompanyMainTelephoneNumber, E_CONTACT_PHONE_COMPANY);
 
-	set_str_con_value (PR_MANAGER_NAME_UNICODE, E_CONTACT_MANAGER);
-	set_str_con_value (PR_ASSISTANT_UNICODE, E_CONTACT_ASSISTANT);
-	set_str_con_value (PR_COMPANY_NAME_UNICODE, E_CONTACT_ORG);
-	set_str_con_value (PR_DEPARTMENT_NAME_UNICODE, E_CONTACT_ORG_UNIT);
-	set_str_con_value (PR_PROFESSION_UNICODE, E_CONTACT_ROLE);
-	set_str_con_value (PR_TITLE_UNICODE, E_CONTACT_TITLE);
+	set_con_value (PidTagManagerName, E_CONTACT_MANAGER);
+	set_con_value (PidTagAssistant, E_CONTACT_ASSISTANT);
+	set_con_value (PidTagCompanyName, E_CONTACT_ORG);
+	set_con_value (PidTagDepartmentName, E_CONTACT_ORG_UNIT);
+	set_con_value (PidTagProfession, E_CONTACT_ROLE);
+	set_con_value (PidTagTitle, E_CONTACT_TITLE);
 
-	set_str_con_value (PR_OFFICE_LOCATION_UNICODE, E_CONTACT_OFFICE);
-	set_str_con_value (PR_SPOUSE_NAME_UNICODE, E_CONTACT_SPOUSE);
+	set_con_value (PidTagOfficeLocation, E_CONTACT_OFFICE);
+	set_con_value (PidTagSpouseName, E_CONTACT_SPOUSE);
 
-	set_str_con_value (PR_BODY_UNICODE, E_CONTACT_NOTE);
-	set_str_con_value (PR_NICKNAME_UNICODE, E_CONTACT_NICKNAME);
+	set_con_value (PidTagBody, E_CONTACT_NOTE);
+	set_con_value (PidTagNickname, E_CONTACT_NICKNAME);
 
 	/* BDAY AND ANNV */
 	if (e_contact_get (mcd->contact, E_CONTACT_BIRTH_DATE)) {
@@ -378,8 +331,7 @@ mapi_book_write_props (EMapiConnection *conn,
 
 		e_mapi_util_time_t_to_filetime (mktime (&tmtime) + (24 * 60 * 60), &t);
 
-		if (!e_mapi_utils_add_spropvalue (mem_ctx, values, n_values, PR_BIRTHDAY, &t))
-			return FALSE;
+		set_value (PidTagBirthday, &t);
 	}
 
 	if (e_contact_get (mcd->contact, E_CONTACT_ANNIVERSARY)) {
@@ -393,37 +345,38 @@ mapi_book_write_props (EMapiConnection *conn,
 
 		e_mapi_util_time_t_to_filetime (mktime (&tmtime) + (24 * 60 * 60), &t);
 
-		if (!e_mapi_utils_add_spropvalue (mem_ctx, values, n_values, PR_WEDDING_ANNIVERSARY, &t))
-			return FALSE;
+		set_value (PidTagWeddingAnniversary, &t);
 	}
 
 	/* Home and Office address */
 	if (e_contact_get (mcd->contact, E_CONTACT_ADDRESS_HOME)) {
 		EContactAddress *contact_addr = e_contact_get (mcd->contact, E_CONTACT_ADDRESS_HOME);
 
-		set_str_named_value (PidLidHomeAddress, contact_addr->street);
-		set_str_value (PR_HOME_ADDRESS_POST_OFFICE_BOX_UNICODE, contact_addr->ext);
-		set_str_value (PR_HOME_ADDRESS_CITY_UNICODE, contact_addr->locality);
-		set_str_value (PR_HOME_ADDRESS_STATE_OR_PROVINCE_UNICODE, contact_addr->region);
-		set_str_value (PR_HOME_ADDRESS_POSTAL_CODE_UNICODE, contact_addr->code);
-		set_str_value (PR_HOME_ADDRESS_COUNTRY_UNICODE, contact_addr->country);
+		set_value (PidLidHomeAddress, contact_addr->street);
+		set_value (PidTagHomeAddressPostOfficeBox, contact_addr->ext);
+		set_value (PidTagHomeAddressCity, contact_addr->locality);
+		set_value (PidTagHomeAddressStateOrProvince, contact_addr->region);
+		set_value (PidTagHomeAddressPostalCode, contact_addr->code);
+		set_value (PidTagHomeAddressCountry, contact_addr->country);
 	}
 
 	if (e_contact_get (mcd->contact, E_CONTACT_ADDRESS_WORK)) {
 		EContactAddress *contact_addr = e_contact_get (mcd->contact, E_CONTACT_ADDRESS_WORK);
 
-		set_str_named_value (PidLidWorkAddress, contact_addr->street);
-		set_str_value (PR_POST_OFFICE_BOX_UNICODE, contact_addr->ext);
-		set_str_value (PR_LOCALITY_UNICODE, contact_addr->locality);
-		set_str_value (PR_STATE_OR_PROVINCE_UNICODE, contact_addr->region);
-		set_str_value (PR_POSTAL_CODE_UNICODE, contact_addr->code);
-		set_str_value (PR_COUNTRY_UNICODE, contact_addr->country);
+		set_value (PidLidWorkAddress, contact_addr->street);
+		set_value (PidTagPostOfficeBox, contact_addr->ext);
+		set_value (PidTagLocality, contact_addr->locality);
+		set_value (PidTagStateOrProvince, contact_addr->region);
+		set_value (PidTagPostalCode, contact_addr->code);
+		set_value (PidTagCountry, contact_addr->country);
 	}
 
 	if (e_contact_get (mcd->contact, E_CONTACT_IM_AIM)) {
 		GList *l = e_contact_get (mcd->contact, E_CONTACT_IM_AIM);
-		set_str_named_value (PidLidInstantMessagingAddress, l->data);
+		set_value (PidLidInstantMessagingAddress, l->data);
 	}
+
+	#undef set_value
 
 	return TRUE;
 }
@@ -769,9 +722,11 @@ ebbm_contacts_create_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 	EBookBackendMAPIContacts *ebmac;
 	EBookBackendMAPIContactsPrivate *priv;
 	EMapiConnection *conn;
-	MapiCreateitemData mcd;
+	EMapiCreateitemData mcd;
 	GError *mapi_error = NULL;
-	mapi_id_t mid;
+	mapi_id_t mid = 0;
+	mapi_object_t obj_folder;
+	gboolean status;
 	gchar *id;
 	EContact *contact;
 
@@ -810,9 +765,17 @@ ebbm_contacts_create_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 	e_book_backend_mapi_get_db (ebma, &mcd.db);
 	mcd.contact = contact;
 
-	mid = e_mapi_connection_create_item (conn, olFolderContacts, priv->fid,
-		mapi_book_write_props, &mcd,
-		NULL, NULL, NULL, MAPI_OPTIONS_DONT_SUBMIT | (priv->is_public_folder ? MAPI_OPTIONS_USE_PFSTORE : 0), cancellable, &mapi_error);
+	if (priv->is_public_folder)
+		status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+	else
+		status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+
+	if (status) {
+		e_mapi_connection_create_object (conn, &obj_folder, E_MAPI_CREATE_FLAG_NONE,
+						 ebbm_contact_to_object, &mcd,
+						 &mid, cancellable, &mapi_error);
+		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
+	}
 
 	e_book_backend_mapi_unlock_connection (ebma);
 
@@ -907,7 +870,7 @@ ebbm_contacts_modify_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 	EBookBackendMAPIContacts *ebmac;
 	EBookBackendMAPIContactsPrivate *priv;
 	EMapiConnection *conn;
-	MapiCreateitemData mcd;
+	EMapiCreateitemData mcd;
 	EContact *contact;
 	GError *mapi_error = NULL;
 	mapi_id_t mid;
@@ -948,9 +911,23 @@ ebbm_contacts_modify_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 	mcd.contact = contact;
 
 	if (e_mapi_util_mapi_id_from_string (e_contact_get_const (contact, E_CONTACT_UID), &mid)) {
-		if (!e_mapi_connection_modify_item (conn, olFolderContacts, priv->fid, mid,
-			mapi_book_write_props, &mcd, NULL, NULL, NULL, priv->is_public_folder ? MAPI_OPTIONS_USE_PFSTORE : 0, cancellable, &mapi_error)) {
+		mapi_object_t obj_folder;
+		gboolean status;
 
+		if (priv->is_public_folder)
+			status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+		else
+			status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+
+		if (status) {
+			status = e_mapi_connection_modify_object (conn, &obj_folder, mid,
+								  ebbm_contact_to_object, &mcd,
+								  cancellable, &mapi_error);
+
+			e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
+		}
+
+		if (!status) {
 			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to modify item on a server"));
 			if (mapi_error)
 				g_error_free (mapi_error);

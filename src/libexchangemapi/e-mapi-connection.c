@@ -2131,10 +2131,10 @@ maybe_replace_named_id_tag (uint32_t *pproptag,
 		return;
 
 	for (i = 0; i < named_ids_len; i++) {
-		if ((*pproptag) == named_ids_list[i].propid ||
+		if ((*pproptag) == named_ids_list[i].pidlid_propid ||
 		    ((((*pproptag) & 0xFFFF) == PT_ERROR) &&
-			((*pproptag) & ~0xFFFF) == (named_ids_list[i].propid & ~0xFFFF))) {
-			(*pproptag) = ((*pproptag) & 0xFFFF) | (named_ids_list[i].pidlid_propid & ~0xFFFF);
+			((*pproptag) & ~0xFFFF) == (named_ids_list[i].pidlid_propid & ~0xFFFF))) {
+			(*pproptag) = ((*pproptag) & 0xFFFF) | (named_ids_list[i].propid & ~0xFFFF);
 			break;
 		}
 	}
@@ -3670,7 +3670,9 @@ update_recipient_properties (EMapiConnection *conn,
 		/* do not overwrite all properties, if recipient was resolved properly */
 		if (!is_resolved
 		    || props[ii].ulPropTag == PidTagRecipientType
-		    || props[ii].ulPropTag == PidTagSendInternetEncoding)
+		    || props[ii].ulPropTag == PidTagSendInternetEncoding
+		    || props[ii].ulPropTag == PidTagRecipientFlags
+		    || props[ii].ulPropTag == PidTagRecipientTrackStatus)
 			SRow_addprop (aRow, props[ii]);
 	}
 
@@ -3718,8 +3720,7 @@ add_object_recipients (EMapiConnection *conn,
 					  PidTagEmailAddress,
 					  PidTagAddressType,
 					  PidTagSendRichInfo,
-					  PidTag7BitDisplayName/*,
-					  PidTagPrimarySmtpAddress*/};
+					  PidTag7BitDisplayName};
 	enum MAPISTATUS	ms;
 	struct SPropTagArray *tags;
 	struct SRowSet *rows = NULL;

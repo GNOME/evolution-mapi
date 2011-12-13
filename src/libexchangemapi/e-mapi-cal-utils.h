@@ -51,7 +51,6 @@ typedef enum {
 struct cal_cbdata {
 	gint kind;
 	ECalComponent *comp;
-	struct SPropValue *props;
 	gboolean is_modify;
 
 	/* These are appt specific data */
@@ -135,6 +134,13 @@ ECalComponent *	e_mapi_cal_util_object_to_comp			(EMapiConnection *conn,
 								 const gchar *local_store_uri,
 								 const gchar *use_uid,
 								 GSList **detached_components);
+
+gboolean	e_mapi_cal_utils_comp_to_object			(EMapiConnection *conn,
+								 TALLOC_CTX *mem_ctx,
+								 EMapiObject **pobject, /* out */
+								 gpointer user_data,
+								 GCancellable *cancellable,
+								 GError **perror);
 
 gchar *	e_mapi_cal_utils_get_icomp_x_prop (icalcomponent *comp, const gchar *key);
 
