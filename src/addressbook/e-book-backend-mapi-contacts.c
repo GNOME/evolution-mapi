@@ -58,7 +58,6 @@ struct _EBookBackendMAPIContactsPrivate
 
 static gboolean
 build_restriction_from_sexp_query (EMapiConnection *conn,
-				   mapi_id_t fid,
 				   TALLOC_CTX *mem_ctx,
 				   struct mapi_SRestriction **restrictions,
 				   gpointer user_data,
@@ -431,7 +430,6 @@ transfer_contact_cb (EMapiConnection *conn,
 
 static gboolean
 gather_contact_mids_cb (EMapiConnection *conn,
-			mapi_id_t fid,
 			TALLOC_CTX *mem_ctx,
 			const ListObjectsData *object_data,
 			guint32 obj_index,
@@ -511,7 +509,6 @@ transfer_contacts_cb (EMapiConnection *conn,
 
 static gboolean
 gather_known_uids_cb (EMapiConnection *conn,
-		      mapi_id_t fid,
 		      TALLOC_CTX *mem_ctx,
 		      const ListObjectsData *object_data,
 		      guint32 obj_index,
@@ -832,17 +829,16 @@ ebbm_contacts_remove_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 
 	to_remove = NULL;
 	for (l = id_list; l; l = l->next) {
-		mapi_id_t mid;
 		const gchar *uid = l->data;
-		struct id_list *idl = g_new0 (struct id_list, 1);
+		mapi_id_t *pmid = g_new0 (mapi_id_t, 1);
 
-		if (e_mapi_util_mapi_id_from_string (uid, &mid)) {
-			idl->id = mid;
-			to_remove = g_slist_prepend (to_remove, idl);
+		if (e_mapi_util_mapi_id_from_string (uid, pmid)) {
+			to_remove = g_slist_prepend (to_remove, pmid);
 
 			*removed_ids = g_slist_prepend (*removed_ids, g_strdup (uid));
 		} else {
 			g_debug ("%s: Failed to decode MID from '%s'", G_STRFUNC, uid);
+			g_free (pmid);
 		}
 	}
 

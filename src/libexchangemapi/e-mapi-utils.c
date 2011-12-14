@@ -106,25 +106,6 @@ e_mapi_util_find_SPropVal_array_propval (struct SPropValue *values, uint32_t pro
 	return (get_SPropValue(values, proptag));
 }
 
-gconstpointer
-e_mapi_util_find_SPropVal_array_namedid (struct SPropValue *values, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
-{
-	uint32_t proptag;
-	gconstpointer res = NULL;
-
-	g_return_val_if_fail (values != NULL, NULL);
-	g_return_val_if_fail (conn != NULL, NULL);
-
-	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL, NULL);
-	if (proptag != MAPI_E_RESERVED)
-		res = e_mapi_util_find_SPropVal_array_propval (values, proptag);
-
-	if (!res)
-		res = e_mapi_util_find_SPropVal_array_propval (values, namedid);
-
-	return res;
-}
-
 /*
  * Retrieve the property value for a given SRow and property tag.
  *
@@ -275,129 +256,6 @@ e_mapi_util_find_array_datetime_propval (struct timeval *tv, struct mapi_SPropVa
 	g_return_val_if_fail (properties != NULL, MAPI_E_INVALID_PARAMETER);
 
 	return get_mapi_SPropValue_array_date_timeval (tv, properties, proptag);
-}
-
-enum MAPISTATUS
-e_mapi_util_find_array_datetime_namedid (struct timeval *tv, struct mapi_SPropValue_array *properties, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
-{
-	enum MAPISTATUS res = MAPI_E_NOT_FOUND;
-	uint32_t proptag;
-
-	g_return_val_if_fail (tv != NULL, MAPI_E_INVALID_PARAMETER);
-	g_return_val_if_fail (properties != NULL, MAPI_E_INVALID_PARAMETER);
-	g_return_val_if_fail (conn != NULL, MAPI_E_INVALID_PARAMETER);
-
-	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL, NULL);
-	if (proptag != MAPI_E_RESERVED)
-		res = e_mapi_util_find_array_datetime_propval (tv, properties, proptag);
-
-	if (res == MAPI_E_NOT_FOUND)
-		res = e_mapi_util_find_array_datetime_propval (tv, properties, namedid);
-
-	return res;
-}
-
-ExchangeMAPIStream *
-e_mapi_util_find_stream (GSList *stream_list, uint32_t proptag)
-{
-	GSList *l = stream_list;
-
-	for (; l != NULL; l = l->next) {
-		ExchangeMAPIStream *stream = (ExchangeMAPIStream *) (l->data);
-		if (stream->proptag == proptag)
-			return stream;
-	}
-
-	return NULL;
-}
-
-ExchangeMAPIStream *
-e_mapi_util_find_stream_namedid (GSList *stream_list, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
-{
-	uint32_t proptag;
-	gconstpointer res = NULL;
-
-	g_return_val_if_fail (conn != NULL, NULL);
-
-	if (!stream_list)
-		return NULL;
-
-	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL, NULL);
-	if (proptag != MAPI_E_RESERVED)
-		res = e_mapi_util_find_stream (stream_list, proptag);
-
-	if (!res)
-		res = e_mapi_util_find_stream (stream_list, namedid);
-
-	return (ExchangeMAPIStream *) res;
-}
-
-void
-e_mapi_util_free_attachment_list (GSList **attach_list)
-{
-	GSList *l = *attach_list;
-
-	if (!l)
-		return;
-
-	for (; l != NULL; l = l->next) {
-		ExchangeMAPIAttachment *attachment = (ExchangeMAPIAttachment *) (l->data);
-
-		if (attachment->mail) {
-			mail_item_free (attachment->mail);
-		} else {
-			g_free (attachment->lpProps);
-			e_mapi_util_free_stream_list (&(attachment->streams));
-		}
-
-		g_free (attachment);
-		l->data = NULL;
-	}
-	g_slist_free (*attach_list);
-	*attach_list = NULL;
-}
-
-void
-e_mapi_util_free_recipient_list (GSList **recip_list)
-{
-	GSList *l = *recip_list;
-
-	if (!l)
-		return;
-
-	for (; l != NULL; l = l->next) {
-		ExchangeMAPIRecipient *recipient = (ExchangeMAPIRecipient *) (l->data);
-
-		talloc_free (recipient->mem_ctx);
-		if (recipient->in.ext_cValues)
-			g_free (recipient->in.ext_lpProps);
-		if (recipient->in.req_cValues)
-			g_free (recipient->in.req_lpProps);
-/*		if (recipient->out_SRow.cValues)
-			g_free (recipient->out_SRow.lpProps);
-*/		g_free (recipient);
-	}
-	g_slist_free (*recip_list);
-	*recip_list = NULL;
-}
-
-void
-e_mapi_util_free_stream_list (GSList **stream_list)
-{
-	GSList *l = *stream_list;
-
-	if (!l)
-		return;
-
-	for (; l != NULL; l = l->next) {
-		ExchangeMAPIStream *stream = (ExchangeMAPIStream *) (l->data);
-		g_byte_array_free (stream->value, TRUE);
-		stream->value = NULL;
-		g_free (stream);
-		stream = NULL;
-	}
-	g_slist_free (*stream_list);
-	*stream_list = NULL;
 }
 
 static void
@@ -767,69 +625,6 @@ e_mapi_util_recip_entryid_decode (EMapiConnection *conn, const struct Binary_r *
 	}
 
 	return FALSE;
-}
-
-/**
- * exchange_lf_to_crlf:
- * @in: input text in UNIX ("\n") format
- *
- * Creates a copy of @in with all LFs converted to CRLFs.
- *
- * Return value: the converted text, which the caller must free.
- **/
-gchar *
-exchange_lf_to_crlf (const gchar *in)
-{
-	gint len;
-	const gchar *s;
-	gchar *out, *d;
-
-	g_return_val_if_fail (in != NULL, NULL);
-
-	len = strlen (in);
-	for (s = strchr (in, '\n'); s; s = strchr (s + 1, '\n'))
-		len++;
-
-	out = g_malloc (len + 1);
-	for (s = in, d = out; *s; s++) {
-		if (*s == '\n')
-			*d++ = '\r';
-		*d++ = *s;
-	}
-	*d = '\0';
-
-	return out;
-}
-
-/**
- * exchange_crlf_to_lf:
- * @in: input text in network ("\r\n") format
- *
- * Creates a copy of @in with all CRLFs converted to LFs. (Actually,
- * it just strips CRs, so any raw CRs will be removed.)
- *
- * Return value: the converted text, which the caller must free.
- **/
-gchar *
-exchange_crlf_to_lf (const gchar *in)
-{
-	const gchar *s;
-	gchar *out;
-	GString *str;
-
-	g_return_val_if_fail (in != NULL, NULL);
-
-	str = g_string_new ("");
-
-	for (s = in; *s; s++) {
-		if (*s != '\r')
-			str = g_string_append_c (str, *s);
-	}
-
-	out = str->str;
-	g_string_free (str, FALSE);
-
-	return out;
 }
 
 /**
@@ -1359,7 +1154,6 @@ e_mapi_utils_ensure_utf8_string (uint32_t proptag,
 */
 gboolean
 e_mapi_utils_build_last_modify_restriction (EMapiConnection *conn,
-					    mapi_id_t fid,
 					    TALLOC_CTX *mem_ctx,
 					    struct mapi_SRestriction **restrictions,
 					    gpointer user_data,
@@ -1396,7 +1190,6 @@ e_mapi_utils_build_last_modify_restriction (EMapiConnection *conn,
 
 gboolean
 e_mapi_utils_get_folder_basic_properties_cb (EMapiConnection *conn,
-					     mapi_id_t fid,
 					     TALLOC_CTX *mem_ctx,
 					     /* const */ struct mapi_SPropValue_array *properties,
 					     gpointer user_data,

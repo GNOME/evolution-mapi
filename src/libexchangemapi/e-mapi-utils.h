@@ -32,7 +32,6 @@ gchar *  e_mapi_util_mapi_id_to_string (mapi_id_t id);
 gboolean e_mapi_util_mapi_id_from_string (const gchar *str, mapi_id_t *id);
 
 gconstpointer	e_mapi_util_find_SPropVal_array_propval (struct SPropValue *values, uint32_t proptag);
-gconstpointer	e_mapi_util_find_SPropVal_array_namedid (struct SPropValue *values, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid);
 gconstpointer	e_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag);
 gconstpointer	e_mapi_util_find_row_namedid (struct SRow *aRow, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid);
 gconstpointer	e_mapi_util_find_array_propval (struct mapi_SPropValue_array *properties, uint32_t proptag);
@@ -40,21 +39,10 @@ gconstpointer	e_mapi_util_find_array_namedid (struct mapi_SPropValue_array *prop
 uint32_t	e_mapi_util_find_array_proptag (struct mapi_SPropValue_array *properties, uint32_t proptag);
 
 enum MAPISTATUS e_mapi_util_find_array_datetime_propval (struct timeval *tv, struct mapi_SPropValue_array *properties, uint32_t proptag);
-enum MAPISTATUS e_mapi_util_find_array_datetime_namedid (struct timeval *tv, struct mapi_SPropValue_array *properties, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid);
-
-ExchangeMAPIStream *e_mapi_util_find_stream (GSList *stream_list, uint32_t proptag);
-ExchangeMAPIStream *e_mapi_util_find_stream_namedid (GSList *stream_list, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid);
-
-void e_mapi_util_free_attachment_list (GSList **attach_list);
-void e_mapi_util_free_recipient_list (GSList **recip_list);
-void e_mapi_util_free_stream_list (GSList **stream_list);
 
 void	 e_mapi_util_recip_entryid_generate_smtp (TALLOC_CTX *mem_ctx, struct Binary_r *entryid, const gchar *display_name, const gchar *email);
 void	 e_mapi_util_recip_entryid_generate_ex  (TALLOC_CTX *mem_ctx, struct Binary_r *entryid, const gchar *exchange_dn);
 gboolean e_mapi_util_recip_entryid_decode (EMapiConnection *conn, const struct Binary_r *entyrid, gchar **display_name, gchar **email);
-
-gchar *exchange_lf_to_crlf (const gchar *in);
-gchar *exchange_crlf_to_lf (const gchar *in);
 
 void e_mapi_util_profiledata_from_settings (EMapiProfileData *empd, CamelMapiSettings *settings);
 gchar *		e_mapi_util_profile_name			(struct mapi_context *mapi_ctx,
@@ -117,7 +105,6 @@ gboolean	e_mapi_utils_create_mapi_context		(struct mapi_context **mapi_ctx,
 void		e_mapi_utils_destroy_mapi_context		(struct mapi_context *mapi_ctx);
 
 gboolean	e_mapi_utils_build_last_modify_restriction	(EMapiConnection *conn,
-								 mapi_id_t fid,
 								 TALLOC_CTX *mem_ctx,
 								 struct mapi_SRestriction **restrictions,
 								 gpointer user_data, /* const time_t * */
@@ -131,7 +118,6 @@ struct FolderBasicPropertiesData
 };
 
 gboolean	e_mapi_utils_get_folder_basic_properties_cb	(EMapiConnection *conn,
-								 mapi_id_t fid,
 								 TALLOC_CTX *mem_ctx,
 								 /* const */ struct mapi_SPropValue_array *properties,
 								 gpointer user_data, /* struct FolderBasicPropertiesData * */

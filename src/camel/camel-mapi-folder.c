@@ -240,7 +240,6 @@ struct GatherChangedObjectsData
 
 static gboolean
 gather_changed_objects_to_slist (EMapiConnection *conn,
-				 mapi_id_t fid,
 				 TALLOC_CTX *mem_ctx,
 				 const ListObjectsData *object_data,
 				 guint32 obj_index,

@@ -616,670 +616,6 @@ e_mapi_connection_connected (EMapiConnection *conn)
 	return priv->session != NULL;
 }
 
-/* proptag should be already set for this stream */
-static void
-set_stream_value (ExchangeMAPIStream *stream, const uint32_t *cpid, const guint8 *buf_data, guint32 buf_len, gboolean converted)
-{
-	g_return_if_fail (stream != NULL);
-
-	stream->value = NULL;
-
-	if (!converted && (stream->proptag == PR_HTML || (stream->proptag & 0xFFFF) == PT_UNICODE) && ((cpid && (*cpid == 1200 || *cpid == 1201)) || (buf_len > 5 && buf_data[3] == '\0'))) {
-		/* this is special, get the CPID and transform to utf8 when it's utf16 */
-		gsize written = 0;
-		gchar *in_utf8;
-
-		/* skip Unicode marker, if there */
-		if (buf_len >= 2 && buf_data[0] == 0xFF && buf_data[1] == 0xFE)
-			in_utf8 = g_convert ((const gchar *) buf_data + 2, buf_len - 2, "UTF-8", "UTF-16", NULL, &written, NULL);
-		else
-			in_utf8 = g_convert ((const gchar *) buf_data, buf_len, "UTF-8", "UTF-16", NULL, &written, NULL);
-
-		if (in_utf8 && written > 0) {
-			stream->value = g_byte_array_sized_new (written + 1);
-			g_byte_array_append (stream->value, (const guint8 *) in_utf8, written);
-
-			if (in_utf8[written] != '\0')
-				g_byte_array_append (stream->value, (const guint8 *) "", 1);
-		}
-	}
-
-	if (!stream->value) {
-		stream->value = g_byte_array_sized_new (buf_len);
-		g_byte_array_append (stream->value, buf_data, buf_len);
-	}
-}
-
-/* returns whether found that property */
-static gboolean
-add_stream_from_properties (GSList **stream_list, struct mapi_SPropValue_array *properties, uint32_t proptag, const uint32_t *cpid)
-{
-	if (e_mapi_util_find_stream (*stream_list, proptag)) {
-		return TRUE;
-	} else if (properties) {
-		gconstpointer data;
-
-		data = e_mapi_util_find_array_propval (properties, proptag);
-		if (data) {
-			const struct SBinary_short *bin;
-			const gchar *str;
-			ExchangeMAPIStream *stream;
-
-			switch (proptag & 0xFFFF) {
-			case PT_BINARY:
-				bin = data;
-				if (bin->cb) {
-					stream = g_new0 (ExchangeMAPIStream, 1);
-
-					stream->proptag = proptag;
-					set_stream_value (stream, cpid, bin->lpb, bin->cb, FALSE);
-
-					*stream_list = g_slist_append (*stream_list, stream);
-				}
-
-				return TRUE;
-			case PT_STRING8:
-			case PT_UNICODE:
-				str = data;
-				stream = g_new0 (ExchangeMAPIStream, 1);
-
-				stream->proptag = proptag;
-				set_stream_value (stream, cpid, (const guint8 *) str, strlen (str) + 1, FALSE);
-
-				*stream_list = g_slist_append (*stream_list, stream);
-
-				return TRUE;
-			}
-		}
-	}
-
-	return FALSE;
-}
-
-static gboolean
-e_mapi_util_read_generic_stream (TALLOC_CTX *mem_ctx, mapi_object_t *obj_message, const uint32_t *cpid, uint32_t proptag, GSList **stream_list, struct mapi_SPropValue_array *properties, GError **perror)
-{
-	enum MAPISTATUS	ms;
-	mapi_object_t	obj_stream;
-	uint16_t	cn_read = 0, max_read;
-	uint32_t	off_data = 0;
-	uint8_t		*buf_data = NULL;
-	uint32_t	buf_size = 0;
-	gboolean	done = FALSE;
-
-	/* sanity */
-	e_return_val_mapi_error_if_fail (obj_message, MAPI_E_INVALID_PARAMETER, FALSE);
-	e_return_val_mapi_error_if_fail (((proptag & 0xFFFF) == PT_BINARY) || ((proptag & 0xFFFF) == PT_STRING8 || ((proptag & 0xFFFF) == PT_UNICODE)), MAPI_E_INVALID_PARAMETER, FALSE);
-
-	/* if compressed RTF stream, then return */
-	if (proptag == PR_RTF_COMPRESSED)
-		return FALSE;
-
-	if (add_stream_from_properties (stream_list, properties, proptag, cpid))
-		return TRUE;
-
-	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-	e_mapi_debug_print("Attempt to read stream for proptag 0x%08X ", proptag);
-
-	mapi_object_init(&obj_stream);
-
-	/* get a stream on specified proptag */
-	ms = OpenStream(obj_message, proptag, STREAM_ACCESS_READ, &obj_stream);
-	if (ms != MAPI_E_SUCCESS) {
-	/* If OpenStream failed, should we attempt any other call(s) to fetch the blob? */
-		make_mapi_error (perror, "OpenStream", ms);
-		goto cleanup;
-	}
-
-	/* NOTE: This may prove unreliable for streams larger than 4GB length */
-	ms = GetStreamSize(&obj_stream, &buf_size);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "GetStreamSize", ms);
-		goto cleanup;
-	}
-
-	buf_data = talloc_size (mem_ctx, buf_size);
-	if (!buf_data)
-		goto cleanup;
-
-	/* determine max_read first, to read by chunks as long as possible */
-	max_read = buf_size > STREAM_MAX_READ_SIZE ? STREAM_MAX_READ_SIZE : buf_size;
-	do {
-		ms = ReadStream (&obj_stream, (buf_data) + off_data, max_read, &cn_read);
-		if (ms == MAPI_E_SUCCESS) {
-			if (cn_read == 0) {
-				done = TRUE;
-			} else {
-				off_data += cn_read;
-				if (off_data >= buf_size)
-					done = TRUE;
-			}
-			break;
-		}
-
-		if (ms == 0x2c80)
-			max_read = max_read >> 1;
-		else
-			max_read = STREAM_MAX_READ_SIZE_DF;
-
-		if (max_read < STREAM_MAX_READ_SIZE_DF)
-			max_read = STREAM_MAX_READ_SIZE_DF;
-	} while (ms == 0x2c80); /* an error when max_read is too large? */
-
-	/* Read from the stream */
-	while (!done) {
-		ms = ReadStream (&obj_stream, (buf_data) + off_data, max_read, &cn_read);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "ReadStream", ms);
-			done = TRUE;
-		} else if (cn_read == 0) {
-			done = TRUE;
-		} else {
-			off_data += cn_read;
-			if (off_data >= buf_size)
-				done = TRUE;
-		}
-	}
-
-	if (ms == MAPI_E_SUCCESS) {
-		ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
-
-		stream->proptag = proptag;
-		set_stream_value (stream, cpid, buf_data, off_data, FALSE);
-
-		e_mapi_debug_print("Attempt succeeded for proptag 0x%08X (after name conversion) ", stream->proptag);
-
-		*stream_list = g_slist_append (*stream_list, stream);
-	}
-
-cleanup:
-	mapi_object_release(&obj_stream);
-
-	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-	return (ms == MAPI_E_SUCCESS);
-}
-
-static void
-e_mapi_util_read_body_stream (TALLOC_CTX *mem_ctx, mapi_object_t *obj_message, GSList **stream_list, struct mapi_SPropValue_array *properties, gboolean by_best_body)
-{
-	const uint32_t *cpid = e_mapi_util_find_array_propval (properties, PR_INTERNET_CPID);
-	gboolean can_html = FALSE, has_body = FALSE, has_body_unicode;
-
-	has_body_unicode = add_stream_from_properties (stream_list, properties, PR_BODY_UNICODE, cpid);
-	if (!has_body_unicode)
-		has_body = add_stream_from_properties (stream_list, properties, PR_BODY, cpid);
-
-	if (by_best_body) {
-		uint8_t best_body = 0;
-
-		can_html = GetBestBody (obj_message, &best_body) == MAPI_E_SUCCESS && best_body == olEditorHTML;
-	} else {
-		const uint32_t *ui32 = e_mapi_util_find_array_propval (properties, PR_MSG_EDITOR_FORMAT);
-		can_html = ui32 && *ui32 == olEditorHTML;
-	}
-
-	if (can_html)
-		e_mapi_util_read_generic_stream (mem_ctx, obj_message, cpid, PR_HTML, stream_list, properties, NULL);
-
-	if (!has_body_unicode)
-		has_body_unicode = e_mapi_util_read_generic_stream (mem_ctx, obj_message, cpid, PR_BODY_UNICODE, stream_list, properties, NULL);
-
-	if (!has_body && !has_body_unicode)
-		e_mapi_util_read_generic_stream (mem_ctx, obj_message, cpid, PR_BODY, stream_list, properties, NULL);
-}
-
-/* Returns TRUE if all streams were written succcesfully, else returns FALSE */
-static gboolean
-e_mapi_util_write_generic_streams (mapi_object_t *obj_message, GSList *stream_list, GError **perror)
-{
-	GSList		*l;
-	enum MAPISTATUS	ms;
-	gboolean	status = TRUE;
-
-	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-
-	for (l = stream_list; l; l = l->next) {
-		ExchangeMAPIStream	*stream = (ExchangeMAPIStream *) (l->data);
-		uint32_t		total_written;
-		gboolean		done = FALSE;
-		mapi_object_t		obj_stream;
-
-		mapi_object_init(&obj_stream);
-
-		/* OpenStream on required proptag */
-		ms = OpenStream (obj_message, stream->proptag, STREAM_ACCESS_READWRITE, &obj_stream);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "OpenStream", ms);
-			goto cleanup;
-		}
-
-		/* Set the stream size */
-		ms = SetStreamSize (&obj_stream, stream->value->len);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "SetStreamSize", ms);
-			goto cleanup;
-		}
-
-		total_written = 0;
-		/* Write attachment */
-		while (!done) {
-			uint16_t	cn_written = 0;
-			DATA_BLOB	blob;
-
-			blob.length = (stream->value->len - total_written) < STREAM_MAX_WRITE_SIZE ?
-					(stream->value->len - total_written) : STREAM_MAX_WRITE_SIZE;
-			blob.data = (stream->value->data) + total_written;
-
-			ms = WriteStream (&obj_stream, &blob, &cn_written);
-
-			if (ms != MAPI_E_SUCCESS) {
-				make_mapi_error (perror, "WriteStream", ms);
-				done = TRUE;
-			} else if (cn_written == 0) {
-				done = TRUE;
-			} else {
-				total_written += cn_written;
-				if (total_written >= stream->value->len)
-					done = TRUE;
-			}
-		}
-
-		/* Commit the stream */
-		ms = CommitStream (&obj_stream);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "CommitStream", ms);
-			goto cleanup;
-		}
-
-	cleanup:
-		if (ms != MAPI_E_SUCCESS)
-			status = FALSE;
-		mapi_object_release(&obj_stream);
-	}
-
-	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-	return status;
-}
-
-static void
-set_recipient_properties (TALLOC_CTX *mem_ctx, struct SRow *aRow, ExchangeMAPIRecipient *recipient, gboolean is_external)
-{
-	uint32_t i;
-
-	if (is_external && recipient->in.ext_lpProps) {
-	/* FIXME: Setting PR_ENTRYID property seems to create problems for now. We should take
-	 * another look at this after the CreateOneoffEntryId API is provided by LibMAPI. */
-#if 0
-		struct Binary_r oneoff_eid;
-		struct SPropValue sprop;
-		const gchar *dn = NULL, *email = NULL;
-
-		dn = (const gchar *) e_mapi_util_find_SPropVal_array_propval (recipient->in.ext_lpProps, PR_DISPLAY_NAME_UNICODE);
-		dn = (dn) ? dn : "";
-		email = (const gchar *) e_mapi_util_find_SPropVal_array_propval (recipient->in.ext_lpProps, PR_SMTP_ADDRESS_UNICODE);
-		email = (email) ? email : "";
-		e_mapi_util_recip_entryid_generate_smtp (mem_ctx, &oneoff_eid, dn, email);
-		set_SPropValue_proptag (&sprop, PR_ENTRYID, (gconstpointer )(oneoff_eid));
-		SRow_addprop (aRow, sprop);
-#endif
-
-	/* Now, add the properties which are specified for unresolved recipients alone. */
-		for (i = 0; i < recipient->in.ext_cValues; ++i)
-			SRow_addprop (aRow, recipient->in.ext_lpProps[i]);
-	}
-
-	/* Now, add the properties which are specified for each recipient
-	 * irrespective of whether it was resolved or not. */
-	for (i = 0; i < recipient->in.req_cValues; ++i)
-		SRow_addprop (aRow, recipient->in.req_lpProps[i]);
-}
-
-static gboolean
-e_mapi_util_modify_recipients (EMapiConnection *conn, TALLOC_CTX *mem_ctx, mapi_object_t *obj_message , GSList *recipients, gboolean remove_existing, GError **perror)
-{
-	enum MAPISTATUS	ms;
-	struct SPropTagArray	*SPropTagArray = NULL;
-	struct SRowSet		*SRowSet = NULL;
-	struct PropertyTagArray_r *FlagList = NULL;
-	GSList			*l;
-	const gchar		**users = NULL;
-	uint32_t		i, j, count = 0;
-
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
-	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
-
-	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-
-	SPropTagArray = set_SPropTagArray(mem_ctx, 0xA,
-					  PR_ENTRYID,
-					  PR_DISPLAY_NAME_UNICODE,
-					  PR_OBJECT_TYPE,
-					  PR_DISPLAY_TYPE,
-					  PR_TRANSMITTABLE_DISPLAY_NAME_UNICODE,
-					  PR_EMAIL_ADDRESS_UNICODE,
-					  PR_ADDRTYPE_UNICODE,
-					  PR_SEND_RICH_INFO,
-					  PR_7BIT_DISPLAY_NAME_UNICODE,
-					  PR_SMTP_ADDRESS_UNICODE);
-
-	count = g_slist_length (recipients);
-	users = g_new0 (const gchar *, count + 1);
-
-	for (i = 0, l = recipients; (i < count && l != NULL); ++i, l = l->next) {
-		ExchangeMAPIRecipient *recipient = (ExchangeMAPIRecipient *)(l->data);
-		users[i] = recipient->email_id;
-	}
-
-	/* Attempt to resolve names from the server */
-	LOCK ();
-	ms = ResolveNames (priv->session, users, SPropTagArray, &SRowSet, &FlagList, MAPI_UNICODE);
-	UNLOCK ();
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "ResolveNames", ms);
-		goto cleanup;
-	}
-
-	g_assert (count == FlagList->cValues);
-
-	if (!SRowSet) /* This happens when there are ZERO RESOLVED recipients */
-		SRowSet = talloc_zero(mem_ctx, struct SRowSet);
-
-	for (i = 0, l = recipients, j = 0; (i < count && l != NULL); ++i, l = l->next) {
-		ExchangeMAPIRecipient *recipient = (ExchangeMAPIRecipient *)(l->data);
-		uint32_t last;
-
-		if (FlagList->aulPropTag[i] == MAPI_AMBIGUOUS) {
-			/* We should never get an ambiguous resolution as we use the email-id for resolving.
-			 * However, if we do still get an ambiguous entry, we can't handle it :-( */
-			e_mapi_debug_print ("%s: %s() - '%s' is ambiguous ", G_STRLOC, G_STRFUNC, recipient->email_id);
-			ms = MAPI_E_AMBIGUOUS_RECIP;
-			/* Translators: %s is replaced with an email address which was found ambiguous on a remote server */
-			g_set_error (perror, E_MAPI_ERROR, ms, _("Recipient '%s' is ambiguous"), recipient->email_id);
-			goto cleanup;
-		} else if (FlagList->aulPropTag[i] == MAPI_UNRESOLVED) {
-			/* If the recipient is unresolved, consider it is a SMTP one */
-			SRowSet->aRow = talloc_realloc(mem_ctx, SRowSet->aRow, struct SRow, SRowSet->cRows + 1);
-			last = SRowSet->cRows;
-			SRowSet->aRow[last].cValues = 0;
-			SRowSet->aRow[last].lpProps = talloc_zero(mem_ctx, struct SPropValue);
-			set_recipient_properties(mem_ctx, &SRowSet->aRow[last], recipient, TRUE);
-			SRowSet->cRows += 1;
-		} else if (FlagList->aulPropTag[i] == MAPI_RESOLVED) {
-			set_recipient_properties (mem_ctx, &SRowSet->aRow[j], recipient, FALSE);
-			j += 1;
-		}
-	}
-
-	if (remove_existing) {
-		ms = RemoveAllRecipients (obj_message);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "RemoveAllRecipients", ms);
-			goto cleanup;
-		}
-	}
-
-	/* Modify the recipient table */
-	ms = ModifyRecipients (obj_message, SRowSet);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "ModifyRecipients", ms);
-		goto cleanup;
-	}
-
-cleanup:
-	g_free (users);
-
-	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-	return ms == MAPI_E_SUCCESS;
-}
-
-static gboolean
-e_mapi_util_delete_attachments (TALLOC_CTX *mem_ctx, mapi_object_t *obj_message, GError **perror)
-{
-	enum MAPISTATUS		ms;
-	mapi_object_t		obj_tb_attach;
-	struct SPropTagArray	*proptags;
-	struct SRowSet		rows_attach;
-	uint32_t		attach_count;
-	uint32_t		i_row_attach;
-	gboolean		status = TRUE;
-
-	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-
-	proptags = set_SPropTagArray(mem_ctx, 0x4,
-				     PR_ATTACH_NUM,
-				     PR_INSTANCE_KEY,
-				     PR_RECORD_KEY,
-				     PR_RENDERING_POSITION);
-
-	mapi_object_init(&obj_tb_attach);
-
-	/* open attachment table */
-	ms = GetAttachmentTable (obj_message, &obj_tb_attach);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "GetAttachmentTable", ms);
-		goto cleanup;
-	}
-
-	ms = SetColumns (&obj_tb_attach, proptags);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "SetColumns", ms);
-		goto cleanup;
-	}
-
-	ms = QueryPosition (&obj_tb_attach, NULL, &attach_count);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "QueryPosition", ms);
-		goto cleanup;
-	}
-
-	if (!attach_count)
-		goto cleanup;
-
-	ms = QueryRows (&obj_tb_attach, attach_count, TBL_ADVANCE, &rows_attach);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "QueryRows", ms);
-		goto cleanup;
-	}
-
-	/* foreach attachment, delete by PR_ATTACH_NUM */
-	for (i_row_attach = 0; i_row_attach < rows_attach.cRows; i_row_attach++) {
-		const uint32_t	*num_attach;
-
-		num_attach = (const uint32_t *) get_SPropValue_SRow_data(&rows_attach.aRow[i_row_attach], PR_ATTACH_NUM);
-
-		ms = DeleteAttach (obj_message, *num_attach);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "DeleteAttach", ms);
-			status = FALSE;
-		}
-	}
-
-cleanup:
-	if (ms != MAPI_E_SUCCESS)
-		status = FALSE;
-	mapi_object_release(&obj_tb_attach);
-
-	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-	return status;
-}
-
-/* Returns TRUE if all attachments were written succcesfully, else returns FALSE */
-static gboolean
-e_mapi_util_set_attachments (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, mapi_object_t *obj_message, GSList *attach_list, gboolean remove_existing, GError **perror)
-{
-	GSList		*l;
-	enum MAPISTATUS	ms;
-	gboolean	status = FALSE;
-
-	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-
-	if (remove_existing)
-		e_mapi_util_delete_attachments (mem_ctx, obj_message, NULL);
-
-	for (l = attach_list; l; l = l->next) {
-		ExchangeMAPIAttachment *attachment = (ExchangeMAPIAttachment *) (l->data);
-		mapi_object_t		obj_attach;
-
-		mapi_object_init(&obj_attach);
-
-		/* CreateAttach */
-		ms = CreateAttach (obj_message, &obj_attach);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "CreateAttach", ms);
-			goto cleanup;
-		}
-
-		if (attachment->mail) {
-			struct SPropValue *props = NULL;
-			uint32_t propslen = 0, ui32;
-			MailItem *item = attachment->mail;
-			mapi_object_t obj_emb_msg;
-
-			ui32 = ATTACH_EMBEDDED_MSG;
-			e_mapi_utils_add_spropvalue (mem_ctx, &props, &propslen, PR_ATTACH_METHOD, &ui32);
-			ui32 = 0;
-			e_mapi_utils_add_spropvalue (mem_ctx, &props, &propslen, PR_RENDERING_POSITION, &ui32);
-			e_mapi_utils_add_spropvalue (mem_ctx, &props, &propslen, PR_ATTACH_MIME_TAG, "message/rfc822");
-			if (item->header.subject)
-				e_mapi_utils_add_spropvalue (mem_ctx, &props, &propslen, PR_ATTACH_FILENAME_UNICODE, item->header.subject);
-
-			/* set properties for the item */
-			ms = SetProps (&obj_attach, MAPI_PROPS_SKIP_NAMEDID_CHECK, props, propslen);
-			if (ms != MAPI_E_SUCCESS) {
-				make_mapi_error (perror, "SetProps", ms);
-				goto cleanup;
-			}
-
-			props = NULL;
-			propslen = 0;
-
-			mapi_object_init (&obj_emb_msg);
-
-			ms = OpenEmbeddedMessage (&obj_attach, &obj_emb_msg, MAPI_CREATE);
-			if (ms != MAPI_E_SUCCESS) {
-				make_mapi_error (perror, "OpenEmbeddedMessage", ms);
-				goto cleanup;
-			}
-
-			if (!mapi_mail_utils_create_item_build_props (conn, fid, mem_ctx, &props, &propslen, item, NULL, perror)) {
-				make_mapi_error (perror, "build_props", MAPI_E_CALL_FAILED);
-				goto cleanup;
-			}
-
-			/* set properties for the item */
-			ms = SetProps (&obj_emb_msg, MAPI_PROPS_SKIP_NAMEDID_CHECK, props, propslen);
-			if (ms != MAPI_E_SUCCESS) {
-				mapi_object_release (&obj_emb_msg);
-				make_mapi_error (perror, "SetProps", ms);
-				goto cleanup;
-			}
-
-			if (item->generic_streams) {
-				if (!e_mapi_util_write_generic_streams (&obj_emb_msg, item->generic_streams, perror)) {
-					mapi_object_release (&obj_emb_msg);
-					goto cleanup;
-				}
-			}
-
-			/* Set attachments if any */
-			if (item->attachments) {
-				if (!e_mapi_util_set_attachments (conn, fid, mem_ctx, &obj_emb_msg, item->attachments, FALSE, perror)) {
-					mapi_object_release (&obj_emb_msg);
-					goto cleanup;
-				}
-			}
-
-			/* Set recipients if any */
-			if (item->recipients) {
-				if (!e_mapi_util_modify_recipients (conn, mem_ctx, &obj_emb_msg, item->recipients, FALSE, perror)) {
-					mapi_object_release (&obj_emb_msg);
-					goto cleanup;
-				}
-			}
-
-			ms = SaveChangesMessage (&obj_attach, &obj_emb_msg, KeepOpenReadOnly);
-			if (ms != MAPI_E_SUCCESS) {
-				mapi_object_release (&obj_emb_msg);
-				make_mapi_error (perror, "SaveChangesMessage", ms);
-				goto cleanup;
-			}
-
-			mapi_object_release (&obj_emb_msg);
-		} else {
-			/* SetProps */
-			ms = SetProps (&obj_attach, MAPI_PROPS_SKIP_NAMEDID_CHECK, attachment->lpProps, attachment->cValues);
-			if (ms != MAPI_E_SUCCESS) {
-				make_mapi_error (perror, "SetProps", ms);
-				goto cleanup;
-			}
-
-			/* If there are any streams to be set, write them. */
-			if (!e_mapi_util_write_generic_streams (&obj_attach, attachment->streams, perror))
-				goto cleanup;
-		}
-
-		/* message->SaveChangesAttachment() */
-		ms = SaveChangesAttachment (obj_message, &obj_attach, KeepOpenReadWrite);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "SaveChangesAttachment", ms);
-			goto cleanup;
-		}
-
-		status = TRUE;
-
-	cleanup:
-		mapi_object_release(&obj_attach);
-	}
-
-	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-	return status;
-}
-
-static GByteArray *
-obj_message_to_camel_mime (EMapiConnection *conn, mapi_id_t fid, mapi_object_t *obj_msg)
-{
-	GByteArray *res = NULL;
-	MailItem *item = NULL;
-	CamelMimeMessage *msg;
-
-	g_return_val_if_fail (conn != NULL, NULL);
-	g_return_val_if_fail (obj_msg != NULL, NULL);
-
-	if (!e_mapi_connection_fetch_object_props (conn, NULL, fid, 0, obj_msg, mapi_mail_get_item_prop_list, NULL,
-					fetch_props_to_mail_item_cb, &item,
-					MAPI_OPTIONS_FETCH_ALL | MAPI_OPTIONS_GETBESTBODY, NULL, NULL)
-	    || item == NULL) {
-		if (item)
-			mail_item_free (item);
-
-		return NULL;
-	}
-
-	msg = mapi_mail_item_to_mime_message (conn, item);
-	mail_item_free (item);
-
-	if (msg) {
-		CamelStream *mem = camel_stream_mem_new ();
-
-		res = g_byte_array_new ();
-
-		mem = camel_stream_mem_new ();
-		camel_stream_mem_set_byte_array (CAMEL_STREAM_MEM (mem), res);
-		camel_data_wrapper_write_to_stream_sync (
-			CAMEL_DATA_WRAPPER (msg), mem, NULL, NULL);
-
-		g_object_unref (mem);
-		g_object_unref (msg);
-	}
-
-	return res;
-}
-
 static gboolean
 may_skip_property (uint32_t proptag)
 {
@@ -1310,167 +646,6 @@ may_skip_property (uint32_t proptag)
 	}
 
 	return skip;
-}
-
-/* Returns TRUE if all attachments were read succcesfully, else returns FALSE */
-static gboolean
-e_mapi_util_get_attachments (EMapiConnection *conn,
-			     mapi_id_t fid,
-			     TALLOC_CTX *mem_ctx,
-			     mapi_object_t *obj_message,
-			     GSList **attach_list,
-			     GError **perror)
-{
-	enum MAPISTATUS		ms;
-	mapi_object_t		obj_tb_attach;
-	struct SPropTagArray	*proptags;
-	struct SRowSet		rows_attach;
-	uint32_t		attach_count;
-	uint32_t		i_row_attach;
-	gboolean		status = TRUE;
-
-	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-
-	proptags = set_SPropTagArray(mem_ctx, 0x5,
-				     PR_ATTACH_NUM,
-				     PR_INSTANCE_KEY,
-				     PR_RECORD_KEY,
-				     PR_RENDERING_POSITION,
-				     PR_ATTACH_METHOD);
-
-	mapi_object_init(&obj_tb_attach);
-
-	/* open attachment table */
-	ms = GetAttachmentTable (obj_message, &obj_tb_attach);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "GetAttachmentTable", ms);
-		goto cleanup;
-	}
-
-	ms = SetColumns (&obj_tb_attach, proptags);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "SetColumns", ms);
-		goto cleanup;
-	}
-
-	ms = QueryPosition (&obj_tb_attach, NULL, &attach_count);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "QueryPosition", ms);
-		goto cleanup;
-	}
-
-	if (!attach_count)
-		goto cleanup;
-
-	ms = QueryRows (&obj_tb_attach, attach_count, TBL_ADVANCE, &rows_attach);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "QueryRows", ms);
-		goto cleanup;
-	}
-
-	/* foreach attachment, open by PR_ATTACH_NUM */
-	for (i_row_attach = 0; i_row_attach < rows_attach.cRows; i_row_attach++) {
-		ExchangeMAPIAttachment	*attachment;
-		struct mapi_SPropValue_array properties;
-		const uint32_t	*ui32;
-		mapi_object_t	obj_attach;
-		uint32_t	z, az;
-
-		mapi_object_init(&obj_attach);
-
-		ui32 = (const uint32_t *) get_SPropValue_SRow_data(&rows_attach.aRow[i_row_attach], PR_ATTACH_NUM);
-
-		ms = OpenAttach (obj_message, *ui32, &obj_attach);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "OpenAttach", ms);
-			goto loop_cleanup;
-		}
-
-		ms = GetPropsAll (&obj_attach, MAPI_UNICODE, &properties);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "GetPropsAll", ms);
-			goto loop_cleanup;
-		}
-
-		az = 0;
-		attachment = g_new0 (ExchangeMAPIAttachment, 1);
-		attachment->cValues = properties.cValues;
-		attachment->lpProps = g_new0 (struct SPropValue, attachment->cValues + 1);
-		for (z=0; z < properties.cValues; z++) {
-			if (may_skip_property (properties.lpProps[z].ulPropTag)) {
-				attachment->cValues--;
-				continue;
-			}
-
-			cast_SPropValue (mem_ctx, &properties.lpProps[z],
-					 &(attachment->lpProps[az]));
-
-			if ((attachment->lpProps[az].ulPropTag & 0xFFFF) == PT_STRING8) {
-				struct SPropValue *lpProps;
-				struct SPropTagArray *tags;
-				uint32_t prop_count = 0;
-
-				/* prefer unicode strings, if available */
-				tags = set_SPropTagArray (mem_ctx, 0x1, (attachment->lpProps[az].ulPropTag & 0xFFFF0000) | PT_UNICODE);
-				if (MAPI_E_SUCCESS == GetProps (&obj_attach, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, tags, &lpProps, &prop_count) && prop_count == 1 && lpProps) {
-					if ((lpProps->ulPropTag & 0xFFFF) == PT_UNICODE)
-						attachment->lpProps[az] = *lpProps;
-				}
-				talloc_free (tags);
-			}
-
-			az++;
-		}
-
-		/* just to get all the other streams */
-		for (z = 0; z < properties.cValues; z++) {
-			if ((properties.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY) {
-				e_mapi_util_read_generic_stream (mem_ctx, &obj_attach, e_mapi_util_find_array_propval (&properties, PR_INTERNET_CPID), properties.lpProps[z].ulPropTag, &(attachment->streams), &properties, NULL);
-			}
-		}
-
-		ui32 = (const uint32_t *) get_SPropValue_SRow_data(&rows_attach.aRow[i_row_attach], PR_ATTACH_METHOD);
-		if (ui32 && *ui32 == ATTACH_BY_VALUE) {
-			e_mapi_util_read_generic_stream (mem_ctx, &obj_attach, e_mapi_util_find_array_propval (&properties, PR_INTERNET_CPID), PR_ATTACH_DATA_BIN, &(attachment->streams), &properties, NULL);
-		} else if (ui32 && *ui32 == ATTACH_EMBEDDED_MSG) {
-			mapi_object_t obj_emb_msg;
-
-			mapi_object_init (&obj_emb_msg);
-
-			if (OpenEmbeddedMessage (&obj_attach, &obj_emb_msg, MAPI_READONLY) == MAPI_E_SUCCESS) {
-				/* very the same is in camel-mapi-folder.c, how I hate diplicating the code */
-				GByteArray *bytes;
-
-				bytes = obj_message_to_camel_mime (conn, fid, &obj_emb_msg);
-				if (bytes) {
-					ExchangeMAPIStream *stream = g_new0 (ExchangeMAPIStream, 1);
-
-					stream->value = bytes;
-					stream->proptag = PR_ATTACH_DATA_BIN;
-
-					attachment->streams = g_slist_append (attachment->streams, stream);
-				}
-			}
-
-			mapi_object_release (&obj_emb_msg);
-		}
-
-		*attach_list = g_slist_append (*attach_list, attachment);
-
-	loop_cleanup:
-		if (ms != MAPI_E_SUCCESS)
-			status = FALSE;
-		mapi_object_release(&obj_attach);
-	}
-
- cleanup:
-	if (ms != MAPI_E_SUCCESS)
-		status = FALSE;
-	mapi_object_release(&obj_tb_attach);
-
-	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-	return status;
 }
 
 gboolean
@@ -1576,83 +751,6 @@ e_mapi_connection_get_public_folder (EMapiConnection *conn,
 	UNLOCK ();
 
 	return ms == MAPI_E_SUCCESS;
-}
-
-/* Returns TRUE if all recipients were read succcesfully, else returns FALSE */
-static gboolean
-e_mapi_util_get_recipients (EMapiConnection *conn, TALLOC_CTX *mem_ctx, mapi_object_t *obj_message, GSList **recip_list, GError **perror)
-{
-	enum MAPISTATUS		ms;
-	struct SPropTagArray	proptags;
-	struct SRowSet		rows_recip;
-	uint32_t		i_row_recip;
-	gboolean		status = TRUE;
-
-	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-
-	/* fetch recipient table */
-	ms = GetRecipientTable (obj_message, &rows_recip, &proptags);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "GetRecipientTable", ms);
-		goto cleanup;
-	}
-
-	for (i_row_recip = 0; i_row_recip < rows_recip.cRows; i_row_recip++) {
-		ExchangeMAPIRecipient *recipient = g_new0 (ExchangeMAPIRecipient, 1);
-		gchar *display_name = NULL, *email = NULL;
-		const struct Binary_r *entryid;
-
-		recipient->mem_ctx = talloc_new (conn->priv->session);
-
-		entryid = e_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_RECIPIENT_ENTRYID);
-		if (entryid && e_mapi_util_recip_entryid_decode (conn, entryid, &display_name, &email) && email) {
-			recipient->email_id = talloc_strdup (recipient->mem_ctx, email);
-			if (display_name)
-				recipient->display_name = talloc_strdup (recipient->mem_ctx, display_name);
-		} else {
-			recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) e_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_SMTP_ADDRESS_UNICODE));
-			/* fallback */
-			if (!recipient->email_id) {
-				uint32_t fallback_props[] = {
-					PROP_TAG (PT_UNICODE, 0x6001), /* PidTagNickname for Recipients table */
-					PR_RECIPIENT_DISPLAY_NAME_UNICODE
-				};
-				gint ii;
-				const gchar *addrtype = e_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE_UNICODE);
-
-				if (addrtype && !g_ascii_strcasecmp (addrtype, "SMTP"))
-					recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) e_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_EMAIL_ADDRESS_UNICODE));
-
-				for (ii = 0; !recipient->email_id && ii < G_N_ELEMENTS (fallback_props); ii++) {
-					recipient->email_id = talloc_steal (recipient->mem_ctx, (const gchar *) e_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), fallback_props[ii]));
-				}
-			}
-
-			if (recipient->email_id) {
-				const gchar *addrtype = e_mapi_util_find_row_propval (&(rows_recip.aRow[i_row_recip]), PR_ADDRTYPE_UNICODE);
-
-				if (addrtype && g_ascii_strcasecmp (addrtype, "EX") == 0)
-					recipient->email_id = talloc_strdup (recipient->mem_ctx, e_mapi_connection_ex_to_smtp (conn, recipient->email_id, NULL, NULL, NULL));
-			}
-		}
-
-		recipient->out_SRow.ulAdrEntryPad = rows_recip.aRow[i_row_recip].ulAdrEntryPad;
-		recipient->out_SRow.cValues = rows_recip.aRow[i_row_recip].cValues;
-		recipient->out_SRow.lpProps = talloc_steal ((TALLOC_CTX *)recipient->mem_ctx, rows_recip.aRow[i_row_recip].lpProps);
-
-		*recip_list = g_slist_append (*recip_list, recipient);
-
-		g_free (display_name);
-		g_free (email);
-	}
-
-cleanup:
-	if (ms != MAPI_E_SUCCESS)
-		status = FALSE;
-
-	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-	return status;
 }
 
 static enum MAPISTATUS
@@ -1937,7 +1035,7 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
 		goto cleanup;
 
-	res = cb (conn, mapi_object_get_id (obj_folder), mem_ctx, properties, cb_user_data, cancellable, perror);
+	res = cb (conn, mem_ctx, properties, cb_user_data, cancellable, perror);
 
  cleanup:
 	talloc_free (spropTagArray);
@@ -1948,10 +1046,23 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 	return res;
 }
 
-typedef gboolean (*ForeachTableRowCB) (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, struct SRow *srow, guint32 row_index, guint32 rows_total, gpointer user_data, GCancellable *cancellable, GError **perror);
+typedef gboolean (*ForeachTableRowCB)	(EMapiConnection *conn,
+					 TALLOC_CTX *mem_ctx,
+					 struct SRow *srow,
+					 guint32 row_index,
+					 guint32 rows_total,
+					 gpointer user_data,
+					 GCancellable *cancellable,
+					 GError **perror);
 
 static enum MAPISTATUS
-foreach_tablerow (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, mapi_object_t *obj_table, ForeachTableRowCB cb, gpointer user_data, GCancellable *cancellable, GError **perror)
+foreach_tablerow (EMapiConnection *conn,
+		  TALLOC_CTX *mem_ctx,
+		  mapi_object_t *obj_table,
+		  ForeachTableRowCB cb,
+		  gpointer user_data,
+		  GCancellable *cancellable,
+		  GError **perror)
 {
 	enum MAPISTATUS ms;
 	struct SRowSet SRowSet;
@@ -1992,7 +1103,7 @@ foreach_tablerow (EMapiConnection *conn, mapi_id_t fid, TALLOC_CTX *mem_ctx, map
 		}
 
 		for (i = 0; i < SRowSet.cRows && ms == MAPI_E_SUCCESS; i++) {
-			if (!cb (conn, fid, mem_ctx, &SRowSet.aRow[i], cursor_pos + i + 1, count, user_data, cancellable, perror))
+			if (!cb (conn, mem_ctx, &SRowSet.aRow[i], cursor_pos + i + 1, count, user_data, cancellable, perror))
 				ms = MAPI_E_RESERVED;
 			else if (g_cancellable_set_error_if_cancelled (cancellable, perror))
 				ms = MAPI_E_USER_CANCEL;
@@ -2010,7 +1121,6 @@ struct ListObjectsInternalData
 
 static gboolean
 list_objects_internal_cb (EMapiConnection *conn,
-			  mapi_id_t fid,
 			  TALLOC_CTX *mem_ctx,
 			  struct SRow *srow,
 			  guint32 row_index,
@@ -2041,7 +1151,7 @@ list_objects_internal_cb (EMapiConnection *conn,
 	lod.msg_flags = pmsg_flags ? *pmsg_flags : 0;
 	lod.last_modified = last_modified ? e_mapi_util_filetime_to_time_t (last_modified) : 0;
 
-	return loi_data->cb (conn, fid, mem_ctx, &lod, row_index, rows_total, loi_data->user_data, cancellable, perror);
+	return loi_data->cb (conn, mem_ctx, &lod, row_index, rows_total, loi_data->user_data, cancellable, perror);
 }
 
 static void
@@ -2289,7 +1399,7 @@ e_mapi_connection_list_objects (EMapiConnection *conn,
 	if (build_rs_cb) {
 		struct mapi_SRestriction *restrictions = NULL;
 
-		if (!build_rs_cb (conn, mapi_object_get_id (obj_folder), mem_ctx, &restrictions, build_rs_cb_data, cancellable, perror)) {
+		if (!build_rs_cb (conn, mem_ctx, &restrictions, build_rs_cb_data, cancellable, perror)) {
 			ms = MAPI_E_CALL_FAILED;
 			make_mapi_error (perror, "build_restrictions", ms);
 			goto cleanup;
@@ -2320,7 +1430,7 @@ e_mapi_connection_list_objects (EMapiConnection *conn,
 	loi_data.cb = cb;
 	loi_data.user_data = user_data;
 
-	ms = foreach_tablerow (conn, mapi_object_get_id (obj_folder), mem_ctx, &obj_table, list_objects_internal_cb, &loi_data, cancellable, perror);
+	ms = foreach_tablerow (conn, mem_ctx, &obj_table, list_objects_internal_cb, &loi_data, cancellable, perror);
 
  cleanup:
 	mapi_object_release (&obj_table);
@@ -2700,7 +1810,6 @@ struct FetchObjectAttachmentData
 
 static gboolean
 fetch_object_attachment_cb (EMapiConnection *conn,
-			    mapi_id_t fid,
 			    TALLOC_CTX *mem_ctx,
 			    struct SRow *srow,
 			    guint32 row_index,
@@ -2965,7 +2074,7 @@ e_mapi_connection_fetch_object_internal (EMapiConnection *conn,
 		foa.eap = eap;
 		foa.object = object;
 
-		ms = foreach_tablerow (conn, mapi_object_get_id (eap->obj_folder), mem_ctx, &attach_table, fetch_object_attachment_cb, &foa, cancellable, perror);
+		ms = foreach_tablerow (conn, mem_ctx, &attach_table, fetch_object_attachment_cb, &foa, cancellable, perror);
 		if (ms != MAPI_E_SUCCESS) {
 			make_mapi_error (perror, "AttachTable::foreach_tablerow", ms);
 			goto cleanup;
@@ -3871,7 +2980,6 @@ add_object_recipients (EMapiConnection *conn,
 
 static gboolean
 delete_attachment_cb (EMapiConnection *conn,
-		      mapi_id_t fid,
 		      TALLOC_CTX *mem_ctx,
 		      struct SRow *srow,
 		      guint32 row_index,
@@ -3930,7 +3038,7 @@ delete_object_attachments (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	ms = foreach_tablerow (conn, mapi_object_get_id (obj_folder), mem_ctx, &obj_table, delete_attachment_cb, obj_object, cancellable, perror);
+	ms = foreach_tablerow (conn, mem_ctx, &obj_table, delete_attachment_cb, obj_object, cancellable, perror);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "foreach_tablerow", ms);
 	}
@@ -4277,549 +3385,6 @@ e_mapi_connection_modify_object (EMapiConnection *conn,
 	UNLOCK ();
 
 	return ms == MAPI_E_SUCCESS;
-}
-
-gboolean
-e_mapi_connection_fetch_items  (EMapiConnection *conn,
-				mapi_id_t fid,
-				BuildRestrictionsCB build_rs_cb,
-				gpointer build_rs_cb_data,
-				struct SSortOrderSet *sort_order,
-				BuildReadPropsCB build_props,
-				gpointer brp_data,
-				FetchCallback cb,
-				gpointer data,
-				guint32 options,
-				GCancellable *cancellable,
-				GError **perror)
-{
-	enum MAPISTATUS ms;
-	TALLOC_CTX *mem_ctx;
-	mapi_object_t obj_folder;
-	mapi_object_t obj_table;
-	struct SPropTagArray *SPropTagArray, *propsTagArray = NULL;
-	struct SRowSet SRowSet;
-	uint32_t count, i, cursor_pos = 0;
-	gboolean result = FALSE;
-
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
-	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
-
-	e_mapi_debug_print("%s: Entering %s: folder-id %016" G_GINT64_MODIFIER "X ", G_STRLOC, G_STRFUNC, fid);
-
-	LOCK ();
-	mem_ctx = talloc_new (priv->session);
-	mapi_object_init(&obj_folder);
-	mapi_object_init(&obj_table);
-
-	/* Attempt to open the folder */
-	ms = open_folder (conn, 0, &fid, options, &obj_folder, perror);
-	if (ms != MAPI_E_SUCCESS) {
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-		ms = MAPI_E_USER_CANCEL;
-		goto cleanup;
-	}
-
-	/* Get a handle on the container */
-	ms = GetContentsTable (&obj_folder, &obj_table, TableFlags_UseUnicode, NULL);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "GetContentsTable", ms);
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-		ms = MAPI_E_USER_CANCEL;
-		goto cleanup;
-	}
-
-	SPropTagArray = set_SPropTagArray(mem_ctx, 0x5,
-					  PR_FID,
-					  PR_MID,
-					  PR_LAST_MODIFICATION_TIME,
-					  PR_HASATTACH,
-					  PR_MESSAGE_FLAGS);
-
-	/* Set primary columns to be fetched */
-	ms = SetColumns (&obj_table, SPropTagArray);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "SetColumns", ms);
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-		ms = MAPI_E_USER_CANCEL;
-		goto cleanup;
-	}
-
-	if (build_rs_cb) {
-		struct mapi_SRestriction *restrictions = NULL;
-
-		if (!build_rs_cb (conn, fid, mem_ctx, &restrictions, build_rs_cb_data, cancellable, perror)) {
-			ms = MAPI_E_CALL_FAILED;
-			make_mapi_error (perror, "build_restrictions", ms);
-			goto cleanup;
-		}
-
-		if (restrictions) {
-			/* Applying any restriction that are set. */
-			ms = Restrict (&obj_table, restrictions, NULL);
-			if (ms != MAPI_E_SUCCESS) {
-				make_mapi_error (perror, "Restrict", ms);
-				goto cleanup;
-			}
-
-			if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-				ms = MAPI_E_USER_CANCEL;
-				goto cleanup;
-			}
-		}
-	}
-
-	if (sort_order) {
-		ms = SortTable (&obj_table, sort_order);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "SortTable", ms);
-			goto cleanup;
-		}
-	}
-
-	if (build_props) {
-		propsTagArray = set_SPropTagArray (mem_ctx, 0x1, PR_MESSAGE_CLASS);
-		if (!build_props (conn, fid, mem_ctx, propsTagArray, brp_data, cancellable, perror)) {
-			make_mapi_error (perror, "build_props", MAPI_E_CALL_FAILED);
-			goto cleanup;
-		}
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-	}
-
-	/* Note : We maintain a cursor position. count parameter in QueryRows */
-	/* is more of a request and not gauranteed  */
-	do {
-		/* Number of items in the container */
-		ms = QueryPosition (&obj_table, &cursor_pos, &count);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "QueryPosition", ms);
-			goto cleanup;
-		}
-
-		if (!count)
-			break;
-
-		/* Fill the table columns with data from the rows */
-		ms = QueryRows (&obj_table, count, TBL_ADVANCE, &SRowSet);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "QueryRows", ms);
-			goto cleanup;
-		}
-
-		for (i = 0; i < SRowSet.cRows; i++) {
-			mapi_object_t obj_message;
-			struct mapi_SPropValue_array properties_array = {0};
-			const mapi_id_t *pfid;
-			const mapi_id_t	*pmid;
-			const bool *has_attach = NULL;
-			const uint32_t *msg_flags;
-			GSList *attach_list = NULL;
-			GSList *recip_list = NULL;
-			GSList *stream_list = NULL;
-			gboolean cb_retval = false;
-
-			mapi_object_init(&obj_message);
-
-			pfid = (const uint64_t *) get_SPropValue_SRow_data(&SRowSet.aRow[i], PR_FID);
-			pmid = (const uint64_t *) get_SPropValue_SRow_data(&SRowSet.aRow[i], PR_MID);
-
-			has_attach = (const bool *) get_SPropValue_SRow_data(&SRowSet.aRow[i], PR_HASATTACH);
-			msg_flags = get_SPropValue_SRow_data (&SRowSet.aRow[i], PR_MESSAGE_FLAGS);
-
-			if (options & MAPI_OPTIONS_DONT_OPEN_MESSAGE)
-				goto relax;
-
-			ms = OpenMessage (&obj_folder, *pfid, *pmid, &obj_message, 0);
-			if (ms != MAPI_E_SUCCESS) {
-				make_mapi_error (perror, "OpenMessage", ms);
-				goto loop_cleanup;
-			}
-
-			if (propsTagArray && propsTagArray->cValues) {
-				struct SPropValue *lpProps = NULL;
-				struct SPropTagArray *tags;
-				uint32_t prop_count = 0, k, ll;
-				/* we need to make a local copy of the tag array
-				 * since GetProps will modify the array on any
-				 * errors */
-				tags = set_SPropTagArray (mem_ctx, 0x1, PR_MSG_EDITOR_FORMAT);
-				for (k = 0; k < propsTagArray->cValues; k++)
-					SPropTagArray_add (mem_ctx, tags, propsTagArray->aulPropTag[k]);
-
-				ms = GetProps (&obj_message, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, tags, &lpProps, &prop_count);
-				if (ms != MAPI_E_SUCCESS)
-					make_mapi_error (perror, "GetProps", ms);
-
-				properties_array.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue,
-									 prop_count + 1);
-				properties_array.cValues = prop_count;
-				for (k = 0, ll = 0; k < prop_count; k++, ll++) {
-					if ((lpProps[k].ulPropTag & 0xFFFF) == PT_MV_BINARY) {
-						uint32_t ci;
-
-						properties_array.lpProps[ll].ulPropTag = lpProps[k].ulPropTag;
-						properties_array.lpProps[ll].value.MVbin.cValues = lpProps[k].value.MVbin.cValues;
-						properties_array.lpProps[ll].value.MVbin.bin = (struct SBinary_short *) talloc_array (mem_ctx, struct Binary_r, properties_array.lpProps[ll].value.MVbin.cValues);
-						for (ci = 0; ci < properties_array.lpProps[ll].value.MVbin.cValues; ci++) {
-							properties_array.lpProps[ll].value.MVbin.bin[ci].cb = lpProps[k].value.MVbin.lpbin[ci].cb;
-							properties_array.lpProps[ll].value.MVbin.bin[ci].lpb = lpProps[k].value.MVbin.lpbin[ci].lpb;
-						}
-					} else if (may_skip_property (lpProps[k].ulPropTag)) {
-						ll--;
-						properties_array.cValues--;
-					} else {
-						cast_mapi_SPropValue (mem_ctx,
-								      &properties_array.lpProps[ll],&lpProps[k]);
-					}
-				}
-			} else {
-				ms = GetPropsAll (&obj_message, MAPI_UNICODE, &properties_array);
-				if (ms != MAPI_E_SUCCESS)
-					make_mapi_error (perror, "GetPropsAll", ms);
-			}
-
-			if (has_attach && *has_attach && (MAPI_OPTIONS_FETCH_ATTACHMENTS & options)) {
-				e_mapi_util_get_attachments (conn, fid, mem_ctx, &obj_message, &attach_list, NULL);
-			}
-
-			if (options & MAPI_OPTIONS_FETCH_RECIPIENTS) {
-				e_mapi_util_get_recipients (conn, mem_ctx, &obj_message, &recip_list, perror);
-			}
-
-			/* get the main body stream no matter what */
-			if (options & MAPI_OPTIONS_FETCH_BODY_STREAM) {
-				e_mapi_util_read_body_stream (mem_ctx, &obj_message, &stream_list, &properties_array, (options & MAPI_OPTIONS_GETBESTBODY) != 0);
-			}
-
- relax:
-			if (ms == MAPI_E_SUCCESS) {
-				FetchItemsCallbackData *item_data;
-
-				if ((options & MAPI_OPTIONS_DONT_OPEN_MESSAGE) == 0) {
-					if ((options & MAPI_OPTIONS_FETCH_GENERIC_STREAMS) != 0) {
-						uint32_t z;
-						const uint32_t *cpid = e_mapi_util_find_array_propval (&properties_array, PR_INTERNET_CPID);
-
-						/* just to get all the other streams */
-						for (z = 0; z < properties_array.cValues; z++) {
-							if ((properties_array.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY)
-								e_mapi_util_read_generic_stream (mem_ctx, &obj_message, cpid, properties_array.lpProps[z].ulPropTag, &stream_list, &properties_array, NULL);
-						}
-					}
-				}
-
-				/* NOTE: stream_list, recipient_list and attach_list
-				   should be freed by the callback */
-				item_data = g_new0 (FetchItemsCallbackData, 1);
-				item_data->conn = conn;
-				item_data->fid = *pfid;
-				item_data->mid = *pmid;
-				item_data->msg_flags = msg_flags ? *msg_flags : 0;
-				item_data->properties = &properties_array;
-				item_data->streams = stream_list;
-				item_data->recipients = recip_list;
-				item_data->attachments = attach_list;
-				item_data->total = count; //Total entries in the table.
-				item_data->index = cursor_pos + i; //cursor_pos + current_table_index
-
-				global_unlock ();
-				cb_retval = cb (item_data, data, cancellable, perror);
-				global_lock ();
-
-				g_free (item_data);
-			} else {
-				e_mapi_util_free_stream_list (&stream_list);
-				e_mapi_util_free_recipient_list (&recip_list);
-				e_mapi_util_free_attachment_list (&attach_list);
-			}
-
-			if (propsTagArray && propsTagArray->cValues)
-				talloc_free (properties_array.lpProps);
-
-		loop_cleanup:
-			if ((options & MAPI_OPTIONS_DONT_OPEN_MESSAGE) == 0)
-				mapi_object_release (&obj_message);
-
-			if (!cb_retval) break;
-		}
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-	} while (cursor_pos < count && ms == MAPI_E_SUCCESS);
-
-	result = ms == MAPI_E_SUCCESS;
-
- cleanup:
-	if (propsTagArray)
-		talloc_free (propsTagArray);
-	mapi_object_release(&obj_folder);
-	mapi_object_release(&obj_table);
-	talloc_free (mem_ctx);
-	UNLOCK ();
-
-	e_mapi_debug_print("%s: Leaving %s: folder-id %016" G_GINT64_MODIFIER "X ", G_STRLOC, G_STRFUNC, fid);
-
-	return result;
-}
-
-/* obj_folder and obj_message are released only when obj_folder is not NULL and when returned TRUE */
-gboolean
-e_mapi_connection_fetch_object_props (EMapiConnection *conn,
-				      mapi_object_t *obj_folder,
-				      mapi_id_t fid,
-				      mapi_id_t mid,
-				      mapi_object_t *obj_message,
-				      BuildReadPropsCB build_props,
-				      gpointer brp_data,
-				      FetchCallback cb,
-				      gpointer data,
-				      guint32 options,
-				      GCancellable *cancellable,
-				      GError **perror)
-{
-	enum MAPISTATUS ms;
-	TALLOC_CTX *mem_ctx;
-	struct mapi_SPropValue_array properties_array;
-	struct SPropTagArray *propsTagArray = NULL;
-	GSList *attach_list = NULL;
-	GSList *recip_list = NULL;
-	GSList *stream_list = NULL;
-	gboolean result = FALSE;
-
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
-	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
-
-	e_mapi_debug_print("%s: Entering %s: folder %p message %p", G_STRLOC, G_STRFUNC, obj_folder, obj_message);
-
-	LOCK ();
-	mem_ctx = talloc_new (priv->session);
-
-	if (build_props) {
-		propsTagArray = set_SPropTagArray (mem_ctx, 0x3,
-			PR_MESSAGE_CLASS,
-			PR_HASATTACH,
-			PR_MSG_EDITOR_FORMAT);
-
-		if (!build_props (conn, fid, mem_ctx, propsTagArray, brp_data, cancellable, perror)) {
-			make_mapi_error (perror, "build_props", MAPI_E_CALL_FAILED);
-			goto cleanup;
-		}
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-	}
-
-	if (propsTagArray && propsTagArray->cValues) {
-		struct SPropValue *lpProps;
-		uint32_t prop_count = 0, k, ll;
-
-		lpProps = talloc_zero(mem_ctx, struct SPropValue);
-
-		ms = GetProps (obj_message, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, propsTagArray, &lpProps, &prop_count);
-		if (ms != MAPI_E_SUCCESS)
-			make_mapi_error (perror, "GetProps", ms);
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-
-		/* Conversion from SPropValue to mapi_SPropValue. (no padding here) */
-		properties_array.cValues = prop_count;
-		properties_array.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, prop_count + 1);
-		for (k = 0, ll = 0; k < prop_count; k++, ll++) {
-			if (may_skip_property (lpProps[k].ulPropTag)) {
-				ll--;
-				properties_array.cValues--;
-			} else {
-				cast_mapi_SPropValue (mem_ctx,
-						      &properties_array.lpProps[ll], &lpProps[k]);
-			}
-		}
-	} else {
-		ms = GetPropsAll (obj_message, MAPI_UNICODE, &properties_array);
-		if (ms != MAPI_E_SUCCESS)
-			make_mapi_error (perror, "GetPropsAll", ms);
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-	}
-
-	/* Fetch attachments */
-	if (options & MAPI_OPTIONS_FETCH_ATTACHMENTS) {
-		const bool *has_attach = e_mapi_util_find_array_propval (&properties_array, PR_HASATTACH);
-
-		if (has_attach && *has_attach)
-			e_mapi_util_get_attachments (conn, fid, mem_ctx, obj_message, &attach_list, NULL);
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-	}
-
-	/* Fetch recipients */
-	if (options & MAPI_OPTIONS_FETCH_RECIPIENTS) {
-		e_mapi_util_get_recipients (conn, mem_ctx, obj_message, &recip_list, NULL);
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-	}
-
-	/* get the main body stream no matter what */
-	if (options & MAPI_OPTIONS_FETCH_BODY_STREAM) {
-		e_mapi_util_read_body_stream (mem_ctx, obj_message, &stream_list, &properties_array, (options & MAPI_OPTIONS_GETBESTBODY) != 0);
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-	}
-
-	if (ms == MAPI_E_SUCCESS) {
-		if ((options & MAPI_OPTIONS_FETCH_GENERIC_STREAMS)) {
-			uint32_t z;
-
-			/* just to get all the other streams */
-			for (z = 0; z < properties_array.cValues; z++) {
-				if ((properties_array.lpProps[z].ulPropTag & 0xFFFF) == PT_BINARY) {
-					e_mapi_util_read_generic_stream (mem_ctx, obj_message, e_mapi_util_find_array_propval (&properties_array, PR_INTERNET_CPID), properties_array.lpProps[z].ulPropTag, &stream_list, &properties_array, NULL);
-				}
-
-				if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-					ms = MAPI_E_USER_CANCEL;
-					goto cleanup;
-				}
-			}
-		}
-	}
-
-	/* Release the objects so that the callback may use the store. */
-	if (obj_folder) {
-		/* obj_folder is not NULL, thus can do this */
-		mapi_object_release (obj_message);
-		mapi_object_release (obj_folder);
-	}
-
-	if (ms == MAPI_E_SUCCESS) {
-		FetchItemsCallbackData *item_data = g_new0 (FetchItemsCallbackData, 1);
-		item_data->conn = conn;
-		item_data->fid = fid;
-		item_data->mid = mid;
-		item_data->properties = &properties_array;
-		item_data->streams = stream_list;
-		item_data->recipients = recip_list;
-		item_data->attachments = attach_list;
-
-		/* NOTE: stream_list, recipient_list and attach_list should be freed by the callback */
-		global_unlock ();
-		cb (item_data, data, cancellable, perror);
-		global_lock ();
-
-		g_free (item_data);
-	} else {
-		e_mapi_util_free_stream_list (&stream_list);
-		e_mapi_util_free_recipient_list (&recip_list);
-		e_mapi_util_free_attachment_list (&attach_list);
-	}
-
-	result = ms == MAPI_E_SUCCESS;
-
-cleanup:
-	talloc_free (mem_ctx);
-	UNLOCK ();
-
-	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-	return result;
-}
-
-gboolean
-e_mapi_connection_fetch_item (EMapiConnection *conn,
-			      mapi_id_t fid,
-			      mapi_id_t mid,
-			      BuildReadPropsCB build_props,
-			      gpointer brp_data,
-			      FetchCallback cb,
-			      gpointer data,
-			      guint32 options,
-			      GCancellable *cancellable,
-			      GError **perror)
-{
-	enum MAPISTATUS ms;
-	TALLOC_CTX *mem_ctx;
-	mapi_object_t obj_folder;
-	mapi_object_t obj_message;
-	gboolean result = FALSE;
-
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
-	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
-
-	e_mapi_debug_print("%s: Entering %s: folder-id %016" G_GINT64_MODIFIER "X message-id %016" G_GINT64_MODIFIER "X",
-				G_STRLOC, G_STRFUNC, fid, mid);
-
-	LOCK ();
-	mem_ctx = talloc_new (priv->session);
-	mapi_object_init(&obj_folder);
-	mapi_object_init(&obj_message);
-
-	/* Attempt to open the folder */
-	ms = open_folder (conn, 0, &fid, options, &obj_folder, perror);
-	if (ms != MAPI_E_SUCCESS) {
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-		ms = MAPI_E_USER_CANCEL;
-		goto cleanup;
-	}
-
-	/* Open the item */
-	ms = OpenMessage (&obj_folder, fid, mid, &obj_message, 0x0);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "OpenMessage", ms);
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-		ms = MAPI_E_USER_CANCEL;
-		goto cleanup;
-	}
-
-	result = e_mapi_connection_fetch_object_props (conn, &obj_folder, fid, mid, &obj_message, build_props, brp_data, cb, data, options, cancellable, perror);
-
- cleanup:
-	if (!result) {
-		mapi_object_release (&obj_message);
-		mapi_object_release (&obj_folder);
-	}
-	talloc_free (mem_ctx);
-	UNLOCK ();
-
-	e_mapi_debug_print ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-	return result;
 }
 
 mapi_id_t
@@ -5522,315 +4087,6 @@ e_mapi_connection_get_default_folder_id (EMapiConnection *conn,
 	return (ms == MAPI_E_SUCCESS ? fid : 0);
 }
 
-mapi_id_t
-e_mapi_connection_create_item  (EMapiConnection *conn,
-				uint32_t olFolder,
-				mapi_id_t fid,
-				BuildWritePropsCB build_props,
-				gpointer bwp_data,
-				GSList *recipients,
-				GSList *attachments,
-				GSList *generic_streams,
-				uint32_t options,
-				GCancellable *cancellable,
-				GError **perror)
-{
-	enum MAPISTATUS ms;
-	TALLOC_CTX *mem_ctx;
-	mapi_object_t obj_folder;
-	mapi_object_t obj_message;
-	struct SPropValue *props = NULL;
-	uint32_t propslen = 0;
-	mapi_id_t mid = 0;
-
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, 0);
-	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, 0);
-
-	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-
-	LOCK ();
-
-	mem_ctx = talloc_new (priv->session);
-	mapi_object_init(&obj_folder);
-	mapi_object_init(&obj_message);
-
-	/* Attempt to open the folder */
-	ms = open_folder (conn, olFolder, &fid, options, &obj_folder, perror);
-	if (ms != MAPI_E_SUCCESS) {
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-		ms = MAPI_E_USER_CANCEL;
-		goto cleanup;
-	}
-
-	/* Create the item */
-	ms = CreateMessage (&obj_folder, &obj_message);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "CreateMessage", ms);
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-		ms = MAPI_E_USER_CANCEL;
-		goto cleanup;
-	}
-
-	/* Add regular props using callback */
-	if (build_props && !build_props (conn, fid, mem_ctx, &props, &propslen, bwp_data, cancellable, perror)) {
-		e_mapi_debug_print ("%s: (%s): build_props failed! propslen = %d ", G_STRLOC, G_STRFUNC, propslen);
-		make_mapi_error (perror, "build_props", MAPI_E_CALL_FAILED);
-		goto cleanup;
-	}
-
-	/* set properties for the item */
-	ms = SetProps (&obj_message, MAPI_PROPS_SKIP_NAMEDID_CHECK, props, propslen);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "SetProps", ms);
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-		ms = MAPI_E_USER_CANCEL;
-		goto cleanup;
-	}
-
-	if (generic_streams) {
-		if (!e_mapi_util_write_generic_streams (&obj_message, generic_streams, perror))
-			goto cleanup;
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-	}
-
-	/* Set attachments if any */
-	if (attachments) {
-		if (!e_mapi_util_set_attachments (conn, fid, mem_ctx, &obj_message, attachments, FALSE, perror))
-			goto cleanup;
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-	}
-
-	/* Set recipients if any */
-	if (recipients) {
-		if (!e_mapi_util_modify_recipients (conn, mem_ctx, &obj_message, recipients, FALSE, perror))
-			goto cleanup;
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-	}
-
-	/* Finally, save all changes */
-	ms = SaveChangesMessage (&obj_folder, &obj_message, KeepOpenReadWrite);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "SaveChangesMessage", ms);
-		goto cleanup;
-	}
-
-	if (recipients && !(options & MAPI_OPTIONS_DONT_SUBMIT)) {
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-
-		/* Mark message as ready to be sent */
-		ms = SubmitMessage (&obj_message);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "SubmitMessage", ms);
-
-			/*
-			The code is storing message right to Sent items instead of Outbox,
-			because fetching PR_ENTRYID or PR_IPM_SENTMAIL_ENTRYID didn't seem
-			to work in time of doing this change.
-
-			For more information and other possible (correct) approaches see:
-			https://bugzilla.gnome.org/show_bug.cgi?id=561794
-			*/
-			if ((options & MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE) != 0) {
-				mid = mapi_object_get_id (&obj_message);
-				mapi_object_release(&obj_message);
-				/* to not release a message object twice */
-				mapi_object_init (&obj_message);
-
-				ms = DeleteMessage (&obj_folder, &mid, 1);
-				if (ms != MAPI_E_SUCCESS) {
-					make_mapi_error (perror, "DeleteMessage", ms);
-				}
-
-				/* do not forget to set it back to 0, as the function failed */
-				mid = 0;
-			}
-
-			goto cleanup;
-		}
-	}
-
-	mid = mapi_object_get_id (&obj_message);
-
- cleanup:
-	mapi_object_release(&obj_message);
-	mapi_object_release(&obj_folder);
-	talloc_free(mem_ctx);
-
-	UNLOCK ();
-
-	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-	return mid;
-}
-
-gboolean
-e_mapi_connection_modify_item  (EMapiConnection *conn,
-				uint32_t olFolder,
-				mapi_id_t fid,
-				mapi_id_t mid,
-				BuildWritePropsCB build_props,
-				gpointer bwp_data,
-				GSList *recipients,
-				GSList *attachments,
-				GSList *generic_streams,
-				uint32_t options,
-				GCancellable *cancellable,
-				GError **perror)
-{
-	enum MAPISTATUS ms;
-	TALLOC_CTX *mem_ctx;
-	mapi_object_t obj_folder;
-	mapi_object_t obj_message;
-	struct SPropValue *props = NULL;
-	uint32_t propslen = 0;
-	gboolean result = FALSE;
-
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
-	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
-
-	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-
-	LOCK ();
-
-	mem_ctx = talloc_new (priv->session);
-	mapi_object_init(&obj_folder);
-	mapi_object_init(&obj_message);
-
-	/* Attempt to open the folder */
-	ms = open_folder (conn, olFolder, &fid, options, &obj_folder, perror);
-	if (ms != MAPI_E_SUCCESS) {
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-		ms = MAPI_E_USER_CANCEL;
-		goto cleanup;
-	}
-
-	/* Open the item to be modified */
-	ms = OpenMessage (&obj_folder, fid, mid, &obj_message, MAPI_MODIFY);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "OpenMessage", ms);
-		goto cleanup;
-	}
-
-	/* Add regular props using callback */
-	if (build_props && !build_props (conn, fid, mem_ctx, &props, &propslen, bwp_data, cancellable, perror)) {
-		e_mapi_debug_print ("%s: (%s): Could not build props ", G_STRLOC, G_STRFUNC);
-		make_mapi_error (perror, "build_props", MAPI_E_CALL_FAILED);
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-		ms = MAPI_E_USER_CANCEL;
-		goto cleanup;
-	}
-
-	/* set properties for the item */
-	ms = SetProps (&obj_message, MAPI_PROPS_SKIP_NAMEDID_CHECK, props, propslen);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "SetProps", ms);
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-		ms = MAPI_E_USER_CANCEL;
-		goto cleanup;
-	}
-
-	if (generic_streams) {
-		if (!e_mapi_util_write_generic_streams (&obj_message, generic_streams, perror))
-			goto cleanup;
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-	}
-
-	/* Set attachments if any */
-	if (attachments) {
-		if (!e_mapi_util_set_attachments (conn, fid, mem_ctx, &obj_message, attachments, TRUE, perror))
-			goto cleanup;
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-	} else {
-		e_mapi_util_delete_attachments (mem_ctx, &obj_message, NULL);
-	}
-
-	/* Set recipients if any */
-	if (recipients) {
-		if (!e_mapi_util_modify_recipients (conn, mem_ctx, &obj_message, recipients, TRUE, perror))
-			goto cleanup;
-
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-	}
-
-	/* Finally, save all changes */
-	ms = SaveChangesMessage (&obj_folder, &obj_message, KeepOpenReadWrite);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "SaveChangesMessage", ms);
-		goto cleanup;
-	}
-
-	if (recipients && !(options & MAPI_OPTIONS_DONT_SUBMIT)) {
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-			ms = MAPI_E_USER_CANCEL;
-			goto cleanup;
-		}
-
-		/* Mark message as ready to be sent */
-		ms = SubmitMessage (&obj_message);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "SubmitMessage", ms);
-			goto cleanup;
-		}
-	}
-
-	result = TRUE;
-
- cleanup:
-	mapi_object_release(&obj_message);
-	mapi_object_release(&obj_folder);
-	talloc_free(mem_ctx);
-
-	UNLOCK ();
-
-	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-	return result;
-}
-
 gboolean
 e_mapi_connection_set_flags (EMapiConnection *conn,
 			     uint32_t olFolder,
@@ -6022,7 +4278,7 @@ e_mapi_connection_remove_items (EMapiConnection *conn,
 				uint32_t olFolder,
 				mapi_id_t fid,
 				guint32 fid_options,
-				GSList *mids,
+				const GSList *mids,
 				GCancellable *cancellable,
 				GError **perror)
 {
@@ -6031,7 +4287,7 @@ e_mapi_connection_remove_items (EMapiConnection *conn,
 	mapi_object_t obj_folder;
 	uint32_t i;
 	mapi_id_t *id_messages;
-	GSList *tmp = mids;
+	const GSList *tmp = mids;
 	gboolean result = FALSE;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
@@ -6044,10 +4300,10 @@ e_mapi_connection_remove_items (EMapiConnection *conn,
 	mem_ctx = talloc_new (priv->session);
 	mapi_object_init(&obj_folder);
 
-	id_messages = talloc_array(mem_ctx, mapi_id_t, g_slist_length (mids));
-	for (i=0; tmp; tmp=tmp->next, i++) {
-		struct id_list *data = tmp->data;
-		id_messages[i] = data->id;
+	id_messages = talloc_array(mem_ctx, mapi_id_t, g_slist_length ((GSList *) mids));
+	for (i = 0; tmp; tmp = tmp->next, i++) {
+		mapi_id_t *data = tmp->data;
+		id_messages[i] = *data;
 	}
 
 	/* Attempt to open the folder */
@@ -6092,7 +4348,6 @@ struct GetFolderHierarchyCBData
 
 static gboolean
 get_folder_hierarchy_cb (EMapiConnection *conn,
-			 mapi_id_t fid,
 			 TALLOC_CTX *mem_ctx,
 			 struct SRow *srow,
 			 guint32 row_index,
@@ -6213,7 +4468,7 @@ get_child_folders (EMapiConnection *conn,
 	gfh.cb = cb;
 	gfh.cb_user_data = cb_user_data;
 
-	ms = foreach_tablerow (conn, folder_id, mem_ctx, &obj_table, get_folder_hierarchy_cb, &gfh, cancellable, perror);
+	ms = foreach_tablerow (conn, mem_ctx, &obj_table, get_folder_hierarchy_cb, &gfh, cancellable, perror);
 
  cleanup:
 	talloc_free (spropTagArray);
@@ -7231,3 +5486,149 @@ e_mapi_rename_profile (struct mapi_context *mapi_ctx,
 }
 
 /* profile related functions - end */
+
+EMapiRecipient *
+e_mapi_recipient_new (TALLOC_CTX *mem_ctx)
+{
+	EMapiRecipient *recipient;
+
+	recipient = talloc_zero (mem_ctx, EMapiRecipient);
+	g_assert (recipient != NULL);
+
+	recipient->properties.cValues = 0;
+	recipient->properties.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, 1);
+	recipient->next = NULL;
+
+	g_assert (recipient->properties.lpProps != NULL);
+
+	return recipient;
+}
+
+void
+e_mapi_recipient_free (EMapiRecipient *recipient)
+{
+	if (!recipient)
+		return;
+
+	talloc_free (recipient->properties.lpProps);
+	talloc_free (recipient);
+}
+
+EMapiAttachment *
+e_mapi_attachment_new (TALLOC_CTX *mem_ctx)
+{
+	EMapiAttachment *attachment;
+
+	attachment = talloc_zero (mem_ctx, EMapiAttachment);
+	g_assert (attachment != NULL);
+
+	attachment->properties.cValues = 0;
+	attachment->properties.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, 1);
+	attachment->embedded_object = NULL;
+	attachment->next = NULL;
+
+	g_assert (attachment->properties.lpProps != NULL);
+
+	return attachment;
+}
+
+void
+e_mapi_attachment_free (EMapiAttachment *attachment)
+{
+	if (!attachment)
+		return;
+
+	e_mapi_object_free (attachment->embedded_object);
+	talloc_free (attachment->properties.lpProps);
+	talloc_free (attachment);
+}
+
+EMapiObject *
+e_mapi_object_new (TALLOC_CTX *mem_ctx)
+{
+	EMapiObject *object;
+
+	object = talloc_zero (mem_ctx, EMapiObject);
+	g_assert (object != NULL);
+
+	object->properties.cValues = 0;
+	object->properties.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, 1);
+	object->recipients = NULL;
+	object->attachments = NULL;
+	object->parent = NULL;
+
+	g_assert (object->properties.lpProps != NULL);
+
+	return object;
+}
+
+void
+e_mapi_object_free (EMapiObject *object)
+{
+	EMapiRecipient *recipient;
+	EMapiAttachment *attachment;
+
+	if (!object)
+		return;
+
+	recipient = object->recipients;
+	while (recipient) {
+		EMapiRecipient *r = recipient;
+
+		recipient = recipient->next;
+		e_mapi_recipient_free (r);
+	}
+
+	attachment = object->attachments;
+	while (attachment) {
+		EMapiAttachment *a = attachment;
+
+		attachment = attachment->next;
+		e_mapi_attachment_free (a);
+	}
+
+	talloc_free (object->properties.lpProps);
+	talloc_free (object);
+}
+
+void
+e_mapi_object_add_recipient (EMapiObject *object,
+			     EMapiRecipient *recipient)
+{
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (recipient != NULL);
+	g_return_if_fail (recipient->next == NULL);
+
+	if (!object->recipients) {
+		object->recipients = recipient;
+	} else {
+		EMapiRecipient *recip = object->recipients;
+
+		while (recip->next) {
+			recip = recip->next;
+		}
+
+		recip->next = recipient;
+	}
+}
+
+void
+e_mapi_object_add_attachment (EMapiObject *object,
+			      EMapiAttachment *attachment)
+{
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (attachment != NULL);
+	g_return_if_fail (attachment->next == NULL);
+
+	if (!object->attachments) {
+		object->attachments = attachment;
+	} else {
+		EMapiAttachment *attach = object->attachments;
+
+		while (attach->next) {
+			attach = attach->next;
+		}
+
+		attach->next = attachment;
+	}
+}

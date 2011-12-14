@@ -512,7 +512,6 @@ struct ListCalendarObjectsData
 
 static gboolean
 list_calendar_objects_cb (EMapiConnection *conn,
-			  mapi_id_t fid,
 			  TALLOC_CTX *mem_ctx,
 			  const ListObjectsData *object_data,
 			  guint32 obj_index,
@@ -1349,7 +1348,6 @@ ecbm_capture_req_props (EMapiConnection *conn,
 
 static gboolean
 ecbm_list_for_one_mid_cb (EMapiConnection *conn,
-		          mapi_id_t fid,
 			  TALLOC_CTX *mem_ctx,
 			  const ListObjectsData *object_data,
 			  guint32 obj_index,
@@ -1370,7 +1368,6 @@ ecbm_list_for_one_mid_cb (EMapiConnection *conn,
 
 static gboolean
 ecbm_build_global_id_restriction (EMapiConnection *conn,
-				  mapi_id_t fid,
 				  TALLOC_CTX *mem_ctx,
 				  struct mapi_SRestriction **restrictions,
 				  gpointer user_data,
@@ -1382,21 +1379,16 @@ ecbm_build_global_id_restriction (EMapiConnection *conn,
 	struct SPropValue sprop;
 	struct mapi_SRestriction *restriction;
 	gchar *propval;
-	uint32_t proptag;
 
 	g_return_val_if_fail (restrictions != NULL, FALSE);
 	g_return_val_if_fail (comp != NULL, FALSE);
-
-	proptag = e_mapi_connection_resolve_named_prop (conn, fid, PidLidCleanGlobalObjectId, cancellable, perror);
-	if (proptag == MAPI_E_RESERVED)
-		proptag = PidLidCleanGlobalObjectId;
 
 	restriction = talloc_zero (mem_ctx, struct mapi_SRestriction);
 	g_return_val_if_fail (restriction != NULL, FALSE);
 
 	restriction->rt = RES_PROPERTY;
 	restriction->res.resProperty.relop = RELOP_EQ;
-	restriction->res.resProperty.ulPropTag = proptag;
+	restriction->res.resProperty.ulPropTag = PidLidGlobalObjectId;
 
 	propval = e_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-GLOBALID");
 	if (propval && *propval) {
@@ -1414,11 +1406,11 @@ ecbm_build_global_id_restriction (EMapiConnection *conn,
 		e_cal_component_get_dtstamp (comp, &ical_creation_time);
 
 		e_mapi_util_time_t_to_filetime (icaltime_as_timet (ical_creation_time), &creation_time);
-		e_mapi_cal_util_generate_globalobjectid (TRUE, uid, NULL, ical_creation_time.year ? &creation_time : NULL, &sb);
+		e_mapi_cal_util_generate_globalobjectid (FALSE, uid, NULL, ical_creation_time.year ? &creation_time : NULL, &sb);
 	}
 	g_free (propval);
 
-	set_SPropValue_proptag (&sprop, proptag, &sb);
+	set_SPropValue_proptag (&sprop, PidLidGlobalObjectId, &sb);
 	cast_mapi_SPropValue (mem_ctx, &(restriction->res.resProperty.lpProp), &sprop);
 
 	*restrictions = restriction;
@@ -1874,9 +1866,9 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 		/*if (e_cal_component_has_attendees (E_CAL_COMPONENT (comp_list->data))) {
 		} else {*/
-			struct id_list *data = g_new (struct id_list, 1);
-			data->id = mid;
-			list = g_slist_prepend (list, (gpointer) data);
+			mapi_id_t *pmid = g_new (mapi_id_t, 1);
+			*pmid = mid;
+			list = g_slist_prepend (list, pmid);
 		/* } */
 
 		if (e_mapi_connection_remove_items (priv->conn, priv->olFolder, priv->fid, 0, list, cancellable, &ri_error)) {
@@ -1898,7 +1890,7 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		} else
 			mapi_error_to_edc_error (&err, ri_error, OtherError, "Cannot remove items from a server");
 
-		g_slist_free (list);
+		g_slist_free_full (list, g_free);
 		g_slist_free (comp_list);
 	}
 	g_free (calobj);

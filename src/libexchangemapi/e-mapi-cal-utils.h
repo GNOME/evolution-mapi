@@ -74,50 +74,14 @@ struct cal_cbdata {
 	icaltimezone * (*get_timezone)(gpointer get_tz_data, const gchar *tzid);
 };
 
-void
-e_mapi_cal_util_fetch_organizer (ECalComponent *comp, GSList **recip_list);
-void
-e_mapi_cal_util_fetch_recipients (ECalComponent *comp, GSList **recip_list);
-void
-e_mapi_cal_util_fetch_attachments (ECalComponent *comp, GSList **attach_list, const gchar *local_store_uri);
+void		e_mapi_cal_util_generate_globalobjectid		(gboolean is_clean,
+								 const gchar *uid,
+								 const struct timeval *exception_replace_time,
+								 const struct FILETIME *creation_time,
+								 struct Binary_r *sb);
 
-ECalComponent *
-e_mapi_cal_util_mapi_props_to_comp (EMapiConnection *conn, mapi_id_t fid, icalcomponent_kind kind, const gchar *mid, struct mapi_SPropValue_array *properties,
-					   GSList *streams, GSList *recipients, GSList *attachments,
-					   const gchar *local_store_uri, const icaltimezone *default_zone, gboolean is_reply, GSList **detached_components);
-
-void
-e_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *uid, const struct timeval *exception_replace_time, const struct FILETIME *creation_time, struct Binary_r *sb);
-
-gchar *
-e_mapi_cal_util_camel_helper (EMapiConnection *conn, mapi_id_t fid, mapi_id_t mid, mapi_object_t *obj_message, const gchar *msg_class,
-				   GSList *streams, GSList *recipients, GSList *attachments);
-
-uint32_t
-e_mapi_cal_util_get_new_appt_id (EMapiConnection *conn, mapi_id_t fid);
-
-gboolean	e_mapi_cal_utils_add_named_ids			(EMapiConnection *conn,
-								 mapi_id_t fid,
-								 TALLOC_CTX *mem_ctx,
-								 struct SPropTagArray *props,
-								 gint pkind,
-								 GCancellable *cancellable,
-								 GError **perror);
-gboolean	e_mapi_cal_utils_get_props_cb			(EMapiConnection *conn,
-								 mapi_id_t fid,
-								 TALLOC_CTX *mem_ctx,
-								 struct SPropTagArray *props,
-								 gpointer data,
-								 GCancellable *cancellable,
-								 GError **perror);
-gboolean	e_mapi_cal_utils_write_props_cb			(EMapiConnection *conn,
-								 mapi_id_t fid,
-								 TALLOC_CTX *mem_ctx,
-								 struct SPropValue **values,
-								 uint32_t *n_values,
-								 gpointer data,
-								 GCancellable *cancellable,
-								 GError **perror);
+uint32_t	e_mapi_cal_util_get_new_appt_id			(EMapiConnection *conn,
+								 mapi_id_t fid);
 
 gboolean	e_mapi_cal_utils_get_free_busy_data		(EMapiConnection *conn,
 								 const GSList *users,
@@ -142,7 +106,8 @@ gboolean	e_mapi_cal_utils_comp_to_object			(EMapiConnection *conn,
 								 GCancellable *cancellable,
 								 GError **perror);
 
-gchar *	e_mapi_cal_utils_get_icomp_x_prop (icalcomponent *comp, const gchar *key);
+gchar *		e_mapi_cal_utils_get_icomp_x_prop		(icalcomponent *comp,
+								 const gchar *key);
 
 G_END_DECLS
 
