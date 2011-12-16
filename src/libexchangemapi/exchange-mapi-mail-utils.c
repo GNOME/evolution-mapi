@@ -531,6 +531,8 @@ mapi_mime_msg_body (MailItem *item, const ExchangeMAPIStream *body)
 		if (item->header.cpid && (body->proptag & 0xFFFF) != PT_UNICODE) {
 			if (item->header.cpid == 20127)
 				buff = g_strdup_printf ("%s; charset=\"us-ascii\"", type);
+			else if (item->header.cpid == 20866)
+				buff = g_strdup_printf ("%s; charset=\"koi8-r\"", type);
 			else if (item->header.cpid >= 28591 && item->header.cpid <= 28599)
 				buff = g_strdup_printf ("%s; charset=\"ISO-8859-%d\"", type, item->header.cpid % 10);
 			else if (item->header.cpid == 28603)
