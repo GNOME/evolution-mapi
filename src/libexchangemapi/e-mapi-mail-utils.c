@@ -193,6 +193,8 @@ build_body_part_content (CamelMimePart *part, EMapiObject *object, uint32_t prop
 	
 			if (cpid == 20127)
 				buff = g_strdup_printf ("%s; charset=\"us-ascii\"", type);
+			else if (cpid == 20866)
+				buff = g_strdup_printf ("%s; charset=\"koi8-r\"", type);
 			else if (cpid >= 28591 && cpid <= 28599)
 				buff = g_strdup_printf ("%s; charset=\"ISO-8859-%d\"", type, cpid % 10);
 			else if (cpid == 28603)
