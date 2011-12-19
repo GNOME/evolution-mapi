@@ -1,3 +1,34 @@
+evolution-mapi 3.3.3 2011-12-19
+-------------------------------
+
+Bugs:
+	Bug #663867 - Cannot build against OpenChange svn trunk (Milan Crha)
+	Bug #664572 - Change e_cal_backend_notify_component* to use ECalComponent (Milan Crha)
+	Bug #664062 - Profile name not saved in transport URL (Milan Crha)
+	Bug #664626 - Missing KOI-8R codepage support (patch by Vladislav) (Milan Crha)
+	Bug #665250 - Map GMT Standard Time to Europe/Dublin (Milan Crha)
+
+Miscellanous:
+	Implement fast-transfer for address book backend (Milan Crha)
+	At least minfo->last_modified may change, thus mark minfo dirty (Milan Crha)
+	Remove GSEAL_ENABLE macro. (Matthew Barnes)
+	Remove almost all *_DISABLE_DEPRECATED_FLAGS. (Matthew Barnes)
+	Properly propagate Cancelled GError (Milan Crha)
+	Use different way of converting FILETIME to time_t (Milan Crha)
+	Implement SExp parser for contacts backend (Milan Crha)
+	Add "Listen for server notifications" option to mail/book/calendar (Milan Crha)
+	Preselect colors for newly added calendars (Milan Crha)
+	Do not forget to save changes in CamelFolderSummary (Milan Crha)
+	Provide write functions for EMapiObject and use them in Camel (Milan Crha)
+	Drop last usage of e_mapi_connection_fetch_item/s from e-cal-backend-mapi.c (Milan Crha)
+	Use EMapiObject API for writing in book and calendar (Milan Crha)
+
+Translations:
+	Marek Černocký (cs)
+	Matej Urbančič (sl)
+	Daniel Mustieles (es)
+	Mario Blättermann (de)
+
 evolution-mapi 3.3.2 2011-11-21
 -------------------------------
 
