@@ -252,6 +252,9 @@ camel_mapi_store_summary_add_from_full (CamelStoreSummary *s,
 		msi->camel_folder_flags = camel_folder_flags;
 		msi->mapi_folder_flags = mapi_folder_flags;
 		msi->foreign_user_name = g_strdup ((foreign_user_name && *foreign_user_name) ? foreign_user_name : "");
+
+		msi->latest_last_modify = 0;
+		msi->last_obj_total = -1;
 	}
 
 	return si;

@@ -72,6 +72,10 @@ struct _CamelMapiStoreInfo {
 	guint32 camel_folder_flags; /* CamelFolderInfo::flags */
 	guint32 mapi_folder_flags; /* bit-or of CamelMapiStoreFolderFlags */
 	gchar *foreign_user_name; /* only if CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN is set */
+
+	/* these are not saved */
+	time_t latest_last_modify;
+	gint last_obj_total;
 };
 
 struct _CamelMapiStoreSummary {

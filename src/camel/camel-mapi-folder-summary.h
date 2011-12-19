@@ -66,9 +66,6 @@ struct _CamelMapiMessageContentInfo {
 struct _CamelMapiFolderSummary {
 	CamelFolderSummary parent;
 
-	time_t latest_last_modify;
-	gint last_obj_total;
-
 	guint32 version;
 	guint32 validity;
 };

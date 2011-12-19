@@ -651,9 +651,10 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 	gboolean full_download;
 	CamelSettings *settings;
 	CamelStore *store = camel_folder_get_parent_store (folder);
+	CamelStoreInfo *si = NULL;
+	CamelMapiStoreInfo *msi = NULL;
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
 	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (folder);
-	CamelMapiFolderSummary *mapi_summary = CAMEL_MAPI_FOLDER_SUMMARY (folder->summary);
 	EMapiConnection *conn = camel_mapi_store_get_connection (mapi_store);
 	struct FolderBasicPropertiesData fbp;
 	struct GatherChangedObjectsData gco;
@@ -678,11 +679,24 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 	else
 		status = e_mapi_connection_open_personal_folder (conn, mapi_folder->folder_id, &obj_folder, cancellable, mapi_error);
 
+	si = camel_mapi_store_summary_get_folder_id (mapi_store->summary, mapi_folder->folder_id);
+	msi = (CamelMapiStoreInfo *) si;
+
+	if (!msi) {
+		camel_operation_pop_message (cancellable);
+		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		camel_folder_thaw (folder);
+
+		g_return_val_if_fail (msi != NULL, FALSE);
+
+		return FALSE;
+	}
+
 	if (status) {
 		status = e_mapi_connection_get_folder_properties (conn, &obj_folder, NULL, NULL, e_mapi_utils_get_folder_basic_properties_cb, &fbp, cancellable, mapi_error);
 		if (status) {
-			if (mapi_summary->last_obj_total != fbp.obj_total)
-				mapi_summary->latest_last_modify = 0;
+			if (msi->last_obj_total != fbp.obj_total)
+				msi->latest_last_modify = 0;
 		}
 	}
 
@@ -692,7 +706,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 	gco.to_update = NULL;
 	gco.removed_uids = NULL;
 
-	if (mapi_summary->latest_last_modify <= 0) {
+	if (msi->latest_last_modify <= 0) {
 		GPtrArray *known_uids;
 
 		camel_folder_summary_prepare_fetch_all (folder->summary, NULL);
@@ -712,7 +726,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 
 	if (status) {
 		status = e_mapi_connection_list_objects (conn, &obj_folder,
-			full_download ? NULL : e_mapi_utils_build_last_modify_restriction, &mapi_summary->latest_last_modify,
+			full_download ? NULL : e_mapi_utils_build_last_modify_restriction, &msi->latest_last_modify,
 			gather_changed_objects_to_slist, &gco, cancellable, mapi_error);
 	}
 
@@ -763,8 +777,8 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 
 	if (status) {
 		if (gco.latest_last_modify > 0)
-			mapi_summary->latest_last_modify = gco.latest_last_modify;
-		mapi_summary->last_obj_total = fbp.obj_total;
+			msi->latest_last_modify = gco.latest_last_modify;
+		msi->last_obj_total = fbp.obj_total;
 	}
 
 	camel_folder_summary_save_to_db (folder->summary, NULL);

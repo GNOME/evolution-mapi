@@ -102,8 +102,6 @@ camel_mapi_folder_summary_class_init (CamelMapiFolderSummaryClass *class)
 static void
 camel_mapi_folder_summary_init (CamelMapiFolderSummary *mapi_summary)
 {
-	mapi_summary->latest_last_modify = 0;
-	mapi_summary->last_obj_total = -1;
 }
 
 /**
