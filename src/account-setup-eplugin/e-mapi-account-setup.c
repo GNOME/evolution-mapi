@@ -706,6 +706,10 @@ e_mapi_create (GtkWidget *parent, ESource *source, EMapiFolderType folder_type)
 
 	uri_text = e_source_get_uri (source);
 	if (uri_text && g_ascii_strncasecmp (uri_text, MAPI_URI_PREFIX, MAPI_PREFIX_LENGTH)) {
+		if (uri_text && g_ascii_strncasecmp (uri_text, "mapigal://", strlen ("mapigal://")) == 0) {
+			e_plugin_util_add_check (parent, _("Allow _partial search results"), source, "allow-partial", "true", NULL);
+		}
+
 		return NULL;
 	}
 

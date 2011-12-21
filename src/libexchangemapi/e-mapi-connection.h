@@ -23,7 +23,7 @@
  */
 
 #ifndef E_MAPI_CONNECTION_H
-#define E_MAPI_CONNECTION_H 
+#define E_MAPI_CONNECTION_H
 
 #include <glib.h>
 #include <glib-object.h>
@@ -64,13 +64,14 @@ typedef enum {
 typedef struct {
 	uint32_t pidlid_propid; /* PidLid or PidName legacy property named ID to resolve */
 	uint32_t propid;	/* resolved prop ID; equals to MAPI_E_RESERVED when not found or other error */
-} ResolveNamedIDsData;
+} EResolveNamedIDsData;
 
 typedef struct {
-	mapi_id_t mid; /* message ID, from PidTagMid */
-	const gchar *msg_class; /* PidTagMessageClass */
-	uint32_t msg_flags; /* MAPI MSGFLAG_* bit OR, from PidTagMessageFlags */
-	time_t last_modified; /* PidTagLastModificationTime as UTC */
+	mapi_id_t mid;		/* message ID, from PidTagMid */
+	uint32_t obj_type;	/* PidTagObjectType */
+	const gchar *msg_class;	/* PidTagMessageClass */
+	uint32_t msg_flags;	/* MAPI MSGFLAG_* bit OR, from PidTagMessageFlags */
+	time_t last_modified;	/* PidTagLastModificationTime as UTC */
 } ListObjectsData;
 
 struct _EMapiObject;
@@ -123,15 +124,7 @@ typedef enum {
 } EMapiCreateFlags;
 
 /* callbacks return whether to continue in transfer of the next object */
-typedef gboolean (*FetchGALCallback)		(EMapiConnection *conn,
-						 uint32_t row_index,
-						 uint32_t n_rows,
-						 struct SRow *aRow,
-						 gpointer data,
-						 GCancellable *cancellable,
-						 GError **perror);
 typedef gboolean (*BuildReadPropsCB)		(EMapiConnection *conn,
-						 mapi_id_t fid,
 						 TALLOC_CTX *mem_ctx,
 						 struct SPropTagArray *props,
 						 gpointer data,
@@ -285,13 +278,30 @@ gboolean		e_mapi_connection_modify_object		(EMapiConnection *conn,
 								 GCancellable *cancellable,
 								 GError **perror);
 
-gboolean		e_mapi_connection_fetch_gal		(EMapiConnection *conn,
+gboolean		e_mapi_connection_count_gal_objects	(EMapiConnection *conn,
+								 guint32 *obj_total,
+								 GCancellable *cancellable,
+								 GError **perror);
+
+gboolean		e_mapi_connection_list_gal_objects	(EMapiConnection *conn,
 								 BuildRestrictionsCB build_rs_cb,
 								 gpointer build_rs_cb_data,
-								 BuildReadPropsCB build_props,
-								 gpointer brp_data,
-								 FetchGALCallback cb,
-								 gpointer data,
+								 ListObjectsCB cb,
+								 gpointer user_data,
+								 GCancellable *cancellable,
+								 GError **perror);
+
+gboolean		e_mapi_connection_transfer_gal_objects	(EMapiConnection *conn,
+								 const GSList *mids,
+								 TransferObjectCB cb,
+								 gpointer cb_user_data,
+								 GCancellable *cancellable,
+								 GError **perror);
+
+gboolean		e_mapi_connection_transfer_gal_object	(EMapiConnection *conn,
+								 mapi_id_t message_id,
+								 TransferObjectCB cb,
+								 gpointer cb_user_data,
 								 GCancellable *cancellable,
 								 GError **perror);
 
@@ -384,7 +394,7 @@ GSList *		e_mapi_connection_peek_folders_list	(EMapiConnection *conn);
 
 gboolean		e_mapi_connection_resolve_named_props	(EMapiConnection *conn,
 								 mapi_id_t fid,
-								 ResolveNamedIDsData *named_ids_list,
+								 EResolveNamedIDsData *named_ids_list,
 								 guint named_ids_n_elems,
 								 GCancellable *cancellable,
 								 GError **perror);

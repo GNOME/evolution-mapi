@@ -5,6 +5,7 @@ AM_CPPFLAGS =						\
 	-I$(top_srcdir)					\
 	$(EVOLUTION_DATA_SERVER_CFLAGS)			\
 	$(LIBEDATASERVER_CFLAGS)			\
+	$(LIBEBOOK_CFLAGS)				\
 	$(LIBECAL_CFLAGS)				\
 	$(LIBMAPI_CFLAGS)				\
 	$(CAMEL_CFLAGS)
@@ -32,6 +33,8 @@ libexchangemapi_1_0_la_SOURCES =	\
 	e-mapi-debug.h			\
 	e-mapi-utils.c			\
 	e-mapi-utils.h			\
+	e-mapi-book-utils.c		\
+	e-mapi-book-utils.h		\
 	e-mapi-cal-utils.c		\
 	e-mapi-cal-utils.h		\
 	e-mapi-cal-tz-utils.c		\
@@ -47,6 +50,7 @@ libexchangemapi_1_0_la_SOURCES =	\
 libexchangemapi_1_0_la_LIBADD =			\
 	$(EVOLUTION_DATA_SERVER_LIBS)		\
 	$(LIBEDATASERVER_LIBS)			\
+	$(LIBEBOOK_LIBS)			\
 	$(LIBECAL_LIBS)				\
 	$(LIBMAPI_LIBS)				\
 	$(CAMEL_LIBS)
@@ -62,6 +66,7 @@ libexchangemapiinclude_HEADERS = 	\
 	e-mapi-debug.h			\
 	e-mapi-fast-transfer.h		\
 	e-mapi-utils.h			\
+	e-mapi-book-utils.h		\
 	e-mapi-cal-utils.h		\
 	e-mapi-cal-tz-utils.h		\
 	e-mapi-cal-recur-utils.h	\

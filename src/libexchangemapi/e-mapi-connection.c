@@ -38,14 +38,17 @@
 #include "e-mapi-connection.h"
 #include "e-mapi-folder.h"
 #include "e-mapi-utils.h"
+#include "e-mapi-book-utils.h"
 #include "e-mapi-mail-utils.h"
 #include "e-mapi-fast-transfer.h"
 #include "e-mapi-openchange.h"
 
-//#include <param.h>
 /* how many bytes can be written within one property with SetProps() call;
    if its size exceeds this limit, it's converted into an EMapiStreamedProp */
 #define MAX_PROPERTY_WRITE_SIZE	2048
+
+/* how may contacts in one chunk can GAL ask to fetch */
+#define MAX_GAL_CHUNK 50
 
 static void register_connection (EMapiConnection *conn);
 static void unregister_connection (EMapiConnection *conn);
@@ -531,6 +534,7 @@ e_mapi_connection_new (const gchar *profile, const gchar *password, GCancellable
 
 	priv->profile = g_strdup (profile);
 	priv->has_public_store = FALSE;
+
 	UNLOCK ();
 
 	e_mapi_debug_print ("%s: %s: Connected ", G_STRLOC, G_STRFUNC);
@@ -646,84 +650,6 @@ may_skip_property (uint32_t proptag)
 	}
 
 	return skip;
-}
-
-gboolean
-e_mapi_connection_fetch_gal (EMapiConnection *conn,
-			     BuildRestrictionsCB build_rs_cb,
-			     gpointer build_rs_cb_data,
-			     BuildReadPropsCB build_props,
-			     gpointer brp_data,
-			     FetchGALCallback cb,
-			     gpointer data,
-			     GCancellable *cancellable,
-			     GError **perror)
-{
-	struct SPropTagArray	*propsTagArray;
-	struct SRowSet		*aRowSet;
-	enum MAPISTATUS		ms;
-	uint32_t		i, count, n_rows = 0;
-	uint8_t			ulFlags;
-	TALLOC_CTX *mem_ctx;
-
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
-	e_return_val_mapi_error_if_fail (build_props != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
-	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
-
-	mem_ctx = talloc_new (priv->session);
-
-	LOCK ();
-
-	ms = GetGALTableCount (priv->session, &n_rows);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "GetGALTableCount", ms);
-		n_rows = 0;
-	}
-
-	propsTagArray = set_SPropTagArray (mem_ctx, 0x1, PR_MESSAGE_CLASS);
-	if (!build_props (conn, 0, mem_ctx, propsTagArray, brp_data, cancellable, perror)) {
-		make_mapi_error (perror, "build_props", MAPI_E_CALL_FAILED);
-		UNLOCK();
-		talloc_free (mem_ctx);
-		return FALSE;
-	}
-
-	ms = MAPI_E_SUCCESS;
-	count = 0;
-	ulFlags = TABLE_START;
-	while (ms == MAPI_E_SUCCESS) {
-		aRowSet = NULL;
-		/* fetch per 100 items */
-		ms = GetGALTable (priv->session, propsTagArray, &aRowSet, 100, ulFlags);
-		if ((!aRowSet) || (!(aRowSet->aRow)) || ms != MAPI_E_SUCCESS) {
-			break;
-		}
-		if (aRowSet->cRows) {
-			global_unlock ();
-			for (i = 0; i < aRowSet->cRows; i++, count++) {
-				if (!cb (conn, count, n_rows, &aRowSet->aRow[i], data, cancellable, perror)) {
-					ms = MAPI_E_RESERVED;
-					break;
-				}
-			}
-			global_lock ();
-		} else {
-			talloc_free (aRowSet);
-			break;
-		}
-
-		ulFlags = TABLE_CUR;
-		talloc_free (aRowSet);
-	}
-
-	talloc_free (mem_ctx);
-
-	UNLOCK ();
-
-	if (ms != MAPI_E_SUCCESS && ms != MAPI_E_RESERVED)
-		make_mapi_error (perror, "GetGALTable", ms);
-
-	return ms == MAPI_E_SUCCESS;
 }
 
 gboolean
@@ -929,7 +855,7 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 
 	spropTagArray = set_SPropTagArray (mem_ctx, 3, PidTagFolderId, PidTagLastModificationTime, PidTagContentCount);
 	if (brp_cb) {
-		if (!brp_cb (conn, mapi_object_get_id (obj_folder), mem_ctx, spropTagArray, brp_cb_user_data, cancellable, perror)) {
+		if (!brp_cb (conn, mem_ctx, spropTagArray, brp_cb_user_data, cancellable, perror)) {
 			goto cleanup;
 		}
 	} else {
@@ -941,7 +867,7 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 	if (spropTagArray && spropTagArray->cValues) {
 		struct SPropValue *lpProps;
 		uint32_t prop_count = 0, k, ll;
-		ResolveNamedIDsData *named_ids_list = NULL;
+		EResolveNamedIDsData *named_ids_list = NULL;
 		guint named_ids_len = 0;
 
 		lpProps = talloc_zero (mem_ctx, struct SPropValue);
@@ -957,7 +883,7 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 				g_debug ("%s: Cannot fetch property 0x%08x %s", G_STRFUNC, proptag, name);
 			} else if (((proptag >> 16) & 0xFFFF) >= 0x8000) {
 				if (!named_ids_list)
-					named_ids_list = g_new0 (ResolveNamedIDsData, spropTagArray->cValues - k + 1);
+					named_ids_list = g_new0 (EResolveNamedIDsData, spropTagArray->cValues - k + 1);
 				named_ids_list[named_ids_len].pidlid_propid = proptag;
 				named_ids_list[named_ids_len].propid = MAPI_E_RESERVED;
 				named_ids_len++;
@@ -1130,10 +1056,10 @@ list_objects_internal_cb (EMapiConnection *conn,
 			  GError **perror)
 {
 	struct ListObjectsInternalData *loi_data = user_data;
-	ListObjectsData lod;
+	ListObjectsData lod = { 0 };
 	const mapi_id_t	*pmid;
 	const gchar *msg_class;
-	const uint32_t *pmsg_flags;
+	const uint32_t *pmsg_flags, *pobj_type;
 	const struct FILETIME *last_modified;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
@@ -1141,12 +1067,14 @@ list_objects_internal_cb (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (mem_ctx != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (srow != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	pmid = get_SPropValue_SRow_data (srow, PidTagMid);
-	msg_class = get_SPropValue_SRow_data (srow, PidTagMessageClass);
-	pmsg_flags = get_SPropValue_SRow_data (srow, PidTagMessageFlags);
-	last_modified = get_SPropValue_SRow_data (srow, PidTagLastModificationTime);
+	pmid = e_mapi_util_find_row_propval (srow, PidTagMid);
+	pobj_type = e_mapi_util_find_row_propval (srow, PidTagObjectType);
+	msg_class = e_mapi_util_find_row_propval (srow, PidTagMessageClass);
+	pmsg_flags = e_mapi_util_find_row_propval (srow, PidTagMessageFlags);
+	last_modified = e_mapi_util_find_row_propval (srow, PidTagLastModificationTime);
 
 	lod.mid = pmid ? *pmid : 0;
+	lod.obj_type = pobj_type ? *pobj_type : 0;
 	lod.msg_class = msg_class;
 	lod.msg_flags = pmsg_flags ? *pmsg_flags : 0;
 	lod.last_modified = last_modified ? e_mapi_util_filetime_to_time_t (last_modified) : 0;
@@ -1156,7 +1084,7 @@ list_objects_internal_cb (EMapiConnection *conn,
 
 static void
 maybe_add_named_id_tag (uint32_t proptag,
-			ResolveNamedIDsData **named_ids_list,
+			EResolveNamedIDsData **named_ids_list,
 			guint *named_ids_len)
 {
 	g_return_if_fail (named_ids_list != NULL);
@@ -1164,10 +1092,10 @@ maybe_add_named_id_tag (uint32_t proptag,
 
 	if (((proptag >> 16) & 0xFFFF) >= 0x8000) {
 		if (!*named_ids_list) {
-			*named_ids_list = g_new0 (ResolveNamedIDsData, 1);
+			*named_ids_list = g_new0 (EResolveNamedIDsData, 1);
 			*named_ids_len = 0;
 		} else {
-			*named_ids_list = g_renew (ResolveNamedIDsData, *named_ids_list, *named_ids_len + 1);
+			*named_ids_list = g_renew (EResolveNamedIDsData, *named_ids_list, *named_ids_len + 1);
 		}
 
 		(*named_ids_list)[*named_ids_len].pidlid_propid = proptag;
@@ -1178,7 +1106,7 @@ maybe_add_named_id_tag (uint32_t proptag,
 
 static void
 gather_mapi_SRestriction_named_ids (struct mapi_SRestriction *restriction,
-				    ResolveNamedIDsData **named_ids_list,
+				    EResolveNamedIDsData **named_ids_list,
 				    guint *named_ids_len)
 {
 	guint i;
@@ -1227,60 +1155,78 @@ gather_mapi_SRestriction_named_ids (struct mapi_SRestriction *restriction,
 	}
 }
 
-static void
-maybe_replace_named_id_tag (uint32_t *pproptag,
-			    const ResolveNamedIDsData *named_ids_list,
+/* free returned pointer with g_hash_table_destroy */
+static GHashTable *
+prepare_maybe_replace_hash (const EResolveNamedIDsData *named_ids_list,
 			    guint named_ids_len)
 {
-	gint i;
+	GHashTable *res;
+	gint ii;
+
+	if (!named_ids_list || !named_ids_len)
+		return NULL;
+
+	res = g_hash_table_new (g_direct_hash, g_direct_equal);
+
+	for (ii = 0; ii < named_ids_len; ii++) {
+		uint32_t search_tag = named_ids_list[ii].pidlid_propid;
+		uint32_t replace_with = named_ids_list[ii].propid;
+
+		g_hash_table_insert (res, GUINT_TO_POINTER (search_tag), GUINT_TO_POINTER (replace_with));
+
+		search_tag = (search_tag & ~0xFFFF) | PT_ERROR;
+		replace_with = (replace_with & ~0xFFFF) | PT_ERROR;
+
+		g_hash_table_insert (res, GUINT_TO_POINTER (search_tag), GUINT_TO_POINTER (replace_with));
+	}
+
+	return res;
+}
+
+static void
+maybe_replace_named_id_tag (uint32_t *pproptag,
+			    GHashTable *replace_hash)
+{
+	gpointer key, value;
 
 	g_return_if_fail (pproptag != NULL);
-	g_return_if_fail (named_ids_list != NULL);
 
-	if ((((*pproptag) >> 16) & 0xFFFF) < 0x8000)
+	if (!replace_hash)
 		return;
 
-	for (i = 0; i < named_ids_len; i++) {
-		if ((*pproptag) == named_ids_list[i].pidlid_propid ||
-		    ((((*pproptag) & 0xFFFF) == PT_ERROR) &&
-			((*pproptag) & ~0xFFFF) == (named_ids_list[i].pidlid_propid & ~0xFFFF))) {
-			(*pproptag) = ((*pproptag) & 0xFFFF) | (named_ids_list[i].propid & ~0xFFFF);
-			break;
-		}
-	}
+	if (g_hash_table_lookup_extended (replace_hash, GUINT_TO_POINTER (*pproptag), &key, &value))
+		*pproptag = GPOINTER_TO_UINT (value);
 }
 
 static void
 replace_mapi_SRestriction_named_ids (struct mapi_SRestriction *restriction,
-				     const ResolveNamedIDsData *named_ids_list,
-				     guint named_ids_len)
+				     GHashTable *replace_hash)
 {
 	guint i;
 	uint32_t proptag;
 
 	g_return_if_fail (restriction != NULL);
-	g_return_if_fail (named_ids_list != NULL);
 
-	#define check_proptag(x) {								\
-			proptag = x;								\
-			maybe_replace_named_id_tag (&proptag, named_ids_list, named_ids_len);	\
-			x = proptag;								\
+	#define check_proptag(x) {						\
+			proptag = x;						\
+			maybe_replace_named_id_tag (&proptag, replace_hash);	\
+			x = proptag;						\
 		}
 
 	switch (restriction->rt) {
 	case RES_AND:
 		for (i = 0; i < restriction->res.resAnd.cRes; i++) {
-			replace_mapi_SRestriction_named_ids ((struct mapi_SRestriction *) &(restriction->res.resAnd.res[i]), named_ids_list, named_ids_len);
+			replace_mapi_SRestriction_named_ids ((struct mapi_SRestriction *) &(restriction->res.resAnd.res[i]), replace_hash);
 		}
 		break;
 	case RES_OR:
 		for (i = 0; i < restriction->res.resOr.cRes; i++) {
-			replace_mapi_SRestriction_named_ids ((struct mapi_SRestriction *) &(restriction->res.resOr.res[i]), named_ids_list, named_ids_len);
+			replace_mapi_SRestriction_named_ids ((struct mapi_SRestriction *) &(restriction->res.resOr.res[i]), replace_hash);
 		}
 		break;
 	#ifdef HAVE_RES_NOT_SUPPORTED
 	case RES_NOT:
-		replace_mapi_SRestriction_named_ids (restriction->res.resNot.res, named_ids_list, named_ids_len);
+		replace_mapi_SRestriction_named_ids (restriction->res.resNot.res, replace_hash);
 		break;
 	#endif
 	case RES_CONTENT:
@@ -1316,7 +1262,7 @@ change_mapi_SRestriction_named_ids (EMapiConnection *conn,
 				    GCancellable *cancellable,
 				    GError **perror)
 {
-	ResolveNamedIDsData *named_ids_list = NULL;
+	EResolveNamedIDsData *named_ids_list = NULL;
 	guint named_ids_len = 0;
 	gboolean res = FALSE;
 
@@ -1332,8 +1278,14 @@ change_mapi_SRestriction_named_ids (EMapiConnection *conn,
 
 	res = e_mapi_connection_resolve_named_props (conn, mapi_object_get_id (obj_folder), named_ids_list, named_ids_len, cancellable, perror);
 
-	if (res)
-		replace_mapi_SRestriction_named_ids (restrictions, named_ids_list, named_ids_len);
+	if (res) {
+		GHashTable *replace_hash = prepare_maybe_replace_hash (named_ids_list, named_ids_len);
+
+		if (replace_hash) {
+			replace_mapi_SRestriction_named_ids (restrictions, replace_hash);
+			g_hash_table_destroy (replace_hash);
+		}
+	}
 
 	g_free (named_ids_list);
 
@@ -1378,8 +1330,9 @@ e_mapi_connection_list_objects (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	propTagArray = set_SPropTagArray (mem_ctx, 0x4,
+	propTagArray = set_SPropTagArray (mem_ctx, 0x5,
 					  PidTagMid,
+					  PidTagObjectType,
 					  PidTagMessageClass,
 					  PidTagMessageFlags,
 					  PidTagLastModificationTime);
@@ -2474,7 +2427,7 @@ convert_mapi_props_to_props (EMapiConnection *conn,
 			     GError **perror)
 {
 	uint16_t ii;
-	ResolveNamedIDsData *named_ids_list = NULL;
+	EResolveNamedIDsData *named_ids_list = NULL;
 	guint named_ids_len = 0;
 	gboolean res = TRUE;
 
@@ -2576,23 +2529,31 @@ convert_mapi_props_to_props (EMapiConnection *conn,
 	}
 
 	if (named_ids_list) {
+		GHashTable *replace_hash = NULL;
+
 		res = e_mapi_connection_resolve_named_props (conn, mapi_object_get_id (obj_folder), named_ids_list, named_ids_len, cancellable, perror);
 
-		if (res && *props) {
+		if (res)
+			replace_hash = prepare_maybe_replace_hash (named_ids_list, named_ids_len);
+
+		if (replace_hash && *props) {
 			for (ii = 0; ii < *propslen; ii++) {
 				uint32_t proptag = (*props)[ii].ulPropTag;
 
-				maybe_replace_named_id_tag (&proptag, named_ids_list, named_ids_len);
+				maybe_replace_named_id_tag (&proptag, replace_hash);
 
 				(*props)[ii].ulPropTag = proptag;
 			}
 		}
 
-		if (res && streams) {
+		if (replace_hash && streams) {
 			for (ii = 0; ii < *streamslen; ii++) {
-				maybe_replace_named_id_tag (&((*streams)[ii].proptag), named_ids_list, named_ids_len);
+				maybe_replace_named_id_tag (&((*streams)[ii].proptag), replace_hash);
 			}
 		}
+
+		if (replace_hash)
+			g_hash_table_destroy (replace_hash);
 	}
 
 	g_free (named_ids_list);
@@ -2834,7 +2795,7 @@ add_object_recipients (EMapiConnection *conn,
 	struct SPropTagArray *tags;
 	struct SRowSet *rows = NULL;
 	struct PropertyTagArray_r *flagList = NULL;
-	ResolveNamedIDsData *named_ids_list = NULL;
+	EResolveNamedIDsData *named_ids_list = NULL;
 	guint named_ids_len = 0;
 	const gchar **users = NULL;
 	EMapiRecipient *recipient;
@@ -2902,19 +2863,26 @@ add_object_recipients (EMapiConnection *conn,
 	}
 
 	if (named_ids_list) {
+		GHashTable *replace_hash;
+
 		if (!e_mapi_connection_resolve_named_props (conn, mapi_object_get_id (obj_folder), named_ids_list, named_ids_len, cancellable, perror)) {
 			ms = MAPI_E_CALL_FAILED;
 			make_mapi_error (perror, "e_mapi_connection_resolve_named_props", ms);
 			goto cleanup;
 		}
 
-		for (ii = 0; ii < tags->cValues; ii++) {
+		replace_hash = prepare_maybe_replace_hash (named_ids_list, named_ids_len);
+
+		for (ii = 0; ii < tags->cValues && replace_hash; ii++) {
 			uint32_t proptag = tags->aulPropTag[ii];
 
-			maybe_replace_named_id_tag (&proptag, named_ids_list, named_ids_len);
+			maybe_replace_named_id_tag (&proptag, replace_hash);
 
 			tags->aulPropTag[ii] = proptag;
 		}
+
+		if (replace_hash)
+			g_hash_table_destroy (replace_hash);
 	}
 
 	ms = ResolveNames (priv->session, users, tags, &rows, &flagList, MAPI_UNICODE);
@@ -3387,6 +3355,615 @@ e_mapi_connection_modify_object (EMapiConnection *conn,
 	return ms == MAPI_E_SUCCESS;
 }
 
+static void
+convert_mapi_SRestriction_to_Restriction_r (struct mapi_SRestriction *restriction,
+					    struct Restriction_r *rr,
+					    TALLOC_CTX *mem_ctx,
+					    GHashTable *replace_hash)
+{
+	guint i;
+	uint32_t proptag;
+
+	g_return_if_fail (restriction != NULL);
+	g_return_if_fail (rr != NULL);
+	g_return_if_fail (mem_ctx != NULL);
+
+	#define copy(x, y) rr->res.x = restriction->res.y
+	#define copy_prop(pprop, mprop)	{							\
+			rr->res.pprop = talloc_zero (mem_ctx, struct SPropValue);		\
+			g_return_if_fail (rr->res.pprop != NULL);				\
+			rr->res.pprop->ulPropTag = restriction->res.mprop.ulPropTag;		\
+			rr->res.pprop->dwAlignPad = 0;						\
+			cast_SPropValue (mem_ctx, &(restriction->res.mprop), rr->res.pprop);	\
+		}
+	#define check_proptag(x) {								\
+			proptag = x;								\
+			maybe_replace_named_id_tag (&proptag, replace_hash);			\
+			/* workaround for unresolved properties */				\
+			if (proptag == MAPI_E_RESERVED)						\
+				proptag = PidTagDisplayName;					\
+			x = proptag;								\
+		}
+
+	rr->rt = restriction->rt;
+
+	switch (restriction->rt) {
+	case RES_AND:
+		rr->res.resAnd.lpRes = talloc_zero_array (mem_ctx, struct Restriction_r, restriction->res.resAnd.cRes);
+		g_return_if_fail (rr->res.resAnd.lpRes != NULL);
+
+		copy (resAnd.cRes, resAnd.cRes);
+		for (i = 0; i < restriction->res.resAnd.cRes; i++) {
+			convert_mapi_SRestriction_to_Restriction_r (
+				(struct mapi_SRestriction *) &(restriction->res.resAnd.res[i]),
+				&(rr->res.resAnd.lpRes[i]),
+				mem_ctx, replace_hash);
+		}
+		break;
+	case RES_OR:
+		rr->res.resOr.lpRes = talloc_zero_array (mem_ctx, struct Restriction_r, restriction->res.resOr.cRes);
+		g_return_if_fail (rr->res.resOr.lpRes != NULL);
+
+		copy (resOr.cRes, resOr.cRes);
+		for (i = 0; i < restriction->res.resOr.cRes; i++) {
+			convert_mapi_SRestriction_to_Restriction_r (
+				(struct mapi_SRestriction *) &(restriction->res.resOr.res[i]),
+				&(rr->res.resOr.lpRes[i]),
+				mem_ctx, replace_hash);
+		}
+		break;
+	#ifdef HAVE_RES_NOT_SUPPORTED
+	case RES_NOT:
+		rr->res.resNot.lpRes = talloc_zero (mem_ctx, struct Restriction_r);
+		g_return_if_fail (r->res.resNot.lpRes != NULL);
+
+		convert_mapi_SRestriction_to_Restriction_r (
+			restriction->res.resNot.res,
+			rr->res.resNot.lpRes,
+			mem_ctx, replace_hash);
+		break;
+	#endif
+	case RES_CONTENT:
+		copy (resContent.ulFuzzyLevel, resContent.fuzzy);
+		copy (resContent.ulPropTag, resContent.ulPropTag);
+		copy_prop (resContent.lpProp, resContent.lpProp);
+
+		check_proptag (rr->res.resContent.ulPropTag);
+		check_proptag (rr->res.resContent.lpProp->ulPropTag);
+		break;
+	case RES_PROPERTY:
+		copy (resProperty.relop, resProperty.relop);
+		copy (resProperty.ulPropTag, resProperty.ulPropTag);
+		copy_prop (resProperty.lpProp, resProperty.lpProp);
+
+
+		check_proptag (rr->res.resProperty.ulPropTag);
+		check_proptag (rr->res.resProperty.lpProp->ulPropTag);
+		break;
+	case RES_COMPAREPROPS:
+		copy (resCompareProps.relop, resCompareProps.relop);
+		copy (resCompareProps.ulPropTag1, resCompareProps.ulPropTag1);
+		copy (resCompareProps.ulPropTag2, resCompareProps.ulPropTag2);
+
+		check_proptag (rr->res.resCompareProps.ulPropTag1);
+		check_proptag (rr->res.resCompareProps.ulPropTag2);
+		break;
+	case RES_BITMASK:
+		copy (resBitMask.relMBR, resBitmask.relMBR);
+		copy (resBitMask.ulPropTag, resBitmask.ulPropTag);
+		copy (resBitMask.ulMask, resBitmask.ulMask);
+
+		check_proptag (rr->res.resBitMask.ulPropTag);
+		break;
+	case RES_SIZE:
+		copy (resSize.relop, resSize.relop);
+		copy (resSize.ulPropTag, resSize.ulPropTag);
+		copy (resSize.cb, resSize.size);
+
+		check_proptag (rr->res.resSize.ulPropTag);
+		break;
+	case RES_EXIST:
+		rr->res.resExist.ulReserved1 = 0;
+		rr->res.resExist.ulReserved2 = 0;
+		copy (resExist.ulPropTag, resExist.ulPropTag);
+
+		check_proptag (rr->res.resExist.ulPropTag);
+		break;
+	}
+
+	#undef check_proptag
+	#undef copy_prop
+	#undef copy
+}
+
+static enum MAPISTATUS
+process_gal_rows_chunk (EMapiConnection *conn,
+			TALLOC_CTX *mem_ctx,
+			uint32_t rows_offset,
+			uint32_t rows_total,
+			struct SRowSet *rows,
+			struct PropertyTagArray_r *mids,
+			ForeachTableRowCB cb,
+			gpointer user_data,
+			GCancellable *cancellable,
+			GError **perror)
+{
+	enum MAPISTATUS ms = MAPI_E_SUCCESS;
+	uint32_t ii;
+
+	e_return_val_mapi_error_if_fail (mem_ctx != NULL, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
+	e_return_val_mapi_error_if_fail (rows != NULL, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
+	e_return_val_mapi_error_if_fail (mids != NULL, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
+	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
+	e_return_val_mapi_error_if_fail (rows->cRows <= mids->cValues, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
+
+	for (ii = 0; ii < rows->cRows; ii++) {
+		struct SRow *row = &rows->aRow[ii];
+		int64_t mid = mids->aulPropTag[ii];
+
+		/* add the temporary mid as a PidTagMid */
+		if (!e_mapi_utils_add_spropvalue (mem_ctx, &row->lpProps, &row->cValues, PidTagMid, &mid)) {
+			ms = MAPI_E_CALL_FAILED;
+			make_mapi_error (perror, "e_mapi_utils_add_spropvalue", ms);
+			break;
+		}
+
+		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+			ms = MAPI_E_USER_CANCEL;
+			break;
+		}
+
+		if (!cb (conn, mem_ctx, row, rows_offset + ii + 1, rows_total, user_data, cancellable, perror)) {
+			ms = MAPI_E_USER_CANCEL;
+			break;
+		}
+	}
+
+	return ms;
+}
+
+static enum MAPISTATUS
+foreach_gal_tablerow (EMapiConnection *conn,
+		      TALLOC_CTX *mem_ctx,
+		      struct SRowSet *first_rows,
+		      struct PropertyTagArray_r *all_mids,
+		      struct SPropTagArray *propTagArray,
+		      ForeachTableRowCB cb,
+		      gpointer user_data,
+		      GCancellable *cancellable,
+		      GError **perror)
+{
+	enum MAPISTATUS ms;
+	struct SRowSet *rows = NULL;
+	struct PropertyTagArray_r *to_query = NULL;
+	uint32_t  midspos;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, MAPI_E_INVALID_PARAMETER);
+	e_return_val_mapi_error_if_fail (mem_ctx != NULL, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
+	e_return_val_mapi_error_if_fail (first_rows != NULL, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
+	e_return_val_mapi_error_if_fail (all_mids != NULL, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
+	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
+	e_return_val_mapi_error_if_fail (first_rows->cRows <= all_mids->cValues, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
+
+	midspos = 0;
+	ms = process_gal_rows_chunk (conn, mem_ctx, midspos, all_mids->cValues, first_rows, all_mids, cb, user_data, cancellable, perror);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "process_gal_rows_chunk", ms);
+		goto cleanup;
+	}
+
+	midspos = first_rows->cRows;
+	to_query = talloc_zero (mem_ctx, struct PropertyTagArray_r);
+	to_query->aulPropTag = talloc_zero_array (mem_ctx, uint32_t, MAX_GAL_CHUNK);
+
+	while (midspos < all_mids->cValues) {
+		uint32_t ii;
+
+		to_query->cValues = 0;
+		for (ii = midspos; to_query->cValues < MAX_GAL_CHUNK && ii < all_mids->cValues; to_query->cValues++, ii++) {
+			to_query->aulPropTag[to_query->cValues] = all_mids->aulPropTag[ii];
+		}
+
+		if (!to_query->cValues)
+			break;
+
+		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+			ms = MAPI_E_USER_CANCEL;
+			break;
+		}
+
+		ms = nspi_QueryRows (priv->session->nspi->ctx, mem_ctx, propTagArray, to_query, to_query->cValues, &rows);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "nspi_QueryRows", ms);
+			goto cleanup;
+		}
+
+		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+			ms = MAPI_E_USER_CANCEL;
+			break;
+		}
+
+		if (!rows || rows->cRows <= 0) {
+			/* success or finished, probably */
+			break;
+		}
+
+		ms = process_gal_rows_chunk (conn, mem_ctx, midspos, all_mids->cValues, rows, to_query, cb, user_data, cancellable, perror);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "process_gal_rows_chunk", ms);
+			goto cleanup;
+		}
+
+		midspos += rows->cRows;
+		talloc_free (rows);
+		rows = NULL;
+	}
+
+ cleanup:
+	talloc_free (to_query);
+	talloc_free (rows);
+
+	return ms;
+}
+
+gboolean
+e_mapi_connection_count_gal_objects (EMapiConnection *conn,
+				     guint32 *obj_total,
+				     GCancellable *cancellable,
+				     GError **perror)
+{
+	enum MAPISTATUS ms;
+	uint32_t count = 0;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session->nspi != NULL, MAPI_E_UNCONFIGURED, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session->nspi->ctx != NULL, MAPI_E_UNCONFIGURED, FALSE);
+	e_return_val_mapi_error_if_fail (obj_total != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	*obj_total = 0;
+
+	LOCK ();
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+	} else {
+		ms = GetGALTableCount (priv->session, &count);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "GetGALTableCount", ms);
+		} else {
+			*obj_total = count;
+		}
+	}
+
+	UNLOCK ();
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+gboolean
+e_mapi_connection_list_gal_objects (EMapiConnection *conn,
+				    BuildRestrictionsCB build_rs_cb,
+				    gpointer build_rs_cb_data,
+				    ListObjectsCB cb,
+				    gpointer user_data,
+				    GCancellable *cancellable,
+				    GError **perror)
+{
+	enum MAPISTATUS ms;
+	TALLOC_CTX *mem_ctx;
+	struct SPropTagArray *propTagArray = NULL;
+	struct Restriction_r *use_restriction = NULL;
+	struct SRowSet *rows = NULL;
+	struct PropertyTagArray_r *pMIds = NULL;
+	struct ListObjectsInternalData loi_data;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session->nspi != NULL, MAPI_E_UNCONFIGURED, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session->nspi->ctx != NULL, MAPI_E_UNCONFIGURED, FALSE);
+	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	LOCK ();
+	mem_ctx = talloc_new (priv->session);
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	propTagArray = set_SPropTagArray (mem_ctx, 4,
+					  PidTagObjectType,
+					  PidTagMessageClass,
+					  PidTagMessageFlags,
+					  PidTagLastModificationTime);
+
+	if (build_rs_cb) {
+		struct mapi_SRestriction *restrictions = NULL;
+
+		if (!build_rs_cb (conn, mem_ctx, &restrictions, build_rs_cb_data, cancellable, perror)) {
+			ms = MAPI_E_CALL_FAILED;
+			make_mapi_error (perror, "build_restrictions", ms);
+			goto cleanup;
+		}
+
+		if (restrictions) {
+			EResolveNamedIDsData *named_ids_list = NULL;
+			guint named_ids_len = 0;
+			gboolean res = FALSE;
+
+			gather_mapi_SRestriction_named_ids (restrictions, &named_ids_list, &named_ids_len);
+
+			if (named_ids_list) {
+				/* use 0 for GAL as a folder ID parameter */
+				res = e_mapi_connection_resolve_named_props (conn, 0, named_ids_list, named_ids_len, cancellable, perror);
+
+				if (res) {
+					GHashTable *replace_hash = prepare_maybe_replace_hash (named_ids_list, named_ids_len);
+
+					use_restriction = talloc_zero (mem_ctx, struct Restriction_r);
+					convert_mapi_SRestriction_to_Restriction_r (restrictions, use_restriction, mem_ctx, replace_hash);
+
+					if (replace_hash)
+						g_hash_table_destroy (replace_hash);
+				} else {
+					ms = MAPI_E_CALL_FAILED;
+					goto cleanup;
+				}
+
+				g_free (named_ids_list);
+			} else {
+				use_restriction = talloc_zero (mem_ctx, struct Restriction_r);
+				convert_mapi_SRestriction_to_Restriction_r (restrictions, use_restriction, mem_ctx, NULL);
+			}
+
+			if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+				ms = MAPI_E_USER_CANCEL;
+				goto cleanup;
+			}
+		}
+	}
+
+	ms = nspi_GetMatches (priv->session->nspi->ctx, mem_ctx, propTagArray, use_restriction, &rows, &pMIds);
+	if (ms != MAPI_E_SUCCESS || !rows) {
+		if (ms == MAPI_E_NOT_FOUND || (!rows && ms == MAPI_E_SUCCESS))
+			ms = MAPI_E_SUCCESS;
+		else if (ms != MAPI_E_SUCCESS)
+			make_mapi_error (perror, "nspi_GetMatches", ms);
+		goto cleanup;
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	loi_data.cb = cb;
+	loi_data.user_data = user_data;
+
+	ms = foreach_gal_tablerow (conn, mem_ctx, rows, pMIds, propTagArray, list_objects_internal_cb, &loi_data, cancellable, perror);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "foreach_gal_tablerow", ms);
+		goto cleanup;
+	}
+
+ cleanup:
+	talloc_free (pMIds);
+	talloc_free (rows);
+	talloc_free (propTagArray);
+	talloc_free (mem_ctx);
+	UNLOCK ();
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+struct TransferGALObjectData
+{
+	GHashTable *reverse_replace_hash;
+	TransferObjectCB cb;
+	gpointer cb_user_data;
+};
+
+static gboolean
+e_mapi_transfer_gal_objects_cb (EMapiConnection *conn,
+				TALLOC_CTX *mem_ctx,
+				struct SRow *srow,
+				guint32 row_index,
+				guint32 rows_total,
+				gpointer user_data,
+				GCancellable *cancellable,
+				GError **perror)
+{
+	struct TransferGALObjectData *tgo = user_data;
+	EMapiObject *object;
+	uint32_t ii;
+	gboolean res;
+
+	g_return_val_if_fail (conn != NULL, FALSE);
+	g_return_val_if_fail (mem_ctx != NULL, FALSE);
+	g_return_val_if_fail (srow != NULL, FALSE);
+	g_return_val_if_fail (tgo != NULL, FALSE);
+	g_return_val_if_fail (tgo->cb != NULL, FALSE);
+
+	object = e_mapi_object_new (mem_ctx);
+
+	res = TRUE;
+
+	for (ii = 0; ii < srow->cValues; ii++) {
+		uint32_t proptag = srow->lpProps[ii].ulPropTag;
+		gconstpointer propdata = get_SPropValue_data (&srow->lpProps[ii]);
+
+		if (!propdata || may_skip_property (srow->lpProps[ii].ulPropTag))
+			continue;
+
+		/* reverse_replace_hash has them stored in opposite,
+		   the key is the name-id-proptag as stored on the server,
+		   the value is a pidlid/pidname proptag */
+		maybe_replace_named_id_tag (&proptag, tgo->reverse_replace_hash);
+
+		if (!e_mapi_utils_add_property (&object->properties, proptag, propdata, object)) {
+			res = FALSE;
+			make_mapi_error (perror, "e_mapi_utils_add_property", MAPI_E_CALL_FAILED);
+			break;
+		}
+	}
+
+	if (res)
+		res = tgo->cb (conn, mem_ctx, object, row_index, rows_total, tgo->cb_user_data, cancellable, perror);
+
+	e_mapi_object_free (object);
+
+	return res;
+}
+
+static void
+fill_reverse_replace_hash (gpointer key,
+			   gpointer value,
+			   gpointer user_data)
+{
+	GHashTable *reverse_replace_hash = user_data;
+
+	g_return_if_fail (reverse_replace_hash != NULL);
+
+	g_hash_table_insert (reverse_replace_hash, value, key);
+}
+
+gboolean
+e_mapi_connection_transfer_gal_objects (EMapiConnection *conn,
+					const GSList *mids,
+					TransferObjectCB cb,
+					gpointer cb_user_data,
+					GCancellable *cancellable,
+					GError **perror)
+{
+	enum MAPISTATUS ms;
+	TALLOC_CTX *mem_ctx;
+	struct PropertyTagArray_r *ids = NULL;
+	struct SPropTagArray *propTagArray = NULL;
+	struct SRowSet rows;
+	struct TransferGALObjectData tgo;
+	GHashTable *reverse_replace_hash = NULL;
+	EResolveNamedIDsData *named_ids_list = NULL;
+	guint named_ids_len = 0, ii;
+	const GSList *iter;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session->nspi != NULL, MAPI_E_UNCONFIGURED, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session->nspi->ctx != NULL, MAPI_E_UNCONFIGURED, FALSE);
+	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	LOCK ();
+	mem_ctx = talloc_new (priv->session);
+
+	for (iter = mids; iter; iter = iter->next) {
+		mapi_id_t *pmid = iter->data;
+
+		if (pmid) {
+			if (!ids) {
+				ids = talloc_zero (mem_ctx, struct PropertyTagArray_r);
+			}
+			ids->cValues++;
+			ids->aulPropTag = talloc_realloc (mem_ctx,
+				ids->aulPropTag,
+				uint32_t,
+				ids->cValues + 1);
+			ids->aulPropTag[ids->cValues - 1] = (uint32_t) (*pmid);
+			ids->aulPropTag[ids->cValues] = 0;
+		}
+	}
+
+	if (!ids) {
+		ms = MAPI_E_INVALID_PARAMETER;
+		make_mapi_error (perror, "gather valid mids", ms);
+		goto cleanup;
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	if (!e_mapi_book_utils_get_supported_mapi_proptags (mem_ctx, &propTagArray) || !propTagArray) {
+		ms = MAPI_E_CALL_FAILED;
+		make_mapi_error (perror, "e_mapi_book_utils_get_supported_mapi_proptags", ms);
+		goto cleanup;
+	}
+
+	for (ii = 0; ii < propTagArray->cValues; ii++) {
+		maybe_add_named_id_tag (propTagArray->aulPropTag[ii], &named_ids_list, &named_ids_len);
+	}
+
+	if (named_ids_list) {
+		GHashTable *replace_hash;
+
+		if (!e_mapi_connection_resolve_named_props (conn, 0, named_ids_list, named_ids_len, cancellable, perror)) {
+			ms = MAPI_E_CALL_FAILED;
+			make_mapi_error (perror, "e_mapi_connection_resolve_named_props", ms);
+			goto cleanup;
+		}
+
+		replace_hash = prepare_maybe_replace_hash (named_ids_list, named_ids_len);
+
+		if (replace_hash) {
+			for (ii = 0; ii < propTagArray->cValues; ii++) {
+				uint32_t proptag = propTagArray->aulPropTag[ii];
+
+				maybe_replace_named_id_tag (&proptag, replace_hash);
+
+				propTagArray->aulPropTag[ii] = proptag;
+			}
+
+			reverse_replace_hash = g_hash_table_new (g_direct_hash, g_direct_equal);
+
+			g_hash_table_foreach (replace_hash, fill_reverse_replace_hash, reverse_replace_hash);
+			g_hash_table_destroy (replace_hash);
+		}
+	}
+
+	/* fake rows, to start reading from the first mid */
+	rows.cRows = 0;
+	rows.aRow = NULL;
+
+	tgo.cb = cb;
+	tgo.cb_user_data = cb_user_data;
+	tgo.reverse_replace_hash = reverse_replace_hash;
+
+	ms = foreach_gal_tablerow (conn, mem_ctx, &rows, ids, propTagArray, e_mapi_transfer_gal_objects_cb, &tgo, cancellable, perror);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "foreach_gal_tablerow", ms);
+		goto cleanup;
+	}
+
+ cleanup:
+	if (reverse_replace_hash)
+		g_hash_table_destroy (reverse_replace_hash);
+	talloc_free (propTagArray);
+	talloc_free (ids);
+	talloc_free (mem_ctx);
+	UNLOCK ();
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+gboolean
+e_mapi_connection_transfer_gal_object (EMapiConnection *conn,
+				       mapi_id_t message_id,
+				       TransferObjectCB cb,
+				       gpointer cb_user_data,
+				       GCancellable *cancellable,
+				       GError **perror)
+{
+	GSList *mids;
+	gboolean res;
+
+	mids = g_slist_append (NULL, &message_id);
+	res = e_mapi_connection_transfer_gal_objects (conn, mids, cb, cb_user_data, cancellable, perror);
+	g_slist_free (mids);
+
+	return res;
+}
+
 mapi_id_t
 e_mapi_connection_create_folder (EMapiConnection *conn,
 				 uint32_t olFolder,
@@ -3775,11 +4352,12 @@ e_mapi_connection_move_folder  (EMapiConnection *conn,
 	return result;
 }
 
-/* named_ids_list contains pointers to ResolveNamedIDsData structure */
+/* named_ids_list contains pointers to EResolveNamedIDsData structure;
+   fid 0 is reserved for lookup in GAL */
 gboolean
 e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 					mapi_id_t fid,
-					ResolveNamedIDsData *named_ids_list,
+					EResolveNamedIDsData *named_ids_list,
 					guint named_ids_n_elems,
 					GCancellable *cancellable,
 					GError **perror)
@@ -3807,7 +4385,7 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 
 		if (ids) {
 			for (i = 0; i < named_ids_n_elems; i++) {
-				ResolveNamedIDsData *data = &named_ids_list[i];
+				EResolveNamedIDsData *data = &named_ids_list[i];
 				uint32_t propid;
 
 				propid = GPOINTER_TO_UINT (g_hash_table_lookup (ids, GUINT_TO_POINTER (data->pidlid_propid)));
@@ -3834,10 +4412,17 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 	nameid = mapi_nameid_new (mem_ctx);
 	SPropTagArray = talloc_zero (mem_ctx, struct SPropTagArray);
 
-	/* Attempt to open the folder */
-	ms = open_folder (conn, 0, &fid, 0, &obj_folder, perror);
-	if (ms != MAPI_E_SUCCESS) {
-		goto cleanup;
+	if (fid) {
+		/* Attempt to open the folder */
+		ms = open_folder (conn, 0, &fid, 0, &obj_folder, perror);
+		if (ms != MAPI_E_SUCCESS) {
+			goto cleanup;
+		}
+	} else {
+		if (!priv->session->nspi || !priv->session->nspi->ctx) {
+			ms = MAPI_E_UNCONFIGURED;
+			goto cleanup;
+		}
 	}
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
@@ -3853,7 +4438,7 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 	}
 
 	for (i = 0; i < todo->len; i++) {
-		ResolveNamedIDsData *data = todo->pdata[i];
+		EResolveNamedIDsData *data = todo->pdata[i];
 
 		if (mapi_nameid_canonical_add (nameid, data->pidlid_propid) != MAPI_E_SUCCESS)
 			data->propid = MAPI_E_RESERVED;
@@ -3866,7 +4451,88 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	ms = mapi_nameid_GetIDsFromNames (nameid, &obj_folder, SPropTagArray);
+	if (fid) {
+		ms = mapi_nameid_GetIDsFromNames (nameid, &obj_folder, SPropTagArray);
+	} else {
+		/* lookup in GAL */
+		struct SPropTagArray *gal_tags;
+		uint32_t prop_count = nameid->count;
+		struct PropertyName_r *names = talloc_zero_array (mem_ctx, struct PropertyName_r, prop_count + 1);
+
+		g_assert (names != NULL);
+
+		SPropTagArray = talloc_zero (mem_ctx, struct SPropTagArray);
+		g_assert (SPropTagArray != NULL);
+
+		SPropTagArray->cValues = nameid->count;
+		SPropTagArray->aulPropTag = talloc_zero_array (mem_ctx, enum MAPITAGS, SPropTagArray->cValues + 1);
+		g_assert (SPropTagArray->aulPropTag != NULL);
+
+		j = 0;
+		for (i = 0; i < nameid->count; i++) {
+			guint ab[16];
+
+			SPropTagArray->aulPropTag[i] = nameid->entries[i].proptag;
+
+			if (nameid->entries[i].ulKind == MNID_ID &&
+			    16 == sscanf (nameid->entries[i].OLEGUID,
+					"%02x%02x%02x%02x-"
+					"%02x%02x-"
+					"%02x%02x-"
+					"%02x%02x-"
+					"%02x%02x%02x%02x%02x%02x",
+					&ab[0], &ab[1], &ab[2], &ab[3],
+					&ab[4], &ab[5],
+					&ab[6], &ab[7],
+					&ab[8], &ab[9],
+					&ab[10], &ab[11], &ab[12], &ab[13], &ab[14], &ab[15])) {
+				gint k;
+
+				names[j].ulReserved = 0;
+				names[j].lID = nameid->entries[i].lid;
+				names[j].lpguid = talloc_zero (mem_ctx, struct FlatUID_r);
+
+				for (k = 0; k < 16; k++) {
+					names[j].lpguid->ab[k] = (ab[k] & 0xFF);
+				}
+
+				j++;
+			} else {
+				SPropTagArray->aulPropTag[i] = (SPropTagArray->aulPropTag[i] & (~0xFFFF)) | PT_ERROR;
+				prop_count--;
+			}
+		}
+
+		if (prop_count > 0) {
+			ms = nspi_GetIDsFromNames (priv->session->nspi->ctx, mem_ctx, false, prop_count, names, &gal_tags);
+			if (ms == MAPI_E_SUCCESS && gal_tags) {
+				if (gal_tags->cValues != prop_count)
+					g_warning ("%s: Requested (%d) and returned (%d) property names don't match", G_STRFUNC, prop_count, gal_tags->cValues);
+
+				j = 0;
+				for (i = 0; i < gal_tags->cValues; i++) {
+					while (j < SPropTagArray->cValues && (SPropTagArray->aulPropTag[j] & 0xFFFF) == PT_ERROR) {
+						j++;
+					}
+
+					if (j >= SPropTagArray->cValues)
+						break;
+
+					SPropTagArray->aulPropTag[j] = gal_tags->aulPropTag[i];
+				}
+
+				while (j < SPropTagArray->cValues) {
+					SPropTagArray->aulPropTag[j] = (SPropTagArray->aulPropTag[j] & (~0xFFFF)) | PT_ERROR;
+					j++;
+				}
+			}
+		} else {
+			ms = MAPI_E_NOT_FOUND;
+		}
+
+		talloc_free (names);
+	}
+
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "mapi_nameid_GetIDsFromNames", ms);
 		goto cleanup;
@@ -3879,7 +4545,7 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 
 	for (i = 0, j = 0; i < SPropTagArray->cValues && j < todo->len; i++) {
 		while (j < todo->len) {
-			ResolveNamedIDsData *data = todo->pdata[j];
+			EResolveNamedIDsData *data = todo->pdata[j];
 			if (data && data->propid == 0) {
 				if ((SPropTagArray->aulPropTag[i] & 0xFFFF) == PT_ERROR)
 					data->propid = MAPI_E_RESERVED;
@@ -3906,7 +4572,7 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 		}
 
 		for (i = 0; i < todo->len; i++) {
-			ResolveNamedIDsData *data = todo->pdata[i];
+			EResolveNamedIDsData *data = todo->pdata[i];
 
 			g_hash_table_insert (ids, GUINT_TO_POINTER (data->pidlid_propid), GUINT_TO_POINTER (data->propid));
 		}

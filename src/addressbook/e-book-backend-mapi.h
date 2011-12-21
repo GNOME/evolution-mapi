@@ -32,6 +32,7 @@
 #include "e-mapi-connection.h"
 #include "e-mapi-defs.h"
 #include "e-mapi-utils.h"
+#include "e-mapi-book-utils.h"
 
 G_BEGIN_DECLS
 
@@ -126,33 +127,6 @@ void mapi_error_to_edb_error (GError **perror, const GError *mapi_error, EDataBo
  * Therefore we have a couple arbitrary constants... */
 #define EMA_EBB_CACHE_PROFILEID	"EMA_PROFILE"
 #define EMA_EBB_CACHE_FOLDERID	"EMA_FOLDER"
-
-/* vCard parameter name in contact list */
-#define EMA_X_MEMBERID "X-EMA-MEMBER-ID"
-#define EMA_X_MEMBERVALUE "X-EMA-MEMBER-VALUE"
-
-#define GET_ALL_KNOWN_IDS (GINT_TO_POINTER(1))
-#define GET_UIDS_ONLY     (GINT_TO_POINTER(2))
-
-/* data is one of GET_ALL_KNOWN_IDS or GET_UIDS_ONLY */
-gboolean mapi_book_utils_get_prop_list (EMapiConnection *conn,
-					mapi_id_t fid,
-					TALLOC_CTX *mem_ctx,
-					struct SPropTagArray *props,
-					gpointer data,
-					GCancellable *cancellable,
-					GError **perror);
-
-/* only one of mapi_properties and aRow can be set */
-EContact *mapi_book_utils_contact_from_props (EMapiConnection *conn, mapi_id_t fid, const gchar *book_uri, struct mapi_SPropValue_array *mapi_properties, struct SRow *aRow);
-
-/* converts time_t to string, suitable for E_CONTACT_REV field value;
-   free returned pointer with g_free() */
-gchar *mapi_book_utils_timet_to_string (time_t tt);
-
-/* converts sexp_query into mapi_SRestriction, which is completely
-   allocated on the given mem_ctx */
-struct mapi_SRestriction *mapi_book_utils_sexp_to_restriction (TALLOC_CTX *mem_ctx, const gchar *sexp_query);
 
 G_END_DECLS
 

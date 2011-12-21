@@ -56,76 +56,6 @@ struct _EBookBackendMAPIContactsPrivate
 	gboolean is_public_folder;
 };
 
-static gboolean
-build_restriction_from_sexp_query (EMapiConnection *conn,
-				   TALLOC_CTX *mem_ctx,
-				   struct mapi_SRestriction **restrictions,
-				   gpointer user_data,
-				   GCancellable *cancellable,
-				   GError **perror)
-{
-	const gchar *sexp_query = user_data;
-
-	g_return_val_if_fail (sexp_query != NULL, FALSE);
-
-	*restrictions = mapi_book_utils_sexp_to_restriction (mem_ctx, sexp_query);
-
-	return TRUE;
-}
-
-static uint32_t
-string_to_bin (TALLOC_CTX *mem_ctx, const gchar *str, uint8_t **lpb)
-{
-	uint32_t len, i;
-
-	g_return_val_if_fail (str != NULL, 0);
-	g_return_val_if_fail (lpb != NULL, 0);
-
-	len = strlen (str);
-	g_return_val_if_fail ((len & 1) == 0, 0);
-
-	len = len / 2;
-	*lpb = talloc_zero_array (mem_ctx, uint8_t, len);
-
-	i = 0;
-	while (*str && i < len) {
-		gchar c1 = str[0], c2 = str[1];
-		str += 2;
-
-		g_return_val_if_fail ((c1 >= '0' && c1 <= '9') || (c1 >= 'a' && c1 <= 'f') || (c1 >= 'A' && c1 <= 'F'), 0);
-		g_return_val_if_fail ((c2 >= '0' && c2 <= '9') || (c2 >= 'a' && c2 <= 'f') || (c2 >= 'A' && c2 <= 'F'), 0);
-
-		#define deHex(x) (((x) >= '0' && (x) <= '9') ? ((x) - '0') : (((x) >= 'a' && (x) <= 'f') ? (x) - 'a' + 10 : (x) - 'A' + 10))
-		(*lpb)[i] = (deHex (c1) << 4) | (deHex (c2));
-		#undef deHex
-		i++;
-	}
-
-	return len;
-}
-
-static gint
-cmp_member_id (gconstpointer a, gconstpointer b, gpointer ht)
-{
-	gchar *va, *vb;
-	gint res;
-
-	if (!a)
-		return b ? -1 : 0;
-	if (!b)
-		return 1;
-
-	va = e_vcard_attribute_get_value ((EVCardAttribute *) a);
-	vb = e_vcard_attribute_get_value ((EVCardAttribute *) b);
-
-	res = GPOINTER_TO_INT (g_hash_table_lookup (ht, va)) - GPOINTER_TO_INT (g_hash_table_lookup (ht, vb));
-
-	g_free (va);
-	g_free (vb);
-
-	return res;
-}
-
 typedef struct {
 	EContact *contact;
 	EBookBackendSqliteDB *db;
@@ -140,17 +70,10 @@ ebbm_contact_to_object (EMapiConnection *conn,
 			GError **perror)
 {
 	EMapiCreateitemData *mcd = user_data;
-	EMapiObject *object;
-
-	#define set_value(hex, val) G_STMT_START { \
-		if (!e_mapi_utils_add_property (&object->properties, hex, val, object)) \
-			return FALSE;	\
-		} G_STMT_END
-
-	#define set_con_value(hex, field_id) G_STMT_START { \
-		if (e_contact_get (mcd->contact, field_id)) { \
-			set_value (hex, e_contact_get (mcd->contact, field_id)); \
-		} } G_STMT_END
+	const gchar *uid = NULL;
+	EContact *old_contact = NULL;
+	gboolean res;
+	GError *error = NULL;
 
 	g_return_val_if_fail (mcd != NULL, FALSE);
 	g_return_val_if_fail (mcd->contact != NULL, FALSE);
@@ -159,228 +82,24 @@ ebbm_contact_to_object (EMapiConnection *conn,
 	g_return_val_if_fail (mem_ctx != NULL, FALSE);
 	g_return_val_if_fail (pobject != NULL, FALSE);
 
-	object = e_mapi_object_new (mem_ctx);
-	*pobject = object;
+	uid = e_contact_get_const (mcd->contact, E_CONTACT_UID);
+	if (uid)
+		old_contact = e_book_backend_sqlitedb_get_contact (mcd->db, EMA_EBB_CACHE_FOLDERID, uid, NULL, NULL, &error);
 
-	if (GPOINTER_TO_INT (e_contact_get (mcd->contact, E_CONTACT_IS_LIST))) {
-		const gchar *uid = NULL;
-		EContact *old_contact = NULL;
-		GList *local, *l;
-		struct BinaryArray_r *members, *oneoff_members;
-		uint32_t u32, crc32 = 0;
-		GHashTable *member_values = NULL, *member_ids = NULL;
-		GError *error = NULL;
-
-		uid = e_contact_get_const (mcd->contact, E_CONTACT_UID);
-		if (uid)
-			old_contact = e_book_backend_sqlitedb_get_contact (mcd->db, EMA_EBB_CACHE_FOLDERID, uid, NULL, NULL, &error);
-
-		if (!error && old_contact) {
-			member_values = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-			member_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-
-			local = e_contact_get_attributes (old_contact, E_CONTACT_EMAIL);
-			for (l = local; l; l = l->next) {
-				EVCardAttribute *attr = l->data;
-				GList *param;
-
-				if (!attr)
-					continue;
-
-				param = e_vcard_attribute_get_param (attr, EMA_X_MEMBERVALUE);
-				if (param && param->data && !param->next) {
-					g_hash_table_insert (member_values, e_vcard_attribute_get_value (attr), g_strdup (param->data));
-				}
-
-				param = e_vcard_attribute_get_param (attr, EMA_X_MEMBERID);
-				if (param && param->data && !param->next) {
-					g_hash_table_insert (member_ids, e_vcard_attribute_get_value (attr), GINT_TO_POINTER (atoi (param->data)));
-				}
-			}
-
-			g_object_unref (old_contact);
-			g_list_foreach (local, (GFunc)e_vcard_attribute_free, NULL);
-			g_list_free (local);
-		}
-
-		if (error)
-			g_error_free (error);
-
-		set_value (PidTagMessageClass, IPM_DISTLIST);
-		u32 = 0xFFFFFFFF;
-		set_value (PidLidFileUnderId, &u32);
-		set_con_value (PidLidFileUnder, E_CONTACT_FILE_AS);
-		set_con_value (PidLidDistributionListName, E_CONTACT_FILE_AS);
-		set_con_value (PidTagDisplayName, E_CONTACT_FILE_AS);
-		set_con_value (PidTagNormalizedSubject, E_CONTACT_FILE_AS);
-
-		local = e_contact_get_attributes (mcd->contact, E_CONTACT_EMAIL);
-		if (member_ids)
-			local = g_list_sort_with_data (local, cmp_member_id, member_ids);
-
-		members = talloc_zero (mem_ctx, struct BinaryArray_r);
-		members->cValues = 0;
-		members->lpbin = talloc_zero_array (mem_ctx, struct Binary_r, g_list_length (local));
-
-		oneoff_members = talloc_zero (mem_ctx, struct BinaryArray_r);
-		oneoff_members->cValues = 0;
-		oneoff_members->lpbin = talloc_zero_array (mem_ctx, struct Binary_r, g_list_length (local));
-
-		for (l = local; l; l = l->next) {
-			EVCardAttribute *attr = (EVCardAttribute *) l->data;
-			gchar *raw;
-			CamelInternetAddress *addr;
-
-			if (!attr)
-				continue;
-
-			raw = e_vcard_attribute_get_value (attr);
-			if (!raw)
-				continue;
-
-			addr = camel_internet_address_new ();
-			if (camel_address_decode (CAMEL_ADDRESS (addr), raw) > 0) {
-				const gchar *nm = NULL, *eml = NULL;
-
-				camel_internet_address_get (addr, 0, &nm, &eml);
-				if (eml) {
-					/* keep both lists in sync */
-					if (member_values && g_hash_table_lookup (member_values, raw)) {
-						/* stored ListMembers values when contact's value didn't change */
-						members->lpbin[members->cValues].cb = string_to_bin (mem_ctx, g_hash_table_lookup (member_values, raw), &members->lpbin[members->cValues].lpb);
-						members->cValues++;
-					} else {
-						e_mapi_util_recip_entryid_generate_smtp (mem_ctx, &members->lpbin[members->cValues], nm ? nm : "", eml);
-						members->cValues++;
-					}
-
-					e_mapi_util_recip_entryid_generate_smtp (mem_ctx, &oneoff_members->lpbin[oneoff_members->cValues], nm ? nm : "", eml);
-					oneoff_members->cValues++;
-
-					crc32 = e_mapi_utils_push_crc32 (crc32, members->lpbin[members->cValues - 1].lpb, members->lpbin[members->cValues - 1].cb);
-				}
-			}
-
-			g_object_unref (addr);
-			g_free (raw);
-		}
-
-		if (member_values)
-			g_hash_table_destroy (member_values);
-		if (member_ids)
-			g_hash_table_destroy (member_ids);
-		g_list_foreach (local, (GFunc)e_vcard_attribute_free, NULL);
-		g_list_free (local);
-
-		set_value (PidLidDistributionListOneOffMembers, oneoff_members);
-		set_value (PidLidDistributionListMembers, members);
-		set_value (PidLidDistributionListChecksum, &crc32);
-
-		return TRUE;
+	if (error) {
+		old_contact = NULL;
+		g_clear_error (&error);
 	}
 
-	set_value (PidTagMessageClass, IPM_CONTACT);
-	set_con_value (PidLidFileUnder, E_CONTACT_FILE_AS);
+	res = e_mapi_book_utils_contact_to_object (mcd->contact, old_contact, pobject, mem_ctx, cancellable, perror);
 
-	set_con_value (PidTagDisplayName, E_CONTACT_FULL_NAME);
-	set_con_value (PidTagNormalizedSubject, E_CONTACT_FILE_AS);
-	set_con_value (PidLidEmail1OriginalDisplayName, E_CONTACT_EMAIL_1);
-	/*set_con_value (PidLidEmail1EmailAddress, E_CONTACT_EMAIL_1);*/
+	if (old_contact)
+		g_object_unref (old_contact);
 
-	/*set_con_value (0x8083001e, E_CONTACT_EMAIL_1);*/
-	set_con_value (PidLidEmail2EmailAddress, E_CONTACT_EMAIL_2);
-
-	set_con_value (PidLidEmail3EmailAddress, E_CONTACT_EMAIL_3);
-	/*set_con_value (PidLidEmail3OriginalDisplayName, E_CONTACT_EMAIL_3);*/
-
-	set_con_value (PidLidHtml, E_CONTACT_HOMEPAGE_URL);
-	set_con_value (PidLidFreeBusyLocation, E_CONTACT_FREEBUSY_URL);
-
-	set_con_value (PidTagBusinessTelephoneNumber, E_CONTACT_PHONE_BUSINESS);
-	set_con_value (PidTagHomeTelephoneNumber, E_CONTACT_PHONE_HOME);
-	set_con_value (PidTagMobileTelephoneNumber, E_CONTACT_PHONE_MOBILE);
-	set_con_value (PidTagHomeFaxNumber, E_CONTACT_PHONE_HOME_FAX);
-	set_con_value (PidTagBusinessFaxNumber, E_CONTACT_PHONE_BUSINESS_FAX);
-	set_con_value (PidTagPagerTelephoneNumber, E_CONTACT_PHONE_PAGER);
-	set_con_value (PidTagAssistantTelephoneNumber, E_CONTACT_PHONE_ASSISTANT);
-	set_con_value (PidTagCompanyMainTelephoneNumber, E_CONTACT_PHONE_COMPANY);
-
-	set_con_value (PidTagManagerName, E_CONTACT_MANAGER);
-	set_con_value (PidTagAssistant, E_CONTACT_ASSISTANT);
-	set_con_value (PidTagCompanyName, E_CONTACT_ORG);
-	set_con_value (PidTagDepartmentName, E_CONTACT_ORG_UNIT);
-	set_con_value (PidTagProfession, E_CONTACT_ROLE);
-	set_con_value (PidTagTitle, E_CONTACT_TITLE);
-
-	set_con_value (PidTagOfficeLocation, E_CONTACT_OFFICE);
-	set_con_value (PidTagSpouseName, E_CONTACT_SPOUSE);
-
-	set_con_value (PidTagBody, E_CONTACT_NOTE);
-	set_con_value (PidTagNickname, E_CONTACT_NICKNAME);
-
-	/* BDAY AND ANNV */
-	if (e_contact_get (mcd->contact, E_CONTACT_BIRTH_DATE)) {
-		EContactDate *date = e_contact_get (mcd->contact, E_CONTACT_BIRTH_DATE);
-		struct tm tmtime = { 0 };
-		struct FILETIME t;
-
-		tmtime.tm_mday = date->day;
-		tmtime.tm_mon = date->month - 1;
-		tmtime.tm_year = date->year - 1900;
-
-		e_mapi_util_time_t_to_filetime (mktime (&tmtime) + (24 * 60 * 60), &t);
-
-		set_value (PidTagBirthday, &t);
-	}
-
-	if (e_contact_get (mcd->contact, E_CONTACT_ANNIVERSARY)) {
-		EContactDate *date = e_contact_get (mcd->contact, E_CONTACT_ANNIVERSARY);
-		struct tm tmtime = { 0 };
-		struct FILETIME t;
-
-		tmtime.tm_mday = date->day;
-		tmtime.tm_mon = date->month - 1;
-		tmtime.tm_year = date->year - 1900;
-
-		e_mapi_util_time_t_to_filetime (mktime (&tmtime) + (24 * 60 * 60), &t);
-
-		set_value (PidTagWeddingAnniversary, &t);
-	}
-
-	/* Home and Office address */
-	if (e_contact_get (mcd->contact, E_CONTACT_ADDRESS_HOME)) {
-		EContactAddress *contact_addr = e_contact_get (mcd->contact, E_CONTACT_ADDRESS_HOME);
-
-		set_value (PidLidHomeAddress, contact_addr->street);
-		set_value (PidTagHomeAddressPostOfficeBox, contact_addr->ext);
-		set_value (PidTagHomeAddressCity, contact_addr->locality);
-		set_value (PidTagHomeAddressStateOrProvince, contact_addr->region);
-		set_value (PidTagHomeAddressPostalCode, contact_addr->code);
-		set_value (PidTagHomeAddressCountry, contact_addr->country);
-	}
-
-	if (e_contact_get (mcd->contact, E_CONTACT_ADDRESS_WORK)) {
-		EContactAddress *contact_addr = e_contact_get (mcd->contact, E_CONTACT_ADDRESS_WORK);
-
-		set_value (PidLidWorkAddress, contact_addr->street);
-		set_value (PidTagPostOfficeBox, contact_addr->ext);
-		set_value (PidTagLocality, contact_addr->locality);
-		set_value (PidTagStateOrProvince, contact_addr->region);
-		set_value (PidTagPostalCode, contact_addr->code);
-		set_value (PidTagCountry, contact_addr->country);
-	}
-
-	if (e_contact_get (mcd->contact, E_CONTACT_IM_AIM)) {
-		GList *l = e_contact_get (mcd->contact, E_CONTACT_IM_AIM);
-		set_value (PidLidInstantMessagingAddress, l->data);
-	}
-
-	#undef set_value
-
-	return TRUE;
+	return res;
 }
 
-struct FetchContactItemData
+struct TransferContactData
 {
 	EBookBackendMAPI *ebma;
 	EContact *contact; /* out */
@@ -396,34 +115,15 @@ transfer_contact_cb (EMapiConnection *conn,
 		     GCancellable *cancellable,
 		     GError **perror)
 {
-	struct FetchContactItemData *fcid = user_data;
+	struct TransferContactData *tc = user_data;
 
-	g_return_val_if_fail (fcid != NULL, FALSE);
-	g_return_val_if_fail (fcid->ebma != NULL, FALSE);
+	g_return_val_if_fail (tc != NULL, FALSE);
+	g_return_val_if_fail (tc->ebma != NULL, FALSE);
 	g_return_val_if_fail (object != NULL, FALSE);
 
-	fcid->contact = mapi_book_utils_contact_from_props (conn, E_BOOK_BACKEND_MAPI_CONTACTS (fcid->ebma)->priv->fid, e_book_backend_mapi_get_book_uri (fcid->ebma), &object->properties, NULL);
-
-	if (fcid->contact) {
-		const mapi_id_t *pmid;
-
-		pmid = e_mapi_util_find_array_propval (&object->properties, PidTagMid);
-		if (pmid) {
-			gchar *suid = e_mapi_util_mapi_id_to_string (*pmid);
-
-			/* UID of the contact is nothing but the concatenated string of hex id of folder and the message.*/
-			e_contact_set (fcid->contact, E_CONTACT_UID, suid);
-
-			if (!e_book_backend_mapi_notify_contact_update (fcid->ebma, NULL, fcid->contact, obj_index, obj_total, NULL)) {
-				g_free (suid);
-				return FALSE;
-			}
-
-			g_free (suid);
-		} else {
-			g_debug ("%s: No PidTagMid found", G_STRFUNC);
-		}
-	}
+	tc->contact = e_mapi_book_utils_contact_from_object (conn, object, e_book_backend_mapi_get_book_uri (tc->ebma));
+	if (tc->contact)
+		return e_book_backend_mapi_notify_contact_update (tc->ebma, NULL, tc->contact, obj_index, obj_total, NULL);
 
 	return TRUE;
 }
@@ -477,29 +177,17 @@ transfer_contacts_cb (EMapiConnection *conn,
 	g_return_val_if_fail (object != NULL, FALSE);
 	g_return_val_if_fail (tcd->ebma != NULL, FALSE);
 
-	contact = mapi_book_utils_contact_from_props (conn, E_BOOK_BACKEND_MAPI_CONTACTS (tcd->ebma)->priv->fid, e_book_backend_mapi_get_book_uri (tcd->ebma), &object->properties, NULL);
+	contact = e_mapi_book_utils_contact_from_object (conn, object, e_book_backend_mapi_get_book_uri (tcd->ebma));
 	if (contact) {
-		const mapi_id_t *pmid;
+		if (tcd->cards)
+			*tcd->cards = g_slist_prepend (*tcd->cards, e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30));
 
-		pmid = e_mapi_util_find_array_propval (&object->properties, PidTagMid);
-		if (pmid) {
-			gchar *suid = e_mapi_util_mapi_id_to_string (*pmid);
-
-			e_contact_set (contact, E_CONTACT_UID, suid);
-			g_free (suid);
-
-			if (tcd->cards)
-				*tcd->cards = g_slist_prepend (*tcd->cards, e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30));
-
-			if (!e_book_backend_mapi_notify_contact_update (tcd->ebma, tcd->book_view, contact, obj_index, obj_total, tcd->notify_contact_data)) {
-				g_object_unref (contact);
-				return FALSE;
-			}
-
+		if (!e_book_backend_mapi_notify_contact_update (tcd->ebma, tcd->book_view, contact, obj_index, obj_total, tcd->notify_contact_data)) {
 			g_object_unref (contact);
-		} else {
-			g_debug ("%s: No PidTagMid found", G_STRFUNC);
+			return FALSE;
 		}
+
+		g_object_unref (contact);
 	} else {
 		g_debug ("%s: [%d/%d] Failed to transform to contact", G_STRFUNC, obj_index, obj_total);
 	}
@@ -525,7 +213,7 @@ gather_known_uids_cb (EMapiConnection *conn,
 
 	suid = e_mapi_util_mapi_id_to_string (object_data->mid);
 	if (suid) {
-		g_hash_table_insert (lku->uid_to_rev, suid, mapi_book_utils_timet_to_string (object_data->last_modified));
+		g_hash_table_insert (lku->uid_to_rev, suid, e_mapi_book_utils_timet_to_string (object_data->last_modified));
 		if (lku->latest_last_modify < object_data->last_modified)
 			lku->latest_last_modify = object_data->last_modified;
 	}
@@ -597,7 +285,8 @@ ebbmc_server_notification_cb (EMapiConnection *conn,
 	}
 
 	priv = ((EBookBackendMAPIContacts *) ebma)->priv;
-	if (priv->fid == update_folder1 || priv->fid == update_folder2)
+	if ((priv->fid == update_folder1 || priv->fid == update_folder2) &&
+	    e_book_backend_mapi_is_marked_for_offline (ebma))
 		e_book_backend_mapi_refresh_cache (ebma);
 }
 
@@ -947,7 +636,7 @@ ebbm_contacts_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, co
 	EMapiConnection *conn;
 	mapi_id_t mid;
 	mapi_object_t obj_folder;
-	struct FetchContactItemData fcid = { 0 };
+	struct TransferContactData tc = { 0 };
 	gboolean status;
 	GError *mapi_error = NULL;
 
@@ -996,17 +685,17 @@ ebbm_contacts_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, co
 	}
 
 	if (status) {
-		fcid.ebma = ebma;
-		fcid.contact = NULL;
+		tc.ebma = ebma;
+		tc.contact = NULL;
 
-		e_mapi_connection_transfer_object (conn, &obj_folder, mid, transfer_contact_cb, &fcid, cancellable, &mapi_error);
+		e_mapi_connection_transfer_object (conn, &obj_folder, mid, transfer_contact_cb, &tc, cancellable, &mapi_error);
 	}
 
 	e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
 
-	if (fcid.contact) {
-		*vcard =  e_vcard_to_string (E_VCARD (fcid.contact), EVC_FORMAT_VCARD_30);
-		g_object_unref (fcid.contact);
+	if (tc.contact) {
+		*vcard =  e_vcard_to_string (E_VCARD (tc.contact), EVC_FORMAT_VCARD_30);
+		g_object_unref (tc.contact);
 	} else {
 		if (!mapi_error || mapi_error->code == MAPI_E_NOT_FOUND) {
 			g_propagate_error (error, EDB_ERROR (CONTACT_NOT_FOUND));
@@ -1076,7 +765,7 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellabl
 
 	if (status) {
 		status = e_mapi_connection_list_objects (conn, &obj_folder,
-							 build_restriction_from_sexp_query, (gpointer) query,
+							 e_mapi_book_utils_build_sexp_restriction, (gpointer) query,
 							 gather_contact_mids_cb, &mids,
 							 cancellable, &mapi_error);
 

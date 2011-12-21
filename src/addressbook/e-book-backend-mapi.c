@@ -34,7 +34,6 @@
 
 #include <libebook/e-contact.h>
 #include <libedataserver/e-data-server-util.h>
-#include <libedataserver/e-sexp.h>
 #include <camel/camel.h>
 
 #include <e-mapi-operation-queue.h>
@@ -61,73 +60,14 @@ struct _EBookBackendMAPIPrivate
 	time_t last_update_cache;
 
 	EBookBackendSqliteDB *db;
-	GHashTable *running_book_views;
 
 	guint32 last_server_contact_count;
 	time_t last_modify_time;
 	gboolean server_dirty;
+
+	GHashTable *running_views; /* EDataBookView => GCancellable */
+	GMutex *running_views_lock;
 };
-
-#define ELEMENT_TYPE_MASK   0xF /* mask where the real type of the element is stored */
-
-#define ELEMENT_TYPE_SIMPLE 0x01
-#define ELEMENT_TYPE_COMPLEX 0x02
-
-#define ELEMENT_TYPE_NAMEDID 0x10
-
-static const struct field_element_mapping {
-		EContactField field_id;
-		uint32_t element_type;
-		uint32_t mapi_id;
-		gint contact_type;
-	} mappings [] = {
-
-	{ E_CONTACT_UID, PT_UNICODE, PR_EMAIL_ADDRESS_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_REV, PT_SYSTIME, PR_LAST_MODIFICATION_TIME, ELEMENT_TYPE_SIMPLE},
-
-	{ E_CONTACT_FILE_AS, PT_UNICODE, PidLidFileUnder, ELEMENT_TYPE_SIMPLE | ELEMENT_TYPE_NAMEDID},
-	{ E_CONTACT_FULL_NAME, PT_UNICODE, PR_DISPLAY_NAME_UNICODE, ELEMENT_TYPE_SIMPLE },
-	{ E_CONTACT_GIVEN_NAME, PT_UNICODE, PR_GIVEN_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_FAMILY_NAME, PT_UNICODE, PR_SURNAME_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_NICKNAME, PT_UNICODE, PR_NICKNAME_UNICODE, ELEMENT_TYPE_SIMPLE },
-
-	{ E_CONTACT_EMAIL_1, PT_UNICODE, PidLidEmail1OriginalDisplayName, ELEMENT_TYPE_SIMPLE | ELEMENT_TYPE_NAMEDID},
-	{ E_CONTACT_EMAIL_2, PT_UNICODE, PidLidEmail2EmailAddress, ELEMENT_TYPE_SIMPLE | ELEMENT_TYPE_NAMEDID},
-	{ E_CONTACT_EMAIL_3, PT_UNICODE, PidLidEmail3EmailAddress, ELEMENT_TYPE_SIMPLE | ELEMENT_TYPE_NAMEDID},
-	{ E_CONTACT_IM_AIM,  PT_UNICODE, PidLidInstantMessagingAddress, ELEMENT_TYPE_COMPLEX | ELEMENT_TYPE_NAMEDID},
-
-	{ E_CONTACT_PHONE_BUSINESS, PT_UNICODE, PR_OFFICE_TELEPHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_HOME, PT_UNICODE, PR_HOME_TELEPHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_MOBILE, PT_UNICODE, PR_MOBILE_TELEPHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_HOME_FAX, PT_UNICODE, PR_HOME_FAX_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_BUSINESS_FAX, PT_UNICODE, PR_BUSINESS_FAX_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_PAGER, PT_UNICODE, PR_PAGER_TELEPHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_ASSISTANT, PT_UNICODE, PR_ASSISTANT_TELEPHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_PHONE_COMPANY, PT_UNICODE, PR_COMPANY_MAIN_PHONE_NUMBER_UNICODE, ELEMENT_TYPE_SIMPLE},
-
-	{ E_CONTACT_HOMEPAGE_URL, PT_UNICODE, PidLidHtml, ELEMENT_TYPE_SIMPLE | ELEMENT_TYPE_NAMEDID},
-	{ E_CONTACT_FREEBUSY_URL, PT_UNICODE, PidLidFreeBusyLocation, ELEMENT_TYPE_SIMPLE | ELEMENT_TYPE_NAMEDID},
-
-	{ E_CONTACT_ROLE, PT_UNICODE, PR_PROFESSION_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_TITLE, PT_UNICODE, PR_TITLE_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_ORG, PT_UNICODE, PR_COMPANY_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_ORG_UNIT, PT_UNICODE, PR_DEPARTMENT_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_MANAGER, PT_UNICODE, PR_MANAGER_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_ASSISTANT, PT_UNICODE, PR_ASSISTANT_UNICODE, ELEMENT_TYPE_SIMPLE},
-
-	{ E_CONTACT_OFFICE, PT_UNICODE, PR_OFFICE_LOCATION_UNICODE, ELEMENT_TYPE_SIMPLE},
-	{ E_CONTACT_SPOUSE, PT_UNICODE, PR_SPOUSE_NAME_UNICODE, ELEMENT_TYPE_SIMPLE},
-
-	{ E_CONTACT_BIRTH_DATE,  PT_SYSTIME, PR_BIRTHDAY, ELEMENT_TYPE_COMPLEX},
-	{ E_CONTACT_ANNIVERSARY, PT_SYSTIME, PR_WEDDING_ANNIVERSARY, ELEMENT_TYPE_COMPLEX},
-
-	{ E_CONTACT_NOTE, PT_UNICODE, PR_BODY_UNICODE, ELEMENT_TYPE_SIMPLE},
-
-	{ E_CONTACT_ADDRESS_HOME, PT_UNICODE, PidLidHomeAddress, ELEMENT_TYPE_COMPLEX | ELEMENT_TYPE_NAMEDID},
-	{ E_CONTACT_ADDRESS_WORK, PT_UNICODE, PidLidOtherAddress, ELEMENT_TYPE_COMPLEX | ELEMENT_TYPE_NAMEDID}
-	/* { E_CONTACT_BOOK_URI, ELEMENT_TYPE_SIMPLE, "book_uri"}, */
-	/* { E_CONTACT_CATEGORIES, } */
-	};
 
 static gboolean
 pick_view_cb (EDataBookView *view, gpointer user_data)
@@ -235,7 +175,6 @@ ebbm_update_cache_cb (gpointer data)
 
 	ebmac = E_BOOK_BACKEND_MAPI_GET_CLASS (ebma);
 	g_return_val_if_fail (ebmac != NULL, NULL);
-
 
 	cancellable = priv->update_cache;
 	g_cancellable_reset (cancellable);
@@ -414,7 +353,7 @@ ebbm_connect_user (EBookBackendMAPI *ebma, GCancellable *cancellable, const gcha
 
 		ebbm_notify_connection_status (ebma, TRUE);
 
-		if (!g_cancellable_is_cancelled (cancellable) /* && priv->marked_for_offline */) {
+		if (!g_cancellable_is_cancelled (cancellable) && priv->marked_for_offline) {
 			ebbm_maybe_invoke_cache_update (ebma);
 		}
 	}
@@ -535,18 +474,14 @@ ebbm_get_backend_property (EBookBackendMAPI *ebma, const gchar *prop_name, gchar
 	g_return_val_if_fail (prop_value != NULL, FALSE);
 
 	if (g_str_equal (prop_name, CLIENT_BACKEND_PROPERTY_CAPABILITIES)) {
-		*prop_value = g_strdup ("net,bulk-removes,do-initial-query,contact-lists");
+		if (e_book_backend_mapi_is_marked_for_offline (ebma))
+			*prop_value = g_strdup ("net,bulk-removes,contact-lists,do-initial-query");
+		else
+			*prop_value = g_strdup ("net,bulk-removes,contact-lists");
 	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_REQUIRED_FIELDS)) {
 		*prop_value = g_strdup (e_contact_field_name (E_CONTACT_FILE_AS));
 	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_SUPPORTED_FIELDS)) {
-		gint ii;
-		GSList *fields = NULL;
-
-		for (ii = 0; ii < G_N_ELEMENTS (mappings); ii++) {
-			fields = g_slist_append (fields, (gpointer) e_contact_field_name (mappings[ii].field_id));
-		}
-
-		fields = g_slist_append (fields, (gpointer) e_contact_field_name (E_CONTACT_BOOK_URI));
+		GSList *fields = e_mapi_book_utils_get_supported_contact_fields ();
 
 		*prop_value = e_data_book_string_slist_to_comma_string (fields);
 
@@ -686,6 +621,7 @@ struct BookViewThreadData
 {
 	EBookBackendMAPI *ebma;
 	EDataBookView *book_view;
+	GCancellable *cancellable;
 };
 
 static gpointer
@@ -693,17 +629,19 @@ ebbm_book_view_thread (gpointer data)
 {
 	struct BookViewThreadData *bvtd = data;
 	EBookBackendMAPIPrivate *priv;
+	EBookBackendMAPIClass *ebmac;
 	GError *error = NULL;
 
 	g_return_val_if_fail (bvtd != NULL, NULL);
 	g_return_val_if_fail (bvtd->ebma != NULL, NULL);
 	g_return_val_if_fail (bvtd->book_view != NULL, NULL);
 
+	ebmac = E_BOOK_BACKEND_MAPI_GET_CLASS (bvtd->ebma);
+	g_return_val_if_fail (ebmac != NULL, NULL);
+
 	priv = bvtd->ebma->priv;
 
 	e_data_book_view_notify_progress (bvtd->book_view, -1, _("Searching"));
-
-	e_book_backend_mapi_update_view_by_cache (bvtd->ebma, bvtd->book_view, &error);
 
 	if (!error && priv && priv->conn && (!priv->update_cache_thread || g_cancellable_is_cancelled (priv->update_cache))
 	    && e_book_backend_mapi_book_view_is_running (bvtd->ebma, bvtd->book_view)) {
@@ -713,7 +651,61 @@ ebbm_book_view_thread (gpointer data)
 		if (ebmac && ebmac->op_book_view_thread)
 			ebmac->op_book_view_thread (bvtd->ebma, bvtd->book_view, priv->update_cache, &error);
 
-		ebbm_maybe_invoke_cache_update (bvtd->ebma);
+		if (priv->marked_for_offline) {
+			e_book_backend_mapi_update_view_by_cache (bvtd->ebma, bvtd->book_view, &error);
+
+			ebbm_maybe_invoke_cache_update (bvtd->ebma);
+
+			e_book_backend_mapi_update_view_by_cache (bvtd->ebma, bvtd->book_view, &error);
+		} else if (ebmac->op_list_known_uids && ebmac->op_transfer_contacts) {
+			const gchar *sexp = e_data_book_view_get_card_query (bvtd->book_view);
+
+			/* search only if not searching for everything */
+			if (sexp && *sexp && g_ascii_strcasecmp (sexp, "(contains \"x-evolution-any-field\" \"\")") != 0) {
+				struct ListKnownUidsData lku = { 0 };
+				GHashTable *local_known_uids, *server_known_uids;
+
+				e_book_backend_mapi_update_view_by_cache (bvtd->ebma, bvtd->book_view, &error);
+
+				local_known_uids = e_book_backend_sqlitedb_get_uids_and_rev (priv->db, EMA_EBB_CACHE_FOLDERID, &error);
+				server_known_uids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+
+				lku.uid_to_rev = server_known_uids;
+				lku.latest_last_modify = 0;
+
+				ebmac->op_list_known_uids (bvtd->ebma, e_mapi_book_utils_build_sexp_restriction, (gpointer) sexp, &lku, bvtd->cancellable, &error);
+
+				if (!g_cancellable_is_cancelled (bvtd->cancellable)) {
+					GSList *uids = NULL;
+					GHashTableIter iter;
+					gpointer key, value;
+
+					g_hash_table_iter_init (&iter, server_known_uids);
+					while (g_hash_table_iter_next (&iter, &key, &value)) {
+						const gchar *uid = key, *rev = value, *local_rev;
+
+						local_rev = g_hash_table_lookup (local_known_uids, uid);
+						if (g_strcmp0 (local_rev, rev) != 0) {
+							uids = g_slist_prepend (uids, (gpointer) uid);
+						}
+
+						g_hash_table_remove (local_known_uids, uid);
+					}
+
+					if (uids) {
+						ebbm_transfer_contacts (bvtd->ebma, uids, NULL, bvtd->cancellable, &error);
+						e_book_backend_mapi_update_view_by_cache (bvtd->ebma, bvtd->book_view, &error);
+					}
+
+					/* has borrowed data from server_known_uids */
+					g_slist_free (uids);
+				}
+
+				g_hash_table_destroy (server_known_uids);
+				if (local_known_uids)
+					g_hash_table_destroy (local_known_uids);
+			}
+		}
 	}
 
 	if (error && g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
@@ -727,6 +719,8 @@ ebbm_book_view_thread (gpointer data)
 	if (error)
 		g_error_free (error);
 
+	if (bvtd->cancellable)
+		g_object_unref (bvtd->cancellable);
 	g_object_unref (bvtd->book_view);
 	/* May unref it out of the thread, in case it's the last reference to it */
 	g_idle_add (unref_backend_idle_cb, bvtd->ebma);
@@ -960,8 +954,16 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 			GError *err = NULL;
 			struct BookViewThreadData *bvtd = g_new0 (struct BookViewThreadData, 1);
 
+			g_mutex_lock (ebma->priv->running_views_lock);
+
 			bvtd->ebma = g_object_ref (ebma);
 			bvtd->book_view = g_object_ref (opbv->book_view);
+			bvtd->cancellable = g_hash_table_lookup (ebma->priv->running_views, bvtd->book_view);
+
+			if (bvtd->cancellable)
+				g_object_ref (bvtd->cancellable);
+
+			g_mutex_unlock (ebma->priv->running_views_lock);
 
 			g_thread_create (ebbm_book_view_thread, bvtd, FALSE, &err);
 
@@ -1200,7 +1202,9 @@ ebbm_op_start_book_view (EBookBackend *backend, EDataBookView *book_view)
 	op->base.opid = 0;
 	op->book_view = g_object_ref (book_view);
 
-	g_hash_table_insert (priv->running_book_views, book_view, GINT_TO_POINTER(1));
+	g_mutex_lock (priv->running_views_lock);
+	g_hash_table_insert (priv->running_views, book_view, g_cancellable_new ());
+	g_mutex_unlock (priv->running_views_lock);
 
 	e_mapi_operation_queue_push (priv->op_queue, op);
 }
@@ -1211,6 +1215,7 @@ ebbm_op_stop_book_view (EBookBackend *backend, EDataBookView *book_view)
 	OperationBookView *op;
 	EBookBackendMAPI *ebbm;
 	EBookBackendMAPIPrivate *priv;
+	GCancellable *cancellable;
 
 	g_return_if_fail (backend != NULL);
 	g_return_if_fail (E_IS_BOOK_BACKEND_MAPI (backend));
@@ -1228,7 +1233,12 @@ ebbm_op_stop_book_view (EBookBackend *backend, EDataBookView *book_view)
 	op->base.opid = 0;
 	op->book_view = g_object_ref (book_view);
 
-	g_hash_table_remove (priv->running_book_views, book_view);
+	g_mutex_lock (priv->running_views_lock);
+	cancellable = g_hash_table_lookup (priv->running_views, book_view);
+	if (cancellable)
+		g_cancellable_cancel (cancellable);
+	g_hash_table_remove (priv->running_views, book_view);
+	g_mutex_unlock (priv->running_views_lock);
 
 	e_mapi_operation_queue_push (priv->op_queue, op);
 }
@@ -1268,7 +1278,8 @@ e_book_backend_mapi_init (EBookBackendMAPI *ebma)
 	ebma->priv = G_TYPE_INSTANCE_GET_PRIVATE (ebma, E_TYPE_BOOK_BACKEND_MAPI, EBookBackendMAPIPrivate);
 
 	ebma->priv->op_queue = e_mapi_operation_queue_new ((EMapiOperationQueueFunc) ebbm_operation_cb, ebma);
-	ebma->priv->running_book_views = g_hash_table_new (g_direct_hash, g_direct_equal);
+	ebma->priv->running_views = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_object_unref);
+	ebma->priv->running_views_lock = g_mutex_new ();
 	ebma->priv->conn_lock = g_mutex_new ();
 
 	ebma->priv->update_cache = g_cancellable_new ();
@@ -1309,7 +1320,8 @@ ebbm_dispose (GObject *object)
 		FREE (priv->profile);
 		FREE (priv->book_uri);
 
-		g_hash_table_destroy (priv->running_book_views);
+		g_hash_table_destroy (priv->running_views);
+		g_mutex_free (priv->running_views_lock);
 		g_mutex_free (priv->conn_lock);
 
 		#undef UNREF
@@ -1424,10 +1436,16 @@ e_book_backend_mapi_get_db (EBookBackendMAPI *ebma, EBookBackendSqliteDB **db)
 gboolean
 e_book_backend_mapi_book_view_is_running (EBookBackendMAPI *ebma, EDataBookView *book_view)
 {
+	gboolean res;
+
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma), FALSE);
 	g_return_val_if_fail (ebma->priv != NULL, FALSE);
 
-	return g_hash_table_lookup (ebma->priv->running_book_views, book_view) != NULL;
+	g_mutex_lock (ebma->priv->running_views_lock);
+	res = g_hash_table_lookup (ebma->priv->running_views, book_view) != NULL;
+	g_mutex_unlock (ebma->priv->running_views_lock);
+
+	return res;
 }
 
 gboolean
@@ -1615,344 +1633,6 @@ e_book_backend_mapi_refresh_cache (EBookBackendMAPI *ebma)
 
 /* utility functions/macros */
 
-/* 'data' is one of GET_ALL_KNOWN_IDS or GET_UIDS_ONLY */
-gboolean
-mapi_book_utils_get_prop_list (EMapiConnection *conn,
-			       mapi_id_t fid,
-			       TALLOC_CTX *mem_ctx,
-			       struct SPropTagArray *props,
-			       gpointer data,
-			       GCancellable *cancellable,
-			       GError **perror)
-{
-	/* this is a list of all known book MAPI tag IDs;
-	   if you add new add it here too, otherwise it may not be fetched */
-	static uint32_t known_book_mapi_ids[] = {
-		PR_ASSISTANT_TELEPHONE_NUMBER_UNICODE,
-		PR_ASSISTANT_UNICODE,
-		PR_BIRTHDAY,
-		PR_BODY,
-		PR_BODY_UNICODE,
-		PR_BUSINESS_FAX_NUMBER_UNICODE,
-		PR_COMPANY_MAIN_PHONE_NUMBER_UNICODE,
-		PR_COMPANY_NAME_UNICODE,
-		PR_COUNTRY_UNICODE,
-		PR_DEPARTMENT_NAME_UNICODE,
-		PR_DISPLAY_NAME_UNICODE,
-		PR_EMAIL_ADDRESS_UNICODE,
-		PR_SMTP_ADDRESS_UNICODE, /* used in GAL */
-		PR_FID,
-		PR_GIVEN_NAME_UNICODE,
-		PR_HASATTACH,
-		PR_HOME_ADDRESS_CITY_UNICODE,
-		PR_HOME_ADDRESS_COUNTRY_UNICODE,
-		PR_HOME_ADDRESS_POSTAL_CODE_UNICODE,
-		PR_HOME_ADDRESS_POST_OFFICE_BOX_UNICODE,
-		PR_HOME_ADDRESS_STATE_OR_PROVINCE_UNICODE,
-		PR_HOME_FAX_NUMBER_UNICODE,
-		PR_HOME_TELEPHONE_NUMBER_UNICODE,
-		PR_INSTANCE_NUM,
-		PR_INST_ID,
-		PR_LAST_MODIFICATION_TIME,
-		PR_LOCALITY_UNICODE,
-		PR_MANAGER_NAME_UNICODE,
-		PR_MESSAGE_CLASS,
-		PR_MID,
-		PR_MOBILE_TELEPHONE_NUMBER_UNICODE,
-		PR_NICKNAME_UNICODE,
-		PR_NORMALIZED_SUBJECT_UNICODE,
-		PR_OFFICE_LOCATION_UNICODE,
-		PR_OFFICE_TELEPHONE_NUMBER_UNICODE,
-		PR_PAGER_TELEPHONE_NUMBER_UNICODE,
-		PR_POSTAL_CODE_UNICODE,
-		PR_POST_OFFICE_BOX_UNICODE,
-		PR_PROFESSION_UNICODE,
-		PR_RULE_MSG_NAME,
-		PR_RULE_MSG_PROVIDER,
-		PR_SPOUSE_NAME_UNICODE,
-		PR_STATE_OR_PROVINCE_UNICODE,
-		PR_SUBJECT_UNICODE,
-		PR_SURNAME_UNICODE,
-		PR_TITLE_UNICODE,
-		PR_WEDDING_ANNIVERSARY,
-		PROP_TAG(PT_UNICODE, 0x801f)
-	};
-
-	static uint32_t uids_only_ids[] = {
-		PidTagFolderId,
-		PidTagMid,
-		PidTagLastModificationTime,
-		PidTagEmailAddress
-	};
-
-	/* do not make this array static, the function modifies it on run */
-	ResolveNamedIDsData nids[] = {
-		{ PidLidDistributionListName, 0 },
-		{ PidLidDistributionListOneOffMembers, 0 },
-		{ PidLidDistributionListMembers, 0 },
-		{ PidLidDistributionListChecksum, 0 },
-
-		{ PidLidFileUnder, 0 },
-
-		{ PidLidEmail1OriginalDisplayName, 0 },
-		{ PidLidEmail2OriginalDisplayName, 0 },
-		{ PidLidEmail3OriginalDisplayName, 0 },
-		{ PidLidInstantMessagingAddress, 0 },
-		{ PidLidHtml, 0 },
-		{ PidLidFreeBusyLocation, 0 }
-	};
-
-	g_return_val_if_fail (props != NULL, FALSE);
-
-	if (data == GET_UIDS_ONLY)
-		return e_mapi_utils_add_props_to_props_array (mem_ctx, props, uids_only_ids, G_N_ELEMENTS (uids_only_ids));
-
-	if (data == GET_ALL_KNOWN_IDS && !e_mapi_utils_add_props_to_props_array (mem_ctx, props, known_book_mapi_ids, G_N_ELEMENTS (known_book_mapi_ids)))
-		return FALSE;
-
-	/* called with fid = 0 from GAL */
-	if (!fid)
-		fid = e_mapi_connection_get_default_folder_id (conn, olFolderContacts, cancellable, NULL);
-
-	return e_mapi_utils_add_named_ids_to_props_array (conn, fid, mem_ctx, props, nids, G_N_ELEMENTS (nids), cancellable, perror);
-}
-
-static gchar *
-bin_to_string (const uint8_t *lpb, uint32_t cb)
-{
-	gchar *res, *p;
-	uint32_t i;
-
-	g_return_val_if_fail (lpb != NULL, NULL);
-	g_return_val_if_fail (cb > 0, NULL);
-
-	res = g_new0 (gchar, cb * 2 + 1);
-	for (i = 0, p = res; i < cb; i++, p += 2) {
-		sprintf (p, "%02x", lpb[i] & 0xFF);
-	}
-
-	return res;
-}
-
-static const gchar *
-not_null (gconstpointer ptr)
-{
-	return ptr ? (const gchar *) ptr : "";
-}
-
-/* This is not setting E_CONTACT_UID */
-EContact *
-mapi_book_utils_contact_from_props (EMapiConnection *conn, mapi_id_t fid, const gchar *book_uri, struct mapi_SPropValue_array *mapi_properties, struct SRow *aRow)
-{
-	EContact *contact = e_contact_new ();
-	gint i;
-
-	if (book_uri)
-		e_contact_set (contact, E_CONTACT_BOOK_URI, book_uri);
-
-	#define get_proptag(proptag) (aRow ? e_mapi_util_find_row_propval (aRow, proptag) : e_mapi_util_find_array_propval (mapi_properties, proptag))
-	#define get_str_proptag(proptag) not_null (get_proptag (proptag))
-	#define get_namedid(nid) (aRow ? e_mapi_util_find_row_namedid (aRow, conn, fid, nid) : e_mapi_util_find_array_namedid (mapi_properties, conn, fid, nid))
-	#define get_str_namedid(nid) not_null (get_namedid (nid))
-
-	if (g_str_equal (get_str_proptag (PR_MESSAGE_CLASS), IPM_DISTLIST)) {
-		const struct mapi_SBinaryArray *members, *members_dlist;
-		const struct FILETIME *last_modification;
-		GSList *attrs = NULL, *a;
-		gint i;
-
-		last_modification = get_proptag (PidTagLastModificationTime);
-		if (last_modification) {
-			gchar *buff = NULL;
-
-			buff = mapi_book_utils_timet_to_string (e_mapi_util_filetime_to_time_t (last_modification));
-			if (buff)
-				e_contact_set (contact, E_CONTACT_REV, buff);
-
-			g_free (buff);
-		}
-
-		/* it's a contact list/distribution list, fetch members and return it */
-		e_contact_set (contact, E_CONTACT_IS_LIST, GINT_TO_POINTER (TRUE));
-		/* we do not support this option, same as GroupWise */
-		e_contact_set (contact, E_CONTACT_LIST_SHOW_ADDRESSES, GINT_TO_POINTER (TRUE));
-
-		e_contact_set (contact, E_CONTACT_FILE_AS, get_str_namedid (PidLidDistributionListName));
-
-		members = get_namedid (PidLidDistributionListOneOffMembers);
-		members_dlist = get_namedid (PidLidDistributionListMembers);
-
-		g_return_val_if_fail (members != NULL, NULL);
-		g_return_val_if_fail (members_dlist != NULL, NULL);
-
-		/* these two lists should be in sync */
-		g_return_val_if_fail (members_dlist->cValues == members->cValues, NULL);
-
-		for (i = 0; i < members->cValues; i++) {
-			struct Binary_r br;
-			gchar *display_name = NULL, *email = NULL;
-			gchar *str;
-
-			br.lpb = members->bin[i].lpb;
-			br.cb = members->bin[i].cb;
-			if (e_mapi_util_recip_entryid_decode (conn, &br, &display_name, &email)) {
-				EVCardAttribute *attr;
-				gchar *value;
-				CamelInternetAddress *addr;
-
-				addr = camel_internet_address_new ();
-				attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
-
-				camel_internet_address_add (addr, display_name, email);
-
-				value = camel_address_encode (CAMEL_ADDRESS (addr));
-
-				if (value)
-					e_vcard_attribute_add_value (attr, value);
-
-				g_free (value);
-				g_object_unref (addr);
-
-				str = g_strdup_printf ("%d", i + 1);
-				e_vcard_attribute_add_param_with_value (attr,
-						e_vcard_attribute_param_new (EMA_X_MEMBERID),
-						str);
-				g_free (str);
-
-				/* keep the value from ListMembers with the email, to not need to generate it on list changes;
-				   new values added in evolution-mapi will be always SMTP addresses anyway */
-				str = bin_to_string (members_dlist->bin[i].lpb, members_dlist->bin[i].cb);
-				if (str) {
-					e_vcard_attribute_add_param_with_value (attr,
-						e_vcard_attribute_param_new (EMA_X_MEMBERVALUE),
-						str);
-					g_free (str);
-				}
-
-				attrs = g_slist_prepend (attrs, attr);
-			}
-
-			g_free (display_name);
-			g_free (email);
-		}
-
-		for (a = attrs; a; a = a->next) {
-			e_vcard_add_attribute (E_VCARD (contact), a->data);
-		}
-
-		g_slist_free (attrs);
-
-		return contact;
-	}
-
-	for (i = 0; i < G_N_ELEMENTS (mappings); i++) {
-		gpointer value;
-		gint contact_type;
-
-		/* can cast value, no writing to the value; and it'll be freed not before the end of this function */
-		if (mappings[i].contact_type & ELEMENT_TYPE_NAMEDID)
-			value = (gpointer) get_namedid (mappings[i].mapi_id);
-		else
-			value = (gpointer) get_proptag (mappings[i].mapi_id);
-		contact_type = mappings[i].contact_type & ELEMENT_TYPE_MASK;
-		if (mappings[i].element_type == PT_UNICODE && contact_type == ELEMENT_TYPE_SIMPLE) {
-			const gchar *str = value;
-			if (str && *str)
-				e_contact_set (contact, mappings[i].field_id, str);
-		} else if (contact_type == ELEMENT_TYPE_SIMPLE) {
-			if (value && mappings[i].element_type == PT_SYSTIME) {
-				const struct FILETIME *t = value;
-				gchar *buff = NULL;
-
-				buff = mapi_book_utils_timet_to_string (e_mapi_util_filetime_to_time_t (t));
-				if (buff)
-					e_contact_set (contact, mappings[i].field_id, buff);
-
-				g_free (buff);
-			}
-		} else if (contact_type == ELEMENT_TYPE_COMPLEX) {
-			if (mappings[i].field_id == E_CONTACT_IM_AIM) {
-				const gchar *str = value;
-				if (str && *str) {
-					GList *list = g_list_append (NULL, (gpointer) str);
-
-					e_contact_set (contact, mappings[i].field_id, list);
-
-					g_list_free (list);
-				}
-			} else if (mappings[i].field_id == E_CONTACT_BIRTH_DATE
-				   || mappings[i].field_id == E_CONTACT_ANNIVERSARY) {
-				const struct FILETIME *t = value;
-				time_t time;
-				struct tm * tmtime;
-				if (value) {
-					EContactDate date = {0};
-
-					time = e_mapi_util_filetime_to_time_t (t);
-					tmtime = gmtime (&time);
-
-					date.day = tmtime->tm_mday;
-					date.month = tmtime->tm_mon + 1;
-					date.year = tmtime->tm_year + 1900;
-					e_contact_set (contact, mappings[i].field_id, &date);
-				}
-
-			} else if (mappings[i].field_id == E_CONTACT_ADDRESS_WORK
-				   || mappings[i].field_id == E_CONTACT_ADDRESS_HOME) {
-				EContactAddress contact_addr = { 0 };
-
-				/* type-casting below to not allocate memory twice; e_contact_set will copy values itself. */
-				if (mappings[i].field_id == E_CONTACT_ADDRESS_HOME) {
-					contact_addr.address_format = NULL;
-					contact_addr.po = NULL;
-					contact_addr.street = (gchar *) value;
-					contact_addr.ext = (gchar *) get_str_proptag (PR_HOME_ADDRESS_POST_OFFICE_BOX_UNICODE);
-					contact_addr.locality = (gchar *) get_str_proptag (PR_HOME_ADDRESS_CITY_UNICODE);
-					contact_addr.region = (gchar *) get_str_proptag (PR_HOME_ADDRESS_STATE_OR_PROVINCE_UNICODE);
-					contact_addr.code = (gchar *) get_str_proptag (PR_HOME_ADDRESS_POSTAL_CODE_UNICODE);
-					contact_addr.country = (gchar *) get_str_proptag (PR_HOME_ADDRESS_COUNTRY_UNICODE);
-				} else {
-					contact_addr.address_format = NULL;
-					contact_addr.po = NULL;
-					contact_addr.street = (gchar *) value;
-					contact_addr.ext = (gchar *) get_str_proptag (PR_POST_OFFICE_BOX_UNICODE);
-					contact_addr.locality = (gchar *) get_str_proptag (PR_LOCALITY_UNICODE);
-					contact_addr.region = (gchar *) get_str_proptag (PR_STATE_OR_PROVINCE_UNICODE);
-					contact_addr.code = (gchar *) get_str_proptag (PR_POSTAL_CODE_UNICODE);
-					contact_addr.country = (gchar *) get_str_proptag (PR_COUNTRY_UNICODE);
-				}
-
-				#define is_set(x) ((x) && *(x))
-				if (is_set (contact_addr.address_format) ||
-				    is_set (contact_addr.po) ||
-				    is_set (contact_addr.street) ||
-				    is_set (contact_addr.ext) ||
-				    is_set (contact_addr.locality) ||
-				    is_set (contact_addr.region) ||
-				    is_set (contact_addr.code) ||
-				    is_set (contact_addr.country)) {
-					e_contact_set (contact, mappings[i].field_id, &contact_addr);
-				}
-				#undef is_set
-			}
-		}
-	}
-
-	if (!e_contact_get (contact, E_CONTACT_EMAIL_1)) {
-		gconstpointer value = get_proptag (PR_SMTP_ADDRESS_UNICODE);
-
-		if (value)
-			e_contact_set (contact, E_CONTACT_EMAIL_1, value);
-	}
-
-	#undef get_proptag
-	#undef get_str_proptag
-	#undef get_namedid
-	#undef get_str_namedid
-
-	return contact;
-}
-
 void
 mapi_error_to_edb_error (GError **perror, const GError *mapi_error, EDataBookStatus code, const gchar *context)
 {
@@ -1989,422 +1669,4 @@ mapi_error_to_edb_error (GError **perror, const GError *mapi_error, EDataBookSta
 	g_propagate_error (perror, e_data_book_create_error (code, err_msg ? err_msg : mapi_error->message));
 
 	g_free (err_msg);
-}
-
-gchar *
-mapi_book_utils_timet_to_string (time_t tt)
-{
-	GTimeVal tv;
-
-	tv.tv_sec = tt;
-	tv.tv_usec = 0;
-
-	return g_time_val_to_iso8601 (&tv);
-}
-
-struct EMapiSExpParserData
-{
-	TALLOC_CTX *mem_ctx;
-	/* parser results in ints, indexes to res_parts */
-	GPtrArray *res_parts;
-};
-
-static ESExpResult *
-term_eval_and (struct _ESExp *f,
-	       gint argc,
-	       struct _ESExpResult **argv,
-	       gpointer user_data)
-{
-	struct EMapiSExpParserData *esp = user_data;
-	ESExpResult *r;
-	gint ii, jj, valid = 0;
-
-	r = e_sexp_result_new (f, ESEXP_RES_INT);
-	r->value.number = -1;
-
-	for (ii = 0; ii < argc; ii++) {
-		if (argv[ii]->type == ESEXP_RES_INT &&
-		    argv[ii]->value.number >= 0 && 
-		    argv[ii]->value.number < esp->res_parts->len) {
-			jj = argv[ii]->value.number;
-			valid++;
-		}
-	}
-
-	if (valid == 1) {
-		r->value.number = jj;
-	} else if (valid > 0) {
-		struct mapi_SRestriction *res = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
-		g_return_val_if_fail (res != NULL, NULL);
-
-		res->rt = RES_AND;
-		res->res.resAnd.cRes = valid;
-		res->res.resAnd.res = talloc_zero_array (esp->mem_ctx, struct mapi_SRestriction_and, res->res.resAnd.cRes + 1);
-
-		jj = 0;
-
-		for (ii = 0; ii < argc; ii++) {
-			if (argv[ii]->type == ESEXP_RES_INT &&
-			    argv[ii]->value.number >= 0 && 
-			    argv[ii]->value.number < esp->res_parts->len) {
-				struct mapi_SRestriction *subres = g_ptr_array_index (esp->res_parts, argv[ii]->value.number);
-
-				res->res.resAnd.res[jj].rt = subres->rt;
-				res->res.resAnd.res[jj].res = subres->res;
-
-				jj++;
-			}
-		}
-
-		g_ptr_array_add (esp->res_parts, res);
-		r->value.number = esp->res_parts->len - 1;
-	}
-
-	return r;
-}
-
-static ESExpResult *
-term_eval_or (struct _ESExp *f,
-	      gint argc,
-	      struct _ESExpResult **argv,
-	      gpointer user_data)
-{
-	struct EMapiSExpParserData *esp = user_data;
-	ESExpResult *r;
-	gint ii, jj = -1, valid = 0;
-
-	r = e_sexp_result_new (f, ESEXP_RES_INT);
-	r->value.number = -1;
-
-	for (ii = 0; ii < argc; ii++) {
-		if (argv[ii]->type == ESEXP_RES_INT &&
-		    argv[ii]->value.number >= 0 && 
-		    argv[ii]->value.number < esp->res_parts->len) {
-			jj = argv[ii]->value.number;
-			valid++;
-		    }
-	}
-
-	if (valid == 1) {
-		r->value.number = jj;
-	} else if (valid > 0) {
-		struct mapi_SRestriction *res = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
-		g_return_val_if_fail (res != NULL, NULL);
-
-		res->rt = RES_OR;
-		res->res.resOr.cRes = valid;
-		res->res.resOr.res = talloc_zero_array (esp->mem_ctx, struct mapi_SRestriction_or, res->res.resOr.cRes + 1);
-
-		jj = 0;
-
-		for (ii = 0; ii < argc; ii++) {
-			if (argv[ii]->type == ESEXP_RES_INT &&
-			    argv[ii]->value.number >= 0 && 
-			    argv[ii]->value.number < esp->res_parts->len) {
-				struct mapi_SRestriction *subres = g_ptr_array_index (esp->res_parts, argv[ii]->value.number);
-
-				res->res.resOr.res[jj].rt = subres->rt;
-				res->res.resOr.res[jj].res = subres->res;
-
-				jj++;
-			}
-		}
-
-		g_ptr_array_add (esp->res_parts, res);
-		r->value.number = esp->res_parts->len - 1;
-	}
-
-	return r;
-}
-
-static ESExpResult *
-term_eval_not (struct _ESExp *f,
-	       gint argc,
-	       struct _ESExpResult **argv,
-	       gpointer user_data)
-{
-	ESExpResult *r;
-
-	r = e_sexp_result_new (f, ESEXP_RES_INT);
-	r->value.number = -1;
-
-	#ifdef HAVE_RES_NOT_SUPPORTED
-	if (argc == 1 && argv[0]->type == ESEXP_RES_INT) {
-		struct EMapiSExpParserData *esp = user_data;
-		gint idx = argv[0]->value.number;
-
-		if (esp && idx >= 0 && idx < esp->res_parts->len) {
-			struct mapi_SRestriction *res = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
-			g_return_val_if_fail (res != NULL, NULL);
-
-			res->rt = RES_NOT;
-			res->res.resNot.res = g_ptr_array_index (esp->res_parts, idx);
-
-			g_ptr_array_add (esp->res_parts, res);
-			r->value.number = esp->res_parts->len - 1;
-		}
-	}
-	#endif
-
-	return r;
-}
-
-static uint32_t
-get_proptag_from_field_name (const gchar *field_name, gboolean is_contact_field)
-{
-	EContactField cfid;
-	gint ii;
-
-	if (is_contact_field)
-		cfid = e_contact_field_id (field_name);
-	else
-		cfid = e_contact_field_id_from_vcard (field_name);
-
-	for (ii = 0; ii < G_N_ELEMENTS (mappings); ii++) {
-		if (mappings[ii].field_id == cfid) {
-			return mappings[ii].mapi_id;
-		}
-	}
-
-	return MAPI_E_RESERVED;
-}
-
-static ESExpResult *
-func_eval_text_compare (struct _ESExp *f,
-			gint argc,
-			struct _ESExpResult **argv,
-			gpointer user_data,
-			uint32_t fuzzy)
-{
-	struct EMapiSExpParserData *esp = user_data;
-	ESExpResult *r;
-
-	r = e_sexp_result_new (f, ESEXP_RES_INT);
-	r->value.number = -1;
-
-	if (argc == 2
-	    && argv[0]->type == ESEXP_RES_STRING
-	    && argv[1]->type == ESEXP_RES_STRING) {
-		const gchar *propname = argv[0]->value.string;
-		const gchar *propvalue = argv[1]->value.string;
-
-		if (propname && propvalue && g_ascii_strcasecmp (propname, "x-evolution-any-field") != 0) {
-			uint32_t proptag = get_proptag_from_field_name (propname, TRUE);
-
-			if (proptag != MAPI_E_RESERVED && ((proptag & 0xFFFF) == PT_UNICODE || (proptag & 0xFFFF) == PT_STRING8)) {
-				struct mapi_SRestriction *res = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
-				g_return_val_if_fail (res != NULL, NULL);
-
-				res->rt = RES_CONTENT;
-				res->res.resContent.fuzzy = fuzzy | FL_IGNORECASE;
-				res->res.resContent.ulPropTag = proptag;
-				res->res.resContent.lpProp.ulPropTag = proptag;
-				res->res.resContent.lpProp.value.lpszW = talloc_strdup (esp->mem_ctx, propvalue);
-
-				g_ptr_array_add (esp->res_parts, res);
-				r->value.number = esp->res_parts->len - 1;
-			} else if (g_ascii_strcasecmp (propname, "email") == 0) {
-				struct mapi_SRestriction *res = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
-				g_return_val_if_fail (res != NULL, NULL);
-
-				res->rt = RES_OR;
-				res->res.resOr.cRes = 3;
-				res->res.resOr.res = talloc_zero_array (esp->mem_ctx, struct mapi_SRestriction_or, res->res.resOr.cRes + 1);
-
-				proptag = get_proptag_from_field_name ("email_1", TRUE);
-				res->res.resOr.res[0].rt = RES_CONTENT;
-				res->res.resOr.res[0].res.resContent.fuzzy = fuzzy | FL_IGNORECASE;
-				res->res.resOr.res[0].res.resContent.ulPropTag = proptag;
-				res->res.resOr.res[0].res.resContent.lpProp.ulPropTag = proptag;
-				res->res.resOr.res[0].res.resContent.lpProp.value.lpszW = talloc_strdup (esp->mem_ctx, propvalue);
-
-				proptag = get_proptag_from_field_name ("email_2", TRUE);
-				res->res.resOr.res[1].rt = RES_CONTENT;
-				res->res.resOr.res[1].res.resContent.fuzzy = fuzzy | FL_IGNORECASE;
-				res->res.resOr.res[1].res.resContent.ulPropTag = proptag;
-				res->res.resOr.res[1].res.resContent.lpProp.ulPropTag = proptag;
-				res->res.resOr.res[1].res.resContent.lpProp.value.lpszW = talloc_strdup (esp->mem_ctx, propvalue);
-
-				proptag = get_proptag_from_field_name ("email_3", TRUE);
-				res->res.resOr.res[2].rt = RES_CONTENT;
-				res->res.resOr.res[2].res.resContent.fuzzy = fuzzy | FL_IGNORECASE;
-				res->res.resOr.res[2].res.resContent.ulPropTag = proptag;
-				res->res.resOr.res[2].res.resContent.lpProp.ulPropTag = proptag;
-				res->res.resOr.res[2].res.resContent.lpProp.value.lpszW = talloc_strdup (esp->mem_ctx, propvalue);
-
-				g_ptr_array_add (esp->res_parts, res);
-				r->value.number = esp->res_parts->len - 1;
-			}
-		}
-	}
-
-	return r;
-}
-
-static ESExpResult *
-func_eval_contains (struct _ESExp *f,
-		    gint argc,
-		    struct _ESExpResult **argv,
-		    gpointer user_data)
-{
-	return func_eval_text_compare (f, argc, argv, user_data, FL_SUBSTRING);
-}
-
-static ESExpResult *
-func_eval_is (struct _ESExp *f,
-	      gint argc,
-	      struct _ESExpResult **argv,
-	      gpointer user_data)
-{
-	return func_eval_text_compare (f, argc, argv, user_data, FL_FULLSTRING);
-}
-static ESExpResult *
-func_eval_beginswith (struct _ESExp *f,
-		      gint argc,
-		      struct _ESExpResult **argv,
-		      gpointer user_data)
-{
-	return func_eval_text_compare (f, argc, argv, user_data, FL_PREFIX);
-}
-static ESExpResult *
-func_eval_endswith (struct _ESExp *f,
-		    gint argc,
-		    struct _ESExpResult **argv,
-		    gpointer user_data)
-{
-	/* no suffix, thus at least substring is used */
-	return func_eval_text_compare (f, argc, argv, user_data, FL_SUBSTRING);
-}
-
-static ESExpResult *
-func_eval_field_exists (struct _ESExp *f,
-			gint argc,
-			struct _ESExpResult **argv,
-			gpointer user_data,
-			gboolean is_contact_field)
-{
-	struct EMapiSExpParserData *esp = user_data;
-	ESExpResult *r;
-
-	r = e_sexp_result_new (f, ESEXP_RES_INT);
-	r->value.number = -1;
-
-	if (argc == 1 && argv[0]->type == ESEXP_RES_STRING) {
-		const gchar *propname = argv[0]->value.string;
-		uint32_t proptag = get_proptag_from_field_name (propname, is_contact_field);
-
-		if (proptag != MAPI_E_RESERVED) {
-			struct mapi_SRestriction *res = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
-			g_return_val_if_fail (res != NULL, NULL);
-
-			res->rt = RES_EXIST;
-			res->res.resExist.ulPropTag = proptag;
-
-			g_ptr_array_add (esp->res_parts, res);
-			r->value.number = esp->res_parts->len - 1;
-		} else if (g_ascii_strcasecmp (propname, "email") == 0) {
-			struct mapi_SRestriction *res = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
-			g_return_val_if_fail (res != NULL, NULL);
-
-			res->rt = RES_OR;
-			res->res.resOr.cRes = 3;
-			res->res.resOr.res = talloc_zero_array (esp->mem_ctx, struct mapi_SRestriction_or, res->res.resOr.cRes + 1);
-
-			res->res.resOr.res[0].rt = RES_EXIST;
-			res->res.resOr.res[0].res.resExist.ulPropTag = get_proptag_from_field_name ("email_1", TRUE);
-
-			res->res.resOr.res[1].rt = RES_EXIST;
-			res->res.resOr.res[1].res.resExist.ulPropTag = get_proptag_from_field_name ("email_2", TRUE);
-
-			res->res.resOr.res[2].rt = RES_EXIST;
-			res->res.resOr.res[2].res.resExist.ulPropTag = get_proptag_from_field_name ("email_3", TRUE);
-
-			g_ptr_array_add (esp->res_parts, res);
-			r->value.number = esp->res_parts->len - 1;
-		}
-	}
-
-	return r;
-}
-
-static ESExpResult *
-func_eval_exists (struct _ESExp *f,
-		  gint argc,
-		  struct _ESExpResult **argv,
-		  gpointer user_data)
-{
-	return func_eval_field_exists (f, argc, argv, user_data, TRUE);
-}
-
-static ESExpResult *
-func_eval_exists_vcard (struct _ESExp *f,
-			gint argc,
-			struct _ESExpResult **argv,
-			gpointer user_data)
-{
-	return func_eval_field_exists (f, argc, argv, user_data, FALSE);
-}
-
-struct mapi_SRestriction *
-mapi_book_utils_sexp_to_restriction (TALLOC_CTX *mem_ctx, const gchar *sexp_query)
-{
-	/* 'builtin' functions */
-	static const struct {
-		const gchar *name;
-		ESExpFunc *func;
-		gint type;		/* set to 1 if a function can perform shortcut evaluation, or
-					   doesn't execute everything, 0 otherwise */
-	} check_symbols[] = {
-		{ "and", 		term_eval_and,		0 },
-		{ "or", 		term_eval_or,		0 },
-		{ "not", 		term_eval_not,		0 },
-
-		{ "contains",		func_eval_contains,	0 },
-		{ "is",			func_eval_is,		0 },
-		{ "beginswith",		func_eval_beginswith,	0 },
-		{ "endswith",		func_eval_endswith,	0 },
-		{ "exists",		func_eval_exists,	0 },
-		{ "exists_vcard",	func_eval_exists_vcard,	0 }
-	};
-
-	gint i;
-	ESExp *sexp;
-	ESExpResult *r;
-	struct EMapiSExpParserData esp;
-	struct mapi_SRestriction *restriction;
-
-	g_return_val_if_fail (sexp_query != NULL, NULL);
-
-	esp.mem_ctx = mem_ctx;
-	sexp = e_sexp_new ();
-
-	for (i = 0; i < G_N_ELEMENTS (check_symbols); i++) {
-		if (check_symbols[i].type == 1) {
-			e_sexp_add_ifunction (sexp, 0, check_symbols[i].name,
-					      (ESExpIFunc *) check_symbols[i].func, &esp);
-		} else {
-			e_sexp_add_function (sexp, 0, check_symbols[i].name,
-					     check_symbols[i].func, &esp);
-		}
-	}
-
-	e_sexp_input_text (sexp, sexp_query, strlen (sexp_query));
-	if (e_sexp_parse (sexp) == -1) {
-		e_sexp_unref (sexp);
-		return NULL;
-	}
-
-	esp.res_parts = g_ptr_array_new ();
-	r = e_sexp_eval (sexp);
-
-	restriction = NULL;
-	if (r && r->type == ESEXP_RES_INT && r->value.number >= 0 && r->value.number < esp.res_parts->len)
-		restriction = g_ptr_array_index (esp.res_parts, r->value.number);
-
-	e_sexp_result_free (sexp, r);
-
-	e_sexp_unref (sexp);
-	g_ptr_array_free (esp.res_parts, TRUE);
-
-	return restriction;
 }

@@ -146,25 +146,6 @@ e_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag)
 	return (find_SPropValue_data(aRow, proptag));
 }
 
-gconstpointer
-e_mapi_util_find_row_namedid (struct SRow *aRow, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
-{
-	uint32_t proptag;
-	gconstpointer res = NULL;
-
-	g_return_val_if_fail (aRow != NULL, NULL);
-	g_return_val_if_fail (conn != NULL, NULL);
-
-	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL, NULL);
-	if (proptag != MAPI_E_RESERVED)
-		res = e_mapi_util_find_row_propval (aRow, proptag);
-
-	if (!res)
-		res = e_mapi_util_find_row_propval (aRow, namedid);
-
-	return res;
-}
-
 /*
  * Retrieve the property value for a given mapi_SPropValue_array and property tag.
  *
@@ -203,25 +184,6 @@ e_mapi_util_find_array_propval (struct mapi_SPropValue_array *properties, uint32
 	 */
 
 	return (find_mapi_SPropValue_data(properties, proptag));
-}
-
-gconstpointer
-e_mapi_util_find_array_namedid (struct mapi_SPropValue_array *properties, EMapiConnection *conn, mapi_id_t fid, uint32_t namedid)
-{
-	uint32_t proptag;
-	gconstpointer res = NULL;
-
-	g_return_val_if_fail (properties != NULL, NULL);
-	g_return_val_if_fail (conn != NULL, NULL);
-
-	proptag = e_mapi_connection_resolve_named_prop (conn, fid, namedid, NULL, NULL);
-	if (proptag != MAPI_E_RESERVED)
-		res = e_mapi_util_find_array_propval (properties, proptag);
-
-	if (!res)
-		res = e_mapi_util_find_array_propval (properties, namedid);
-
-	return res;
 }
 
 uint32_t
@@ -753,60 +715,6 @@ e_mapi_util_profile_name (struct mapi_context *mapi_ctx, const EMapiProfileData 
 }
 
 /**
- * Adds prop_ids to props array. props should be created within the given mem_ctx.
- **/
-gboolean
-e_mapi_utils_add_props_to_props_array (TALLOC_CTX *mem_ctx,
-				       struct SPropTagArray *props,
-				       const uint32_t *prop_ids,
-				       guint prop_ids_n_elems)
-{
-	guint i;
-
-	g_return_val_if_fail (mem_ctx != NULL, FALSE);
-	g_return_val_if_fail (props != NULL, FALSE);
-	g_return_val_if_fail (prop_ids != NULL, FALSE);
-	g_return_val_if_fail (prop_ids_n_elems > 0, FALSE);
-
-	for (i = 0; i < prop_ids_n_elems; i++) {
-		SPropTagArray_add (mem_ctx, props, prop_ids[i]);
-	}
-
-	return TRUE;
-}
-
-/* Beware, the named_ids_list array is modified */
-gboolean
-e_mapi_utils_add_named_ids_to_props_array (EMapiConnection *conn,
-					   mapi_id_t fid,
-					   TALLOC_CTX *mem_ctx,
-					   struct SPropTagArray *props,
-					   ResolveNamedIDsData *named_ids_list,
-					   guint named_ids_n_elems,
-					   GCancellable *cancellable,
-					   GError **perror)
-{
-	guint i;
-
-	g_return_val_if_fail (conn != NULL, FALSE);
-	g_return_val_if_fail (mem_ctx != NULL, FALSE);
-	g_return_val_if_fail (props != NULL, FALSE);
-	g_return_val_if_fail (fid > 0, FALSE);
-	g_return_val_if_fail (named_ids_list != NULL, FALSE);
-	g_return_val_if_fail (named_ids_n_elems > 0, FALSE);
-
-	if (!e_mapi_connection_resolve_named_props (conn, fid, named_ids_list, named_ids_n_elems, cancellable, perror))
-		return FALSE;
-
-	for (i = 0; i < named_ids_n_elems; i++) {
-		if (named_ids_list[i].propid != MAPI_E_RESERVED)
-			SPropTagArray_add (mem_ctx, props, named_ids_list[i].propid);
-	}
-
-	return TRUE;
-}
-
-/**
  * Adds a new SPropValue at the end of values_array, allocating its memory in the mem_ctx.
  * *n_values holds number of items stored in the array, and will be increased by one.
  **/
@@ -824,33 +732,6 @@ e_mapi_utils_add_spropvalue (TALLOC_CTX *mem_ctx,
 	*values_array = add_SPropValue (mem_ctx, *values_array, n_values, prop_tag, prop_value);
 
 	return TRUE;
-}
-
-/* similar as e_mapi_utils_add_spropvalue, just here is not used prop_tag, but named id */
-gboolean
-e_mapi_utils_add_spropvalue_namedid (EMapiConnection *conn,
-				     mapi_id_t fid,
-				     TALLOC_CTX *mem_ctx,
-				     struct SPropValue **values_array,
-				     uint32_t *n_values,
-				     uint32_t named_id,
-				     gconstpointer prop_value,
-				     GCancellable *cancellable,
-				     GError **perror)
-{
-	uint32_t prop_tag;
-
-	g_return_val_if_fail (conn != NULL, FALSE);
-	g_return_val_if_fail (fid != 0, FALSE);
-	g_return_val_if_fail (mem_ctx != NULL, FALSE);
-	g_return_val_if_fail (values_array != NULL, FALSE);
-	g_return_val_if_fail (n_values != NULL, FALSE);
-
-	prop_tag = e_mapi_connection_resolve_named_prop (conn, fid, named_id, cancellable, perror);
-	if (prop_tag == MAPI_E_RESERVED)
-		return FALSE;
-
-	return e_mapi_utils_add_spropvalue (mem_ctx, values_array, n_values, prop_tag, prop_value);
 }
 
 gboolean

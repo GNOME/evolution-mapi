@@ -843,7 +843,7 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		g_free (uri);
 		e_source_set_property (source, "auth", "plain/password");
 
-		//FIXME: Offline handling
+		/* FIXME: Offline handling */
 		e_source_set_property(source, "user", NULL);
 		e_source_set_property(source, "username", url->user);
 		e_source_set_property(source, "profile", profile);
@@ -852,7 +852,8 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		SET_KRB_SSO(source, kerberos);
 
 		if (is_new_source) {
-			e_source_set_property(source, "offline_sync", "1");
+			e_source_set_property(source, "offline_sync", "0");
+			e_source_set_property(source, "allow-partial", "true");
 			e_source_set_property (source, "completion", "true");
 		}
 
