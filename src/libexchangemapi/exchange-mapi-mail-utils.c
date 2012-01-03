@@ -60,7 +60,7 @@ gboolean
 fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 {
 	long *flags = NULL;
-	struct FILETIME *delivery_date = NULL;
+	struct FILETIME *delivery_date = NULL, *submit_time = NULL;
 	const gchar *msg_class = NULL, *content_class = NULL;
 	ExchangeMAPIStream *body = NULL;
 	uint32_t content_class_pid;
@@ -102,6 +102,9 @@ fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 			break;
 		case PR_MESSAGE_DELIVERY_TIME:
 			delivery_date = (struct FILETIME *) prop_data;
+			break;
+		case PidTagClientSubmitTime:
+			submit_time = (struct FILETIME *) prop_data;
 			break;
 		case PR_MESSAGE_FLAGS:
 			flags = (long *) prop_data;
@@ -149,6 +152,13 @@ fetch_props_to_mail_item_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 	if (delivery_date) {
 		item->header.recieved_time = exchange_mapi_util_filetime_to_time_t (delivery_date);
+	} else {
+		item->header.recieved_time = 0;
+	}
+	if (submit_time) {
+		item->header.send_time = exchange_mapi_util_filetime_to_time_t (submit_time);
+	} else {
+		item->header.send_time = 0;
 	}
 
 	if (flags && (*flags & MSGFLAG_READ) != 0)
@@ -263,6 +273,7 @@ mapi_mail_get_item_prop_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLO
 		PR_MESSAGE_SIZE,
 		PR_MESSAGE_FLAGS,
 		PR_MESSAGE_DELIVERY_TIME,
+		PidTagClientSubmitTime,
 		PR_MSG_EDITOR_FORMAT,
 
 		PR_SUBJECT_UNICODE,
@@ -425,10 +436,7 @@ static void
 mapi_mime_set_msg_headers (ExchangeMapiConnection *conn, CamelMimeMessage *msg, MailItem *item)
 {
 	gchar *temp_str = NULL;
-	time_t recieved_time;
 	CamelInternetAddress *addr = NULL;
-	gint offset = 0;
-	time_t actual_time;
 
 	/* Setting headers from PR_TRANSPORT_MESSAGE_HEADERS */
 	if (item->header.transport_headers) {
@@ -463,7 +471,12 @@ mapi_mime_set_msg_headers (ExchangeMapiConnection *conn, CamelMimeMessage *msg, 
 		g_object_unref (parser);
 		g_object_unref (part);
 	} else {
-		recieved_time = item->header.recieved_time;
+		time_t recieved_time, actual_time;
+		gint offset = 0;
+
+		recieved_time = item->header.send_time;
+		if (!recieved_time)
+			recieved_time = item->header.recieved_time;
 		actual_time = camel_header_decode_date (ctime(&recieved_time), &offset);
 		camel_mime_message_set_date (msg, actual_time, offset);
 	}
@@ -1525,6 +1538,9 @@ mapi_mime_message_to_mail_item (CamelMimeMessage *message, gint32 message_camel_
 	msg_time = camel_mime_message_get_date (message, &msg_time_offset);
 	if (msg_time == CAMEL_MESSAGE_DATE_CURRENT)
 		msg_time = camel_mime_message_get_date_received (message, &msg_time_offset);
+	mail_item_set_time (&item->header.send_time, msg_time, msg_time_offset);
+
+	msg_time = camel_mime_message_get_date_received (message, &msg_time_offset);
 	mail_item_set_time (&item->header.recieved_time, msg_time, msg_time_offset);
 
 	to = camel_mime_message_get_recipients(message, CAMEL_RECIPIENT_TYPE_TO);
@@ -1652,6 +1668,14 @@ mapi_mail_utils_create_item_build_props (ExchangeMapiConnection *conn, mapi_id_t
 		exchange_mapi_util_time_t_to_filetime (item->header.recieved_time, &msg_date);
 
 		set_value (PR_MESSAGE_DELIVERY_TIME, &msg_date);
+	}
+
+	if (item->header.send_time != 0) {
+		struct FILETIME msg_date = { 0 };
+
+		exchange_mapi_util_time_t_to_filetime (item->header.send_time, &msg_date);
+
+		set_value (PidTagClientSubmitTime, &msg_date);
 	}
 
 	if (item->header.transport_headers && *item->header.transport_headers)

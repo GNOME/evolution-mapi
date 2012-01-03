@@ -150,7 +150,7 @@ fetch_items_summary_cb (FetchItemsCallbackData *item_data, gpointer data)
 	GSList **slist = &(fi_data->items_list);
 
 	long *flags = NULL;
-	struct FILETIME *delivery_date = NULL;
+	struct FILETIME *delivery_date = NULL, *submit_time = NULL;
 	struct FILETIME *last_modification_time = NULL;
 	struct timeval item_modification_time = { 0 };
 	struct timeval fi_data_mod_time = { 0 };
@@ -179,6 +179,9 @@ fetch_items_summary_cb (FetchItemsCallbackData *item_data, gpointer data)
 		case PR_MESSAGE_DELIVERY_TIME:
 			delivery_date = (struct FILETIME *) prop_data;
 			break;
+		case PidTagClientSubmitTime:
+			submit_time = (struct FILETIME *) prop_data;
+			break;
 		case PR_LAST_MODIFICATION_TIME:
 			last_modification_time = (struct FILETIME *) prop_data;
 			break;
@@ -194,6 +197,13 @@ fetch_items_summary_cb (FetchItemsCallbackData *item_data, gpointer data)
 
 	if (delivery_date) {
 		item->header.recieved_time = exchange_mapi_util_filetime_to_time_t (delivery_date);
+	} else {
+		item->header.recieved_time = 0;
+	}
+	if (submit_time) {
+		item->header.send_time = exchange_mapi_util_filetime_to_time_t (submit_time);
+	} else {
+		item->header.send_time = 0;
 	}
 
 	if (last_modification_time) {
@@ -386,8 +396,14 @@ mapi_update_cache (CamelFolder *folder, GSList *list, CamelFolderChangeInfo **ch
 
 			mi->info.uid = exchange_mapi_util_mapi_ids_to_uid(item->fid, item->mid);
 			mi->info.subject = camel_pstring_strdup(item->header.subject);
-			mi->info.date_sent = mi->info.date_received = item->header.recieved_time;
+			mi->info.date_sent = item->header.send_time;
+			mi->info.date_received = item->header.recieved_time;
 			mi->info.size = (guint32) item->header.size;
+
+			if (mi->info.date_sent == 0)
+				mi->info.date_sent = mi->info.date_received;
+			if (mi->info.date_received == 0)
+				mi->info.date_received = mi->info.date_sent;
 
 			/*Threading related properties*/
 			mapi_set_message_id (mi, item->header.message_id);
@@ -701,6 +717,7 @@ mapi_camel_get_summary_list (ExchangeMapiConnection *conn, mapi_id_t fid, TALLOC
 		PR_SUBJECT_UNICODE,
 		PR_MESSAGE_SIZE,
 		PR_MESSAGE_DELIVERY_TIME,
+		PidTagClientSubmitTime,
 		PR_MESSAGE_FLAGS,
 		PR_SENT_REPRESENTING_NAME_UNICODE,
 		PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
