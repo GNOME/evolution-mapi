@@ -492,6 +492,8 @@ gather_object_summary_cb (EMapiConnection *conn,
 
 	info = camel_folder_summary_get (gos->folder->summary, uid_str);
 	if (!info) {
+		CamelMapiMessageInfo *minfo;
+
 		is_new = TRUE;
 
 		if (transport_headers && *transport_headers) {
@@ -519,15 +521,16 @@ gather_object_summary_cb (EMapiConnection *conn,
 		}
 
 		if (!info) {
-			CamelMapiMessageInfo *minfo;
 			const gchar *subject, *message_id, *references, *in_reply_to, *display_to, *display_cc;
-			const struct FILETIME *delivery_time;
+			const struct FILETIME *delivery_time, *submit_time;
 			const uint32_t *msg_size;
+			gint offset = 0;
 			gchar *formatted_addr, *from_name, *from_email;
 			CamelAddress *to_addr, *cc_addr, *bcc_addr;
 
 			subject = e_mapi_util_find_array_propval (&object->properties, PR_SUBJECT_UNICODE);
-			delivery_time = e_mapi_util_find_array_propval (&object->properties, PR_MESSAGE_DELIVERY_TIME);
+			delivery_time = e_mapi_util_find_array_propval (&object->properties, PidTagMessageDeliveryTime);
+			submit_time = e_mapi_util_find_array_propval (&object->properties, PidTagClientSubmitTime);
 			msg_size = e_mapi_util_find_array_propval (&object->properties, PR_MESSAGE_SIZE);
 			message_id = e_mapi_util_find_array_propval (&object->properties, PR_INTERNET_MESSAGE_ID);
 			references = e_mapi_util_find_array_propval (&object->properties, PR_INTERNET_REFERENCES);
@@ -540,8 +543,14 @@ gather_object_summary_cb (EMapiConnection *conn,
 
 			minfo->info.uid = camel_pstring_strdup (uid_str);
 			minfo->info.subject = camel_pstring_strdup (subject);
-			minfo->info.date_sent = minfo->info.date_received = e_mapi_util_filetime_to_time_t (delivery_time);
+			minfo->info.date_sent = e_mapi_util_filetime_to_time_t (submit_time);
+			minfo->info.date_received = e_mapi_util_filetime_to_time_t (delivery_time);
 			minfo->info.size = msg_size ? *msg_size : 0;
+
+			if (minfo->info.date_sent != 0)
+				minfo->info.date_sent = camel_header_decode_date (ctime (&minfo->info.date_sent), &offset);
+			if (minfo->info.date_received != 0)
+				minfo->info.date_received = camel_header_decode_date (ctime (&minfo->info.date_received), &offset);
 
 			/* Threading related properties */
 			mapi_set_message_id (minfo, message_id);
@@ -594,6 +603,14 @@ gather_object_summary_cb (EMapiConnection *conn,
 			
 			g_free (from_name);
 			g_free (from_email);
+		}
+
+		minfo = (CamelMapiMessageInfo *) info;
+		if (minfo) {
+			if (minfo->info.date_sent == 0)
+				minfo->info.date_sent = minfo->info.date_received;
+			if (minfo->info.date_received == 0)
+				minfo->info.date_received = minfo->info.date_sent;
 		}
 	}
 

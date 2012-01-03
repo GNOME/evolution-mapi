@@ -874,7 +874,7 @@ e_mapi_util_filetime_to_time_t (const struct FILETIME *filetime)
 	NTTIME nt;
 
 	if (!filetime)
-		return (time_t) -1;
+		return (time_t) 0;
 
 	nt = filetime->dwHighDateTime;
 	nt = nt << 32;

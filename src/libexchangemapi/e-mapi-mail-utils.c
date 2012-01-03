@@ -660,7 +660,7 @@ e_mapi_mail_utils_object_to_message (EMapiConnection *conn, /* const */ EMapiObj
 		g_object_unref (part);
 	} else {
 		CamelInternetAddress *to_addr, *cc_addr, *bcc_addr;
-		const struct FILETIME *delivery_time;
+		const struct FILETIME *msg_date;
 		gchar *name, *email;
 
 		to_addr = camel_internet_address_new ();
@@ -677,13 +677,15 @@ e_mapi_mail_utils_object_to_message (EMapiConnection *conn, /* const */ EMapiObj
 		g_object_unref (cc_addr);
 		g_object_unref (bcc_addr);
 
-		delivery_time = e_mapi_util_find_array_propval (&object->properties, PidTagMessageDeliveryTime);
-		if (delivery_time) {
-			time_t received_time, actual_time;
+		msg_date = e_mapi_util_find_array_propval (&object->properties, PidTagClientSubmitTime);
+		if (!msg_date)
+			msg_date = e_mapi_util_find_array_propval (&object->properties, PidTagMessageDeliveryTime);
+		if (msg_date) {
+			time_t msg_date_t, actual_time;
 			gint offset = 0;
 
-			received_time = e_mapi_util_filetime_to_time_t (delivery_time);
-			actual_time = camel_header_decode_date (ctime (&received_time), &offset);
+			msg_date_t = e_mapi_util_filetime_to_time_t (msg_date);
+			actual_time = camel_header_decode_date (ctime (&msg_date_t), &offset);
 			camel_mime_message_set_date (msg, actual_time, offset);
 		}
 
@@ -1364,6 +1366,15 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 		msg_time = camel_mime_message_get_date (message, &msg_time_offset);
 		if (msg_time == CAMEL_MESSAGE_DATE_CURRENT)
 			msg_time = camel_mime_message_get_date_received (message, &msg_time_offset);
+		if (msg_time != 0) {
+			struct FILETIME msg_date = { 0 };
+
+			e_mapi_util_time_t_to_filetime (msg_time, &msg_date);
+
+			set_value (PidTagClientSubmitTime, &msg_date);
+		}
+
+		msg_time = camel_mime_message_get_date_received (message, &msg_time_offset);
 		if (msg_time != 0) {
 			struct FILETIME msg_date = { 0 };
 
