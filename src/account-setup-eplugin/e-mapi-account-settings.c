@@ -398,9 +398,8 @@ e_plugin_ui_init (GtkUIManager *ui_manager,
 	action_group = e_shell_window_get_action_group (shell_window, "mail");
 
 	/* Add actions to the "mail" action group. */
-	gtk_action_group_add_actions (action_group, folder_size_entries,
-				      G_N_ELEMENTS (folder_size_entries),
-				      shell_view);
+	e_action_group_add_actions_localized (action_group, GETTEXT_PACKAGE,
+		folder_size_entries, G_N_ELEMENTS (folder_size_entries), shell_view);
 
 	/* Decide whether we want this option to be visible or not */
 	g_signal_connect (shell_view, "update-actions",
