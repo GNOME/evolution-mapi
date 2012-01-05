@@ -26,6 +26,7 @@
 
 #include "e-mapi-defs.h"
 #include "e-mapi-utils.h"
+#include "e-mapi-book-utils.h"
 #include "e-mapi-cal-utils.h"
 #include "e-mapi-mail-utils.h"
 
@@ -272,6 +273,83 @@ is_apple_attach (EMapiAttachment *attach, guint32 *data_len, guint32 *resource_l
 	return is_apple;
 }
 
+static gchar *
+build_ical_string (EMapiConnection *conn,
+		   EMapiObject *object,
+		   const gchar *msg_class)
+{
+	gchar *ical_string = NULL, *use_uid;
+	icalcomponent_kind ical_kind = ICAL_NO_COMPONENT;
+	icalproperty_method ical_method = ICAL_METHOD_NONE;
+	const uint64_t *pmid;
+	ECalComponent *comp;
+	icalcomponent *icalcomp;
+	GSList *detached_components = NULL, *iter;
+
+	g_return_val_if_fail (conn != NULL, NULL);
+	g_return_val_if_fail (object != NULL, NULL);
+	g_return_val_if_fail (msg_class != NULL, NULL);
+
+	if (g_ascii_strcasecmp (msg_class, IPM_SCHEDULE_MEETING_REQUEST) == 0) {
+		ical_method = ICAL_METHOD_REQUEST;
+		ical_kind = ICAL_VEVENT_COMPONENT;
+	} else if (g_ascii_strcasecmp (msg_class, IPM_SCHEDULE_MEETING_CANCELED) == 0) {
+		ical_method = ICAL_METHOD_CANCEL;
+		ical_kind = ICAL_VEVENT_COMPONENT;
+	} else if (g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_RESP_PREFIX)) {
+		ical_method = ICAL_METHOD_REPLY;
+		ical_kind = ICAL_VEVENT_COMPONENT;
+	} else if (g_ascii_strcasecmp (msg_class, IPM_APPOINTMENT) == 0) {
+		ical_method = ICAL_METHOD_NONE;
+		ical_kind = ICAL_VEVENT_COMPONENT;
+	} else if (g_ascii_strcasecmp (msg_class, IPM_TASK) == 0) {
+		ical_method = ICAL_METHOD_NONE;
+		ical_kind = ICAL_VTODO_COMPONENT;
+	} else if (g_ascii_strcasecmp (msg_class, IPM_STICKYNOTE) == 0) {
+		ical_method = ICAL_METHOD_NONE;
+		ical_kind = ICAL_VJOURNAL_COMPONENT;
+	} else {
+		return NULL;
+	}
+
+	pmid = e_mapi_util_find_array_propval (&object->properties, PidTagMid);
+	if (pmid)
+		use_uid = e_mapi_util_mapi_id_to_string (*pmid);
+	else
+		use_uid = e_cal_component_gen_uid ();
+
+	comp = e_mapi_cal_util_object_to_comp (conn, object, ical_kind, ical_method == ICAL_METHOD_REPLY, NULL, use_uid, &detached_components);
+
+	g_free (use_uid);
+
+	if (!comp)
+		return NULL;
+
+	if (ical_method != ICAL_METHOD_NONE || detached_components) {
+		icalcomp = e_cal_util_new_top_level ();
+		if (ical_method != ICAL_METHOD_NONE)
+			icalcomponent_set_method (icalcomp, ical_method);
+
+		icalcomponent_add_component (icalcomp,
+			icalcomponent_new_clone (e_cal_component_get_icalcomponent (comp)));
+		for (iter = detached_components; iter; iter = g_slist_next (iter)) {
+			icalcomponent_add_component (icalcomp,
+				icalcomponent_new_clone (e_cal_component_get_icalcomponent (iter->data)));
+		}
+
+		ical_string = icalcomponent_as_ical_string_r (icalcomp);
+
+		icalcomponent_free (icalcomp);
+	} else {
+		ical_string = e_cal_component_get_as_string (comp);
+	}
+
+	g_slist_free_full (detached_components, g_object_unref);
+	g_object_unref (comp);
+
+	return ical_string;
+}
+
 static void
 classify_attachments (EMapiConnection *conn, EMapiAttachment *attachments, const gchar *msg_class, GSList **inline_attachments, GSList **noninline_attachments)
 {
@@ -414,28 +492,74 @@ classify_attachments (EMapiConnection *conn, EMapiAttachment *attachments, const
 
 		if (!is_smime && !is_apple) {
 			if (ui32 && *ui32 == ATTACH_EMBEDDED_MSG && attach->embedded_object) {
-				CamelMimeMessage *embedded_msg;
+				const gchar *embedded_msg_class = e_mapi_util_find_array_propval (&attach->embedded_object->properties, PidTagMessageClass);
+				gboolean fallback = FALSE;
 
-				embedded_msg = e_mapi_mail_utils_object_to_message (conn, attach->embedded_object);
-				if (embedded_msg) {
-					CamelStream *mem;
-					GByteArray *data;
+				if (embedded_msg_class &&
+				    (g_ascii_strcasecmp (embedded_msg_class, IPM_CONTACT) == 0 ||
+				     g_ascii_strcasecmp (embedded_msg_class, IPM_DISTLIST) == 0)) {
+					EContact *contact = e_mapi_book_utils_contact_from_object (conn, attach->embedded_object, NULL);
 
-					data = g_byte_array_new ();
+					if (contact) {
+						gchar *str;
 
-					mem = camel_stream_mem_new ();
-					camel_stream_mem_set_byte_array (CAMEL_STREAM_MEM (mem), data);
-					camel_data_wrapper_write_to_stream_sync (
-						CAMEL_DATA_WRAPPER (embedded_msg), mem, NULL, NULL);
+						if (!e_contact_get_const (contact, E_CONTACT_UID))
+							e_contact_set (contact, E_CONTACT_UID, "");
 
-					g_object_unref (mem);
-					g_object_unref (embedded_msg);
+						str = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+						if (str) {
+							camel_mime_part_set_content (part, str, strlen (str), "text/x-vcard");
 
-					camel_mime_part_set_content (part, (const gchar *) data->data, data->len, mime_type);
+							g_free (str);
+						} else {
+							fallback = TRUE;
+						}
 
-					g_byte_array_free (data, TRUE);
+						g_object_unref (contact);
+					} else {
+						fallback = TRUE;
+					}
+				} else if (embedded_msg_class &&
+				    (g_ascii_strcasecmp (embedded_msg_class, IPM_APPOINTMENT) == 0 ||
+				     g_ascii_strcasecmp (embedded_msg_class, IPM_TASK) == 0 ||
+				     g_ascii_strcasecmp (embedded_msg_class, IPM_STICKYNOTE) == 0)) {
+					gchar *str = build_ical_string (conn, attach->embedded_object, embedded_msg_class);
+
+					if (str) {
+						camel_mime_part_set_content (part, str, strlen (str), "text/calendar");
+
+						g_free (str);
+					} else {
+						fallback = TRUE;
+					}
 				} else {
-					camel_mime_part_set_content (part, (const gchar *) data_bin->lpb, data_bin->cb, mime_type);
+					fallback = TRUE;
+				}
+
+				if (fallback) {
+					CamelMimeMessage *embedded_msg;
+
+					embedded_msg = e_mapi_mail_utils_object_to_message (conn, attach->embedded_object);
+					if (embedded_msg) {
+						CamelStream *mem;
+						GByteArray *data;
+
+						data = g_byte_array_new ();
+
+						mem = camel_stream_mem_new ();
+						camel_stream_mem_set_byte_array (CAMEL_STREAM_MEM (mem), data);
+						camel_data_wrapper_write_to_stream_sync (
+							CAMEL_DATA_WRAPPER (embedded_msg), mem, NULL, NULL);
+
+						g_object_unref (mem);
+						g_object_unref (embedded_msg);
+
+						camel_mime_part_set_content (part, (const gchar *) data->data, data->len, mime_type);
+
+						g_byte_array_free (data, TRUE);
+					} else {
+						camel_mime_part_set_content (part, (const gchar *) data_bin->lpb, data_bin->cb, mime_type);
+					}
 				}
 			} else {
 				camel_mime_part_set_content (part, (const gchar *) data_bin->lpb, data_bin->cb, mime_type);
@@ -448,10 +572,15 @@ classify_attachments (EMapiConnection *conn, EMapiAttachment *attachments, const
 				camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
 		}
 
+		/* Content-Disposition */
+		ui32 = e_mapi_util_find_array_propval (&attach->properties, PidTagRenderingPosition);
+		if (ui32 && *ui32 != 0xFFFFFFFF)
+			camel_mime_part_set_disposition (part, "attachment; inline");
+		else
+			camel_mime_part_set_disposition (part, "attachment");
+
 		/* Content-ID */
 		content_id = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachContentId);
-
-		/* TODO : Add disposition */
 		if (content_id && !is_apple && !is_smime) {
 			camel_mime_part_set_content_id (part, content_id);
 			*inline_attachments = g_slist_append (*inline_attachments, part);
@@ -546,68 +675,6 @@ build_multipart_mixed (CamelMultipart *content, GSList *attachments)
 	add_multipart_attachments (m_mixed, attachments);
 
 	return m_mixed;
-}
-
-static gchar *
-build_ical_string (EMapiConnection *conn,
-		   EMapiObject *object,
-		   const gchar *msg_class)
-{
-	gchar *ical_string = NULL, *use_uid;
-	icalcomponent_kind ical_kind = ICAL_NO_COMPONENT;
-	icalproperty_method ical_method = ICAL_METHOD_NONE;
-	const uint64_t *pmid;
-	ECalComponent *comp;
-	icalcomponent *icalcomp;
-	GSList *detached_components = NULL, *iter;
-
-	g_return_val_if_fail (conn != NULL, NULL);
-	g_return_val_if_fail (object != NULL, NULL);
-	g_return_val_if_fail (msg_class != NULL, NULL);
-
-	if (!g_ascii_strcasecmp (msg_class, IPM_SCHEDULE_MEETING_REQUEST)) {
-		ical_method = ICAL_METHOD_REQUEST;
-		ical_kind = ICAL_VEVENT_COMPONENT;
-	} else if (!g_ascii_strcasecmp (msg_class, IPM_SCHEDULE_MEETING_CANCELED)) {
-		ical_method = ICAL_METHOD_CANCEL;
-		ical_kind = ICAL_VEVENT_COMPONENT;
-	} else if (g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_RESP_PREFIX)) {
-		ical_method = ICAL_METHOD_REPLY;
-		ical_kind = ICAL_VEVENT_COMPONENT;
-	} else {
-		return NULL;
-	}
-
-	pmid = e_mapi_util_find_array_propval (&object->properties, PidTagMid);
-	if (pmid)
-		use_uid = e_mapi_util_mapi_id_to_string (*pmid);
-	else
-		use_uid = e_cal_component_gen_uid ();
-
-	comp = e_mapi_cal_util_object_to_comp (conn, object, ical_kind, ical_method == ICAL_METHOD_REPLY, NULL, use_uid, &detached_components);
-
-	g_free (use_uid);
-
-	if (!comp)
-		return NULL;
-
-	icalcomp = e_cal_util_new_top_level ();
-	icalcomponent_set_method (icalcomp, ical_method);
-	if (comp)
-		icalcomponent_add_component (icalcomp,
-			icalcomponent_new_clone (e_cal_component_get_icalcomponent (comp)));
-	for (iter = detached_components; iter; iter = g_slist_next (iter)) {
-		icalcomponent_add_component (icalcomp,
-				icalcomponent_new_clone (e_cal_component_get_icalcomponent (iter->data)));
-	}
-
-	ical_string = icalcomponent_as_ical_string_r (icalcomp);
-
-	icalcomponent_free (icalcomp);
-	g_slist_free_full (detached_components, g_object_unref);
-	g_object_unref (comp);
-
-	return ical_string;
 }
 
 CamelMimeMessage *
