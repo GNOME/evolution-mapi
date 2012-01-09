@@ -61,6 +61,8 @@ struct _EBookBackendMAPIPrivate
 
 	EBookBackendSqliteDB *db;
 
+	glong last_db_commit_time; /* when committed changes to db */
+
 	guint32 last_server_contact_count;
 	time_t last_modify_time;
 	gboolean server_dirty;
@@ -68,6 +70,16 @@ struct _EBookBackendMAPIPrivate
 	GHashTable *running_views; /* EDataBookView => GCancellable */
 	GMutex *running_views_lock;
 };
+
+static glong
+get_current_time_ms (void)
+{
+	GTimeVal tv;
+
+	g_get_current_time (&tv);
+
+	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+}
 
 static gboolean
 pick_view_cb (EDataBookView *view, gpointer user_data)
@@ -138,7 +150,12 @@ ebbm_transfer_contacts (EBookBackendMAPI *ebma,
 	g_return_if_fail (ebmac != NULL);
 	g_return_if_fail (ebmac->op_transfer_contacts != NULL);
 
+	e_book_backend_sqlitedb_lock_updates (ebma->priv->db, NULL);
+	ebma->priv->last_db_commit_time = get_current_time_ms ();
+
 	ebmac->op_transfer_contacts (ebma, uids, book_view, &last_notification, cancellable, error);
+
+	e_book_backend_sqlitedb_unlock_updates (ebma->priv->db, TRUE, NULL);
 }
 
 static gboolean
@@ -226,6 +243,8 @@ ebbm_update_cache_cb (gpointer data)
 				ebbm_transfer_contacts (ebma, uids, NULL, cancellable, &error);
 
 			if (!error && !g_cancellable_is_cancelled (cancellable) && !partial_update) {
+				e_book_backend_sqlitedb_lock_updates (priv->db, NULL);
+
 				g_hash_table_iter_init (&iter, local_known_uids);
 				while (g_hash_table_iter_next (&iter, &key, &value)) {
 					const gchar *uid = key;
@@ -235,6 +254,8 @@ ebbm_update_cache_cb (gpointer data)
 
 					e_book_backend_mapi_notify_contact_removed (ebma, uid);
 				}
+
+				e_book_backend_sqlitedb_unlock_updates (priv->db, TRUE, NULL);
 			}
 
 			priv->last_server_contact_count = server_stored_contacts;
@@ -840,9 +861,13 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 			if (added_contacts && !error) {
 				const GSList *l;
 
+				e_book_backend_sqlitedb_lock_updates (ebma->priv->db, NULL);
+
 				for (l = added_contacts; l; l = l->next) {
 					e_book_backend_mapi_notify_contact_update (ebma, NULL, E_CONTACT (l->data), -1, -1, NULL);
 				}
+
+				e_book_backend_sqlitedb_unlock_updates (ebma->priv->db, TRUE, NULL);
 			}
 
 			e_data_book_respond_create_contacts (op->book, op->opid, error, added_contacts);
@@ -866,12 +891,16 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 			if (!error) {
 				GSList *r;
 
+				e_book_backend_sqlitedb_lock_updates (ebma->priv->db, NULL);
+
 				for (r = removed_ids; r; r = r->next) {
 					const gchar *uid = r->data;
 
 					if (uid)
 						e_book_backend_mapi_notify_contact_removed (ebma, uid);
 				}
+
+				e_book_backend_sqlitedb_unlock_updates (ebma->priv->db, TRUE, NULL);
 			}
 
 			e_data_book_respond_remove_contacts (op->book, op->opid, error, removed_ids);
@@ -896,9 +925,13 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 			if (modified_contacts && !error) {
 				const GSList *l;
 
+				e_book_backend_sqlitedb_lock_updates (ebma->priv->db, NULL);
+
 				for (l = modified_contacts; l; l = l->next) {
 					e_book_backend_mapi_notify_contact_update (ebma, NULL, E_CONTACT (l->data), -1, -1, NULL);
 				}
+
+				e_book_backend_sqlitedb_unlock_updates (ebma->priv->db, TRUE, NULL);
 			}
 
 			e_data_book_respond_modify_contacts (op->book, op->opid, error, modified_contacts);
@@ -1288,6 +1321,7 @@ e_book_backend_mapi_init (EBookBackendMAPI *ebma)
 	ebma->priv->last_server_contact_count = 0;
 	ebma->priv->last_modify_time = 0;
 	ebma->priv->server_dirty = FALSE;
+	ebma->priv->last_db_commit_time = 0;
 
 	g_signal_connect (
 		ebma, "notify::online",
@@ -1498,16 +1532,6 @@ e_book_backend_mapi_update_view_by_cache (EBookBackendMAPI *ebma, EDataBookView 
 	}
 }
 
-static glong
-get_current_time_ms (void)
-{
-	GTimeVal tv;
-
-	g_get_current_time (&tv);
-
-	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
-}
-
 /* called from op_transfer_contacts - book_view and notify_contact_data are taken from there;
    notify_contact_data is a pointer to glong last_notification, if not NULL;
    returns whether can continue with fetching */
@@ -1517,6 +1541,7 @@ e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView
 	EBookBackendMAPIPrivate *priv;
 	glong *last_notification = notify_contact_data;
 	EDataBookView *book_view = pbook_view;
+	glong current_time;
 	GError *error = NULL;
 
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma), FALSE);
@@ -1526,18 +1551,17 @@ e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView
 	priv = ebma->priv;
 	g_return_val_if_fail (priv != NULL, FALSE);
 
+	current_time = get_current_time_ms ();
+
 	/* report progres to any book_view, if not passed in;
 	   it can happen when cache is filling and the book view started later */
 	if (!book_view)
 		book_view = ebbm_pick_book_view (ebma);
 
 	if (book_view) {
-		glong current_time;
-
 		if (!e_book_backend_mapi_book_view_is_running (ebma, book_view))
 			return FALSE;
 
-		current_time = get_current_time_ms ();
 		if (index > 0 && last_notification && current_time - *last_notification > 333) {
 			gchar *status_msg = NULL;
 			EBookBackendMAPIClass *ebmac = E_BOOK_BACKEND_MAPI_GET_CLASS (ebma);
@@ -1557,9 +1581,18 @@ e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView
 	if (!pbook_view && g_cancellable_is_cancelled (priv->update_cache))
 		return FALSE;
 
-	e_book_backend_sqlitedb_add_contact (ebma->priv->db,
+	e_book_backend_sqlitedb_add_contact (priv->db,
 					     EMA_EBB_CACHE_FOLDERID, contact,
 					     FALSE, &error);
+
+	/* commit not often than each minute, also to not lose data already transferred */
+	if (current_time - priv->last_db_commit_time >= 60000) {
+		e_book_backend_sqlitedb_unlock_updates (priv->db, TRUE, NULL);
+		e_book_backend_sqlitedb_lock_updates (priv->db, NULL);
+
+		priv->last_db_commit_time = current_time;
+	}
+
 	if (!error) {
 		e_book_backend_notify_update (E_BOOK_BACKEND (ebma), contact);
 		return TRUE;
