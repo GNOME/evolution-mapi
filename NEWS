@@ -1,3 +1,19 @@
+evolution-mapi 3.2.3 2012-01-09
+-------------------------------
+
+Bugs:
+	Bug #664016 - Password prompt for Notes, Tasks, etc. on login (Milan Crha)
+	Bug #664062 - Profile name not saved in transport URL (Milan Crha)
+	Bug #664626 - Missing KOI-8R codepage support (patch by Vladislav) (Milan Crha)
+	Bug #665250 - Map GMT Standard Time to Europe/Dublin (Milan Crha)
+	Bug #666952 - Wrong date in message list (Milan Crha)
+
+Miscellanous:
+	Remove almost all *_DISABLE_DEPRECATED_FLAGS. (Matthew Barnes)
+
+Translations:
+	Joe Hansen (da)
+
 evolution-mapi 3.2.2 2011-11-14
 -------------------------------
 
