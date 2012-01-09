@@ -188,7 +188,9 @@ ebbm_gal_transfer_contacts (EBookBackendMAPI *ebma,
 	}
 
 	source = e_backend_get_source (E_BACKEND (ebma));
-	if (source && g_strcmp0 (e_source_get_property (source, "allow-partial"), "true") == 0) {
+	if (source &&
+	    !e_book_backend_mapi_is_marked_for_offline (ebma) &&
+	    g_strcmp0 (e_source_get_property (source, "allow-partial"), "true") == 0) {
 		const gchar *partial_count_str = e_source_get_property (source, "partial-count");
 
 		partial_count = 0;

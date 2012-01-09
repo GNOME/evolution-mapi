@@ -106,6 +106,13 @@ ebbm_pick_book_view (EBookBackendMAPI *ebma)
 static gboolean
 complete_view_cb (EDataBookView *view, gpointer user_data)
 {
+	EBookBackendMAPI *ebma = user_data;
+
+	g_return_val_if_fail (ebma != NULL, FALSE);
+
+	if (e_book_backend_mapi_book_view_is_running (ebma, view))
+		e_book_backend_mapi_update_view_by_cache (ebma, view, NULL);
+
 	e_data_book_view_notify_complete (view, NULL);
 
 	return TRUE;
@@ -114,7 +121,7 @@ complete_view_cb (EDataBookView *view, gpointer user_data)
 static void
 complete_views (EBookBackendMAPI *ebma)
 {
-	e_book_backend_foreach_view (E_BOOK_BACKEND (ebma), complete_view_cb, NULL);
+	e_book_backend_foreach_view (E_BOOK_BACKEND (ebma), complete_view_cb, ebma);
 }
 
 static void
