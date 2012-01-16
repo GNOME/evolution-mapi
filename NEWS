@@ -1,3 +1,23 @@
+evolution-mapi 3.3.4 2012-01-16
+-------------------------------
+
+Bugs:
+	Bug #666952 - Wrong date in message list (Milan Crha)
+	Bug #667185 - Menu items from plugins not translated (Milan Crha)
+	Bug #644817 - Slow addressbook cache (Milan Crha)
+
+Miscellanous:
+	Rewrite GAL to support restrictions and partial search results (Milan Crha)
+	Decode attached book/calendar objects in a downloaded message (Milan Crha)
+	[GAL] Do not use partial updates when marked for offline (Milan Crha)
+
+Translations:
+	Daniel Mustieles (es)
+	Marek Černocký (cs)
+	Matej Urbančič (sl)
+	Joe Hansen (da)
+	Jiro Matsuzawa (ja)
+
 evolution-mapi 3.3.3 2011-12-19
 -------------------------------
 
