@@ -47,8 +47,6 @@ struct _EMapiAccountListenerClass {
 	GObjectClass parent_class;
 };
 
-void			e_mapi_add_esource			(CamelService *service, const gchar *folder_name, const gchar *fid, gint folder_type);
-void			e_mapi_remove_esource			(CamelService *service, const gchar *folder_name, const gchar *fid, gint folder_type);
 GType			e_mapi_account_listener_get_type	(void);
 EMapiAccountListener *	e_mapi_account_listener_new		(void);
 

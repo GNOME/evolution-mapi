@@ -217,14 +217,6 @@ find_source_by_fid (GSList *sources, const gchar *fid)
 	return NULL;
 }
 
-#define CALENDAR_SOURCES	"/apps/evolution/calendar/sources"
-#define TASK_SOURCES		"/apps/evolution/tasks/sources"
-#define JOURNAL_SOURCES		"/apps/evolution/memos/sources"
-#define SELECTED_CALENDARS	"/apps/evolution/calendar/display/selected_calendars"
-#define SELECTED_TASKS		"/apps/evolution/calendar/tasks/selected_tasks"
-#define SELECTED_JOURNALS	"/apps/evolution/calendar/memos/selected_memos"
-#define ADDRESSBOOK_SOURCES     "/apps/evolution/addressbook/sources"
-
 static void
 add_cal_esource (EAccount *account, GSList *folders, EMapiFolderType folder_type, CamelURL *url, CamelSettings *settings, mapi_id_t trash_fid)
 {
@@ -249,13 +241,13 @@ add_cal_esource (EAccount *account, GSList *folders, EMapiFolderType folder_type
 	kerberos = camel_mapi_settings_get_kerberos (mapi_settings) ? "required" : NULL;
 	stay_synchronized = camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (settings));
 
-	if (folder_type == MAPI_FOLDER_TYPE_APPOINTMENT) {
+	if (folder_type == E_MAPI_FOLDER_TYPE_APPOINTMENT) {
 		conf_key = CALENDAR_SOURCES;
 		source_selection_key = SELECTED_CALENDARS;
-	} else if (folder_type == MAPI_FOLDER_TYPE_TASK) {
+	} else if (folder_type == E_MAPI_FOLDER_TYPE_TASK) {
 		conf_key = TASK_SOURCES;
 		source_selection_key = SELECTED_TASKS;
-	} else if (folder_type == MAPI_FOLDER_TYPE_MEMO) {
+	} else if (folder_type == E_MAPI_FOLDER_TYPE_MEMO) {
 		conf_key = JOURNAL_SOURCES;
 		source_selection_key = SELECTED_JOURNALS;
 	} else {
@@ -350,32 +342,11 @@ add_cal_esource (EAccount *account, GSList *folders, EMapiFolderType folder_type
 		e_source_set_property (source, "acl-owner-name", account->id->name);
 		e_source_set_property (source, "acl-owner-email", account->id->address);
 
-		if (folder_type != MAPI_FOLDER_TYPE_APPOINTMENT)
+		if (folder_type != E_MAPI_FOLDER_TYPE_APPOINTMENT)
 			e_source_set_property (source, "alarm", "never");
 
 		if (is_new_source || !e_source_peek_color_spec (source)) {
-			static gint color_mover = 0;
-			static gint color_indexer = -1;
-			const guint32 colors[] = {
-				0x1464ae, /* dark blue */
-				0x14ae64, /* dark green */
-				0xae1464, /* dark red */
-				0
-			};
-			guint32 color;
-			gchar *color_str;
-
-			color_indexer++;
-			if (colors[color_indexer] == 0) {
-				color_mover += 1;
-				color_indexer = 0;
-			}
-
-			color = colors[color_indexer];
-			color = (color & ~(0xFF << (color_indexer * 8))) |
-				(((((color >> (color_indexer * 8)) & 0xFF) + (0x33 * color_mover)) % 0xFF) << (color_indexer * 8));
-
-			color_str = g_strdup_printf ("#%06x", color);
+			gchar *color_str = e_mapi_folder_pick_color_spec (1, folder_type != E_MAPI_FOLDER_TYPE_APPOINTMENT);
 			e_source_set_color_spec (source, color_str);
 			g_free (color_str);
 		}
@@ -403,7 +374,8 @@ add_cal_esource (EAccount *account, GSList *folders, EMapiFolderType folder_type
 			ESource *source = temp_list->data;
 
 			if (source && E_IS_SOURCE (source)) {
-				if (g_strcmp0 (e_source_get_property (source, "public"), "yes") != 0)
+				if (!e_source_get_property (source, "foreign-username") &&
+				    g_strcmp0 (e_source_get_property (source, "public"), "yes") != 0)
 					e_source_group_remove_source (group, source);
 			}
 		}
@@ -422,157 +394,6 @@ add_cal_esource (EAccount *account, GSList *folders, EMapiFolderType folder_type
 	g_object_unref (client);
 }
 
-void e_mapi_add_esource (CamelService *service, const gchar *folder_name, const gchar *fid, gint folder_type)
-{
-	CamelNetworkSettings *network_settings;
-	CamelOfflineSettings *offline_settings;
-	CamelMapiSettings *mapi_settings;
-	CamelSettings *settings;
-	ESourceList *source_list = NULL;
-	ESourceGroup *group = NULL;
-	const gchar *conf_key = NULL, *kerberos = NULL;
-	GConfClient* client;
-	GSList *sources;
-	ESource *source = NULL;
-	gchar *relative_uri = NULL;
-	gchar *base_uri = NULL;
-	const gchar *host;
-	const gchar *user;
-
-	g_return_if_fail (CAMEL_IS_SERVICE (service));
-
-	if (folder_type == MAPI_FOLDER_TYPE_APPOINTMENT)
-		conf_key = CALENDAR_SOURCES;
-	else if (folder_type == MAPI_FOLDER_TYPE_TASK)
-		conf_key = TASK_SOURCES;
-	else if (folder_type == MAPI_FOLDER_TYPE_MEMO)
-		conf_key = JOURNAL_SOURCES;
-	else if (folder_type == MAPI_FOLDER_TYPE_JOURNAL)
-		conf_key = JOURNAL_SOURCES;
-	else if (folder_type == MAPI_FOLDER_TYPE_CONTACT)
-		conf_key = ADDRESSBOOK_SOURCES;
-	else {
-		g_warning ("%s: %s: Unknown EMapiFolderType\n", G_STRLOC, G_STRFUNC);
-		return;
-	}
-
-	settings = camel_service_get_settings (service);
-
-	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	host = camel_network_settings_get_host (network_settings);
-	user = camel_network_settings_get_user (network_settings);
-
-	client = gconf_client_get_default ();
-	source_list = e_source_list_new_for_gconf (client, conf_key);
-	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, user, host);
-	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
-	sources = e_source_group_peek_sources (group);
-	for (; sources != NULL; sources = g_slist_next (sources)) {
-		ESource *source = E_SOURCE (sources->data);
-		gchar * folder_id = e_source_get_duped_property (source, "folder-id");
-		if (folder_id && fid) {
-			if (strcmp (fid, folder_id) != 0)
-				continue;
-			else {
-				g_warning ("%s: %s: Esource Already exist \n", G_STRLOC, G_STRFUNC);
-				return;
-			}
-		}
-	}
-
-	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
-	offline_settings = CAMEL_OFFLINE_SETTINGS (settings);
-
-	relative_uri = g_strconcat (";", fid, NULL);
-	kerberos = camel_mapi_settings_get_kerberos (mapi_settings) ? "required" : NULL;
-	source = e_source_new (folder_name, relative_uri);
-	e_source_set_property (source, "auth", "1");
-	e_source_set_property (source, "auth-type", "plain/password");
-	e_source_set_property (source, "username", user);
-	e_source_set_property (source, "host", host);
-	e_source_set_property (source, "profile", camel_mapi_settings_get_profile (mapi_settings));
-	e_source_set_property (source, "domain", camel_mapi_settings_get_domain (mapi_settings));
-	e_source_set_property (source, "realm", camel_mapi_settings_get_realm (mapi_settings));
-	e_source_set_property (source, "folder-id", fid);
-	e_source_set_property (source, "offline_sync", camel_offline_settings_get_stay_synchronized (offline_settings) ? "1" : "0");
-	e_source_set_property (source, "public", "yes");
-	e_source_set_property (source, "delete", "yes");
-	SET_KRB_SSO(source, kerberos);
-
-	e_source_group_add_source (group, source, -1);
-
-	g_object_unref (source);
-	g_free (relative_uri);
-
-	if (!e_source_list_add_group (source_list, group, -1))
-		return;
-
-	if (!e_source_list_sync (source_list, NULL))
-		return;
-
-	g_object_unref (group);
-	g_object_unref (source_list);
-	g_object_unref (client);
-}
-
-void e_mapi_remove_esource (CamelService *service, const gchar * folder_name, const gchar *fid, gint folder_type)
-{
-	CamelNetworkSettings *network_settings;
-	CamelSettings *settings;
-	ESourceList *source_list = NULL;
-	ESourceGroup *group = NULL;
-	const gchar *conf_key = NULL;
-	GConfClient* client;
-	GSList *sources=NULL;
-	gchar *base_uri = NULL;
-	const gchar *host;
-	const gchar *user;
-
-	g_return_if_fail (CAMEL_IS_SERVICE (service));
-
-	if (folder_type == MAPI_FOLDER_TYPE_APPOINTMENT)
-		conf_key = CALENDAR_SOURCES;
-	else if (folder_type == MAPI_FOLDER_TYPE_TASK)
-		conf_key = TASK_SOURCES;
-	else if (folder_type == MAPI_FOLDER_TYPE_MEMO)
-		conf_key = JOURNAL_SOURCES;
-	else if (folder_type == MAPI_FOLDER_TYPE_JOURNAL)
-		conf_key = JOURNAL_SOURCES;
-	else if (folder_type == MAPI_FOLDER_TYPE_CONTACT)
-		conf_key = ADDRESSBOOK_SOURCES;
-	else {
-		g_warning ("%s: %s: Unknown EMapiFolderType\n", G_STRLOC, G_STRFUNC);
-		return;
-	}
-
-	settings = camel_service_get_settings (service);
-
-	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	host = camel_network_settings_get_host (network_settings);
-	user = camel_network_settings_get_user (network_settings);
-
-	client = gconf_client_get_default ();
-	source_list = e_source_list_new_for_gconf (client, conf_key);
-	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, user, host);
-	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
-	sources = e_source_group_peek_sources (group);
-
-	for (; sources != NULL; sources = g_slist_next (sources)) {
-		ESource *source = E_SOURCE (sources->data);
-		gchar * folder_id = e_source_get_duped_property (source, "folder-id");
-		if (folder_id && fid)
-			if (strcmp(fid, folder_id) == 0) {
-				e_source_group_remove_source(group, source);
-				break;
-			}
-	}
-
-	g_free (base_uri);
-	g_object_unref (source_list);
-	g_object_unref (client);
-
-}
-
 static void
 remove_cal_esource (EAccount *existing_account_info, EMapiFolderType folder_type, CamelURL *url)
 {
@@ -584,13 +405,13 @@ remove_cal_esource (EAccount *existing_account_info, EMapiFolderType folder_type
 	GSList *node_tobe_deleted;
 	gchar *base_uri;
 
-	if (folder_type == MAPI_FOLDER_TYPE_APPOINTMENT) {
+	if (folder_type == E_MAPI_FOLDER_TYPE_APPOINTMENT) {
 		conf_key = CALENDAR_SOURCES;
 		source_selection_key = SELECTED_CALENDARS;
-	} else if (folder_type == MAPI_FOLDER_TYPE_TASK) {
+	} else if (folder_type == E_MAPI_FOLDER_TYPE_TASK) {
 		conf_key = TASK_SOURCES;
 		source_selection_key = SELECTED_TASKS;
-	} else if (folder_type == MAPI_FOLDER_TYPE_MEMO) {
+	} else if (folder_type == E_MAPI_FOLDER_TYPE_MEMO) {
 		conf_key = JOURNAL_SOURCES;
 		source_selection_key = SELECTED_JOURNALS;
 	} else {
@@ -653,9 +474,9 @@ add_calendar_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid)
 		settings = g_object_new (CAMEL_TYPE_MAPI_SETTINGS, NULL);
 		camel_settings_load_from_url (settings, url);
 
-		add_cal_esource (account, folders, MAPI_FOLDER_TYPE_APPOINTMENT, url, settings, trash_fid);
-		add_cal_esource (account, folders, MAPI_FOLDER_TYPE_TASK, url, settings, trash_fid);
-		add_cal_esource (account, folders, MAPI_FOLDER_TYPE_MEMO, url, settings, trash_fid);
+		add_cal_esource (account, folders, E_MAPI_FOLDER_TYPE_APPOINTMENT, url, settings, trash_fid);
+		add_cal_esource (account, folders, E_MAPI_FOLDER_TYPE_TASK, url, settings, trash_fid);
+		add_cal_esource (account, folders, E_MAPI_FOLDER_TYPE_MEMO, url, settings, trash_fid);
 
 		g_object_unref (settings);
 		camel_url_free (url);
@@ -677,9 +498,9 @@ remove_calendar_sources_async (gpointer worker_data, gboolean cancelled, gpointe
 	url = camel_url_new (account->source->url, NULL);
 
 	if (url) {
-		remove_cal_esource (account, MAPI_FOLDER_TYPE_APPOINTMENT, url);
-		remove_cal_esource (account, MAPI_FOLDER_TYPE_TASK, url);
-		remove_cal_esource (account, MAPI_FOLDER_TYPE_MEMO, url);
+		remove_cal_esource (account, E_MAPI_FOLDER_TYPE_APPOINTMENT, url);
+		remove_cal_esource (account, E_MAPI_FOLDER_TYPE_TASK, url);
+		remove_cal_esource (account, E_MAPI_FOLDER_TYPE_MEMO, url);
 
 		camel_url_free (url);
 	}
@@ -763,7 +584,7 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		gchar *fid, *relative_uri;
 		gboolean is_new_source = FALSE;
 
-		if (folder->container_class != MAPI_FOLDER_TYPE_CONTACT || trash_fid == e_mapi_folder_get_parent_id (folder))
+		if (folder->container_class != E_MAPI_FOLDER_TYPE_CONTACT || trash_fid == e_mapi_folder_get_parent_id (folder))
 			continue;
 
 		fid = e_mapi_util_mapi_id_to_string (folder->folder_id);
@@ -869,7 +690,8 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 			ESource *source = temp_list->data;
 
 			if (source && E_IS_SOURCE (source)) {
-				if (g_strcmp0 (e_source_get_property (source, "public"), "yes") != 0)
+				if (!e_source_get_property (source, "foreign-username") &&
+				    g_strcmp0 (e_source_get_property (source, "public"), "yes") != 0)
 					e_source_group_remove_source (group, source);
 			}
 		}

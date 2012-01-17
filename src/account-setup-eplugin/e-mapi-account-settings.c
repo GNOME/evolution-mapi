@@ -48,12 +48,11 @@
 #include <mail/em-folder-tree.h>
 
 #include "e-mapi-account-listener.h"
+#include "e-mapi-subscribe-foreign-folder.h"
 
 #define FOLDERSIZE_MENU_ITEM 0
 
-gboolean  e_plugin_ui_init (GtkUIManager *ui_manager,
-			    EShellView *shell_view);
-
+gboolean  e_plugin_ui_init (GtkUIManager *ui_manager, EShellView *shell_view);
 GtkWidget *org_gnome_e_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data);
 
 enum {
@@ -218,9 +217,10 @@ folder_size_clicked (GtkButton *button,
 	mapi_settings_run_folder_size_dialog (profile, NULL);
 }
 
-static void
-action_folder_size_cb (GtkAction *action,
-		       EShellView *shell_view)
+static gchar *
+get_profile_name_from_folder_tree (EShellView *shell_view,
+				   gchar **pfolder_uri,
+				   CamelStore **pstore)
 {
 	EShellSidebar *shell_sidebar;
 	EMFolderTree *folder_tree;
@@ -260,11 +260,31 @@ action_folder_size_cb (GtkAction *action,
 				service = CAMEL_SERVICE (store);
 				settings = camel_service_get_settings (service);
 				g_object_get (settings, "profile", &profile, NULL);
+
+				if (pstore && profile)
+					*pstore = g_object_ref (store);
 			}
 		}
 	}
 
 	g_object_unref (folder_tree);
+
+	if (pfolder_uri)
+		*pfolder_uri = folder_uri;
+	else
+		g_free (folder_uri);
+
+	return profile;
+}
+
+static void
+action_folder_size_cb (GtkAction *action,
+		       EShellView *shell_view)
+{
+	gchar *folder_uri = NULL;
+	gchar *profile = NULL;
+
+	profile = get_profile_name_from_folder_tree (shell_view, &folder_uri, NULL);
 	g_return_if_fail (folder_uri != NULL);
 
 	if (g_str_has_prefix (folder_uri, "mapi://"))
@@ -275,47 +295,29 @@ action_folder_size_cb (GtkAction *action,
 }
 
 static void
-folder_size_actions_update_cb (EShellView *shell_view, GtkActionEntry *entries)
+action_subscribe_foreign_folder_cb (GtkAction *action,
+				    EShellView *shell_view)
 {
-	EShellWindow *shell_window;
-	GtkActionGroup *action_group;
-	GtkUIManager *ui_manager;
-	GtkAction *folder_size_action;
+	gchar *profile;
+	GtkWindow *parent;
+	EShellBackend *backend;
+	CamelSession *session = NULL;
+	CamelStore *store = NULL;
 
-	EShellSidebar *shell_sidebar;
-	EMFolderTree *folder_tree;
-	gchar *folder_uri = NULL;
-	CamelURL *url = NULL;
-	gboolean show_menu_entry = FALSE;
-
-	shell_sidebar = e_shell_view_get_shell_sidebar (shell_view);
-	g_object_get (shell_sidebar, "folder-tree", &folder_tree, NULL);
-	folder_uri = em_folder_tree_get_selected_uri (folder_tree);
-	g_object_unref (folder_tree);
-	if (!(folder_uri && *folder_uri)) {
-		g_free (folder_uri);
+	profile = get_profile_name_from_folder_tree (shell_view, NULL, &store);
+	if (!profile)
 		return;
-	}
 
-	shell_window = e_shell_view_get_shell_window (shell_view);
+	g_free (profile);
 
-	ui_manager = e_shell_window_get_ui_manager (shell_window);
-	action_group = e_lookup_action_group (ui_manager, "mail");
+	parent = GTK_WINDOW (e_shell_view_get_shell_window (shell_view));
+	backend = e_shell_view_get_shell_backend (shell_view);
+	g_object_get (G_OBJECT (backend), "session", &session, NULL);
 
-	folder_size_action = gtk_action_group_get_action (action_group,
-							  "mail-mapi-folder-size");
+	e_mapi_subscribe_foreign_folder (parent, session, store);
 
-	/* Show / Hide action entry */
-	if (g_str_has_prefix (folder_uri, "mapi://")) {
-		show_menu_entry = TRUE;
-		url = camel_url_new (folder_uri, NULL);
-		if (url && url->path && strlen (url->path) > 1)
-			show_menu_entry = FALSE;
-		camel_url_free (url);
-	}
-
-	gtk_action_set_visible (folder_size_action, show_menu_entry);
-	g_free (folder_uri);
+	g_object_unref (session);
+	g_object_unref (store);
 }
 
 /* used only in Account Editor */
@@ -377,15 +379,95 @@ org_gnome_e_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 	return GTK_WIDGET (vsettings);
 }
 
-static GtkActionEntry folder_size_entries[] = {
+static GtkActionEntry folder_context_entries[] = {
 
 	{ "mail-mapi-folder-size",
 	  NULL,
-	  N_("Folder size"),
+	  N_("Folder size..."),
 	  NULL,
 	  NULL,  /* XXX Add a tooltip! */
-	  G_CALLBACK (action_folder_size_cb) }
+	  G_CALLBACK (action_folder_size_cb) },
+
+	{ "mail-mapi-subscribe-foreign-folder",
+	  NULL,
+	  N_("Subscribe to other user's folder..."),
+	  NULL,
+	  NULL,  /* XXX Add a tooltip! */
+	  G_CALLBACK (action_subscribe_foreign_folder_cb) }
 };
+
+static void
+mapi_plugin_update_actions_cb (EShellView *shell_view,
+			       GtkActionEntry *entries)
+{
+	EShellWindow *shell_window;
+	GtkActionGroup *action_group;
+	GtkUIManager *ui_manager;
+	EShellSidebar *shell_sidebar;
+	EMFolderTree *folder_tree;
+	gchar *folder_uri = NULL;
+	CamelURL *url = NULL;
+	gboolean show_menu_entry = FALSE;
+	gint ii;
+	GSList *actions = NULL, *iter;
+	gboolean online = FALSE;
+
+	shell_sidebar = e_shell_view_get_shell_sidebar (shell_view);
+	g_object_get (shell_sidebar, "folder-tree", &folder_tree, NULL);
+	folder_uri = em_folder_tree_get_selected_uri (folder_tree);
+	g_object_unref (folder_tree);
+	if (!(folder_uri && *folder_uri)) {
+		g_free (folder_uri);
+		return;
+	}
+
+	shell_window = e_shell_view_get_shell_window (shell_view);
+
+	ui_manager = e_shell_window_get_ui_manager (shell_window);
+	action_group = e_lookup_action_group (ui_manager, "mail");
+
+	for (ii = 0; ii < G_N_ELEMENTS (folder_context_entries); ii++) {
+		GtkAction *action;
+
+		action = gtk_action_group_get_action (action_group, folder_context_entries[ii].name);
+		if (action)
+			actions = g_slist_prepend (actions, action);
+	}
+
+	/* Show / Hide action entry */
+	if (g_str_has_prefix (folder_uri, "mapi://")) {
+		show_menu_entry = TRUE;
+		url = camel_url_new (folder_uri, NULL);
+		if (url && url->path && strlen (url->path) > 1)
+			show_menu_entry = FALSE;
+		camel_url_free (url);
+	}
+
+	g_free (folder_uri);
+
+	if (show_menu_entry) {
+		EShellBackend *backend;
+		CamelSession *session = NULL;
+
+		backend = e_shell_view_get_shell_backend (shell_view);
+		g_object_get (G_OBJECT (backend), "session", &session, NULL);
+
+		online = session && camel_session_get_online (session);
+
+		if (session)
+			g_object_unref (session);
+	}
+
+	for (iter = actions; iter; iter = iter->next) {
+		GtkAction *action = iter->data;
+
+		gtk_action_set_visible (action, show_menu_entry);
+		if (show_menu_entry)
+			gtk_action_set_sensitive (action, online);
+	}
+
+	g_slist_free (actions);
+}
 
 gboolean
 e_plugin_ui_init (GtkUIManager *ui_manager,
@@ -399,11 +481,11 @@ e_plugin_ui_init (GtkUIManager *ui_manager,
 
 	/* Add actions to the "mail" action group. */
 	e_action_group_add_actions_localized (action_group, GETTEXT_PACKAGE,
-		folder_size_entries, G_N_ELEMENTS (folder_size_entries), shell_view);
+		folder_context_entries, G_N_ELEMENTS (folder_context_entries), shell_view);
 
 	/* Decide whether we want this option to be visible or not */
 	g_signal_connect (shell_view, "update-actions",
-			  G_CALLBACK (folder_size_actions_update_cb),
+			  G_CALLBACK (mapi_plugin_update_actions_cb),
 			  shell_view);
 
 	g_object_unref (action_group);

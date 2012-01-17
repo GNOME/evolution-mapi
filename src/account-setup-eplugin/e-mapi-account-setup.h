@@ -24,12 +24,26 @@
 #ifndef E_MAPI_ACCOUNT_SETUP_H
 #define E_MAPI_ACCOUNT_SETUP_H
 
+#include <gtk/gtk.h>
+
 #include "e-mapi-account-listener.h"
 
 #define MAPI_URI_PREFIX   "mapi://" 
 #define MAPI_PREFIX_LENGTH 7
 
-EMapiAccountListener *
-e_mapi_accounts_peek_config_listener (void);
+EMapiAccountListener *	e_mapi_accounts_peek_config_listener	(void);
+
+typedef void		(* EMapiSetupFunc)			(GObject *with_object,
+								 gpointer user_data,
+								 GCancellable *cancellable,
+								 GError **perror);
+
+void			e_mapi_run_in_thread_with_feedback	(GtkWindow *parent,
+								 GObject *with_object,
+								 const gchar *description,
+								 EMapiSetupFunc thread_func,
+								 EMapiSetupFunc idle_func,
+								 gpointer user_data,
+								 GDestroyNotify free_user_data);
 
 #endif /* E_MAPI_ACCOUNT_SETUP_H */

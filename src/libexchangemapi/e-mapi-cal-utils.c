@@ -540,7 +540,7 @@ e_mapi_cal_utils_get_free_busy_data (EMapiConnection *conn, const GSList *users,
 	struct SRow		aRow;
 	enum MAPISTATUS		ms;
 	uint32_t		i;
-	mapi_object_t           obj_store;
+	mapi_object_t           obj_folder;
 	const GSList *l;
 
 	const uint32_t			*publish_start;
@@ -562,12 +562,15 @@ e_mapi_cal_utils_get_free_busy_data (EMapiConnection *conn, const GSList *users,
 
 	*freebusy = NULL;
 
-	if (!e_mapi_connection_get_public_folder (conn, &obj_store, cancellable, mapi_error)) {
+	mapi_object_init (&obj_folder);
+
+	if (!e_mapi_connection_get_public_folder (conn, &obj_folder, cancellable, mapi_error)) {
+		mapi_object_release (&obj_folder);
 		return FALSE;
 	}
 
 	for ( l = users; l != NULL; l = g_slist_next (l)) {
-		ms = GetUserFreeBusyData (&obj_store, (const gchar *)l->data, &aRow);
+		ms = GetUserFreeBusyData (&obj_folder, (const gchar *)l->data, &aRow);
 
 		if (ms != MAPI_E_SUCCESS) {
 			gchar *context = g_strconcat ("GetUserFreeBusyData for ", l->data, NULL);
@@ -575,6 +578,8 @@ e_mapi_cal_utils_get_free_busy_data (EMapiConnection *conn, const GSList *users,
 			make_mapi_error (mapi_error, context, ms);
 
 			g_free (context);
+
+			mapi_object_release (&obj_folder);
 
 			return FALSE;
 		}
@@ -642,6 +647,8 @@ e_mapi_cal_utils_get_free_busy_data (EMapiConnection *conn, const GSList *users,
 		g_object_unref (comp);
 		talloc_free (aRow.lpProps);
 	}
+
+	mapi_object_release (&obj_folder);
 
 	return TRUE;
 }

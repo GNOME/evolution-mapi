@@ -54,7 +54,32 @@ struct _EBookBackendMAPIContactsPrivate
 {
 	mapi_id_t fid;
 	gboolean is_public_folder;
+	gchar *foreign_username; /* NULL, if not a foreign folder */
 };
+
+static gboolean
+ebbm_contacts_open_folder (EBookBackendMAPIContacts *ebmac,
+			   EMapiConnection *conn,
+			   mapi_object_t *obj_folder,
+			   GCancellable *cancellable,
+			   GError **perror)
+{
+	gboolean res;
+
+	g_return_val_if_fail (ebmac != NULL, FALSE);
+	g_return_val_if_fail (ebmac->priv != NULL, FALSE);
+	g_return_val_if_fail (conn != NULL, FALSE);
+	g_return_val_if_fail (obj_folder != NULL, FALSE);
+
+	if (ebmac->priv->foreign_username)
+		res = e_mapi_connection_open_foreign_folder (conn, ebmac->priv->foreign_username, ebmac->priv->fid, obj_folder, cancellable, perror);
+	else if (ebmac->priv->is_public_folder)
+		res = e_mapi_connection_open_public_folder (conn, ebmac->priv->fid, obj_folder, cancellable, perror);
+	else
+		res = e_mapi_connection_open_personal_folder (conn, ebmac->priv->fid, obj_folder, cancellable, perror);
+
+	return res;
+}
 
 typedef struct {
 	EContact *contact;
@@ -305,8 +330,13 @@ ebbm_contacts_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean 
 
 	priv->fid = 0;
 	priv->is_public_folder = g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0;
-
+	priv->foreign_username = e_source_get_duped_property (source, "foreign-username");
 	e_mapi_util_mapi_id_from_string (e_source_get_property (source, "folder-id"), &priv->fid);
+
+	if (priv->foreign_username && !*priv->foreign_username) {
+		g_free (priv->foreign_username);
+		priv->foreign_username = NULL;
+	}
 
 	/* Chain up to parent's op_load_source() method. */
 	if (E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_open)
@@ -320,7 +350,6 @@ static void
 ebbm_contacts_connection_status_changed (EBookBackendMAPI *ebma, gboolean is_online)
 {
 	ESource *source;
-	EBookBackendMAPIContactsPrivate *priv = ((EBookBackendMAPIContacts *) ebma)->priv;
 
 	e_book_backend_notify_readonly (E_BOOK_BACKEND (ebma), !is_online);
 
@@ -341,10 +370,7 @@ ebbm_contacts_connection_status_changed (EBookBackendMAPI *ebma, gboolean is_onl
 			return;
 		}
 
-		if (priv->is_public_folder)
-			status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, NULL, NULL);
-		else
-			status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, NULL, NULL);
+		status = ebbm_contacts_open_folder (E_BOOK_BACKEND_MAPI_CONTACTS (ebma), conn, &obj_folder, NULL, NULL);
 
 		if (status) {
 			e_mapi_connection_enable_notifications (conn, &obj_folder,
@@ -381,7 +407,7 @@ ebbm_contacts_remove (EBookBackendMAPI *ebma, GCancellable *cancellable, GError 
 		return;
 	}
 
-	if (!priv->is_public_folder) {
+	if (!priv->is_public_folder && !priv->foreign_username) {
 		EMapiConnection *conn;
 
 		e_book_backend_mapi_lock_connection (ebma);
@@ -390,7 +416,10 @@ ebbm_contacts_remove (EBookBackendMAPI *ebma, GCancellable *cancellable, GError 
 		if (!conn) {
 			g_propagate_error (error, EDB_ERROR (OFFLINE_UNAVAILABLE));
 		} else {
-			e_mapi_connection_remove_folder (conn, priv->fid, 0, cancellable, &mapi_error);
+			mapi_object_t *obj_store = NULL;
+
+			if (e_mapi_connection_peek_store (conn, priv->foreign_username ? FALSE : priv->is_public_folder, priv->foreign_username, &obj_store, cancellable, &mapi_error))
+				e_mapi_connection_remove_folder (conn, obj_store, priv->fid, cancellable, &mapi_error);
 
 			if (mapi_error) {
 				mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to remove public folder"));
@@ -451,10 +480,7 @@ ebbm_contacts_create_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 	e_book_backend_mapi_get_db (ebma, &mcd.db);
 	mcd.contact = contact;
 
-	if (priv->is_public_folder)
-		status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
-	else
-		status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+	status = ebbm_contacts_open_folder (ebmac, conn, &obj_folder, cancellable, &mapi_error);
 
 	if (status) {
 		e_mapi_connection_create_object (conn, &obj_folder, E_MAPI_CREATE_FLAG_NONE,
@@ -495,6 +521,7 @@ ebbm_contacts_remove_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 	GError *mapi_error = NULL;
 	GSList *to_remove;
 	const GSList *l;
+	mapi_object_t obj_folder;
 
 	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
@@ -531,7 +558,10 @@ ebbm_contacts_remove_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 		}
 	}
 
-	e_mapi_connection_remove_items (conn, olFolderContacts, priv->fid, priv->is_public_folder ? MAPI_OPTIONS_USE_PFSTORE : 0, to_remove, cancellable, &mapi_error);
+	if (ebbm_contacts_open_folder (ebmac, conn, &obj_folder, cancellable, &mapi_error)) {
+		e_mapi_connection_remove_items (conn, &obj_folder, to_remove, cancellable, &mapi_error);
+		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
+	}
 
 	e_book_backend_mapi_unlock_connection (ebma);
 
@@ -599,10 +629,7 @@ ebbm_contacts_modify_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 		mapi_object_t obj_folder;
 		gboolean status;
 
-		if (priv->is_public_folder)
-			status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
-		else
-			status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+		status = ebbm_contacts_open_folder (ebmac, conn, &obj_folder, cancellable, &mapi_error);
 
 		if (status) {
 			status = e_mapi_connection_modify_object (conn, &obj_folder, mid,
@@ -672,10 +699,7 @@ ebbm_contacts_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, co
 		return;
 	}
 
-	if (priv->is_public_folder)
-		status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
-	else
-		status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+	status = ebbm_contacts_open_folder (ebmac, conn, &obj_folder, cancellable, &mapi_error);
 
 	if (status) {
 		status = e_mapi_util_mapi_id_from_string (id, &mid);
@@ -758,10 +782,7 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellabl
 	tcd.ebma = ebma;
 	tcd.cards = vCards;
 
-	if (priv->is_public_folder)
-		status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
-	else
-		status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+	status = ebbm_contacts_open_folder (ebmac, conn, &obj_folder, cancellable, &mapi_error);
 
 	if (status) {
 		status = e_mapi_connection_list_objects (conn, &obj_folder,
@@ -811,7 +832,6 @@ ebbm_contacts_get_contacts_count (EBookBackendMAPI *ebma,
 				  GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
-	EBookBackendMAPIContactsPrivate *priv;
 	EMapiConnection *conn;
 	gboolean status;
 	mapi_object_t obj_folder;
@@ -824,8 +844,6 @@ ebbm_contacts_get_contacts_count (EBookBackendMAPI *ebma,
 	e_return_data_book_error_if_fail (ebmac != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 	e_return_data_book_error_if_fail (ebmac->priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
-	priv = ebmac->priv;
-
 	e_book_backend_mapi_lock_connection (ebma);
 
 	conn = e_book_backend_mapi_get_connection (ebma);
@@ -835,10 +853,7 @@ ebbm_contacts_get_contacts_count (EBookBackendMAPI *ebma,
 		return;
 	}
 
-	if (priv->is_public_folder)
-		status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
-	else
-		status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+	status = ebbm_contacts_open_folder (ebmac, conn, &obj_folder, cancellable, &mapi_error);
 
 	if (status) {
 		struct FolderBasicPropertiesData fbp = { 0 };
@@ -869,7 +884,6 @@ ebbm_contacts_list_known_uids (EBookBackendMAPI *ebma,
 			       GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
-	EBookBackendMAPIContactsPrivate *priv;
 	EMapiConnection *conn;
 	gboolean status;
 	mapi_object_t obj_folder;
@@ -884,8 +898,6 @@ ebbm_contacts_list_known_uids (EBookBackendMAPI *ebma,
 	e_return_data_book_error_if_fail (ebmac != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 	e_return_data_book_error_if_fail (ebmac->priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
-	priv = ebmac->priv;
-
 	e_book_backend_mapi_lock_connection (ebma);
 
 	conn = e_book_backend_mapi_get_connection (ebma);
@@ -895,10 +907,7 @@ ebbm_contacts_list_known_uids (EBookBackendMAPI *ebma,
 		return;
 	}
 
-	if (priv->is_public_folder)
-		status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
-	else
-		status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+	status = ebbm_contacts_open_folder (ebmac, conn, &obj_folder, cancellable, &mapi_error);
 
 	if (status) {
 		status = e_mapi_connection_list_objects (conn, &obj_folder, build_rs_cb, build_rs_cb_data,
@@ -955,10 +964,7 @@ ebbm_contacts_transfer_contacts (EBookBackendMAPI *ebma,
 	tcd.book_view = book_view;
 	tcd.notify_contact_data = notify_contact_data;
 
-	if (priv->is_public_folder)
-		status = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
-	else
-		status = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
+	status = ebbm_contacts_open_folder (ebmac, conn, &obj_folder, cancellable, &mapi_error);
 
 	if (status) {
 		GSList *mids = NULL;
@@ -999,14 +1005,33 @@ static void
 e_book_backend_mapi_contacts_init (EBookBackendMAPIContacts *backend)
 {
 	backend->priv = G_TYPE_INSTANCE_GET_PRIVATE (backend, E_TYPE_BOOK_BACKEND_MAPI_CONTACTS, EBookBackendMAPIContactsPrivate);
+
+	backend->priv->foreign_username = NULL;
+}
+
+static void
+ebbm_contacts_finalize (GObject *object)
+{
+	EBookBackendMAPIContactsPrivate *priv;
+
+	priv = E_BOOK_BACKEND_MAPI_CONTACTS (object)->priv;
+
+	g_free (priv->foreign_username);
+	priv->foreign_username = NULL;
+
+	G_OBJECT_CLASS (e_book_backend_mapi_contacts_parent_class)->finalize (object);
 }
 
 static void
 e_book_backend_mapi_contacts_class_init (EBookBackendMAPIContactsClass *klass)
 {
 	EBookBackendMAPIClass *parent_class;
+	GObjectClass *object_class;
 
 	g_type_class_add_private (klass, sizeof (EBookBackendMAPIContactsPrivate));
+
+	object_class = G_OBJECT_CLASS (klass);
+	object_class->finalize = ebbm_contacts_finalize;
 
 	parent_class = E_BOOK_BACKEND_MAPI_CLASS (klass);
 

@@ -50,8 +50,9 @@
 	(G_TYPE_INSTANCE_GET_CLASS \
 	((obj), CAMEL_TYPE_MAPI_STORE, CamelMapiStoreClass))
 
-#define DISPLAY_NAME_FAVOURITES _("Favorites")
-#define DISPLAY_NAME_ALL_PUBLIC_FOLDERS _("All Public Folders")
+#define DISPLAY_NAME_FAVORITES		_("Favorites")
+#define DISPLAY_NAME_FOREIGN_FOLDERS	_("Foreign folders")
+#define DISPLAY_NAME_ALL_PUBLIC_FOLDERS	_("All Public Folders")
 
 G_BEGIN_DECLS
 
@@ -79,6 +80,9 @@ const gchar *	camel_mapi_store_system_folder_fid (CamelMapiStore *mapi_store, gu
 const gchar *	mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid, gboolean use_cache);
 
 EMapiConnection *	camel_mapi_store_get_connection (CamelMapiStore *mapi_store);
+
+void		camel_mapi_store_ensure_unique_path (CamelMapiStore *mapi_store, gchar **ppath);
+void		camel_mapi_store_announce_subscribed_folder (CamelMapiStore *mapi_store, const gchar *path);
 
 G_END_DECLS
 

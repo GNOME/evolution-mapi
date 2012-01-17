@@ -28,21 +28,30 @@
 
 #include <libmapi/libmapi.h>
 
+#define CALENDAR_SOURCES	"/apps/evolution/calendar/sources"
+#define TASK_SOURCES		"/apps/evolution/tasks/sources"
+#define JOURNAL_SOURCES		"/apps/evolution/memos/sources"
+#define SELECTED_CALENDARS	"/apps/evolution/calendar/display/selected_calendars"
+#define SELECTED_TASKS		"/apps/evolution/calendar/tasks/selected_tasks"
+#define SELECTED_JOURNALS	"/apps/evolution/calendar/memos/selected_memos"
+#define ADDRESSBOOK_SOURCES     "/apps/evolution/addressbook/sources"
+
 typedef enum  {
-	MAPI_FOLDER_TYPE_MAIL=1,
-	MAPI_FOLDER_TYPE_APPOINTMENT,
-	MAPI_FOLDER_TYPE_CONTACT,
-	MAPI_FOLDER_TYPE_MEMO,
-	MAPI_FOLDER_TYPE_JOURNAL,
-	MAPI_FOLDER_TYPE_TASK,
-	MAPI_FOLDER_TYPE_NOTE_HOMEPAGE,
-	MAPI_FOLDER_TYPE_UNKNOWN
+	E_MAPI_FOLDER_TYPE_UNKNOWN = 0,
+	E_MAPI_FOLDER_TYPE_MAIL,
+	E_MAPI_FOLDER_TYPE_APPOINTMENT,
+	E_MAPI_FOLDER_TYPE_CONTACT,
+	E_MAPI_FOLDER_TYPE_MEMO,
+	E_MAPI_FOLDER_TYPE_JOURNAL,
+	E_MAPI_FOLDER_TYPE_TASK,
+	E_MAPI_FOLDER_TYPE_NOTE_HOMEPAGE
 } EMapiFolderType;
 
 typedef enum {
-	MAPI_PERSONAL_FOLDER,
-	MAPI_FAVOURITE_FOLDER,
-	MAPI_FOREIGN_FOLDER
+	E_MAPI_FOLDER_CATEGORY_UNKNOWN = 0,
+	E_MAPI_FOLDER_CATEGORY_PERSONAL,
+	E_MAPI_FOLDER_CATEGORY_PUBLIC,
+	E_MAPI_FOLDER_CATEGORY_FOREIGN
 } EMapiFolderCategory;
 
 typedef struct _EMapiFolder {
@@ -72,6 +81,9 @@ typedef struct _EMapiFolder {
 	gpointer reserved3;
 } EMapiFolder;
 
+EMapiFolderType		e_mapi_folder_type_from_string	(const gchar *container_class);
+const gchar *		e_mapi_folder_type_to_string	(EMapiFolderType folder_type);
+
 EMapiFolder *		e_mapi_folder_new		(const gchar *folder_name,
 							 const gchar *container_class,
 							 EMapiFolderCategory catgory,
@@ -82,7 +94,6 @@ EMapiFolder *		e_mapi_folder_new		(const gchar *folder_name,
 							 uint32_t total);
 EMapiFolder *		e_mapi_folder_copy		(EMapiFolder *src);
 void			e_mapi_folder_free		(EMapiFolder *folder);
-EMapiFolderType		e_mapi_container_class		(gchar *type);
 
 const gchar *		e_mapi_folder_get_name		(EMapiFolder *folder);
 mapi_id_t		e_mapi_folder_get_fid		(EMapiFolder *folder);
@@ -95,4 +106,26 @@ gboolean		e_mapi_folder_is_root		(EMapiFolder *folder);
 GSList *		e_mapi_folder_copy_list		(GSList *folder_list);
 void			e_mapi_folder_free_list		(GSList *folder_list);
 
+gchar *			e_mapi_folder_pick_color_spec	(gint move_by,
+							 gboolean around_middle);
+
+gboolean		e_mapi_folder_add_as_esource	(EMapiFolderType folder_type,
+							 const gchar *login_profile,
+							 const gchar *login_domain,
+							 const gchar *login_realm,
+							 const gchar *login_host,
+							 const gchar *login_user,
+							 gboolean login_kerberos,
+							 gboolean offline_sync,
+							 EMapiFolderCategory folder_category,
+							 const gchar *foreign_username, /* NULL for public folder */
+							 const gchar *folder_name,
+							 const gchar *fid,
+							 GError **perror);
+
+gboolean		e_mapi_folder_remove_as_esource	(EMapiFolderType folder_type,
+							 const gchar *login_host,
+							 const gchar *login_user,
+							 const gchar *fid,
+							 GError **perror);
 #endif

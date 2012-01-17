@@ -82,6 +82,7 @@
 		    <popup name="mail-folder-popup">
 		      <placeholder name="mail-folder-popup-actions">
 			<menuitem action="mail-mapi-folder-size"/>
+			<menuitem action="mail-mapi-subscribe-foreign-folder"/>
 		      </placeholder>
 		    </popup>
 		  </ui-manager>

@@ -579,7 +579,7 @@ traverse_tree (GtkTreeModel *model, GtkTreeIter iter, EMapiFolderType folder_typ
 		}
 
 		gtk_tree_model_get (model, &iter, FOLDER_COL, &folder, -1);
-		if (folder && (e_mapi_folder_get_type (folder) == folder_type || (folder_type == MAPI_FOLDER_TYPE_MEMO && e_mapi_folder_get_type (folder) == MAPI_FOLDER_TYPE_JOURNAL))) {
+		if (folder && (e_mapi_folder_get_type (folder) == folder_type || (folder_type == E_MAPI_FOLDER_TYPE_MEMO && e_mapi_folder_get_type (folder) == E_MAPI_FOLDER_TYPE_JOURNAL))) {
 			sub_used = TRUE;
 		}
 
@@ -689,6 +689,20 @@ e_mapi_cursor_change (GtkTreeView *treeview, ESource *source)
 	}
 }
 
+static EMapiFolderCategory
+e_mapi_source_to_folder_category (ESource *source)
+{
+	g_return_val_if_fail (source != NULL, E_MAPI_FOLDER_CATEGORY_UNKNOWN);
+
+	if (e_source_get_property (source, "foreign-username"))
+		return E_MAPI_FOLDER_CATEGORY_FOREIGN;
+
+	if (g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0)
+		return E_MAPI_FOLDER_CATEGORY_PUBLIC;
+
+	return E_MAPI_FOLDER_CATEGORY_PERSONAL;
+}
+
 static GtkWidget *
 e_mapi_create (GtkWidget *parent, ESource *source, EMapiFolderType folder_type)
 {
@@ -715,6 +729,15 @@ e_mapi_create (GtkWidget *parent, ESource *source, EMapiFolderType folder_type)
 
 	e_plugin_util_add_check (parent, _("Lis_ten for server notifications"), source, "server-notification", "true", NULL);
 
+	switch (e_mapi_source_to_folder_category (source)) {
+	case E_MAPI_FOLDER_CATEGORY_FOREIGN:
+	case E_MAPI_FOLDER_CATEGORY_PUBLIC:
+		/* no extra options for subscribed folders */
+		return NULL;
+	default:
+		break;
+	}
+
 	folders = NULL;
 	group = e_source_peek_group (source);
 	profile = g_strdup (e_source_get_property (source, "profile"));
@@ -736,7 +759,7 @@ e_mapi_create (GtkWidget *parent, ESource *source, EMapiFolderType folder_type)
 
 	table = g_object_new (GTK_TYPE_TABLE, NULL);
 
-	if (folder_type == MAPI_FOLDER_TYPE_CONTACT) {
+	if (folder_type == E_MAPI_FOLDER_TYPE_CONTACT) {
 		gtk_container_add (GTK_CONTAINER (parent), table);
 	} else {
 		g_object_get (parent, "n-rows", &row, NULL);
@@ -781,7 +804,7 @@ e_mapi_create_addressbook (EPlugin *epl, EConfigHookItemFactoryData *data)
 {
 	EABConfigTargetSource *t = (EABConfigTargetSource *) data->target;
 
-	return e_mapi_create (data->parent, t->source, MAPI_FOLDER_TYPE_CONTACT);
+	return e_mapi_create (data->parent, t->source, E_MAPI_FOLDER_TYPE_CONTACT);
 }
 
 GtkWidget *
@@ -792,13 +815,13 @@ e_mapi_create_calendar (EPlugin *epl, EConfigHookItemFactoryData *data)
 
 	switch (t->source_type) {
 	case E_CAL_CLIENT_SOURCE_TYPE_EVENTS:
-		folder_type = MAPI_FOLDER_TYPE_APPOINTMENT;
+		folder_type = E_MAPI_FOLDER_TYPE_APPOINTMENT;
 		break;
 	case E_CAL_CLIENT_SOURCE_TYPE_TASKS:
-		folder_type = MAPI_FOLDER_TYPE_TASK;
+		folder_type = E_MAPI_FOLDER_TYPE_TASK;
 		break;
 	case E_CAL_CLIENT_SOURCE_TYPE_MEMOS:
-		folder_type = MAPI_FOLDER_TYPE_MEMO;
+		folder_type = E_MAPI_FOLDER_TYPE_MEMO;
 		break;
 	default:
 		g_return_val_if_reached (NULL);
@@ -817,22 +840,49 @@ e_mapi_book_check (EPlugin *epl, EConfigHookPageCheckData *data)
 	if (!uri_text)
 		return TRUE;
 
-	/* FIXME: Offline handling */
-
 	/* not a MAPI account */
 	if (g_ascii_strncasecmp (uri_text, MAPI_URI_PREFIX, MAPI_PREFIX_LENGTH)) {
 		g_free (uri_text);
 		return TRUE;
 	}
 
-	/* does not have a parent-fid which is needed for folder creation on server */
-	if (!e_source_get_property (source, "parent-fid")) {
-		g_free (uri_text);
-		return FALSE;
-	}
-
 	g_free (uri_text);
-	return TRUE;
+
+	/* does not have a parent-fid which is needed for folder creation on server */
+	return e_source_get_property (source, "parent-fid") ||
+		e_source_get_property (source, "foreign-username") ||
+		g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0;
+}
+
+static gboolean
+emas_open_folder (ESource *source,
+		  EMapiConnection *conn,
+		  mapi_id_t fid,
+		  mapi_object_t *obj_folder,
+		  GCancellable *cancellable,
+		  GError **perror)
+{
+	gchar *foreign_username;
+	gboolean is_public_folder;
+	gboolean res;
+
+	g_return_val_if_fail (source != NULL, FALSE);
+	g_return_val_if_fail (conn != NULL, FALSE);
+	g_return_val_if_fail (obj_folder != NULL, FALSE);
+
+	is_public_folder = g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0;
+	foreign_username = e_source_get_duped_property (source, "foreign-username");
+
+	if (foreign_username)
+		res = e_mapi_connection_open_foreign_folder (conn, foreign_username, fid, obj_folder, cancellable, perror);
+	else if (is_public_folder)
+		res = e_mapi_connection_open_public_folder (conn, fid, obj_folder, cancellable, perror);
+	else
+		res = e_mapi_connection_open_personal_folder (conn, fid, obj_folder, cancellable, perror);
+
+	g_free (foreign_username);
+
+	return res;
 }
 
 void
@@ -845,11 +895,21 @@ e_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	ESourceGroup *grp;
 	EMapiConnection *conn;
 	mapi_id_t fid, pfid;
+	mapi_object_t obj_folder;
 	GError *mapi_error = NULL;
 
 	uri_text = e_source_get_uri (source);
 	if (uri_text && g_ascii_strncasecmp (uri_text, MAPI_URI_PREFIX, MAPI_PREFIX_LENGTH))
 		return;
+
+	switch (e_mapi_source_to_folder_category (source)) {
+	case E_MAPI_FOLDER_CATEGORY_FOREIGN:
+	case E_MAPI_FOLDER_CATEGORY_PUBLIC:
+		/* no extra changes for subscribed folders */
+		return;
+	default:
+		break;
+	}
 
 	e_mapi_util_mapi_id_from_string (e_source_get_property (source, "parent-fid"), &pfid);
 
@@ -857,7 +917,13 @@ e_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	conn = e_mapi_connection_find (e_source_get_property (source, "profile"));
 	g_return_if_fail (conn != NULL);
 
-	fid = e_mapi_connection_create_folder (conn, olFolderContacts, pfid, 0, e_source_peek_name (source), NULL, &mapi_error);
+	fid = 0;
+	if (emas_open_folder (source, conn, pfid, &obj_folder, NULL, NULL)) {
+		if (!e_mapi_connection_create_folder (conn, &obj_folder, e_source_peek_name (source), IPF_CONTACT, &fid, NULL, &mapi_error))
+			fid = 0;
+		e_mapi_connection_close_folder (conn, &obj_folder, NULL, NULL);
+	}
+
 	g_object_unref (conn);
 
 	if (!fid) {
@@ -875,7 +941,6 @@ e_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	r_uri = g_strconcat (";", sfid, NULL);
 	e_source_set_relative_uri (source, r_uri);
 
-	//FIXME: Offline handling
 	grp = e_source_peek_group (source);
 	e_source_set_property (source, "auth", "plain/password");
 	e_source_set_property(source, "user", NULL);
@@ -896,7 +961,6 @@ e_mapi_book_commit (EPlugin *epl, EConfigTarget *target)
 	e_source_set_property (source, "public", "no");
 	e_source_set_property (source, "folder-id", sfid);
 
-	// Update the folder list in the plugin and EMapiFolder
 	g_free (r_uri);
 	g_free (sfid);
 
@@ -914,8 +978,6 @@ e_mapi_cal_check (EPlugin *epl, EConfigHookPageCheckData *data)
 	if (!uri_text)
 		return TRUE;
 
-	/* FIXME: Offline handling */
-
 	/* not a MAPI account */
 	if (g_ascii_strncasecmp (uri_text, MAPI_URI_PREFIX, MAPI_PREFIX_LENGTH)) {
 		g_free (uri_text);
@@ -924,13 +986,9 @@ e_mapi_cal_check (EPlugin *epl, EConfigHookPageCheckData *data)
 
 	g_free (uri_text);
 
-	/* FIXME: Offline handling */
-
-	/* does not have a parent-fid which is needed for folder creation on server */
-	if (!e_source_get_property (source, "parent-fid"))
-		return FALSE;
-
-	return TRUE;
+	return e_source_get_property (source, "parent-fid") ||
+		e_source_get_property (source, "foreign-username") ||
+		g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0;
 }
 
 void
@@ -942,7 +1000,8 @@ e_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 	ESource *source = t->source;
 	gchar *tmp, *sfid;
 	mapi_id_t fid, pfid;
-	uint32_t type;
+	mapi_object_t obj_folder;
+	const gchar *type;
 	gchar *uri_text = e_source_get_uri (source);
 	GError *mapi_error = NULL;
 
@@ -950,22 +1009,29 @@ e_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 		return;
 	g_free (uri_text);
 
+	switch (e_mapi_source_to_folder_category (source)) {
+	case E_MAPI_FOLDER_CATEGORY_FOREIGN:
+	case E_MAPI_FOLDER_CATEGORY_PUBLIC:
+		/* no extra changes for subscribed folders */
+		return;
+	default:
+		break;
+	}
+
 	switch (t->source_type) {
 		case E_CAL_CLIENT_SOURCE_TYPE_EVENTS:
-			type = olFolderCalendar;
+			type = IPF_APPOINTMENT;
 			break;
 		case E_CAL_CLIENT_SOURCE_TYPE_TASKS:
-			type = olFolderTasks;
+			type = IPF_TASK;
 			break;
 		case E_CAL_CLIENT_SOURCE_TYPE_MEMOS:
-			type = olFolderNotes;
+			type = IPF_STICKYNOTE;
 			break;
 		default:
 			g_warning ("%s: %s: Unknown EMapiFolderType\n", G_STRLOC, G_STRFUNC);
 			return;
 	}
-
-	/* FIXME: Offline handling */
 
 	e_mapi_util_mapi_id_from_string (e_source_get_property (source, "parent-fid"), &pfid);
 
@@ -973,7 +1039,13 @@ e_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 	conn = e_mapi_connection_find (e_source_get_property (source, "profile"));
 	g_return_if_fail (conn != NULL);
 
-	fid = e_mapi_connection_create_folder (conn, type, pfid, 0, e_source_peek_name (source), NULL, &mapi_error);
+	fid = 0;
+	if (emas_open_folder (source, conn, pfid, &obj_folder, NULL, NULL)) {
+		if (!e_mapi_connection_create_folder (conn, &obj_folder, e_source_peek_name (source), type, &fid, NULL, &mapi_error))
+			fid = 0;
+		e_mapi_connection_close_folder (conn, &obj_folder, NULL, NULL);
+	}
+
 	g_object_unref (conn);
 
 	if (!fid) {
@@ -1049,4 +1121,146 @@ e_mapi_cal_commit (EPlugin *epl, EConfigTarget *target)
 
 	// Update the folder list in the plugin and EMapiFolder
 	return;
+}
+
+struct RunWithFeedbackData
+{
+	GtkWindow *parent;
+	GtkWidget *dialog;
+	GCancellable *cancellable;
+	GObject *with_object;
+	EMapiSetupFunc thread_func;
+	EMapiSetupFunc idle_func;
+	gpointer user_data;
+	GDestroyNotify free_user_data;
+	GError *error;
+};
+
+static void
+free_run_with_feedback_data (gpointer ptr)
+{
+	struct RunWithFeedbackData *rfd = ptr;
+
+	if (!rfd)
+		return;
+
+	if (rfd->dialog)
+		gtk_widget_destroy (rfd->dialog);
+
+	g_object_unref (rfd->cancellable);
+	g_object_unref (rfd->with_object);
+
+	if (rfd->free_user_data)
+		rfd->free_user_data (rfd->user_data);
+
+	g_clear_error (&rfd->error);
+
+	g_free (rfd);
+}
+
+static gboolean
+run_with_feedback_idle (gpointer user_data)
+{
+	struct RunWithFeedbackData *rfd = user_data;
+	gboolean was_cancelled = FALSE;
+
+	g_return_val_if_fail (rfd != NULL, FALSE);
+
+	if (!g_cancellable_is_cancelled (rfd->cancellable)) {
+		if (rfd->idle_func && !rfd->error)
+			rfd->idle_func (rfd->with_object, rfd->user_data, rfd->cancellable, &rfd->error);
+
+		was_cancelled = g_cancellable_is_cancelled (rfd->cancellable);
+
+		if (rfd->dialog) {
+			gtk_widget_destroy (rfd->dialog);
+			rfd->dialog = NULL;
+		}
+	}
+
+	if (!was_cancelled) {
+		if (rfd->error)
+			e_notice (rfd->parent, GTK_MESSAGE_ERROR, "%s", rfd->error->message);
+	}
+
+	free_run_with_feedback_data (rfd);
+
+	return FALSE;
+}
+
+static gpointer
+run_with_feedback_thread (gpointer user_data)
+{
+	struct RunWithFeedbackData *rfd = user_data;
+
+	g_return_val_if_fail (rfd != NULL, NULL);
+	g_return_val_if_fail (rfd->thread_func != NULL, NULL);
+
+	if (!g_cancellable_is_cancelled (rfd->cancellable))
+		rfd->thread_func (rfd->with_object, rfd->user_data, rfd->cancellable, &rfd->error);
+
+	g_idle_add (run_with_feedback_idle, rfd);
+
+	return NULL;
+}
+
+static void
+run_with_feedback_response_cb (GtkWidget *dialog,
+			       gint resonse_id,
+			       struct RunWithFeedbackData *rfd)
+{
+	g_return_if_fail (rfd != NULL);
+
+	rfd->dialog = NULL;
+	g_cancellable_cancel (rfd->cancellable);
+
+	gtk_widget_destroy (dialog);
+}
+
+void
+e_mapi_run_in_thread_with_feedback (GtkWindow *parent,
+				    GObject *with_object,
+				    const gchar *description,
+				    EMapiSetupFunc thread_func,
+				    EMapiSetupFunc idle_func,
+				    gpointer user_data,
+				    GDestroyNotify free_user_data)
+{
+	GtkWidget *dialog, *label, *content;
+	struct RunWithFeedbackData *rfd;
+
+	g_return_if_fail (with_object != NULL);
+	g_return_if_fail (description != NULL);
+	g_return_if_fail (thread_func != NULL);
+
+	dialog = gtk_dialog_new_with_buttons ("",
+		parent,
+		GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		NULL);
+
+	label = gtk_label_new (description);
+	gtk_widget_show (label);
+
+	content = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+
+	gtk_container_add (GTK_CONTAINER (content), label);
+	gtk_container_set_border_width (GTK_CONTAINER (content), 12);
+
+	rfd = g_new0 (struct RunWithFeedbackData, 1);
+	rfd->parent = parent;
+	rfd->dialog = dialog;
+	rfd->cancellable = g_cancellable_new ();
+	rfd->with_object = g_object_ref (with_object);
+	rfd->thread_func = thread_func;
+	rfd->idle_func = idle_func;
+	rfd->user_data = user_data;
+	rfd->free_user_data = free_user_data;
+	rfd->error = NULL;
+
+	g_signal_connect (dialog, "response", G_CALLBACK (run_with_feedback_response_cb), rfd);
+
+	gtk_widget_show (dialog);
+
+	g_return_if_fail (g_thread_create (run_with_feedback_thread, rfd, FALSE, NULL));
 }

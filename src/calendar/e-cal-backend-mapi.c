@@ -68,9 +68,9 @@ struct _ECalBackendMAPIPrivate {
 	EMapiOperationQueue *op_queue;
 
 	mapi_id_t		fid;
-	uint32_t		olFolder;
 	gchar			*profile;
 	gboolean is_public_folder;
+	gchar *foreign_username;
 	EMapiConnection *conn;
 
 	/* These fields are entirely for access rights */
@@ -101,6 +101,30 @@ struct _ECalBackendMAPIPrivate {
 	gint last_obj_total;
 	GCancellable *cancellable;
 };
+
+static gboolean
+ecbm_open_folder (ECalBackendMAPI *ecbm,
+		  EMapiConnection *conn,
+		  mapi_object_t *obj_folder,
+		  GCancellable *cancellable,
+		  GError **perror)
+{
+	gboolean res;
+
+	g_return_val_if_fail (ecbm != NULL, FALSE);
+	g_return_val_if_fail (ecbm->priv != NULL, FALSE);
+	g_return_val_if_fail (conn != NULL, FALSE);
+	g_return_val_if_fail (obj_folder != NULL, FALSE);
+
+	if (ecbm->priv->foreign_username)
+		res = e_mapi_connection_open_foreign_folder (conn, ecbm->priv->foreign_username, ecbm->priv->fid, obj_folder, cancellable, perror);
+	else if (ecbm->priv->is_public_folder)
+		res = e_mapi_connection_open_public_folder (conn, ecbm->priv->fid, obj_folder, cancellable, perror);
+	else
+		res = e_mapi_connection_open_personal_folder (conn, ecbm->priv->fid, obj_folder, cancellable, perror);
+
+	return res;
+}
 
 #define CACHE_REFRESH_INTERVAL 600000
 
@@ -295,10 +319,12 @@ ecbm_remove (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, GEr
 		g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
 		return;
 	}
-	if (!priv->is_public_folder) {
+	if (!priv->is_public_folder && !priv->foreign_username) {
 		GError *mapi_error = NULL;
+		mapi_object_t *obj_store = NULL;
 
-		if (!e_mapi_connection_remove_folder (priv->conn, priv->fid, 0, cancellable, &mapi_error)) {
+		if (!e_mapi_connection_peek_store (priv->conn, priv->foreign_username ? FALSE : priv->is_public_folder, priv->foreign_username, &obj_store, cancellable, &mapi_error) ||
+		    !e_mapi_connection_remove_folder (priv->conn, obj_store, priv->fid, cancellable, &mapi_error)) {
 			mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to remove public folder"));
 			if (mapi_error)
 				g_error_free (mapi_error);
@@ -712,12 +738,7 @@ update_local_cache (ECalBackendMAPI *cbmapi, GCancellable *cancellable)
 
 	conn = g_object_ref (priv->conn);
 
-	if (priv->is_public_folder) {
-		success = e_mapi_connection_open_public_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
-	} else {
-		success = e_mapi_connection_open_personal_folder (conn, priv->fid, &obj_folder, cancellable, &mapi_error);
-	}
-
+	success = ecbm_open_folder (cbmapi, conn, &obj_folder, cancellable, &mapi_error);
 	if (!success) {
 		notify_error (cbmapi, mapi_error, _("Failed to open folder: %s"));
 		goto cleanup;
@@ -1155,11 +1176,7 @@ ecbm_connect_user (ECalBackend *backend, GCancellable *cancellable, const gchar 
 			mapi_object_t obj_folder;
 			gboolean status;
 
-			if (priv->is_public_folder)
-				status = e_mapi_connection_open_public_folder (priv->conn, priv->fid, &obj_folder, NULL, NULL);
-			else
-				status = e_mapi_connection_open_personal_folder (priv->conn, priv->fid, &obj_folder, NULL, NULL);
-
+			status = ecbm_open_folder (cbmapi, priv->conn, &obj_folder, NULL, NULL);
 			if (status) {
 				e_mapi_connection_enable_notifications (priv->conn, &obj_folder,
 					fnevObjectCreated | fnevObjectModified | fnevObjectDeleted | fnevObjectMoved | fnevObjectCopied,
@@ -1199,7 +1216,6 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gbool
 	ESource *esource;
 	const gchar *fid = NULL;
 	const gchar *cache_dir, *krb_sso = NULL;
-	uint32_t olFolder = 0;
 
 	if (e_cal_backend_is_opened (E_CAL_BACKEND (backend))) {
 		e_cal_backend_notify_opened (backend, NULL);
@@ -1220,19 +1236,6 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gbool
 	g_mutex_lock (priv->mutex);
 
 	cbmapi->priv->read_only = FALSE;
-
-	switch (e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi))) {
-	default:
-	case ICAL_VEVENT_COMPONENT:
-		olFolder = olFolderCalendar;
-		break;
-	case ICAL_VTODO_COMPONENT:
-		olFolder = olFolderTasks;
-		break;
-	case ICAL_VJOURNAL_COMPONENT:
-		olFolder = olFolderNotes;
-		break;
-	}
 
 	if (priv->store) {
 		g_object_unref (priv->store);
@@ -1281,8 +1284,13 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gbool
 	priv->owner_email = g_strdup (e_source_get_property (esource, "acl-owner-email"));
 
 	e_mapi_util_mapi_id_from_string (fid, &priv->fid);
-	priv->olFolder = olFolder;
 	priv->is_public_folder = g_strcmp0 (e_source_get_property (esource, "public"), "yes") == 0;
+	priv->foreign_username = e_source_get_duped_property (esource, "foreign-username");
+
+	if (priv->foreign_username && !*priv->foreign_username) {
+		g_free (priv->foreign_username);
+		priv->foreign_username = NULL;
+	}
 
 	krb_sso = e_source_get_property (esource, "kerberos");
 	g_mutex_unlock (priv->mutex);
@@ -1434,7 +1442,7 @@ get_server_data (ECalBackendMAPI *cbmapi,
 	icalcomp = e_cal_component_get_icalcomponent (comp);
 	get_comp_mid (icalcomp, &mid);
 
-	if (!e_mapi_connection_open_personal_folder (priv->conn, priv->fid, &obj_folder, cancellable, NULL))
+	if (!ecbm_open_folder (cbmapi, priv->conn, &obj_folder, cancellable, NULL))
 		return;
 
 	if (!e_mapi_connection_transfer_object (priv->conn, &obj_folder, mid, ecbm_capture_req_props, cbdata, cancellable, &error)) {
@@ -1561,12 +1569,7 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		cbdata.globalid = NULL;
 		cbdata.cleanglobalid = NULL;
 
-		if (priv->is_public_folder) {
-			status = e_mapi_connection_open_public_folder (priv->conn, priv->fid, &obj_folder, cancellable, &mapi_error);
-		} else {
-			status = e_mapi_connection_open_personal_folder (priv->conn, priv->fid, &obj_folder, cancellable, &mapi_error);
-		}
-
+		status = ecbm_open_folder (cbmapi, priv->conn, &obj_folder, cancellable, &mapi_error);
 		if (status) {
 			e_mapi_connection_create_object (priv->conn, &obj_folder, E_MAPI_CREATE_FLAG_NONE,
 							 e_mapi_cal_utils_comp_to_object, &cbdata,
@@ -1767,12 +1770,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 			cbdata.meeting_type = has_attendees ? MEETING_OBJECT_RCVD : NOT_A_MEETING;
 		}
 
-		if (priv->is_public_folder) {
-			status = e_mapi_connection_open_public_folder (priv->conn, priv->fid, &obj_folder, cancellable, &mapi_error);
-		} else {
-			status = e_mapi_connection_open_personal_folder (priv->conn, priv->fid, &obj_folder, cancellable, &mapi_error);
-		}
-
+		status = ecbm_open_folder (cbmapi, priv->conn, &obj_folder, cancellable, &mapi_error);
 		if (status) {
 			status = e_mapi_connection_modify_object (priv->conn, &obj_folder, mid, 
 								  e_mapi_cal_utils_comp_to_object, &cbdata,
@@ -1861,28 +1859,30 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		ecbm_modify_object (backend, cal, cancellable, new_calobj, CALOBJ_MOD_ALL, old_ecalcomp, new_ecalcomp, &err);
 		g_free (new_calobj);
 	} else {
+		mapi_object_t obj_folder;
 		GSList *list=NULL, *l, *comp_list = e_cal_backend_store_get_components_by_uid (priv->store, uid);
 		GError *ri_error = NULL;
+		mapi_id_t *pmid = g_new (mapi_id_t, 1);
 
-		/*if (e_cal_component_has_attendees (E_CAL_COMPONENT (comp_list->data))) {
-		} else {*/
-			mapi_id_t *pmid = g_new (mapi_id_t, 1);
-			*pmid = mid;
-			list = g_slist_prepend (list, pmid);
-		/* } */
+		*pmid = mid;
+		list = g_slist_prepend (list, pmid);
 
-		if (e_mapi_connection_remove_items (priv->conn, priv->olFolder, priv->fid, 0, list, cancellable, &ri_error)) {
-			for (l = comp_list; l; l = l->next) {
-				ECalComponent *comp = E_CAL_COMPONENT (l->data);
-				ECalComponentId *id = e_cal_component_get_id (comp);
+		if (ecbm_open_folder (cbmapi, priv->conn, &obj_folder, cancellable, &ri_error)) {
+			if (e_mapi_connection_remove_items (priv->conn, &obj_folder, list, cancellable, &ri_error)) {
+				for (l = comp_list; l; l = l->next) {
+					ECalComponent *comp = E_CAL_COMPONENT (l->data);
+					ECalComponentId *id = e_cal_component_get_id (comp);
 
-				e_cal_backend_store_remove_component (priv->store, id->uid, id->rid);
-				if (!id->rid || !g_str_equal (id->rid, rid))
-					e_cal_backend_notify_component_removed (E_CAL_BACKEND (cbmapi), id, comp, NULL);
-				e_cal_component_free_id (id);
+					e_cal_backend_store_remove_component (priv->store, id->uid, id->rid);
+					if (!id->rid || !g_str_equal (id->rid, rid))
+						e_cal_backend_notify_component_removed (E_CAL_BACKEND (cbmapi), id, comp, NULL);
+					e_cal_component_free_id (id);
 
-				g_object_unref (comp);
+					g_object_unref (comp);
+				}
 			}
+
+			e_mapi_connection_close_folder (priv->conn, &obj_folder, cancellable, &ri_error);
 
 			*old_ecalcomp = e_cal_component_new_from_icalcomponent (icalparser_parse_string (calobj));
 			*new_ecalcomp = NULL;
@@ -3336,6 +3336,11 @@ ecbm_finalize (GObject *object)
 	if (priv->sendoptions_sync_timeout) {
 		g_source_remove (priv->sendoptions_sync_timeout);
 		priv->sendoptions_sync_timeout = 0;
+	}
+
+	if (priv->foreign_username) {
+		g_free (priv->foreign_username);
+		priv->foreign_username = NULL;
 	}
 
 	if (priv->conn) {
