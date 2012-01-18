@@ -48,19 +48,6 @@ typedef struct _EMapiConnection EMapiConnection;
 typedef struct _EMapiConnectionClass EMapiConnectionClass;
 typedef struct _EMapiConnectionPrivate EMapiConnectionPrivate;
 
-typedef enum {
-	MAPI_OPTIONS_FETCH_ATTACHMENTS = 1<<0,
-	MAPI_OPTIONS_FETCH_RECIPIENTS = 1<<1,
-	MAPI_OPTIONS_FETCH_BODY_STREAM = 1<<2,
-	MAPI_OPTIONS_FETCH_GENERIC_STREAMS = 1<<3,
-	MAPI_OPTIONS_FETCH_GAL = 1 <<4,
-	MAPI_OPTIONS_DONT_SUBMIT = 1<<5,
-	MAPI_OPTIONS_GETBESTBODY = 1<<6,
-	MAPI_OPTIONS_USE_PFSTORE = 1<<7,
-	MAPI_OPTIONS_DONT_OPEN_MESSAGE = 1<<8,
-	MAPI_OPTIONS_DELETE_ON_SUBMIT_FAILURE = 1<<9
-} ExchangeMAPIOptions;
-
 typedef struct {
 	uint32_t pidlid_propid; /* PidLid or PidName legacy property named ID to resolve */
 	uint32_t propid;	/* resolved prop ID; equals to MAPI_E_RESERVED when not found or other error */
@@ -350,17 +337,14 @@ gboolean		e_mapi_connection_empty_folder		(EMapiConnection *conn,
 								 GCancellable *cancellable,
 								 GError **perror);
 gboolean		e_mapi_connection_rename_folder		(EMapiConnection *conn,
-								 mapi_id_t fid,
-								 guint32 fid_options,
+								 mapi_object_t *obj_folder,
 								 const gchar *new_name,
 								 GCancellable *cancellable,
 								 GError **perror);
 gboolean		e_mapi_connection_move_folder		(EMapiConnection *conn,
-								 mapi_id_t src_fid,
-								 mapi_id_t src_parent_fid,
-								 guint32 src_fid_options,
-								 mapi_id_t des_fid,
-								 guint32 des_fid_options,
+								 mapi_object_t *src_obj_folder,
+								 mapi_object_t *src_parent_obj_folder,
+								 mapi_object_t *des_obj_folder,
 								 const gchar *new_name,
 								 GCancellable *cancellable,
 								 GError **perror);
@@ -402,13 +386,13 @@ gboolean		e_mapi_connection_get_pf_folders_list	(EMapiConnection *conn,
 GSList *		e_mapi_connection_peek_folders_list	(EMapiConnection *conn);
 
 gboolean		e_mapi_connection_resolve_named_props	(EMapiConnection *conn,
-								 mapi_id_t fid,
+								 mapi_object_t *obj_folder,
 								 EResolveNamedIDsData *named_ids_list,
 								 guint named_ids_n_elems,
 								 GCancellable *cancellable,
 								 GError **perror);
 uint32_t		e_mapi_connection_resolve_named_prop	(EMapiConnection *conn,
-								 mapi_id_t fid,
+								 mapi_object_t *obj_folder,
 								 uint32_t pidlid_propid,
 								 GCancellable *cancellable,
 								 GError **perror);

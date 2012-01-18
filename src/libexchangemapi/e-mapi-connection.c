@@ -838,38 +838,6 @@ e_mapi_connection_get_public_folder (EMapiConnection *conn,
 	return ms == MAPI_E_SUCCESS;
 }
 
-static enum MAPISTATUS
-open_folder (EMapiConnection *conn, uint32_t olFolder, mapi_id_t *fid, guint32 fid_options, mapi_object_t *obj_folder, GError **perror)
-{
-	enum MAPISTATUS ms;
-
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, MAPI_E_INVALID_PARAMETER);
-	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
-	e_return_val_mapi_error_if_fail (fid != NULL, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
-
-	if (*fid == 0) {
-		ms = GetDefaultFolder (&priv->msg_store, fid, olFolder);
-		if (ms != MAPI_E_SUCCESS) {
-			make_mapi_error (perror, "GetDefaultFolder", ms);
-			return ms;
-		}
-
-		fid_options = 0;
-	}
-
-	if ((fid_options & MAPI_OPTIONS_USE_PFSTORE) != 0) {
-		if (!ensure_public_store (priv, perror)) {
-			return MAPI_E_CALL_FAILED;
-		}
-	}
-
-	ms = OpenFolder (((fid_options & MAPI_OPTIONS_USE_PFSTORE) != 0 ? &priv->public_store : &priv->msg_store), *fid, obj_folder);
-	if (ms != MAPI_E_SUCCESS)
-		make_mapi_error (perror, "OpenFolder", ms);
-
-	return ms;
-}
-
 gboolean
 e_mapi_connection_peek_store (EMapiConnection *conn,
 			      gboolean public_store,
@@ -1219,7 +1187,7 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 		}
 
 		if (named_ids_list) {
-			if (!e_mapi_connection_resolve_named_props (conn, mapi_object_get_id (obj_folder), named_ids_list, named_ids_len, cancellable, perror)) {
+			if (!e_mapi_connection_resolve_named_props (conn, obj_folder, named_ids_list, named_ids_len, cancellable, perror)) {
 				g_free (named_ids_list);
 				goto cleanup;
 			}
@@ -1539,7 +1507,7 @@ change_mapi_SRestriction_named_ids (EMapiConnection *conn,
 	if (!named_ids_list)
 		return TRUE;
 
-	res = e_mapi_connection_resolve_named_props (conn, mapi_object_get_id (obj_folder), named_ids_list, named_ids_len, cancellable, perror);
+	res = e_mapi_connection_resolve_named_props (conn, obj_folder, named_ids_list, named_ids_len, cancellable, perror);
 
 	if (res) {
 		GHashTable *replace_hash = prepare_maybe_replace_hash (named_ids_list, named_ids_len, TRUE);
@@ -1848,7 +1816,7 @@ ensure_additional_properties_cb (EMapiConnection *conn,
 
 		if (!e_mapi_util_find_array_propval (&object->properties, prop)) {
 			if (((prop >> 16) & 0xFFFF) >= 0x8000) {
-				prop = e_mapi_connection_resolve_named_prop (conn, mapi_object_get_id (eap->obj_folder), prop, cancellable, NULL);
+				prop = e_mapi_connection_resolve_named_prop (conn, eap->obj_folder, prop, cancellable, NULL);
 			}
 		} else {
 			prop = MAPI_E_RESERVED;
@@ -2239,7 +2207,7 @@ e_mapi_connection_fetch_object_internal (EMapiConnection *conn,
 	if (!e_mapi_util_find_array_propval (&object->properties, PidNameContentClass)) {
 		uint32_t prop = PidNameContentClass;
 
-		prop = e_mapi_connection_resolve_named_prop (conn, mapi_object_get_id (eap->obj_folder), prop, cancellable, NULL);
+		prop = e_mapi_connection_resolve_named_prop (conn, eap->obj_folder, prop, cancellable, NULL);
 		if (prop != MAPI_E_RESERVED) {
 			struct SPropTagArray *tags;
 			struct SPropValue *lpProps = NULL;
@@ -2794,7 +2762,7 @@ convert_mapi_props_to_props (EMapiConnection *conn,
 	if (named_ids_list) {
 		GHashTable *replace_hash = NULL;
 
-		res = e_mapi_connection_resolve_named_props (conn, mapi_object_get_id (obj_folder), named_ids_list, named_ids_len, cancellable, perror);
+		res = e_mapi_connection_resolve_named_props (conn, obj_folder, named_ids_list, named_ids_len, cancellable, perror);
 
 		if (res)
 			replace_hash = prepare_maybe_replace_hash (named_ids_list, named_ids_len, TRUE);
@@ -3128,7 +3096,7 @@ add_object_recipients (EMapiConnection *conn,
 	if (named_ids_list) {
 		GHashTable *replace_hash;
 
-		if (!e_mapi_connection_resolve_named_props (conn, mapi_object_get_id (obj_folder), named_ids_list, named_ids_len, cancellable, perror)) {
+		if (!e_mapi_connection_resolve_named_props (conn, obj_folder, named_ids_list, named_ids_len, cancellable, perror)) {
 			ms = MAPI_E_CALL_FAILED;
 			make_mapi_error (perror, "e_mapi_connection_resolve_named_props", ms);
 			goto cleanup;
@@ -3958,8 +3926,8 @@ e_mapi_connection_list_gal_objects (EMapiConnection *conn,
 			gather_mapi_SRestriction_named_ids (restrictions, &named_ids_list, &named_ids_len);
 
 			if (named_ids_list) {
-				/* use 0 for GAL as a folder ID parameter */
-				res = e_mapi_connection_resolve_named_props (conn, 0, named_ids_list, named_ids_len, cancellable, perror);
+				/* use NULL for GAL as a folder ID parameter */
+				res = e_mapi_connection_resolve_named_props (conn, NULL, named_ids_list, named_ids_len, cancellable, perror);
 
 				if (res) {
 					GHashTable *replace_hash = prepare_maybe_replace_hash (named_ids_list, named_ids_len, TRUE);
@@ -4160,7 +4128,8 @@ e_mapi_connection_transfer_gal_objects (EMapiConnection *conn,
 	if (named_ids_list) {
 		GHashTable *replace_hash;
 
-		if (!e_mapi_connection_resolve_named_props (conn, 0, named_ids_list, named_ids_len, cancellable, perror)) {
+		/* use NULL for GAL as a folder ID parameter */
+		if (!e_mapi_connection_resolve_named_props (conn, NULL, named_ids_list, named_ids_len, cancellable, perror)) {
 			ms = MAPI_E_CALL_FAILED;
 			make_mapi_error (perror, "e_mapi_connection_resolve_named_props", ms);
 			goto cleanup;
@@ -4495,32 +4464,24 @@ e_mapi_connection_remove_folder (EMapiConnection *conn,
 
 gboolean
 e_mapi_connection_rename_folder (EMapiConnection *conn,
-				 mapi_id_t fid,
-				 guint32 fid_options,
+				 mapi_object_t *obj_folder,
 				 const gchar *new_name,
 				 GCancellable *cancellable,
 				 GError **perror)
 {
-	enum MAPISTATUS ms;
-	mapi_object_t obj_folder;
+	enum MAPISTATUS ms = MAPI_E_RESERVED;
 	struct SPropValue *props = NULL;
 	TALLOC_CTX *mem_ctx;
-	gboolean result = FALSE;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (new_name != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	e_mapi_debug_print ("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
 	mem_ctx = talloc_new (priv->session);
-	mapi_object_init(&obj_folder);
-
-	/* Open the folder to be renamed */
-	ms = open_folder (conn, 0, &fid, fid_options, &obj_folder, perror);
-	if (ms != MAPI_E_SUCCESS) {
-		goto cleanup;
-	}
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 		ms = MAPI_E_USER_CANCEL;
@@ -4528,111 +4489,65 @@ e_mapi_connection_rename_folder (EMapiConnection *conn,
 	}
 
 	props = talloc_zero(mem_ctx, struct SPropValue);
-	set_SPropValue_proptag (props, PR_DISPLAY_NAME_UNICODE, new_name);
+	set_SPropValue_proptag (props, PidTagDisplayName, new_name);
 
-	ms = SetProps (&obj_folder, MAPI_PROPS_SKIP_NAMEDID_CHECK, props, 1);
+	ms = SetProps (obj_folder, MAPI_PROPS_SKIP_NAMEDID_CHECK, props, 1);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "SetProps", ms);
 		goto cleanup;
 	}
 
-	result = TRUE;
-
  cleanup:
-	mapi_object_release(&obj_folder);
-	talloc_free(mem_ctx);
+	talloc_free (mem_ctx);
 	UNLOCK ();
 
-	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
+	e_mapi_debug_print ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
-	return result;
+	return ms == MAPI_E_SUCCESS;
 }
 
 /* moves folder 'src_fid' to folder 'des_fid' under name 'new_name' (no path in a new_name),
    'src_parent_fid' is folder ID of a parent of the src_fid */
 gboolean
 e_mapi_connection_move_folder  (EMapiConnection *conn,
-				mapi_id_t src_fid,
-				mapi_id_t src_parent_fid,
-				guint32 src_fid_options,
-				mapi_id_t des_fid,
-				guint32 des_fid_options,
+				mapi_object_t *src_obj_folder,
+				mapi_object_t *src_parent_obj_folder,
+				mapi_object_t *des_obj_folder,
 				const gchar *new_name,
 				GCancellable *cancellable,
 				GError **perror)
 {
-	enum MAPISTATUS ms;
-	mapi_object_t obj_src, obj_src_parent, obj_des;
-	gboolean result = FALSE;
+	enum MAPISTATUS ms = MAPI_E_RESERVED;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
-
-	e_return_val_mapi_error_if_fail (src_fid != 0, MAPI_E_INVALID_PARAMETER, FALSE);
-	e_return_val_mapi_error_if_fail (src_parent_fid != 0, MAPI_E_INVALID_PARAMETER, FALSE);
-	e_return_val_mapi_error_if_fail (des_fid != 0, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (src_obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (src_parent_obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (des_obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (new_name != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (strchr (new_name, '/') == NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
 	LOCK ();
 
-	mapi_object_init (&obj_src);
-	mapi_object_init (&obj_src_parent);
-	mapi_object_init (&obj_des);
-
-	ms = open_folder (conn, 0, &src_fid, src_fid_options, &obj_src, perror);
-	if (ms != MAPI_E_SUCCESS) {
-		goto cleanup;
-	}
-
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 		ms = MAPI_E_USER_CANCEL;
-		goto cleanup;
+	} else {
+		ms = MoveFolder (src_obj_folder, src_parent_obj_folder, des_obj_folder, (gchar *) new_name, TRUE);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "MoveFolder", ms);
+		}
 	}
-
-	ms = open_folder (conn, 0, &src_parent_fid, src_fid_options, &obj_src_parent, perror);
-	if (ms != MAPI_E_SUCCESS) {
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-		ms = MAPI_E_USER_CANCEL;
-		goto cleanup;
-	}
-
-	ms = open_folder (conn, 0, &des_fid, des_fid_options, &obj_des, perror);
-	if (ms != MAPI_E_SUCCESS) {
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-		ms = MAPI_E_USER_CANCEL;
-		goto cleanup;
-	}
-
-	ms = MoveFolder (&obj_src, &obj_src_parent, &obj_des, (gchar *)new_name, TRUE);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "MoveFolder", ms);
-		goto cleanup;
-	}
-
-	result = TRUE;
-
- cleanup:
-	mapi_object_release (&obj_des);
-	mapi_object_release (&obj_src_parent);
-	mapi_object_release (&obj_src);
 
 	UNLOCK ();
 
-	return result;
+	return ms == MAPI_E_SUCCESS;
 }
 
 /* named_ids_list contains pointers to EResolveNamedIDsData structure;
-   fid 0 is reserved for lookup in GAL */
+   obj_folder NULL is reserved for lookup in GAL */
 gboolean
 e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
-					mapi_id_t fid,
+					mapi_object_t *obj_folder,
 					EResolveNamedIDsData *named_ids_list,
 					guint named_ids_n_elems,
 					GCancellable *cancellable,
@@ -4640,7 +4555,7 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 {
 	enum MAPISTATUS ms;
 	TALLOC_CTX *mem_ctx;
-	mapi_object_t obj_folder;
+	mapi_id_t fid;
 	struct mapi_nameid *nameid;
 	struct SPropTagArray *SPropTagArray;
 	guint i, j;
@@ -4655,6 +4570,11 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 	e_mapi_debug_print ("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	LOCK ();
+
+	fid = 0;
+	if (obj_folder)
+		fid = mapi_object_get_id (obj_folder);
+
 	if (priv->named_ids) {
 		gint64 i64 = fid;
 		GHashTable *ids = g_hash_table_lookup (priv->named_ids, &i64);
@@ -4683,18 +4603,11 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 	}
 
 	mem_ctx = talloc_new (priv->session);
-	mapi_object_init (&obj_folder);
 
 	nameid = mapi_nameid_new (mem_ctx);
 	SPropTagArray = talloc_zero (mem_ctx, struct SPropTagArray);
 
-	if (fid) {
-		/* Attempt to open the folder */
-		ms = open_folder (conn, 0, &fid, 0, &obj_folder, perror);
-		if (ms != MAPI_E_SUCCESS) {
-			goto cleanup;
-		}
-	} else {
+	if (!obj_folder) {
 		if (!priv->session->nspi || !priv->session->nspi->ctx) {
 			ms = MAPI_E_UNCONFIGURED;
 			goto cleanup;
@@ -4727,8 +4640,8 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	if (fid) {
-		ms = mapi_nameid_GetIDsFromNames (nameid, &obj_folder, SPropTagArray);
+	if (obj_folder) {
+		ms = mapi_nameid_GetIDsFromNames (nameid, obj_folder, SPropTagArray);
 	} else {
 		/* lookup in GAL */
 		struct SPropTagArray *gal_tags;
@@ -4859,7 +4772,6 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
  cleanup:
 	if (todo)
 		g_ptr_array_free (todo, TRUE);
-	mapi_object_release (&obj_folder);
 	talloc_free (mem_ctx);
 
 	UNLOCK ();
@@ -4872,96 +4784,23 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 /* returns MAPI_E_RESERVED on any error */
 uint32_t
 e_mapi_connection_resolve_named_prop (EMapiConnection *conn,
-				      mapi_id_t fid,
+				      mapi_object_t *obj_folder,
 				      uint32_t pidlid_propid,
 				      GCancellable *cancellable,
 				      GError **perror)
 {
-	enum MAPISTATUS ms;
-	TALLOC_CTX *mem_ctx;
-	mapi_object_t obj_folder;
-	struct mapi_nameid *nameid;
-	struct SPropTagArray *SPropTagArray;
-	uint32_t res = MAPI_E_RESERVED;
+	EResolveNamedIDsData named_ids_list[1];
 
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, res);
-	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, res);
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, MAPI_E_RESERVED);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, MAPI_E_RESERVED);
 
-	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
+	named_ids_list[0].pidlid_propid = pidlid_propid;
+	named_ids_list[0].propid = MAPI_E_RESERVED;
 
-	LOCK ();
+	if (!e_mapi_connection_resolve_named_props (conn, obj_folder, named_ids_list, 1, cancellable, perror))
+		return MAPI_E_RESERVED;
 
-	if (priv->named_ids) {
-		gint64 i64 = fid;
-		GHashTable *ids = g_hash_table_lookup (priv->named_ids, &i64);
-
-		if (ids) {
-			res = GPOINTER_TO_UINT (g_hash_table_lookup (ids, GUINT_TO_POINTER (pidlid_propid)));
-			if (res != 0) {
-				UNLOCK ();
-				e_mapi_debug_print ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-				return res;
-			}
-
-			res = MAPI_E_RESERVED;
-		}
-	}
-
-	mem_ctx = talloc_new (priv->session);
-	mapi_object_init(&obj_folder);
-
-	nameid = mapi_nameid_new(mem_ctx);
-	SPropTagArray = talloc_zero(mem_ctx, struct SPropTagArray);
-
-	/* Attempt to open the folder */
-	ms = open_folder (conn, 0, &fid, 0, &obj_folder, perror);
-	if (ms != MAPI_E_SUCCESS) {
-		goto cleanup;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-		ms = MAPI_E_USER_CANCEL;
-		goto cleanup;
-	}
-
-	mapi_nameid_canonical_add (nameid, pidlid_propid);
-
-	ms = mapi_nameid_GetIDsFromNames(nameid, &obj_folder, SPropTagArray);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "mapi_nameid_GetIDsFromNames", ms);
-		goto cleanup;
-	}
-
-	res = SPropTagArray->aulPropTag[0];
-	if ((res & 0xFFFF) == PT_ERROR)
-		res = MAPI_E_RESERVED;
-
-	if (priv->named_ids) {
-		gint64 i64 = fid;
-		GHashTable *ids = g_hash_table_lookup (priv->named_ids, &i64);
-
-		if (!ids) {
-			gint64 *i64ptr = g_malloc (sizeof (gint64));
-
-			*i64ptr = fid;
-			ids = g_hash_table_new (g_direct_hash, g_direct_equal);
-
-			g_hash_table_insert (priv->named_ids, i64ptr, ids);
-		}
-
-		g_hash_table_insert (ids, GUINT_TO_POINTER (pidlid_propid), GUINT_TO_POINTER (res));
-	}
-
- cleanup:
-	mapi_object_release(&obj_folder);
-	talloc_free(mem_ctx);
-
-	UNLOCK ();
-
-	e_mapi_debug_print("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
-
-	return res;
+	return named_ids_list[0].propid;
 }
 
 /* returns named id, aka PidLid/PidName for a given proptag, which might be previously
@@ -5806,7 +5645,7 @@ e_mapi_connection_resolve_username (EMapiConnection *conn,
 		if (named_ids_list) {
 			GHashTable *replace_hash;
 
-			if (!e_mapi_connection_resolve_named_props (conn, 0, named_ids_list, named_ids_len, cancellable, perror)) {
+			if (!e_mapi_connection_resolve_named_props (conn, NULL, named_ids_list, named_ids_len, cancellable, perror)) {
 				goto cleanup;
 			}
 

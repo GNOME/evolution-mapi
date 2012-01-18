@@ -510,7 +510,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 /* Opens dialog to subscribe to folders of other
    users in the given store */
 void
-e_mapi_subscribe_foreign_folder	(GtkWindow *parent,
+e_mapi_subscribe_foreign_folder (GtkWindow *parent,
 				 CamelSession *session,
 				 CamelStore *store)
 {

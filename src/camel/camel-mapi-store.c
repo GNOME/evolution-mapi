@@ -1431,9 +1431,16 @@ mapi_store_rename_folder_sync (CamelStore *store,
 
 	if (tmp == NULL || g_str_equal (old_parent, new_parent)) {
 		gchar *folder_id;
+		gboolean status = FALSE;
+		mapi_object_t obj_folder;
+
+		if (cms_open_folder (mapi_store, priv->conn, old_fid, &obj_folder, cancellable, &local_error)) {
+			status = e_mapi_connection_rename_folder (priv->conn, &obj_folder, tmp ? tmp : new_name, cancellable, &local_error);
+			e_mapi_connection_close_folder (priv->conn, &obj_folder, cancellable, &local_error);
+		}
 
 		/* renaming in the same folder, thus no MoveFolder necessary */
-		if (!e_mapi_connection_rename_folder (priv->conn, old_fid, 0, tmp ? tmp : new_name, cancellable, &local_error)) {
+		if (!status) {
 			if (local_error) {
 				if (!e_mapi_utils_propagate_cancelled_error (local_error, error))
 					g_set_error (
@@ -1494,31 +1501,49 @@ mapi_store_rename_folder_sync (CamelStore *store,
 				}
 				camel_store_summary_info_free (mapi_store->summary, new_si);
 			}
-		} else if (!old_parent_fid_str || !new_parent_fid_str ||
-			   !e_mapi_util_mapi_id_from_string (old_parent_fid_str, &old_parent_fid) ||
-			   !e_mapi_util_mapi_id_from_string (new_parent_fid_str, &new_parent_fid) ||
-			   !e_mapi_connection_move_folder (priv->conn, old_fid, old_parent_fid, 0, new_parent_fid, 0, tmp, cancellable, &local_error)) {
-			camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-			if (local_error) {
-				if (!e_mapi_utils_propagate_cancelled_error (local_error, error))
+		} else {
+			gboolean status = FALSE;
+
+			if (old_parent_fid_str && new_parent_fid_str &&
+			   e_mapi_util_mapi_id_from_string (old_parent_fid_str, &old_parent_fid) &&
+			   e_mapi_util_mapi_id_from_string (new_parent_fid_str, &new_parent_fid)) {
+				mapi_object_t src_obj_folder, src_parent_obj_folder, des_obj_folder;
+
+				if (cms_open_folder (mapi_store, priv->conn, old_fid, &src_obj_folder, cancellable, &local_error)) {
+					if (cms_open_folder (mapi_store, priv->conn, old_parent_fid, &src_parent_obj_folder, cancellable, &local_error)) {
+						if (cms_open_folder (mapi_store, priv->conn, new_parent_fid, &des_obj_folder, cancellable, &local_error)) {
+							status = e_mapi_connection_move_folder (priv->conn, &src_obj_folder, &src_parent_obj_folder, &des_obj_folder, tmp, cancellable, &local_error);
+							e_mapi_connection_close_folder (priv->conn, &des_obj_folder, cancellable, &local_error);
+						}
+						e_mapi_connection_close_folder (priv->conn, &src_parent_obj_folder, cancellable, &local_error);
+					}
+					e_mapi_connection_close_folder (priv->conn, &src_obj_folder, cancellable, &local_error);
+				}
+			}
+
+			if (!status) {
+				camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
+				if (local_error) {
+					if (!e_mapi_utils_propagate_cancelled_error (local_error, error))
+						g_set_error (
+							error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+							_("Cannot rename MAPI folder '%s' to '%s': %s"),
+							old_name, new_name, local_error->message);
+					g_error_free (local_error);
+				} else {
 					g_set_error (
 						error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-						_("Cannot rename MAPI folder '%s' to '%s': %s"),
-						old_name, new_name, local_error->message);
-				g_error_free (local_error);
+						_("Cannot rename MAPI folder '%s' to '%s'"),
+						old_name, new_name);
+				}
+				g_free (old_parent);
+				g_free (new_parent);
+				return FALSE;
 			} else {
-				g_set_error (
-					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-					_("Cannot rename MAPI folder '%s' to '%s'"),
-					old_name, new_name);
+				/* folder was moved, update all subfolders immediately, thus
+				   the next get_folder_info call will know about them */
+				mapi_rename_folder_infos (mapi_store, old_name, new_name);
 			}
-			g_free (old_parent);
-			g_free (new_parent);
-			return FALSE;
-		} else {
-			/* folder was moved, update all subfolders immediately, thus
-			   the next get_folder_info call will know about them */
-			mapi_rename_folder_infos (mapi_store, old_name, new_name);
 		}
 
 		folder_id = g_strdup (old_fid_str);
