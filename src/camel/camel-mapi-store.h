@@ -52,7 +52,6 @@
 
 #define DISPLAY_NAME_FAVORITES		_("Favorites")
 #define DISPLAY_NAME_FOREIGN_FOLDERS	_("Foreign folders")
-#define DISPLAY_NAME_ALL_PUBLIC_FOLDERS	_("All Public Folders")
 
 G_BEGIN_DECLS
 

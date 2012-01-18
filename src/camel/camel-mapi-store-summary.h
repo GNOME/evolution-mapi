@@ -54,10 +54,11 @@ typedef struct _CamelMapiStoreSummaryPrivate CamelMapiStoreSummaryPrivate;
 typedef struct _CamelMapiStoreInfo CamelMapiStoreInfo;
 
 enum CamelMapiStoreFolderFlags {
-	CAMEL_MAPI_STORE_FOLDER_FLAG_PERSONAL	= 1 << 0,
-	CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC	= 1 << 1,
-	CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN	= 1 << 2,
-	CAMEL_MAPI_STORE_FOLDER_FLAG_MAIL	= 1 << 3
+	CAMEL_MAPI_STORE_FOLDER_FLAG_PERSONAL	 = 1 << 0,
+	CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC	 = 1 << 1,
+	CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN	 = 1 << 2,
+	CAMEL_MAPI_STORE_FOLDER_FLAG_MAIL	 = 1 << 3,
+	CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC_REAL = 1 << 4 /* real public folder; the unreal is that under Favorites */
 };
 
 enum {

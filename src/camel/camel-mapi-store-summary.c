@@ -266,6 +266,7 @@ camel_mapi_store_summary_add_from_full (CamelStoreSummary *s,
 CamelStoreInfo *
 camel_mapi_store_summary_get_folder_id (CamelStoreSummary *s, mapi_id_t folder_id)
 {
+	CamelStoreInfo *adept = NULL;
 	gint ii, count;
 
 	count = camel_store_summary_count (s);
@@ -276,11 +277,25 @@ camel_mapi_store_summary_get_folder_id (CamelStoreSummary *s, mapi_id_t folder_i
 		if (si == NULL)
 			continue;
 
-		if (msi->folder_id == folder_id)
-			return si;
+		if (msi->folder_id == folder_id) {
+			/* public folders can be stored in a summary twice, once as "All Public Folders/..."
+			   and once as a subscribed variant, "Favorites/...". In that case prefer
+			   the subscribed folder folder, from the general public folder
+			*/
+			if ((msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC_REAL) == 0) {
+				if (adept)
+					camel_store_summary_info_free (s, adept);
+				return si;
+			} else {
+				if (adept)
+					camel_store_summary_info_free (s, adept);
+				adept = si;
+				camel_store_summary_info_ref (s, adept);
+			}
+		}
 
 		camel_store_summary_info_free (s, si);
 	}
 
-	return NULL;
+	return adept;
 }
