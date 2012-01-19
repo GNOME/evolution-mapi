@@ -43,7 +43,6 @@
 #include <shell/e-shell-view.h>
 #include <shell/e-shell-window.h>
 
-#include <mail/mail-config.h>
 #include <mail/em-config.h>
 #include <mail/em-folder-tree.h>
 
