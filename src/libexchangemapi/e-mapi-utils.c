@@ -589,6 +589,44 @@ e_mapi_util_recip_entryid_decode (EMapiConnection *conn, const struct Binary_r *
 	return FALSE;
 }
 
+gboolean
+e_mapi_util_recip_entryid_decode_dn (const struct SBinary_short *entryid,
+				     gchar **exchange_dn)
+{
+	struct Binary_r ei;
+
+	if (!entryid)
+		return FALSE;
+
+	ei.cb = entryid->cb;
+	ei.lpb = entryid->lpb;
+
+	return recip_entryid_decode_ex (&ei, exchange_dn);
+}
+
+gboolean
+e_mapi_util_recip_entryid_equal (const struct SBinary_short *entryid1,
+				 const struct SBinary_short *entryid2)
+{
+	gchar *dn1 = NULL, *dn2 = NULL;
+	gboolean same = FALSE;
+
+	if (!entryid1 && !entryid2)
+		return TRUE;
+
+	if (!entryid1 || !entryid2 || !entryid1->lpb || !entryid2->lpb || entryid1->cb != entryid2->cb)
+		return FALSE;
+
+	same = e_mapi_util_recip_entryid_decode_dn (entryid1, &dn1) &&
+	       e_mapi_util_recip_entryid_decode_dn (entryid2, &dn2) &&
+	       dn1 && dn2 && g_ascii_strcasecmp (dn1, dn2) == 0;
+
+	g_free (dn1);
+	g_free (dn2);
+
+	return same;
+}
+
 /**
  * e_mapi_util_profiledata_from_settings:
  * @empd: destination for profile settings

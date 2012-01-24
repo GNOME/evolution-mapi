@@ -219,7 +219,7 @@ ebbm_gal_transfer_contacts (EBookBackendMAPI *ebma,
 	tg.book_view = book_view;
 	tg.notify_contact_data = notify_contact_data;
 
-	status = e_mapi_connection_transfer_gal_objects	(conn, get_mids, transfer_gal_cb, &tg, cancellable, &mapi_error);
+	status = e_mapi_connection_transfer_gal_objects	(conn, get_mids, NULL, NULL, transfer_gal_cb, &tg, cancellable, &mapi_error);
 
 	if (mapi_error) {
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch GAL entries"));

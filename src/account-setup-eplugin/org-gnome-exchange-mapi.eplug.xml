@@ -77,22 +77,51 @@
 			</group>
 		</hook>
 
-		<hook class="org.gnome.evolution.ui:1.0">
-		  <ui-manager id="org.gnome.evolution.mail">
-		    <popup name="mail-folder-popup">
-		      <placeholder name="mail-folder-popup-actions">
-			<menuitem action="mail-mapi-folder-size"/>
-			<menuitem action="mail-mapi-subscribe-foreign-folder"/>
-		      </placeholder>
-		    </popup>
-		  </ui-manager>
-		</hook>
-
 		<hook class="org.gnome.evolution.mail.popup:1.0">
 			<menu id="org.gnome.evolution.mail.foldertree.popup" target="folder"
 				factory="org_gnome_folder_size_display_popup">
 			</menu>
 		</hook>
 
+		<hook class="org.gnome.evolution.ui:1.0">
+		  <ui-manager id="org.gnome.evolution.mail" callback="mapi_ui_init_mail">
+		    <popup name="mail-folder-popup">
+		      <placeholder name="mail-folder-popup-actions">
+			<menuitem action="mail-mapi-folder-size"/>
+			<menuitem action="mail-mapi-subscribe-foreign-folder"/>
+			<menuitem action="mail-mapi-folder-permissions"/>
+		      </placeholder>
+		    </popup>
+		  </ui-manager>
+
+		  <ui-manager id="org.gnome.evolution.calendars" callback="mapi_ui_init_calendar">
+		    <popup name="calendar-popup">
+		      <placeholder name="calendar-popup-actions">
+			<menuitem action="calendar-mapi-folder-permissions"/>
+		      </placeholder>
+		    </popup>
+		  </ui-manager>
+		  <ui-manager id="org.gnome.evolution.tasks" callback="mapi_ui_init_tasks">
+		    <popup name="task-list-popup">
+		      <placeholder name="task-list-popup-actions">
+			<menuitem action="tasks-mapi-folder-permissions"/>
+		      </placeholder>
+		    </popup>
+		  </ui-manager>
+		  <ui-manager id="org.gnome.evolution.memos" callback="mapi_ui_init_memos">
+		    <popup name="memo-list-popup">
+		      <placeholder name="memo-list-popup-actions">
+			<menuitem action="memos-mapi-folder-permissions"/>
+		      </placeholder>
+		    </popup>
+		  </ui-manager>
+		  <ui-manager id="org.gnome.evolution.contacts" callback="mapi_ui_init_contacts">
+		    <popup name="address-book-popup">
+		      <placeholder name="address-book-popup-actions">
+			<menuitem action="contacts-mapi-folder-permissions"/>
+		      </placeholder>
+		    </popup>
+		  </ui-manager>
+		</hook>
 	</e-plugin>
 </e-plugin-list>

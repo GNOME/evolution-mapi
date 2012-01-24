@@ -27,6 +27,7 @@
 #include <gtk/gtk.h>
 
 #include "e-mapi-account-listener.h"
+#include <e-mapi-connection.h>
 
 #define MAPI_URI_PREFIX   "mapi://" 
 #define MAPI_PREFIX_LENGTH 7
@@ -45,5 +46,14 @@ void			e_mapi_run_in_thread_with_feedback	(GtkWindow *parent,
 								 EMapiSetupFunc idle_func,
 								 gpointer user_data,
 								 GDestroyNotify free_user_data);
+
+EMapiConnection	*	e_mapi_account_open_connection_for	(GtkWindow *parent,
+								 const gchar *login_profile,
+								 const gchar *login_username,
+								 const gchar *login_url,
+								 GCancellable *cancellable,
+								 GError **perror);
+
+void			e_mapi_account_unref_conn_in_thread	(EMapiConnection *conn);
 
 #endif /* E_MAPI_ACCOUNT_SETUP_H */

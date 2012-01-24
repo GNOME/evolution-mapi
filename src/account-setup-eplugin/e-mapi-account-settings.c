@@ -30,6 +30,7 @@
 
 #include <libedataserver/e-xml-hash-utils.h>
 #include <libedataserverui/e-passwords.h>
+#include <libedataserverui/e-source-selector.h>
 #include <libedataserver/e-account.h>
 #include <e-util/e-util.h>
 #include <e-util/e-dialog-utils.h>
@@ -48,11 +49,12 @@
 
 #include "e-mapi-account-listener.h"
 #include "e-mapi-subscribe-foreign-folder.h"
+#include "e-mapi-edit-folder-permissions.h"
+
+#include "camel/camel-mapi-store.h"
+#include "camel/camel-mapi-store-summary.h"
 
 #define FOLDERSIZE_MENU_ITEM 0
-
-gboolean  e_plugin_ui_init (GtkUIManager *ui_manager, EShellView *shell_view);
-GtkWidget *org_gnome_e_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data);
 
 enum {
 	COL_FOLDERSIZE_NAME = 0,
@@ -218,60 +220,48 @@ folder_size_clicked (GtkButton *button,
 
 static gchar *
 get_profile_name_from_folder_tree (EShellView *shell_view,
-				   gchar **pfolder_uri,
+				   gchar **pfolder_path,
 				   CamelStore **pstore)
 {
 	EShellSidebar *shell_sidebar;
 	EMFolderTree *folder_tree;
-	gchar *folder_uri;
-	GtkTreeSelection *selection;
-	gchar *profile = NULL;
+	gchar *profile = NULL, *selected_path = NULL;
+	CamelStore *selected_store = NULL;
 
 	/* Get hold of Folder Tree */
 	shell_sidebar = e_shell_view_get_shell_sidebar (shell_view);
 	g_object_get (shell_sidebar, "folder-tree", &folder_tree, NULL);
-	folder_uri = em_folder_tree_get_selected_uri (folder_tree);
-	selection = em_folder_tree_model_get_selection (EM_FOLDER_TREE_MODEL (gtk_tree_view_get_model (GTK_TREE_VIEW (folder_tree))));
-	if (selection) {
-		GtkTreeIter iter;
-		GtkTreeModel *model = NULL;
+	if (em_folder_tree_get_selected (folder_tree, &selected_store, &selected_path) ||
+	    em_folder_tree_store_root_selected (folder_tree, &selected_store)) {
+		if (selected_store) {
+			CamelProvider *provider = camel_service_get_provider (CAMEL_SERVICE (selected_store));
 
-		if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
-			gboolean is_folder = FALSE;
-			CamelStore *store = NULL;
-
-			gtk_tree_model_get (model, &iter,
-				COL_BOOL_IS_FOLDER, &is_folder,
-				COL_POINTER_CAMEL_STORE, &store,
-				-1);
-
-			if (is_folder && !store) {
-				CamelFolder *folder = em_folder_tree_get_selected_folder (folder_tree);
-
-				if (folder)
-					store = camel_folder_get_parent_store (folder);
-			}
-
-			if (CAMEL_IS_SERVICE (store)) {
+			if (provider && g_ascii_strcasecmp (provider->protocol, "mapi") == 0) {
 				CamelService *service;
 				CamelSettings *settings;
 
-				service = CAMEL_SERVICE (store);
+				service = CAMEL_SERVICE (selected_store);
 				settings = camel_service_get_settings (service);
 				g_object_get (settings, "profile", &profile, NULL);
 
 				if (pstore && profile)
-					*pstore = g_object_ref (store);
+					*pstore = g_object_ref (selected_store);
+
+				if (pfolder_path)
+					*pfolder_path = selected_path;
+				else
+					g_free (selected_path);
+
+				selected_path = NULL;
 			}
+
+			g_object_unref (selected_store);
 		}
+
+		g_free (selected_path);
 	}
 
 	g_object_unref (folder_tree);
-
-	if (pfolder_uri)
-		*pfolder_uri = folder_uri;
-	else
-		g_free (folder_uri);
 
 	return profile;
 }
@@ -280,16 +270,12 @@ static void
 action_folder_size_cb (GtkAction *action,
 		       EShellView *shell_view)
 {
-	gchar *folder_uri = NULL;
-	gchar *profile = NULL;
+	gchar *profile;
 
-	profile = get_profile_name_from_folder_tree (shell_view, &folder_uri, NULL);
-	g_return_if_fail (folder_uri != NULL);
-
-	if (g_str_has_prefix (folder_uri, "mapi://"))
+	profile = get_profile_name_from_folder_tree (shell_view, NULL, NULL);
+	if (profile)
 		mapi_settings_run_folder_size_dialog (profile, NULL);
 
-	g_free (folder_uri);
 	g_free (profile);
 }
 
@@ -307,8 +293,6 @@ action_subscribe_foreign_folder_cb (GtkAction *action,
 	if (!profile)
 		return;
 
-	g_free (profile);
-
 	parent = GTK_WINDOW (e_shell_view_get_shell_window (shell_view));
 	backend = e_shell_view_get_shell_backend (shell_view);
 	g_object_get (G_OBJECT (backend), "session", &session, NULL);
@@ -317,7 +301,58 @@ action_subscribe_foreign_folder_cb (GtkAction *action,
 
 	g_object_unref (session);
 	g_object_unref (store);
+	g_free (profile);
 }
+
+static void
+action_folder_permissions_mail_cb (GtkAction *action,
+				   EShellView *shell_view)
+{
+	gchar *profile, *folder_path = NULL;
+	GtkWindow *parent;
+	CamelStore *store = NULL;
+	CamelMapiStore *mapi_store;
+	CamelNetworkSettings *network_settings;
+	CamelStoreInfo *si;
+
+	profile = get_profile_name_from_folder_tree (shell_view, &folder_path, &store);
+	if (!profile)
+		return;
+
+	mapi_store = CAMEL_MAPI_STORE (store);
+	g_return_if_fail (mapi_store != NULL);
+	g_return_if_fail (folder_path != NULL);
+
+	network_settings = CAMEL_NETWORK_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (store)));
+	g_return_if_fail (network_settings != NULL);
+
+	parent = GTK_WINDOW (e_shell_view_get_shell_window (shell_view));
+
+	si = camel_store_summary_path (mapi_store->summary, folder_path);
+	if (!si) {
+		e_notice (parent, GTK_MESSAGE_ERROR, _("Cannot edit permissions of folder '%s', choose other folder."), folder_path);
+	} else {
+		CamelMapiStoreInfo *msi = (CamelMapiStoreInfo *) si;
+
+		e_mapi_edit_folder_permissions (parent,
+			profile,
+			camel_network_settings_get_user (network_settings),
+			camel_network_settings_get_host (network_settings),
+			camel_service_get_display_name (CAMEL_SERVICE (store)),
+			folder_path,
+			msi->folder_id,
+			(msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN) != 0 ? E_MAPI_FOLDER_CATEGORY_FOREIGN :
+			(msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC) != 0 ? E_MAPI_FOLDER_CATEGORY_PUBLIC :
+			E_MAPI_FOLDER_CATEGORY_PERSONAL,
+			msi->foreign_username,
+			FALSE);
+	}
+
+	g_object_unref (store);
+	g_free (folder_path);
+}
+
+GtkWidget *org_gnome_e_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data);
 
 /* used only in Account Editor */
 GtkWidget *
@@ -378,7 +413,32 @@ org_gnome_e_mapi_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 	return GTK_WIDGET (vsettings);
 }
 
-static GtkActionEntry folder_context_entries[] = {
+static void
+mapi_plugin_enable_actions (GtkActionGroup *action_group,
+			    const GtkActionEntry *entries,
+			    guint n_entries,
+			    gboolean can_show,
+			    gboolean is_online)
+{
+	gint ii;
+
+	g_return_if_fail (action_group != NULL);
+	g_return_if_fail (entries != NULL);
+
+	for (ii = 0; ii < n_entries; ii++) {
+		GtkAction *action;
+
+		action = gtk_action_group_get_action (action_group, entries[ii].name);
+		if (!action)
+			continue;
+
+		gtk_action_set_visible (action, can_show);
+		if (can_show)
+			gtk_action_set_sensitive (action, is_online);
+	}
+}
+
+static GtkActionEntry mail_account_context_entries[] = {
 
 	{ "mail-mapi-folder-size",
 	  NULL,
@@ -395,56 +455,53 @@ static GtkActionEntry folder_context_entries[] = {
 	  G_CALLBACK (action_subscribe_foreign_folder_cb) }
 };
 
+static GtkActionEntry mail_folder_context_entries[] = {
+	{ "mail-mapi-folder-permissions",
+	  "folder-new",
+	  N_("Permissions..."),
+	  NULL,
+	  N_("Edit MAPI folder permissions"),
+	  G_CALLBACK (action_folder_permissions_mail_cb) }
+};
+
 static void
-mapi_plugin_update_actions_cb (EShellView *shell_view,
-			       GtkActionEntry *entries)
+mapi_plugin_update_actions_mail_cb (EShellView *shell_view,
+				    GtkActionEntry *entries)
 {
 	EShellWindow *shell_window;
 	GtkActionGroup *action_group;
 	GtkUIManager *ui_manager;
 	EShellSidebar *shell_sidebar;
 	EMFolderTree *folder_tree;
-	gchar *folder_uri = NULL;
-	CamelURL *url = NULL;
-	gboolean show_menu_entry = FALSE;
-	gint ii;
-	GSList *actions = NULL, *iter;
+	CamelStore *selected_store = NULL;
+	gchar *selected_path = NULL;
+	gboolean account_node = FALSE, folder_node = FALSE;
 	gboolean online = FALSE;
 
 	shell_sidebar = e_shell_view_get_shell_sidebar (shell_view);
 	g_object_get (shell_sidebar, "folder-tree", &folder_tree, NULL);
-	folder_uri = em_folder_tree_get_selected_uri (folder_tree);
-	g_object_unref (folder_tree);
-	if (!(folder_uri && *folder_uri)) {
-		g_free (folder_uri);
-		return;
+	if (em_folder_tree_get_selected (folder_tree, &selected_store, &selected_path) ||
+	    em_folder_tree_store_root_selected (folder_tree, &selected_store)) {
+		if (selected_store) {
+			CamelProvider *provider = camel_service_get_provider (CAMEL_SERVICE (selected_store));
+
+			if (provider && g_ascii_strcasecmp (provider->protocol, "mapi") == 0) {
+				account_node = !selected_path || !*selected_path;
+				folder_node = !account_node;
+			}
+
+			g_object_unref (selected_store);
+		}
 	}
+	g_object_unref (folder_tree);
+
+	g_free (selected_path);
 
 	shell_window = e_shell_view_get_shell_window (shell_view);
-
 	ui_manager = e_shell_window_get_ui_manager (shell_window);
 	action_group = e_lookup_action_group (ui_manager, "mail");
 
-	for (ii = 0; ii < G_N_ELEMENTS (folder_context_entries); ii++) {
-		GtkAction *action;
-
-		action = gtk_action_group_get_action (action_group, folder_context_entries[ii].name);
-		if (action)
-			actions = g_slist_prepend (actions, action);
-	}
-
-	/* Show / Hide action entry */
-	if (g_str_has_prefix (folder_uri, "mapi://")) {
-		show_menu_entry = TRUE;
-		url = camel_url_new (folder_uri, NULL);
-		if (url && url->path && strlen (url->path) > 1)
-			show_menu_entry = FALSE;
-		camel_url_free (url);
-	}
-
-	g_free (folder_uri);
-
-	if (show_menu_entry) {
+	if (account_node || folder_node) {
 		EShellBackend *backend;
 		CamelSession *session = NULL;
 
@@ -457,20 +514,15 @@ mapi_plugin_update_actions_cb (EShellView *shell_view,
 			g_object_unref (session);
 	}
 
-	for (iter = actions; iter; iter = iter->next) {
-		GtkAction *action = iter->data;
-
-		gtk_action_set_visible (action, show_menu_entry);
-		if (show_menu_entry)
-			gtk_action_set_sensitive (action, online);
-	}
-
-	g_slist_free (actions);
+	mapi_plugin_enable_actions (action_group, mail_account_context_entries, G_N_ELEMENTS (mail_account_context_entries), account_node, online);
+	mapi_plugin_enable_actions (action_group, mail_folder_context_entries, G_N_ELEMENTS (mail_folder_context_entries), folder_node, online);
 }
 
+gboolean mapi_ui_init_mail (GtkUIManager *ui_manager, EShellView *shell_view);
+
 gboolean
-e_plugin_ui_init (GtkUIManager *ui_manager,
-                  EShellView *shell_view)
+mapi_ui_init_mail (GtkUIManager *ui_manager,
+                   EShellView *shell_view)
 {
 	EShellWindow *shell_window;
 	GtkActionGroup *action_group;
@@ -480,14 +532,247 @@ e_plugin_ui_init (GtkUIManager *ui_manager,
 
 	/* Add actions to the "mail" action group. */
 	e_action_group_add_actions_localized (action_group, GETTEXT_PACKAGE,
-		folder_context_entries, G_N_ELEMENTS (folder_context_entries), shell_view);
+		mail_account_context_entries, G_N_ELEMENTS (mail_account_context_entries), shell_view);
+	e_action_group_add_actions_localized (action_group, GETTEXT_PACKAGE,
+		mail_folder_context_entries, G_N_ELEMENTS (mail_folder_context_entries), shell_view);
 
 	/* Decide whether we want this option to be visible or not */
 	g_signal_connect (shell_view, "update-actions",
-			  G_CALLBACK (mapi_plugin_update_actions_cb),
+			  G_CALLBACK (mapi_plugin_update_actions_mail_cb),
 			  shell_view);
 
 	g_object_unref (action_group);
+
+	return TRUE;
+}
+
+static gboolean
+get_selected_mapi_source (EShellView *shell_view,
+			  ESource **selected_source)
+{
+	ESource *source;
+	gchar *uri = NULL;
+	EShellSidebar *shell_sidebar;
+	ESourceSelector *selector = NULL;
+
+	g_return_val_if_fail (shell_view != NULL, FALSE);
+
+	shell_sidebar = e_shell_view_get_shell_sidebar (shell_view);
+	g_return_val_if_fail (shell_sidebar != NULL, FALSE);
+
+	g_object_get (shell_sidebar, "selector", &selector, NULL);
+	g_return_val_if_fail (selector != NULL, FALSE);
+
+	source = e_source_selector_peek_primary_selection (selector);
+	uri = source ? e_source_get_uri (source) : NULL;
+	if (uri && g_str_has_prefix (uri, "mapi://"))
+		source = g_object_ref (source);
+	else
+		source = NULL;
+
+	g_free (uri);
+	g_object_unref (selector);
+
+	if (selected_source)
+		*selected_source = source;
+	else if (source)
+		g_object_unref (source);
+
+	return source != NULL;
+}
+
+/* how many menu entries are defined; all calendar/tasks/memos/contacts
+   actions should have same count */
+#define MAPI_ESOURCE_NUM_ENTRIES 1
+
+static void
+update_mapi_source_entries_cb (EShellView *shell_view,
+			       GtkActionEntry *entries)
+{
+	GtkActionGroup *action_group;
+	EShell *shell;
+	EShellWindow *shell_window;
+	const gchar *group;
+	gboolean is_mapi_source, is_online;
+
+	g_return_if_fail (E_IS_SHELL_VIEW (shell_view));
+	g_return_if_fail (entries != NULL);
+
+	if (strstr (entries->name, "calendar"))
+		group = "calendar";
+	else if (strstr (entries->name, "tasks"))
+		group = "tasks";
+	else if (strstr (entries->name, "memos"))
+		group = "memos";
+	else if (strstr (entries->name, "contacts"))
+		group = "contacts";
+	else
+		g_return_if_reached ();
+
+	is_mapi_source = get_selected_mapi_source (shell_view, NULL);
+	shell_window = e_shell_view_get_shell_window (shell_view);
+	shell = e_shell_window_get_shell (shell_window);
+
+	is_online = shell && e_shell_get_online (shell);
+	action_group = e_shell_window_get_action_group (shell_window, group);
+
+	mapi_plugin_enable_actions (action_group, entries, MAPI_ESOURCE_NUM_ENTRIES, is_mapi_source, is_online);
+}
+
+static void
+setup_mapi_source_actions (EShellView *shell_view,
+			   GtkActionEntry *entries,
+			   guint n_entries)
+{
+	EShellWindow *shell_window;
+	const gchar *group;
+
+	g_return_if_fail (shell_view != NULL);
+	g_return_if_fail (entries != NULL);
+	g_return_if_fail (n_entries > 0);
+	g_return_if_fail (n_entries == MAPI_ESOURCE_NUM_ENTRIES);
+
+	if (strstr (entries->name, "calendar"))
+		group = "calendar";
+	else if (strstr (entries->name, "tasks"))
+		group = "tasks";
+	else if (strstr (entries->name, "memos"))
+		group = "memos";
+	else if (strstr (entries->name, "contacts"))
+		group = "contacts";
+	else
+		g_return_if_reached ();
+
+	shell_window = e_shell_view_get_shell_window (shell_view);
+
+	e_action_group_add_actions_localized (
+		e_shell_window_get_action_group (shell_window, group), GETTEXT_PACKAGE,
+		entries, MAPI_ESOURCE_NUM_ENTRIES, shell_view);
+
+	g_signal_connect (shell_view, "update-actions", G_CALLBACK (update_mapi_source_entries_cb), entries);
+}
+
+static void
+action_folder_permissions_source_cb (GtkAction *action,
+				     EShellView *shell_view)
+{
+	ESource *source = NULL;
+	mapi_id_t folder_id = 0;
+	const gchar *foreign_username;
+	gboolean is_public;
+
+	g_return_if_fail (action != NULL);
+	g_return_if_fail (shell_view != NULL);
+	g_return_if_fail (get_selected_mapi_source (shell_view, &source));
+	g_return_if_fail (source != NULL);
+	g_return_if_fail (e_mapi_util_mapi_id_from_string (e_source_get_property (source, "folder-id"), &folder_id));
+	g_return_if_fail (gtk_action_get_name (action) != NULL);
+
+	foreign_username = e_source_get_property (source, "foreign-username");
+	is_public = !foreign_username && g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0;
+
+	e_mapi_edit_folder_permissions (NULL,
+		e_source_get_property (source, "profile"),
+		e_source_get_property (source, "username"),
+		e_source_get_property (source, "host"),
+		e_source_group_peek_name (e_source_peek_group (source)),
+		e_source_peek_name (source),
+		folder_id,
+		foreign_username ? E_MAPI_FOLDER_CATEGORY_FOREIGN :
+		is_public ? E_MAPI_FOLDER_CATEGORY_PUBLIC :
+		E_MAPI_FOLDER_CATEGORY_PERSONAL,
+		foreign_username,
+		strstr (gtk_action_get_name (action), "calendar") != NULL);
+
+	g_object_unref (source);
+}
+
+static GtkActionEntry calendar_context_entries[] = {
+
+	{ "calendar-mapi-folder-permissions",
+	  "folder-new",
+	  N_("Permissions..."),
+	  NULL,
+	  N_("Edit MAPI calendar permissions"),
+	  G_CALLBACK (action_folder_permissions_source_cb) }
+};
+
+gboolean mapi_ui_init_calendar (GtkUIManager *ui_manager, EShellView *shell_view);
+
+gboolean
+mapi_ui_init_calendar (GtkUIManager *ui_manager,
+		       EShellView *shell_view)
+{
+	setup_mapi_source_actions (shell_view,
+		calendar_context_entries,
+		G_N_ELEMENTS (calendar_context_entries));
+
+	return TRUE;
+}
+
+static GtkActionEntry tasks_context_entries[] = {
+
+	{ "tasks-mapi-folder-permissions",
+	  "folder-new",
+	  N_("Permissions..."),
+	  NULL,
+	  N_("Edit MAPI tasks permissions"),
+	  G_CALLBACK (action_folder_permissions_source_cb) }
+};
+
+gboolean mapi_ui_init_tasks (GtkUIManager *ui_manager, EShellView *shell_view);
+
+gboolean
+mapi_ui_init_tasks (GtkUIManager *ui_manager,
+		    EShellView *shell_view)
+{
+	setup_mapi_source_actions (shell_view,
+		tasks_context_entries,
+		G_N_ELEMENTS (tasks_context_entries));
+
+	return TRUE;
+}
+static GtkActionEntry memos_context_entries[] = {
+
+	{ "memos-mapi-folder-permissions",
+	  "folder-new",
+	  N_("Permissions..."),
+	  NULL,
+	  N_("Edit MAPI memos permissions"),
+	  G_CALLBACK (action_folder_permissions_source_cb) }
+};
+
+gboolean mapi_ui_init_memos (GtkUIManager *ui_manager, EShellView *shell_view);
+
+gboolean
+mapi_ui_init_memos (GtkUIManager *ui_manager,
+		    EShellView *shell_view)
+{
+	setup_mapi_source_actions (shell_view,
+		memos_context_entries,
+		G_N_ELEMENTS (memos_context_entries));
+
+	return TRUE;
+}
+static GtkActionEntry contacts_context_entries[] = {
+
+	{ "contacts-mapi-folder-permissions",
+	  "folder-new",
+	  N_("Permissions..."),
+	  NULL,
+	  N_("Edit MAPI contacts permissions"),
+	  G_CALLBACK (action_folder_permissions_source_cb) }
+};
+
+gboolean mapi_ui_init_contacts (GtkUIManager *ui_manager, EShellView *shell_view);
+
+gboolean
+mapi_ui_init_contacts (GtkUIManager *ui_manager,
+		       EShellView *shell_view)
+{
+	setup_mapi_source_actions (shell_view,
+		contacts_context_entries,
+		G_N_ELEMENTS (contacts_context_entries));
 
 	return TRUE;
 }

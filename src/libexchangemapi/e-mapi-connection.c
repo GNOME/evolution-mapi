@@ -1145,6 +1145,7 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
 	LOCK ();
 	mem_ctx = talloc_new (priv->session);
@@ -1333,6 +1334,278 @@ foreach_tablerow (EMapiConnection *conn,
 	} while (cursor_pos < count && ms == MAPI_E_SUCCESS);
 
 	return ms;
+}
+
+static gboolean
+gather_folder_permissions_cb (EMapiConnection *conn,
+			      TALLOC_CTX *mem_ctx,
+			      struct SRow *srow,
+			      guint32 row_index,
+			      guint32 rows_total,
+			      gpointer user_data,
+			      GCancellable *cancellable,
+			      GError **perror)
+{
+	GSList **entries = user_data;
+	const gchar *username;
+	const struct Binary_r *pentry_id;
+	const uint64_t *pid;
+	const uint32_t *prights;
+
+	g_return_val_if_fail (srow != NULL, FALSE);
+	g_return_val_if_fail (entries != NULL, FALSE);
+
+	username = e_mapi_util_find_row_propval (srow, PidTagMemberName);
+	pid = e_mapi_util_find_row_propval (srow, PidTagMemberId);
+	pentry_id = e_mapi_util_find_row_propval (srow, PidTagEntryId);
+	prights = e_mapi_util_find_row_propval (srow, PidTagMemberRights);
+
+	if (prights && pid) {
+		EMapiPermissionEntry *pem;
+		struct SBinary_short entry_id;
+
+		entry_id.cb = pentry_id ? pentry_id->cb : 0;
+		entry_id.lpb = pentry_id ? pentry_id->lpb : NULL;
+
+		pem = e_mapi_permission_entry_new (username, pentry_id ? &entry_id : NULL, *pid, *prights);
+		g_return_val_if_fail (pem != NULL, FALSE);
+
+		*entries = g_slist_prepend (*entries, pem);
+	} else {
+		g_debug ("%s: Skipping [%d/%d] (%s) No rights or member ID set", G_STRFUNC, row_index, rows_total, username ? username : "no member name");
+	}
+
+	return TRUE;
+}
+
+gboolean
+e_mapi_connection_get_permissions (EMapiConnection *conn,
+				   mapi_object_t *obj_folder,
+				   gboolean with_freebusy,
+				   GSList **entries, /* EMapiPermissionEntry */
+				   GCancellable *cancellable,
+				   GError **perror)
+{
+	enum MAPISTATUS ms = MAPI_E_RESERVED;
+	struct SPropTagArray *propTagArray;
+	mapi_object_t obj_table;
+	TALLOC_CTX *mem_ctx;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (entries != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	LOCK ();
+	mem_ctx = talloc_new (priv->session);
+	mapi_object_init (&obj_table);
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	ms = GetPermissionsTable (obj_folder, with_freebusy ? IncludeFreeBusy : 0, &obj_table);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "GetPermissionsTable", ms);
+		goto cleanup;
+	}
+
+	propTagArray = set_SPropTagArray (mem_ctx, 4,
+					  PidTagMemberId,
+					  PidTagEntryId,
+					  PidTagMemberName,
+					  PidTagMemberRights);
+
+	/* Set primary columns to be fetched */
+	ms = SetColumns (&obj_table, propTagArray);
+	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "SetColumns", ms);
+		goto cleanup;
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	*entries = NULL;
+
+	ms = foreach_tablerow (conn, mem_ctx, &obj_table, gather_folder_permissions_cb, entries, cancellable, perror);
+	if (ms == MAPI_E_SUCCESS) {
+		*entries = g_slist_reverse (*entries);
+	} else {
+		g_slist_free_full (*entries, (GDestroyNotify) e_mapi_permission_entry_free);
+		*entries = NULL;
+	}
+
+ cleanup:
+	mapi_object_release (&obj_table);
+	talloc_free (mem_ctx);
+	UNLOCK();
+
+	return ms == MAPI_E_SUCCESS;
+}
+
+gboolean
+e_mapi_connection_set_permissions (EMapiConnection *conn,
+				   mapi_object_t *obj_folder,
+				   gboolean with_freebusy,
+				   const GSList *entries, /* EMapiPermissionEntry */
+				   GCancellable *cancellable,
+				   GError **perror)
+{
+	enum MAPISTATUS ms = MAPI_E_RESERVED;
+	struct mapi_PermissionsData *rows = NULL;
+	GSList *current_entries = NULL;
+	TALLOC_CTX *mem_ctx;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	LOCK ();
+	mem_ctx = talloc_new (priv->session);
+
+	rows = talloc_zero (mem_ctx, struct mapi_PermissionsData);
+	if (!rows) {
+		ms = MAPI_E_NOT_ENOUGH_RESOURCES;
+		make_mapi_error (perror, "talloc_zero", ms);
+		goto cleanup;
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	if (!e_mapi_connection_get_permissions (conn, obj_folder, with_freebusy, &current_entries, cancellable, perror)) {
+		ms = MAPI_E_CALL_FAILED;
+		make_mapi_error (perror, "e_mapi_connection_get_permissions", ms);
+		goto cleanup;
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	rows->ModifyCount = g_slist_length ((GSList *) entries) + g_slist_length (current_entries);
+	if (rows->ModifyCount > 0) {
+		const GSList *iter, *citer;
+		GSList *removed_entries = g_slist_copy (current_entries);
+		gint row_index = 0;
+
+		rows->PermissionsData = talloc_array (rows, struct PermissionData, rows->ModifyCount);
+		if (!rows->PermissionsData) {
+			ms = MAPI_E_NOT_ENOUGH_RESOURCES;
+			make_mapi_error (perror, "talloc_zero", ms);
+			g_slist_free (removed_entries);
+			goto cleanup;
+		}
+
+		for (iter = entries; iter; iter = iter->next) {
+			const EMapiPermissionEntry *pem = iter->data, *cpem = NULL;
+
+			if (!pem) {
+				ms = MAPI_E_INVALID_PARAMETER;
+				make_mapi_error (perror, "entries::data", ms);
+				g_slist_free (removed_entries);
+				goto cleanup;
+			}
+
+			for (citer = current_entries; citer; citer = citer->next) {
+				cpem = citer->data;
+
+				if (cpem && ((cpem->entry_id.cb == pem->entry_id.cb && cpem->member_id == pem->member_id) ||
+				   (cpem->entry_id.cb > 0 && e_mapi_util_recip_entryid_equal (&cpem->entry_id, &pem->entry_id)))) {
+					removed_entries = g_slist_remove (removed_entries, cpem);
+					break;
+				}
+
+				cpem = NULL;
+			}
+
+			if (cpem == NULL) {
+				rows->PermissionsData[row_index].PermissionDataFlags = ROW_ADD;
+				rows->PermissionsData[row_index].lpProps.cValues = 2;
+				rows->PermissionsData[row_index].lpProps.lpProps = talloc_zero_array (rows, struct mapi_SPropValue, 3);
+				if (!rows->PermissionsData[row_index].lpProps.lpProps) {
+					ms = MAPI_E_NOT_ENOUGH_RESOURCES;
+					make_mapi_error (perror, "talloc_zero", ms);
+					g_slist_free (removed_entries);
+					goto cleanup;
+				}
+
+				rows->PermissionsData[row_index].lpProps.lpProps[0].ulPropTag = PidTagEntryId;
+				rows->PermissionsData[row_index].lpProps.lpProps[0].value.bin = pem->entry_id;
+
+				rows->PermissionsData[row_index].lpProps.lpProps[1].ulPropTag = PidTagMemberRights;
+				rows->PermissionsData[row_index].lpProps.lpProps[1].value.l = pem->member_rights;
+
+				row_index++;
+			} else if (cpem->member_rights != pem->member_rights) {
+				rows->PermissionsData[row_index].PermissionDataFlags = ROW_MODIFY;
+				rows->PermissionsData[row_index].lpProps.cValues = 2;
+				rows->PermissionsData[row_index].lpProps.lpProps = talloc_zero_array (rows, struct mapi_SPropValue, 3);
+				if (!rows->PermissionsData[row_index].lpProps.lpProps) {
+					ms = MAPI_E_NOT_ENOUGH_RESOURCES;
+					make_mapi_error (perror, "talloc_zero", ms);
+					g_slist_free (removed_entries);
+					goto cleanup;
+				}
+
+				rows->PermissionsData[row_index].lpProps.lpProps[0].ulPropTag = PidTagMemberId;
+				rows->PermissionsData[row_index].lpProps.lpProps[0].value.d = pem->member_id;
+
+				rows->PermissionsData[row_index].lpProps.lpProps[1].ulPropTag = PidTagMemberRights;
+				rows->PermissionsData[row_index].lpProps.lpProps[1].value.l = pem->member_rights;
+
+				row_index++;
+			}
+		}
+
+		for (citer = removed_entries; citer; citer = citer->next) {
+			const EMapiPermissionEntry *cpem = citer->data;
+
+			if (cpem) {
+				rows->PermissionsData[row_index].PermissionDataFlags = ROW_REMOVE;
+				rows->PermissionsData[row_index].lpProps.cValues = 1;
+				rows->PermissionsData[row_index].lpProps.lpProps = talloc_zero_array (rows, struct mapi_SPropValue, 2);
+				if (!rows->PermissionsData[row_index].lpProps.lpProps) {
+					ms = MAPI_E_NOT_ENOUGH_RESOURCES;
+					make_mapi_error (perror, "talloc_zero", ms);
+					g_slist_free (removed_entries);
+					goto cleanup;
+				}
+
+				rows->PermissionsData[row_index].lpProps.lpProps[0].ulPropTag = PidTagMemberId;
+				rows->PermissionsData[row_index].lpProps.lpProps[0].value.d = cpem->member_id;
+
+				row_index++;
+			}
+		}
+
+		rows->ModifyCount = row_index;
+
+		g_slist_free (removed_entries);
+	}
+
+	if (rows->ModifyCount > 0) {
+		ms = ModifyPermissions (obj_folder, with_freebusy ? ModifyPerms_IncludeFreeBusy : 0, rows);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "ModifyPermissions", ms);
+			goto cleanup;
+		}
+	}
+
+ cleanup:
+	g_slist_free_full (current_entries, (GDestroyNotify) e_mapi_permission_entry_free);
+	talloc_free (rows);
+	talloc_free (mem_ctx);
+	UNLOCK();
+
+	return ms == MAPI_E_SUCCESS;
 }
 
 struct ListObjectsInternalData
@@ -4062,6 +4335,8 @@ fill_reverse_replace_hash (gpointer key,
 gboolean
 e_mapi_connection_transfer_gal_objects (EMapiConnection *conn,
 					const GSList *mids,
+					BuildReadPropsCB brp_cb,
+					gpointer brp_cb_user_data,
 					TransferObjectCB cb,
 					gpointer cb_user_data,
 					GCancellable *cancellable,
@@ -4115,10 +4390,19 @@ e_mapi_connection_transfer_gal_objects (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	if (!e_mapi_book_utils_get_supported_mapi_proptags (mem_ctx, &propTagArray) || !propTagArray) {
-		ms = MAPI_E_CALL_FAILED;
-		make_mapi_error (perror, "e_mapi_book_utils_get_supported_mapi_proptags", ms);
-		goto cleanup;
+	if (brp_cb) {
+		propTagArray = set_SPropTagArray (mem_ctx, 1, PidTagObjectType);
+		if (!brp_cb (conn, mem_ctx, propTagArray, brp_cb_user_data, cancellable, perror)) {
+			ms = MAPI_E_CALL_FAILED;
+			make_mapi_error (perror, "brp_cb", ms);
+			goto cleanup;
+		}
+	} else {
+		if (!e_mapi_book_utils_get_supported_mapi_proptags (mem_ctx, &propTagArray) || !propTagArray) {
+			ms = MAPI_E_CALL_FAILED;
+			make_mapi_error (perror, "e_mapi_book_utils_get_supported_mapi_proptags", ms);
+			goto cleanup;
+		}
 	}
 
 	for (ii = 0; ii < propTagArray->cValues; ii++) {
@@ -4190,7 +4474,7 @@ e_mapi_connection_transfer_gal_object (EMapiConnection *conn,
 	gboolean res;
 
 	mids = g_slist_append (NULL, &message_id);
-	res = e_mapi_connection_transfer_gal_objects (conn, mids, cb, cb_user_data, cancellable, perror);
+	res = e_mapi_connection_transfer_gal_objects (conn, mids, NULL, NULL, cb, cb_user_data, cancellable, perror);
 	g_slist_free (mids);
 
 	return res;
@@ -4720,6 +5004,11 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 		}
 
 		talloc_free (names);
+	}
+
+	if (ms == MAPI_E_NOT_FOUND) {
+		res = TRUE;
+		goto cleanup;
 	}
 
 	if (ms != MAPI_E_SUCCESS) {
@@ -6483,4 +6772,40 @@ e_mapi_object_add_attachment (EMapiObject *object,
 
 		attach->next = attachment;
 	}
+}
+
+EMapiPermissionEntry *
+e_mapi_permission_entry_new (const gchar *username,
+			     const struct SBinary_short *entry_id,
+			     uint64_t member_id,
+			     uint32_t member_rights)
+{
+	EMapiPermissionEntry *entry;
+
+	entry = g_new0 (EMapiPermissionEntry, 1);
+	entry->username = g_strdup (username);
+
+	if (entry_id && entry_id->lpb) {
+		entry->entry_id.cb = entry_id->cb;
+		entry->entry_id.lpb = g_memdup (entry_id->lpb, entry_id->cb);
+	} else {
+		entry->entry_id.cb = 0;
+		entry->entry_id.lpb = NULL;
+	}
+
+	entry->member_id = member_id;
+	entry->member_rights = member_rights;
+
+	return entry;
+}
+
+void
+e_mapi_permission_entry_free (EMapiPermissionEntry *entry)
+{
+	if (!entry)
+		return;
+
+	g_free (entry->username);
+	g_free (entry->entry_id.lpb);
+	g_free (entry);
 }

@@ -32,6 +32,7 @@
 
 #include <gtk/gtk.h>
 #include <libedataserver/e-xml-hash-utils.h>
+#include <libedataserver/e-credentials.h>
 #include <libedataserverui/e-passwords.h>
 #include <libedataserver/e-account.h>
 #include <e-util/e-dialog-utils.h>
@@ -248,7 +249,7 @@ static char*
 prompt_password(const gchar *user, const gchar *host, const gchar *key,
 		EMConfigTargetSettings *account)
 {
-	int pw_flags = E_PASSWORDS_REMEMBER_FOREVER|E_PASSWORDS_SECRET;
+	guint32 pw_flags = E_PASSWORDS_REMEMBER_FOREVER|E_PASSWORDS_SECRET;
 	gchar *password, *title;
 	gboolean save = TRUE;
 
@@ -1235,7 +1236,7 @@ e_mapi_run_in_thread_with_feedback (GtkWindow *parent,
 
 	dialog = gtk_dialog_new_with_buttons ("",
 		parent,
-		GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+		GTK_DIALOG_MODAL,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		NULL);
 
@@ -1263,4 +1264,97 @@ e_mapi_run_in_thread_with_feedback (GtkWindow *parent,
 	gtk_widget_show (dialog);
 
 	g_return_if_fail (g_thread_create (run_with_feedback_thread, rfd, FALSE, NULL));
+}
+
+EMapiConnection	*
+e_mapi_account_open_connection_for (GtkWindow *parent,
+				    const gchar *login_profile,
+				    const gchar *login_username,
+				    const gchar *login_url,
+				    GCancellable *cancellable,
+				    GError **perror)
+{
+	guint32 prompt_flags = E_PASSWORDS_SECRET | E_PASSWORDS_ONLINE | E_PASSWORDS_DISABLE_REMEMBER;
+	EMapiConnection *conn = NULL;
+	gchar *password = NULL;
+	SoupURI *suri;
+	gchar *key_str, *title;
+
+	g_return_val_if_fail (login_profile != NULL, NULL);
+	g_return_val_if_fail (login_username != NULL, NULL);
+	g_return_val_if_fail (login_url != NULL, NULL);
+
+	/* use the one from mailer, if there, otherwise open new */
+	conn = e_mapi_connection_find (login_profile);
+	if (conn)
+		return conn;
+
+	if (strchr (login_url, '/') != NULL) {
+		suri = soup_uri_new (login_url);
+	} else {
+		gchar *url = g_strconcat ("http://", login_url, NULL);
+		suri = soup_uri_new (url);
+		g_free (url);
+	}
+
+	g_return_val_if_fail (suri != NULL, NULL);
+
+	soup_uri_set_user (suri, login_username);
+	soup_uri_set_password (suri, NULL);
+	soup_uri_set_fragment (suri, NULL);
+
+	key_str = soup_uri_to_string (suri, FALSE);
+	title = g_strdup_printf (_("Enter Password for %s@%s"), soup_uri_get_user (suri), soup_uri_get_host (suri));
+
+	soup_uri_free (suri);
+
+	g_return_val_if_fail (key_str != NULL, NULL);
+
+	password = e_passwords_get_password (NULL, key_str);
+	if (!password)
+		password = e_passwords_ask_password (title, NULL, key_str, NULL, prompt_flags, NULL, parent);
+
+	prompt_flags |= E_PASSWORDS_REPROMPT;
+
+	do {
+		conn = e_mapi_connection_new (login_profile, password, cancellable, perror);
+
+		if (!conn && !g_cancellable_is_cancelled (cancellable)) {
+			e_credentials_util_safe_free_string (password);
+			password = e_passwords_ask_password (title, NULL, key_str, NULL, prompt_flags, NULL, parent);
+		}
+	} while (!conn && !g_cancellable_is_cancelled (cancellable));
+
+	e_credentials_util_safe_free_string (password);
+	g_free (key_str);
+	g_free (title);
+
+	return conn;
+}
+
+static gpointer
+unref_conn_in_thread (gpointer ptr)
+{
+	EMapiConnection *conn = ptr;
+
+	g_return_val_if_fail (conn != NULL, NULL);
+
+	g_object_unref (conn);
+
+	return NULL;
+}
+
+/* because this also disconnects from a server, which can take its time */
+void
+e_mapi_account_unref_conn_in_thread (EMapiConnection *conn)
+{
+	GError *error = NULL;
+
+	if (!conn)
+		return;
+
+	if (!g_thread_create (unref_conn_in_thread, conn, FALSE, &error)) {
+		g_warning ("%s: Failed to run thread: %s", G_STRFUNC, error ? error->message : "Unknown error");
+		g_object_unref (conn);
+	}
 }

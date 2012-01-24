@@ -105,6 +105,38 @@ void			e_mapi_object_add_recipient	(EMapiObject *object,
 void			e_mapi_object_add_attachment	(EMapiObject *object,
 							 EMapiAttachment *attachment);
 
+#define E_MAPI_PERMISSION_MEMBER_ID_ANONYMOUS_CLIENT	(~((uint64_t) 0))
+#define E_MAPI_PERMISSION_MEMBER_ID_DEFAULT_USER	((uint64_t) 0)
+
+typedef enum {
+	E_MAPI_PERMISSION_BIT_FREE_BUSY_DETAILED	= 0x00001000,
+	E_MAPI_PERMISSION_BIT_FREE_BUSY_SIMPLE		= 0x00000800,
+	E_MAPI_PERMISSION_BIT_FOLDER_VISIBLE		= 0x00000400,
+	E_MAPI_PERMISSION_BIT_FOLDER_CONTACT		= 0x00000200,
+	E_MAPI_PERMISSION_BIT_FOLDER_OWNER		= 0x00000100,
+	E_MAPI_PERMISSION_BIT_CREATE_SUBFOLDER		= 0x00000080,
+	E_MAPI_PERMISSION_BIT_DELETE_ANY		= 0x00000040,
+	E_MAPI_PERMISSION_BIT_EDIT_ANY			= 0x00000020,
+	E_MAPI_PERMISSION_BIT_DELETE_OWNED		= 0x00000010,
+	E_MAPI_PERMISSION_BIT_EDIT_OWNED		= 0x00000008,
+	E_MAPI_PERMISSION_BIT_CREATE			= 0x00000002,
+	E_MAPI_PERMISSION_BIT_READ_ANY			= 0x00000001
+} EMapiPermissionBits;
+
+typedef struct {
+	gchar *username;		/* PidTagMemberName - display name for a user */
+
+	struct SBinary_short entry_id;	/* PidTagEntryId of the user */
+	uint64_t member_id;		/* PidTagMemberId of the user */
+	uint32_t member_rights;		/* PidTagMemberRights of the user */
+} EMapiPermissionEntry;
+
+EMapiPermissionEntry *	e_mapi_permission_entry_new	(const gchar *username,
+							 const struct SBinary_short *entry_id,
+							 uint64_t member_id,
+							 uint32_t member_rights);
+void			e_mapi_permission_entry_free	(EMapiPermissionEntry *entry);
+
 typedef enum {
 	E_MAPI_CREATE_FLAG_NONE		= 0,
 	E_MAPI_CREATE_FLAG_SUBMIT	= 1 << 0
@@ -236,6 +268,20 @@ gboolean		e_mapi_connection_get_folder_properties	(EMapiConnection *conn,
 								 GCancellable *cancellable,
 								 GError **perror);
 
+gboolean		e_mapi_connection_get_permissions	(EMapiConnection *conn,
+								 mapi_object_t *obj_folder,
+								 gboolean with_freebusy,
+								 GSList **entries, /* out, EMapiPermissionEntry */
+								 GCancellable *cancellable,
+								 GError **perror);
+
+gboolean		e_mapi_connection_set_permissions	(EMapiConnection *conn,
+								 mapi_object_t *obj_folder,
+								 gboolean with_freebusy,
+								 const GSList *entries, /* EMapiPermissionEntry */
+								 GCancellable *cancellable,
+								 GError **perror);
+
 gboolean		e_mapi_connection_list_objects		(EMapiConnection *conn,
 								 mapi_object_t *obj_folder,
 								 BuildRestrictionsCB build_rs_cb,
@@ -301,6 +347,8 @@ gboolean		e_mapi_connection_list_gal_objects	(EMapiConnection *conn,
 
 gboolean		e_mapi_connection_transfer_gal_objects	(EMapiConnection *conn,
 								 const GSList *mids,
+								 BuildReadPropsCB brp_cb, /* NULL for all supported */
+								 gpointer brp_cb_user_data,
 								 TransferObjectCB cb,
 								 gpointer cb_user_data,
 								 GCancellable *cancellable,

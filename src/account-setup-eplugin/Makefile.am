@@ -23,7 +23,11 @@ liborg_gnome_exchange_mapi_la_SOURCES = 	\
 	e-mapi-account-listener.c		\
 	e-mapi-account-listener.h		\
 	e-mapi-subscribe-foreign-folder.c	\
-	e-mapi-subscribe-foreign-folder.h
+	e-mapi-subscribe-foreign-folder.h	\
+	e-mapi-edit-folder-permissions.c	\
+	e-mapi-edit-folder-permissions.h	\
+	e-mapi-search-gal-user.c		\
+	e-mapi-search-gal-user.h
 
 liborg_gnome_exchange_mapi_la_LIBADD = 			\
 	$(top_builddir)/src/libexchangemapi/libexchangemapi-1.0.la \

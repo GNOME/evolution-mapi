@@ -35,7 +35,6 @@
 
 #include "e-mapi-account-setup.h"
 #include "e-mapi-subscribe-foreign-folder.h"
-#include "e-mapi-debug.h"
 #include "e-mapi-utils.h"
 
 #ifndef PidTagMailboxOwnerName

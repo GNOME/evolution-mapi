@@ -54,6 +54,10 @@ gboolean	e_mapi_util_recip_entryid_decode	(EMapiConnection *conn,
 							 const struct Binary_r *entyrid,
 							 gchar **display_name,
 							 gchar **email);
+gboolean	e_mapi_util_recip_entryid_decode_dn	(const struct SBinary_short *entryid,
+							 gchar **exchange_dn);
+gboolean	e_mapi_util_recip_entryid_equal		(const struct SBinary_short *entryid1,
+							 const struct SBinary_short *entryid2);
 
 void		e_mapi_util_profiledata_from_settings	(EMapiProfileData *empd,
 							 CamelMapiSettings *settings);

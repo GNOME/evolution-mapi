@@ -1,6 +1,8 @@
 src/account-setup-eplugin/e-mapi-account-listener.c
 src/account-setup-eplugin/e-mapi-account-setup.c
 src/account-setup-eplugin/e-mapi-account-settings.c
+src/account-setup-eplugin/e-mapi-edit-folder-permissions.c
+src/account-setup-eplugin/e-mapi-search-gal-user.c
 src/account-setup-eplugin/e-mapi-subscribe-foreign-folder.c
 src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml
 src/addressbook/e-book-backend-mapi.c
