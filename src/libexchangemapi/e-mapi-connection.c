@@ -2835,13 +2835,14 @@ e_mapi_connection_transfer_summary (EMapiConnection *conn,
 				goto cleanup;
 			}
 
-			tags = set_SPropTagArray (mem_ctx, 6,
+			tags = set_SPropTagArray (mem_ctx, 7,
 				PR_FID,
 				PR_MID,
 				PR_MESSAGE_FLAGS,
 				PR_LAST_MODIFICATION_TIME,
 				PR_MESSAGE_CLASS,
-				PR_TRANSPORT_MESSAGE_HEADERS_UNICODE);
+				PR_TRANSPORT_MESSAGE_HEADERS_UNICODE,
+				PidTagIconIndex);
 
 			ms = GetProps (&obj_message, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, tags, &lpProps, &prop_count);
 			if (ms == MAPI_E_SUCCESS) {

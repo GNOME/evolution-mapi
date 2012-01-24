@@ -378,7 +378,7 @@ gather_object_offline_cb (EMapiConnection *conn,
 	if (msg) {
 		gchar *uid_str;
 		const mapi_id_t *pmid;
-		const uint32_t *pmsg_flags;
+		const uint32_t *pmsg_flags, *picon_index;
 		const struct FILETIME *last_modified;
 		uint32_t msg_flags;
 		CamelMessageInfo *info;
@@ -387,6 +387,7 @@ gather_object_offline_cb (EMapiConnection *conn,
 		pmid = e_mapi_util_find_array_propval (&object->properties, PR_MID);
 		pmsg_flags = e_mapi_util_find_array_propval (&object->properties, PR_MESSAGE_FLAGS);
 		last_modified = e_mapi_util_find_array_propval (&object->properties, PR_LAST_MODIFICATION_TIME);
+		picon_index = e_mapi_util_find_array_propval (&object->properties, PidTagIconIndex);
 
 		if (!pmid) {
 			g_debug ("%s: Received message [%d/%d] without PR_MID", G_STRFUNC, obj_index, obj_total);
@@ -412,7 +413,7 @@ gather_object_offline_cb (EMapiConnection *conn,
 		info = camel_folder_summary_info_new_from_message (gos->folder->summary, msg, NULL);
 		if (info) {
 			CamelMapiMessageInfo *minfo = (CamelMapiMessageInfo *) info;
-			guint32 flags = 0, mask = CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ATTACHMENTS;
+			guint32 flags = 0, mask = CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ATTACHMENTS | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED;
 
 			minfo->info.uid = camel_pstring_strdup (uid_str);
 
@@ -426,6 +427,12 @@ gather_object_offline_cb (EMapiConnection *conn,
 				flags |= CAMEL_MESSAGE_SEEN;
 			if ((msg_flags & MSGFLAG_HASATTACH) != 0)
 				flags |= CAMEL_MESSAGE_ATTACHMENTS;
+			if (picon_index) {
+				if (*picon_index == 0x105)
+					flags |= CAMEL_MESSAGE_ANSWERED;
+				if (*picon_index == 0x106)
+					flags |= CAMEL_MESSAGE_FORWARDED;
+			}
 
 			if ((camel_message_info_flags (info) & mask) != flags) {
 				if (is_new)
@@ -480,7 +487,7 @@ gather_object_summary_cb (EMapiConnection *conn,
 	struct GatherObjectSummaryData *gos = user_data;
 	gchar *uid_str;
 	const mapi_id_t *pmid;
-	const uint32_t *pmsg_flags;
+	const uint32_t *pmsg_flags, *picon_index;
 	const struct FILETIME *last_modified;
 	const gchar *transport_headers;
 	uint32_t msg_flags;
@@ -495,6 +502,7 @@ gather_object_summary_cb (EMapiConnection *conn,
 	pmsg_flags = e_mapi_util_find_array_propval (&object->properties, PR_MESSAGE_FLAGS);
 	last_modified = e_mapi_util_find_array_propval (&object->properties, PR_LAST_MODIFICATION_TIME);
 	transport_headers = e_mapi_util_find_array_propval (&object->properties, PR_TRANSPORT_MESSAGE_HEADERS_UNICODE);
+	picon_index = e_mapi_util_find_array_propval (&object->properties, PidTagIconIndex);
 
 	if (!pmid) {
 		g_debug ("%s: Received message [%d/%d] without PR_MID", G_STRFUNC, obj_index, obj_total);
@@ -639,7 +647,7 @@ gather_object_summary_cb (EMapiConnection *conn,
 
 	if (info) {
 		CamelMapiMessageInfo *minfo = (CamelMapiMessageInfo *) info;
-		guint32 flags = 0, mask = CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ATTACHMENTS;
+		guint32 flags = 0, mask = CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ATTACHMENTS | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED;
 
 		if (last_modified) {
 			minfo->last_modified = e_mapi_util_filetime_to_time_t (last_modified);
@@ -651,6 +659,12 @@ gather_object_summary_cb (EMapiConnection *conn,
 			flags |= CAMEL_MESSAGE_SEEN;
 		if ((msg_flags & MSGFLAG_HASATTACH) != 0)
 			flags |= CAMEL_MESSAGE_ATTACHMENTS;
+		if (picon_index) {
+			if (*picon_index == 0x105)
+				flags |= CAMEL_MESSAGE_ANSWERED;
+			if (*picon_index == 0x106)
+				flags |= CAMEL_MESSAGE_FORWARDED;
+		}
 
 		if ((camel_message_info_flags (info) & mask) != flags) {
 			if (is_new)

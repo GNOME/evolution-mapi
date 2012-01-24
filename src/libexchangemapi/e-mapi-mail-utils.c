@@ -1397,6 +1397,15 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 	set_value (PidTagInternetCodepage, &ui32);
 
 	if ((create_flags & E_MAPI_CREATE_FLAG_SUBMIT) == 0) {
+		if ((message_camel_flags & CAMEL_MESSAGE_ANSWERED) != 0 ||
+		    (message_camel_flags & CAMEL_MESSAGE_ANSWERED_ALL) != 0) {
+			ui32 = 0x105;
+			set_value (PidTagIconIndex, &ui32);
+		} else if ((message_camel_flags & CAMEL_MESSAGE_FORWARDED) != 0) {
+			ui32 = 0x106;
+			set_value (PidTagIconIndex, &ui32);
+		}
+
 		ui32 = 0;
 		if (message_camel_flags & CAMEL_MESSAGE_SEEN)
 			ui32 |= MSGFLAG_READ;
