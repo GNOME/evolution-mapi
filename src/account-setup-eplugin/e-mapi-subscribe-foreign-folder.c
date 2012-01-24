@@ -34,6 +34,7 @@
 #include "camel/camel-mapi-store-summary.h"
 
 #include "e-mapi-account-setup.h"
+#include "e-mapi-search-gal-user.h"
 #include "e-mapi-subscribe-foreign-folder.h"
 #include "e-mapi-utils.h"
 
@@ -45,6 +46,7 @@
 #define STR_FOLDER_NAME_COMBO		"e-mapi-folder-name-combo"
 #define STR_MAPI_CAMEL_SESSION		"e-mapi-camel-session"
 #define STR_MAPI_CAMEL_STORE		"e-mapi-camel-store"
+#define STR_MAPI_DIRECT_USER_NAME	"e-mapi-direct-user-name"
 
 static gboolean
 add_foreign_folder_to_camel (CamelMapiStore *mapi_store,
@@ -162,6 +164,8 @@ name_entry_changed_cb (GObject *dialog)
 	entry = g_object_get_data (dialog, STR_USER_NAME_SELECTOR_ENTRY);
 	g_return_if_fail (entry != NULL);
 
+	g_object_set_data (G_OBJECT (entry), STR_MAPI_DIRECT_USER_NAME, NULL);
+
 	text = gtk_entry_get_text (entry);
 
 	gtk_dialog_set_response_sensitive (GTK_DIALOG (dialog), GTK_RESPONSE_OK, text && *text && *text != ' ' && *text != ',');
@@ -171,6 +175,7 @@ struct EMapiCheckForeignFolderData
 {
 	GtkWidget *dialog;
 	gchar *username;
+	gchar *direct_username;
 	gchar *user_displayname;
 	gchar *orig_foldername;
 	gchar *use_foldername;
@@ -189,6 +194,7 @@ e_mapi_check_foreign_folder_data_free (gpointer ptr)
 		return;
 
 	g_free (cffd->username);
+	g_free (cffd->direct_username);
 	g_free (cffd->user_displayname);
 	g_free (cffd->orig_foldername);
 	g_free (cffd->use_foldername);
@@ -291,12 +297,19 @@ check_foreign_folder_thread (GObject *with_object,
 		return;
 	}
 
-	if (!e_mapi_connection_resolve_username (conn, cffd->username,
-		NULL, NULL,
-		check_foreign_username_resolved_cb, cffd,
-		cancellable, perror)) {
-		make_mapi_error (perror, "e_mapi_connection_resolve_username", MAPI_E_CALL_FAILED);
-		return;
+	if (cffd->direct_username && *cffd->direct_username) {
+		g_return_if_fail (cffd->user_displayname == NULL);
+
+		cffd->user_displayname = cffd->username;
+		cffd->username = g_strdup (cffd->direct_username);
+	} else {
+		if (!e_mapi_connection_resolve_username (conn, cffd->username,
+			NULL, NULL,
+			check_foreign_username_resolved_cb, cffd,
+			cancellable, perror)) {
+			make_mapi_error (perror, "e_mapi_connection_resolve_username", MAPI_E_CALL_FAILED);
+			return;
+		}
 	}
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
@@ -487,6 +500,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 	cffd = g_new0 (struct EMapiCheckForeignFolderData, 1);
 	cffd->dialog = GTK_WIDGET (dialog);
 	cffd->username = g_strdup (username ? username : "");
+	cffd->direct_username = g_strdup (g_object_get_data (G_OBJECT (entry), STR_MAPI_DIRECT_USER_NAME));
 	cffd->orig_foldername = orig_foldername;
 	cffd->use_foldername = use_foldername;
 	cffd->folder_id = 0;
@@ -504,6 +518,45 @@ subscribe_foreign_response_cb (GObject *dialog,
 		e_mapi_check_foreign_folder_data_free);
 
 	g_free (description);
+}
+
+static void
+pick_gal_user_clicked_cb (GtkButton *button,
+			  GObject *dialog)
+{
+	GtkEntry *entry;
+	CamelMapiStore *mapi_store;
+	gchar *text, *display_name = NULL, *dn = NULL;
+	EMapiGalUserType searched_type = E_MAPI_GAL_USER_NONE;
+
+	g_return_if_fail (dialog != NULL);
+
+	entry = g_object_get_data (dialog, STR_USER_NAME_SELECTOR_ENTRY);
+	mapi_store = g_object_get_data (dialog, STR_MAPI_CAMEL_STORE);
+
+	g_return_if_fail (entry != NULL);
+	g_return_if_fail (mapi_store != NULL);
+
+	text = g_strstrip (g_strdup (gtk_entry_get_text (entry)));
+
+	if (e_mapi_search_gal_user_modal (GTK_WINDOW (dialog),
+					  camel_mapi_store_get_connection (mapi_store),
+					  text,
+					  &searched_type,
+					  &display_name,
+					  NULL,
+					  &dn,
+					  NULL)) {
+		if (searched_type == E_MAPI_GAL_USER_REGULAR &&
+		    display_name && dn && *dn && strchr (dn, '=')) {
+			gtk_entry_set_text (entry, display_name);
+			g_object_set_data_full (G_OBJECT (entry), STR_MAPI_DIRECT_USER_NAME, g_strdup (strrchr (dn, '=') + 1), g_free);
+		}
+	}
+
+	g_free (text);
+	g_free (display_name);
+	g_free (dn);
 }
 
 /* Opens dialog to subscribe to folders of other
@@ -572,7 +625,7 @@ e_mapi_subscribe_foreign_folder (GtkWindow *parent,
 	pango_attr_list_unref (attrs);
 
 	gtk_grid_attach (grid, label, 0, row, 1, 1);
-	gtk_grid_attach (grid, widget, 1, row, 3, 1);
+	gtk_grid_attach (grid, widget, 1, row, 2, 1);
 
 	row++;
 
@@ -598,9 +651,18 @@ e_mapi_subscribe_foreign_folder (GtkWindow *parent,
 		"vexpand", FALSE,
 		NULL);
 
+	widget = gtk_button_new_with_mnemonic (_("C_hoose..."));
+	g_object_set (G_OBJECT (entry),
+		"hexpand", TRUE,
+		"vexpand", FALSE,
+		NULL);
+
 	gtk_label_set_mnemonic_widget (GTK_LABEL (label), entry);
+	g_signal_connect (widget, "clicked", G_CALLBACK (pick_gal_user_clicked_cb), dialog);
+
 	gtk_grid_attach (grid, label, 0, row, 1, 1);
 	gtk_grid_attach (grid, entry, 1, row, 1, 1);
+	gtk_grid_attach (grid, widget, 2, row, 1, 1);
 
 	row++;
 
