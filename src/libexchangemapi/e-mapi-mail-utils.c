@@ -728,6 +728,8 @@ e_mapi_mail_utils_object_to_message (EMapiConnection *conn, /* const */ EMapiObj
 	} else {
 		CamelInternetAddress *to_addr, *cc_addr, *bcc_addr;
 		const struct FILETIME *msg_date;
+		const bool *read_receipt;
+		const uint32_t *priority;
 		gchar *name, *email;
 
 		to_addr = camel_internet_address_new ();
@@ -772,7 +774,7 @@ e_mapi_mail_utils_object_to_message (EMapiConnection *conn, /* const */ EMapiObj
 		if (email && *email) {
 			CamelInternetAddress *addr;
 
-			addr = camel_internet_address_new();
+			addr = camel_internet_address_new ();
 			camel_internet_address_add (addr, name, email);
 			camel_mime_message_set_from (msg, addr);
 		}
@@ -792,6 +794,42 @@ e_mapi_mail_utils_object_to_message (EMapiConnection *conn, /* const */ EMapiObj
 		str = e_mapi_util_find_array_propval (&object->properties, PidTagInReplyToId);
 		if (str)
 			camel_medium_add_header (CAMEL_MEDIUM (msg), "In-Reply-To", str);
+
+		priority = e_mapi_util_find_array_propval (&object->properties, PidTagImportance);
+		if (priority && *priority > 1)
+			camel_medium_add_header (CAMEL_MEDIUM (msg), "X-Priority", "1");
+
+		/* Read-Receipt handling */
+		read_receipt = e_mapi_util_find_array_propval (&object->properties, PidTagReadReceiptRequested);
+		if (read_receipt && *read_receipt) {
+			if (!camel_medium_get_header (CAMEL_MEDIUM (msg), "Disposition-Notification-To")) {
+				name = NULL;
+				email = NULL;
+
+				e_mapi_mail_utils_decode_email_address1 (conn, &object->properties,
+					PidTagReadReceiptName,
+					PidTagReadReceiptEmailAddress,
+					PidTagReadReceiptAddressType,
+					&name, &email);
+
+				if (email && *email) {
+					CamelInternetAddress *addr;
+					gchar *address;
+
+					addr = camel_internet_address_new ();
+					camel_internet_address_add (addr, name, email);
+					address = camel_address_encode (CAMEL_ADDRESS (addr));
+
+					camel_medium_add_header (CAMEL_MEDIUM (msg), "Disposition-Notification-To", address);
+
+					g_object_unref (addr);
+					g_free (address);
+				}
+
+				g_free (name);
+				g_free (email);
+			}
+		}
 	}
 
 	str = e_mapi_util_find_array_propval (&object->properties, PidNameContentClass);
@@ -1492,6 +1530,39 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 	str = camel_medium_get_header ((CamelMedium *) message, "Message-ID");
 	if (str)
 		set_value (PidTagInternetMessageId, str);
+
+	str = camel_medium_get_header ((CamelMedium *) message, "X-Priority");
+	if (str && g_str_equal (str, "1")) {
+		ui32 = 2;
+		set_value (PidTagImportance, &ui32);
+	}
+
+	str = camel_medium_get_header ((CamelMedium *) message, "Disposition-Notification-To");
+	if (str) {
+		CamelInternetAddress *addr;
+
+		namep = NULL;
+		addressp = NULL;
+
+		addr = camel_internet_address_new ();
+		if (camel_address_decode (CAMEL_ADDRESS (addr), str) != -1 &&
+		    camel_internet_address_get (addr, 0, &namep, &addressp) &&
+		    addressp && *addressp) {
+			if (namep && *namep)
+				set_value (PidTagReadReceiptName, namep);
+
+			set_value (PidTagReadReceiptEmailAddress, addressp);
+			set_value (PidTagReadReceiptAddressType, "SMTP");
+
+			if ((create_flags & E_MAPI_CREATE_FLAG_SUBMIT) != 0) {
+				bl = true;
+
+				set_value (PidTagReadReceiptRequested, &bl);
+			}
+		}
+
+		g_object_unref (addr);
+	}
 
 	addresses = camel_mime_message_get_recipients (message, CAMEL_RECIPIENT_TYPE_TO);
 	e_mapi_mail_add_recipients (object, addresses, olTo);

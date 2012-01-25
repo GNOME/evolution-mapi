@@ -47,6 +47,8 @@
 
 G_BEGIN_DECLS
 
+#define CAMEL_MAPI_MESSAGE_WITH_READ_RECEIPT (CAMEL_MESSAGE_FOLDER_FLAGGED << 1)
+
 typedef struct _CamelMapiFolderSummary CamelMapiFolderSummary;
 typedef struct _CamelMapiFolderSummaryClass CamelMapiFolderSummaryClass;
 typedef struct _CamelMapiMessageInfo CamelMapiMessageInfo;

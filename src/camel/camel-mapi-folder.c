@@ -308,6 +308,16 @@ gather_changed_objects_to_slist (EMapiConnection *conn,
 				if ((object_data->msg_flags & MSGFLAG_HASATTACH) != 0)
 					flags |= CAMEL_MESSAGE_ATTACHMENTS;
 
+				if ((minfo->info.flags & CAMEL_MAPI_MESSAGE_WITH_READ_RECEIPT) != 0) {
+					if ((object_data->msg_flags & MSGFLAG_RN_PENDING) == 0 &&
+					    !camel_message_info_user_flag (info, "receipt-handled")) {
+						camel_message_info_set_user_flag (info, "receipt-handled", TRUE);
+						minfo->info.dirty = TRUE;
+
+						camel_folder_summary_touch (gco->summary);
+					}
+				}
+
 				if ((minfo->info.flags & mask) != (flags & mask)) {
 					camel_message_info_set_flags (info, mask, flags);
 					minfo->server_flags = camel_message_info_flags (info);
@@ -386,6 +396,8 @@ gather_object_offline_cb (EMapiConnection *conn,
 		const mapi_id_t *pmid;
 		const uint32_t *pmsg_flags, *picon_index;
 		const struct FILETIME *last_modified;
+		const bool *pread_receipt;
+		const gchar *msg_class;
 		uint32_t msg_flags;
 		CamelMessageInfo *info;
 		gboolean is_new;
@@ -394,6 +406,11 @@ gather_object_offline_cb (EMapiConnection *conn,
 		pmsg_flags = e_mapi_util_find_array_propval (&object->properties, PR_MESSAGE_FLAGS);
 		last_modified = e_mapi_util_find_array_propval (&object->properties, PR_LAST_MODIFICATION_TIME);
 		picon_index = e_mapi_util_find_array_propval (&object->properties, PidTagIconIndex);
+		pread_receipt = e_mapi_util_find_array_propval (&object->properties, PidTagReadReceiptRequested);
+		msg_class = e_mapi_util_find_array_propval (&object->properties, PidTagMessageClass);
+
+		if (msg_class && g_str_has_prefix (msg_class, "REPORT.IPM.Note.IPNRN"))
+			pread_receipt = NULL;
 
 		if (!pmid) {
 			g_debug ("%s: Received message [%d/%d] without PR_MID", G_STRFUNC, obj_index, obj_total);
@@ -434,7 +451,7 @@ gather_object_offline_cb (EMapiConnection *conn,
 		info = camel_folder_summary_info_new_from_message (gos->folder->summary, msg, NULL);
 		if (info) {
 			CamelMapiMessageInfo *minfo = (CamelMapiMessageInfo *) info;
-			guint32 flags = 0, mask = CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ATTACHMENTS | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED;
+			guint32 flags = 0, mask = CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ATTACHMENTS | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED | CAMEL_MAPI_MESSAGE_WITH_READ_RECEIPT;
 
 			minfo->info.uid = camel_pstring_strdup (uid_str);
 
@@ -462,6 +479,12 @@ gather_object_offline_cb (EMapiConnection *conn,
 					camel_message_info_set_flags (info, mask, flags);
 				minfo->server_flags = camel_message_info_flags (info);
 			}
+
+			if (pread_receipt)
+				flags |= CAMEL_MAPI_MESSAGE_WITH_READ_RECEIPT;
+
+			if (pread_receipt && (msg_flags & MSGFLAG_RN_PENDING) == 0)
+				camel_message_info_set_user_flag (info, "receipt-handled", TRUE);
 
 			minfo->info.dirty = TRUE;
 			camel_folder_summary_touch (gos->folder->summary);
@@ -511,6 +534,8 @@ gather_object_summary_cb (EMapiConnection *conn,
 	const uint32_t *pmsg_flags, *picon_index;
 	const struct FILETIME *last_modified;
 	const gchar *transport_headers;
+	const bool *pread_receipt;
+	const gchar *msg_class;
 	uint32_t msg_flags;
 	CamelMessageInfo *info;
 	gboolean is_new = FALSE;
@@ -524,6 +549,11 @@ gather_object_summary_cb (EMapiConnection *conn,
 	last_modified = e_mapi_util_find_array_propval (&object->properties, PR_LAST_MODIFICATION_TIME);
 	transport_headers = e_mapi_util_find_array_propval (&object->properties, PR_TRANSPORT_MESSAGE_HEADERS_UNICODE);
 	picon_index = e_mapi_util_find_array_propval (&object->properties, PidTagIconIndex);
+	pread_receipt = e_mapi_util_find_array_propval (&object->properties, PidTagReadReceiptRequested);
+	msg_class = e_mapi_util_find_array_propval (&object->properties, PidTagMessageClass);
+
+	if (msg_class && g_str_has_prefix (msg_class, "REPORT.IPM.Note.IPNRN"))
+		pread_receipt = NULL;
 
 	if (!pmid) {
 		g_debug ("%s: Received message [%d/%d] without PR_MID", G_STRFUNC, obj_index, obj_total);
@@ -668,7 +698,7 @@ gather_object_summary_cb (EMapiConnection *conn,
 
 	if (info) {
 		CamelMapiMessageInfo *minfo = (CamelMapiMessageInfo *) info;
-		guint32 flags = 0, mask = CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ATTACHMENTS | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED;
+		guint32 flags = 0, mask = CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ATTACHMENTS | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED | CAMEL_MAPI_MESSAGE_WITH_READ_RECEIPT;
 
 		if (last_modified) {
 			minfo->last_modified = e_mapi_util_filetime_to_time_t (last_modified);
@@ -690,6 +720,12 @@ gather_object_summary_cb (EMapiConnection *conn,
 			if (*picon_index == 0x106)
 				flags |= CAMEL_MESSAGE_FORWARDED;
 		}
+
+		if (pread_receipt)
+			flags |= CAMEL_MAPI_MESSAGE_WITH_READ_RECEIPT;
+
+		if (pread_receipt && (msg_flags & MSGFLAG_RN_PENDING) == 0)
+			camel_message_info_set_user_flag (info, "receipt-handled", TRUE);
 
 		if ((camel_message_info_flags (info) & mask) != flags) {
 			if (is_new)
@@ -1536,7 +1572,7 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 	CamelService *service;
 	EMapiConnection *conn;
 	GPtrArray *known_uids;
-	GSList *read_items = NULL, *unread_items = NULL, *to_free = NULL, *junk_items = NULL, *deleted_items = NULL, *l;
+	GSList *read_items = NULL, *read_with_receipt = NULL, *unread_items = NULL, *to_free = NULL, *junk_items = NULL, *deleted_items = NULL, *l;
 	flags_diff_t diff, unset_flags;
 	const gchar *folder_id;
 	const gchar *full_name;
@@ -1614,6 +1650,8 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 
 			if (diff.bits & CAMEL_MESSAGE_SEEN) {
 				read_items = g_slist_prepend (read_items, mid);
+				if (flags & CAMEL_MAPI_MESSAGE_WITH_READ_RECEIPT)
+					read_with_receipt = g_slist_prepend (read_with_receipt, mid);
 				used = TRUE;
 			} else if (unset_flags.bits & CAMEL_MESSAGE_SEEN) {
 				unread_items = g_slist_prepend (unread_items, mid);
@@ -1646,6 +1684,8 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 
 	if (read_items && has_obj_folder) {
 		camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
+		if (read_with_receipt)
+			e_mapi_connection_set_flags (conn, &obj_folder, read_with_receipt, CLEAR_RN_PENDING, cancellable, NULL);
 		e_mapi_connection_set_flags (conn, &obj_folder, read_items, 0, cancellable, NULL);
 		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 	}
