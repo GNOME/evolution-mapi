@@ -1085,6 +1085,15 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
 	CamelService *service;
 
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store)) &&
+	    (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST) != 0) {
+		g_set_error (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("Folder list not available in offline mode."));
+		return NULL;
+	}
+
 	service = CAMEL_SERVICE (store);
 
 	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
