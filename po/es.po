@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi.master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2012-01-24 13:24+0000\n"
-"PO-Revision-Date: 2012-01-25 12:01+0100\n"
+"POT-Creation-Date: 2012-01-25 11:02+0000\n"
+"PO-Revision-Date: 2012-01-25 14:31+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -197,7 +197,6 @@ msgstr "Suscribirse a la carpeta de otro usuario…"
 #: ../src/account-setup-eplugin/e-mapi-account-settings.c:717
 #: ../src/account-setup-eplugin/e-mapi-account-settings.c:739
 #: ../src/account-setup-eplugin/e-mapi-account-settings.c:761
-#| msgid "Permission denied"
 msgid "Permissions..."
 msgstr "Permisos…"
 
@@ -254,7 +253,7 @@ msgstr "Autor"
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:130
 msgctxt "PermissionsLevel"
 msgid "Nonediting Author"
-msgstr ""
+msgstr "Autor sin edición"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:135
 msgctxt "PermissionsLevel"
@@ -273,7 +272,7 @@ msgstr "Personalizado"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:274
 msgid "Writing folder permissions, please wait..."
-msgstr ""
+msgstr "Escribiendo los permisos de la carpeta, espere…"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:780
 #: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:526
@@ -288,7 +287,6 @@ msgid "Default"
 msgstr "Predeterminado"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:784
-#| msgid "Unknown error"
 msgctxt "User"
 msgid "Unknown"
 msgstr "Desconocido"
@@ -299,14 +297,13 @@ msgid "Name"
 msgstr "Nombre"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:882
-#, fuzzy
 #| msgid "Permission denied"
 msgid "Permission level"
-msgstr "Permiso denegado"
+msgstr "Nivel de permisos"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:935
 msgid "Edit MAPI folder permissions..."
-msgstr ""
+msgstr "Editar los permisos de la carpeta MAPI…"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:960
 #: ../src/account-setup-eplugin/e-mapi-subscribe-foreign-folder.c:606
@@ -314,164 +311,152 @@ msgid "Account:"
 msgstr "Cuenta:"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:986
-#| msgid "_Folder name:"
 msgid "Folder name:"
 msgstr "Nombre de la carpeta:"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1007
-#, fuzzy
 #| msgid "Folder"
 msgid "Folder ID:"
-msgstr "Carpeta"
+msgstr "ID de la carpeta:"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1066
-#| msgid "Permission denied"
 msgid "Permissions"
 msgstr "Permisos:"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1087
-#, fuzzy
 #| msgid "Permission denied"
 msgid "Permi_ssion level:"
-msgstr "Permiso denegado"
+msgstr "Nivel de permi_sos:"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1115
 msgctxt "Permissions"
 msgid "Read"
-msgstr ""
+msgstr "Lectura"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1126
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1189
 msgctxt "Permissions"
 msgid "None"
-msgstr ""
+msgstr "Niguno"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1131
 msgctxt "Permissions"
 msgid "Full Details"
-msgstr ""
+msgstr "Todos los detalles"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1136
 msgctxt "Permissions"
 msgid "Simple Free/Busy"
-msgstr ""
+msgstr "Libre/ocupado simple"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1140
-#, fuzzy
 #| msgid "Failed to get Free/Busy data"
 msgctxt "Permissions"
 msgid "Detailed Free/Busy"
-msgstr "Falló al obtener los datos de disponibilidad"
+msgstr "Libre/ocupado detallado"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1147
 msgctxt "Permissions"
 msgid "Write"
-msgstr ""
+msgstr "Escritura"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1158
 msgctxt "Permissions"
 msgid "Create items"
-msgstr ""
+msgstr "Crear elementos"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1162
-#, fuzzy
 #| msgid "Cannot create folder '%s'"
 msgctxt "Permissions"
 msgid "Create subfolders"
-msgstr "No se puede crear la carpeta «%s»"
+msgstr "Crear subcarpetas"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1166
 msgctxt "Permissions"
 msgid "Edit own"
-msgstr ""
+msgstr "Editar propietario"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1170
 msgctxt "Permissions"
 msgid "Edit all"
-msgstr ""
+msgstr "Editar todo"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1178
 msgctxt "Permissions"
 msgid "Delete items"
-msgstr ""
+msgstr "Eliminar elementos"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1194
 msgctxt "Permissions"
 msgid "Own"
-msgstr ""
+msgstr "Propios"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1199
 msgctxt "Permissions"
 msgid "All"
-msgstr ""
+msgstr "Todos"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1205
 msgctxt "Permissions"
 msgid "Other"
-msgstr ""
+msgstr "Otros"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1216
-#| msgid "_Folder name:"
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Propietario de la carpeta"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1220
-#| msgid "_Folder name:"
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Carpeta de contacto"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1224
-#| msgid "Folder Size"
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Carpeta visible"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:1279
 msgid "Reading folder permissions, please wait..."
-msgstr ""
+msgstr "Leyendo los permisos de la carpeta, espere…"
 
 #: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:223
-#, fuzzy
 #| msgid "Folder of user '%s' not found"
 msgid "No users found"
-msgstr "No se encontró la carpeta del usuario «%s»"
+msgstr "No se encontraron usuarios"
 
 #: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:226
 #, c-format
 msgid "Found one user"
 msgid_plural "Found %d users"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Se encontró un usuario"
+msgstr[1] "Se encontraron %d usuarios"
 
 #: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:231
 #, c-format
 msgid "Found %d users, but showing only first %d"
 msgid_plural "Found %d users, but showing only first %d"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Se encontraron %d usuarios, pero sólo se muestran los %d primeros"
+msgstr[1] "Se encontraron %d usuarios, pero sólo se muestran los %d primeros"
 
 #: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:518
 #: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:709
 msgid "Search for a user"
-msgstr ""
+msgstr "Buscar un usuario"
 
 #: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:534
-#| msgid "Searching"
 msgid "Searching..."
 msgstr "Buscando..."
 
 #: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:605
 msgid "E-mail"
-msgstr ""
+msgstr "Correo-e"
 
 #: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:646
 msgid "Choose MAPI user..."
-msgstr ""
+msgstr "Elegir usuario MAPI…"
 
 #: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:669
-#| msgid "Searching"
 msgid "_Search:"
 msgstr "_Buscar:"
 
@@ -567,7 +552,7 @@ msgstr "_Usuario:"
 
 #: ../src/account-setup-eplugin/e-mapi-subscribe-foreign-folder.c:654
 msgid "C_hoose..."
-msgstr ""
+msgstr "E_legir…"
 
 #: ../src/account-setup-eplugin/e-mapi-subscribe-foreign-folder.c:669
 msgid "_Folder name:"
@@ -584,7 +569,7 @@ msgstr "Buscando"
 #: ../src/addressbook/e-book-backend-mapi.c:1707
 #: ../src/calendar/e-cal-backend-mapi.c:164
 #: ../src/calendar/e-cal-backend-mapi.c:459
-#: ../src/camel/camel-mapi-folder.c:1783
+#: ../src/camel/camel-mapi-folder.c:1797
 msgid "Unknown error"
 msgstr "Error desconocido"
 
@@ -711,70 +696,70 @@ msgstr ""
 msgid "Failed to get Free/Busy data"
 msgstr "Falló al obtener los datos de disponibilidad"
 
-#: ../src/camel/camel-mapi-folder.c:713
+#: ../src/camel/camel-mapi-folder.c:727
 #, c-format
 msgid "Refreshing folder '%s'"
 msgstr "Actualizando la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-folder.c:780
+#: ../src/camel/camel-mapi-folder.c:794
 #, c-format
 msgid "Downloading messages in folder '%s'"
 msgstr "Descargando mensajes en la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-folder.c:873 ../src/camel/camel-mapi-folder.c:1423
-#: ../src/camel/camel-mapi-folder.c:1433
+#: ../src/camel/camel-mapi-folder.c:887 ../src/camel/camel-mapi-folder.c:1437
+#: ../src/camel/camel-mapi-folder.c:1447
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Este mensaje no está disponible en modo desconectado."
 
-#: ../src/camel/camel-mapi-folder.c:885
+#: ../src/camel/camel-mapi-folder.c:899
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Falló al obtener los elementos: %s"
 
-#: ../src/camel/camel-mapi-folder.c:890
+#: ../src/camel/camel-mapi-folder.c:904
 msgid "Fetching items failed"
 msgstr "Falló al obtener los elementos"
 
-#: ../src/camel/camel-mapi-folder.c:1120
+#: ../src/camel/camel-mapi-folder.c:1134
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "No se puede anexar el mensaje a la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-folder.c:1128 ../src/camel/camel-mapi-folder.c:1156
+#: ../src/camel/camel-mapi-folder.c:1142 ../src/camel/camel-mapi-folder.c:1170
 #, c-format
 msgid "Offline."
 msgstr "Desconectado."
 
-#: ../src/camel/camel-mapi-folder.c:1236
+#: ../src/camel/camel-mapi-folder.c:1250
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "Falló al vaciar la papelera: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1241
+#: ../src/camel/camel-mapi-folder.c:1255
 msgid "Failed to empty Trash"
 msgstr "Falló al vaciar la papelera"
 
-#: ../src/camel/camel-mapi-folder.c:1408
+#: ../src/camel/camel-mapi-folder.c:1422
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "No se puede obtener el mensaje %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1409
+#: ../src/camel/camel-mapi-folder.c:1423
 msgid "No such message"
 msgstr "No existe ese mensaje"
 
-#: ../src/camel/camel-mapi-folder.c:1454
+#: ../src/camel/camel-mapi-folder.c:1468
 #, c-format
 msgid "Could not get message: %s"
 msgstr "No se puede obtener el mensaje: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1460
+#: ../src/camel/camel-mapi-folder.c:1474
 #, c-format
 msgid "Could not get message"
 msgstr "No se puede obtener el mensaje"
 
-#: ../src/camel/camel-mapi-folder.c:1897
+#: ../src/camel/camel-mapi-folder.c:1911
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No se pudo cargar el resumen para %s"
@@ -1040,26 +1025,26 @@ msgid "Folder of user '%s' not found"
 msgstr "No se encontró la carpeta del usuario «%s»"
 
 #. Translators: %s is replaced with an email address which was found ambiguous on a remote server
-#: ../src/libexchangemapi/e-mapi-connection.c:3411
+#: ../src/libexchangemapi/e-mapi-connection.c:3412
 #, c-format
 msgid "Recipient '%s' is ambiguous"
 msgstr "El destinatario «%s» es ambiguo"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:5782
+#: ../src/libexchangemapi/e-mapi-connection.c:5783
 msgid "All Public Folders"
 msgstr "Todas las carpetas públicas"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6024
+#: ../src/libexchangemapi/e-mapi-connection.c:6025
 #, c-format
 msgid "User name '%s' is ambiguous"
 msgstr "El nombre de usuario «%s» es ambiguo"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6027
+#: ../src/libexchangemapi/e-mapi-connection.c:6028
 #, c-format
 msgid "User name '%s' not found"
 msgstr "No se encontró el nombre de usuario «%s»"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6277
+#: ../src/libexchangemapi/e-mapi-connection.c:6278
 #, c-format
 msgid "Server '%s' is not reachable"
 msgstr "El servidor «%s» no es alcanzable"
