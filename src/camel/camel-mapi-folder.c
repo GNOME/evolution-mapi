@@ -259,6 +259,7 @@ struct GatherChangedObjectsData
 	GSList *to_update; /* mapi_id_t * */
 	GHashTable *removed_uids;
 	time_t latest_last_modify;
+	gboolean is_public_folder;
 };
 
 static gboolean
@@ -297,6 +298,10 @@ gather_changed_objects_to_slist (EMapiConnection *conn,
 				update = TRUE;
 			} else {
 				guint32 mask = CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ATTACHMENTS, flags = 0;
+
+				/* do not change unread state for known messages in public folders */
+				if (gco->is_public_folder)
+					mask &= ~CAMEL_MESSAGE_SEEN;
 
 				if ((object_data->msg_flags & MSGFLAG_READ) != 0)
 					flags |= CAMEL_MESSAGE_SEEN;
@@ -341,6 +346,7 @@ struct GatherObjectSummaryData
 {
 	CamelFolder *folder;
 	CamelFolderChangeInfo *changes;
+	gboolean is_public_folder;
 };
 
 static void
@@ -407,8 +413,23 @@ gather_object_offline_cb (EMapiConnection *conn,
 		msg_flags = pmsg_flags ? *pmsg_flags : 0;
 
 		is_new = !camel_folder_summary_check_uid (gos->folder->summary, uid_str);
-		if (!is_new)
+		if (!is_new) {
+			/* keep local read/unread flag on messages from public folders */
+			if (gos->is_public_folder) {
+				gboolean user_has_read;
+
+				info = camel_folder_summary_get (gos->folder->summary, uid_str);
+				if (info) {
+					user_has_read = (camel_message_info_flags (info) & CAMEL_MESSAGE_SEEN) != 0;
+					if ((user_has_read ? 1 : 0) != ((msg_flags & MSGFLAG_READ) ? 1 : 0))
+						msg_flags = (msg_flags & (~MSGFLAG_READ)) | (user_has_read ? MSGFLAG_READ : 0);
+
+					camel_message_info_free (info);
+				}
+			}
+
 			camel_folder_summary_remove_uid (gos->folder->summary, uid_str);
+		}
 
 		info = camel_folder_summary_info_new_from_message (gos->folder->summary, msg, NULL);
 		if (info) {
@@ -655,6 +676,10 @@ gather_object_summary_cb (EMapiConnection *conn,
 			minfo->last_modified = 0;
 		}
 
+		/* do not change unread state for known messages in public folders */
+		if (gos->is_public_folder && !is_new)
+			mask &= ~CAMEL_MESSAGE_SEEN;
+
 		if ((msg_flags & MSGFLAG_READ) != 0)
 			flags |= CAMEL_MESSAGE_SEEN;
 		if ((msg_flags & MSGFLAG_HASATTACH) != 0)
@@ -756,6 +781,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 	gco.summary = folder->summary;
 	gco.to_update = NULL;
 	gco.removed_uids = NULL;
+	gco.is_public_folder = (mapi_folder->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC) != 0;
 
 	if (msi->latest_last_modify <= 0) {
 		GPtrArray *known_uids;
@@ -786,6 +812,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 
 		gos.folder = folder;
 		gos.changes = camel_folder_change_info_new ();
+		gos.is_public_folder = gco.is_public_folder;
 
 		if (gco.removed_uids)
 			g_hash_table_foreach (gco.removed_uids, remove_removed_uids_cb, &gos);
@@ -808,6 +835,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 
 		gos.folder = folder;
 		gos.changes = camel_folder_change_info_new ();
+		gos.is_public_folder = gco.is_public_folder;
 
 		g_hash_table_foreach (gco.removed_uids, remove_removed_uids_cb, &gos);
 
