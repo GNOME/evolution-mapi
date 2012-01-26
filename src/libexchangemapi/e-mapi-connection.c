@@ -1538,10 +1538,12 @@ e_mapi_connection_set_permissions (EMapiConnection *conn,
 				}
 
 				rows->PermissionsData[row_index].lpProps.lpProps[0].ulPropTag = PidTagEntryId;
-				rows->PermissionsData[row_index].lpProps.lpProps[0].value.bin = pem->entry_id;
+				rows->PermissionsData[row_index].lpProps.lpProps[0].value.bin.cb = pem->entry_id.cb;
+				rows->PermissionsData[row_index].lpProps.lpProps[0].value.bin.lpb = pem->entry_id.lpb;
 
 				rows->PermissionsData[row_index].lpProps.lpProps[1].ulPropTag = PidTagMemberRights;
-				rows->PermissionsData[row_index].lpProps.lpProps[1].value.l = pem->member_rights;
+				rows->PermissionsData[row_index].lpProps.lpProps[1].value.l = pem->member_rights &
+					~(with_freebusy ? 0 : (E_MAPI_PERMISSION_BIT_FREE_BUSY_DETAILED | E_MAPI_PERMISSION_BIT_FREE_BUSY_SIMPLE));
 
 				row_index++;
 			} else if (cpem->member_rights != pem->member_rights) {
@@ -1559,7 +1561,8 @@ e_mapi_connection_set_permissions (EMapiConnection *conn,
 				rows->PermissionsData[row_index].lpProps.lpProps[0].value.d = pem->member_id;
 
 				rows->PermissionsData[row_index].lpProps.lpProps[1].ulPropTag = PidTagMemberRights;
-				rows->PermissionsData[row_index].lpProps.lpProps[1].value.l = pem->member_rights;
+				rows->PermissionsData[row_index].lpProps.lpProps[1].value.l = pem->member_rights &
+					~(with_freebusy ? 0 : (E_MAPI_PERMISSION_BIT_FREE_BUSY_DETAILED | E_MAPI_PERMISSION_BIT_FREE_BUSY_SIMPLE));
 
 				row_index++;
 			}
@@ -1593,6 +1596,27 @@ e_mapi_connection_set_permissions (EMapiConnection *conn,
 
 	if (rows->ModifyCount > 0) {
 		ms = ModifyPermissions (obj_folder, with_freebusy ? ModifyPerms_IncludeFreeBusy : 0, rows);
+		if (ms == MAPI_E_INVALID_PARAMETER && with_freebusy) {
+			gint ii;
+
+			for (ii = 0; ii < rows->ModifyCount; ii++) {
+				if (rows->PermissionsData[ii].PermissionDataFlags == ROW_ADD) {
+					rows->PermissionsData[ii].lpProps.lpProps[1].value.l &=
+						~(E_MAPI_PERMISSION_BIT_FREE_BUSY_DETAILED | E_MAPI_PERMISSION_BIT_FREE_BUSY_SIMPLE);
+				} else if (rows->PermissionsData[ii].PermissionDataFlags == ROW_MODIFY) {
+					rows->PermissionsData[ii].lpProps.lpProps[1].value.l &=
+						~(E_MAPI_PERMISSION_BIT_FREE_BUSY_DETAILED | E_MAPI_PERMISSION_BIT_FREE_BUSY_SIMPLE);
+				}
+			}
+
+			/* older servers (up to 8.0.360.0) can have issue setting Free/Busy flags,
+			   thus try to set permissions without modifying these;
+			   similar error can be also thrown when setting Free/Busy flags in rights,
+			   but does not use ModifyPerms_IncludeFreeBusy flag
+			*/
+			ms = ModifyPermissions (obj_folder, 0, rows);
+		}
+
 		if (ms != MAPI_E_SUCCESS) {
 			make_mapi_error (perror, "ModifyPermissions", ms);
 			goto cleanup;
