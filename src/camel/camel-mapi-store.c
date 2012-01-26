@@ -1194,6 +1194,16 @@ mapi_store_create_folder_sync (CamelStore *store,
 		return NULL;
 	}
 
+	if (parent_name && (!*parent_name ||
+	    g_str_equal (parent_name, DISPLAY_NAME_FAVORITES) ||
+	    g_str_equal (parent_name, DISPLAY_NAME_FOREIGN_FOLDERS))) {
+		g_set_error_literal (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("MAPI folders can be created only within user's mailbox"));
+		return NULL;
+	}
+
 	camel_service_lock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	if (parent_name && *parent_name)
