@@ -359,10 +359,7 @@ mapi_convert_to_folder_info (CamelMapiStore *store,
 		}
 	}
 
-	if (folder->category == E_MAPI_FOLDER_CATEGORY_PERSONAL)
-		fi->flags |= CAMEL_STORE_INFO_FOLDER_SUBSCRIBED; /*Set this default for mailbox.*/
-
-	if (folder->child_count <=0)
+	if (folder->child_count <= 0)
 		fi->flags |= CAMEL_FOLDER_NOCHILDREN;
 	/*
 	   parent_hash contains the "parent id <-> folder id" combination. So we form
@@ -493,7 +490,6 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 		   them from an automatic removal */
 		if (((msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC) == 0 &&
 		    (msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN) == 0) ||
-		    (msi->info.flags & CAMEL_FOLDER_SUBSCRIBED) == 0 ||
 		    (msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC_REAL) != 0)
 			g_hash_table_insert (old_cache_folders, g_strdup (camel_store_info_path (store->summary, msi)), GINT_TO_POINTER (1));
 
@@ -749,14 +745,15 @@ mapi_get_folder_info_offline (CamelStore *store, const gchar *top,
 
 		/* Allow Mailbox and Favourites (Subscribed public folders) */
 		if (subscribed &&
-		    ((si->flags & CAMEL_STORE_INFO_FOLDER_SUBSCRIBED) == 0 ||
+		    (((si->flags & CAMEL_STORE_INFO_FOLDER_SUBSCRIBED) == 0 &&
+		     (msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PERSONAL) == 0) ||
 		    (!subscription_list && (msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC_REAL) != 0))) {
 			camel_store_summary_info_free (mapi_store->summary, si);
 			continue;
 		}
 
 		if (!subscription_list &&
-		    !(msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_MAIL) &&
+		    (msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_MAIL) == 0 &&
 		    (si->flags & CAMEL_STORE_INFO_FOLDER_SUBSCRIBED) != 0 &&
 		    ((msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC) != 0 ||
 		     (msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN) != 0)) {
@@ -1656,6 +1653,15 @@ mapi_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 	}
 
 	msi = (CamelMapiStoreInfo *) si;
+	if ((msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC) == 0) {
+		/* this is not a public folder, but MAPI supports subscribtions
+		   only on public folders, thus report success
+		*/
+
+		camel_store_summary_info_free (mapi_store->summary, si);
+
+		return TRUE;
+	}
 
 	path = g_strconcat (DISPLAY_NAME_FAVORITES, "/", use_folder_name, NULL);
 	si2 = camel_store_summary_path (mapi_store->summary, path);
@@ -1768,16 +1774,22 @@ mapi_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 		CamelStoreInfo *si2 = camel_mapi_store_summary_get_folder_id (mapi_store->summary, msi->folder_id);
 
 		if (si2) {
+			CamelMapiStoreInfo *msi2 = (CamelMapiStoreInfo *) si2;
+
 			fi = mapi_build_folder_info (mapi_store, NULL, camel_store_info_path (mapi_store->summary, si2));
 			camel_subscribable_folder_unsubscribed (subscribable, fi);
 			camel_folder_info_free (fi);
 
-			/* remove also frees 'si2' */
-			camel_store_summary_remove (mapi_store->summary, si2);
-			camel_store_summary_touch (mapi_store->summary);
-			camel_store_summary_save (mapi_store->summary);
+			if ((msi2->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC) != 0 &&
+			    (msi2->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC_REAL) == 0) {
+				/* remove calls also free on 'si2' */
+				camel_store_summary_remove (mapi_store->summary, si2);
+				camel_store_summary_touch (mapi_store->summary);
+			} else {
+				camel_store_summary_info_free (mapi_store->summary, si2);
+			}
 		} else {
-			g_debug ("%s: Failed to find subscribed by folder ID\n", G_STRFUNC);
+			g_debug ("%s: Failed to find subscribed by folder ID", G_STRFUNC);
 		}
 	} else {
 		CamelSettings *settings;
@@ -1794,14 +1806,16 @@ mapi_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 			error);
 	}
 
-	if ((msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC_REAL) == 0) {
+	if ((msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC) != 0 &&
+	    (msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC_REAL) == 0) {
 		/* remove calls also free on 'si' */
 		camel_store_summary_remove (mapi_store->summary, si);
 		camel_store_summary_touch (mapi_store->summary);
-		camel_store_summary_save (mapi_store->summary);
 	} else {
 		camel_store_summary_info_free (mapi_store->summary, si);
 	}
+
+	camel_store_summary_save (mapi_store->summary);
 
 	return res;
 }

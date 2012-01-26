@@ -147,6 +147,12 @@ store_info_load (CamelStoreSummary *s, FILE *in)
 				g_free (msi->foreign_username);
 				msi->foreign_username = NULL;
 			}
+
+			/* personal folders are not subscribable */
+			if ((msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PERSONAL) != 0) {
+				si->flags &= ~(CAMEL_STORE_INFO_FOLDER_SUBSCRIBED | CAMEL_FOLDER_SUBSCRIBED);
+				msi->camel_folder_flags &= ~(CAMEL_STORE_INFO_FOLDER_SUBSCRIBED | CAMEL_FOLDER_SUBSCRIBED);
+			}
 		}
 
 		g_free (folder_id_str);

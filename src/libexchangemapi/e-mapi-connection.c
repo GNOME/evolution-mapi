@@ -4632,6 +4632,9 @@ emc_open_folders (EMapiConnection *conn,
 
 	LOCK ();
 
+	mapi_object_init (obj_child_folder);
+	mapi_object_init (obj_parent_folder);
+
 	ms = OpenFolder (obj_store, child_fid, obj_child_folder);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "OpenFolder-1", ms);
@@ -4641,6 +4644,7 @@ emc_open_folders (EMapiConnection *conn,
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 		ms = MAPI_E_USER_CANCEL;
 		mapi_object_release (obj_child_folder);
+		mapi_object_init (obj_child_folder);
 		goto cleanup;
 	}
 
@@ -4649,12 +4653,14 @@ emc_open_folders (EMapiConnection *conn,
 		ms = MAPI_E_CALL_FAILED;
 		make_mapi_error (perror, "GetFolderProperties", ms);
 		mapi_object_release (obj_child_folder);
+		mapi_object_init (obj_child_folder);
 		goto cleanup;
 	}
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 		ms = MAPI_E_USER_CANCEL;
 		mapi_object_release (obj_child_folder);
+		mapi_object_init (obj_child_folder);
 		goto cleanup;
 	}
 
@@ -4662,6 +4668,7 @@ emc_open_folders (EMapiConnection *conn,
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "OpenFolder-2", ms);
 		mapi_object_release (obj_child_folder);
+		mapi_object_init (obj_child_folder);
 		goto cleanup;
 	}
 
@@ -4702,10 +4709,13 @@ e_mapi_connection_remove_folder (EMapiConnection *conn,
 
 	LOCK ();
 
+	mapi_object_init (&obj_folder);
+	mapi_object_init (&obj_parent);
+
 	if (!emc_open_folders (conn, obj_store, fid_to_remove, &obj_folder, &obj_parent, cancellable, perror)) {
 		ms = MAPI_E_CALL_FAILED;
 		make_mapi_error (perror, "emc_open_folders", ms);
-		
+		goto cleanup;
 	}
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
