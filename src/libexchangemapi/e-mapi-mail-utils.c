@@ -795,8 +795,8 @@ e_mapi_mail_utils_object_to_message (EMapiConnection *conn, /* const */ EMapiObj
 		if (str)
 			camel_medium_add_header (CAMEL_MEDIUM (msg), "In-Reply-To", str);
 
-		priority = e_mapi_util_find_array_propval (&object->properties, PidTagImportance);
-		if (priority && *priority > 1)
+		priority = e_mapi_util_find_array_propval (&object->properties, PidTagPriority);
+		if (priority && *priority == 1)
 			camel_medium_add_header (CAMEL_MEDIUM (msg), "X-Priority", "1");
 
 		/* Read-Receipt handling */
@@ -1533,8 +1533,8 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 
 	str = camel_medium_get_header ((CamelMedium *) message, "X-Priority");
 	if (str && g_str_equal (str, "1")) {
-		ui32 = 2;
-		set_value (PidTagImportance, &ui32);
+		ui32 = 1;
+		set_value (PidTagPriority, &ui32);
 	}
 
 	str = camel_medium_get_header ((CamelMedium *) message, "Disposition-Notification-To");
