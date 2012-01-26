@@ -462,10 +462,9 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 	GError *err = NULL;
 
 	if (!camel_mapi_store_connected (store, NULL)) {
-		g_set_error (
-			error, CAMEL_SERVICE_ERROR,
-			CAMEL_SERVICE_ERROR_UNAVAILABLE,
-			_("Folder list not available in offline mode."));
+		g_set_error_literal (
+			error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("Folder list is not available in offline mode"));
 		return FALSE;
 	}
 
@@ -1084,10 +1083,9 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store)) &&
 	    (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST) != 0) {
-		g_set_error (
-			error, CAMEL_SERVICE_ERROR,
-			CAMEL_SERVICE_ERROR_UNAVAILABLE,
-			_("Folder list not available in offline mode."));
+		g_set_error_literal (
+			error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("Folder list is not available in offline mode"));
 		return NULL;
 	}
 
@@ -1172,9 +1170,9 @@ mapi_store_create_folder_sync (CamelStore *store,
 	GError *mapi_error = NULL;
 
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
-		g_set_error (
-			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Cannot create MAPI folders in offline mode."));
+		g_set_error_literal (
+			error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("Cannot create MAPI folders in offline mode"));
 		return NULL;
 	}
 
@@ -1298,6 +1296,13 @@ mapi_store_delete_folder_sync (CamelStore *store,
 	gboolean success = TRUE;
 	GError *local_error = NULL;
 
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
+		g_set_error_literal (
+			error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("Cannot delete MAPI folders in offline mode"));
+		return FALSE;
+	}
+
 	camel_service_lock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	if (!camel_mapi_store_connected ((CamelMapiStore *)store, &local_error)) {
@@ -1376,6 +1381,13 @@ mapi_store_rename_folder_sync (CamelStore *store,
 	mapi_id_t old_fid;
 	GError *local_error = NULL;
 
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
+		g_set_error_literal (
+			error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("Cannot rename MAPI folders in offline mode"));
+		return FALSE;
+	}
+
 	service = CAMEL_SERVICE (store);
 	user_cache_dir = camel_service_get_user_cache_dir (service);
 
@@ -1398,7 +1410,7 @@ mapi_store_rename_folder_sync (CamelStore *store,
 		/*To translators : '%s' is current name of the folder */
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Cannot rename MAPI folder '%s'. Folder does not exist."),
+			_("Cannot rename MAPI folder '%s'. Folder does not exist"),
 			old_name);
 		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		return FALSE;
@@ -1410,7 +1422,7 @@ mapi_store_rename_folder_sync (CamelStore *store,
 		 new name of the folder.*/
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Cannot rename MAPI default folder '%s' to '%s'."),
+			_("Cannot rename MAPI default folder '%s' to '%s'"),
 			old_name, new_name);
 		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		return FALSE;
@@ -1644,6 +1656,13 @@ mapi_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 	const gchar *use_folder_name = folder_name, *f_name;
 	gchar *path;
 
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (mapi_store))) {
+		g_set_error_literal (
+			error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("Cannot subscribe MAPI folders in offline mode"));
+		return FALSE;
+	}
+
 	/* subscribe is done only with public folders, which are added to Favorites */
 	f_name = strrchr (folder_name, '/');
 	if (!f_name) {
@@ -1772,6 +1791,13 @@ mapi_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 	CamelStoreInfo *si;
 	CamelMapiStoreInfo *msi;
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (subscribable);
+
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (mapi_store))) {
+		g_set_error_literal (
+			error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("Cannot unsubscribe MAPI folders in offline mode"));
+		return FALSE;
+	}
 
 	si = camel_store_summary_path (mapi_store->summary, folder_name);
 	if (!si) {
@@ -1995,6 +2021,13 @@ mapi_connect_sync (CamelService *service,
 	CamelServiceConnectionStatus status;
 	CamelSession *session;
 	gchar *name;
+
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
+		g_set_error_literal (
+			error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("Cannot connect MAPI store in offline mode"));
+		return FALSE;
+	}
 
 	session = camel_service_get_session (service);
 
