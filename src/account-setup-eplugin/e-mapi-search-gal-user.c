@@ -292,7 +292,8 @@ list_gal_search_mids_cb (EMapiConnection *conn,
 	g_return_val_if_fail (object_data != NULL, FALSE);
 	g_return_val_if_fail (user_data != NULL, FALSE);
 
-	if (object_data->obj_type == MAPI_MAILUSER) {
+	/* zero means PidTagObjectType not found or supported */
+	if (object_data->obj_type == MAPI_MAILUSER || object_data->obj_type == 0) {
 		GSList **pmids = user_data;
 		mapi_id_t *mid;
 

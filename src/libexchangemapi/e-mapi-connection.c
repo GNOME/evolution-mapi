@@ -1858,12 +1858,12 @@ e_mapi_connection_list_objects (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	propTagArray = set_SPropTagArray (mem_ctx, 0x5,
-					  PidTagMid,
-					  PidTagObjectType,
-					  PidTagMessageClass,
-					  PidTagMessageFlags,
-					  PidTagLastModificationTime);
+	propTagArray = set_SPropTagArray (mem_ctx, 4,
+		PidTagMid,
+		PidTagMessageClass,
+		PidTagMessageFlags,
+		PidTagLastModificationTime);
+		/* PidTagObjectType doesn't work with Exchange 2010 servers */
 
 	/* Set primary columns to be fetched */
 	ms = SetColumns (&obj_table, propTagArray);
