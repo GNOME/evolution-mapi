@@ -47,6 +47,14 @@ void			e_mapi_run_in_thread_with_feedback	(GtkWindow *parent,
 								 gpointer user_data,
 								 GDestroyNotify free_user_data);
 
+void			e_mapi_run_in_thread_with_feedback_modal(GtkWindow *parent,
+								 GObject *with_object,
+								 const gchar *description,
+								 EMapiSetupFunc thread_func,
+								 EMapiSetupFunc idle_func,
+								 gpointer user_data,
+								 GDestroyNotify free_user_data);
+
 EMapiConnection	*	e_mapi_account_open_connection_for	(GtkWindow *parent,
 								 const gchar *login_profile,
 								 const gchar *login_username,

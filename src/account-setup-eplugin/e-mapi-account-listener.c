@@ -949,7 +949,7 @@ update_account_sources_async (gpointer worker_data, gboolean cancelled, gpointer
 		csd->profile_name = g_strdup (profile);
 		csd->account = g_object_ref (account);
 
-		g_timeout_add_seconds (1, check_for_account_conn_cb, csd);
+		g_timeout_add_seconds (5, check_for_account_conn_cb, csd);
 	}
 
 	camel_url_free (url);

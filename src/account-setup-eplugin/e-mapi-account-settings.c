@@ -48,6 +48,7 @@
 #include <mail/em-folder-tree.h>
 
 #include "e-mapi-account-listener.h"
+#include "e-mapi-account-setup.h"
 #include "e-mapi-subscribe-foreign-folder.h"
 #include "e-mapi-edit-folder-permissions.h"
 
@@ -68,26 +69,35 @@ typedef struct
 	GtkGrid *spinner_grid;
 
 	gchar *profile;
+	gchar *username;
+	gchar *host;
 
 	GSList *folder_list;
-	EMapiConnection *conn;
+	GCancellable *cancellable;
+	GError *error;
 } FolderSizeDialogData;
 
 static gboolean
-fill_folder_size_dialog_cb (gpointer data)
+mapi_settings_get_folder_size_idle (gpointer user_data)
 {
 	GtkWidget *widget;
 	GtkCellRenderer *renderer;
 	GtkListStore *store;
 	GtkTreeIter iter;
 	GtkBox *content_area;
-	FolderSizeDialogData *dialog_data = (FolderSizeDialogData *)data;
+	FolderSizeDialogData *fsd = user_data;
+
+	g_return_val_if_fail (fsd != NULL, FALSE);
+
+	if (g_cancellable_is_cancelled (fsd->cancellable))
+		goto cleanup;
 
 	/* Hide progress bar. Set status*/
-	gtk_widget_destroy (GTK_WIDGET (dialog_data->spinner_grid));
+	gtk_widget_destroy (GTK_WIDGET (fsd->spinner_grid));
 
-	if (dialog_data->folder_list) {
+	if (fsd->folder_list) {
 		GtkWidget *scrolledwindow, *tree_view;
+		GSList *fiter;
 
 		scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
 		gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -109,8 +119,8 @@ fill_folder_size_dialog_cb (gpointer data)
 		gtk_tree_view_set_model (GTK_TREE_VIEW (tree_view), GTK_TREE_MODEL (store));
 
 		/* Populate model with data */
-		while (dialog_data->folder_list) {
-			EMapiFolder *folder = (EMapiFolder *) dialog_data->folder_list->data;
+		for (fiter = fsd->folder_list; fiter;  fiter = fiter->next) {
+			EMapiFolder *folder = fiter->data;
 			gchar *folder_size = g_format_size_for_display (folder->size);
 
 			gtk_list_store_append (store, &iter);
@@ -118,12 +128,16 @@ fill_folder_size_dialog_cb (gpointer data)
 					    COL_FOLDERSIZE_NAME, folder->folder_name,
 					    COL_FOLDERSIZE_SIZE, folder_size,
 					    -1);
-			dialog_data->folder_list = g_slist_next (dialog_data->folder_list);
+
 			g_free (folder_size);
 		}
 
 		gtk_container_add (GTK_CONTAINER (scrolledwindow), tree_view);
 		widget = scrolledwindow;
+	} else if (fsd->error) {
+		gchar *msg = g_strconcat (_("Unable to retrieve folder size information"), "\n", fsd->error->message, NULL);
+		widget = gtk_label_new (msg);
+		g_free (msg);
 	} else {
 		widget = gtk_label_new (_("Unable to retrieve folder size information"));
 	}
@@ -131,91 +145,117 @@ fill_folder_size_dialog_cb (gpointer data)
 	gtk_widget_show_all (widget);
 
 	/* Pack into content_area */
-	content_area = GTK_BOX (gtk_dialog_get_content_area (dialog_data->dialog));
+	content_area = GTK_BOX (gtk_dialog_get_content_area (fsd->dialog));
 	gtk_box_pack_start (content_area, widget, TRUE, TRUE, 6);
 
-	if (dialog_data->conn)
-		g_object_unref (dialog_data->conn);
+ cleanup:
+	e_mapi_folder_free_list (fsd->folder_list);
+	g_free (fsd->profile);
+	g_free (fsd->username);
+	g_free (fsd->host);
+	g_object_unref (fsd->cancellable);
+	g_clear_error (&fsd->error);
+	g_free (fsd);
 
 	return FALSE;
 }
 
 static gpointer
-mapi_settings_get_folder_size (gpointer data)
+mapi_settings_get_folder_size_thread (gpointer user_data)
 {
-	FolderSizeDialogData *dialog_data = (FolderSizeDialogData *)data;
+	FolderSizeDialogData *fsd = user_data;
+	EMapiConnection *conn;
 
-	dialog_data->folder_list = NULL;
-	dialog_data->conn = e_mapi_connection_find (dialog_data->profile);
-	if (dialog_data->conn && e_mapi_connection_connected (dialog_data->conn))
-		dialog_data->folder_list = e_mapi_connection_peek_folders_list (dialog_data->conn);
+	g_return_val_if_fail (fsd != NULL, NULL);
 
-	g_timeout_add (100, fill_folder_size_dialog_cb, dialog_data);
+	fsd->folder_list = NULL;
+	conn = e_mapi_account_open_connection_for (GTK_WINDOW (fsd->dialog),
+		fsd->profile,
+		fsd->username,
+		fsd->host,
+		fsd->cancellable,
+		&fsd->error);
+
+	if (conn && e_mapi_connection_connected (conn)) {
+		fsd->folder_list = NULL;
+		e_mapi_connection_get_folders_list (conn,
+			&fsd->folder_list,
+			NULL, NULL,
+			fsd->cancellable, &fsd->error);
+	}
+
+	if (conn)
+		g_object_unref (conn);
+
+	g_idle_add (mapi_settings_get_folder_size_idle, fsd);
 
 	return NULL;
 }
 
 static void
-mapi_settings_run_folder_size_dialog (const gchar *profile, gpointer data)
+mapi_settings_run_folder_size_dialog (CamelMapiSettings *mapi_settings)
 {
 	GtkBox *content_area;
-	GtkWidget *spinner, *alignment;
+	GtkWidget *spinner, *alignment, *dialog;
 	GtkWidget *spinner_label;
-	FolderSizeDialogData *dialog_data;
+	GCancellable *cancellable;
+	FolderSizeDialogData *fsd;
 
-	dialog_data = g_new0 (FolderSizeDialogData, 1);
+	g_return_if_fail (mapi_settings != NULL);
 
-	dialog_data->dialog = (GtkDialog *)gtk_dialog_new_with_buttons (_("Folder Size"), NULL,
-							   GTK_DIALOG_DESTROY_WITH_PARENT,
-							   GTK_STOCK_CLOSE, GTK_RESPONSE_ACCEPT,
-							   NULL);
+	dialog = gtk_dialog_new_with_buttons (_("Folder Size"), NULL,
+		GTK_DIALOG_DESTROY_WITH_PARENT,
+		GTK_STOCK_CLOSE, GTK_RESPONSE_ACCEPT,
+		NULL);
 
-	gtk_window_set_default_size (GTK_WINDOW (dialog_data->dialog), 250, 300);
+	fsd = g_new0 (FolderSizeDialogData, 1);
+	fsd->dialog = GTK_DIALOG (dialog);
 
-	content_area = GTK_BOX (gtk_dialog_get_content_area (dialog_data->dialog));
+	gtk_window_set_default_size (GTK_WINDOW (fsd->dialog), 250, 300);
+
+	content_area = GTK_BOX (gtk_dialog_get_content_area (fsd->dialog));
 
 	spinner = gtk_spinner_new ();
 	gtk_spinner_start (GTK_SPINNER (spinner));
 	spinner_label = gtk_label_new (_("Fetching folder list…"));
 
-	dialog_data->spinner_grid = GTK_GRID (gtk_grid_new ());
-	gtk_grid_set_column_spacing (dialog_data->spinner_grid, 6);
-	gtk_grid_set_column_homogeneous (dialog_data->spinner_grid, FALSE);
-	gtk_orientable_set_orientation (GTK_ORIENTABLE (dialog_data->spinner_grid), GTK_ORIENTATION_HORIZONTAL);
+	fsd->spinner_grid = GTK_GRID (gtk_grid_new ());
+	gtk_grid_set_column_spacing (fsd->spinner_grid, 6);
+	gtk_grid_set_column_homogeneous (fsd->spinner_grid, FALSE);
+	gtk_orientable_set_orientation (GTK_ORIENTABLE (fsd->spinner_grid), GTK_ORIENTATION_HORIZONTAL);
 
 	alignment = gtk_alignment_new (1.0, 0.5, 0.0, 1.0);
 	gtk_container_add (GTK_CONTAINER (alignment), spinner);
 	gtk_misc_set_alignment (GTK_MISC (spinner_label), 0.0, 0.5);
 
-	gtk_container_add (GTK_CONTAINER (dialog_data->spinner_grid), alignment);
-	gtk_container_add (GTK_CONTAINER (dialog_data->spinner_grid), spinner_label);
+	gtk_container_add (GTK_CONTAINER (fsd->spinner_grid), alignment);
+	gtk_container_add (GTK_CONTAINER (fsd->spinner_grid), spinner_label);
 
 	/* Pack the TreeView into dialog's content area */
-	gtk_box_pack_start (content_area, GTK_WIDGET (dialog_data->spinner_grid), TRUE, TRUE, 6);
-	gtk_widget_show_all (GTK_WIDGET (dialog_data->dialog));
+	gtk_box_pack_start (content_area, GTK_WIDGET (fsd->spinner_grid), TRUE, TRUE, 6);
+	gtk_widget_show_all (GTK_WIDGET (fsd->dialog));
 
-	dialog_data->profile = g_strdup (profile);
+	cancellable = g_cancellable_new ();
+	fsd->profile = g_strdup (camel_mapi_settings_get_profile (mapi_settings));
+	fsd->username = g_strdup (camel_network_settings_get_user (CAMEL_NETWORK_SETTINGS (mapi_settings)));
+	fsd->host = g_strdup (camel_network_settings_get_host (CAMEL_NETWORK_SETTINGS (mapi_settings)));
+	fsd->cancellable = g_object_ref (cancellable);
 
-	/* Fetch folder list and size information in a thread */
-	g_thread_create (mapi_settings_get_folder_size, dialog_data, FALSE, NULL);
+	g_return_if_fail (g_thread_create (mapi_settings_get_folder_size_thread, fsd, FALSE, NULL));
 
 	/* Start the dialog */
-	gtk_dialog_run (dialog_data->dialog);
+	gtk_dialog_run (GTK_DIALOG (dialog));
 
-	gtk_widget_destroy (GTK_WIDGET (dialog_data->dialog));
-
-	g_free (dialog_data->profile);
-	g_free (dialog_data);
+	g_cancellable_cancel (cancellable);
+	g_object_unref (cancellable);
+	gtk_widget_destroy (GTK_WIDGET (dialog));
 }
 
 static void
 folder_size_clicked (GtkButton *button,
                      CamelMapiSettings *mapi_settings)
 {
-	const gchar *profile;
-
-	profile = camel_mapi_settings_get_profile (mapi_settings);
-	mapi_settings_run_folder_size_dialog (profile, NULL);
+	mapi_settings_run_folder_size_dialog (mapi_settings);
 }
 
 static gchar *
@@ -271,12 +311,18 @@ action_folder_size_cb (GtkAction *action,
 		       EShellView *shell_view)
 {
 	gchar *profile;
+	CamelStore *store = NULL;
+	CamelMapiSettings *mapi_settings;
 
-	profile = get_profile_name_from_folder_tree (shell_view, NULL, NULL);
-	if (profile)
-		mapi_settings_run_folder_size_dialog (profile, NULL);
+	profile = get_profile_name_from_folder_tree (shell_view, NULL, &store);
+	if (profile && store) {
+		mapi_settings = CAMEL_MAPI_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (store)));
+		mapi_settings_run_folder_size_dialog (mapi_settings);
+	}
 
 	g_free (profile);
+	if (store)
+		g_object_unref (store);
 }
 
 static void
