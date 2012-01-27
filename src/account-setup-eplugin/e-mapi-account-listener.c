@@ -239,7 +239,7 @@ add_cal_esource (EAccount *account, GSList *folders, EMapiFolderType folder_type
 	domain = camel_mapi_settings_get_domain (mapi_settings);
 	realm = camel_mapi_settings_get_realm (mapi_settings);
 	kerberos = camel_mapi_settings_get_kerberos (mapi_settings) ? "required" : NULL;
-	stay_synchronized = camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (settings));
+	stay_synchronized = TRUE /* camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (settings)) */;
 
 	if (folder_type == E_MAPI_FOLDER_TYPE_APPOINTMENT) {
 		conf_key = CALENDAR_SOURCES;
@@ -552,7 +552,7 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 	domain = camel_mapi_settings_get_domain (settings);
 	realm = camel_mapi_settings_get_realm (settings);
 	kerberos = camel_mapi_settings_get_kerberos (settings) ? "required" : NULL;
-	stay_synchronized = camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (settings));
+	stay_synchronized = TRUE /* camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (settings)) */;
 
 	base_uri = g_strdup_printf ("mapi://%s@%s/", url->user, url->host);
 	client = gconf_client_get_default ();
@@ -636,7 +636,7 @@ add_addressbook_sources (EAccount *account, GSList *folders, mapi_id_t trash_fid
 		g_free (relative_uri);
 	}
 
-	//Add GAL
+	/* Add GAL */
 	if (!gconf_client_get_bool (client, "/apps/evolution/eplugin/mapi/disable_gal", NULL)) {
 		gchar *uri;
 		gboolean is_new_source = FALSE;
