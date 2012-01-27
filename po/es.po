@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi.master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2012-01-26 11:51+0000\n"
-"PO-Revision-Date: 2012-01-26 13:39+0100\n"
+"POT-Creation-Date: 2012-01-27 10:19+0000\n"
+"PO-Revision-Date: 2012-01-27 12:33+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -273,13 +273,13 @@ msgid "Writing folder permissions, please wait..."
 msgstr "Escribiendo los permisos de la carpeta, espere…"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:780
-#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:526
+#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:527
 msgctxt "User"
 msgid "Anonymous"
 msgstr "Anónimo"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:782
-#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:523
+#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:524
 msgctxt "User"
 msgid "Default"
 msgstr "Predeterminado"
@@ -290,7 +290,7 @@ msgid "Unknown"
 msgstr "Desconocido"
 
 #: ../src/account-setup-eplugin/e-mapi-edit-folder-permissions.c:876
-#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:599
+#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:600
 msgid "Name"
 msgstr "Nombre"
 
@@ -431,24 +431,24 @@ msgid_plural "Found %d users, but showing only first %d"
 msgstr[0] "Se encontraron %d usuarios, pero sólo se muestran los %d primeros"
 msgstr[1] "Se encontraron %d usuarios, pero sólo se muestran los %d primeros"
 
-#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:518
-#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:709
+#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:519
+#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:710
 msgid "Search for a user"
 msgstr "Buscar un usuario"
 
-#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:534
+#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:535
 msgid "Searching..."
 msgstr "Buscando..."
 
-#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:605
+#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:606
 msgid "E-mail"
 msgstr "Correo-e"
 
-#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:646
+#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:647
 msgid "Choose MAPI user..."
 msgstr "Elegir usuario MAPI…"
 
-#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:669
+#: ../src/account-setup-eplugin/e-mapi-search-gal-user.c:670
 msgid "_Search:"
 msgstr "_Buscar:"
 
@@ -807,7 +807,6 @@ msgid "Cannot find folder in a local cache"
 msgstr "No se puede encontrar la carpeta en la caché local"
 
 #: ../src/camel/camel-mapi-store.c:467 ../src/camel/camel-mapi-store.c:1088
-#| msgid "Folder list not available in offline mode."
 msgid "Folder list is not available in offline mode"
 msgstr "La lista de carpetas no está disponible en modo desconectado"
 
@@ -817,7 +816,6 @@ msgid "Connecting to '%s'"
 msgstr "Conectando a «%s»"
 
 #: ../src/camel/camel-mapi-store.c:1175
-#| msgid "Cannot create MAPI folders in offline mode."
 msgid "Cannot create MAPI folders in offline mode"
 msgstr "No se pueden crear carpetas MAPI en modo desconectado"
 
@@ -851,7 +849,6 @@ msgid "Cannot create folder '%s'"
 msgstr "No se puede crear la carpeta «%s»"
 
 #: ../src/camel/camel-mapi-store.c:1302
-#| msgid "Cannot create MAPI folders in offline mode."
 msgid "Cannot delete MAPI folders in offline mode"
 msgstr "No se pueden eliminar carpetas MAPI en modo desconectado"
 
@@ -866,19 +863,16 @@ msgid "Cannot remove folder '%s'"
 msgstr "No se puede quitar la carpeta «%s»"
 
 #: ../src/camel/camel-mapi-store.c:1387
-#| msgid "Cannot create MAPI folders in offline mode."
 msgid "Cannot rename MAPI folders in offline mode"
 msgstr "No se pueden renombrar carpetas MAPI en modo desconectado"
 
 #: ../src/camel/camel-mapi-store.c:1413
 #, c-format
-#| msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
 msgstr "No se puede renombrar la carpeta MAPI «%s». La carpeta no existe"
 
 #: ../src/camel/camel-mapi-store.c:1425
 #, c-format
-#| msgid "Cannot rename MAPI default folder '%s' to '%s'."
 msgid "Cannot rename MAPI default folder '%s' to '%s'"
 msgstr "No se puede renombrar la carpeta MAPI predeterminada «%s» a «%s»."
 
@@ -897,7 +891,6 @@ msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "No se puede renombrar la carpeta MAPI «%s» a «%s»: %s"
 
 #: ../src/camel/camel-mapi-store.c:1662
-#| msgid "Cannot create MAPI folders in offline mode."
 msgid "Cannot subscribe MAPI folders in offline mode"
 msgstr "No se puede suscribir a las carpetas MAPI en modo desconectado"
 
@@ -907,7 +900,6 @@ msgid "Folder '%s' not found"
 msgstr "No se encontró el complemento «%s»"
 
 #: ../src/camel/camel-mapi-store.c:1798
-#| msgid "Cannot create MAPI folders in offline mode."
 msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr "No se pueden desuscribir carpetas MAPI en modo desconectado"
 
@@ -928,7 +920,6 @@ msgid "Exchange MAPI service for %s on %s"
 msgstr "Servidor MAPI Exchange para %s en %s"
 
 #: ../src/camel/camel-mapi-store.c:2028
-#| msgid "Cannot create MAPI folders in offline mode."
 msgid "Cannot connect MAPI store in offline mode"
 msgstr "No se conectar a un almacenamiento MAPI en modo desconectado."
 
@@ -1053,26 +1044,35 @@ msgid "Folder of user '%s' not found"
 msgstr "No se encontró la carpeta del usuario «%s»"
 
 #. Translators: %s is replaced with an email address which was found ambiguous on a remote server
-#: ../src/libexchangemapi/e-mapi-connection.c:3413
+#: ../src/libexchangemapi/e-mapi-connection.c:3437
 #, c-format
 msgid "Recipient '%s' is ambiguous"
 msgstr "El destinatario «%s» es ambiguo"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:5794
+#: ../src/libexchangemapi/e-mapi-connection.c:4266
+#, c-format
+msgid ""
+"Search result exceeded allowed size limit. Use more specific search term, "
+"please"
+msgstr ""
+"La búsqueda de resultados supera el límite máximo permitido. Use un término "
+"más específico"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:5824
 msgid "All Public Folders"
 msgstr "Todas las carpetas públicas"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6036
+#: ../src/libexchangemapi/e-mapi-connection.c:6066
 #, c-format
 msgid "User name '%s' is ambiguous"
 msgstr "El nombre de usuario «%s» es ambiguo"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6039
+#: ../src/libexchangemapi/e-mapi-connection.c:6069
 #, c-format
 msgid "User name '%s' not found"
 msgstr "No se encontró el nombre de usuario «%s»"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6289
+#: ../src/libexchangemapi/e-mapi-connection.c:6319
 #, c-format
 msgid "Server '%s' is not reachable"
 msgstr "El servidor «%s» no es alcanzable"
