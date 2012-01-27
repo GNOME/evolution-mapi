@@ -4254,10 +4254,16 @@ e_mapi_connection_list_gal_objects (EMapiConnection *conn,
 		}
 	}
 
-	ms = nspi_GetMatches (priv->session->nspi->ctx, mem_ctx, propTagArray, use_restriction, &rows, &pMIds);
+	ms = nspi_GetMatches (priv->session->nspi->ctx, mem_ctx, propTagArray, use_restriction,
+		#ifdef HAVE_NSPI_GETMATCHES_ULRESULT
+		(uint32_t) -1,
+		#endif
+		&rows, &pMIds);
 	if (ms != MAPI_E_SUCCESS || !rows) {
 		if (ms == MAPI_E_NOT_FOUND || (!rows && ms == MAPI_E_SUCCESS))
 			ms = MAPI_E_SUCCESS;
+		else if (ms == MAPI_E_TABLE_TOO_BIG)
+			g_set_error (perror, E_MAPI_ERROR, MAPI_E_TABLE_TOO_BIG, _("Search result exceeded allowed size limit. Use more specific search term, please"));
 		else if (ms != MAPI_E_SUCCESS)
 			make_mapi_error (perror, "nspi_GetMatches", ms);
 		goto cleanup;
