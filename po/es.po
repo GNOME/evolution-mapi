@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi.master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2012-01-27 10:19+0000\n"
-"PO-Revision-Date: 2012-01-27 12:33+0100\n"
+"POT-Creation-Date: 2012-01-27 17:04+0000\n"
+"PO-Revision-Date: 2012-01-29 13:17+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -25,29 +25,25 @@ msgid "Global Address List"
 msgstr "Lista global de direcciones"
 
 #: ../src/account-setup-eplugin/e-mapi-account-listener.c:1077
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:256
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1307
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:289
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1788
 #, c-format
 msgid "Enter Password for %s@%s"
 msgstr "Introducir la contraseña para %s@%s"
 
-#. NOTE: A good way would be display the list of username entries
-#. using GtkEntryCompletion in the username gtkentry. But plugins
-#. as of now does not have access to it
-#. TODO : Fix strings
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:177
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:180
 msgid "Select username"
 msgstr "Seleccionar el usuario"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:187
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:190
 msgid "Full name"
 msgstr "Nombre completo"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:192
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:195
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:224
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:222
 msgid ""
 "There are more users with similar user name on a server.\n"
 "Please select that you would like to use from the below list."
@@ -55,11 +51,21 @@ msgstr ""
 "Hay más usuarios con un nombre de usuario similar en un servidor.\n"
 "Seleccione en la siguiente lista el que quiere usar."
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:279
-msgid "Cannot create MAPI folders in offline mode."
-msgstr "No se pueden crear carpetas MAPI en modo desconectado."
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:354
+msgid "Authentication finished successfully."
+msgstr "La autenticación finalizó correctamente."
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:308
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:356
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:502
+msgid "Authentication failed."
+msgstr "Falló la autenticación."
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:432
+#| msgid "Cannot create MAPI folders in offline mode"
+msgid "Cannot authenticate MAPI accounts in offline mode"
+msgstr "No se pueden autenticar las cuentas MAPI en modo desconectado"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:461
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -67,154 +73,237 @@ msgstr ""
 "El servidor, nombre de usuario y nombre de dominio no pueden estar vacíos. "
 "Rellénelos con valores correctos."
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:311
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:464
 msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
 msgstr ""
-"El reino del nombre no puede estar vacío cuando «Kerberos» está seleccionado. "
-"Rellénelo con valores correctos."
+"El reino del nombre no puede estar vacío cuando «Kerberos» está "
+"seleccionado. Rellénelo con valores correctos."
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:358
-msgid "Authentication finished successfully."
-msgstr "La autenticación finalizó correctamente."
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:495
+#| msgid "Writing folder permissions, please wait..."
+msgid "Connecting to a server, please wait..."
+msgstr "conectando al servidor, espere…"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:364
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:374
-msgid "Authentication failed."
-msgstr "Falló la autenticación."
-
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:408
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:536
 msgid "_Domain name:"
 msgstr "_Dominio:"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:420
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:548
 msgid "_Authenticate"
 msgstr "_Autenticar"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:429
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:557
 msgid "_Use secure connection"
 msgstr "Usar _conexión segura:"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:443
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:571
 msgid "_Kerberos authentication"
 msgstr "Autenticación de _Kerberos"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:454
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:582
 msgid "_Realm name:"
 msgstr "_Reino del nombre:"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:604
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:732
 msgid "Personal Folders"
 msgstr "Carpetas personales"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:725
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:934
+#| msgid "Reading folder permissions, please wait..."
+msgid "Searching remote MAPI folder structure, please wait..."
+msgstr "Buscando la estructura de carpetas MAPI remotas, espere…"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:962
 msgid "Allow _partial search results"
 msgstr "_Permitir resultados de búsqueda parciales"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:731
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:968
 #: ../src/camel/camel-mapi-provider.c:61
 msgid "Lis_ten for server notifications"
 msgstr "E_scuchar las notificaciones del servidor"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:770
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1016
+#| msgid "Cannot create MAPI folders in offline mode"
+msgid "Cannot create MAPI calendar in offline mode"
+msgstr "No se pueden crear calendarios MAPI en modo desconectado"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1019
+#| msgid "Cannot create MAPI folders in offline mode"
+msgid "Cannot create MAPI task list in offline mode"
+msgstr "No se pueden crear listas de tareas MAPI en modo desconectado"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1022
+#| msgid "Cannot create MAPI folders in offline mode"
+msgid "Cannot create MAPI memo list in offline mode"
+msgstr "No se pueden crear listas de notas MAPI en modo desconectado"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1025
+#| msgid "Cannot create MAPI folders in offline mode"
+msgid "Cannot create MAPI address book in offline mode"
+msgstr "No se pueden crear libretas de direcciones MAPI en modo desconectado"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1029
+#| msgid "Cannot create MAPI folders in offline mode"
+msgid "Cannot create MAPI source in offline mode"
+msgstr "No se pueden crear fuentes MAPI en modo desconectado"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1038
 msgid "_Location:"
 msgstr "_Lugar:"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:932
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1241
+#, c-format
+#| msgid "Failed to create calendar '%s': %s"
+msgid "Failed to create folder '%s': %s"
+msgstr "Falló al crear la carpeta «%s»: %s"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1243
+#, c-format
+#| msgid "Failed to create calendar '%s'"
+msgid "Failed to create folder '%s'"
+msgstr "Falló al crear la carpeta «%s»"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1262
 #, c-format
 msgid "Failed to create address book '%s': %s"
 msgstr "Falló al crear la libreta de direcciones «%s»: %s"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:935
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1264
 #, c-format
 msgid "Failed to create address book '%s'"
 msgstr "Falló al crear la libreta de direcciones «%s»"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1054
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1339
+#| msgid "Writing folder permissions, please wait..."
+msgid "Creating address book on a server, please wait..."
+msgstr "Creando libreta de direcciones en el servidor, espere…"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1390
 #, c-format
 msgid "Failed to create calendar '%s': %s"
 msgstr "Falló al crear el calendario «%s»: %s"
 
-#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1057
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1392
 #, c-format
 msgid "Failed to create calendar '%s'"
 msgstr "Falló al crear el calendario «%s»"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:100
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1400
+#, c-format
+#| msgid "Failed to create calendar '%s': %s"
+msgid "Failed to create task list '%s': %s"
+msgstr "Falló al crear la lista de tareas «%s»: %s"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1402
+#, c-format
+#| msgid "Failed to create calendar '%s'"
+msgid "Failed to create task list '%s'"
+msgstr "Falló al crear la lista de tareas «%s»"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1410
+#, c-format
+#| msgid "Failed to create calendar '%s': %s"
+msgid "Failed to create memo list '%s': %s"
+msgstr "Falló al crear la lista de notas «%s»: %s"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1412
+#, c-format
+#| msgid "Failed to create calendar '%s'"
+msgid "Failed to create memo list '%s'"
+msgstr "Falló al crear la lista de notas «%s»"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1514
+#| msgid "Writing folder permissions, please wait..."
+msgid "Creating calendar on a server, please wait..."
+msgstr "Creando calendario en el servidor, espere…"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1518
+#| msgid "Writing folder permissions, please wait..."
+msgid "Creating task list on a server, please wait..."
+msgstr "Creando lista de tareas en el servidor, espere…"
+
+#: ../src/account-setup-eplugin/e-mapi-account-setup.c:1522
+#| msgid "Writing folder permissions, please wait..."
+msgid "Creating memo list on a server, please wait..."
+msgstr "Creando lista de notas en el servidor, espere…"
+
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:110
 msgid "Folder"
 msgstr "Carpeta"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:105
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:115
 msgid "Size"
 msgstr "Tamaño"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:128
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:138
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:142
 msgid "Unable to retrieve folder size information"
 msgstr "No se pudo obtener la información del tamaño de la carpeta"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:168
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:400
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:206
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:446
 msgid "Folder Size"
 msgstr "Tamaño de la carpeta"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:179
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:220
 msgid "Fetching folder list…"
 msgstr "Obteniendo la lista de carpetas…"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:333
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:379
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr ""
 "No se pueden editar los permisos de la carpeta «%s», elija otra carpeta."
 
 #. Miscellaneous settings
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:385
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:431
 msgid "Miscellaneous"
 msgstr "Misceláneo"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:398
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:444
 msgid "View the size of all Exchange folders"
 msgstr "Ver el tamaño de todas las carpetas Exchange"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:411
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:457
 #: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
 msgid "Exchange Settings"
 msgstr "Configuración de Exchange"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:445
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:491
 msgid "Folder size..."
 msgstr "Tamaño de la carpeta…"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:452
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:498
 msgid "Subscribe to other user's folder..."
 msgstr "Suscribirse a la carpeta de otro usuario…"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:461
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:694
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:717
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:739
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:761
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:507
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:740
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:763
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:785
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:807
 msgid "Permissions..."
 msgstr "Permisos…"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:463
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:509
 msgid "Edit MAPI folder permissions"
 msgstr "Editar los permisos de la carpeta MAPI"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:696
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:742
 msgid "Edit MAPI calendar permissions"
 msgstr "Editar los permisos del calendario MAPI"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:719
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:765
 msgid "Edit MAPI tasks permissions"
 msgstr "Editar los permisos de las tareas MAPI"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:741
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:787
 msgid "Edit MAPI memos permissions"
 msgstr "Editar los permisos de las notas MAPI"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:763
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:809
 msgid "Edit MAPI contacts permissions"
 msgstr "Editar los permisos de los contactos MAPI"
 
@@ -1089,6 +1178,9 @@ msgstr ""
 #: ../src/libexchangemapi/e-mapi-folder.c:415
 msgid "Cannot remove folder, unsupported folder type"
 msgstr "No se puede quitar la carpeta, tipo de carpeta no soportado"
+
+#~ msgid "Cannot create MAPI folders in offline mode."
+#~ msgstr "No se pueden crear carpetas MAPI en modo desconectado."
 
 #~ msgid "Updating local summary cache for new messages in %s"
 #~ msgstr ""
