@@ -352,6 +352,76 @@ gather_changed_objects_to_slist (EMapiConnection *conn,
 	return TRUE;
 }
 
+static void
+update_message_info (CamelMessageInfo *info,
+		     /* const */ EMapiObject *object,
+		     gboolean is_new,
+		     gboolean is_public_folder,
+		     gboolean user_has_read)
+{
+	CamelMapiMessageInfo *minfo = (CamelMapiMessageInfo *) info;
+	guint32 flags = 0, mask = CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ATTACHMENTS | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED | CAMEL_MAPI_MESSAGE_WITH_READ_RECEIPT;
+	const uint32_t *pmsg_flags, *picon_index;
+	const struct FILETIME *last_modified;
+	const uint8_t *pread_receipt;
+	const gchar *msg_class;
+	uint32_t msg_flags;
+
+	g_return_if_fail (info != NULL);
+	g_return_if_fail (object != NULL);
+
+	pmsg_flags = e_mapi_util_find_array_propval (&object->properties, PidTagMessageFlags);
+	last_modified = e_mapi_util_find_array_propval (&object->properties, PidTagLastModificationTime);
+	picon_index = e_mapi_util_find_array_propval (&object->properties, PidTagIconIndex);
+	pread_receipt = e_mapi_util_find_array_propval (&object->properties, PidTagReadReceiptRequested);
+	msg_class = e_mapi_util_find_array_propval (&object->properties, PidTagMessageClass);
+
+	if (msg_class && g_str_has_prefix (msg_class, "REPORT.IPM.Note.IPNRN"))
+		pread_receipt = NULL;
+
+	msg_flags = pmsg_flags ? *pmsg_flags : 0;
+
+	if (!is_new && is_public_folder) {
+		/* do not change unread state for known messages in public folders */
+		if ((user_has_read ? 1 : 0) != ((msg_flags & MSGFLAG_READ) ? 1 : 0))
+			msg_flags = (msg_flags & (~MSGFLAG_READ)) | (user_has_read ? MSGFLAG_READ : 0);
+	}
+
+	if (last_modified) {
+		minfo->last_modified = e_mapi_util_filetime_to_time_t (last_modified);
+	} else {
+		minfo->last_modified = 0;
+	}
+
+	if ((msg_flags & MSGFLAG_READ) != 0)
+		flags |= CAMEL_MESSAGE_SEEN;
+	if ((msg_flags & MSGFLAG_HASATTACH) != 0)
+		flags |= CAMEL_MESSAGE_ATTACHMENTS;
+	if (picon_index) {
+		if (*picon_index == 0x105)
+			flags |= CAMEL_MESSAGE_ANSWERED;
+		if (*picon_index == 0x106)
+			flags |= CAMEL_MESSAGE_FORWARDED;
+	}
+
+	if (pread_receipt && *pread_receipt)
+		flags |= CAMEL_MAPI_MESSAGE_WITH_READ_RECEIPT;
+
+	if (pread_receipt && *pread_receipt && (msg_flags & MSGFLAG_RN_PENDING) == 0)
+		camel_message_info_set_user_flag (info, "receipt-handled", TRUE);
+
+	if ((camel_message_info_flags (info) & mask) != flags) {
+		if (is_new)
+			minfo->info.flags = flags;
+		else
+			camel_message_info_set_flags (info, mask, flags);
+		minfo->server_flags = camel_message_info_flags (info);
+	}
+
+	minfo->info.dirty = TRUE;
+	camel_folder_summary_touch (minfo->info.summary);
+}
+
 struct GatherObjectSummaryData
 {
 	CamelFolder *folder;
@@ -394,32 +464,20 @@ gather_object_offline_cb (EMapiConnection *conn,
 	if (msg) {
 		gchar *uid_str;
 		const mapi_id_t *pmid;
-		const uint32_t *pmsg_flags, *picon_index;
-		const struct FILETIME *last_modified;
-		const bool *pread_receipt;
-		const gchar *msg_class;
-		uint32_t msg_flags;
 		CamelMessageInfo *info;
 		gboolean is_new;
+		gboolean user_has_read = FALSE;
 
-		pmid = e_mapi_util_find_array_propval (&object->properties, PR_MID);
-		pmsg_flags = e_mapi_util_find_array_propval (&object->properties, PR_MESSAGE_FLAGS);
-		last_modified = e_mapi_util_find_array_propval (&object->properties, PR_LAST_MODIFICATION_TIME);
-		picon_index = e_mapi_util_find_array_propval (&object->properties, PidTagIconIndex);
-		pread_receipt = e_mapi_util_find_array_propval (&object->properties, PidTagReadReceiptRequested);
-		msg_class = e_mapi_util_find_array_propval (&object->properties, PidTagMessageClass);
-
-		if (msg_class && g_str_has_prefix (msg_class, "REPORT.IPM.Note.IPNRN"))
-			pread_receipt = NULL;
+		pmid = e_mapi_util_find_array_propval (&object->properties, PidTagMid);
 
 		if (!pmid) {
-			g_debug ("%s: Received message [%d/%d] without PR_MID", G_STRFUNC, obj_index, obj_total);
+			g_debug ("%s: Received message [%d/%d] without PidTagMid", G_STRFUNC, obj_index, obj_total);
 			e_mapi_debug_dump_object (object, TRUE, 3);
 			return TRUE;
 		}
 
-		if (!last_modified) {
-			g_debug ("%s: Received message [%d/%d] without PR_LAST_MODIFICATION_TIME", G_STRFUNC, obj_index, obj_total);
+		if (!e_mapi_util_find_array_propval (&object->properties, PidTagLastModificationTime)) {
+			g_debug ("%s: Received message [%d/%d] without PidTagLastModificationTime", G_STRFUNC, obj_index, obj_total);
 			e_mapi_debug_dump_object (object, TRUE, 3);
 		}
 
@@ -427,20 +485,13 @@ gather_object_offline_cb (EMapiConnection *conn,
 		if (!uid_str)
 			return FALSE;
 
-		msg_flags = pmsg_flags ? *pmsg_flags : 0;
-
 		is_new = !camel_folder_summary_check_uid (gos->folder->summary, uid_str);
 		if (!is_new) {
 			/* keep local read/unread flag on messages from public folders */
 			if (gos->is_public_folder) {
-				gboolean user_has_read;
-
 				info = camel_folder_summary_get (gos->folder->summary, uid_str);
 				if (info) {
 					user_has_read = (camel_message_info_flags (info) & CAMEL_MESSAGE_SEEN) != 0;
-					if ((user_has_read ? 1 : 0) != ((msg_flags & MSGFLAG_READ) ? 1 : 0))
-						msg_flags = (msg_flags & (~MSGFLAG_READ)) | (user_has_read ? MSGFLAG_READ : 0);
-
 					camel_message_info_free (info);
 				}
 			}
@@ -451,50 +502,17 @@ gather_object_offline_cb (EMapiConnection *conn,
 		info = camel_folder_summary_info_new_from_message (gos->folder->summary, msg, NULL);
 		if (info) {
 			CamelMapiMessageInfo *minfo = (CamelMapiMessageInfo *) info;
-			guint32 flags = 0, mask = CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ATTACHMENTS | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED | CAMEL_MAPI_MESSAGE_WITH_READ_RECEIPT;
 
 			minfo->info.uid = camel_pstring_strdup (uid_str);
 
-			if (last_modified) {
-				minfo->last_modified = e_mapi_util_filetime_to_time_t (last_modified);
-			} else {
-				minfo->last_modified = 0;
-			}
+			update_message_info (info, object, is_new, gos->is_public_folder, user_has_read);
 
-			if ((msg_flags & MSGFLAG_READ) != 0)
-				flags |= CAMEL_MESSAGE_SEEN;
-			if ((msg_flags & MSGFLAG_HASATTACH) != 0)
-				flags |= CAMEL_MESSAGE_ATTACHMENTS;
-			if (picon_index) {
-				if (*picon_index == 0x105)
-					flags |= CAMEL_MESSAGE_ANSWERED;
-				if (*picon_index == 0x106)
-					flags |= CAMEL_MESSAGE_FORWARDED;
-			}
-
-			if ((camel_message_info_flags (info) & mask) != flags) {
-				if (is_new)
-					minfo->info.flags = flags;
-				else
-					camel_message_info_set_flags (info, mask, flags);
-				minfo->server_flags = camel_message_info_flags (info);
-			}
-
-			if (pread_receipt)
-				flags |= CAMEL_MAPI_MESSAGE_WITH_READ_RECEIPT;
-
-			if (pread_receipt && (msg_flags & MSGFLAG_RN_PENDING) == 0)
-				camel_message_info_set_user_flag (info, "receipt-handled", TRUE);
-
-			minfo->info.dirty = TRUE;
-			camel_folder_summary_touch (gos->folder->summary);
+			camel_folder_summary_add (gos->folder->summary, info);
+			camel_message_info_ref (info);
 
 			if (is_new) {
-				camel_folder_summary_add (gos->folder->summary, info);
 				camel_folder_change_info_add_uid (gos->changes, camel_message_info_uid (info));
 				camel_folder_change_info_recent_uid (gos->changes, camel_message_info_uid (info));
-
-				camel_message_info_ref (info);
 			} else {
 				camel_folder_change_info_change_uid (gos->changes, camel_message_info_uid (info));
 			}
@@ -531,12 +549,7 @@ gather_object_summary_cb (EMapiConnection *conn,
 	struct GatherObjectSummaryData *gos = user_data;
 	gchar *uid_str;
 	const mapi_id_t *pmid;
-	const uint32_t *pmsg_flags, *picon_index;
-	const struct FILETIME *last_modified;
 	const gchar *transport_headers;
-	const bool *pread_receipt;
-	const gchar *msg_class;
-	uint32_t msg_flags;
 	CamelMessageInfo *info;
 	gboolean is_new = FALSE;
 
@@ -544,33 +557,23 @@ gather_object_summary_cb (EMapiConnection *conn,
 	g_return_val_if_fail (gos->folder != NULL, FALSE);
 	g_return_val_if_fail (object != NULL, FALSE);
 
-	pmid = e_mapi_util_find_array_propval (&object->properties, PR_MID);
-	pmsg_flags = e_mapi_util_find_array_propval (&object->properties, PR_MESSAGE_FLAGS);
-	last_modified = e_mapi_util_find_array_propval (&object->properties, PR_LAST_MODIFICATION_TIME);
-	transport_headers = e_mapi_util_find_array_propval (&object->properties, PR_TRANSPORT_MESSAGE_HEADERS_UNICODE);
-	picon_index = e_mapi_util_find_array_propval (&object->properties, PidTagIconIndex);
-	pread_receipt = e_mapi_util_find_array_propval (&object->properties, PidTagReadReceiptRequested);
-	msg_class = e_mapi_util_find_array_propval (&object->properties, PidTagMessageClass);
-
-	if (msg_class && g_str_has_prefix (msg_class, "REPORT.IPM.Note.IPNRN"))
-		pread_receipt = NULL;
+	pmid = e_mapi_util_find_array_propval (&object->properties, PidTagMid);
+	transport_headers = e_mapi_util_find_array_propval (&object->properties, PidTagTransportMessageHeaders);
 
 	if (!pmid) {
-		g_debug ("%s: Received message [%d/%d] without PR_MID", G_STRFUNC, obj_index, obj_total);
+		g_debug ("%s: Received message [%d/%d] without PidTagMid", G_STRFUNC, obj_index, obj_total);
 		e_mapi_debug_dump_object (object, TRUE, 3);
 		return TRUE;
 	}
 
-	if (!last_modified) {
-		g_debug ("%s: Received message [%d/%d] without PR_LAST_MODIFICATION_TIME", G_STRFUNC, obj_index, obj_total);
+	if (!e_mapi_util_find_array_propval (&object->properties, PidTagLastModificationTime)) {
+		g_debug ("%s: Received message [%d/%d] without PidTagLastModificationTime", G_STRFUNC, obj_index, obj_total);
 		e_mapi_debug_dump_object (object, TRUE, 3);
 	}
 
 	uid_str = e_mapi_util_mapi_id_to_string (*pmid);
 	if (!uid_str)
 		return FALSE;
-
-	msg_flags = pmsg_flags ? *pmsg_flags : 0;
 
 	info = camel_folder_summary_get (gos->folder->summary, uid_str);
 	if (!info) {
@@ -697,46 +700,9 @@ gather_object_summary_cb (EMapiConnection *conn,
 	}
 
 	if (info) {
-		CamelMapiMessageInfo *minfo = (CamelMapiMessageInfo *) info;
-		guint32 flags = 0, mask = CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ATTACHMENTS | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED | CAMEL_MAPI_MESSAGE_WITH_READ_RECEIPT;
+		gboolean user_has_read = (camel_message_info_flags (info) & CAMEL_MESSAGE_SEEN) != 0;
 
-		if (last_modified) {
-			minfo->last_modified = e_mapi_util_filetime_to_time_t (last_modified);
-		} else {
-			minfo->last_modified = 0;
-		}
-
-		/* do not change unread state for known messages in public folders */
-		if (gos->is_public_folder && !is_new)
-			mask &= ~CAMEL_MESSAGE_SEEN;
-
-		if ((msg_flags & MSGFLAG_READ) != 0)
-			flags |= CAMEL_MESSAGE_SEEN;
-		if ((msg_flags & MSGFLAG_HASATTACH) != 0)
-			flags |= CAMEL_MESSAGE_ATTACHMENTS;
-		if (picon_index) {
-			if (*picon_index == 0x105)
-				flags |= CAMEL_MESSAGE_ANSWERED;
-			if (*picon_index == 0x106)
-				flags |= CAMEL_MESSAGE_FORWARDED;
-		}
-
-		if (pread_receipt)
-			flags |= CAMEL_MAPI_MESSAGE_WITH_READ_RECEIPT;
-
-		if (pread_receipt && (msg_flags & MSGFLAG_RN_PENDING) == 0)
-			camel_message_info_set_user_flag (info, "receipt-handled", TRUE);
-
-		if ((camel_message_info_flags (info) & mask) != flags) {
-			if (is_new)
-				minfo->info.flags = flags;
-			else
-				camel_message_info_set_flags (info, mask, flags);
-			minfo->server_flags = camel_message_info_flags (info);
-		}
-
-		minfo->info.dirty = TRUE;
-		camel_folder_summary_touch (gos->folder->summary);
+		update_message_info (info, object, is_new, gos->is_public_folder, user_has_read);
 
 		if (is_new) {
 			camel_folder_summary_add (gos->folder->summary, info);

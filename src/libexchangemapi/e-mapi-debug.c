@@ -749,7 +749,7 @@ e_mapi_debug_dump_properties (struct mapi_SPropValue_array *properties,
 			g_print (" PT_NULL");
 			break;
 		case PT_BOOLEAN:
-			g_print (" (bool) - %d", (bool) lpProp->value.b);
+			g_print (" (bool) - %d", lpProp->value.b);
 			break;
 		case PT_I2:
 			g_print (" (uint16_t) - %d", lpProp->value.i);

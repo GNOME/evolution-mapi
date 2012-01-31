@@ -2397,7 +2397,7 @@ e_mapi_connection_fetch_object_internal (EMapiConnection *conn,
 	uint16_t ui16, uj16, np_count = 0, *np_propID = NULL;
 	uint32_t ui32;
 	struct MAPINAMEID *np_nameid = NULL;
-	const bool *has_attachments;
+	const uint8_t *has_attachments;
 	struct SPropTagArray recipient_proptags;
 	struct SRowSet recipient_rows;
 	mapi_object_t attach_table;
@@ -5019,7 +5019,7 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 		}
 
 		if (prop_count > 0) {
-			ms = nspi_GetIDsFromNames (priv->session->nspi->ctx, mem_ctx, false, prop_count, names, &gal_tags);
+			ms = nspi_GetIDsFromNames (priv->session->nspi->ctx, mem_ctx, 0, prop_count, names, &gal_tags);
 			if (ms == MAPI_E_SUCCESS && gal_tags) {
 				if (gal_tags->cValues != prop_count)
 					g_warning ("%s: Requested (%d) and returned (%d) property names don't match", G_STRFUNC, prop_count, gal_tags->cValues);
@@ -5643,7 +5643,7 @@ set_default_folders (TALLOC_CTX *mem_ctx,
 		g_free (key_fid);
 
 		if (default_type != 0 || IsMailboxFolder (obj_store,folder->folder_id, &default_type)) {
-			folder->is_default = true; /* TODO : Clean up. Redundant.*/
+			folder->is_default = TRUE; /* TODO : Clean up. Redundant.*/
 			folder->default_type = default_type;
 		}
 
@@ -5752,7 +5752,7 @@ e_mapi_connection_get_folders_list (EMapiConnection *conn,
 	/* FIXME: May have to get the child folders count? Do we need/use it? */
 	folder = e_mapi_folder_new (mailbox_name, IPF_NOTE,
 					   E_MAPI_FOLDER_CATEGORY_PERSONAL, mailbox_id, 0, 0, 0 ,0);
-	folder->is_default = true;
+	folder->is_default = TRUE;
 	folder->default_type = olFolderTopInformationStore; /*Is this correct ?*/
 	folder->size = mailbox_size ? *mailbox_size : 0;
 
@@ -5822,7 +5822,7 @@ e_mapi_connection_get_pf_folders_list (EMapiConnection *conn,
 	}
 
 	folder = e_mapi_folder_new (_("All Public Folders"), IPF_NOTE, 0, mailbox_id, 0, 0, 0, 0);
-	folder->is_default = true;
+	folder->is_default = TRUE;
 	folder->default_type = olPublicFoldersAllPublicFolders;
 	*mapi_folders = g_slist_prepend (*mapi_folders, folder);
 	result = get_child_folders (conn, mem_ctx, E_MAPI_FOLDER_CATEGORY_PUBLIC, &priv->public_store, mailbox_id, mapi_folders, cb, cb_user_data, cancellable, perror);
@@ -6297,7 +6297,7 @@ test_server_availability (struct mapi_context *mapi_ctx,
 	binding_str = talloc_asprintf (mem_ctx, "ncacn_ip_tcp:%s[", profile->server);
 
 	/* If seal option is enabled in the profile */
-	if (profile->seal == true) {
+	if (profile->seal != 0) {
 		binding_str = talloc_strdup_append (binding_str, "seal,");
 	}
 

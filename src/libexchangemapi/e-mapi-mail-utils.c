@@ -728,7 +728,7 @@ e_mapi_mail_utils_object_to_message (EMapiConnection *conn, /* const */ EMapiObj
 	} else {
 		CamelInternetAddress *to_addr, *cc_addr, *bcc_addr;
 		const struct FILETIME *msg_date;
-		const bool *read_receipt;
+		const uint8_t *read_receipt;
 		const uint32_t *priority;
 		gchar *name, *email;
 
@@ -930,7 +930,7 @@ e_mapi_mail_add_recipients (EMapiObject *object,
 	for (ii = 0; addresses && camel_internet_address_get (addresses, ii, &name, &email); ii++) {
 		EMapiRecipient *recipient;
 		uint32_t ui32 = 0;
-		bool bl;
+		uint8_t bl;
 
 		recipient = e_mapi_recipient_new (object);
 		e_mapi_object_add_recipient (object, recipient);
@@ -970,7 +970,7 @@ e_mapi_mail_add_recipients (EMapiObject *object,
 		ui32 = MAPI_MAILUSER;
 		set_value (PidTagObjectType, &ui32);
 
-		bl = false;
+		bl = 0;
 		set_value (PidTagSendRichInfo, &bl);
 
 		#undef set_value
@@ -1399,7 +1399,7 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 	gchar *pid_name_content_type = NULL;
 	gint ii = 0;
 	uint32_t ui32;
-	bool bl;
+	uint8_t bl;
 
 	g_return_val_if_fail (message != NULL, FALSE);
 	g_return_val_if_fail (pobject != NULL, FALSE);
@@ -1454,7 +1454,7 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 	}
 	set_value (PidTagMessageFlags, &ui32);
 
-	bl = false;
+	bl = 0;
 	set_value (PidTagSendRichInfo, &bl);
 
 	/* PidTagConversationTopic and PidTagNormalizedSubject, together with PidTagSubjectPrefix
@@ -1555,7 +1555,7 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 			set_value (PidTagReadReceiptAddressType, "SMTP");
 
 			if ((create_flags & E_MAPI_CREATE_FLAG_SUBMIT) != 0) {
-				bl = true;
+				bl = 1;
 
 				set_value (PidTagReadReceiptRequested, &bl);
 			}

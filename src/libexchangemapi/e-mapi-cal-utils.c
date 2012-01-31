@@ -850,7 +850,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 	const struct mapi_SLPSTRArrayW *categories_array;
 	const struct SBinary_short *bin;
 	const uint32_t *ui32;
-	const bool *b;
+	const uint8_t *b;
 	icalcomponent *ical_comp;
 	icalproperty *prop = NULL;
 	icalparameter *param = NULL;
@@ -1539,7 +1539,7 @@ e_mapi_cal_utils_comp_to_object (EMapiConnection *conn,
 	icalcomponent *ical_comp;
 	icalcomponent_kind kind;
 	uint32_t flag32;
-	bool b;
+	uint8_t b;
 	icalproperty *prop;
 	struct icaltimetype dtstart, dtend, utc_dtstart, utc_dtend, all_day_dtstart = {0}, all_day_dtend = {0};
 	const icaltimezone *utc_zone;
