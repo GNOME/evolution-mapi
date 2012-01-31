@@ -254,6 +254,23 @@ e_mapi_folder_pick_color_spec (gint move_by,
 
 #define MAPI_URI_PREFIX   "mapi://" 
 
+static const gchar *
+get_gconf_key_for_folder_type (EMapiFolderType folder_type)
+{
+	if (folder_type == E_MAPI_FOLDER_TYPE_APPOINTMENT)
+		return CALENDAR_SOURCES;
+	else if (folder_type == E_MAPI_FOLDER_TYPE_TASK)
+		return TASK_SOURCES;
+	else if (folder_type == E_MAPI_FOLDER_TYPE_MEMO)
+		return JOURNAL_SOURCES;
+	else if (folder_type == E_MAPI_FOLDER_TYPE_JOURNAL)
+		return JOURNAL_SOURCES;
+	else if (folder_type == E_MAPI_FOLDER_TYPE_CONTACT)
+		return ADDRESSBOOK_SOURCES;
+
+	return NULL;
+}
+
 gboolean
 e_mapi_folder_add_as_esource (EMapiFolderType folder_type,
 			      const gchar *login_profile,
@@ -287,17 +304,8 @@ e_mapi_folder_add_as_esource (EMapiFolderType folder_type,
 	if (folder_category == E_MAPI_FOLDER_CATEGORY_FOREIGN)
 		g_return_val_if_fail (foreign_username != NULL, FALSE);
 
-	if (folder_type == E_MAPI_FOLDER_TYPE_APPOINTMENT)
-		conf_key = CALENDAR_SOURCES;
-	else if (folder_type == E_MAPI_FOLDER_TYPE_TASK)
-		conf_key = TASK_SOURCES;
-	else if (folder_type == E_MAPI_FOLDER_TYPE_MEMO)
-		conf_key = JOURNAL_SOURCES;
-	else if (folder_type == E_MAPI_FOLDER_TYPE_JOURNAL)
-		conf_key = JOURNAL_SOURCES;
-	else if (folder_type == E_MAPI_FOLDER_TYPE_CONTACT)
-		conf_key = ADDRESSBOOK_SOURCES;
-	else {
+	conf_key = get_gconf_key_for_folder_type (folder_type);
+	if (!conf_key) {
 		g_propagate_error (perror, g_error_new_literal (E_MAPI_ERROR, MAPI_E_INVALID_PARAMETER, _("Cannot add folder, unsupported folder type")));
 		return FALSE;
 	}
@@ -321,14 +329,15 @@ e_mapi_folder_add_as_esource (EMapiFolderType folder_type,
 		gchar *folder_id = e_source_get_duped_property (source, "folder-id");
 		if (folder_id) {
 			if (g_str_equal (fid, folder_id)) {
+				g_propagate_error (perror,
+					g_error_new (E_MAPI_ERROR, MAPI_E_INVALID_PARAMETER,
+						_("Cannot add folder, folder already exists as '%s'"), e_source_peek_name (source)));
+
 				g_object_unref (source_list);
 				g_object_unref (client);
 				g_free (folder_id);
 				g_free (base_uri);
-				
-				g_propagate_error (perror,
-					g_error_new (E_MAPI_ERROR, MAPI_E_INVALID_PARAMETER,
-						_("Cannot add folder, folder already exists as '%s'"), e_source_peek_name (source)));
+
 				return FALSE;
 			}
 
@@ -401,17 +410,8 @@ e_mapi_folder_remove_as_esource (EMapiFolderType folder_type,
 	g_return_val_if_fail (login_user != NULL, FALSE);
 	g_return_val_if_fail (fid != NULL, FALSE);
 
-	if (folder_type == E_MAPI_FOLDER_TYPE_APPOINTMENT)
-		conf_key = CALENDAR_SOURCES;
-	else if (folder_type == E_MAPI_FOLDER_TYPE_TASK)
-		conf_key = TASK_SOURCES;
-	else if (folder_type == E_MAPI_FOLDER_TYPE_MEMO)
-		conf_key = JOURNAL_SOURCES;
-	else if (folder_type == E_MAPI_FOLDER_TYPE_JOURNAL)
-		conf_key = JOURNAL_SOURCES;
-	else if (folder_type == E_MAPI_FOLDER_TYPE_CONTACT)
-		conf_key = ADDRESSBOOK_SOURCES;
-	else {
+	conf_key = get_gconf_key_for_folder_type (folder_type);
+	if (!conf_key) {
 		g_propagate_error (perror, g_error_new_literal (E_MAPI_ERROR, MAPI_E_INVALID_PARAMETER, _("Cannot remove folder, unsupported folder type")));
 		return FALSE;
 	}
@@ -449,4 +449,61 @@ e_mapi_folder_remove_as_esource (EMapiFolderType folder_type,
 	g_object_unref (client);
 
 	return TRUE;
+}
+
+gboolean
+e_mapi_folder_is_subscribed_as_esource (EMapiFolderType folder_type,
+					const gchar *login_host,
+					const gchar *login_user,
+					const gchar *fid)
+{
+	ESourceList *source_list = NULL;
+	ESourceGroup *group = NULL;
+	const gchar *conf_key = NULL;
+	GConfClient* client;
+	GSList *sources = NULL;
+	gchar *base_uri = NULL;
+	gboolean found = FALSE;
+
+	g_return_val_if_fail (login_host != NULL, FALSE);
+	g_return_val_if_fail (login_user != NULL, FALSE);
+	g_return_val_if_fail (fid != NULL, FALSE);
+
+	conf_key = get_gconf_key_for_folder_type (folder_type);
+	if (!conf_key)
+		return FALSE;
+
+	client = gconf_client_get_default ();
+	source_list = e_source_list_new_for_gconf (client, conf_key);
+	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, login_user, login_host);
+	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
+	if (!group) {
+		g_free (base_uri);
+		g_object_unref (source_list);
+		g_object_unref (client);
+
+		return FALSE;
+	}
+
+	sources = e_source_group_peek_sources (group);
+	for (; sources != NULL; sources = g_slist_next (sources)) {
+		ESource *source = E_SOURCE (sources->data);
+		gchar *folder_id = e_source_get_duped_property (source, "folder-id");
+		if (folder_id) {
+			if (g_str_equal (fid, folder_id)) {
+				g_free (folder_id);
+
+				found = TRUE;
+				break;
+			}
+
+			g_free (folder_id);
+		}
+	}
+
+	g_free (base_uri);
+	g_object_unref (source_list);
+	g_object_unref (client);
+
+	return found;
 }

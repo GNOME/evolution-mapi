@@ -128,4 +128,10 @@ gboolean		e_mapi_folder_remove_as_esource	(EMapiFolderType folder_type,
 							 const gchar *login_user,
 							 const gchar *fid,
 							 GError **perror);
+
+gboolean		e_mapi_folder_is_subscribed_as_esource
+							(EMapiFolderType folder_type,
+							 const gchar *login_host,
+							 const gchar *login_user,
+							 const gchar *fid);
 #endif
