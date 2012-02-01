@@ -1855,6 +1855,55 @@ mapi_folder_transfer_messages_to_sync (CamelFolder *source,
 	return success;
 }
 
+static CamelFolderQuotaInfo *
+mapi_folder_get_quota_info_sync (CamelFolder *folder,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	CamelMapiStore *mapi_store;
+	CamelFolderQuotaInfo *quota_info = NULL;
+	EMapiConnection *conn;
+	uint64_t current_size = -1, receive_quota = -1, send_quota = -1;
+
+	g_return_val_if_fail (folder != NULL, NULL);
+	g_return_val_if_fail (CAMEL_IS_MAPI_FOLDER (folder), NULL);
+
+	mapi_store = CAMEL_MAPI_STORE (camel_folder_get_parent_store (folder));
+	g_return_val_if_fail (mapi_store != NULL, NULL);
+	
+	/* check for offline operation */
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (mapi_store)))
+		return NULL;
+
+	conn = camel_mapi_store_get_connection (mapi_store);
+	if (conn && e_mapi_connection_get_store_quotas (
+		conn, NULL,
+		&current_size, &receive_quota, &send_quota,
+		cancellable, error)) {
+		if (current_size != -1) {
+			if (receive_quota != -1) {
+				quota_info = camel_folder_quota_info_new (_("Receive quota"), current_size, receive_quota);
+			}
+
+			if (send_quota != -1) {
+				CamelFolderQuotaInfo *qi;
+
+				qi = camel_folder_quota_info_new (_("Send quota"), current_size, send_quota);
+				if (quota_info)
+					quota_info->next = qi;
+				else
+					quota_info = qi;
+			}
+		}
+	}
+
+	if (!quota_info)
+		g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+			_("No quota information available"));
+
+	return quota_info;
+}
+
 static void
 camel_mapi_folder_class_init (CamelMapiFolderClass *class)
 {
@@ -1881,6 +1930,7 @@ camel_mapi_folder_class_init (CamelMapiFolderClass *class)
 	folder_class->refresh_info_sync = mapi_folder_refresh_info_sync;
 	folder_class->synchronize_sync = mapi_folder_synchronize_sync;
 	folder_class->transfer_messages_to_sync = mapi_folder_transfer_messages_to_sync;
+	folder_class->get_quota_info_sync = mapi_folder_get_quota_info_sync;
 }
 
 static void

@@ -130,6 +130,7 @@ make_mapi_error (GError **perror, const gchar *context, enum MAPISTATUS mapi_sta
 	err (MAPI_E_END_OF_SESSION,			_("End of session"));
 	err (MAPI_E_NOT_INITIALIZED,			_("MAPI is not initialized or connected"));
 	err (MAPI_E_NO_ACCESS,				_("Permission denied"));
+	err (ecShutoffQuotaExceeded,			_("Mailbox quota exceeded"));
 
 	#undef err
 
@@ -891,6 +892,105 @@ e_mapi_connection_peek_store (EMapiConnection *conn,
 	return TRUE;
 }
 
+/* sets quotas and current_size to -1 when not available, but still can return TRUE */
+gboolean
+e_mapi_connection_get_store_quotas (EMapiConnection *conn,
+				    mapi_object_t *obj_store, /* can be NULL, for mailbox store */
+				    uint64_t *current_size, /* out */
+				    uint64_t *receive_quota, /* out */
+				    uint64_t *send_quota, /* out */
+				    GCancellable *cancellable,
+				    GError **perror)
+{
+	enum MAPISTATUS ms = MAPI_E_RESERVED;
+	TALLOC_CTX *mem_ctx;
+	struct SPropTagArray *spropTagArray = NULL;
+	struct SPropValue *lpProps = NULL;
+	mapi_object_t *use_store;
+
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (current_size != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (receive_quota != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (send_quota != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+
+	use_store = obj_store;
+	if (!use_store)
+		use_store = &priv->msg_store;
+
+	*current_size = -1;
+	*receive_quota = -1;
+	*send_quota = -1;
+
+	LOCK ();
+	mem_ctx = talloc_new (priv->session);
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		ms = MAPI_E_USER_CANCEL;
+		goto cleanup;
+	}
+
+	spropTagArray = set_SPropTagArray (mem_ctx, 4,
+		PidTagMessageSize,
+		PidTagMessageSizeExtended,
+		PidTagProhibitReceiveQuota,
+		PidTagProhibitSendQuota);
+
+	if (spropTagArray && spropTagArray->cValues) {
+		uint32_t prop_count = 0;
+		const uint32_t *pmessage_size, *preceive_quota, *psend_quota;
+		const uint64_t *pmessage_size_ex;
+
+		ms = GetProps (use_store, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, spropTagArray, &lpProps, &prop_count);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "GetProps", ms);
+			goto cleanup;
+		} else if (!lpProps) {
+			ms = MAPI_E_CALL_FAILED;
+			make_mapi_error (perror, "GetProps", ms);
+			goto cleanup;
+		}
+
+		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+			ms = MAPI_E_USER_CANCEL;
+			goto cleanup;
+		}
+
+		pmessage_size = e_mapi_util_find_SPropVal_array_propval (lpProps, PidTagMessageSize);
+		pmessage_size_ex = e_mapi_util_find_SPropVal_array_propval (lpProps, PidTagMessageSizeExtended);
+		preceive_quota = e_mapi_util_find_SPropVal_array_propval (lpProps, PidTagProhibitReceiveQuota);
+		psend_quota = e_mapi_util_find_SPropVal_array_propval (lpProps, PidTagProhibitSendQuota);
+
+		if (pmessage_size && *pmessage_size != -1)
+			*current_size = *pmessage_size;
+		else if (pmessage_size_ex && *pmessage_size_ex)
+			*current_size = *pmessage_size_ex;
+
+		if (*current_size != -1) {
+			if (preceive_quota && *preceive_quota != -1) {
+				*receive_quota = *preceive_quota;
+				*receive_quota *= 1024;
+			}
+
+			if (psend_quota && *psend_quota != -1) {
+				*send_quota = *psend_quota;
+				*send_quota *= 1024;
+			}
+		}
+	} else {
+		ms = MAPI_E_NOT_ENOUGH_RESOURCES;
+		make_mapi_error (perror, "set_SPropTagArray", ms);
+	}
+
+ cleanup:
+	talloc_free (spropTagArray);
+	talloc_free (lpProps);
+	talloc_free (mem_ctx);
+	UNLOCK();
+
+	return ms == MAPI_E_SUCCESS;
+}
+
 gboolean
 e_mapi_connection_open_default_folder (EMapiConnection *conn,
 				       uint32_t olFolderIdentifier,
@@ -1140,6 +1240,7 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 	TALLOC_CTX *mem_ctx;
 	struct SPropTagArray *spropTagArray = NULL;
 	struct mapi_SPropValue_array *properties = NULL;
+	struct SPropValue *lpProps = NULL;
 	gboolean res = FALSE;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
@@ -1165,13 +1266,10 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 
 	properties = talloc_zero (mem_ctx, struct mapi_SPropValue_array);
 	if (spropTagArray && spropTagArray->cValues) {
-		struct SPropValue *lpProps;
 		uint32_t prop_count = 0, k, ll;
 		EResolveNamedIDsData *named_ids_list = NULL;
 		guint named_ids_len = 0;
 		GHashTable *replace_hash = NULL;
-
-		lpProps = talloc_zero (mem_ctx, struct SPropValue);
 
 		for (k = 0; k < spropTagArray->cValues; k++) {
 			uint32_t proptag = spropTagArray->aulPropTag[k];
@@ -1214,6 +1312,11 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 
 		ms = GetProps (obj_folder, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, spropTagArray, &lpProps, &prop_count);
 		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "GetProps", ms);
+			g_free (named_ids_list);
+			goto cleanup;
+		} else if (!lpProps) {
+			ms = MAPI_E_CALL_FAILED;
 			make_mapi_error (perror, "GetProps", ms);
 			g_free (named_ids_list);
 			goto cleanup;
@@ -1263,6 +1366,7 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
  cleanup:
 	talloc_free (spropTagArray);
 	talloc_free (properties);
+	talloc_free (lpProps);
 	talloc_free (mem_ctx);
 	UNLOCK();
 
@@ -2895,6 +2999,8 @@ e_mapi_connection_transfer_summary (EMapiConnection *conn,
 							ms = MAPI_E_USER_CANCEL;
 							e_mapi_object_free (object);
 							mapi_object_release (&obj_message);
+							talloc_free (lpProps);
+							talloc_free (tags);
 							goto cleanup;
 						}
 
@@ -2917,11 +3023,14 @@ e_mapi_connection_transfer_summary (EMapiConnection *conn,
 				if (ms != MAPI_E_SUCCESS) {
 					make_mapi_error (perror, "transfer_object", ms);
 					mapi_object_release (&obj_message);
+					talloc_free (lpProps);
+					talloc_free (tags);
 					goto cleanup;
 				}
 			}
 
 			mapi_object_release (&obj_message);
+			talloc_free (lpProps);
 			talloc_free (tags);
 		}
 
@@ -5522,7 +5631,7 @@ mapi_get_ren_additional_fids (TALLOC_CTX *mem_ctx,
 	mapi_id_t inbox_id, fid;
 	mapi_object_t obj_folder_inbox;
 	struct SPropTagArray *SPropTagArray;
-	struct SPropValue *lpProps;
+	struct SPropValue *lpProps = NULL;
 	struct SRow aRow;
 	const struct BinaryArray_r *entryids;
 	struct Binary_r entryid;
@@ -5569,9 +5678,12 @@ mapi_get_ren_additional_fids (TALLOC_CTX *mem_ctx,
 	/* GetProps on Inbox for PR_ADDITIONAL_REN_ENTRYIDS */
 	SPropTagArray = set_SPropTagArray(mem_ctx, 0x1, PR_ADDITIONAL_REN_ENTRYIDS);
 
-	lpProps = talloc_zero(mem_ctx, struct SPropValue);
 	ms = GetProps (&obj_folder_inbox, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, SPropTagArray, &lpProps, &count);
 	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "GetProps", ms);
+		goto cleanup;
+	} else if (!lpProps) {
+		ms = MAPI_E_CALL_FAILED;
 		make_mapi_error (perror, "GetProps", ms);
 		goto cleanup;
 	}
@@ -5608,6 +5720,7 @@ mapi_get_ren_additional_fids (TALLOC_CTX *mem_ctx,
 
  cleanup:
 	mapi_object_release (&obj_folder_inbox);
+	talloc_free (lpProps);
 
 	return ms == MAPI_E_SUCCESS;
 }
@@ -5679,8 +5792,8 @@ e_mapi_connection_get_folders_list (EMapiConnection *conn,
 {
 	enum MAPISTATUS	ms;
 	TALLOC_CTX		*mem_ctx;
-	struct SPropTagArray	*SPropTagArray;
-	struct SPropValue	*lpProps;
+	struct SPropTagArray	*SPropTagArray = NULL;
+	struct SPropValue	*lpProps = NULL;
 	struct SRow		aRow;
 	gboolean		result = FALSE;
 	mapi_id_t		mailbox_id;
@@ -5712,11 +5825,12 @@ e_mapi_connection_get_folders_list (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	lpProps = talloc_zero(mem_ctx, struct SPropValue);
 	ms = GetProps (&priv->msg_store, MAPI_PROPS_SKIP_NAMEDID_CHECK | MAPI_UNICODE, SPropTagArray, &lpProps, &count);
-	talloc_free (SPropTagArray);
-
 	if (ms != MAPI_E_SUCCESS) {
+		make_mapi_error (perror, "GetProps", ms);
+		goto cleanup;
+	} else if (!lpProps) {
+		ms = MAPI_E_CALL_FAILED;
 		make_mapi_error (perror, "GetProps", ms);
 		goto cleanup;
 	}
@@ -5771,6 +5885,8 @@ e_mapi_connection_get_folders_list (EMapiConnection *conn,
 	g_slist_foreach (*mapi_folders, (GFunc) set_user_name, (gpointer) mailbox_user_name);
 
  cleanup:
+	talloc_free (SPropTagArray);
+	talloc_free (lpProps);
 	talloc_free (mem_ctx);
 
 	UNLOCK ();

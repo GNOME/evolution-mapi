@@ -2042,6 +2042,7 @@ mapi_connect_sync (CamelService *service,
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
 	CamelServiceConnectionStatus status;
 	CamelSession *session;
+	uint64_t current_size = -1, receive_quota = -1, send_quota = -1;
 	gchar *name;
 
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
@@ -2066,12 +2067,12 @@ mapi_connect_sync (CamelService *service,
 
 	name = camel_service_get_name (service, TRUE);
 	camel_operation_push_message (cancellable, _("Connecting to '%s'"), name);
-	g_free (name);
 
 	if (!camel_session_authenticate_sync (session, service, NULL, cancellable, error)) {
 		camel_operation_pop_message (cancellable);
 		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		camel_service_disconnect_sync (service, TRUE, NULL);
+		g_free (name);
 		return FALSE;
 	}
 
@@ -2081,6 +2082,38 @@ mapi_connect_sync (CamelService *service,
 		CAMEL_OFFLINE_STORE (store), TRUE, cancellable, NULL);
 
 	camel_store_summary_save (store->summary);
+
+	if (e_mapi_connection_get_store_quotas (
+		store->priv->conn, NULL,
+		&current_size, &receive_quota, &send_quota,
+		cancellable, NULL)) {
+
+		if (current_size != -1) {
+			gchar *msg = NULL;
+
+			/* warn/alert when the last 1% lefts from the size quota */
+			if (send_quota != -1 && current_size * 0.95 >= send_quota) {
+				if (send_quota != -1 && current_size >= send_quota) {
+					msg = g_strdup_printf (_("Mailbox '%s' is full, no new messages will be received or sent."), name);
+				} else {
+					msg = g_strdup_printf (_("Mailbox '%s' is near its size limit, message send will be disabled soon."), name);
+				}
+			} else if (receive_quota != -1 && current_size * 0.95 >= receive_quota) {
+				if (current_size >= receive_quota) {
+					msg = g_strdup_printf (_("Mailbox '%s' is full, no new messages will be received."), name);
+				} else {
+					msg = g_strdup_printf (_("Mailbox '%s' is near its size limit."), name);
+				}
+			}
+
+			if (msg) {
+				camel_session_alert_user (session, CAMEL_SESSION_ALERT_WARNING, msg, NULL);
+				g_free (msg);
+			}
+		}
+	}
+
+	g_free (name);
 
 	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 

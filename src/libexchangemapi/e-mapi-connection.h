@@ -229,6 +229,14 @@ gboolean		e_mapi_connection_peek_store		(EMapiConnection *conn,
 								 GCancellable *cancellable,
 								 GError **perror);
 
+gboolean		e_mapi_connection_get_store_quotas	(EMapiConnection *conn,
+								 mapi_object_t *obj_store, /* can be NULL */
+								 uint64_t *current_size, /* out */
+								 uint64_t *receive_quota, /* out */
+								 uint64_t *send_quota, /* out */
+								 GCancellable *cancellable,
+								 GError **perror);
+
 gboolean		e_mapi_connection_open_default_folder	(EMapiConnection *conn,
 								 uint32_t olFolderIdentifier,
 								 mapi_object_t *obj_folder, /* out */
