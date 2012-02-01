@@ -1277,11 +1277,18 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gbool
 		return /* Success */;
 	}
 
-	priv->profile = g_strdup (e_source_get_property (esource, "profile"));
-	priv->user_name = g_strdup (e_source_get_property (esource, "acl-user-name"));
-	priv->user_email = g_strdup (e_source_get_property (esource, "acl-user-email"));
-	priv->owner_name = g_strdup (e_source_get_property (esource, "acl-owner-name"));
-	priv->owner_email = g_strdup (e_source_get_property (esource, "acl-owner-email"));
+	g_free (priv->profile);
+	g_free (priv->user_name);
+	g_free (priv->user_email);
+	g_free (priv->owner_name);
+	g_free (priv->owner_email);
+	g_free (priv->foreign_username);
+
+	priv->profile = e_source_get_duped_property (esource, "profile");
+	priv->user_name = e_source_get_duped_property (esource, "acl-user-name");
+	priv->user_email = e_source_get_duped_property (esource, "acl-user-email");
+	priv->owner_name = e_source_get_duped_property (esource, "acl-owner-name");
+	priv->owner_email = e_source_get_duped_property (esource, "acl-owner-email");
 
 	e_mapi_util_mapi_id_from_string (fid, &priv->fid);
 	priv->is_public_folder = g_strcmp0 (e_source_get_property (esource, "public"), "yes") == 0;
@@ -2893,8 +2900,10 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 		g_object_unref (op->cancellable);
 	if (op->cal)
 		g_object_unref (op->cal);
-
 	g_free (op);
+
+	/* for cases when this is the last reference */
+	e_mapi_utils_unref_in_thread (G_OBJECT (backend));
 }
 
 static GSList *
@@ -2924,6 +2933,7 @@ base_op_abstract (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellabl
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (cbmapi);
 	if (cal)
 		g_object_ref (cal);
 	if (cancellable)
@@ -2952,6 +2962,7 @@ str_op_abstract (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (cbmapi);
 	if (cal)
 		g_object_ref (cal);
 	if (cancellable)
@@ -2981,6 +2992,7 @@ str2_op_abstract (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellabl
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (cbmapi);
 	if (cal)
 		g_object_ref (cal);
 	if (cancellable)
@@ -3032,6 +3044,7 @@ ecbm_op_open (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *c
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (cbmapi);
 	if (cal)
 		g_object_ref (cal);
 	if (cancellable)
@@ -3061,6 +3074,7 @@ ecbm_op_authenticate_user (ECalBackend *backend, GCancellable *cancellable, ECre
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (cbmapi);
 	if (cancellable)
 		g_object_ref (cancellable);
 
@@ -3094,6 +3108,7 @@ ecbm_op_modify_object (ECalBackend *backend, EDataCal *cal, guint32 opid, GCance
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (cbmapi);
 	if (cal)
 		g_object_ref (cal);
 	if (cancellable)
@@ -3124,6 +3139,7 @@ ecbm_op_remove_object (ECalBackend *backend, EDataCal *cal, guint32 opid, GCance
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (cbmapi);
 	if (cal)
 		g_object_ref (cal);
 	if (cancellable)
@@ -3155,6 +3171,7 @@ ecbm_op_discard_alarm (ECalBackend *backend, EDataCal *cal, guint32 opid, GCance
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (cbmapi);
 	if (cal)
 		g_object_ref (cal);
 	if (cancellable)
@@ -3194,6 +3211,8 @@ ecbm_op_start_view (ECalBackend *backend, EDataCalView *view)
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (cbmapi);
+
 	op = g_new0 (OperationStartView, 1);
 	op->base.ot = OP_START_VIEW;
 	op->view = g_object_ref (view);
@@ -3215,6 +3234,7 @@ ecbm_op_get_free_busy (ECalBackend *backend, EDataCal *cal, guint32 opid, GCance
 	priv = cbmapi->priv;
 	g_return_if_fail (priv != NULL);
 
+	g_object_ref (cbmapi);
 	if (cal)
 		g_object_ref (cal);
 	if (cancellable)
@@ -3243,6 +3263,9 @@ ecbm_dispose (GObject *object)
 
 	cbmapi = E_CAL_BACKEND_MAPI (object);
 	priv = cbmapi->priv;
+
+	if (priv && priv->op_queue)
+		e_mapi_operation_queue_cancel_all (priv->op_queue);
 
 	if (priv && priv->cancellable) {
 		g_cancellable_cancel (priv->cancellable);
@@ -3286,6 +3309,11 @@ ecbm_finalize (GObject *object)
 		g_cond_free (priv->dlock->cond);
 		g_free (priv->dlock);
 		priv->dthread = NULL;
+	}
+
+	if (priv->op_queue) {
+		g_object_unref (priv->op_queue);
+		priv->op_queue = NULL;
 	}
 
 	if (priv->mutex) {
@@ -3346,11 +3374,6 @@ ecbm_finalize (GObject *object)
 	if (priv->conn) {
 		g_object_unref (priv->conn);
 		priv->conn = NULL;
-	}
-
-	if (priv->op_queue) {
-		g_object_unref (priv->op_queue);
-		priv->op_queue = NULL;
 	}
 
 	g_free (priv);

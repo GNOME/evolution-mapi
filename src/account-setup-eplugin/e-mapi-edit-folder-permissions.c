@@ -154,7 +154,7 @@ edit_permissions_widgets_free (gpointer ptr)
 	g_free (widgets->login_url);
 	g_free (widgets->foreign_username);
 	if (widgets->conn)
-		e_mapi_account_unref_conn_in_thread (widgets->conn);
+		e_mapi_utils_unref_in_thread (G_OBJECT (widgets->conn));
 	g_free (widgets);
 }
 

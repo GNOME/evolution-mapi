@@ -125,4 +125,7 @@ gboolean	e_mapi_utils_get_folder_basic_properties_cb	(EMapiConnection *conn,
 gboolean	e_mapi_utils_copy_to_mapi_SPropValue		(TALLOC_CTX *mem_ctx,
 								 struct mapi_SPropValue *mapi_sprop, 
 								 struct SPropValue *sprop);
+
+void		e_mapi_utils_unref_in_thread			(GObject *object);
+
 #endif

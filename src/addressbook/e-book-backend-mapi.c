@@ -1061,8 +1061,10 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 		g_object_unref (op->cancellable);
 	if (op->book)
 		g_object_unref (op->book);
-	g_object_unref (ebma);
 	g_free (op);
+
+	/* for cases when this is the last reference */
+	e_mapi_utils_unref_in_thread (G_OBJECT (backend));
 }
 
 static void

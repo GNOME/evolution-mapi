@@ -1812,30 +1812,3 @@ e_mapi_account_open_connection_for (GtkWindow *parent,
 
 	return conn;
 }
-
-static gpointer
-unref_conn_in_thread (gpointer ptr)
-{
-	EMapiConnection *conn = ptr;
-
-	g_return_val_if_fail (conn != NULL, NULL);
-
-	g_object_unref (conn);
-
-	return NULL;
-}
-
-/* because this also disconnects from a server, which can take its time */
-void
-e_mapi_account_unref_conn_in_thread (EMapiConnection *conn)
-{
-	GError *error = NULL;
-
-	if (!conn)
-		return;
-
-	if (!g_thread_create (unref_conn_in_thread, conn, FALSE, &error)) {
-		g_warning ("%s: Failed to run thread: %s", G_STRFUNC, error ? error->message : "Unknown error");
-		g_object_unref (conn);
-	}
-}

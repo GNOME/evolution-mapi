@@ -1251,3 +1251,31 @@ e_mapi_utils_copy_to_mapi_SPropValue (TALLOC_CTX *mem_ctx,
 
 	return FALSE;
 }
+
+static gpointer
+unref_object_in_thread (gpointer ptr)
+{
+	GObject *object = ptr;
+
+	g_return_val_if_fail (object != NULL, NULL);
+
+	g_object_unref (object);
+
+	return NULL;
+}
+
+void
+e_mapi_utils_unref_in_thread (GObject *object)
+{
+	GError *error = NULL;
+
+	if (!object)
+		return;
+
+	g_return_if_fail (G_IS_OBJECT (object));
+
+	if (!g_thread_create (unref_object_in_thread, object, FALSE, &error)) {
+		g_warning ("%s: Failed to run thread: %s", G_STRFUNC, error ? error->message : "Unknown error");
+		g_object_unref (object);
+	}
+}

@@ -62,6 +62,4 @@ EMapiConnection	*	e_mapi_account_open_connection_for	(GtkWindow *parent,
 								 GCancellable *cancellable,
 								 GError **perror);
 
-void			e_mapi_account_unref_conn_in_thread	(EMapiConnection *conn);
-
 #endif /* E_MAPI_ACCOUNT_SETUP_H */
