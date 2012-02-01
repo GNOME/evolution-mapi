@@ -487,7 +487,7 @@ validate_credentials_cb (GtkWidget *widget,
 		vcd->krb_sso = empd.krb_sso;
 		vcd->krb_realm = g_strdup (empd.krb_realm);
 		vcd->key = g_strdup (key);
-		vcd->mapi_settings = g_object_ref (vcd->mapi_settings);
+		vcd->mapi_settings = g_object_ref (mapi_settings);
 		vcd->success = FALSE;
 
 		e_mapi_run_in_thread_with_feedback_modal (get_widget_toplevel_window (widget),
@@ -1617,19 +1617,6 @@ run_with_feedback_idle (gpointer user_data)
 	return FALSE;
 }
 
-static gboolean
-run_with_feedback_response_idle (gpointer user_data)
-{
-	struct RunWithFeedbackData *rfd = user_data;
-
-	g_return_val_if_fail (rfd != NULL, FALSE);
-
-	if (rfd->dialog)
-		gtk_dialog_response (GTK_DIALOG (rfd->dialog), GTK_RESPONSE_CLOSE);
-
-	return FALSE;
-}
-
 static gpointer
 run_with_feedback_thread (gpointer user_data)
 {
@@ -1641,10 +1628,7 @@ run_with_feedback_thread (gpointer user_data)
 	if (!g_cancellable_is_cancelled (rfd->cancellable))
 		rfd->thread_func (rfd->with_object, rfd->user_data, rfd->cancellable, &rfd->error);
 
-	if (rfd->run_modal)
-		g_idle_add (run_with_feedback_response_idle, rfd);
-	else
-		g_idle_add (run_with_feedback_idle, rfd);
+	g_idle_add (run_with_feedback_idle, rfd);
 
 	return NULL;
 }
@@ -1656,13 +1640,11 @@ run_with_feedback_response_cb (GtkWidget *dialog,
 {
 	g_return_if_fail (rfd != NULL);
 
-	if (!rfd->run_modal)
-		rfd->dialog = NULL;
+	rfd->dialog = NULL;
 
 	g_cancellable_cancel (rfd->cancellable);
 
-	if (!rfd->run_modal)
-		gtk_widget_destroy (dialog);
+	gtk_widget_destroy (dialog);
 }
 
 static void
@@ -1711,11 +1693,16 @@ e_mapi_run_in_thread_with_feedback_general (GtkWindow *parent,
 	g_signal_connect (dialog, "response", G_CALLBACK (run_with_feedback_response_cb), rfd);
 
 	if (run_modal) {
+		GCancellable *cancellable;
+
+		cancellable = g_object_ref (rfd->cancellable);
+
 		g_return_if_fail (g_thread_create (run_with_feedback_thread, rfd, FALSE, NULL));
 
 		gtk_dialog_run (GTK_DIALOG (dialog));
 
-		run_with_feedback_idle (rfd);
+		g_cancellable_cancel (cancellable);
+		g_object_unref (cancellable);
 	} else {
 		gtk_widget_show (dialog);
 
