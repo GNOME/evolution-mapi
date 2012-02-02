@@ -2920,7 +2920,7 @@ internal_get_summary_cb (EMapiConnection *conn,
 	return gsd->cb (conn, mem_ctx, object, gsd->obj_index, gsd->obj_total, gsd->cb_user_data, cancellable, perror);
 }
 
-/* transfers items summary, which is either PR_TRANSPORT_MESSAGE_HEADERS_UNICODE or
+/* transfers items summary, which is either PidTagTransportMessageHeaders or
    the object without attachment */
 gboolean
 e_mapi_connection_transfer_summary (EMapiConnection *conn,
@@ -2963,13 +2963,14 @@ e_mapi_connection_transfer_summary (EMapiConnection *conn,
 				goto cleanup;
 			}
 
-			tags = set_SPropTagArray (mem_ctx, 8,
-				PR_FID,
-				PR_MID,
-				PR_MESSAGE_FLAGS,
-				PR_LAST_MODIFICATION_TIME,
-				PR_MESSAGE_CLASS,
-				PR_TRANSPORT_MESSAGE_HEADERS_UNICODE,
+			tags = set_SPropTagArray (mem_ctx, 9,
+				PidTagFolderId,
+				PidTagMid,
+				PidTagMessageFlags,
+				PidTagMessageSize,
+				PidTagMessageClass,
+				PidTagLastModificationTime,
+				PidTagTransportMessageHeaders,
 				PidTagIconIndex,
 				PidTagReadReceiptRequested);
 
@@ -2977,7 +2978,7 @@ e_mapi_connection_transfer_summary (EMapiConnection *conn,
 			if (ms == MAPI_E_SUCCESS) {
 				ms = MAPI_E_NOT_FOUND;
 				if (lpProps && prop_count > 0) {
-					const gchar *headers = e_mapi_util_find_SPropVal_array_propval (lpProps, PR_TRANSPORT_MESSAGE_HEADERS_UNICODE);
+					const gchar *headers = e_mapi_util_find_SPropVal_array_propval (lpProps, PidTagTransportMessageHeaders);
 
 					if (headers && *headers) {
 						EMapiObject *object;

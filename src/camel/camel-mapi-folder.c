@@ -596,8 +596,12 @@ gather_object_summary_cb (EMapiConnection *conn,
 				info = camel_folder_summary_info_new_from_header (gos->folder->summary, part->headers);
 				if (info) {
 					CamelMapiMessageInfo *minfo = (CamelMapiMessageInfo *) info;
+					const uint32_t *msg_size;
 
 					minfo->info.uid = camel_pstring_strdup (uid_str);
+
+					msg_size = e_mapi_util_find_array_propval (&object->properties, PidTagMessageSize);
+					minfo->info.size = msg_size ? *msg_size : 0;
 				}
 			}
 
@@ -613,15 +617,15 @@ gather_object_summary_cb (EMapiConnection *conn,
 			gchar *formatted_addr, *from_name, *from_email;
 			CamelAddress *to_addr, *cc_addr, *bcc_addr;
 
-			subject = e_mapi_util_find_array_propval (&object->properties, PR_SUBJECT_UNICODE);
+			subject = e_mapi_util_find_array_propval (&object->properties, PidTagSubject);
 			delivery_time = e_mapi_util_find_array_propval (&object->properties, PidTagMessageDeliveryTime);
 			submit_time = e_mapi_util_find_array_propval (&object->properties, PidTagClientSubmitTime);
-			msg_size = e_mapi_util_find_array_propval (&object->properties, PR_MESSAGE_SIZE);
-			message_id = e_mapi_util_find_array_propval (&object->properties, PR_INTERNET_MESSAGE_ID);
-			references = e_mapi_util_find_array_propval (&object->properties, PR_INTERNET_REFERENCES);
-			in_reply_to = e_mapi_util_find_array_propval (&object->properties, PR_IN_REPLY_TO_ID);
-			display_to = e_mapi_util_find_array_propval (&object->properties, PR_DISPLAY_TO_UNICODE);
-			display_cc = e_mapi_util_find_array_propval (&object->properties, PR_DISPLAY_CC_UNICODE);
+			msg_size = e_mapi_util_find_array_propval (&object->properties, PidTagMessageSize);
+			message_id = e_mapi_util_find_array_propval (&object->properties, PidTagInternetMessageId);
+			references = e_mapi_util_find_array_propval (&object->properties, PidTagInternetReferences);
+			in_reply_to = e_mapi_util_find_array_propval (&object->properties, PidTagInReplyToId);
+			display_to = e_mapi_util_find_array_propval (&object->properties, PidTagDisplayTo);
+			display_cc = e_mapi_util_find_array_propval (&object->properties, PidTagDisplayCc);
 
 			info = camel_message_info_new (gos->folder->summary);
 			minfo = (CamelMapiMessageInfo *) info;
@@ -673,9 +677,9 @@ gather_object_summary_cb (EMapiConnection *conn,
 			from_email = NULL;
 
 			e_mapi_mail_utils_decode_email_address1 (conn, &object->properties,
-				PR_SENT_REPRESENTING_NAME_UNICODE,
-				PR_SENT_REPRESENTING_EMAIL_ADDRESS_UNICODE,
-				PR_SENT_REPRESENTING_ADDRTYPE,
+				PidTagSentRepresentingName,
+				PidTagSentRepresentingEmailAddress,
+				PidTagSentRepresentingAddressType,
 				&from_name, &from_email);
 
 			if (from_email && *from_email) {
