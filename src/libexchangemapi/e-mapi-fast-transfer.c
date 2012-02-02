@@ -51,6 +51,10 @@ struct _EMapiFXParserClosure {
 	uint32_t marker;
 	/* where to store read properties */
 	struct mapi_SPropValue_array *current_properties;
+	TALLOC_CTX *current_streamed_mem_ctx;
+	EMapiStreamedProp **current_streamed_properties;
+	guint32 *current_streamed_properties_count;
+	
 	/* what object is currently read (can be embeded object or the below object */
 	EMapiObject *current_object;
 
@@ -113,6 +117,9 @@ parse_marker_cb (uint32_t marker, void *closure)
 				data->object = NULL;
 				data->current_object = NULL;
 				data->current_properties = NULL;
+				data->current_streamed_mem_ctx = NULL;
+				data->current_streamed_properties = NULL;
+				data->current_streamed_properties_count = NULL;
 			}
 
 			if (stop)
@@ -123,6 +130,9 @@ parse_marker_cb (uint32_t marker, void *closure)
 			data->object = e_mapi_object_new (data->mem_ctx);
 			data->current_object = data->object;
 			data->current_properties = &data->object->properties;
+			data->current_streamed_mem_ctx = data->object;
+			data->current_streamed_properties = &data->object->streamed_properties;
+			data->current_streamed_properties_count = &data->object->streamed_properties_count;
 			data->marker = marker;
 			break;
 		case PidTagEndMessage:
@@ -136,6 +146,9 @@ parse_marker_cb (uint32_t marker, void *closure)
 				data->object = NULL;
 				data->current_object = NULL;
 				data->current_properties = NULL;
+				data->current_streamed_mem_ctx = NULL;
+				data->current_streamed_properties = NULL;
+				data->current_streamed_properties_count = NULL;
 
 				if (stop)
 					return MAPI_E_USER_CANCEL;
@@ -155,11 +168,17 @@ parse_marker_cb (uint32_t marker, void *closure)
 				data->current_object->recipients = recipient;
 
 				data->current_properties = &recipient->properties;
+				data->current_streamed_mem_ctx = NULL;
+				data->current_streamed_properties = NULL;
+				data->current_streamed_properties_count = NULL;
 			}
 			data->marker = marker;
 			break;
 		case PidTagEndToRecip:
 			data->current_properties = NULL;
+			data->current_streamed_mem_ctx = NULL;
+			data->current_streamed_properties = NULL;
+			data->current_streamed_properties_count = NULL;
 			data->marker = 0;
 			break;
 		case PidTagNewAttach:
@@ -175,11 +194,17 @@ parse_marker_cb (uint32_t marker, void *closure)
 				data->current_object->attachments = attachment;
 
 				data->current_properties = &attachment->properties;
+				data->current_streamed_mem_ctx = attachment;
+				data->current_streamed_properties = &attachment->streamed_properties;
+				data->current_streamed_properties_count = &attachment->streamed_properties_count;
 			}
 			data->marker = marker;
 			break;
 		case PidTagEndAttach:
 			data->current_properties = NULL;
+			data->current_streamed_mem_ctx = NULL;
+			data->current_streamed_properties = NULL;
+			data->current_streamed_properties_count = NULL;
 			data->marker = 0;
 			break;
 		case PidTagStartEmbed:
@@ -198,6 +223,9 @@ parse_marker_cb (uint32_t marker, void *closure)
 				data->current_object->attachments->embedded_object = object;
 				data->current_object = object;
 				data->current_properties = &object->properties;
+				data->current_streamed_mem_ctx = object;
+				data->current_streamed_properties = &object->streamed_properties;
+				data->current_streamed_properties_count = &object->streamed_properties_count;
 			}
 			data->marker = marker;
 			break;
@@ -210,6 +238,9 @@ parse_marker_cb (uint32_t marker, void *closure)
 				e_mapi_object_finish_read (data->current_object);
 				data->current_object = data->current_object->parent;
 				data->current_properties = NULL;
+				data->current_streamed_mem_ctx = NULL;
+				data->current_streamed_properties = NULL;
+				data->current_streamed_properties_count = NULL;
 			}
 			data->marker = 0;
 			break;
@@ -274,6 +305,24 @@ parse_property_cb (struct SPropValue prop, void *closure)
 	}
 
 	switch (prop.ulPropTag & 0xFFFF) {
+		case PT_BINARY:
+			if (data->current_streamed_properties && data->current_streamed_properties_count &&
+			    prop.value.bin.cb > 65535) {
+				guint32 index;
+
+				(*data->current_streamed_properties) = talloc_realloc (data->current_streamed_mem_ctx,
+					(*data->current_streamed_properties),
+					EMapiStreamedProp,
+					(*data->current_streamed_properties_count) + 1);
+				index = (*data->current_streamed_properties_count);
+				(*data->current_streamed_properties_count)++;
+				(*data->current_streamed_properties)[index].proptag = prop.ulPropTag;
+				(*data->current_streamed_properties)[index].cb = prop.value.bin.cb;
+				(*data->current_streamed_properties)[index].lpb = prop.value.bin.lpb;
+				break;
+			} else if (prop.value.bin.cb > 65535) {
+				g_debug ("%s: PT_BINARY property 0x%X larger than 64KB (%d), will be truncated", G_STRFUNC, prop.ulPropTag, prop.value.bin.cb);
+			}
 		case PT_BOOLEAN:
 		case PT_I2:
 		case PT_LONG:
@@ -282,7 +331,6 @@ parse_property_cb (struct SPropValue prop, void *closure)
 		case PT_STRING8:
 		case PT_UNICODE:
 		case PT_SYSTIME:
-		case PT_BINARY:
 		case PT_ERROR:
 		case PT_CLSID:
 		case PT_SVREID:
@@ -336,6 +384,9 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 	data.objects_total = objects_total;
 	data.marker = 0;
 	data.current_properties = NULL;
+	data.current_streamed_mem_ctx = NULL;
+	data.current_streamed_properties = NULL;
+	data.current_streamed_properties_count = NULL;
 	data.current_object = NULL;
 	data.object = NULL;
 
@@ -344,6 +395,9 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 		data.object = e_mapi_object_new (data.mem_ctx);
 		data.current_object = data.object;
 		data.current_properties = &data.object->properties;
+		data.current_streamed_mem_ctx = data.object;
+		data.current_streamed_properties = &data.object->streamed_properties;
+		data.current_streamed_properties_count = &data.object->streamed_properties_count;
 		data.marker = PidTagStartMessage;
 	}
 		

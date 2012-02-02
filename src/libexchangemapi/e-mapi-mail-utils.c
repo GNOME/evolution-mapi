@@ -177,7 +177,7 @@ build_body_part_content (CamelMimePart *part, EMapiObject *object, uint32_t prop
 	camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_8BIT);
 
 	value = e_mapi_util_find_array_propval (&object->properties, proptag);
-	if (value) {
+	if (value || (proptag == PidTagHtml && e_mapi_object_get_streamed (object, proptag))) {
 		const gchar *type = NULL;
 		gchar *buff = NULL, *in_utf8;
 		const uint32_t *pcpid = e_mapi_util_find_array_propval (&object->properties, PidTagInternetCodepage);
@@ -214,12 +214,19 @@ build_body_part_content (CamelMimePart *part, EMapiObject *object, uint32_t prop
 		in_utf8 = NULL;
 
 		if (proptag == PidTagHtml) {
-			const struct SBinary_short *html_bin = value;
+			uint64_t cb = 0;
+			const uint8_t *lpb = NULL;
 
-			if (e_mapi_utils_ensure_utf8_string (proptag, pcpid, html_bin->lpb, html_bin->cb, &in_utf8))
+			if (!e_mapi_object_get_bin_prop (object, proptag, &cb, &lpb)) {
+				g_warn_if_reached ();
+				cb = 0;
+				lpb = (const uint8_t *) "";
+			}
+
+			if (e_mapi_utils_ensure_utf8_string (proptag, pcpid, lpb, cb, &in_utf8))
 				camel_mime_part_set_content (part, in_utf8, strlen (in_utf8), type);
 			else
-				camel_mime_part_set_content (part, (const gchar *) html_bin->lpb, html_bin->cb, type);
+				camel_mime_part_set_content (part, (const gchar *) lpb, cb, type);
 			
 		} else {
 			const gchar *str = value;
@@ -240,33 +247,35 @@ static gboolean
 is_apple_attach (EMapiAttachment *attach, guint32 *data_len, guint32 *resource_len)
 {
 	gboolean is_apple = FALSE;
-	const struct SBinary_short *encoding_bin = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachEncoding);
+	uint64_t enc_cb = 0;
+	const uint8_t *enc_lpb = NULL;
 	guint8 apple_enc_magic[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x14, 0x03, 0x0B, 0x01 };
 
-	if (encoding_bin && encoding_bin->lpb && encoding_bin->cb == G_N_ELEMENTS (apple_enc_magic)) {
+	if (e_mapi_attachment_get_bin_prop (attach, PidTagAttachEncoding, &enc_cb, &enc_lpb) && enc_cb == G_N_ELEMENTS (apple_enc_magic)) {
 		gint idx;
 
 		is_apple = TRUE;
-		for (idx = 0; idx < encoding_bin->cb && is_apple; idx++) {
-			is_apple = apple_enc_magic[idx] == encoding_bin->lpb[idx];
+		for (idx = 0; idx < enc_cb && is_apple; idx++) {
+			is_apple = apple_enc_magic[idx] == enc_lpb[idx];
 		}
 	}
 
 	if (is_apple) {
 		/* check boundaries too */
-		const struct SBinary_short *data_bin = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachDataBinary);
+		uint64_t data_cb = 0;
+		const uint8_t *data_lpb = NULL;
 
-		is_apple = data_bin && data_bin->lpb && data_bin->cb > 128;
+		is_apple = e_mapi_attachment_get_bin_prop (attach, PidTagAttachDataBinary, &data_cb, &data_lpb) && data_lpb && data_cb > 128;
 
 		if (is_apple) {
-			const guint8 *bin = data_bin->lpb;
+			const guint8 *bin = data_lpb;
 
 			/* in big-endian format */
 			*data_len = (bin[83] << 24) | (bin[84] << 16) | (bin[85] << 8) | (bin[86]);
 			*resource_len = (bin[87] << 24) | (bin[88] << 16) | (bin[89] << 8) | (bin[90]);
 
 			/* +/- mod 128 (but the first 128 is a header length) */
-			is_apple = 128 + *data_len + *resource_len <= data_bin->cb && bin[1] < 64;
+			is_apple = 128 + *data_len + *resource_len <= data_cb && bin[1] < 64;
 		}
 	}
 
@@ -364,12 +373,12 @@ classify_attachments (EMapiConnection *conn, EMapiAttachment *attachments, const
 		CamelContentType *content_type;
 		CamelMimePart *part;
 		const uint32_t *ui32;
-		const struct SBinary_short *data_bin;
+		uint64_t data_cb = 0;
+		const uint8_t *data_lpb = NULL;
 		gboolean is_apple;
 		guint32 apple_data_len = 0, apple_resource_len = 0;
 
-		data_bin = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachDataBinary);
-		if (!data_bin && !attach->embedded_object) {
+		if (!e_mapi_attachment_get_bin_prop (attach, PidTagAttachDataBinary, &data_cb, &data_lpb) && !attach->embedded_object) {
 			g_debug ("%s: Skipping attachment without data and without embedded object", G_STRFUNC);
 			continue;
 		}
@@ -403,7 +412,8 @@ classify_attachments (EMapiConnection *conn, EMapiAttachment *attachments, const
 		if (is_apple) {
 			CamelMultipart *mp;
 			gchar *apple_filename;
-			const struct SBinary_short *mac_info_bin;
+			uint64_t mac_info_cb = 0;
+			const uint8_t *mac_info_lpb = NULL;
 
 			mp = camel_multipart_new ();
 			camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (mp), "multipart/appledouble");
@@ -411,9 +421,8 @@ classify_attachments (EMapiConnection *conn, EMapiAttachment *attachments, const
 
 			camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
 
-			mac_info_bin = e_mapi_util_find_array_propval (&attach->properties, PidNameAttachmentMacInfo);
-			if (mac_info_bin && mac_info_bin->lpb && mac_info_bin->cb > 0) {
-				camel_mime_part_set_content (part, (const gchar *) mac_info_bin->lpb, mac_info_bin->cb, mime_type);
+			if (e_mapi_attachment_get_bin_prop (attach, PidNameAttachmentMacInfo, &mac_info_cb, &mac_info_lpb) && mac_info_lpb && mac_info_cb > 0) {
+				camel_mime_part_set_content (part, (const gchar *) mac_info_lpb, mac_info_cb, mime_type);
 			} else {
 				/* RFC 1740 */
 				guint8 header[] = {
@@ -434,7 +443,7 @@ classify_attachments (EMapiConnection *conn, EMapiAttachment *attachments, const
 				header[37] = (apple_resource_len      ) & 0xFF;
 
 				g_byte_array_append (arr, header, G_N_ELEMENTS (header));
-				g_byte_array_append (arr, data_bin->lpb + 128 + apple_data_len + (apple_data_len % 128), apple_resource_len);
+				g_byte_array_append (arr, data_lpb + 128 + apple_data_len + (apple_data_len % 128), apple_resource_len);
 
 				camel_mime_part_set_content (part, (const gchar *) arr->data, arr->len, mime_type);
 
@@ -446,7 +455,7 @@ classify_attachments (EMapiConnection *conn, EMapiAttachment *attachments, const
 
 			part = camel_mime_part_new ();
 
-			apple_filename = g_strndup ((const gchar *) data_bin->lpb + 2, data_bin->lpb[1]);
+			apple_filename = g_strndup ((const gchar *) data_lpb + 2, data_lpb[1]);
 			camel_mime_part_set_filename (part, (apple_filename && *apple_filename) ? apple_filename : filename);
 			g_free (apple_filename);
 
@@ -454,7 +463,7 @@ classify_attachments (EMapiConnection *conn, EMapiAttachment *attachments, const
 			if (!mime_type)
 				mime_type = "application/octet-stream";
 
-			camel_mime_part_set_content (part, (const gchar *) data_bin->lpb + 128, apple_data_len, mime_type);
+			camel_mime_part_set_content (part, (const gchar *) data_lpb + 128, apple_data_len, mime_type);
 			camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
 			camel_multipart_add_part (mp, part);
 			g_object_unref (part);
@@ -467,7 +476,7 @@ classify_attachments (EMapiConnection *conn, EMapiAttachment *attachments, const
 			CamelStream *mem;
 
 			mem = camel_stream_mem_new ();
-			camel_stream_write (mem, (const gchar *) data_bin->lpb, data_bin->cb, NULL, NULL);
+			camel_stream_write (mem, (const gchar *) data_lpb, data_cb, NULL, NULL);
 			g_seekable_seek (G_SEEKABLE (mem), 0, G_SEEK_SET, NULL, NULL);
 
 			parser = camel_mime_parser_new ();
@@ -558,11 +567,11 @@ classify_attachments (EMapiConnection *conn, EMapiAttachment *attachments, const
 
 						g_byte_array_free (data, TRUE);
 					} else {
-						camel_mime_part_set_content (part, (const gchar *) data_bin->lpb, data_bin->cb, mime_type);
+						camel_mime_part_set_content (part, (const gchar *) data_lpb, data_cb, mime_type);
 					}
 				}
 			} else {
-				camel_mime_part_set_content (part, (const gchar *) data_bin->lpb, data_bin->cb, mime_type);
+				camel_mime_part_set_content (part, (const gchar *) data_lpb, data_cb, mime_type);
 			}
 
 			content_type = camel_mime_part_get_content_type (part);
@@ -1060,30 +1069,37 @@ get_content_stream (CamelMimePart *part, GCancellable *cancellable)
 
 static void
 e_mapi_mail_content_stream_to_bin (CamelStream *content_stream,
-				   struct SBinary_short *bin,
+				   uint64_t *pcb,
+				   uint8_t **plpb,
 				   TALLOC_CTX *mem_ctx,
 				   GCancellable *cancellable)
 {
 	guint8 *buf;
 	guint32	read_size;
+	uint64_t cb;
+	uint8_t *lpb;
 
 	g_return_if_fail (content_stream != NULL);
-	g_return_if_fail (bin != NULL);
+	g_return_if_fail (pcb != NULL);
+	g_return_if_fail (plpb != NULL);
 	g_return_if_fail (mem_ctx != NULL);
 
 	buf = g_new0 (guint8 , STREAM_SIZE);
 
-	bin->cb = 0;
-	bin->lpb = NULL;
+	cb = 0;
+	lpb = NULL;
 
 	g_seekable_seek (G_SEEKABLE (content_stream), 0, G_SEEK_SET, NULL, NULL);
 	while (read_size = camel_stream_read (content_stream, (gchar *) buf, STREAM_SIZE, cancellable, NULL), read_size > 0) {
-		bin->lpb = talloc_realloc (mem_ctx, bin->lpb, uint8_t, bin->cb + read_size);
-		memcpy (bin->lpb + bin->cb, buf, read_size);
-		bin->cb += read_size;
+		lpb = talloc_realloc (mem_ctx, lpb, uint8_t, cb + read_size);
+		memcpy (lpb + cb, buf, read_size);
+		cb += read_size;
 	}
 
 	g_free (buf);
+
+	*pcb = cb;
+	*plpb = lpb;
 }
 
 #define set_attach_value(pt,vl) {						\
@@ -1103,7 +1119,8 @@ e_mapi_mail_add_attach (EMapiObject *object,
 	CamelContentType *content_type;
 	const gchar *content_id;
 	const gchar *filename;
-	struct SBinary_short bin;
+	uint64_t data_cb = 0;
+	uint8_t *data_lpb = NULL;
 	uint32_t ui32;
 
 	g_return_val_if_fail (object != NULL, FALSE);
@@ -1136,8 +1153,8 @@ e_mapi_mail_add_attach (EMapiObject *object,
 		g_free (ct);
 	}
 
-	e_mapi_mail_content_stream_to_bin (content_stream, &bin, attach, cancellable);
-	set_attach_value (PidTagAttachDataBinary, &bin);
+	e_mapi_mail_content_stream_to_bin (content_stream, &data_cb, &data_lpb, attach, cancellable);
+	e_mapi_attachment_add_streamed (attach, PidTagAttachDataBinary, data_cb, data_lpb);
 
 	return TRUE;
 }
@@ -1148,19 +1165,22 @@ e_mapi_mail_add_body (EMapiObject *object,
 		      uint32_t proptag,
 		      GCancellable *cancellable)
 {
-	struct SBinary_short bin = { 0 };
+	uint64_t data_cb = 0;
+	uint8_t *data_lpb = NULL;
 	gchar *str;
 
-	e_mapi_mail_content_stream_to_bin (content_stream, &bin, object, cancellable);
-	str = talloc_strndup (object, (const gchar *) bin.lpb, bin.cb);
-	talloc_free (bin.lpb);
+	e_mapi_mail_content_stream_to_bin (content_stream, &data_cb, &data_lpb, object, cancellable);
+	str = talloc_strndup (object, (const gchar *) data_lpb, data_cb);
+	talloc_free (data_lpb);
 
 	if ((proptag & 0xFFFF) == PT_BINARY) {
-		bin.lpb = (uint8_t *) (str ? str : "");
-		bin.cb = strlen ((const gchar *) bin.lpb) + 1;
-		/* include trailing zero ................ ^^^ */
+		data_lpb = (uint8_t *) (str ? str : "");
+		data_cb = strlen ((const gchar *) data_lpb) + 1;
+		/* include trailing zero .................. ^^^ */
 
-		return e_mapi_utils_add_property (&object->properties, proptag, &bin, object);
+		e_mapi_object_add_streamed (object, proptag, data_cb, data_lpb);
+
+		return TRUE;
 	} else if (str) {
 		if (!e_mapi_utils_add_property (&object->properties, proptag, str, object)) {
 			talloc_free (str);
@@ -1187,7 +1207,8 @@ e_mapi_mail_do_smime_encrypted (EMapiObject *object,
 	CamelDataWrapper *dw;
 	CamelContentType *type;
 	uint32_t ui32;
-	struct SBinary_short bin;
+	uint64_t data_cb = 0;
+	uint8_t *data_lpb = NULL;
 	gchar *content_type_str;
 
 	g_return_val_if_fail (object != NULL, FALSE);
@@ -1220,8 +1241,8 @@ e_mapi_mail_do_smime_encrypted (EMapiObject *object,
 	set_attach_value (PidTagAttachLongFilename, "SMIME.txt");
 	set_attach_value (PidTagDisplayName, "SMIME.txt");
 
-	e_mapi_mail_content_stream_to_bin (content_stream, &bin, attach, cancellable);
-	set_attach_value (PidTagAttachDataBinary, &bin);
+	e_mapi_mail_content_stream_to_bin (content_stream, &data_cb, &data_lpb, attach, cancellable);
+	e_mapi_attachment_add_streamed (attach, PidTagAttachDataBinary, data_cb, data_lpb);
 
 	g_object_unref (content_stream);
 
@@ -1240,7 +1261,8 @@ e_mapi_mail_do_smime_signed (EMapiObject *object,
 	CamelContentType *type;
 	CamelDataWrapper *dw;
 	uint32_t ui32;
-	struct SBinary_short bin;
+	uint64_t data_cb = 0;
+	uint8_t *data_lpb = NULL;
 	gchar *content_type_str;
 
 	g_free (*pmsg_class);
@@ -1293,8 +1315,8 @@ e_mapi_mail_do_smime_signed (EMapiObject *object,
 	set_attach_value (PidTagAttachLongFilename, "SMIME.txt");
 	set_attach_value (PidTagDisplayName, "SMIME.txt");
 
-	e_mapi_mail_content_stream_to_bin (content_stream, &bin, attach, cancellable);
-	set_attach_value (PidTagAttachDataBinary, &bin);
+	e_mapi_mail_content_stream_to_bin (content_stream, &data_cb, &data_lpb, attach, cancellable);
+	e_mapi_attachment_add_streamed (attach, PidTagAttachDataBinary, data_cb, data_lpb);
 
 	g_object_unref (content_stream);
 

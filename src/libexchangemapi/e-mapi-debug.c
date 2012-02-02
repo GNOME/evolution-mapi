@@ -867,6 +867,49 @@ e_mapi_debug_dump_properties (struct mapi_SPropValue_array *properties,
 	}
 }
 
+static void
+e_mapi_debug_dump_streamed_properties (guint32 streamed_properties_count,
+				       const EMapiStreamedProp *streamed_properties,
+				       gint indent)
+{
+	guint32 ii;
+
+	if (!streamed_properties || streamed_properties_count <= 0)
+		return;
+
+	for (ii = 0; ii < streamed_properties_count; ii++) {
+		const gchar *tmp;
+
+		tmp = get_proptag_name (streamed_properties[ii].proptag);
+		if (!tmp || !*tmp)
+			tmp = get_namedid_name (streamed_properties[ii].proptag);
+
+		if (tmp && *tmp)
+			g_print ("%*s%s ", indent, "", tmp);
+		else
+			g_print ("%*s0x%08X   ", indent, "", streamed_properties[ii].proptag);
+
+		switch (streamed_properties[ii].proptag & 0xFFFF) {
+		case PT_STRING8:
+			g_print (" (streamed string) - '%s'", streamed_properties[ii].cb == 0 ? "" : streamed_properties[ii].lpb ? (const gchar *) streamed_properties[ii].lpb : "null");
+			break;
+		case PT_UNICODE:
+			g_print (" (streamed unicodestring) - '%s'", streamed_properties[ii].cb == 0 ? "" : streamed_properties[ii].lpb ? (const gchar *) streamed_properties[ii].lpb : "null");
+			break;
+		case PT_BINARY:
+			g_print (" (streamed Binary %p, size %" G_GINT64_MODIFIER "d): %s", streamed_properties[ii].lpb, streamed_properties[ii].cb, streamed_properties[ii].cb > 0 ? "\n" : "");
+			e_mapi_debug_dump_bin (streamed_properties[ii].lpb, streamed_properties[ii].cb, indent + 3);
+			break;
+		default:
+			g_print (" (other streamed type %p, size %" G_GINT64_MODIFIER "d): %s", streamed_properties[ii].lpb, streamed_properties[ii].cb, streamed_properties[ii].cb > 0 ? "\n" : "");
+			e_mapi_debug_dump_bin (streamed_properties[ii].lpb, streamed_properties[ii].cb, indent + 3);
+			break;
+		}
+
+		g_print ("\n");
+	}
+}
+
 void
 e_mapi_debug_dump_object (EMapiObject *object, gboolean with_properties, gint indent)
 {
@@ -879,8 +922,10 @@ e_mapi_debug_dump_object (EMapiObject *object, gboolean with_properties, gint in
 	if (!object)
 		return;
 
-	if (with_properties)
+	if (with_properties) {
 		e_mapi_debug_dump_properties (&object->properties, indent + 3);
+		e_mapi_debug_dump_streamed_properties (object->streamed_properties_count, object->streamed_properties, indent + 3);
+	}
 
 	for (index = 0, recipient = object->recipients; recipient; index++, recipient = recipient->next) {
 		g_print ("%*sRecipient[%d]:\n", indent + 2, "", index);
@@ -890,8 +935,11 @@ e_mapi_debug_dump_object (EMapiObject *object, gboolean with_properties, gint in
 
 	for (index = 0, attachment = object->attachments; attachment; index++, attachment = attachment->next) {
 		g_print ("%*sAttachment[%d]:\n", indent + 2, "", index);
-		if (with_properties)
+		if (with_properties) {
 			e_mapi_debug_dump_properties (&attachment->properties, indent + 3);
+			e_mapi_debug_dump_streamed_properties (attachment->streamed_properties_count, attachment->streamed_properties, indent + 3);
+		}
+
 		if (attachment->embedded_object) {
 			g_print ("%*sEmbedded object:\n", indent + 3, "");
 			e_mapi_debug_dump_object (attachment->embedded_object, with_properties, indent + 5);

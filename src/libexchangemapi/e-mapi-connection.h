@@ -61,24 +61,27 @@ typedef struct {
 	time_t last_modified;	/* PidTagLastModificationTime as UTC */
 } ListObjectsData;
 
-struct _EMapiObject;
-struct _EMapiRecipient;
-struct _EMapiAttachment;
+typedef struct _EMapiStreamedProp {
+	uint32_t proptag;
+	uint64_t cb;
+	const uint8_t *lpb; /* taken from the original mapi prop, no need to copy the memory */
+} EMapiStreamedProp;
 
-typedef struct _EMapiObject EMapiObject;
 typedef struct _EMapiRecipient EMapiRecipient;
 typedef struct _EMapiAttachment EMapiAttachment;
+typedef struct _EMapiObject EMapiObject;
 
-struct _EMapiRecipient
-{
+struct _EMapiRecipient {
 	struct mapi_SPropValue_array properties;
 
 	EMapiRecipient *next;
 };
 
-struct _EMapiAttachment
-{
+struct _EMapiAttachment {
 	struct mapi_SPropValue_array properties;
+	EMapiStreamedProp *streamed_properties; /* use get/add functions for these */
+	guint32 streamed_properties_count;
+
 	EMapiObject *embedded_object;
 
 	EMapiAttachment *next;
@@ -86,6 +89,9 @@ struct _EMapiAttachment
 
 struct _EMapiObject {
 	struct mapi_SPropValue_array properties;
+	EMapiStreamedProp *streamed_properties; /* use get/add functions for these */
+	guint32 streamed_properties_count;
+
 	EMapiRecipient *recipients; /* NULL when none */
 	EMapiAttachment *attachments; /* NULL when none */
 
@@ -97,6 +103,16 @@ void			e_mapi_recipient_free		(EMapiRecipient *recipient);
 
 EMapiAttachment *	e_mapi_attachment_new		(TALLOC_CTX *mem_ctx);
 void			e_mapi_attachment_free		(EMapiAttachment *attachment);
+void			e_mapi_attachment_add_streamed	(EMapiAttachment *attachment,
+							 uint32_t proptag,
+							 uint64_t cb,
+							 const uint8_t *lpb); /* this might be created inside the attachment TALLOC_CTX */
+EMapiStreamedProp *	e_mapi_attachment_get_streamed	(EMapiAttachment *attachment,
+							 uint32_t proptag);
+gboolean		e_mapi_attachment_get_bin_prop	(EMapiAttachment *attachment,
+							 uint32_t proptag,
+							 uint64_t *cb,
+							 const uint8_t **lpb);
 
 EMapiObject *		e_mapi_object_new		(TALLOC_CTX *mem_ctx);
 void			e_mapi_object_free		(EMapiObject *object);
@@ -104,6 +120,16 @@ void			e_mapi_object_add_recipient	(EMapiObject *object,
 							 EMapiRecipient *recipient);
 void			e_mapi_object_add_attachment	(EMapiObject *object,
 							 EMapiAttachment *attachment);
+void			e_mapi_object_add_streamed	(EMapiObject *object,
+							 uint32_t proptag,
+							 uint64_t cb,
+							 const uint8_t *lpb); /* this might be created inside the attachment TALLOC_CTX */
+EMapiStreamedProp *	e_mapi_object_get_streamed	(EMapiObject *object,
+							 uint32_t proptag);
+gboolean		e_mapi_object_get_bin_prop	(EMapiObject *object,
+							 uint32_t proptag,
+							 uint64_t *cb,
+							 const uint8_t **lpb);
 
 #define E_MAPI_PERMISSION_MEMBER_ID_ANONYMOUS_CLIENT	(~((uint64_t) 0))
 #define E_MAPI_PERMISSION_MEMBER_ID_DEFAULT_USER	((uint64_t) 0)

@@ -2296,7 +2296,8 @@ fetch_object_property_as_stream (EMapiConnection *conn,
 				 TALLOC_CTX *mem_ctx,
 				 mapi_object_t *obj_message,
 				 uint32_t proptag,
-				 struct SBinary_short *bin,
+				 uint64_t *pcb,
+				 uint8_t **plpb,
 				 GCancellable *cancellable,
 				 GError **perror)
 {
@@ -2304,12 +2305,15 @@ fetch_object_property_as_stream (EMapiConnection *conn,
 	mapi_object_t obj_stream;
 	uint32_t buf_size, max_read;
 	uint16_t off_data, cn_read;
+	uint64_t cb = 0;
+	uint8_t *lpb = NULL;
 	gboolean done = FALSE;
 
 	g_return_val_if_fail (conn != NULL, MAPI_E_INVALID_PARAMETER);
 	g_return_val_if_fail (mem_ctx != NULL, MAPI_E_INVALID_PARAMETER);
 	g_return_val_if_fail (obj_message != NULL, MAPI_E_INVALID_PARAMETER);
-	g_return_val_if_fail (bin != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (pcb != NULL, MAPI_E_INVALID_PARAMETER);
+	g_return_val_if_fail (plpb != NULL, MAPI_E_INVALID_PARAMETER);
 
 	mapi_object_init (&obj_stream);
 
@@ -2319,7 +2323,7 @@ fetch_object_property_as_stream (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	bin->cb = 0;
+	cb = 0;
 
 	ms = GetStreamSize (&obj_stream, &buf_size);
 	if (ms != MAPI_E_SUCCESS) {
@@ -2327,16 +2331,16 @@ fetch_object_property_as_stream (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	bin->cb = buf_size;
-	bin->lpb = talloc_size (mem_ctx, bin->cb + 1);
-	if (!bin->lpb || !bin->cb)
+	cb = buf_size;
+	lpb = talloc_size (mem_ctx, cb + 1);
+	if (!lpb || !cb)
 		goto cleanup;
 
 	/* determine max_read first, to read by chunks as long as possible */
 	off_data = 0;
 	max_read = buf_size > STREAM_MAX_READ_SIZE ? STREAM_MAX_READ_SIZE : buf_size;
 	do {
-		ms = ReadStream (&obj_stream, (bin->lpb) + off_data, max_read, &cn_read);
+		ms = ReadStream (&obj_stream, lpb + off_data, max_read, &cn_read);
 		if (ms == MAPI_E_SUCCESS) {
 			if (cn_read == 0) {
 				done = TRUE;
@@ -2358,7 +2362,7 @@ fetch_object_property_as_stream (EMapiConnection *conn,
 	} while (ms == 0x2c80); /* an error when max_read is too large? */
 
 	while (!done) {
-		ms = ReadStream (&obj_stream, bin->lpb + off_data, max_read, &cn_read);
+		ms = ReadStream (&obj_stream, lpb + off_data, max_read, &cn_read);
 		if (ms != MAPI_E_SUCCESS) {
 			make_mapi_error (perror, "ReadStream", ms);
 			done = TRUE;
@@ -2373,6 +2377,9 @@ fetch_object_property_as_stream (EMapiConnection *conn,
 
  cleanup:
 	mapi_object_release (&obj_stream);
+
+	*pcb = cb;
+	*plpb = lpb;
 
 	return ms;
 }
@@ -2439,22 +2446,16 @@ fetch_object_attachment_cb (EMapiConnection *conn,
 	attach_method = e_mapi_util_find_row_propval (srow, PidTagAttachMethod);
 	if (attach_method && *attach_method == ATTACH_BY_VALUE) {
 		if (!e_mapi_util_find_array_propval (&attachment->properties, PidTagAttachDataBinary)) {
-			struct SBinary_short bin;
+			uint64_t cb = 0;
+			uint8_t *lpb = NULL;
 
-			ms = fetch_object_property_as_stream (conn, mem_ctx, &obj_attach, PidTagAttachDataBinary, &bin, cancellable, perror);
+			ms = fetch_object_property_as_stream (conn, mem_ctx, &obj_attach, PidTagAttachDataBinary, &cb, &lpb, cancellable, perror);
 			if (ms != MAPI_E_SUCCESS) {
 				make_mapi_error (perror, "Attachment::fetch PidTagAttachDataBinary", ms);
 				goto cleanup;
 			}
 
-			attachment->properties.cValues++;
-			attachment->properties.lpProps = talloc_realloc (mem_ctx,
-									 attachment->properties.lpProps,
-									 struct mapi_SPropValue,
-									 attachment->properties.cValues + 1);
-			attachment->properties.lpProps[attachment->properties.cValues - 1].ulPropTag = PidTagAttachDataBinary;
-			attachment->properties.lpProps[attachment->properties.cValues - 1].value.bin = bin;
-			attachment->properties.lpProps[attachment->properties.cValues].ulPropTag = 0;
+			e_mapi_attachment_add_streamed (attachment, PidTagAttachDataBinary, cb, lpb);
 		}
 	} else if (attach_method && *attach_method == ATTACH_EMBEDDED_MSG) {
 		mapi_object_t obj_emb_msg;
@@ -2568,39 +2569,34 @@ e_mapi_connection_fetch_object_internal (EMapiConnection *conn,
 		uint8_t best_body = 0;
 
 		if (GetBestBody (obj_message, &best_body) == MAPI_E_SUCCESS && best_body == olEditorHTML) {
-			struct SBinary_short bin;
+			uint64_t cb = 0;
+			uint8_t *lpb = NULL;
 
-			ms = fetch_object_property_as_stream (conn, mem_ctx, obj_message, PidTagHtml, &bin, cancellable, perror);
+			ms = fetch_object_property_as_stream (conn, mem_ctx, obj_message, PidTagHtml, &cb, &lpb, cancellable, perror);
 			if (ms != MAPI_E_SUCCESS) {
 				make_mapi_error (perror, "Object::fetch PidTagHtml", ms);
 				goto cleanup;
 			}
 
-			object->properties.cValues++;
-			object->properties.lpProps = talloc_realloc (mem_ctx,
-								     object->properties.lpProps,
-								     struct mapi_SPropValue,
-								     object->properties.cValues + 1);
-			object->properties.lpProps[object->properties.cValues - 1].ulPropTag = PidTagHtml;
-			object->properties.lpProps[object->properties.cValues - 1].value.bin = bin;
-			object->properties.lpProps[object->properties.cValues].ulPropTag = 0;
+			e_mapi_object_add_streamed (object, PidTagHtml, cb, lpb);
 		}
 	}
 
 	if (!e_mapi_util_find_array_propval (&object->properties, PidTagBody)) {
-		struct SBinary_short bin;
+		uint64_t cb = 0;
+		uint8_t *lpb = NULL;
 
-		if (fetch_object_property_as_stream (conn, mem_ctx, obj_message, PidTagBody, &bin, cancellable, NULL) == MAPI_E_SUCCESS) {
+		if (fetch_object_property_as_stream (conn, mem_ctx, obj_message, PidTagBody, &cb, &lpb, cancellable, NULL) == MAPI_E_SUCCESS) {
 			object->properties.cValues++;
 			object->properties.lpProps = talloc_realloc (mem_ctx,
 								     object->properties.lpProps,
 								     struct mapi_SPropValue,
 								     object->properties.cValues + 1);
 			object->properties.lpProps[object->properties.cValues - 1].ulPropTag = PidTagBody;
-			if (bin.cb > 0 && bin.lpb[bin.cb - 1] == 0)
-				object->properties.lpProps[object->properties.cValues - 1].value.lpszW = (const char *) talloc_steal (object, bin.lpb);
+			if (cb > 0 && lpb[cb - 1] == 0)
+				object->properties.lpProps[object->properties.cValues - 1].value.lpszW = (const char *) talloc_steal (object, lpb);
 			else
-				object->properties.lpProps[object->properties.cValues - 1].value.lpszW = talloc_strndup (object, (char *) bin.lpb, bin.cb);
+				object->properties.lpProps[object->properties.cValues - 1].value.lpszW = talloc_strndup (object, (char *) lpb, cb);
 			object->properties.lpProps[object->properties.cValues].ulPropTag = 0;
 		}
 	}
@@ -3048,16 +3044,12 @@ e_mapi_connection_transfer_summary (EMapiConnection *conn,
 	return ms == MAPI_E_SUCCESS;
 }
 
-typedef struct {
-	uint32_t proptag;
-	uint32_t cb;
-	const uint8_t *lpb; /* taken from the original mapi prop, no need to copy the memory */
-} EMapiStreamedProp;
-
 static gboolean
 convert_mapi_props_to_props (EMapiConnection *conn,
 			     mapi_object_t *obj_folder,
 			     const struct mapi_SPropValue_array *mapi_props,
+			     const EMapiStreamedProp *known_streams,
+			     guint known_streams_count,
 			     struct SPropValue **props,
 			     uint32_t *propslen,
 			     EMapiStreamedProp **streams, /* can be NULL for no streaming */
@@ -3078,7 +3070,23 @@ convert_mapi_props_to_props (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (mem_ctx != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	if (streams) {
 		e_return_val_mapi_error_if_fail (streamslen != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	} else {
+		e_return_val_mapi_error_if_fail (known_streams == NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	}
+
+	#define addstream() {										\
+			if (!*streams) {								\
+				*streams = g_new0 (EMapiStreamedProp, 1);				\
+				*streamslen = 0;							\
+			} else {									\
+				*streams = g_renew (EMapiStreamedProp, *streams, *streamslen + 1);	\
+			}										\
+													\
+			(*streams)[*streamslen].proptag = proptag;					\
+			(*streams)[*streamslen].cb = 0;							\
+			(*streams)[*streamslen].lpb = NULL;						\
+			(*streamslen) += 1;								\
+		}
 
 	for (ii = 0; ii < mapi_props->cValues; ii++) {
 		gboolean processed = FALSE;
@@ -3096,20 +3104,6 @@ convert_mapi_props_to_props (EMapiConnection *conn,
 			uint32_t sz;
 			const gchar *str;
 			const struct SBinary_short *bin;
-
-			#define addstream() {										\
-					if (!*streams) {								\
-						*streams = g_new0 (EMapiStreamedProp, 1);				\
-						*streamslen = 0;							\
-					} else {									\
-						*streams = g_renew (EMapiStreamedProp, *streams, *streamslen + 1);	\
-					}										\
-															\
-					(*streams)[*streamslen].proptag = proptag;					\
-					(*streams)[*streamslen].cb = 0;							\
-					(*streams)[*streamslen].lpb = NULL;						\
-					(*streamslen) += 1;								\
-				}
 
 			switch (proptag & 0xFFFF) {
 			case PT_BINARY:
@@ -3160,13 +3154,24 @@ convert_mapi_props_to_props (EMapiConnection *conn,
 				}
 				break;
 			}
-
-			#undef addstream
 		}
 
 		if (!processed)
 			e_mapi_utils_add_spropvalue (mem_ctx, props, propslen, proptag, propdata);
 	}
+
+	if (known_streams && known_streams_count > 0 && streams) {
+		for (ii = 0; ii < known_streams_count; ii++) {
+			uint32_t proptag = known_streams[ii].proptag;
+
+			maybe_add_named_id_tag (proptag, &named_ids_list, &named_ids_len);
+
+			addstream ();
+			(*streams)[(*streamslen) - 1].cb = known_streams[ii].cb;
+			(*streams)[(*streamslen) - 1].lpb = known_streams[ii].lpb;
+		}
+	}
+	#undef addstream
 
 	if (named_ids_list) {
 		GHashTable *replace_hash = NULL;
@@ -3209,7 +3214,7 @@ write_streamed_prop (EMapiConnection *conn,
 		     GError **perror)
 {
 	enum MAPISTATUS	ms;
-	uint32_t total_written;
+	uint64_t total_written;
 	gboolean done = FALSE;
 	mapi_object_t obj_stream;
 
@@ -3291,6 +3296,8 @@ update_props_on_object (EMapiConnection *conn,
 			mapi_object_t *obj_folder,
 			mapi_object_t *obj_object,
 			const struct mapi_SPropValue_array *properties,
+			const EMapiStreamedProp *known_streams,
+			guint known_streams_count,
 			TALLOC_CTX *mem_ctx,
 			GCancellable *cancellable,
 			GError **perror)
@@ -3306,7 +3313,7 @@ update_props_on_object (EMapiConnection *conn,
 
 	LOCK ();
 
-	if (!convert_mapi_props_to_props (conn, obj_folder, properties, &props, &propslen, &streams, &streamslen, mem_ctx, cancellable, perror)) {
+	if (!convert_mapi_props_to_props (conn, obj_folder, properties, known_streams, known_streams_count, &props, &propslen, &streams, &streamslen, mem_ctx, cancellable, perror)) {
 		ms = MAPI_E_CALL_FAILED;
 		make_mapi_error (perror, "convert_mapi_props_to_props", ms);
 		goto cleanup;
@@ -3373,7 +3380,7 @@ update_recipient_properties (EMapiConnection *conn,
 
 	g_return_val_if_fail (recipient != NULL, FALSE);
 
-	if (!convert_mapi_props_to_props (conn, obj_folder, &recipient->properties, &props, &propslen, NULL, NULL, mem_ctx, cancellable, perror))
+	if (!convert_mapi_props_to_props (conn, obj_folder, &recipient->properties, NULL, 0, &props, &propslen, NULL, NULL, mem_ctx, cancellable, perror))
 		return FALSE;
 
 	for (ii = 0; ii < propslen; ii++) {
@@ -3703,7 +3710,10 @@ add_object_attachments (EMapiConnection *conn,
 			goto cleanup;
 		}
 
-		if (!update_props_on_object (conn, obj_folder, &obj_attach, &attachment->properties, mem_ctx, cancellable, perror)) {
+		if (!update_props_on_object (conn, obj_folder, &obj_attach,
+			&attachment->properties,
+			attachment->streamed_properties, attachment->streamed_properties_count,
+			mem_ctx, cancellable, perror)) {
 			ms = MAPI_E_CALL_FAILED;
 			make_mapi_error (perror, "update_props_on_object", ms);
 			goto cleanup;
@@ -3767,7 +3777,10 @@ update_message_with_object (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (obj_message != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (object != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	if (!update_props_on_object (conn, obj_folder, obj_message, &object->properties, mem_ctx, cancellable, perror))
+	if (!update_props_on_object (conn, obj_folder, obj_message,
+		&object->properties,
+		object->streamed_properties, object->streamed_properties_count,
+		mem_ctx, cancellable, perror))
 		return FALSE;
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
@@ -6824,6 +6837,8 @@ e_mapi_attachment_new (TALLOC_CTX *mem_ctx)
 
 	attachment->properties.cValues = 0;
 	attachment->properties.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, 1);
+	attachment->streamed_properties = NULL;
+	attachment->streamed_properties_count = 0;
 	attachment->embedded_object = NULL;
 	attachment->next = NULL;
 
@@ -6840,7 +6855,87 @@ e_mapi_attachment_free (EMapiAttachment *attachment)
 
 	e_mapi_object_free (attachment->embedded_object);
 	talloc_free (attachment->properties.lpProps);
+	talloc_free (attachment->streamed_properties);
 	talloc_free (attachment);
+}
+
+void
+e_mapi_attachment_add_streamed (EMapiAttachment *attachment,
+				uint32_t proptag,
+				uint64_t cb,
+				const uint8_t *lpb)
+{
+	guint32 index;
+
+	g_return_if_fail (attachment != NULL);
+	g_return_if_fail (proptag != 0);
+	g_return_if_fail (e_mapi_attachment_get_streamed (attachment, proptag) == NULL);
+
+	attachment->streamed_properties = talloc_realloc (attachment,
+		attachment->streamed_properties,
+		EMapiStreamedProp,
+		attachment->streamed_properties_count + 1);
+	g_return_if_fail (attachment->streamed_properties != NULL);
+
+	index = attachment->streamed_properties_count;
+	attachment->streamed_properties_count++;
+	attachment->streamed_properties[index].proptag = proptag;
+	attachment->streamed_properties[index].cb = cb;
+	attachment->streamed_properties[index].lpb = lpb;
+}
+
+EMapiStreamedProp *
+e_mapi_attachment_get_streamed (EMapiAttachment *attachment,
+				uint32_t proptag)
+{
+	guint32 ii;
+
+	g_return_val_if_fail (attachment != NULL, NULL);
+
+	if (!attachment->streamed_properties_count || !attachment->streamed_properties)
+		return NULL;
+
+	for (ii = 0; ii < attachment->streamed_properties_count; ii++) {
+		if (attachment->streamed_properties[ii].proptag == proptag)
+			return &attachment->streamed_properties[ii];
+	}
+
+	return NULL;
+}
+
+gboolean
+e_mapi_attachment_get_bin_prop (EMapiAttachment *attachment,
+				uint32_t proptag,
+				uint64_t *cb,
+				const uint8_t **lpb)
+{
+	EMapiStreamedProp *streamed;
+	const struct SBinary_short *bin;
+
+	g_return_val_if_fail (attachment != NULL, FALSE);
+	g_return_val_if_fail (cb != NULL, FALSE);
+	g_return_val_if_fail (lpb != NULL, FALSE);
+
+	*cb = 0;
+	*lpb = NULL;
+
+	streamed = e_mapi_attachment_get_streamed (attachment, proptag);
+	if (streamed) {
+		*cb = streamed->cb;
+		*lpb = streamed->lpb;
+
+		return TRUE;
+	}
+
+	bin = e_mapi_util_find_array_propval (&attachment->properties, proptag);
+	if (bin) {
+		*cb = bin->cb;
+		*lpb = bin->lpb;
+
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 EMapiObject *
@@ -6853,6 +6948,8 @@ e_mapi_object_new (TALLOC_CTX *mem_ctx)
 
 	object->properties.cValues = 0;
 	object->properties.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, 1);
+	object->streamed_properties = NULL;
+	object->streamed_properties_count = 0;
 	object->recipients = NULL;
 	object->attachments = NULL;
 	object->parent = NULL;
@@ -6887,6 +6984,7 @@ e_mapi_object_free (EMapiObject *object)
 		e_mapi_attachment_free (a);
 	}
 
+	talloc_free (object->streamed_properties);
 	talloc_free (object->properties.lpProps);
 	talloc_free (object);
 }
@@ -6931,6 +7029,85 @@ e_mapi_object_add_attachment (EMapiObject *object,
 
 		attach->next = attachment;
 	}
+}
+
+void
+e_mapi_object_add_streamed (EMapiObject *object,
+			    uint32_t proptag,
+			    uint64_t cb,
+			    const uint8_t *lpb)
+{
+	guint32 index;
+
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (proptag != 0);
+	g_return_if_fail (e_mapi_object_get_streamed (object, proptag) == NULL);
+
+	object->streamed_properties = talloc_realloc (object,
+		object->streamed_properties,
+		EMapiStreamedProp,
+		object->streamed_properties_count + 1);
+	g_return_if_fail (object->streamed_properties != NULL);
+
+	index = object->streamed_properties_count;
+	object->streamed_properties_count++;
+	object->streamed_properties[index].proptag = proptag;
+	object->streamed_properties[index].cb = cb;
+	object->streamed_properties[index].lpb = lpb;
+}
+
+EMapiStreamedProp *
+e_mapi_object_get_streamed (EMapiObject *object,
+			    uint32_t proptag)
+{
+	guint32 ii;
+
+	g_return_val_if_fail (object != NULL, NULL);
+
+	if (!object->streamed_properties_count || !object->streamed_properties)
+		return NULL;
+
+	for (ii = 0; ii < object->streamed_properties_count; ii++) {
+		if (object->streamed_properties[ii].proptag == proptag)
+			return &object->streamed_properties[ii];
+	}
+
+	return NULL;
+}
+
+gboolean
+e_mapi_object_get_bin_prop (EMapiObject *object,
+			    uint32_t proptag,
+			    uint64_t *cb,
+			    const uint8_t **lpb)
+{
+	EMapiStreamedProp *streamed;
+	const struct SBinary_short *bin;
+
+	g_return_val_if_fail (object != NULL, FALSE);
+	g_return_val_if_fail (cb != NULL, FALSE);
+	g_return_val_if_fail (lpb != NULL, FALSE);
+
+	*cb = 0;
+	*lpb = NULL;
+
+	streamed = e_mapi_object_get_streamed (object, proptag);
+	if (streamed) {
+		*cb = streamed->cb;
+		*lpb = streamed->lpb;
+
+		return TRUE;
+	}
+
+	bin = e_mapi_util_find_array_propval (&object->properties, proptag);
+	if (bin) {
+		*cb = bin->cb;
+		*lpb = bin->lpb;
+
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 EMapiPermissionEntry *

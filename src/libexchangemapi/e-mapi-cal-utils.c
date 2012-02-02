@@ -792,14 +792,14 @@ set_attachments_to_comp (EMapiConnection *conn,
 	e_cal_component_get_uid (comp, &uid);
 
 	for (attach = attachments; attach; attach = attach->next) {
-		const struct SBinary_short *data_bin;
+		uint64_t data_cb = 0;
+		const uint8_t *data_lpb = NULL;
 		const gchar *filename;
 		const uint32_t *ui32;
 		gchar *path, *attach_uri;
 		GError *error = NULL;
 
-		data_bin = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachDataBinary);
-		if (!data_bin) {
+		if (!e_mapi_attachment_get_bin_prop (attach, PidTagAttachDataBinary, &data_cb, &data_lpb)) {
 			g_debug ("%s: Skipping calendar attachment without data", G_STRFUNC);
 			continue;
 		}
@@ -819,7 +819,7 @@ set_attachments_to_comp (EMapiConnection *conn,
 			continue;
 		}
 
-		if (!g_file_set_contents (path, (const gchar *) data_bin->lpb, data_bin->cb, &error)) {
+		if (!g_file_set_contents (path, (const gchar *) data_lpb, data_cb, &error)) {
 			g_debug ("%s: Failed to write attachment content to '%s': %s", G_STRFUNC, path, error ? error->message : "Unknown error");
 			g_free (attach_uri);
 			g_clear_error (&error);
@@ -900,12 +900,13 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 
 		g_free (utf8_str);
 	} else {
-		const struct SBinary_short *html_bin = e_mapi_util_find_array_propval (&object->properties, PidTagHtml);
+		uint64_t html_cb = 0;
+		const uint8_t *html_lpb = NULL;
 
-		if (html_bin) {
+		if (e_mapi_object_get_bin_prop (object, PidTagHtml, &html_cb, &html_lpb)) {
 			gchar *utf8_str = NULL;
 
-			if (e_mapi_utils_ensure_utf8_string (PidTagHtml, ui32, html_bin->lpb, html_bin->cb, &utf8_str))
+			if (e_mapi_utils_ensure_utf8_string (PidTagHtml, ui32, html_lpb, html_cb, &utf8_str))
 				icalcomponent_set_description (ical_comp, utf8_str);
 
 			g_free (utf8_str);
@@ -1471,7 +1472,8 @@ e_mapi_cal_utils_add_attachments (EMapiObject *object,
 			guint filelength = g_mapped_file_get_length (mapped_file);
 			const gchar *split_name;
 			uint32_t ui32;
-			struct SBinary_short bin;
+			uint64_t data_cb;
+			uint8_t *data_lpb;
 
 			if (g_str_has_prefix (filename, safeuid)) {
 				split_name = (filename + strlen (safeuid) + strlen ("-"));
@@ -1504,9 +1506,9 @@ e_mapi_cal_utils_add_attachments (EMapiObject *object,
 			set_value (PidTagAttachFilename, split_name);
 			set_value (PidTagAttachLongFilename, split_name);
 
-			bin.cb = filelength;
-			bin.lpb = talloc_memdup (attachment, attach, bin.cb);
-			set_value (PidTagAttachDataBinary, &bin);
+			data_cb = filelength;
+			data_lpb = talloc_memdup (attachment, attach, data_cb);
+			e_mapi_attachment_add_streamed (attachment, PidTagAttachDataBinary, data_cb, data_lpb);
 
 			#undef set_value
 
@@ -2080,10 +2082,10 @@ e_mapi_cal_utils_comp_to_object (EMapiConnection *conn,
 		set_value (PidLidIsRecurring, &b);
 
 		if (b) {
-			struct SBinary_short bin;
+			struct SBinary_short recur_bin;
 
-			if (e_mapi_cal_util_rrule_to_bin (comp, &bin, object)) {
-				set_value (PidLidAppointmentRecur, &bin);
+			if (e_mapi_cal_util_rrule_to_bin (comp, &recur_bin, object)) {
+				set_value (PidLidAppointmentRecur, &recur_bin);
 			}
 		}
 
