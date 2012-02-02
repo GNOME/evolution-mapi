@@ -710,6 +710,12 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 	GSList *exdate_list = NULL;
 	GByteArray fake_ba;
 
+	if (e_mapi_debug_is_enabled ()) {
+		e_mapi_debug_print ("Converting binary to RRULE:");
+		e_mapi_debug_dump_bin (lpb, cb, 3);
+		e_mapi_debug_print ("\n");
+	}
+
 	fake_ba.data = (guint8 *) lpb;
 	fake_ba.len = cb;
 

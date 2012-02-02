@@ -50,8 +50,10 @@ e_mapi_debug_print (const gchar *format, ...)
 	fflush (stdout);
 }
 
-static void
-dump_bin (const uint8_t *bin, uint32_t bin_sz, gint indent)
+void
+e_mapi_debug_dump_bin (const uint8_t *bin,
+		       uint32_t bin_sz,
+		       gint indent)
 {
 	gint k, l, last;
 
@@ -808,7 +810,7 @@ e_mapi_debug_dump_properties (struct mapi_SPropValue_array *properties,
 			break;
 		case PT_BINARY:
 			g_print (" (struct SBinary_short *) - %p Binary data follows (size %d): %s", &lpProp->value.bin, lpProp->value.bin.cb, lpProp->value.bin.cb > 0 ? "\n" : "");
-			dump_bin (lpProp->value.bin.lpb, lpProp->value.bin.cb, indent + 3);
+			e_mapi_debug_dump_bin (lpProp->value.bin.lpb, lpProp->value.bin.cb, indent + 3);
 			break;
 		case PT_MV_STRING8:
 			g_print (" (struct mapi_SLPSTRArray *) (%d items)", lpProp->value.MVszA.cValues);
@@ -853,7 +855,7 @@ e_mapi_debug_dump_properties (struct mapi_SPropValue_array *properties,
 			g_print (" PT_MV_BINARY (%d items)", lpProp->value.MVbin.cValues);
 			for (j = 0; j < lpProp->value.MVbin.cValues; j++) {
 				g_print ("\n%*sitem[%d] (size %d)\n", indent + 2, "", j, lpProp->value.MVbin.bin[j].cb);
-				dump_bin (lpProp->value.MVbin.bin[j].lpb, lpProp->value.MVbin.bin[j].cb, indent + 3);
+				e_mapi_debug_dump_bin (lpProp->value.MVbin.bin[j].lpb, lpProp->value.MVbin.bin[j].cb, indent + 3);
 			}
 			break;
 		default:

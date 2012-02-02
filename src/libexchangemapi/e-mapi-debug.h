@@ -30,6 +30,9 @@ G_BEGIN_DECLS
 gboolean	e_mapi_debug_is_enabled (void);
 void		e_mapi_debug_print (const gchar *format, ...);
 
+void		e_mapi_debug_dump_bin		(const uint8_t *bin,
+						 uint32_t bin_sz,
+						 gint indent);
 void		e_mapi_debug_dump_properties	(struct mapi_SPropValue_array *properties,
 						 gint indent);
 void		e_mapi_debug_dump_object	(EMapiObject *object,
