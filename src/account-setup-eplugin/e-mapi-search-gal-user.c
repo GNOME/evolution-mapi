@@ -228,7 +228,7 @@ search_gal_finish_idle (gpointer user_data)
 			g_free (str);
 		} else {
 			gchar *str;
-			str = g_strdup_printf (ngettext ("Found %d users, but showing only first %d", "Found %d users, but showing only first %d", sid->found_total), sid->found_total, added);
+			str = g_strdup_printf (ngettext ("Found %d user, but showing only first %d", "Found %d users, but showing only first %d", sid->found_total), sid->found_total, added);
 			gtk_label_set_text (GTK_LABEL (pgu->info_label), str);
 			g_free (str);
 		}
