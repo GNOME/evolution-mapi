@@ -1881,8 +1881,7 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 					ECalComponentId *id = e_cal_component_get_id (comp);
 
 					e_cal_backend_store_remove_component (priv->store, id->uid, id->rid);
-					if (!id->rid || !g_str_equal (id->rid, rid))
-						e_cal_backend_notify_component_removed (E_CAL_BACKEND (cbmapi), id, comp, NULL);
+					e_cal_backend_notify_component_removed (E_CAL_BACKEND (cbmapi), id, comp, NULL);
 					e_cal_component_free_id (id);
 
 					g_object_unref (comp);
