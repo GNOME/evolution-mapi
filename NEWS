@@ -1,3 +1,45 @@
+evolution-mapi 3.3.5 2012-02-06
+-------------------------------
+
+Bugs:
+	Bug #601382 - Support for subscribe to other user's folder (Milan Crha)
+	Bug #568391 - Public folders having same name shown only once (Milan Crha)
+	Bug #667714 - Support for setting user's folder permissions (Milan Crha)
+	Bug #561658 - Unread count not shown against public folders (Milan Crha)
+	Bug #586353 - Implement message read-receipt and importance flags (Milan Crha)
+	Bug #668631 - Folder->Subscriptions cannot be managed in offline (Milan Crha)
+	Bug #668633 - Newly created folder even shown under Favorites (Milan Crha)
+	Bug #668634 - Warn user with folder create error (Milan Crha)
+	Bug #668635 - Better offline mode error handling (Milan Crha)
+	Bug #668630 - Error while assigning permissions (Milan Crha)
+	Bug #668641 - Doesn't fetch mails with Exchange 2010 server (Milan Crha)
+	Bug #668816 - Contact search fails in GAL after certain limit (Milan Crha)
+	Bug #668637 - May not be able to create books/calendars in offline (Milan Crha)
+	Bug #668825 - Read-receipt info set event when not requested (Milan Crha)
+	Bug #668820 - Subscribed public calendar/task are shown in mail view (Milan Crha)
+	Bug #668804 - Crash in ecbm_connect_user() (Milan Crha)
+	Bug #601483 - Support for quota message service (Milan Crha)
+	Bug #669226 - Crash when removing calendar component (Milan Crha)
+
+Miscellanous:
+	Replace more obsolete code (Milan Crha)
+	Adapt to libemail-engine. (Matthew Barnes)
+	Be able to search GAL users from "Subscribe other user's folder" dialog (Milan Crha)
+	Recognize Replied and Forwarded mail messages (Milan Crha)
+	Misplaced PidTagImportance with PidTagPriority (Milan Crha)
+	Cache calendars/books locally by default, except of GAL (Milan Crha)
+	Could not create new MAPI account (Milan Crha)
+	Message size in message list not shown (always zero bytes) (Milan Crha)
+	Cannot read/write large attachments (Milan Crha)
+	Add debugging for bin-to-rrule converter (Milan Crha)
+	Fixed singular form (Marek Černocký)
+
+Translations:
+	Daniel Mustieles (es)
+	Marek Černocký (cs)
+	Matej Urbančič (sl)
+	Mario Blättermann (de)
+
 evolution-mapi 3.3.4 2012-01-16
 -------------------------------
 
