@@ -679,7 +679,7 @@ add_to_store (GtkTreeStore *ts, EMapiFolder *folder)
 
 	ts_model = GTK_TREE_MODEL (ts);
 
-	gtk_tree_model_get_iter_first (ts_model, &iter);
+	g_return_if_fail (gtk_tree_model_get_iter_first (ts_model, &iter));
 	if (!check_node (ts, folder, iter)) {
 		GtkTreeIter node;
 		gtk_tree_store_append (ts, &node, &iter);
@@ -729,6 +729,7 @@ add_folders (GSList *folders, GtkTreeStore *ts, EMapiFolderType folder_type)
 {
 	GSList *tmp = folders;
 	GtkTreeIter iter;
+	GtkTreeModel *model = GTK_TREE_MODEL (ts);
 	gchar *node = _("Personal Folders");
 
 	/* add all... */
@@ -741,8 +742,8 @@ add_folders (GSList *folders, GtkTreeStore *ts, EMapiFolderType folder_type)
 	}
 
 	/* ... then remove those which don't belong to folder_type */
-	if (gtk_tree_model_get_iter_first ((GtkTreeModel *)ts, &iter)) {
-		traverse_tree ((GtkTreeModel *)ts, iter, folder_type, NULL);
+	if (gtk_tree_model_get_iter_first (model, &iter)) {
+		traverse_tree (model, iter, folder_type, NULL);
 	}
 }
 

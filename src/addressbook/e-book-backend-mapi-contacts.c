@@ -163,7 +163,7 @@ gather_contact_mids_cb (EMapiConnection *conn,
 			GCancellable *cancellable,
 			GError **perror)
 {
-	GSList *pmids = user_data;
+	GSList **pmids = user_data;
 	mapi_id_t *pmid;
 
 	g_return_val_if_fail (object_data != NULL, FALSE);
@@ -172,7 +172,7 @@ gather_contact_mids_cb (EMapiConnection *conn,
 	pmid = g_new0 (mapi_id_t, 1);
 	*pmid = object_data->mid;
 
-	pmids = g_slist_prepend (pmids, pmid);
+	*pmids = g_slist_prepend (*pmids, pmid);
 
 	return TRUE;
 }

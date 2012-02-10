@@ -205,7 +205,7 @@ escape_slash (const gchar *str)
 	if (!count)
 		return g_strdup (str);
 
-	res = g_malloc0 (sizeof (gchar *) * (1 + ii + (2 * count)));
+	res = g_malloc0 (sizeof (gchar) * (1 + ii + (2 * count)));
 	for (ii = 0, jj = 0; str[ii]; ii++, jj++) {
 		if (str[ii] == '\\') {
 			res[jj] = '\\';

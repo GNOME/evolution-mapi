@@ -3302,7 +3302,7 @@ update_props_on_object (EMapiConnection *conn,
 			GCancellable *cancellable,
 			GError **perror)
 {
-	enum MAPISTATUS	ms;
+	enum MAPISTATUS	ms = MAPI_E_RESERVED;
 	struct SPropValue *props = NULL;
 	uint32_t propslen = 0;
 	EMapiStreamedProp *streams = NULL;
@@ -5382,7 +5382,7 @@ e_mapi_connection_copymove_items (EMapiConnection *conn,
 				  GCancellable *cancellable,
 				  GError **perror)
 {
-	enum MAPISTATUS	ms;
+	enum MAPISTATUS	ms = MAPI_E_RESERVED;
 	GSList *l;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, MAPI_E_INVALID_PARAMETER);
@@ -6484,7 +6484,7 @@ try_create_profile_main_thread_cb (struct tcp_data *data)
 	for (iter = e_list_get_iterator (E_LIST (accounts)); e_iterator_is_valid (iter); e_iterator_next (iter)) {
 		EAccount *account = E_ACCOUNT (e_iterator_get (iter));
 		if (account && account->source && account->source->url && g_ascii_strncasecmp (account->source->url, "mapi://", 7) == 0) {
-			CamelURL *url = camel_url_new (e_account_get_string (account, E_ACCOUNT_SOURCE_URL), NULL);
+			CamelURL *url;
 			CamelSettings *settings;
 			const gchar *url_string;
 

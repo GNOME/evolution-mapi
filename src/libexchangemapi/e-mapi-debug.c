@@ -770,6 +770,7 @@ e_mapi_debug_dump_properties (struct mapi_SPropValue_array *properties,
 			break;
 		case PT_APPTIME:
 			g_print (" PT_APPTIME");
+			break;
 		case PT_I8:
 			g_print (" (gint) - 0x%016" G_GINT64_MODIFIER "X", lpProp->value.d);
 			break;
@@ -790,8 +791,7 @@ e_mapi_debug_dump_properties (struct mapi_SPropValue_array *properties,
 			g_print (" (string) - '%s'", lpProp->value.lpszA ? lpProp->value.lpszA : "null");
 			break;
 		case PT_UNICODE:
-			if (lpProp)
-				g_print (" (unicodestring) - '%s'", lpProp->value.lpszW ? lpProp->value.lpszW : lpProp->value.lpszA ? lpProp->value.lpszA : "null");
+			g_print (" (unicodestring) - '%s'", lpProp->value.lpszW ? lpProp->value.lpszW : lpProp->value.lpszA ? lpProp->value.lpszA : "null");
 			break;
 		case PT_OBJECT:
 			g_print (" PT_OBJECT");
@@ -917,7 +917,7 @@ e_mapi_debug_dump_object (EMapiObject *object, gboolean with_properties, gint in
 	EMapiAttachment *attachment;
 	gint index;
 
-	g_print ("%*sEMapiObject: %p (parent:%p)\n", indent, "", object, object->parent);
+	g_print ("%*sEMapiObject: %p (parent:%p)\n", indent, "", object, object ? object->parent : NULL);
 
 	if (!object)
 		return;

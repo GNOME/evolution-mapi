@@ -1144,10 +1144,12 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
 		return FALSE;
 
 	e_cal_component_get_rrule_list (comp, &rrule_list);
-	e_cal_component_get_exdate_list (comp, &exdate_list);
+	if (g_slist_length (rrule_list) != 1) {
+		e_cal_component_free_recur_list (rrule_list);
+		return FALSE;
+	}
 
-	if (g_slist_length (rrule_list) != 1)
-		goto cleanup;
+	e_cal_component_get_exdate_list (comp, &exdate_list);
 
 	rt = (struct icalrecurrencetype *)(rrule_list->data);
 
@@ -1369,7 +1371,6 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
 	/* Reserved Block 2 Size */
 	arp_to_gba(&arp, ba);
 
- cleanup:
 	free_arp_contents(&arp);
 	e_cal_component_free_exdate_list (exdate_list);
 	e_cal_component_free_recur_list (rrule_list);

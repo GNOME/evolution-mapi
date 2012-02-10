@@ -160,10 +160,8 @@ mapi_error_to_edc_error (GError **perror, const GError *mapi_error, EDataCalCall
 
 	if (context)
 		err_msg = g_strconcat (context, mapi_error ? ": " : NULL, mapi_error ? mapi_error->message : NULL, NULL);
-	else if (!mapi_error)
-		err_msg = g_strdup (_("Unknown error"));
 
-	g_propagate_error (perror, EDC_ERROR_EX (code, err_msg ? err_msg : mapi_error->message));
+	g_propagate_error (perror, EDC_ERROR_EX (code, err_msg ? err_msg : mapi_error ? mapi_error->message : _("Unknown error")));
 
 	g_free (err_msg);
 }

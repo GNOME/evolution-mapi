@@ -558,7 +558,6 @@ e_mapi_cal_utils_get_free_busy_data (EMapiConnection *conn, const GSList *users,
 	GSList *attendee_list = NULL;
 	icalcomponent *icalcomp = NULL;
 	icaltimetype start_time, end_time;
-	icaltimezone *default_zone = NULL;
 
 	*freebusy = NULL;
 
@@ -600,8 +599,8 @@ e_mapi_cal_utils_get_free_busy_data (EMapiConnection *conn, const GSList *users,
 		e_cal_component_commit_sequence (comp);
 		icalcomp = e_cal_component_get_icalcomponent (comp);
 
-		start_time = icaltime_from_timet_with_zone (start, 0, default_zone ? default_zone : NULL);
-		end_time = icaltime_from_timet_with_zone (end, 0, default_zone ? default_zone : NULL);
+		start_time = icaltime_from_timet_with_zone (start, 0, NULL);
+		end_time = icaltime_from_timet_with_zone (end, 0, NULL);
 		icalcomponent_set_dtstart (icalcomp, start_time);
 		icalcomponent_set_dtend (icalcomp, end_time);
 

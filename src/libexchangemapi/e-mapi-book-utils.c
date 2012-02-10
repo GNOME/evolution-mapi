@@ -434,9 +434,8 @@ e_mapi_book_utils_contact_to_object (EContact *contact,
 		struct BinaryArray_r *members, *oneoff_members;
 		uint32_t u32, crc32 = 0;
 		GHashTable *member_values = NULL, *member_ids = NULL;
-		GError *error = NULL;
 
-		if (!error && old_contact) {
+		if (old_contact) {
 			member_values = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 			member_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
@@ -461,9 +460,6 @@ e_mapi_book_utils_contact_to_object (EContact *contact,
 
 			g_list_free_full (local, (GDestroyNotify) e_vcard_attribute_free);
 		}
-
-		if (error)
-			g_error_free (error);
 
 		set_value (PidTagMessageClass, IPM_DISTLIST);
 		u32 = 0xFFFFFFFF;
@@ -501,8 +497,7 @@ e_mapi_book_utils_contact_to_object (EContact *contact,
 			if (camel_address_decode (CAMEL_ADDRESS (addr), raw) > 0) {
 				const gchar *nm = NULL, *eml = NULL;
 
-				camel_internet_address_get (addr, 0, &nm, &eml);
-				if (eml) {
+				if (camel_internet_address_get (addr, 0, &nm, &eml) && eml) {
 					/* keep both lists in sync */
 					if (member_values && g_hash_table_lookup (member_values, raw)) {
 						/* stored ListMembers values when contact's value didn't change */

@@ -89,7 +89,7 @@ mapi_send_to_sync (CamelTransport *transport,
 	const gchar *profile;
 	GError *mapi_error = NULL;
 
-	if (!camel_internet_address_get((CamelInternetAddress *)from, 0, &namep, &addressp)) {
+	if (!camel_internet_address_get (CAMEL_INTERNET_ADDRESS (from), 0, &namep, &addressp)) {
 		return (FALSE);
 	}
 
@@ -136,10 +136,10 @@ mapi_send_to_sync (CamelTransport *transport,
 		return FALSE;
 	}
 
-	if (e_mapi_connection_open_default_folder (conn, olFolderSentMail, &obj_folder, cancellable, error)) {
-		e_mapi_connection_create_object (conn, &obj_folder, E_MAPI_CREATE_FLAG_SUBMIT, convert_message_to_object_cb, message, &mid, cancellable, error);
+	if (e_mapi_connection_open_default_folder (conn, olFolderSentMail, &obj_folder, cancellable, &mapi_error)) {
+		e_mapi_connection_create_object (conn, &obj_folder, E_MAPI_CREATE_FLAG_SUBMIT, convert_message_to_object_cb, message, &mid, cancellable, &mapi_error);
 
-		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, error);
+		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
 	}
 
 	g_object_unref (conn);

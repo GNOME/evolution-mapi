@@ -1525,7 +1525,7 @@ e_book_backend_mapi_update_view_by_cache (EBookBackendMAPI *ebma, EDataBookView 
 		EbSdbSearchData *sdata = (EbSdbSearchData *) l->data;
 		gchar *vcard = sdata->vcard;
 
-		if (i > 0 && ((i++) % 10) == 0 && !e_book_backend_mapi_book_view_is_running (ebma, book_view))
+		if (((i++) % 10) == 0 && !e_book_backend_mapi_book_view_is_running (ebma, book_view))
 			break;
 
 		if (vcard) {
@@ -1705,10 +1705,8 @@ mapi_error_to_edb_error (GError **perror, const GError *mapi_error, EDataBookSta
 
 	if (context)
 		err_msg = g_strconcat (context, mapi_error ? ": " : NULL, mapi_error ? mapi_error->message : NULL, NULL);
-	else if (!mapi_error)
-		err_msg = g_strdup (_("Unknown error"));
 
-	g_propagate_error (perror, e_data_book_create_error (code, err_msg ? err_msg : mapi_error->message));
+	g_propagate_error (perror, e_data_book_create_error (code, err_msg ? err_msg : mapi_error ? mapi_error->message : _("Unknown error")));
 
 	g_free (err_msg);
 }
