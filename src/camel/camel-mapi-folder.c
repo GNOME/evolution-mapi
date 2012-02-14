@@ -1957,8 +1957,11 @@ camel_mapi_folder_init (CamelMapiFolder *mapi_folder)
 }
 
 CamelFolder *
-camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar *folder_dir,
-		      guint32 flags, GError **error)
+camel_mapi_folder_new (CamelStore *store,
+		       const gchar *folder_name,
+		       const gchar *folder_dir,
+		       guint32 flags,
+		       GError **error)
 {
 
 	CamelFolder	*folder = NULL;
@@ -1985,8 +1988,10 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 
 	folder = g_object_new (
 		CAMEL_TYPE_MAPI_FOLDER,
-		"display-name", short_name, "full-name", folder_name,
-		"parent-store", store, NULL);
+		"display-name", short_name,
+		"full-name", folder_name,
+		"parent-store", store,
+		NULL);
 
 	mapi_folder = CAMEL_MAPI_FOLDER(folder);
 
@@ -2002,12 +2007,12 @@ camel_mapi_folder_new (CamelStore *store, const gchar *folder_name, const gchar 
 	}
 
 	/* set/load persistent state */
-	state_file = g_strdup_printf ("%s/%s/cmeta", folder_dir, folder_name);
+	state_file = g_build_filename (folder_dir, short_name, "cmeta", NULL);
 	camel_object_set_state_filename (CAMEL_OBJECT (folder), state_file);
 	g_free(state_file);
 	camel_object_state_read (CAMEL_OBJECT (folder));
 
-	state_file = g_strdup_printf ("%s/%s", folder_dir, folder_name);
+	state_file = g_build_filename (folder_dir, short_name, NULL);
 	mapi_folder->cache = camel_data_cache_new (state_file, error);
 	g_free (state_file);
 	if (!mapi_folder->cache) {

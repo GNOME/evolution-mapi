@@ -1037,6 +1037,44 @@ mapi_store_can_refresh_folder (CamelStore *store,
 	return CAMEL_STORE_CLASS(camel_mapi_store_parent_class)->can_refresh_folder (store, info, error) || check_all;
 }
 
+static gchar *
+mapi_build_folder_dir (const gchar *user_cache_dir,
+		       const gchar *folder_name)
+{
+	GString *path;
+	gchar **elems;
+	gint ii;
+
+	g_return_val_if_fail (user_cache_dir != NULL, NULL);
+	g_return_val_if_fail (*user_cache_dir != 0, NULL);
+	g_return_val_if_fail (folder_name != NULL, NULL);
+
+	elems = g_strsplit (folder_name, "/", -1);
+	g_return_val_if_fail (elems != NULL, NULL);
+
+	path = g_string_new (user_cache_dir);
+	if (path->str[path->len - 1] != G_DIR_SEPARATOR)
+		g_string_append_c (path, G_DIR_SEPARATOR);
+	g_string_append (path, "folders");
+
+	for (ii = 0; elems[ii]; ii++) {
+		if (path->str[path->len - 1] != G_DIR_SEPARATOR)
+			g_string_append_c (path, G_DIR_SEPARATOR);
+
+		if (ii != 0) {
+			g_string_append (path, "sub");
+			g_string_append_c (path, G_DIR_SEPARATOR);
+		}
+
+		if (elems[ii + 1])
+			g_string_append (path, elems[ii]);
+	}
+
+	g_strfreev (elems);
+
+	return g_string_free (path, FALSE);
+}
+
 static CamelFolder *
 mapi_store_get_folder_sync (CamelStore *store,
                             const gchar *folder_name,
@@ -1049,7 +1087,7 @@ mapi_store_get_folder_sync (CamelStore *store,
 	CamelStoreInfo *si;
 	CamelFolder *folder;
 	const gchar *user_cache_dir;
-	gchar *storage_path;
+	gchar *folder_dir;
 
 	si = camel_store_summary_path (mapi_store->summary, folder_name);
 	if (!si && (flags & CAMEL_STORE_FOLDER_CREATE) == CAMEL_STORE_FOLDER_CREATE) {
@@ -1082,9 +1120,11 @@ mapi_store_get_folder_sync (CamelStore *store,
 	service = CAMEL_SERVICE (store);
 	user_cache_dir = camel_service_get_user_cache_dir (service);
 
-	storage_path = g_build_filename (user_cache_dir, "folders", NULL);
-	folder = camel_mapi_folder_new (store, folder_name, storage_path, flags, error);
-	g_free (storage_path);
+	folder_dir = mapi_build_folder_dir (user_cache_dir, folder_name);
+	g_return_val_if_fail (folder_dir != NULL, NULL);
+
+	folder = camel_mapi_folder_new (store, folder_name, folder_dir, flags, error);
+	g_free (folder_dir);
 
 	return folder;
 }
