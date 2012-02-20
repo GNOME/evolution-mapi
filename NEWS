@@ -1,3 +1,16 @@
+evolution-mapi 3.3.90 2012-02-20
+--------------------------------
+
+Miscellanous:
+	Fix issues found by Coverity Scan (Milan Crha)
+	Generate ChangeLog from git log (Milan Crha)
+	Populate .gitignore with more files and create default COPYING file (Milan Crha)
+	Differentiate between user and system folders in local cache (Milan Crha)
+
+Translations:
+	Mario Blättermann (de)
+	Matej Urbančič (sl)
+
 evolution-mapi 3.3.5 2012-02-06
 -------------------------------
 
