@@ -32,6 +32,8 @@ G_BEGIN_DECLS
 
 const gchar *	e_mapi_cal_tz_util_get_mapi_equivalent	(const gchar *ical_tz_location);
 const gchar *	e_mapi_cal_tz_util_get_ical_equivalent	(const gchar *mapi_tz_location);
+const gchar *	e_mapi_cal_tz_util_ical_from_zone_struct(const guint8 *lpb,
+							 guint32 cb);
 gboolean	e_mapi_cal_tz_util_populate		(void);
 void		e_mapi_cal_tz_util_destroy		(void);
 void		e_mapi_cal_tz_util_dump			(void);

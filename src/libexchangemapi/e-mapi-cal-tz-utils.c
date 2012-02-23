@@ -80,6 +80,100 @@ e_mapi_cal_tz_util_get_ical_equivalent (const gchar *mapi_tz_location)
 	return retval;
 }
 
+static struct icaltimetype
+tm_to_icaltimetype (struct tm *tm,
+		    gboolean dst)
+{
+	struct icaltimetype itt;
+
+	memset (&itt, 0, sizeof (struct icaltimetype));
+
+	itt.second = 0;
+	itt.minute = 0;
+	itt.hour = 0;
+
+	itt.day = 1;
+	itt.month = dst ? 6 : 1;
+	itt.year = tm->tm_year + 1900;
+
+	itt.is_utc = 0;
+	itt.is_date = 0;
+
+	return itt;
+}
+
+static gint
+get_offset (icaltimezone *zone,
+	    gboolean dst)
+{
+	struct tm local;
+	struct icaltimetype tt;
+	gint offset;
+	time_t now = time (NULL);
+
+	gmtime_r (&now, &local);
+	tt = tm_to_icaltimetype (&local, dst);
+	offset = icaltimezone_get_utc_offset (zone, &tt, NULL);
+
+	return offset / -60;
+}
+
+const gchar *
+e_mapi_cal_tz_util_ical_from_zone_struct (const guint8 *lpb,
+					  guint32 cb)
+{
+	GHashTableIter iter;
+	gpointer key, value;
+	guint32 utcBias, stdBias, dstBias;
+	const gchar *res = NULL;
+
+	g_return_val_if_fail (lpb != NULL, NULL);
+
+	/* get the timezone by biases, which are the first 3*4 bytes */
+	if (cb < 12)
+		return NULL;
+
+	memcpy (&utcBias, lpb, 4); lpb += 4;
+	memcpy (&stdBias, lpb, 4); lpb += 4;
+	memcpy (&dstBias, lpb, 4); lpb += 4;
+
+	g_static_rec_mutex_lock (&mutex);
+	if (!e_mapi_cal_tz_util_populate ()) {
+		g_static_rec_mutex_unlock (&mutex);
+		return NULL;
+	}
+
+	g_hash_table_iter_init (&iter, mapi_to_ical);
+	while (g_hash_table_iter_next (&iter, &key, &value)) {
+		const gchar *location = value;
+		icaltimezone *zone;
+		gint offset;
+
+		zone = icaltimezone_get_builtin_timezone (location);
+		if (!zone)
+			continue;
+
+		offset = get_offset (zone, FALSE);
+		if (offset != utcBias || offset != utcBias + stdBias)
+			continue;
+
+		offset = get_offset (zone, TRUE);
+		if (offset != utcBias + dstBias)
+			continue;
+
+		/* pick shortest and alphabetically first timezone */
+		if (!res ||
+		    strlen (res) > strlen (location) ||
+		    (strlen (res) == strlen (location) &&
+		    strcmp (location, res) < 0))
+			res = location;
+	}
+
+	g_static_rec_mutex_unlock (&mutex);
+
+	return res;
+}
+
 void
 e_mapi_cal_tz_util_destroy (void)
 {

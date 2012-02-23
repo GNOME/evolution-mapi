@@ -1003,7 +1003,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 		if (location && *location)
 			icalcomponent_set_location (ical_comp, location);
 
-		b = e_mapi_util_find_array_propval (&object->properties, PidLidAppointmentSubType);;
+		b = e_mapi_util_find_array_propval (&object->properties, PidLidAppointmentSubType);
 		all_day = b && *b;
 
 		bin = e_mapi_util_find_array_propval (&object->properties, PidLidAppointmentTimeZoneDefinitionStartDisplay);
@@ -1011,6 +1011,12 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 			gchar *buf = e_mapi_cal_util_bin_to_mapi_tz (bin->lpb, bin->cb);
 			dtstart_tz_location = e_mapi_cal_tz_util_get_ical_equivalent (buf);
 			g_free (buf);
+		}
+
+		if (!dtstart_tz_location) {
+			bin = e_mapi_util_find_array_propval (&object->properties, PidLidTimeZoneStruct);
+			if (bin)
+				dtstart_tz_location = e_mapi_cal_tz_util_ical_from_zone_struct (bin->lpb, bin->cb);
 		}
 
 		if (e_mapi_util_find_array_datetime_propval (&t, &object->properties, PidLidAppointmentStartWhole) == MAPI_E_SUCCESS) {
@@ -1028,6 +1034,12 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 			gchar *buf = e_mapi_cal_util_bin_to_mapi_tz (bin->lpb, bin->cb);
 			dtend_tz_location = e_mapi_cal_tz_util_get_ical_equivalent (buf);
 			g_free (buf);
+		}
+
+		if (!dtend_tz_location) {
+			bin = e_mapi_util_find_array_propval (&object->properties, PidLidTimeZoneStruct);
+			if (bin)
+				dtend_tz_location = e_mapi_cal_tz_util_ical_from_zone_struct (bin->lpb, bin->cb);
 		}
 
 		if (e_mapi_util_find_array_datetime_propval (&t, &object->properties, PidLidAppointmentEndWhole) == MAPI_E_SUCCESS) {
