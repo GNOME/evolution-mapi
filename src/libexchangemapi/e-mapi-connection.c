@@ -6574,8 +6574,8 @@ mapi_profile_load (struct mapi_context *mapi_ctx, const gchar *profname, const g
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
 	/* Initialize libmapi logger*/
-	if (g_getenv ("MAPI_DEBUG")) {
-		debug_log_level = atoi (g_getenv ("MAPI_DEBUG"));
+	if (g_getenv ("LIBMAPI_DEBUG")) {
+		debug_log_level = atoi (g_getenv ("LIBMAPI_DEBUG"));
 		SetMAPIDumpData (mapi_ctx, TRUE);
 		SetMAPIDebugLevel (mapi_ctx, debug_log_level);
 	}

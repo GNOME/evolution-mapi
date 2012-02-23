@@ -132,6 +132,11 @@ e_mapi_book_utils_contact_from_object (EMapiConnection *conn,
 
 	g_return_val_if_fail (object != NULL, NULL);
 
+	if (e_mapi_debug_is_enabled ()) {
+		printf ("%s:\n", G_STRFUNC);
+		e_mapi_debug_dump_object (object, TRUE, 3);
+	}
+
 	contact = e_contact_new ();
 	if (book_uri)
 		e_contact_set (contact, E_CONTACT_BOOK_URI, book_uri);
@@ -530,6 +535,11 @@ e_mapi_book_utils_contact_to_object (EContact *contact,
 		set_value (PidLidDistributionListMembers, members);
 		set_value (PidLidDistributionListChecksum, &crc32);
 
+		if (e_mapi_debug_is_enabled ()) {
+			printf ("%s:\n", G_STRFUNC);
+			e_mapi_debug_dump_object (object, TRUE, 3);
+		}
+
 		return TRUE;
 	}
 
@@ -630,6 +640,11 @@ e_mapi_book_utils_contact_to_object (EContact *contact,
 	}
 
 	#undef set_value
+
+	if (e_mapi_debug_is_enabled ()) {
+		printf ("%s:\n", G_STRFUNC);
+		e_mapi_debug_dump_object (object, TRUE, 3);
+	}
 
 	return TRUE;
 }

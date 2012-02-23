@@ -27,7 +27,7 @@ e_mapi_debug_is_enabled (void)
 	static gchar enabled = -1;
 
 	if (enabled == -1)
-		enabled = g_getenv ("EXCHANGEMAPI_DEBUG") != NULL ? 1 : 0;
+		enabled = g_getenv ("MAPI_DEBUG") != NULL ? 1 : 0;
 
 	return enabled == 1;
 }

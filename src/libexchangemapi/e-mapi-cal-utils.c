@@ -859,6 +859,11 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 	g_return_val_if_fail (object != NULL, NULL);
 	g_return_val_if_fail (use_uid != NULL, NULL);
 
+	if (e_mapi_debug_is_enabled ()) {
+		printf ("%s:\n", G_STRFUNC);
+		e_mapi_debug_dump_object (object, TRUE, 3);
+	}
+
 	switch (kind) {
 		case ICAL_VEVENT_COMPONENT:
 		case ICAL_VTODO_COMPONENT:
@@ -2187,6 +2192,11 @@ e_mapi_cal_utils_comp_to_object (EMapiConnection *conn,
 		e_mapi_cal_utils_add_recipients (object, comp);
 
 	e_mapi_cal_utils_add_attachments (object, comp);
+
+	if (e_mapi_debug_is_enabled ()) {
+		printf ("%s:\n", G_STRFUNC);
+		e_mapi_debug_dump_object (object, TRUE, 3);
+	}
 
 	return TRUE;
 }

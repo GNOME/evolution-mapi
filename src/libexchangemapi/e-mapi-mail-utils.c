@@ -700,6 +700,11 @@ e_mapi_mail_utils_object_to_message (EMapiConnection *conn, /* const */ EMapiObj
 	g_return_val_if_fail (conn != NULL, NULL);
 	g_return_val_if_fail (object != NULL, NULL);
 
+	if (e_mapi_debug_is_enabled ()) {
+		printf ("%s:\n", G_STRFUNC);
+		e_mapi_debug_dump_object (object, TRUE, 3);
+	}
+
 	msg = camel_mime_message_new ();
 
 	str = e_mapi_util_find_array_propval (&object->properties, PidTagTransportMessageHeaders);
@@ -1647,6 +1652,11 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 	*pobject = object;
 
 	#undef set_value
+
+	if (e_mapi_debug_is_enabled ()) {
+		printf ("%s:\n", G_STRFUNC);
+		e_mapi_debug_dump_object (object, TRUE, 3);
+	}
 
 	return TRUE;
 }

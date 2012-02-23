@@ -1413,21 +1413,6 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 	klass->op_transfer_contacts		= NULL;
 }
 
-gboolean
-e_book_backend_mapi_debug_enabled (void)
-{
-	gint8 debug_enabled = -1;
-
-	if (debug_enabled == -1) {
-		if (g_getenv ("MAPI_DEBUG"))
-			debug_enabled = 1;
-		else
-			debug_enabled = 0;
-	}
-
-	return debug_enabled != 0;
-}
-
 const gchar *
 e_book_backend_mapi_get_book_uri (EBookBackendMAPI *ebma)
 {
