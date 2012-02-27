@@ -910,15 +910,28 @@ mapi_refresh_folder (CamelFolder *folder, GCancellable *cancellable, GError **er
 	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 	is_locked = TRUE;
 
-	if (!camel_mapi_store_connected (mapi_store, NULL))
-		goto end1;
-
-	if (!camel_mapi_store_connected (mapi_store, NULL)) {
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (mapi_store))) {
 		/*BUG : Fix exception string.*/
 		g_set_error (
 			error, CAMEL_SERVICE_ERROR,
 			CAMEL_SERVICE_ERROR_UNAVAILABLE,
 			_("This message is not available in offline mode."));
+		success = FALSE;
+		goto end1;
+	}
+
+	if (!camel_mapi_store_connected (mapi_store, &mapi_error)) {
+		if (mapi_error) {
+			if (!e_mapi_utils_propagate_cancelled_error (mapi_error, error))
+				g_set_error (
+					error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
+					_("Fetching items failed: %s"), mapi_error->message);
+			g_error_free (mapi_error);
+		} else {
+			g_set_error_literal (
+				error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
+				_("Fetching items failed"));
+		}
 		success = FALSE;
 		goto end1;
 	}
@@ -1474,11 +1487,19 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 	}
 
 	/* Check if we are really offline */
-	if (!camel_mapi_store_connected (mapi_store, NULL)) {
-		g_set_error (
-			error, CAMEL_SERVICE_ERROR,
-			CAMEL_SERVICE_ERROR_UNAVAILABLE,
-			_("This message is not available in offline mode."));
+	if (!camel_mapi_store_connected (mapi_store, &mapi_error)) {
+		if (mapi_error) {
+			if (!e_mapi_utils_propagate_cancelled_error (mapi_error, error))
+				g_set_error (
+					error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_INVALID,
+					_("Could not get message: %s"), mapi_error->message);
+			g_error_free (mapi_error);
+		} else {
+			g_set_error (
+				error, CAMEL_SERVICE_ERROR,
+				CAMEL_SERVICE_ERROR_INVALID,
+				_("Could not get message"));
+		}
 		camel_message_info_free (&mi->info);
 		return NULL;
 	}
@@ -1569,9 +1590,9 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 	e_mapi_util_mapi_id_from_string (folder_id, &fid);
 
 	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-	if (!camel_mapi_store_connected (mapi_store, NULL)) {
+	if (!camel_mapi_store_connected (mapi_store, error)) {
 		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-		return TRUE;
+		return FALSE;
 	}
 	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
