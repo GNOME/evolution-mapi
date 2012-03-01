@@ -1856,10 +1856,10 @@ mapi_folder_transfer_messages_to_sync (CamelFolder *source,
 				"%s", err ? err->message : _("Unknown error"));
 		g_clear_error (&err);
 		success = FALSE;
-	} else {
+	} else if (delete_originals) {
 		changes = camel_folder_change_info_new ();
 
-		for (i=0; i < uids->len; i++) {
+		for (i = 0; i < uids->len; i++) {
 			camel_folder_summary_remove_uid (source->summary, uids->pdata[i]);
 			camel_folder_change_info_remove_uid (changes, uids->pdata[i]);
 		}

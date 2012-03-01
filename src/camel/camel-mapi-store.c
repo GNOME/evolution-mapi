@@ -1371,10 +1371,23 @@ mapi_store_delete_folder_sync (CamelStore *store,
 			return FALSE;
 		}
 
-		return TRUE;
+		g_set_error_literal (
+			error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("Cannot delete MAPI folders in offline mode"));
+
+		return FALSE;
 	}
 
 	folder_id = g_hash_table_lookup (priv->name_hash, folder_name);
+	if (!folder_id) {
+		camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		g_set_error (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("Cannot find folder '%s'"), folder_name);
+		return FALSE;
+	}
+
 	e_mapi_util_mapi_id_from_string (folder_id, &folder_fid);
 
 	msi = (CamelMapiStoreInfo *) camel_mapi_store_summary_get_folder_id (mapi_store->summary, folder_fid);
@@ -1391,12 +1404,14 @@ mapi_store_delete_folder_sync (CamelStore *store,
 		status = FALSE;
 
 	if (status) {
-		success = mapi_forget_folder (mapi_store,folder_name,error);
+		success = mapi_forget_folder (mapi_store, folder_name, error);
 
-		/* remove from name_cache at the end, because the folder_id is from there */
-		/*g_hash_table_remove (priv->parent_hash, folder_id);*/
-		g_hash_table_remove (priv->id_hash, folder_id);
-		g_hash_table_remove (priv->name_hash, folder_name);
+		if (success) {
+			/* remove from name_cache at the end, because the folder_id is from there */
+			/*g_hash_table_remove (priv->parent_hash, folder_id);*/
+			g_hash_table_remove (priv->id_hash, folder_id);
+			g_hash_table_remove (priv->name_hash, folder_name);
+		}
 	} else {
 		success = FALSE;
 
@@ -1459,7 +1474,11 @@ mapi_store_rename_folder_sync (CamelStore *store,
 			return FALSE;
 		}
 
-		return TRUE;
+		g_set_error_literal (
+			error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("Cannot rename MAPI folders in offline mode"));
+
+		return FALSE;
 	}
 
 	/* Need a full name of a folder */
