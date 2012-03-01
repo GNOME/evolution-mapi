@@ -2186,6 +2186,8 @@ struct EnsureAdditionalPropertiesData
 	gpointer cb_user_data;
 	mapi_object_t *obj_folder;
 	guint32 downloaded;
+	guint32 download_offset;
+	guint32 download_total;
 };
 
 static gboolean
@@ -2288,7 +2290,7 @@ ensure_additional_properties_cb (EMapiConnection *conn,
 
 	eap->downloaded++;
 
-	return eap->cb (conn, mem_ctx, object, obj_index, obj_total, eap->cb_user_data, cancellable, perror);
+	return eap->cb (conn, mem_ctx, object, eap->downloaded + eap->download_offset, eap->download_total, eap->cb_user_data, cancellable, perror);
 }
 
 static enum MAPISTATUS
@@ -2757,14 +2759,13 @@ e_mapi_connection_fetch_objects_internal (EMapiConnection *conn,
 		/* silently skip broken objects */
 		ms = e_mapi_connection_fetch_object_internal (conn, mem_ctx, &obj_message, eap, &object, cancellable, &local_error);
 		if (ms == MAPI_E_SUCCESS) {
-			if (!eap->cb (conn, mem_ctx, object, eap->downloaded, ids->count, eap->cb_user_data, cancellable, perror)) {
+			if (!eap->cb (conn, mem_ctx, object, eap->downloaded + eap->download_offset, eap->download_total, eap->cb_user_data, cancellable, perror)) {
 				ms = MAPI_E_USER_CANCEL;
 				make_mapi_error (perror, "Object processing", ms);
 			}
 		} else {
-			e_mapi_debug_print ("%s: Skipping object %016" G_GINT64_MODIFIER "X because its fetch failed: %s",
+			e_mapi_debug_print ("%s: Failed to fetch object %016" G_GINT64_MODIFIER "X: %s",
 				G_STRFUNC, element->id, local_error ? local_error->message : mapi_get_errstr (ms));
-			ms = MAPI_E_SUCCESS;
 		}
 
 		e_mapi_object_free (object);
@@ -2790,7 +2791,6 @@ e_mapi_connection_transfer_objects (EMapiConnection *conn,
 {
 	enum MAPISTATUS ms;
 	TALLOC_CTX *mem_ctx;
-	mapi_id_array_t ids;
 	const GSList *iter;
 	struct EnsureAdditionalPropertiesData eap;
 
@@ -2802,44 +2802,55 @@ e_mapi_connection_transfer_objects (EMapiConnection *conn,
 	LOCK ();
 	mem_ctx = talloc_new (priv->session);
 
-	ms = mapi_id_array_init (priv->mapi_ctx, &ids);
-	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "mapi_id_array_init", ms);
-		goto cleanup;
-	}
+	eap.download_offset = 0;
+	eap.download_total = g_slist_length ((GSList *) mids);
 
-	for (iter = mids; iter; iter = iter->next) {
-		mapi_id_t *pmid = iter->data;
+	iter = mids;
+	while (iter) {
+		mapi_id_array_t ids;
 
-		if (pmid)
-			mapi_id_array_add_id (&ids, *pmid);
-	}
+		ms = mapi_id_array_init (priv->mapi_ctx, &ids);
+		if (ms != MAPI_E_SUCCESS) {
+			make_mapi_error (perror, "mapi_id_array_init", ms);
+			goto cleanup;
+		}
 
-	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-		ms = MAPI_E_USER_CANCEL;
+		/* run this in chunks of 100 IDs */
+		for (; iter && ids.count < 100; iter = iter->next) {
+			mapi_id_t *pmid = iter->data;
+
+			if (pmid)
+				mapi_id_array_add_id (&ids, *pmid);
+		}
+
+		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+			ms = MAPI_E_USER_CANCEL;
+			mapi_id_array_release (&ids);
+			goto cleanup;
+		}
+
+		eap.cb = cb;
+		eap.cb_user_data = cb_user_data;
+		eap.obj_folder = obj_folder;
+		eap.downloaded = 0;
+
+		ms = e_mapi_fast_transfer_objects (conn, mem_ctx, obj_folder, &ids, ensure_additional_properties_cb, &eap, cancellable, perror);
+		if (ms == MAPI_E_CALL_FAILED) {
+			/* err, fallback to slow transfer, probably FXGetBuffer failed;
+			   see http://tracker.openchange.org/issues/378
+			*/
+
+			g_clear_error (perror);
+
+			e_mapi_debug_print ("%s: Failed to fast-transfer, fallback to slow fetch from %d of %d objects\n", G_STRFUNC, eap.downloaded, ids.count);
+
+			ms = e_mapi_connection_fetch_objects_internal (conn, mem_ctx, &ids, &eap, cancellable, perror);
+		}
+
+		eap.download_offset += ids.count;
+
 		mapi_id_array_release (&ids);
-		goto cleanup;
 	}
-
-	eap.cb = cb;
-	eap.cb_user_data = cb_user_data;
-	eap.obj_folder = obj_folder;
-	eap.downloaded = 0;
-
-	ms = e_mapi_fast_transfer_objects (conn, mem_ctx, obj_folder, &ids, ensure_additional_properties_cb, &eap, cancellable, perror);
-	if (ms == MAPI_E_CALL_FAILED) {
-		/* err, fallback to slow transfer, probably FXGetBuffer failed;
-		   see http://tracker.openchange.org/issues/378
-		*/
-
-		g_clear_error (perror);
-
-		e_mapi_debug_print ("%s: Failed to fast-transfer, fallback to slow fetch from %d of %d objects\n", G_STRFUNC, eap.downloaded, ids.count);
-
-		ms = e_mapi_connection_fetch_objects_internal (conn, mem_ctx, &ids, &eap, cancellable, perror);
-	}
-
-	mapi_id_array_release (&ids);
 
  cleanup:
 	talloc_free (mem_ctx);
