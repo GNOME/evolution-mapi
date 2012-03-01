@@ -4079,7 +4079,7 @@ convert_mapi_SRestriction_to_Restriction_r (struct mapi_SRestriction *restrictio
 	#ifdef HAVE_RES_NOT_SUPPORTED
 	case RES_NOT:
 		rr->res.resNot.lpRes = talloc_zero (mem_ctx, struct Restriction_r);
-		g_return_if_fail (r->res.resNot.lpRes != NULL);
+		g_return_if_fail (rr->res.resNot.lpRes != NULL);
 
 		convert_mapi_SRestriction_to_Restriction_r (
 			restriction->res.resNot.res,
