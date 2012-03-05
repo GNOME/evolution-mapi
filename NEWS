@@ -1,3 +1,21 @@
+evolution-mapi 3.3.91 2012-03-05
+--------------------------------
+
+Bugs:
+	Bug #669817 - Events using incorrect timezone (Milan Crha)
+	Bug #668810 - Crash in g_str_hash, mapi_store_delete_folder_sync (Milan Crha)
+
+Miscellanous:
+	Debug object properties from outside and change env variable names (Milan Crha)
+	Report connection errors, instead of ignore them (Milan Crha)
+	Failed to fetch content of large folders (Milan Crha)
+	Fix typo in a conditionally compiled code (Milan Crha)
+
+Translations:
+	Martin Srebotnjak (sl)
+	Gabriel Speckhahn (pt_BR)
+	Kjartan Maraas (nb)
+
 evolution-mapi 3.3.90 2012-02-20
 --------------------------------
 
