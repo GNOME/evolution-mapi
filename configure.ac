@@ -114,7 +114,7 @@ PKG_CHECK_MODULES(LIBEDATASERVER, libedataserver-$EDS_PACKAGE >= eds_minimum_ver
 PKG_CHECK_MODULES(LIBEBACKEND, libebackend-$EDS_PACKAGE >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBECAL, libecal-$EDS_PACKAGE >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBEDATACAL, libedata-cal-$EDS_PACKAGE >= eds_minimum_version)
-PKG_CHECK_MODULES(LIBBOOK, libebook-$EDS_PACKAGE >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBEBOOK, libebook-$EDS_PACKAGE >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBEDATABOOK, libedata-book-$EDS_PACKAGE >= eds_minimum_version)
 PKG_CHECK_MODULES(CAMEL, camel-$EDS_PACKAGE >= eds_minimum_version)
 
