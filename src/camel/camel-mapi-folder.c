@@ -1023,7 +1023,19 @@ mapi_get_message_info(CamelFolder *folder, const gchar *uid)
 static void
 mapi_folder_rename (CamelFolder *folder, const gchar *new)
 {
+	CamelStore *parent_store;
+
+	parent_store = camel_folder_get_parent_store (folder);
+
+	camel_store_summary_disconnect_folder_summary (
+		((CamelMapiStore *) parent_store)->summary,
+		folder->summary);
+
 	((CamelFolderClass *)camel_mapi_folder_parent_class)->rename(folder, new);
+
+	camel_store_summary_connect_folder_summary (
+		((CamelMapiStore *) parent_store)->summary,
+		camel_folder_get_full_name (folder), folder->summary);
 }
 
 static gint
