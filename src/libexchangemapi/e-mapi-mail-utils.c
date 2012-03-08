@@ -1268,7 +1268,7 @@ e_mapi_mail_do_smime_signed (EMapiObject *object,
 	uint32_t ui32;
 	uint64_t data_cb = 0;
 	uint8_t *data_lpb = NULL;
-	gchar *content_type_str;
+	gchar *content_type_str, *content_type_unfolded;
 
 	g_free (*pmsg_class);
 	*pmsg_class = g_strdup ("IPM.Note.SMIME.MultipartSigned");
@@ -1297,14 +1297,16 @@ e_mapi_mail_do_smime_signed (EMapiObject *object,
 	dw = CAMEL_DATA_WRAPPER (multipart);
 	type = camel_data_wrapper_get_mime_type_field (dw);
 	content_type_str = camel_content_type_format (type);
+	content_type_unfolded = camel_header_unfold (content_type_str);
 
 	#define wstr(str) camel_stream_write (content_stream, str, strlen (str), cancellable, NULL)
 	wstr("Content-Type: ");
-	wstr(content_type_str);
-	wstr("\n\n");
+	wstr(content_type_unfolded);
+	wstr("\r\n\r\n");
 	#undef wstr
 
 	g_free (content_type_str);
+	g_free (content_type_unfolded);
 
 	camel_data_wrapper_write_to_stream_sync (dw, (CamelStream *) content_stream, cancellable, NULL);
 
