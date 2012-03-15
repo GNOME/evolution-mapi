@@ -2789,7 +2789,7 @@ e_mapi_connection_transfer_objects (EMapiConnection *conn,
 				    GCancellable *cancellable,
 				    GError **perror)
 {
-	enum MAPISTATUS ms;
+	enum MAPISTATUS ms = MAPI_E_CALL_FAILED;
 	TALLOC_CTX *mem_ctx;
 	const GSList *iter;
 	struct EnsureAdditionalPropertiesData eap;
