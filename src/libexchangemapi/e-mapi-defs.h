@@ -115,13 +115,6 @@ typedef enum {
 
 /* APPOINTMENTS */
 typedef enum {
-    olFree = 0,
-    olTentative = 1,
-    olBusy = 2,
-    olOutOfOffice = 3
-} OlBusyStatus; /* Appointment flags with PR_APPOINTMENT_BUSY_STATUS */
-
-typedef enum {
     olOrganizer = 0,
     olRequired = 1,
     olOptional = 2,

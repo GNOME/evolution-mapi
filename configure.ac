@@ -27,7 +27,7 @@ dnl Required Packages
 dnl *******************
 m4_define([eds_minimum_version], [ema_version])
 m4_define([evo_minimum_version], [ema_version])
-m4_define([libmapi_minimum_version], [0.11])
+m4_define([libmapi_minimum_version], [1.0])
 m4_define([glib_minimum_version], [2.16.1])
 m4_define([gtk_minimum_version], [2.99.2])
 m4_define([gconf_minimum_version], [2.0.0])
@@ -135,40 +135,6 @@ AC_SUBST(LIBMAPI_CFLAGS)
 AC_SUBST(LIBMAPI_LIBS)
 
 dnl ****************************
-dnl Check for struct StringArrayW_r availability
-dnl ****************************
-AC_MSG_CHECKING([libmapi struct StringArrayW_r])
-save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
-save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
-AC_LINK_IFELSE([AC_LANG_PROGRAM(
-	[[#include <libmapi/libmapi.h>]],
-	[[struct StringArrayW_r str;]])],
-	[ac_cv_have_saw=yes],
-	[ac_cv_have_saw=no
-	 save_cflags="$save_cflags -DStringArrayW_r=WStringArray_r"
-	])
-CFLAGS=$save_cflags
-LIBS=$save_libs
-AC_MSG_RESULT([$ac_cv_have_saw])
-
-dnl ****************************
-dnl Check for struct mapi_SLPSTRArrayW availability
-dnl ****************************
-AC_MSG_CHECKING([libmapi struct mapi_SLPSTRArrayW])
-save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
-save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
-AC_LINK_IFELSE([AC_LANG_PROGRAM(
-	[[#include <libmapi/libmapi.h>]],
-	[[struct mapi_SLPSTRArrayW str;]])],
-	[ac_cv_have_msaw=yes],
-	[ac_cv_have_msaw=no
-	 save_cflags="$save_cflags -Dmapi_SLPSTRArrayW=mapi_SPLSTRArrayW"
-	])
-CFLAGS=$save_cflags
-LIBS=$save_libs
-AC_MSG_RESULT([$ac_cv_have_msaw])
-
-dnl ****************************
 dnl Check for struct mapi_SNotRestriction availability
 dnl see http://tracker.openchange.org/issues/377
 dnl ****************************
@@ -182,20 +148,6 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM(
 CFLAGS=$save_cflags
 LIBS=$save_libs
 AC_MSG_RESULT([$ac_cv_have_rns])
-
-dnl ****************************
-dnl Check for nspi_GetMatches with ulResult availability
-dnl ****************************
-AC_MSG_CHECKING([libmapi nspi_GetMatches with ulResult parameter])
-save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
-save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
-AC_LINK_IFELSE([AC_LANG_PROGRAM(
-	[[#include <libmapi/libmapi.h>]],
-	[[nspi_GetMatches (NULL, NULL, NULL, NULL, 5000, NULL, NULL);]])],
-	[AC_DEFINE(HAVE_NSPI_GETMATCHES_ULRESULT, 1, [libmapi supports nspi_GetMatches with ulResult parameter]) ac_cv_have_ngmr=yes],[ac_cv_have_ngmr=no])
-CFLAGS=$save_cflags
-LIBS=$save_libs
-AC_MSG_RESULT([$ac_cv_have_ngmr])
 
 dnl ****************************
 dnl Expose version information

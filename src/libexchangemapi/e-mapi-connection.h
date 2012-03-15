@@ -30,6 +30,7 @@
 #include <gio/gio.h>
 
 #include <libmapi/libmapi.h>
+#include <libmapi/mapi_nameid.h>
 
 /* Standard GObject macros */
 #define E_MAPI_TYPE_CONNECTION (e_mapi_connection_get_type ())

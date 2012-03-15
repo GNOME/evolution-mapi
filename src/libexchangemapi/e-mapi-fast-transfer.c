@@ -29,7 +29,6 @@
 #include "e-mapi-debug.h"
 
 #include "e-mapi-fast-transfer.h"
-#include "e-mapi-openchange.h"
 
 struct _EMapiFXParserClosure;
 typedef struct _EMapiFXParserClosure EMapiFXParserClosure;
@@ -269,10 +268,10 @@ parse_namedprop_cb (uint32_t proptag, struct MAPINAMEID nameid, void *closure)
 	guid = GUID_string (data->mem_ctx, &(nameid.lpguid));
 
 	if (nameid.ulKind == MNID_ID) {
-		if (e_mapi_nameid_lid_lookup_canonical (nameid.kind.lid, guid, &lid) != MAPI_E_SUCCESS)
+		if (mapi_nameid_lid_lookup_canonical (nameid.kind.lid, guid, &lid) != MAPI_E_SUCCESS)
 			lid = MAPI_E_RESERVED;
 	} else if (nameid.ulKind == MNID_STRING) {
-		if (e_mapi_nameid_string_lookup_canonical (nameid.kind.lpwstr.Name, guid, &lid) != MAPI_E_SUCCESS)
+		if (mapi_nameid_string_lookup_canonical (nameid.kind.lpwstr.Name, guid, &lid) != MAPI_E_SUCCESS)
 			lid = MAPI_E_RESERVED;
 	}
 
@@ -368,7 +367,7 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 	enum MAPISTATUS ms;
 	enum TransferStatus transferStatus;
 	uint16_t stepCount = -1, totalCount = -1;
-	struct e_mapi_fx_parser_context *parser;
+	struct fx_parser_context *parser;
 	EMapiFXParserClosure data = { 0 };
 
 	data.conn = conn;
@@ -401,11 +400,11 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 		data.marker = PidTagStartMessage;
 	}
 		
-	parser = e_mapi_fxparser_init (data.mem_ctx, &data);
-	e_mapi_fxparser_set_marker_callback (parser, parse_marker_cb);
-	e_mapi_fxparser_set_delprop_callback (parser, parse_delprop_cb);
-	e_mapi_fxparser_set_namedprop_callback (parser, parse_namedprop_cb);
-	e_mapi_fxparser_set_property_callback (parser, parse_property_cb);
+	parser = fxparser_init (data.mem_ctx, &data);
+	fxparser_set_marker_callback (parser, parse_marker_cb);
+	fxparser_set_delprop_callback (parser, parse_delprop_cb);
+	fxparser_set_namedprop_callback (parser, parse_namedprop_cb);
+	fxparser_set_property_callback (parser, parse_property_cb);
 
 	do {
 		DATA_BLOB transferdata;
@@ -414,7 +413,7 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 		if (ms != MAPI_E_SUCCESS)
 			break;
 
-		ms = e_mapi_fxparser_parse (parser, &transferdata);
+		ms = fxparser_parse (parser, &transferdata);
 		if (ms != MAPI_E_SUCCESS)
 			break;
 

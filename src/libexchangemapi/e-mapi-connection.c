@@ -41,7 +41,6 @@
 #include "e-mapi-book-utils.h"
 #include "e-mapi-mail-utils.h"
 #include "e-mapi-fast-transfer.h"
-#include "e-mapi-openchange.h"
 
 /* how many bytes can be written within one property with SetProps() call;
    if its size exceeds this limit, it's converted into an EMapiStreamedProp */
@@ -2544,10 +2543,10 @@ e_mapi_connection_fetch_object_internal (EMapiConnection *conn,
 					guid = GUID_string (mem_ctx, &(np_nameid[ui16].lpguid));
 
 					if (np_nameid[ui16].ulKind == MNID_ID) {
-						if (e_mapi_nameid_lid_lookup_canonical (np_nameid[ui16].kind.lid, guid, &lid) != MAPI_E_SUCCESS)
+						if (mapi_nameid_lid_lookup_canonical (np_nameid[ui16].kind.lid, guid, &lid) != MAPI_E_SUCCESS)
 							lid = MAPI_E_RESERVED;
 					} else if (np_nameid[ui16].ulKind == MNID_STRING) {
-						if (e_mapi_nameid_string_lookup_canonical (np_nameid[ui16].kind.lpwstr.Name, guid, &lid) != MAPI_E_SUCCESS)
+						if (mapi_nameid_string_lookup_canonical (np_nameid[ui16].kind.lpwstr.Name, guid, &lid) != MAPI_E_SUCCESS)
 							lid = MAPI_E_RESERVED;
 					}
 
@@ -4388,11 +4387,7 @@ e_mapi_connection_list_gal_objects (EMapiConnection *conn,
 		}
 	}
 
-	ms = nspi_GetMatches (priv->session->nspi->ctx, mem_ctx, propTagArray, use_restriction,
-		#ifdef HAVE_NSPI_GETMATCHES_ULRESULT
-		(uint32_t) -1,
-		#endif
-		&rows, &pMIds);
+	ms = nspi_GetMatches (priv->session->nspi->ctx, mem_ctx, propTagArray, use_restriction, (uint32_t) -1, &rows, &pMIds);
 	if (ms != MAPI_E_SUCCESS || !rows) {
 		if (ms == MAPI_E_NOT_FOUND || (!rows && ms == MAPI_E_SUCCESS))
 			ms = MAPI_E_SUCCESS;
@@ -6306,11 +6301,7 @@ e_mapi_connection_enable_notifications (EMapiConnection *conn,
 	}
 
 	if (priv->register_notification_result == MAPI_E_RESERVED)
-		priv->register_notification_result = RegisterNotification (priv->session, fnevNewMail |
-			     fnevObjectCreated |
-			     fnevObjectDeleted |
-			     fnevObjectModified |
-			     fnevObjectMoved);
+		priv->register_notification_result = RegisterNotification (priv->session);
 
 	if (priv->register_notification_result != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "RegisterNotification", priv->register_notification_result);
@@ -6402,71 +6393,6 @@ e_mapi_connection_disable_notifications	(EMapiConnection *conn,
 }
 
 /* profile related functions - begin */
-
-extern const struct ndr_interface_table ndr_table_exchange_ds_rfr; /* from openchange's ndr_exchange.h */
-
-static enum MAPISTATUS
-test_server_availability (struct mapi_context *mapi_ctx,
-			  const gchar *profname,
-			  const gchar *password,
-			  GCancellable *cancellable,
-			  GError **perror)
-{
-	enum MAPISTATUS	ms = MAPI_E_LOGON_FAILED;
-	TALLOC_CTX *mem_ctx;
-	struct mapi_profile *profile;
-	gchar *binding_str;
-	struct dcerpc_pipe *pipe;
-	struct tevent_context	*ev;
-	NTSTATUS status;
-
-	mem_ctx = talloc_new (mapi_ctx->mem_ctx);
-	profile = talloc_zero (mem_ctx, struct mapi_profile);
-	if (!profile) {
-		talloc_free (mem_ctx);
-		return MAPI_E_NOT_ENOUGH_RESOURCES;
-	}
-
-	ms = OpenProfile (mapi_ctx, profile, profname, password);
-	if (ms != MAPI_E_SUCCESS)
-		goto cleanup;
-
-	ms = LoadProfile (mapi_ctx, profile);
-	if (ms != MAPI_E_SUCCESS)
-		goto cleanup;
-
-	binding_str = talloc_asprintf (mem_ctx, "ncacn_ip_tcp:%s[", profile->server);
-
-	/* If seal option is enabled in the profile */
-	if (profile->seal != 0) {
-		binding_str = talloc_strdup_append (binding_str, "seal,");
-	}
-
-	/* If localaddress parameter is available in the profile */
-	if (profile->localaddr) {
-		binding_str = talloc_asprintf_append (binding_str, "localaddress=%s,", profile->localaddr);
-	}
-
-	binding_str = talloc_strdup_append (binding_str, "]");
-	ev = tevent_context_init (mem_ctx);
-
-	status = dcerpc_pipe_connect (mem_ctx, &pipe, binding_str, &ndr_table_exchange_ds_rfr, profile->credentials, ev, mapi_ctx->lp_ctx); 
-
-	if (!NT_STATUS_IS_OK (status))
-		e_mapi_debug_print ("%s: Failed to connect to remote server: %s %s\n", G_STRFUNC, binding_str, nt_errstr (status));
-
-	if (NT_STATUS_EQUAL (status, NT_STATUS_OBJECT_NAME_NOT_FOUND)) {
-		ms = MAPI_E_NETWORK_ERROR;
-		g_set_error (perror, E_MAPI_ERROR, ms, _("Server '%s' is not reachable"), profile->server);
-	}
-
-	talloc_free (binding_str);
-
- cleanup:
-	talloc_free (mem_ctx);
-
-	return ms;
-}
 
 struct tcp_data
 {
@@ -6596,9 +6522,6 @@ mapi_profile_load (struct mapi_context *mapi_ctx, const gchar *profname, const g
 	ms = MapiLogonEx (mapi_ctx, &session, profname, password);
 	if (ms == MAPI_E_NOT_FOUND && try_create_profile (mapi_ctx, profname, password, cancellable, perror))
 		ms = MapiLogonEx (mapi_ctx, &session, profname, password);
-
-	if (ms == MAPI_E_LOGON_FAILED)
-		ms = test_server_availability (mapi_ctx, profname, password, cancellable, perror);
 
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "MapiLogonEx", ms);

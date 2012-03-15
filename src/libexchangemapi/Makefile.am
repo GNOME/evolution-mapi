@@ -22,8 +22,6 @@ libexchangemapi_1_0_la_SOURCES =	\
 	camel-mapi-settings.h		\
 	e-mapi-fast-transfer.h		\
 	e-mapi-fast-transfer.c		\
-	e-mapi-openchange.h		\
-	e-mapi-openchange.c		\
 	e-mapi-defs.h			\
 	e-mapi-folder.c			\
 	e-mapi-folder.h			\
@@ -71,7 +69,6 @@ libexchangemapiinclude_HEADERS = 	\
 	e-mapi-cal-tz-utils.h		\
 	e-mapi-cal-recur-utils.h	\
 	e-mapi-mail-utils.h		\
-	e-mapi-openchange.h		\
 	e-mapi-operation-queue.h
 
 pkgconfigdir = $(libdir)/pkgconfig
