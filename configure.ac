@@ -2,7 +2,7 @@ dnl Simple configuration script for openchange evolution plugin
 dnl Written by Julien Kerihuel <j.kerihuel@openchange.org>
 dnl Modified for GNOME Evolution MAPI Provider by Johnny Jacob <jjohnny@novell.com>
 
-m4_define([ema_version], [3.3.92])
+m4_define([ema_version], [3.4.0])
 
 AC_PREREQ(2.58)
 AC_INIT([evolution-mapi], [ema_version], [http://bugzilla.gnome.org/browse.cgi?product=evolution-mapi])
