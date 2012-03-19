@@ -1,3 +1,19 @@
+evolution-mapi 3.3.92 2012-03-19
+--------------------------------
+
+Bugs:
+	Bug #671638 - Trouble reading S/MIME messages (Milan Crha)
+
+Miscellanous:
+	Fix typo in LIBEBOOK variable (Milan Crha)
+	Update store<=>folder summaries connection on folder rename (Milan Crha)
+	Fix possible use of uninitialized variable (Milan Crha)
+	Bump OpenChange dependency to 1.0 (Milan Crha)
+
+Translations:
+	Mario Blättermann (de)
+	Piotr Drąg (pl)
+
 evolution-mapi 3.3.91 2012-03-05
 --------------------------------
 
