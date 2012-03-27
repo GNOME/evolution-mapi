@@ -99,21 +99,28 @@ static gboolean		mapi_folder_synchronize_sync
 G_DEFINE_TYPE (CamelMapiFolder, camel_mapi_folder, CAMEL_TYPE_OFFLINE_FOLDER)
 
 static GPtrArray *
-mapi_folder_search_by_expression (CamelFolder *folder, const gchar *expression, GError **error)
+mapi_folder_search_by_expression (CamelFolder *folder,
+				  const gchar *expression,
+				  GCancellable *cancellable,
+				  GError **error)
 {
 	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER(folder);
 	GPtrArray *matches;
 
 	CAMEL_MAPI_FOLDER_LOCK(mapi_folder, search_lock);
 	camel_folder_search_set_folder (mapi_folder->search, folder);
-	matches = camel_folder_search_search(mapi_folder->search, expression, NULL, error);
+	matches = camel_folder_search_search(mapi_folder->search, expression, NULL, cancellable, error);
 	CAMEL_MAPI_FOLDER_UNLOCK(mapi_folder, search_lock);
 
 	return matches;
 }
 
 static GPtrArray *
-mapi_folder_search_by_uids (CamelFolder *folder, const gchar *expression, GPtrArray *uids, GError **error)
+mapi_folder_search_by_uids (CamelFolder *folder,
+			    const gchar *expression,
+			    GPtrArray *uids,
+			    GCancellable *cancellable,
+			    GError **error)
 {
 	GPtrArray *matches;
 	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (folder);
@@ -123,7 +130,7 @@ mapi_folder_search_by_uids (CamelFolder *folder, const gchar *expression, GPtrAr
 
 	CAMEL_MAPI_FOLDER_LOCK (mapi_folder, search_lock);
 	camel_folder_search_set_folder (mapi_folder->search, folder);
-	matches = camel_folder_search_search (mapi_folder->search, expression, uids, error);
+	matches = camel_folder_search_search (mapi_folder->search, expression, uids, cancellable, error);
 	CAMEL_MAPI_FOLDER_UNLOCK (mapi_folder, search_lock);
 
 	return matches;
