@@ -31,7 +31,7 @@
 #include <libical/icaltz-util.h>
 
 #include <libedata-cal/e-cal-backend-file-store.h>
-#include <libedataserver/e-xml-hash-utils.h>
+#include <libedataserver/e-data-server-util.h>
 
 #include <e-mapi-connection.h>
 #include <e-mapi-cal-utils.h>
@@ -2475,9 +2475,9 @@ typedef enum {
 	OP_AUTHENTICATE_USER,
 	OP_REFRESH,
 	OP_REMOVE,
-	OP_CREATE_OBJECT,
-	OP_MODIFY_OBJECT,
-	OP_REMOVE_OBJECT,
+	OP_CREATE_OBJECTS,
+	OP_MODIFY_OBJECTS,
+	OP_REMOVE_OBJECTS,
 	OP_DISCARD_ALARM,
 	OP_RECEIVE_OBJECTS,
 	OP_SEND_OBJECTS,
@@ -2514,15 +2514,20 @@ typedef struct {
 typedef struct {
 	OperationBase base;
 
-	gchar *calobj;
+	GSList *calobjs;
+} OperationCreate;
+
+typedef struct {
+	OperationBase base;
+
+	GSList *calobjs;
 	CalObjModType mod;
 } OperationModify;
 
 typedef struct {
 	OperationBase base;
 
-	gchar *uid;
-	gchar *rid;
+	GSList *ids;
 	CalObjModType mod;
 } OperationRemove;
 
@@ -2620,77 +2625,114 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 			e_data_cal_respond_remove (op->cal, op->opid, error);
 		}
 	} break;
-	case OP_CREATE_OBJECT: {
-		OperationStr *ops = (OperationStr *) op;
-		const gchar *calobj = ops->str;
+	case OP_CREATE_OBJECTS: {
+		OperationCreate *opc = (OperationCreate *) op;
 
 		if (!cancelled) {
-			gchar *uid = NULL;
-			ECalComponent *new_ecalcomp = NULL;
+			GSList *iter;
+			GSList *uids = NULL;
+			GSList *new_components = NULL;
 
-			ecbm_create_object (backend, op->cal, op->cancellable, calobj, &uid, &new_ecalcomp, &error);
+			for (iter = opc->calobjs; iter && !g_cancellable_is_cancelled (op->cancellable) && !error; iter = iter->next) {
+				const gchar *calobj = iter->data;
+				gchar *uid = NULL;
+				ECalComponent *new_ecalcomp = NULL;
 
-			e_data_cal_respond_create_object (op->cal, op->opid, error, uid, new_ecalcomp);
+				ecbm_create_object (backend, op->cal, op->cancellable, calobj, &uid, &new_ecalcomp, &error);
+
+				if (!error) {
+					uids = g_slist_prepend (uids, uid);
+					new_components = g_slist_prepend (new_components, new_ecalcomp);
+				}
+			}
+
+			uids = g_slist_reverse (uids);
+			new_components = g_slist_reverse (new_components);
+
+			e_data_cal_respond_create_objects (op->cal, op->opid, error, uids, new_components);
 
 			/* free memory */
-			g_free (uid);
-
-			if (new_ecalcomp)
-				g_object_unref (new_ecalcomp);
+			e_util_free_string_slist (uids);
+			e_util_free_nullable_object_slist (new_components);
 		}
 
-		g_free (ops->str);
+		e_util_free_string_slist (opc->calobjs);
 	} break;
-	case OP_MODIFY_OBJECT: {
+	case OP_MODIFY_OBJECTS: {
 		OperationModify *opm = (OperationModify *) op;
 
 		if (!cancelled) {
-			ECalComponent *old_ecalcomp = NULL, *new_ecalcomp = NULL;
+			GSList *iter;
+			GSList *new_components = NULL;
+			GSList *old_components = NULL;
 
-			ecbm_modify_object (backend, op->cal, op->cancellable, opm->calobj, opm->mod, &old_ecalcomp, &new_ecalcomp, &error);
+			for (iter = opm->calobjs; iter && !g_cancellable_is_cancelled (op->cancellable) && !error; iter = iter->next) {
+				const gchar *calobj = iter->data;
+				ECalComponent *old_ecalcomp = NULL, *new_ecalcomp = NULL;
 
-			if (!new_ecalcomp)
-				new_ecalcomp = e_cal_component_new_from_icalcomponent (icalparser_parse_string (opm->calobj));
+				ecbm_modify_object (backend, op->cal, op->cancellable, calobj, opm->mod, &old_ecalcomp, &new_ecalcomp, &error);
 
-			e_data_cal_respond_modify_object (op->cal, op->opid, error, old_ecalcomp, new_ecalcomp);
+				if (!error) {
+					if (!new_ecalcomp)
+						new_ecalcomp = e_cal_component_new_from_icalcomponent (icalparser_parse_string (calobj));
 
-			if (old_ecalcomp)
-				g_object_unref (old_ecalcomp);
-			if (new_ecalcomp)
-				g_object_unref (new_ecalcomp);
+					old_components = g_slist_prepend (old_components, old_ecalcomp);
+					new_components = g_slist_prepend (new_components, new_ecalcomp);
+				}
+			}
+
+			old_components = g_slist_reverse (old_components);
+			new_components = g_slist_reverse (new_components);
+
+			e_data_cal_respond_modify_objects (op->cal, op->opid, error, old_components, new_components);
+
+			e_util_free_nullable_object_slist (old_components);
+			e_util_free_nullable_object_slist (new_components);
 		}
 
-		g_free (opm->calobj);
+		e_util_free_string_slist (opm->calobjs);
 	} break;
-	case OP_REMOVE_OBJECT: {
+	case OP_REMOVE_OBJECTS: {
 		OperationRemove *opr = (OperationRemove *) op;
 
 		if (!cancelled) {
-			ECalComponent *old_ecalcomp = NULL, *new_ecalcomp = NULL;
+			GSList *iter;
+			GSList *ids = NULL;
+			GSList *new_components = NULL;
+			GSList *old_components = NULL;
 
-			ecbm_remove_object (backend, op->cal, op->cancellable, opr->uid, opr->rid, opr->mod, &old_ecalcomp, &new_ecalcomp, &error);
+			for (iter = opr->ids; iter && !g_cancellable_is_cancelled (op->cancellable) && !error; iter = iter->next) {
+				const ECalComponentId *ecid = iter->data;
+				ECalComponent *old_ecalcomp = NULL, *new_ecalcomp = NULL;
 
-			if (!error) {
-				ECalComponentId *id = g_new0 (ECalComponentId, 1);
-				id->uid = g_strdup (opr->uid);
+				if (!ecid)
+					continue;
 
-				if (opr->mod == CALOBJ_MOD_THIS)
-					id->rid = g_strdup (opr->rid);
+				ecbm_remove_object (backend, op->cal, op->cancellable, ecid->uid, ecid->rid, opr->mod, &old_ecalcomp, &new_ecalcomp, &error);
 
-				e_data_cal_respond_remove_object (op->cal, op->opid, error, id, old_ecalcomp, new_ecalcomp);
+				if (!error) {
+					ECalComponentId *id = g_new0 (ECalComponentId, 1);
+					id->uid = g_strdup (ecid->uid);
 
-				e_cal_component_free_id (id);
-			} else
-				e_data_cal_respond_remove_object (op->cal, op->opid, error, NULL, old_ecalcomp, new_ecalcomp);
+					if (opr->mod == CALOBJ_MOD_THIS)
+						id->rid = g_strdup (ecid->rid);
 
-			if (old_ecalcomp)
-				g_object_unref (old_ecalcomp);
-			if (new_ecalcomp)
-				g_object_unref (new_ecalcomp);
+					ids = g_slist_prepend (ids, id);
+				}
+			}
+
+			ids = g_slist_reverse (ids);
+			old_components = g_slist_reverse (old_components);
+			new_components = g_slist_reverse (new_components);
+
+			e_data_cal_respond_remove_objects (op->cal, op->opid, error, ids, old_components, new_components);
+
+			g_slist_free_full (ids, (GDestroyNotify) e_cal_component_free_id);
+			e_util_free_nullable_object_slist (old_components);
+			e_util_free_nullable_object_slist (new_components);
 		}
 
-		g_free (opr->uid);
-		g_free (opr->rid);
+		g_slist_free_full (opr->ids, (GDestroyNotify) e_cal_component_free_id);
 	} break;
 	case OP_DISCARD_ALARM: {
 		OperationDiscardAlarm *opda = (OperationDiscardAlarm *) op;
@@ -3089,10 +3131,47 @@ STR_OP_DEF (ecbm_op_get_backend_property, OP_GET_BACKEND_PROPERTY)
 BASE_OP_DEF (ecbm_op_refresh, OP_REFRESH)
 BASE_OP_DEF (ecbm_op_remove, OP_REMOVE)
 
-STR_OP_DEF (ecbm_op_create_object, OP_CREATE_OBJECT)
+static void
+ecbm_op_create_objects (ECalBackend *backend,
+			EDataCal *cal,
+			guint32 opid,
+			GCancellable *cancellable,
+			const GSList *calobjs)
+{
+	OperationCreate *op;
+	ECalBackendMAPI *cbmapi;
+	ECalBackendMAPIPrivate *priv;
+
+	g_return_if_fail (backend != NULL);
+	g_return_if_fail (E_IS_CAL_BACKEND_MAPI (backend));
+
+	cbmapi = E_CAL_BACKEND_MAPI (backend);
+	priv = cbmapi->priv;
+	g_return_if_fail (priv != NULL);
+
+	g_object_ref (cbmapi);
+	if (cal)
+		g_object_ref (cal);
+	if (cancellable)
+		g_object_ref (cancellable);
+
+	op = g_new0 (OperationCreate, 1);
+	op->base.ot = OP_CREATE_OBJECTS;
+	op->base.cal = cal;
+	op->base.opid = opid;
+	op->base.cancellable = cancellable;
+	op->calobjs = e_util_copy_string_slist (NULL, calobjs);
+
+	e_mapi_operation_queue_push (priv->op_queue, op);
+}
 
 static void
-ecbm_op_modify_object (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *cancellable, const gchar *calobj, CalObjModType mod)
+ecbm_op_modify_objects (ECalBackend *backend,
+			EDataCal *cal,
+			guint32 opid,
+			GCancellable *cancellable,
+			const GSList *calobjs,
+			CalObjModType mod)
 {
 	OperationModify *op;
 	ECalBackendMAPI *cbmapi;
@@ -3112,20 +3191,26 @@ ecbm_op_modify_object (ECalBackend *backend, EDataCal *cal, guint32 opid, GCance
 		g_object_ref (cancellable);
 
 	op = g_new0 (OperationModify, 1);
-	op->base.ot = OP_MODIFY_OBJECT;
+	op->base.ot = OP_MODIFY_OBJECTS;
 	op->base.cal = cal;
 	op->base.opid = opid;
 	op->base.cancellable = cancellable;
-	op->calobj = g_strdup (calobj);
+	op->calobjs = e_util_copy_string_slist (NULL, calobjs);
 	op->mod = mod;
 
 	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
 static void
-ecbm_op_remove_object (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *cancellable, const gchar *uid, const gchar *rid, CalObjModType mod)
+ecbm_op_remove_objects (ECalBackend *backend,
+			EDataCal *cal,
+			guint32 opid,
+			GCancellable *cancellable,
+			const GSList *ids,
+			CalObjModType mod)
 {
 	OperationRemove *op;
+	GSList *iter;
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
 
@@ -3143,13 +3228,25 @@ ecbm_op_remove_object (ECalBackend *backend, EDataCal *cal, guint32 opid, GCance
 		g_object_ref (cancellable);
 
 	op = g_new0 (OperationRemove, 1);
-	op->base.ot = OP_REMOVE_OBJECT;
+	op->base.ot = OP_REMOVE_OBJECTS;
 	op->base.cal = cal;
 	op->base.opid = opid;
 	op->base.cancellable = cancellable;
-	op->uid = g_strdup (uid);
-	op->rid = g_strdup (rid);
+	op->ids = g_slist_copy ((GSList *) ids);
 	op->mod = mod;
+
+	for (iter = op->ids; iter; iter = iter->next) {
+		ECalComponentId *srcid = iter->data, *desid;
+
+		if (!srcid)
+			continue;
+
+		desid = g_new0 (ECalComponentId, 1);
+		desid->uid = g_strdup (srcid->uid);
+		desid->rid = g_strdup (srcid->rid);
+
+		iter->data = desid;
+	}
 
 	e_mapi_operation_queue_push (priv->op_queue, op);
 }
@@ -3402,9 +3499,9 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 	backend_class->get_object = ecbm_op_get_object;
 	backend_class->get_object_list = ecbm_op_get_object_list;
 	backend_class->get_attachment_uris = ecbm_op_get_attachment_uris;
-	backend_class->create_object = ecbm_op_create_object;
-	backend_class->modify_object = ecbm_op_modify_object;
-	backend_class->remove_object = ecbm_op_remove_object;
+	backend_class->create_objects = ecbm_op_create_objects;
+	backend_class->modify_objects = ecbm_op_modify_objects;
+	backend_class->remove_objects = ecbm_op_remove_objects;
 	backend_class->discard_alarm = ecbm_op_discard_alarm;
 	backend_class->receive_objects = ecbm_op_receive_objects;
 	backend_class->send_objects = ecbm_op_send_objects;
