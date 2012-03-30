@@ -582,7 +582,7 @@ e_mapi_subscribe_foreign_folder (GtkWindow *parent,
 	g_return_if_fail (CAMEL_IS_MAPI_STORE (store));
 
 	dialog = G_OBJECT (gtk_dialog_new_with_buttons (
-		_("Subscribe to other MAPI user's folder..."),
+		_("Subscribe to folder of other MAPI user..."),
 		parent,
 		GTK_DIALOG_DESTROY_WITH_PARENT,
 		GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE,

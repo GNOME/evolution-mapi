@@ -495,7 +495,7 @@ static GtkActionEntry mail_account_context_entries[] = {
 
 	{ "mail-mapi-subscribe-foreign-folder",
 	  NULL,
-	  N_("Subscribe to other user's folder..."),
+	  N_("Subscribe to folder of other user..."),
 	  NULL,
 	  NULL,  /* XXX Add a tooltip! */
 	  G_CALLBACK (action_subscribe_foreign_folder_cb) }
