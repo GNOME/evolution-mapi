@@ -6604,14 +6604,12 @@ mapi_profile_create (struct mapi_context *mapi_ctx,
 
 	add_string_attr (profname, "binding", empd->server);
 	add_string_attr (profname, "workstation", workstation);
+	add_string_attr (profname, "kerberos", empd->krb_sso ? "yes" : "no");
 
-	if (empd->krb_sso) {
-		/* note: domain and realm are intentially not added to
-		 *       the libmapi profile in the case of SSO enabled,
-		 *       as it changes the behavior, and breaks SSO support. */
-		add_string_attr (profname, "kerberos", "yes");
-	} else {
-		/* only add domain if !kerberos SSO */
+	/* note: domain and realm are intentially not added to
+	 *       the libmapi profile in the case of SSO enabled,
+	 *       as it changes the behavior, and breaks SSO support. */
+	if (!empd->krb_sso) {
 		add_string_attr (profname, "domain", empd->domain);
 	}
 
