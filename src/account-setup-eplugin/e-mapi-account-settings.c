@@ -609,12 +609,14 @@ get_selected_mapi_source (EShellView *shell_view,
 	g_object_get (shell_sidebar, "selector", &selector, NULL);
 	g_return_val_if_fail (selector != NULL, FALSE);
 
-	source = e_source_selector_peek_primary_selection (selector);
+	source = e_source_selector_ref_primary_selection (selector);
 	uri = source ? e_source_get_uri (source) : NULL;
-	if (uri && g_str_has_prefix (uri, "mapi://"))
-		source = g_object_ref (source);
-	else
-		source = NULL;
+	if (!uri || !g_str_has_prefix (uri, "mapi://")) {
+		if (source) {
+			g_object_unref (source);
+			source = NULL;
+		}
+	}
 
 	g_free (uri);
 	g_object_unref (selector);
