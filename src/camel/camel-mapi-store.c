@@ -818,6 +818,11 @@ mapi_get_folder_info_offline (CamelStore *store, const gchar *top,
 
 	unescape_folder_names (fi);
 
+	if (!fi && error && !*error)
+		g_set_error_literal (error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER,
+			(flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST) != 0 ?
+			_("No public folder found") : _("No folder found"));
+
 	return fi;
 }
 
