@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi.master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2012-03-30 14:13+0000\n"
-"PO-Revision-Date: 2012-04-01 18:41+0200\n"
+"POT-Creation-Date: 2012-04-25 11:59+0000\n"
+"PO-Revision-Date: 2012-04-26 12:46+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -77,8 +77,8 @@ msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
 msgstr ""
-"El reino del nombre no puede estar vacío cuando «Kerberos» está "
-"seleccionado. Rellénelo con valores correctos."
+"El reino del nombre no puede estar vacío cuando «Kerberos» está seleccionado. "
+"Rellénelo con valores correctos."
 
 #: ../src/account-setup-eplugin/e-mapi-account-setup.c:495
 msgid "Connecting to a server, please wait..."
@@ -258,15 +258,14 @@ msgid "Folder size..."
 msgstr "Tamaño de la carpeta…"
 
 #: ../src/account-setup-eplugin/e-mapi-account-settings.c:498
-#| msgid "Subscribe to other user's folder..."
 msgid "Subscribe to folder of other user..."
 msgstr "Suscribirse a la carpeta de otro usuario…"
 
 #: ../src/account-setup-eplugin/e-mapi-account-settings.c:507
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:740
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:763
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:785
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:807
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:742
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:765
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:787
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:809
 msgid "Permissions..."
 msgstr "Permisos…"
 
@@ -274,19 +273,19 @@ msgstr "Permisos…"
 msgid "Edit MAPI folder permissions"
 msgstr "Editar los permisos de la carpeta MAPI"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:742
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:744
 msgid "Edit MAPI calendar permissions"
 msgstr "Editar los permisos del calendario MAPI"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:765
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:767
 msgid "Edit MAPI tasks permissions"
 msgstr "Editar los permisos de las tareas MAPI"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:787
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:789
 msgid "Edit MAPI memos permissions"
 msgstr "Editar los permisos de las notas MAPI"
 
-#: ../src/account-setup-eplugin/e-mapi-account-settings.c:809
+#: ../src/account-setup-eplugin/e-mapi-account-settings.c:811
 msgid "Edit MAPI contacts permissions"
 msgstr "Editar los permisos de los contactos MAPI"
 
@@ -603,7 +602,6 @@ msgstr ""
 "Comprobando la disponibilidad de la carpeta «%s» del usuario «%s», espere…"
 
 #: ../src/account-setup-eplugin/e-mapi-subscribe-foreign-folder.c:585
-#| msgid "Subscribe to other MAPI user's folder..."
 msgid "Subscribe to folder of other MAPI user..."
 msgstr "Suscribirse a la carpeta de otro usuario MAPI…"
 
@@ -890,107 +888,116 @@ msgstr ""
 msgid "Cannot find folder in a local cache"
 msgstr "No se puede encontrar la carpeta en la caché local"
 
-#: ../src/camel/camel-mapi-store.c:467 ../src/camel/camel-mapi-store.c:1146
+#: ../src/camel/camel-mapi-store.c:467 ../src/camel/camel-mapi-store.c:1151
 msgid "Folder list is not available in offline mode"
 msgstr "La lista de carpetas no está disponible en modo desconectado"
 
-#: ../src/camel/camel-mapi-store.c:1170 ../src/camel/camel-mapi-store.c:2128
+#: ../src/camel/camel-mapi-store.c:824
+#| msgid "No users found"
+msgid "No public folder found"
+msgstr "No se encontró ninguna carpeta pública"
+
+#: ../src/camel/camel-mapi-store.c:824
+#| msgid "No users found"
+msgid "No folder found"
+msgstr "No se encontró ninguna carpeta"
+
+#: ../src/camel/camel-mapi-store.c:1175 ../src/camel/camel-mapi-store.c:2133
 #, c-format
 msgid "Connecting to '%s'"
 msgstr "Conectando a «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1233
+#: ../src/camel/camel-mapi-store.c:1238
 msgid "Cannot create MAPI folders in offline mode"
 msgstr "No se pueden crear carpetas MAPI en modo desconectado"
 
-#: ../src/camel/camel-mapi-store.c:1240
+#: ../src/camel/camel-mapi-store.c:1245
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "No se puede crear la carpeta nueva «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1249
+#: ../src/camel/camel-mapi-store.c:1254
 #, c-format
 msgid "Authentication failed"
 msgstr "Falló la autenticación"
 
-#: ../src/camel/camel-mapi-store.c:1259
-#| msgid "MAPI folders can be created only within user's mailbox"
+#: ../src/camel/camel-mapi-store.c:1264
 msgid "MAPI folders can be created only within mailbox of the logged user"
 msgstr ""
 "Las carpetas MAPI solo se pueden crear en el buzón del usuario registrado"
 
-#: ../src/camel/camel-mapi-store.c:1275 ../src/camel/camel-mapi-store.c:1387
+#: ../src/camel/camel-mapi-store.c:1280 ../src/camel/camel-mapi-store.c:1392
 #, c-format
 msgid "Cannot find folder '%s'"
 msgstr "No se puede encontrar la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1327
+#: ../src/camel/camel-mapi-store.c:1332
 #, c-format
 msgid "Cannot create folder '%s': %s"
 msgstr "No se puede crear la carpeta «%s»: %s"
 
-#: ../src/camel/camel-mapi-store.c:1332
+#: ../src/camel/camel-mapi-store.c:1337
 #, c-format
 msgid "Cannot create folder '%s'"
 msgstr "No se puede crear la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1360 ../src/camel/camel-mapi-store.c:1376
+#: ../src/camel/camel-mapi-store.c:1365 ../src/camel/camel-mapi-store.c:1381
 msgid "Cannot delete MAPI folders in offline mode"
 msgstr "No se pueden eliminar carpetas MAPI en modo desconectado"
 
-#: ../src/camel/camel-mapi-store.c:1422
+#: ../src/camel/camel-mapi-store.c:1427
 #, c-format
 msgid "Cannot remove folder '%s': %s"
 msgstr "No se puede quitar la carpeta «%s»: «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1429
+#: ../src/camel/camel-mapi-store.c:1434
 #, c-format
 msgid "Cannot remove folder '%s'"
 msgstr "No se puede quitar la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1460 ../src/camel/camel-mapi-store.c:1479
+#: ../src/camel/camel-mapi-store.c:1465 ../src/camel/camel-mapi-store.c:1484
 msgid "Cannot rename MAPI folders in offline mode"
 msgstr "No se pueden renombrar carpetas MAPI en modo desconectado"
 
-#: ../src/camel/camel-mapi-store.c:1490
+#: ../src/camel/camel-mapi-store.c:1495
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
 msgstr "No se puede renombrar la carpeta MAPI «%s». La carpeta no existe"
 
-#: ../src/camel/camel-mapi-store.c:1502
+#: ../src/camel/camel-mapi-store.c:1507
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'"
 msgstr "No se puede renombrar la carpeta MAPI predeterminada «%s» a «%s»."
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1529 ../src/camel/camel-mapi-store.c:1562
-#: ../src/camel/camel-mapi-store.c:1641
+#: ../src/camel/camel-mapi-store.c:1534 ../src/camel/camel-mapi-store.c:1567
+#: ../src/camel/camel-mapi-store.c:1646
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "No se puede renombrar la carpeta MAPI «%s» a «%s»."
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
 #. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1555 ../src/camel/camel-mapi-store.c:1635
+#: ../src/camel/camel-mapi-store.c:1560 ../src/camel/camel-mapi-store.c:1640
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "No se puede renombrar la carpeta MAPI «%s» a «%s»: %s"
 
-#: ../src/camel/camel-mapi-store.c:1739
+#: ../src/camel/camel-mapi-store.c:1744
 msgid "Cannot subscribe MAPI folders in offline mode"
 msgstr "No se puede suscribir a las carpetas MAPI en modo desconectado"
 
-#: ../src/camel/camel-mapi-store.c:1756
+#: ../src/camel/camel-mapi-store.c:1761
 #, c-format
 msgid "Folder '%s' not found"
 msgstr "No se encontró el complemento «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1879
+#: ../src/camel/camel-mapi-store.c:1884
 msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr "No se pueden desuscribir carpetas MAPI en modo desconectado"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:2087
+#: ../src/camel/camel-mapi-store.c:2092
 #: ../src/camel/camel-mapi-transport.c:181
 #, c-format
 msgid "Exchange MAPI server %s"
@@ -999,24 +1006,24 @@ msgstr "Servidor MAPI Exchange %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:2091
+#: ../src/camel/camel-mapi-store.c:2096
 #: ../src/camel/camel-mapi-transport.c:184
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Servidor MAPI Exchange para %s en %s"
 
-#: ../src/camel/camel-mapi-store.c:2110
+#: ../src/camel/camel-mapi-store.c:2115
 msgid "Cannot connect MAPI store in offline mode"
 msgstr "No se conectar a un almacenamiento MAPI en modo desconectado."
 
-#: ../src/camel/camel-mapi-store.c:2156
+#: ../src/camel/camel-mapi-store.c:2161
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received or sent."
 msgstr ""
 "El buzón de correo «%s» está lleno, no se enviarán ni se recibirán mensajes "
 "nuevos."
 
-#: ../src/camel/camel-mapi-store.c:2158
+#: ../src/camel/camel-mapi-store.c:2163
 #, c-format
 msgid ""
 "Mailbox '%s' is near its size limit, message send will be disabled soon."
@@ -1024,17 +1031,17 @@ msgstr ""
 "El buzón de correo «%s» está cerca de su límite de tamaño, el envío de "
 "mensajes se desactivará pronto."
 
-#: ../src/camel/camel-mapi-store.c:2162
+#: ../src/camel/camel-mapi-store.c:2167
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received."
 msgstr "El buzón de correo «%s» está lleno, no se recibirán mensajes nuevos."
 
-#: ../src/camel/camel-mapi-store.c:2164
+#: ../src/camel/camel-mapi-store.c:2169
 #, c-format
 msgid "Mailbox '%s' is near its size limit."
 msgstr "El buzón de correo «%s» está cerca de su límite de tamaño."
 
-#: ../src/camel/camel-mapi-store.c:2574
+#: ../src/camel/camel-mapi-store.c:2579
 msgid "Authentication password not available"
 msgstr "La contraseña de la autenticación no está disponible"
 
