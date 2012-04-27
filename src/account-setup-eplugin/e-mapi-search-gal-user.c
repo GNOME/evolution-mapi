@@ -289,19 +289,16 @@ list_gal_search_mids_cb (EMapiConnection *conn,
 			 GCancellable *cancellable,
 			 GError **perror)
 {
+	GSList **pmids = user_data;
+	mapi_id_t *mid;
+
 	g_return_val_if_fail (object_data != NULL, FALSE);
 	g_return_val_if_fail (user_data != NULL, FALSE);
 
-	/* zero means PidTagObjectType not found or supported */
-	if (object_data->obj_type == MAPI_MAILUSER || object_data->obj_type == 0) {
-		GSList **pmids = user_data;
-		mapi_id_t *mid;
+	mid = g_new0 (mapi_id_t, 1);
+	*mid = object_data->mid;
 
-		mid = g_new0 (mapi_id_t, 1);
-		*mid = object_data->mid;
-
-		*pmids = g_slist_prepend (*pmids, mid);
-	}
+	*pmids = g_slist_prepend (*pmids, mid);
 
 	return TRUE;
 }
