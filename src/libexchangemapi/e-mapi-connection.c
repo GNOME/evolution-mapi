@@ -1755,7 +1755,7 @@ list_objects_internal_cb (EMapiConnection *conn,
 	ListObjectsData lod = { 0 };
 	const mapi_id_t	*pmid;
 	const gchar *msg_class;
-	const uint32_t *pmsg_flags, *pobj_type;
+	const uint32_t *pmsg_flags;
 	const struct FILETIME *last_modified;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
@@ -1764,13 +1764,11 @@ list_objects_internal_cb (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (srow != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
 	pmid = e_mapi_util_find_row_propval (srow, PidTagMid);
-	pobj_type = e_mapi_util_find_row_propval (srow, PidTagObjectType);
 	msg_class = e_mapi_util_find_row_propval (srow, PidTagMessageClass);
 	pmsg_flags = e_mapi_util_find_row_propval (srow, PidTagMessageFlags);
 	last_modified = e_mapi_util_find_row_propval (srow, PidTagLastModificationTime);
 
 	lod.mid = pmid ? *pmid : 0;
-	lod.obj_type = pobj_type ? *pobj_type : 0;
 	lod.msg_class = msg_class;
 	lod.msg_flags = pmsg_flags ? *pmsg_flags : 0;
 	lod.last_modified = last_modified ? e_mapi_util_filetime_to_time_t (last_modified) : 0;
@@ -4335,11 +4333,8 @@ e_mapi_connection_list_gal_objects (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	propTagArray = set_SPropTagArray (mem_ctx, 4,
-					  PidTagObjectType,
-					  PidTagMessageClass,
-					  PidTagMessageFlags,
-					  PidTagLastModificationTime);
+	/* other listing tags not found/used by GAL */
+	propTagArray = set_SPropTagArray (mem_ctx, 1, PidTagLastModificationTime);
 
 	if (build_rs_cb) {
 		struct mapi_SRestriction *restrictions = NULL;
@@ -4583,13 +4578,23 @@ e_mapi_connection_transfer_gal_objects (EMapiConnection *conn,
 		replace_hash = prepare_maybe_replace_hash (named_ids_list, named_ids_len, TRUE);
 
 		if (replace_hash) {
-			for (ii = 0; ii < propTagArray->cValues; ii++) {
+			guint prop_count = propTagArray->cValues, jj;
+
+			for (ii = 0, jj = 0; ii < prop_count; ii++) {
 				uint32_t proptag = propTagArray->aulPropTag[ii];
 
 				maybe_replace_named_id_tag (&proptag, replace_hash);
 
-				propTagArray->aulPropTag[ii] = proptag;
+				propTagArray->aulPropTag[jj] = proptag;
+
+				if (proptag == MAPI_E_RESERVED)
+					propTagArray->cValues--;
+				else
+					jj++;
 			}
+
+			if (jj < ii)
+				propTagArray->aulPropTag[jj] = 0;
 
 			reverse_replace_hash = g_hash_table_new (g_direct_hash, g_direct_equal);
 
@@ -5168,6 +5173,31 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 				while (j < SPropTagArray->cValues) {
 					SPropTagArray->aulPropTag[j] = (SPropTagArray->aulPropTag[j] & (~0xFFFF)) | PT_ERROR;
 					j++;
+				}
+			}
+
+			/* 2010 server can return call_failed when didn't find any properties */
+			if (ms == MAPI_E_CALL_FAILED)
+				ms = MAPI_E_NOT_FOUND;
+
+			if (ms == MAPI_E_NOT_FOUND || ms == MAPI_E_SUCCESS) {
+				for (j = 0; j < SPropTagArray->cValues; j++) {
+					/* if not found then 0 is returned in the array */
+					if (SPropTagArray->aulPropTag[j] != 0 &&
+					    (SPropTagArray->aulPropTag[j] & 0xFFFF) != PT_ERROR)
+						break;
+				}
+
+				/* all of them failed to read, try the Contacts folder in hope
+				   the named properties has the same numbers there as in GAL */
+				if (j == SPropTagArray->cValues) {
+					mapi_object_t obj_contacts;
+
+					if (e_mapi_connection_open_default_folder (conn, olFolderContacts, &obj_contacts, cancellable, NULL)) {
+						/* always keep MAPI_E_NOT_FOUND, thus the later processing on the storing of saved items is skipped */
+						e_mapi_connection_resolve_named_props (conn, &obj_contacts, named_ids_list, named_ids_n_elems, cancellable, NULL);
+						e_mapi_connection_close_folder (conn, &obj_contacts, cancellable, NULL);
+					}
 				}
 			}
 		} else {

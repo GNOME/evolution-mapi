@@ -56,7 +56,6 @@ typedef struct {
 
 typedef struct {
 	mapi_id_t mid;		/* message ID, from PidTagMid */
-	uint32_t obj_type;	/* PidTagObjectType */
 	const gchar *msg_class;	/* PidTagMessageClass */
 	uint32_t msg_flags;	/* MAPI MSGFLAG_* bit OR, from PidTagMessageFlags */
 	time_t last_modified;	/* PidTagLastModificationTime as UTC */
