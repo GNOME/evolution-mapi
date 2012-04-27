@@ -1,3 +1,23 @@
+evolution-mapi 3.5.1  2012-04-27
+--------------------------------
+
+Bugs:
+	Bug #672175 - Make CamelFolderSearch cancellable (Milan Crha)
+	Bug #670457 - Add bulk methods to ECalClient (Milan Crha)
+	Bug #246255 - "Other User's Folder" - avoid this genitive construction (Milan Crha)
+	Bug #668819 - Set error when no folder found (Milan Crha)
+
+Miscellanous:
+	Explicitly enable/disable kerberos in MAPI profile (Milan Crha)
+	Adapt to API change in ESourceSelector (Milan Crha)
+	Change GAL named-id property fetching and GAL listing (Milan Crha)
+
+Translations:
+	Matej Urbančič (sl)
+	Daniel Mustieles (es)
+	Daniel Nylander (sv)
+	Marek Černocký (cs)
+
 evolution-mapi 3.4.0  2012-03-26
 --------------------------------
 
