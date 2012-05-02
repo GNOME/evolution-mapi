@@ -205,6 +205,8 @@ ei_to_gba(const struct ema_ExceptionInfo *ei, GByteArray *gba)
 	}
 	if (ei->OverrideFlags&ARO_REMINDERDELTA) {
 		GBA_APPEND_LVAL (gba, ei->ReminderDelta);
+	}
+	if (ei->OverrideFlags & ARO_REMINDER) {
 		GBA_APPEND_LVAL (gba, ei->ReminderSet);
 	}
 	if (ei->OverrideFlags&ARO_LOCATION) {
@@ -363,6 +365,9 @@ gba_to_ei(const GByteArray *gba, ptrdiff_t *off, struct ema_ExceptionInfo *ei)
 
 	if (ei->OverrideFlags&ARO_REMINDERDELTA) {
 		GBA_DEREF_OFFSET (gba, *off, ei->ReminderDelta, guint32);
+	}
+
+	if (ei->OverrideFlags & ARO_REMINDER) {
 		GBA_DEREF_OFFSET (gba, *off, ei->ReminderSet, guint32);
 	}
 
