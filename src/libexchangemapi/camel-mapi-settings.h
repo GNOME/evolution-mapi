@@ -63,6 +63,7 @@ void		camel_mapi_settings_set_check_all
 						(CamelMapiSettings *settings,
 						 gboolean check_all);
 const gchar *	camel_mapi_settings_get_domain	(CamelMapiSettings *settings);
+gchar *		camel_mapi_settings_dup_domain	(CamelMapiSettings *settings);
 void		camel_mapi_settings_set_domain	(CamelMapiSettings *settings,
 						 const gchar *domain);
 gboolean	camel_mapi_settings_get_filter_junk
@@ -81,9 +82,11 @@ void		camel_mapi_settings_set_kerberos
 						(CamelMapiSettings *settings,
 						 gboolean kerberos);
 const gchar *	camel_mapi_settings_get_profile	(CamelMapiSettings *settings);
+gchar *		camel_mapi_settings_dup_profile	(CamelMapiSettings *settings);
 void		camel_mapi_settings_set_profile	(CamelMapiSettings *settings,
 						 const gchar *profile);
 const gchar *	camel_mapi_settings_get_realm	(CamelMapiSettings *settings);
+gchar *		camel_mapi_settings_dup_realm	(CamelMapiSettings *settings);
 void		camel_mapi_settings_set_realm	(CamelMapiSettings *settings,
 						 const gchar *realm);
 gboolean	camel_mapi_settings_get_listen_notifications
