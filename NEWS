@@ -1,3 +1,16 @@
+evolution-mapi 3.4.2  2012-05-14
+--------------------------------
+
+Bugs:
+	Bug #675283 - Fails to parse recurring blob (Milan Crha)
+
+Miscellanous:
+	Explicitly enable/disable kerberos in MAPI profile (Milan Crha)
+	Change GAL named-id property fetching and GAL listing (Milan Crha)
+
+Translations:
+	Bruno Brouard (fr)
+
 evolution-mapi 3.4.1  2012-04-16
 --------------------------------
 
