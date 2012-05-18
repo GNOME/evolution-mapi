@@ -1987,7 +1987,7 @@ camel_mapi_folder_init (CamelMapiFolder *mapi_folder)
 	folder->permanent_flags = CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_DELETED |
 		CAMEL_MESSAGE_DRAFT | CAMEL_MESSAGE_FLAGGED | CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_JUNK;
 
-	folder->folder_flags = CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY | CAMEL_FOLDER_HAS_SEARCH_CAPABILITY;
+	folder->folder_flags = CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY;
 
 #ifdef ENABLE_THREADS
 	g_static_mutex_init(&mapi_folder->priv->search_lock);
