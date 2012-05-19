@@ -764,14 +764,11 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 
 	camel_operation_push_message (cancellable, _("Refreshing folder '%s'"), camel_folder_get_display_name (folder));
 
-	camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-
 	si = camel_mapi_store_summary_get_folder_id (mapi_store->summary, mapi_folder->folder_id);
 	msi = (CamelMapiStoreInfo *) si;
 
 	if (!msi) {
 		camel_operation_pop_message (cancellable);
-		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		camel_folder_thaw (folder);
 
 		g_return_val_if_fail (msi != NULL, FALSE);
@@ -863,8 +860,6 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 	if (gco.removed_uids)
 		g_hash_table_destroy (gco.removed_uids);
 
-	camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-
 	camel_operation_pop_message (cancellable);
 
 	if (status) {
@@ -885,9 +880,7 @@ mapi_refresh_folder (CamelFolder *folder, GCancellable *cancellable, GError **er
 
 	CamelMapiStore *mapi_store;
 	CamelMapiFolder *mapi_folder;
-	CamelService *service;
 	CamelStore *parent_store;
-	gboolean is_locked = FALSE;
 	gboolean status;
 	gboolean success = TRUE;
 	GError *mapi_error = NULL;
@@ -896,7 +889,6 @@ mapi_refresh_folder (CamelFolder *folder, GCancellable *cancellable, GError **er
 
 	mapi_folder = CAMEL_MAPI_FOLDER (folder);
 	mapi_store = CAMEL_MAPI_STORE (parent_store);
-	service = CAMEL_SERVICE (parent_store);
 
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (mapi_store)))
 		goto end1;
@@ -913,9 +905,6 @@ mapi_refresh_folder (CamelFolder *folder, GCancellable *cancellable, GError **er
 	if (camel_folder_is_frozen (folder)) {
 		mapi_folder->need_refresh = TRUE;
 	}
-
-	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-	is_locked = TRUE;
 
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (mapi_store))) {
 		/*BUG : Fix exception string.*/
@@ -963,13 +952,7 @@ mapi_refresh_folder (CamelFolder *folder, GCancellable *cancellable, GError **er
 
 	camel_folder_summary_touch (folder->summary);
 
-	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-	is_locked = FALSE;
-
- end1:
-	if (is_locked)
-		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-
+end1:
 	return success;
 }
 
@@ -1297,13 +1280,11 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 		}
 		g_ptr_array_free (folders, TRUE);
 
-		camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		status = cmf_open_folder (mapi_folder, conn, &obj_folder, cancellable, &mapi_error);
 		if (status) {
 			status = e_mapi_connection_empty_folder (conn, &obj_folder, cancellable, &mapi_error);
 			e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
 		}
-		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 		if (status) {
 			camel_folder_freeze (folder);
@@ -1357,15 +1338,11 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 	if (deleted_items) {
 		mapi_object_t obj_folder;
 
-		camel_service_lock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-
 		status = cmf_open_folder (mapi_folder, conn, &obj_folder, cancellable, NULL);
 		if (status) {
 			status = e_mapi_connection_remove_items (conn, &obj_folder, deleted_items, cancellable, NULL);
 			e_mapi_connection_close_folder (conn, &obj_folder, cancellable, NULL);
 		}
-
-		camel_service_unlock (CAMEL_SERVICE (mapi_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 		if (status) {
 			while (deleted_items_uid) {
@@ -1608,12 +1585,8 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store, full_name);
 	e_mapi_util_mapi_id_from_string (folder_id, &fid);
 
-	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-	if (!camel_mapi_store_connected (mapi_store, error)) {
-		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
+	if (!camel_mapi_store_connected (mapi_store, error))
 		return FALSE;
-	}
-	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	is_junk_folder = (mapi_folder->camel_folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_JUNK;
 
@@ -1693,22 +1666,17 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 	has_obj_folder = cmf_open_folder (mapi_folder, conn, &obj_folder, cancellable, NULL);
 
 	if (read_items && has_obj_folder) {
-		camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		if (read_with_receipt)
 			e_mapi_connection_set_flags (conn, &obj_folder, read_with_receipt, CLEAR_RN_PENDING, cancellable, NULL);
 		e_mapi_connection_set_flags (conn, &obj_folder, read_items, 0, cancellable, NULL);
-		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 	}
 
 	if (unread_items && has_obj_folder) {
-		camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		e_mapi_connection_set_flags (conn, &obj_folder, unread_items, CLEAR_READ_FLAG, cancellable, NULL);
-		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 	}
 
 	/* Remove messages from server*/
 	if (deleted_items && has_obj_folder) {
-		camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		if ((mapi_folder->camel_folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH) {
 			e_mapi_connection_remove_items (conn, &obj_folder, deleted_items, cancellable, NULL);
 		} else {
@@ -1727,8 +1695,6 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 				g_error_free (err);
 			}
 		}
-
-		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 	}
 
 	if (junk_items && has_obj_folder) {
@@ -1737,13 +1703,11 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 		GError *err = NULL;
 
 		if (has_obj_folder) {
-			camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 			e_mapi_util_mapi_id_from_string (camel_mapi_store_system_folder_fid (mapi_store, olFolderJunk), &junk_fid);
 			if (e_mapi_connection_open_personal_folder (conn, junk_fid, &junk_obj_folder, cancellable, &err)) {
 				e_mapi_connection_copymove_items (conn, &obj_folder, &junk_obj_folder, FALSE, junk_items, cancellable, &err);
 				e_mapi_connection_close_folder (conn, &junk_obj_folder, cancellable, &err);
 			}
-			camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		}
 
 		/* in junk_items are only emails which are not deleted */

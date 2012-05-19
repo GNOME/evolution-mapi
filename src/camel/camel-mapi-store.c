@@ -1154,8 +1154,6 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 
 	service = CAMEL_SERVICE (store);
 
-	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-
 	if (camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
 		CamelServiceConnectionStatus status;
 
@@ -1173,7 +1171,7 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 				gchar *name = camel_service_get_name (service, TRUE);
 
 				camel_operation_push_message (cancellable, _("Connecting to '%s'"), name);
-				camel_service_connect_sync (service, NULL);
+				camel_service_connect_sync (service, cancellable, NULL);
 				camel_operation_pop_message (cancellable);
 
 				g_free (name);
@@ -1182,10 +1180,8 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 			if (check_for_connection (service, NULL) || status == CAMEL_SERVICE_CONNECTING) {
 				gboolean first_check = !mapi_store->priv->folders_synced;
 
-				if (!mapi_folders_sync (mapi_store, flags, cancellable, error)) {
-					camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
+				if (!mapi_folders_sync (mapi_store, flags, cancellable, error))
 					return NULL;
-				}
 
 				if (first_check) {
 					camel_store_summary_touch (mapi_store->summary);
@@ -1194,8 +1190,6 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 			}
 		}
 	}
-
-	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	return mapi_get_folder_info_offline (store, top, flags, error);
 }
@@ -1265,15 +1259,12 @@ mapi_store_create_folder_sync (CamelStore *store,
 		return NULL;
 	}
 
-	camel_service_lock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-
 	if (parent_name && *parent_name)
 		parent_id = g_strdup (g_hash_table_lookup (priv->name_hash, parent_name));
 	else
 		parent_id = NULL;
 
 	if (!parent_id) {
-		camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		g_set_error (
 			error, CAMEL_SERVICE_ERROR,
 			CAMEL_SERVICE_ERROR_UNAVAILABLE,
@@ -1284,10 +1275,8 @@ mapi_store_create_folder_sync (CamelStore *store,
 	new_folder_id = 0;
 
 	conn = priv->conn;
-	if (!cms_open_folder (mapi_store, conn, parent_fid, &obj_folder, cancellable, error)) {
-		camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	if (!cms_open_folder (mapi_store, conn, parent_fid, &obj_folder, cancellable, error))
 		return NULL;
-	}
 
 	if (!e_mapi_connection_create_folder (conn, &obj_folder, folder_name, IPF_NOTE, &new_folder_id, cancellable, &mapi_error))
 		new_folder_id = 0;
@@ -1338,7 +1327,6 @@ mapi_store_create_folder_sync (CamelStore *store,
 		}
 	}
 
-	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	return root;
 
 }
@@ -1366,11 +1354,7 @@ mapi_store_delete_folder_sync (CamelStore *store,
 		return FALSE;
 	}
 
-	camel_service_lock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-
 	if (!camel_mapi_store_connected ((CamelMapiStore *)store, &local_error)) {
-		camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-
 		if (local_error != NULL) {
 			g_propagate_error (error, local_error);
 			return FALSE;
@@ -1385,7 +1369,6 @@ mapi_store_delete_folder_sync (CamelStore *store,
 
 	folder_id = g_hash_table_lookup (priv->name_hash, folder_name);
 	if (!folder_id) {
-		camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		g_set_error (
 			error, CAMEL_SERVICE_ERROR,
 			CAMEL_SERVICE_ERROR_UNAVAILABLE,
@@ -1436,8 +1419,6 @@ mapi_store_delete_folder_sync (CamelStore *store,
 		}
 	}
 
-	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-
 	return success;
 }
 
@@ -1469,11 +1450,7 @@ mapi_store_rename_folder_sync (CamelStore *store,
 	service = CAMEL_SERVICE (store);
 	user_cache_dir = camel_service_get_user_cache_dir (service);
 
-	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-
 	if (!camel_mapi_store_connected ((CamelMapiStore *)store, &local_error)) {
-		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-
 		if (local_error != NULL) {
 			g_propagate_error (error, local_error);
 			return FALSE;
@@ -1494,7 +1471,6 @@ mapi_store_rename_folder_sync (CamelStore *store,
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			_("Cannot rename MAPI folder '%s'. Folder does not exist"),
 			old_name);
-		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		return FALSE;
 	}
 
@@ -1506,7 +1482,6 @@ mapi_store_rename_folder_sync (CamelStore *store,
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			_("Cannot rename MAPI default folder '%s' to '%s'"),
 			old_name, new_name);
-		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		return FALSE;
 	}
 
@@ -1533,7 +1508,6 @@ mapi_store_rename_folder_sync (CamelStore *store,
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			_("Cannot rename MAPI folder '%s' to '%s'"),
 			old_name, new_name);
-		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		g_free (old_parent);
 		g_free (new_parent);
 		return FALSE;
@@ -1568,7 +1542,6 @@ mapi_store_rename_folder_sync (CamelStore *store,
 					old_name, new_name);
 			}
 
-			camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 			g_free (old_parent);
 			g_free (new_parent);
 			return FALSE;
@@ -1632,7 +1605,6 @@ mapi_store_rename_folder_sync (CamelStore *store,
 			}
 
 			if (!status) {
-				camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 				if (local_error) {
 					if (!e_mapi_utils_propagate_cancelled_error (local_error, error))
 						g_set_error (
@@ -1667,8 +1639,6 @@ mapi_store_rename_folder_sync (CamelStore *store,
 
 		g_free (folder_id);
 	}
-
-	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	si = camel_store_summary_path (mapi_store->summary, old_name);
 	if (si) {
@@ -2123,19 +2093,15 @@ mapi_connect_sync (CamelService *service,
 		return FALSE;
 	}
 
-	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-	if (check_for_connection (service, NULL)) {
-		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
+	if (check_for_connection (service, NULL))
 		return TRUE;
-	}
 
 	name = camel_service_get_name (service, TRUE);
 	camel_operation_push_message (cancellable, _("Connecting to '%s'"), name);
 
 	if (!camel_session_authenticate_sync (session, service, NULL, cancellable, error)) {
 		camel_operation_pop_message (cancellable);
-		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-		camel_service_disconnect_sync (service, TRUE, NULL);
+		camel_service_disconnect_sync (service, TRUE, cancellable, NULL);
 		g_free (name);
 		return FALSE;
 	}
@@ -2178,8 +2144,6 @@ mapi_connect_sync (CamelService *service,
 	}
 
 	g_free (name);
-
-	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	return TRUE;
 }
@@ -2679,7 +2643,7 @@ gboolean
 camel_mapi_store_connected (CamelMapiStore *store, GError **error)
 {
 	return camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))
-	    && camel_service_connect_sync ((CamelService *)store, error);
+	    && camel_service_connect_sync ((CamelService *)store, NULL, error);
 }
 
 static void
