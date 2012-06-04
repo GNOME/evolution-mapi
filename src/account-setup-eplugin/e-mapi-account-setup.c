@@ -71,21 +71,13 @@ void e_mapi_cal_commit (EPlugin *epl, EConfigTarget *target);
 
 static EMapiAccountListener *config_listener = NULL;
 
-static void
-free_mapi_listener ( void )
-{
-	g_object_unref (config_listener);
-}
-
 gint
 e_plugin_lib_enable (EPlugin *ep, gint enable)
 {
 	d(e_mapi_debug_print ("Loading Exchange MAPI Plugin"));
 
-	if (!config_listener) {
+	if (!config_listener)
 		config_listener = e_mapi_account_listener_new ();
-		g_atexit ( free_mapi_listener );
-	}
 
 	return 0;
 }
