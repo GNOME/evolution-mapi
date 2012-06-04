@@ -1,3 +1,23 @@
+evolution-mapi 3.5.2  2012-06-04
+--------------------------------
+
+Bugs:
+	Bug #675283 - Fails to parse recurring blob (Milan Crha)
+	Bug #675871 - Hide gnu make extensions warnings for automake 1.12
+
+Miscellanous:
+	CamelMapiSettings: Add thread-safe accessors for string properties. (Matthew Barnes)
+	Remove camel_folder_has_search_capability() (Milan Crha)
+	Adapt to CamelService API changes. (Matthew Barnes)
+	Replace/remove deprecated GLib functions (Milan Crha)
+
+Translations:
+	Bruno Brouard (fr)
+	Marek Černocký (cs)
+	Rudolfs Mazurs (lv)
+	Matej Urbančič (sl)
+	Andika Triwidada (id)
+
 evolution-mapi 3.5.1  2012-04-27
 --------------------------------
 
