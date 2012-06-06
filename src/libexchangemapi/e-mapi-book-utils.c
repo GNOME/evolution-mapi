@@ -127,6 +127,7 @@ e_mapi_book_utils_contact_from_object (EMapiConnection *conn,
 				       const gchar *book_uri)
 {
 	EContact *contact;
+	gchar *email_1;
 	const mapi_id_t *pmid;
 	gint i;
 
@@ -341,12 +342,15 @@ e_mapi_book_utils_contact_from_object (EMapiConnection *conn,
 		}
 	}
 
-	if (!e_contact_get (contact, E_CONTACT_EMAIL_1)) {
+	email_1 = e_contact_get (contact, E_CONTACT_EMAIL_1);
+	if (!email_1) {
 		gconstpointer value = get_proptag (PidTagPrimarySmtpAddress);
 
 		if (value)
 			e_contact_set (contact, E_CONTACT_EMAIL_1, value);
 	}
+
+	g_free (email_1);
 
 	#undef get_proptag
 	#undef get_str_proptag

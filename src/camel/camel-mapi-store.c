@@ -2594,6 +2594,7 @@ mapi_authenticate_sync (CamelService *service,
 			error, CAMEL_SERVICE_ERROR,
 			CAMEL_SERVICE_ERROR_UNAVAILABLE,
 			mapi_error->message);
+		g_clear_error (&mapi_error);
 		result = CAMEL_AUTHENTICATION_ERROR;
 	} else {
 		/* mapi_error should be set */

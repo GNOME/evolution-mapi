@@ -1210,6 +1210,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 				e_cal_component_alarm_set_trigger (e_alarm, trigger);
 
 				e_cal_component_add_alarm (comp, e_alarm);
+				e_cal_component_alarm_free (e_alarm);
 			}
 		} else
 			e_cal_component_remove_all_alarms (comp);
@@ -1260,6 +1261,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 				e_cal_component_alarm_set_trigger (e_alarm, trigger);
 
 				e_cal_component_add_alarm (comp, e_alarm);
+				e_cal_component_alarm_free (e_alarm);
 			}
 		} else
 			e_cal_component_remove_all_alarms (comp);

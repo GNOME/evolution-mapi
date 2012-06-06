@@ -672,14 +672,19 @@ build_multipart_alternative (EMapiObject *object, GSList *inline_attachments)
 static CamelMultipart *
 build_multipart_mixed (CamelMultipart *content, GSList *attachments)
 {
-	CamelMimePart *part = camel_mime_part_new ();
 	CamelMultipart *m_mixed = camel_multipart_new ();
 	camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (m_mixed), "multipart/mixed");
 	camel_multipart_set_boundary (m_mixed, NULL);
 
-	camel_medium_set_content (CAMEL_MEDIUM (part), CAMEL_DATA_WRAPPER (content));
-	camel_multipart_add_part (m_mixed, part);
-	g_object_unref (part);
+	if (content) {
+		CamelMimePart *part = camel_mime_part_new ();
+
+		camel_medium_set_content (CAMEL_MEDIUM (part), CAMEL_DATA_WRAPPER (content));
+		camel_multipart_add_part (m_mixed, part);
+
+		g_object_unref (part);
+		g_object_unref (content);
+	}
 
 	add_multipart_attachments (m_mixed, attachments);
 
@@ -791,6 +796,7 @@ e_mapi_mail_utils_object_to_message (EMapiConnection *conn, /* const */ EMapiObj
 			addr = camel_internet_address_new ();
 			camel_internet_address_add (addr, name, email);
 			camel_mime_message_set_from (msg, addr);
+			g_object_unref (addr);
 		}
 		
 		g_free (name);

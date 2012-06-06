@@ -409,11 +409,14 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 	do {
 		DATA_BLOB transferdata;
 
+		transferdata.data = NULL;
+
 		ms = FXGetBuffer (fasttransfer_ctx, 0, &transferStatus, &stepCount, &totalCount, &transferdata);
 		if (ms != MAPI_E_SUCCESS)
 			break;
 
 		ms = fxparser_parse (parser, &transferdata);
+		talloc_free (transferdata.data);
 		if (ms != MAPI_E_SUCCESS)
 			break;
 

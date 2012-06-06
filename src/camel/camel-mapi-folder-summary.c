@@ -128,8 +128,9 @@ camel_mapi_folder_summary_new (CamelFolder *folder)
 		We need to pass the ex and find out why it is not loaded etc. ? */
 		camel_folder_summary_clear (summary, NULL);
 		g_warning ("Unable to load summary %s\n", local_error ? local_error->message : "Unknown error");
-		g_clear_error (&local_error);
 	}
+
+	g_clear_error (&local_error);
 
 	return summary;
 }

@@ -1355,6 +1355,9 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 			make_mapi_error (perror, "GetPropsAll", ms);
 			goto cleanup;
 		}
+
+		if (properties)
+			properties->lpProps = talloc_steal (properties, properties->lpProps);
 	}
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
@@ -2442,6 +2445,9 @@ fetch_object_attachment_cb (EMapiConnection *conn,
 		goto cleanup;
 	}
 
+	if (attachment->properties.lpProps)
+		attachment->properties.lpProps = talloc_steal (attachment, attachment->properties.lpProps);
+
 	attach_method = e_mapi_util_find_row_propval (srow, PidTagAttachMethod);
 	if (attach_method && *attach_method == ATTACH_BY_VALUE) {
 		if (!e_mapi_util_find_array_propval (&attachment->properties, PidTagAttachDataBinary)) {
@@ -2521,6 +2527,9 @@ e_mapi_connection_fetch_object_internal (EMapiConnection *conn,
 		make_mapi_error (perror, "GetPropsAll", ms);
 		goto cleanup;
 	}
+
+	if (object->properties.lpProps)
+		object->properties.lpProps = talloc_steal (object, object->properties.lpProps);
 
 	/* to transform named ids to their PidLid or PidName tags, like the fast-transfer does */
 	ms = QueryNamedProperties (obj_message, 0, NULL, &np_count, &np_propID, &np_nameid);
@@ -2806,7 +2815,7 @@ e_mapi_connection_transfer_objects (EMapiConnection *conn,
 	while (iter) {
 		mapi_id_array_t ids;
 
-		ms = mapi_id_array_init (priv->mapi_ctx, &ids);
+		ms = mapi_id_array_init (mem_ctx, &ids);
 		if (ms != MAPI_E_SUCCESS) {
 			make_mapi_error (perror, "mapi_id_array_init", ms);
 			goto cleanup;
@@ -3591,6 +3600,9 @@ add_object_recipients (EMapiConnection *conn,
 	}
 
  cleanup:
+	talloc_free (rows);
+	talloc_free (flagList);
+
 	UNLOCK ();
 
 	g_free (users);
@@ -5419,12 +5431,14 @@ e_mapi_connection_copymove_items (EMapiConnection *conn,
 				  GError **perror)
 {
 	enum MAPISTATUS	ms = MAPI_E_RESERVED;
+	TALLOC_CTX *mem_ctx;
 	GSList *l;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, MAPI_E_INVALID_PARAMETER);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
 
 	LOCK ();
+	mem_ctx = talloc_new (priv->session);
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 		ms = MAPI_E_USER_CANCEL;
@@ -5435,7 +5449,7 @@ e_mapi_connection_copymove_items (EMapiConnection *conn,
 		mapi_id_array_t msg_id_array;
 		gint count = 0;
 
-		mapi_id_array_init (conn->priv->mapi_ctx, &msg_id_array);
+		mapi_id_array_init (mem_ctx, &msg_id_array);
 
 		for (l = mid_list; l != NULL && count < 500; l = g_slist_next (l), count++)
 			mapi_id_array_add_id (&msg_id_array, *((mapi_id_t *)l->data));
@@ -5457,6 +5471,7 @@ e_mapi_connection_copymove_items (EMapiConnection *conn,
 	}
 
  cleanup:
+	talloc_free (mem_ctx);
 	UNLOCK ();
 
 	return ms == MAPI_E_SUCCESS;
@@ -6059,8 +6074,15 @@ e_mapi_connection_ex_to_smtp (EMapiConnection *conn,
 					  PR_SMTP_ADDRESS_UNICODE);
 
 	ms = ResolveNames (priv->session, (const gchar **)str_array, SPropTagArray, &SRowSet, &flaglist, MAPI_UNICODE);
-	if (ms != MAPI_E_SUCCESS)
+	if (ms != MAPI_E_SUCCESS) {
+		talloc_free (SRowSet);
+		talloc_free (flaglist);
+
+		SRowSet = NULL;
+		flaglist = NULL;
+
 		ms = ResolveNames (priv->session, (const gchar **)str_array, SPropTagArray, &SRowSet, &flaglist, 0);
+	}
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 		ms = MAPI_E_USER_CANCEL;
@@ -6072,6 +6094,8 @@ e_mapi_connection_ex_to_smtp (EMapiConnection *conn,
 			*display_name = g_strdup (e_mapi_util_find_row_propval (SRowSet->aRow, PR_DISPLAY_NAME_UNICODE));
 	}
 
+	talloc_free (SRowSet);
+	talloc_free (flaglist);
 	talloc_free (mem_ctx);
 
 	UNLOCK ();
@@ -6170,6 +6194,12 @@ e_mapi_connection_resolve_username (EMapiConnection *conn,
 			if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 				ms = MAPI_E_USER_CANCEL;
 			} else {
+				talloc_free (rows);
+				talloc_free (flaglist);
+
+				rows = NULL;
+				flaglist = NULL;
+
 				ms = ResolveNames (priv->session, str_array, tag_array, &rows, &flaglist, 0);
 			}
 		}
@@ -6238,6 +6268,8 @@ e_mapi_connection_resolve_username (EMapiConnection *conn,
 
  cleanup:
 	g_free (named_ids_list);
+	talloc_free (rows);
+	talloc_free (flaglist);
 	talloc_free (mem_ctx);
 
 	UNLOCK ();
