@@ -4394,7 +4394,55 @@ e_mapi_connection_list_gal_objects (EMapiConnection *conn,
 		}
 	}
 
+	loi_data.cb = cb;
+	loi_data.user_data = user_data;
+
 	ms = nspi_GetMatches (priv->session->nspi->ctx, mem_ctx, propTagArray, use_restriction, (uint32_t) -1, &rows, &pMIds);
+	if (ms == MAPI_E_TOO_COMPLEX && use_restriction && use_restriction->rt == RES_OR) {
+		/* case lazy MS servers which do not want to search sertain properties in OR-s */
+		gint ii;
+		gboolean any_good = FALSE;
+
+		for (ii = 0; ii < use_restriction->res.resOr.cRes; ii++) {
+			talloc_free (pMIds);
+			talloc_free (rows);
+			pMIds = NULL;
+			rows = NULL;
+
+			ms = nspi_GetMatches (priv->session->nspi->ctx, mem_ctx, propTagArray,
+				&use_restriction->res.resOr.lpRes[ii],
+				(uint32_t) -1, &rows, &pMIds);
+
+			if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+				ms = MAPI_E_USER_CANCEL;
+				goto cleanup;
+			}
+
+			if (ms == MAPI_E_SUCCESS) {
+				if (!rows)
+					continue;
+
+				ms = foreach_gal_tablerow (conn, mem_ctx, rows, pMIds, propTagArray, list_objects_internal_cb, &loi_data, cancellable, perror);
+				if (ms != MAPI_E_SUCCESS) {
+					make_mapi_error (perror, "foreach_gal_tablerow", ms);
+					goto cleanup;
+				}
+
+				any_good = TRUE;
+			} else if (ms != MAPI_E_NOT_FOUND && ms != MAPI_E_TOO_COMPLEX && ms != MAPI_E_TABLE_TOO_BIG) {
+				break;
+			}
+		}
+
+		/* in case the last check fails, update based on the overall result */
+		if (any_good) {
+			ms = MAPI_E_SUCCESS;
+			goto cleanup;
+		} else {
+			ms = MAPI_E_TOO_COMPLEX;
+		}
+	}
+
 	if (ms != MAPI_E_SUCCESS || !rows) {
 		if (ms == MAPI_E_NOT_FOUND || (!rows && ms == MAPI_E_SUCCESS))
 			ms = MAPI_E_SUCCESS;
@@ -4409,9 +4457,6 @@ e_mapi_connection_list_gal_objects (EMapiConnection *conn,
 		ms = MAPI_E_USER_CANCEL;
 		goto cleanup;
 	}
-
-	loi_data.cb = cb;
-	loi_data.user_data = user_data;
 
 	ms = foreach_gal_tablerow (conn, mem_ctx, rows, pMIds, propTagArray, list_objects_internal_cb, &loi_data, cancellable, perror);
 	if (ms != MAPI_E_SUCCESS) {

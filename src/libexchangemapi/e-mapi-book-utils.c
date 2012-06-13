@@ -688,8 +688,14 @@ term_eval_and (struct _ESExp *f,
 		if (argv[ii]->type == ESEXP_RES_INT &&
 		    argv[ii]->value.number >= 0 && 
 		    argv[ii]->value.number < esp->res_parts->len) {
+			struct mapi_SRestriction *subres = g_ptr_array_index (esp->res_parts, argv[ii]->value.number);
+
 			jj = argv[ii]->value.number;
 			valid++;
+
+			/* join two consecutive AND-s into one */
+			if (subres->rt == RES_AND)
+				valid += subres->res.resAnd.cRes - 1;
 		}
 	}
 
@@ -711,10 +717,20 @@ term_eval_and (struct _ESExp *f,
 			    argv[ii]->value.number < esp->res_parts->len) {
 				struct mapi_SRestriction *subres = g_ptr_array_index (esp->res_parts, argv[ii]->value.number);
 
-				res->res.resAnd.res[jj].rt = subres->rt;
-				res->res.resAnd.res[jj].res = subres->res;
+				/* join two consecutive AND-s into one */
+				if (subres->rt == RES_AND) {
+					gint xx;
 
-				jj++;
+					for (xx = 0; xx < subres->res.resAnd.cRes; xx++, jj++) {
+						res->res.resAnd.res[jj].rt = subres->res.resAnd.res[xx].rt;
+						res->res.resAnd.res[jj].res = subres->res.resAnd.res[xx].res;
+					}
+				} else {
+					res->res.resAnd.res[jj].rt = subres->rt;
+					res->res.resAnd.res[jj].res = subres->res;
+
+					jj++;
+				}
 			}
 		}
 
@@ -742,8 +758,14 @@ term_eval_or (struct _ESExp *f,
 		if (argv[ii]->type == ESEXP_RES_INT &&
 		    argv[ii]->value.number >= 0 && 
 		    argv[ii]->value.number < esp->res_parts->len) {
+			struct mapi_SRestriction *subres = g_ptr_array_index (esp->res_parts, argv[ii]->value.number);
+
 			jj = argv[ii]->value.number;
 			valid++;
+
+			/* join two consecutive OR-s into one */
+			if (subres->rt == RES_OR)
+				valid += subres->res.resOr.cRes - 1;
 		    }
 	}
 
@@ -765,10 +787,20 @@ term_eval_or (struct _ESExp *f,
 			    argv[ii]->value.number < esp->res_parts->len) {
 				struct mapi_SRestriction *subres = g_ptr_array_index (esp->res_parts, argv[ii]->value.number);
 
-				res->res.resOr.res[jj].rt = subres->rt;
-				res->res.resOr.res[jj].res = subres->res;
+				/* join two consecutive OR-s into one */
+				if (subres->rt == RES_OR) {
+					gint xx;
 
-				jj++;
+					for (xx = 0; xx < subres->res.resOr.cRes; xx++, jj++) {
+						res->res.resOr.res[jj].rt = subres->res.resOr.res[xx].rt;
+						res->res.resOr.res[jj].res = subres->res.resOr.res[xx].res;
+					}
+				} else {
+					res->res.resOr.res[jj].rt = subres->rt;
+					res->res.resOr.res[jj].res = subres->res;
+
+					jj++;
+				}
 			}
 		}
 
@@ -984,7 +1016,7 @@ func_eval_field_exists (struct _ESExp *f,
 			res->res.resOr.res[0].res.resExist.ulPropTag = PidTagPrimarySmtpAddress;
 
 			for (ii = 1, jj = 0; emails[jj]; jj++) {
-				proptag = get_proptag_from_field_name ("email_1", TRUE);
+				proptag = get_proptag_from_field_name (emails[jj], TRUE);
 
 				if (proptag == MAPI_E_RESERVED)
 					continue;
