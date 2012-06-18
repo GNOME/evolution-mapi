@@ -1,3 +1,13 @@
+evolution-mapi 3.4.3  2012-06-18
+--------------------------------
+
+Bugs:
+	Bug #677266 - Memory leaks when synchronizing for offline (Milan Crha)
+	Bug #677684 - Addressbook doesn't return matched contacts (Milan Crha)
+
+Translations:
+	Andika Triwidada (id)
+
 evolution-mapi 3.4.2  2012-05-14
 --------------------------------
 
