@@ -429,6 +429,9 @@ camel_mapi_settings_set_check_all (CamelMapiSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_MAPI_SETTINGS (settings));
 
+	if ((settings->priv->check_all ? 1 : 0) == (check_all ? 1 : 0))
+		return;
+
 	settings->priv->check_all = check_all;
 
 	g_object_notify (G_OBJECT (settings), "check-all");
@@ -472,6 +475,11 @@ camel_mapi_settings_set_domain (CamelMapiSettings *settings,
 
 	g_mutex_lock (settings->priv->property_lock);
 
+	if (g_strcmp0 (settings->priv->domain, domain) == 0) {
+		g_mutex_unlock (settings->priv->property_lock);
+		return;
+	}
+
 	g_free (settings->priv->domain);
 	settings->priv->domain = g_strdup (domain);
 
@@ -494,6 +502,9 @@ camel_mapi_settings_set_filter_junk (CamelMapiSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_MAPI_SETTINGS (settings));
 
+	if ((settings->priv->filter_junk ? 1 : 0) == (filter_junk ? 1 : 0))
+		return;
+
 	settings->priv->filter_junk = filter_junk;
 
 	g_object_notify (G_OBJECT (settings), "filter-junk");
@@ -513,6 +524,9 @@ camel_mapi_settings_set_filter_junk_inbox (CamelMapiSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_MAPI_SETTINGS (settings));
 
+	if ((settings->priv->filter_junk_inbox ? 1 : 0) == (filter_junk_inbox ? 1 : 0))
+		return;
+
 	settings->priv->filter_junk_inbox = filter_junk_inbox;
 
 	g_object_notify (G_OBJECT (settings), "filter-junk-inbox");
@@ -531,6 +545,9 @@ camel_mapi_settings_set_kerberos (CamelMapiSettings *settings,
                                   gboolean kerberos)
 {
 	g_return_if_fail (CAMEL_IS_MAPI_SETTINGS (settings));
+
+	if ((settings->priv->kerberos ? 1 : 0) == (kerberos ? 1 : 0))
+		return;
 
 	settings->priv->kerberos = kerberos;
 
@@ -570,6 +587,11 @@ camel_mapi_settings_set_profile (CamelMapiSettings *settings,
 	g_return_if_fail (CAMEL_IS_MAPI_SETTINGS (settings));
 
 	g_mutex_lock (settings->priv->property_lock);
+
+	if (g_strcmp0 (settings->priv->profile, profile) == 0) {
+		g_mutex_unlock (settings->priv->property_lock);
+		return;
+	}
 
 	g_free (settings->priv->profile);
 	settings->priv->profile = g_strdup (profile);
@@ -617,6 +639,11 @@ camel_mapi_settings_set_realm (CamelMapiSettings *settings,
 
 	g_mutex_lock (settings->priv->property_lock);
 
+	if (g_strcmp0 (settings->priv->realm, realm) == 0) {
+		g_mutex_unlock (settings->priv->property_lock);
+		return;
+	}
+
 	g_free (settings->priv->realm);
 	settings->priv->realm = g_strdup (realm);
 
@@ -638,6 +665,9 @@ camel_mapi_settings_set_listen_notifications (CamelMapiSettings *settings,
 					      gboolean listen_notifications)
 {
 	g_return_if_fail (CAMEL_IS_MAPI_SETTINGS (settings));
+
+	if ((settings->priv->listen_notifications ? 1 : 0) == (listen_notifications ? 1 : 0))
+		return;
 
 	settings->priv->listen_notifications = listen_notifications;
 
