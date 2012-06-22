@@ -12,14 +12,14 @@ REQUIRED_INTLTOOL_VERSION=0.35.5
 
 (test -f $srcdir/configure.ac \
   && test -f $srcdir/ChangeLog \
-  && test -d $srcdir/src/account-setup-eplugin) || {
+  && test -d $srcdir/src/configuration) || {
     echo -n "**Error**: Directory "\`$srcdir\'" does not look like the"
     echo " top-level $PKG_NAME directory"
     exit 1
 }
 
 which gnome-autogen.sh || {
-    echo "You need to install gnome-common from the GNOME SVN"
+    echo "You need to install gnome-common from the GNOME git"
     exit 1
 }
 USE_GNOME2_MACROS=1 . gnome-autogen.sh

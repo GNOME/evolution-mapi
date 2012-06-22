@@ -28,10 +28,11 @@
 #include <glib.h>
 #include <gio/gio.h>
 
-#include <libedataserver/e-data-server-util.h>
+#include <libedataserver/libedataserver.h>
 
 #include "e-mapi-utils.h"
 #include "e-mapi-mail-utils.h"
+#include "e-source-mapi-folder.h"
 
 #ifdef G_OS_WIN32
 /* Undef the similar macro from pthread.h, it doesn't check if
@@ -655,7 +656,9 @@ e_mapi_util_profiledata_from_settings (EMapiProfileData *empd, CamelMapiSettings
 }
 
 gboolean
-e_mapi_util_trigger_krb_auth (const EMapiProfileData *empd, GError **error) {
+e_mapi_util_trigger_krb_auth (const EMapiProfileData *empd,
+			      GError **error)
+{
 	gint success = FALSE;
 	GError *local_error = NULL;
 	GDBusConnection *connection;
@@ -1278,4 +1281,102 @@ e_mapi_utils_unref_in_thread (GObject *object)
 		g_warning ("%s: Failed to run thread: %s", G_STRFUNC, error ? error->message : "Unknown error");
 		g_object_unref (object);
 	}
+}
+
+static gboolean
+is_for_profile (ESource *source,
+		const gchar *profile)
+{
+	ESourceCamel *extension;
+	CamelMapiSettings *settings;
+	const gchar *extension_name;
+
+	if (!source)
+		return FALSE;
+
+	if (!profile)
+		return TRUE;
+
+	extension_name = e_source_camel_get_extension_name ("mapi");
+	if (!e_source_has_extension (source, extension_name))
+		return FALSE;
+
+	extension = e_source_get_extension (source, extension_name);
+	settings = CAMEL_MAPI_SETTINGS (e_source_camel_get_settings (extension));
+
+	return settings && g_strcmp0 (camel_mapi_settings_get_profile (settings), profile) == 0;
+}
+
+/* filters @esources thus the resulting list will contain ESource-s only for @profile;
+   free returned list with g_list_free_full (list, g_object_unref); */
+GList *
+e_mapi_utils_filter_sources_for_profile (const GList *esources,
+					 const gchar *profile)
+{
+	GList *found = NULL;
+	const GList *iter;
+	ESource *master_source;
+
+	master_source = e_mapi_utils_get_master_source (esources, profile);
+	if (!master_source)
+		return NULL;
+
+	for (iter = esources; iter; iter = iter->next) {
+		ESource *source = iter->data;
+
+		if (is_for_profile (source, profile) ||
+		    g_strcmp0 (e_source_get_uid (master_source), e_source_get_parent (source)) == 0)
+			found = g_list_prepend (found, g_object_ref (source));
+	}
+
+	return g_list_reverse (found);
+}
+
+/* returns (not-reffed) member of @esources, which is for @profile and @folder_id */
+ESource *
+e_mapi_utils_get_source_for_folder (const GList *esources,
+				    const gchar *profile,
+				    mapi_id_t folder_id)
+{
+	ESource *master_source;
+	const GList *iter;
+	
+	master_source = e_mapi_utils_get_master_source (esources, profile);
+	if (!master_source)
+		return NULL;
+
+	for (iter = esources; iter; iter = iter->next) {
+		ESource *source = iter->data;
+
+		if ((is_for_profile (source, profile) ||
+		    g_strcmp0 (e_source_get_uid (master_source), e_source_get_parent (source)) == 0) &&
+		    e_source_has_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER)) {
+			ESourceMapiFolder *folder_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
+
+			g_return_val_if_fail (folder_ext != NULL, NULL);
+
+			if (e_source_mapi_folder_get_id (folder_ext) == folder_id)
+				return source;
+		}
+	}
+
+	return NULL;
+}
+
+/* returns (not-reffed) member of @esources, which is master (with no parent) source for @profile */
+ESource *
+e_mapi_utils_get_master_source (const GList *esources,
+				const gchar *profile)
+{
+	const GList *iter;
+
+	for (iter = esources; iter; iter = iter->next) {
+		ESource *source = iter->data;
+
+		if (!e_source_get_parent (source) &&
+		    is_for_profile (source, profile))
+			return source;
+	}
+
+	return NULL;
 }

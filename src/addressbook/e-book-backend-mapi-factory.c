@@ -23,9 +23,11 @@
 
 #include <config.h>
 
-#include <libedata-book/e-book-backend-factory.h>
+#include <libedata-book/libedata-book.h>
+
 #include "e-book-backend-mapi-contacts.h"
 #include "e-book-backend-mapi-gal.h"
+#include "e-source-mapi-folder.h"
 
 typedef EBookBackendFactory EBookBackendMapiContactsFactory;
 typedef EBookBackendFactoryClass EBookBackendMapiContactsFactoryClass;
@@ -88,6 +90,8 @@ e_book_backend_mapi_gal_factory_init (EBookBackendFactory *factory)
 G_MODULE_EXPORT void
 e_module_load (GTypeModule *type_module)
 {
+	e_source_mapi_folder_type_register (type_module);
+
 	e_book_backend_mapi_contacts_factory_register_type (type_module);
 	e_book_backend_mapi_gal_factory_register_type (type_module);
 }

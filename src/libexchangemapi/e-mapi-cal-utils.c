@@ -27,9 +27,8 @@
 
 #include <glib/gstdio.h>
 #include <glib/gi18n-lib.h>
-#include <fcntl.h>
-#include <libecal/e-cal-util.h>
-#include <libedataserver/e-data-server-util.h>
+#include <libecal/libecal.h>
+#include <libedataserver/libedataserver.h>
 
 #include "e-mapi-mail-utils.h"
 #include "e-mapi-cal-utils.h"

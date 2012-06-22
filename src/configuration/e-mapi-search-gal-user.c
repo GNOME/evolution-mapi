@@ -28,7 +28,7 @@
 #include <glib/gi18n-lib.h>
 #include <gtk/gtk.h>
 
-#include "e-mapi-account-setup.h"
+#include "e-mapi-config-utils.h"
 #include "e-mapi-search-gal-user.h"
 #include "e-mapi-utils.h"
 #include "e-mapi-defs.h"

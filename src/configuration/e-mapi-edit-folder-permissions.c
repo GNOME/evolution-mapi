@@ -28,7 +28,7 @@
 #include <glib/gi18n-lib.h>
 #include <gtk/gtk.h>
 
-#include "e-mapi-account-setup.h"
+#include "e-mapi-config-utils.h"
 #include "e-mapi-edit-folder-permissions.h"
 #include "e-mapi-search-gal-user.h"
 #include "e-mapi-utils.h"
@@ -45,9 +45,9 @@ enum {
 
 struct EMapiPermissionsDialogWidgets
 {
-	gchar *login_profile;
-	gchar *login_username;
-	gchar *login_url;
+	ESourceRegistry *registry;
+	ESource *source;
+	CamelMapiSettings *mapi_settings;
 	mapi_id_t folder_id;
 	EMapiFolderCategory folder_category;
 	gchar *foreign_username;
@@ -149,9 +149,9 @@ edit_permissions_widgets_free (gpointer ptr)
 	if (!widgets)
 		return;
 
-	g_free (widgets->login_profile);
-	g_free (widgets->login_username);
-	g_free (widgets->login_url);
+	g_object_unref (widgets->registry);
+	g_object_unref (widgets->source);
+	g_object_unref (widgets->mapi_settings);
 	g_free (widgets->foreign_username);
 	if (widgets->conn)
 		e_mapi_utils_unref_in_thread (G_OBJECT (widgets->conn));
@@ -270,7 +270,7 @@ edit_permissions_response_cb (GObject *dialog,
 		write_entries = g_slist_reverse (write_entries);
 	}
 
-	e_mapi_run_in_thread_with_feedback (GTK_WINDOW (dialog), dialog,
+	e_mapi_config_utils_run_in_thread_with_feedback (GTK_WINDOW (dialog), dialog,
 		_("Writing folder permissions, please wait..."),
 		write_folder_permissions_thread,
 		write_folder_permissions_idle,
@@ -705,14 +705,14 @@ read_folder_permissions_thread (GObject *dialog,
 
 	widgets = g_object_get_data (dialog, E_MAPI_PERM_DLG_WIDGETS);
 	g_return_if_fail (widgets != NULL);
-	g_return_if_fail (widgets->login_profile != NULL);
-	g_return_if_fail (widgets->login_username != NULL);
-	g_return_if_fail (widgets->login_url != NULL);
+	g_return_if_fail (widgets->registry != NULL);
+	g_return_if_fail (widgets->source != NULL);
+	g_return_if_fail (widgets->mapi_settings != NULL);
 
-	widgets->conn = e_mapi_account_open_connection_for (GTK_WINDOW (dialog),
-		widgets->login_profile,
-		widgets->login_username,
-		widgets->login_url,
+	widgets->conn = e_mapi_config_utils_open_connection_for (GTK_WINDOW (dialog),
+		widgets->registry,
+		widgets->source,
+		widgets->mapi_settings,
 		cancellable,
 		perror);
 
@@ -894,9 +894,9 @@ create_permissions_tree_view (GObject *dialog,
    users in the given store */
 void
 e_mapi_edit_folder_permissions (GtkWindow *parent,
-				const gchar *login_profile,
-				const gchar *login_username,
-				const gchar *login_url,
+				ESourceRegistry *registry,
+				ESource *source,
+				CamelMapiSettings *mapi_settings,
 				const gchar *account_name,
 				const gchar *folder_name,
 				mapi_id_t folder_id,
@@ -916,17 +916,17 @@ e_mapi_edit_folder_permissions (GtkWindow *parent,
 	gchar *str;
 	gint row, ii;
 
-	g_return_if_fail (login_profile != NULL);
-	g_return_if_fail (login_username != NULL);
-	g_return_if_fail (login_url != NULL);
+	g_return_if_fail (registry != NULL);
+	g_return_if_fail (source != NULL);
+	g_return_if_fail (mapi_settings != NULL);
 	g_return_if_fail (account_name != NULL);
 	g_return_if_fail (folder_name != NULL);
 	g_return_if_fail (folder_id != 0);
 
 	widgets = g_new0 (struct EMapiPermissionsDialogWidgets, 1);
-	widgets->login_profile = g_strdup (login_profile);
-	widgets->login_username = g_strdup (login_username);
-	widgets->login_url = g_strdup (login_url);
+	widgets->registry = g_object_ref (registry);
+	widgets->source = g_object_ref (source);
+	widgets->mapi_settings = g_object_ref (mapi_settings);
 	widgets->folder_id = folder_id;
 	widgets->folder_category = folder_category;
 	widgets->foreign_username = g_strdup (foreign_username);
@@ -1275,7 +1275,7 @@ e_mapi_edit_folder_permissions (GtkWindow *parent,
 
 	found_entries = g_new0 (GSList *, 1);
 
-	e_mapi_run_in_thread_with_feedback (GTK_WINDOW (dialog), dialog,
+	e_mapi_config_utils_run_in_thread_with_feedback (GTK_WINDOW (dialog), dialog,
 		_("Reading folder permissions, please wait..."),
 		read_folder_permissions_thread,
 		read_folder_permissions_idle,

@@ -22,7 +22,7 @@
 #endif
 
 #include <camel/camel.h>
-#include <libecal/e-cal-util.h>
+#include <libecal/libecal.h>
 
 #include "e-mapi-defs.h"
 #include "e-mapi-utils.h"

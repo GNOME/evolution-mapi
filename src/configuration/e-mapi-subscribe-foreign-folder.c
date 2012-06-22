@@ -28,12 +28,13 @@
 #include <glib/gi18n-lib.h>
 #include <gtk/gtk.h>
 
-#include <libedataserverui/e-name-selector.h>
+#include <libedataserverui/libedataserverui.h>
+#include <libemail-engine/e-mail-session.h>
 
 #include "camel/camel-mapi-store.h"
 #include "camel/camel-mapi-store-summary.h"
 
-#include "e-mapi-account-setup.h"
+#include "e-mapi-config-utils.h"
 #include "e-mapi-search-gal-user.h"
 #include "e-mapi-subscribe-foreign-folder.h"
 #include "e-mapi-utils.h"
@@ -366,12 +367,13 @@ check_foreign_folder_idle (GObject *with_object,
 			   GError **perror)
 {
 	struct EMapiCheckForeignFolderData *cffd = user_data;
-	gchar *fid, *folder_name;
+	gchar *folder_name;
 	const gchar *base_username, *base_foldername;
 	CamelSettings *settings;
 	CamelMapiSettings *mapi_settings;
 	CamelMapiStore *mapi_store;
-	CamelNetworkSettings *network_settings;
+	ESourceRegistry *registry = NULL;
+	CamelSession *session;
 	EMapiFolderType folder_type;
 
 	g_return_if_fail (with_object != NULL);
@@ -382,9 +384,6 @@ check_foreign_folder_idle (GObject *with_object,
 
 	if (!cffd->folder_id)
 		return;
-
-	fid = e_mapi_util_mapi_id_to_string (cffd->folder_id);
-	g_return_if_fail (fid != NULL);
 
 	base_username = cffd->user_displayname ? cffd->user_displayname : cffd->username;
 	base_foldername = cffd->folder_displayname ? cffd->folder_displayname : cffd->orig_foldername;
@@ -399,7 +398,9 @@ check_foreign_folder_idle (GObject *with_object,
 	mapi_store = CAMEL_MAPI_STORE (with_object);
 	settings = camel_service_get_settings (CAMEL_SERVICE (mapi_store));
 	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
-	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+	session = camel_service_get_session (CAMEL_SERVICE (mapi_store));
+	if (E_IS_MAIL_SESSION (session))
+		registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
 
 	folder_type = e_mapi_folder_type_from_string (cffd->folder_container_class);
 	if ((folder_type == E_MAPI_FOLDER_TYPE_MAIL &&
@@ -410,25 +411,22 @@ check_foreign_folder_idle (GObject *with_object,
 		base_username,
 		base_foldername,
 		perror)) ||
-	    (folder_type != E_MAPI_FOLDER_TYPE_MAIL && !e_mapi_folder_add_as_esource (folder_type,
+	    (folder_type != E_MAPI_FOLDER_TYPE_MAIL && !e_mapi_folder_add_as_esource (registry,
+		folder_type,
 		camel_mapi_settings_get_profile (mapi_settings),
-		camel_mapi_settings_get_domain (mapi_settings),
-		camel_mapi_settings_get_realm (mapi_settings),
-		camel_network_settings_get_host (network_settings),
-		camel_network_settings_get_user (network_settings),
-		camel_mapi_settings_get_kerberos (mapi_settings),
 		TRUE /* camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (mapi_settings)) */,
 		E_MAPI_FOLDER_CATEGORY_FOREIGN,
 		cffd->username,
 		folder_name,
-		fid,
+		cffd->folder_id,
+		0,
+		cancellable,
 		perror))) {
 		/* to not destroy the dialog on error */
 		cffd->folder_id = 0;
 	}
 
 	g_free (folder_name);
-	g_free (fid);
 }
 
 static void
@@ -508,7 +506,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 
 	description = g_strdup_printf (_("Testing availability of folder '%s' of user '%s', please wait..."), cffd->orig_foldername, cffd->username);
 
-	e_mapi_run_in_thread_with_feedback (
+	e_mapi_config_utils_run_in_thread_with_feedback (
 		GTK_WINDOW (dialog),
 		G_OBJECT (cstore),
 		description,
@@ -629,7 +627,7 @@ e_mapi_subscribe_foreign_folder (GtkWindow *parent,
 
 	row++;
 
-	name_selector = e_name_selector_new ();
+	name_selector = e_name_selector_new (e_mail_session_get_registry (E_MAIL_SESSION (session)));
 	name_selector_model = e_name_selector_peek_model (name_selector);
 	e_name_selector_model_add_section (name_selector_model, "User", _("User"), NULL);
 	name_selector_dialog = e_name_selector_peek_dialog (name_selector);

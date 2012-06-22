@@ -26,14 +26,13 @@
 #endif
 
 #include <stdlib.h>
-#include <fcntl.h>
 #include <string.h>
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <glib/gi18n-lib.h>
 
-#include <libebook/e-contact.h>
-#include <libedataserver/e-data-server-util.h>
+#include <libebook/libebook.h>
+#include <libedataserver/libedataserver.h>
 #include <camel/camel.h>
 
 #include <e-mapi-operation-queue.h>
@@ -43,7 +42,10 @@
 
 #include "e-book-backend-mapi.h"
 
-G_DEFINE_TYPE (EBookBackendMAPI, e_book_backend_mapi, E_TYPE_BOOK_BACKEND)
+static void e_book_backend_mapi_authenticator_init (ESourceAuthenticatorInterface *interface);
+
+G_DEFINE_TYPE_WITH_CODE (EBookBackendMAPI, e_book_backend_mapi, E_TYPE_BOOK_BACKEND,
+	G_IMPLEMENT_INTERFACE (E_TYPE_SOURCE_AUTHENTICATOR, e_book_backend_mapi_authenticator_init))
 
 struct _EBookBackendMAPIPrivate
 {
@@ -51,8 +53,7 @@ struct _EBookBackendMAPIPrivate
 
 	GMutex *conn_lock;
 	EMapiConnection *conn;
-	gchar *profile;
-	gchar *book_uri;
+	gchar *book_uid;
 	gboolean marked_for_offline;
 
 	GThread *update_cache_thread;
@@ -70,6 +71,35 @@ struct _EBookBackendMAPIPrivate
 	GHashTable *running_views; /* EDataBookView => GCancellable */
 	GMutex *running_views_lock;
 };
+
+static CamelMapiSettings *
+ebbm_get_collection_settings (EBookBackendMAPI *ebbm)
+{
+	ESource *source;
+	ESource *collection;
+	ESourceCamel *extension;
+	ESourceRegistry *registry;
+	CamelSettings *settings;
+	const gchar *extension_name;
+
+	source = e_backend_get_source (E_BACKEND (ebbm));
+	registry = e_book_backend_get_registry (E_BOOK_BACKEND (ebbm));
+
+	extension_name = e_source_camel_get_extension_name ("mapi");
+	e_source_camel_generate_subtype ("mapi", CAMEL_TYPE_MAPI_SETTINGS);
+
+	/* The collection settings live in our parent data source. */
+	collection = e_source_registry_find_extension (
+		registry, source, extension_name);
+	g_return_val_if_fail (collection != NULL, NULL);
+
+	extension = e_source_get_extension (collection, extension_name);
+	settings = e_source_camel_get_settings (extension);
+
+	g_object_unref (collection);
+
+	return CAMEL_MAPI_SETTINGS (settings);
+}
 
 static glong
 get_current_time_ms (void)
@@ -322,12 +352,18 @@ ebbm_maybe_invoke_cache_update (EBookBackendMAPI *ebma)
 	}
 }
 
-static void
-ebbm_connect_user (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *password, GError **error)
+static ESourceAuthenticationResult
+ebbm_connect_user (EBookBackendMAPI *ebma,
+		   GCancellable *cancellable,
+		   const GString *password,
+		   GError **error)
 {
 	EBookBackendMAPIPrivate *priv = ebma->priv;
-	GError *mapi_error = NULL;
 	EMapiConnection *old_conn;
+	CamelMapiSettings *settings;
+	GError *mapi_error = NULL;
+
+	settings = ebbm_get_collection_settings (ebma);
 
 	if (!e_backend_get_online (E_BACKEND (ebma))) {
 		ebbm_notify_connection_status (ebma, FALSE);
@@ -342,18 +378,18 @@ ebbm_connect_user (EBookBackendMAPI *ebma, GCancellable *cancellable, const gcha
 
 		if (g_cancellable_set_error_if_cancelled (cancellable, error)) {
 			e_book_backend_mapi_unlock_connection (ebma);
-			return;
+			return E_SOURCE_AUTHENTICATION_ERROR;
 		}
 
 		old_conn = priv->conn;
 		priv->conn = NULL;
 
-		priv->conn = e_mapi_connection_new (priv->profile,
-							   password,
-							   cancellable,
-							   &mapi_error);
+		priv->conn = e_mapi_connection_new (
+			e_book_backend_get_registry (E_BOOK_BACKEND (ebma)),
+			camel_mapi_settings_get_profile (settings),
+			password, cancellable, &mapi_error);
 		if (!priv->conn) {
-			priv->conn = e_mapi_connection_find (priv->profile);
+			priv->conn = e_mapi_connection_find (camel_mapi_settings_get_profile (settings));
 			if (priv->conn && !e_mapi_connection_connected (priv->conn))
 				e_mapi_connection_reconnect (priv->conn, password, cancellable, &mapi_error);
 		}
@@ -362,6 +398,8 @@ ebbm_connect_user (EBookBackendMAPI *ebma, GCancellable *cancellable, const gcha
 			g_object_unref (old_conn);
 
 		if (!priv->conn || mapi_error) {
+			gboolean is_network_error = g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR);
+
 			if (priv->conn) {
 				g_object_unref (priv->conn);
 				priv->conn = NULL;
@@ -374,7 +412,8 @@ ebbm_connect_user (EBookBackendMAPI *ebma, GCancellable *cancellable, const gcha
 				g_error_free (mapi_error);
 
 			ebbm_notify_connection_status (ebma, FALSE);
-			return;
+
+			return is_network_error ? E_SOURCE_AUTHENTICATION_ERROR : E_SOURCE_AUTHENTICATION_REJECTED;
 		}
 
 		e_book_backend_mapi_unlock_connection (ebma);
@@ -385,15 +424,21 @@ ebbm_connect_user (EBookBackendMAPI *ebma, GCancellable *cancellable, const gcha
 			ebbm_maybe_invoke_cache_update (ebma);
 		}
 	}
+
+	return E_SOURCE_AUTHENTICATION_ACCEPTED;
 }
 
 static void
-ebbm_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean only_if_exists, GError **perror)
+ebbm_open (EBookBackendMAPI *ebma,
+	   GCancellable *cancellable,
+	   gboolean only_if_exists,
+	   GError **perror)
 {
 	EBookBackendMAPIPrivate *priv = ebma->priv;
 	ESource *source = e_backend_get_source (E_BACKEND (ebma));
-	const gchar *offline;
-	const gchar *cache_dir, *krb_sso;
+	ESourceOffline *offline_extension;
+	CamelMapiSettings *settings;
+	const gchar *cache_dir;
 	GError *error = NULL;
 
 	if (e_book_backend_is_opened (E_BOOK_BACKEND (ebma))) {
@@ -401,15 +446,14 @@ ebbm_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean only_if_e
 		return;
 	}
 
-	offline = e_source_get_property (source, "offline_sync");
-	priv->marked_for_offline = offline  && g_str_equal (offline, "1");
+	settings = ebbm_get_collection_settings (ebma);
 
-	if (priv->book_uri)
-		g_free (priv->book_uri);
-	priv->book_uri = e_source_get_uri (source);
+	offline_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_OFFLINE);
+	priv->marked_for_offline = e_source_offline_get_stay_synchronized (offline_extension);
 
-	g_free (priv->profile);
-	priv->profile = g_strdup (e_source_get_property (source, "profile"));
+	if (priv->book_uid)
+		g_free (priv->book_uid);
+	priv->book_uid = e_source_dup_uid (source);
 
 	cache_dir = e_book_backend_get_cache_dir (E_BOOK_BACKEND (ebma));
 
@@ -446,14 +490,33 @@ ebbm_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean only_if_e
 	}
 
 	e_book_backend_notify_online (E_BOOK_BACKEND (ebma), TRUE);
-	krb_sso = e_source_get_property (source, "kerberos");
-	if (!krb_sso || !g_str_equal (krb_sso, "required")) {
-		e_book_backend_notify_auth_required (E_BOOK_BACKEND (ebma),
-						     TRUE, NULL);
-	} else {
-		ebbm_connect_user (ebma, cancellable, NULL, perror);
-		e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), NULL);
+
+
+	if (!camel_mapi_settings_get_kerberos (settings) ||
+	    ebbm_connect_user (ebma, cancellable, NULL, &error) != E_SOURCE_AUTHENTICATION_ACCEPTED) {
+		ESourceRegistry *registry;
+
+		registry = e_book_backend_get_registry (E_BOOK_BACKEND (ebma));
+
+		e_source_registry_authenticate_sync (
+			registry, source,
+			E_SOURCE_AUTHENTICATOR (ebma),
+			cancellable, &error);
 	}
+
+	if (error && perror)
+		g_propagate_error (perror, g_error_copy (error));
+
+	e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), error);
+}
+
+static ESourceAuthenticationResult
+ebbm_try_password_sync (ESourceAuthenticator *authenticator,
+			const GString *password,
+			GCancellable *cancellable,
+			GError **error)
+{
+	return ebbm_connect_user (E_BOOK_BACKEND_MAPI (authenticator), cancellable, password, error);
 }
 
 static void
@@ -467,7 +530,7 @@ ebbm_remove (EBookBackendMAPI *ebma, GCancellable *cancellable, GError **error)
 
 	priv = ebma->priv;
 
-	if (!priv->book_uri)
+	if (!priv->book_uid)
 		return;
 
 	e_book_backend_mapi_lock_connection (ebma);
@@ -524,34 +587,17 @@ ebbm_get_backend_property (EBookBackendMAPI *ebma, const gchar *prop_name, gchar
 }
 
 static void
-ebbm_authenticate_user (EBookBackendMAPI *ebma, GCancellable *cancellable, ECredentials *credentials, GError **error)
-{
-	const gchar *password;
-
-	if (!e_backend_get_online (E_BACKEND (ebma))) {
-		ebbm_notify_connection_status (ebma, FALSE);
-	} else {
-		password = e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD);
-		ebbm_connect_user (ebma, cancellable, password, error);
-	}
-}
-
-static void
 ebbm_notify_online_cb (EBookBackend *backend, GParamSpec *pspec)
 {
 	EBookBackendMAPI *ebma = E_BOOK_BACKEND_MAPI (backend);
 	EBookBackendMAPIPrivate *priv = ebma->priv;
-	ESource *esource;
-	const gchar *krb_sso = NULL;
 	gboolean online;
 
 	online = e_backend_get_online (E_BACKEND (backend));
 
-	e_book_backend_notify_online (backend, online);
 	if (e_book_backend_is_opened (backend)) {
 		e_book_backend_mapi_lock_connection (ebma);
 
-		esource = e_backend_get_source (E_BACKEND (ebma));
 		if (!online) {
 			e_book_backend_notify_readonly (backend, TRUE);
 			ebbm_notify_connection_status (ebma, FALSE);
@@ -562,23 +608,12 @@ ebbm_notify_online_cb (EBookBackend *backend, GParamSpec *pspec)
 			}
 		} else {
 			ebbm_notify_connection_status (ebma, TRUE);
-			if (!priv->conn) {
-				krb_sso = e_source_get_property (esource,
-								 "kerberos");
-				if (!krb_sso
-				    || !g_str_equal (krb_sso, "required")) {
-					e_book_backend_notify_auth_required (backend, TRUE, NULL);
-				} else {
-					ebbm_connect_user (ebma, NULL, NULL,
-							   NULL);
-					e_book_backend_notify_opened (backend,
-								      NULL);
-				}
-			}
 		}
 
 		e_book_backend_mapi_unlock_connection (ebma);
 	}
+
+	e_book_backend_notify_online (backend, online);
 }
 
 static void
@@ -770,7 +805,6 @@ typedef enum {
 	OP_GET_CONTACT_LIST,
 	OP_START_BOOK_VIEW,
 	OP_STOP_BOOK_VIEW,
-	OP_AUTHENTICATE_USER,
 	OP_GET_BACKEND_PROPERTY
 } OperationType;
 
@@ -787,12 +821,6 @@ typedef struct {
 
 	gboolean only_if_exists;
 } OperationOpen;
-
-typedef struct {
-	OperationBase base;
-
-	ECredentials *credentials;
-} OperationAuthenticateUser;
 
 typedef struct {
 	OperationBase base;
@@ -1025,20 +1053,6 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 		}
 
 		g_object_unref (opbv->book_view);
-	} break;
-	case OP_AUTHENTICATE_USER: {
-		OperationAuthenticateUser *opau = (OperationAuthenticateUser *) op;
-
-		if (!cancelled) {
-			if (ebmac->op_authenticate_user)
-				ebmac->op_authenticate_user (ebma, op->cancellable, opau->credentials, &error);
-			else
-				error = EDB_ERROR (NOT_SUPPORTED);
-
-			e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), error);
-		}
-
-		e_credentials_free (opau->credentials);
 	} break;
 	case OP_GET_BACKEND_PROPERTY: {
 		OperationStr *ops = (OperationStr *) op;
@@ -1286,35 +1300,6 @@ ebbm_op_stop_book_view (EBookBackend *backend, EDataBookView *book_view)
 }
 
 static void
-ebbm_op_authenticate_user (EBookBackend *backend, GCancellable *cancellable, ECredentials *credentials)
-{
-	OperationAuthenticateUser *op;
-	EBookBackendMAPI *ebbm;
-	EBookBackendMAPIPrivate *priv;
-
-	g_return_if_fail (backend != NULL);
-	g_return_if_fail (E_IS_BOOK_BACKEND_MAPI (backend));
-
-	ebbm = E_BOOK_BACKEND_MAPI (backend);
-	priv = ebbm->priv;
-	g_return_if_fail (priv != NULL);
-
-	if (cancellable)
-		g_object_ref (cancellable);
-
-	g_object_ref (ebbm);
-
-	op = g_new0 (OperationAuthenticateUser, 1);
-	op->base.ot = OP_AUTHENTICATE_USER;
-	op->base.book = NULL;
-	op->base.opid = 0;
-	op->base.cancellable = cancellable;
-	op->credentials = e_credentials_new_clone (credentials);
-
-	e_mapi_operation_queue_push (priv->op_queue, op);
-}
-
-static void
 e_book_backend_mapi_init (EBookBackendMAPI *ebma)
 {
 	ebma->priv = G_TYPE_INSTANCE_GET_PRIVATE (ebma, E_TYPE_BOOK_BACKEND_MAPI, EBookBackendMAPIPrivate);
@@ -1360,8 +1345,7 @@ ebbm_dispose (GObject *object)
 		UNREF (priv->db);
 		UNREF (priv->update_cache);
 
-		FREE (priv->profile);
-		FREE (priv->book_uri);
+		FREE (priv->book_uid);
 
 		g_hash_table_destroy (priv->running_views);
 		g_mutex_free (priv->running_views_lock);
@@ -1397,11 +1381,9 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 	backend_class->get_contact_list		= ebbm_op_get_contact_list;
 	backend_class->start_book_view		= ebbm_op_start_book_view;
 	backend_class->stop_book_view		= ebbm_op_stop_book_view;
-	backend_class->authenticate_user	= ebbm_op_authenticate_user;
 	backend_class->get_backend_property	= ebbm_op_get_backend_property;
 	klass->op_open				= ebbm_open;
 	klass->op_remove			= ebbm_remove;
-	klass->op_authenticate_user		= ebbm_authenticate_user;
 	klass->op_get_contact			= ebbm_get_contact;
 	klass->op_get_contact_list		= ebbm_get_contact_list;
 
@@ -1413,13 +1395,19 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 	klass->op_transfer_contacts		= NULL;
 }
 
+static void
+e_book_backend_mapi_authenticator_init (ESourceAuthenticatorInterface *interface)
+{
+	interface->try_password_sync = ebbm_try_password_sync;
+}
+
 const gchar *
-e_book_backend_mapi_get_book_uri (EBookBackendMAPI *ebma)
+e_book_backend_mapi_get_book_uid (EBookBackendMAPI *ebma)
 {
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma), NULL);
 	g_return_val_if_fail (ebma->priv != NULL, NULL);
 
-	return ebma->priv->book_uri;
+	return ebma->priv->book_uid;
 }
 
 void

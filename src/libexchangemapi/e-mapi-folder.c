@@ -27,12 +27,12 @@
 
 #include <glib/gi18n-lib.h>
 
-#include <libedataserver/e-source.h>
-#include <libedataserver/e-source-group.h>
-#include <libedataserver/e-source-list.h>
+#include <libedataserver/libedataserver.h>
 
 #include "e-mapi-connection.h"
 #include "e-mapi-folder.h"
+#include "e-mapi-utils.h"
+#include "e-source-mapi-folder.h"
 
 #define d(x)
 
@@ -143,7 +143,7 @@ e_mapi_folder_get_name (EMapiFolder *folder)
 }
 
 guint64
-e_mapi_folder_get_fid (EMapiFolder *folder)
+e_mapi_folder_get_id (EMapiFolder *folder)
 {
 	return folder->folder_id;
 }
@@ -164,6 +164,12 @@ EMapiFolderType
 e_mapi_folder_get_type (EMapiFolder *folder)
 {
 	return folder->container_class;
+}
+
+EMapiFolderCategory
+e_mapi_folder_get_category (EMapiFolder *folder)
+{
+	return folder->category;
 }
 
 guint32
@@ -252,258 +258,174 @@ e_mapi_folder_pick_color_spec (gint move_by,
 	return g_strdup_printf ("#%06x", color);
 }
 
-#define MAPI_URI_PREFIX   "mapi://" 
-
-static const gchar *
-get_gconf_key_for_folder_type (EMapiFolderType folder_type)
+gboolean
+e_mapi_folder_populate_esource (ESource *source,
+				const GList *sources,
+				EMapiFolderType folder_type,
+				const gchar *profile,
+				gboolean offline_sync,
+				EMapiFolderCategory folder_category,
+				const gchar *foreign_username, /* NULL for public folder */
+				const gchar *folder_name,
+				mapi_id_t folder_id,
+				gint color_seed,
+				GCancellable *cancellable,
+				GError **perror)
 {
-	if (folder_type == E_MAPI_FOLDER_TYPE_APPOINTMENT)
-		return CALENDAR_SOURCES;
-	else if (folder_type == E_MAPI_FOLDER_TYPE_TASK)
-		return TASK_SOURCES;
-	else if (folder_type == E_MAPI_FOLDER_TYPE_MEMO)
-		return JOURNAL_SOURCES;
-	else if (folder_type == E_MAPI_FOLDER_TYPE_JOURNAL)
-		return JOURNAL_SOURCES;
-	else if (folder_type == E_MAPI_FOLDER_TYPE_CONTACT)
-		return ADDRESSBOOK_SOURCES;
+	ESource *master_source;
+	gboolean res = FALSE;
 
-	return NULL;
+	master_source = e_mapi_utils_get_master_source (sources, profile);
+
+	if (master_source) {
+		ESourceBackend *backend_ext;
+
+		e_source_set_parent (source, e_source_get_uid (master_source));
+		e_source_set_display_name (source, folder_name);
+
+		switch (folder_type) {
+			case E_MAPI_FOLDER_TYPE_APPOINTMENT:
+				backend_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_CALENDAR);
+				break;
+			case E_MAPI_FOLDER_TYPE_JOURNAL:
+			case E_MAPI_FOLDER_TYPE_MEMO:
+				backend_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_MEMO_LIST);
+				break;
+			case E_MAPI_FOLDER_TYPE_TASK:
+				backend_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_TASK_LIST);
+				break;
+			case E_MAPI_FOLDER_TYPE_CONTACT:
+				backend_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_ADDRESS_BOOK);
+				break;
+			default:
+				backend_ext = NULL;
+				break;
+		}
+
+		if (backend_ext) {
+			ESourceMapiFolder *folder_ext;
+			ESourceOffline *offline_ext;
+
+			e_source_backend_set_backend_name (backend_ext , "mapi");
+
+			folder_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
+			e_source_mapi_folder_set_id (folder_ext, folder_id);
+			if (folder_category == E_MAPI_FOLDER_CATEGORY_PUBLIC)
+				e_source_mapi_folder_set_is_public (folder_ext, TRUE);
+			else
+				e_source_mapi_folder_set_foreign_username (folder_ext, foreign_username);
+			
+			offline_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_OFFLINE);
+			e_source_offline_set_stay_synchronized (offline_ext, offline_sync);
+
+			/* set also color for calendar-like sources */
+			if (folder_type != E_MAPI_FOLDER_TYPE_CONTACT) {
+				gchar *color_str;
+
+				color_str = e_mapi_folder_pick_color_spec (1 + g_list_length ((GList *) sources), folder_type != E_MAPI_FOLDER_TYPE_APPOINTMENT);
+				e_source_selectable_set_color (E_SOURCE_SELECTABLE (backend_ext), color_str);
+				g_free (color_str);
+			}
+
+			res = TRUE;
+		} else {
+			g_propagate_error (perror, g_error_new_literal (E_MAPI_ERROR, MAPI_E_INVALID_PARAMETER, _("Cannot add folder, unsupported folder type")));
+		}
+	} else {
+		g_propagate_error (perror, g_error_new_literal (E_MAPI_ERROR, MAPI_E_INVALID_PARAMETER, _("Cannot add folder, master source not found")));
+	}
+
+	return res;
 }
 
 gboolean
-e_mapi_folder_add_as_esource (EMapiFolderType folder_type,
-			      const gchar *login_profile,
-			      const gchar *login_domain,
-			      const gchar *login_realm,
-			      const gchar *login_host,
-			      const gchar *login_user,
-			      gboolean login_kerberos,
+e_mapi_folder_add_as_esource (ESourceRegistry *pregistry,
+			      EMapiFolderType folder_type,
+			      const gchar *profile,
 			      gboolean offline_sync,
 			      EMapiFolderCategory folder_category,
 			      const gchar *foreign_username, /* NULL for public folder */
 			      const gchar *folder_name,
-			      const gchar *fid,
+			      mapi_id_t folder_id,
+			      gint color_seed,
+			      GCancellable *cancellable,
 			      GError **perror)
 {
-	ESourceList *source_list = NULL;
-	ESourceGroup *group = NULL;
-	const gchar *conf_key = NULL;
-	GConfClient* client;
-	GSList *sources;
-	ESource *source = NULL;
-	gchar *relative_uri = NULL;
-	gchar *base_uri = NULL;
+	ESourceRegistry *registry;
+	GList *sources;
+	ESource *source;
+	gboolean res = FALSE;
 
-	g_return_val_if_fail (login_profile != NULL, FALSE);
-	g_return_val_if_fail (login_host != NULL, FALSE);
-	g_return_val_if_fail (login_user != NULL, FALSE);
-	g_return_val_if_fail (folder_name != NULL, FALSE);
-	g_return_val_if_fail (fid != NULL, FALSE);
-	g_return_val_if_fail (folder_category == E_MAPI_FOLDER_CATEGORY_PUBLIC || folder_category == E_MAPI_FOLDER_CATEGORY_FOREIGN, FALSE);
-	if (folder_category == E_MAPI_FOLDER_CATEGORY_FOREIGN)
-		g_return_val_if_fail (foreign_username != NULL, FALSE);
-
-	conf_key = get_gconf_key_for_folder_type (folder_type);
-	if (!conf_key) {
-		g_propagate_error (perror, g_error_new_literal (E_MAPI_ERROR, MAPI_E_INVALID_PARAMETER, _("Cannot add folder, unsupported folder type")));
-		return FALSE;
+	registry = pregistry;
+	if (!registry) {
+		registry = e_source_registry_new_sync (cancellable, perror);
+		if (!registry)
+			return FALSE;
 	}
 
-	client = gconf_client_get_default ();
-	source_list = e_source_list_new_for_gconf (client, conf_key);
-	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, login_user, login_host);
-	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
-	if (!group) {
-		g_propagate_error (perror, g_error_new_literal (E_MAPI_ERROR, MAPI_E_INVALID_PARAMETER, _("Cannot add folder, group of sources not found")));
-		g_object_unref (source_list);
-		g_object_unref (client);
-		g_free (base_uri);
+	sources = e_source_registry_list_sources (registry, NULL);
+	source = e_source_new (NULL, NULL, NULL);
 
-		return FALSE;
+	if (e_mapi_folder_populate_esource (
+		source,
+		sources,
+		folder_type,
+		profile,
+		offline_sync,
+		folder_category,
+		foreign_username,
+		folder_name,
+		folder_id,
+		color_seed,
+		cancellable,
+		perror)) {
+		res = e_source_registry_commit_source_sync (registry, source, cancellable, perror);
 	}
-
-	sources = e_source_group_peek_sources (group);
-	for (; sources != NULL; sources = g_slist_next (sources)) {
-		ESource *source = E_SOURCE (sources->data);
-		gchar *folder_id = e_source_get_duped_property (source, "folder-id");
-		if (folder_id) {
-			if (g_str_equal (fid, folder_id)) {
-				g_propagate_error (perror,
-					g_error_new (E_MAPI_ERROR, MAPI_E_INVALID_PARAMETER,
-						_("Cannot add folder, folder already exists as '%s'"), e_source_peek_name (source)));
-
-				g_object_unref (source_list);
-				g_object_unref (client);
-				g_free (folder_id);
-				g_free (base_uri);
-
-				return FALSE;
-			}
-
-			g_free (folder_id);
-		}
-	}
-
-	relative_uri = g_strconcat (";", fid, NULL);
-	source = e_source_new (folder_name, relative_uri);
-	e_source_set_property (source, "username", login_user);
-	e_source_set_property (source, "host", login_host);
-	e_source_set_property (source, "profile", login_profile);
-	e_source_set_property (source, "domain", login_domain);
-	e_source_set_property (source, "realm", login_realm);
-	e_source_set_property (source, "folder-id", fid);
-	e_source_set_property (source, "offline_sync", offline_sync ? "1" : "0");
-	e_source_set_property (source, "delete", "yes");
-	if (folder_category == E_MAPI_FOLDER_CATEGORY_PUBLIC)
-		e_source_set_property (source, "public", "yes");
-	else
-		e_source_set_property (source, "foreign-username", foreign_username);
-	if (login_kerberos) {
-		e_source_set_property (source, "kerberos", "required");
-	} else {
-		e_source_set_property (source, "auth", "1");
-		e_source_set_property (source, "auth-type", "plain/password");
-	}
-
-	/* set also color for calendar-like sources */
-	if (folder_type != E_MAPI_FOLDER_TYPE_CONTACT) {
-		GSList *sources = e_source_group_peek_sources (group);
-		gchar *color_str;
-
-		color_str = e_mapi_folder_pick_color_spec (1 + g_slist_length (sources), folder_type != E_MAPI_FOLDER_TYPE_APPOINTMENT);
-		e_source_set_color_spec (source, color_str);
-		g_free (color_str);
-	}
-
-	e_source_group_add_source (group, source, -1);
-
 	g_object_unref (source);
-	g_object_unref (client);
-	g_free (relative_uri);
-	g_free (base_uri);
 
-	if (!e_source_list_sync (source_list, perror)) {
-		g_object_unref (source_list);
-		return FALSE;
-	}
+	g_list_free_full (sources, g_object_unref);
+	if (!pregistry)
+		g_object_unref (registry);
 
-	g_object_unref (source_list);
-	return TRUE;
+	return res;
 }
 
 gboolean
-e_mapi_folder_remove_as_esource (EMapiFolderType folder_type,
-				 const gchar *login_host,
-				 const gchar *login_user,
-				 const gchar *fid,
+e_mapi_folder_remove_as_esource (ESourceRegistry *pregistry,
+				 const gchar *profile,
+				 mapi_id_t folder_id,
+				 GCancellable *cancellable,
 				 GError **perror)
 {
-	ESourceList *source_list = NULL;
-	ESourceGroup *group = NULL;
-	const gchar *conf_key = NULL;
-	GConfClient* client;
-	GSList *sources = NULL;
-	gchar *base_uri = NULL;
+	ESourceRegistry *registry;
+	ESource *source;
+	GList *sources;
+	gboolean res = TRUE;
 
-	g_return_val_if_fail (login_host != NULL, FALSE);
-	g_return_val_if_fail (login_user != NULL, FALSE);
-	g_return_val_if_fail (fid != NULL, FALSE);
-
-	conf_key = get_gconf_key_for_folder_type (folder_type);
-	if (!conf_key) {
-		g_propagate_error (perror, g_error_new_literal (E_MAPI_ERROR, MAPI_E_INVALID_PARAMETER, _("Cannot remove folder, unsupported folder type")));
-		return FALSE;
+	registry = pregistry;
+	if (!registry) {
+		registry = e_source_registry_new_sync (cancellable, perror);
+		if (!registry)
+			return FALSE;
 	}
 
-	client = gconf_client_get_default ();
-	source_list = e_source_list_new_for_gconf (client, conf_key);
-	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, login_user, login_host);
-	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
-	if (!group) {
-		g_free (base_uri);
-		g_object_unref (source_list);
-		g_object_unref (client);
+	sources = e_source_registry_list_sources (registry, NULL);
+	source = e_mapi_utils_get_source_for_folder (sources, profile, folder_id);
 
-		return TRUE;
-	}
+	if (source)
+		res = e_source_remove_sync (source, cancellable, perror);
 
-	sources = e_source_group_peek_sources (group);
-	for (; sources != NULL; sources = g_slist_next (sources)) {
-		ESource *source = E_SOURCE (sources->data);
-		gchar *folder_id = e_source_get_duped_property (source, "folder-id");
-		if (folder_id) {
-			if (g_str_equal (fid, folder_id)) {
-				g_free (folder_id);
+	g_list_free_full (sources, g_object_unref);
+	if (!pregistry)
+		g_object_unref (registry);
 
-				e_source_group_remove_source (group, source);
-				break;
-			}
-
-			g_free (folder_id);
-		}
-	}
-
-	g_free (base_uri);
-	g_object_unref (source_list);
-	g_object_unref (client);
-
-	return TRUE;
+	return res;
 }
 
 gboolean
-e_mapi_folder_is_subscribed_as_esource (EMapiFolderType folder_type,
-					const gchar *login_host,
-					const gchar *login_user,
-					const gchar *fid)
+e_mapi_folder_is_subscribed_as_esource (const GList *esources,
+					const gchar *profile,
+					mapi_id_t fid)
 {
-	ESourceList *source_list = NULL;
-	ESourceGroup *group = NULL;
-	const gchar *conf_key = NULL;
-	GConfClient* client;
-	GSList *sources = NULL;
-	gchar *base_uri = NULL;
-	gboolean found = FALSE;
-
-	g_return_val_if_fail (login_host != NULL, FALSE);
-	g_return_val_if_fail (login_user != NULL, FALSE);
-	g_return_val_if_fail (fid != NULL, FALSE);
-
-	conf_key = get_gconf_key_for_folder_type (folder_type);
-	if (!conf_key)
-		return FALSE;
-
-	client = gconf_client_get_default ();
-	source_list = e_source_list_new_for_gconf (client, conf_key);
-	base_uri = g_strdup_printf ("%s%s@%s/", MAPI_URI_PREFIX, login_user, login_host);
-	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
-	if (!group) {
-		g_free (base_uri);
-		g_object_unref (source_list);
-		g_object_unref (client);
-
-		return FALSE;
-	}
-
-	sources = e_source_group_peek_sources (group);
-	for (; sources != NULL; sources = g_slist_next (sources)) {
-		ESource *source = E_SOURCE (sources->data);
-		gchar *folder_id = e_source_get_duped_property (source, "folder-id");
-		if (folder_id) {
-			if (g_str_equal (fid, folder_id)) {
-				g_free (folder_id);
-
-				found = TRUE;
-				break;
-			}
-
-			g_free (folder_id);
-		}
-	}
-
-	g_free (base_uri);
-	g_object_unref (source_list);
-	g_object_unref (client);
-
-	return found;
+	return e_mapi_utils_get_source_for_folder (esources, profile, fid) != NULL;
 }

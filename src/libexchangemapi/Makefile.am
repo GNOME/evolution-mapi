@@ -42,7 +42,9 @@ libexchangemapi_1_0_la_SOURCES =	\
 	e-mapi-mail-utils.c		\
 	e-mapi-mail-utils.h		\
 	e-mapi-operation-queue.c	\
-	e-mapi-operation-queue.h
+	e-mapi-operation-queue.h	\
+	e-source-mapi-folder.c		\
+	e-source-mapi-folder.h
 
 
 libexchangemapi_1_0_la_LIBADD =			\

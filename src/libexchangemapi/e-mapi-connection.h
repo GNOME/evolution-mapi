@@ -31,6 +31,7 @@
 
 #include <libmapi/libmapi.h>
 #include <libmapi/mapi_nameid.h>
+#include <libedataserver/libedataserver.h>
 
 /* Standard GObject macros */
 #define E_MAPI_TYPE_CONNECTION (e_mapi_connection_get_type ())
@@ -229,13 +230,14 @@ struct _EMapiConnectionClass {
 };
 
 GType			e_mapi_connection_get_type		(void);
-EMapiConnection *	e_mapi_connection_new			(const gchar *profile,
-								 const gchar *password,
+EMapiConnection *	e_mapi_connection_new			(ESourceRegistry *registry,
+								 const gchar *profile,
+								 const GString *password,
 								 GCancellable *cancellable,
 								 GError **perror);
 EMapiConnection *	e_mapi_connection_find			(const gchar *profile);
 gboolean		e_mapi_connection_reconnect		(EMapiConnection *conn,
-								 const gchar *password,
+								 const GString *password,
 								 GCancellable *cancellable,
 								 GError **perror);
 gboolean		e_mapi_connection_close			(EMapiConnection *conn);
@@ -515,7 +517,7 @@ gboolean		e_mapi_connection_disable_notifications	(EMapiConnection *conn,
 
 typedef struct {
 	const gchar *username;
-	gchar *password;
+	GString *password;
 	const gchar *domain;
 	const gchar *server;
 	gboolean use_ssl;
@@ -525,7 +527,7 @@ typedef struct {
 
 #define COMPLETE_PROFILEDATA(x) \
 	((x)->username && *(x)->username && (x)->server && *(x)->server \
-	 && (((x)->domain && *(x)->domain && (x)->password && *(x)->password) \
+	 && (((x)->domain && *(x)->domain) \
 	     || ((x)->krb_sso && (x)->krb_realm && *(x)->krb_realm)))
 
 gboolean		e_mapi_create_profile			(struct mapi_context *mapi_ctx,

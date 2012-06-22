@@ -27,14 +27,7 @@
 #include <glib.h>
 
 #include <libmapi/libmapi.h>
-
-#define CALENDAR_SOURCES	"/apps/evolution/calendar/sources"
-#define TASK_SOURCES		"/apps/evolution/tasks/sources"
-#define JOURNAL_SOURCES		"/apps/evolution/memos/sources"
-#define SELECTED_CALENDARS	"/apps/evolution/calendar/display/selected_calendars"
-#define SELECTED_TASKS		"/apps/evolution/calendar/tasks/selected_tasks"
-#define SELECTED_JOURNALS	"/apps/evolution/calendar/memos/selected_memos"
-#define ADDRESSBOOK_SOURCES     "/apps/evolution/addressbook/sources"
+#include <libedataserver/libedataserver.h>
 
 typedef enum  {
 	E_MAPI_FOLDER_TYPE_UNKNOWN = 0,
@@ -96,9 +89,10 @@ EMapiFolder *		e_mapi_folder_copy		(EMapiFolder *src);
 void			e_mapi_folder_free		(EMapiFolder *folder);
 
 const gchar *		e_mapi_folder_get_name		(EMapiFolder *folder);
-mapi_id_t		e_mapi_folder_get_fid		(EMapiFolder *folder);
+mapi_id_t		e_mapi_folder_get_id		(EMapiFolder *folder);
 mapi_id_t		e_mapi_folder_get_parent_id	(EMapiFolder *folder);
 EMapiFolderType		e_mapi_folder_get_type		(EMapiFolder *folder);
+EMapiFolderCategory	e_mapi_folder_get_category	(EMapiFolder *folder);
 guint32			e_mapi_folder_get_unread_count	(EMapiFolder *folder);
 guint32			e_mapi_folder_get_total_count	(EMapiFolder *folder);
 gboolean		e_mapi_folder_is_root		(EMapiFolder *folder);
@@ -109,29 +103,39 @@ void			e_mapi_folder_free_list		(GSList *folder_list);
 gchar *			e_mapi_folder_pick_color_spec	(gint move_by,
 							 gboolean around_middle);
 
-gboolean		e_mapi_folder_add_as_esource	(EMapiFolderType folder_type,
-							 const gchar *login_profile,
-							 const gchar *login_domain,
-							 const gchar *login_realm,
-							 const gchar *login_host,
-							 const gchar *login_user,
-							 gboolean login_kerberos,
+gboolean		e_mapi_folder_populate_esource	(ESource *source,
+							 const GList *sources,
+							 EMapiFolderType folder_type,
+							 const gchar *profile,
 							 gboolean offline_sync,
 							 EMapiFolderCategory folder_category,
 							 const gchar *foreign_username, /* NULL for public folder */
 							 const gchar *folder_name,
-							 const gchar *fid,
+							 mapi_id_t folder_id,
+							 gint color_seed,
+							 GCancellable *cancellable,
 							 GError **perror);
 
-gboolean		e_mapi_folder_remove_as_esource	(EMapiFolderType folder_type,
-							 const gchar *login_host,
-							 const gchar *login_user,
-							 const gchar *fid,
+gboolean		e_mapi_folder_add_as_esource	(ESourceRegistry *pregistry,
+							 EMapiFolderType folder_type,
+							 const gchar *profile,
+							 gboolean offline_sync,
+							 EMapiFolderCategory folder_category,
+							 const gchar *foreign_username, /* NULL for public folder */
+							 const gchar *folder_name,
+							 mapi_id_t folder_id,
+							 gint color_seed,
+							 GCancellable *cancellable,
+							 GError **perror);
+
+gboolean		e_mapi_folder_remove_as_esource	(ESourceRegistry *pregistry,
+							 const gchar *profile,
+							 mapi_id_t folder_id,
+							 GCancellable *cancellable,
 							 GError **perror);
 
 gboolean		e_mapi_folder_is_subscribed_as_esource
-							(EMapiFolderType folder_type,
-							 const gchar *login_host,
-							 const gchar *login_user,
-							 const gchar *fid);
+							(const GList *esources,
+							 const gchar *profile,
+							 mapi_id_t fid);
 #endif

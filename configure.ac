@@ -30,7 +30,6 @@ m4_define([evo_minimum_version], [ema_version])
 m4_define([libmapi_minimum_version], [1.0])
 m4_define([glib_minimum_version], [2.16.1])
 m4_define([gtk_minimum_version], [2.99.2])
-m4_define([gconf_minimum_version], [2.0.0])
 
 dnl ***********************************
 dnl Automake 1.11 - Silent Build Rules
@@ -102,8 +101,7 @@ dnl Check for GNOME Platform
 dnl *****************************
 PKG_CHECK_MODULES(GNOME_PLATFORM,
 	[glib-2.0 >= glib_minimum_version
-	gtk+-3.0 >= gtk_minimum_version
-	gconf-2.0 >= gconf_minimum_version])
+	gtk+-3.0 >= gtk_minimum_version])
 
 dnl ********************************
 dnl Check for evolution-data-server 
@@ -119,9 +117,10 @@ PKG_CHECK_MODULES(LIBEDATABOOK, libedata-book-$EDS_PACKAGE >= eds_minimum_versio
 PKG_CHECK_MODULES(CAMEL, camel-$EDS_PACKAGE >= eds_minimum_version)
 
 dnl ****************************
-dnl Check for evolution plugins 
+dnl Check for evolution stuff
 dnl ****************************
-PKG_CHECK_MODULES(EVOLUTION_PLUGIN, evolution-plugin-3.0 >= evo_minimum_version)
+PKG_CHECK_MODULES(EVOLUTION_SHELL, evolution-shell-3.0 >= evo_minimum_version)
+PKG_CHECK_MODULES(EVOLUTION_MAIL, evolution-mail-3.0 >= evo_minimum_version)
 
 dnl ****************************
 dnl Check for LibMAPI
@@ -164,18 +163,9 @@ AC_SUBST(EVO_REQUIRED)
 LIBMAPI_REQUIRED=libmapi_minimum_version
 AC_SUBST(LIBMAPI_REQUIRED)
 
-dnl *******************************
-dnl Add evolution plugin rules here
-dnl *******************************
-EVO_PLUGIN_RULE=$srcdir/eplugin-rule.mk
-AC_SUBST_FILE(EVO_PLUGIN_RULE)
-
 dnl *******************
 dnl Special directories
 dnl *******************
-plugindir=`$PKG_CONFIG --variable=plugindir evolution-plugin-3.0`
-AC_SUBST(plugindir)
-
 ebook_backenddir=`$PKG_CONFIG --variable=backenddir libedata-book-1.2`
 AC_SUBST(ebook_backenddir)
 
@@ -187,6 +177,12 @@ AC_SUBST(camel_providerdir)
 
 edataserver_privincludedir=`$PKG_CONFIG --variable=privincludedir libedataserver-$EDS_PACKAGE`
 AC_SUBST(edataserver_privincludedir)
+
+eds_moduledir=`$PKG_CONFIG --variable=moduledir libebackend-1.2`
+AC_SUBST(eds_moduledir)
+
+evo_moduledir=`$PKG_CONFIG --variable=moduledir evolution-shell-3.0`
+AC_SUBST(evo_moduledir)
 
 libmapi_ldif_dir=`$PKG_CONFIG --variable=datadir libmapi`/setup
 AC_SUBST(libmapi_ldif_dir)
@@ -205,10 +201,11 @@ dnl **************************
 AC_CONFIG_FILES([
 Makefile 
 src/Makefile
-src/account-setup-eplugin/Makefile
 src/addressbook/Makefile
 src/calendar/Makefile
 src/camel/Makefile
+src/collection/Makefile
+src/configuration/Makefile
 src/libexchangemapi/Makefile
 src/libexchangemapi/libexchangemapi-]EVO_MAPI_API_VERSION_MACRO[.pc:src/libexchangemapi/libexchangemapi.pc.in
 po/Makefile.in

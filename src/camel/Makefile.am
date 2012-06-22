@@ -7,6 +7,7 @@ AM_CPPFLAGS = -I.. 				\
 	-I$(top_srcdir)/src/			\
 	-I$(top_srcdir)/src/camel		\
 	-I$(top_srcdir)/src/libexchangemapi	\
+	$(EVOLUTION_MAIL_CFLAGS)		\
 	$(CAMEL_CFLAGS)				\
 	$(LIBECAL_CFLAGS)			\
         $(LIBMAPI_CFLAGS)                       \
@@ -31,6 +32,7 @@ noinst_HEADERS =         			\
 libcamelmapi_la_LDFLAGS = -avoid-version -module $(NO_UNDEFINED)
 libcamelmapi_la_LIBADD = 			\
 	$(top_builddir)/src/libexchangemapi/libexchangemapi-1.0.la \
+	$(EVOLUTION_MAIL_LIBS)			\
 	$(CAMEL_LIBS) 				\
 	$(LIBECAL_LIBS)				\
         $(LIBMAPI_LIBS)

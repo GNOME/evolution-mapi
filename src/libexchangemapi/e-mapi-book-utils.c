@@ -22,7 +22,7 @@
 #include <config.h>
 #endif
 
-#include <libedataserver/e-sexp.h>
+#include <libedataserver/libedataserver.h>
 
 #include "e-mapi-book-utils.h"
 

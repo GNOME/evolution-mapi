@@ -1,3 +1,3 @@
-SUBDIRS=libexchangemapi calendar addressbook camel account-setup-eplugin
-DIST_SUBDIRS=libexchangemapi calendar addressbook camel account-setup-eplugin
+SUBDIRS=libexchangemapi addressbook calendar camel collection configuration
+
 -include $(top_srcdir)/git.mk

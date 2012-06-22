@@ -33,20 +33,14 @@
 #include <glib/gi18n-lib.h>
 
 #include <sys/time.h>
-/*
-** #include <glib/gi18n-lib.h>
-*/
 
-#include <libedataserver/e-sexp.h>
-#include "libedataserver/e-flag.h"
-#include <libebook/e-contact.h>
+#include <libedataserver/libedataserver.h>
+#include <libedata-book/libedata-book.h>
+#include <libebook/libebook.h>
 #include <camel/camel.h>
 
-#include <libedata-book/e-book-backend-sexp.h>
-#include <libedata-book/e-data-book.h>
-#include <libedata-book/e-data-book-view.h>
-
 #include "e-book-backend-mapi-contacts.h"
+#include "e-source-mapi-folder.h"
 
 G_DEFINE_TYPE (EBookBackendMAPIContacts, e_book_backend_mapi_contacts, E_TYPE_BOOK_BACKEND_MAPI)
 
@@ -146,7 +140,7 @@ transfer_contact_cb (EMapiConnection *conn,
 	g_return_val_if_fail (tc->ebma != NULL, FALSE);
 	g_return_val_if_fail (object != NULL, FALSE);
 
-	tc->contact = e_mapi_book_utils_contact_from_object (conn, object, e_book_backend_mapi_get_book_uri (tc->ebma));
+	tc->contact = e_mapi_book_utils_contact_from_object (conn, object, e_book_backend_mapi_get_book_uid (tc->ebma));
 	if (tc->contact)
 		return e_book_backend_mapi_notify_contact_update (tc->ebma, NULL, tc->contact, obj_index, obj_total, NULL);
 
@@ -202,7 +196,7 @@ transfer_contacts_cb (EMapiConnection *conn,
 	g_return_val_if_fail (object != NULL, FALSE);
 	g_return_val_if_fail (tcd->ebma != NULL, FALSE);
 
-	contact = e_mapi_book_utils_contact_from_object (conn, object, e_book_backend_mapi_get_book_uri (tcd->ebma));
+	contact = e_mapi_book_utils_contact_from_object (conn, object, e_book_backend_mapi_get_book_uid (tcd->ebma));
 	if (contact) {
 		if (tcd->cards)
 			*tcd->cards = g_slist_prepend (*tcd->cards, e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30));
@@ -319,6 +313,7 @@ static void
 ebbm_contacts_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean only_if_exists, GError **perror)
 {
 	ESource *source = e_backend_get_source (E_BACKEND (ebma));
+	ESourceMapiFolder *ext_mapi_folder;
 	EBookBackendMAPIContactsPrivate *priv = ((EBookBackendMAPIContacts *) ebma)->priv;
 	GError *err = NULL;
 
@@ -328,10 +323,11 @@ ebbm_contacts_open (EBookBackendMAPI *ebma, GCancellable *cancellable, gboolean 
 		return;
 	}
 
-	priv->fid = 0;
-	priv->is_public_folder = g_strcmp0 (e_source_get_property (source, "public"), "yes") == 0;
-	priv->foreign_username = e_source_get_duped_property (source, "foreign-username");
-	e_mapi_util_mapi_id_from_string (e_source_get_property (source, "folder-id"), &priv->fid);
+	ext_mapi_folder = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
+
+	priv->fid = e_source_mapi_folder_get_id (ext_mapi_folder);
+	priv->is_public_folder = e_source_mapi_folder_is_public (ext_mapi_folder);
+	priv->foreign_username = e_source_mapi_folder_dup_foreign_username (ext_mapi_folder);
 
 	if (priv->foreign_username && !*priv->foreign_username) {
 		g_free (priv->foreign_username);
@@ -350,6 +346,7 @@ static void
 ebbm_contacts_connection_status_changed (EBookBackendMAPI *ebma, gboolean is_online)
 {
 	ESource *source;
+	ESourceMapiFolder *ext_mapi_folder;
 
 	e_book_backend_notify_readonly (E_BOOK_BACKEND (ebma), !is_online);
 
@@ -357,7 +354,9 @@ ebbm_contacts_connection_status_changed (EBookBackendMAPI *ebma, gboolean is_onl
 		return;
 
 	source = e_backend_get_source (E_BACKEND (ebma));
-	if (source && g_strcmp0 (e_source_get_property (source, "server-notification"), "true") == 0) {
+	ext_mapi_folder = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
+
+	if (e_source_mapi_folder_get_server_notification (ext_mapi_folder)) {
 		EMapiConnection *conn;
 		mapi_object_t obj_folder;
 		gboolean status;
@@ -505,7 +504,7 @@ ebbm_contacts_create_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 
 	/* UID of the contact is nothing but the concatenated string of hex id of folder and the message.*/
 	e_contact_set (contact, E_CONTACT_UID, id);
-	e_contact_set (contact, E_CONTACT_BOOK_URI, e_book_backend_mapi_get_book_uri (ebma));
+	e_contact_set (contact, E_CONTACT_BOOK_URI, e_book_backend_mapi_get_book_uid (ebma));
 
 	g_free (id);
 

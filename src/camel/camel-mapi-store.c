@@ -35,6 +35,7 @@
 #include <errno.h>
 
 #include <libmapi/libmapi.h>
+#include <libemail-engine/e-mail-session.h>
 
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
@@ -313,7 +314,7 @@ mapi_convert_to_folder_info (CamelMapiStore *store,
 
 	name = escape_slash (e_mapi_folder_get_name (folder));
 
-	id = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", e_mapi_folder_get_fid (folder));
+	id = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", e_mapi_folder_get_id (folder));
 
 	fi = camel_folder_info_new ();
 
@@ -518,7 +519,7 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 		gchar *fid = NULL, *parent_id = NULL, *tmp = NULL;
 		guint *folder_type = g_new0 (guint, 1);
 
-		fid = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", e_mapi_folder_get_fid((EMapiFolder *)(temp_list->data)));
+		fid = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", e_mapi_folder_get_id ((EMapiFolder *)(temp_list->data)));
 		parent_id = g_strdup_printf ("%016" G_GINT64_MODIFIER "X", e_mapi_folder_get_parent_id ((EMapiFolder *)(temp_list->data)));
 		full_name = g_hash_table_lookup (priv->id_hash, fid);
 		if (!full_name) {
@@ -569,7 +570,7 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 			if (!msi) {
 				msi = (CamelMapiStoreInfo *) camel_mapi_store_summary_add_from_full (store->summary,
 						info->full_name,
-						e_mapi_folder_get_fid (folder),
+						e_mapi_folder_get_id (folder),
 						e_mapi_folder_get_parent_id (folder),
 						info->flags,
 						folder->category == E_MAPI_FOLDER_CATEGORY_PERSONAL ? CAMEL_MAPI_STORE_FOLDER_FLAG_PERSONAL :
@@ -600,7 +601,7 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 			if (!msi) {
 				msi = (CamelMapiStoreInfo *) camel_mapi_store_summary_add_from_full (store->summary,
 						info->full_name,
-						e_mapi_folder_get_fid (folder),
+						e_mapi_folder_get_id (folder),
 						e_mapi_folder_get_parent_id (folder),
 						info->flags,
 						CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC | CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC_REAL,
@@ -693,12 +694,17 @@ unescape_folder_names (CamelFolderInfo *fi)
 }
 
 static CamelFolderInfo *
-mapi_get_folder_info_offline (CamelStore *store, const gchar *top,
-			 guint32 flags, GError **error)
+mapi_get_folder_info_offline (CamelStore *store,
+			      const gchar *top,
+			      guint32 flags,
+			      GCancellable *cancellable,
+			      GError **error)
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
-	CamelNetworkSettings *network_settings;
+	CamelMapiSettings *settings;
 	CamelFolderInfo *fi;
+	ESourceRegistry *registry = NULL;
+	GList *my_sources = NULL;
 	GPtrArray *folders;
 	gchar *path;
 	gint i, count;
@@ -708,8 +714,22 @@ mapi_get_folder_info_offline (CamelStore *store, const gchar *top,
 	subscription_list = (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST);
 	subscribed = (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED);
 
-	network_settings = CAMEL_NETWORK_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (store)));
+	settings = CAMEL_MAPI_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (store)));
 	folders = g_ptr_array_new ();
+
+	if (subscription_list) {
+		GError *local_error = NULL;
+
+		registry = e_source_registry_new_sync (cancellable, &local_error);
+		if (registry) {
+			GList *all_sources = e_source_registry_list_sources (registry, NULL);
+
+			my_sources = e_mapi_utils_filter_sources_for_profile (all_sources,
+				camel_mapi_settings_get_profile (settings));
+
+			g_list_free_full (all_sources, g_object_unref);
+		}
+	}
 
 	if (!top || !*top)
 		top = "";
@@ -778,15 +798,10 @@ mapi_get_folder_info_offline (CamelStore *store, const gchar *top,
 
 				folder_type = mapi_folders_hash_table_type_lookup (mapi_store, camel_store_info_path (mapi_store->summary, si));
 				if (folder_type != E_MAPI_FOLDER_TYPE_UNKNOWN && folder_type != E_MAPI_FOLDER_TYPE_MAIL) {
-					gchar *fid = e_mapi_util_mapi_id_to_string (msi->folder_id);
-
-					if (e_mapi_folder_is_subscribed_as_esource (folder_type,
-						camel_network_settings_get_host (network_settings),
-						camel_network_settings_get_user (network_settings),
-						fid))
+					if (e_mapi_folder_is_subscribed_as_esource (my_sources,
+						camel_mapi_settings_get_profile (settings),
+						msi->folder_id))
 						fi->flags |= CAMEL_FOLDER_SUBSCRIBED;
-
-					g_free (fid);
 				}
 			}
 
@@ -822,6 +837,10 @@ mapi_get_folder_info_offline (CamelStore *store, const gchar *top,
 		g_set_error_literal (error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER,
 			(flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST) != 0 ?
 			_("No public folder found") : _("No folder found"));
+
+	g_list_free_full (my_sources, g_object_unref);
+	if (registry)
+		g_object_unref (registry);
 
 	return fi;
 }
@@ -1191,7 +1210,7 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 		}
 	}
 
-	return mapi_get_folder_info_offline (store, top, flags, error);
+	return mapi_get_folder_info_offline (store, top, flags, cancellable, error);
 }
 
 static CamelFolder *
@@ -1792,8 +1811,6 @@ mapi_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 	} else {
 		CamelSettings *settings;
 		CamelMapiSettings *mapi_settings;
-		CamelNetworkSettings *network_settings;
-		gchar *folder_id;
 		guint folder_type = mapi_folders_hash_table_type_lookup (mapi_store, folder_name);
 
 		/* remember the folder, thus it can be removed and checked in Subscriptions dialog */
@@ -1802,31 +1819,22 @@ mapi_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 
 		settings = camel_service_get_settings (CAMEL_SERVICE (mapi_store));
 		mapi_settings = CAMEL_MAPI_SETTINGS (settings);
-		network_settings = CAMEL_NETWORK_SETTINGS (settings);
 
-		folder_id = e_mapi_util_mapi_id_to_string (msi->folder_id);
-
-		if (!e_mapi_folder_add_as_esource (folder_type,
+		if (!e_mapi_folder_add_as_esource (NULL, folder_type,
 			camel_mapi_settings_get_profile (mapi_settings),
-			camel_mapi_settings_get_domain (mapi_settings),
-			camel_mapi_settings_get_realm (mapi_settings),
-			camel_network_settings_get_host (network_settings),
-			camel_network_settings_get_user (network_settings),
-			camel_mapi_settings_get_kerberos (mapi_settings),
 			TRUE /* camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (mapi_settings)) */,
 			E_MAPI_FOLDER_CATEGORY_PUBLIC,
 			NULL,
 			use_folder_name,
-			folder_id,
+			msi->folder_id,
+			(gint) msi->folder_id,
+			cancellable,
 			error)) {
 			camel_store_summary_info_free (mapi_store->summary, si);
-			g_free (folder_id);
 			g_free (path);
 
 			return FALSE;
 		}
-
-		g_free (folder_id);
 	}
 	camel_store_summary_info_free (mapi_store->summary, si);
 	camel_store_summary_save (mapi_store->summary);
@@ -1884,17 +1892,14 @@ mapi_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 			g_debug ("%s: Failed to find subscribed by folder ID", G_STRFUNC);
 		}
 	} else {
-		CamelSettings *settings;
-		CamelNetworkSettings *network_settings;
-		guint folder_type = mapi_folders_hash_table_type_lookup (mapi_store, folder_name);
+		CamelMapiSettings *settings;
 
-		settings = camel_service_get_settings (CAMEL_SERVICE (mapi_store));
-		network_settings = CAMEL_NETWORK_SETTINGS (settings);
+		settings = CAMEL_MAPI_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (mapi_store)));
 
-		res = e_mapi_folder_remove_as_esource (folder_type,
-			camel_network_settings_get_host (network_settings),
-			camel_network_settings_get_user (network_settings),
-			camel_mapi_store_folder_id_lookup (mapi_store, folder_name),
+		res = e_mapi_folder_remove_as_esource (NULL,
+			camel_mapi_settings_get_profile (settings),
+			msi->folder_id,
+			cancellable,
 			error);
 	}
 
@@ -2516,6 +2521,7 @@ mapi_authenticate_sync (CamelService *service,
 	const gchar *profile;
 	const gchar *password;
 	GError *mapi_error = NULL;
+	GString *password_str;
 
 	settings = camel_service_get_settings (service);
 	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
@@ -2544,7 +2550,11 @@ mapi_authenticate_sync (CamelService *service,
 		return CAMEL_AUTHENTICATION_ERROR;
 	}
 
-	store->priv->conn = e_mapi_connection_new (profile, password, cancellable, &mapi_error);
+	password_str = g_string_new (password);
+	store->priv->conn = e_mapi_connection_new (
+		e_mail_session_get_registry (E_MAIL_SESSION (camel_service_get_session (service))),
+		profile, password_str, cancellable, &mapi_error);
+	g_string_free (password_str, TRUE);
 	if (store->priv->conn && e_mapi_connection_connected (store->priv->conn)) {
 		result = CAMEL_AUTHENTICATION_ACCEPTED;
 

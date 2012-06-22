@@ -26,13 +26,15 @@
 
 #include <gtk/gtk.h>
 #include <libmapi/libmapi.h>
+#include <libedataserver/libedataserver.h>
 
-#include <e-mapi-folder.h>
+#include "e-mapi-folder.h"
+#include "camel-mapi-settings.h"
 
 void	e_mapi_edit_folder_permissions	(GtkWindow *parent,
-					 const gchar *login_profile,
-					 const gchar *login_username,
-					 const gchar *login_url,
+					 ESourceRegistry *registry,
+					 ESource *source,
+					 CamelMapiSettings *mapi_settings,
 					 const gchar *account_name,
 					 const gchar *folder_name,
 					 mapi_id_t folder_id,

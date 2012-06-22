@@ -24,7 +24,7 @@
 #ifndef E_MAPI_CAL_UTILS_H
 #define E_MAPI_CAL_UTILS_H
 
-#include <libecal/e-cal-component.h>
+#include <libecal/libecal.h>
 
 #include "e-mapi-connection.h"
 #include "e-mapi-defs.h"

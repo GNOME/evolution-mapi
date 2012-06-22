@@ -81,8 +81,8 @@ e_mapi_cal_tz_util_get_ical_equivalent (const gchar *mapi_tz_location)
 }
 
 static struct icaltimetype
-tm_to_icaltimetype (struct tm *tm,
-		    gboolean dst)
+e_mapi_tm_to_icaltimetype (struct tm *tm,
+			   gboolean dst)
 {
 	struct icaltimetype itt;
 
@@ -112,7 +112,7 @@ get_offset (icaltimezone *zone,
 	time_t now = time (NULL);
 
 	gmtime_r (&now, &local);
-	tt = tm_to_icaltimetype (&local, dst);
+	tt = e_mapi_tm_to_icaltimetype (&local, dst);
 	offset = icaltimezone_get_utc_offset (zone, &tt, NULL);
 
 	return offset / -60;

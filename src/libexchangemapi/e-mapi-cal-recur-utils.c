@@ -25,8 +25,9 @@
 #include <config.h>
 #endif
 
+#include <libecal/libecal.h>
+
 #include "e-mapi-cal-recur-utils.h"
-#include <libecal/e-cal-util.h>
 
 /* Reader/Writer versions */
 #define READER_VERSION	0x3004

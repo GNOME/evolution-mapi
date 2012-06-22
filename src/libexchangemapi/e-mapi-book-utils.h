@@ -21,7 +21,7 @@
 #ifndef E_MAPI_BOOK_UTILS_H
 #define E_MAPI_BOOK_UTILS_H
 
-#include <libebook/e-contact.h>
+#include <libebook/libebook.h>
 
 #include <e-mapi-connection.h>
 #include <e-mapi-defs.h>

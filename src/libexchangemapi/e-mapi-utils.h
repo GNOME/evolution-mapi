@@ -24,6 +24,8 @@
 #ifndef E_MAPI_UTILS_H
 #define E_MAPI_UTILS_H 
 
+#include <libedataserver/libedataserver.h>
+
 #include "camel-mapi-settings.h"
 #include "e-mapi-debug.h"
 #include "e-mapi-connection.h"
@@ -128,4 +130,13 @@ gboolean	e_mapi_utils_copy_to_mapi_SPropValue		(TALLOC_CTX *mem_ctx,
 
 void		e_mapi_utils_unref_in_thread			(GObject *object);
 
+GList *		e_mapi_utils_filter_sources_for_profile		(const GList *esources,
+								 const gchar *profile);
+
+ESource *	e_mapi_utils_get_source_for_folder		(const GList *esources,
+								 const gchar *profile,
+								 mapi_id_t folder_id);
+
+ESource *	e_mapi_utils_get_master_source			(const GList *esources,
+								 const gchar *profile);
 #endif

@@ -26,7 +26,7 @@
 
 #include <glib.h>
 
-#include <libedata-cal/e-cal-backend.h>
+#include <libedata-cal/libedata-cal.h>
 
 G_BEGIN_DECLS
 

@@ -24,11 +24,8 @@
 #include <glib.h>
 #include <gio/gio.h>
 
-#include <libedata-book/e-book-backend.h>
-#include <libedata-book/e-data-book.h>
-#include <libedata-book/e-data-book-view.h>
+#include <libedata-book/libedata-book.h>
 
-#include <libedata-book/e-book-backend-sqlitedb.h>
 #include "e-mapi-connection.h"
 #include "e-mapi-defs.h"
 #include "e-mapi-utils.h"
@@ -100,7 +97,7 @@ typedef struct
 
 GType e_book_backend_mapi_get_type (void);
 
-const gchar *e_book_backend_mapi_get_book_uri (EBookBackendMAPI *ebma);
+const gchar *e_book_backend_mapi_get_book_uid (EBookBackendMAPI *ebma);
 void e_book_backend_mapi_lock_connection (EBookBackendMAPI *ebma);
 void e_book_backend_mapi_unlock_connection (EBookBackendMAPI *ebma);
 EMapiConnection *e_book_backend_mapi_get_connection (EBookBackendMAPI *ebma);

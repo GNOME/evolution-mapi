@@ -34,15 +34,12 @@
 
 #include <sys/time.h>
 
-#include <libedataserver/e-sexp.h>
-#include "libedataserver/e-flag.h"
-#include <libebook/e-contact.h>
-
-#include <libedata-book/e-book-backend-sexp.h>
-#include <libedata-book/e-data-book.h>
-#include <libedata-book/e-data-book-view.h>
+#include <libedataserver/libedataserver.h>
+#include <libedata-book/libedata-book.h>
+#include <libebook/libebook.h>
 
 #include "e-book-backend-mapi-gal.h"
+#include "e-source-mapi-folder.h"
 
 /* default value for "partial-count", upper bound of objects to download during partial search */
 #define DEFAULT_PARTIAL_COUNT 50
@@ -81,7 +78,7 @@ transfer_gal_cb (EMapiConnection *conn,
 	g_return_val_if_fail (object != NULL, FALSE);
 	g_return_val_if_fail (tg != NULL, FALSE);
 
-	contact = e_mapi_book_utils_contact_from_object (conn, object, e_book_backend_mapi_get_book_uri (tg->ebma));
+	contact = e_mapi_book_utils_contact_from_object (conn, object, e_book_backend_mapi_get_book_uid (tg->ebma));
 	if (!contact) {
 		/* this is GAL, just ignore them */
 		return TRUE;
@@ -173,6 +170,7 @@ ebbm_gal_transfer_contacts (EBookBackendMAPI *ebma,
 	struct TransferGalData tg = { 0 };
 	EMapiConnection *conn;
 	ESource *source;
+	ESourceMapiFolder *ext_mapi_folder;
 	GSList *get_mids = NULL;
 	const GSList *iter;
 	gint partial_count = -1;
@@ -188,14 +186,12 @@ ebbm_gal_transfer_contacts (EBookBackendMAPI *ebma,
 	}
 
 	source = e_backend_get_source (E_BACKEND (ebma));
-	if (source &&
-	    !e_book_backend_mapi_is_marked_for_offline (ebma) &&
-	    g_strcmp0 (e_source_get_property (source, "allow-partial"), "true") == 0) {
-		const gchar *partial_count_str = e_source_get_property (source, "partial-count");
+	ext_mapi_folder = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
 
-		partial_count = 0;
-		if (partial_count_str)
-			partial_count = atoi (partial_count_str);
+	if (ext_mapi_folder &&
+	    !e_book_backend_mapi_is_marked_for_offline (ebma) &&
+	    e_source_mapi_folder_get_allow_partial (ext_mapi_folder)) {
+		partial_count = e_source_mapi_folder_get_partial_count (ext_mapi_folder);
 
 		if (partial_count <= 0)
 			partial_count = DEFAULT_PARTIAL_COUNT;

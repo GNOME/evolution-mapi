@@ -28,10 +28,7 @@
 
 #include <glib/gi18n-lib.h>
 #include <camel/camel.h>
-#include <libedataserver/e-account.h>
-#include <libedataserver/e-account-list.h>
-#include <libedataserver/e-data-server-util.h>
-#include <libedataserver/e-flag.h>
+#include <libedataserver/libedataserver.h>
 
 #include <tevent.h>
 
@@ -52,7 +49,7 @@
 static void register_connection (EMapiConnection *conn);
 static void unregister_connection (EMapiConnection *conn);
 static gboolean mapi_profile_create (struct mapi_context *mapi_ctx, const EMapiProfileData *empd, mapi_profile_callback_t callback, gconstpointer data, GCancellable *cancellable, GError **perror, gboolean use_locking);
-static struct mapi_session *mapi_profile_load (struct mapi_context *mapi_ctx, const gchar *profname, const gchar *password, GCancellable *cancellable, GError **perror);
+static struct mapi_session *mapi_profile_load (ESourceRegistry *registry, struct mapi_context *mapi_ctx, const gchar *profname, const gchar *password, GCancellable *cancellable, GError **perror);
 
 /* GObject foo - begin */
 
@@ -165,6 +162,8 @@ make_mapi_error (GError **perror, const gchar *context, enum MAPISTATUS mapi_sta
 }
 
 struct _EMapiConnectionPrivate {
+	ESourceRegistry *registry;
+
 	struct mapi_context *mapi_ctx;
 	struct mapi_session *session;
 	GStaticRecMutex session_lock;
@@ -410,6 +409,10 @@ e_mapi_connection_finalize (GObject *object)
 
 		e_flag_free (priv->notification_flag);
 		priv->notification_flag = NULL;
+
+		if (priv->registry)
+			g_object_unref (priv->registry);
+		priv->registry = NULL;
 	}
 
 	if (G_OBJECT_CLASS (e_mapi_connection_parent_class)->finalize)
@@ -555,7 +558,11 @@ e_mapi_connection_find (const gchar *profile)
 
 /* Creates a new connection object and connects to a server as defined in 'profile' */
 EMapiConnection *
-e_mapi_connection_new (const gchar *profile, const gchar *password, GCancellable *cancellable, GError **perror)
+e_mapi_connection_new (ESourceRegistry *registry,
+		       const gchar *profile,
+		       const GString *password,
+		       GCancellable *cancellable,
+		       GError **perror)
 {
 	EMapiConnection *conn;
 	EMapiConnectionPrivate *priv;
@@ -568,7 +575,7 @@ e_mapi_connection_new (const gchar *profile, const gchar *password, GCancellable
 	if (!e_mapi_utils_create_mapi_context (&mapi_ctx, perror))
 		return NULL;
 
-	session = mapi_profile_load (mapi_ctx, profile, password, cancellable, perror);
+	session = mapi_profile_load (registry, mapi_ctx, profile, password ? password->str : NULL, cancellable, perror);
 	if (!session) {
 		e_mapi_utils_destroy_mapi_context (mapi_ctx);
 		return NULL;
@@ -580,6 +587,7 @@ e_mapi_connection_new (const gchar *profile, const gchar *password, GCancellable
 
 	LOCK ();
 	mapi_object_init (&priv->msg_store);
+	priv->registry = registry ? g_object_ref (registry) : NULL;
 	priv->mapi_ctx = mapi_ctx;
 	priv->session = session;
 
@@ -632,7 +640,10 @@ e_mapi_connection_close (EMapiConnection *conn)
 }
 
 gboolean
-e_mapi_connection_reconnect (EMapiConnection *conn, const gchar *password, GCancellable *cancellable, GError **perror)
+e_mapi_connection_reconnect (EMapiConnection *conn,
+			     const GString *password,
+			     GCancellable *cancellable,
+			     GError **perror)
 {
 	enum MAPISTATUS ms;
 
@@ -644,7 +655,7 @@ e_mapi_connection_reconnect (EMapiConnection *conn, const gchar *password, GCanc
 	if (priv->session)
 		e_mapi_connection_close (conn);
 
-	priv->session = mapi_profile_load (priv->mapi_ctx, priv->profile, password, cancellable, perror);
+	priv->session = mapi_profile_load (priv->registry, priv->mapi_ctx, priv->profile, password ? password->str : NULL, cancellable, perror);
 	if (!priv->session) {
 		e_mapi_debug_print ("%s: %s: Login failed ", G_STRLOC, G_STRFUNC);
 		UNLOCK ();
@@ -6503,6 +6514,7 @@ e_mapi_connection_disable_notifications	(EMapiConnection *conn,
 
 struct tcp_data
 {
+	ESourceRegistry *registry;
 	struct mapi_context *mapi_ctx;
 	const gchar *profname;
 	const gchar *password;
@@ -6516,57 +6528,59 @@ struct tcp_data
 static gboolean
 try_create_profile_main_thread_cb (struct tcp_data *data)
 {
-	EAccountList *accounts;
 	EMapiProfileData empd = { 0 };
-	EIterator *iter;
-	GConfClient *gconf;
+	GList *all_sources;
+	ESource *source;
 
 	g_return_val_if_fail (data != NULL, FALSE);
+	if (!data->registry) {
+		e_flag_set (data->eflag);
+		return FALSE;
+	}
 
-	gconf = gconf_client_get_default ();
-	accounts = e_account_list_new (gconf);
-	for (iter = e_list_get_iterator (E_LIST (accounts)); e_iterator_is_valid (iter); e_iterator_next (iter)) {
-		EAccount *account = E_ACCOUNT (e_iterator_get (iter));
-		if (account && account->source && account->source->url && g_ascii_strncasecmp (account->source->url, "mapi://", 7) == 0) {
-			CamelURL *url;
-			CamelSettings *settings;
-			const gchar *url_string;
+	all_sources = e_source_registry_list_sources (data->registry, NULL);
+	source = e_mapi_utils_get_master_source (all_sources, data->profname);
 
-			url_string = e_account_get_string (account, E_ACCOUNT_SOURCE_URL);
-			url = camel_url_new (url_string, NULL);
+	if (source) {
+		ESourceCamel *extension;
+		CamelSettings *settings;
+		const gchar *extension_name;
+		CamelNetworkSettings *network_settings;
 
-			settings = g_object_new (CAMEL_TYPE_MAPI_SETTINGS, NULL);
-			camel_settings_load_from_url (settings, url);
+		extension_name = e_source_camel_get_extension_name ("mapi");
+		extension = e_source_get_extension (source, extension_name);
+		settings = e_source_camel_get_settings (extension);
 
-			empd.server = url->host;
-			empd.username = url->user;
-			e_mapi_util_profiledata_from_settings (&empd, CAMEL_MAPI_SETTINGS (settings));
-			/* cast away the const, but promise not to touch it */
-			empd.password = (gchar*)data->password;
+		network_settings = CAMEL_NETWORK_SETTINGS (settings);
 
-			if (COMPLETE_PROFILEDATA(&empd)) {
-				gchar *profname = e_mapi_util_profile_name (data->mapi_ctx, &empd, FALSE);
+		empd.server = camel_network_settings_get_host (network_settings);
+		empd.username = camel_network_settings_get_user (network_settings);
+		e_mapi_util_profiledata_from_settings (&empd, CAMEL_MAPI_SETTINGS (settings));
 
-				if (profname && g_str_equal (profname, data->profname)) {
-					/* do not use locking here, because when this is called then other thread is holding the lock */
-					data->has_profile = mapi_profile_create (data->mapi_ctx, &empd, NULL, NULL, NULL, data->perror, FALSE);
+		if (data->password)
+			empd.password = g_string_new (data->password);
+		else
+			data->password = NULL;
 
-					g_free (profname);
-					g_object_unref (settings);
-					camel_url_free (url);
-					break;
-				}
+		if (COMPLETE_PROFILEDATA (&empd)) {
+			gchar *profname = e_mapi_util_profile_name (data->mapi_ctx, &empd, FALSE);
 
-				g_free (profname);
+			if (profname && g_str_equal (profname, data->profname)) {
+				/* do not use locking here, because when this is called then other thread is holding the lock */
+				data->has_profile = mapi_profile_create (data->mapi_ctx, &empd, NULL, NULL, NULL, data->perror, FALSE);
 			}
 
-			g_object_unref (settings);
-			camel_url_free (url);
+			g_free (profname);
+		}
+
+		if (empd.password) {
+			if (empd.password->len)
+				memset (empd.password->str, 0, empd.password->len);
+			g_string_free (empd.password, TRUE);
 		}
 	}
 
-	g_object_unref (accounts);
-	g_object_unref (gconf);
+	g_list_free_full (all_sources, g_object_unref);
 
 	e_flag_set (data->eflag);
 
@@ -6574,7 +6588,12 @@ try_create_profile_main_thread_cb (struct tcp_data *data)
 }
 
 static gboolean
-try_create_profile (struct mapi_context *mapi_ctx, const gchar *profname, const gchar *password, GCancellable *cancellable, GError **perror)
+try_create_profile (ESourceRegistry *registry,
+		    struct mapi_context *mapi_ctx,
+		    const gchar *profname,
+		    const gchar *password,
+		    GCancellable *cancellable,
+		    GError **perror)
 {
 	struct tcp_data data;
 
@@ -6582,6 +6601,7 @@ try_create_profile (struct mapi_context *mapi_ctx, const gchar *profname, const 
 	g_return_val_if_fail (profname != NULL, FALSE);
 	g_return_val_if_fail (*profname != 0, FALSE);
 
+	data.registry = registry;
 	data.mapi_ctx = mapi_ctx;
 	data.profname = profname;
 	data.password = password;
@@ -6604,7 +6624,12 @@ try_create_profile (struct mapi_context *mapi_ctx, const gchar *profname, const 
 }
 
 static struct mapi_session *
-mapi_profile_load (struct mapi_context *mapi_ctx, const gchar *profname, const gchar *password, GCancellable *cancellable, GError **perror)
+mapi_profile_load (ESourceRegistry *registry,
+		   struct mapi_context *mapi_ctx,
+		   const gchar *profname,
+		   const gchar *password,
+		   GCancellable *cancellable,
+		   GError **perror)
 {
 	enum MAPISTATUS	ms = MAPI_E_SUCCESS;
 	struct mapi_session *session = NULL;
@@ -6627,7 +6652,7 @@ mapi_profile_load (struct mapi_context *mapi_ctx, const gchar *profname, const g
 	e_mapi_debug_print("Loading profile %s ", profname);
 
 	ms = MapiLogonEx (mapi_ctx, &session, profname, password);
-	if (ms == MAPI_E_NOT_FOUND && try_create_profile (mapi_ctx, profname, password, cancellable, perror))
+	if (ms == MAPI_E_NOT_FOUND && try_create_profile (registry, mapi_ctx, profname, password, cancellable, perror))
 		ms = MapiLogonEx (mapi_ctx, &session, profname, password);
 
 	if (ms != MAPI_E_SUCCESS) {
@@ -6684,7 +6709,7 @@ mapi_profile_create (struct mapi_context *mapi_ctx,
 	}
 
 	/*We need all the params before proceeding.*/
-	e_return_val_mapi_error_if_fail (COMPLETE_PROFILEDATA(empd),
+	e_return_val_mapi_error_if_fail (COMPLETE_PROFILEDATA (empd) && empd->password && empd->password->len,
 					 MAPI_E_INVALID_PARAMETER, FALSE);
 
 	if (use_locking)
@@ -6700,7 +6725,7 @@ mapi_profile_create (struct mapi_context *mapi_ctx,
 	/* don't bother to check error - it would be valid if we got an error */
 
 	ms = CreateProfile (mapi_ctx, profname, empd->username,
-			    empd->password, OC_PROFILE_NOPASSWORD);
+			    empd->password->str, OC_PROFILE_NOPASSWORD);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "CreateProfile", ms);
 		goto cleanup;
@@ -6732,7 +6757,7 @@ mapi_profile_create (struct mapi_context *mapi_ctx,
 
 	/* Login now */
 	e_mapi_debug_print("Logging into the server... ");
-	ms = MapiLogonProvider (mapi_ctx, &session, profname, empd->password,
+	ms = MapiLogonProvider (mapi_ctx, &session, profname, empd->password->str,
 				PROVIDER_ID_NSPI);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "MapiLogonProvider", ms);

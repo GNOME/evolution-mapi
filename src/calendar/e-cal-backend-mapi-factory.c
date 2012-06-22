@@ -23,7 +23,9 @@
 
 #include <config.h>
 
-#include <libedata-cal/e-cal-backend-factory.h>
+#include <libedata-cal/libedata-cal.h>
+
+#include "e-source-mapi-folder.h"
 #include "e-cal-backend-mapi.h"
 
 #define FACTORY_NAME "mapi"
@@ -118,6 +120,8 @@ e_cal_backend_mapi_todos_factory_init (ECalBackendFactory *factory)
 G_MODULE_EXPORT void
 e_module_load (GTypeModule *type_module)
 {
+	e_source_mapi_folder_type_register (type_module);
+
 	e_cal_backend_mapi_events_factory_register_type (type_module);
 	e_cal_backend_mapi_journal_factory_register_type (type_module);
 	e_cal_backend_mapi_todos_factory_register_type (type_module);

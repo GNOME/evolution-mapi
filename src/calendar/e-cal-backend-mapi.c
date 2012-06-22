@@ -30,13 +30,14 @@
 
 #include <libical/icaltz-util.h>
 
-#include <libedata-cal/e-cal-backend-file-store.h>
-#include <libedataserver/e-data-server-util.h>
+#include <libedata-cal/libedata-cal.h>
+#include <libedataserver/libedataserver.h>
 
 #include <e-mapi-connection.h>
 #include <e-mapi-cal-utils.h>
 #include <e-mapi-utils.h>
 #include <e-mapi-operation-queue.h>
+#include <e-source-mapi-folder.h>
 
 #include "e-cal-backend-mapi.h"
 
@@ -55,7 +56,10 @@
 #define EDC_ERROR(_code) e_data_cal_create_error (_code, NULL)
 #define EDC_ERROR_EX(_code, _msg) e_data_cal_create_error (_code, _msg)
 
-G_DEFINE_TYPE (ECalBackendMAPI, e_cal_backend_mapi, E_TYPE_CAL_BACKEND)
+static void e_cal_backend_mapi_authenticator_init (ESourceAuthenticatorInterface *interface);
+
+G_DEFINE_TYPE_WITH_CODE (ECalBackendMAPI, e_cal_backend_mapi, E_TYPE_CAL_BACKEND,
+	G_IMPLEMENT_INTERFACE (E_TYPE_SOURCE_AUTHENTICATOR, e_cal_backend_mapi_authenticator_init))
 
 typedef struct {
 	GCond *cond;
@@ -68,16 +72,9 @@ struct _ECalBackendMAPIPrivate {
 	EMapiOperationQueue *op_queue;
 
 	mapi_id_t		fid;
-	gchar			*profile;
 	gboolean is_public_folder;
 	gchar *foreign_username;
 	EMapiConnection *conn;
-
-	/* These fields are entirely for access rights */
-	gchar			*owner_name;
-	gchar			*owner_email;
-	gchar			*user_name;
-	gchar			*user_email;
 
 	/* A mutex to control access to the private structure */
 	GMutex			*mutex;
@@ -101,6 +98,35 @@ struct _ECalBackendMAPIPrivate {
 	gint last_obj_total;
 	GCancellable *cancellable;
 };
+
+static CamelMapiSettings *
+ecbm_get_collection_settings (ECalBackendMAPI *ecbm)
+{
+	ESource *source;
+	ESource *collection;
+	ESourceCamel *extension;
+	ESourceRegistry *registry;
+	CamelSettings *settings;
+	const gchar *extension_name;
+
+	source = e_backend_get_source (E_BACKEND (ecbm));
+	registry = e_cal_backend_get_registry (E_CAL_BACKEND (ecbm));
+
+	extension_name = e_source_camel_get_extension_name ("mapi");
+	e_source_camel_generate_subtype ("mapi", CAMEL_TYPE_MAPI_SETTINGS);
+
+	/* The collection settings live in our parent data source. */
+	collection = e_source_registry_find_extension (
+		registry, source, extension_name);
+	g_return_val_if_fail (collection != NULL, NULL);
+
+	extension = e_source_get_extension (collection, extension_name);
+	settings = e_source_camel_get_settings (extension);
+
+	g_object_unref (collection);
+
+	return CAMEL_MAPI_SETTINGS (settings);
+}
 
 static gboolean
 ecbm_open_folder (ECalBackendMAPI *ecbm,
@@ -185,44 +211,92 @@ get_comp_mid (icalcomponent *icalcomp, mapi_id_t *mid)
 	}
 }
 
+static ESource *
+ecbm_find_identity_source (ECalBackendMAPI *cbmapi)
+{
+	ESourceRegistry *registry;
+	GList *all_sources, *my_sources, *iter;
+	CamelMapiSettings *settings;
+	ESource *res = NULL;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), NULL);
+
+	settings = ecbm_get_collection_settings (cbmapi);
+	g_return_val_if_fail (settings != NULL, NULL);
+
+	registry = e_cal_backend_get_registry (E_CAL_BACKEND (cbmapi));
+	all_sources = e_source_registry_list_sources (registry, NULL);
+	my_sources = e_mapi_utils_filter_sources_for_profile (all_sources,
+		camel_mapi_settings_get_profile (settings));
+	g_list_free_full (all_sources, g_object_unref);
+
+	for (iter = my_sources; iter; iter = iter->next) {
+		ESource *source = iter->data;
+
+		if (!source)
+			continue;
+
+		if (e_source_has_extension (source, E_SOURCE_EXTENSION_MAIL_IDENTITY)) {
+			res = g_object_ref (source);
+			break;
+		}
+	}
+
+	g_list_free_full (my_sources, g_object_unref);
+
+	return res;
+}
+
 static const gchar *
 ecbm_get_owner_name (ECalBackendMAPI *cbmapi)
 {
-	ECalBackendMAPIPrivate *priv;
+	ESource *identity_source;
+	ESourceMailIdentity *identity_ext;
+	const gchar *res = NULL;
 
-	priv = cbmapi->priv;
+	identity_source = ecbm_find_identity_source (cbmapi);
+	if (!identity_source)
+		return NULL;
 
-	return priv->owner_name;
+	identity_ext = e_source_get_extension (identity_source, E_SOURCE_EXTENSION_MAIL_IDENTITY);
+	if (identity_ext)
+		res = e_source_mail_identity_get_name (identity_ext);
+
+	g_object_unref (identity_source);
+
+	return res;
 }
 
 static const gchar *
 ecbm_get_owner_email (ECalBackendMAPI *cbmapi)
 {
-	ECalBackendMAPIPrivate *priv;
+	ESource *identity_source;
+	ESourceMailIdentity *identity_ext;
+	const gchar *res = NULL;
 
-	priv = cbmapi->priv;
+	identity_source = ecbm_find_identity_source (cbmapi);
+	if (!identity_source)
+		return NULL;
 
-	return priv->owner_email;
+	identity_ext = e_source_get_extension (identity_source, E_SOURCE_EXTENSION_MAIL_IDENTITY);
+	if (identity_ext)
+		res = e_source_mail_identity_get_address (identity_ext);
+
+	g_object_unref (identity_source);
+
+	return res;
 }
 
 static const gchar *
 ecbm_get_user_name (ECalBackendMAPI *cbmapi)
 {
-	ECalBackendMAPIPrivate *priv;
-
-	priv = cbmapi->priv;
-
-	return priv->user_name;
+	return ecbm_get_owner_name (cbmapi);
 }
 
 static const gchar *
 ecbm_get_user_email (ECalBackendMAPI *cbmapi)
 {
-	ECalBackendMAPIPrivate *priv;
-
-	priv = cbmapi->priv;
-
-	return priv->user_email;
+	return ecbm_get_owner_email (cbmapi);
 }
 
 static gboolean
@@ -252,12 +326,10 @@ ecbm_get_backend_property (ECalBackend *backend, EDataCal *cal, const gchar *pro
 				  );
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
 		ECalBackendMAPI *cbmapi;
-		ECalBackendMAPIPrivate *priv;
 
 		cbmapi = E_CAL_BACKEND_MAPI (backend);
-		priv = cbmapi->priv;
 
-		*prop_value = g_strdup (priv->user_email);
+		*prop_value = g_strdup (ecbm_get_user_email (cbmapi));
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_ALARM_EMAIL_ADDRESS)) {
 		/* We don't support email alarms. This should not have been called. */
 		*prop_value = NULL;
@@ -394,7 +466,7 @@ notify_view_progress (ECalBackendMAPI *cbmapi, guint index, guint total)
 
 	/* To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server. */
 	progress_string = g_strdup_printf (_("Loading items in folder %s"),
-				e_source_peek_name (e_backend_get_source (E_BACKEND (cbmapi))));
+				e_source_get_display_name (e_backend_get_source (E_BACKEND (cbmapi))));
 
 	pd.msg = progress_string;
 
@@ -1041,36 +1113,6 @@ run_delta_thread (ECalBackendMAPI *cbmapi)
 }
 
 static void
-ecbm_connect (ECalBackendMAPI *cbmapi, GError **perror)
-{
-	ECalBackendMAPIPrivate *priv;
-
-	priv = cbmapi->priv;
-
-	if (!priv->fid) {
-		g_propagate_error (perror, EDC_ERROR_EX (OtherError, "No folder ID set"));
-		return;
-	}
-
-	if (!priv->conn || !e_mapi_connection_connected (priv->conn)) {
-		g_propagate_error (perror, EDC_ERROR (AuthenticationFailed));
-		return;
-	}
-
-	/* We have established a connection */
-	if (priv->store && priv->fid) {
-		e_cal_backend_notify_online (E_CAL_BACKEND (cbmapi), TRUE);
-
-		if (priv->mode_changed && !priv->dthread) {
-			priv->mode_changed = FALSE;
-			run_delta_thread (cbmapi);
-		}
-	}
-
-	priv->mode_changed = FALSE;
-}
-
-static void
 ecbm_server_notification_cb (EMapiConnection *conn,
 			     guint event_mask,
 			     gpointer event_data,
@@ -1138,11 +1180,15 @@ ecbm_server_notification_cb (EMapiConnection *conn,
 		run_delta_thread (cbmapi);
 }
 
-static void
-ecbm_connect_user (ECalBackend *backend, GCancellable *cancellable, const gchar *password, GError **perror)
+static ESourceAuthenticationResult
+ecbm_connect_user (ECalBackend *backend,
+		   GCancellable *cancellable,
+		   const GString *password,
+		   GError **perror)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
+	CamelMapiSettings *settings;
 	EMapiConnection *old_conn;
 	GError *mapi_error = NULL;
 
@@ -1152,10 +1198,13 @@ ecbm_connect_user (ECalBackend *backend, GCancellable *cancellable, const gchar 
 	priv = cbmapi->priv;
 
 	old_conn = priv->conn;
+	settings = ecbm_get_collection_settings (cbmapi);
 
-	priv->conn = e_mapi_connection_new (priv->profile, password, cancellable, &mapi_error);
+	priv->conn = e_mapi_connection_new (
+		e_cal_backend_get_registry (backend),
+		camel_mapi_settings_get_profile (settings), password, cancellable, &mapi_error);
 	if (!priv->conn) {
-		priv->conn = e_mapi_connection_find (priv->profile);
+		priv->conn = e_mapi_connection_find (camel_mapi_settings_get_profile (settings));
 		if (priv->conn
 		    && !e_mapi_connection_connected (priv->conn)) {
 			e_mapi_connection_reconnect (priv->conn, password, cancellable, &mapi_error);
@@ -1168,9 +1217,11 @@ ecbm_connect_user (ECalBackend *backend, GCancellable *cancellable, const gchar 
 	if (priv->conn && e_mapi_connection_connected (priv->conn)) {
 		/* Success */
 		ESource *source;
+		ESourceMapiFolder *ext_mapi_folder;
 
 		source = e_backend_get_source (E_BACKEND (cbmapi));
-		if (source && g_strcmp0 (e_source_get_property (source, "server-notification"), "true") == 0) {
+		ext_mapi_folder = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
+		if (ext_mapi_folder && e_source_mapi_folder_get_server_notification (ext_mapi_folder)) {
 			mapi_object_t obj_folder;
 			gboolean status;
 
@@ -1186,36 +1237,67 @@ ecbm_connect_user (ECalBackend *backend, GCancellable *cancellable, const gchar 
 			g_signal_connect (priv->conn, "server-notification", G_CALLBACK (ecbm_server_notification_cb), cbmapi);
 		}
 	} else {
-		mapi_error_to_edc_error (perror, mapi_error, g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR) ? OtherError : AuthenticationFailed, NULL);
+		gboolean is_network_error = g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR);
+
+		mapi_error_to_edc_error (perror, mapi_error, is_network_error ? OtherError : AuthenticationFailed, NULL);
 		if (mapi_error)
 			g_error_free (mapi_error);
 		g_static_mutex_unlock (&auth_mutex);
-		return;
+		return is_network_error ? E_SOURCE_AUTHENTICATION_ERROR : E_SOURCE_AUTHENTICATION_REJECTED;
 	}
 
 	if (mapi_error) {
 		mapi_error_to_edc_error (perror, mapi_error, AuthenticationFailed, NULL);
 		g_error_free (mapi_error);
 		g_static_mutex_unlock (&auth_mutex);
-		return;
+		return E_SOURCE_AUTHENTICATION_REJECTED;
 	}
 
 	g_static_mutex_unlock (&auth_mutex);
 
-	ecbm_connect (cbmapi, perror);
+	if (!priv->fid) {
+		g_propagate_error (perror, EDC_ERROR_EX (OtherError, "No folder ID set"));
+		return E_SOURCE_AUTHENTICATION_ERROR;
+	}
+
+	if (!priv->conn || !e_mapi_connection_connected (priv->conn)) {
+		g_propagate_error (perror, EDC_ERROR (AuthenticationFailed));
+		return E_SOURCE_AUTHENTICATION_REJECTED;
+	}
+
+	/* We have established a connection */
+	if (priv->store && priv->fid) {
+		e_cal_backend_notify_online (E_CAL_BACKEND (cbmapi), TRUE);
+
+		if (priv->mode_changed && !priv->dthread) {
+			priv->mode_changed = FALSE;
+			run_delta_thread (cbmapi);
+		}
+	}
+
+	priv->mode_changed = FALSE;
+
+	return E_SOURCE_AUTHENTICATION_ACCEPTED;
 }
 
 
 static void
-ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gboolean only_if_exists, GError **perror)
+ecbm_open (ECalBackend *backend,
+	   EDataCal *cal,
+	   GCancellable *cancellable,
+	   gboolean only_if_exists,
+	   GError **perror)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
 	ESource *esource;
-	const gchar *fid = NULL;
-	const gchar *cache_dir, *krb_sso = NULL;
+	ESourceMapiFolder *ext_mapi_folder;
+	guint64 fid;
+	const gchar *cache_dir;
+	CamelMapiSettings *settings;
+	GError *error = NULL;
 
-	if (e_cal_backend_is_opened (E_CAL_BACKEND (backend))) {
+	if (e_cal_backend_is_opened (backend)) {
 		e_cal_backend_notify_opened (backend, NULL);
 		return /* Success */;
 	}
@@ -1223,9 +1305,12 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gbool
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
+	settings = ecbm_get_collection_settings (cbmapi);
+
 	esource = e_backend_get_source (E_BACKEND (cbmapi));
-	fid = e_source_get_property (esource, "folder-id");
-	if (!(fid && *fid)) {
+	ext_mapi_folder = e_source_get_extension (esource, E_SOURCE_EXTENSION_MAPI_FOLDER);
+	fid = e_source_mapi_folder_get_id (ext_mapi_folder);
+	if (!fid) {
 		g_propagate_error (perror, EDC_ERROR_EX (OtherError, "No folder ID set"));
 		e_cal_backend_notify_opened (backend, EDC_ERROR_EX (OtherError, "No folder ID set"));
 		return;
@@ -1255,13 +1340,13 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gbool
 
 	/* Not for remote */
 	if (!e_backend_get_online (E_BACKEND (backend))) {
-		const gchar *display_contents = NULL;
+		ESourceOffline *offline_extension;
 
 		cbmapi->priv->read_only = TRUE;
 
-		display_contents = e_source_get_property (esource, "offline_sync");
+		offline_extension = e_source_get_extension (esource, E_SOURCE_EXTENSION_OFFLINE);
 
-		if (!display_contents || !g_str_equal (display_contents, "1")) {
+		if (!e_source_offline_get_stay_synchronized (offline_extension)) {
 			g_mutex_unlock (priv->mutex);
 			g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
 			e_cal_backend_notify_opened (backend, EDC_ERROR (RepositoryOffline));
@@ -1275,51 +1360,48 @@ ecbm_open (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, gbool
 		return /* Success */;
 	}
 
-	g_free (priv->profile);
-	g_free (priv->user_name);
-	g_free (priv->user_email);
-	g_free (priv->owner_name);
-	g_free (priv->owner_email);
 	g_free (priv->foreign_username);
 
-	priv->profile = e_source_get_duped_property (esource, "profile");
-	priv->user_name = e_source_get_duped_property (esource, "acl-user-name");
-	priv->user_email = e_source_get_duped_property (esource, "acl-user-email");
-	priv->owner_name = e_source_get_duped_property (esource, "acl-owner-name");
-	priv->owner_email = e_source_get_duped_property (esource, "acl-owner-email");
-
-	e_mapi_util_mapi_id_from_string (fid, &priv->fid);
-	priv->is_public_folder = g_strcmp0 (e_source_get_property (esource, "public"), "yes") == 0;
-	priv->foreign_username = e_source_get_duped_property (esource, "foreign-username");
+	priv->fid = fid;
+	priv->is_public_folder = e_source_mapi_folder_is_public (ext_mapi_folder);
+	priv->foreign_username = e_source_mapi_folder_dup_foreign_username (ext_mapi_folder);
 
 	if (priv->foreign_username && !*priv->foreign_username) {
 		g_free (priv->foreign_username);
 		priv->foreign_username = NULL;
 	}
 
-	krb_sso = e_source_get_property (esource, "kerberos");
 	g_mutex_unlock (priv->mutex);
 
 	e_cal_backend_notify_online (backend, TRUE);
 	e_cal_backend_notify_readonly (backend, priv->read_only);
 
-	if (!krb_sso || !g_str_equal (krb_sso, "required")) {
-		e_cal_backend_notify_auth_required (backend, TRUE, NULL);
-	} else {
-		ecbm_connect_user (backend, cancellable, NULL, perror);
-		e_cal_backend_notify_opened (backend, NULL);
+	if (!camel_mapi_settings_get_kerberos (settings) ||
+	    ecbm_connect_user (backend, cancellable, NULL, &error) != E_SOURCE_AUTHENTICATION_ACCEPTED) {
+		ESourceRegistry *registry;
+
+		registry = e_cal_backend_get_registry (backend);
+
+		e_source_registry_authenticate_sync (
+			registry, esource,
+			E_SOURCE_AUTHENTICATOR (backend),
+			cancellable, &error);
 	}
+
+	if (error && perror)
+		g_propagate_error (perror, g_error_copy (error));
+
+	e_cal_backend_notify_opened (backend, error);
 }
 
-static void
-ecbm_authenticate_user (ECalBackend *backend, GCancellable *cancellable, ECredentials *credentials, GError **perror)
-{
-	const gchar *password;
 
-	g_static_mutex_lock (&auth_mutex);
-	password = e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD);
-	g_static_mutex_unlock (&auth_mutex);
-	ecbm_connect_user (backend, cancellable, password, perror);
+static ESourceAuthenticationResult
+ecbm_try_password_sync (ESourceAuthenticator *authenticator,
+			const GString *password,
+			GCancellable *cancellable,
+			GError **error)
+{
+	return ecbm_connect_user (E_CAL_BACKEND (authenticator), cancellable, password, error);
 }
 
 static gboolean
@@ -1509,7 +1591,6 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	ECalComponent *comp;
 	mapi_id_t mid = 0;
 	gchar *tmp = NULL;
-	struct cal_cbdata cbdata = { 0 };
 	struct icaltimetype current;
 	GError *mapi_error = NULL;
 
@@ -1547,21 +1628,22 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	e_cal_component_set_created (comp, &current);
 	e_cal_component_set_last_modified (comp, &current);
 
-	cbdata.kind = kind;
-	cbdata.username = (gchar *) ecbm_get_user_name (cbmapi);
-	cbdata.useridtype = (gchar *) "SMTP";
-	cbdata.userid = (gchar *) ecbm_get_user_email (cbmapi);
-	cbdata.ownername = (gchar *) ecbm_get_owner_name (cbmapi);
-	cbdata.owneridtype = (gchar *) "SMTP";
-	cbdata.ownerid = (gchar *) ecbm_get_owner_email (cbmapi);
-	cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) ecbm_internal_get_timezone;
-	cbdata.get_tz_data = cbmapi;
-
 	/* Check if object exists */
 	if (e_backend_get_online (E_BACKEND (backend))) {
+		struct cal_cbdata cbdata = { 0 };
 		gboolean status;
 		mapi_object_t obj_folder;
 		gboolean has_attendees = e_cal_component_has_attendees (comp);
+
+		cbdata.kind = kind;
+		cbdata.username = g_strdup (ecbm_get_user_name (cbmapi));
+		cbdata.useridtype = (gchar *) "SMTP";
+		cbdata.userid = g_strdup (ecbm_get_user_email (cbmapi));
+		cbdata.ownername = g_strdup (ecbm_get_owner_name (cbmapi));
+		cbdata.owneridtype = (gchar *) "SMTP";
+		cbdata.ownerid = g_strdup (ecbm_get_owner_email (cbmapi));
+		cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) ecbm_internal_get_timezone;
+		cbdata.get_tz_data = cbmapi;
 
 		/* Create an appointment */
 		cbdata.comp = comp;
@@ -1582,6 +1664,11 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 			e_mapi_connection_close_folder (priv->conn, &obj_folder, cancellable, &mapi_error);
 		}
+
+		g_free (cbdata.username);
+		g_free (cbdata.userid);
+		g_free (cbdata.ownername);
+		g_free (cbdata.ownerid);
 
 		if (!mid) {
 			g_object_unref (comp);
@@ -2384,8 +2471,6 @@ ecbm_notify_online_cb (ECalBackend *backend, GParamSpec *pspec)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
-	ESource *esource = NULL;
-	const gchar *krb_sso = NULL;
 	gboolean online;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
@@ -2395,17 +2480,9 @@ ecbm_notify_online_cb (ECalBackend *backend, GParamSpec *pspec)
 
 	g_mutex_lock (priv->mutex);
 
-	esource = e_backend_get_source (E_BACKEND (cbmapi));
-	krb_sso = e_source_get_property (esource, "kerberos");
-	e_cal_backend_notify_online (backend, online);
-
 	priv->mode_changed = TRUE;
 	if (online) {
 		priv->read_only = FALSE;
-		if (e_cal_backend_is_opened (backend)
-		    && ! (krb_sso && g_str_equal (krb_sso, "required"))) {
-			e_cal_backend_notify_auth_required (backend, TRUE, NULL);
-		}
 	} else {
 		priv->read_only = TRUE;
 
@@ -2414,6 +2491,7 @@ ecbm_notify_online_cb (ECalBackend *backend, GParamSpec *pspec)
 	}
 
 	e_cal_backend_notify_readonly (backend, priv->read_only);
+	e_cal_backend_notify_online (backend, online);
 	g_mutex_unlock (priv->mutex);
 }
 
@@ -2472,7 +2550,6 @@ ecbm_internal_get_timezone (ECalBackend *backend, const gchar *tzid)
 typedef enum {
 	OP_GET_BACKEND_PROPERTY,
 	OP_OPEN,
-	OP_AUTHENTICATE_USER,
 	OP_REFRESH,
 	OP_REMOVE,
 	OP_CREATE_OBJECTS,
@@ -2503,13 +2580,6 @@ typedef struct {
 
 	gboolean only_if_exists;
 } OperationOpen;
-
-typedef struct {
-	OperationBase base;
-
-	ECredentials *credentials;
-	GCancellable *cancellable;
-} OperationAuthenticateUser;
 
 typedef struct {
 	OperationBase base;
@@ -2600,16 +2670,6 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 
 			e_data_cal_respond_open (op->cal, op->opid, error);
 		}
-	} break;
-	case OP_AUTHENTICATE_USER: {
-		OperationAuthenticateUser *opau = (OperationAuthenticateUser *) op;
-
-		if (!cancelled) {
-			ecbm_authenticate_user (backend, op->cancellable, opau->credentials, &error);
-
-			e_cal_backend_notify_opened (backend, error);
-		}
-		e_credentials_free (opau->credentials);
 	} break;
 	case OP_REFRESH: {
 		if (!cancelled) {
@@ -3099,34 +3159,6 @@ ecbm_op_open (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *c
 	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
-static void
-ecbm_op_authenticate_user (ECalBackend *backend, GCancellable *cancellable, ECredentials *credentials)
-{
-	OperationAuthenticateUser *op;
-	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
-
-	g_return_if_fail (backend != NULL);
-	g_return_if_fail (E_IS_CAL_BACKEND_MAPI (backend));
-
-	cbmapi = E_CAL_BACKEND_MAPI (backend);
-	priv = cbmapi->priv;
-	g_return_if_fail (priv != NULL);
-
-	g_object_ref (cbmapi);
-	if (cancellable)
-		g_object_ref (cancellable);
-
-	op = g_new0 (OperationAuthenticateUser, 1);
-	op->base.ot = OP_AUTHENTICATE_USER;
-	op->base.cal = NULL;
-	op->base.opid = 0;
-	op->base.cancellable = cancellable;
-	op->credentials = e_credentials_new_clone (credentials);
-
-	e_mapi_operation_queue_push (priv->op_queue, op);
-}
-
 STR_OP_DEF (ecbm_op_get_backend_property, OP_GET_BACKEND_PROPERTY)
 BASE_OP_DEF (ecbm_op_refresh, OP_REFRESH)
 BASE_OP_DEF (ecbm_op_remove, OP_REMOVE)
@@ -3430,31 +3462,6 @@ ecbm_finalize (GObject *object)
 		priv->store = NULL;
 	}
 
-	if (priv->profile) {
-		g_free (priv->profile);
-		priv->profile = NULL;
-	}
-
-	if (priv->user_name) {
-		g_free (priv->user_name);
-		priv->user_name = NULL;
-	}
-
-	if (priv->user_email) {
-		g_free (priv->user_email);
-		priv->user_email = NULL;
-	}
-
-	if (priv->owner_name) {
-		g_free (priv->owner_name);
-		priv->owner_name = NULL;
-	}
-
-	if (priv->owner_email) {
-		g_free (priv->owner_email);
-		priv->owner_email = NULL;
-	}
-
 	if (priv->sendoptions_sync_timeout) {
 		g_source_remove (priv->sendoptions_sync_timeout);
 		priv->sendoptions_sync_timeout = 0;
@@ -3493,7 +3500,6 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 	/* functions done asynchronously */
 	backend_class->get_backend_property = ecbm_op_get_backend_property;
 	backend_class->open = ecbm_op_open;
-	backend_class->authenticate_user = ecbm_op_authenticate_user;
 	backend_class->refresh = ecbm_op_refresh;
 	backend_class->remove = ecbm_op_remove;
 	backend_class->get_object = ecbm_op_get_object;
@@ -3512,6 +3518,12 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 
 	/* functions done synchronously */
 	backend_class->internal_get_timezone = ecbm_internal_get_timezone;
+}
+
+static void
+e_cal_backend_mapi_authenticator_init (ESourceAuthenticatorInterface *interface)
+{
+	interface->try_password_sync = ecbm_try_password_sync;
 }
 
 static void
