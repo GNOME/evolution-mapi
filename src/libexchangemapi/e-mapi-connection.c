@@ -3453,8 +3453,7 @@ add_object_recipients (EMapiConnection *conn,
 					  PidTagTransmittableDisplayName,
 					  PidTagEmailAddress,
 					  PidTagAddressType,
-					  PidTagSendRichInfo,
-					  PidTag7BitDisplayName};
+					  PidTagSendRichInfo};
 	enum MAPISTATUS	ms;
 	struct SPropTagArray *tags;
 	struct SRowSet *rows = NULL;
