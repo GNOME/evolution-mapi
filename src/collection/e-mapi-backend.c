@@ -486,7 +486,10 @@ mapi_backend_try_password_sync (ESourceAuthenticator *authenticator,
 		    g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_PASSWORD_EXPIRED))
 			res = E_SOURCE_AUTHENTICATION_REJECTED;
 
-		g_propagate_error (error, mapi_error);
+		if (res != E_SOURCE_AUTHENTICATION_REJECTED)
+			g_propagate_error (error, mapi_error);
+		else
+			g_clear_error (&mapi_error);
 
 		return res;
 	}

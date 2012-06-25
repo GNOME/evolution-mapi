@@ -1239,7 +1239,8 @@ ecbm_connect_user (ECalBackend *backend,
 	} else {
 		gboolean is_network_error = g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR);
 
-		mapi_error_to_edc_error (perror, mapi_error, is_network_error ? OtherError : AuthenticationFailed, NULL);
+		if (!is_network_error)
+			mapi_error_to_edc_error (perror, mapi_error, is_network_error ? OtherError : AuthenticationFailed, NULL);
 		if (mapi_error)
 			g_error_free (mapi_error);
 		g_static_mutex_unlock (&auth_mutex);
@@ -1247,7 +1248,7 @@ ecbm_connect_user (ECalBackend *backend,
 	}
 
 	if (mapi_error) {
-		mapi_error_to_edc_error (perror, mapi_error, AuthenticationFailed, NULL);
+		/* do not set error when authentication was rejected */
 		g_error_free (mapi_error);
 		g_static_mutex_unlock (&auth_mutex);
 		return E_SOURCE_AUTHENTICATION_REJECTED;
@@ -1261,7 +1262,7 @@ ecbm_connect_user (ECalBackend *backend,
 	}
 
 	if (!priv->conn || !e_mapi_connection_connected (priv->conn)) {
-		g_propagate_error (perror, EDC_ERROR (AuthenticationFailed));
+		/* do not set error when authentication was rejected */
 		return E_SOURCE_AUTHENTICATION_REJECTED;
 	}
 

@@ -405,7 +405,8 @@ ebbm_connect_user (EBookBackendMAPI *ebma,
 				priv->conn = NULL;
 			}
 
-			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Cannot connect"));
+			if (!is_network_error)
+				mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Cannot connect"));
 			e_book_backend_mapi_unlock_connection (ebma);
 
 			if (mapi_error)

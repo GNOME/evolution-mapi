@@ -325,7 +325,10 @@ mail_config_mapi_authenticator_try_password_sync (ESourceAuthenticator *auth,
 		g_warn_if_fail (!mapi_authenticator->success);
 		mapi_authenticator->success = FALSE;
 
-		g_propagate_error (error, mapi_error);
+		if (is_network_error)
+			g_propagate_error (error, mapi_error);
+		else
+			g_clear_error (&mapi_error);
 
 		return is_network_error ? E_SOURCE_AUTHENTICATION_ERROR : E_SOURCE_AUTHENTICATION_REJECTED;
 	}
