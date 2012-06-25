@@ -140,7 +140,7 @@ e_mapi_book_utils_contact_from_object (EMapiConnection *conn,
 
 	contact = e_contact_new ();
 	if (book_uri)
-		e_contact_set (contact, E_CONTACT_BOOK_URI, book_uri);
+		e_contact_set (contact, E_CONTACT_BOOK_UID, book_uri);
 
 	#define get_proptag(proptag) e_mapi_util_find_array_propval (&object->properties, proptag)
 	#define get_str_proptag(proptag) not_null (get_proptag (proptag))
@@ -1152,7 +1152,7 @@ e_mapi_book_utils_get_supported_contact_fields (void)
 		fields = g_slist_append (fields, (gpointer) e_contact_field_name (mappings[ii].field_id));
 	}
 
-	fields = g_slist_append (fields, (gpointer) e_contact_field_name (E_CONTACT_BOOK_URI));
+	fields = g_slist_append (fields, (gpointer) e_contact_field_name (E_CONTACT_BOOK_UID));
 
 	return fields;
 }

@@ -504,7 +504,7 @@ ebbm_contacts_create_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 
 	/* UID of the contact is nothing but the concatenated string of hex id of folder and the message.*/
 	e_contact_set (contact, E_CONTACT_UID, id);
-	e_contact_set (contact, E_CONTACT_BOOK_URI, e_book_backend_mapi_get_book_uid (ebma));
+	e_contact_set (contact, E_CONTACT_BOOK_UID, e_book_backend_mapi_get_book_uid (ebma));
 
 	g_free (id);
 
