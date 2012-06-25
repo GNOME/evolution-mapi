@@ -1,3 +1,16 @@
+evolution-mapi 3.5.3  2012-06-25
+--------------------------------
+
+Bugs:
+	Bug #677266 - Memory leaks when synchronizing for offline (Milan Crha)
+	Bug #677684 - Addressbook doesn't return matched contacts (Milan Crha)
+
+Miscellanous:
+	Do not call g_object_notify() when property didn't change (Milan Crha)
+	Make it work with API changes for 3.5.3 (Milan Crha)
+	Do not set GError on E_SOURCE_AUTHENTICATION_REJECTED return value (Milan Crha)
+	Fix build failure due to rename of E_CONTACT_BOOK_URI to E_CONTACT_BOOK_UID (Milan Crha)
+
 evolution-mapi 3.5.2  2012-06-04
 --------------------------------
 
