@@ -2664,6 +2664,10 @@ mapi_update_hash_table_type (CamelMapiStore *store, const gchar *full_name, guin
 	if (full_name && folder_type) {
 		if (!g_hash_table_lookup (priv->container_hash, full_name))
 			g_hash_table_insert (priv->container_hash, g_strdup (full_name), folder_type);
+		else
+			g_free (folder_type);
+	} else {
+		g_free (folder_type);
 	}
 }
 
