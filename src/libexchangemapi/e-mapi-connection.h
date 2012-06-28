@@ -65,6 +65,7 @@ typedef struct _EMapiStreamedProp {
 	uint32_t proptag;
 	uint64_t cb;
 	const uint8_t *lpb; /* taken from the original mapi prop, no need to copy the memory */
+	gconstpointer orig_value; /* exact original value, as stored inside mapi prop; the lpb can be converted to utf16 */
 } EMapiStreamedProp;
 
 typedef struct _EMapiRecipient EMapiRecipient;

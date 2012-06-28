@@ -540,9 +540,6 @@ e_mapi_connection_find (const gchar *profile)
 #define STREAM_MAX_READ_SIZE    0x8000
 #define STREAM_MAX_READ_SIZE_DF 0x1000
 #define STREAM_MAX_WRITE_SIZE   0x1000
-#define STREAM_ACCESS_READ      0x0000
-#define STREAM_ACCESS_WRITE     0x0001
-#define STREAM_ACCESS_READWRITE 0x0002
 
 #define CHECK_CORRECT_CONN_AND_GET_PRIV(_conn, _val)							\
 	EMapiConnectionPrivate *priv;									\
@@ -2319,7 +2316,7 @@ fetch_object_property_as_stream (EMapiConnection *conn,
 
 	mapi_object_init (&obj_stream);
 
-	ms = OpenStream (obj_message, proptag, STREAM_ACCESS_READ, &obj_stream);
+	ms = OpenStream (obj_message, proptag, OpenStream_ReadOnly, &obj_stream);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "OpenStream", ms);
 		goto cleanup;
@@ -3102,6 +3099,7 @@ convert_mapi_props_to_props (EMapiConnection *conn,
 			(*streams)[*streamslen].proptag = proptag;					\
 			(*streams)[*streamslen].cb = 0;							\
 			(*streams)[*streamslen].lpb = NULL;						\
+			(*streams)[*streamslen].orig_value = NULL;					\
 			(*streamslen) += 1;								\
 		}
 
@@ -3129,6 +3127,7 @@ convert_mapi_props_to_props (EMapiConnection *conn,
 					addstream ();
 					(*streams)[(*streamslen) - 1].cb = bin->cb;
 					(*streams)[(*streamslen) - 1].lpb = bin->lpb;
+					(*streams)[(*streamslen) - 1].orig_value = propdata;
 					processed = TRUE;
 				}
 				break;
@@ -3139,6 +3138,7 @@ convert_mapi_props_to_props (EMapiConnection *conn,
 					addstream ();
 					(*streams)[(*streamslen) - 1].cb = sz;
 					(*streams)[(*streamslen) - 1].lpb = (uint8_t *) str;
+					(*streams)[(*streamslen) - 1].orig_value = propdata;
 					processed = TRUE;
 				}
 				break;
@@ -3150,6 +3150,7 @@ convert_mapi_props_to_props (EMapiConnection *conn,
 					gsize written = 0;
 
 					addstream ();
+					(*streams)[(*streamslen) - 1].orig_value = propdata;
 
 					in_unicode = g_convert (str, strlen (str), "UTF-16", "UTF-8", NULL, &written, NULL);
 					if (in_unicode && written > 0) {
@@ -3186,6 +3187,7 @@ convert_mapi_props_to_props (EMapiConnection *conn,
 			addstream ();
 			(*streams)[(*streamslen) - 1].cb = known_streams[ii].cb;
 			(*streams)[(*streamslen) - 1].lpb = known_streams[ii].lpb;
+			(*streams)[(*streamslen) - 1].orig_value = NULL;
 		}
 	}
 	#undef addstream
@@ -3227,6 +3229,7 @@ static gboolean
 write_streamed_prop (EMapiConnection *conn,
 		     mapi_object_t *obj_object,
 		     const EMapiStreamedProp *stream,
+		     TALLOC_CTX *mem_ctx,
 		     GCancellable *cancellable,
 		     GError **perror)
 {
@@ -3250,9 +3253,24 @@ write_streamed_prop (EMapiConnection *conn,
 	}
 
 	/* OpenStream on required proptag */
-	ms = OpenStream (obj_object, stream->proptag, STREAM_ACCESS_READWRITE, &obj_stream);
+	ms = OpenStream (obj_object, stream->proptag, OpenStream_Create, &obj_stream);
 	if (ms != MAPI_E_SUCCESS) {
-		make_mapi_error (perror, "OpenStream", ms);
+		if (ms == MAPI_E_NO_ACCESS && stream->orig_value) {
+			/* write property with SetProps, because this one cannot be written as stream */
+			struct SPropValue *props = NULL;
+			uint32_t propslen = 0;
+
+			e_mapi_utils_add_spropvalue (mem_ctx, &props, &propslen, stream->proptag, stream->orig_value);
+
+			ms = SetProps (obj_object, MAPI_PROPS_SKIP_NAMEDID_CHECK, props, propslen);
+
+			talloc_free (props);
+
+			if (ms != MAPI_E_SUCCESS)
+				make_mapi_error (perror, "SetProps", ms);
+		} else {
+			make_mapi_error (perror, "OpenStream", ms);
+		}
 		goto cleanup;
 	}
 
@@ -3362,7 +3380,7 @@ update_props_on_object (EMapiConnection *conn,
 		guint ii;
 
 		for (ii = 0; ii < streamslen; ii++) {
-			if (!write_streamed_prop (conn, obj_object, &streams[ii], cancellable, perror)) {
+			if (!write_streamed_prop (conn, obj_object, &streams[ii], mem_ctx, cancellable, perror)) {
 				ms = MAPI_E_CALL_FAILED;
 				make_mapi_error (perror, "write_streamed_prop", ms);
 				break;
@@ -6920,6 +6938,7 @@ e_mapi_attachment_add_streamed (EMapiAttachment *attachment,
 	attachment->streamed_properties[index].proptag = proptag;
 	attachment->streamed_properties[index].cb = cb;
 	attachment->streamed_properties[index].lpb = lpb;
+	attachment->streamed_properties[index].orig_value = lpb;
 }
 
 EMapiStreamedProp *
@@ -7092,6 +7111,7 @@ e_mapi_object_add_streamed (EMapiObject *object,
 	object->streamed_properties[index].proptag = proptag;
 	object->streamed_properties[index].cb = cb;
 	object->streamed_properties[index].lpb = lpb;
+	object->streamed_properties[index].orig_value = lpb;
 }
 
 EMapiStreamedProp *
