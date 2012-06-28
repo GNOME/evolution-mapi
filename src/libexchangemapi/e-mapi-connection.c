@@ -1166,7 +1166,7 @@ maybe_add_named_id_tag (uint32_t proptag,
 	g_return_if_fail (named_ids_list != NULL);
 	g_return_if_fail (named_ids_len != NULL);
 
-	if (((proptag >> 16) & 0xFFFF) >= 0x8000) {
+	if (get_namedid_name (proptag)) {
 		if (!*named_ids_list) {
 			*named_ids_list = g_new0 (EResolveNamedIDsData, 1);
 			*named_ids_len = 0;
@@ -2226,7 +2226,7 @@ ensure_additional_properties_cb (EMapiConnection *conn,
 		uint32_t prop = additional_properties[ii].orig_proptag;
 
 		if (!e_mapi_util_find_array_propval (&object->properties, prop)) {
-			if (((prop >> 16) & 0xFFFF) >= 0x8000) {
+			if (get_namedid_name (prop)) {
 				prop = e_mapi_connection_resolve_named_prop (conn, eap->obj_folder, prop, cancellable, NULL);
 			}
 		} else {
