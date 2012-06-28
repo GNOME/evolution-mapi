@@ -158,7 +158,7 @@ e_mapi_config_utils_run_in_thread_with_feedback_general (GtkWindow *parent,
 					    GDestroyNotify free_user_data,
 					    gboolean run_modal)
 {
-	GtkWidget *dialog, *label, *content;
+	GtkWidget *dialog, *label, *content, *spinner, *box;
 	struct RunWithFeedbackData *rfd;
 
 	g_return_if_fail (with_object != NULL);
@@ -171,12 +171,20 @@ e_mapi_config_utils_run_in_thread_with_feedback_general (GtkWindow *parent,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		NULL);
 
+	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+
+	spinner = gtk_spinner_new ();
+	gtk_spinner_start (GTK_SPINNER (spinner));
+	gtk_box_pack_start (GTK_BOX (box), spinner, FALSE, FALSE, 0);
+
 	label = gtk_label_new (description);
-	gtk_widget_show (label);
+	gtk_box_pack_start (GTK_BOX (box), label, TRUE, TRUE, 0);
+
+	gtk_widget_show_all (box);
 
 	content = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
 
-	gtk_container_add (GTK_CONTAINER (content), label);
+	gtk_container_add (GTK_CONTAINER (content), box);
 	gtk_container_set_border_width (GTK_CONTAINER (content), 12);
 
 	rfd = g_new0 (struct RunWithFeedbackData, 1);
