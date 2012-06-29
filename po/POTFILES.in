@@ -11,6 +11,7 @@ src/addressbook/e-book-backend-mapi-gal.c
 src/calendar/e-cal-backend-mapi.c
 src/camel/camel-mapi-folder.c
 src/camel/camel-mapi-provider.c
+src/camel/camel-mapi-sasl-krb.c
 src/camel/camel-mapi-store.c
 src/camel/camel-mapi-transport.c
 src/libexchangemapi/e-mapi-cal-utils.c
