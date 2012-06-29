@@ -265,7 +265,7 @@ mapi_config_utils_authenticator_try_password_sync (ESourceAuthenticator *auth,
 						   GError **error)
 {
 	EMapiConfigUtilsAuthenticator *authenticator = (EMapiConfigUtilsAuthenticator *) auth;
-	EMapiProfileData empd;
+	EMapiProfileData empd = { 0 };
 	CamelNetworkSettings *network_settings;
 	GError *mapi_error = NULL;
 

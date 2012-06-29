@@ -298,7 +298,7 @@ mail_config_mapi_authenticator_try_password_sync (ESourceAuthenticator *auth,
 	EMailConfigMapiAuthenticator *mapi_authenticator = (EMailConfigMapiAuthenticator *) auth;
 	EMailConfigServicePage *page;
 	ESourceRegistry *registry;
-	EMapiProfileData empd;
+	EMapiProfileData empd = { 0 };
 	GError *mapi_error = NULL;
 
 	empd.username = mapi_authenticator->username;
@@ -415,7 +415,7 @@ validate_credentials_thread (GObject *button,
 
 	if (mapi_authenticator->krb_sso) {
 		GError *error = NULL;
-		EMapiProfileData empd;
+		EMapiProfileData empd = { 0 };
 
 		empd.username = mapi_authenticator->username;
 		empd.domain = mapi_authenticator->domain;

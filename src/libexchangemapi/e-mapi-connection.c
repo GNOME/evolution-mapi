@@ -6726,7 +6726,7 @@ mapi_profile_create (struct mapi_context *mapi_ctx,
 	}
 
 	/*We need all the params before proceeding.*/
-	e_return_val_mapi_error_if_fail (COMPLETE_PROFILEDATA (empd) && empd->password && empd->password->len,
+	e_return_val_mapi_error_if_fail (COMPLETE_PROFILEDATA (empd) && (empd->krb_sso || (empd->password && empd->password->len)),
 					 MAPI_E_INVALID_PARAMETER, FALSE);
 
 	if (use_locking)
@@ -6742,7 +6742,7 @@ mapi_profile_create (struct mapi_context *mapi_ctx,
 	/* don't bother to check error - it would be valid if we got an error */
 
 	ms = CreateProfile (mapi_ctx, profname, empd->username,
-			    empd->password->str, OC_PROFILE_NOPASSWORD);
+			    empd->krb_sso ? NULL : empd->password->str, OC_PROFILE_NOPASSWORD);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "CreateProfile", ms);
 		goto cleanup;
@@ -6774,7 +6774,7 @@ mapi_profile_create (struct mapi_context *mapi_ctx,
 
 	/* Login now */
 	e_mapi_debug_print("Logging into the server... ");
-	ms = MapiLogonProvider (mapi_ctx, &session, profname, empd->password->str,
+	ms = MapiLogonProvider (mapi_ctx, &session, profname, empd->krb_sso ? NULL : empd->password->str,
 				PROVIDER_ID_NSPI);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "MapiLogonProvider", ms);

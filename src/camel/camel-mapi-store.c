@@ -42,6 +42,7 @@
 
 #include "camel-mapi-store.h"
 #include "camel-mapi-folder.h"
+#include "camel-mapi-sasl-krb.h"
 #include "camel-mapi-settings.h"
 #include "camel-mapi-store-summary.h"
 #include "camel-mapi-folder-summary.h"
@@ -1952,6 +1953,9 @@ camel_mapi_store_class_init (CamelMapiStoreClass *class)
 	CamelServiceClass *service_class;
 	CamelStoreClass *store_class;
 
+	/* register MAPIKRB auth type */
+	CAMEL_TYPE_MAPI_SASL_KRB;
+
 	g_type_class_add_private (class, sizeof (CamelMapiStorePrivate));
 
 	object_class = G_OBJECT_CLASS (class);
@@ -2081,6 +2085,7 @@ mapi_connect_sync (CamelService *service,
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
 	CamelServiceConnectionStatus status;
 	CamelSession *session;
+	EMapiProfileData empd = { 0 };
 	uint64_t current_size = -1, receive_quota = -1, send_quota = -1;
 	gchar *name;
 
@@ -2104,7 +2109,9 @@ mapi_connect_sync (CamelService *service,
 	name = camel_service_get_name (service, TRUE);
 	camel_operation_push_message (cancellable, _("Connecting to '%s'"), name);
 
-	if (!camel_session_authenticate_sync (session, service, NULL, cancellable, error)) {
+	e_mapi_util_profiledata_from_settings (&empd, CAMEL_MAPI_SETTINGS (camel_service_get_settings (service)));
+
+	if (!camel_session_authenticate_sync (session, service, empd.krb_sso ? "MAPIKRB" : NULL, cancellable, error)) {
 		camel_operation_pop_message (cancellable);
 		camel_service_disconnect_sync (service, TRUE, cancellable, NULL);
 		g_free (name);
@@ -2534,20 +2541,20 @@ mapi_authenticate_sync (CamelService *service,
 	profile = camel_mapi_settings_get_profile (mapi_settings);
 
 	if (empd.krb_sso) {
-		if (e_mapi_util_trigger_krb_auth (&empd, error))
-			return CAMEL_AUTHENTICATION_ACCEPTED;
-		else
+		if (!e_mapi_util_trigger_krb_auth (&empd, error))
 			return CAMEL_AUTHENTICATION_ERROR;
-	}
 
-	password = camel_service_get_password (service);
+		password = NULL;
+	} else {
+		password = camel_service_get_password (service);
 
-	if (password == NULL) {
-		g_set_error_literal (
-			error, CAMEL_SERVICE_ERROR,
-			CAMEL_SERVICE_ERROR_CANT_AUTHENTICATE,
-			_("Authentication password not available"));
-		return CAMEL_AUTHENTICATION_ERROR;
+		if (password == NULL) {
+			g_set_error_literal (
+				error, CAMEL_SERVICE_ERROR,
+				CAMEL_SERVICE_ERROR_CANT_AUTHENTICATE,
+				_("Authentication password not available"));
+			return CAMEL_AUTHENTICATION_ERROR;
+		}
 	}
 
 	password_str = g_string_new (password);

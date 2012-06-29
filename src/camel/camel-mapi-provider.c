@@ -31,6 +31,7 @@
 
 #include <gmodule.h>
 
+#include "camel-mapi-sasl-krb.h"
 #include "camel-mapi-store.h"
 #include "camel-mapi-transport.h"
 
@@ -113,6 +114,9 @@ camel_provider_module_init(void)
 
 	bindtextdomain (GETTEXT_PACKAGE, EXCHANGE_MAPI_LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+
+	/* register MAPIKRB auth type */
+	CAMEL_TYPE_MAPI_SASL_KRB;
 
 	camel_provider_register (&mapi_provider);
 }
