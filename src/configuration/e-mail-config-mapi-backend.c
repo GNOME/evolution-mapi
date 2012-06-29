@@ -555,6 +555,130 @@ mail_config_mapi_backend_new_collection (EMailConfigServiceBackend *backend)
 	return source;
 }
 
+static GHashTable *
+get_kerberos_realms (void)
+{
+	GFile *file;
+	GHashTable *realms = NULL;
+
+	file = g_file_new_for_path ("/etc/krb5.conf");
+	
+	if (file) {
+		GFileInputStream *input_stream = g_file_read (file, NULL, NULL);
+
+		if (input_stream) {
+			GDataInputStream *data = g_data_input_stream_new (G_INPUT_STREAM (input_stream));
+
+			if (data) {
+				gchar *line;
+				gboolean in_domain_realm = FALSE;
+
+				while (line = g_data_input_stream_read_line_utf8 (data, NULL, NULL, NULL), line) {
+					g_strstrip (line);
+
+					if (line [0] == '[') {
+						if (in_domain_realm) {
+							g_free (line);
+							break;
+						}
+
+						if (g_str_equal (line, "[domain_realm]"))
+							in_domain_realm = TRUE;
+					} else if (in_domain_realm) {
+						gchar **split = g_strsplit (line, "=", 2);
+
+						if (split && split[0] && split[1] && !split[2]) {
+							g_strstrip (split[0]);
+							g_strstrip (split[1]);
+
+							if (split[0][0] && split[1][0]) {
+								if (!realms)
+									realms = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+
+								g_hash_table_insert (realms, g_strdup (split[0]), g_strdup (split[1]));
+							}
+						}
+
+						g_strfreev (split);
+					}
+
+					g_free (line);
+				}
+
+				g_object_unref (data);
+			}
+
+			g_object_unref (input_stream);
+		}
+
+		g_object_unref (file);
+	}
+
+	return realms;
+}
+
+static const gchar *
+find_in_realms (GHashTable *realms, const gchar *domain)
+{
+	GHashTableIter iter;
+	gpointer key, value;
+
+	g_return_val_if_fail (realms != NULL, NULL);
+	g_return_val_if_fail (domain != NULL, NULL);
+
+	if (!*domain)
+		return NULL;
+
+	g_hash_table_iter_init (&iter, realms);
+	while (g_hash_table_iter_next (&iter, &key, &value)) {
+		if (g_ascii_strcasecmp (domain, key) == 0)
+			return value;
+	}
+
+	return NULL;
+}
+
+static void
+kerberos_toggled_cb (GtkWidget *check_button,
+		     GParamSpec *param,
+		     CamelMapiSettings *settings)
+{
+	gchar *host;
+
+	if (!camel_mapi_settings_get_kerberos (settings))
+		return;
+
+	host = camel_network_settings_dup_host (CAMEL_NETWORK_SETTINGS (settings));
+
+	if (host && *host) {
+		/* guess realm from /etc/krb5.conf, if available;
+		   it's just trying to be nice to the user, no big deal if this fails */
+		GHashTable *realms;
+
+		realms = get_kerberos_realms ();
+		if (realms) {
+			const gchar *dot;
+
+			dot = host;
+			while (dot) {
+				const gchar *realm;
+
+				realm = find_in_realms (realms, dot);
+				if (realm && *realm) {
+					camel_mapi_settings_set_realm (settings, realm);
+					break;
+				}
+
+				dot = *dot ? strchr (dot + 1, '.') : NULL;
+			}
+
+			g_hash_table_destroy (realms);
+		}
+	}
+
+	g_free (host);
+}
+
 static void
 mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 					 GtkBox *parent)
@@ -700,6 +824,10 @@ mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		settings, "kerberos",
 		label, "sensitive",
 		G_BINDING_SYNC_CREATE);
+
+	g_signal_connect_object (settings, "notify::kerberos",
+		G_CALLBACK (kerberos_toggled_cb), settings,
+		G_CONNECT_AFTER);
 
 	entry = gtk_entry_new ();
 	gtk_widget_set_hexpand (entry, TRUE);
