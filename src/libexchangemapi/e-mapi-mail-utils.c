@@ -768,14 +768,8 @@ e_mapi_mail_utils_object_to_message (EMapiConnection *conn, /* const */ EMapiObj
 		msg_date = e_mapi_util_find_array_propval (&object->properties, PidTagClientSubmitTime);
 		if (!msg_date)
 			msg_date = e_mapi_util_find_array_propval (&object->properties, PidTagMessageDeliveryTime);
-		if (msg_date) {
-			time_t msg_date_t, actual_time;
-			gint offset = 0;
-
-			msg_date_t = e_mapi_util_filetime_to_time_t (msg_date);
-			actual_time = camel_header_decode_date (ctime (&msg_date_t), &offset);
-			camel_mime_message_set_date (msg, actual_time, offset);
-		}
+		if (msg_date)
+			camel_mime_message_set_date (msg, e_mapi_util_filetime_to_time_t (msg_date), 0);
 
 		str = e_mapi_util_find_array_propval (&object->properties, PidTagSubject);
 		if (str)
