@@ -613,7 +613,6 @@ gather_object_summary_cb (EMapiConnection *conn,
 			const gchar *subject, *message_id, *references, *in_reply_to, *display_to, *display_cc;
 			const struct FILETIME *delivery_time, *submit_time;
 			const uint32_t *msg_size;
-			gint offset = 0;
 			gchar *formatted_addr, *from_name, *from_email;
 			CamelAddress *to_addr, *cc_addr, *bcc_addr;
 
@@ -637,9 +636,9 @@ gather_object_summary_cb (EMapiConnection *conn,
 			minfo->info.size = msg_size ? *msg_size : 0;
 
 			if (minfo->info.date_sent != 0)
-				minfo->info.date_sent = camel_header_decode_date (ctime (&minfo->info.date_sent), &offset);
+				minfo->info.date_sent = minfo->info.date_sent;
 			if (minfo->info.date_received != 0)
-				minfo->info.date_received = camel_header_decode_date (ctime (&minfo->info.date_received), &offset);
+				minfo->info.date_received = minfo->info.date_received;
 
 			/* Threading related properties */
 			mapi_set_message_id (minfo, message_id);
