@@ -45,6 +45,7 @@ static const struct field_element_mapping {
 	{ E_CONTACT_GIVEN_NAME,		PidTagGivenName,		ELEMENT_TYPE_SIMPLE },
 	{ E_CONTACT_FAMILY_NAME,	PidTagSurname,			ELEMENT_TYPE_SIMPLE },
 	{ E_CONTACT_NICKNAME,		PidTagNickname,			ELEMENT_TYPE_SIMPLE },
+	{ E_CONTACT_PHOTO,		PidLidHasPicture,		ELEMENT_TYPE_COMPLEX },
 
 	{ E_CONTACT_EMAIL_1,		PidLidEmail1OriginalDisplayName,ELEMENT_TYPE_SIMPLE },
 	{ E_CONTACT_EMAIL_2,		PidLidEmail2EmailAddress,	ELEMENT_TYPE_SIMPLE },
@@ -338,6 +339,32 @@ e_mapi_book_utils_contact_from_object (EMapiConnection *conn,
 					e_contact_set (contact, mappings[i].field_id, &contact_addr);
 				}
 				#undef is_set
+			} else if (mappings[i].field_id == E_CONTACT_PHOTO) {
+				if (object->attachments) {
+					EMapiAttachment *attachment;
+
+					for (attachment = object->attachments; attachment; attachment = attachment->next) {
+						const uint8_t *bval = e_mapi_util_find_array_propval (&attachment->properties, PidTagAttachmentContactPhoto);
+
+						if (bval && *bval) {
+							uint64_t data_cb = 0;
+							const uint8_t *data_lpb = NULL;
+
+							if (e_mapi_attachment_get_bin_prop (attachment, PidTagAttachDataBinary, &data_cb, &data_lpb) && data_cb > 0) {
+								EContactPhoto photo;
+
+								photo.type = E_CONTACT_PHOTO_TYPE_INLINED;
+								photo.data.inlined.mime_type = NULL;
+								photo.data.inlined.length = data_cb;
+								photo.data.inlined.data = (guchar *) data_lpb;
+
+								e_contact_set (contact, E_CONTACT_PHOTO, &photo);
+							}
+
+							break;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -420,6 +447,7 @@ e_mapi_book_utils_contact_to_object (EContact *contact,
 				     GError **perror)
 {
 	EMapiObject *object;
+	EContactPhoto *photo;
 
 	#define set_value(hex, val) G_STMT_START { \
 		if (!e_mapi_utils_add_property (&object->properties, hex, val, object)) \
@@ -430,6 +458,13 @@ e_mapi_book_utils_contact_to_object (EContact *contact,
 		if (e_contact_get (contact, field_id)) { \
 			set_value (hex, e_contact_get (contact, field_id)); \
 		} } G_STMT_END
+
+	#define set_attach_value(pt,vl) {							\
+		if (!e_mapi_utils_add_property (&attachment->properties, pt, vl, attachment)) {	\
+			g_warning ("%s: Failed to set property 0x%x", G_STRFUNC, pt);		\
+			return FALSE;								\
+		}										\
+	}
 
 	g_return_val_if_fail (contact != NULL, FALSE);
 	g_return_val_if_fail (mem_ctx != NULL, FALSE);
@@ -643,7 +678,74 @@ e_mapi_book_utils_contact_to_object (EContact *contact,
 		set_value (PidLidInstantMessagingAddress, l->data);
 	}
 
+	photo = e_contact_get (contact, E_CONTACT_PHOTO);
+	if (photo) {
+		gchar *content = NULL;
+		gsize length = 0;
+		gboolean do_free = FALSE;
+
+		if (photo->type == E_CONTACT_PHOTO_TYPE_INLINED) {
+			content = (gchar *) photo->data.inlined.data;
+			length = photo->data.inlined.length;
+		} else if (photo->type == E_CONTACT_PHOTO_TYPE_URI) {
+			gchar *filename = g_filename_from_uri (photo->data.uri, NULL, NULL);
+			if (filename) {
+				if (!g_file_get_contents (filename, &content, &length, NULL)) {
+					content = NULL;
+					length = 0;
+				} else {
+					do_free = TRUE;
+				}
+
+				g_free (filename);
+			}
+		}
+
+		if (content && length > 0) {
+			EMapiAttachment *attachment = e_mapi_attachment_new (mem_ctx);
+			if (attachment) {
+				uint32_t ui32;
+				uint8_t bval, *lpb;
+
+				ui32 = ATTACH_BY_VALUE;
+				set_attach_value (PidTagAttachMethod, &ui32);
+				ui32 = -1;
+				set_attach_value (PidTagRenderingPosition, &ui32);
+
+				/* intentionally not localized, these values are the requirement */
+				set_attach_value (PidTagDisplayName, "ContactPicture.jpg");
+				set_attach_value (PidTagAttachFilename, "ContactPicture.jpg");
+				set_attach_value (PidTagAttachExtension, ".jpg");
+
+				bval = 1;
+				set_attach_value (PidTagAttachmentContactPhoto, &bval);
+
+				lpb = talloc_realloc (attachment, NULL, uint8_t, length);
+				memcpy (lpb, content, length);
+
+				e_mapi_attachment_add_streamed (attachment, PidTagAttachDataBinary, (uint64_t) length, lpb);
+
+				e_mapi_object_add_attachment (object, attachment);
+
+				bval = 1;
+				set_value (PidLidHasPicture, &bval);
+			}
+		} else {
+			uint8_t bval = 0;
+			set_value (PidLidHasPicture, &bval);
+		}
+
+		if (do_free)
+			g_free (content);
+		e_contact_photo_free (photo);
+	} else {
+		uint8_t bval = 0;
+		set_value (PidLidHasPicture, &bval);
+	}
+
 	#undef set_value
+	#undef set_con_value
+	#undef set_attach_value
 
 	if (e_mapi_debug_is_enabled ()) {
 		printf ("%s:\n", G_STRFUNC);
