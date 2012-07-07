@@ -1025,22 +1025,6 @@ mapi_store_finalize (GObject *object)
 	G_OBJECT_CLASS (camel_mapi_store_parent_class)->finalize (object);
 }
 
-static guint
-mapi_store_hash_folder_name (gconstpointer key)
-{
-	return g_str_hash(key);
-}
-
-static gint
-mapi_store_compare_folder_name (gconstpointer a,
-                          gconstpointer b)
-{
-	gconstpointer	aname = a;
-	gconstpointer	bname = b;
-
-	return g_str_equal(aname, bname);
-}
-
 static gboolean
 mapi_store_can_refresh_folder (CamelStore *store,
                                CamelFolderInfo *info,
@@ -1972,8 +1956,6 @@ camel_mapi_store_class_init (CamelMapiStoreClass *class)
 	service_class->query_auth_types_sync = mapi_query_auth_types_sync;
 
 	store_class = CAMEL_STORE_CLASS (class);
-	store_class->hash_folder_name = mapi_store_hash_folder_name;
-	store_class->compare_folder_name = mapi_store_compare_folder_name;
 	store_class->can_refresh_folder = mapi_store_can_refresh_folder;
 	store_class->free_folder_info = camel_store_free_folder_info_full;
 	store_class->get_folder_sync = mapi_store_get_folder_sync;
