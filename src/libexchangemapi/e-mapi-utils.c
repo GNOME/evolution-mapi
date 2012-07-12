@@ -50,6 +50,128 @@
 #define KRB_DBUS_PATH               "/org/gnome/KrbAuthDialog"
 #define KRB_DBUS_INTERFACE          "org.gnome.KrbAuthDialog"
 
+void
+e_mapi_cancellable_rec_mutex_init (EMapiCancellableRecMutex *rec_mutex)
+{
+	g_return_if_fail (rec_mutex != NULL);
+
+	g_rec_mutex_init (&rec_mutex->rec_mutex);
+	g_mutex_init (&rec_mutex->cond_mutex);
+	g_cond_init (&rec_mutex->cond);
+}
+
+void
+e_mapi_cancellable_rec_mutex_clear (EMapiCancellableRecMutex *rec_mutex)
+{
+	g_return_if_fail (rec_mutex != NULL);
+
+	g_rec_mutex_clear (&rec_mutex->rec_mutex);
+	g_mutex_clear (&rec_mutex->cond_mutex);
+	g_cond_clear (&rec_mutex->cond);
+}
+
+static void
+cancellable_rec_mutex_cancelled_cb (GCancellable *cancellable,
+				    EMapiCancellableRecMutex *rec_mutex)
+{
+	g_return_if_fail (rec_mutex != NULL);
+
+	/* wake-up any waiting threads */
+	g_mutex_lock (&rec_mutex->cond_mutex);
+	g_cond_broadcast (&rec_mutex->cond);
+	g_mutex_unlock (&rec_mutex->cond_mutex);
+}
+
+/* returns FALSE if cancelled, in which case the lock is not held */
+gboolean
+e_mapi_cancellable_rec_mutex_lock (EMapiCancellableRecMutex *rec_mutex,
+				   GCancellable *cancellable,
+				   GError **error)
+{
+	gulong handler_id;
+	gboolean res = TRUE;
+
+	g_return_val_if_fail (rec_mutex != NULL, FALSE);
+
+	g_mutex_lock (&rec_mutex->cond_mutex);
+	if (!cancellable) {
+		g_mutex_unlock (&rec_mutex->cond_mutex);
+		g_rec_mutex_lock (&rec_mutex->rec_mutex);
+		return TRUE;
+	}
+
+	if (g_cancellable_is_cancelled (cancellable)) {
+		if (error && !*error)
+			g_cancellable_set_error_if_cancelled (cancellable, error);
+		g_mutex_unlock (&rec_mutex->cond_mutex);
+		return FALSE;
+	}
+
+	handler_id = g_signal_connect (cancellable, "cancelled",
+		G_CALLBACK (cancellable_rec_mutex_cancelled_cb), rec_mutex);
+
+	while (!g_rec_mutex_trylock (&rec_mutex->rec_mutex)) {
+		/* recheck once per 10 seconds, just in case */
+		g_cond_wait_until (&rec_mutex->cond, &rec_mutex->cond_mutex,
+			g_get_monotonic_time () + (10 * G_TIME_SPAN_SECOND));
+
+		if (g_cancellable_is_cancelled (cancellable)) {
+			if (error && !*error)
+				g_cancellable_set_error_if_cancelled (cancellable, error);
+			res = FALSE;
+			break;
+		}
+	}
+
+	g_signal_handler_disconnect (cancellable, handler_id);
+
+	g_mutex_unlock (&rec_mutex->cond_mutex);
+
+	return res;
+}
+
+void
+e_mapi_cancellable_rec_mutex_unlock (EMapiCancellableRecMutex *rec_mutex)
+{
+	g_return_if_fail (rec_mutex != NULL);
+
+	g_rec_mutex_unlock (&rec_mutex->rec_mutex);
+
+	g_mutex_lock (&rec_mutex->cond_mutex);
+	/* also wake-up any waiting threads */
+	g_cond_broadcast (&rec_mutex->cond);
+	g_mutex_unlock (&rec_mutex->cond_mutex);
+}
+
+static gboolean
+manage_global_lock (gboolean lock,
+		    GCancellable *cancellable,
+		    GError **error)
+{
+	static EMapiCancellableRecMutex global_lock;
+	gboolean res = TRUE;
+
+	if (lock)
+		res = e_mapi_cancellable_rec_mutex_lock (&global_lock, cancellable, error);
+	else
+		e_mapi_cancellable_rec_mutex_unlock (&global_lock);
+
+	return res;
+}
+
+gboolean
+e_mapi_utils_global_lock (GCancellable *cancellable,
+			  GError **error)
+{
+	return manage_global_lock (TRUE, cancellable, error);
+}
+
+void
+e_mapi_utils_global_unlock (void)
+{
+	manage_global_lock (FALSE, NULL, NULL);
+}
+
 inline gchar *
 e_mapi_util_mapi_id_to_string (mapi_id_t id)
 {
@@ -956,29 +1078,6 @@ e_mapi_utils_propagate_cancelled_error (const GError *mapi_error,
 	return TRUE;
 }
 
-static void
-manage_global_lock (gboolean lock)
-{
-	static GStaticRecMutex global_lock = G_STATIC_REC_MUTEX_INIT;
-
-	if (lock)
-		g_static_rec_mutex_lock (&global_lock);
-	else
-		g_static_rec_mutex_unlock (&global_lock);
-}
-
-void
-e_mapi_utils_global_lock (void)
-{
-	manage_global_lock (TRUE);
-}
-
-void
-e_mapi_utils_global_unlock (void)
-{
-	manage_global_lock (FALSE);
-}
-
 gboolean
 e_mapi_utils_create_mapi_context (struct mapi_context **mapi_ctx, GError **perror)
 {
@@ -988,7 +1087,8 @@ e_mapi_utils_create_mapi_context (struct mapi_context **mapi_ctx, GError **perro
 
 	g_return_val_if_fail (mapi_ctx != NULL, FALSE);
 
-	e_mapi_utils_global_lock ();
+	if (!e_mapi_utils_global_lock (NULL, perror))
+		return FALSE;
 
 	*mapi_ctx = NULL;
 	user_data_dir = e_get_user_data_dir ();
@@ -1028,7 +1128,9 @@ e_mapi_utils_destroy_mapi_context (struct mapi_context *mapi_ctx)
 	if (!mapi_ctx)
 		return;
 
-	e_mapi_utils_global_lock ();
+	if (!e_mapi_utils_global_lock (NULL, NULL))
+		return;
+
 	MAPIUninitialize (mapi_ctx);
 	e_mapi_utils_global_unlock ();
 }

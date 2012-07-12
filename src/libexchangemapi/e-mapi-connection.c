@@ -55,13 +55,38 @@ static struct mapi_session *mapi_profile_load (ESourceRegistry *registry, struct
 
 G_DEFINE_TYPE (EMapiConnection, e_mapi_connection, G_TYPE_OBJECT)
 
+/* These three macros require 'priv' variable of type EMapiConnectionPrivate */
+#define LOCK(_cclb,_err,_ret) G_STMT_START { 						\
+	e_mapi_debug_print ("%s: %s: lock(session & global)", G_STRLOC, G_STRFUNC);	\
+	if (!e_mapi_cancellable_rec_mutex_lock (&priv->session_lock, _cclb, _err)) {	\
+		e_mapi_debug_print ("   %s: %s: cancelled before got session lock)", G_STRLOC, G_STRFUNC); \
+		return _ret;								\
+	}										\
+	if (!e_mapi_utils_global_lock (_cclb, _err)) {					\
+		e_mapi_cancellable_rec_mutex_unlock (&priv->session_lock);		\
+		e_mapi_debug_print ("   %s: %s: cancelled before got global lock)", G_STRLOC, G_STRFUNC); \
+		return _ret;								\
+	}										\
+	} G_STMT_END
 
-#define global_lock() e_mapi_utils_global_lock ()
-#define global_unlock() e_mapi_utils_global_unlock ()
+#define LOCK_VOID(_cclb,_err) G_STMT_START { 						\
+	e_mapi_debug_print ("%s: %s: lock(session & global)", G_STRLOC, G_STRFUNC);	\
+	if (!e_mapi_cancellable_rec_mutex_lock (&priv->session_lock, _cclb, _err)) {	\
+		e_mapi_debug_print ("   %s: %s: cancelled before got session lock)", G_STRLOC, G_STRFUNC); \
+		return;									\
+	}										\
+	if (!e_mapi_utils_global_lock (_cclb, _err)) {					\
+		e_mapi_cancellable_rec_mutex_unlock (&priv->session_lock);		\
+		e_mapi_debug_print ("   %s: %s: cancelled before got global lock)", G_STRLOC, G_STRFUNC); \
+		return;									\
+	}										\
+	} G_STMT_END
 
-/* These two macros require 'priv' variable of type EMapiConnectionPrivate */
-#define LOCK()		e_mapi_debug_print ("%s: %s: lock(session & global)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_lock (&priv->session_lock); global_lock ();
-#define UNLOCK()	e_mapi_debug_print ("%s: %s: unlock(session & global)", G_STRLOC, G_STRFUNC); g_static_rec_mutex_unlock (&priv->session_lock); global_unlock ();
+#define UNLOCK() G_STMT_START {								\
+	e_mapi_debug_print ("%s: %s: unlock(session & global)", G_STRLOC, G_STRFUNC);	\
+	e_mapi_utils_global_unlock ();							\
+	e_mapi_cancellable_rec_mutex_unlock (&priv->session_lock);			\
+	} G_STMT_END
 
 #define e_return_val_mapi_error_if_fail(expr, _code, _val)				\
 	G_STMT_START {									\
@@ -166,7 +191,7 @@ struct _EMapiConnectionPrivate {
 
 	struct mapi_context *mapi_ctx;
 	struct mapi_session *session;
-	GStaticRecMutex session_lock;
+	EMapiCancellableRecMutex session_lock;
 
 	gchar *profile;			/* profile name, where the session is connected to */
 	mapi_object_t msg_store;	/* valid only when session != NULL */
@@ -207,7 +232,7 @@ stop_notification (EMapiConnectionPrivate *priv,
 	e_return_val_mapi_error_if_fail (priv != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	ms = Unsubscribe (priv->session, conn_id);
 	if (ms != MAPI_E_SUCCESS)
@@ -234,7 +259,7 @@ stop_all_notifications (EMapiConnectionPrivate *priv)
 	if (!priv->notification_thread)
 		return;
 
-	LOCK ();
+	LOCK_VOID (NULL, NULL);
 	if (priv->session)
 		g_hash_table_foreach (priv->known_notifications, call_stop_notification, priv);
 	g_hash_table_remove_all (priv->known_notifications);
@@ -384,7 +409,7 @@ e_mapi_connection_finalize (GObject *object)
 	priv = E_MAPI_CONNECTION (object)->priv;
 
 	if (priv) {
-		LOCK ();
+		LOCK_VOID (NULL, NULL);
 		disconnect (priv);
 		g_free (priv->profile);
 		priv->profile = NULL;
@@ -398,7 +423,7 @@ e_mapi_connection_finalize (GObject *object)
 		priv->foreign_stores = NULL;
 
 		UNLOCK ();
-		g_static_rec_mutex_free (&priv->session_lock);
+		e_mapi_cancellable_rec_mutex_clear (&priv->session_lock);
 		g_static_rec_mutex_free (&priv->folders_lock);
 
 		e_mapi_utils_destroy_mapi_context (priv->mapi_ctx);
@@ -446,7 +471,7 @@ e_mapi_connection_init (EMapiConnection *conn)
 	conn->priv = G_TYPE_INSTANCE_GET_PRIVATE (conn, E_MAPI_TYPE_CONNECTION, EMapiConnectionPrivate);
 	g_return_if_fail (conn->priv != NULL);
 
-	g_static_rec_mutex_init (&conn->priv->session_lock);
+	e_mapi_cancellable_rec_mutex_init (&conn->priv->session_lock);
 	g_static_rec_mutex_init (&conn->priv->folders_lock);
 
 	conn->priv->session = NULL;
@@ -582,7 +607,7 @@ e_mapi_connection_new (ESourceRegistry *registry,
 	priv = conn->priv;
 	e_return_val_mapi_error_if_fail (priv != NULL, MAPI_E_INVALID_PARAMETER, conn);
 
-	LOCK ();
+	LOCK (cancellable, perror, NULL);
 	mapi_object_init (&priv->msg_store);
 	priv->registry = registry ? g_object_ref (registry) : NULL;
 	priv->mapi_ctx = mapi_ctx;
@@ -626,7 +651,7 @@ e_mapi_connection_close (EMapiConnection *conn)
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 
-	LOCK ();
+	LOCK (NULL, NULL, FALSE);
 
 	res = priv->session != NULL;
 	disconnect (priv);
@@ -648,7 +673,7 @@ e_mapi_connection_reconnect (EMapiConnection *conn,
 
 	e_return_val_mapi_error_if_fail (priv->profile != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 	if (priv->session)
 		e_mapi_connection_close (conn);
 
@@ -748,7 +773,7 @@ e_mapi_connection_test_foreign_folder (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (folder_name != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (fid != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	mapi_object_init (&obj_store);
 	mapi_object_init (&obj_folder);
@@ -832,7 +857,7 @@ e_mapi_connection_get_public_folder (EMapiConnection *conn,
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	mapi_object_init (obj_folder);
 
@@ -862,7 +887,7 @@ e_mapi_connection_peek_store (EMapiConnection *conn,
 		e_return_val_mapi_error_if_fail (!public_store, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (obj_store != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	if (public_store) {
 		if (!ensure_public_store (priv, perror)) {
@@ -929,7 +954,7 @@ e_mapi_connection_get_store_quotas (EMapiConnection *conn,
 	*receive_quota = -1;
 	*send_quota = -1;
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 	mem_ctx = talloc_new (priv->session);
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
@@ -1012,9 +1037,9 @@ e_mapi_connection_open_default_folder (EMapiConnection *conn,
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
-
 	mapi_object_init (obj_folder);
+
+	LOCK (cancellable, perror, FALSE);
 
 	ms = GetDefaultFolder (&priv->msg_store, &fid, olFolderIdentifier);
 	if (ms != MAPI_E_SUCCESS) {
@@ -1047,9 +1072,9 @@ e_mapi_connection_open_personal_folder (EMapiConnection *conn,
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
-
 	mapi_object_init (obj_folder);
+
+	LOCK (cancellable, perror, FALSE);
 
 	ms = OpenFolder (&priv->msg_store, fid, obj_folder);
 	if (ms != MAPI_E_SUCCESS)
@@ -1072,7 +1097,9 @@ e_mapi_connection_open_public_folder (EMapiConnection *conn,
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	mapi_object_init (obj_folder);
+
+	LOCK (cancellable, perror, FALSE);
 
 	if (!ensure_public_store (priv, perror)) {
 		UNLOCK ();
@@ -1083,8 +1110,6 @@ e_mapi_connection_open_public_folder (EMapiConnection *conn,
 		UNLOCK ();
 		return FALSE;
 	}
-
-	mapi_object_init (obj_folder);
 
 	ms = OpenFolder (&priv->public_store, fid, obj_folder);
 	if (ms != MAPI_E_SUCCESS)
@@ -1110,7 +1135,9 @@ e_mapi_connection_open_foreign_folder (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (username != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	mapi_object_init (obj_folder);
+
+	LOCK (cancellable, perror, FALSE);
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 		UNLOCK ();
@@ -1124,8 +1151,6 @@ e_mapi_connection_open_foreign_folder (EMapiConnection *conn,
 	} else {
 		ms = MAPI_E_SUCCESS;
 	}
-
-	mapi_object_init (obj_folder);
 
 	if (ms == MAPI_E_SUCCESS) {
 		ms = OpenFolder (msg_store, fid, obj_folder);
@@ -1146,12 +1171,29 @@ e_mapi_connection_close_folder (EMapiConnection *conn,
 				GCancellable *cancellable,
 				GError **perror)
 {
+	gboolean was_cancelled = FALSE;
+
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	/* kinda bad thing to do, but nothing better;
+	   if the open_folder succeeded, then it's always good to free resources,
+	   even when the operation on the folder was cancelled; and as it's good
+	   to be cancellable, then this is better than passing NULL to LOCK().
+	*/
+	if (cancellable) {
+		was_cancelled = g_cancellable_is_cancelled (cancellable);
+		if (was_cancelled)
+			g_cancellable_reset (cancellable);
+	}
+
+	LOCK (cancellable, perror, FALSE);
 
 	mapi_object_release (obj_folder);
+
+	/* this can invoke 'cancelled' again, but no big deal for evo-mapi */
+	if (was_cancelled)
+		g_cancellable_cancel (cancellable);
 
 	UNLOCK ();
 
@@ -1255,7 +1297,7 @@ e_mapi_connection_get_folder_properties (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 	mem_ctx = talloc_new (priv->session);
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
@@ -1510,7 +1552,7 @@ e_mapi_connection_get_permissions (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (entries != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 	mem_ctx = talloc_new (priv->session);
 	mapi_object_init (&obj_table);
 
@@ -1578,7 +1620,7 @@ e_mapi_connection_set_permissions (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 	mem_ctx = talloc_new (priv->session);
 
 	rows = talloc_zero (mem_ctx, struct mapi_PermissionsData);
@@ -1954,7 +1996,7 @@ e_mapi_connection_list_objects (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 	mem_ctx = talloc_new (priv->session);
 	mapi_object_init (&obj_table);
 
@@ -2813,7 +2855,7 @@ e_mapi_connection_transfer_objects (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 	mem_ctx = talloc_new (priv->session);
 
 	eap.download_offset = 0;
@@ -2962,7 +3004,7 @@ e_mapi_connection_transfer_summary (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 	mem_ctx = talloc_new (priv->session);
 
 	ms = MAPI_E_SUCCESS;
@@ -3254,7 +3296,7 @@ write_streamed_prop (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (obj_object != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (stream != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	mapi_object_init (&obj_stream);
 
@@ -3357,7 +3399,7 @@ update_props_on_object (EMapiConnection *conn,
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	if (!convert_mapi_props_to_props (conn, obj_folder, properties, known_streams, known_streams_count, &props, &propslen, &streams, &streamslen, mem_ctx, cancellable, perror)) {
 		ms = MAPI_E_CALL_FAILED;
@@ -3455,7 +3497,7 @@ delete_object_recipients (EMapiConnection *conn,
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	ms = RemoveAllRecipients (obj_object);
 	if (ms != MAPI_E_SUCCESS)
@@ -3512,7 +3554,7 @@ add_object_recipients (EMapiConnection *conn,
 	if (!count)
 		return TRUE;
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	all_proptags = g_hash_table_new (g_direct_hash, g_direct_equal);
 	users = g_new0 (const gchar *, count + 1);
@@ -3682,7 +3724,7 @@ delete_object_attachments (EMapiConnection *conn,
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	mapi_object_init (&obj_table);
 
@@ -3740,7 +3782,7 @@ add_object_attachments (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (obj_message != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (mem_ctx != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	for (attachment = attachments; attachment && ms == MAPI_E_SUCCESS; attachment = attachment->next) {
 		mapi_object_t obj_attach;
@@ -3889,7 +3931,7 @@ e_mapi_connection_create_object (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (write_object_cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (out_mid != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	*out_mid = 0;
 
@@ -4002,7 +4044,7 @@ e_mapi_connection_modify_object (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (write_object_cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (mid != 0, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	mem_ctx = talloc_new (priv->session);
 	mapi_object_init (&obj_message);
@@ -4324,7 +4366,7 @@ e_mapi_connection_count_gal_objects (EMapiConnection *conn,
 
 	*obj_total = 0;
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 		ms = MAPI_E_USER_CANCEL;
@@ -4365,7 +4407,7 @@ e_mapi_connection_list_gal_objects (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (priv->session->nspi->ctx != NULL, MAPI_E_UNCONFIGURED, FALSE);
 	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 	mem_ctx = talloc_new (priv->session);
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
@@ -4600,7 +4642,7 @@ e_mapi_connection_transfer_gal_objects (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (priv->session->nspi->ctx != NULL, MAPI_E_UNCONFIGURED, FALSE);
 	e_return_val_mapi_error_if_fail (cb != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 	mem_ctx = talloc_new (priv->session);
 
 	for (iter = mids; iter; iter = iter->next) {
@@ -4752,7 +4794,7 @@ e_mapi_connection_create_folder (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (new_folder_type != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (new_fid != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 	mapi_object_init (&obj_folder);
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
@@ -4804,7 +4846,7 @@ e_mapi_connection_empty_folder (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (obj_folder, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 		ms = MAPI_E_USER_CANCEL;
@@ -4879,7 +4921,7 @@ emc_open_folders (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (obj_child_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (obj_parent_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	mapi_object_init (obj_child_folder);
 	mapi_object_init (obj_parent_folder);
@@ -4956,7 +4998,7 @@ e_mapi_connection_remove_folder (EMapiConnection *conn,
 			folder = NULL;
 	}
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	mapi_object_init (&obj_folder);
 	mapi_object_init (&obj_parent);
@@ -5025,7 +5067,7 @@ e_mapi_connection_rename_folder (EMapiConnection *conn,
 
 	e_mapi_debug_print ("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 	mem_ctx = talloc_new (priv->session);
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
@@ -5072,7 +5114,7 @@ e_mapi_connection_move_folder  (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (new_name != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (strchr (new_name, '/') == NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 		ms = MAPI_E_USER_CANCEL;
@@ -5114,7 +5156,7 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 
 	e_mapi_debug_print ("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	fid = 0;
 	if (obj_folder)
@@ -5427,7 +5469,7 @@ e_mapi_connection_get_default_folder_id (EMapiConnection *conn,
 
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
-	LOCK ();
+	LOCK (cancellable, perror, 0);
 
 	ms = GetDefaultFolder (&priv->msg_store, &fid, olFolder);
 	if (ms != MAPI_E_SUCCESS) {
@@ -5464,7 +5506,7 @@ e_mapi_connection_set_flags (EMapiConnection *conn,
 
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 	mem_ctx = talloc_new (priv->session);
 
 	id_messages = talloc_array (mem_ctx, mapi_id_t, g_slist_length (mids));
@@ -5510,7 +5552,7 @@ e_mapi_connection_copymove_items (EMapiConnection *conn,
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, MAPI_E_INVALID_PARAMETER);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 	mem_ctx = talloc_new (priv->session);
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
@@ -5570,7 +5612,7 @@ e_mapi_connection_remove_items (EMapiConnection *conn,
 
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	mem_ctx = talloc_new (priv->session);
 
@@ -5947,7 +5989,7 @@ e_mapi_connection_get_folders_list (EMapiConnection *conn,
 
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	mem_ctx = talloc_new (priv->session);
 
@@ -6053,7 +6095,7 @@ e_mapi_connection_get_pf_folders_list (EMapiConnection *conn,
 
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 	mem_ctx = talloc_new (priv->session);
 
 	if (!ensure_public_store (priv, perror))
@@ -6104,7 +6146,7 @@ e_mapi_connection_peek_folders_list (EMapiConnection *conn)
 	g_static_rec_mutex_lock (&priv->folders_lock);
 
 	if (!priv->folders) {
-		LOCK ();
+		LOCK (NULL, NULL, NULL);
 		e_mapi_connection_get_folders_list (conn, &priv->folders, NULL, NULL, NULL, perror);
 		UNLOCK ();
 	}
@@ -6138,9 +6180,9 @@ e_mapi_connection_ex_to_smtp (EMapiConnection *conn,
 	str_array[0] = ex_address;
 	str_array[1] = NULL;
 
-	mem_ctx = talloc_new (priv->session);
+	LOCK (cancellable, perror, NULL);
 
-	LOCK ();
+	mem_ctx = talloc_new (priv->session);
 
 	SPropTagArray = set_SPropTagArray (mem_ctx, 0x2,
 					  PR_DISPLAY_NAME_UNICODE,
@@ -6206,7 +6248,7 @@ e_mapi_connection_resolve_username (EMapiConnection *conn,
 	str_array[0] = to_resolve;
 	str_array[1] = NULL;
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	mem_ctx = talloc_new (priv->session);
 
@@ -6376,7 +6418,7 @@ e_mapi_connection_notification_thread (gpointer user_data)
 	while (g_hash_table_size (priv->known_notifications) > 0) {
 		GTimeVal tv;
 
-		LOCK ();
+		LOCK (NULL, NULL, NULL);
 		/* this returns MAPI_E_INVALID_PARAMETER when there
 		   is no pending notification
 		*/
@@ -6416,7 +6458,7 @@ e_mapi_connection_enable_notifications (EMapiConnection *conn,
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	if (event_mask == 0)
 		event_mask = fnevNewMail |
@@ -6482,7 +6524,7 @@ e_mapi_connection_disable_notifications	(EMapiConnection *conn,
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	LOCK ();
+	LOCK (cancellable, perror, FALSE);
 
 	if (!priv->notification_thread) {
 		/* no notifications started, just return */
@@ -6655,7 +6697,8 @@ mapi_profile_load (ESourceRegistry *registry,
 	e_return_val_mapi_error_if_fail (mapi_ctx != NULL, MAPI_E_INVALID_PARAMETER, NULL);
 	e_return_val_mapi_error_if_fail (profname != NULL, MAPI_E_INVALID_PARAMETER, NULL);
 
-	e_mapi_utils_global_lock ();
+	if (!e_mapi_utils_global_lock (cancellable, perror))
+		return NULL;
 
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
 
@@ -6729,8 +6772,10 @@ mapi_profile_create (struct mapi_context *mapi_ctx,
 	e_return_val_mapi_error_if_fail (COMPLETE_PROFILEDATA (empd) && (empd->krb_sso || (empd->password && empd->password->len)),
 					 MAPI_E_INVALID_PARAMETER, FALSE);
 
-	if (use_locking)
-		e_mapi_utils_global_lock ();
+	if (use_locking) {
+		if (!e_mapi_utils_global_lock (cancellable, perror))
+			return FALSE;
+	}
 
 	e_mapi_debug_print ("Create profile with %s %s %s\n", empd->username,
 		 empd->domain, empd->server);
@@ -6845,7 +6890,8 @@ e_mapi_delete_profile (struct mapi_context *mapi_ctx,
 
 	e_return_val_mapi_error_if_fail (mapi_ctx != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	e_mapi_utils_global_lock ();
+	if (!e_mapi_utils_global_lock (NULL, perror))
+		return FALSE;
 
 	e_mapi_debug_print ("Deleting profile %s ", profile);
 
@@ -6872,7 +6918,8 @@ e_mapi_rename_profile (struct mapi_context *mapi_ctx,
 	g_return_if_fail (new_name != NULL);
 
 	/* do not use locking here, it's called with a lock held already */
-	/* e_mapi_utils_global_lock (); */
+	/* if (!e_mapi_utils_global_lock (NULL, perror))
+		return; */
 
 	RenameProfile (mapi_ctx, old_name, new_name);
 

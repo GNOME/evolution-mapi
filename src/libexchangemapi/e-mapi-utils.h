@@ -30,6 +30,23 @@
 #include "e-mapi-debug.h"
 #include "e-mapi-connection.h"
 
+typedef struct _EMapiCancellableRecMutex {
+	GRecMutex rec_mutex;
+	GMutex cond_mutex;
+	GCond cond;
+} EMapiCancellableRecMutex;
+
+void		e_mapi_cancellable_rec_mutex_init	(EMapiCancellableRecMutex *rec_mutex);
+void		e_mapi_cancellable_rec_mutex_clear	(EMapiCancellableRecMutex *rec_mutex);
+gboolean	e_mapi_cancellable_rec_mutex_lock	(EMapiCancellableRecMutex *rec_mutex,
+							 GCancellable *cancellable,
+							 GError **error);
+void		e_mapi_cancellable_rec_mutex_unlock	(EMapiCancellableRecMutex *rec_mutex);
+
+gboolean	e_mapi_utils_global_lock		(GCancellable *cancellable,
+							 GError **error);
+void		e_mapi_utils_global_unlock		(void);
+
 gchar *		e_mapi_util_mapi_id_to_string		(mapi_id_t id);
 gboolean	e_mapi_util_mapi_id_from_string		(const gchar *str, mapi_id_t *id);
 
@@ -99,8 +116,6 @@ void		e_mapi_util_time_t_to_filetime		(const time_t tt,
 gboolean	e_mapi_utils_propagate_cancelled_error	(const GError *mapi_error,
 							 GError **error);
 
-void		e_mapi_utils_global_lock		(void);
-void		e_mapi_utils_global_unlock		(void);
 gboolean	e_mapi_utils_create_mapi_context	(struct mapi_context **mapi_ctx,
 							 GError **perror);
 void		e_mapi_utils_destroy_mapi_context	(struct mapi_context *mapi_ctx);
