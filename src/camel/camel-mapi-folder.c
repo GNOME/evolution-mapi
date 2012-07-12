@@ -731,7 +731,7 @@ gather_object_summary_cb (EMapiConnection *conn,
 gboolean
 camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable, GError **mapi_error)
 {
-	gboolean status;
+	gboolean status, has_obj_folder;
 	gboolean full_download;
 	CamelSettings *settings;
 	CamelStore *store = camel_folder_get_parent_store (folder);
@@ -772,6 +772,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 	}
 
 	status = cmf_open_folder (mapi_folder, conn, &obj_folder, cancellable, mapi_error);
+	has_obj_folder = status;
 
 	if (status) {
 		status = e_mapi_connection_get_folder_properties (conn, &obj_folder, NULL, NULL, e_mapi_utils_get_folder_basic_properties_cb, &fbp, cancellable, mapi_error);
@@ -849,7 +850,8 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 		camel_folder_change_info_free (gos.changes);
 	}
 
-	e_mapi_connection_close_folder (conn, &obj_folder, cancellable, mapi_error);
+	if (has_obj_folder)
+		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, mapi_error);
 
 	g_slist_free_full (gco.to_update, g_free);
 	if (gco.removed_uids)

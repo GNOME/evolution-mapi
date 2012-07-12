@@ -664,7 +664,7 @@ ebbm_contacts_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, co
 	mapi_id_t mid;
 	mapi_object_t obj_folder;
 	struct TransferContactData tc = { 0 };
-	gboolean status;
+	gboolean status, has_obj_folder;
 	GError *mapi_error = NULL;
 
 	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
@@ -700,6 +700,7 @@ ebbm_contacts_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, co
 	}
 
 	status = ebbm_contacts_open_folder (ebmac, conn, &obj_folder, cancellable, &mapi_error);
+	has_obj_folder = status;
 
 	if (status) {
 		status = e_mapi_util_mapi_id_from_string (id, &mid);
@@ -715,7 +716,8 @@ ebbm_contacts_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, co
 		e_mapi_connection_transfer_object (conn, &obj_folder, mid, transfer_contact_cb, &tc, cancellable, &mapi_error);
 	}
 
-	e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
+	if (has_obj_folder)
+		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
 
 	if (tc.contact) {
 		*vcard =  e_vcard_to_string (E_VCARD (tc.contact), EVC_FORMAT_VCARD_30);
