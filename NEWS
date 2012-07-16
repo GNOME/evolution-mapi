@@ -1,3 +1,27 @@
+evolution-mapi 3.5.4  2012-07-16
+--------------------------------
+
+Bugs:
+	Bug #637291 - Can't send to both internal and external recipients (Milan Crha)
+	Bug #678952 - Not all named properties are converted to server tags (Milan Crha)
+	Bug #679041 - Incorrect date in Sent Items folder (Milan Crha)
+
+Miscellanous:
+	Avoid possible memory leak (Milan Crha)
+	Use SetProps if write property as stream failed (Milan Crha)
+	Add spinner to wait dialog (Milan Crha)
+	Kerberos authentication did not work (Milan Crha)
+	Prefill Kerberos Realm from /etc/krb5.conf, if possible (Milan Crha)
+	Add support for E_CONTACT_PHOTO property (Milan Crha)
+	Remove redundant method implementations. (Matthew Barnes)
+	Use cancellable rec mutex for connection operations (Milan Crha)
+	Could free uninitialized memory in e_mapi_connection_close_folder() (Milan Crha)
+
+Translations:
+	Matej Urbančič (sl)
+	Daniel Mustieles (es)
+	Bruno Brouard (fr)
+
 evolution-mapi 3.5.3  2012-06-25
 --------------------------------
 
