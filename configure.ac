@@ -28,7 +28,7 @@ dnl *******************
 m4_define([eds_minimum_version], [ema_version])
 m4_define([evo_minimum_version], [ema_version])
 m4_define([libmapi_minimum_version], [1.0])
-m4_define([glib_minimum_version], [2.16.1])
+m4_define([glib_minimum_version], [2.32.0])
 m4_define([gtk_minimum_version], [2.99.2])
 
 dnl ***********************************

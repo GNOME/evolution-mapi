@@ -71,14 +71,20 @@ struct _CamelMapiStoreClass {
 };
 
 GType		camel_mapi_store_get_type		(void);
-gboolean	camel_mapi_store_connected		(CamelMapiStore *mapi_store, GError **error);
+gboolean	camel_mapi_store_connected		(CamelMapiStore *mapi_store,
+							 GCancellable *cancellable,
+							 GError **error);
+void		camel_mapi_store_maybe_disconnect	(CamelMapiStore *mapi_store,
+							 const GError *mapi_error);
 
 const gchar *	camel_mapi_store_folder_id_lookup (CamelMapiStore *mapi_store, const gchar *folder_name);
 const gchar *	camel_mapi_store_folder_lookup (CamelMapiStore *mapi_store, const gchar *folder_id);
 const gchar *	camel_mapi_store_system_folder_fid (CamelMapiStore *mapi_store, guint folder_type);
 const gchar *	mapi_folders_hash_table_name_lookup (CamelMapiStore *store, const gchar *fid, gboolean use_cache);
 
-EMapiConnection *	camel_mapi_store_get_connection (CamelMapiStore *mapi_store);
+EMapiConnection *	camel_mapi_store_get_connection (CamelMapiStore *mapi_store,
+							 GCancellable *cancellable,
+							 GError **error);
 
 void		camel_mapi_store_ensure_unique_path (CamelMapiStore *mapi_store, gchar **ppath);
 void		camel_mapi_store_announce_subscribed_folder (CamelMapiStore *mapi_store, const gchar *path);

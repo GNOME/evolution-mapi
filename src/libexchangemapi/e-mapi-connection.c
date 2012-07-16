@@ -283,7 +283,8 @@ release_foreign_stores_cb (gpointer pusername, gpointer pmsg_store, gpointer use
 
 /* should have session_lock locked already, when calling this function */
 static void
-disconnect (EMapiConnectionPrivate *priv)
+disconnect (EMapiConnectionPrivate *priv,
+	    gboolean clean)
 {
 	g_return_if_fail (priv != NULL);
 
@@ -302,9 +303,11 @@ disconnect (EMapiConnectionPrivate *priv)
 	g_hash_table_foreach (priv->foreign_stores, release_foreign_stores_cb, NULL);
 	g_hash_table_remove_all (priv->foreign_stores); 
 
-	Logoff (&priv->msg_store);
-	/* it's released by the Logoff() call
-	mapi_object_release (&priv->msg_store); */
+	if (clean) {
+		Logoff (&priv->msg_store);
+		/* it's released by the Logoff() call
+		mapi_object_release (&priv->msg_store); */
+	}
 
 	if (priv->named_ids)
 		g_hash_table_remove_all (priv->named_ids);
@@ -410,7 +413,7 @@ e_mapi_connection_finalize (GObject *object)
 
 	if (priv) {
 		LOCK_VOID (NULL, NULL);
-		disconnect (priv);
+		disconnect (priv, TRUE);
 		g_free (priv->profile);
 		priv->profile = NULL;
 
@@ -643,18 +646,19 @@ e_mapi_connection_new (ESourceRegistry *registry,
 }
 
 gboolean
-e_mapi_connection_close (EMapiConnection *conn)
+e_mapi_connection_disconnect (EMapiConnection *conn,
+			      gboolean clean,
+			      GCancellable *cancellable,
+			      GError **perror)
 {
 	gboolean res = FALSE;
-	/* to have this used in the below macros */
-	GError **perror = NULL;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 
-	LOCK (NULL, NULL, FALSE);
+	LOCK (cancellable, perror, FALSE);
 
 	res = priv->session != NULL;
-	disconnect (priv);
+	disconnect (priv, clean);
 
 	UNLOCK ();
 
@@ -675,7 +679,7 @@ e_mapi_connection_reconnect (EMapiConnection *conn,
 
 	LOCK (cancellable, perror, FALSE);
 	if (priv->session)
-		e_mapi_connection_close (conn);
+		e_mapi_connection_disconnect (conn, FALSE, cancellable, perror);
 
 	priv->session = mapi_profile_load (priv->registry, priv->mapi_ctx, priv->profile, password ? password->str : NULL, cancellable, perror);
 	if (!priv->session) {
@@ -6682,6 +6686,33 @@ try_create_profile (ESourceRegistry *registry,
 	return data.has_profile;
 }
 
+static gboolean
+can_reach_mapi_server (const gchar *server_address,
+		       GCancellable *cancellable,
+		       GError **perror)
+{
+	GNetworkMonitor *network_monitor;
+	GSocketConnectable *connectable;
+	GError *local_error = NULL;
+	gboolean reachable;
+
+	g_return_val_if_fail (server_address != NULL, FALSE);
+
+	network_monitor = g_network_monitor_get_default ();
+	connectable = g_network_address_new (server_address, 135);
+	reachable = g_network_monitor_can_reach (network_monitor, connectable, cancellable, &local_error);
+	g_object_unref (connectable);
+
+	if (!reachable) {
+		if (local_error)
+			g_propagate_error (perror, local_error);
+		else
+			g_set_error (perror, G_IO_ERROR, G_IO_ERROR_HOST_UNREACHABLE, _("Server '%s' cannot be reached"), server_address);
+	}
+
+	return reachable;
+}
+
 static struct mapi_session *
 mapi_profile_load (ESourceRegistry *registry,
 		   struct mapi_context *mapi_ctx,
@@ -6692,6 +6723,7 @@ mapi_profile_load (ESourceRegistry *registry,
 {
 	enum MAPISTATUS	ms = MAPI_E_SUCCESS;
 	struct mapi_session *session = NULL;
+	struct mapi_profile profile = { 0 };
 	guint32 debug_log_level = 0;
 
 	e_return_val_mapi_error_if_fail (mapi_ctx != NULL, MAPI_E_INVALID_PARAMETER, NULL);
@@ -6707,6 +6739,15 @@ mapi_profile_load (ESourceRegistry *registry,
 		debug_log_level = atoi (g_getenv ("LIBMAPI_DEBUG"));
 		SetMAPIDumpData (mapi_ctx, TRUE);
 		SetMAPIDebugLevel (mapi_ctx, debug_log_level);
+	}
+
+	if (MAPI_E_SUCCESS == OpenProfile (mapi_ctx, &profile, profname, NULL)) {
+		if (!can_reach_mapi_server (profile.server, cancellable, perror)) {
+			ShutDown (&profile);
+			goto cleanup;
+		}
+
+		ShutDown (&profile);
 	}
 
 	e_mapi_debug_print("Loading profile %s ", profname);
@@ -6771,6 +6812,9 @@ mapi_profile_create (struct mapi_context *mapi_ctx,
 	/*We need all the params before proceeding.*/
 	e_return_val_mapi_error_if_fail (COMPLETE_PROFILEDATA (empd) && (empd->krb_sso || (empd->password && empd->password->len)),
 					 MAPI_E_INVALID_PARAMETER, FALSE);
+
+	if (!can_reach_mapi_server (empd->server, cancellable, perror))
+		return FALSE;
 
 	if (use_locking) {
 		if (!e_mapi_utils_global_lock (cancellable, perror))

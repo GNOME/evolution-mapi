@@ -292,7 +292,7 @@ check_foreign_folder_thread (GObject *with_object,
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
 		return;
 
-	conn = camel_mapi_store_get_connection (CAMEL_MAPI_STORE (with_object));
+	conn = camel_mapi_store_get_connection (CAMEL_MAPI_STORE (with_object), cancellable, perror);
 	if (!conn || !e_mapi_connection_connected (conn)) {
 		make_mapi_error (perror, "EMapiConnection", MAPI_E_NOT_INITIALIZED);
 		return;
@@ -538,7 +538,7 @@ pick_gal_user_clicked_cb (GtkButton *button,
 	text = g_strstrip (g_strdup (gtk_entry_get_text (entry)));
 
 	if (e_mapi_search_gal_user_modal (GTK_WINDOW (dialog),
-					  camel_mapi_store_get_connection (mapi_store),
+					  camel_mapi_store_get_connection (mapi_store, NULL, NULL),
 					  text,
 					  &searched_type,
 					  &display_name,

@@ -241,7 +241,10 @@ gboolean		e_mapi_connection_reconnect		(EMapiConnection *conn,
 								 const GString *password,
 								 GCancellable *cancellable,
 								 GError **perror);
-gboolean		e_mapi_connection_close			(EMapiConnection *conn);
+gboolean		e_mapi_connection_disconnect		(EMapiConnection *conn,
+								 gboolean clean,
+								 GCancellable *cancellable,
+								 GError **perror);
 gboolean		e_mapi_connection_connected		(EMapiConnection *conn);
 
 gboolean		e_mapi_connection_test_foreign_folder	(EMapiConnection *conn,
