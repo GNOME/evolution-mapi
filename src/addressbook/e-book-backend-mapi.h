@@ -121,6 +121,7 @@ gboolean		e_book_backend_mapi_notify_contact_update	(EBookBackendMAPI *ebma,
 									 EContact *contact,
 									 gint index,
 									 gint total,
+									 gboolean cache_is_locked,
 									 gpointer notify_contact_data);
 void			e_book_backend_mapi_notify_contact_removed	(EBookBackendMAPI *ebma,
 									 const gchar *uid);

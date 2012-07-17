@@ -944,7 +944,7 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 				e_book_backend_sqlitedb_lock_updates (ebma->priv->db, NULL);
 
 				for (l = added_contacts; l; l = l->next) {
-					e_book_backend_mapi_notify_contact_update (ebma, NULL, E_CONTACT (l->data), -1, -1, NULL);
+					e_book_backend_mapi_notify_contact_update (ebma, NULL, E_CONTACT (l->data), -1, -1, TRUE, NULL);
 				}
 
 				e_book_backend_sqlitedb_unlock_updates (ebma->priv->db, TRUE, NULL);
@@ -1008,7 +1008,7 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 				e_book_backend_sqlitedb_lock_updates (ebma->priv->db, NULL);
 
 				for (l = modified_contacts; l; l = l->next) {
-					e_book_backend_mapi_notify_contact_update (ebma, NULL, E_CONTACT (l->data), -1, -1, NULL);
+					e_book_backend_mapi_notify_contact_update (ebma, NULL, E_CONTACT (l->data), -1, -1, TRUE, NULL);
 				}
 
 				e_book_backend_sqlitedb_unlock_updates (ebma->priv->db, TRUE, NULL);
@@ -1572,7 +1572,13 @@ e_book_backend_mapi_update_view_by_cache (EBookBackendMAPI *ebma, EDataBookView 
    notify_contact_data is a pointer to glong last_notification, if not NULL;
    returns whether can continue with fetching */
 gboolean
-e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView *pbook_view, EContact *contact, gint index, gint total, gpointer notify_contact_data)
+e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma,
+					   EDataBookView *pbook_view,
+					   EContact *contact,
+					   gint index,
+					   gint total,
+					   gboolean cache_is_locked,
+					   gpointer notify_contact_data)
 {
 	EBookBackendMAPIPrivate *priv;
 	glong *last_notification = notify_contact_data;
@@ -1622,7 +1628,7 @@ e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView
 					     FALSE, &error);
 
 	/* commit not often than each minute, also to not lose data already transferred */
-	if (current_time - priv->last_db_commit_time >= 60000) {
+	if (cache_is_locked && current_time - priv->last_db_commit_time >= 60000) {
 		e_book_backend_sqlitedb_unlock_updates (priv->db, TRUE, NULL);
 		e_book_backend_sqlitedb_lock_updates (priv->db, NULL);
 

@@ -84,7 +84,7 @@ transfer_gal_cb (EMapiConnection *conn,
 		return TRUE;
 	}
 
-	if (!e_book_backend_mapi_notify_contact_update (tg->ebma, tg->book_view, contact, obj_index, obj_total, tg->notify_contact_data)) {
+	if (!e_book_backend_mapi_notify_contact_update (tg->ebma, tg->book_view, contact, obj_index, obj_total, FALSE, tg->notify_contact_data)) {
 		g_object_unref (contact);
 		return FALSE;
 	}
