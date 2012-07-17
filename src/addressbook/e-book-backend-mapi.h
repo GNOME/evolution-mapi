@@ -108,7 +108,7 @@ void e_book_backend_mapi_get_db (EBookBackendMAPI *ebma, EBookBackendSqliteDB **
 gboolean e_book_backend_mapi_book_view_is_running (EBookBackendMAPI *ebma, EDataBookView *book_view);
 void e_book_backend_mapi_update_view_by_cache (EBookBackendMAPI *ebma, EDataBookView *book_view, GError **error);
 gboolean e_book_backend_mapi_is_marked_for_offline (EBookBackendMAPI *ebma);
-gboolean e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView *book_view, EContact *contact, gint index, gint total, gpointer notify_contact_data);
+gboolean e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView *book_view, EContact *contact, gint index, gint total, gboolean cache_is_locked, gpointer notify_contact_data);
 void e_book_backend_mapi_notify_contact_removed (EBookBackendMAPI *ebma, const gchar *uid);
 void   e_book_backend_mapi_cache_set (EBookBackendMAPI *ebma, const gchar *key, const gchar *value);
 gchar *e_book_backend_mapi_cache_get (EBookBackendMAPI *ebma, const gchar *key);

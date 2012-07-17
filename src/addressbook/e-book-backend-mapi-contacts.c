@@ -148,7 +148,7 @@ transfer_contact_cb (EMapiConnection *conn,
 
 	tc->contact = e_mapi_book_utils_contact_from_object (conn, object, e_book_backend_mapi_get_book_uri (tc->ebma));
 	if (tc->contact)
-		return e_book_backend_mapi_notify_contact_update (tc->ebma, NULL, tc->contact, obj_index, obj_total, NULL);
+		return e_book_backend_mapi_notify_contact_update (tc->ebma, NULL, tc->contact, obj_index, obj_total, FALSE, NULL);
 
 	return TRUE;
 }
@@ -207,7 +207,7 @@ transfer_contacts_cb (EMapiConnection *conn,
 		if (tcd->cards)
 			*tcd->cards = g_slist_prepend (*tcd->cards, e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30));
 
-		if (!e_book_backend_mapi_notify_contact_update (tcd->ebma, tcd->book_view, contact, obj_index, obj_total, tcd->notify_contact_data)) {
+		if (!e_book_backend_mapi_notify_contact_update (tcd->ebma, tcd->book_view, contact, obj_index, obj_total, FALSE, tcd->notify_contact_data)) {
 			g_object_unref (contact);
 			return FALSE;
 		}
