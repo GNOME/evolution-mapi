@@ -496,7 +496,6 @@ ebbm_open (EBookBackendMAPI *ebma,
 	EBookBackendMAPIPrivate *priv = ebma->priv;
 	ESource *source = e_backend_get_source (E_BACKEND (ebma));
 	ESourceOffline *offline_extension;
-	CamelMapiSettings *settings;
 	const gchar *cache_dir;
 	GError *error = NULL;
 
@@ -504,8 +503,6 @@ ebbm_open (EBookBackendMAPI *ebma,
 		e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), NULL /* Success */);
 		return;
 	}
-
-	settings = ebbm_get_collection_settings (ebma);
 
 	offline_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_OFFLINE);
 	priv->marked_for_offline = e_source_offline_get_stay_synchronized (offline_extension);
@@ -551,17 +548,6 @@ ebbm_open (EBookBackendMAPI *ebma,
 	e_book_backend_notify_online (E_BOOK_BACKEND (ebma), TRUE);
 
 	e_book_backend_mapi_ensure_connected (ebma, cancellable, &error);
-	if (!camel_mapi_settings_get_kerberos (settings) ||
-	    ebbm_connect_user (ebma, cancellable, NULL, &error) != E_SOURCE_AUTHENTICATION_ACCEPTED) {
-		ESourceRegistry *registry;
-
-		registry = e_book_backend_get_registry (E_BOOK_BACKEND (ebma));
-
-		e_source_registry_authenticate_sync (
-			registry, source,
-			E_SOURCE_AUTHENTICATOR (ebma),
-			cancellable, &error);
-	}
 
 	if (error && perror)
 		g_propagate_error (perror, g_error_copy (error));
