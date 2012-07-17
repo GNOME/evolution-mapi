@@ -360,24 +360,28 @@ ebbm_contacts_connection_status_changed (EBookBackendMAPI *ebma, gboolean is_onl
 		EMapiConnection *conn;
 		mapi_object_t obj_folder;
 		gboolean status;
+		GError *mapi_error = NULL;
 
 		e_book_backend_mapi_lock_connection (ebma);
 
-		conn = e_book_backend_mapi_get_connection (ebma);
+		conn = e_book_backend_mapi_get_connection (ebma, NULL, NULL);
 		if (!conn) {
 			e_book_backend_mapi_unlock_connection (ebma);
 			return;
 		}
 
-		status = ebbm_contacts_open_folder (E_BOOK_BACKEND_MAPI_CONTACTS (ebma), conn, &obj_folder, NULL, NULL);
+		status = ebbm_contacts_open_folder (E_BOOK_BACKEND_MAPI_CONTACTS (ebma), conn, &obj_folder, NULL, &mapi_error);
 
 		if (status) {
 			e_mapi_connection_enable_notifications (conn, &obj_folder,
 				fnevObjectCreated | fnevObjectModified | fnevObjectDeleted | fnevObjectMoved | fnevObjectCopied,
-				NULL, NULL);
+				NULL, &mapi_error);
 
-			e_mapi_connection_close_folder (conn, &obj_folder, NULL, NULL);
+			e_mapi_connection_close_folder (conn, &obj_folder, NULL, &mapi_error);
 		}
+
+		e_book_backend_mapi_maybe_disconnect (ebma, mapi_error);
+		g_clear_error (&mapi_error);
 
 		g_signal_connect (conn, "server-notification", G_CALLBACK (ebbmc_server_notification_cb), ebma);
 
@@ -411,9 +415,13 @@ ebbm_contacts_remove (EBookBackendMAPI *ebma, GCancellable *cancellable, GError 
 
 		e_book_backend_mapi_lock_connection (ebma);
 
-		conn = e_book_backend_mapi_get_connection (ebma);
+		conn = e_book_backend_mapi_get_connection (ebma, cancellable, &mapi_error);
 		if (!conn) {
-			g_propagate_error (error, EDB_ERROR (OFFLINE_UNAVAILABLE));
+			if (!mapi_error)
+				g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+			else
+				mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_REPOSITORY_OFFLINE, NULL);
+			g_clear_error (&mapi_error);
 		} else {
 			mapi_object_t *obj_store = NULL;
 
@@ -422,6 +430,7 @@ ebbm_contacts_remove (EBookBackendMAPI *ebma, GCancellable *cancellable, GError 
 
 			if (mapi_error) {
 				mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to remove public folder"));
+				e_book_backend_mapi_maybe_disconnect (ebma, mapi_error);
 				g_error_free (mapi_error);
 			}
 		}
@@ -462,10 +471,16 @@ ebbm_contacts_create_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 
 	e_book_backend_mapi_lock_connection (ebma);
 
-	conn = e_book_backend_mapi_get_connection (ebma);
+	conn = e_book_backend_mapi_get_connection (ebma, cancellable, &mapi_error);
 	if (!conn) {
-		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
 		e_book_backend_mapi_unlock_connection (ebma);
+
+		if (!mapi_error)
+			g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+		else
+			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_REPOSITORY_OFFLINE, NULL);
+		g_clear_error (&mapi_error);
+
 		return;
 	}
 
@@ -488,6 +503,7 @@ ebbm_contacts_create_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
 	}
 
+	e_book_backend_mapi_maybe_disconnect (ebma, mapi_error);
 	e_book_backend_mapi_unlock_connection (ebma);
 
 	if (!mid) {
@@ -535,10 +551,16 @@ ebbm_contacts_remove_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 
 	e_book_backend_mapi_lock_connection (ebma);
 
-	conn = e_book_backend_mapi_get_connection (ebma);
+	conn = e_book_backend_mapi_get_connection (ebma, cancellable, &mapi_error);
 	if (!conn) {
-		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
 		e_book_backend_mapi_unlock_connection (ebma);
+
+		if (!mapi_error)
+			g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+		else
+			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_REPOSITORY_OFFLINE, NULL);
+		g_clear_error (&mapi_error);
+
 		return;
 	}
 
@@ -562,6 +584,7 @@ ebbm_contacts_remove_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
 	}
 
+	e_book_backend_mapi_maybe_disconnect (ebma, mapi_error);
 	e_book_backend_mapi_unlock_connection (ebma);
 
 	if (mapi_error) {
@@ -607,10 +630,16 @@ ebbm_contacts_modify_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 
 	e_book_backend_mapi_lock_connection (ebma);
 
-	conn = e_book_backend_mapi_get_connection (ebma);
+	conn = e_book_backend_mapi_get_connection (ebma, cancellable, &mapi_error);
 	if (!conn) {
-		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
 		e_book_backend_mapi_unlock_connection (ebma);
+
+		if (!mapi_error)
+			g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+		else
+			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_REPOSITORY_OFFLINE, NULL);
+		g_clear_error (&mapi_error);
+
 		return;
 	}
 
@@ -638,6 +667,7 @@ ebbm_contacts_modify_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 			e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
 		}
 
+		e_book_backend_mapi_maybe_disconnect (ebma, mapi_error);
 		if (!status) {
 			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to modify item on a server"));
 			if (mapi_error)
@@ -691,10 +721,16 @@ ebbm_contacts_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, co
 
 	e_book_backend_mapi_lock_connection (ebma);
 
-	conn = e_book_backend_mapi_get_connection (ebma);
+	conn = e_book_backend_mapi_get_connection (ebma, cancellable, &mapi_error);
 	if (!conn) {
-		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
 		e_book_backend_mapi_unlock_connection (ebma);
+
+		if (!mapi_error)
+			g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+		else
+			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_REPOSITORY_OFFLINE, NULL);
+		g_clear_error (&mapi_error);
+
 		return;
 	}
 
@@ -722,6 +758,8 @@ ebbm_contacts_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, co
 		*vcard =  e_vcard_to_string (E_VCARD (tc.contact), EVC_FORMAT_VCARD_30);
 		g_object_unref (tc.contact);
 	} else {
+		e_book_backend_mapi_maybe_disconnect (ebma, mapi_error);
+
 		if (!mapi_error || mapi_error->code == MAPI_E_NOT_FOUND) {
 			g_propagate_error (error, EDB_ERROR (CONTACT_NOT_FOUND));
 		} else {
@@ -772,10 +810,15 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellabl
 
 	e_book_backend_mapi_lock_connection (ebma);
 
-	conn = e_book_backend_mapi_get_connection (ebma);
+	conn = e_book_backend_mapi_get_connection (ebma, cancellable, &mapi_error);
 	if (!conn) {
 		e_book_backend_mapi_unlock_connection (ebma);
-		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+
+		if (!mapi_error)
+			g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+		else
+			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_REPOSITORY_OFFLINE, NULL);
+		g_clear_error (&mapi_error);
 
 		return;
 	}
@@ -798,6 +841,8 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellabl
 
 		g_slist_free_full (mids, g_free);
 	}
+
+	e_book_backend_mapi_maybe_disconnect (ebma, mapi_error);
 
 	if (!status) {
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch items from a server"));
@@ -847,10 +892,16 @@ ebbm_contacts_get_contacts_count (EBookBackendMAPI *ebma,
 
 	e_book_backend_mapi_lock_connection (ebma);
 
-	conn = e_book_backend_mapi_get_connection (ebma);
+	conn = e_book_backend_mapi_get_connection (ebma, cancellable, &mapi_error);
 	if (!conn) {
 		e_book_backend_mapi_unlock_connection (ebma);
-		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+
+		if (!mapi_error)
+			g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+		else
+			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_REPOSITORY_OFFLINE, NULL);
+		g_clear_error (&mapi_error);
+
 		return;
 	}
 
@@ -867,6 +918,8 @@ ebbm_contacts_get_contacts_count (EBookBackendMAPI *ebma,
 		
 		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
 	}
+
+	e_book_backend_mapi_maybe_disconnect (ebma, mapi_error);
 
 	if (mapi_error) {
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to count server contacts"));
@@ -901,10 +954,16 @@ ebbm_contacts_list_known_uids (EBookBackendMAPI *ebma,
 
 	e_book_backend_mapi_lock_connection (ebma);
 
-	conn = e_book_backend_mapi_get_connection (ebma);
+	conn = e_book_backend_mapi_get_connection (ebma, cancellable, &mapi_error);
 	if (!conn) {
 		e_book_backend_mapi_unlock_connection (ebma);
-		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+
+		if (!mapi_error)
+			g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+		else
+			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_REPOSITORY_OFFLINE, NULL);
+		g_clear_error (&mapi_error);
+
 		return;
 	}
 
@@ -917,6 +976,8 @@ ebbm_contacts_list_known_uids (EBookBackendMAPI *ebma,
 
 		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
 	}
+
+	e_book_backend_mapi_maybe_disconnect (ebma, mapi_error);
 
 	if (mapi_error) {
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to list items from a server"));
@@ -953,10 +1014,15 @@ ebbm_contacts_transfer_contacts (EBookBackendMAPI *ebma,
 
 	e_book_backend_mapi_lock_connection (ebma);
 
-	conn = e_book_backend_mapi_get_connection (ebma);
+	conn = e_book_backend_mapi_get_connection (ebma, cancellable, &mapi_error);
 	if (!conn) {
 		e_book_backend_mapi_unlock_connection (ebma);
-		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+
+		if (!mapi_error)
+			g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+		else
+			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_REPOSITORY_OFFLINE, NULL);
+		g_clear_error (&mapi_error);
 
 		return;
 	}
@@ -991,6 +1057,8 @@ ebbm_contacts_transfer_contacts (EBookBackendMAPI *ebma,
 
 		g_slist_free_full (mids, g_free);
 	}
+
+	e_book_backend_mapi_maybe_disconnect (ebma, mapi_error);
 
 	if (!status) {
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to transfer contacts from a server"));

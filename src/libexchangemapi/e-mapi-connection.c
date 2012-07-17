@@ -407,13 +407,15 @@ e_mapi_connection_dispose (GObject *object)
 static void
 e_mapi_connection_finalize (GObject *object)
 {
+	EMapiConnection *conn;
 	EMapiConnectionPrivate *priv;
 
-	priv = E_MAPI_CONNECTION (object)->priv;
+	conn = E_MAPI_CONNECTION (object);
+	priv = conn->priv;
 
 	if (priv) {
 		LOCK_VOID (NULL, NULL);
-		disconnect (priv, TRUE);
+		disconnect (priv, TRUE && e_mapi_connection_connected (conn));
 		g_free (priv->profile);
 		priv->profile = NULL;
 
@@ -553,7 +555,8 @@ e_mapi_connection_find (const gchar *profile)
 		EMapiConnection *conn = E_MAPI_CONNECTION (l->data);
 		EMapiConnectionPrivate *priv = conn->priv;
 
-		if (priv && priv->profile && g_str_equal (profile, priv->profile))
+		if (priv && priv->profile && g_str_equal (profile, priv->profile) &&
+		    e_mapi_connection_connected (conn))
 			res = conn;
 	}
 
@@ -658,7 +661,7 @@ e_mapi_connection_disconnect (EMapiConnection *conn,
 	LOCK (cancellable, perror, FALSE);
 
 	res = priv->session != NULL;
-	disconnect (priv, clean);
+	disconnect (priv, clean && e_mapi_connection_connected (conn));
 
 	UNLOCK ();
 
@@ -716,15 +719,53 @@ e_mapi_connection_reconnect (EMapiConnection *conn,
 	return priv->session != NULL;
 }
 
+static gboolean
+can_reach_mapi_server (const gchar *server_address,
+		       GCancellable *cancellable,
+		       GError **perror)
+{
+	GNetworkMonitor *network_monitor;
+	GSocketConnectable *connectable;
+	GError *local_error = NULL;
+	gboolean reachable;
+
+	g_return_val_if_fail (server_address != NULL, FALSE);
+
+	network_monitor = g_network_monitor_get_default ();
+	connectable = g_network_address_new (server_address, 135);
+	reachable = g_network_monitor_can_reach (network_monitor, connectable, cancellable, &local_error);
+	g_object_unref (connectable);
+
+	if (!reachable) {
+		if (local_error)
+			g_propagate_error (perror, local_error);
+		else
+			g_set_error (perror, G_IO_ERROR, G_IO_ERROR_HOST_UNREACHABLE, _("Server '%s' cannot be reached"), server_address);
+	}
+
+	return reachable;
+}
+
 gboolean
 e_mapi_connection_connected (EMapiConnection *conn)
 {
 	/* to have this used in the below macros */
 	GError **perror = NULL;
+	gboolean res;
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 
-	return priv->session != NULL;
+	res = priv->session != NULL;
+	if (res) {
+		struct mapi_profile profile = { 0 };
+
+		if (MAPI_E_SUCCESS == OpenProfile (priv->mapi_ctx, &profile, priv->profile, NULL)) {
+			res = can_reach_mapi_server (profile.server, NULL, perror);
+			ShutDown (&profile);
+		}
+	}
+
+	return res;
 }
 
 static gboolean
@@ -6684,33 +6725,6 @@ try_create_profile (ESourceRegistry *registry,
 	e_flag_free (data.eflag);
 
 	return data.has_profile;
-}
-
-static gboolean
-can_reach_mapi_server (const gchar *server_address,
-		       GCancellable *cancellable,
-		       GError **perror)
-{
-	GNetworkMonitor *network_monitor;
-	GSocketConnectable *connectable;
-	GError *local_error = NULL;
-	gboolean reachable;
-
-	g_return_val_if_fail (server_address != NULL, FALSE);
-
-	network_monitor = g_network_monitor_get_default ();
-	connectable = g_network_address_new (server_address, 135);
-	reachable = g_network_monitor_can_reach (network_monitor, connectable, cancellable, &local_error);
-	g_object_unref (connectable);
-
-	if (!reachable) {
-		if (local_error)
-			g_propagate_error (perror, local_error);
-		else
-			g_set_error (perror, G_IO_ERROR, G_IO_ERROR_HOST_UNREACHABLE, _("Server '%s' cannot be reached"), server_address);
-	}
-
-	return reachable;
 }
 
 static struct mapi_session *

@@ -97,19 +97,39 @@ typedef struct
 
 GType e_book_backend_mapi_get_type (void);
 
-const gchar *e_book_backend_mapi_get_book_uid (EBookBackendMAPI *ebma);
-void e_book_backend_mapi_lock_connection (EBookBackendMAPI *ebma);
-void e_book_backend_mapi_unlock_connection (EBookBackendMAPI *ebma);
-EMapiConnection *e_book_backend_mapi_get_connection (EBookBackendMAPI *ebma);
-void e_book_backend_mapi_get_db (EBookBackendMAPI *ebma, EBookBackendSqliteDB **db);
-gboolean e_book_backend_mapi_book_view_is_running (EBookBackendMAPI *ebma, EDataBookView *book_view);
-void e_book_backend_mapi_update_view_by_cache (EBookBackendMAPI *ebma, EDataBookView *book_view, GError **error);
-gboolean e_book_backend_mapi_is_marked_for_offline (EBookBackendMAPI *ebma);
-gboolean e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma, EDataBookView *book_view, EContact *contact, gint index, gint total, gpointer notify_contact_data);
-void e_book_backend_mapi_notify_contact_removed (EBookBackendMAPI *ebma, const gchar *uid);
-void   e_book_backend_mapi_cache_set (EBookBackendMAPI *ebma, const gchar *key, const gchar *value);
-gchar *e_book_backend_mapi_cache_get (EBookBackendMAPI *ebma, const gchar *key);
-void e_book_backend_mapi_refresh_cache (EBookBackendMAPI *ebma);
+const gchar *		e_book_backend_mapi_get_book_uid (EBookBackendMAPI *ebma);
+void			e_book_backend_mapi_lock_connection		(EBookBackendMAPI *ebma);
+void			e_book_backend_mapi_unlock_connection		(EBookBackendMAPI *ebma);
+EMapiConnection *	e_book_backend_mapi_get_connection		(EBookBackendMAPI *ebma,
+									 GCancellable *cancellable,
+									 GError **perror);
+gboolean		e_book_backend_mapi_ensure_connected		(EBookBackendMAPI *ebma,
+									 GCancellable *cancellable, 
+									 GError **error);
+void			e_book_backend_mapi_maybe_disconnect		(EBookBackendMAPI *ebma,
+									 const GError *mapi_error);
+void			e_book_backend_mapi_get_db			(EBookBackendMAPI *ebma,
+									 EBookBackendSqliteDB **db);
+gboolean		e_book_backend_mapi_book_view_is_running	(EBookBackendMAPI *ebma,
+									 EDataBookView *book_view);
+void			e_book_backend_mapi_update_view_by_cache	(EBookBackendMAPI *ebma,
+									 EDataBookView *book_view,
+									 GError **error);
+gboolean		e_book_backend_mapi_is_marked_for_offline	(EBookBackendMAPI *ebma);
+gboolean		e_book_backend_mapi_notify_contact_update	(EBookBackendMAPI *ebma,
+									 EDataBookView *book_view,
+									 EContact *contact,
+									 gint index,
+									 gint total,
+									 gpointer notify_contact_data);
+void			e_book_backend_mapi_notify_contact_removed	(EBookBackendMAPI *ebma,
+									 const gchar *uid);
+void			e_book_backend_mapi_cache_set			(EBookBackendMAPI *ebma,
+									 const gchar *key,
+									 const gchar *value);
+gchar *			e_book_backend_mapi_cache_get			(EBookBackendMAPI *ebma,
+									 const gchar *key);
+void			e_book_backend_mapi_refresh_cache		(EBookBackendMAPI *ebma);
 
 /* utility functions/macros */
 

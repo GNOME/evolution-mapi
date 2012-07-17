@@ -178,10 +178,16 @@ ebbm_gal_transfer_contacts (EBookBackendMAPI *ebma,
 
 	e_book_backend_mapi_lock_connection (ebma);
 
-	conn = e_book_backend_mapi_get_connection (ebma);
+	conn = e_book_backend_mapi_get_connection (ebma, cancellable, &mapi_error);
 	if (!conn) {
 		e_book_backend_mapi_unlock_connection (ebma);
-		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+
+		if (!mapi_error)
+			g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+		else
+			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_REPOSITORY_OFFLINE, NULL);
+		g_clear_error (&mapi_error);
+
 		return;
 	}
 
@@ -218,6 +224,8 @@ ebbm_gal_transfer_contacts (EBookBackendMAPI *ebma,
 	status = e_mapi_connection_transfer_gal_objects	(conn, get_mids, NULL, NULL, transfer_gal_cb, &tg, cancellable, &mapi_error);
 
 	if (mapi_error) {
+		e_book_backend_mapi_maybe_disconnect (ebma, mapi_error);
+
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch GAL entries"));
 		g_error_free (mapi_error);
 	} else if (!status) {
@@ -236,21 +244,34 @@ ebbm_gal_get_contacts_count (EBookBackendMAPI *ebma,
 			     GError **error)
 {
 	EMapiConnection *conn;
+	GError *mapi_error = NULL;
 
 	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 	e_return_data_book_error_if_fail (obj_total != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	e_book_backend_mapi_lock_connection (ebma);
 
-	conn = e_book_backend_mapi_get_connection (ebma);
+	conn = e_book_backend_mapi_get_connection (ebma, cancellable, &mapi_error);
 	if (!conn) {
 		e_book_backend_mapi_unlock_connection (ebma);
-		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+
+		if (!mapi_error)
+			g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+		else
+			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_REPOSITORY_OFFLINE, NULL);
+		g_clear_error (&mapi_error);
+
 		return;
 	}
 
-	if (!e_mapi_connection_count_gal_objects (conn, obj_total, cancellable, error))
+	if (!e_mapi_connection_count_gal_objects (conn, obj_total, cancellable, &mapi_error))
 		*obj_total = -1;
+
+	e_book_backend_mapi_maybe_disconnect (ebma, mapi_error);
+	if (mapi_error) {
+		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, NULL);
+		g_clear_error (&mapi_error);
+	}
 
 	e_book_backend_mapi_unlock_connection (ebma);
 }
@@ -272,16 +293,23 @@ ebbm_gal_list_known_uids (EBookBackendMAPI *ebma,
 
 	e_book_backend_mapi_lock_connection (ebma);
 
-	conn = e_book_backend_mapi_get_connection (ebma);
+	conn = e_book_backend_mapi_get_connection (ebma, cancellable, &mapi_error);
 	if (!conn) {
 		e_book_backend_mapi_unlock_connection (ebma);
-		g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+
+		if (!mapi_error)
+			g_propagate_error (error, EDB_ERROR (REPOSITORY_OFFLINE));
+		else
+			mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_REPOSITORY_OFFLINE, NULL);
+		g_clear_error (&mapi_error);
+
 		return;
 	}
 
 	e_mapi_connection_list_gal_objects (conn, build_rs_cb, build_rs_cb_data, list_gal_uids_cb, lku, cancellable, &mapi_error);
 
 	if (mapi_error) {
+		e_book_backend_mapi_maybe_disconnect (ebma, mapi_error);
 		mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to fetch GAL entries"));
 		g_error_free (mapi_error);
 	}

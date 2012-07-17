@@ -51,7 +51,7 @@ struct _EBookBackendMAPIPrivate
 {
 	EMapiOperationQueue *op_queue;
 
-	GMutex *conn_lock;
+	GRecMutex conn_lock;
 	EMapiConnection *conn;
 	gchar *book_uid;
 	gboolean marked_for_offline;
@@ -69,7 +69,7 @@ struct _EBookBackendMAPIPrivate
 	gboolean server_dirty;
 
 	GHashTable *running_views; /* EDataBookView => GCancellable */
-	GMutex *running_views_lock;
+	GMutex running_views_lock;
 };
 
 static CamelMapiSettings *
@@ -398,15 +398,16 @@ ebbm_connect_user (EBookBackendMAPI *ebma,
 			g_object_unref (old_conn);
 
 		if (!priv->conn || mapi_error) {
-			gboolean is_network_error = g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR);
+			gboolean is_network_error = g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR) ||
+				(mapi_error && mapi_error->domain != E_MAPI_ERROR);
 
 			if (priv->conn) {
 				g_object_unref (priv->conn);
 				priv->conn = NULL;
 			}
 
-			if (!is_network_error)
-				mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Cannot connect"));
+			if (is_network_error)
+				mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, NULL);
 			e_book_backend_mapi_unlock_connection (ebma);
 
 			if (mapi_error)
@@ -427,6 +428,63 @@ ebbm_connect_user (EBookBackendMAPI *ebma,
 	}
 
 	return E_SOURCE_AUTHENTICATION_ACCEPTED;
+}
+
+/* connection lock should be already held when calling this function */
+gboolean
+e_book_backend_mapi_ensure_connected (EBookBackendMAPI *ebma,
+				      GCancellable *cancellable, 
+				      GError **error)
+{
+	CamelMapiSettings *settings;
+	GError *local_error = NULL;
+
+	g_return_val_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma), FALSE);
+
+	if (ebma->priv->conn && e_mapi_connection_connected (ebma->priv->conn))
+		return TRUE;
+
+	settings = ebbm_get_collection_settings (ebma);
+
+	if (!camel_mapi_settings_get_kerberos (settings) ||
+	    ebbm_connect_user (ebma, cancellable, NULL, &local_error) != E_SOURCE_AUTHENTICATION_ACCEPTED) {
+		ESourceRegistry *registry;
+
+		registry = e_book_backend_get_registry (E_BOOK_BACKEND (ebma));
+
+		e_source_registry_authenticate_sync (
+			registry, e_backend_get_source (E_BACKEND (ebma)),
+			E_SOURCE_AUTHENTICATOR (ebma),
+			cancellable, &local_error);
+	}
+
+	if (!local_error)
+		return TRUE;
+
+	g_propagate_error (error, local_error);
+
+	return FALSE;
+}
+
+/* connection lock should be already held when calling this function */
+void
+e_book_backend_mapi_maybe_disconnect (EBookBackendMAPI *ebma,
+				      const GError *mapi_error)
+{
+	g_return_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma));
+
+	/* no error or already disconnected */
+	if (!mapi_error || !ebma->priv->conn)
+		return;
+
+	if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR) ||
+	    g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_CALL_FAILED)) {
+		e_mapi_connection_disconnect (ebma->priv->conn,
+			!g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR),
+			NULL, NULL);
+		g_object_unref (ebma->priv->conn);
+		ebma->priv->conn = NULL;
+	}
 }
 
 static void
@@ -492,7 +550,7 @@ ebbm_open (EBookBackendMAPI *ebma,
 
 	e_book_backend_notify_online (E_BOOK_BACKEND (ebma), TRUE);
 
-
+	e_book_backend_mapi_ensure_connected (ebma, cancellable, &error);
 	if (!camel_mapi_settings_get_kerberos (settings) ||
 	    ebbm_connect_user (ebma, cancellable, NULL, &error) != E_SOURCE_AUTHENTICATION_ACCEPTED) {
 		ESourceRegistry *registry;
@@ -1023,7 +1081,7 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 			GError *err = NULL;
 			struct BookViewThreadData *bvtd = g_new0 (struct BookViewThreadData, 1);
 
-			g_mutex_lock (ebma->priv->running_views_lock);
+			g_mutex_lock (&ebma->priv->running_views_lock);
 
 			bvtd->ebma = g_object_ref (ebma);
 			bvtd->book_view = g_object_ref (opbv->book_view);
@@ -1032,7 +1090,7 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 			if (bvtd->cancellable)
 				g_object_ref (bvtd->cancellable);
 
-			g_mutex_unlock (ebma->priv->running_views_lock);
+			g_mutex_unlock (&ebma->priv->running_views_lock);
 
 			g_thread_create (ebbm_book_view_thread, bvtd, FALSE, &err);
 
@@ -1259,9 +1317,9 @@ ebbm_op_start_book_view (EBookBackend *backend, EDataBookView *book_view)
 	op->base.opid = 0;
 	op->book_view = g_object_ref (book_view);
 
-	g_mutex_lock (priv->running_views_lock);
+	g_mutex_lock (&priv->running_views_lock);
 	g_hash_table_insert (priv->running_views, book_view, g_cancellable_new ());
-	g_mutex_unlock (priv->running_views_lock);
+	g_mutex_unlock (&priv->running_views_lock);
 
 	e_mapi_operation_queue_push (priv->op_queue, op);
 }
@@ -1290,12 +1348,12 @@ ebbm_op_stop_book_view (EBookBackend *backend, EDataBookView *book_view)
 	op->base.opid = 0;
 	op->book_view = g_object_ref (book_view);
 
-	g_mutex_lock (priv->running_views_lock);
+	g_mutex_lock (&priv->running_views_lock);
 	cancellable = g_hash_table_lookup (priv->running_views, book_view);
 	if (cancellable)
 		g_cancellable_cancel (cancellable);
 	g_hash_table_remove (priv->running_views, book_view);
-	g_mutex_unlock (priv->running_views_lock);
+	g_mutex_unlock (&priv->running_views_lock);
 
 	e_mapi_operation_queue_push (priv->op_queue, op);
 }
@@ -1307,8 +1365,8 @@ e_book_backend_mapi_init (EBookBackendMAPI *ebma)
 
 	ebma->priv->op_queue = e_mapi_operation_queue_new ((EMapiOperationQueueFunc) ebbm_operation_cb, ebma);
 	ebma->priv->running_views = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_object_unref);
-	ebma->priv->running_views_lock = g_mutex_new ();
-	ebma->priv->conn_lock = g_mutex_new ();
+	g_mutex_init (&ebma->priv->running_views_lock);
+	g_rec_mutex_init (&ebma->priv->conn_lock);
 
 	ebma->priv->update_cache = g_cancellable_new ();
 	ebma->priv->update_cache_thread = NULL;
@@ -1349,8 +1407,8 @@ ebbm_dispose (GObject *object)
 		FREE (priv->book_uid);
 
 		g_hash_table_destroy (priv->running_views);
-		g_mutex_free (priv->running_views_lock);
-		g_mutex_free (priv->conn_lock);
+		g_mutex_clear (&priv->running_views_lock);
+		g_rec_mutex_clear (&priv->conn_lock);
 
 		#undef UNREF
 		#undef FREE
@@ -1416,9 +1474,8 @@ e_book_backend_mapi_lock_connection (EBookBackendMAPI *ebma)
 {
 	g_return_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma));
 	g_return_if_fail (ebma->priv != NULL);
-	g_return_if_fail (ebma->priv->conn_lock != NULL);
 
-	g_mutex_lock (ebma->priv->conn_lock);
+	g_rec_mutex_lock (&ebma->priv->conn_lock);
 }
 
 void
@@ -1426,16 +1483,26 @@ e_book_backend_mapi_unlock_connection (EBookBackendMAPI *ebma)
 {
 	g_return_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma));
 	g_return_if_fail (ebma->priv != NULL);
-	g_return_if_fail (ebma->priv->conn_lock != NULL);
 
-	g_mutex_unlock (ebma->priv->conn_lock);
+	g_rec_mutex_unlock (&ebma->priv->conn_lock);
 }
 
 EMapiConnection *
-e_book_backend_mapi_get_connection (EBookBackendMAPI *ebma)
+e_book_backend_mapi_get_connection (EBookBackendMAPI *ebma,
+				    GCancellable *cancellable,
+				    GError **perror)
 {
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma), NULL);
 	g_return_val_if_fail (ebma->priv != NULL, NULL);
+
+	if (ebma->priv->conn)
+		return ebma->priv->conn;
+
+	if (!e_backend_get_online (E_BACKEND (ebma)))
+		return NULL;
+
+	if (!e_book_backend_mapi_ensure_connected (ebma, cancellable, perror))
+		return NULL;
 
 	return ebma->priv->conn;
 }
@@ -1458,9 +1525,9 @@ e_book_backend_mapi_book_view_is_running (EBookBackendMAPI *ebma, EDataBookView 
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma), FALSE);
 	g_return_val_if_fail (ebma->priv != NULL, FALSE);
 
-	g_mutex_lock (ebma->priv->running_views_lock);
+	g_mutex_lock (&ebma->priv->running_views_lock);
 	res = g_hash_table_lookup (ebma->priv->running_views, book_view) != NULL;
-	g_mutex_unlock (ebma->priv->running_views_lock);
+	g_mutex_unlock (&ebma->priv->running_views_lock);
 
 	return res;
 }

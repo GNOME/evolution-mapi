@@ -152,6 +152,9 @@ ecbm_open_folder (ECalBackendMAPI *ecbm,
 	return res;
 }
 
+static EMapiConnection *e_cal_backend_mapi_get_connection	(ECalBackendMAPI *cbma, GCancellable *cancellable, GError **perror);
+static void		e_cal_backend_mapi_maybe_disconnect	(ECalBackendMAPI *cbma, const GError *mapi_error);
+
 #define CACHE_REFRESH_INTERVAL 600000
 
 static GStaticMutex auth_mutex = G_STATIC_MUTEX_INIT;
@@ -385,16 +388,26 @@ ecbm_remove (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, GEr
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
-	if (!e_backend_get_online (E_BACKEND (backend)) || !priv->conn || !e_mapi_connection_connected (priv->conn)) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
 		return;
 	}
+
 	if (!priv->is_public_folder && !priv->foreign_username) {
+		EMapiConnection *conn;
 		GError *mapi_error = NULL;
 		mapi_object_t *obj_store = NULL;
 
-		if (!e_mapi_connection_peek_store (priv->conn, priv->foreign_username ? FALSE : priv->is_public_folder, priv->foreign_username, &obj_store, cancellable, &mapi_error) ||
-		    !e_mapi_connection_remove_folder (priv->conn, obj_store, priv->fid, cancellable, &mapi_error)) {
+		conn = e_cal_backend_mapi_get_connection (cbmapi, cancellable, &mapi_error);
+		if (!conn) {
+			if (!mapi_error)
+				g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
+			else
+				mapi_error_to_edc_error (perror, mapi_error, RepositoryOffline, NULL);
+			e_cal_backend_mapi_maybe_disconnect (cbmapi, mapi_error);
+			g_clear_error (&mapi_error);
+		} else if (!e_mapi_connection_peek_store (conn, priv->foreign_username ? FALSE : priv->is_public_folder, priv->foreign_username, &obj_store, cancellable, &mapi_error) ||
+		           !e_mapi_connection_remove_folder (conn, obj_store, priv->fid, cancellable, &mapi_error)) {
 			mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to remove public folder"));
 			if (mapi_error)
 				g_error_free (mapi_error);
@@ -552,6 +565,8 @@ notify_error_ex (ECalBackendMAPI *mapi_backend, GError **perror, const gchar *fo
 	e_cal_backend_notify_error (E_CAL_BACKEND (mapi_backend), msg);
 	g_free (msg);
 
+	if (perror)
+		e_cal_backend_mapi_maybe_disconnect (mapi_backend, *perror);
 	g_clear_error (perror);
 }
 
@@ -806,7 +821,13 @@ update_local_cache (ECalBackendMAPI *cbmapi, GCancellable *cancellable)
 
 	g_mutex_lock (priv->updating_mutex);
 
-	conn = g_object_ref (priv->conn);
+	conn = e_cal_backend_mapi_get_connection (cbmapi, cancellable, &mapi_error);
+	if (!conn) {
+		g_clear_error (&mapi_error);
+		goto cleanup;
+	}
+
+	g_object_ref (conn);
 
 	success = ecbm_open_folder (cbmapi, conn, &obj_folder, cancellable, &mapi_error);
 	if (!success) {
@@ -910,7 +931,8 @@ update_local_cache (ECalBackendMAPI *cbmapi, GCancellable *cancellable)
 	}
 
  cleanup:
-	g_object_unref (conn);
+	if (conn)
+		g_object_unref (conn);
 	g_mutex_unlock (priv->updating_mutex);
 
 	g_mutex_lock (priv->is_updating_mutex);
@@ -1237,10 +1259,11 @@ ecbm_connect_user (ECalBackend *backend,
 			g_signal_connect (priv->conn, "server-notification", G_CALLBACK (ecbm_server_notification_cb), cbmapi);
 		}
 	} else {
-		gboolean is_network_error = g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR);
+		gboolean is_network_error = g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR) ||
+			(mapi_error && mapi_error->domain != E_MAPI_ERROR);
 
-		if (!is_network_error)
-			mapi_error_to_edc_error (perror, mapi_error, is_network_error ? OtherError : AuthenticationFailed, NULL);
+		if (is_network_error)
+			mapi_error_to_edc_error (perror, mapi_error, OtherError, NULL);
 		if (mapi_error)
 			g_error_free (mapi_error);
 		g_static_mutex_unlock (&auth_mutex);
@@ -1281,6 +1304,80 @@ ecbm_connect_user (ECalBackend *backend,
 	return E_SOURCE_AUTHENTICATION_ACCEPTED;
 }
 
+static gboolean
+e_cal_backend_mapi_ensure_connected (ECalBackendMAPI *cbma,
+				     GCancellable *cancellable,
+				     GError **perror)
+{
+	CamelMapiSettings *settings;
+	GError *local_error = NULL;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_MAPI (cbma), FALSE);
+
+	if (cbma->priv->conn && e_mapi_connection_connected (cbma->priv->conn))
+		return TRUE;
+
+	settings = ecbm_get_collection_settings (cbma);
+
+	if (!camel_mapi_settings_get_kerberos (settings) ||
+	    ecbm_connect_user (E_CAL_BACKEND (cbma), cancellable, NULL, &local_error) != E_SOURCE_AUTHENTICATION_ACCEPTED) {
+		ESourceRegistry *registry;
+
+		registry = e_cal_backend_get_registry (E_CAL_BACKEND (cbma));
+
+		e_source_registry_authenticate_sync (
+			registry, e_backend_get_source (E_BACKEND (cbma)),
+			E_SOURCE_AUTHENTICATOR (cbma),
+			cancellable, &local_error);
+	}
+
+	if (!local_error)
+		return TRUE;
+
+	g_propagate_error (perror, local_error);
+
+	return FALSE;
+}
+
+static void
+e_cal_backend_mapi_maybe_disconnect (ECalBackendMAPI *cbma,
+				     const GError *mapi_error)
+{
+	g_return_if_fail (E_IS_CAL_BACKEND_MAPI (cbma));
+
+	/* no error or already disconnected */
+	if (!mapi_error || !cbma->priv->conn)
+		return;
+
+	if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR) ||
+	    g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_CALL_FAILED)) {
+		e_mapi_connection_disconnect (cbma->priv->conn,
+			!g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR),
+			NULL, NULL);
+		g_object_unref (cbma->priv->conn);
+		cbma->priv->conn = NULL;
+	}
+}
+
+static EMapiConnection *
+e_cal_backend_mapi_get_connection (ECalBackendMAPI *cbma,
+				   GCancellable *cancellable,
+				   GError **perror)
+{
+	g_return_val_if_fail (E_IS_CAL_BACKEND_MAPI (cbma), NULL);
+	g_return_val_if_fail (cbma->priv != NULL, NULL);
+
+	if (cbma->priv->conn)
+		return cbma->priv->conn;
+
+	if (!e_backend_get_online (E_BACKEND (cbma)))
+		return NULL;
+
+	if (!e_cal_backend_mapi_ensure_connected (cbma, cancellable, perror))
+		return NULL;
+
+	return cbma->priv->conn;
+}
 
 static void
 ecbm_open (ECalBackend *backend,
@@ -1295,7 +1392,6 @@ ecbm_open (ECalBackend *backend,
 	ESourceMapiFolder *ext_mapi_folder;
 	guint64 fid;
 	const gchar *cache_dir;
-	CamelMapiSettings *settings;
 	GError *error = NULL;
 
 	if (e_cal_backend_is_opened (backend)) {
@@ -1305,8 +1401,6 @@ ecbm_open (ECalBackend *backend,
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
-
-	settings = ecbm_get_collection_settings (cbmapi);
 
 	esource = e_backend_get_source (E_BACKEND (cbmapi));
 	ext_mapi_folder = e_source_get_extension (esource, E_SOURCE_EXTENSION_MAPI_FOLDER);
@@ -1377,17 +1471,7 @@ ecbm_open (ECalBackend *backend,
 	e_cal_backend_notify_online (backend, TRUE);
 	e_cal_backend_notify_readonly (backend, priv->read_only);
 
-	if (!camel_mapi_settings_get_kerberos (settings) ||
-	    ecbm_connect_user (backend, cancellable, NULL, &error) != E_SOURCE_AUTHENTICATION_ACCEPTED) {
-		ESourceRegistry *registry;
-
-		registry = e_cal_backend_get_registry (backend);
-
-		e_source_registry_authenticate_sync (
-			registry, esource,
-			E_SOURCE_AUTHENTICATOR (backend),
-			cancellable, &error);
-	}
+	e_cal_backend_mapi_ensure_connected (cbmapi, cancellable, &error);
 
 	if (error && perror)
 		g_propagate_error (perror, g_error_copy (error));
@@ -1521,37 +1605,45 @@ get_server_data (ECalBackendMAPI *cbmapi,
 		 struct cal_cbdata *cbdata,
 		 GCancellable *cancellable)
 {
-	ECalBackendMAPIPrivate *priv = cbmapi->priv;
+	EMapiConnection *conn;
 	icalcomponent *icalcomp;
 	mapi_id_t mid;
 	mapi_object_t obj_folder;
-	GError *error = NULL;
+	GError *mapi_error = NULL;
 
 	icalcomp = e_cal_component_get_icalcomponent (comp);
 	get_comp_mid (icalcomp, &mid);
 
-	if (!ecbm_open_folder (cbmapi, priv->conn, &obj_folder, cancellable, NULL))
-		return;
+	conn = e_cal_backend_mapi_get_connection (cbmapi, cancellable, &mapi_error);
+	if (!conn)
+		goto cleanup;
 
-	if (!e_mapi_connection_transfer_object (priv->conn, &obj_folder, mid, ecbm_capture_req_props, cbdata, cancellable, &error)) {
-		if (!g_error_matches (error, E_MAPI_ERROR, MAPI_E_NOT_FOUND)) {
-			g_clear_error (&error);
-			e_mapi_connection_close_folder (priv->conn, &obj_folder, cancellable, NULL);
-			return;
+	if (!ecbm_open_folder (cbmapi, conn, &obj_folder, cancellable, &mapi_error))
+		goto cleanup;
+
+	if (!e_mapi_connection_transfer_object (conn, &obj_folder, mid, ecbm_capture_req_props, cbdata, cancellable, &mapi_error)) {
+		if (!g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NOT_FOUND)) {
+			g_clear_error (&mapi_error);
+			e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
+			goto cleanup;
 		}
 
 		/* try to find by global-id, if not found by MID */
-		g_clear_error (&error);
+		g_clear_error (&mapi_error);
 	}
 
-	if (e_mapi_connection_list_objects (priv->conn, &obj_folder,
+	if (e_mapi_connection_list_objects (conn, &obj_folder,
 					    ecbm_build_global_id_restriction, comp,
 					    ecbm_list_for_one_mid_cb, &mid,
-					    cancellable, NULL)) {
-		e_mapi_connection_transfer_object (priv->conn, &obj_folder, mid, ecbm_capture_req_props, cbdata, cancellable, NULL);
+					    cancellable, &mapi_error)) {
+		e_mapi_connection_transfer_object (conn, &obj_folder, mid, ecbm_capture_req_props, cbdata, cancellable, &mapi_error);
 	}
 
-	e_mapi_connection_close_folder (priv->conn, &obj_folder, cancellable, NULL);
+	e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
+
+ cleanup:
+	e_cal_backend_mapi_maybe_disconnect (cbmapi, mapi_error);
+	g_clear_error (&mapi_error);
 }
 
 /* frees data members allocated in get_server_data(), not the cbdata itself */
@@ -1587,6 +1679,7 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
+	EMapiConnection *conn;
 	icalcomponent_kind kind;
 	icalcomponent *icalcomp;
 	ECalComponent *comp;
@@ -1630,7 +1723,8 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	e_cal_component_set_last_modified (comp, &current);
 
 	/* Check if object exists */
-	if (e_backend_get_online (E_BACKEND (backend))) {
+	conn = e_cal_backend_mapi_get_connection (cbmapi, cancellable, &mapi_error);
+	if (conn) {
 		struct cal_cbdata cbdata = { 0 };
 		gboolean status;
 		mapi_object_t obj_folder;
@@ -1652,18 +1746,18 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		cbdata.msgflags = MSGFLAG_READ;
 		cbdata.meeting_type = has_attendees ? MEETING_OBJECT : NOT_A_MEETING;
 		cbdata.resp = has_attendees ? olResponseOrganized : olResponseNone;
-		cbdata.appt_id = e_mapi_cal_util_get_new_appt_id (priv->conn, priv->fid);
+		cbdata.appt_id = e_mapi_cal_util_get_new_appt_id (conn, priv->fid);
 		cbdata.appt_seq = 0;
 		cbdata.globalid = NULL;
 		cbdata.cleanglobalid = NULL;
 
-		status = ecbm_open_folder (cbmapi, priv->conn, &obj_folder, cancellable, &mapi_error);
+		status = ecbm_open_folder (cbmapi, conn, &obj_folder, cancellable, &mapi_error);
 		if (status) {
-			e_mapi_connection_create_object (priv->conn, &obj_folder, E_MAPI_CREATE_FLAG_NONE,
+			e_mapi_connection_create_object (conn, &obj_folder, E_MAPI_CREATE_FLAG_NONE,
 							 e_mapi_cal_utils_comp_to_object, &cbdata,
 							 &mid, cancellable, &mapi_error);
 
-			e_mapi_connection_close_folder (priv->conn, &obj_folder, cancellable, &mapi_error);
+			e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
 		}
 
 		g_free (cbdata.username);
@@ -1674,6 +1768,7 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		if (!mid) {
 			g_object_unref (comp);
 			mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to create item on a server"));
+			e_cal_backend_mapi_maybe_disconnect (cbmapi, mapi_error);
 			if (mapi_error)
 				g_error_free (mapi_error);
 			return;
@@ -1691,7 +1786,12 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		*new_ecalcomp = e_cal_component_clone (comp);
 		e_cal_backend_notify_component_created (E_CAL_BACKEND (cbmapi), *new_ecalcomp);
 	} else {
-		g_propagate_error (error, EDC_ERROR (UnsupportedMethod));
+		e_cal_backend_mapi_maybe_disconnect (cbmapi, mapi_error);
+		if (!mapi_error)
+			g_propagate_error (error, EDC_ERROR (RepositoryOffline));
+		else
+			mapi_error_to_edc_error (error, mapi_error, RepositoryOffline, NULL);
+		g_clear_error (&mapi_error);
 		g_object_unref (comp);
 		return;
 	}
@@ -1760,6 +1860,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 {
 	ECalBackendMAPI *cbmapi;
         ECalBackendMAPIPrivate *priv;
+	EMapiConnection *conn;
 	icalcomponent_kind kind;
 	icalcomponent *icalcomp;
 	ECalComponent *comp, *cache_comp = NULL;
@@ -1821,7 +1922,9 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) ecbm_internal_get_timezone;
 	cbdata.get_tz_data = cbmapi;
 
-	if (e_backend_get_online (E_BACKEND (backend))) {
+	conn = e_cal_backend_mapi_get_connection (cbmapi, cancellable, &mapi_error);
+
+	if (conn) {
 		gboolean has_attendees = e_cal_component_has_attendees (comp);
 		mapi_object_t obj_folder;
 
@@ -1863,13 +1966,13 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 			cbdata.meeting_type = has_attendees ? MEETING_OBJECT_RCVD : NOT_A_MEETING;
 		}
 
-		status = ecbm_open_folder (cbmapi, priv->conn, &obj_folder, cancellable, &mapi_error);
+		status = ecbm_open_folder (cbmapi, conn, &obj_folder, cancellable, &mapi_error);
 		if (status) {
-			status = e_mapi_connection_modify_object (priv->conn, &obj_folder, mid, 
+			status = e_mapi_connection_modify_object (conn, &obj_folder, mid, 
 								  e_mapi_cal_utils_comp_to_object, &cbdata,
 								  cancellable, &mapi_error);
 
-			status = e_mapi_connection_close_folder (priv->conn, &obj_folder, cancellable, &mapi_error) && status;
+			status = e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error) && status;
 		}
 
 		free_server_data (&cbdata);
@@ -1878,6 +1981,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 			g_object_unref (cache_comp);
 
 			mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to modify item on a server"));
+			e_cal_backend_mapi_maybe_disconnect (cbmapi, mapi_error);
 			if (mapi_error)
 				g_error_free (mapi_error);
 			return;
@@ -1885,7 +1989,12 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	} else {
 		g_object_unref (comp);
 		g_object_unref (cache_comp);
-		g_propagate_error (error, EDC_ERROR (UnsupportedMethod));
+		e_cal_backend_mapi_maybe_disconnect (cbmapi, mapi_error);
+		if (!mapi_error)
+			g_propagate_error (error, EDC_ERROR (RepositoryOffline));
+		else
+			mapi_error_to_edc_error (error, mapi_error, RepositoryOffline, NULL);
+		g_clear_error (&mapi_error);
 		return;
 	}
 
@@ -1906,10 +2015,11 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 {
 	ECalBackendMAPI *cbmapi;
         ECalBackendMAPIPrivate *priv;
+	EMapiConnection *conn;
 	icalcomponent *icalcomp;
 	gchar *calobj = NULL;
 	mapi_id_t mid;
-	GError *err = NULL;
+	GError *err = NULL, *mapi_error = NULL;
 
 	*old_ecalcomp = *new_ecalcomp = NULL;
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
@@ -1941,6 +2051,8 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 	get_comp_mid (icalcomp, &mid);
 
+	conn = e_cal_backend_mapi_get_connection (cbmapi, cancellable, &mapi_error);
+
 	if (mod == CALOBJ_MOD_THIS && rid && *rid) {
 		gchar *new_calobj = NULL;
 		struct icaltimetype time_rid;
@@ -1951,7 +2063,7 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		new_calobj = icalcomponent_as_ical_string_r (icalcomp);
 		ecbm_modify_object (backend, cal, cancellable, new_calobj, CALOBJ_MOD_ALL, old_ecalcomp, new_ecalcomp, &err);
 		g_free (new_calobj);
-	} else {
+	} else if (conn) {
 		mapi_object_t obj_folder;
 		GSList *list=NULL, *l, *comp_list = e_cal_backend_store_get_components_by_uid (priv->store, uid);
 		GError *ri_error = NULL;
@@ -1960,8 +2072,8 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		*pmid = mid;
 		list = g_slist_prepend (list, pmid);
 
-		if (ecbm_open_folder (cbmapi, priv->conn, &obj_folder, cancellable, &ri_error)) {
-			if (e_mapi_connection_remove_items (priv->conn, &obj_folder, list, cancellable, &ri_error)) {
+		if (ecbm_open_folder (cbmapi, conn, &obj_folder, cancellable, &ri_error)) {
+			if (e_mapi_connection_remove_items (conn, &obj_folder, list, cancellable, &ri_error)) {
 				for (l = comp_list; l; l = l->next) {
 					ECalComponent *comp = E_CAL_COMPONENT (l->data);
 					ECalComponentId *id = e_cal_component_get_id (comp);
@@ -1974,17 +2086,27 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 				}
 			}
 
-			e_mapi_connection_close_folder (priv->conn, &obj_folder, cancellable, &ri_error);
+			e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &ri_error);
 
 			*old_ecalcomp = e_cal_component_new_from_icalcomponent (icalparser_parse_string (calobj));
 			*new_ecalcomp = NULL;
 			err = NULL; /* Success */
-		} else
-			mapi_error_to_edc_error (&err, ri_error, OtherError, "Cannot remove items from a server");
+		} else {
+			e_cal_backend_mapi_maybe_disconnect (cbmapi, ri_error);
+			mapi_error_to_edc_error (&err, ri_error, OtherError, _("Cannot remove items from a server"));
+		}
 
 		g_slist_free_full (list, g_free);
 		g_slist_free (comp_list);
+	} else {
+		e_cal_backend_mapi_maybe_disconnect (cbmapi, mapi_error);
+		if (!mapi_error)
+			g_propagate_error (&err, EDC_ERROR (RepositoryOffline));
+		else
+			mapi_error_to_edc_error (&err, mapi_error, RepositoryOffline, NULL);
+		g_clear_error (&mapi_error);
 	}
+
 	g_free (calobj);
 
 	if (err)
@@ -2001,21 +2123,25 @@ static void
 ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *calobj, GSList **users, gchar **modified_calobj, GError **error)
 {
 	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
+	EMapiConnection *conn;
 	icalcomponent_kind kind;
 	icalcomponent *icalcomp;
 	GError *mapi_error = NULL;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
-	priv = cbmapi->priv;
 
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
 
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
 
-	if (!e_backend_get_online (E_BACKEND (backend))) {
-		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
+	conn = e_cal_backend_mapi_get_connection (cbmapi, cancellable, &mapi_error);
+	if (!conn) {
+		if (!mapi_error)
+			g_propagate_error (error, EDC_ERROR (RepositoryOffline));
+		else
+			mapi_error_to_edc_error (error, mapi_error, RepositoryOffline, NULL);
+		g_clear_error (&mapi_error);
 		return;
 	}
 
@@ -2136,12 +2262,12 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 			cbdata.cleanglobalid = &cleanglobalid;
 
 			mid = 0;
-			if (e_mapi_connection_open_default_folder (priv->conn, olFolderSentMail, &obj_folder, cancellable, &mapi_error)) {
-				e_mapi_connection_create_object (priv->conn, &obj_folder, E_MAPI_CREATE_FLAG_SUBMIT,
+			if (e_mapi_connection_open_default_folder (conn, olFolderSentMail, &obj_folder, cancellable, &mapi_error)) {
+				e_mapi_connection_create_object (conn, &obj_folder, E_MAPI_CREATE_FLAG_SUBMIT,
 								 e_mapi_cal_utils_comp_to_object, &cbdata,
 								 &mid, cancellable, &mapi_error);
 
-				e_mapi_connection_close_folder (priv->conn, &obj_folder, cancellable, &mapi_error);
+				e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &mapi_error);
 			}
 
 			cbdata.globalid = NULL;
@@ -2153,6 +2279,7 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 			if (!mid) {
 				g_object_unref (comp);
 				mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to create item on a server"));
+				e_cal_backend_mapi_maybe_disconnect (cbmapi, mapi_error);
 				if (mapi_error)
 					g_error_free (mapi_error);
 				return;
@@ -2386,19 +2513,25 @@ static void
 ecbm_get_free_busy (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const GSList *users, time_t start, time_t end, GSList **freebusy, GError **perror)
 {
 	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
+	EMapiConnection *conn;
 	GError *mapi_error = NULL;
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
-	priv = cbmapi->priv;
 
-	if (!priv->conn) {
-		g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
+	conn = e_cal_backend_mapi_get_connection (cbmapi, cancellable, &mapi_error);
+
+	if (!conn) {
+		if (!mapi_error)
+			g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
+		else
+			mapi_error_to_edc_error (perror, mapi_error, RepositoryOffline, NULL);
+		g_clear_error (&mapi_error);
 		return;
 	}
 
-	if (!e_mapi_cal_utils_get_free_busy_data (priv->conn, users, start, end, freebusy, cancellable, &mapi_error)) {
+	if (!e_mapi_cal_utils_get_free_busy_data (conn, users, start, end, freebusy, cancellable, &mapi_error)) {
 		mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to get Free/Busy data"));
+		e_cal_backend_mapi_maybe_disconnect (cbmapi, mapi_error);
 
 		if (mapi_error)
 			g_error_free (mapi_error);
