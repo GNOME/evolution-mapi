@@ -6185,8 +6185,8 @@ e_mapi_connection_peek_folders_list (EMapiConnection *conn)
 	/* to have this used in the below macros */
 	GError **perror = NULL;
 
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
-	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, NULL);
+	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, NULL);
 
 	g_static_rec_mutex_lock (&priv->folders_lock);
 
@@ -6217,7 +6217,7 @@ e_mapi_connection_ex_to_smtp (EMapiConnection *conn,
 	const gchar		*str_array[2];
 	gchar			*smtp_addr = NULL;
 
-	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
+	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, NULL);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, NULL);
 
 	e_return_val_mapi_error_if_fail (ex_address != NULL, MAPI_E_INVALID_PARAMETER, NULL);
