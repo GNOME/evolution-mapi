@@ -81,7 +81,10 @@ mapi_backend_queue_auth_session (EMapiBackend *backend)
 		server, E_SOURCE_AUTHENTICATOR (backend),
 		e_source_get_uid (source));
 
-	e_source_registry_server_queue_auth_session (server, session);
+	/* For now at least, we don't need to know the
+	 * results, so no callback function is needed. */
+	e_source_registry_server_authenticate (
+		server, session, NULL, NULL, NULL);
 
 	g_object_unref (session);
 	g_object_unref (server);
