@@ -1107,7 +1107,7 @@ mapi_ui_init_calendar (GtkUIManager *ui_manager,
 		calendar_context_entries, G_N_ELEMENTS (calendar_context_entries));
 }
 
-GtkActionEntry tasks_context_entries[] = {
+static GtkActionEntry tasks_context_entries[] = {
 
 	{ "tasks-mapi-folder-permissions",
 	  "folder-new",
@@ -1117,7 +1117,7 @@ GtkActionEntry tasks_context_entries[] = {
 	  G_CALLBACK (action_folder_permissions_source_cb) }
 };
 
-const gchar *mapi_ui_task_def =
+static const gchar *mapi_ui_task_def =
 	"<popup name=\"task-list-popup\">\n"
 	"  <placeholder name=\"task-list-popup-actions\">\n"
 	"    <menuitem action=\"tasks-mapi-folder-permissions\"/>\n"
@@ -1147,7 +1147,7 @@ static GtkActionEntry memos_context_entries[] = {
 	  G_CALLBACK (action_folder_permissions_source_cb) }
 };
 
-const gchar *mapi_ui_memo_def =
+static const gchar *mapi_ui_memo_def =
 	"<popup name=\"memo-list-popup\">\n"
 	"  <placeholder name=\"memo-list-popup-actions\">\n"
 	"    <menuitem action=\"memos-mapi-folder-permissions\"/>\n"
@@ -1177,7 +1177,7 @@ static GtkActionEntry contacts_context_entries[] = {
 	  G_CALLBACK (action_folder_permissions_source_cb) }
 };
 
-const gchar *mapi_ui_book_def =
+static const gchar *mapi_ui_book_def =
 	"<popup name=\"address-book-popup\">\n"
 	"  <placeholder name=\"address-book-popup-actions\">\n"
 	"    <menuitem action=\"contacts-mapi-folder-permissions\"/>\n"
