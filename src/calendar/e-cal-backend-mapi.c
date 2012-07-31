@@ -1321,12 +1321,8 @@ e_cal_backend_mapi_ensure_connected (ECalBackendMAPI *cbma,
 
 	if (!camel_mapi_settings_get_kerberos (settings) ||
 	    ecbm_connect_user (E_CAL_BACKEND (cbma), cancellable, NULL, &local_error) != E_SOURCE_AUTHENTICATION_ACCEPTED) {
-		ESourceRegistry *registry;
-
-		registry = e_cal_backend_get_registry (E_CAL_BACKEND (cbma));
-
-		e_source_registry_authenticate_sync (
-			registry, e_backend_get_source (E_BACKEND (cbma)),
+		e_backend_authenticate_sync (
+			E_BACKEND (cbma),
 			E_SOURCE_AUTHENTICATOR (cbma),
 			cancellable, &local_error);
 	}
