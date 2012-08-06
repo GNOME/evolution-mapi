@@ -1,3 +1,19 @@
+evolution-mapi 3.5.5  2012-08-06
+--------------------------------
+
+Bugs:
+	Bug #608327 - Cannot recover after connection lost (Milan Crha)
+
+Miscellanous:
+	Could leave EBookBackend local cache locked for updates (Milan Crha)
+	Fix runtime check error return values (Milan Crha)
+	Adapt to ESourceRegistryServer API changes. (Matthew Barnes)
+	Declare UI definitions as static (Milan Crha)
+	Use e_backend_authenticate_sync() in backends. (Matthew Barnes)
+
+Translations:
+	Daniel Mustieles (es)
+
 evolution-mapi 3.5.4  2012-07-16
 --------------------------------
 
