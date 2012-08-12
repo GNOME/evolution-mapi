@@ -766,10 +766,13 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 
 	camel_folder_freeze (folder);
 
-	settings = camel_service_get_settings (CAMEL_SERVICE (store));
+	settings = camel_service_ref_settings (CAMEL_SERVICE (store));
+
 	full_download =
 		camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (settings)) ||
 		camel_offline_folder_get_offline_sync (CAMEL_OFFLINE_FOLDER (folder));
+
+	g_object_unref (settings);
 
 	camel_operation_push_message (cancellable, _("Refreshing folder '%s'"), camel_folder_get_display_name (folder));
 
@@ -1111,25 +1114,31 @@ mapi_folder_constructed (GObject *object)
 	CamelService *service;
 	CamelFolder *folder;
 	const gchar *full_name;
-	const gchar *host;
-	const gchar *user;
 	gchar *description;
+	gchar *host;
+	gchar *user;
 
 	folder = CAMEL_FOLDER (object);
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
 
 	service = CAMEL_SERVICE (parent_store);
-	settings = camel_service_get_settings (service);
+
+	settings = camel_service_ref_settings (service);
 
 	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	host = camel_network_settings_get_host (network_settings);
-	user = camel_network_settings_get_user (network_settings);
+	host = camel_network_settings_dup_host (network_settings);
+	user = camel_network_settings_dup_user (network_settings);
+
+	g_object_unref (settings);
 
 	description = g_strdup_printf (
 		"%s@%s:%s", user, host, full_name);
 	camel_folder_set_description (folder, description);
 	g_free (description);
+
+	g_free (host);
+	g_free (user);
 }
 
 struct CamelMapiCreateData
@@ -2015,9 +2024,12 @@ camel_mapi_folder_new (CamelStore *store,
 	gboolean filter_inbox;
 
 	service = CAMEL_SERVICE (store);
-	settings = camel_service_get_settings (service);
+
+	settings = camel_service_ref_settings (service);
 
 	filter_inbox = camel_store_settings_get_filter_inbox (CAMEL_STORE_SETTINGS (settings));
+
+	g_object_unref (settings);
 
 	short_name = strrchr (folder_name, '/');
 	if (short_name)

@@ -375,6 +375,7 @@ check_foreign_folder_idle (GObject *with_object,
 	ESourceRegistry *registry = NULL;
 	CamelSession *session;
 	EMapiFolderType folder_type;
+	gchar *profile;
 
 	g_return_if_fail (with_object != NULL);
 	g_return_if_fail (CAMEL_IS_MAPI_STORE (with_object));
@@ -396,8 +397,14 @@ check_foreign_folder_idle (GObject *with_object,
 	folder_name = g_strdup_printf (C_("ForeignFolder", "%s - %s"), base_username, base_foldername);
 
 	mapi_store = CAMEL_MAPI_STORE (with_object);
-	settings = camel_service_get_settings (CAMEL_SERVICE (mapi_store));
+
+	settings = camel_service_ref_settings (CAMEL_SERVICE (mapi_store));
+
 	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
+	profile = camel_mapi_settings_dup_profile (mapi_settings);
+
+	g_object_unref (settings);
+
 	session = camel_service_get_session (CAMEL_SERVICE (mapi_store));
 	if (E_IS_MAIL_SESSION (session))
 		registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
@@ -411,9 +418,7 @@ check_foreign_folder_idle (GObject *with_object,
 		base_username,
 		base_foldername,
 		perror)) ||
-	    (folder_type != E_MAPI_FOLDER_TYPE_MAIL && !e_mapi_folder_add_as_esource (registry,
-		folder_type,
-		camel_mapi_settings_get_profile (mapi_settings),
+	    (folder_type != E_MAPI_FOLDER_TYPE_MAIL && !e_mapi_folder_add_as_esource (registry, folder_type, profile,
 		TRUE /* camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (mapi_settings)) */,
 		E_MAPI_FOLDER_CATEGORY_FOREIGN,
 		cffd->username,
@@ -427,6 +432,7 @@ check_foreign_folder_idle (GObject *with_object,
 	}
 
 	g_free (folder_name);
+	g_free (profile);
 }
 
 static void

@@ -620,8 +620,10 @@ get_profile_name_from_folder_tree (EShellView *shell_view,
 				CamelSettings *settings;
 
 				service = CAMEL_SERVICE (selected_store);
-				settings = camel_service_get_settings (service);
+
+				settings = camel_service_ref_settings (service);
 				g_object_get (settings, "profile", &profile, NULL);
+				g_object_unref (settings);
 
 				if (pstore && profile)
 					*pstore = g_object_ref (selected_store);
@@ -652,20 +654,23 @@ action_folder_size_cb (GtkAction *action,
 	gchar *profile;
 	CamelSession *session;
 	CamelStore *store = NULL;
-	CamelMapiSettings *mapi_settings;
 
 	profile = get_profile_name_from_folder_tree (shell_view, NULL, &store);
 	if (profile && store) {
+		CamelSettings *settings;
 		ESourceRegistry *registry;
 		ESource *source;
 
-		mapi_settings = CAMEL_MAPI_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (store)));
 		session = camel_service_get_session (CAMEL_SERVICE (store));
 		registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
 		source = e_source_registry_ref_source (registry, camel_service_get_uid (CAMEL_SERVICE (store)));
 
+		settings = camel_service_ref_settings (CAMEL_SERVICE (store));
+
 		e_mapi_config_utils_run_folder_size_dialog (
-			registry, source, mapi_settings);
+			registry, source, CAMEL_MAPI_SETTINGS (settings));
+
+		g_object_unref (settings);
 
 		g_object_unref (source); 
 	}
@@ -709,7 +714,6 @@ action_folder_permissions_mail_cb (GtkAction *action,
 	GtkWindow *parent;
 	CamelStore *store = NULL;
 	CamelMapiStore *mapi_store;
-	CamelNetworkSettings *network_settings;
 	CamelStoreInfo *si;
 
 	profile = get_profile_name_from_folder_tree (shell_view, &folder_path, &store);
@@ -719,9 +723,6 @@ action_folder_permissions_mail_cb (GtkAction *action,
 	mapi_store = CAMEL_MAPI_STORE (store);
 	g_return_if_fail (mapi_store != NULL);
 	g_return_if_fail (folder_path != NULL);
-
-	network_settings = CAMEL_NETWORK_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (store)));
-	g_return_if_fail (network_settings != NULL);
 
 	shell_window = e_shell_view_get_shell_window (shell_view);
 	parent = GTK_WINDOW (shell_window);
@@ -733,14 +734,17 @@ action_folder_permissions_mail_cb (GtkAction *action,
 		CamelMapiStoreInfo *msi = (CamelMapiStoreInfo *) si;
 		ESourceRegistry *registry = e_shell_get_registry (e_shell_window_get_shell (shell_window));
 		ESource *source;
+		CamelSettings *settings;
 
 		source = e_source_registry_ref_source (registry, camel_service_get_uid (CAMEL_SERVICE (store)));
 		g_return_if_fail (source != NULL);
 
+		settings = camel_service_ref_settings (CAMEL_SERVICE (store));
+
 		e_mapi_edit_folder_permissions (parent,
 			registry,
 			source,
-			CAMEL_MAPI_SETTINGS (network_settings),
+			CAMEL_MAPI_SETTINGS (settings),
 			camel_service_get_display_name (CAMEL_SERVICE (store)),
 			folder_path,
 			msi->folder_id,
@@ -749,6 +753,8 @@ action_folder_permissions_mail_cb (GtkAction *action,
 			E_MAPI_FOLDER_CATEGORY_PERSONAL,
 			msi->foreign_username,
 			FALSE);
+
+		g_object_unref (settings);
 
 		g_object_unref (source);
 	}
@@ -1057,7 +1063,8 @@ action_folder_permissions_source_cb (GtkAction *action,
 
 	extension_name = e_source_camel_get_extension_name ("mapi");
 	extension = e_source_get_extension (parent_source, extension_name);
-	settings = e_source_camel_get_settings (extension);
+
+	settings = e_source_camel_ref_settings (extension);
 
 	e_mapi_edit_folder_permissions (NULL,
 		registry,
@@ -1071,6 +1078,8 @@ action_folder_permissions_source_cb (GtkAction *action,
 		E_MAPI_FOLDER_CATEGORY_PERSONAL,
 		foreign_username,
 		strstr (gtk_action_get_name (action), "calendar") != NULL);
+
+	g_object_unref (settings);
 
 	g_object_unref (source);
 	g_object_unref (parent_source);
@@ -1508,7 +1517,6 @@ e_mapi_download_folder_structure_thread (GObject *source_obj,
 	ESourceCamel *extension;
 	EMapiConnection *conn;
 	CamelSettings *settings;
-	CamelMapiSettings *mapi_settings;
 
 	g_return_if_fail (fsd != NULL);
 	g_return_if_fail (fsd->tree_view != NULL);
@@ -1521,15 +1529,17 @@ e_mapi_download_folder_structure_thread (GObject *source_obj,
 	g_return_if_fail (e_source_has_extension (source, extension_name));
 
 	extension = e_source_get_extension (source, extension_name);
-	settings = e_source_camel_get_settings (extension);
-	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
+
+	settings = e_source_camel_ref_settings (extension);
 
 	conn = e_mapi_config_utils_open_connection_for (NULL,
 		fsd->registry,
 		source,
-		mapi_settings,
+		CAMEL_MAPI_SETTINGS (settings),
 		cancellable,
 		perror);
+
+	g_object_unref (settings);
 
 	if (!conn)
 		return;

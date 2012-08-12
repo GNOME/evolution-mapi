@@ -86,7 +86,7 @@ mapi_send_to_sync (CamelTransport *transport,
 	mapi_object_t obj_folder;
 	CamelService *service;
 	CamelSettings *settings;
-	const gchar *profile;
+	gchar *profile;
 	GError *mapi_error = NULL;
 
 	if (!camel_internet_address_get (CAMEL_INTERNET_ADDRESS (from), 0, &namep, &addressp)) {
@@ -96,8 +96,11 @@ mapi_send_to_sync (CamelTransport *transport,
 	g_return_val_if_fail (CAMEL_IS_SERVICE (transport), FALSE);
 
 	service = CAMEL_SERVICE (transport);
-	settings = camel_service_get_settings (service);
-	profile = camel_mapi_settings_get_profile (CAMEL_MAPI_SETTINGS (settings));
+
+	settings = camel_service_ref_settings (service);
+	profile = camel_mapi_settings_dup_profile (CAMEL_MAPI_SETTINGS (settings));
+	g_object_unref (settings);
+
 	if (!profile) {
 		/* try to find corresponding CamelStore with profile name filled */
 		const gchar *my_uid = camel_service_get_uid (service);
@@ -119,8 +122,9 @@ mapi_send_to_sync (CamelTransport *transport,
 			if (g_strcmp0 (my_uid, store_uid) == 0 ||
 			    g_str_has_prefix (my_uid, store_uid) ||
 			    g_str_has_prefix (store_uid, my_uid)) {
-				settings = camel_service_get_settings (store);
-				profile = camel_mapi_settings_get_profile (CAMEL_MAPI_SETTINGS (settings));
+				settings = camel_service_dup_settings (store);
+				profile = camel_mapi_settings_dup_profile (CAMEL_MAPI_SETTINGS (settings));
+				g_object_unref (settings);
 			}
 		}
 
@@ -128,6 +132,9 @@ mapi_send_to_sync (CamelTransport *transport,
 	}
 
 	conn = e_mapi_connection_find (profile);
+
+	g_free (profile);
+
 	if (!conn) {
 		g_set_error (
 			error, CAMEL_SERVICE_ERROR,
@@ -167,23 +174,31 @@ mapi_transport_get_name(CamelService *service, gboolean brief)
 {
 	CamelNetworkSettings *network_settings;
 	CamelSettings *settings;
-	const gchar *host;
-	const gchar *user;
+	gchar *host;
+	gchar *name;
+	gchar *user;
 
-	settings = camel_service_get_settings (service);
+	settings = camel_service_ref_settings (service);
 
 	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	host = camel_network_settings_get_host (network_settings);
-	user = camel_network_settings_get_user (network_settings);
+	host = camel_network_settings_dup_host (network_settings);
+	user = camel_network_settings_dup_user (network_settings);
+
+	g_object_unref (settings);
 
 	if (brief) {
 		/* Translators: The %s is replaced with a server's host name */
-		return g_strdup_printf (_("Exchange MAPI server %s"), host);
+		name = g_strdup_printf (_("Exchange MAPI server %s"), host);
 	} else {
 		/* Translators: The first %s is replaced with a user name, the second with a server's host name */
-		return g_strdup_printf (_("Exchange MAPI service for %s on %s"),
+		name = g_strdup_printf (_("Exchange MAPI service for %s on %s"),
 					user, host);
 	}
+
+	g_free (host);
+	g_free (user);
+
+	return name;
 }
 
 static void

@@ -715,7 +715,8 @@ mapi_get_folder_info_offline (CamelStore *store,
 			      GError **error)
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
-	CamelMapiSettings *settings;
+	CamelSettings *settings;
+	CamelMapiSettings *mapi_settings;
 	CamelFolderInfo *fi;
 	ESourceRegistry *registry = NULL;
 	GList *my_sources = NULL;
@@ -724,11 +725,18 @@ mapi_get_folder_info_offline (CamelStore *store,
 	gint i, count;
 	gboolean subscribed, subscription_list = FALSE;
 	gboolean has_public_folders = FALSE, has_foreign_folders = FALSE;
+	gchar *profile;
 
 	subscription_list = (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST);
 	subscribed = (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED);
 
-	settings = CAMEL_MAPI_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (store)));
+	settings = camel_service_ref_settings (CAMEL_SERVICE (store));
+
+	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
+	profile = camel_mapi_settings_dup_profile (mapi_settings);
+
+	g_object_unref (settings);
+
 	folders = g_ptr_array_new ();
 
 	if (subscription_list) {
@@ -738,8 +746,7 @@ mapi_get_folder_info_offline (CamelStore *store,
 		if (registry) {
 			GList *all_sources = e_source_registry_list_sources (registry, NULL);
 
-			my_sources = e_mapi_utils_filter_sources_for_profile (all_sources,
-				camel_mapi_settings_get_profile (settings));
+			my_sources = e_mapi_utils_filter_sources_for_profile (all_sources, profile);
 
 			g_list_free_full (all_sources, g_object_unref);
 		}
@@ -812,9 +819,7 @@ mapi_get_folder_info_offline (CamelStore *store,
 
 				folder_type = mapi_folders_hash_table_type_lookup (mapi_store, camel_store_info_path (mapi_store->summary, si));
 				if (folder_type != E_MAPI_FOLDER_TYPE_UNKNOWN && folder_type != E_MAPI_FOLDER_TYPE_MAIL) {
-					if (e_mapi_folder_is_subscribed_as_esource (my_sources,
-						camel_mapi_settings_get_profile (settings),
-						msi->folder_id))
+					if (e_mapi_folder_is_subscribed_as_esource (my_sources, profile, msi->folder_id))
 						fi->flags |= CAMEL_FOLDER_SUBSCRIBED;
 				}
 			}
@@ -855,6 +860,8 @@ mapi_get_folder_info_offline (CamelStore *store,
 	g_list_free_full (my_sources, g_object_unref);
 	if (registry)
 		g_object_unref (registry);
+
+	g_free (profile);
 
 	return fi;
 }
@@ -1045,6 +1052,7 @@ mapi_store_can_refresh_folder (CamelStore *store,
 {
 	CamelService *service;
 	CamelSettings *settings;
+	CamelMapiSettings *mapi_settings;
 	gboolean check_all;
 
 	/* skip unselectable folders from automatic refresh */
@@ -1052,11 +1060,18 @@ mapi_store_can_refresh_folder (CamelStore *store,
 		return FALSE;
 
 	service = CAMEL_SERVICE (store);
-	settings = camel_service_get_settings (service);
 
-	check_all = camel_mapi_settings_get_check_all (CAMEL_MAPI_SETTINGS (settings));
+	settings = camel_service_ref_settings (service);
 
-	return CAMEL_STORE_CLASS(camel_mapi_store_parent_class)->can_refresh_folder (store, info, error) || check_all;
+	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
+	check_all = camel_mapi_settings_get_check_all (mapi_settings);
+
+	g_object_unref (settings);
+
+	if (check_all)
+		return TRUE;
+
+	return CAMEL_STORE_CLASS(camel_mapi_store_parent_class)->can_refresh_folder (store, info, error);
 }
 
 static gchar *
@@ -1819,16 +1834,19 @@ mapi_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 		CamelSettings *settings;
 		CamelMapiSettings *mapi_settings;
 		guint folder_type = mapi_folders_hash_table_type_lookup (mapi_store, folder_name);
+		gchar *profile;
 
 		/* remember the folder, thus it can be removed and checked in Subscriptions dialog */
 		msi->camel_folder_flags = msi->camel_folder_flags | CAMEL_FOLDER_SUBSCRIBED | CAMEL_STORE_INFO_FOLDER_SUBSCRIBED | CAMEL_FOLDER_NOCHILDREN;
 		camel_store_summary_touch (mapi_store->summary);
 
-		settings = camel_service_get_settings (CAMEL_SERVICE (mapi_store));
+		settings = camel_service_ref_settings (CAMEL_SERVICE (mapi_store));
 		mapi_settings = CAMEL_MAPI_SETTINGS (settings);
+		profile = camel_mapi_settings_dup_profile (mapi_settings);
 
-		if (!e_mapi_folder_add_as_esource (NULL, folder_type,
-			camel_mapi_settings_get_profile (mapi_settings),
+		g_object_unref (settings);
+
+		if (!e_mapi_folder_add_as_esource (NULL, folder_type, profile,
 			TRUE /* camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (mapi_settings)) */,
 			E_MAPI_FOLDER_CATEGORY_PUBLIC,
 			NULL,
@@ -1838,10 +1856,13 @@ mapi_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 			cancellable,
 			error)) {
 			camel_store_summary_info_free (mapi_store->summary, si);
+			g_free (profile);
 			g_free (path);
 
 			return FALSE;
 		}
+
+		g_free (profile);
 	}
 	camel_store_summary_info_free (mapi_store->summary, si);
 	camel_store_summary_save (mapi_store->summary);
@@ -1899,15 +1920,19 @@ mapi_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 			g_debug ("%s: Failed to find subscribed by folder ID", G_STRFUNC);
 		}
 	} else {
-		CamelMapiSettings *settings;
+		CamelSettings *settings;
+		const gchar *profile;
 
-		settings = CAMEL_MAPI_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (mapi_store)));
+		settings = camel_service_ref_settings (CAMEL_SERVICE (mapi_store));
+		profile = camel_mapi_settings_get_profile (CAMEL_MAPI_SETTINGS (settings));
 
 		res = e_mapi_folder_remove_as_esource (NULL,
-			camel_mapi_settings_get_profile (settings),
+			profile,
 			msi->folder_id,
 			cancellable,
 			error);
+
+		g_object_unref (profile);
 	}
 
 	if ((msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC) != 0 &&
@@ -2061,24 +2086,32 @@ mapi_get_name(CamelService *service, gboolean brief)
 {
 	CamelNetworkSettings *network_settings;
 	CamelSettings *settings;
-	const gchar *host;
-	const gchar *user;
+	gchar *host;
+	gchar *name;
+	gchar *user;
 
-	settings = camel_service_get_settings (service);
+	settings = camel_service_ref_settings (service);
 
 	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	host = camel_network_settings_get_host (network_settings);
-	user = camel_network_settings_get_user (network_settings);
+	host = camel_network_settings_dup_host (network_settings);
+	user = camel_network_settings_dup_user (network_settings);
+
+	g_object_unref (settings);
 
 	if (brief) {
 		/* Translators: The %s is replaced with a server's host name */
-		return g_strdup_printf(_("Exchange MAPI server %s"), host);
+		name = g_strdup_printf(_("Exchange MAPI server %s"), host);
 	} else {
 		/*To translators : Example string : Exchange MAPI service for
 		  _username_ on _server host name__*/
-		return g_strdup_printf(_("Exchange MAPI service for %s on %s"),
+		name = g_strdup_printf(_("Exchange MAPI service for %s on %s"),
 				       user, host);
 	}
+
+	g_free (host);
+	g_free (user);
+
+	return name;
 }
 
 static gboolean
@@ -2089,6 +2122,7 @@ mapi_connect_sync (CamelService *service,
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
 	CamelServiceConnectionStatus status;
 	CamelSession *session;
+	CamelSettings *settings;
 	EMapiProfileData empd = { 0 };
 	uint64_t current_size = -1, receive_quota = -1, send_quota = -1;
 	gchar *name;
@@ -2113,7 +2147,9 @@ mapi_connect_sync (CamelService *service,
 	name = camel_service_get_name (service, TRUE);
 	camel_operation_push_message (cancellable, _("Connecting to '%s'"), name);
 
-	e_mapi_util_profiledata_from_settings (&empd, CAMEL_MAPI_SETTINGS (camel_service_get_settings (service)));
+	settings = camel_service_ref_settings (service);
+	e_mapi_util_profiledata_from_settings (&empd, CAMEL_MAPI_SETTINGS (settings));
+	g_object_unref (settings);
 
 	if (!camel_session_authenticate_sync (session, service, empd.krb_sso ? "MAPIKRB" : NULL, cancellable, error)) {
 		camel_operation_pop_message (cancellable);
@@ -2535,7 +2571,7 @@ mapi_authenticate_sync (CamelService *service,
 	GError *mapi_error = NULL;
 	GString *password_str;
 
-	settings = camel_service_get_settings (service);
+	settings = camel_service_ref_settings (service);
 	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
 	network_settings = CAMEL_NETWORK_SETTINGS (settings);
 
@@ -2546,8 +2582,10 @@ mapi_authenticate_sync (CamelService *service,
 	profile = camel_mapi_settings_get_profile (mapi_settings);
 
 	if (empd.krb_sso) {
-		if (!e_mapi_util_trigger_krb_auth (&empd, error))
+		if (!e_mapi_util_trigger_krb_auth (&empd, error)) {
+			g_object_unref (settings);
 			return CAMEL_AUTHENTICATION_ERROR;
+		}
 
 		password = NULL;
 	} else {
@@ -2558,6 +2596,7 @@ mapi_authenticate_sync (CamelService *service,
 				error, CAMEL_SERVICE_ERROR,
 				CAMEL_SERVICE_ERROR_CANT_AUTHENTICATE,
 				_("Authentication password not available"));
+			g_object_unref (settings);
 			return CAMEL_AUTHENTICATION_ERROR;
 		}
 	}
@@ -2598,6 +2637,8 @@ mapi_authenticate_sync (CamelService *service,
 			g_clear_error (&mapi_error);
 		result = CAMEL_AUTHENTICATION_ERROR;
 	}
+
+	g_object_unref (settings);
 
 	return result;
 }
