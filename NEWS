@@ -1,3 +1,17 @@
+evolution-mapi 3.4.4  2012-08-13
+--------------------------------
+
+Bugs:
+	Bug #637291 - Can't send to both internal and external recipients (Milan Crha)
+	Bug #678952 - Not all named properties are converted to server tags (Milan Crha)
+	Bug #679041 - Incorrect date in Sent Items folder (Milan Crha)
+
+Miscellanous:
+	Use SetProps if write property as stream failed (Milan Crha)
+	Kerberos authentication did not work (Milan Crha)
+	Could free uninitialized memory in e_mapi_connection_close_folder() (Milan Crha)
+	Could leave EBookBackend local cache locked for updates (Milan Crha)
+
 evolution-mapi 3.4.3  2012-06-18
 --------------------------------
 
