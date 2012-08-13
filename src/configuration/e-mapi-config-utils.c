@@ -1064,7 +1064,7 @@ action_folder_permissions_source_cb (GtkAction *action,
 	extension_name = e_source_camel_get_extension_name ("mapi");
 	extension = e_source_get_extension (parent_source, extension_name);
 
-	settings = e_source_camel_ref_settings (extension);
+	settings = e_source_camel_get_settings (extension);
 
 	e_mapi_edit_folder_permissions (NULL,
 		registry,
@@ -1078,8 +1078,6 @@ action_folder_permissions_source_cb (GtkAction *action,
 		E_MAPI_FOLDER_CATEGORY_PERSONAL,
 		foreign_username,
 		strstr (gtk_action_get_name (action), "calendar") != NULL);
-
-	g_object_unref (settings);
 
 	g_object_unref (source);
 	g_object_unref (parent_source);
@@ -1530,7 +1528,7 @@ e_mapi_download_folder_structure_thread (GObject *source_obj,
 
 	extension = e_source_get_extension (source, extension_name);
 
-	settings = e_source_camel_ref_settings (extension);
+	settings = e_source_camel_get_settings (extension);
 
 	conn = e_mapi_config_utils_open_connection_for (NULL,
 		fsd->registry,
@@ -1538,8 +1536,6 @@ e_mapi_download_folder_structure_thread (GObject *source_obj,
 		CAMEL_MAPI_SETTINGS (settings),
 		cancellable,
 		perror);
-
-	g_object_unref (settings);
 
 	if (!conn)
 		return;

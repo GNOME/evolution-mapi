@@ -122,7 +122,7 @@ mapi_send_to_sync (CamelTransport *transport,
 			if (g_strcmp0 (my_uid, store_uid) == 0 ||
 			    g_str_has_prefix (my_uid, store_uid) ||
 			    g_str_has_prefix (store_uid, my_uid)) {
-				settings = camel_service_dup_settings (store);
+				settings = camel_service_ref_settings (store);
 				profile = camel_mapi_settings_dup_profile (CAMEL_MAPI_SETTINGS (settings));
 				g_object_unref (settings);
 			}

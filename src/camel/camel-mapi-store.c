@@ -1932,7 +1932,7 @@ mapi_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 			cancellable,
 			error);
 
-		g_object_unref (profile);
+		g_object_unref (settings);
 	}
 
 	if ((msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC) != 0 &&
