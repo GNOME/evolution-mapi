@@ -1456,6 +1456,7 @@ struct EMapiFolderStructureData
 	ESource *source;
 	ESource *child_source;
 	ESourceRegistry *registry;
+	ESourceConfig *config;
 };
 
 static void
@@ -1468,7 +1469,10 @@ e_mapi_folder_structure_data_free (gpointer ptr)
 
 	e_mapi_folder_free_list (fsd->folders);
 	g_object_unref (fsd->tree_view);
-	g_object_unref (fsd->source);
+	if (fsd->source)
+		g_object_unref (fsd->source);
+	if (fsd->config)
+		g_object_unref (fsd->config);
 	g_object_unref (fsd->child_source);
 	g_object_unref (fsd->registry);
 	g_free (fsd);
@@ -1550,12 +1554,29 @@ e_mapi_download_folder_structure_thread (GObject *source_obj,
 		g_object_unref (conn);
 }
 
-static gboolean
-e_mapi_invoke_folder_structure_download_idle (gpointer user_data)
+static void
+tree_view_mapped_cb (GObject *tree_view)
 {
-	struct EMapiFolderStructureData *fsd = user_data;
+	const struct EMapiFolderStructureData *old_fsd = g_object_get_data (tree_view, "mapi-fsd-pointer");
+	struct EMapiFolderStructureData *fsd;
+	GtkTreeViewColumn *column;
+	ESource *parent_source;
 
-	g_return_val_if_fail (fsd != NULL, FALSE);
+	g_return_if_fail (old_fsd != NULL);
+
+	parent_source = e_source_config_get_collection_source (old_fsd->config);
+	g_return_if_fail (parent_source != NULL);
+
+	fsd = g_new0 (struct EMapiFolderStructureData, 1);
+	fsd->folder_type = old_fsd->folder_type;
+	fsd->folders = NULL;
+	fsd->tree_view = g_object_ref (old_fsd->tree_view);
+	fsd->source = g_object_ref (parent_source);
+	fsd->child_source = g_object_ref (old_fsd->child_source);
+	fsd->registry = g_object_ref (old_fsd->registry);
+
+	column = gtk_tree_view_get_column (GTK_TREE_VIEW (tree_view), 0);
+	gtk_tree_view_column_set_title (column, e_source_get_display_name (parent_source));
 
 	e_mapi_config_utils_run_in_thread_with_feedback (e_mapi_config_utils_get_widget_toplevel_window (fsd->tree_view),
 		G_OBJECT (fsd->source),
@@ -1564,8 +1585,6 @@ e_mapi_invoke_folder_structure_download_idle (gpointer user_data)
 		e_mapi_download_folder_structure_idle,
 		fsd,
 		e_mapi_folder_structure_data_free);
-
-	return FALSE;
 }
 
 void
@@ -1657,7 +1676,6 @@ e_mapi_config_utils_insert_widgets (ESourceConfigBackend *backend,
 		GtkTreeViewColumn *column;
 		GtkTreeStore *tree_store;
 		GtkWidget *tree_view, *scrolled_window;
-		ESource *parent_source;
 
 		content_grid = GTK_GRID (gtk_grid_new ());
 		gtk_grid_set_row_spacing (content_grid, 2);
@@ -1670,9 +1688,8 @@ e_mapi_config_utils_insert_widgets (ESourceConfigBackend *backend,
 
 		tree_store = gtk_tree_store_new (NUM_COLS, G_TYPE_STRING, G_TYPE_UINT64, G_TYPE_POINTER);
 
-		parent_source = e_source_config_get_collection_source (config);
 		renderer = gtk_cell_renderer_text_new ();
-		column = gtk_tree_view_column_new_with_attributes (e_source_get_display_name (parent_source), renderer, "text", NAME_COL, NULL);
+		column = gtk_tree_view_column_new_with_attributes ("", renderer, "text", NAME_COL, NULL);
 		tree_view = gtk_tree_view_new_with_model (GTK_TREE_MODEL (tree_store));
 		gtk_tree_view_append_column (GTK_TREE_VIEW (tree_view), column);
 		g_object_set (tree_view, "expander-column", column, "headers-visible", TRUE, NULL);
@@ -1696,11 +1713,12 @@ e_mapi_config_utils_insert_widgets (ESourceConfigBackend *backend,
 			fsd->folder_type = folder_type;
 			fsd->folders = NULL;
 			fsd->tree_view = g_object_ref (tree_view);
-			fsd->source = g_object_ref (parent_source);
+			fsd->config = g_object_ref (config);
 			fsd->child_source = g_object_ref (scratch_source);
 			fsd->registry = g_object_ref (e_source_config_get_registry (config));
 
-			g_idle_add (e_mapi_invoke_folder_structure_download_idle, fsd);
+			g_signal_connect_after (tree_view, "map", G_CALLBACK (tree_view_mapped_cb), NULL);
+			g_object_set_data_full (G_OBJECT (tree_view), "mapi-fsd-pointer", fsd, e_mapi_folder_structure_data_free);
 		}
 
 		gtk_widget_set_hexpand (GTK_WIDGET (content_grid), TRUE);

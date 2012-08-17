@@ -78,6 +78,35 @@ mapi_backend_queue_auth_session (EMapiBackend *backend)
 		NULL, NULL, NULL);
 }
 
+static void
+add_remote_sources (EMapiBackend *backend)
+{
+	GList *old_sources, *iter;
+	ESourceRegistryServer *registry;
+
+	registry = e_collection_backend_ref_server (E_COLLECTION_BACKEND (backend));
+	old_sources = e_collection_backend_claim_all_resources (E_COLLECTION_BACKEND (backend));
+	for (iter = old_sources; iter; iter = iter->next) {
+		ESource *source = iter->data;
+		ESourceMapiFolder *extension;
+		const gchar *foreign_username;
+
+		if (!e_source_has_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER))
+			continue;
+
+		/* foreign folders are just added */
+		extension = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
+		foreign_username = e_source_mapi_folder_get_foreign_username (extension);
+		if (e_source_mapi_folder_is_public (extension) || (foreign_username && *foreign_username)) {
+			e_server_side_source_set_writable (E_SERVER_SIDE_SOURCE (source), TRUE);
+			e_server_side_source_set_remote_deletable (E_SERVER_SIDE_SOURCE (source), TRUE);
+			e_source_registry_server_add_source (registry, source);
+		}
+	}
+	g_list_free_full (old_sources, g_object_unref);
+	g_object_unref (registry);
+}
+
 struct SyndFoldersData
 {
 	EMapiBackend *backend;
@@ -177,6 +206,8 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 				NULL,
 				NULL)) {
 				color_seed++;
+				e_server_side_source_set_writable (E_SERVER_SIDE_SOURCE (source), TRUE);
+				e_server_side_source_set_remote_deletable (E_SERVER_SIDE_SOURCE (source), TRUE);
 				e_source_registry_server_add_source (server, source);
 			}
 
@@ -257,6 +288,8 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 		g_object_unref (source);
 	}
 
+	add_remote_sources (backend);
+
 	g_list_free_full (configured, g_object_unref);
 	g_object_unref (server);
 
@@ -277,6 +310,23 @@ mapi_backend_source_changed_cb (ESource *source,
 	    e_backend_get_online (E_BACKEND (backend)) &&
 	    backend->priv->need_update_folders)
 		mapi_backend_queue_auth_session (backend);
+}
+
+static void
+mapi_backend_constructed (GObject *object)
+{
+	ESource *source;
+
+	/* Chain up to parent's constructed() method. */
+	G_OBJECT_CLASS (e_mapi_backend_parent_class)->constructed (object);
+
+	source = e_backend_get_source (E_BACKEND (object));
+
+	/* XXX Wondering if we ought to delay this until after folders
+	 *     are initially populated, just to remove the possibility
+	 *     of weird races with clients trying to create folders. */
+	e_server_side_source_set_remote_creatable (
+		E_SERVER_SIDE_SOURCE (source), TRUE);
 }
 
 static void
@@ -449,6 +499,78 @@ mapi_backend_child_removed (ECollectionBackend *backend,
 		child_removed (backend, child_source);
 }
 
+static gboolean
+mapi_backend_create_resource_sync (ECollectionBackend *backend,
+                                   ESource *source,
+                                   GCancellable *cancellable,
+                                   GError **error)
+{
+	ESourceRegistryServer *server;
+	ESource *parent_source;
+	const gchar *cache_dir;
+	const gchar *parent_uid;
+
+	if (!e_source_has_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER)) {
+		g_set_error (
+			error, G_IO_ERROR,
+			G_IO_ERROR_INVALID_ARGUMENT,
+			_("Data source '%s' does not represent a MAPI folder"),
+			e_source_get_display_name (source));
+		return FALSE;
+	}
+
+	/* UI part takes care of the remote folder creation, if needed,
+	   thus just accept the source here */
+
+	/* Configure the source as a collection member. */
+	parent_source = e_backend_get_source (E_BACKEND (backend));
+	parent_uid = e_source_get_uid (parent_source);
+	e_source_set_parent (source, parent_uid);
+
+	/* Changes should be written back to the cache directory. */
+	cache_dir = e_collection_backend_get_cache_dir (backend);
+	e_server_side_source_set_write_directory (
+		E_SERVER_SIDE_SOURCE (source), cache_dir);
+
+	/* Set permissions for clients. */
+	e_server_side_source_set_writable (
+		E_SERVER_SIDE_SOURCE (source), TRUE);
+	e_server_side_source_set_remote_deletable (
+		E_SERVER_SIDE_SOURCE (source), TRUE);
+
+	server = e_collection_backend_ref_server (backend);
+	e_source_registry_server_add_source (server, source);
+	g_object_unref (server);
+
+	return TRUE;
+}
+
+static gboolean
+mapi_backend_delete_resource_sync (ECollectionBackend *backend,
+                                   ESource *source,
+                                   GCancellable *cancellable,
+                                   GError **error)
+{
+	ESourceRegistryServer *server;
+
+	if (!e_source_has_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER)) {
+		g_set_error (
+			error, G_IO_ERROR,
+			G_IO_ERROR_INVALID_ARGUMENT,
+			_("Data source '%s' does not represent a MAPI folder"),
+			e_source_get_display_name (source));
+		return FALSE;
+	}
+
+	/* respective backends are taking care of cache removal
+	   same as remote folder removal, if needed */
+	server = e_collection_backend_ref_server (backend);
+	e_source_registry_server_remove_source (server, source);
+	g_object_unref (server);
+
+	return TRUE;
+}
+
 static ESourceAuthenticationResult
 mapi_backend_try_password_sync (ESourceAuthenticator *authenticator,
 				const GString *password,
@@ -521,6 +643,7 @@ e_mapi_backend_class_init (EMapiBackendClass *class)
 	g_type_class_add_private (class, sizeof (EMapiBackendPrivate));
 
 	object_class = G_OBJECT_CLASS (class);
+	object_class->constructed = mapi_backend_constructed;
 	object_class->dispose = mapi_backend_dispose;
 	object_class->finalize = mapi_backend_finalize;
 
@@ -529,6 +652,8 @@ e_mapi_backend_class_init (EMapiBackendClass *class)
 	backend_class->dup_resource_id = mapi_backend_dup_resource_id;
 	backend_class->child_added = mapi_backend_child_added;
 	backend_class->child_removed = mapi_backend_child_removed;
+	backend_class->create_resource_sync = mapi_backend_create_resource_sync;
+	backend_class->delete_resource_sync = mapi_backend_delete_resource_sync;
 
 	/* This generates an ESourceCamel subtype for CamelMapiSettings. */
 	e_source_camel_generate_subtype ("mapi", CAMEL_TYPE_MAPI_SETTINGS);
