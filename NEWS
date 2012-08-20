@@ -1,3 +1,18 @@
+evolution-mapi 3.5.90 2012-08-20
+--------------------------------
+
+Miscellanous:
+	Update git.mk. (Matthew Barnes)
+	Adapt to CamelSession API changes. (Matthew Barnes)
+	Adapt to CamelService API changes. (Matthew Barnes)
+	Fix a build break after recent API changes in eds (Milan Crha)
+	Partially implement add/remove of ESource-s (Milan Crha)
+
+Translations:
+	Aurimas Černius (lt)
+	Matej Urbančič (sl)
+	Mario Blättermann (de)
+
 evolution-mapi 3.5.5  2012-08-06
 --------------------------------
 
