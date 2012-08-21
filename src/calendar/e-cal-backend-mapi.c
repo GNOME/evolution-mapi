@@ -805,7 +805,7 @@ update_local_cache (ECalBackendMAPI *cbmapi, GCancellable *cancellable)
 	struct ListCalendarObjectsData lco;
 	GSList *iter, *components;
 	mapi_object_t obj_folder;
-	gboolean success;
+	gboolean success = FALSE;
 	GError *mapi_error = NULL;
 	GHashTable *comps_by_mids;
 	gboolean partial_update;
