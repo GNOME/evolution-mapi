@@ -16,9 +16,10 @@
  *
  */
 
-#include "e-mapi-backend.h"
-
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
+
 #include <glib/gi18n-lib.h>
 
 #include <e-mapi-connection.h>
@@ -26,6 +27,9 @@
 #include <e-mapi-utils.h>
 #include <e-source-mapi-folder.h>
 #include <camel-mapi-settings.h>
+
+#include "e-mapi-backend-authenticator.h"
+#include "e-mapi-backend.h"
 
 #define E_MAPI_BACKEND_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE \
@@ -546,12 +550,47 @@ mapi_backend_create_resource_sync (ECollectionBackend *backend,
 }
 
 static gboolean
+mapi_backend_delete_resource_cb (EBackend *backend,
+				 CamelMapiSettings *settings,
+				 EMapiConnection *conn,
+				 gpointer user_data,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	ESource *source = user_data;
+	ESourceMapiFolder *folder_ext;
+	mapi_object_t *obj_store = NULL;
+	const gchar *foreign_username;
+	gboolean res = FALSE;
+	guint64 fid;
+
+	g_return_val_if_fail (e_source_has_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER), FALSE);
+
+	folder_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
+	g_return_val_if_fail (!e_source_mapi_folder_is_public (folder_ext), FALSE);
+
+	foreign_username = e_source_mapi_folder_get_foreign_username (folder_ext);
+	g_return_val_if_fail (!foreign_username || !*foreign_username, FALSE);
+
+	fid = e_source_mapi_folder_get_id (folder_ext);
+	g_return_val_if_fail (fid != 0, FALSE);
+
+	if (e_mapi_connection_peek_store (conn, FALSE, NULL, &obj_store, cancellable, error))
+		res = e_mapi_connection_remove_folder (conn, obj_store, fid, cancellable, error);
+
+	return res;
+}
+
+static gboolean
 mapi_backend_delete_resource_sync (ECollectionBackend *backend,
                                    ESource *source,
                                    GCancellable *cancellable,
                                    GError **error)
 {
 	ESourceRegistryServer *server;
+	CamelMapiSettings *settings;
+	ESourceMapiFolder *folder_ext;
+	const gchar *foreign_username;
 
 	if (!e_source_has_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER)) {
 		g_set_error (
@@ -562,11 +601,20 @@ mapi_backend_delete_resource_sync (ECollectionBackend *backend,
 		return FALSE;
 	}
 
-	/* respective backends are taking care of cache removal
-	   same as remote folder removal, if needed */
-	server = e_collection_backend_ref_server (backend);
-	e_source_registry_server_remove_source (server, source);
-	g_object_unref (server);
+	settings = mapi_backend_get_settings (E_MAPI_BACKEND (backend));
+	g_return_val_if_fail (settings != NULL, FALSE);
+
+	folder_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
+	foreign_username = e_source_mapi_folder_get_foreign_username (folder_ext);
+
+	if (e_source_mapi_folder_is_public (folder_ext) ||
+	    (foreign_username && *foreign_username) ||
+	    e_mapi_backend_authenticator_run (
+		E_BACKEND (backend), settings, mapi_backend_delete_resource_cb, source, cancellable, error)) {
+		server = e_collection_backend_ref_server (backend);
+		e_source_registry_server_remove_source (server, source);
+		g_object_unref (server);
+	}
 
 	return TRUE;
 }
