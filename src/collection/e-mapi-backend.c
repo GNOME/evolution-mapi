@@ -319,18 +319,23 @@ mapi_backend_source_changed_cb (ESource *source,
 static void
 mapi_backend_constructed (GObject *object)
 {
+	EBackend *backend = E_BACKEND (object);
 	ESource *source;
 
 	/* Chain up to parent's constructed() method. */
 	G_OBJECT_CLASS (e_mapi_backend_parent_class)->constructed (object);
 
-	source = e_backend_get_source (E_BACKEND (object));
+	source = e_backend_get_source (backend);
 
 	/* XXX Wondering if we ought to delay this until after folders
 	 *     are initially populated, just to remove the possibility
 	 *     of weird races with clients trying to create folders. */
 	e_server_side_source_set_remote_creatable (
 		E_SERVER_SIDE_SOURCE (source), TRUE);
+
+	g_signal_connect (
+		source, "changed",
+		G_CALLBACK (mapi_backend_source_changed_cb), backend);
 }
 
 static void
@@ -379,10 +384,6 @@ mapi_backend_populate (ECollectionBackend *backend)
 	 * hierarchy immediately on startup, schedule an authentication
 	 * session first thing. */
 	mapi_backend_queue_auth_session (mapi_backend);
-
-	g_signal_connect (
-		source, "changed",
-		G_CALLBACK (mapi_backend_source_changed_cb), backend);
 }
 
 static gchar *
