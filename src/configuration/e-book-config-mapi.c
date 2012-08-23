@@ -40,6 +40,13 @@ book_config_mapi_insert_widgets (ESourceConfigBackend *backend,
 	e_mapi_config_utils_insert_widgets (backend, scratch_source);
 }
 
+static gboolean
+book_config_mapi_check_complete (ESourceConfigBackend *backend,
+				 ESource *scratch_source)
+{
+	return e_mapi_config_utils_check_complete (scratch_source);
+}
+
 static void
 e_book_config_mapi_class_init (EBookConfigMapiClass *class)
 {
@@ -53,6 +60,7 @@ e_book_config_mapi_class_init (EBookConfigMapiClass *class)
 	backend_class->backend_name = "mapi";
 	backend_class->allow_creation = book_config_mapi_allow_creation;
 	backend_class->insert_widgets = book_config_mapi_insert_widgets;
+	backend_class->check_complete = book_config_mapi_check_complete;
 }
 
 static void

@@ -1565,6 +1565,10 @@ tree_view_mapped_cb (GObject *tree_view)
 	g_return_if_fail (old_fsd != NULL);
 
 	parent_source = e_source_config_get_collection_source (old_fsd->config);
+	if (!parent_source)
+		parent_source = e_source_registry_find_extension (
+			old_fsd->registry, old_fsd->child_source, E_SOURCE_EXTENSION_COLLECTION);
+
 	g_return_if_fail (parent_source != NULL);
 
 	fsd = g_new0 (struct EMapiFolderStructureData, 1);
@@ -1727,4 +1731,39 @@ e_mapi_config_utils_insert_widgets (ESourceConfigBackend *backend,
 
 		e_source_config_insert_widget (config, scratch_source, NULL, GTK_WIDGET (content_grid));
 	}
+}
+
+gboolean
+e_mapi_config_utils_check_complete (ESource *scratch_source)
+{
+	ESourceBackend *backend_ext = NULL;
+	ESourceMapiFolder *folder_ext;
+
+	g_return_val_if_fail (scratch_source != NULL, FALSE);
+
+	if (e_source_has_extension (scratch_source, E_SOURCE_EXTENSION_ADDRESS_BOOK)) {
+		backend_ext = e_source_get_extension (scratch_source, E_SOURCE_EXTENSION_ADDRESS_BOOK);
+	} else if (e_source_has_extension (scratch_source, E_SOURCE_EXTENSION_CALENDAR)) {
+		backend_ext = e_source_get_extension (scratch_source, E_SOURCE_EXTENSION_CALENDAR);
+	} else if (e_source_has_extension (scratch_source, E_SOURCE_EXTENSION_TASK_LIST)) {
+		backend_ext = e_source_get_extension (scratch_source, E_SOURCE_EXTENSION_TASK_LIST);
+	} else if (e_source_has_extension (scratch_source, E_SOURCE_EXTENSION_MEMO_LIST)) {
+		backend_ext = e_source_get_extension (scratch_source, E_SOURCE_EXTENSION_MEMO_LIST);
+	}
+
+	if (!backend_ext || g_strcmp0 (e_source_backend_get_backend_name (backend_ext), "mapi") != 0)
+		return TRUE;
+
+	folder_ext = e_source_get_extension (scratch_source, E_SOURCE_EXTENSION_MAPI_FOLDER);
+	if (!folder_ext)
+		return FALSE;
+
+	if (!e_source_mapi_folder_get_id (folder_ext) &&
+	    !e_mapi_config_utils_is_online ())
+		return FALSE;
+
+	/* does not have a parent-fid which is needed for folder creation on server */
+	return e_source_mapi_folder_get_parent_id (folder_ext) ||
+		e_source_mapi_folder_get_foreign_username (folder_ext) ||
+		e_source_mapi_folder_is_public (folder_ext);
 }

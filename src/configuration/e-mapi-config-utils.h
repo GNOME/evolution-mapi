@@ -70,5 +70,6 @@ GtkWindow *		e_mapi_config_utils_get_widget_toplevel_window		(GtkWidget *widget)
 
 void			e_mapi_config_utils_insert_widgets			(ESourceConfigBackend *backend,
 										 ESource *scratch_source);
+gboolean		e_mapi_config_utils_check_complete			(ESource *scratch_source);
 
 #endif /* E_MAPI_CONFIG_UTILS */

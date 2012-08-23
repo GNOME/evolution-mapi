@@ -504,6 +504,72 @@ mapi_backend_child_removed (ECollectionBackend *backend,
 }
 
 static gboolean
+mapi_backend_create_resource_cb (EBackend *backend,
+				 CamelMapiSettings *settings,
+				 EMapiConnection *conn,
+				 gpointer user_data,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	ESourceBackend *backend_ext = NULL;
+	const gchar *folder_type_str = NULL;
+	ESource *source = user_data;
+	ESourceMapiFolder *folder_ext;
+	mapi_object_t obj_folder;
+	const gchar *foreign_username;
+	gboolean res = FALSE;
+	guint64 fid;
+
+	g_return_val_if_fail (e_source_has_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER), FALSE);
+
+	folder_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
+	foreign_username = e_source_mapi_folder_get_foreign_username (folder_ext);
+
+	fid = e_source_mapi_folder_get_id (folder_ext);
+	g_return_val_if_fail (fid == 0, FALSE);
+
+	if (e_source_has_extension (source, E_SOURCE_EXTENSION_ADDRESS_BOOK)) {
+		backend_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_ADDRESS_BOOK);
+		folder_type_str = IPF_CONTACT;
+	} else if (e_source_has_extension (source, E_SOURCE_EXTENSION_CALENDAR)) {
+		backend_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_CALENDAR);
+		folder_type_str = IPF_APPOINTMENT;
+	} else if (e_source_has_extension (source, E_SOURCE_EXTENSION_TASK_LIST)) {
+		backend_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_TASK_LIST);
+		folder_type_str = IPF_TASK;
+	} else if (e_source_has_extension (source, E_SOURCE_EXTENSION_MEMO_LIST)) {
+		backend_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_MEMO_LIST);
+		folder_type_str = IPF_STICKYNOTE;
+	}
+
+	if (!backend_ext || g_strcmp0 (e_source_backend_get_backend_name (backend_ext), "mapi") != 0)
+		return FALSE;
+
+	fid = e_source_mapi_folder_get_parent_id (folder_ext);
+
+	if (foreign_username && *foreign_username)
+		res = e_mapi_connection_open_foreign_folder (conn, foreign_username, fid, &obj_folder, cancellable, error);
+	else if (e_source_mapi_folder_is_public (folder_ext))
+		res = e_mapi_connection_open_public_folder (conn, fid, &obj_folder, cancellable, error);
+	else
+		res = e_mapi_connection_open_personal_folder (conn, fid, &obj_folder, cancellable, error);
+
+	if (res) {
+		fid = 0;
+		if (!e_mapi_connection_create_folder (conn, &obj_folder, e_source_get_display_name (source), folder_type_str, &fid, cancellable, error))
+			fid = 0;
+		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, error);
+
+		if (fid)
+			e_source_mapi_folder_set_id (folder_ext, fid);
+		else
+			res = FALSE;
+	}
+
+	return res;
+}
+
+static gboolean
 mapi_backend_create_resource_sync (ECollectionBackend *backend,
                                    ESource *source,
                                    GCancellable *cancellable,
@@ -511,6 +577,9 @@ mapi_backend_create_resource_sync (ECollectionBackend *backend,
 {
 	ESourceRegistryServer *server;
 	ESource *parent_source;
+	CamelMapiSettings *settings;
+	ESourceMapiFolder *folder_ext;
+	const gchar *foreign_username;
 	const gchar *cache_dir;
 	const gchar *parent_uid;
 
@@ -523,8 +592,17 @@ mapi_backend_create_resource_sync (ECollectionBackend *backend,
 		return FALSE;
 	}
 
-	/* UI part takes care of the remote folder creation, if needed,
-	   thus just accept the source here */
+	settings = mapi_backend_get_settings (E_MAPI_BACKEND (backend));
+	g_return_val_if_fail (settings != NULL, FALSE);
+
+	folder_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
+	foreign_username = e_source_mapi_folder_get_foreign_username (folder_ext);
+
+	if (!e_source_mapi_folder_is_public (folder_ext) &&
+	    !(foreign_username && *foreign_username) &&
+	    !e_mapi_backend_authenticator_run (
+		E_BACKEND (backend), settings, mapi_backend_create_resource_cb, source, cancellable, error))
+		return FALSE;
 
 	/* Configure the source as a collection member. */
 	parent_source = e_backend_get_source (E_BACKEND (backend));
@@ -607,14 +685,15 @@ mapi_backend_delete_resource_sync (ECollectionBackend *backend,
 	folder_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
 	foreign_username = e_source_mapi_folder_get_foreign_username (folder_ext);
 
-	if (e_source_mapi_folder_is_public (folder_ext) ||
-	    (foreign_username && *foreign_username) ||
-	    e_mapi_backend_authenticator_run (
-		E_BACKEND (backend), settings, mapi_backend_delete_resource_cb, source, cancellable, error)) {
-		server = e_collection_backend_ref_server (backend);
-		e_source_registry_server_remove_source (server, source);
-		g_object_unref (server);
-	}
+	if (!e_source_mapi_folder_is_public (folder_ext) &&
+	    !(foreign_username && *foreign_username) &&
+	    !e_mapi_backend_authenticator_run (
+		E_BACKEND (backend), settings, mapi_backend_delete_resource_cb, source, cancellable, error))
+		return FALSE;
+
+	server = e_collection_backend_ref_server (backend);
+	e_source_registry_server_remove_source (server, source);
+	g_object_unref (server);
 
 	return TRUE;
 }

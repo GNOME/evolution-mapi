@@ -40,6 +40,13 @@ cal_config_mapi_insert_widgets (ESourceConfigBackend *backend,
 	e_mapi_config_utils_insert_widgets (backend, scratch_source);
 }
 
+static gboolean
+cal_config_mapi_check_complete (ESourceConfigBackend *backend,
+				ESource *scratch_source)
+{
+	return e_mapi_config_utils_check_complete (scratch_source);
+}
+
 static void
 e_cal_config_mapi_class_init (ECalConfigMapiClass *class)
 {
@@ -53,6 +60,7 @@ e_cal_config_mapi_class_init (ECalConfigMapiClass *class)
 	backend_class->backend_name = "mapi";
 	backend_class->allow_creation = cal_config_mapi_allow_creation;
 	backend_class->insert_widgets = cal_config_mapi_insert_widgets;
+	backend_class->check_complete = cal_config_mapi_check_complete;
 }
 
 static void
