@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2012-08-07 07:38+0000\n"
-"PO-Revision-Date: 2012-08-07 12:22+0100\n"
+"POT-Creation-Date: 2012-08-23 14:33+0000\n"
+"PO-Revision-Date: 2012-08-29 08:46+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: \n"
@@ -29,8 +29,8 @@ msgstr "Iskanje"
 #: ../src/addressbook/e-book-backend-mapi.c:1738
 #: ../src/calendar/e-cal-backend-mapi.c:193
 #: ../src/calendar/e-cal-backend-mapi.c:542
-#: ../src/camel/camel-mapi-folder.c:1862
-#: ../src/camel/camel-mapi-folder.c:1938
+#: ../src/camel/camel-mapi-folder.c:1871
+#: ../src/camel/camel-mapi-folder.c:1947
 msgid "Unknown error"
 msgstr "Neznana napaka"
 
@@ -157,87 +157,87 @@ msgstr "Trenutno predmetov s strežnika ni mogoče odstraniti"
 msgid "Failed to get Free/Busy data"
 msgstr "Pridobivanje podatkov prostosti/zasedenosti je spodletelo"
 
-#: ../src/camel/camel-mapi-folder.c:774
+#: ../src/camel/camel-mapi-folder.c:777
 #, c-format
 msgid "Refreshing folder '%s'"
 msgstr "Osveževanje mape '%s'"
 
-#: ../src/camel/camel-mapi-folder.c:841
+#: ../src/camel/camel-mapi-folder.c:844
 #, c-format
 msgid "Downloading messages in folder '%s'"
 msgstr "Prejemanje sporočil v mapo '%s'"
 
-#: ../src/camel/camel-mapi-folder.c:928
-#: ../src/camel/camel-mapi-folder.c:1503
+#: ../src/camel/camel-mapi-folder.c:931
+#: ../src/camel/camel-mapi-folder.c:1512
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Sporočilo ni na voljo v načinu brez povezave."
 
-#: ../src/camel/camel-mapi-folder.c:938
-#: ../src/camel/camel-mapi-folder.c:956
+#: ../src/camel/camel-mapi-folder.c:941
+#: ../src/camel/camel-mapi-folder.c:959
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Pridobivanje predmetov je spodletelo: %s"
 
-#: ../src/camel/camel-mapi-folder.c:943
-#: ../src/camel/camel-mapi-folder.c:961
+#: ../src/camel/camel-mapi-folder.c:946
+#: ../src/camel/camel-mapi-folder.c:964
 msgid "Fetching items failed"
 msgstr "Neuspešno branje predmetov"
 
-#: ../src/camel/camel-mapi-folder.c:1195
+#: ../src/camel/camel-mapi-folder.c:1204
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Ni mogoče pripeti sporočila v mapo '%s'"
 
-#: ../src/camel/camel-mapi-folder.c:1204
-#: ../src/camel/camel-mapi-folder.c:1232
+#: ../src/camel/camel-mapi-folder.c:1213
+#: ../src/camel/camel-mapi-folder.c:1241
 #, c-format
 msgid "Offline."
 msgstr "Nepovezano."
 
-#: ../src/camel/camel-mapi-folder.c:1313
+#: ../src/camel/camel-mapi-folder.c:1322
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "Praznjenje smeti je spodletelo: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1319
+#: ../src/camel/camel-mapi-folder.c:1328
 msgid "Failed to empty Trash"
 msgstr "Praznjenje smeti je spodletelo"
 
-#: ../src/camel/camel-mapi-folder.c:1488
+#: ../src/camel/camel-mapi-folder.c:1497
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Ni mogoče dobiti sporočila %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1489
+#: ../src/camel/camel-mapi-folder.c:1498
 msgid "No such message"
 msgstr "Ni takega sporočila"
 
-#: ../src/camel/camel-mapi-folder.c:1514
-#: ../src/camel/camel-mapi-folder.c:1544
+#: ../src/camel/camel-mapi-folder.c:1523
+#: ../src/camel/camel-mapi-folder.c:1553
 #, c-format
 msgid "Could not get message: %s"
 msgstr "Ni mogoče dobiti sporočila: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1520
-#: ../src/camel/camel-mapi-folder.c:1551
+#: ../src/camel/camel-mapi-folder.c:1529
+#: ../src/camel/camel-mapi-folder.c:1560
 #, c-format
 msgid "Could not get message"
 msgstr "Ni mogoče dobiti sporočila"
 
-#: ../src/camel/camel-mapi-folder.c:1918
+#: ../src/camel/camel-mapi-folder.c:1927
 msgid "Receive quota"
 msgstr "Pridobi omejitev uporabe"
 
-#: ../src/camel/camel-mapi-folder.c:1924
+#: ../src/camel/camel-mapi-folder.c:1933
 msgid "Send quota"
 msgstr "Pošlji omejitev uporabe"
 
-#: ../src/camel/camel-mapi-folder.c:1943
+#: ../src/camel/camel-mapi-folder.c:1952
 msgid "No quota information available"
 msgstr "Ni podatkov o omejitvi prostora"
 
-#: ../src/camel/camel-mapi-folder.c:2043
+#: ../src/camel/camel-mapi-folder.c:2055
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Ni mogoče naložiti povzetka za %s"
@@ -272,7 +272,7 @@ msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Neželeno pošto preveri le v mapi _dohodnih sporočil"
 
 #: ../src/camel/camel-mapi-provider.c:62
-#: ../src/configuration/e-mapi-config-utils.c:1605
+#: ../src/configuration/e-mapi-config-utils.c:1634
 msgid "Lis_ten for server notifications"
 msgstr "_Prisluhni obvestilom strežnika"
 
@@ -302,120 +302,120 @@ msgid "Cannot find folder in a local cache"
 msgstr "Ni mogoče najti mape v krajevnem predpomnilniku"
 
 #: ../src/camel/camel-mapi-store.c:481
-#: ../src/camel/camel-mapi-store.c:1168
+#: ../src/camel/camel-mapi-store.c:1183
 msgid "Folder list is not available in offline mode"
 msgstr "Seznam map v načinu brez povezave ni na voljo."
 
-#: ../src/camel/camel-mapi-store.c:853
+#: ../src/camel/camel-mapi-store.c:858
 msgid "No public folder found"
 msgstr "Javne mape ni mogoče najti"
 
-#: ../src/camel/camel-mapi-store.c:853
+#: ../src/camel/camel-mapi-store.c:858
 msgid "No folder found"
 msgstr "Mape ni mogoče najti"
 
-#: ../src/camel/camel-mapi-store.c:1190
-#: ../src/camel/camel-mapi-store.c:2114
+#: ../src/camel/camel-mapi-store.c:1205
+#: ../src/camel/camel-mapi-store.c:2148
 #, c-format
 msgid "Connecting to '%s'"
 msgstr "Povezovanje s strežnikom '%s'"
 
-#: ../src/camel/camel-mapi-store.c:1249
+#: ../src/camel/camel-mapi-store.c:1264
 msgid "Cannot create MAPI folders in offline mode"
 msgstr "Map MAPI v načinu brez povezave ni mogoče ustvariti."
 
-#: ../src/camel/camel-mapi-store.c:1256
+#: ../src/camel/camel-mapi-store.c:1271
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "Ni mogoče ustvariti nove mape '%s'"
 
-#: ../src/camel/camel-mapi-store.c:1265
+#: ../src/camel/camel-mapi-store.c:1280
 #, c-format
 msgid "Authentication failed"
 msgstr "Overitev ni uspela"
 
-#: ../src/camel/camel-mapi-store.c:1275
+#: ../src/camel/camel-mapi-store.c:1290
 msgid "MAPI folders can be created only within mailbox of the logged user"
 msgstr "Mape MAPI je mogoče ustvariti le v poštnem predalu prijavljenega uporabnika"
 
-#: ../src/camel/camel-mapi-store.c:1288
-#: ../src/camel/camel-mapi-store.c:1393
+#: ../src/camel/camel-mapi-store.c:1303
+#: ../src/camel/camel-mapi-store.c:1408
 #, c-format
 msgid "Cannot find folder '%s'"
 msgstr "Ni mogoče najti mape '%s'"
 
-#: ../src/camel/camel-mapi-store.c:1338
+#: ../src/camel/camel-mapi-store.c:1353
 #, c-format
 msgid "Cannot create folder '%s': %s"
 msgstr "Ni mogoče ustvariti mape '%s': %s"
 
-#: ../src/camel/camel-mapi-store.c:1344
+#: ../src/camel/camel-mapi-store.c:1359
 #, c-format
 msgid "Cannot create folder '%s'"
 msgstr "Ni mogoče ustvariti mape '%s'"
 
-#: ../src/camel/camel-mapi-store.c:1371
-#: ../src/camel/camel-mapi-store.c:1383
+#: ../src/camel/camel-mapi-store.c:1386
+#: ../src/camel/camel-mapi-store.c:1398
 msgid "Cannot delete MAPI folders in offline mode"
 msgstr "Map MAPI v načinu brez povezave ni mogoče izbrisati."
 
-#: ../src/camel/camel-mapi-store.c:1433
+#: ../src/camel/camel-mapi-store.c:1448
 #, c-format
 msgid "Cannot remove folder '%s': %s"
 msgstr "Ni mogoče odstraniti mape '%s': %s"
 
-#: ../src/camel/camel-mapi-store.c:1441
+#: ../src/camel/camel-mapi-store.c:1456
 #, c-format
 msgid "Cannot remove folder '%s'"
 msgstr "Ni mogoče odstraniti mape '%s'"
 
-#: ../src/camel/camel-mapi-store.c:1470
 #: ../src/camel/camel-mapi-store.c:1485
+#: ../src/camel/camel-mapi-store.c:1500
 msgid "Cannot rename MAPI folders in offline mode"
 msgstr "Map MAPI v načinu brez povezave ni mogoče preimenovati."
 
-#: ../src/camel/camel-mapi-store.c:1496
+#: ../src/camel/camel-mapi-store.c:1511
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
 msgstr "Mape MAPI '%s' ni mogoče preimenovati, saj ne obstaja."
 
-#: ../src/camel/camel-mapi-store.c:1507
+#: ../src/camel/camel-mapi-store.c:1522
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'"
 msgstr "Privzete mape MAPI '%s' ni mogoče preimenovati v '%s'."
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1533
-#: ../src/camel/camel-mapi-store.c:1566
-#: ../src/camel/camel-mapi-store.c:1644
+#: ../src/camel/camel-mapi-store.c:1548
+#: ../src/camel/camel-mapi-store.c:1581
+#: ../src/camel/camel-mapi-store.c:1659
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "Ni mogoče preimenovati mape MAPI '%s' v '%s'"
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
 #. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1558
-#: ../src/camel/camel-mapi-store.c:1637
+#: ../src/camel/camel-mapi-store.c:1573
+#: ../src/camel/camel-mapi-store.c:1652
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "Ni mogoče preimenovati mape MAPI `%s' v `%s': %s"
 
-#: ../src/camel/camel-mapi-store.c:1740
+#: ../src/camel/camel-mapi-store.c:1755
 msgid "Cannot subscribe MAPI folders in offline mode"
 msgstr "Map MAPI v načinu brez povezave ni mogoče naročiti."
 
-#: ../src/camel/camel-mapi-store.c:1757
+#: ../src/camel/camel-mapi-store.c:1772
 #, c-format
 msgid "Folder '%s' not found"
 msgstr "Mape '%s' ni mogoče najti"
 
-#: ../src/camel/camel-mapi-store.c:1869
+#: ../src/camel/camel-mapi-store.c:1890
 msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr "Map MAPI v načinu brez povezave ni mogoče preklicati."
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:2075
-#: ../src/camel/camel-mapi-transport.c:181
+#: ../src/camel/camel-mapi-store.c:2103
+#: ../src/camel/camel-mapi-transport.c:191
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI strežnik %s"
@@ -423,54 +423,60 @@ msgstr "Exchange MAPI strežnik %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:2079
-#: ../src/camel/camel-mapi-transport.c:184
+#: ../src/camel/camel-mapi-store.c:2107
+#: ../src/camel/camel-mapi-transport.c:194
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Exchange MAPI storitev za %s na %s"
 
-#: ../src/camel/camel-mapi-store.c:2099
+#: ../src/camel/camel-mapi-store.c:2133
 msgid "Cannot connect MAPI store in offline mode"
 msgstr "Shrambe MAPI v načinu brez povezave ni mogoče povezati."
 
-#: ../src/camel/camel-mapi-store.c:2142
+#: ../src/camel/camel-mapi-store.c:2178
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received or sent."
 msgstr "Poštni predal '%s' je poln, novih sporočil ne bo mogoče prejeti niti poslati."
 
-#: ../src/camel/camel-mapi-store.c:2144
+#: ../src/camel/camel-mapi-store.c:2180
 #, c-format
 msgid "Mailbox '%s' is near its size limit, message send will be disabled soon."
 msgstr "Velikost poštnega predala '%s' se bliža omejitvi, pošiljanje sporočil bo kmalu onemogočeno."
 
-#: ../src/camel/camel-mapi-store.c:2148
+#: ../src/camel/camel-mapi-store.c:2184
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received."
 msgstr "Poštni predal '%s' je poln, novih sporočil ne bo mogoče prejeti."
 
-#: ../src/camel/camel-mapi-store.c:2150
+#: ../src/camel/camel-mapi-store.c:2186
 #, c-format
 msgid "Mailbox '%s' is near its size limit."
 msgstr "Velikost poštnega predala '%s' se bliža omejitvi."
 
-#: ../src/camel/camel-mapi-store.c:2560
+#: ../src/camel/camel-mapi-store.c:2598
 msgid "Authentication password not available"
 msgstr "Geslo za overitev ni na voljo."
 
-#: ../src/camel/camel-mapi-transport.c:135
-#: ../src/camel/camel-mapi-transport.c:157
+#: ../src/camel/camel-mapi-transport.c:142
+#: ../src/camel/camel-mapi-transport.c:164
 #, c-format
 msgid "Could not send message."
 msgstr "Ni mogoče poslati sporočila."
 
-#: ../src/camel/camel-mapi-transport.c:152
+#: ../src/camel/camel-mapi-transport.c:159
 #, c-format
 msgid "Could not send message: %s"
 msgstr "Ni mogoče poslati sporočila: %s"
 
-#: ../src/collection/e-mapi-backend.c:238
+#: ../src/collection/e-mapi-backend.c:273
 msgid "Global Address List"
 msgstr "Splošni seznam naslovov"
+
+#: ../src/collection/e-mapi-backend.c:591
+#: ../src/collection/e-mapi-backend.c:678
+#, c-format
+msgid "Data source '%s' does not represent a MAPI folder"
+msgstr "Podatkovni vir '%s' ni ustrezna mapa MAPI"
 
 #: ../src/configuration/e-book-config-mapigal.c:63
 msgid "Allow _partial search results"
@@ -587,76 +593,76 @@ msgstr "Velikost mape"
 msgid "Fetching folder list…"
 msgstr "Pridobivanje seznama map ..."
 
-#: ../src/configuration/e-mapi-config-utils.c:731
+#: ../src/configuration/e-mapi-config-utils.c:732
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr "Ni mogoče urediti dovoljenj mape '%s'; izbrati je treba drugo mapo."
 
-#: ../src/configuration/e-mapi-config-utils.c:789
+#: ../src/configuration/e-mapi-config-utils.c:795
 msgid "Folder size..."
 msgstr "Velikost mape ..."
 
-#: ../src/configuration/e-mapi-config-utils.c:796
+#: ../src/configuration/e-mapi-config-utils.c:802
 msgid "Subscribe to folder of other user..."
 msgstr "Naročilo na mapo drugega uporabnika ..."
 
-#: ../src/configuration/e-mapi-config-utils.c:805
-#: ../src/configuration/e-mapi-config-utils.c:1084
-#: ../src/configuration/e-mapi-config-utils.c:1114
-#: ../src/configuration/e-mapi-config-utils.c:1144
-#: ../src/configuration/e-mapi-config-utils.c:1174
+#: ../src/configuration/e-mapi-config-utils.c:811
+#: ../src/configuration/e-mapi-config-utils.c:1091
+#: ../src/configuration/e-mapi-config-utils.c:1121
+#: ../src/configuration/e-mapi-config-utils.c:1151
+#: ../src/configuration/e-mapi-config-utils.c:1181
 msgid "Permissions..."
 msgstr "Dovoljenja ..."
 
-#: ../src/configuration/e-mapi-config-utils.c:807
+#: ../src/configuration/e-mapi-config-utils.c:813
 msgid "Edit MAPI folder permissions"
 msgstr "Uredi dovoljenja map MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1086
+#: ../src/configuration/e-mapi-config-utils.c:1093
 msgid "Edit MAPI calendar permissions"
 msgstr "Uredi dovoljenja koledarja MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1116
+#: ../src/configuration/e-mapi-config-utils.c:1123
 msgid "Edit MAPI tasks permissions"
 msgstr "Uredi dovoljenja nalog MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1146
+#: ../src/configuration/e-mapi-config-utils.c:1153
 msgid "Edit MAPI memos permissions"
 msgstr "Uredi dovoljenja opomnikov MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1176
+#: ../src/configuration/e-mapi-config-utils.c:1183
 msgid "Edit MAPI contacts permissions"
 msgstr "Uredi dovoljenja stikov MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1349
+#: ../src/configuration/e-mapi-config-utils.c:1356
 msgid "Personal Folders"
 msgstr "Osebne mape"
 
-#: ../src/configuration/e-mapi-config-utils.c:1556
+#: ../src/configuration/e-mapi-config-utils.c:1587
 msgid "Searching remote MAPI folder structure, please wait..."
 msgstr "Poteka preiskovanje oddaljene zgradbe map MAPI ..."
 
-#: ../src/configuration/e-mapi-config-utils.c:1626
+#: ../src/configuration/e-mapi-config-utils.c:1655
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Ni mogoče ustvariti koledarja MAPI v načinu brez povezave."
 
-#: ../src/configuration/e-mapi-config-utils.c:1629
+#: ../src/configuration/e-mapi-config-utils.c:1658
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "Ni mogoče ustvariti seznama nalog MAPI v načinu brez povezave."
 
-#: ../src/configuration/e-mapi-config-utils.c:1632
+#: ../src/configuration/e-mapi-config-utils.c:1661
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "Ni mogoče ustvariti seznama opomnikov MAPI v načinu brez povezave."
 
-#: ../src/configuration/e-mapi-config-utils.c:1635
+#: ../src/configuration/e-mapi-config-utils.c:1664
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "Ni mogoče ustvariti imenika MAPI v načinu brez povezave."
 
-#: ../src/configuration/e-mapi-config-utils.c:1639
+#: ../src/configuration/e-mapi-config-utils.c:1668
 msgid "Cannot create MAPI source in offline mode"
 msgstr "Ni mogoče ustvariti vira MAPI v načinu brez povezave."
 
-#: ../src/configuration/e-mapi-config-utils.c:1660
+#: ../src/configuration/e-mapi-config-utils.c:1688
 msgid "_Location:"
 msgstr "_Mesto:"
 
@@ -745,7 +751,7 @@ msgid "Edit MAPI folder permissions..."
 msgstr "Uredi dovoljenja map MAPI ..."
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:960
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:604
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:610
 msgid "Account:"
 msgstr "Račun:"
 
@@ -932,60 +938,60 @@ msgstr "Ni mogoče dodati mape, ker ni mogoče določiti vrste."
 #. the second '%s' is replaced with folder name.
 #. Example result: "John Smith - Calendar"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:396
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:397
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s - %s"
 msgstr "%s - %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:486
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:682
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:492
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:688
 msgid "Inbox"
 msgstr "Dohodna pošta"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:488
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:683
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:494
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
 msgid "Contacts"
 msgstr "Stiki"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:490
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:684
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:496
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:690
 msgid "Calendar"
 msgstr "Koledar"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:492
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:685
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:498
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:691
 msgid "Memos"
 msgstr "Opomniki"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:494
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:686
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:500
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:692
 msgid "Tasks"
 msgstr "Naloge"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:507
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:513
 #, c-format
 msgid "Testing availability of folder '%s' of user '%s', please wait..."
 msgstr "Preizkušanje dostopnosti mape '%s' uporabnika '%s', počakajte ..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:583
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:589
 msgid "Subscribe to folder of other MAPI user..."
 msgstr "Naročilo na mapo drugega uporabnika MAPI ..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:632
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:638
 msgid "User"
 msgstr "Uporabnik"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:639
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:645
 msgid "_User:"
 msgstr "_Uporabnik:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:652
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:658
 msgid "C_hoose..."
 msgstr "I_zbor ..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:667
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:673
 msgid "_Folder name:"
 msgstr "Ime _mape:"
 
