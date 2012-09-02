@@ -4,12 +4,16 @@
 # pomóc w jego rozwijaniu i pielęgnowaniu, napisz do nas:
 # gnomepl@aviary.pl
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# Wadim Dziedzic <wdziedzic@aviary.pl>, 2009.
+# Piotr Drąg <piotrdrag@gmail.com>, 2009-2012.
+# Tomasz Dominikowski <dominikowski@gmail.com>, 2009.
+# Aviary.pl <gnomepl@aviary.pl>, 2009-2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-08-22 03:45+0200\n"
-"PO-Revision-Date: 2012-08-22 03:47+0200\n"
+"POT-Creation-Date: 2012-09-02 23:05+0200\n"
+"PO-Revision-Date: 2012-09-02 23:07+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -268,7 +272,7 @@ msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "S_zukanie niechcianych treści tylko w katalogu przychodzących"
 
 #: ../src/camel/camel-mapi-provider.c:62
-#: ../src/configuration/e-mapi-config-utils.c:1630
+#: ../src/configuration/e-mapi-config-utils.c:1634
 msgid "Lis_ten for server notifications"
 msgstr "Nasłuchiwanie powiadomień serwera"
 
@@ -469,12 +473,12 @@ msgstr "Nie można wysłać wiadomości."
 msgid "Could not send message: %s"
 msgstr "Nie można wysłać wiadomości: %s"
 
-#: ../src/collection/e-mapi-backend.c:269
+#: ../src/collection/e-mapi-backend.c:273
 msgid "Global Address List"
 msgstr "Ogólna lista adresowa"
 
-#: ../src/collection/e-mapi-backend.c:517
-#: ../src/collection/e-mapi-backend.c:560
+#: ../src/collection/e-mapi-backend.c:591
+#: ../src/collection/e-mapi-backend.c:678
 #, c-format
 msgid "Data source '%s' does not represent a MAPI folder"
 msgstr "Źródło danych \"%s\" nie odpowiada katalogowi MAPI"
@@ -647,31 +651,31 @@ msgstr "Modyfikacja uprawnień kontaktów MAPI"
 msgid "Personal Folders"
 msgstr "Katalogi osobiste"
 
-#: ../src/configuration/e-mapi-config-utils.c:1583
+#: ../src/configuration/e-mapi-config-utils.c:1587
 msgid "Searching remote MAPI folder structure, please wait..."
 msgstr "Wyszukiwanie zdalnej struktury katalogów MAPI, proszę czekać..."
 
-#: ../src/configuration/e-mapi-config-utils.c:1651
+#: ../src/configuration/e-mapi-config-utils.c:1655
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Nie można utworzyć kalendarza MAPI w trybie offline."
 
-#: ../src/configuration/e-mapi-config-utils.c:1654
+#: ../src/configuration/e-mapi-config-utils.c:1658
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "Nie można utworzyć listy zadań MAPI w trybie offline."
 
-#: ../src/configuration/e-mapi-config-utils.c:1657
+#: ../src/configuration/e-mapi-config-utils.c:1661
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "Nie można utworzyć listy notatek MAPI w trybie offline."
 
-#: ../src/configuration/e-mapi-config-utils.c:1660
+#: ../src/configuration/e-mapi-config-utils.c:1664
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "Nie można utworzyć książki adresowej MAPI w trybie offline."
 
-#: ../src/configuration/e-mapi-config-utils.c:1664
+#: ../src/configuration/e-mapi-config-utils.c:1668
 msgid "Cannot create MAPI source in offline mode"
 msgstr "Nie można utworzyć źródła MAPI w trybie offline."
 
-#: ../src/configuration/e-mapi-config-utils.c:1684
+#: ../src/configuration/e-mapi-config-utils.c:1688
 msgid "_Location:"
 msgstr "_Położenie:"
 
