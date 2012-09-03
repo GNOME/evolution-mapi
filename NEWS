@@ -1,3 +1,17 @@
+evolution-mapi 3.5.91 2012-09-03
+--------------------------------
+
+Miscellanous:
+	Fix a compiler warning (variable may be used uninitialized) (Milan Crha)
+	Delete user's remote folders on delete of its local ESource (Milan Crha)
+	Be able to create book/calendar/task/memo folders (Milan Crha)
+	Install ESource::changed listener in mapi_backend_constructed() (Milan Crha)
+
+Translations:
+	Daniel Mustieles (es)
+ 	Piotr Drąg (pl)
+	Matej Urbančič (sl)
+
 evolution-mapi 3.5.90 2012-08-20
 --------------------------------
 
