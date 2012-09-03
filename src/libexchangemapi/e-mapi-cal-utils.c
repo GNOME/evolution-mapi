@@ -216,7 +216,7 @@ static const uint8_t GID_START_SEQ[] = {
    creation_time is a value of PR_CREATION_TIME
 */
 void
-e_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *uid, const struct timeval *exception_replace_time, const struct FILETIME *creation_time, struct Binary_r *sb)
+e_mapi_cal_util_generate_globalobjectid (gboolean is_clean, const gchar *uid, const struct timeval *exception_replace_time, const struct FILETIME *creation_time, struct SBinary_short *sb)
 {
 	GByteArray *ba;
 	guint32 val32;
@@ -1922,11 +1922,19 @@ e_mapi_cal_utils_comp_to_object (EMapiConnection *conn,
 		set_value (PidLidAppointmentSequence, &flag32);
 
 		if (cbdata->cleanglobalid) {
-			set_value (PidLidCleanGlobalObjectId, cbdata->cleanglobalid);
+			struct Binary_r bin;
+			bin.cb = cbdata->cleanglobalid->cb;
+			bin.lpb = cbdata->cleanglobalid->lpb;
+
+			set_value (PidLidCleanGlobalObjectId, &bin);
 		}
 
 		if (cbdata->globalid) {
-			set_value (PidLidGlobalObjectId, cbdata->globalid);
+			struct Binary_r bin;
+			bin.cb = cbdata->globalid->cb;
+			bin.lpb = cbdata->globalid->lpb;
+
+			set_value (PidLidGlobalObjectId, &bin);
 		}
 
 		flag32 = cbdata->resp;

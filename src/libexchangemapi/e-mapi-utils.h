@@ -106,8 +106,8 @@ uint32_t	e_mapi_utils_push_crc32			(uint32_t crc32,
 							 uint32_t n_bytes);
 
 struct
-Binary_r *	e_mapi_util_copy_binary_r		(const struct Binary_r *bin);
-void		e_mapi_util_free_binary_r		(struct Binary_r *bin);
+SBinary_short *	e_mapi_util_copy_sbinary_short		(const struct SBinary_short *bin);
+void		e_mapi_util_free_sbinary_short		(struct SBinary_short *bin);
 
 time_t		e_mapi_util_filetime_to_time_t		(const struct FILETIME *filetime);
 void		e_mapi_util_time_t_to_filetime		(const time_t tt,

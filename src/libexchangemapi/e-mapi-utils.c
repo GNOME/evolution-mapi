@@ -1003,16 +1003,16 @@ e_mapi_utils_push_crc32 (uint32_t crc32, uint8_t *bytes, uint32_t n_bytes)
 	return crc32;
 }
 
-/* copies a Binary_r, which should be freed with e_mapi_util_free_binary_r() */
-struct Binary_r *
-e_mapi_util_copy_binary_r (const struct Binary_r *bin)
+/* copies an SBinary_short, which should be freed with e_mapi_util_free_sbinary_short() */
+struct SBinary_short *
+e_mapi_util_copy_sbinary_short (const struct SBinary_short *bin)
 {
-	struct Binary_r *res;
+	struct SBinary_short *res;
 
 	if (!bin || !bin->cb)
 		return NULL;
 
-	res = g_new0 (struct Binary_r, 1);
+	res = g_new0 (struct SBinary_short, 1);
 	res->cb = bin->cb;
 	res->lpb = g_new (uint8_t, res->cb);
 	memcpy (res->lpb, bin->lpb, res->cb);
@@ -1020,9 +1020,9 @@ e_mapi_util_copy_binary_r (const struct Binary_r *bin)
 	return res;
 }
 
-/* frees Binary_r previously allocated by e_mapi_util_copy_binary_r() */
+/* frees SBinary_short previously allocated by e_mapi_util_copy_sbinary_short() */
 void
-e_mapi_util_free_binary_r (struct Binary_r *bin)
+e_mapi_util_free_sbinary_short (struct SBinary_short *bin)
 {
 	if (!bin)
 		return;

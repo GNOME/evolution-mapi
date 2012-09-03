@@ -57,8 +57,8 @@ struct cal_cbdata {
 	MAPIMeetingOptions meeting_type;
 	uint32_t appt_id;
 	uint32_t appt_seq;
-	struct Binary_r *globalid;
-	struct Binary_r *cleanglobalid;
+	struct SBinary_short *globalid;
+	struct SBinary_short *cleanglobalid;
 
 	uint32_t msgflags;
 	OlResponseStatus resp;
@@ -78,7 +78,7 @@ void		e_mapi_cal_util_generate_globalobjectid		(gboolean is_clean,
 								 const gchar *uid,
 								 const struct timeval *exception_replace_time,
 								 const struct FILETIME *creation_time,
-								 struct Binary_r *sb);
+								 struct SBinary_short *sb);
 
 uint32_t	e_mapi_cal_util_get_new_appt_id			(EMapiConnection *conn,
 								 mapi_id_t fid);

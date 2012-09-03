@@ -1508,8 +1508,8 @@ ecbm_capture_req_props (EMapiConnection *conn,
 	if (ui32)
 		cbdata->appt_seq = *ui32;
 
-	cbdata->cleanglobalid = e_mapi_util_copy_binary_r (e_mapi_util_find_array_propval (&object->properties, PidLidCleanGlobalObjectId));
-	cbdata->globalid = e_mapi_util_copy_binary_r (e_mapi_util_find_array_propval (&object->properties, PidLidGlobalObjectId));
+	cbdata->cleanglobalid = e_mapi_util_copy_sbinary_short (e_mapi_util_find_array_propval (&object->properties, PidLidCleanGlobalObjectId));
+	cbdata->globalid = e_mapi_util_copy_sbinary_short (e_mapi_util_find_array_propval (&object->properties, PidLidGlobalObjectId));
 
 	cbdata->username = g_strdup (e_mapi_util_find_array_propval (&object->properties, PidTagSentRepresentingName));
 	cbdata->useridtype = g_strdup (e_mapi_util_find_array_propval (&object->properties, PidTagSentRepresentingAddressType));
@@ -1551,7 +1551,7 @@ ecbm_build_global_id_restriction (EMapiConnection *conn,
 				  GError **perror)
 {
 	ECalComponent *comp = user_data;
-	struct Binary_r sb;
+	struct SBinary_short sb;
 	struct SPropValue sprop;
 	struct mapi_SRestriction *restriction;
 	gchar *propval;
@@ -1651,8 +1651,8 @@ free_server_data (struct cal_cbdata *cbdata)
 
 	#define do_free(_func, _val) _func (_val); _val = NULL
 
-	do_free (e_mapi_util_free_binary_r, cbdata->cleanglobalid);
-	do_free (e_mapi_util_free_binary_r, cbdata->globalid);
+	do_free (e_mapi_util_free_sbinary_short, cbdata->cleanglobalid);
+	do_free (e_mapi_util_free_sbinary_short, cbdata->globalid);
 	do_free (g_free, cbdata->username);
 	do_free (g_free, cbdata->useridtype);
 	do_free (g_free, cbdata->userid);
@@ -2160,7 +2160,7 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 			mapi_id_t mid = 0;
 			const gchar *compuid;
 			gchar *propval;
-			struct Binary_r globalid = { 0 }, cleanglobalid = { 0 };
+			struct SBinary_short globalid = { 0 }, cleanglobalid = { 0 };
 			struct timeval *exception_repleace_time = NULL, ex_rep_time = { 0 };
 			struct FILETIME creation_time = { 0 };
 			struct icaltimetype ical_creation_time = { 0 };
@@ -2251,9 +2251,9 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 			}
 
 			if (cbdata.globalid)
-				e_mapi_util_free_binary_r (cbdata.globalid);
+				e_mapi_util_free_sbinary_short (cbdata.globalid);
 			if (cbdata.cleanglobalid)
-				e_mapi_util_free_binary_r (cbdata.cleanglobalid);
+				e_mapi_util_free_sbinary_short (cbdata.cleanglobalid);
 			cbdata.globalid = &globalid;
 			cbdata.cleanglobalid = &cleanglobalid;
 
