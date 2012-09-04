@@ -617,7 +617,7 @@ add_button_clicked_cb (GObject *dialog)
 			gtk_list_store_append (store, &iter);
 			gtk_list_store_set (store, &iter,
 				COL_NAME, pem->username,
-				COL_PERMISSION_LEVEL, g_dgettext ("PermissionsLevel", predefined_levels[0].name),
+				COL_PERMISSION_LEVEL, g_dpgettext2 (GETTEXT_PACKAGE, "PermissionsLevel", predefined_levels[0].name),
 				COL_E_MAPI_PERMISSION_ENTRY, pem,
 				COL_E_MAPI_GAL_USER_TYPE, user_type,
 				COL_IS_NEW, TRUE,
@@ -794,7 +794,7 @@ read_folder_permissions_idle (GObject *dialog,
 			}
 		}
 
-		perm_level = g_dgettext ("PermissionsLevel", predefined_levels[ii].name);
+		perm_level = g_dpgettext2 (GETTEXT_PACKAGE, "PermissionsLevel", predefined_levels[ii].name);
 
 		user_type = E_MAPI_GAL_USER_REGULAR;
 		if (pem->member_id == E_MAPI_PERMISSION_MEMBER_ID_ANONYMOUS_CLIENT)
@@ -1101,7 +1101,7 @@ e_mapi_edit_folder_permissions (GtkWindow *parent,
 
 	combo_text = GTK_COMBO_BOX_TEXT (widget);
 	for (ii = 0; ii < G_N_ELEMENTS (predefined_levels); ii++)
-		gtk_combo_box_text_append_text (combo_text, g_dgettext ("PermissionsLevel", predefined_levels[ii].name));
+		gtk_combo_box_text_append_text (combo_text, g_dpgettext2 (GETTEXT_PACKAGE, "PermissionsLevel", predefined_levels[ii].name));
 	gtk_combo_box_set_active (GTK_COMBO_BOX (combo_text), 0);
 
 	gtk_label_set_mnemonic_widget (GTK_LABEL (label), widget);
