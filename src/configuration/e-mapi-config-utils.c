@@ -902,8 +902,6 @@ mapi_ui_init_mail (GtkUIManager *ui_manager,
 	g_signal_connect (shell_view, "update-actions",
 			  G_CALLBACK (mapi_ui_update_actions_mail_cb),
 			  shell_view);
-
-	g_object_unref (action_group);
 }
 
 static gboolean
