@@ -16,6 +16,12 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include <glib/gi18n-lib.h>
+
 #include "e-book-config-mapi.h"
 #include "e-book-config-mapigal.h"
 #include "e-cal-config-mapi.h"
@@ -32,6 +38,11 @@ void e_module_unload (GTypeModule *type_module);
 G_MODULE_EXPORT void
 e_module_load (GTypeModule *type_module)
 {
+	bindtextdomain (GETTEXT_PACKAGE, EXCHANGE_MAPI_LOCALEDIR);
+	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+
+	e_source_mapi_folder_type_register (type_module);
+
 	e_book_config_mapi_type_register (type_module);
 	e_book_config_mapigal_type_register (type_module);
 	e_cal_config_mapi_type_register (type_module);
@@ -39,8 +50,6 @@ e_module_load (GTypeModule *type_module)
 	e_mail_config_mapi_page_type_register (type_module);
 	e_mail_config_mapi_extension_type_register (type_module);
 	e_mapi_config_ui_extension_type_register (type_module);
-
-	e_source_mapi_folder_type_register (type_module);
 }
 
 G_MODULE_EXPORT void

@@ -5,6 +5,7 @@ eds_module_LTLIBRARIES = module-mapi-backend.la
 module_mapi_backend_la_CPPFLAGS =		\
 	$(AM_CPPFLAGS)				\
 	-DG_LOG_DOMAIN=\"module-mapi-backend\"	\
+	-DEXCHANGE_MAPI_LOCALEDIR=\"$(localedir)\" \
 	-I$(top_srcdir)/src/libexchangemapi	\
 	$(LIBEDATASERVER_CFLAGS)		\
 	$(LIBEBACKEND_CFLAGS)			\

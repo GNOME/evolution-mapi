@@ -5,6 +5,7 @@ evo_module_LTLIBRARIES = module-mapi-configuration.la
 module_mapi_configuration_la_CPPFLAGS =			\
 	$(AM_CPPFLAGS)					\
 	-DG_LOG_DOMAIN=\"module-mapi-configuration\"	\
+	-DEXCHANGE_MAPI_LOCALEDIR=\"$(localedir)\"	\
 	-I$(top_srcdir)/src				\
 	-I$(top_srcdir)/src/libexchangemapi		\
 	$(LIBECAL_CFLAGS)				\

@@ -1,5 +1,6 @@
 AM_CPPFLAGS =					\
 	-DG_LOG_DOMAIN=\"libecalbackendmapi\"	\
+	-DEXCHANGE_MAPI_LOCALEDIR=\"$(localedir)\" \
 	-I$(top_srcdir)/src/calendar		\
 	-I$(top_srcdir)/src/libexchangemapi	\
 	$(LIBEBACKEND_CFLAGS)			\

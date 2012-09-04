@@ -1,5 +1,6 @@
 AM_CPPFLAGS =					\
 	-DG_LOG_DOMAIN=\"libebookbackend\"	\
+	-DEXCHANGE_MAPI_LOCALEDIR=\"$(localedir)\" \
 	-I$(top_srcdir)/src/addressbook		\
 	-I$(top_srcdir)/src/libexchangemapi	\
 	$(LIBEBACKEND_CFLAGS)			\

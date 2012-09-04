@@ -21,7 +21,11 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
+
+#include <glib/gi18n-lib.h>
 
 #include <libedata-cal/libedata-cal.h>
 
@@ -120,6 +124,9 @@ e_cal_backend_mapi_todos_factory_init (ECalBackendFactory *factory)
 G_MODULE_EXPORT void
 e_module_load (GTypeModule *type_module)
 {
+	bindtextdomain (GETTEXT_PACKAGE, EXCHANGE_MAPI_LOCALEDIR);
+	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+
 	e_source_mapi_folder_type_register (type_module);
 
 	e_cal_backend_mapi_events_factory_register_type (type_module);
