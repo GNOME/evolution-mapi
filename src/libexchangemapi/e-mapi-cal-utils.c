@@ -2055,20 +2055,26 @@ e_mapi_cal_utils_comp_to_object (EMapiConnection *conn,
 				/* Translators: This is a meeting response prefix which will be shown in a message Subject */
 				prefix_subject (C_("MeetingResp", "Accepted:"));
 				text = IPM_SCHEDULE_MEETING_RESP_POS;
+				flag32 = 1 << 5; /* ciRespondedAccept */
 			} else if (cbdata->resp == olResponseTentative) {
 				/* Translators: This is a meeting response prefix which will be shown in a message Subject */
 				prefix_subject (C_("MeetingResp", "Tentative:"));
 				text = IPM_SCHEDULE_MEETING_RESP_TENT;
+				flag32 = 1 << 4; /* ciRespondedTentative */
 			} else if (cbdata->resp == olResponseDeclined) {
 				/* Translators: This is a meeting response prefix which will be shown in a message Subject */
 				prefix_subject (C_("MeetingResp", "Declined:"));
 				text = IPM_SCHEDULE_MEETING_RESP_NEG;
+				flag32 = 1 << 6; /* ciRespondedDecline */
 			} else {
 				text = "";
+				flag32 = 1 << 11; /* ciCanceled */
 			}
 			#undef prefix_subject
 			set_value (PidTagMessageClass, text);
 			text = NULL;
+
+			set_value (PidLidClientIntent, &flag32);
 
 			flag32 = 0xFFFFFFFF;  /* no idea why this has to be -1, but that's what the docs say */
 			set_value (PidTagIconIndex, &flag32);
@@ -2081,6 +2087,9 @@ e_mapi_cal_utils_comp_to_object (EMapiConnection *conn,
 
 			flag32 = mtgEmpty;
 			set_value (PidLidMeetingType, &flag32);
+
+			tt = icaltime_as_timet (icaltime_current_time_with_zone (utc_zone));
+			set_timet_value (PidLidAppointmentReplyTime, tt);
 
 			break;
 		case NOT_A_MEETING :
