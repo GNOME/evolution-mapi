@@ -1997,6 +1997,9 @@ e_mapi_cal_utils_comp_to_object (EMapiConnection *conn,
 			b = 1;
 			set_value (PidLidFInvited, &b);
 
+			tt = icaltime_as_timet (icaltime_current_time_with_zone (utc_zone));
+			set_timet_value (PidLidAttendeeCriticalChange, tt);
+
 			break;
 		case MEETING_REQUEST_RCVD :
 			set_value (PidTagMessageClass, IPM_APPOINTMENT);
