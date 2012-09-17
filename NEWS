@@ -1,3 +1,24 @@
+evolution-mapi 3.5.92 2012-09-17
+--------------------------------
+
+Bugs:
+	Bug #681069 - Crash under e_mapi_util_copy_binary_r() (Milan Crha)
+	Bug #682914 - Some messages won't show translated strings (Jiro Matsuzawa)
+	Bug #680921 - e_shell_window_get_action_group() doesn't return reffed pointer (Milan Crha)
+	Bug #678952 - Meeting invitation reply causes crash of Outlook 2010 (Milan Crha)
+	Bug #678952 - Meeting invitation causes crash of Outlook 2010 (Milan Crha)
+
+Miscellanous:
+	Make translations work in respective modules (Milan Crha)
+
+Translations:
+	Marek Černocký (cs)
+	Sandeep Sheshrao Shedmake (mr)
+	Andika Triwidada (id)
+	Sweta Kothari (gu)
+	Chris Leonard (en_GB)
+	Aurimas Černius (lt)
+
 evolution-mapi 3.5.91 2012-09-03
 --------------------------------
 
