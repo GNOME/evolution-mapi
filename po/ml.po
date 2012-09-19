@@ -10,7 +10,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug."
 "cgi?product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
 "POT-Creation-Date: 2012-08-17 08:58+0000\n"
-"PO-Revision-Date: 2012-09-20 02:31+0000\n"
+"PO-Revision-Date: 2012-09-20 02:38+0000\n"
 "Last-Translator: Ani Peter <apeter@redhat.com>\n"
 "Language-Team: Malayalam <discuss@lists.smc.org.in>\n"
 "Language: \n"
@@ -18,8 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Lokalize 1.0\n"
-"nplurals=2; plural=(n != 1)\n"
-"\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ../src/addressbook/e-book-backend-mapi.c:748
 msgid "Searching"
@@ -930,15 +929,15 @@ msgstr "ഒരു ഉപയോക്താക്കളും ലഭ്യമാ�
 #, c-format
 msgid "Found one user"
 msgid_plural "Found %d users"
-msgstr[0] "ഒരുപയോക്താവു് ലഭ്യമായി"
-msgstr[1] "ഉപയോക്താക്കള്‍ ലഭ്യമായി"
+msgstr[0] "ഒരുപയോക്താവു് കണ്ടുപിടിച്ചിരിയ്ക്കുന്നു"
+msgstr[1] "%d ഉപയോക്താക്കള്‍ കണ്ടുപിടിച്ചിരിയ്ക്കുന്നു"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:231
 #, c-format
 msgid "Found %d user, but showing only first %d"
 msgid_plural "Found %d users, but showing only first %d"
-msgstr[0] "%d ഉപയോക്താവു് ലഭ്യമായി, പക്ഷേ ആദ്യത്തെ %d മാത്രം കാണിയ്ക്കുന്നു"
-msgstr[1] "%d ഉപയോക്താക്കള്‍ ലഭ്യമായി, പക്ഷേ ആദ്യത്തെ %d മാത്രം കാണിയ്ക്കുന്നു"
+msgstr[0] "%d ഉപയോക്താവു് ലഭ്യമായി, പക്ഷേ ആദ്യത്തെ %d കാണിയ്ക്കുന്നു"
+msgstr[1] "%d ഉപയോക്താക്കള്‍ ലഭ്യമായി, പക്ഷേ ആദ്യത്തെ %d കാണിയ്ക്കുന്നു"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:516
 #: ../src/configuration/e-mapi-search-gal-user.c:707
