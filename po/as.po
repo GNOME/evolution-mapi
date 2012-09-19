@@ -2,365 +2,1270 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Amitakhya Phukan <aphukan@fedoraproject.org>, 2009.
+# Nilamdyuti Goswami <ngoswami@redhat.com>, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: as\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
-"POT-Creation-Date: 2009-09-08 06:24+0000\n"
-"PO-Revision-Date: 2009-09-21 10:02+0530\n"
-"Last-Translator: \n"
-"Language-Team: Assamese <>\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug."
+"cgi?product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
+"POT-Creation-Date: 2012-08-17 08:58+0000\n"
+"PO-Revision-Date: 2012-09-20 04:13+0530\n"
+"Last-Translator: Nilamdyuti Goswami <ngoswami@redhat.com>\n"
+"Language-Team: as_IN <kde-i18n-doc@kde.org>\n"
+"Language: as\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 0.2\n"
+"X-Generator: Lokalize 1.0\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
+#: ../src/addressbook/e-book-backend-mapi.c:748
+msgid "Searching"
+msgstr "সন্ধান কৰা হৈছে"
+
+#: ../src/addressbook/e-book-backend-mapi.c:1738
+#: ../src/calendar/e-cal-backend-mapi.c:193
+#: ../src/calendar/e-cal-backend-mapi.c:542
+#: ../src/camel/camel-mapi-folder.c:1871 ../src/camel/camel-mapi-folder.c:1947
+msgid "Unknown error"
+msgstr "অজ্ঞাত ত্ৰুটি"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:432
+#: ../src/calendar/e-cal-backend-mapi.c:411
+msgid "Failed to remove public folder"
+msgstr "ৰাজহুৱা ফোল্ডাৰ আতৰাবলে ব্যৰ্থ"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:468
+msgid "The backend does not support bulk additions"
+msgstr "বেকএণ্ডে বৃহত সংযোজন সমৰ্থন নকৰে"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:510
+#: ../src/calendar/e-cal-backend-mapi.c:1766
+#: ../src/calendar/e-cal-backend-mapi.c:2277
+#| msgid "Unable to authenticate to Exchange MAPI server."
+msgid "Failed to create item on a server"
+msgstr "এটা চাৰ্ভাৰত বস্তু সৃষ্টি কৰিবলে ব্যৰ্থ"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:627
+msgid "The backend does not support bulk modifications"
+msgstr "বেকএণ্ডে বৃহত পৰিৱৰ্তন সমৰ্থন নকৰে"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:672
+#: ../src/calendar/e-cal-backend-mapi.c:1979
+msgid "Failed to modify item on a server"
+msgstr "এটা চাৰ্ভাৰত বস্তু পৰিবৰ্তন কৰিবলে ত্ৰুটি"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:848
+#| msgid "Error fetching changes from the server."
+msgid "Failed to fetch items from a server"
+msgstr "এটা চাৰ্ভাৰৰ পৰা বস্তু প্ৰাপ্ত কৰিবলে ব্যৰ্থ"
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. %d is an index of the contact.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:866
 #, c-format
-msgid "Enter Password for %s@%s"
-msgstr "%s@%s ৰ গুপ্তশব্দ লিখক"
+msgid "Caching contact %d"
+msgstr "পৰিচয় %d ক্যাশ কৰা হৈছে"
 
-#. NOTE: A good way would be display the list of username entries
-#. using GtkEntryCompletion in the username gtkentry. But plugins
-#. as of now does not have access to it
-#. TODO : Fix strings
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
-msgid "Select username"
-msgstr "ব্যৱহাৰকৰ্তাৰ নাম নিৰ্বাচন কৰক"
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. The first %d is an index of the contact,
+#. the second %d is total count of conacts on the server.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:870
+#, c-format
+msgid "Caching contact %d/%d"
+msgstr "পৰিচয় %d/%d ক্যাশ কৰা হৈছে"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
-msgid "Full name"
-msgstr "সম্পূৰ্ণ নাম"
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:925
+msgid "Failed to count server contacts"
+msgstr "চাৰ্ভাৰ পৰিচয়সমূহ গণনা কৰিবলে ব্যৰ্থ"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
-msgid "User name"
-msgstr "ব্যৱহাৰকৰ্তাৰ নাম"
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:983
+msgid "Failed to list items from a server"
+msgstr "এটা চাৰ্ভাৰৰ পৰা বস্তুবোৰ তালিকাভুক্ত কৰিবলে ব্যৰ্থ"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
-msgid ""
-"Server, username and domain name cannot be empty. Please fill them with "
-"correct values."
-msgstr ""
-"সেৱক, ব্যৱহাৰকৰ্তা নাম আৰু ডোমেইনৰ নাম উল্লেখ কৰা আবশ্যক । অনুগ্ৰহ এইসমূহৰ ক্ষেত্ৰত "
-"যথাযত মান লিখক ।"
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1064
+msgid "Failed to transfer contacts from a server"
+msgstr "এটা চাৰ্ভাৰৰ পৰা পৰিচয়সমূহ স্থানান্তৰ কৰিবলে ব্যৰ্থ"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
-msgid "Authentication finished successfully."
-msgstr "সাফল্যৰ সৈতে পৰিচয় প্ৰমাণ কৰা হৈছে ।"
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. %d is an index of the GAL entry.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:153
+#, c-format
+msgid "Caching GAL contact %d"
+msgstr "GAL পৰিচয় %d ক্যাশ কৰা হৈছে"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
-msgid "Authentication failed."
-msgstr "পৰিচয় প্ৰমাণ কৰিবলৈ ব্যৰ্থ ।"
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. The first %d is an index of the GAL entry,
+#. the second %d is total count of entries in GAL.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:157
+#, c-format
+msgid "Caching GAL contact %d/%d"
+msgstr "GAL পৰিচয় %d/%d ক্যাশ কৰা হৈছে"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
-msgid "_Domain name:"
-msgstr "ডোমেইনৰ নাম: (_D)"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
-msgid "_Authenticate"
-msgstr "অনুমোদন (_A)"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
-msgid "Personal Folders"
-msgstr "ব্যক্তিগত ফোল্ডাৰ"
-
-#
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
-msgid "_Location:"
-msgstr "অবস্থান:(_L)"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
-msgid "_Folder size"
-msgstr "ফোল্ডাৰৰ মাপ (_F)"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
-msgid "Folder"
-msgstr "ফোল্ডাৰ"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
-msgid "Size"
-msgstr "মাপ"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
-msgid "Unable to retrieve folder size information"
-msgstr "ফোল্ডাৰৰ মাপ সংক্ৰান্ত তথ্য প্ৰাপ্ত কৰিবলৈ ব্যৰ্থ"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
-msgid "Folder Size"
-msgstr "ফোল্ডাৰৰ মাপ"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
-msgid "Fetching folder list ..."
-msgstr "ফোল্ডাৰৰ তালিকা প্ৰাপ্ত কৰা হৈছে ..."
-
-#. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
-msgid "Miscellaneous"
-msgstr "বিবিধ বৈশিষ্ট্য"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
-msgid "View the size of all Exchange folders"
-msgstr "সমস্ত Exchange ফোল্ডাৰৰ মাপ প্ৰদৰ্শন কৰক"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
-msgid "Folders Size"
-msgstr "ফোল্ডাৰৰ মাপ"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
-#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
-msgid "Exchange Settings"
-msgstr "Exchange সংক্ৰান্ত বৈশিষ্ট্যাবলী"
-
-#
-#: ../src/calendar/e-cal-backend-mapi.c:115
-#: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:472
-msgid "Authentication failed"
-msgstr "অনুমোদন ব্যৰ্থ"
+#: ../src/addressbook/e-book-backend-mapi-gal.c:229
+#: ../src/addressbook/e-book-backend-mapi-gal.c:313
+msgid "Failed to fetch GAL entries"
+msgstr "GAL প্ৰবিষ্টিসমূহ প্ৰাপ্ত কৰা হৈছে"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:391
+#: ../src/calendar/e-cal-backend-mapi.c:481
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "%s ফোল্ডাৰত অন্তৰ্ভুক্ত বস্তু লোড কৰা হৈছে"
 
-#. FIXME: String : We need to restart evolution-data-server
-#: ../src/calendar/e-cal-backend-mapi.c:581
-#: ../src/calendar/e-cal-backend-mapi.c:592
-#: ../src/calendar/e-cal-backend-mapi.c:618
-msgid "Error fetching changes from the server."
-msgstr "পৰিবৰ্তনৰ তথ্য সেৱকৰ পৰা প্ৰাপ্ত কৰিবলৈ সমস্যা ।"
+#: ../src/calendar/e-cal-backend-mapi.c:834
+#, c-format
+#| msgid "Loading items in folder %s"
+msgid "Failed to open folder: %s"
+msgstr "ফোল্ডাৰ খোলিবলে ব্যৰ্থ: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:973
-#: ../src/calendar/e-cal-backend-mapi.c:983
-#: ../src/calendar/e-cal-backend-mapi.c:1088
-#: ../src/calendar/e-cal-backend-mapi.c:1170
+#: ../src/calendar/e-cal-backend-mapi.c:842
+#, c-format
+msgid "Failed to get folder properties: %s"
+msgstr "ফোল্ডাৰ বৈশিষ্টসমূহ প্ৰাপ্ত কৰিবলে ব্যৰ্থ: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:883
+#, c-format
+msgid "Failed to list objects: %s"
+msgstr "অবজেক্টসমূহ তালিকাভুক্ত কৰিবলে ব্যৰ্থ: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:909
+#, c-format
+msgid "Failed to transfer objects: %s"
+msgstr "অবজেক্টসমূহ স্থানান্তৰ কৰিবলে ব্যৰ্থ: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:928
+#, c-format
+msgid "Failed to close folder: %s"
+msgstr "ফোল্ডাৰ বন্ধ কৰিবলে ব্যৰ্থ: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1425
+#: ../src/calendar/e-cal-backend-mapi.c:1426
 msgid "Could not create cache file"
 msgstr "কেশে ফাইল নিৰ্মাণ কৰিবলৈ ব্যৰ্থ"
 
-#
-#: ../src/calendar/e-cal-backend-mapi.c:1099
-msgid "Could not create thread for populating cache"
-msgstr "কেশেৰ তথ্য পূৰণ কৰাৰ বাবে থ্ৰেড নিৰ্মাণ কৰিবলৈ ব্যৰ্থ"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1513
+#: ../src/calendar/e-cal-backend-mapi.c:1887
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
 msgstr ""
-"পুনৰ্বাৰ ঘটিত সাক্ষাৎকাৰৰ কোনো একটি বাৰৰ তথ্য সমৰ্থনৰ ব্যৱস্থা বৰ্তমানে উপলব্ধ নহয় । "
-"চিহ্নিত সাক্ষাৎকাৰ সম্বন্ধীয় তথ্য, সেৱকেত পৰিবৰ্তন কৰা হয়নি ।"
+"পুনৰ্বাৰ ঘটিত সাক্ষাৎকাৰৰ কোনো একটি বাৰৰ তথ্য সমৰ্থনৰ ব্যৱস্থা বৰ্তমানে উপলব্ধ নহয়। "
+"চিহ্নিত সাক্ষাৎকাৰ সম্বন্ধীয় তথ্য, সেৱকেত পৰিবৰ্তন কৰা হয়নি।"
 
-#: ../src/camel/camel-mapi-folder.c:478
-#, c-format
-#| msgid "Fetching summary information for new messages in %s"
-msgid "Updating local summary cache for new messages in %s"
-msgstr "%s ত উপস্থিত নতুন বাৰ্তা সম্বন্ধে সংক্ষিপ্ত তথ্যৰ কেছে উন্নত কৰা হৈছে"
+#: ../src/calendar/e-cal-backend-mapi.c:2092
+msgid "Cannot remove items from a server"
+msgstr "এটা চাৰ্ভাৰৰ পৰা বস্তুবোৰ আতৰাব নোৱাৰি"
 
-#: ../src/camel/camel-mapi-folder.c:702
-#, c-format
-msgid "Retrieving message IDs from server for %s"
-msgstr "%s ৰ বাবে সেৱকৰ পৰা বাৰ্তাৰ ID প্ৰাপ্ত কৰা হৈছে"
+#: ../src/calendar/e-cal-backend-mapi.c:2529
+msgid "Failed to get Free/Busy data"
+msgstr "মুক্ত/ব্যস্ত তথ্য প্ৰাপ্ত কৰিবলে ব্যৰ্থ"
 
-#: ../src/camel/camel-mapi-folder.c:724
+#: ../src/camel/camel-mapi-folder.c:777
 #, c-format
-msgid "Removing deleted messages from cache in %s"
-msgstr "%s ৰ কেছেত উপস্থিত বৰ্জিত বাৰ্তা আঁতৰুৱা হৈছে"
+#| msgid "Fetching folder list ..."
+msgid "Refreshing folder '%s'"
+msgstr "ফোল্ডাৰ '%s' ক সতেজ কৰা হৈছে"
+
+#: ../src/camel/camel-mapi-folder.c:844
+#, c-format
+#| msgid "Loading items in folder %s"
+msgid "Downloading messages in folder '%s'"
+msgstr "ফোল্ডাৰ '%s' ত বাৰ্তাসমূহ ডাউনল'ড কৰা হৈছে"
 
 #
-#: ../src/camel/camel-mapi-folder.c:1029 ../src/camel/camel-mapi-folder.c:1643
-#: ../src/camel/camel-mapi-folder.c:1651
-msgid "This message is not available in offline mode."
-msgstr "অফ-লাইন অবস্থায় এই বাৰ্তাটি উপলব্ধ নাই ।"
-
-#: ../src/camel/camel-mapi-folder.c:1038
+#: ../src/camel/camel-mapi-folder.c:931 ../src/camel/camel-mapi-folder.c:1512
 #, c-format
-msgid "Fetching summary information for new messages in %s"
-msgstr "%s-ত উপস্থিত নতুন বাৰ্তা সম্বন্ধে সংক্ষিপ্ত তথ্য প্ৰাপ্ত কৰা হৈছে"
+msgid "This message is not available in offline mode."
+msgstr "অফ-লাইন অবস্থায় এই বাৰ্তাটি উপলব্ধ নাই।"
 
-#: ../src/camel/camel-mapi-folder.c:1048
+#: ../src/camel/camel-mapi-folder.c:941 ../src/camel/camel-mapi-folder.c:959
+#, c-format
+#| msgid "Fetching items failed"
+msgid "Fetching items failed: %s"
+msgstr "বস্তুবোৰ প্ৰাপ্ত কৰা ব্যৰ্থ হল: %s"
+
+#: ../src/camel/camel-mapi-folder.c:946 ../src/camel/camel-mapi-folder.c:964
 msgid "Fetching items failed"
 msgstr "বস্তু প্ৰাপ্ত কৰিবলৈ বিফল"
 
-#: ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1204
 #, c-format
-msgid ""
-"Cannot get message: %s\n"
-"  %s"
-msgstr ""
-"বাৰ্তা প্ৰাপ্ত কৰা সম্ভব নহয়: %s\n"
-"  %s"
+msgid "Cannot append message to folder '%s'"
+msgstr "'%s' ফোল্ডাৰত বাৰ্তা সংযোজন কৰিবলৈ ব্যৰ্থ"
 
-#
-#: ../src/camel/camel-mapi-folder.c:1607
-msgid "No such message"
-msgstr "এই ধৰনৰ কোনো বাৰ্তা উপস্থিত নাই"
+#: ../src/camel/camel-mapi-folder.c:1213 ../src/camel/camel-mapi-folder.c:1241
+#, c-format
+#| msgid "Offline. '%s'"
+msgid "Offline."
+msgstr "অফলাইন"
 
-#: ../src/camel/camel-mapi-folder.c:1619
-msgid "Message fetching cancelled by user."
-msgstr "ব্যৱহাৰকৰ্তা দ্বাৰা তথ্য আহৰণেৰ কৰ্ম বাতিল কৰা হৈছে ।"
+#: ../src/camel/camel-mapi-folder.c:1322
+#, c-format
+msgid "Failed to empty Trash: %s"
+msgstr "আবৰ্জনা ৰিক্ত কৰিবলে ব্যৰ্থ: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1626
+#: ../src/camel/camel-mapi-folder.c:1328
+msgid "Failed to empty Trash"
+msgstr "আবৰ্জনা ৰিক্ত কৰিবলে ব্যৰ্থ"
+
+#: ../src/camel/camel-mapi-folder.c:1497
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "বাৰ্তা %s প্ৰাপ্ত কৰা সম্ভব নহয়: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1672 ../src/camel/camel-mapi-folder.c:1684
+#
+#: ../src/camel/camel-mapi-folder.c:1498
+msgid "No such message"
+msgstr "এই ধৰনৰ কোনো বাৰ্তা উপস্থিত নাই"
+
+#: ../src/camel/camel-mapi-folder.c:1523 ../src/camel/camel-mapi-folder.c:1553
+#, c-format
+#| msgid "Could not get message"
+msgid "Could not get message: %s"
+msgstr "বাৰ্তা প্ৰাপ্ত কৰিব পৰা নগল: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1529 ../src/camel/camel-mapi-folder.c:1560
+#, c-format
 msgid "Could not get message"
 msgstr "বাৰ্তা প্ৰাপ্ত কৰিবলৈ ব্যৰ্থ"
 
-#: ../src/camel/camel-mapi-folder.c:1964
-#, c-format
-#| msgid "Cannot create new folder `%s'"
-msgid "Cannot append message to folder '%s'"
-msgstr "'%s' ফোল্ডাৰত বাৰ্তা সংযোজন কৰিবলৈ ব্যৰ্থ"
+#: ../src/camel/camel-mapi-folder.c:1927
+msgid "Receive quota"
+msgstr "কুটা গ্ৰহণ কৰক"
 
-#: ../src/camel/camel-mapi-folder.c:1971
-#, c-format
-msgid "Offline. '%s'"
-msgstr "অফ-লাইন। '%s'"
+#: ../src/camel/camel-mapi-folder.c:1933
+msgid "Send quota"
+msgstr "কুটা পঠাওক"
 
-#: ../src/camel/camel-mapi-folder.c:2091
+#: ../src/camel/camel-mapi-folder.c:1952
+msgid "No quota information available"
+msgstr "কোনো কুটা তথ্য উপলব্ধ নাই"
+
+#: ../src/camel/camel-mapi-folder.c:2055
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s সম্বন্ধীয় সংক্ষিপ্ত তথ্য লোড কৰিবলৈ ব্যৰ্থ"
 
 #
-#: ../src/camel/camel-mapi-provider.c:51
+#: ../src/camel/camel-mapi-provider.c:45
 msgid "Checking for new mail"
 msgstr "নতুন বাৰ্তাৰ উপস্থিতি পৰীক্ষা কৰা হৈছে"
 
 #
-#: ../src/camel/camel-mapi-provider.c:53
+#: ../src/camel/camel-mapi-provider.c:47
 msgid "C_heck for new messages in all folders"
 msgstr "সকল ফোল্ডাৰত নতুন বাৰ্তাৰ উপস্থিতি পৰীক্ষা কৰা হৈছে (_h)"
 
 #
-#: ../src/camel/camel-mapi-provider.c:57
+#: ../src/camel/camel-mapi-provider.c:51
 msgid "Options"
 msgstr "বিকল্পসমূহ"
 
 #
-#: ../src/camel/camel-mapi-provider.c:59
+#: ../src/camel/camel-mapi-provider.c:53
 msgid "Automatically synchroni_ze account locally"
 msgstr "স্বয়ংক্ৰিয়ভাবে স্থানীয়ৰূপে হিচাপ সুসংগত কৰা হ'ব (_z)"
 
 #
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:62
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
 "চিহ্নিত সেৱকত উপস্থিত Inbox ফোল্ডাৰত উপস্থিত নতুন বাৰ্তাৰ ক্ষেত্ৰত ফিল্টাৰ প্ৰয়োগ কৰা "
 "হ'ব (_A)"
 
 #
-#: ../src/camel/camel-mapi-provider.c:64
+#: ../src/camel/camel-mapi-provider.c:58
 msgid "Check new messages for _Junk contents"
 msgstr "অবাঞ্ছিত সামগ্ৰী চিহ্নিত কৰাৰ উদ্দেশ্যে নতুন বাৰ্তা পৰীক্ষা কৰা হ'ব (_J)"
 
 #
-#: ../src/camel/camel-mapi-provider.c:66
+#: ../src/camel/camel-mapi-provider.c:60
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "অকল Inbox ফোল্ডাৰত অবাঞ্ছিত বাৰ্তা পৰীক্ষা কৰা হ'ব (_e)"
 
-#: ../src/camel/camel-mapi-provider.c:78
-msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
-msgstr "MAPI প্ৰয়োগকৰ্তা Microsoft Exchange / OpenChange সেৱক ব্যৱহাৰৰ বাবে"
+#: ../src/camel/camel-mapi-provider.c:62
+#: ../src/configuration/e-mapi-config-utils.c:1630
+msgid "Lis_ten for server notifications"
+msgstr "চাৰ্ভাৰ অধিসূচনাসমূহ শুনক (_t)"
+
+#: ../src/camel/camel-mapi-provider.c:73
+#| msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
+msgstr "MAPI ৰে Microsoft Exchange 2007/OpenChange চাৰ্ভাৰসমূহ অভিগম কৰিবলে"
 
 #
-#: ../src/camel/camel-mapi-provider.c:93
+#: ../src/camel/camel-mapi-provider.c:88
 msgid "Password"
 msgstr "গুপ্তশব্দ"
 
-#: ../src/camel/camel-mapi-provider.c:94
-msgid "This option will connect to the Openchange server using a plaintext password."
-msgstr ""
-"এই বিকল্পৰ সাহায্যে প্লেইন-টেক্সট গুপ্তশব্দ সহযোগে Openchange সেৱকৰ সৈতে সংযোগ "
-"স্থাপন কৰা হ'ব ।"
+#: ../src/camel/camel-mapi-provider.c:89
+#| msgid ""
+#| "This option will connect to the Openchange server using a plaintext "
+#| "password."
+msgid "This option will connect to the OpenChange server using a plaintext password."
+msgstr "ই এটা প্লেইনটেক্সট পাছৱাৰ্ড ব্যৱহাৰ কৰি OpenChange চাৰ্ভাৰলে সংযোগ কৰিব।"
+
+#: ../src/camel/camel-mapi-sasl-krb.c:28
+msgid "Kerberos"
+msgstr "Kerberos"
+
+#: ../src/camel/camel-mapi-sasl-krb.c:30
+#| msgid ""
+#| "This option will connect to the Openchange server using a plaintext "
+#| "password."
+msgid "This option will connect to the server using kerberos key."
+msgstr "এই বিকল্পয় চাৰ্ভাৰৰ সৈতে kerberos কি' ব্যৱহাৰ কৰি সংযোগ কৰিব।"
+
+#: ../src/camel/camel-mapi-store.c:133 ../src/camel/camel-mapi-store.c:175
+msgid "Cannot find folder in a local cache"
+msgstr "এটা স্থানীয় ক্যাশত ফোল্ডাৰ বিচাৰি পোৱা নগল"
+
+#: ../src/camel/camel-mapi-store.c:481 ../src/camel/camel-mapi-store.c:1183
+#| msgid "Folder list not available in offline mode."
+msgid "Folder list is not available in offline mode"
+msgstr "ফোল্ডাৰ তালিকা অফলাইন অৱস্থাত উপলব্ধ নাই"
+
+#: ../src/camel/camel-mapi-store.c:858
+#| msgid "All Public Folders"
+msgid "No public folder found"
+msgstr "কোনো ৰাজহুৱা ফোল্ডাৰ পোৱা নগল"
+
+#: ../src/camel/camel-mapi-store.c:858
+msgid "No folder found"
+msgstr "কোনো ফোল্ডাৰ পোৱা নগল"
+
+#: ../src/camel/camel-mapi-store.c:1205 ../src/camel/camel-mapi-store.c:2148
+#, c-format
+msgid "Connecting to '%s'"
+msgstr "'%s' ৰ  সৈতে সংযোগ কৰা হৈছে'"
+
+#: ../src/camel/camel-mapi-store.c:1264
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI folders in offline mode"
+msgstr "অফলাইন অৱস্থাত MAPI ফোল্ডাৰসমূহ সৃষ্টি কৰিব নোৱাৰি"
+
+#: ../src/camel/camel-mapi-store.c:1271
+#, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot create new folder '%s'"
+msgstr "নতুন ফোল্ডাৰ '%s' সৃষ্টি কৰিব পৰা নাযায়"
 
 #
-#: ../src/camel/camel-mapi-store.c:61
-msgid "Favorites"
-msgstr "পছন্দ"
+#: ../src/camel/camel-mapi-store.c:1280
+#, c-format
+msgid "Authentication failed"
+msgstr "অনুমোদন ব্যৰ্থ"
 
-#
-#: ../src/camel/camel-mapi-store.c:62
-msgid "All Public Folders"
-msgstr "সকল সাৰ্বজনীন ফোল্ডাৰ"
+#: ../src/camel/camel-mapi-store.c:1290
+msgid "MAPI folders can be created only within mailbox of the logged user"
+msgstr "MAPI ফোল্ডাৰসমূহ কেৱল লগ কৰা ব্যৱহাৰকাৰীজনৰ মেইলবাকচৰ মাজত সৃষ্টি কৰিব পাৰি"
 
-#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
+#: ../src/camel/camel-mapi-store.c:1303 ../src/camel/camel-mapi-store.c:1408
+#, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot find folder '%s'"
+msgstr "ফোল্ডাৰ '%s' বিচাৰি পোৱা নাযায়"
+
+#: ../src/camel/camel-mapi-store.c:1353
+#, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot create folder '%s': %s"
+msgstr "ফোল্ডাৰ '%s' সৃষ্টি কৰিব পৰা নাযায়: %s"
+
+#: ../src/camel/camel-mapi-store.c:1359
+#, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot create folder '%s'"
+msgstr "ফোল্ডাৰ '%s' সৃষ্টি কৰিব পৰা নাযায়"
+
+#: ../src/camel/camel-mapi-store.c:1386 ../src/camel/camel-mapi-store.c:1398
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot delete MAPI folders in offline mode"
+msgstr "অফলাইন অৱস্থাত MAPI ফোল্ডাৰ মচিব নোৱাৰি"
+
+#: ../src/camel/camel-mapi-store.c:1448
+#, c-format
+#| msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgid "Cannot remove folder '%s': %s"
+msgstr "ফোল্ডাৰ '%s' আতৰাব নোৱাৰি: %s"
+
+#: ../src/camel/camel-mapi-store.c:1456
+#, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot remove folder '%s'"
+msgstr "ফোল্ডাৰ '%s' আতৰাব নোৱাৰি"
+
+#: ../src/camel/camel-mapi-store.c:1485 ../src/camel/camel-mapi-store.c:1500
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot rename MAPI folders in offline mode"
+msgstr "অফলাইন অৱস্থাত MAPI ফোল্ডাৰসমূহ পুনৰ নামাকৰণ কৰিব নোৱাৰি"
+
+#: ../src/camel/camel-mapi-store.c:1511
+#, c-format
+#| msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
+msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
+msgstr "MAPI ফোল্ডাৰ '%s' পুনৰ নামাকৰণ কৰিব নোৱাৰি। ফোল্ডাৰৰ অস্তিত্ব নাই"
+
+#: ../src/camel/camel-mapi-store.c:1522
+#, c-format
+#| msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgid "Cannot rename MAPI default folder '%s' to '%s'"
+msgstr "MAPI অবিক্লপিত ফোল্ডাৰ '%s' ক '%s' লে পুনৰ নামাকৰণ কৰিব নোৱাৰি"
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1548 ../src/camel/camel-mapi-store.c:1581
+#: ../src/camel/camel-mapi-store.c:1659
+#, c-format
+#| msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgid "Cannot rename MAPI folder '%s' to '%s'"
+msgstr "MAPI ফোল্ডাৰ '%s' ক '%s' লে পুনৰ নামাকৰণ কৰিব নোৱাৰি"
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#. The last '%s' is a detailed error message.
+#: ../src/camel/camel-mapi-store.c:1573 ../src/camel/camel-mapi-store.c:1652
+#, c-format
+#| msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgid "Cannot rename MAPI folder '%s' to '%s': %s"
+msgstr "MAPI ফোল্ডাৰ '%s' ক '%s' লে পুনৰ নামাকৰণ কৰিব নোৱাৰি: %s"
+
+#: ../src/camel/camel-mapi-store.c:1755
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot subscribe MAPI folders in offline mode"
+msgstr "MAPI ফোল্ডাৰসমূহক অফলাইন অৱস্থাত স্বাক্ষৰ কৰিব নোৱাৰি"
+
+#: ../src/camel/camel-mapi-store.c:1772
+#, c-format
+msgid "Folder '%s' not found"
+msgstr "ফোল্ডাৰ '%s' পোৱা নগল"
+
+#: ../src/camel/camel-mapi-store.c:1890
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot unsubscribe MAPI folders in offline mode"
+msgstr "অফলাইন অৱস্থাত MAPI ফোল্ডাৰসমূহ অস্বাক্ষৰ কৰিব নোৱাৰি"
+
+#. Translators: The %s is replaced with a server's host name
+#: ../src/camel/camel-mapi-store.c:2103
+#: ../src/camel/camel-mapi-transport.c:191
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI সেৱক %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
+#. Translators: The first %s is replaced with a user name, the second with a server's host name
+#: ../src/camel/camel-mapi-store.c:2107
+#: ../src/camel/camel-mapi-transport.c:194
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "%s ৰ বাবে Exchange MAPI পৰিসেবা, %s ৰ উপৰ স্থাপিত"
 
-#. To translators : First %s : is the error text or the reason
-#. for prompting the user if it is available.
-#. Second %s is : Username.
-#. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:315
+#: ../src/camel/camel-mapi-store.c:2133
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot connect MAPI store in offline mode"
+msgstr "অফলাইন অৱস্থাত MAPI সংৰক্ষণৰ সৈতে সংযোগ কৰিব নোৱাৰি"
+
+#: ../src/camel/camel-mapi-store.c:2178
 #, c-format
-msgid "%s Please enter the MAPI password for %s@%s"
-msgstr "%s অনুগ্ৰহ কৰে %s@%s ৰ বাবে MAPI গুপ্তশব্দ লিখক"
+msgid "Mailbox '%s' is full, no new messages will be received or sent."
+msgstr "মেইলবাকচ '%s' পূৰ্ণ, কোনো নতুন বাৰ্তা গ্ৰহণ কৰা অথবা পঠোৱা নহয়।"
 
-#
-#: ../src/camel/camel-mapi-store.c:328
-msgid "You did not enter a password."
-msgstr "কোনো গুপ্তশব্দ উল্লেখ কৰা হয়নি ।"
-
-#: ../src/camel/camel-mapi-store.c:336
+#: ../src/camel/camel-mapi-store.c:2180
 #, c-format
-msgid "Unable to authenticate to Exchange MAPI server."
-msgstr "Exchange MAPI সেৱকে পৰিআয় প্ৰমাণ কৰা সম্ভব হয়নি ।"
+msgid "Mailbox '%s' is near its size limit, message send will be disabled soon."
+msgstr "মেইলবাকচ '%s' তাৰ আকাৰ সীমাৰ ওচৰ পাইছে, বাৰ্তা পঠোৱা সোনকালে অসামৰ্থবান হব।"
 
-#: ../src/camel/camel-mapi-store.c:456
-msgid "Cannot create MAPI folders in offline mode."
-msgstr "অফ-লাইন অবস্থায় MAPI ফোল্ডাৰ নিৰ্মাণ কৰা সম্ভব নহয় ।"
-
-#: ../src/camel/camel-mapi-store.c:461
+#: ../src/camel/camel-mapi-store.c:2184
 #, c-format
-msgid "Cannot create new folder `%s'"
-msgstr "নতুন ফোল্ডাৰ `%s' নিৰ্মাণ কৰা সম্ভব নহয়"
+msgid "Mailbox '%s' is full, no new messages will be received."
+msgstr "মেইলবাকচ '%s' পূৰ্ণ, কোনো নতুন বাৰ্তা গ্ৰহণ কৰা নহয়।"
 
-#: ../src/camel/camel-mapi-store.c:670
+#: ../src/camel/camel-mapi-store.c:2186
 #, c-format
-msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
-msgstr "MAPI ফোল্ডাৰ `%s' ৰ নাম পৰিবৰ্তন কৰা সম্ভব নহয় । ফোল্ডাৰ উপস্থিত নাই ।"
+msgid "Mailbox '%s' is near its size limit."
+msgstr "মেইলবাকচ '%s' তাৰ আকাৰ সীমাৰ ওচৰ পাইছে।"
 
-#: ../src/camel/camel-mapi-store.c:681
+#: ../src/camel/camel-mapi-store.c:2598
+#| msgid "Authentication failed"
+msgid "Authentication password not available"
+msgstr "প্ৰমাণীকৰণ পাছৱাৰ্ড উপলব্ধ নহয়"
+
+#: ../src/camel/camel-mapi-transport.c:142
+#: ../src/camel/camel-mapi-transport.c:164
 #, c-format
-msgid "Cannot rename MAPI default folder `%s' to `%s'."
-msgstr "MAPI ডিফল্ট ফোল্ডাৰৰ নাম `%s'ৰ পৰা `%s'-এ পৰিবৰ্তন কৰা সম্ভব নহয় ।"
-
-#: ../src/camel/camel-mapi-store.c:699
-#, c-format
-msgid "Cannot rename MAPI folder `%s' to `%s'"
-msgstr "MAPI ফোল্ডাৰৰ নাম `%s'ৰ পৰা `%s'-এ পৰিবৰ্তন কৰা সম্ভব নহয়"
-
-#: ../src/camel/camel-mapi-store.c:1227
-msgid "Folder list not available in offline mode."
-msgstr "অফ-লাইন অবস্থায় ফোল্ডাৰৰ তালিকা উপলব্ধ হ'ব না ।"
-
-#. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:116
 msgid "Could not send message."
-msgstr "বাৰ্তা পাঠাতে ব্যৰ্থ ।"
+msgstr "বাৰ্তা পাঠাতে ব্যৰ্থ।"
+
+#: ../src/camel/camel-mapi-transport.c:159
+#, c-format
+#| msgid "Could not send message."
+msgid "Could not send message: %s"
+msgstr "বাৰ্তা পঠাব পৰা নাযায়: %s"
+
+#: ../src/collection/e-mapi-backend.c:269
+#| msgid "Global Address List / Active Directory"
+msgid "Global Address List"
+msgstr "বিশ্বব্যাপী ঠিকনা তালিকা"
+
+#: ../src/collection/e-mapi-backend.c:517
+#: ../src/collection/e-mapi-backend.c:560
+#, c-format
+msgid "Data source '%s' does not represent a MAPI folder"
+msgstr "তথ্য উৎস '%s' এ এটা MAPI ফোল্ডাৰ প্ৰতিনিদ্ধিত্ব নকৰে"
+
+#: ../src/configuration/e-book-config-mapigal.c:63
+msgid "Allow _partial search results"
+msgstr "আংশিক সন্ধান ফলাফলসমূহৰ অনুমতি দিয়ক (_p)"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:126
+msgid "Select username"
+msgstr "ব্যৱহাৰকৰ্তাৰ নাম নিৰ্বাচন কৰক"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:136
+msgid "Full name"
+msgstr "সম্পূৰ্ণ নাম"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:141
+#| msgid "User name"
+msgid "Username"
+msgstr "ব্যৱহাৰকাৰীৰ নাম"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:168
+msgid ""
+"There are more users with similar user name on a server.\n"
+"Please select that you would like to use from the below list."
+msgstr ""
+"একেটা ব্যৱহাৰকাৰী নামৰ সৈতে চাৰ্ভাৰত আৰু অন্য ব্যৱহাৰকাৰীসকল আছে।\n"
+"অনুগ্ৰহ কৰি তলৰ তালিকাৰ পৰা আপুনি ব্যৱহাৰ কৰিব বিচৰা ব্যৱহাৰ কৰক।"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:396
+msgid "Authentication finished successfully."
+msgstr "সাফল্যৰ সৈতে পৰিচয় প্ৰমাণ কৰা হৈছে।"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:398
+#: ../src/configuration/e-mail-config-mapi-backend.c:519
+msgid "Authentication failed."
+msgstr "পৰিচয় প্ৰমাণ কৰিবলৈ ব্যৰ্থ।"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:460
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot authenticate MAPI accounts in offline mode"
+msgstr "অফলাইন অৱস্থাত MAPI একাওন্টসমূহ প্ৰমাণীত কৰিব নোৱাৰি"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:489
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"সেৱক, ব্যৱহাৰকৰ্তা নাম আৰু ডোমেইনৰ নাম উল্লেখ কৰা আবশ্যক। অনুগ্ৰহ এইসমূহৰ ক্ষেত্ৰত "
+"যথাযত মান লিখক।"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:492
+#| msgid ""
+#| "Server, username and domain name cannot be empty. Please fill them with "
+#| "correct values."
+msgid ""
+"Realm name cannot be empty when kerberos is selected. Please fill them with "
+"correct values."
+msgstr ""
+"kerberos সংলগ্ন থকা অৱস্থাত ৰাজত্ব নাম ৰিক্ত হব নোৱাৰিব। অনুগ্ৰহ কৰি সিহতক সঠিক মানৰ "
+"সৈতে "
+"পূৰ্ণ কৰক।"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:513
+msgid "Connecting to the server, please wait..."
+msgstr "চাৰ্ভাৰৰ সৈতে সংযোগ কৰা হৈছে, অনুগ্ৰহ কৰি অপেক্ষা কৰক..."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:721
+msgid "Configuration"
+msgstr "সংৰূপ"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:730
+msgid "_Server:"
+msgstr "চাৰ্ভাৰ (_S):"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:747
+#| msgid "User name"
+msgid "User_name:"
+msgstr "ব্যৱহাৰকাৰী নাম (_n):"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:772
+msgid "_Domain name:"
+msgstr "ডোমেইনৰ নাম: (_D)"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:785
+msgid "_Authenticate"
+msgstr "অনুমোদন (_A)"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:793
+msgid "_Use secure connection"
+msgstr "সুৰক্ষিত সংযোগ ব্যৱহাৰ কৰক (_U)"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:808
+msgid "_Kerberos authentication"
+msgstr "Kerberos প্ৰমাণীকৰণ (_K)"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:820
+#| msgid "_Domain name:"
+msgid "_Realm name:"
+msgstr "ৰাজত্বৰ নাম (_R):"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:186
+#: ../src/configuration/e-mail-config-mapi-page.c:247
+#| msgid "Exchange Settings"
+msgid "MAPI Settings"
+msgstr "MAPI সংহতিসমূহ"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:192
+msgid "View the size of all Exchange folders"
+msgstr "সমস্ত Exchange ফোল্ডাৰৰ মাপ প্ৰদৰ্শন কৰক"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:196
+#| msgid "Folder Size"
+msgid "Folder _Size"
+msgstr "ফোল্ডাৰৰ আকাৰ (_S)"
+
+#: ../src/configuration/e-mapi-config-utils.c:454
+msgid "Folder"
+msgstr "ফোল্ডাৰ"
+
+#: ../src/configuration/e-mapi-config-utils.c:459
+msgid "Size"
+msgstr "মাপ"
+
+#: ../src/configuration/e-mapi-config-utils.c:482
+#: ../src/configuration/e-mapi-config-utils.c:486
+msgid "Unable to retrieve folder size information"
+msgstr "ফোল্ডাৰৰ মাপ সংক্ৰান্ত তথ্য প্ৰাপ্ত কৰিবলৈ ব্যৰ্থ"
+
+#: ../src/configuration/e-mapi-config-utils.c:552
+msgid "Folder Size"
+msgstr "ফোল্ডাৰৰ মাপ"
+
+#: ../src/configuration/e-mapi-config-utils.c:566
+#| msgid "Fetching folder list ..."
+msgid "Fetching folder list…"
+msgstr "ফোল্ডাৰৰ তালিকা প্ৰাপ্ত কৰা হৈছে…"
+
+#: ../src/configuration/e-mapi-config-utils.c:732
+#, c-format
+msgid "Cannot edit permissions of folder '%s', choose other folder."
+msgstr "ফোল্ডাৰ '%s' ৰ অনুমতিসমূহ সম্পাদন কৰিব নোৱাৰি, অন্য ফোল্ডাৰ বাছক।"
+
+#: ../src/configuration/e-mapi-config-utils.c:795
+#| msgid "_Folder size"
+msgid "Folder size..."
+msgstr "ফোল্ডাৰৰ আকাৰ..."
+
+#: ../src/configuration/e-mapi-config-utils.c:802
+msgid "Subscribe to folder of other user..."
+msgstr "অন্য ব্যৱহাৰকাৰীৰ ফোল্ডাৰলে স্বাক্ষৰ কৰক..."
+
+#: ../src/configuration/e-mapi-config-utils.c:811
+#: ../src/configuration/e-mapi-config-utils.c:1091
+#: ../src/configuration/e-mapi-config-utils.c:1121
+#: ../src/configuration/e-mapi-config-utils.c:1151
+#: ../src/configuration/e-mapi-config-utils.c:1181
+msgid "Permissions..."
+msgstr "অনুমতিসমূহ..."
+
+#: ../src/configuration/e-mapi-config-utils.c:813
+msgid "Edit MAPI folder permissions"
+msgstr "MAPI ফোল্ডাৰৰ অনুমতিসমূহ সম্পাদন কৰক"
+
+#: ../src/configuration/e-mapi-config-utils.c:1093
+msgid "Edit MAPI calendar permissions"
+msgstr "MAPI কেলেন্ডাৰ অনুমতিসমূহ সম্পাদন কৰক"
+
+#: ../src/configuration/e-mapi-config-utils.c:1123
+msgid "Edit MAPI tasks permissions"
+msgstr "MAPI কাৰ্য্য অনুমতিসমূহ সম্পাদন কৰক"
+
+#: ../src/configuration/e-mapi-config-utils.c:1153
+msgid "Edit MAPI memos permissions"
+msgstr "MAPI মেমোসমূহৰ অনুমতিসমূহ সম্পাদন কৰক"
+
+#: ../src/configuration/e-mapi-config-utils.c:1183
+msgid "Edit MAPI contacts permissions"
+msgstr "MAPI পৰিচয়সমূহৰ অনুমতিসমূহ সম্পাদন কৰক"
+
+#: ../src/configuration/e-mapi-config-utils.c:1356
+msgid "Personal Folders"
+msgstr "ব্যক্তিগত ফোল্ডাৰ"
+
+#: ../src/configuration/e-mapi-config-utils.c:1583
+msgid "Searching remote MAPI folder structure, please wait..."
+msgstr "দূৰৱৰ্তী MAPI ফোল্ডাৰ গঠন সন্ধান কৰা হৈছে, অনুগ্ৰহ কৰি অপেক্ষা কৰক..."
+
+#: ../src/configuration/e-mapi-config-utils.c:1651
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI calendar in offline mode"
+msgstr "অফলাইন অৱস্থাত MAPI কেলেন্ডাৰ সৃষ্টি কৰিব নোৱাৰি"
+
+#: ../src/configuration/e-mapi-config-utils.c:1654
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI task list in offline mode"
+msgstr "অফলাইন অৱস্থাত MAPI কাৰ্য্য তালিকা সৃষ্টি কৰিব নোৱাৰি"
+
+#: ../src/configuration/e-mapi-config-utils.c:1657
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI memo list in offline mode"
+msgstr "অফলাইন অৱস্থাত MAPI মেমো তালিকা সৃষ্টি কৰিব নোৱাৰি"
+
+#: ../src/configuration/e-mapi-config-utils.c:1660
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI address book in offline mode"
+msgstr "অফলাইন অৱস্থাত MAPI ঠিকনা বহি সৃষ্টি কৰিব নোৱাৰি"
+
+#: ../src/configuration/e-mapi-config-utils.c:1664
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI source in offline mode"
+msgstr "অফলাইন অৱস্থাত MAPI উৎস সৃষ্টি কৰিব নোৱাৰি"
 
 #
-#~ msgid "Global Address List / Active Directory"
-#~ msgstr "ঠিকানাৰ সাৰ্বজনীন তালিকা / সক্ৰিয় ডিৰেক্টৰি"
+#: ../src/configuration/e-mapi-config-utils.c:1684
+msgid "_Location:"
+msgstr "অবস্থান:(_L)"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:89
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "কোনো নহয়"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:90
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "গৰাকী"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:100
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "প্ৰকাশ কৰা সম্পাদক"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:109
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "সম্পাদক"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:117
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "প্ৰকাশ কৰা লেখক"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:124
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "লেখক"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:130
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "সম্পাদন নকৰা লেখক"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:135
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "পুনৰদৰ্শক"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:138
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "অৱদানকাৰী"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:141
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "স্বনিৰ্বাচিত"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:274
+msgid "Writing folder permissions, please wait..."
+msgstr "ফোল্ডাৰ অনুমতিসমূহ লিখা হৈছে, অনুগ্ৰহ কৰি অপেক্ষা কৰক..."
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:780
+#: ../src/configuration/e-mapi-search-gal-user.c:524
+msgctxt "User"
+msgid "Anonymous"
+msgstr "বেনামী"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
+#: ../src/configuration/e-mapi-search-gal-user.c:521
+msgctxt "User"
+msgid "Default"
+msgstr "অবিকল্পিত"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
+msgctxt "User"
+msgid "Unknown"
+msgstr "অজ্ঞাত"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:876
+#: ../src/configuration/e-mapi-search-gal-user.c:597
+msgid "Name"
+msgstr "নাম"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:882
+msgid "Permission level"
+msgstr "অনুমতি স্তৰ"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:935
+msgid "Edit MAPI folder permissions..."
+msgstr "MAPI ফোল্ডাৰৰ অনুমতিসমূহ সম্পাদন কৰক..."
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:960
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:610
+msgid "Account:"
+msgstr "একাওন্ট:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:986
+#| msgid "Folder Size"
+msgid "Folder name:"
+msgstr "ফোল্ডাৰৰ নাম:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1007
+#| msgid "Folder"
+msgid "Folder ID:"
+msgstr "ফোল্ডাৰ ID:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1066
+msgid "Permissions"
+msgstr "অনুমতিসমূহ"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1087
+msgid "Permi_ssion level:"
+msgstr "অনুমতি স্তৰ (_s):"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1115
+msgctxt "Permissions"
+msgid "Read"
+msgstr "পঢ়ক"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1126
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1189
+msgctxt "Permissions"
+msgid "None"
+msgstr "কোনো নহয়"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1131
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "সম্পূৰ্ণ বিৱৰণ"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1136
+msgctxt "Permissions"
+msgid "Simple Free/Busy"
+msgstr "সহজ মুক্ত/ব্যস্ত"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1140
+msgctxt "Permissions"
+msgid "Detailed Free/Busy"
+msgstr "বিৱৰিত মুক্ত/ব্যস্ত"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1147
+msgctxt "Permissions"
+msgid "Write"
+msgstr "লিখক"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1158
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "বস্তুবোৰ সৃষ্টি কৰক"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
+#| msgid "Cannot create new folder `%s'"
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "চাবফোল্ডাৰসমূহ সৃষ্টি কৰক"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr "নিজস্ব সম্পাদন কৰক"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1170
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "সকলো সম্পাদন কৰক"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1178
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "বস্তুবোৰ মচি পেলাওক"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1194
+msgctxt "Permissions"
+msgid "Own"
+msgstr "নিজস্ব"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1199
+msgctxt "Permissions"
+msgid "All"
+msgstr "সকলো"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1205
+msgctxt "Permissions"
+msgid "Other"
+msgstr "অন্য"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1216
+#| msgid "Folder Size"
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "ফোল্ডাৰৰ গৰাকী"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
+#| msgid "Folder"
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr "ফোল্ডাৰৰ পৰিচয়"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
+#| msgid "_Folder size"
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr "ফোল্ডাৰ দৃশ্যমান"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1279
+msgid "Reading folder permissions, please wait..."
+msgstr "ফোল্ডাৰৰ অনুমতিসমূহ পঢ়া হৈছে, অনুগ্ৰহ কৰি অপেক্ষা কৰক..."
+
+#: ../src/configuration/e-mapi-search-gal-user.c:223
+msgid "No users found"
+msgstr "কোনো ব্যৱহাৰকাৰী পোৱা নগল"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:226
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "এজন ব্যৱহাৰকাৰী পোৱা গল"
+msgstr[1] "%d ব্যৱহাৰকাৰীসকল পোৱা গল"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:231
+#, c-format
+msgid "Found %d user, but showing only first %d"
+msgid_plural "Found %d users, but showing only first %d"
+msgstr[0] "%d ব্যৱহাৰকাৰী পোৱা গল, কিন্তু কেৱল প্ৰথম %d দেখুৱা হৈছে"
+msgstr[1] "%d ব্যৱহাৰকাৰীসকল পোৱা গল, কিন্তু কেৱল প্ৰথম %d দেখুৱা হৈছে"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:516
+#: ../src/configuration/e-mapi-search-gal-user.c:707
+msgid "Search for a user"
+msgstr "এজন ব্যৱহাৰকাৰী সন্ধান কৰক"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:532
+msgid "Searching..."
+msgstr "সন্ধান কৰা হৈছে..."
+
+#: ../src/configuration/e-mapi-search-gal-user.c:603
+msgid "E-mail"
+msgstr "ই-মেইল"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:644
+msgid "Choose MAPI user..."
+msgstr "MAPI ব্যৱহাৰকাৰী বাছক..."
+
+#: ../src/configuration/e-mapi-search-gal-user.c:667
+msgid "_Search:"
+msgstr "সন্ধান কৰক (_S):"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:90
+#, c-format
+msgid "Cannot add folder, folder already exists as '%s'"
+msgstr "ফোল্ডাৰ যোগ কৰিব নোৱাৰি, ফোল্ডাৰ ইতিমধ্যে '%s' ৰূপে অস্তিত্ববান"
+
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. Example result: "Mailbox - John Smith"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:115
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox - %s"
+msgstr "মেইলবাকচ - %s"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:144
+#, c-format
+msgid "Cannot add folder, failed to add to store's summary"
+msgstr "ফোল্ডাৰ যোগ কৰিব নোৱাৰি, সংৰক্ষণৰ সাৰাংশলে যোগ কৰিবলে ব্যৰ্থ"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:326
+#, c-format
+msgid ""
+"Folder '%s' not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr ""
+"ফোল্ডাৰ '%s' পোৱা নগল। হয় ই অস্তিত্ববান নহয় অথবা আপোনাৰ ওচৰত ইয়াক অভিগম "
+"কৰিবলে অনুমতি নাই।"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:356
+msgid "Cannot add folder, cannot determine folder's type"
+msgstr "ফোল্ডাৰ যোগ কৰিব নোৱাৰি, ফোল্ডাৰৰ ধৰণ নিৰ্ধাৰণ কৰিব নোৱাৰি"
+
+#. Translators: This is used to name foreign folder.
+#. The first '%s' is replaced with user name to whom the folder belongs,
+#. the second '%s' is replaced with folder name.
+#. Example result: "John Smith - Calendar"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:397
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s - %s"
+msgstr "%s - %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:492
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:688
+msgid "Inbox"
+msgstr "ইনবক্স"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:494
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
+msgid "Contacts"
+msgstr "পৰিচয়সমূহ"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:496
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:690
+msgid "Calendar"
+msgstr "কেলেন্ডাৰ"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:498
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:691
+msgid "Memos"
+msgstr "মেমোসমূহ"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:500
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:692
+msgid "Tasks"
+msgstr "কাৰ্য্যসমূহ"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:513
+#, c-format
+msgid "Testing availability of folder '%s' of user '%s', please wait..."
+msgstr ""
+"ব্যৱহাৰকাৰী '%s' ৰ ফোল্ডাৰ '%s' ৰ উপলব্ধতা পৰিক্ষা কৰা হৈছে, অনুগ্ৰহ কৰি অপেক্ষা কৰক.."
+"."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:589
+msgid "Subscribe to folder of other MAPI user..."
+msgstr "অন্য MAPI ব্যৱহাৰকাৰীৰ ফোল্ডাৰলে স্বাক্ষৰ কৰক..."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:638
+#| msgid "User name"
+msgid "User"
+msgstr "ব্যৱহাৰকাৰী"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:645
+msgid "_User:"
+msgstr "ব্যৱহাৰকাৰী (_U):"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:658
+msgid "C_hoose..."
+msgstr "বাছক (_h)..."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:673
+#| msgid "_Folder size"
+msgid "_Folder name:"
+msgstr "ফোল্ডাৰৰ নাম (_F):"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2048
+msgctxt "MeetingResp"
+msgid "Accepted:"
+msgstr "গ্ৰহণ কৰা হল:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2052
+msgctxt "MeetingResp"
+msgid "Tentative:"
+msgstr "আনুমানিক:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2056
+msgctxt "MeetingResp"
+msgid "Declined:"
+msgstr "নাকচ কৰা হল:"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:140
+msgid "Failed to login into the server"
+msgstr "চাৰ্ভাৰলে লগিন কৰিবলে ব্যৰ্থ"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:141
+msgid "Cannot create more sessions, session limit was reached"
+msgstr "অধিক অধিবেশন সৃষ্টি কৰিব পৰা নাযায়, অধিবেশন সীমা প্ৰাপ্ত হৈছে"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:142
+msgid "User cancelled operation"
+msgstr "ব্যৱহাৰকাৰী দ্বাৰা কাৰ্য্য বাতিল কৰা হৈছে"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:143
+msgid "Unable to abort"
+msgstr "বাতিল কৰিবলে ব্যৰ্থ"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:144
+msgid "Network error"
+msgstr "নেটৱাৰ্ক ত্ৰুটি"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:145
+msgid "Disk error"
+msgstr "ডিস্ক ত্ৰুটি"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:146
+msgid "Password change required"
+msgstr "পাছৱাৰ্ডৰ পৰিবৰ্তনৰ প্ৰয়োজন"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:147
+#| msgid "Password"
+msgid "Password expired"
+msgstr "পাছৱাৰ্ডৰ অৱসান ঘটিছে"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:148
+msgid "Invalid workstation account"
+msgstr "অবৈধ ৱাৰ্কস্টেশন একাওন্ট"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:149
+msgid "Invalid access time"
+msgstr "অবৈধ অভিগম সময়"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:150
+msgid "Account is disabled"
+msgstr "একাওন্ট অসামৰ্থবান"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:151
+msgid "End of session"
+msgstr "অধিবেশনৰ অন্ত"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:152
+msgid "MAPI is not initialized or connected"
+msgstr "MAPI আৰম্ভ কৰা হোৱা নাই অথবা সংযুক্ত নহয়"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:153
+msgid "Permission denied"
+msgstr "অনুমতি নাকচ কৰা হৈছে"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:154
+msgid "Mailbox quota exceeded"
+msgstr "মেইলবাকচ কুটা প্ৰাপ্ত হৈছে"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:162
+#, c-format
+msgid "MAPI error %s (0x%x) occurred"
+msgstr "MAPI ত্ৰুটি %s (0x%x) দেখা দিলে"
+
+#. Translators: The first '%s' is replaced with an error context,
+#. aka where the error occurred, the second '%s' is replaced with
+#. the error message.
+#: ../src/libexchangemapi/e-mapi-connection.c:179
+#, c-format
+msgctxt "EXCHANGEMAPI_ERROR"
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:743
+#, c-format
+msgid "Server '%s' cannot be reached"
+msgstr "চাৰ্ভাৰ '%s' প্ৰাপ্ত কৰিব নোৱাৰি"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:864
+#, c-format
+msgid "Folder name '%s' is not a known default folder name, nor folder ID."
+msgstr "ফোল্ডাৰ নাম '%s' এটা জ্ঞাত ফোল্ডাৰ নাম নহয়, ফোল্ডাৰ ID ও নহয়।"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:1195
+#, c-format
+msgid "Failed to open store for user '%s'"
+msgstr "ব্যৱহাৰকাৰী '%s' ৰ বাবে সংৰক্ষণ খোলিবলে ব্যৰ্থ"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:1203
+#, c-format
+msgid "Folder of user '%s' not found"
+msgstr "ব্যৱহাৰকাৰী '%s' ৰ ফোল্ডাৰ পোৱা নগল"
+
+#. Translators: %s is replaced with an email address which was found ambiguous on a remote server
+#: ../src/libexchangemapi/e-mapi-connection.c:3686
+#, c-format
+msgid "Recipient '%s' is ambiguous"
+msgstr "গ্ৰাহক '%s' দ্বৈৰ্থক"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:4565
+#, c-format
+msgid ""
+"Search result exceeded allowed size limit. Use more specific search term, "
+"please"
+msgstr ""
+"সন্ধানৰ ফলাফল অনুমোদিত আকাৰ সীমা অতিক্ৰম কৰিছে। অনুগ্ৰহ কৰি অধিক বিশেষ সন্ধান সংজ্ঞা "
+"ব্যৱহাৰ "
+"কৰক"
+
+#
+#: ../src/libexchangemapi/e-mapi-connection.c:6165
+msgid "All Public Folders"
+msgstr "সকল সাৰ্বজনীন ফোল্ডাৰ"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6422
+#, c-format
+msgid "User name '%s' is ambiguous"
+msgstr "ব্যৱহাৰকাৰী নাম '%s' দ্বৈৰ্থক"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6425
+#, c-format
+msgid "User name '%s' not found"
+msgstr "ব্যৱহাৰকাৰী নাম '%s' পোৱা নগল"
+
+#: ../src/libexchangemapi/e-mapi-folder.c:332
+msgid "Cannot add folder, unsupported folder type"
+msgstr "ফোল্ডাৰ যোগ কৰিব পৰা নাযায়, অসমৰ্থিত ফোল্ডাৰ ধৰণ"
+
+#: ../src/libexchangemapi/e-mapi-folder.c:335
+msgid "Cannot add folder, master source not found"
+msgstr "ফোল্ডাৰ যোগ কৰিব নোৱাৰি, মাস্টাৰ উৎস পোৱা নগল"
+
+#~ msgid "Enter Password for %s@%s"
+#~ msgstr "%s@%s ৰ গুপ্তশব্দ লিখক"
+
+#~ msgid "Miscellaneous"
+#~ msgstr "বিবিধ বৈশিষ্ট্য"
+
+#~ msgid "Folders Size"
+#~ msgstr "ফোল্ডাৰৰ মাপ"
+
+#
+#~ msgid "Could not create thread for populating cache"
+#~ msgstr "কেশেৰ তথ্য পূৰণ কৰাৰ বাবে থ্ৰেড নিৰ্মাণ কৰিবলৈ ব্যৰ্থ"
+
+#~| msgid "Fetching summary information for new messages in %s"
+#~ msgid "Updating local summary cache for new messages in %s"
+#~ msgstr "%s ত উপস্থিত নতুন বাৰ্তা সম্বন্ধে সংক্ষিপ্ত তথ্যৰ কেছে উন্নত কৰা হৈছে"
+
+#~ msgid "Retrieving message IDs from server for %s"
+#~ msgstr "%s ৰ বাবে সেৱকৰ পৰা বাৰ্তাৰ ID প্ৰাপ্ত কৰা হৈছে"
+
+#~ msgid "Removing deleted messages from cache in %s"
+#~ msgstr "%s ৰ কেছেত উপস্থিত বৰ্জিত বাৰ্তা আঁতৰুৱা হৈছে"
+
+#~ msgid "Fetching summary information for new messages in %s"
+#~ msgstr "%sত উপস্থিত নতুন বাৰ্তা সম্বন্ধে সংক্ষিপ্ত তথ্য প্ৰাপ্ত কৰা হৈছে"
+
+#~ msgid ""
+#~ "Cannot get message: %s\n"
+#~ "  %s"
+#~ msgstr ""
+#~ "বাৰ্তা প্ৰাপ্ত কৰা সম্ভব নহয়: %s\n"
+#~ "  %s"
+
+#~ msgid "Message fetching cancelled by user."
+#~ msgstr "ব্যৱহাৰকৰ্তা দ্বাৰা তথ্য আহৰণেৰ কৰ্ম বাতিল কৰা হৈছে।"
+
+#
+#~ msgid "Favorites"
+#~ msgstr "পছন্দ"
+
+#~ msgid "%s Please enter the MAPI password for %s@%s"
+#~ msgstr "%s অনুগ্ৰহ কৰে %s@%s ৰ বাবে MAPI গুপ্তশব্দ লিখক"
+
+#
+#~ msgid "You did not enter a password."
+#~ msgstr "কোনো গুপ্তশব্দ উল্লেখ কৰা হয়নি।"
 
 #~ msgid "_Global Catalog server name:"
 #~ msgstr "Global Catalog সেৱকৰ নাম:(_G)"
 
 #~ msgid "_Limit number of GAL responses: %s"
 #~ msgstr "GALৰ পৰা প্ৰাপ্ত প্ৰত্যুত্তোৰৰ সংখ্যা সীমিত কৰা হ'ব: %s (_L)"
-
