@@ -3,45 +3,551 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # Manilal K M <libregeek@gmail.com>, 2009.
-# Ani Peter <apeter@redhat.com>, 2009
+# Ani Peter <apeter@redhat.com>, 2009, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi.gnome-2-28.ml\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi\n"
-"POT-Creation-Date: 2009-09-08 06:24+0000\n"
-"PO-Revision-Date: 2009-09-11 15:34+0530\n"
-"Last-Translator: \n"
-"Language-Team:  <en@li.org>\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug."
+"cgi?product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
+"POT-Creation-Date: 2012-08-17 08:58+0000\n"
+"PO-Revision-Date: 2012-09-20 02:31+0000\n"
+"Last-Translator: Ani Peter <apeter@redhat.com>\n"
+"Language-Team: Malayalam <discuss@lists.smc.org.in>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.11.4\n"
+"X-Generator: Lokalize 1.0\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:616
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:204
-#, c-format
-msgid "Enter Password for %s@%s"
-msgstr "%s@%s ന്റെ അടയാളവാക്കു് നല്‍കുക"
+#: ../src/addressbook/e-book-backend-mapi.c:748
+msgid "Searching"
+msgstr "തെരയുന്നു"
 
-#. NOTE: A good way would be display the list of username entries
-#. using GtkEntryCompletion in the username gtkentry. But plugins
-#. as of now does not have access to it
-#. TODO : Fix strings
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:125
+#: ../src/addressbook/e-book-backend-mapi.c:1738
+#: ../src/calendar/e-cal-backend-mapi.c:193
+#: ../src/calendar/e-cal-backend-mapi.c:542
+#: ../src/camel/camel-mapi-folder.c:1871 ../src/camel/camel-mapi-folder.c:1947
+msgid "Unknown error"
+msgstr "അപരിചിതമായ പിശക്"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:432
+#: ../src/calendar/e-cal-backend-mapi.c:411
+msgid "Failed to remove public folder"
+msgstr "പബ്ലിക് ഫോള്‍ഡര്‍ നീക്കം ചെയ്യുന്നതില്‍ പരാജയം"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:468
+msgid "The backend does not support bulk additions"
+msgstr "അധികമായവ ബാക്കന്‍ഡ് പിന്തുണയ്ക്കുന്നില്ല"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:510
+#: ../src/calendar/e-cal-backend-mapi.c:1766
+#: ../src/calendar/e-cal-backend-mapi.c:2277
+#| msgid "Unable to authenticate to Exchange MAPI server."
+msgid "Failed to create item on a server"
+msgstr "ഒരു സര്‍വറില്‍ വസ്തു തയ്യാറാക്കുന്നതില്‍ പരാജയം"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:627
+msgid "The backend does not support bulk modifications"
+msgstr "അധികമായി മാറ്റം വരുത്തിയവയില്‍ ബാക്കന്‍ഡ് പിന്തുണയ്ക്കുന്നില്ല"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:672
+#: ../src/calendar/e-cal-backend-mapi.c:1979
+msgid "Failed to modify item on a server"
+msgstr "ഒരു സര്‍വറില്‍ വസ്തുവിനു് മാറ്റം വരുത്തുന്നതില്‍ പരാജയപ്പെട്ടു"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:848
+#| msgid "Error fetching changes from the server."
+msgid "Failed to fetch items from a server"
+msgstr "ഒരു സര്‍വറില്‍ വസ്തുക്കള്‍ ലഭ്യമാക്കുന്നതില്‍ പരാജയം"
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. %d is an index of the contact.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:866
+#, c-format
+msgid "Caching contact %d"
+msgstr "%d വിലാസം കാഷ് ചെയ്യുന്നു"
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. The first %d is an index of the contact,
+#. the second %d is total count of conacts on the server.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:870
+#, c-format
+msgid "Caching contact %d/%d"
+msgstr "%d/%d വിലാസം കാഷ് ചെയ്യുന്നു"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:925
+msgid "Failed to count server contacts"
+msgstr "സര്‍വര്‍ വിലാസങ്ങള്‍ എണ്ണുന്നതില്‍ പരാജയപ്പെട്ടു"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:983
+msgid "Failed to list items from a server"
+msgstr "ഒരു സര്‍വറില്‍ നിന്നും വസ്തുക്കള്‍ ലഭ്യമാക്കുന്നതില്‍ പരാജയപ്പെട്ടു"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1064
+msgid "Failed to transfer contacts from a server"
+msgstr "ഒരു സര്‍വറില്‍ നിന്നും വിലാസങ്ങള്‍ നീക്കുന്നതില്‍ പരാജയപ്പെട്ടു"
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. %d is an index of the GAL entry.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:153
+#, c-format
+msgid "Caching GAL contact %d"
+msgstr "GAL വിലാസം %d കാഷ് ചെയ്യുന്നു"
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. The first %d is an index of the GAL entry,
+#. the second %d is total count of entries in GAL.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:157
+#, c-format
+msgid "Caching GAL contact %d/%d"
+msgstr "GAL വിലാസം %d/%d കാഷ് ചെയ്യുന്നു"
+
+#: ../src/addressbook/e-book-backend-mapi-gal.c:229
+#: ../src/addressbook/e-book-backend-mapi-gal.c:313
+msgid "Failed to fetch GAL entries"
+msgstr "GAL എന്‍ട്രറികള്‍ ലഭ്യമാക്കുന്നതില്‍ പരാജയം"
+
+#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
+#: ../src/calendar/e-cal-backend-mapi.c:481
+#, c-format
+msgid "Loading items in folder %s"
+msgstr "%s ഫോള്‍ഡറില്‍ വസ്തുക്കള്‍ ലഭ്യമാക്കുന്നു"
+
+#: ../src/calendar/e-cal-backend-mapi.c:834
+#, c-format
+#| msgid "Loading items in folder %s"
+msgid "Failed to open folder: %s"
+msgstr "ഫോള്‍ഡര്‍ തുറക്കുന്നതില്‍ പരാജയപ്പെട്ടു: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:842
+#, c-format
+msgid "Failed to get folder properties: %s"
+msgstr "ഫോള്‍ഡര്‍ വിശേഷതകള്‍ ലഭ്യമാക്കുന്നതില്‍ പരാജയപ്പെട്ടു: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:883
+#, c-format
+msgid "Failed to list objects: %s"
+msgstr "വസ്തുക്കള്‍ ലഭ്യമാക്കുന്നതില്‍ പരാജയം: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:909
+#, c-format
+msgid "Failed to transfer objects: %s"
+msgstr "വസ്തുക്കള്‍ നീക്കുന്നതില്‍ പരാജയപ്പെട്ടു: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:928
+#, c-format
+msgid "Failed to close folder: %s"
+msgstr "ഫോള്‍ഡര്‍ അടയ്ക്കുന്നതില്‍ പരാജയപ്പെട്ടു: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1425
+#: ../src/calendar/e-cal-backend-mapi.c:1426
+msgid "Could not create cache file"
+msgstr "cache ഫയല്‍ നിര്‍മ്മിക്കുവാന്‍ സാധ്യമായില്ല"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1887
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+msgstr ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+
+#: ../src/calendar/e-cal-backend-mapi.c:2092
+msgid "Cannot remove items from a server"
+msgstr "ഒരു സര്‍വറില്‍ നിന്നും വസ്കുക്കള്‍ നീക്കം ചെയ്യുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/calendar/e-cal-backend-mapi.c:2529
+msgid "Failed to get Free/Busy data"
+msgstr "ഫ്രീ/തിരക്കു് ഡേറ്റാ ലഭ്യമാക്കുന്നതില്‍ പരാജയം"
+
+#: ../src/camel/camel-mapi-folder.c:777
+#, c-format
+#| msgid "Fetching folder list ..."
+msgid "Refreshing folder '%s'"
+msgstr "'%s' ഫോള്‍ഡര്‍ പുതുക്കുന്നു"
+
+#: ../src/camel/camel-mapi-folder.c:844
+#, c-format
+#| msgid "Loading items in folder %s"
+msgid "Downloading messages in folder '%s'"
+msgstr "'%s' ഫോള്‍ഡറില്‍ സന്ദേശങ്ങള്‍ ഡൌണ്‍ലോഡ് ചെയ്യുന്നു"
+
+#: ../src/camel/camel-mapi-folder.c:931 ../src/camel/camel-mapi-folder.c:1512
+#, c-format
+msgid "This message is not available in offline mode."
+msgstr "ഓഫ്‌ലൈന്‍ രീതിയില്‍ ഈ സന്ദേശം ലഭ്യമല്ല."
+
+#: ../src/camel/camel-mapi-folder.c:941 ../src/camel/camel-mapi-folder.c:959
+#, c-format
+#| msgid "Fetching items failed"
+msgid "Fetching items failed: %s"
+msgstr "വസ്തുക്കള്‍ ലഭ്യമാക്കുന്നതു് പരാജയപ്പെട്ടു: %s"
+
+#: ../src/camel/camel-mapi-folder.c:946 ../src/camel/camel-mapi-folder.c:964
+msgid "Fetching items failed"
+msgstr "വസ്തുക്കള്‍ ലഭ്യമാക്കുന്നതു് പരാജയപ്പെട്ടു"
+
+#: ../src/camel/camel-mapi-folder.c:1204
+#, c-format
+msgid "Cannot append message to folder '%s'"
+msgstr "ഫോള്‍ഡര്‍ `%s'-ലേക്ക് സന്ദേശം ചേര്‍ക്കുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/camel/camel-mapi-folder.c:1213 ../src/camel/camel-mapi-folder.c:1241
+#, c-format
+#| msgid "Offline. '%s'"
+msgid "Offline."
+msgstr "ഓഫ്‌ലൈന്‍."
+
+#: ../src/camel/camel-mapi-folder.c:1322
+#, c-format
+msgid "Failed to empty Trash: %s"
+msgstr "ചവറ്റുകുട്ട കാലിയാക്കുന്നതില്‍ പരാജയം: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1328
+msgid "Failed to empty Trash"
+msgstr "ചവറ്റുകുട്ട കാലിയാക്കുന്നതില്‍ പരാജയം"
+
+#: ../src/camel/camel-mapi-folder.c:1497
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "സന്ദേശം %s ലഭ്യമായില്ല: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1498
+msgid "No such message"
+msgstr "അങ്ങനെയൊരു സന്ദേശമില്ല"
+
+#: ../src/camel/camel-mapi-folder.c:1523 ../src/camel/camel-mapi-folder.c:1553
+#, c-format
+#| msgid "Could not get message"
+msgid "Could not get message: %s"
+msgstr "സന്ദേശം ലഭ്യമായില്ല: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1529 ../src/camel/camel-mapi-folder.c:1560
+#, c-format
+msgid "Could not get message"
+msgstr "സന്ദേശം ലഭ്യമായില്ല"
+
+#: ../src/camel/camel-mapi-folder.c:1927
+msgid "Receive quota"
+msgstr "കോട്ടാ ലഭ്യമാക്കുക"
+
+#: ../src/camel/camel-mapi-folder.c:1933
+msgid "Send quota"
+msgstr "കോട്ടാ അയയ്ക്കുക"
+
+#: ../src/camel/camel-mapi-folder.c:1952
+msgid "No quota information available"
+msgstr "കോട്ടാ വിവരം ലഭ്യമായില്ല"
+
+#: ../src/camel/camel-mapi-folder.c:2055
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "%s ന്റെ സംക്ഷിപ്ത വിവരം എടുക്കുവാന്ഡ സാധിച്ചില്ല"
+
+#: ../src/camel/camel-mapi-provider.c:45
+msgid "Checking for new mail"
+msgstr "പുതിയ മെയിലിനായി പരിശോധിക്കുന്നു"
+
+#: ../src/camel/camel-mapi-provider.c:47
+msgid "C_heck for new messages in all folders"
+msgstr "എല്ലാ ഫോള്‍ഡറുകളിലും പുതിയ സന്ദേശത്തിനായി തിരയുക (_h)"
+
+#: ../src/camel/camel-mapi-provider.c:51
+msgid "Options"
+msgstr "ഐച്ഛികങ്ങള്‍"
+
+#: ../src/camel/camel-mapi-provider.c:53
+msgid "Automatically synchroni_ze account locally"
+msgstr "അക്കൌണ്ട് ലോക്കലായി സ്വയമേ _സിന്‍ക്രൊണൈസ് ചെയ്യുക"
+
+#. i18n: copy from evolution:camel-imap-provider.c
+#: ../src/camel/camel-mapi-provider.c:56
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "_ഈ സര്‍വറിലുള്ള മെയില്‍പ്പെട്ടിലെ പുതിയ സന്ദേശങ്ങള്‍ക്കു് ഫില്‍‌റ്ററുകള്‍ നല്‍കുക"
+
+#: ../src/camel/camel-mapi-provider.c:58
+msgid "Check new messages for _Junk contents"
+msgstr "പുതിയ സന്ദേശങ്ങളില്‍ അനാവശ്യമായ ഉള്ളടക്കമുണ്ടോ എന്ന് പരിശോധിക്കുക (_J)"
+
+#: ../src/camel/camel-mapi-provider.c:60
+msgid "Only check for Junk messag_es in the Inbox folder"
+msgstr "പുതിയ സന്ദേശങ്ങളില്‍ അനാവശ്യമായവ ഉണ്ടോ എന്ന് പരിശോധിക്കുക (_J)"
+
+#: ../src/camel/camel-mapi-provider.c:62
+#: ../src/configuration/e-mapi-config-utils.c:1630
+msgid "Lis_ten for server notifications"
+msgstr "സര്‍വര്‍ അറിയിപ്പുകള്‍ക്കായി കാത്തിരിയ്ക്കു_ക"
+
+#: ../src/camel/camel-mapi-provider.c:73
+#| msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
+msgstr ""
+"MAPI ഉപയോഗിച്ചു മൈക്രോസോഫ്റ്റ് എക്സ്‌ചേഞ്ച് 2007/ ഓപ്പണ്‍ചേഞ്ച് സെര്‍വറുകളുമായി ബന്ധപ്പെടാന്‍ വേണ്ടി"
+
+#: ../src/camel/camel-mapi-provider.c:88
+msgid "Password"
+msgstr "അടയാളവാക്കു്"
+
+#: ../src/camel/camel-mapi-provider.c:89
+#| msgid ""
+#| "This option will connect to the Openchange server using a plaintext "
+#| "password."
+msgid "This option will connect to the OpenChange server using a plaintext password."
+msgstr ""
+"ഒരു പ്ളെയിന്‍ടെക്സ്റ്റ് രഹസ്യവാക്കു് ഉപയോഗിച്ച്  ഓപ്പണ്‍ചോഞ്ച് സര്‍വറിലേക്ക് ബന്ധപ്പെടാന്‍ ഈ ഉപാധി "
+"സഹായിക്കുന്നു."
+
+#: ../src/camel/camel-mapi-sasl-krb.c:28
+msgid "Kerberos"
+msgstr "കെര്‍ബറോസ്"
+
+#: ../src/camel/camel-mapi-sasl-krb.c:30
+#| msgid ""
+#| "This option will connect to the Openchange server using a plaintext "
+#| "password."
+msgid "This option will connect to the server using kerberos key."
+msgstr "കെര്‍ബറോസ് കീ ഉപയോഗിച്ചു് സര്‍വറിലേക്കു് ഈ ഐച്ഛികം കണക്ട് ചെയ്യുന്നു."
+
+#: ../src/camel/camel-mapi-store.c:133 ../src/camel/camel-mapi-store.c:175
+msgid "Cannot find folder in a local cache"
+msgstr "ലോക്കല്‍ കാഷില്‍ ഫോള്‍ഡര്‍ കണ്ടുപിടിയ്ക്കുവാന്‍ സാധ്യമായില്ല"
+
+#: ../src/camel/camel-mapi-store.c:481 ../src/camel/camel-mapi-store.c:1183
+#| msgid "Folder list not available in offline mode."
+msgid "Folder list is not available in offline mode"
+msgstr "ഫോള്‍ഡര്‍ പട്ടിക ഓഫ്‌ലൈനില്‍ ലഭ്യമല്ല"
+
+#: ../src/camel/camel-mapi-store.c:858
+#| msgid "All Public Folders"
+msgid "No public folder found"
+msgstr "ഒരു പൊതു ഫോള്‍ഡറും ലഭ്യമായില്ല"
+
+#: ../src/camel/camel-mapi-store.c:858
+msgid "No folder found"
+msgstr "ഫോള്‍ഡര്‍ ലഭ്യമായില്ല"
+
+#: ../src/camel/camel-mapi-store.c:1205 ../src/camel/camel-mapi-store.c:2148
+#, c-format
+msgid "Connecting to '%s'"
+msgstr "'%s'-ലേക്കു് കണക്ട് ചെയ്യുന്നു"
+
+#: ../src/camel/camel-mapi-store.c:1264
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI folders in offline mode"
+msgstr "ഓഫ്‌ലൈന്‍ മോഡില്‍ MAPI ഫോള്‍ഡറുകള്‍ ഉണ്ടാക്കുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/camel/camel-mapi-store.c:1271
+#, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot create new folder '%s'"
+msgstr "ഫോള്‍ഡര്‍ `%s'  ഉണ്ടാക്കുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/camel/camel-mapi-store.c:1280
+#, c-format
+msgid "Authentication failed"
+msgstr "ആധികാരകത ഉറപ്പാക്കല്‍ പരാജയപ്പെട്ടു"
+
+#: ../src/camel/camel-mapi-store.c:1290
+msgid "MAPI folders can be created only within mailbox of the logged user"
+msgstr ""
+"പ്രവേശിച്ച ഉപയോക്താവിന്റെ എഴുത്തുപെട്ടിയില്‍ മാത്രമേ MAPI ഫോള്‍ഡറുകള്‍ തയ്യാറാക്കുവാന്‍ സാധ്യമാകൂ"
+
+#: ../src/camel/camel-mapi-store.c:1303 ../src/camel/camel-mapi-store.c:1408
+#, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot find folder '%s'"
+msgstr "ഫോള്‍ഡര്‍ `%s'  ഉണ്ടാക്കുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/camel/camel-mapi-store.c:1353
+#, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot create folder '%s': %s"
+msgstr "ഫോള്‍ഡര്‍ `%s'  ഉണ്ടാക്കുവാന്‍ സാധ്യമല്ല: %s"
+
+#: ../src/camel/camel-mapi-store.c:1359
+#, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot create folder '%s'"
+msgstr "ഫോള്‍ഡര്‍ `%s'  ഉണ്ടാക്കുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/camel/camel-mapi-store.c:1386 ../src/camel/camel-mapi-store.c:1398
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot delete MAPI folders in offline mode"
+msgstr "ഓഫ്‌ലൈന്‍ മോഡില്‍ MAPI ഫോള്‍ഡറുകള്‍ വെട്ടി നീക്കുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/camel/camel-mapi-store.c:1448
+#, c-format
+#| msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgid "Cannot remove folder '%s': %s"
+msgstr "'%s' ഫോള്‍ഡര്‍ നീക്കം ചെയ്യുവാന്‍ സാധ്യമല്ല: %s"
+
+#: ../src/camel/camel-mapi-store.c:1456
+#, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot remove folder '%s'"
+msgstr "ഫോള്‍ഡര്‍ `%s' നീക്കം ചെയ്യുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/camel/camel-mapi-store.c:1485 ../src/camel/camel-mapi-store.c:1500
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot rename MAPI folders in offline mode"
+msgstr "ഓഫ്‌ലൈന്‍ മോഡില്‍ MAPI ഫോള്‍ഡറുകളുടെ പേരു് മാറ്റുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/camel/camel-mapi-store.c:1511
+#, c-format
+#| msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
+msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
+msgstr "'%s' എന്ന MAPI ഫോള്‍ഡറിന്റെ പേരു മാറ്റാന്‍ സാധിച്ചില്ല. ഫോള്‍ഡര്‍ നിലവിലില്ല"
+
+#: ../src/camel/camel-mapi-store.c:1522
+#, c-format
+#| msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgid "Cannot rename MAPI default folder '%s' to '%s'"
+msgstr "സഹജമായ MAPI ഫോള്‍ഡറിന്റെ പേരു '%s' ല്‍ നിന്നും '%s' ലേക്ക് മാറ്റാന്‍ സാധിച്ചില്ല"
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1548 ../src/camel/camel-mapi-store.c:1581
+#: ../src/camel/camel-mapi-store.c:1659
+#, c-format
+#| msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgid "Cannot rename MAPI folder '%s' to '%s'"
+msgstr "MAPI ഫോള്‍ഡറിന്റെ പേരു '%s' ല്‍ നിന്നും '%s' ലേക്ക് മാറ്റാന്‍ സാധിച്ചില്ല"
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#. The last '%s' is a detailed error message.
+#: ../src/camel/camel-mapi-store.c:1573 ../src/camel/camel-mapi-store.c:1652
+#, c-format
+#| msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgid "Cannot rename MAPI folder '%s' to '%s': %s"
+msgstr "MAPI ഫോള്‍ഡറിന്റെ പേരു '%s' ല്‍ നിന്നും '%s' ലേക്ക് മാറ്റാന്‍ സാധിച്ചില്ല: %s"
+
+#: ../src/camel/camel-mapi-store.c:1755
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot subscribe MAPI folders in offline mode"
+msgstr "ഓഫ്‌ലൈന്‍ മോഡില്‍ MAPI ഫോള്‍ഡറുകളിലേക്കു് അംഗത്വം ലഭിയ്ക്കുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/camel/camel-mapi-store.c:1772
+#, c-format
+msgid "Folder '%s' not found"
+msgstr "ഫോള്‍ഡര്‍ '%s' ലഭ്യമല്ല"
+
+#: ../src/camel/camel-mapi-store.c:1890
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot unsubscribe MAPI folders in offline mode"
+msgstr "ഓഫ്‌ലൈന്‍ മോഡില്‍ MAPI ഫോള്‍ഡറുകളില്‍ നിന്നും അംഗത്വം നിഷേധിയ്ക്കുവാന്‍ സാധ്യമല്ല"
+
+#. Translators: The %s is replaced with a server's host name
+#: ../src/camel/camel-mapi-store.c:2103
+#: ../src/camel/camel-mapi-transport.c:191
+#, c-format
+msgid "Exchange MAPI server %s"
+msgstr "എക്ല്‌ചേഞ്ച് MAPI സെര്‍വര്‍ %s"
+
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#. Translators: The first %s is replaced with a user name, the second with a server's host name
+#: ../src/camel/camel-mapi-store.c:2107
+#: ../src/camel/camel-mapi-transport.c:194
+#, c-format
+msgid "Exchange MAPI service for %s on %s"
+msgstr "%s-നുള്ള Exchange MAPI സര്‍വീസ്, %s-ല്‍ "
+
+#: ../src/camel/camel-mapi-store.c:2133
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot connect MAPI store in offline mode"
+msgstr "ഓഫ്‌ലൈന്‍ മോഡില്‍ MAPI സ്റ്റോര്‍ കണക്ട് ചെയ്യുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/camel/camel-mapi-store.c:2178
+#, c-format
+msgid "Mailbox '%s' is full, no new messages will be received or sent."
+msgstr ""
+"'%s' എഴുത്തുപെട്ടി പൂര്‍ണ്ണമായി, അതിനാല്‍ പുതിയ സന്ദേശങ്ങള്‍ അയയ്ക്കുവാനോ കിട്ടുവാനോ സാധ്യമല്ല."
+
+#: ../src/camel/camel-mapi-store.c:2180
+#, c-format
+msgid "Mailbox '%s' is near its size limit, message send will be disabled soon."
+msgstr ""
+"'%s' എഴുത്തുപെട്ടി അതിന്റെ പൂര്‍ണ്ണ പരിധിയിലെത്തി, സന്ദേശം അയയ്ക്കുന്നതു് ഉടന്‍ പ്രവര്‍ത്തന "
+"രഹിതമാക്കുന്നു."
+
+#: ../src/camel/camel-mapi-store.c:2184
+#, c-format
+msgid "Mailbox '%s' is full, no new messages will be received."
+msgstr "എഴുത്തുപെട്ടി '%s' പൂര്‍ണ്ണമാണു്, ഒരു പുതിയ സന്ദേശങ്ങളും ലഭ്യമല്ല."
+
+#: ../src/camel/camel-mapi-store.c:2186
+#, c-format
+msgid "Mailbox '%s' is near its size limit."
+msgstr "എഴുത്തുപെട്ടി '%s'-യുടെ പരിധി അടുക്കുന്നു."
+
+#: ../src/camel/camel-mapi-store.c:2598
+#| msgid "Authentication failed"
+msgid "Authentication password not available"
+msgstr "ആധികാരകത ഉറപ്പാക്കുന്നതിനുള്ള രഹസ്യവാക്ക് പരാജയപ്പെട്ടു"
+
+#: ../src/camel/camel-mapi-transport.c:142
+#: ../src/camel/camel-mapi-transport.c:164
+#, c-format
+msgid "Could not send message."
+msgstr "സന്ദേശം അയയ്ക്കാന്‍ സാധിച്ചില്ല"
+
+#: ../src/camel/camel-mapi-transport.c:159
+#, c-format
+#| msgid "Could not send message."
+msgid "Could not send message: %s"
+msgstr "സന്ദേശം അയയ്ക്കാന്‍ സാധിച്ചില്ല: %s"
+
+#: ../src/collection/e-mapi-backend.c:269
+msgid "Global Address List"
+msgstr "ഗ്ലോബല്‍ വിലാസ പട്ടിക"
+
+#: ../src/collection/e-mapi-backend.c:517
+#: ../src/collection/e-mapi-backend.c:560
+#, c-format
+msgid "Data source '%s' does not represent a MAPI folder"
+msgstr "ഡേറ്റാ ശ്രോതസ്സ് '%s' ഒരു MAPI ഫോള്‍ഡറിനെ സൂചിപ്പിയ്ക്കുന്നില്ല"
+
+#: ../src/configuration/e-book-config-mapigal.c:63
+msgid "Allow _partial search results"
+msgstr "_പാതി തെരച്ചില്‍ ഫലങ്ങള്‍ അനുവദിയ്ക്കുക "
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:126
 msgid "Select username"
 msgstr "ഉപയോക്തൃനാമം തെരഞ്ഞെടുക്കുക"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:135
+#: ../src/configuration/e-mail-config-mapi-backend.c:136
 msgid "Full name"
 msgstr "പൂര്‍ണ്ണ നാമം"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:140
-msgid "User name"
-msgstr "ഉപയോക്താവിന്റെ നാമം"
+#: ../src/configuration/e-mail-config-mapi-backend.c:141
+#| msgid "User name"
+msgid "Username"
+msgstr "ഉപയോക്തൃനാമം"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:194
+#: ../src/configuration/e-mail-config-mapi-backend.c:168
+msgid ""
+"There are more users with similar user name on a server.\n"
+"Please select that you would like to use from the below list."
+msgstr ""
+"ഒരു സര്‍വറില്‍ ഇതേപോലെ പേരുള്ള അനവധി ഉപയോക്താക്കളുണ്ടു്.\n"
+"താഴെ പറഞ്ഞിരിയ്ക്കുന്ന പട്ടികയില്‍ നിന്നും നിങ്ങള്‍ക്കു് ഇഷ്ടമുള്ളതു് ദയവായി തെരഞ്ഞെടുക്കുക."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:396
+msgid "Authentication finished successfully."
+msgstr "ആധികാരികത വിജയകരമായി ഉറപ്പാക്കി"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:398
+#: ../src/configuration/e-mail-config-mapi-backend.c:519
+msgid "Authentication failed."
+msgstr "ആധികാരികത ഉറപ്പാക്കല്‍ പരാജയപ്പെട്ടു."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:460
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot authenticate MAPI accounts in offline mode"
+msgstr "ഓഫ്‌ലൈന്‍ മോഡില്‍ MAPI അക്കൌണ്ടുകള്‍ക്കുള്ള ആധികാരികത ഉറപ്പാക്കുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:489
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -49,293 +555,699 @@ msgstr ""
 "സെര്‍വര്‍,ഉപയോക്തൃനാമം, ഡൊമൈനിന്റെ പേരു് എന്നിവ ശൂന്യമാകാന്‍ പാടില്ല. ദയവായി അവ ശരിയായ "
 "രീതിയില്‍ പൂരിപ്പിക്കുക."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:231
-msgid "Authentication finished successfully."
-msgstr "ആധികാരികത വിജയകരമായി ഉറപ്പാക്കി"
+#: ../src/configuration/e-mail-config-mapi-backend.c:492
+#| msgid ""
+#| "Server, username and domain name cannot be empty. Please fill them with "
+#| "correct values."
+msgid ""
+"Realm name cannot be empty when kerberos is selected. Please fill them with "
+"correct values."
+msgstr ""
+"കെര്‍ബറോസ് തെരഞ്ഞെടുക്കുമ്പോള്‍ സാമ്രാജ്യത്തിന്റെ നാമം കാലിയാക്കുവാന്‍ സാധ്യമല്ല. ശരിയായ "
+"മൂല്ല്യങ്ങളുമായി ഇവ ദയവായി പൂരിപ്പിയ്ക്കുക."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:237
-msgid "Authentication failed."
-msgstr "ആധികാരികത ഉറപ്പാക്കല്‍ പരാജയപ്പെട്ടു."
+#: ../src/configuration/e-mail-config-mapi-backend.c:513
+msgid "Connecting to the server, please wait..."
+msgstr "സര്‍വറിലേക്ക് കണക്ട് ചെയ്യുന്നു, ദയവായി കാത്തിരിയ്ക്കുക..."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:299
+#: ../src/configuration/e-mail-config-mapi-backend.c:721
+msgid "Configuration"
+msgstr "ക്രമീകരണം"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:730
+msgid "_Server:"
+msgstr "_സര്‍വര്‍:"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:747
+#| msgid "User name"
+msgid "User_name:"
+msgstr "_ഉപയോക്തൃനാമം:"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:772
 msgid "_Domain name:"
 msgstr "ഡൊമൈന്‍ നാമം"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:309
+#: ../src/configuration/e-mail-config-mapi-backend.c:785
 msgid "_Authenticate"
 msgstr "ആധികാരികത ഉറപ്പാക്കുക"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:411
-msgid "Personal Folders"
-msgstr "വ്യക്തിപരമായ ഫോള്‍ഡറുകള്‍"
+#: ../src/configuration/e-mail-config-mapi-backend.c:793
+msgid "_Use secure connection"
+msgstr "സുരക്ഷിതമായ കണക്ഷന്‍ _ഉപയോഗിയ്ക്കുക"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:473
-msgid "_Location:"
-msgstr "സ്ഥലം"
+#: ../src/configuration/e-mail-config-mapi-backend.c:808
+msgid "_Kerberos authentication"
+msgstr "കെര്‍_ബറോസ് ആധികാരികത ഉറപ്പാക്കല്‍ സംവിധാനം"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:78
-msgid "_Folder size"
-msgstr "_ഫോള്‍ഡറിന്റെ വ്യാപ്തി"
+#: ../src/configuration/e-mail-config-mapi-backend.c:820
+#| msgid "_Domain name:"
+msgid "_Realm name:"
+msgstr "_സാമ്രാജ്യത്തിന്റെ പേരു്:"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:133
-msgid "Folder"
-msgstr "ഫോള്‍ഡര്‍"
+#: ../src/configuration/e-mail-config-mapi-page.c:186
+#: ../src/configuration/e-mail-config-mapi-page.c:247
+#| msgid "Exchange Settings"
+msgid "MAPI Settings"
+msgstr "MAPI ക്രമീകരണങ്ങള്‍"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:138
-msgid "Size"
-msgstr "വ്യാപ്തി"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:158
-msgid "Unable to retrieve folder size information"
-msgstr "ഫോള്‍ഡറിന്റെ വ്യപ്തി സംബന്ധിച്ചുള്ള വിവരങ്ങള്‍ ലഭ്യമാക്കുവാന്‍ സാധ്യമല്ല"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:182
-msgid "Folder Size"
-msgstr "ഫോള്‍ഡറിന്റെ വ്യാപ്തി"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:190
-msgid "Fetching folder list ..."
-msgstr "ഫോള്‍ഡറിന്റെ പട്ടിക ലഭ്യമാക്കുന്നു..."
-
-#. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:250
-msgid "Miscellaneous"
-msgstr "പലവക"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:263
+#: ../src/configuration/e-mail-config-mapi-page.c:192
 msgid "View the size of all Exchange folders"
 msgstr "എല്ലാ എക്സ്ചെയിഞ്ച് ഫോള്‍ഡറുകളുടേയും വ്യാപ്തി കാണുക"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:265
-msgid "Folders Size"
-msgstr "ഫോള്‍ഡറുകളുടെ വ്യാപ്തി"
+#: ../src/configuration/e-mail-config-mapi-page.c:196
+#| msgid "Folder Size"
+msgid "Folder _Size"
+msgstr "ഫോള്‍ഡറിന്റെ _വ്യാപ്തി"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:276
-#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
-msgid "Exchange Settings"
-msgstr "എക്സ്ചെയിഞ്ച് ക്രമീകരണങ്ങള്‍"
+#: ../src/configuration/e-mapi-config-utils.c:454
+msgid "Folder"
+msgstr "ഫോള്‍ഡര്‍"
 
-#: ../src/calendar/e-cal-backend-mapi.c:115
-#: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:472
-msgid "Authentication failed"
-msgstr "ആധികാരകത ഉറപ്പാക്കല്‍ പരാജയപ്പെട്ടു"
+#: ../src/configuration/e-mapi-config-utils.c:459
+msgid "Size"
+msgstr "വ്യാപ്തി"
 
-#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:391
+#: ../src/configuration/e-mapi-config-utils.c:482
+#: ../src/configuration/e-mapi-config-utils.c:486
+msgid "Unable to retrieve folder size information"
+msgstr "ഫോള്‍ഡറിന്റെ വ്യപ്തി സംബന്ധിച്ചുള്ള വിവരങ്ങള്‍ ലഭ്യമാക്കുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/configuration/e-mapi-config-utils.c:552
+msgid "Folder Size"
+msgstr "ഫോള്‍ഡറിന്റെ വ്യാപ്തി"
+
+#: ../src/configuration/e-mapi-config-utils.c:566
+#| msgid "Fetching folder list ..."
+msgid "Fetching folder list…"
+msgstr "ഫോള്‍ഡറിന്റെ പട്ടിക ലഭ്യമാക്കുന്നു..."
+
+#: ../src/configuration/e-mapi-config-utils.c:732
 #, c-format
-msgid "Loading items in folder %s"
-msgstr "%s ഫോള്‍ഡറില്‍ വസ്തുക്കള്‍ ലഭ്യമാക്കുന്നു"
-
-#. FIXME: String : We need to restart evolution-data-server
-#: ../src/calendar/e-cal-backend-mapi.c:581
-#: ../src/calendar/e-cal-backend-mapi.c:592
-#: ../src/calendar/e-cal-backend-mapi.c:618
-msgid "Error fetching changes from the server."
-msgstr "സെര്‍വറ്ല്‍ നിന്നും മാറ്റങ്ങള്‍ എടുക്കുന്നതില്‍ പിശകു സംഭവിച്ചു"
-
-#: ../src/calendar/e-cal-backend-mapi.c:973
-#: ../src/calendar/e-cal-backend-mapi.c:983
-#: ../src/calendar/e-cal-backend-mapi.c:1088
-#: ../src/calendar/e-cal-backend-mapi.c:1170
-msgid "Could not create cache file"
-msgstr "cache ഫയല്‍ നിര്‍മ്മിക്കുവാന്‍ സാധ്യമായില്ല"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1099
-msgid "Could not create thread for populating cache"
-msgstr "cache-നുളള ത്രെഡ് നിര്‍മ്മിക്കുവാന്‍ സാധ്യമായില്ല"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1513
-msgid ""
-"Support for modifying single instances of a recurring appointment is not yet "
-"implemented. No change was made to the appointment on the server."
+msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr ""
-"Support for modifying single instances of a recurring appointment is not yet "
-"implemented. No change was made to the appointment on the server."
+"ഫോള്‍ഡര്‍ '%s'-നുള്ള അനുമതികള്‍ ചിട്ടപ്പെടുത്തുവാന്‍ സാധ്യമല്ല, മറ്റൊരു ഫോള്‍ഡര്‍ തെരഞ്ഞെടുക്കുക."
 
-#: ../src/camel/camel-mapi-folder.c:478
-#, c-format
-#| msgid "Fetching summary information for new messages in %s"
-msgid "Updating local summary cache for new messages in %s"
-msgstr "%s-ല്‍ ലോക്കല്‍ സമ്മറി കാഷിനുള്ള പുതിയ സന്ദേശങ്ങള്‍ പരിഷ്കരിക്കുന്നു."
+#: ../src/configuration/e-mapi-config-utils.c:795
+#| msgid "_Folder size"
+msgid "Folder size..."
+msgstr "ഫോള്‍ഡറിന്റെ വ്യാപ്തി..."
 
-#: ../src/camel/camel-mapi-folder.c:702
-#, c-format
-msgid "Retrieving message IDs from server for %s"
-msgstr "%s-നുള്ള സര്‍വറില്‍ നിന്നും സന്ദേശങ്ങളുടെ ID ലഭ്യമാക്കുന്നു"
+#: ../src/configuration/e-mapi-config-utils.c:802
+msgid "Subscribe to folder of other user..."
+msgstr "മറ്റൊരു ഉപയോക്താവിന്റെ ഫോള്‍ഡറിലേക്കു് അംഗമാകുക..."
 
-#: ../src/camel/camel-mapi-folder.c:724
-#, c-format
-msgid "Removing deleted messages from cache in %s"
-msgstr "%s-ലുള്ള കാഷില്‍ നിന്നും വെട്ടി നീക്കിയ സന്ദേശങ്ങള്‍ നീക്കം ചെയ്യുന്നു"
+#: ../src/configuration/e-mapi-config-utils.c:811
+#: ../src/configuration/e-mapi-config-utils.c:1091
+#: ../src/configuration/e-mapi-config-utils.c:1121
+#: ../src/configuration/e-mapi-config-utils.c:1151
+#: ../src/configuration/e-mapi-config-utils.c:1181
+msgid "Permissions..."
+msgstr "അനുമതികള്‍..."
 
-#: ../src/camel/camel-mapi-folder.c:1029 ../src/camel/camel-mapi-folder.c:1643
-#: ../src/camel/camel-mapi-folder.c:1651
-msgid "This message is not available in offline mode."
-msgstr "ഓഫ്‌ലൈന്‍ രീതിയില്‍ ഈ സന്ദേശം ലഭ്യമല്ല."
+#: ../src/configuration/e-mapi-config-utils.c:813
+msgid "Edit MAPI folder permissions"
+msgstr "MAPI ഫോള്‍ഡര്‍ അനുമതികള്‍ ചിട്ടപ്പെടുത്തുക"
 
-#: ../src/camel/camel-mapi-folder.c:1038
-#, c-format
-msgid "Fetching summary information for new messages in %s"
-msgstr "പുതിയ സന്ദേശങ്ങള്‍ക്കുളള സംക്ഷിപ്ത വിവരം %s-ല്‍ നിന്നും ലഭ്യമാക്കുന്നു"
+#: ../src/configuration/e-mapi-config-utils.c:1093
+msgid "Edit MAPI calendar permissions"
+msgstr "MAPI കലണ്ടറിനുള്ള അനുമതികള്‍ ചിട്ടപ്പെടുത്തുക"
 
-#: ../src/camel/camel-mapi-folder.c:1048
-msgid "Fetching items failed"
-msgstr "വസ്തുക്കള്‍ ലഭ്യമാക്കുന്നതു് പരാജയപ്പെട്ടു"
+#: ../src/configuration/e-mapi-config-utils.c:1123
+msgid "Edit MAPI tasks permissions"
+msgstr "MAPI ജോലികള്‍ അനുമതികള്‍ ചിട്ടപ്പെടുത്തുക"
 
-#: ../src/camel/camel-mapi-folder.c:1607
-#, c-format
-msgid ""
-"Cannot get message: %s\n"
-"  %s"
-msgstr ""
-"സന്ദേശം ലഭ്യമല്ല: %s\n"
-"  %s"
+#: ../src/configuration/e-mapi-config-utils.c:1153
+msgid "Edit MAPI memos permissions"
+msgstr "MAPI മെമ്മോകള്‍ക്കുള്ള അനുമതികള്‍ ചിട്ടപ്പെടുത്തുക"
 
-#: ../src/camel/camel-mapi-folder.c:1607
-msgid "No such message"
-msgstr "അങ്ങനെയൊരു സന്ദേശമില്ല"
+#: ../src/configuration/e-mapi-config-utils.c:1183
+msgid "Edit MAPI contacts permissions"
+msgstr "MAPI വിലാസങ്ങള്‍ക്കുള്ള അനുമതികള്‍ ചിട്ടപ്പെടുത്തുക"
 
-#: ../src/camel/camel-mapi-folder.c:1619
-msgid "Message fetching cancelled by user."
-msgstr "സന്ദേശം എടുക്കുന്നതു ഉപയോക്താവ് റദ്ദാക്കിയിരിക്കുന്നു."
+#: ../src/configuration/e-mapi-config-utils.c:1356
+msgid "Personal Folders"
+msgstr "വ്യക്തിപരമായ ഫോള്‍ഡറുകള്‍"
 
-#: ../src/camel/camel-mapi-folder.c:1626
-#, c-format
-msgid "Cannot get message %s: %s"
-msgstr "സന്ദേശം %s ലഭ്യമായില്ല: %s"
+#: ../src/configuration/e-mapi-config-utils.c:1583
+msgid "Searching remote MAPI folder structure, please wait..."
+msgstr "വിദൂര MAPI ഫോള്‍ഡര്‍ ശൈലി തെരയുന്നു, ദയവായി കാത്തിരിയ്ക്കുക..."
 
-#: ../src/camel/camel-mapi-folder.c:1672 ../src/camel/camel-mapi-folder.c:1684
-msgid "Could not get message"
-msgstr "സന്ദേശം ലഭ്യമായില്ല"
+#: ../src/configuration/e-mapi-config-utils.c:1651
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI calendar in offline mode"
+msgstr "ഓഫ്‌ലൈന്‍ മോഡില്‍ MAPI കലണ്ടര്‍ ഉണ്ടാക്കുവാന്‍ സാധ്യമല്ല"
 
-#: ../src/camel/camel-mapi-folder.c:1964
-#, c-format
+#: ../src/configuration/e-mapi-config-utils.c:1654
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI task list in offline mode"
+msgstr "ഓഫ്‌ലൈന്‍ മോഡില്‍ MAPI ജോലികളുടെ പട്ടിക ഉണ്ടാക്കുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/configuration/e-mapi-config-utils.c:1657
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI memo list in offline mode"
+msgstr "ഓഫ്‌ലൈന്‍ മോഡില്‍ MAPI മെമ്മോ പട്ടിക ഉണ്ടാക്കുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/configuration/e-mapi-config-utils.c:1660
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI address book in offline mode"
+msgstr "ഓഫ്‌ലൈന്‍ മോഡില്‍ MAPI വിലാസ പൂസ്തകം ഉണ്ടാക്കുവാന്‍ സാധ്യമല്ല."
+
+#: ../src/configuration/e-mapi-config-utils.c:1664
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI source in offline mode"
+msgstr "ഓഫ്‌ലൈന്‍ മോഡില്‍ MAPI ശ്രോതസ്സ് ഉണ്ടാക്കുവാന്‍ സാധ്യമല്ല."
+
+#: ../src/configuration/e-mapi-config-utils.c:1684
+msgid "_Location:"
+msgstr "സ്ഥലം"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:89
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "ഒന്നുമില്ല"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:90
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "ഉടമസ്ഥന്‍"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:100
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "പ്രസിദ്ധീകരിയ്ക്കുന്ന എഡിറ്റര്‍"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:109
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "എ‍ഡിറ്റര്‍"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:117
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "പ്രസിദ്ധീകരിയ്ക്കുന്ന രചയിതാവു്"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:124
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "രചയിതാവു്"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:130
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "ചിട്ടപ്പെടുത്തുവാന്‍ കഴിവില്ലാത്ത രചയിതാവു്"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:135
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "പരിശോധകന്‍"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:138
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "സംഭാവനക്കാരന്‍"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:141
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "യഥേഷ്ടം"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:274
+msgid "Writing folder permissions, please wait..."
+msgstr "ഫോള്‍ഡറിനുള്ള അനുമതികള്‍ സൂക്ഷിയ്ക്കുന്നു, ദയവായി കാത്തിയിരിയ്ക്കുക..."
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:780
+#: ../src/configuration/e-mapi-search-gal-user.c:524
+msgctxt "User"
+msgid "Anonymous"
+msgstr "അജ്ഞാതം"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
+#: ../src/configuration/e-mapi-search-gal-user.c:521
+msgctxt "User"
+msgid "Default"
+msgstr "സ്വതവേയുള്ളതു്"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
+msgctxt "User"
+msgid "Unknown"
+msgstr "അപരിചിതം"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:876
+#: ../src/configuration/e-mapi-search-gal-user.c:597
+msgid "Name"
+msgstr "പേരു്"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:882
+msgid "Permission level"
+msgstr "അനുമതിയുടെ അവസ്ഥ"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:935
+msgid "Edit MAPI folder permissions..."
+msgstr "MAPI ഫോള്‍ഡര്‍ അനുമതികള്‍ ചിട്ടപ്പെടുത്തുക..."
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:960
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:610
+msgid "Account:"
+msgstr "അക്കൌണ്ട്:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:986
+#| msgid "Folder Size"
+msgid "Folder name:"
+msgstr "ഫോള്‍ഡറിന്റെ പേരു്:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1007
+#| msgid "Folder"
+msgid "Folder ID:"
+msgstr "ഫോള്‍ഡര്‍ ഐഡി:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1066
+msgid "Permissions"
+msgstr "അനുമതികള്‍"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1087
+msgid "Permi_ssion level:"
+msgstr "അനു_മതിയുടെ ലവല്‍:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1115
+msgctxt "Permissions"
+msgid "Read"
+msgstr "വായിയ്ക്കുക"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1126
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1189
+msgctxt "Permissions"
+msgid "None"
+msgstr "ഒന്നുമില്ല"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1131
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "പൂര്‍ണ്ണ വിശദാംശങ്ങള്‍"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1136
+msgctxt "Permissions"
+msgid "Simple Free/Busy"
+msgstr "ലളിതമായ ഫ്രീ/തിരക്കു്"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1140
+msgctxt "Permissions"
+msgid "Detailed Free/Busy"
+msgstr "വിശദമായ ഫ്രീ/തിരക്കു്"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1147
+msgctxt "Permissions"
+msgid "Write"
+msgstr "എഴുതുക"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1158
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "വസ്തുക്കള്‍ തയ്യാറാക്കുക"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
 #| msgid "Cannot create new folder `%s'"
-msgid "Cannot append message to folder '%s'"
-msgstr "ഫോള്‍ഡര്‍ `%s'-ലേക്ക് സന്ദേശം ചേര്‍ക്കുവാന്‍ സാധ്യമല്ല"
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "ഉപഫോള്‍ഡറുകള്‍ തയ്യാറാക്കുക"
 
-#: ../src/camel/camel-mapi-folder.c:1971
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr "സ്വന്തമായതു് ചിട്ടപ്പെടുത്തുക"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1170
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "എല്ലാം ചിട്ടപ്പെടുത്തുക"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1178
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "വസ്തുക്കള്‍ വെട്ടിനീക്കുക"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1194
+msgctxt "Permissions"
+msgid "Own"
+msgstr "സ്വന്തം"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1199
+msgctxt "Permissions"
+msgid "All"
+msgstr "എല്ലാം"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1205
+msgctxt "Permissions"
+msgid "Other"
+msgstr "മറ്റുള്ളവ"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1216
+#| msgid "Folder Size"
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "ഫോള്‍ഡറിന്റെ ഉടമസ്ഥന്‍"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
+#| msgid "Folder"
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr "ഫോള്‍ഡര്‍ വിലാസം"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
+#| msgid "_Folder size"
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr "ദൃശ്യമായ ഫോള്‍ഡര്‍"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1279
+msgid "Reading folder permissions, please wait..."
+msgstr "ഫോള്‍ഡറിന്റെ അനുമതി ലഭ്യമായി, ദയവായി കാത്തിരിയ്ക്കുക..."
+
+#: ../src/configuration/e-mapi-search-gal-user.c:223
+msgid "No users found"
+msgstr "ഒരു ഉപയോക്താക്കളും ലഭ്യമായില്ല"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:226
 #, c-format
-msgid "Offline. '%s'"
-msgstr "ഓഫ്‌ലൈന്‍. '%s'"
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "ഒരുപയോക്താവു് ലഭ്യമായി"
+msgstr[1] "ഉപയോക്താക്കള്‍ ലഭ്യമായി"
 
-#: ../src/camel/camel-mapi-folder.c:2091
+#: ../src/configuration/e-mapi-search-gal-user.c:231
 #, c-format
-msgid "Could not load summary for %s"
-msgstr "%s ന്റെ സംക്ഷിപ്ത വിവരം എടുക്കുവാന്ഡ സാധിച്ചില്ല"
+msgid "Found %d user, but showing only first %d"
+msgid_plural "Found %d users, but showing only first %d"
+msgstr[0] "%d ഉപയോക്താവു് ലഭ്യമായി, പക്ഷേ ആദ്യത്തെ %d മാത്രം കാണിയ്ക്കുന്നു"
+msgstr[1] "%d ഉപയോക്താക്കള്‍ ലഭ്യമായി, പക്ഷേ ആദ്യത്തെ %d മാത്രം കാണിയ്ക്കുന്നു"
 
-#: ../src/camel/camel-mapi-provider.c:51
-msgid "Checking for new mail"
-msgstr "പുതിയ മെയിലിനായി പരിശോധിക്കുന്നു"
+#: ../src/configuration/e-mapi-search-gal-user.c:516
+#: ../src/configuration/e-mapi-search-gal-user.c:707
+msgid "Search for a user"
+msgstr "ഒരു ഉപയോക്താവിനായി തെരയുന്നു"
 
-#: ../src/camel/camel-mapi-provider.c:53
-msgid "C_heck for new messages in all folders"
-msgstr "എല്ലാ ഫോള്‍ഡറുകളിലും പുതിയ സന്ദേശത്തിനായി തിരയുക (_h)"
+#: ../src/configuration/e-mapi-search-gal-user.c:532
+msgid "Searching..."
+msgstr "തെരയുന്നു..."
 
-#: ../src/camel/camel-mapi-provider.c:57
-msgid "Options"
-msgstr "ഐച്ഛികങ്ങള്‍"
+#: ../src/configuration/e-mapi-search-gal-user.c:603
+msgid "E-mail"
+msgstr "ഈമെയില്‍"
 
-#: ../src/camel/camel-mapi-provider.c:59
-msgid "Automatically synchroni_ze account locally"
-msgstr "അക്കൌണ്ട് ലോക്കലായി സ്വയമേ _സിന്‍ക്രൊണൈസ് ചെയ്യുക"
+#: ../src/configuration/e-mapi-search-gal-user.c:644
+msgid "Choose MAPI user..."
+msgstr "MAPI ഉപയോക്താവിനെ തെരഞ്ഞെടുക്കുക:"
 
-#. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:62
-msgid "_Apply filters to new messages in Inbox on this server"
-msgstr "_ഈ സര്‍വറിലുള്ള മെയില്‍പ്പെട്ടിലെ പുതിയ സന്ദേശങ്ങള്‍ക്കു് ഫില്‍‌റ്ററുകള്‍ നല്‍കുക"
+#: ../src/configuration/e-mapi-search-gal-user.c:667
+msgid "_Search:"
+msgstr "തെ_രയുക:"
 
-#: ../src/camel/camel-mapi-provider.c:64
-msgid "Check new messages for _Junk contents"
-msgstr "പുതിയ സന്ദേശങ്ങളില്‍ അനാവശ്യമായ ഉള്ളടക്കമുണ്ടോ എന്ന് പരിശോധിക്കുക (_J)"
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:90
+#, c-format
+msgid "Cannot add folder, folder already exists as '%s'"
+msgstr "ഫോള്‍ഡര്‍ ചേര്‍ക്കുവാനായില്ല, '%s' എന്ന പേരില്‍ ഫോള്‍ഡര്‍ നിലവിലുണ്ടു്"
 
-#: ../src/camel/camel-mapi-provider.c:66
-msgid "Only check for Junk messag_es in the Inbox folder"
-msgstr "പുതിയ സന്ദേശങ്ങളില്‍ അനാവശ്യമായവ ഉണ്ടോ എന്ന് പരിശോധിക്കുക (_J)"
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. Example result: "Mailbox - John Smith"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:115
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox - %s"
+msgstr "എഴുത്തുപെട്ടി - %s"
 
-#: ../src/camel/camel-mapi-provider.c:78
-msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
-msgstr "MAPI ഉപയോഗിച്ചു മൈക്രോസോഫ്റ്റ് എക്സ്‌ചേഞ്ച് / ഓപ്പണ്‍ചേഞ്ച് സെര്‍വറുകളുമായി ബന്ധപ്പെടാന്‍ വേണ്ടി"
-
-#: ../src/camel/camel-mapi-provider.c:93
-msgid "Password"
-msgstr "അടയാളവാക്കു്"
-
-#: ../src/camel/camel-mapi-provider.c:94
-msgid "This option will connect to the Openchange server using a plaintext password."
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:144
+#, c-format
+msgid "Cannot add folder, failed to add to store's summary"
 msgstr ""
-"ഒരു പ്ളെയിന്‍ടെക്സ്റ്റ്  അടയാളവാക്കു് ഉപയോഗിച്ച്  ഓപ്പണ്‍ചോഞ്ച് സര്‍വറിലേക്ക് ബന്ധപ്പെടാന്‍ ഈ ഉപാധി "
-"സഹായിക്കുന്നു."
+"ഫോള്‍ഡര്‍ ചേര്‍ക്കുവാന്‍ സാധ്യമല്ല, സ്റ്റോറിന്റെ ചുരുക്കത്തിലേക്കു് ചേര്‍ക്കുന്നതില്‍ പരാജയപ്പെട്ടു"
 
-#: ../src/camel/camel-mapi-store.c:61
-msgid "Favorites"
-msgstr "ഇഷ്ടമുളളവ"
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:326
+#, c-format
+msgid ""
+"Folder '%s' not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr ""
+"ഫോള്‍ഡര്‍ '%s' ലഭ്യമായില്ല. ഒന്നുകില്‍ ഇതു് നിലവിലില്ല അല്ലെങ്കില്‍ നിങ്ങള്‍ക്കതിലേക്കുള്ള "
+"പ്രവേശനമില്ല."
 
-#: ../src/camel/camel-mapi-store.c:62
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:356
+msgid "Cannot add folder, cannot determine folder's type"
+msgstr "ഫോള്‍ഡര്‍ ചേര്‍ക്കുവാന്‍ സാധ്യമല്ല, ഫോള്‍ഡര്‍ തരം നിശ്ചയിയ്ക്കുവാന്‍ സാധ്യമല്ല"
+
+#. Translators: This is used to name foreign folder.
+#. The first '%s' is replaced with user name to whom the folder belongs,
+#. the second '%s' is replaced with folder name.
+#. Example result: "John Smith - Calendar"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:397
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s - %s"
+msgstr "%s - %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:492
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:688
+msgid "Inbox"
+msgstr "ഇന്‍ബോക്സ്"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:494
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
+msgid "Contacts"
+msgstr "വിലാസങ്ങള്‍"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:496
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:690
+msgid "Calendar"
+msgstr "കലണ്ടര്‍"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:498
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:691
+msgid "Memos"
+msgstr "മെമ്മോകള്‍"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:500
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:692
+msgid "Tasks"
+msgstr "ജോലികള്‍"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:513
+#, c-format
+msgid "Testing availability of folder '%s' of user '%s', please wait..."
+msgstr "ഫോള്‍ഡര്‍ '%s'-ന്റെ ('%s' ഉപയോക്താവിന്റെ) ലഭ്യത പരീക്ഷിയ്ക്കുന്നു, ദയവായി കാത്തിരിയ്ക്കുക..."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:589
+msgid "Subscribe to folder of other MAPI user..."
+msgstr "മറ്റു് MAPI ഉപയോക്താവിന്റെ ഫോള്‍ഡറിലേക്കു് അംഗമാക്കുക..."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:638
+#| msgid "User name"
+msgid "User"
+msgstr "ഉപയോക്താവു്"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:645
+msgid "_User:"
+msgstr "_ഉപയോക്താവു്:"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:658
+msgid "C_hoose..."
+msgstr "തെ_രഞ്ഞെടുക്കുക..."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:673
+#| msgid "_Folder size"
+msgid "_Folder name:"
+msgstr "ഫോള്‍_ഡറിന്റെ പേരു്: "
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2048
+msgctxt "MeetingResp"
+msgid "Accepted:"
+msgstr "സ്വീകരിച്ചിരിയ്ക്കുന്നു:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2052
+msgctxt "MeetingResp"
+msgid "Tentative:"
+msgstr "സാധ്യത:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2056
+msgctxt "MeetingResp"
+msgid "Declined:"
+msgstr "നിര്‍ത്തിയിരിയ്ക്കുന്നു:"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:140
+msgid "Failed to login into the server"
+msgstr "സര്‍വറിലേക്കു് പ്രവേശിയ്ക്കുന്നതില്‍ പരാജയം"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:141
+msgid "Cannot create more sessions, session limit was reached"
+msgstr "കൂടുതല്‍ സെഷനുകള്‍ തയ്യാറാക്കുവാന്‍ സാധ്യമായില്ല, സെഷന്‍ പരിധി കടന്നിരിയ്ക്കുന്നു"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:142
+msgid "User cancelled operation"
+msgstr "ഉപയോക്താവു് പ്രക്രിയ റദ്ദീക്കിയിരിയ്ക്കുന്നു"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:143
+msgid "Unable to abort"
+msgstr "നിര്‍ത്തുവാന്‍ സാധ്യമല്ല"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:144
+msgid "Network error"
+msgstr "നെറ്റ്‌വര്‍ക്കില്‍ പിശക്"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:145
+msgid "Disk error"
+msgstr "ഡിസ്കില്‍ പിശക്"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:146
+msgid "Password change required"
+msgstr "രഹസ്യവാക്ക് മാറ്റേണ്ടതുണ്ടു്"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:147
+#| msgid "Password"
+msgid "Password expired"
+msgstr "രഹസ്യവാക്കിന്റെ കാലാവധി കഴിഞ്ഞിരിയ്ക്കുന്നു"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:148
+msgid "Invalid workstation account"
+msgstr "തെറ്റായ വര്‍ക്ക്സ്റ്റേഷന്‍ അക്കൌണ്ട്"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:149
+msgid "Invalid access time"
+msgstr "തെറ്റായ പ്രവേശന സമയം"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:150
+msgid "Account is disabled"
+msgstr "അക്കൌണ്ട് പ്രവര്‍ത്തന രഹിതം"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:151
+msgid "End of session"
+msgstr "സെഷന്‍ അവസാനിച്ചു"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:152
+msgid "MAPI is not initialized or connected"
+msgstr "MAPI ആരംഭിച്ചിട്ടില്ല അല്ലെങ്കില്‍ കണക്ട് ചെയ്തിട്ടില്ല"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:153
+msgid "Permission denied"
+msgstr "അനുവാദം നിഷേധിച്ചിരിയ്ക്കുന്നു"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:154
+msgid "Mailbox quota exceeded"
+msgstr "മെയില്‍ബോക്സിന്റെ കോട്ടയുടെ പരിധി കഴിഞ്ഞിരിയ്ക്കുന്നു"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:162
+#, c-format
+msgid "MAPI error %s (0x%x) occurred"
+msgstr "MAPI പിശകുണ്ടായിരിയ്ക്കുന്നു %s (0x%x)"
+
+#. Translators: The first '%s' is replaced with an error context,
+#. aka where the error occurred, the second '%s' is replaced with
+#. the error message.
+#: ../src/libexchangemapi/e-mapi-connection.c:179
+#, c-format
+msgctxt "EXCHANGEMAPI_ERROR"
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:743
+#, c-format
+msgid "Server '%s' cannot be reached"
+msgstr "'%s' സര്‍വര്‍ ലഭ്യമായില്ല"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:864
+#, c-format
+msgid "Folder name '%s' is not a known default folder name, nor folder ID."
+msgstr "ഫോള്‍ഡര്‍ നാമം '%s' പരിചിതമായ സ്വതവേയുള്ളൊരു ഫോള്‍ഡര്‍ നാമമല്ല, ഫോള്‍ഡര്‍ ഐഡിയുമല്ല"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:1195
+#, c-format
+msgid "Failed to open store for user '%s'"
+msgstr "'%s' ഉപയോക്താവിനുള്ള സ്റ്റോര്‍ തുറക്കുന്നതില്‍ പരാജയം"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:1203
+#, c-format
+msgid "Folder of user '%s' not found"
+msgstr "'%s' ഉപയോക്താവിന്റെ ഫോള്‍ഡര്‍ ലഭ്യമായില്ല"
+
+#. Translators: %s is replaced with an email address which was found ambiguous on a remote server
+#: ../src/libexchangemapi/e-mapi-connection.c:3686
+#, c-format
+msgid "Recipient '%s' is ambiguous"
+msgstr "റെസീപ്യന്റ് '%s' അനുചിതം"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:4565
+#, c-format
+msgid ""
+"Search result exceeded allowed size limit. Use more specific search term, "
+"please"
+msgstr ""
+"അനുവദനീയമായ വ്യാപ്തി തെരച്ചില്‍ ഫലം കടന്നിരിയ്ക്കുന്നു, ദയവായി ഉചിതമായ രീതിയില്‍ "
+"തെരയുക"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6165
 msgid "All Public Folders"
 msgstr "എല്ലാ പൊതു ഫോള്‍ഡറുകളും"
 
-#: ../src/camel/camel-mapi-store.c:273 ../src/camel/camel-mapi-transport.c:128
+#: ../src/libexchangemapi/e-mapi-connection.c:6422
 #, c-format
-msgid "Exchange MAPI server %s"
-msgstr "എക്ല്‌ചേഞ്ച് MAPI സെര്‍വര്‍ %s"
+msgid "User name '%s' is ambiguous"
+msgstr "ഉപയോക്തൃനാമം '%s' അനുചിതം"
 
-#. To translators : Example string : Exchange MAPI service for
-#. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:277 ../src/camel/camel-mapi-transport.c:130
+#: ../src/libexchangemapi/e-mapi-connection.c:6425
 #, c-format
-msgid "Exchange MAPI service for %s on %s"
-msgstr "%s-നുള്ള Exchange MAPI സര്‍വീസ്, %s-ല്‍ "
+msgid "User name '%s' not found"
+msgstr "'%s' ഉപയോക്തൃനാമം ലഭ്യമായില്ല"
 
-#. To translators : First %s : is the error text or the reason
-#. for prompting the user if it is available.
-#. Second %s is : Username.
-#. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:315
-#, c-format
-msgid "%s Please enter the MAPI password for %s@%s"
-msgstr "%s ദയവായി %s@%s  ന്റെ MAPI അടയാളനാക്കു് നല്‍കുക"
+#: ../src/libexchangemapi/e-mapi-folder.c:332
+msgid "Cannot add folder, unsupported folder type"
+msgstr "ഫോള്‍ഡര്‍ ചേര്‍ക്കുവാന്‍ സാധ്യമല്ല, ഫോള്‍ഡര്‍ തരം പിന്തുണയ്ക്കുന്നില്ല"
 
-#: ../src/camel/camel-mapi-store.c:328
-msgid "You did not enter a password."
-msgstr "താങ്കള്‍ അടയാളവാക്കു് നല്‍കിയില്ല"
+#: ../src/libexchangemapi/e-mapi-folder.c:335
+msgid "Cannot add folder, master source not found"
+msgstr "ഫോള്‍ഡര്‍ ചേര്‍ക്കുവാന്‍ സാധ്യമല്ല, മാസ്റ്റര്‍ ഉറവിടം ലഭ്യമല്ല"
 
-#: ../src/camel/camel-mapi-store.c:336
-#, c-format
-msgid "Unable to authenticate to Exchange MAPI server."
-msgstr "എക്സ്‌ചേഞ്ച്  MAPI സെര്‍വരുമായി ആധികാരികത ഉറപ്പാക്കാന്‍ സാധിച്ചില്ല"
+#~ msgid "Enter Password for %s@%s"
+#~ msgstr "%s@%s ന്റെ അടയാളവാക്കു് നല്‍കുക"
 
-#: ../src/camel/camel-mapi-store.c:456
-msgid "Cannot create MAPI folders in offline mode."
-msgstr "ഓഫ്‌ലൈന്‍ മോഡില്‍ MAPI ഫോള്‍ഡറുകള്‍ ഉണ്ടാക്കുവാന്‍ സാധ്യമല്ല."
+#~ msgid "Miscellaneous"
+#~ msgstr "പലവക"
 
-#: ../src/camel/camel-mapi-store.c:461
-#, c-format
-msgid "Cannot create new folder `%s'"
-msgstr "ഫോള്‍ഡര്‍ `%s'  ഉണ്ടാക്കുവാന്‍ സാധ്യമല്ല:"
+#~ msgid "Folders Size"
+#~ msgstr "ഫോള്‍ഡറുകളുടെ വ്യാപ്തി"
 
-#: ../src/camel/camel-mapi-store.c:670
-#, c-format
-msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
-msgstr "'%s' എന്ന MAPI ഫോള്‍ഡറിന്റെ പേരു മാറ്റാന്‍ സാധിച്ചില്ല. ഫോള്‍ഡര്‍ നിലവിലില്ല."
+#~ msgid "Could not create thread for populating cache"
+#~ msgstr "cache-നുളള ത്രെഡ് നിര്‍മ്മിക്കുവാന്‍ സാധ്യമായില്ല"
 
-#: ../src/camel/camel-mapi-store.c:681
-#, c-format
-msgid "Cannot rename MAPI default folder `%s' to `%s'."
-msgstr "സഹജമായ MAPI ഫോള്‍ഡറിന്റെ പേരു '%s' ല്‍ നിന്നും '%s' ലേക്ക് മാറ്റാന്‍ സാധിച്ചില്ല"
+#~| msgid "Fetching summary information for new messages in %s"
+#~ msgid "Updating local summary cache for new messages in %s"
+#~ msgstr "%s-ല്‍ ലോക്കല്‍ സമ്മറി കാഷിനുള്ള പുതിയ സന്ദേശങ്ങള്‍ പരിഷ്കരിക്കുന്നു."
 
-#: ../src/camel/camel-mapi-store.c:699
-#, c-format
-msgid "Cannot rename MAPI folder `%s' to `%s'"
-msgstr "MAPI ഫോള്‍ഡറിന്റെ പേരു '%s' ല്‍ നിന്നും '%s' ലേക്ക് മാറ്റാന്‍ സാധിച്ചില്ല"
+#~ msgid "Retrieving message IDs from server for %s"
+#~ msgstr "%s-നുള്ള സര്‍വറില്‍ നിന്നും സന്ദേശങ്ങളുടെ ID ലഭ്യമാക്കുന്നു"
 
-#: ../src/camel/camel-mapi-store.c:1227
-msgid "Folder list not available in offline mode."
-msgstr "ഫോള്‍ഡര്‍ പട്ടിക ഓഫ്‌ലൈനില്‍ ലഭ്യമല്ല"
+#~ msgid "Removing deleted messages from cache in %s"
+#~ msgstr "%s-ലുള്ള കാഷില്‍ നിന്നും വെട്ടി നീക്കിയ സന്ദേശങ്ങള്‍ നീക്കം ചെയ്യുന്നു"
 
-#. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:116
-msgid "Could not send message."
-msgstr "സന്ദേശം അയയ്ക്കാന്‍ സാധിച്ചില്ല"
+#~ msgid "Fetching summary information for new messages in %s"
+#~ msgstr "പുതിയ സന്ദേശങ്ങള്‍ക്കുളള സംക്ഷിപ്ത വിവരം %s-ല്‍ നിന്നും ലഭ്യമാക്കുന്നു"
 
+#~ msgid ""
+#~ "Cannot get message: %s\n"
+#~ "  %s"
+#~ msgstr ""
+#~ "സന്ദേശം ലഭ്യമല്ല: %s\n"
+#~ "  %s"
+
+#~ msgid "Message fetching cancelled by user."
+#~ msgstr "സന്ദേശം എടുക്കുന്നതു ഉപയോക്താവ് റദ്ദാക്കിയിരിക്കുന്നു."
+
+#~ msgid "Favorites"
+#~ msgstr "ഇഷ്ടമുളളവ"
+
+#~ msgid "%s Please enter the MAPI password for %s@%s"
+#~ msgstr "%s ദയവായി %s@%s  ന്റെ MAPI അടയാളനാക്കു് നല്‍കുക"
+
+#~ msgid "You did not enter a password."
+#~ msgstr "താങ്കള്‍ അടയാളവാക്കു് നല്‍കിയില്ല"
