@@ -1,2965 +1,1235 @@
-# translation of hi.po to Hindi
+# translation of evolution-mapi.gnome-2-26.po to Hindi
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 #
-# Rajesh Ranjan <rranjan@redhat.com>, 2010.
+# Rajesh Ranjan <rranjan@redhat.com>, 2009.
+# Rajesh Ranjan <rajesh672@gmail.com>, 2009.
+# rajesh <rajeshkajha@yahoo.com>, 2012.
 msgid ""
 msgstr ""
-"Project-Id-Version: hi\n"
+"Project-Id-Version: evolution-mapi.gnome-2-26\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=NetworkManager&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-09-10 15:25+0000\n"
-"PO-Revision-Date: 2010-07-26 13:05+0530\n"
-"Last-Translator: Rajesh Ranjan <rranjan@redhat.com>\n"
-"Language-Team: Hindi <fedora-trans-hi@redhat.com>\n"
+"product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
+"POT-Creation-Date: 2012-08-17 08:58+0000\n"
+"PO-Revision-Date: 2012-09-22 10:44+0530\n"
+"Last-Translator: rajesh <rajeshkajha@yahoo.com>\n"
+"Language-Team: Hindi <hindi.sf.net>\n"
 "Language: hi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.11.4\n"
+"X-Generator: Lokalize 1.2\n"
 "Plural-Forms: nplurals=2; plural=(n!=1);\n"
 "\n"
 "\n"
 "\n"
-"\n"
-"\n"
-"\n"
 
-#: ../cli/src/common.c:32 ../cli/src/common.c:44 ../cli/src/common.c:52
-#: ../cli/src/common.c:63 ../cli/src/connections.c:128
-#: ../cli/src/connections.c:162
-msgid "GROUP"
-msgstr ""
+#: ../src/addressbook/e-book-backend-mapi.c:748
+msgid "Searching"
+msgstr "खोज रहा है"
 
-#. 0
-#: ../cli/src/common.c:33 ../cli/src/common.c:53
-msgid "ADDRESS"
-msgstr "ADDRESS"
-
-#. 1
-#: ../cli/src/common.c:34 ../cli/src/common.c:54
-msgid "ROUTE"
-msgstr ""
-
-#. 2
-#: ../cli/src/common.c:35 ../cli/src/common.c:55
-msgid "DNS"
-msgstr "DNS"
-
-#. 3
-#: ../cli/src/common.c:36 ../cli/src/common.c:56
-msgid "DOMAIN"
-msgstr ""
-
-#. 4
-#: ../cli/src/common.c:37
-msgid "WINS"
-msgstr ""
-
-#. 0
-#: ../cli/src/common.c:45 ../cli/src/common.c:64
-msgid "OPTION"
-msgstr ""
-
-#: ../cli/src/common.c:366
-msgid "unmanaged"
-msgstr "अप्रबंधित"
-
-#: ../cli/src/common.c:368
-msgid "unavailable"
-msgstr "अनुपलब्ध"
-
-#: ../cli/src/common.c:370 ../cli/src/network-manager.c:120
-msgid "disconnected"
-msgstr "डिसकनेक्टेड"
-
-#: ../cli/src/common.c:372
-msgid "connecting (prepare)"
-msgstr "कनेक्टिंग (तैयार)"
-
-#: ../cli/src/common.c:374
-msgid "connecting (configuring)"
-msgstr "कनेक्टिंग (विन्यस्त कर रहा है)"
-
-#: ../cli/src/common.c:376
-msgid "connecting (need authentication)"
-msgstr "कनेक्टिंग (सत्यापन जरूरी)"
-
-#: ../cli/src/common.c:378
-msgid "connecting (getting IP configuration)"
-msgstr "कनेक्टिंग (IP विन्यास पा रहा है)"
-
-#: ../cli/src/common.c:380
-#, fuzzy
-#| msgid "connecting (getting IP configuration)"
-msgid "connecting (checking IP connectivity)"
-msgstr "कनेक्टिंग (IP विन्यास पा रहा है)"
-
-#: ../cli/src/common.c:382
-#, fuzzy
-#| msgid "connecting (getting IP configuration)"
-msgid "connecting (starting secondary connections)"
-msgstr "कनेक्टिंग (IP विन्यास पा रहा है)"
-
-#: ../cli/src/common.c:384 ../cli/src/network-manager.c:116
-msgid "connected"
-msgstr "कनेक्टेड"
-
-#: ../cli/src/common.c:386 ../cli/src/connections.c:633
-#, fuzzy
-#| msgid "activating"
-msgid "deactivating"
-msgstr "सक्रिय कर रहा है"
-
-#: ../cli/src/common.c:388
-msgid "connection failed"
-msgstr "कनेक्शन विफल"
-
-#: ../cli/src/common.c:390 ../cli/src/connections.c:636
-#: ../cli/src/connections.c:659 ../cli/src/connections.c:1351
-#: ../cli/src/devices.c:622 ../cli/src/network-manager.c:123
-#: ../cli/src/network-manager.c:185 ../cli/src/network-manager.c:188
-#: ../cli/src/network-manager.c:197 ../cli/src/network-manager.c:257
-#: ../cli/src/network-manager.c:273 ../cli/src/network-manager.c:431
-#: ../cli/src/network-manager.c:486 ../cli/src/network-manager.c:524
-#: ../cli/src/network-manager.c:563 ../cli/src/settings.c:591
-#: ../cli/src/settings.c:619 ../cli/src/utils.c:531 ../src/main.c:462
-#: ../src/main.c:481
-msgid "unknown"
-msgstr "अज्ञात"
-
-#: ../cli/src/common.c:399
-msgid "No reason given"
-msgstr ""
-
-#: ../cli/src/common.c:402
-#, fuzzy
-#| msgid "Unknown"
+#: ../src/addressbook/e-book-backend-mapi.c:1738
+#: ../src/calendar/e-cal-backend-mapi.c:193
+#: ../src/calendar/e-cal-backend-mapi.c:542
+#: ../src/camel/camel-mapi-folder.c:1871 ../src/camel/camel-mapi-folder.c:1947
 msgid "Unknown error"
+msgstr "अज्ञात त्रुटि"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:432
+#: ../src/calendar/e-cal-backend-mapi.c:411
+msgid "Failed to remove public folder"
+msgstr "सार्वजनिक फ़ोल्डर को हटाने में विफल"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:468
+msgid "The backend does not support bulk additions"
+msgstr "बैकेंड बड़ी मात्रा मे जोड़ का समर्थन नहीं करता है"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:510
+#: ../src/calendar/e-cal-backend-mapi.c:1766
+#: ../src/calendar/e-cal-backend-mapi.c:2277
+#| msgid "Unable to authenticate to Exchange MAPI server."
+msgid "Failed to create item on a server"
+msgstr "सर्वर पर मद बनाने में विफल"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:627
+msgid "The backend does not support bulk modifications"
+msgstr "बैकेंड बड़ी मात्रा में परिवर्तन का समर्थन नहीं करता है"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:672
+#: ../src/calendar/e-cal-backend-mapi.c:1979
+msgid "Failed to modify item on a server"
+msgstr "सर्वर पर मद रूपांतरित करने में विफल"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:848
+#| msgid "Error fetching changes from the server."
+msgid "Failed to fetch items from a server"
+msgstr "सर्वर से मद लाने में विफल"
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. %d is an index of the contact.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:866
+#, c-format
+msgid "Caching contact %d"
+msgstr "%d संपर्क कैश करा रहा है"
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. The first %d is an index of the contact,
+#. the second %d is total count of conacts on the server.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:870
+#, c-format
+msgid "Caching contact %d/%d"
+msgstr "%d/%d संपर्क कैश कर रहा है"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:925
+msgid "Failed to count server contacts"
+msgstr "गिनती सर्वर संपर्क में विफल"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:983
+msgid "Failed to list items from a server"
+msgstr "सर्वर से मद सूचीबद्ध करने में विफल"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1064
+msgid "Failed to transfer contacts from a server"
+msgstr "सर्वर से संपर्क हस्तांतरित करने में विफल"
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. %d is an index of the GAL entry.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:153
+#, c-format
+msgid "Caching GAL contact %d"
+msgstr "GAL संपर्क %d कैश कर रहा है"
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. The first %d is an index of the GAL entry,
+#. the second %d is total count of entries in GAL.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:157
+#, c-format
+msgid "Caching GAL contact %d/%d"
+msgstr "GAL संपर्क %d/%d कैश कर रहा है"
+
+#: ../src/addressbook/e-book-backend-mapi-gal.c:229
+#: ../src/addressbook/e-book-backend-mapi-gal.c:313
+msgid "Failed to fetch GAL entries"
+msgstr "GAL प्रविष्टि पाने में विफल"
+
+#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
+#: ../src/calendar/e-cal-backend-mapi.c:481
+#, c-format
+msgid "Loading items in folder %s"
+msgstr "%s फ़ोल्डर में वस्तुएँ लोड कर रहा है"
+
+#: ../src/calendar/e-cal-backend-mapi.c:834
+#, c-format
+#| msgid "Loading items in folder %s"
+msgid "Failed to open folder: %s"
+msgstr "फ़ोल्डर खोलने में असफल: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:842
+#, c-format
+msgid "Failed to get folder properties: %s"
+msgstr "फ़ोल्डर विशेषता पाने में विफल: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:883
+#, c-format
+msgid "Failed to list objects: %s"
+msgstr "वस्तु सूचीबद्ध करने में विफल: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:909
+#, c-format
+msgid "Failed to transfer objects: %s"
+msgstr "वस्तु हस्तांतरित करने में विफल: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:928
+#, c-format
+msgid "Failed to close folder: %s"
+msgstr "फ़ोल्डर बंद करने में विफल: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1425
+#: ../src/calendar/e-cal-backend-mapi.c:1426
+msgid "Could not create cache file"
+msgstr "कैश फ़ाइल नहीं बना सका"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1887
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+msgstr ""
+"किसी पुनरावृति युक्ति भेंट को एकल उदाहरण बदलने के लिए समर्थन लागू नहीं हुआ है."
+" सर्वर पर भेंट "
+"के लिए कोई शुल्क नहीं लिया गया था."
+
+#: ../src/calendar/e-cal-backend-mapi.c:2092
+msgid "Cannot remove items from a server"
+msgstr "सर्वर से मद हटा नहीं सकता है"
+
+#: ../src/calendar/e-cal-backend-mapi.c:2529
+msgid "Failed to get Free/Busy data"
+msgstr "मुक्त/व्यस्त आँकड़ा पाने में विफल"
+
+#: ../src/camel/camel-mapi-folder.c:777
+#, c-format
+msgid "Refreshing folder '%s'"
+msgstr "'%s' फ़ोल्डर ताज़ा कर रहा है"
+
+#: ../src/camel/camel-mapi-folder.c:844
+#, c-format
+#| msgid "Loading items in folder %s"
+msgid "Downloading messages in folder '%s'"
+msgstr "'%s' फ़ोल्डर में संदेश डाउनलोड कर रहा है"
+
+#: ../src/camel/camel-mapi-folder.c:931 ../src/camel/camel-mapi-folder.c:1512
+#, c-format
+msgid "This message is not available in offline mode."
+msgstr "ऑफ़लाइन मोड में यह संदेश उपलब्ध नहीं है."
+
+#: ../src/camel/camel-mapi-folder.c:941 ../src/camel/camel-mapi-folder.c:959
+#, c-format
+#| msgid "Fetching items failed"
+msgid "Fetching items failed: %s"
+msgstr "वस्तुएँ लाना विफल: %s"
+
+#: ../src/camel/camel-mapi-folder.c:946 ../src/camel/camel-mapi-folder.c:964
+msgid "Fetching items failed"
+msgstr "वस्तुएँ लाना विफल"
+
+#: ../src/camel/camel-mapi-folder.c:1204
+#, c-format
+msgid "Cannot append message to folder '%s'"
+msgstr "फ़ोल्डर `%s' में संदेश जोड़ नहीं सकता है"
+
+#: ../src/camel/camel-mapi-folder.c:1213 ../src/camel/camel-mapi-folder.c:1241
+#, c-format
+msgid "Offline."
+msgstr "ऑफ़लाइन."
+
+#: ../src/camel/camel-mapi-folder.c:1322
+#, c-format
+msgid "Failed to empty Trash: %s"
+msgstr "रद्दी खाली करने में विफल: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1328
+msgid "Failed to empty Trash"
+msgstr "रद्दी खाली करने में विफल"
+
+#: ../src/camel/camel-mapi-folder.c:1497
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "%s संदेश नहीं पा सकता है: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1498
+msgid "No such message"
+msgstr "कोई ऐसा संदेश नहीं"
+
+#: ../src/camel/camel-mapi-folder.c:1523 ../src/camel/camel-mapi-folder.c:1553
+#, c-format
+#| msgid "Could not get message"
+msgid "Could not get message: %s"
+msgstr "संदेश पा नहीं सका: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1529 ../src/camel/camel-mapi-folder.c:1560
+#, c-format
+msgid "Could not get message"
+msgstr "संदेश नहीं पा सका"
+
+#: ../src/camel/camel-mapi-folder.c:1927
+msgid "Receive quota"
+msgstr "कोटा पाया"
+
+#: ../src/camel/camel-mapi-folder.c:1933
+msgid "Send quota"
+msgstr "कोटा भेजें"
+
+#: ../src/camel/camel-mapi-folder.c:1952
+msgid "No quota information available"
+msgstr "कोई कोटा सूचना उपलब्ध नहीं"
+
+#: ../src/camel/camel-mapi-folder.c:2055
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "%s के लिए सार नहीं लोड कर सका"
+
+#: ../src/camel/camel-mapi-provider.c:45
+msgid "Checking for new mail"
+msgstr "नए ई-मेल के लिए जाँच रहा है"
+
+#: ../src/camel/camel-mapi-provider.c:47
+msgid "C_heck for new messages in all folders"
+msgstr "सभी फ़ोल्डर में नए संदेश के लिए जांचें (_h)"
+
+#: ../src/camel/camel-mapi-provider.c:51
+msgid "Options"
+msgstr "विकल्प"
+
+#: ../src/camel/camel-mapi-provider.c:53
+msgid "Automatically synchroni_ze account locally"
+msgstr "खाता को स्थानीय रूप से स्वतः तुल्यकालित करें (_z)"
+
+#. i18n: copy from evolution:camel-imap-provider.c
+#: ../src/camel/camel-mapi-provider.c:56
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "इस सर्वर पर नए संदेश में फिल्टर लागू करें (_A)"
+
+#: ../src/camel/camel-mapi-provider.c:58
+msgid "Check new messages for _Junk contents"
+msgstr "जंक सामग्री के लिए नया संदेश जांचें (_J)"
+
+#: ../src/camel/camel-mapi-provider.c:60
+msgid "Only check for Junk messag_es in the Inbox folder"
+msgstr "आई डाक पेटी में जंक संदेश को केवल जांचें (_e)"
+
+#: ../src/camel/camel-mapi-provider.c:62
+#: ../src/configuration/e-mapi-config-utils.c:1630
+msgid "Lis_ten for server notifications"
+msgstr "सर्वर अधिसूचना के लिए सुनें (_t)"
+
+#: ../src/camel/camel-mapi-provider.c:73
+#| msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
+msgstr "Microsoft एक्चेंज 2007/ OpenChange की पहुंच के लिए MAPI के प्रयोग से"
+
+#: ../src/camel/camel-mapi-provider.c:88
+msgid "Password"
+msgstr "पासवर्ड"
+
+#: ../src/camel/camel-mapi-provider.c:89
+#| msgid ""
+#| "This option will connect to the Openchange server using a plaintext "
+#| "password."
+msgid ""
+"This option will connect to the OpenChange server using a plaintext password."
+msgstr ""
+" किसी सादा पाठ कूटशब्द के प्रयोग से यह विकल्प OpenChange सर्वर को कनेक्ट "
+"करेगा."
+
+#: ../src/camel/camel-mapi-sasl-krb.c:28
+msgid "Kerberos"
+msgstr "करबरोस"
+
+#: ../src/camel/camel-mapi-sasl-krb.c:30
+#| msgid ""
+#| "This option will connect to the Openchange server using a plaintext "
+#| "password."
+msgid "This option will connect to the server using kerberos key."
+msgstr "यह विकल्प करबरोस कुँजी के उपयोग से सर्वर में कनेक्ट करेगा."
+
+#: ../src/camel/camel-mapi-store.c:133 ../src/camel/camel-mapi-store.c:175
+msgid "Cannot find folder in a local cache"
+msgstr "स्थानीय कैश में फ़ोल्डर नहीं ढूँढ़ सकता है"
+
+#: ../src/camel/camel-mapi-store.c:481 ../src/camel/camel-mapi-store.c:1183
+#| msgid "Folder list not available in offline mode."
+msgid "Folder list is not available in offline mode"
+msgstr "ऑफ़लाइन अवस्था में फ़ोल्डर सूची उपलब्ध नहीं."
+
+#: ../src/camel/camel-mapi-store.c:858
+#| msgid "All Public Folders"
+msgid "No public folder found"
+msgstr "कोई सार्वजनिक फ़ोल्डर नहीं मिला"
+
+#: ../src/camel/camel-mapi-store.c:858
+msgid "No folder found"
+msgstr "कोई फ़ोल्डर नहीं मिला"
+
+#: ../src/camel/camel-mapi-store.c:1205 ../src/camel/camel-mapi-store.c:2148
+#, c-format
+msgid "Connecting to '%s'"
+msgstr "'%s' से कनेक्ट कर रहा है"
+
+#: ../src/camel/camel-mapi-store.c:1264
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI folders in offline mode"
+msgstr "ऑफलाइन मोड में MAPI फोल्डर नहीं बना सकता है"
+
+#: ../src/camel/camel-mapi-store.c:1271
+#, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot create new folder '%s'"
+msgstr "नया फ़ोल्डर `%s' नहीं बना सकता है"
+
+#: ../src/camel/camel-mapi-store.c:1280
+#, c-format
+msgid "Authentication failed"
+msgstr "सत्यापन असफल"
+
+#: ../src/camel/camel-mapi-store.c:1290
+msgid "MAPI folders can be created only within mailbox of the logged user"
+msgstr ""
+"MAPI फ़ोल्डर को लॉग किए गए उपयोक्ता के मेलबॉक्स में केवल नहीं बनाया जा सकता है"
+
+#: ../src/camel/camel-mapi-store.c:1303 ../src/camel/camel-mapi-store.c:1408
+#, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot find folder '%s'"
+msgstr "'%s' फ़ोल्डर नहीं ढूँढ़ सकता है"
+
+#: ../src/camel/camel-mapi-store.c:1353
+#, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot create folder '%s': %s"
+msgstr "फ़ोल्डर '%s' नहीं बना सकता है: %s"
+
+#: ../src/camel/camel-mapi-store.c:1359
+#, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot create folder '%s'"
+msgstr "फ़ोल्डर '%s' नहीं बना सकता है"
+
+#: ../src/camel/camel-mapi-store.c:1386 ../src/camel/camel-mapi-store.c:1398
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot delete MAPI folders in offline mode"
+msgstr "ऑफलाइन मोड में MAPI फ़ोल्डर का विलोपन नहीं कर सकते हैं"
+
+#: ../src/camel/camel-mapi-store.c:1448
+#, c-format
+#| msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgid "Cannot remove folder '%s': %s"
+msgstr "फ़ोल्डर '%s' नहीं हटा सकता है: %s"
+
+#: ../src/camel/camel-mapi-store.c:1456
+#, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot remove folder '%s'"
+msgstr "फ़ोल्डर '%s' नहीं हटा सकता है"
+
+#: ../src/camel/camel-mapi-store.c:1485 ../src/camel/camel-mapi-store.c:1500
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot rename MAPI folders in offline mode"
+msgstr "ऑफलाइन मोड में MAPI फोल्डर का नाम नहीं बदल सकता है"
+
+#: ../src/camel/camel-mapi-store.c:1511
+#, c-format
+#| msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
+msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
+msgstr "MAPI फ़ोल्डर '%s' का नाम नहीं बदल सकता है. फ़ोल्डर मौजूद नहीं है."
+
+#: ../src/camel/camel-mapi-store.c:1522
+#, c-format
+#| msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgid "Cannot rename MAPI default folder '%s' to '%s'"
+msgstr "MAPI तयशुदा फ़ोल्डर '%s' का नाम '%s' में नहीं बदल सकता है"
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1548 ../src/camel/camel-mapi-store.c:1581
+#: ../src/camel/camel-mapi-store.c:1659
+#, c-format
+#| msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgid "Cannot rename MAPI folder '%s' to '%s'"
+msgstr "MAPI फ़ोल्डर '%s' का नाम '%s' में नहीं बदल सकता है"
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#. The last '%s' is a detailed error message.
+#: ../src/camel/camel-mapi-store.c:1573 ../src/camel/camel-mapi-store.c:1652
+#, c-format
+#| msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgid "Cannot rename MAPI folder '%s' to '%s': %s"
+msgstr "MAPI फ़ोल्डर '%s' का नाम '%s' में नहीं बदल सकता है: %s"
+
+#: ../src/camel/camel-mapi-store.c:1755
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot subscribe MAPI folders in offline mode"
+msgstr "ऑफलाइन मोड में MAPI फोल्डर की सदस्यता नहीं ले सकता है"
+
+#: ../src/camel/camel-mapi-store.c:1772
+#, c-format
+msgid "Folder '%s' not found"
+msgstr "फ़ोल्डर '%s' नहीं मिला"
+
+#: ../src/camel/camel-mapi-store.c:1890
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot unsubscribe MAPI folders in offline mode"
+msgstr "MAPI फ़ोल्डर से ऑफलाइन मोड में सदस्यता वापस नहीं ले सकता है"
+
+#. Translators: The %s is replaced with a server's host name
+#: ../src/camel/camel-mapi-store.c:2103
+#: ../src/camel/camel-mapi-transport.c:191
+#, c-format
+msgid "Exchange MAPI server %s"
+msgstr "MAPI सर्वर %s का विनिमय करें"
+
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#. Translators: The first %s is replaced with a user name, the second with a server's host name
+#: ../src/camel/camel-mapi-store.c:2107
+#: ../src/camel/camel-mapi-transport.c:194
+#, c-format
+msgid "Exchange MAPI service for %s on %s"
+msgstr "MAPI सेवा को %s के लिए %s पर बदलें"
+
+#: ../src/camel/camel-mapi-store.c:2133
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot connect MAPI store in offline mode"
+msgstr "ऑफलाइन मोड में MAPI स्टोर से कनेक्ट नहीं कर सकता है"
+
+#: ../src/camel/camel-mapi-store.c:2178
+#, c-format
+msgid "Mailbox '%s' is full, no new messages will be received or sent."
+msgstr "मेलबॉक्स '%s' भरा है, कोई नया संदेश न तो पाया गया है न ही भेजा गया है."
+
+#: ../src/camel/camel-mapi-store.c:2180
+#, c-format
+msgid ""
+"Mailbox '%s' is near its size limit, message send will be disabled soon."
+msgstr ""
+"मेलबॉक्स '%s' भरने ही वाला है, संदेश प्रेषण जल्द ही निष्क्रिय हो जाएगा."
+
+#: ../src/camel/camel-mapi-store.c:2184
+#, c-format
+msgid "Mailbox '%s' is full, no new messages will be received."
+msgstr "मेलबॉक्स '%s' भर गया है, कोई नया संदेश नहीं आ पाएगा."
+
+#: ../src/camel/camel-mapi-store.c:2186
+#, c-format
+msgid "Mailbox '%s' is near its size limit."
+msgstr "मेलबॉक्स '%s' भरने ही वाला है."
+
+#: ../src/camel/camel-mapi-store.c:2598
+#| msgid "Authentication failed"
+msgid "Authentication password not available"
+msgstr "सत्यापन कूटशब्द अनुपलब्ध है"
+
+#: ../src/camel/camel-mapi-transport.c:142
+#: ../src/camel/camel-mapi-transport.c:164
+#, c-format
+msgid "Could not send message."
+msgstr "संदेश नहीं भेज सका."
+
+#: ../src/camel/camel-mapi-transport.c:159
+#, c-format
+#| msgid "Could not send message."
+msgid "Could not send message: %s"
+msgstr "संदेश नहीं भेज सका: %s"
+
+#: ../src/collection/e-mapi-backend.c:269
+#| msgid "Global Address List / Active Directory"
+msgid "Global Address List"
+msgstr "वैश्विक पता सूची"
+
+#: ../src/collection/e-mapi-backend.c:517
+#: ../src/collection/e-mapi-backend.c:560
+#, c-format
+msgid "Data source '%s' does not represent a MAPI folder"
+msgstr "आँकड़ा स्रोत '%s' किसी MAPI फ़ोल्डर को प्रतिरूपित नहीं करता है"
+
+#: ../src/configuration/e-book-config-mapigal.c:63
+msgid "Allow _partial search results"
+msgstr "आंशिक खोज परिणाम स्वीकारें (_p)"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:126
+msgid "Select username"
+msgstr "उपयोक्तानाम चुनें"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:136
+msgid "Full name"
+msgstr "पूरा नाम"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:141
+msgid "Username"
+msgstr "उपयोक्तानाम"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:168
+msgid ""
+"There are more users with similar user name on a server.\n"
+"Please select that you would like to use from the below list."
+msgstr ""
+"समान उपयोक्तानाम के साथ सर्वर पर कई उपयोक्ता हैं.\n"
+"कृपया चुनें कि आप नीचे की सूची से उपयोग करना चाहते हैं."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:396
+msgid "Authentication finished successfully."
+msgstr "सत्यापन सफलतापूर्वक समाप्त."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:398
+#: ../src/configuration/e-mail-config-mapi-backend.c:519
+msgid "Authentication failed."
+msgstr "प्रमाणीकरण असफल"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:460
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot authenticate MAPI accounts in offline mode"
+msgstr "ऑफलाइन मोड में MAPI खाता सत्यापित नहीं कर सकता है"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:489
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"सर्वर, उपयोक्तानाम, और डोमेन नाम रिक्त नहीं हो सकता है. कृपया उन्हें सही मान "
+"से भरें."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:492
+#| msgid ""
+#| "Server, username and domain name cannot be empty. Please fill them with "
+#| "correct values."
+msgid ""
+"Realm name cannot be empty when kerberos is selected. Please fill them with "
+"correct values."
+msgstr ""
+"करबरोस चुने होने पर रियल्म नाम रिक्त नहीं हो सकता है. कृपया सही मान से भरें."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:513
+msgid "Connecting to the server, please wait..."
+msgstr "सर्वर से कनेक्ट कर रहा है, कृपया इंतजार करें..."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:721
+msgid "Configuration"
+msgstr "विन्यास"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:730
+msgid "_Server:"
+msgstr "सर्वर (_S):"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:747
+msgid "User_name:"
+msgstr "उपयोक्ता नाम (_n):"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:772
+msgid "_Domain name:"
+msgstr "डोमेन नाम (_D):"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:785
+msgid "_Authenticate"
+msgstr "सत्यापित किया (_A)"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:793
+msgid "_Use secure connection"
+msgstr "सुरक्षित कनेक्शन का उपयोग करें (_U)"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:808
+msgid "_Kerberos authentication"
+msgstr "करबरोस सत्यापन (_K)"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:820
+#| msgid "_Domain name:"
+msgid "_Realm name:"
+msgstr "रियल्म नाम (_R):"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:186
+#: ../src/configuration/e-mail-config-mapi-page.c:247
+msgid "MAPI Settings"
+msgstr "MAPI सेटिंग"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:192
+msgid "View the size of all Exchange folders"
+msgstr "सभी लेनदेन फ़ोल्डरों का आकार देखें"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:196
+msgid "Folder _Size"
+msgstr "फ़ोल्डर आकार (_S)"
+
+#: ../src/configuration/e-mapi-config-utils.c:454
+msgid "Folder"
+msgstr "फ़ोल्डर"
+
+#: ../src/configuration/e-mapi-config-utils.c:459
+msgid "Size"
+msgstr "आकार"
+
+#: ../src/configuration/e-mapi-config-utils.c:482
+#: ../src/configuration/e-mapi-config-utils.c:486
+msgid "Unable to retrieve folder size information"
+msgstr "फ़ोल्डर आकार सूचना पाने में असमर्थ"
+
+#: ../src/configuration/e-mapi-config-utils.c:552
+msgid "Folder Size"
+msgstr "फ़ोल्डर आकार"
+
+#: ../src/configuration/e-mapi-config-utils.c:566
+msgid "Fetching folder list…"
+msgstr "फ़ोल्डर सूची ला रहा है…"
+
+#: ../src/configuration/e-mapi-config-utils.c:732
+#, c-format
+msgid "Cannot edit permissions of folder '%s', choose other folder."
+msgstr "'%s' फ़ोल्डर की अनुमति संपादित नहीं कर सकता है, दूसरे फ़ोल्डर चुनें."
+
+#: ../src/configuration/e-mapi-config-utils.c:795
+msgid "Folder size..."
+msgstr "फ़ोल्डर आकार..."
+
+#: ../src/configuration/e-mapi-config-utils.c:802
+msgid "Subscribe to folder of other user..."
+msgstr "दूसरे उपयोक्ता के फ़ोल्डर की सदस्यता लें..."
+
+#: ../src/configuration/e-mapi-config-utils.c:811
+#: ../src/configuration/e-mapi-config-utils.c:1091
+#: ../src/configuration/e-mapi-config-utils.c:1121
+#: ../src/configuration/e-mapi-config-utils.c:1151
+#: ../src/configuration/e-mapi-config-utils.c:1181
+msgid "Permissions..."
+msgstr "अनुमतियाँ..."
+
+#: ../src/configuration/e-mapi-config-utils.c:813
+msgid "Edit MAPI folder permissions"
+msgstr "MAPI फ़ोल्डर अनुमतियाँ संपादित करें"
+
+#: ../src/configuration/e-mapi-config-utils.c:1093
+msgid "Edit MAPI calendar permissions"
+msgstr "MAPI पंचांग अनुमतियाँ संपादित करें"
+
+#: ../src/configuration/e-mapi-config-utils.c:1123
+msgid "Edit MAPI tasks permissions"
+msgstr "MAPI कार्य अनुमतियाँ संपादित करें"
+
+#: ../src/configuration/e-mapi-config-utils.c:1153
+msgid "Edit MAPI memos permissions"
+msgstr "MAPI ज्ञापन अनुमतियाँ संपादित करें"
+
+#: ../src/configuration/e-mapi-config-utils.c:1183
+msgid "Edit MAPI contacts permissions"
+msgstr "MAPI संपर्क अनुमतियाँ संपादित करें"
+
+#: ../src/configuration/e-mapi-config-utils.c:1356
+msgid "Personal Folders"
+msgstr "निजी फ़ोल्डर"
+
+#: ../src/configuration/e-mapi-config-utils.c:1583
+msgid "Searching remote MAPI folder structure, please wait..."
+msgstr "दूरस्थ MAPI फ़ोल्डर संरचना खोज रहा है - कृपया प्रतीक्षा करें..."
+
+#: ../src/configuration/e-mapi-config-utils.c:1651
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI calendar in offline mode"
+msgstr "ऑफलाइन मोड में MAPI पंचांग नहीं बना सकता है"
+
+#: ../src/configuration/e-mapi-config-utils.c:1654
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI task list in offline mode"
+msgstr "ऑफलाइन मोड में MAPI कार्य सूची नहीं बना सकता है"
+
+#: ../src/configuration/e-mapi-config-utils.c:1657
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI memo list in offline mode"
+msgstr "ऑफलाइन मोड में MAPI ज्ञापन सूची नहीं बना सकता है"
+
+#: ../src/configuration/e-mapi-config-utils.c:1660
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI address book in offline mode"
+msgstr "ऑफलाइन मोड में MAPI पता पुस्तिका नहीं बना सकता है"
+
+#: ../src/configuration/e-mapi-config-utils.c:1664
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI source in offline mode"
+msgstr "ऑफलाइन मोड में MAPI स्रोत नहीं बना सकता है"
+
+#: ../src/configuration/e-mapi-config-utils.c:1684
+msgid "_Location:"
+msgstr "स्थान (_L):"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:89
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "कुछ नहीं"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:90
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "स्वामी"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:100
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "प्रकाशक संपादक"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:109
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "संपादक"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:117
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "प्रकाशक लेखक"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:124
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "लेखक"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:130
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "गैरसंपादन लेखक"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:135
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "समीक्षक"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:138
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "योगदानकर्ता"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:141
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "मनपसंद"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:274
+msgid "Writing folder permissions, please wait..."
+msgstr "फ़ोल्डर अनुमतियाँ लिख रहा है, कृपया प्रतीक्षा करें..."
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:780
+#: ../src/configuration/e-mapi-search-gal-user.c:524
+msgctxt "User"
+msgid "Anonymous"
 msgstr "अज्ञात"
 
-#: ../cli/src/common.c:405
-msgid "Device is now managed"
-msgstr ""
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
+#: ../src/configuration/e-mapi-search-gal-user.c:521
+msgctxt "User"
+msgid "Default"
+msgstr "तयशुदा"
 
-#: ../cli/src/common.c:408
-msgid "Device is now unmanaged"
-msgstr ""
-
-#: ../cli/src/common.c:411
-#, fuzzy
-#| msgid "the VPN service returned invalid configuration"
-msgid "The device could not be readied for configuration"
-msgstr "VPN सेवा ने अवैध विन्यास वापस किया"
-
-#: ../cli/src/common.c:414
-msgid ""
-"IP configuration could not be reserved (no available address, timeout, etc.)"
-msgstr ""
-
-#: ../cli/src/common.c:417
-msgid "The IP configuration is no longer valid"
-msgstr ""
-
-#: ../cli/src/common.c:420
-msgid "Secrets were required, but not provided"
-msgstr ""
-
-#: ../cli/src/common.c:423
-msgid "802.1X supplicant disconnected"
-msgstr ""
-
-#: ../cli/src/common.c:426
-msgid "802.1X supplicant configuration failed"
-msgstr ""
-
-#: ../cli/src/common.c:429
-msgid "802.1X supplicant failed"
-msgstr ""
-
-#: ../cli/src/common.c:432
-msgid "802.1X supplicant took too long to authenticate"
-msgstr ""
-
-#: ../cli/src/common.c:435
-#, fuzzy
-#| msgid "the VPN service failed to start"
-msgid "PPP service failed to start"
-msgstr "VPN सेवा आरंभ होने में विफल रहा"
-
-#: ../cli/src/common.c:438
-#, fuzzy
-#| msgid "VPN disconnected"
-msgid "PPP service disconnected"
-msgstr "VPN डिसकनेक्टेंड"
-
-#: ../cli/src/common.c:441
-msgid "PPP failed"
-msgstr ""
-
-#: ../cli/src/common.c:444
-#, fuzzy
-#| msgid "the VPN service failed to start"
-msgid "DHCP client failed to start"
-msgstr "VPN सेवा आरंभ होने में विफल रहा"
-
-#: ../cli/src/common.c:447
-msgid "DHCP client error"
-msgstr ""
-
-#: ../cli/src/common.c:450
-#, fuzzy
-#| msgid "VPN connection failed"
-msgid "DHCP client failed"
-msgstr "VPN कनेक्शन विफल"
-
-#: ../cli/src/common.c:453
-#, fuzzy
-#| msgid "the VPN service failed to start"
-msgid "Shared connection service failed to start"
-msgstr "VPN सेवा आरंभ होने में विफल रहा"
-
-#: ../cli/src/common.c:456
-#, fuzzy
-#| msgid "connection failed"
-msgid "Shared connection service failed"
-msgstr "कनेक्शन विफल"
-
-#: ../cli/src/common.c:459
-#, fuzzy
-#| msgid "the VPN service failed to start"
-msgid "AutoIP service failed to start"
-msgstr "VPN सेवा आरंभ होने में विफल रहा"
-
-#: ../cli/src/common.c:462
-msgid "AutoIP service error"
-msgstr ""
-
-#: ../cli/src/common.c:465
-#, fuzzy
-#| msgid "the VPN service failed to start"
-msgid "AutoIP service failed"
-msgstr "VPN सेवा आरंभ होने में विफल रहा"
-
-#: ../cli/src/common.c:468
-msgid "The line is busy"
-msgstr ""
-
-#: ../cli/src/common.c:471
-msgid "No dial tone"
-msgstr ""
-
-#: ../cli/src/common.c:474
-msgid "No carrier could be established"
-msgstr ""
-
-#: ../cli/src/common.c:477
-msgid "The dialing request timed out"
-msgstr ""
-
-#: ../cli/src/common.c:480
-msgid "The dialing attempt failed"
-msgstr ""
-
-#: ../cli/src/common.c:483
-#, fuzzy
-#| msgid "Error: Connection activation failed."
-msgid "Modem initialization failed"
-msgstr "त्रुटि: कनेक्शन सक्रिय किया जाना विफल."
-
-#: ../cli/src/common.c:486
-#, fuzzy
-#| msgid "Failed to decrypt the private key."
-msgid "Failed to select the specified APN"
-msgstr "निजी कुंजी गोपित करने में विफल."
-
-#: ../cli/src/common.c:489
-msgid "Not searching for networks"
-msgstr ""
-
-#: ../cli/src/common.c:492
-msgid "Network registration denied"
-msgstr ""
-
-#: ../cli/src/common.c:495
-msgid "Network registration timed out"
-msgstr ""
-
-#: ../cli/src/common.c:498
-msgid "Failed to register with the requested network"
-msgstr ""
-
-#: ../cli/src/common.c:501
-#, fuzzy
-#| msgid "VPN connection failed"
-msgid "PIN check failed"
-msgstr "VPN कनेक्शन विफल"
-
-#: ../cli/src/common.c:504
-msgid "Necessary firmware for the device may be missing"
-msgstr ""
-
-#: ../cli/src/common.c:507
-#, fuzzy
-#| msgid "the connection was removed"
-msgid "The device was removed"
-msgstr "कनेक्शन हटाया गया था"
-
-#: ../cli/src/common.c:510
-#, fuzzy
-#| msgid "NetworkManager status"
-msgid "NetworkManager went to sleep"
-msgstr "NetworkManager स्थिति"
-
-#: ../cli/src/common.c:513
-#, fuzzy
-#| msgid "no active connection or device"
-msgid "The device's active connection disappeared"
-msgstr "कोई सक्रिय कनेक्शन या युक्ति नहीं"
-
-#: ../cli/src/common.c:516
-msgid "Device disconnected by user or client"
-msgstr ""
-
-#: ../cli/src/common.c:519
-msgid "Carrier/link changed"
-msgstr ""
-
-#: ../cli/src/common.c:522
-#, fuzzy
-#| msgid "the connection was removed"
-msgid "The device's existing connection was assumed"
-msgstr "कनेक्शन हटाया गया था"
-
-#: ../cli/src/common.c:525
-msgid "The supplicant is now available"
-msgstr ""
-
-#: ../cli/src/common.c:528
-#, fuzzy
-#| msgid "'dhcpcd' could be found."
-msgid "The modem could not be found"
-msgstr "'dhcpcd' नहीं मिल सका."
-
-#: ../cli/src/common.c:531
-#, fuzzy
-#| msgid "the connection attempt timed out"
-msgid "The Bluetooth connection failed or timed out"
-msgstr "कनेक्शन प्रयास का समय समाप्त"
-
-#: ../cli/src/common.c:534
-msgid "GSM Modem's SIM card not inserted"
-msgstr ""
-
-#: ../cli/src/common.c:537
-msgid "GSM Modem's SIM PIN required"
-msgstr ""
-
-#: ../cli/src/common.c:540
-msgid "GSM Modem's SIM PUK required"
-msgstr ""
-
-#: ../cli/src/common.c:543
-msgid "GSM Modem's SIM wrong"
-msgstr ""
-
-#: ../cli/src/common.c:546
-msgid "InfiniBand device does not support connected mode"
-msgstr ""
-
-#: ../cli/src/common.c:549
-#, fuzzy
-#| msgid "connection failed"
-msgid "A dependency of the connection failed"
-msgstr "कनेक्शन विफल"
-
-#: ../cli/src/common.c:552
-msgid "A problem with the RFC 2684 Ethernet over ADSL bridge"
-msgstr ""
-
-#: ../cli/src/common.c:555
-msgid "ModemManager is unavailable"
-msgstr ""
-
-#: ../cli/src/common.c:558 ../cli/src/devices.c:274 ../cli/src/devices.c:290
-#: ../cli/src/devices.c:410 ../cli/src/devices.c:454
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
+msgctxt "User"
 msgid "Unknown"
 msgstr "अज्ञात"
 
-#. 0
-#. used only for 'GENERAL' group listing
-#: ../cli/src/connections.c:59 ../cli/src/connections.c:129
-#: ../cli/src/devices.c:105 ../cli/src/devices.c:129 ../cli/src/devices.c:139
-#: ../cli/src/devices.c:149 ../cli/src/devices.c:163 ../cli/src/devices.c:177
-#: ../cli/src/devices.c:199
-msgid "NAME"
-msgstr "NAME"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:876
+#: ../src/configuration/e-mapi-search-gal-user.c:597
+msgid "Name"
+msgstr "नाम"
 
-#. 0
-#. 1
-#: ../cli/src/connections.c:60 ../cli/src/connections.c:130
-msgid "UUID"
-msgstr "UUID"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:882
+msgid "Permission level"
+msgstr "अनुमति स्तर"
 
-#. 1
-#. 0
-#. 1
-#. 2
-#: ../cli/src/connections.c:61 ../cli/src/connections.c:163
-#: ../cli/src/devices.c:71 ../cli/src/devices.c:107 ../cli/src/devices.c:202
-msgid "TYPE"
-msgstr "TYPE"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:935
+msgid "Edit MAPI folder permissions..."
+msgstr "MAPI फ़ोल्डर अनुमतियाँ संपादित कर रहा है..."
 
-#. 2
-#: ../cli/src/connections.c:62
-msgid "TIMESTAMP"
-msgstr "TIMESTAMP"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:960
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:610
+msgid "Account:"
+msgstr "खाता:"
 
-#. 3
-#: ../cli/src/connections.c:63
-msgid "TIMESTAMP-REAL"
-msgstr "TIMESTAMP-REAL"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:986
+msgid "Folder name:"
+msgstr "फ़ोल्डर नाम:"
 
-#. 4
-#. 13
-#: ../cli/src/connections.c:64 ../cli/src/devices.c:119
-msgid "AUTOCONNECT"
-msgstr "AUTOCONNECT"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1007
+msgid "Folder ID:"
+msgstr "फ़ोल्डर आईडी:"
 
-#. 5
-#: ../cli/src/connections.c:65
-msgid "READONLY"
-msgstr "READONLY"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1066
+msgid "Permissions"
+msgstr "अनुमतियाँ"
 
-#. 6
-#. 8
-#. 2
-#. 11
-#. 5
-#: ../cli/src/connections.c:66 ../cli/src/connections.c:137
-#: ../cli/src/devices.c:73 ../cli/src/devices.c:189 ../cli/src/devices.c:205
-msgid "DBUS-PATH"
-msgstr ""
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1087
+msgid "Permi_ssion level:"
+msgstr "अनुमति स्तर (_s):"
 
-#. 2
-#: ../cli/src/connections.c:131
-msgid "DEVICES"
-msgstr "DEVICES"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1115
+msgctxt "Permissions"
+msgid "Read"
+msgstr "पढ़ें"
 
-#. 3
-#. 1
-#. 8
-#. 1
-#: ../cli/src/connections.c:132 ../cli/src/devices.c:72
-#: ../cli/src/devices.c:114 ../cli/src/network-manager.c:39
-msgid "STATE"
-msgstr "STATE"
-
-#. 4
-#: ../cli/src/connections.c:133
-msgid "DEFAULT"
-msgstr "DEFAULT"
-
-#. 5
-#: ../cli/src/connections.c:134
-#, fuzzy
-#| msgid "DEFAULT"
-msgid "DEFAULT6"
-msgstr "DEFAULT"
-
-#. 6
-#: ../cli/src/connections.c:135
-msgid "SPEC-OBJECT"
-msgstr "SPEC-OBJECT"
-
-#. 7
-#. 1
-#: ../cli/src/connections.c:136 ../cli/src/connections.c:150
-msgid "VPN"
-msgstr "VPN"
-
-#. 9
-#: ../cli/src/connections.c:138
-msgid "CON-PATH"
-msgstr ""
-
-#. 10
-#: ../cli/src/connections.c:139
-msgid "ZONE"
-msgstr ""
-
-#. 11
-#: ../cli/src/connections.c:140
-msgid "MASTER-PATH"
-msgstr ""
-
-#: ../cli/src/connections.c:148 ../cli/src/devices.c:82
-msgid "GENERAL"
-msgstr "GENERAL"
-
-#. 0
-#: ../cli/src/connections.c:149
-#, fuzzy
-#| msgid "TKIP"
-msgid "IP"
-msgstr "TKIP"
-
-#. 1
-#: ../cli/src/connections.c:164
-#, fuzzy
-#| msgid "NAME"
-msgid "USERNAME"
-msgstr "NAME"
-
-#. 2
-#: ../cli/src/connections.c:165
-msgid "GATEWAY"
-msgstr "GATEWAY"
-
-#. 3
-#: ../cli/src/connections.c:166
-msgid "BANNER"
-msgstr ""
-
-#. 4
-#: ../cli/src/connections.c:167
-#, fuzzy
-#| msgid "STATE"
-msgid "VPN-STATE"
-msgstr "STATE"
-
-#. 5
-#: ../cli/src/connections.c:168
-msgid "CFG"
-msgstr ""
-
-#: ../cli/src/connections.c:190
-#, fuzzy, c-format
-#| msgid ""
-#| "Usage: nmcli con { COMMAND | help }\n"
-#| "  COMMAND := { list | status | up | down }\n"
-#| "\n"
-#| "  list [id <id> | uuid <id> | system | user]\n"
-#| "  status\n"
-#| "  up id <id> | uuid <id> [iface <iface>] [ap <hwaddr>] [--nowait] [--"
-#| "timeout <timeout>]\n"
-#| "  down id <id> | uuid <id>\n"
-msgid ""
-"Usage: nmcli con { COMMAND | help }\n"
-"  COMMAND := { list | status | up | down | delete }\n"
-"\n"
-"  list [id <id> | uuid <id>]\n"
-"  status [id <id> | uuid <id> | path <path>]\n"
-"  up id <id> | uuid <id> [iface <iface>] [ap <BSSID>] [nsp <name>] [--"
-"nowait] [--timeout <timeout>]\n"
-"  up id <id> | uuid <id> [iface <iface>] [ap <BSSID>] [--nowait] [--timeout "
-"<timeout>]\n"
-"  down id <id> | uuid <id>\n"
-"  delete id <id> | uuid <id>\n"
-msgstr ""
-"प्रयोग: nmcli con { COMMAND | help }\n"
-"  COMMAND := { list | status | up | down }\n"
-"\n"
-"  list [id <id> | uuid <id> | system | user]\n"
-"  status\n"
-"  up id <id> | uuid <id> [iface <iface>] [ap <hwaddr>] [--nowait] [--timeout "
-"<timeout>]\n"
-"  down id <id> | uuid <id>\n"
-
-#: ../cli/src/connections.c:249 ../cli/src/connections.c:609
-#, c-format
-msgid "Error: 'con list': %s"
-msgstr "त्रुटि: 'con list': %s"
-
-#: ../cli/src/connections.c:251 ../cli/src/connections.c:611
-#, c-format
-msgid "Error: 'con list': %s; allowed fields: %s"
-msgstr "त्रुटि: 'con list': %s; अनुमतिप्राप्त क्षेत्र: %s"
-
-#: ../cli/src/connections.c:259
-msgid "Connection details"
-msgstr "कनेक्शन्स विवरण"
-
-#: ../cli/src/connections.c:484
-msgid "never"
-msgstr "कभी नहीं"
-
-#. "CAPABILITIES"
-#. Print header
-#. "WIFI-PROPERTIES"
-#: ../cli/src/connections.c:485 ../cli/src/connections.c:486
-#: ../cli/src/connections.c:714 ../cli/src/connections.c:715
-#: ../cli/src/connections.c:717 ../cli/src/devices.c:418
-#: ../cli/src/devices.c:471 ../cli/src/devices.c:587 ../cli/src/devices.c:588
-#: ../cli/src/devices.c:589 ../cli/src/devices.c:621 ../cli/src/devices.c:647
-#: ../cli/src/devices.c:648 ../cli/src/devices.c:649 ../cli/src/devices.c:650
-#: ../cli/src/devices.c:651 ../cli/src/network-manager.c:267
-#: ../cli/src/settings.c:700 ../cli/src/settings.c:773
-#: ../cli/src/settings.c:893 ../cli/src/settings.c:1175
-#: ../cli/src/settings.c:1176 ../cli/src/settings.c:1178
-#: ../cli/src/settings.c:1180 ../cli/src/settings.c:1181
-#: ../cli/src/settings.c:1312 ../cli/src/settings.c:1313
-#: ../cli/src/settings.c:1314 ../cli/src/settings.c:1315
-#: ../cli/src/settings.c:1392 ../cli/src/settings.c:1393
-#: ../cli/src/settings.c:1394 ../cli/src/settings.c:1395
-#: ../cli/src/settings.c:1396 ../cli/src/settings.c:1397
-#: ../cli/src/settings.c:1398 ../cli/src/settings.c:1399
-#: ../cli/src/settings.c:1400 ../cli/src/settings.c:1401
-#: ../cli/src/settings.c:1402 ../cli/src/settings.c:1403
-#: ../cli/src/settings.c:1404 ../cli/src/settings.c:1475
-msgid "yes"
-msgstr "हाँ"
-
-#: ../cli/src/connections.c:485 ../cli/src/connections.c:486
-#: ../cli/src/connections.c:714 ../cli/src/connections.c:715
-#: ../cli/src/connections.c:717 ../cli/src/devices.c:418
-#: ../cli/src/devices.c:471 ../cli/src/devices.c:587 ../cli/src/devices.c:588
-#: ../cli/src/devices.c:589 ../cli/src/devices.c:621 ../cli/src/devices.c:647
-#: ../cli/src/devices.c:648 ../cli/src/devices.c:649 ../cli/src/devices.c:650
-#: ../cli/src/devices.c:651 ../cli/src/network-manager.c:269
-#: ../cli/src/settings.c:700 ../cli/src/settings.c:702
-#: ../cli/src/settings.c:773 ../cli/src/settings.c:893
-#: ../cli/src/settings.c:1175 ../cli/src/settings.c:1176
-#: ../cli/src/settings.c:1178 ../cli/src/settings.c:1180
-#: ../cli/src/settings.c:1181 ../cli/src/settings.c:1312
-#: ../cli/src/settings.c:1313 ../cli/src/settings.c:1314
-#: ../cli/src/settings.c:1315 ../cli/src/settings.c:1392
-#: ../cli/src/settings.c:1393 ../cli/src/settings.c:1394
-#: ../cli/src/settings.c:1395 ../cli/src/settings.c:1396
-#: ../cli/src/settings.c:1397 ../cli/src/settings.c:1398
-#: ../cli/src/settings.c:1399 ../cli/src/settings.c:1400
-#: ../cli/src/settings.c:1401 ../cli/src/settings.c:1402
-#: ../cli/src/settings.c:1403 ../cli/src/settings.c:1404
-#: ../cli/src/settings.c:1475
-msgid "no"
-msgstr "नहीं"
-
-#: ../cli/src/connections.c:560
-#, fuzzy
-#| msgid "Connection details"
-msgid "Connection list"
-msgstr "कनेक्शन्स विवरण"
-
-#: ../cli/src/connections.c:573 ../cli/src/connections.c:1110
-#: ../cli/src/connections.c:1648 ../cli/src/connections.c:1663
-#: ../cli/src/connections.c:1672 ../cli/src/connections.c:1682
-#: ../cli/src/connections.c:1694 ../cli/src/connections.c:1802
-#: ../cli/src/connections.c:1904 ../cli/src/devices.c:1041
-#: ../cli/src/devices.c:1051 ../cli/src/devices.c:1169
-#: ../cli/src/devices.c:1177 ../cli/src/devices.c:1541
-#: ../cli/src/devices.c:1548 ../cli/src/devices.c:1562
-#: ../cli/src/devices.c:1569 ../cli/src/devices.c:1586
-#: ../cli/src/devices.c:1597 ../cli/src/devices.c:1818
-#: ../cli/src/devices.c:1825
-#, c-format
-msgid "Error: %s argument is missing."
-msgstr "त्रुटि: %s तर्क अनुपस्थित है."
-
-#: ../cli/src/connections.c:586
-#, c-format
-msgid "Error: %s - no such connection."
-msgstr "त्रुटि: %s - कोई ऐसा कनेक्शन नहीं."
-
-#: ../cli/src/connections.c:592 ../cli/src/connections.c:1707
-#: ../cli/src/connections.c:1819 ../cli/src/connections.c:1911
-#: ../cli/src/devices.c:825 ../cli/src/devices.c:905 ../cli/src/devices.c:1065
-#: ../cli/src/devices.c:1183 ../cli/src/devices.c:1610
-#: ../cli/src/devices.c:1831
-#, c-format
-msgid "Unknown parameter: %s\n"
-msgstr "अज्ञात पैरामीटर: %s\n"
-
-#: ../cli/src/connections.c:601
-#, c-format
-msgid "Error: no valid parameter specified."
-msgstr "त्रुटि: कोई वैध पैरामीटर निर्दिष्ट नहीं."
-
-#: ../cli/src/connections.c:616 ../cli/src/connections.c:2004
-#: ../cli/src/devices.c:2039 ../cli/src/network-manager.c:596
-#, c-format
-msgid "Error: %s."
-msgstr "त्रुटि: %s."
-
-#: ../cli/src/connections.c:629
-msgid "activating"
-msgstr "सक्रिय कर रहा है"
-
-#: ../cli/src/connections.c:631
-msgid "activated"
-msgstr "सक्रिय किया हुआ"
-
-#: ../cli/src/connections.c:645
-msgid "VPN connecting (prepare)"
-msgstr "VPN कनेक्टिंग (तैयार)"
-
-#: ../cli/src/connections.c:647
-msgid "VPN connecting (need authentication)"
-msgstr "VPN कनेक्टिंग (सत्यापन जरूरी)"
-
-#: ../cli/src/connections.c:649
-msgid "VPN connecting"
-msgstr "VPN कनेक्टिंग"
-
-#: ../cli/src/connections.c:651
-msgid "VPN connecting (getting IP configuration)"
-msgstr "VPN कनेक्टिंग (IP विन्यास पा रहा है)"
-
-#: ../cli/src/connections.c:653
-msgid "VPN connected"
-msgstr "VPN कनेक्टेड"
-
-#: ../cli/src/connections.c:655
-msgid "VPN connection failed"
-msgstr "VPN कनेक्शन विफल"
-
-#: ../cli/src/connections.c:657
-msgid "VPN disconnected"
-msgstr "VPN डिसकनेक्टेंड"
-
-#: ../cli/src/connections.c:710 ../cli/src/connections.c:720
-msgid "N/A"
-msgstr ""
-
-#: ../cli/src/connections.c:914 ../cli/src/connections.c:1138
-#, c-format
-msgid "Error: 'con status': %s"
-msgstr "त्रुटि: 'con status': %s"
-
-#: ../cli/src/connections.c:916 ../cli/src/connections.c:1140
-#, c-format
-msgid "Error: 'con status': %s; allowed fields: %s"
-msgstr "त्रुटि: 'con status': %s; अनुमतिप्राप्त क्षेत्र: %s"
-
-#: ../cli/src/connections.c:924
-#, fuzzy
-#| msgid "Active connections"
-msgid "Active connection details"
-msgstr "सक्रिय कनेक्शन"
-
-#: ../cli/src/connections.c:1060 ../cli/src/connections.c:1722
-#: ../cli/src/connections.c:1834 ../cli/src/connections.c:1925
-#: ../cli/src/devices.c:852 ../cli/src/devices.c:914 ../cli/src/devices.c:1080
-#: ../cli/src/devices.c:1213 ../cli/src/devices.c:1632
-#: ../cli/src/devices.c:1860 ../cli/src/network-manager.c:311
-#, fuzzy, c-format
-#| msgid "Error: Could not connect to NetworkManager."
-msgid "Error: Can't find out if NetworkManager is running: %s."
-msgstr "त्रुटि: NetworkManager से कनेक्ट नहीं कर सका."
-
-#: ../cli/src/connections.c:1064 ../cli/src/connections.c:1726
-#: ../cli/src/connections.c:1838 ../cli/src/connections.c:1929
-#: ../cli/src/devices.c:856 ../cli/src/devices.c:918 ../cli/src/devices.c:1084
-#: ../cli/src/devices.c:1217 ../cli/src/devices.c:1636
-#: ../cli/src/devices.c:1864 ../cli/src/network-manager.c:315
-#, fuzzy, c-format
-#| msgid "NetworkManager status"
-msgid "Error: NetworkManager is not running."
-msgstr "NetworkManager स्थिति"
-
-#: ../cli/src/connections.c:1096
-msgid "Active connections"
-msgstr "सक्रिय कनेक्शन"
-
-#: ../cli/src/connections.c:1121
-#, fuzzy, c-format
-#| msgid "Error: %s - no such connection."
-msgid "Error: '%s' is not an active connection."
-msgstr "त्रुटि: %s - कोई ऐसा कनेक्शन नहीं."
-
-#: ../cli/src/connections.c:1126
-#, fuzzy, c-format
-#| msgid "Unknown parameter: %s\n"
-msgid "Error: unknown parameter: %s"
-msgstr "अज्ञात पैरामीटर: %s\n"
-
-#: ../cli/src/connections.c:1233
-#, c-format
-msgid "no active connection on device '%s'"
-msgstr "युक्ति '%s' पर कोई सक्रिय कनेक्शन नहीं"
-
-#: ../cli/src/connections.c:1241
-msgid "no active connection or device"
-msgstr "कोई सक्रिय कनेक्शन या युक्ति नहीं"
-
-#: ../cli/src/connections.c:1312
-#, c-format
-msgid "device '%s' not compatible with connection '%s'"
-msgstr "युक्ति '%s' '%s' के साथ संगत नहीं है"
-
-#: ../cli/src/connections.c:1315
-#, c-format
-msgid "no device found for connection '%s'"
-msgstr "'%s' कनेक्शन के लिए कोई युक्ति नहीं मिला"
-
-#: ../cli/src/connections.c:1327
-msgid "unknown reason"
-msgstr "अज्ञात कारण"
-
-#: ../cli/src/connections.c:1329
-msgid "none"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1126
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1189
+msgctxt "Permissions"
+msgid "None"
 msgstr "कुछ नहीं"
 
-#: ../cli/src/connections.c:1331
-msgid "the user was disconnected"
-msgstr "उपयोक्ता डिसकनेक्ट किया गया था"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1131
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "पूर्ण विवरण"
 
-#: ../cli/src/connections.c:1333
-msgid "the base network connection was interrupted"
-msgstr "मौलिक संजाल कनेक्शन में बाधा आई थी"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1136
+msgctxt "Permissions"
+msgid "Simple Free/Busy"
+msgstr "सरल खाली/व्यस्त"
 
-#: ../cli/src/connections.c:1335
-msgid "the VPN service stopped unexpectedly"
-msgstr "VPN सेवा अचानक रुक गई"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1140
+msgctxt "Permissions"
+msgid "Detailed Free/Busy"
+msgstr "विवरणयुक्त खाली/व्यस्त"
 
-#: ../cli/src/connections.c:1337
-msgid "the VPN service returned invalid configuration"
-msgstr "VPN सेवा ने अवैध विन्यास वापस किया"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1147
+msgctxt "Permissions"
+msgid "Write"
+msgstr "लिखें"
 
-#: ../cli/src/connections.c:1339
-msgid "the connection attempt timed out"
-msgstr "कनेक्शन प्रयास का समय समाप्त"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1158
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "मद बनायें"
 
-#: ../cli/src/connections.c:1341
-msgid "the VPN service did not start in time"
-msgstr "VPN सेवा समय पर आरंभ नहीं हुआ"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
+#| msgid "Cannot create new folder `%s'"
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "उपफ़ोल्डर बनाएँ"
 
-#: ../cli/src/connections.c:1343
-msgid "the VPN service failed to start"
-msgstr "VPN सेवा आरंभ होने में विफल रहा"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr "खुद का संपादित करें"
 
-#: ../cli/src/connections.c:1345
-msgid "no valid VPN secrets"
-msgstr "कोई वैध VPN गुप्त नहीं"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1170
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "सभी संपादित करें"
 
-#: ../cli/src/connections.c:1347
-msgid "invalid VPN secrets"
-msgstr "अवैध VPN गुप्त"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1178
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "वस्तु मिटाएँ"
 
-#: ../cli/src/connections.c:1349
-msgid "the connection was removed"
-msgstr "कनेक्शन हटाया गया था"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1194
+msgctxt "Permissions"
+msgid "Own"
+msgstr "स्वयं"
 
-#: ../cli/src/connections.c:1366 ../cli/src/connections.c:1571
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1199
+msgctxt "Permissions"
+msgid "All"
+msgstr "सभी"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1205
+msgctxt "Permissions"
+msgid "Other"
+msgstr "अन्य"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1216
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "फ़ोल्डर स्वामी"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr "फ़ोल्डर संपर्क"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr "फ़ोल्डर दृष्टिगोचर"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1279
+msgid "Reading folder permissions, please wait..."
+msgstr "फ़ोल्डर अनुमतियाँ पढ़ रहा है, कृपया प्रतीक्षा करें..."
+
+#: ../src/configuration/e-mapi-search-gal-user.c:223
+msgid "No users found"
+msgstr "कोइ उपयोक्ता नहीं मिला"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:226
 #, c-format
-msgid "Connection successfully activated (D-Bus active path: %s)\n"
-msgstr ""
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "एक उपयोक्ता मिला"
+msgstr[1] "%d उपयोक्ता मिला"
 
-#. Active connection failed and dissapeared, quit.
-#: ../cli/src/connections.c:1371 ../cli/src/connections.c:1472
+#: ../src/configuration/e-mapi-search-gal-user.c:231
 #, c-format
-msgid "Error: Connection activation failed."
-msgstr "त्रुटि: कनेक्शन सक्रिय किया जाना विफल."
+msgid "Found %d user, but showing only first %d"
+msgid_plural "Found %d users, but showing only first %d"
+msgstr[0] "%d उपयोक्ता मिला, लेकिन केवल पहले %d को दिखा रहा है"
+msgstr[1] "%d उपयोक्ता मिले, लेकिन केवल पहले %d को दिखा रहा है"
 
-#: ../cli/src/connections.c:1396
+#: ../src/configuration/e-mapi-search-gal-user.c:516
+#: ../src/configuration/e-mapi-search-gal-user.c:707
+msgid "Search for a user"
+msgstr "किसी उपयोक्ता को खोजें"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:532
+msgid "Searching..."
+msgstr "खोज रहा है..."
+
+#: ../src/configuration/e-mapi-search-gal-user.c:603
+msgid "E-mail"
+msgstr "ई-मेल"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:644
+msgid "Choose MAPI user..."
+msgstr "MAPI उपयोक्ता चुनें..."
+
+#: ../src/configuration/e-mapi-search-gal-user.c:667
+msgid "_Search:"
+msgstr "खोजें (_S):"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:90
 #, c-format
-msgid "VPN connection successfully activated (D-Bus active path: %s)\n"
-msgstr ""
+msgid "Cannot add folder, folder already exists as '%s'"
+msgstr "फ़ोल्डर जोड़ नहीं सकता है, फ़ोल्डर '%s' बतौर पहले से मौजूद है"
 
-#: ../cli/src/connections.c:1404
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. Example result: "Mailbox - John Smith"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:115
 #, c-format
-msgid "Error: Connection activation failed: %s."
-msgstr "त्रुटि: कनेक्शन सक्रियकरण विफल: %s."
+msgctxt "ForeignFolder"
+msgid "Mailbox - %s"
+msgstr "मेलबॉक्स - %s"
 
-#: ../cli/src/connections.c:1501 ../cli/src/devices.c:974
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:144
 #, c-format
-msgid "Error: Timeout %d sec expired."
-msgstr "त्रुटि: समय समाप्ति %d सेकेंड में समाप्त."
+msgid "Cannot add folder, failed to add to store's summary"
+msgstr "फ़ोल्डर जोड़ नहीं सकता है, स्टोर की स्मृति को जोड़ने में विफल"
 
-#: ../cli/src/connections.c:1562
-#, c-format
-msgid "Error: Connection activation failed: %s"
-msgstr "त्रुटि: कनेक्शन सक्रियकरण विफल: %s"
-
-#: ../cli/src/connections.c:1656 ../cli/src/connections.c:1810
-#: ../cli/src/connections.c:1938
-#, c-format
-msgid "Error: Unknown connection: %s."
-msgstr "त्रुटि: अज्ञात कनेक्शन: %s."
-
-#: ../cli/src/connections.c:1702 ../cli/src/devices.c:1059
-#: ../cli/src/devices.c:1605
-#, c-format
-msgid "Error: timeout value '%s' is not valid."
-msgstr "त्रुटि: समय समाप्ति मान '%s' वैध नहीं है."
-
-#: ../cli/src/connections.c:1715 ../cli/src/connections.c:1827
-#: ../cli/src/connections.c:1918
-#, c-format
-msgid "Error: id or uuid has to be specified."
-msgstr "त्रुटि: id या uuid को निर्दिष्ट किया जाना है."
-
-#: ../cli/src/connections.c:1747
-#, c-format
-msgid "Error: No suitable device found: %s."
-msgstr "त्रुटि: कोई उपयुक्त युक्ति नहीं मिला: %s."
-
-#: ../cli/src/connections.c:1749
-#, c-format
-msgid "Error: No suitable device found."
-msgstr "त्रुटि: कोई उपयुक्त युक्ति नहीं मिला."
-
-#: ../cli/src/connections.c:1863
-#, c-format
-msgid "Warning: Connection not active\n"
-msgstr "चेतावनी: कनेक्शन सक्रिय नहीं\n"
-
-#: ../cli/src/connections.c:1877
-#, fuzzy, c-format
-#| msgid "Error: Connection activation failed: %s"
-msgid "Error: Connection deletion failed: %s"
-msgstr "त्रुटि: कनेक्शन सक्रियकरण विफल: %s"
-
-#: ../cli/src/connections.c:1995
-#, c-format
-msgid "Error: 'con' command '%s' is not valid."
-msgstr "त्रुटि: 'con' कमांड '%s' वैध नहीं है."
-
-#: ../cli/src/connections.c:2063
-#, c-format
-msgid "Error: could not connect to D-Bus."
-msgstr "त्रुटि: D-Bus से कनेक्ट नहीं कर पाया."
-
-#: ../cli/src/connections.c:2071
-#, c-format
-msgid "Error: Could not get system settings."
-msgstr "त्रुटि: सिस्टम सेटिंग नहीं पा सका."
-
-#: ../cli/src/connections.c:2081
-#, fuzzy, c-format
-#| msgid "Error: Can't obtain connections: settings services are not running."
-msgid "Error: Can't obtain connections: settings service is not running."
-msgstr "त्रुटि: कनेक्शन नहीं पा सकता है: सेटिंग सेवा चल नहीं रही है."
-
-#. 0
-#. 9
-#. 3
-#: ../cli/src/devices.c:70 ../cli/src/devices.c:106 ../cli/src/devices.c:187
-#: ../cli/src/devices.c:203
-msgid "DEVICE"
-msgstr "DEVICE"
-
-#. 0
-#: ../cli/src/devices.c:83
-msgid "CAPABILITIES"
-msgstr "CAPABILITIES"
-
-#. 1
-#: ../cli/src/devices.c:84
-msgid "WIFI-PROPERTIES"
-msgstr "WIFI-PROPERTIES"
-
-#. 2
-#: ../cli/src/devices.c:85
-msgid "AP"
-msgstr "AP"
-
-#. 3
-#: ../cli/src/devices.c:86
-msgid "WIRED-PROPERTIES"
-msgstr "WIRED-PROPERTIES"
-
-#. 4
-#: ../cli/src/devices.c:87
-#, fuzzy
-#| msgid "WIFI-PROPERTIES"
-msgid "WIMAX-PROPERTIES"
-msgstr "WIFI-PROPERTIES"
-
-#. 5
-#. 0
-#: ../cli/src/devices.c:88 ../cli/src/devices.c:200
-#, fuzzy
-#| msgid "DNS"
-msgid "NSP"
-msgstr "DNS"
-
-#. 6
-#: ../cli/src/devices.c:89
-#, fuzzy
-#| msgid "IP4-DNS"
-msgid "IP4"
-msgstr "IP4-DNS"
-
-#. 7
-#: ../cli/src/devices.c:90
-msgid "DHCP4"
-msgstr ""
-
-#. 8
-#: ../cli/src/devices.c:91
-#, fuzzy
-#| msgid "IP6-DNS"
-msgid "IP6"
-msgstr "IP6-DNS"
-
-#. 9
-#: ../cli/src/devices.c:92
-msgid "DHCP6"
-msgstr ""
-
-#. 2
-#: ../cli/src/devices.c:108
-msgid "VENDOR"
-msgstr ""
-
-#. 3
-#: ../cli/src/devices.c:109
-msgid "PRODUCT"
-msgstr ""
-
-#. 4
-#: ../cli/src/devices.c:110
-msgid "DRIVER"
-msgstr "DRIVER"
-
-#. 5
-#: ../cli/src/devices.c:111
-#, fuzzy
-#| msgid "DRIVER"
-msgid "DRIVER-VERSION"
-msgstr "DRIVER"
-
-#. 6
-#: ../cli/src/devices.c:112
-msgid "FIRMWARE-VERSION"
-msgstr ""
-
-#. 7
-#: ../cli/src/devices.c:113
-msgid "HWADDR"
-msgstr "HWADDR"
-
-#. 9
-#: ../cli/src/devices.c:115
-msgid "REASON"
-msgstr ""
-
-#. 10
-#: ../cli/src/devices.c:116
-msgid "UDI"
-msgstr ""
-
-#. 11
-#: ../cli/src/devices.c:117
-msgid "IP-IFACE"
-msgstr ""
-
-#. 12
-#: ../cli/src/devices.c:118
-msgid "NM-MANAGED"
-msgstr ""
-
-#. 14
-#: ../cli/src/devices.c:120
-msgid "FIRMWARE-MISSING"
-msgstr ""
-
-#. 15
-#: ../cli/src/devices.c:121
-#, fuzzy
-#| msgid "AUTOCONNECT"
-msgid "CONNECTION"
-msgstr "AUTOCONNECT"
-
-#. 0
-#: ../cli/src/devices.c:130
-msgid "CARRIER-DETECT"
-msgstr "CARRIER-DETECT"
-
-#. 1
-#: ../cli/src/devices.c:131
-msgid "SPEED"
-msgstr "SPEED"
-
-#. 0
-#: ../cli/src/devices.c:140
-msgid "CARRIER"
-msgstr "CARRIER"
-
-#. 0
-#: ../cli/src/devices.c:150
-msgid "WEP"
-msgstr "WEP"
-
-#. 1
-#: ../cli/src/devices.c:151
-msgid "WPA"
-msgstr "WPA"
-
-#. 2
-#: ../cli/src/devices.c:152
-msgid "WPA2"
-msgstr "WPA2"
-
-#. 3
-#: ../cli/src/devices.c:153
-msgid "TKIP"
-msgstr "TKIP"
-
-#. 4
-#: ../cli/src/devices.c:154
-msgid "CCMP"
-msgstr "CCMP"
-
-#. 0
-#: ../cli/src/devices.c:164
-#, fuzzy
-#| msgid "FREQ"
-msgid "CTR-FREQ"
-msgstr "FREQ"
-
-#. 1
-#: ../cli/src/devices.c:165
-msgid "RSSI"
-msgstr ""
-
-#. 2
-#: ../cli/src/devices.c:166
-msgid "CINR"
-msgstr ""
-
-#. 3
-#: ../cli/src/devices.c:167
-msgid "TX-POW"
-msgstr ""
-
-#. 4
-#: ../cli/src/devices.c:168
-msgid "BSID"
-msgstr ""
-
-#. 0
-#: ../cli/src/devices.c:178
-msgid "SSID"
-msgstr "SSID"
-
-#. 1
-#: ../cli/src/devices.c:179
-msgid "BSSID"
-msgstr "BSSID"
-
-#. 2
-#: ../cli/src/devices.c:180
-msgid "MODE"
-msgstr "MODE"
-
-#. 3
-#: ../cli/src/devices.c:181
-msgid "FREQ"
-msgstr "FREQ"
-
-#. 4
-#: ../cli/src/devices.c:182
-msgid "RATE"
-msgstr "RATE"
-
-#. 5
-#. 1
-#: ../cli/src/devices.c:183 ../cli/src/devices.c:201
-msgid "SIGNAL"
-msgstr "SIGNAL"
-
-#. 6
-#: ../cli/src/devices.c:184
-msgid "SECURITY"
-msgstr "SECURITY"
-
-#. 7
-#: ../cli/src/devices.c:185
-msgid "WPA-FLAGS"
-msgstr "WPA-FLAGS"
-
-#. 8
-#: ../cli/src/devices.c:186
-msgid "RSN-FLAGS"
-msgstr "RSN-FLAGS"
-
-#. 10
-#. 4
-#: ../cli/src/devices.c:188 ../cli/src/devices.c:204
-msgid "ACTIVE"
-msgstr "ACTIVE"
-
-#: ../cli/src/devices.c:223
-#, fuzzy, c-format
-#| msgid ""
-#| "Usage: nmcli dev { COMMAND | help }\n"
-#| "\n"
-#| "  COMMAND := { status | list | disconnect | wifi }\n"
-#| "\n"
-#| "  status\n"
-#| "  list [iface <iface>]\n"
-#| "  disconnect iface <iface> [--nowait] [--timeout <timeout>]\n"
-#| "  wifi [list [iface <iface>] [hwaddr <hwaddr>]]\n"
-#| "\n"
-msgid ""
-"Usage: nmcli dev { COMMAND | help }\n"
-"\n"
-"  COMMAND := { status | list | disconnect | wifi | wimax }\n"
-"\n"
-"  COMMAND := { status | list | disconnect | wifi }\n"
-"\n"
-"  status\n"
-"  list [iface <iface>]\n"
-"  disconnect iface <iface> [--nowait] [--timeout <timeout>]\n"
-"  wifi [list [iface <iface>] [bssid <BSSID>]]\n"
-"  wifi connect <(B)SSID> [password <password>] [wep-key-type key|phrase] "
-"[iface <iface>] [bssid <BSSID>] [name <name>]\n"
-"               [--private] [--nowait] [--timeout <timeout>]\n"
-"  wimax [list [iface <iface>] [nsp <name>]]\n"
-"\n"
-msgstr ""
-"प्रयोग: nmcli dev { COMMAND | help }\n"
-"\n"
-"  COMMAND := { status | list | disconnect | wifi }\n"
-"\n"
-"  status\n"
-"  list [iface <iface>]\n"
-"  disconnect iface <iface> [--nowait] [--timeout <timeout>]\n"
-"  wifi [list [iface <iface>] [hwaddr <hwaddr>]]\n"
-"\n"
-
-#: ../cli/src/devices.c:323
-msgid "(none)"
-msgstr "(कोई नहीं)"
-
-#: ../cli/src/devices.c:379
-#, c-format
-msgid "%u MHz"
-msgstr "%u MHz"
-
-#: ../cli/src/devices.c:380
-#, c-format
-msgid "%u MB/s"
-msgstr "%u MB/s"
-
-#: ../cli/src/devices.c:389
-msgid "Encrypted: "
-msgstr "गोपित: "
-
-#: ../cli/src/devices.c:394
-msgid "WEP "
-msgstr "WEP "
-
-#: ../cli/src/devices.c:396
-msgid "WPA "
-msgstr "WPA "
-
-#: ../cli/src/devices.c:398
-msgid "WPA2 "
-msgstr "WPA2 "
-
-#: ../cli/src/devices.c:401
-msgid "Enterprise "
-msgstr "एंटरप्राइज "
-
-#: ../cli/src/devices.c:410
-msgid "Ad-Hoc"
-msgstr "तदर्थ"
-
-#: ../cli/src/devices.c:410
-msgid "Infrastructure"
-msgstr "आधारभूत ढाँचा"
-
-#: ../cli/src/devices.c:445
-msgid "Home"
-msgstr ""
-
-#: ../cli/src/devices.c:448
-msgid "Partner"
-msgstr ""
-
-#: ../cli/src/devices.c:451
-msgid "Roaming"
-msgstr ""
-
-#: ../cli/src/devices.c:523
-#, c-format
-msgid "Error: 'dev list': %s"
-msgstr "त्रुटि: 'dev list': %s"
-
-#: ../cli/src/devices.c:525
-#, c-format
-msgid "Error: 'dev list': %s; allowed fields: %s"
-msgstr "त्रुटि: 'dev list': %s; अनुमति प्राप्त क्षेत्र: %s"
-
-#: ../cli/src/devices.c:534
-msgid "Device details"
-msgstr "युक्ति विवरण"
-
-#: ../cli/src/devices.c:579 ../cli/src/devices.c:582 ../cli/src/devices.c:1000
-#: ../cli/src/utils.c:477
-msgid "(unknown)"
-msgstr "(अज्ञात)"
-
-#: ../cli/src/devices.c:591
-#, fuzzy
-#| msgid "connected"
-msgid "not connected"
-msgstr "कनेक्टेड"
-
-#: ../cli/src/devices.c:618
-#, c-format
-msgid "%u Mb/s"
-msgstr "%u Mb/s"
-
-#. Print header
-#. "WIRED-PROPERTIES"
-#: ../cli/src/devices.c:691
-msgid "on"
-msgstr "चालू"
-
-#: ../cli/src/devices.c:691
-msgid "off"
-msgstr "बंद"
-
-#: ../cli/src/devices.c:842
-#, c-format
-msgid "Error: 'dev status': %s"
-msgstr "त्रुटि: 'dev status': %s"
-
-#: ../cli/src/devices.c:844
-#, c-format
-msgid "Error: 'dev status': %s; allowed fields: %s"
-msgstr "त्रुटि: 'dev status': %s; अनुमति प्राप्त क्षेत्र: %s"
-
-#: ../cli/src/devices.c:867
-msgid "Status of devices"
-msgstr "युक्ति की स्थिति"
-
-#: ../cli/src/devices.c:898
-#, c-format
-msgid "Error: '%s' argument is missing."
-msgstr "त्रुटि: '%s' तर्क अनुपस्थित है."
-
-#: ../cli/src/devices.c:939 ../cli/src/devices.c:1104
-#: ../cli/src/devices.c:1245 ../cli/src/devices.c:1892
-#, c-format
-msgid "Error: Device '%s' not found."
-msgstr "त्रुटि: युक्ति '%s' नहीं मिला."
-
-#: ../cli/src/devices.c:962
-#, c-format
-msgid "Success: Device '%s' successfully disconnected."
-msgstr "सफल: युक्ति '%s' सफलतापूर्वक डिसकनेक्डेड."
-
-#: ../cli/src/devices.c:997
-#, c-format
-msgid "Error: Device '%s' (%s) disconnecting failed: %s"
-msgstr "त्रुटि: युक्ति '%s' (%s) डिसकनेक्टिंग विफल: %s"
-
-#: ../cli/src/devices.c:1010
-#, fuzzy, c-format
-#| msgid "Success: Device '%s' successfully disconnected."
-msgid "Device '%s' has been disconnected.\n"
-msgstr "सफल: युक्ति '%s' सफलतापूर्वक डिसकनेक्डेड."
-
-#: ../cli/src/devices.c:1073
-#, c-format
-msgid "Error: iface has to be specified."
-msgstr "त्रुटि: iface को निर्दिष्टि करना है."
-
-#: ../cli/src/devices.c:1203
-#, c-format
-msgid "Error: 'dev wifi': %s"
-msgstr "त्रुटि: 'dev wifi': %s"
-
-#: ../cli/src/devices.c:1205
-#, c-format
-msgid "Error: 'dev wifi': %s; allowed fields: %s"
-msgstr "त्रुटि: 'dev wifi': %s; अनुमति प्राप्त क्षेत्र: %s"
-
-#: ../cli/src/devices.c:1228
-msgid "WiFi scan list"
-msgstr "WiFi स्कैन सूची"
-
-#: ../cli/src/devices.c:1265 ../cli/src/devices.c:1319
-#, fuzzy, c-format
-#| msgid "Error: Access point with hwaddr '%s' not found."
-msgid "Error: Access point with bssid '%s' not found."
-msgstr "Error: hwaddr '%s' के साथ पहुँच नहीं मिला."
-
-#: ../cli/src/devices.c:1282
-#, c-format
-msgid "Error: Device '%s' is not a WiFi device."
-msgstr "त्रुटि: युक्ति '%s' एक WiFi युक्ति नहीं है."
-
-#: ../cli/src/devices.c:1350 ../cli/src/devices.c:1396
-#, c-format
-msgid "Connection with UUID '%s' created and activated on device '%s'\n"
-msgstr ""
-
-#: ../cli/src/devices.c:1355
-#, fuzzy, c-format
-#| msgid "Error: Connection activation failed: %s."
-msgid "Error: Connection activation failed: (%d) %s."
-msgstr "त्रुटि: कनेक्शन सक्रियकरण विफल: %s."
-
-#: ../cli/src/devices.c:1380
-#, c-format
-msgid "Error: Failed to add/activate new connection: (%d) %s"
-msgstr ""
-
-#: ../cli/src/devices.c:1388
-#, c-format
-msgid "Error: Failed to add/activate new connection: Unknown error"
-msgstr ""
-
-#: ../cli/src/devices.c:1532
-#, fuzzy, c-format
-#| msgid "Error: %s argument is missing."
-msgid "Error: SSID or BSSID are missing."
-msgstr "त्रुटि: %s तर्क अनुपस्थित है."
-
-#: ../cli/src/devices.c:1555
-#, fuzzy, c-format
-#| msgid "Error: timeout value '%s' is not valid."
-msgid "Error: bssid argument value '%s' is not a valid BSSID."
-msgstr "त्रुटि: समय समाप्ति मान '%s' वैध नहीं है."
-
-#: ../cli/src/devices.c:1579
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:326
 #, c-format
 msgid ""
-"Error: wep-key-type argument value '%s' is invalid, use 'key' or 'phrase'."
+"Folder '%s' not found. Either it does not exist or you do not have "
+"permission to access it."
 msgstr ""
+"फ़ोल्डर '%s' नहीं मिला. या तो यह मौजूद नहीं है या आपके पास इसके पहुँच की "
+"अनुमति नहीं है."
 
-#: ../cli/src/devices.c:1619
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:356
+msgid "Cannot add folder, cannot determine folder's type"
+msgstr "फ़ोल्डर नहीं जोड़ सकता है, फ़ोल्डर के प्रकार निर्धारित नहीं कर सकता है"
+
+#. Translators: This is used to name foreign folder.
+#. The first '%s' is replaced with user name to whom the folder belongs,
+#. the second '%s' is replaced with folder name.
+#. Example result: "John Smith - Calendar"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:397
 #, c-format
-msgid "Error: BSSID to connect to (%s) differs from bssid argument (%s)."
+msgctxt "ForeignFolder"
+msgid "%s - %s"
+msgstr "%s - %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:492
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:688
+msgid "Inbox"
+msgstr "आई डाक"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:494
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
+msgid "Contacts"
+msgstr "संपर्क"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:496
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:690
+msgid "Calendar"
+msgstr "पंचांग"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:498
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:691
+msgid "Memos"
+msgstr "ज्ञापन"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:500
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:692
+msgid "Tasks"
+msgstr "कार्य"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:513
+#, c-format
+msgid "Testing availability of folder '%s' of user '%s', please wait..."
 msgstr ""
+"फ़ोल्डर '%s' '%s' उपयोक्ता की उपलब्धता जाँच रहा है, कृपया प्रतीक्षा करें..."
 
-#: ../cli/src/devices.c:1625
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:589
+msgid "Subscribe to folder of other MAPI user..."
+msgstr "अन्य MAPI उपयोक्ता के फ़ोल्डर में सदस्यता लें..."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:638
+msgid "User"
+msgstr "उपयोक्ता"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:645
+msgid "_User:"
+msgstr "उपयोक्ता (_U):"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:658
+msgid "C_hoose..."
+msgstr "चुनें (_h)..."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:673
+#| msgid "_Domain name:"
+msgid "_Folder name:"
+msgstr "फ़ोल्डर नाम (_F):"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2048
+msgctxt "MeetingResp"
+msgid "Accepted:"
+msgstr "स्वीकृत:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2052
+msgctxt "MeetingResp"
+msgid "Tentative:"
+msgstr "औपबंधिक:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2056
+msgctxt "MeetingResp"
+msgid "Declined:"
+msgstr "अस्वीकृत:"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:140
+msgid "Failed to login into the server"
+msgstr "सर्वर में लॉगिन में विफल"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:141
+msgid "Cannot create more sessions, session limit was reached"
+msgstr "अधिक सत्र नहीं बना सकता है, सत्र सीमा पहुँच गया था"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:142
+msgid "User cancelled operation"
+msgstr "उपयोक्ता रद्दीकरण संक्रिया"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:143
+msgid "Unable to abort"
+msgstr "छोड़ने में असमर्थ"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:144
+msgid "Network error"
+msgstr "संजाल त्रुटि"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:145
+msgid "Disk error"
+msgstr "डिस्क त्रुटि"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:146
+msgid "Password change required"
+msgstr "कूटशब्द परिवर्तन जरूरी"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:147
+#| msgid "Password"
+msgid "Password expired"
+msgstr "कूटशब्द का समय समाप्त"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:148
+msgid "Invalid workstation account"
+msgstr "अवैध कार्यस्टेशन खाता"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:149
+msgid "Invalid access time"
+msgstr "अवैध पहुँच समय"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:150
+msgid "Account is disabled"
+msgstr "खाता निष्क्रिय है"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:151
+msgid "End of session"
+msgstr "सत्र का अंत"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:152
+msgid "MAPI is not initialized or connected"
+msgstr "MAPI आरंभीकृत नहीं है या कनेक्टेड नहीं है"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:153
+msgid "Permission denied"
+msgstr "अनुमति निषेधित"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:154
+msgid "Mailbox quota exceeded"
+msgstr "मेलबॉक्स कोटा से ऊपर हो गया"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:162
 #, c-format
-msgid "Error: Parameter '%s' is neither SSID nor BSSID."
-msgstr ""
+msgid "MAPI error %s (0x%x) occurred"
+msgstr "MAPI त्रुटि %s (0x%x) आयी"
 
-#: ../cli/src/devices.c:1654
-#, fuzzy, c-format
-#| msgid "Error: Device '%s' is not a WiFi device."
-msgid "Error: Device '%s' is not a Wi-Fi device."
-msgstr "त्रुटि: युक्ति '%s' एक WiFi युक्ति नहीं है."
-
-#: ../cli/src/devices.c:1656
-#, fuzzy, c-format
-#| msgid "Error: No suitable device found."
-msgid "Error: No Wi-Fi device found."
-msgstr "त्रुटि: कोई उपयुक्त युक्ति नहीं मिला."
-
-#: ../cli/src/devices.c:1674
-#, fuzzy, c-format
-#| msgid "Error: Access point with hwaddr '%s' not found."
-msgid "Error: No network with SSID '%s' found."
-msgstr "Error: hwaddr '%s' के साथ पहुँच नहीं मिला."
-
-#: ../cli/src/devices.c:1676
-#, fuzzy, c-format
-#| msgid "Error: Access point with hwaddr '%s' not found."
-msgid "Error: No access point with BSSID '%s' found."
-msgstr "Error: hwaddr '%s' के साथ पहुँच नहीं मिला."
-
-#: ../cli/src/devices.c:1774
+#. Translators: The first '%s' is replaced with an error context,
+#. aka where the error occurred, the second '%s' is replaced with
+#. the error message.
+#: ../src/libexchangemapi/e-mapi-connection.c:179
 #, c-format
-msgid "Error: 'dev wifi' command '%s' is not valid."
-msgstr "त्रुटि: 'dev wifi' कमांड '%s' वैध नहीं है."
+msgctxt "EXCHANGEMAPI_ERROR"
+msgid "%s: %s"
+msgstr "%s: %s"
 
-#: ../cli/src/devices.c:1850
-#, fuzzy, c-format
-#| msgid "Error: 'dev wifi': %s"
-msgid "Error: 'dev wimax': %s"
-msgstr "त्रुटि: 'dev wifi': %s"
-
-#: ../cli/src/devices.c:1852
-#, fuzzy, c-format
-#| msgid "Error: 'dev wifi': %s; allowed fields: %s"
-msgid "Error: 'dev wimax': %s; allowed fields: %s"
-msgstr "त्रुटि: 'dev wifi': %s; अनुमति प्राप्त क्षेत्र: %s"
-
-#: ../cli/src/devices.c:1875
-msgid "WiMAX NSP list"
-msgstr ""
-
-#: ../cli/src/devices.c:1912
-#, fuzzy, c-format
-#| msgid "Error: Device '%s' not found."
-msgid "Error: NSP with name '%s' not found."
-msgstr "त्रुटि: युक्ति '%s' नहीं मिला."
-
-#: ../cli/src/devices.c:1923
-#, fuzzy, c-format
-#| msgid "Error: Device '%s' is not a WiFi device."
-msgid "Error: Device '%s' is not a WiMAX device."
-msgstr "त्रुटि: युक्ति '%s' एक WiFi युक्ति नहीं है."
-
-#: ../cli/src/devices.c:1954
-#, fuzzy, c-format
-#| msgid "Error: Access point with hwaddr '%s' not found."
-msgid "Error: Access point with nsp '%s' not found."
-msgstr "Error: hwaddr '%s' के साथ पहुँच नहीं मिला."
-
-#: ../cli/src/devices.c:1981
-#, fuzzy, c-format
-#| msgid "Error: 'dev wifi' command '%s' is not valid."
-msgid "Error: 'dev wimax' command '%s' is not valid."
-msgstr "त्रुटि: 'dev wifi' कमांड '%s' वैध नहीं है."
-
-#: ../cli/src/devices.c:2031
+#: ../src/libexchangemapi/e-mapi-connection.c:743
 #, c-format
-msgid "Error: 'dev' command '%s' is not valid."
-msgstr "त्रुटि: 'dev' कमांड '%s' वैध नहीं है."
+msgid "Server '%s' cannot be reached"
+msgstr "सर्वर '%s' नहीं पहुँच सका"
 
-#: ../cli/src/network-manager.c:37
-msgid "RUNNING"
-msgstr "RUNNING"
-
-#. 0
-#: ../cli/src/network-manager.c:38
-msgid "VERSION"
-msgstr ""
-
-#. 2
-#: ../cli/src/network-manager.c:40
-msgid "NET-ENABLED"
-msgstr ""
-
-#. 3
-#: ../cli/src/network-manager.c:41
-msgid "WIFI-HARDWARE"
-msgstr "WIFI-HARDWARE"
-
-#. 4
-#: ../cli/src/network-manager.c:42
-msgid "WIFI"
-msgstr "WIFI"
-
-#. 5
-#: ../cli/src/network-manager.c:43
-msgid "WWAN-HARDWARE"
-msgstr "WWAN-HARDWARE"
-
-#. 6
-#: ../cli/src/network-manager.c:44
-msgid "WWAN"
-msgstr "WWAN"
-
-#. 7
-#: ../cli/src/network-manager.c:45
-#, fuzzy
-#| msgid "WIFI-HARDWARE"
-msgid "WIMAX-HARDWARE"
-msgstr "WIFI-HARDWARE"
-
-#. 8
-#: ../cli/src/network-manager.c:46
-msgid "WIMAX"
-msgstr ""
-
-#: ../cli/src/network-manager.c:62
-msgid "PERMISSION"
-msgstr ""
-
-#. 0
-#: ../cli/src/network-manager.c:63
-msgid "VALUE"
-msgstr ""
-
-#: ../cli/src/network-manager.c:77
-#, fuzzy, c-format
-#| msgid ""
-#| "Usage: nmcli nm { COMMAND | help }\n"
-#| "\n"
-#| "  COMMAND := { status | sleep | wakeup | wifi | wwan }\n"
-#| "\n"
-#| "  status\n"
-#| "  sleep\n"
-#| "  wakeup\n"
-#| "  wifi [on|off]\n"
-#| "  wwan [on|off]\n"
-#| "\n"
-msgid ""
-"Usage: nmcli nm { COMMAND | help }\n"
-"\n"
-"  COMMAND := { status | permissions | enable | sleep | wifi | wwan | "
-"wimax }\n"
-"\n"
-"  COMMAND := { status | permissions | enable | sleep | wifi | wwan }\n"
-"\n"
-"  status\n"
-"  permissions\n"
-"  enable [true|false]\n"
-"  sleep [true|false]\n"
-"  wifi [on|off]\n"
-"  wwan [on|off]\n"
-"  wimax [on|off]\n"
-"\n"
-msgstr ""
-"प्रयोग: nmcli nm { COMMAND | help }\n"
-"\n"
-"  COMMAND := { status | sleep | wakeup | wifi | wwan }\n"
-"\n"
-"  status\n"
-"  sleep\n"
-"  wakeup\n"
-"  wifi [on|off]\n"
-"  wwan [on|off]\n"
-"\n"
-
-#: ../cli/src/network-manager.c:108
-msgid "asleep"
-msgstr "asleep"
-
-#: ../cli/src/network-manager.c:110
-msgid "connecting"
-msgstr "जुड़ रहा है"
-
-#: ../cli/src/network-manager.c:112
-msgid "connected (local only)"
-msgstr ""
-
-#: ../cli/src/network-manager.c:114
-#, fuzzy
-#| msgid "connected"
-msgid "connected (site only)"
-msgstr "कनेक्टेड"
-
-#: ../cli/src/network-manager.c:118
-#, fuzzy
-#| msgid "connecting"
-msgid "disconnecting"
-msgstr "जुड़ रहा है"
-
-#: ../cli/src/network-manager.c:158
+#: ../src/libexchangemapi/e-mapi-connection.c:864
 #, c-format
-msgid "Error: 'nm status': %s"
-msgstr "त्रुटि: 'nm status': %s"
+msgid "Folder name '%s' is not a known default folder name, nor folder ID."
+msgstr "फ़ोल्डर '%s' ज्ञात फ़ोल्डर नाम नहीं है, न ही फ़ोल्डर ID."
 
-#: ../cli/src/network-manager.c:160
+#: ../src/libexchangemapi/e-mapi-connection.c:1195
 #, c-format
-msgid "Error: 'nm status': %s; allowed fields: %s"
-msgstr "त्रुटि: 'nm status': %s; अनुमति प्राप्त क्षेत्र: %s"
+msgid "Failed to open store for user '%s'"
+msgstr "'%s' उपयोक्ता के लिए स्टोर खोलने में विफल"
 
-#. create NMClient
-#: ../cli/src/network-manager.c:173 ../cli/src/network-manager.c:174
-#: ../cli/src/network-manager.c:175 ../cli/src/network-manager.c:176
-#: ../cli/src/network-manager.c:177 ../cli/src/network-manager.c:179
-#: ../cli/src/network-manager.c:180 ../cli/src/network-manager.c:429
-#: ../cli/src/network-manager.c:484 ../cli/src/network-manager.c:522
-#: ../cli/src/network-manager.c:561
-msgid "enabled"
-msgstr "सक्षम"
-
-#: ../cli/src/network-manager.c:173 ../cli/src/network-manager.c:174
-#: ../cli/src/network-manager.c:175 ../cli/src/network-manager.c:176
-#: ../cli/src/network-manager.c:177 ../cli/src/network-manager.c:179
-#: ../cli/src/network-manager.c:180 ../cli/src/network-manager.c:429
-#: ../cli/src/network-manager.c:484 ../cli/src/network-manager.c:522
-#: ../cli/src/network-manager.c:561
-msgid "disabled"
-msgstr "अक्षम"
-
-#: ../cli/src/network-manager.c:193
-msgid "NetworkManager status"
-msgstr "NetworkManager स्थिति"
-
-#. Print header
-#: ../cli/src/network-manager.c:196
-msgid "running"
-msgstr "कार्यशील"
-
-#: ../cli/src/network-manager.c:196
-msgid "not running"
-msgstr "नहीं चल रहा है"
-
-#: ../cli/src/network-manager.c:271
-msgid "auth"
-msgstr ""
-
-#: ../cli/src/network-manager.c:301
-#, fuzzy, c-format
-#| msgid "Error: 'nm status': %s"
-msgid "Error: 'nm permissions': %s"
-msgstr "त्रुटि: 'nm status': %s"
-
-#: ../cli/src/network-manager.c:303
-#, fuzzy, c-format
-#| msgid "Error: 'nm status': %s; allowed fields: %s"
-msgid "Error: 'nm permissions': %s; allowed fields: %s"
-msgstr "त्रुटि: 'nm status': %s; अनुमति प्राप्त क्षेत्र: %s"
-
-#: ../cli/src/network-manager.c:324
-#, fuzzy
-#| msgid "NetworkManager status"
-msgid "NetworkManager permissions"
-msgstr "NetworkManager स्थिति"
-
-#: ../cli/src/network-manager.c:350 ../cli/src/utils.c:457
-#, fuzzy, c-format
-#| msgid "Error: could not connect to D-Bus."
-msgid "Error: Couldn't connect to system bus: %s"
-msgstr "त्रुटि: D-Bus से कनेक्ट नहीं कर पाया."
-
-#: ../cli/src/network-manager.c:361
-#, fuzzy, c-format
-#| msgid "Error: could not connect to D-Bus."
-msgid "Error: Couldn't create D-Bus object proxy."
-msgstr "त्रुटि: D-Bus से कनेक्ट नहीं कर पाया."
-
-#: ../cli/src/network-manager.c:367
-#, fuzzy, c-format
-#| msgid "Error: 'con list': %s"
-msgid "Error in sleep: %s"
-msgstr "त्रुटि: 'con list': %s"
-
-#: ../cli/src/network-manager.c:416 ../cli/src/network-manager.c:471
-#: ../cli/src/network-manager.c:509 ../cli/src/network-manager.c:548
+#: ../src/libexchangemapi/e-mapi-connection.c:1203
 #, c-format
-msgid "Error: '--fields' value '%s' is not valid here; allowed fields: %s"
-msgstr "त्रुटि: '--fields' मान '%s' यहाँ वैध नहीं है; अनुमति प्राप्त क्षेत्र हैं: %s"
+msgid "Folder of user '%s' not found"
+msgstr "'%s' उपयोक्ता का फ़ोल्डर"
 
-#: ../cli/src/network-manager.c:424
-#, fuzzy
-#| msgid "WiFi enabled"
-msgid "Networking enabled"
-msgstr "WiFi सक्षम"
-
-#: ../cli/src/network-manager.c:440
-#, fuzzy, c-format
-#| msgid "Error: invalid 'wwan' parameter: '%s'."
-msgid "Error: invalid 'enable' parameter: '%s'; use 'true' or 'false'."
-msgstr "त्रुटि: अवैध 'wwan' पैरामीटर: '%s'."
-
-#: ../cli/src/network-manager.c:450
-#, fuzzy, c-format
-#| msgid "Error: Could not connect to NetworkManager."
-msgid "Error: Sleeping status is not exported by NetworkManager."
-msgstr "त्रुटि: NetworkManager से कनेक्ट नहीं कर सका."
-
-#: ../cli/src/network-manager.c:458
-#, fuzzy, c-format
-#| msgid "Error: invalid 'wifi' parameter: '%s'."
-msgid "Error: invalid 'sleep' parameter: '%s'; use 'true' or 'false'."
-msgstr "त्रुटि: अवैध 'wifi' पैरामीटर: '%s'."
-
-#: ../cli/src/network-manager.c:479
-msgid "WiFi enabled"
-msgstr "WiFi सक्षम"
-
-#: ../cli/src/network-manager.c:495
+#. Translators: %s is replaced with an email address which was found ambiguous on a remote server
+#: ../src/libexchangemapi/e-mapi-connection.c:3686
 #, c-format
-msgid "Error: invalid 'wifi' parameter: '%s'."
-msgstr "त्रुटि: अवैध 'wifi' पैरामीटर: '%s'."
+msgid "Recipient '%s' is ambiguous"
+msgstr "'%s' प्राप्तकर्ता दुविधापूर्ण है"
 
-#: ../cli/src/network-manager.c:517
-msgid "WWAN enabled"
-msgstr "WWAN सक्रिय"
-
-#: ../cli/src/network-manager.c:533
-#, c-format
-msgid "Error: invalid 'wwan' parameter: '%s'."
-msgstr "त्रुटि: अवैध 'wwan' पैरामीटर: '%s'."
-
-#: ../cli/src/network-manager.c:556
-#, fuzzy
-#| msgid "WiFi enabled"
-msgid "WiMAX enabled"
-msgstr "WiFi सक्षम"
-
-#: ../cli/src/network-manager.c:572
-#, fuzzy, c-format
-#| msgid "Error: invalid 'wifi' parameter: '%s'."
-msgid "Error: invalid 'wimax' parameter: '%s'."
-msgstr "त्रुटि: अवैध 'wifi' पैरामीटर: '%s'."
-
-#: ../cli/src/network-manager.c:585
-#, c-format
-msgid "Error: 'nm' command '%s' is not valid."
-msgstr "त्रुटि: 'nm' कमांड '%s' वैध नहीं है."
-
-#: ../cli/src/nmcli.c:76
-#, fuzzy, c-format
-#| msgid ""
-#| "Usage: %s [OPTIONS] OBJECT { COMMAND | help }\n"
-#| "\n"
-#| "OPTIONS\n"
-#| "  -t[erse]                                   terse output\n"
-#| "  -p[retty]                                  pretty output\n"
-#| "  -m[ode] tabular|multiline                  output mode\n"
-#| "  -f[ields] <field1,field2,...>|all|common   specify fields to output\n"
-#| "  -e[scape] yes|no                           escape columns separators in "
-#| "values\n"
-#| "  -v[ersion]                                 show program version\n"
-#| "  -h[elp]                                    print this help\n"
-#| "\n"
-#| "OBJECT\n"
-#| "  nm          NetworkManager status\n"
-#| "  con         NetworkManager connections\n"
-#| "  dev         devices managed by NetworkManager\n"
-#| "\n"
-msgid ""
-"Usage: %s [OPTIONS] OBJECT { COMMAND | help }\n"
-"\n"
-"OPTIONS\n"
-"  -t[erse]                                   terse output\n"
-"  -p[retty]                                  pretty output\n"
-"  -m[ode] tabular|multiline                  output mode\n"
-"  -f[ields] <field1,field2,...>|all|common   specify fields to output\n"
-"  -e[scape] yes|no                           escape columns separators in "
-"values\n"
-"  -n[ocheck]                                 don't check nmcli and "
-"NetworkManager versions\n"
-"  -v[ersion]                                 show program version\n"
-"  -h[elp]                                    print this help\n"
-"\n"
-"OBJECT\n"
-"  nm          NetworkManager status\n"
-"  con         NetworkManager connections\n"
-"  dev         devices managed by NetworkManager\n"
-"\n"
-msgstr ""
-"प्रयोग: %s [OPTIONS] OBJECT { COMMAND | help }\n"
-"\n"
-"OPTIONS\n"
-"  -t[erse]                                   terse output\n"
-"  -p[retty]                                  pretty output\n"
-"  -m[ode] tabular|multiline                  output mode\n"
-"  -f[ields] <field1,field2,...>|all|common   specify fields to output\n"
-"  -e[scape] yes|no                           escape columns separators in "
-"values\n"
-"  -v[ersion]                                 show program version\n"
-"  -h[elp]                                    print this help\n"
-"\n"
-"OBJECT\n"
-"  nm          NetworkManager status\n"
-"  con         NetworkManager connections\n"
-"  dev         devices managed by NetworkManager\n"
-"\n"
-
-#: ../cli/src/nmcli.c:121
-#, c-format
-msgid "Error: Object '%s' is unknown, try 'nmcli help'."
-msgstr "त्रुटि: वस्तु '%s' अज्ञात है, 'nmcli help' आजमाएँ."
-
-#: ../cli/src/nmcli.c:151
-#, c-format
-msgid "Error: Option '--terse' is specified the second time."
-msgstr "त्रुटि: विकल्प '--terse' ने दूसरी बार निर्दिष्ट किया है."
-
-#: ../cli/src/nmcli.c:156
-#, c-format
-msgid "Error: Option '--terse' is mutually exclusive with '--pretty'."
-msgstr "त्रुटि: विकल्प '--terse' '--pretty' के साथ परस्पर वहिर्वेषी है."
-
-#: ../cli/src/nmcli.c:164
-#, c-format
-msgid "Error: Option '--pretty' is specified the second time."
-msgstr "त्रुटि: विकल्प '--pretty' दूसरी बार निर्दिष्ट किया है."
-
-#: ../cli/src/nmcli.c:169
-#, c-format
-msgid "Error: Option '--pretty' is mutually exclusive with '--terse'."
-msgstr "त्रुटि: विकल्प '--pretty' परस्पर वहिर्वेशी है '--terse' के साथ."
-
-#: ../cli/src/nmcli.c:179 ../cli/src/nmcli.c:195
-#, c-format
-msgid "Error: missing argument for '%s' option."
-msgstr "त्रुटि: '%s' विकल्प के लिए अनुपस्थित तर्क."
-
-#: ../cli/src/nmcli.c:188 ../cli/src/nmcli.c:204
-#, c-format
-msgid "Error: '%s' is not valid argument for '%s' option."
-msgstr "त्रुटि: '%s' '%s' विकल्प के लिए वैध तर्क नहीं है."
-
-#: ../cli/src/nmcli.c:211
-#, c-format
-msgid "Error: fields for '%s' options are missing."
-msgstr "त्रुटि: '%s' विकल्प के लिए क्षेत्र अनुपस्थित है."
-
-#: ../cli/src/nmcli.c:219
-#, c-format
-msgid "nmcli tool, version %s\n"
-msgstr "nmcli टूल, संस्करण %s\n"
-
-#: ../cli/src/nmcli.c:225
-#, c-format
-msgid "Error: Option '%s' is unknown, try 'nmcli -help'."
-msgstr "त्रुटि: विकल्प '%s' अज्ञात है, 'nmcli -help' आजमाएँ."
-
-#: ../cli/src/nmcli.c:244
-#, c-format
-msgid "Caught signal %d, shutting down..."
-msgstr "संकेत %d पकड़ा, बंद कर रहा है..."
-
-#: ../cli/src/nmcli.c:269
-#, fuzzy
-#| msgid "Error: Could not get user settings."
-msgid "Error: Could not create NMClient object."
-msgstr "त्रुटि: उपयोक्ता सेटिंग नहीं पा सका."
-
-#: ../cli/src/nmcli.c:285
-msgid "Success"
-msgstr "सफल"
-
-#: ../cli/src/settings.c:525
-#, c-format
-msgid "%d (hex-ascii-key)"
-msgstr "%d (hex-ascii-key)"
-
-#: ../cli/src/settings.c:527
-#, c-format
-msgid "%d (104/128-bit passphrase)"
-msgstr "%d (104/128-बिट पासफ्रेज)"
-
-#: ../cli/src/settings.c:530 ../cli/src/settings.c:658
-#, c-format
-msgid "%d (unknown)"
-msgstr "%d (अज्ञात)"
-
-#: ../cli/src/settings.c:556
-msgid "0 (unknown)"
-msgstr "0 (अज्ञात)"
-
-#: ../cli/src/settings.c:562
-msgid "any, "
-msgstr "कोई, "
-
-#: ../cli/src/settings.c:564
-msgid "900 MHz, "
-msgstr "900 MHz, "
-
-#: ../cli/src/settings.c:566
-msgid "1800 MHz, "
-msgstr "1800 MHz, "
-
-#: ../cli/src/settings.c:568
-msgid "1900 MHz, "
-msgstr "1900 MHz, "
-
-#: ../cli/src/settings.c:570
-msgid "850 MHz, "
-msgstr "850 MHz, "
-
-#: ../cli/src/settings.c:572
-msgid "WCDMA 3GPP UMTS 2100 MHz, "
-msgstr "WCDMA 3GPP UMTS 2100 MHz, "
-
-#: ../cli/src/settings.c:574
-msgid "WCDMA 3GPP UMTS 1800 MHz, "
-msgstr "WCDMA 3GPP UMTS 1800 MHz, "
-
-#: ../cli/src/settings.c:576
-msgid "WCDMA 3GPP UMTS 1700/2100 MHz, "
-msgstr "WCDMA 3GPP UMTS 1700/2100 MHz, "
-
-#: ../cli/src/settings.c:578
-msgid "WCDMA 3GPP UMTS 800 MHz, "
-msgstr "WCDMA 3GPP UMTS 800 MHz, "
-
-#: ../cli/src/settings.c:580
-msgid "WCDMA 3GPP UMTS 850 MHz, "
-msgstr "WCDMA 3GPP UMTS 850 MHz, "
-
-#: ../cli/src/settings.c:582
-msgid "WCDMA 3GPP UMTS 900 MHz, "
-msgstr "WCDMA 3GPP UMTS 900 MHz, "
-
-#: ../cli/src/settings.c:584
-msgid "WCDMA 3GPP UMTS 1700 MHz, "
-msgstr "WCDMA 3GPP UMTS 1700 MHz, "
-
-#: ../cli/src/settings.c:586
-#, fuzzy
-#| msgid "WCDMA 3GPP UMTS 900 MHz, "
-msgid "WCDMA 3GPP UMTS 1900 MHz, "
-msgstr "WCDMA 3GPP UMTS 900 MHz, "
-
-#: ../cli/src/settings.c:588
-#, fuzzy
-#| msgid "WCDMA 3GPP UMTS 2100 MHz, "
-msgid "WCDMA 3GPP UMTS 2600 MHz, "
-msgstr "WCDMA 3GPP UMTS 2100 MHz, "
-
-#: ../cli/src/settings.c:606
-msgid "0 (NONE)"
-msgstr ""
-
-#: ../cli/src/settings.c:612
-msgid "REORDER_HEADERS, "
-msgstr ""
-
-#: ../cli/src/settings.c:614
-msgid "GVRP, "
-msgstr ""
-
-#: ../cli/src/settings.c:616
-msgid "LOOSE_BINDING, "
-msgstr ""
-
-#: ../cli/src/settings.c:652
-#, fuzzy, c-format
-#| msgid "disabled"
-msgid "%d (disabled)"
-msgstr "अक्षम"
-
-#: ../cli/src/settings.c:654
-#, c-format
-msgid "%d (enabled, prefer public IP)"
-msgstr ""
-
-#: ../cli/src/settings.c:656
-#, c-format
-msgid "%d (enabled, prefer temporary IP)"
-msgstr ""
-
-#: ../cli/src/settings.c:777 ../cli/src/settings.c:973
-#: ../cli/src/settings.c:1682
-msgid "auto"
-msgstr "auto"
-
-#: ../cli/src/utils.c:103
-#, fuzzy, c-format
-#| msgid "%s: error converting IP4 address 0x%X"
-msgid "Error converting IP4 address '0x%X' to text form"
-msgstr "%s: IP4 पता 0x%X को बदलने में त्रुटि"
-
-#: ../cli/src/utils.c:131
-#, fuzzy, c-format
-#| msgid "%s: error converting IP4 address 0x%X"
-msgid "Error converting IP6 address '%s' to text form"
-msgstr "%s: IP4 पता 0x%X को बदलने में त्रुटि"
-
-#: ../cli/src/utils.c:232
-#, c-format
-msgid "field '%s' has to be alone"
-msgstr "क्षेत्र '%s' को अलग रहना है"
-
-#: ../cli/src/utils.c:235
-#, c-format
-msgid "invalid field '%s'"
-msgstr "अवैध क्षेत्र '%s'"
-
-#: ../cli/src/utils.c:254
-msgid "Option '--terse' requires specifying '--fields'"
-msgstr "विकल्प '--terse' के लिए '--fields' निर्दिष्ट करना है"
-
-#: ../cli/src/utils.c:258
-#, c-format
-msgid "Option '--terse' requires specific '--fields' option values , not '%s'"
-msgstr "विकल्प '--terse' के लिए '--fields' विकल्प मान की जरूरत है, न कि '%s'"
-
-#: ../cli/src/utils.c:468
-#, c-format
-msgid "Error: Couldn't create D-Bus object proxy for org.freedesktop.DBus"
-msgstr ""
-
-#: ../cli/src/utils.c:476
-#, c-format
-msgid "Error: NameHasOwner request failed: %s"
-msgstr ""
-
-#: ../cli/src/utils.c:521
+#: ../src/libexchangemapi/e-mapi-connection.c:4565
 #, c-format
 msgid ""
-"Warning: nmcli (%s) and NetworkManager (%s) versions don't match. Use --"
-"nocheck to suppress the warning.\n"
+"Search result exceeded allowed size limit. Use more specific search term, "
+"please"
 msgstr ""
+"खोज परिणाम अनुमतिप्राप्त आकार सीमा से निकल गया. अधिक विशेष खोज पद का उपयोग "
+"करें"
 
-#: ../cli/src/utils.c:530
+#: ../src/libexchangemapi/e-mapi-connection.c:6165
+msgid "All Public Folders"
+msgstr "सभी सार्वजनिक फ़ोल्डर"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6422
 #, c-format
-msgid ""
-"Error: nmcli (%s) and NetworkManager (%s) versions don't match. Force "
-"execution using --nocheck, but the results are unpredictable."
-msgstr ""
+msgid "User name '%s' is ambiguous"
+msgstr "उपयोक्ता नाम '%s' दुविधापूर्ण है"
 
-#: ../libnm-util/crypto.c:133
+#: ../src/libexchangemapi/e-mapi-connection.c:6425
 #, c-format
-msgid "PEM key file had no end tag '%s'."
-msgstr "PEM कुंजी फाइल के पास कोई अंत टैग '%s' नहीं है."
+msgid "User name '%s' not found"
+msgstr "उपयोक्ता '%s' नहीं मिला"
 
-#: ../libnm-util/crypto.c:146
-#, c-format
-msgid "Doesn't look like a PEM private key file."
-msgstr "एक PEM निजी कुंजी फाइल की तरह का नहीं दिखता है."
+#: ../src/libexchangemapi/e-mapi-folder.c:332
+msgid "Cannot add folder, unsupported folder type"
+msgstr "फ़ोल्डर जोड़ नहीं सकता है, असमर्थित फ़ोल्डर प्रकार"
 
-#: ../libnm-util/crypto.c:154
-#, c-format
-msgid "Not enough memory to store PEM file data."
-msgstr "PEM फाइल डेटा जमा करने के लिए पर्याप्त स्मृति नहीं."
+#: ../src/libexchangemapi/e-mapi-folder.c:335
+msgid "Cannot add folder, master source not found"
+msgstr "फ़ोल्डर जोड़ नहीं सकता है, मास्टर स्रोत नहीं मिला"
 
-#: ../libnm-util/crypto.c:170
-#, c-format
-msgid "Malformed PEM file: Proc-Type was not first tag."
-msgstr "विरूपित PEM फाइल: Proc-Type पहला टैग नहीं था."
+#~ msgid "Enter Password for %s@%s"
+#~ msgstr "%s@%s के लिए कूटशब्द दाखिल करें"
 
-#: ../libnm-util/crypto.c:178
-#, c-format
-msgid "Malformed PEM file: unknown Proc-Type tag '%s'."
-msgstr "विरूपित PEM फाइल: अज्ञात Proc-Type टैग '%s'."
+#~ msgid "Could not create thread for populating cache"
+#~ msgstr "कैश भरने के लिए लड़ी बना नहीं सका"
 
-#: ../libnm-util/crypto.c:188
-#, c-format
-msgid "Malformed PEM file: DEK-Info was not the second tag."
-msgstr "विरूपित PEM फाइल: DEK-Info दूसरा टैग नहीं था."
-
-#: ../libnm-util/crypto.c:199
-#, c-format
-msgid "Malformed PEM file: no IV found in DEK-Info tag."
-msgstr "विरूपित PEM फाइल: कोई IV DEK-Info टैग में नहीं मिला."
-
-#: ../libnm-util/crypto.c:206
-#, c-format
-msgid "Malformed PEM file: invalid format of IV in DEK-Info tag."
-msgstr "विरूपित PEM फाइल: IV का अवैध प्रारूप DEK-Info टैग में."
-
-#: ../libnm-util/crypto.c:219
-#, c-format
-msgid "Malformed PEM file: unknown private key cipher '%s'."
-msgstr "विरूपित PEM फाइल: अज्ञात निजी कुंजी साइफर '%s'."
-
-#: ../libnm-util/crypto.c:238
-#, c-format
-msgid "Could not decode private key."
-msgstr "निजी कुंजी को विगोपित नहीं कर सका."
-
-#: ../libnm-util/crypto.c:284
-msgid "Failed to find expected PKCS#8 start tag."
-msgstr ""
-
-#: ../libnm-util/crypto.c:292
-#, c-format
-msgid "Failed to find expected PKCS#8 end tag '%s'."
-msgstr ""
-
-#: ../libnm-util/crypto.c:312
 #, fuzzy
-#| msgid "Not enough memory to store file data."
-msgid "Not enough memory to store private key data."
-msgstr "फाइल आँकड़ा जमा करने के लिए पर्याप्त स्मृति नहीं."
+#~ msgid "Updating local summary cache for new messages in %s"
+#~ msgstr "%s में नए संदेश के लिए सार सूचना ले रहा है"
 
-#: ../libnm-util/crypto.c:317
-#, fuzzy
-#| msgid "Failed to decrypt the private key."
-msgid "Failed to decode PKCS#8 private key."
-msgstr "निजी कुंजी गोपित करने में विफल."
+#~ msgid "Fetching summary information for new messages in %s"
+#~ msgstr "%s में नए संदेश के लिए सार सूचना ले रहा है"
 
-#: ../libnm-util/crypto.c:339 ../libnm-util/crypto.c:625
-#, c-format
-msgid "Not enough memory to store certificate data."
-msgstr "प्रमाणपत्र आँकड़ा जमा करने के लिए पर्याप्त स्मृति नहीं."
+#~ msgid ""
+#~ "Cannot get message: %s\n"
+#~ "  %s"
+#~ msgstr ""
+#~ "संदेश पा नहीं सकता है: %s\n"
+#~ "  %s"
 
-#: ../libnm-util/crypto.c:365
-#, c-format
-msgid "IV must be an even number of bytes in length."
-msgstr "IV की लंबाई में बाइट संख्या सम संख्या होनी चाहिए."
+#~ msgid "Message fetching cancelled by user."
+#~ msgstr "संदेश लाना उपयोक्ता द्वारा रद्द."
 
-#: ../libnm-util/crypto.c:374
-#, c-format
-msgid "Not enough memory to store the IV."
-msgstr "IV जमा करने के लिए पर्याप्त स्मृति नहीं."
+#~ msgid "Favorites"
+#~ msgstr "पसंदीदा"
 
-#: ../libnm-util/crypto.c:385
-#, c-format
-msgid "IV contains non-hexadecimal digits."
-msgstr "IV गैर हेक्साडेसीमेल अंक समाहित करता है."
+#~ msgid "%s Please enter the MAPI password for %s@%s"
+#~ msgstr "%s कृपया MAPI कूटशब्द %s@%s के लिए दाखिल करें"
 
-#: ../libnm-util/crypto.c:423 ../libnm-util/crypto_gnutls.c:147
-#: ../libnm-util/crypto_gnutls.c:265 ../libnm-util/crypto_nss.c:167
-#: ../libnm-util/crypto_nss.c:332
-#, c-format
-msgid "Private key cipher '%s' was unknown."
-msgstr "निजी कुंजी साइफर '%s' अज्ञात था."
+#~ msgid "You did not enter a password."
+#~ msgstr "आपने कूटशब्द नहीं दाखिल किया."
 
-#: ../libnm-util/crypto.c:432
-#, c-format
-msgid "Not enough memory to decrypt private key."
-msgstr "निजी कुंजी गोपित करने के लिए पर्याप्त स्मृति नहीं."
+#~ msgid "_Global Catalog server name:"
+#~ msgstr "वैश्विक केटलॉग सर्वर नाम:"
 
-#: ../libnm-util/crypto.c:497
-#, c-format
-msgid "Not enough memory to store decrypted private key."
-msgstr "विगोपित निजी कुंजी जमा करने के लिए पर्याप्त स्मृति नहीं."
-
-#: ../libnm-util/crypto.c:542
-#, c-format
-msgid "Unable to determine private key type."
-msgstr "निजी कुंजी प्रकार निर्धारित करने में असमर्थ."
-
-#: ../libnm-util/crypto.c:597
-#, fuzzy, c-format
-#| msgid "PEM certificate '%s' had no end tag '%s'."
-msgid "PEM certificate had no start tag '%s'."
-msgstr "PEM प्रमाणपत्र '%s' के पास कोई अंत टैग '%s' नहीं है."
-
-#: ../libnm-util/crypto.c:606
-#, fuzzy, c-format
-#| msgid "PEM certificate '%s' had no end tag '%s'."
-msgid "PEM certificate had no end tag '%s'."
-msgstr "PEM प्रमाणपत्र '%s' के पास कोई अंत टैग '%s' नहीं है."
-
-#: ../libnm-util/crypto.c:630
-#, c-format
-msgid "Failed to decode certificate."
-msgstr "प्रमाणपत्र विगोपित करने में विफल."
-
-#: ../libnm-util/crypto_gnutls.c:50
-msgid "Failed to initialize the crypto engine."
-msgstr "क्रिप्टो ईंजन आरंभीकृत करने में विफल."
-
-#: ../libnm-util/crypto_gnutls.c:92
-#, c-format
-msgid "Failed to initialize the MD5 engine: %s / %s."
-msgstr "MD5 ईंजन आरंभीकृत करने में विफल: %s / %s."
-
-#: ../libnm-util/crypto_gnutls.c:155
-#, c-format
-msgid "Invalid IV length (must be at least %zd)."
-msgstr "अवैध IV लंबाई (कम से कम %zd होना चाहिए)."
-
-#: ../libnm-util/crypto_gnutls.c:164 ../libnm-util/crypto_nss.c:184
-#, c-format
-msgid "Not enough memory for decrypted key buffer."
-msgstr "विगोपित कुंजी बफर के लिए पर्याप्त स्मृति नहीं."
-
-#: ../libnm-util/crypto_gnutls.c:172
-#, c-format
-msgid "Failed to initialize the decryption cipher context: %s / %s."
-msgstr "विगोपन साइफर संदर्भ को आरंभीकृत करने में विफल: %s / %s."
-
-#: ../libnm-util/crypto_gnutls.c:181
-#, c-format
-msgid "Failed to set symmetric key for decryption: %s / %s."
-msgstr "गोपन के लिए सममितीय कुंजी सेट करने में विफल: %s / %s."
-
-#: ../libnm-util/crypto_gnutls.c:190
-#, c-format
-msgid "Failed to set IV for decryption: %s / %s."
-msgstr "IV को गोपन के लिए सेट करने में विफल: %s / %s."
-
-#: ../libnm-util/crypto_gnutls.c:199
-#, c-format
-msgid "Failed to decrypt the private key: %s / %s."
-msgstr "निजी कुंजी गोपित करने में विफल: %s / %s."
-
-#: ../libnm-util/crypto_gnutls.c:209 ../libnm-util/crypto_nss.c:263
-#, c-format
-msgid "Failed to decrypt the private key: unexpected padding length."
-msgstr "निजी कुंजी गोपित करने में विफल: अप्रत्याशित पैडिंग लंबाई."
-
-#: ../libnm-util/crypto_gnutls.c:220 ../libnm-util/crypto_nss.c:274
-#, c-format
-msgid "Failed to decrypt the private key."
-msgstr "निजी कुंजी गोपित करने में विफल."
-
-#: ../libnm-util/crypto_gnutls.c:285 ../libnm-util/crypto_nss.c:352
-#, c-format
-msgid "Could not allocate memory for encrypting."
-msgstr "गोपन के लिए स्मृति आबंटित नहीं कर सका."
-
-#: ../libnm-util/crypto_gnutls.c:293
-#, c-format
-msgid "Failed to initialize the encryption cipher context: %s / %s."
-msgstr "गोपन साइफर संदर्भ को आरंभीकृत करने में विफल: %s / %s."
-
-#: ../libnm-util/crypto_gnutls.c:302
-#, c-format
-msgid "Failed to set symmetric key for encryption: %s / %s."
-msgstr "गोपन के लिए सममितीय कुंजी सेट करने में विफल: %s / %s."
-
-#: ../libnm-util/crypto_gnutls.c:312
-#, c-format
-msgid "Failed to set IV for encryption: %s / %s."
-msgstr "IV को गोपन के लिए सेट करने में विफल: %s / %s."
-
-#: ../libnm-util/crypto_gnutls.c:321
-#, c-format
-msgid "Failed to encrypt the data: %s / %s."
-msgstr "आँकड़ा गोपित करने में विफल: %s / %s."
-
-#: ../libnm-util/crypto_gnutls.c:361
-#, c-format
-msgid "Error initializing certificate data: %s"
-msgstr "प्रमाणपत्र आँकड़ा आरंभीकृत करने में विफल: %s"
-
-#: ../libnm-util/crypto_gnutls.c:383
-#, c-format
-msgid "Couldn't decode certificate: %s"
-msgstr "प्रमाणपत्र विगोपित नहीं कर सका: %s"
-
-#: ../libnm-util/crypto_gnutls.c:407
-#, c-format
-msgid "Couldn't initialize PKCS#12 decoder: %s"
-msgstr "PKCS#12 विगोपक आरंभीकृत नहीं कर सका: %s"
-
-#: ../libnm-util/crypto_gnutls.c:420
-#, c-format
-msgid "Couldn't decode PKCS#12 file: %s"
-msgstr "PKCS#12 फाइल विगोपित नहीं कर सका: %s"
-
-#: ../libnm-util/crypto_gnutls.c:432
-#, c-format
-msgid "Couldn't verify PKCS#12 file: %s"
-msgstr "PKCS#12 फाइल जाँच नहीं सका: %s"
-
-#: ../libnm-util/crypto_gnutls.c:460
-#, fuzzy, c-format
-#| msgid "Couldn't initialize PKCS#12 decoder: %s"
-msgid "Couldn't initialize PKCS#8 decoder: %s"
-msgstr "PKCS#12 विगोपक आरंभीकृत नहीं कर सका: %s"
-
-#: ../libnm-util/crypto_gnutls.c:483
-#, fuzzy, c-format
-#| msgid "Couldn't decode PKCS#12 file: %s"
-msgid "Couldn't decode PKCS#8 file: %s"
-msgstr "PKCS#12 फाइल विगोपित नहीं कर सका: %s"
-
-#: ../libnm-util/crypto_nss.c:56
-#, c-format
-msgid "Failed to initialize the crypto engine: %d."
-msgstr "क्रिप्टो ईंजन आरंभीकृत करने में विफल: %d."
-
-#: ../libnm-util/crypto_nss.c:107
-#, c-format
-msgid "Failed to initialize the MD5 context: %d."
-msgstr "MD5 संदर्भ आरंभीकृत करने में विफल: %d."
-
-#: ../libnm-util/crypto_nss.c:175
-#, c-format
-msgid "Invalid IV length (must be at least %d)."
-msgstr "अवैध IV लंबाई (जरूर कम से कम %d होना चाहिए)."
-
-#: ../libnm-util/crypto_nss.c:192
-#, c-format
-msgid "Failed to initialize the decryption cipher slot."
-msgstr "विगोपन साइफर स्लॉट को आरंभीकृत करने में विफल."
-
-#: ../libnm-util/crypto_nss.c:202
-#, c-format
-msgid "Failed to set symmetric key for decryption."
-msgstr "गोपन के लिए सममितीय कुंजी सेट करने में विफल."
-
-#: ../libnm-util/crypto_nss.c:212
-#, c-format
-msgid "Failed to set IV for decryption."
-msgstr "IV को गोपन के लिए सेट करने में विफल."
-
-#: ../libnm-util/crypto_nss.c:220
-#, c-format
-msgid "Failed to initialize the decryption context."
-msgstr "गोपन संदर्भ आरंभीकृत करने में विफल."
-
-#: ../libnm-util/crypto_nss.c:233
-#, c-format
-msgid "Failed to decrypt the private key: %d."
-msgstr "निजी कुंजी गोपित करने में विफल: %d."
-
-#: ../libnm-util/crypto_nss.c:241
-#, c-format
-msgid "Failed to decrypt the private key: decrypted data too large."
-msgstr "निजी कुंजी गोपित करने में विफल: विगोपित आँकड़ा काफी बड़ा है."
-
-#: ../libnm-util/crypto_nss.c:252
-#, c-format
-msgid "Failed to finalize decryption of the private key: %d."
-msgstr "निजी कुंजी के विगोपन को अंतिम रूप देने में विफल: %d."
-
-#: ../libnm-util/crypto_nss.c:360
-#, c-format
-msgid "Failed to initialize the encryption cipher slot."
-msgstr "गोपन साइफर स्लाट आरंभीकृत करने में विफल."
-
-#: ../libnm-util/crypto_nss.c:368
-#, c-format
-msgid "Failed to set symmetric key for encryption."
-msgstr "गोपन के लिए सममितीय कुंजी सेट करने में विफल."
-
-#: ../libnm-util/crypto_nss.c:376
-#, c-format
-msgid "Failed to set IV for encryption."
-msgstr "IV को गोपन के लिए सेट करने में विफल."
-
-#: ../libnm-util/crypto_nss.c:384
-#, c-format
-msgid "Failed to initialize the encryption context."
-msgstr "गोपन संदर्भ आरंभीकृत करने में विफल."
-
-#: ../libnm-util/crypto_nss.c:392
-#, c-format
-msgid "Failed to encrypt: %d."
-msgstr "गोपित करने में विफल: %d."
-
-#: ../libnm-util/crypto_nss.c:400
-#, c-format
-msgid "Unexpected amount of data after encrypting."
-msgstr "गोपन के बाद आँकड़ा की अप्रत्याशित मात्रा."
-
-#: ../libnm-util/crypto_nss.c:443
-#, c-format
-msgid "Couldn't decode certificate: %d"
-msgstr "प्रमाणपत्र डिकोड नहीं कर सका: %d"
-
-#: ../libnm-util/crypto_nss.c:478
-#, c-format
-msgid "Couldn't convert password to UCS2: %d"
-msgstr "कूटशब्द को UCS2 में बदल नहीं सका: %d"
-
-#: ../libnm-util/crypto_nss.c:506
-#, c-format
-msgid "Couldn't initialize PKCS#12 decoder: %d"
-msgstr "PKCS#12 डिकोडर को आरंभीकृत नहीं कर सका: %d"
-
-#: ../libnm-util/crypto_nss.c:515
-#, c-format
-msgid "Couldn't decode PKCS#12 file: %d"
-msgstr "PKCS#12 फाइल विगोपित नहीं कर सका: %d"
-
-#: ../libnm-util/crypto_nss.c:524
-#, c-format
-msgid "Couldn't verify PKCS#12 file: %d"
-msgstr "PKCS#12 फाइल जाँच नहीं सका: %d"
-
-#: ../libnm-util/crypto_nss.c:568
-msgid "Could not generate random data."
-msgstr "क्रमहीन आँकड़ा बना नहीं सका."
-
-#: ../libnm-util/nm-utils.c:2040
-#, c-format
-msgid "Not enough memory to make encryption key."
-msgstr "गोपन कुंजी बनाने के लिए पर्याप्त मात्रा में स्मृति नहीं."
-
-#: ../libnm-util/nm-utils.c:2150
-msgid "Could not allocate memory for PEM file creation."
-msgstr "PEM फाइल निर्माण के लिए स्मृति नहीं आबंटित कर सका."
-
-#: ../libnm-util/nm-utils.c:2162
-#, c-format
-msgid "Could not allocate memory for writing IV to PEM file."
-msgstr "IV से PEM फाइल में लिखने के लिए स्मृति नहीं आबंटित कर सका."
-
-#: ../libnm-util/nm-utils.c:2174
-#, c-format
-msgid "Could not allocate memory for writing encrypted key to PEM file."
-msgstr "गोपित कुंजी को PEM फाइल में लिखने के लिए स्मृति नहीं आबंटित कर सका."
-
-#: ../libnm-util/nm-utils.c:2193
-#, c-format
-msgid "Could not allocate memory for PEM file data."
-msgstr "PEM फाइल आँकड़ा के लिए स्मृति नहीं आबंटित कर सका."
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:1
-msgid "Enable or disable system networking"
-msgstr "तंत्र संजालन सक्रिय या निष्क्रिय करें"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:2
-msgid "System policy prevents enabling or disabling system networking"
-msgstr "तंत्र संजालन के युक्ति के सक्रियण या निष्क्रियण को तंत्र नीति रोकता है"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:3
-msgid ""
-"Put NetworkManager to sleep or wake it up (should only be used by system "
-"power management)"
-msgstr ""
-" NetworkManager को स्लीप स्थिति या वेकअप स्थिति में रखें (केवल सिस्टम पावर मैनेजमेंट के "
-"द्वारा प्रयोग किया जाएगा)"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:4
-msgid "System policy prevents putting NetworkManager to sleep or waking it up"
-msgstr "NetworkManager को स्लीप या वेकअप स्थिति में लाने के लिए नेटवर्कमैनेजर रोकता है"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:5
-msgid "Enable or disable WiFi devices"
-msgstr "WiFi युक्तियाँ सक्रिय या निष्क्रिय करें"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:6
-msgid "System policy prevents enabling or disabling WiFi devices"
-msgstr "WiFi युक्ति के सक्रियण या निष्क्रियण को तंत्र नीति रोकता है"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:7
-msgid "Enable or disable mobile broadband devices"
-msgstr "मोबाइल ब्राडबैंड युक्तियाँ सक्रिय या निष्क्रिय करें"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:8
-msgid "System policy prevents enabling or disabling mobile broadband devices"
-msgstr "मोबाइल ब्रॉडबैंड युक्ति के सक्रियण या निष्क्रियण को तंत्र नीति रोकता है"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:9
-#, fuzzy
-#| msgid "Enable or disable mobile broadband devices"
-msgid "Enable or disable WiMAX mobile broadband devices"
-msgstr "मोबाइल ब्राडबैंड युक्तियाँ सक्रिय या निष्क्रिय करें"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:10
-#, fuzzy
-#| msgid ""
-#| "System policy prevents enabling or disabling mobile broadband devices"
-msgid ""
-"System policy prevents enabling or disabling WiMAX mobile broadband devices"
-msgstr "मोबाइल ब्रॉडबैंड युक्ति के सक्रियण या निष्क्रियण को तंत्र नीति रोकता है"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:11
-msgid "Allow control of network connections"
-msgstr "संजाल कनेक्शन के नियंत्रण स्वीकार करें"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:12
-msgid "System policy prevents control of network connections"
-msgstr "सिस्टम कनेक्शन के नियंत्रण को सिस्टम नीति रोकता है"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:13
-msgid "Connection sharing via a protected WiFi network"
-msgstr "किसी संरक्षित WiFi संजाल के द्वारा कनेक्शन साझा"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:14
-msgid "System policy prevents sharing connections via a protected WiFi network"
-msgstr "किसी संरक्षित WiFi संजाल के द्वारा साझा कनेक्शन को सिस्टम नीति रोकता है"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:15
-msgid "Connection sharing via an open WiFi network"
-msgstr "किसी खुले WiFi संजाल के द्वारा कनेक्शन साझा"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:16
-msgid "System policy prevents sharing connections via an open WiFi network"
-msgstr "किसी खुले WiFi संजाल के द्वारा साझा कनेक्शन को सिस्टम नीति रोकता है"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:17
-#, fuzzy
-#| msgid "Allow control of network connections"
-msgid "Modify personal network connections"
-msgstr "संजाल कनेक्शन के नियंत्रण स्वीकार करें"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:18
-#, fuzzy
-#| msgid "System policy prevents modification of system settings"
-msgid "System policy prevents modification of personal network settings"
-msgstr "सिस्टम नीति सिस्टम सेटिंग के रूपांतरण को रोकता है."
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:19
-#, fuzzy
-#| msgid "Modify system connections"
-msgid "Modify network connections for all users"
-msgstr "सिस्टम कनेक्शन सुधारें"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:20
-#, fuzzy
-#| msgid "System policy prevents modification of system settings"
-msgid "System policy prevents modification of network settings for all users"
-msgstr "सिस्टम नीति सिस्टम सेटिंग के रूपांतरण को रोकता है."
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:21
-msgid "Modify persistent system hostname"
-msgstr "स्थिर सिस्टम होस्टनेम को सुधारें"
-
-#: ../policy/org.freedesktop.NetworkManager.policy.in.h:22
-msgid "System policy prevents modification of the persistent system hostname"
-msgstr "सिस्टम नीति स्थिर सिस्टम होस्टनेम के रूपांतरण को रोकता है."
-
-#: ../src/main.c:158
-#, fuzzy, c-format
-#| msgid "Failed to encrypt: %d."
-msgid "Failed to set signal mask: %d"
-msgstr "गोपित करने में विफल: %d."
-
-#: ../src/main.c:167
-#, c-format
-msgid "Failed to create signal handling thread: %d"
-msgstr ""
-
-#: ../src/main.c:182
-#, c-format
-msgid "Opening %s failed: %s\n"
-msgstr ""
-
-#: ../src/main.c:188
-#, c-format
-msgid "Writing to %s failed: %s\n"
-msgstr ""
-
-#: ../src/main.c:193
-#, c-format
-msgid "Closing %s failed: %s\n"
-msgstr ""
-
-#: ../src/main.c:236
-#, c-format
-msgid "NetworkManager is already running (pid %ld)\n"
-msgstr ""
-
-#: ../src/main.c:376
-#, fuzzy
-#| msgid "NetworkManager status"
-msgid "Print NetworkManager version and exit"
-msgstr "NetworkManager स्थिति"
-
-#: ../src/main.c:377
-msgid "Don't become a daemon"
-msgstr ""
-
-#: ../src/main.c:378
-msgid "Make all warnings fatal"
-msgstr ""
-
-#: ../src/main.c:379
-msgid "Specify the location of a PID file"
-msgstr ""
-
-#: ../src/main.c:379
-msgid "filename"
-msgstr ""
-
-#: ../src/main.c:380
-msgid "State file location"
-msgstr ""
-
-#: ../src/main.c:380
-msgid "/path/to/state.file"
-msgstr ""
-
-#: ../src/main.c:381
-msgid "Config file location"
-msgstr ""
-
-#: ../src/main.c:381
-msgid "/path/to/config.file"
-msgstr ""
-
-#: ../src/main.c:382
-msgid "List of plugins separated by ','"
-msgstr ""
-
-#: ../src/main.c:382
-msgid "plugin1,plugin2"
-msgstr ""
-
-#. Translators: Do not translate the values in the square brackets
-#: ../src/main.c:384
-msgid "Log level: one of [ERR, WARN, INFO, DEBUG]"
-msgstr ""
-
-#. Translators: Do not translate the values in the square brackets
-#: ../src/main.c:387
-msgid ""
-"Log domains separated by ',': any combination of\n"
-"                                                [NONE,HW,RFKILL,ETHER,WIFI,"
-"BT,MB,DHCP4,DHCP6,PPP,\n"
-"                                                 WIFI_SCAN,IP4,IP6,AUTOIP4,"
-"DNS,VPN,SHARING,SUPPLICANT,\n"
-"                                                 AGENTS,SETTINGS,SUSPEND,"
-"CORE,DEVICE,OLPC,WIMAX,\n"
-"                                                 INFINIBAND,FIREWALL,ADSL]"
-msgstr ""
-
-#: ../src/main.c:393
-msgid "An http(s) address for checking internet connectivity"
-msgstr ""
-
-#: ../src/main.c:394
-msgid "The interval between connectivity checks (in seconds)"
-msgstr ""
-
-#: ../src/main.c:395
-msgid "The expected start of the response"
-msgstr ""
-
-#: ../src/main.c:395
-msgid "Bingo!"
-msgstr ""
-
-#: ../src/main.c:400
-#, c-format
-msgid "GModules are not supported on your platform!\n"
-msgstr ""
-
-#: ../src/main.c:423
-msgid ""
-"NetworkManager monitors all network connections and automatically\n"
-"chooses the best connection to use.  It also allows the user to\n"
-"specify wireless access points which wireless cards in the computer\n"
-"should associate with."
-msgstr ""
-
-#: ../src/main.c:429
-#, c-format
-msgid "Invalid option.  Please use --help to see a list of valid options.\n"
-msgstr "अवैध विकल्प.  कृपया --help का उपयोग वैध विकल्प देने के लिए करें.\n"
-
-#: ../src/main.c:439
-#, fuzzy, c-format
-#| msgid "Error: Could not connect to NetworkManager."
-msgid "You must be root to run NetworkManager!\n"
-msgstr "त्रुटि: NetworkManager से कनेक्ट नहीं कर सका."
-
-#: ../src/main.c:460
-#, fuzzy, c-format
-#| msgid "Failed to set IV for encryption: %s / %s."
-msgid "Failed to read configuration: (%d) %s\n"
-msgstr "IV को गोपन के लिए सेट करने में विफल: %s / %s."
-
-#: ../src/main.c:471
-#, c-format
-msgid "%s.  Please use --help to see a list of valid options.\n"
-msgstr "%s.  कृपया --help का उपयोग वैध विकल्प देने के लिए करें.\n"
-
-#: ../src/main.c:478
-#, c-format
-msgid "State file %s parsing failed: (%d) %s\n"
-msgstr ""
-
-#: ../src/main.c:495
-#, c-format
-msgid "Could not daemonize: %s [error %u]\n"
-msgstr ""
-
-#: ../src/dhcp-manager/nm-dhcp-dhclient-utils.c:62
-msgid "# Created by NetworkManager\n"
-msgstr "# संजाल प्रबंधक द्वारा निर्मित\n"
-
-#: ../src/dhcp-manager/nm-dhcp-dhclient-utils.c:69
-#, c-format
-msgid ""
-"# Merged from %s\n"
-"\n"
-msgstr ""
-"#%s से मिलाया गया\n"
-"\n"
-
-#: ../src/dhcp-manager/nm-dhcp-manager.c:266
-msgid "no usable DHCP client could be found."
-msgstr "कोई प्रयोज्य DHCP क्लाइंट नहीं मिला."
-
-#: ../src/dhcp-manager/nm-dhcp-manager.c:275
-msgid "'dhclient' could be found."
-msgstr "'dhclient' नहीं मिल सका."
-
-#: ../src/dhcp-manager/nm-dhcp-manager.c:285
-msgid "'dhcpcd' could be found."
-msgstr "'dhcpcd' नहीं मिल सका."
-
-#: ../src/dhcp-manager/nm-dhcp-manager.c:293
-#, c-format
-msgid "unsupported DHCP client '%s'"
-msgstr "असमर्थित DHCP क्लाइंट '%s'"
-
-#: ../src/dns-manager/nm-dns-manager.c:380
-msgid "NOTE: the libc resolver may not support more than 3 nameservers."
-msgstr "नोट: libc समाधानकर्ता 3 नेमसर्वर से अधिक का समर्थन नहीं कर सकता है."
-
-#: ../src/dns-manager/nm-dns-manager.c:382
-msgid "The nameservers listed below may not be recognized."
-msgstr "नीचे सूची में दिया गया नेमसर्वर पहचाना नहीं जा सकता है."
-
-#: ../src/logging/nm-logging.c:131
-#, c-format
-msgid "Unknown log level '%s'"
-msgstr "अज्ञात लॉग स्तर '%s'"
-
-#: ../src/logging/nm-logging.c:156
-#, c-format
-msgid "Unknown log domain '%s'"
-msgstr "अज्ञात लॉग डोमेन '%s'"
-
-#: ../src/modem-manager/nm-modem-cdma.c:281 ../src/nm-device-bt.c:351
-#, fuzzy, c-format
-#| msgid "connection failed"
-msgid "CDMA connection %d"
-msgstr "कनेक्शन विफल"
-
-#: ../src/modem-manager/nm-modem-gsm.c:549 ../src/nm-device-bt.c:347
-#, fuzzy, c-format
-#| msgid "connection failed"
-msgid "GSM connection %d"
-msgstr "कनेक्शन विफल"
-
-#: ../src/nm-device-bond.c:191
-#, fuzzy, c-format
-#| msgid "connection failed"
-msgid "Bond connection %d"
-msgstr "कनेक्शन विफल"
-
-#: ../src/nm-device-adsl.c:193
-#, fuzzy, c-format
-#| msgid "connection failed"
-msgid "ADSL connection %d"
-msgstr "कनेक्शन विफल"
-
-#: ../src/nm-device-bt.c:322
-#, fuzzy, c-format
-#| msgid "VPN connection failed"
-msgid "PAN connection %d"
-msgstr "VPN कनेक्शन विफल"
-
-#: ../src/nm-device-bt.c:355
-#, fuzzy, c-format
-#| msgid "VPN connection failed"
-msgid "DUN connection %d"
-msgstr "VPN कनेक्शन विफल"
-
-#: ../src/nm-device-ethernet.c:1327
-#, fuzzy, c-format
-#| msgid "VPN connection failed"
-msgid "PPPoE connection %d"
-msgstr "VPN कनेक्शन विफल"
-
-#: ../src/nm-device-ethernet.c:1327 ../src/settings/nm-settings-utils.c:50
-#, fuzzy, c-format
-#| msgid "Active connections"
-msgid "Wired connection %d"
-msgstr "सक्रिय कनेक्शन"
-
-#: ../src/nm-device-infiniband.c:303
-#, c-format
-msgid "InfiniBand connection %d"
-msgstr ""
-
-#: ../src/nm-device-olpc-mesh.c:303
-#, c-format
-msgid "Mesh %d"
-msgstr ""
-
-#: ../src/nm-device-vlan.c:362
-#, fuzzy, c-format
-#| msgid "VPN connection failed"
-msgid "VLAN connection %d"
-msgstr "VPN कनेक्शन विफल"
-
-#: ../src/nm-manager.c:661
-#, fuzzy, c-format
-#| msgid "VPN connection failed"
-msgid "VPN connection %d"
-msgstr "VPN कनेक्शन विफल"
-
-#: ../src/nm-netlink-monitor.c:148 ../src/nm-netlink-monitor.c:272
-#: ../src/nm-netlink-monitor.c:695
-#, c-format
-msgid "error processing netlink message: %s"
-msgstr "netlink संदेश की प्रक्रिया में त्रुटि: %s"
-
-#: ../src/nm-netlink-monitor.c:251
-msgid "error occurred while waiting for data on socket"
-msgstr "सॉकेट पर आँकड़ा के लिए प्रतीक्षा करने के दौरान त्रुटि"
-
-#: ../src/nm-netlink-monitor.c:296
-#, c-format
-msgid "unable to connect to netlink for monitoring link status: %s"
-msgstr "नेटलिंक को मॉनिटरिंग लिंक स्थिति के लिए कनेक्ट करने में असमर्थ: %s"
-
-#: ../src/nm-netlink-monitor.c:307
-#, c-format
-msgid "unable to enable netlink handle credential passing: %s"
-msgstr "नेटलिंक नियंत्रण श्रेय पासिंग सक्रिय करने में असमर्थ: %s"
-
-#: ../src/nm-netlink-monitor.c:330 ../src/nm-netlink-monitor.c:390
-#, c-format
-msgid "unable to allocate netlink handle for monitoring link status: %s"
-msgstr "लिंक स्थिति मॉनिटर करने के लिए नेटलिंक नियंत्रण का आबंटित नहीं कर सका: %s"
-
-#: ../src/nm-netlink-monitor.c:415
-#, c-format
-msgid "unable to allocate netlink link cache for monitoring link status: %s"
-msgstr "नेटलिंक कैश को मॉनिटरिंग लिंक स्थिति के लिए आबंटित करने में असमर्थ: %s"
-
-#: ../src/nm-netlink-monitor.c:542
-#, c-format
-msgid "unable to join netlink group: %s"
-msgstr "नेटलिंक समूह में शामिल होने में असमर्थ: %s"
-
-#: ../src/nm-netlink-monitor.c:671 ../src/nm-netlink-monitor.c:684
-#, c-format
-msgid "error updating link cache: %s"
-msgstr "लिंक कैश अद्यतन करने में त्रुटि: %s"
-
-#: ../src/settings/plugins/ifcfg-rh/reader.c:94
-msgid "System"
-msgstr "तंत्र"
-
-#: ../src/settings/plugins/ifcfg-rh/reader.c:3641
-msgid "Bond"
-msgstr ""
-
-#: ../test/nm-online.c:112
-#, fuzzy, c-format
-#| msgid "connecting"
-msgid "\rConnecting"
-msgstr "जुड़ रहा है"
-
-#: ../test/nm-online.c:143
-msgid "Time to wait for a connection, in seconds (default is 30)"
-msgstr ""
-
-#: ../test/nm-online.c:144
-msgid "Exit immediately if NetworkManager is not running or connecting"
-msgstr ""
-
-#: ../test/nm-online.c:145
-msgid "Don't print anything"
-msgstr ""
-
-#: ../test/nm-online.c:163
-#, fuzzy
-#| msgid "Error: Could not connect to NetworkManager."
-msgid "Waits for a successful connection in NetworkManager."
-msgstr "त्रुटि: NetworkManager से कनेक्ट नहीं कर सका."
-
-#: ../test/nm-online.c:169 ../test/nm-online.c:178
-#, fuzzy
-#| msgid "Invalid option.  Please use --help to see a list of valid options.\n"
-msgid "Invalid option.  Please use --help to see a list of valid options."
-msgstr "अवैध विकल्प.  कृपया --help का उपयोग वैध विकल्प देने के लिए करें.\n"
-
-#~ msgid "SCOPE"
-#~ msgstr "SCOPE"
-
-#~ msgid "DBUS-SERVICE"
-#~ msgstr "DBUS-SERVICE"
-
-#~ msgid "system"
-#~ msgstr "तंत्र"
-
-#~ msgid "user"
-#~ msgstr "उपयोक्ता"
-
-#~ msgid "System connections"
-#~ msgstr "सिस्टम कनेक्शन"
-
-#~ msgid "User connections"
-#~ msgstr "उपयोक्ता कनेक्शन"
-
-#~ msgid "state: %s\n"
-#~ msgstr "स्थिति: %s\n"
-
-#~ msgid "Connection activated\n"
-#~ msgstr "कनेक्शन सक्रिय किया गया\n"
-
-#~ msgid "state: %s (%d)\n"
-#~ msgstr "स्थिति: %s (%d)\n"
-
-#~ msgid "Error: Obtaining active connection for '%s' failed."
-#~ msgstr "त्रुटि: '%s' के लिए सक्रिय कनेक्शन पा रहा है."
-
-#~ msgid "Active connection state: %s\n"
-#~ msgstr "सक्रिय कनेक्शन स्थिति: %s\n"
-
-#~ msgid "Active connection path: %s\n"
-#~ msgstr "सक्रिय कनेक्शन पथ: %s\n"
-
-#~ msgid "IP4-SETTINGS"
-#~ msgstr "IP4-SETTINGS"
-
-#~ msgid "IP6-SETTINGS"
-#~ msgstr "IP6-SETTINGS"
-
-#~ msgid "PREFIX"
-#~ msgstr "PREFIX"
-
-#~ msgid "unknown)"
-#~ msgstr "अज्ञात)"
-
-#~ msgid "Device state: %d (%s)\n"
-#~ msgstr "युक्ति स्थिति: %d (%s)\n"
-
-#~ msgid "not set"
-#~ msgstr "सेट नहीं"
-
-#~ msgid "Allow use of user-specific connections"
-#~ msgstr "उपयोक्ता विशिष्ट कनेक्शन के उपयोग की स्वीकृति दें"
-
-#~ msgid "System policy prevents use of user-specific connections"
-#~ msgstr "सिस्टम नीति उपयोक्ता विशेष कनेक्शन के उपयोग को रोकता है"
-
-#~ msgid "Auto %s"
-#~ msgstr "स्वतः %s"
+#~ msgid "_Limit number of GAL responses: %s"
+#~ msgstr "GAL अनुक्रिया की संख्या सीमित करें (_L): %s"
