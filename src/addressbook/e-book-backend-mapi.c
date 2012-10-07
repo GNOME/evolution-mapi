@@ -1229,7 +1229,7 @@ ebbm_op_open (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable
 }
 
 static void
-ebbm_op_start_book_view (EBookBackend *backend, EDataBookView *book_view)
+ebbm_op_start_view (EBookBackend *backend, EDataBookView *book_view)
 {
 	OperationBookView *op;
 	EBookBackendMAPI *ebbm;
@@ -1259,7 +1259,7 @@ ebbm_op_start_book_view (EBookBackend *backend, EDataBookView *book_view)
 }
 
 static void
-ebbm_op_stop_book_view (EBookBackend *backend, EDataBookView *book_view)
+ebbm_op_stop_view (EBookBackend *backend, EDataBookView *book_view)
 {
 	OperationBookView *op;
 	EBookBackendMAPI *ebbm;
@@ -1371,8 +1371,8 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 	backend_class->modify_contacts		= ebbm_op_modify_contacts;
 	backend_class->get_contact		= ebbm_op_get_contact;
 	backend_class->get_contact_list		= ebbm_op_get_contact_list;
-	backend_class->start_book_view		= ebbm_op_start_book_view;
-	backend_class->stop_book_view		= ebbm_op_stop_book_view;
+	backend_class->start_view		= ebbm_op_start_view;
+	backend_class->stop_view		= ebbm_op_stop_view;
 	backend_class->get_backend_property	= ebbm_op_get_backend_property;
 	klass->op_open				= ebbm_open;
 	klass->op_remove			= ebbm_remove;
