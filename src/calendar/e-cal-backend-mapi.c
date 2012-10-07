@@ -379,51 +379,6 @@ ecbm_refresh (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, GE
 		g_cond_signal (priv->dlock->cond);
 }
 
-static void
-ecbm_remove (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, GError **perror)
-{
-	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
-
-	cbmapi = E_CAL_BACKEND_MAPI (backend);
-	priv = cbmapi->priv;
-
-	if (!e_backend_get_online (E_BACKEND (backend))) {
-		g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
-		return;
-	}
-
-	if (!priv->is_public_folder && !priv->foreign_username) {
-		EMapiConnection *conn;
-		GError *mapi_error = NULL;
-		mapi_object_t *obj_store = NULL;
-
-		conn = e_cal_backend_mapi_get_connection (cbmapi, cancellable, &mapi_error);
-		if (!conn) {
-			if (!mapi_error)
-				g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
-			else
-				mapi_error_to_edc_error (perror, mapi_error, RepositoryOffline, NULL);
-			e_cal_backend_mapi_maybe_disconnect (cbmapi, mapi_error);
-			g_clear_error (&mapi_error);
-		} else if (!e_mapi_connection_peek_store (conn, priv->foreign_username ? FALSE : priv->is_public_folder, priv->foreign_username, &obj_store, cancellable, &mapi_error) ||
-		           !e_mapi_connection_remove_folder (conn, obj_store, priv->fid, cancellable, &mapi_error)) {
-			mapi_error_to_edc_error (perror, mapi_error, OtherError, _("Failed to remove public folder"));
-			if (mapi_error)
-				g_error_free (mapi_error);
-			return;
-		}
-	}
-
-	g_mutex_lock (priv->mutex);
-
-	/* remove the cache */
-	if (priv->store)
-		e_cal_backend_store_remove (priv->store);
-
-	g_mutex_unlock (priv->mutex);
-}
-
 #if 0
 static const gchar *
 get_element_type (icalcomponent_kind kind)
@@ -2681,7 +2636,6 @@ typedef enum {
 	OP_GET_BACKEND_PROPERTY,
 	OP_OPEN,
 	OP_REFRESH,
-	OP_REMOVE,
 	OP_CREATE_OBJECTS,
 	OP_MODIFY_OBJECTS,
 	OP_REMOVE_OBJECTS,
@@ -2806,13 +2760,6 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 			ecbm_refresh (backend, op->cal, op->cancellable, &error);
 
 			e_data_cal_respond_refresh (op->cal, op->opid, error);
-		}
-	} break;
-	case OP_REMOVE: {
-		if (!cancelled) {
-			ecbm_remove (backend, op->cal, op->cancellable, &error);
-
-			e_data_cal_respond_remove (op->cal, op->opid, error);
 		}
 	} break;
 	case OP_CREATE_OBJECTS: {
@@ -3291,7 +3238,6 @@ ecbm_op_open (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *c
 
 STR_OP_DEF (ecbm_op_get_backend_property, OP_GET_BACKEND_PROPERTY)
 BASE_OP_DEF (ecbm_op_refresh, OP_REFRESH)
-BASE_OP_DEF (ecbm_op_remove, OP_REMOVE)
 
 static void
 ecbm_op_create_objects (ECalBackend *backend,
@@ -3631,7 +3577,6 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 	backend_class->get_backend_property = ecbm_op_get_backend_property;
 	backend_class->open = ecbm_op_open;
 	backend_class->refresh = ecbm_op_refresh;
-	backend_class->remove = ecbm_op_remove;
 	backend_class->get_object = ecbm_op_get_object;
 	backend_class->get_object_list = ecbm_op_get_object_list;
 	backend_class->get_attachment_uris = ecbm_op_get_attachment_uris;
