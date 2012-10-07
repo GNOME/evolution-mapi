@@ -837,7 +837,6 @@ ebbm_book_view_thread (gpointer data)
 
 typedef enum {
 	OP_OPEN,
-	OP_REMOVE,
 
 	OP_CREATE_CONTACTS,
 	OP_REMOVE_CONTACTS,
@@ -911,16 +910,6 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 				error = EDB_ERROR (NOT_SUPPORTED);
 
 			e_data_book_respond_open (op->book, op->opid, error);
-		}
-	} break;
-	case OP_REMOVE: {
-		if (!cancelled) {
-			if (ebmac->op_remove)
-				ebmac->op_remove (ebma, op->cancellable, &error);
-			else
-				error = EDB_ERROR (NOT_SUPPORTED);
-
-			e_data_book_respond_remove (op->book, op->opid, error);
 		}
 	} break;
 	case OP_CREATE_CONTACTS: {
@@ -1123,35 +1112,6 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 }
 
 static void
-base_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cancellable, OperationType ot)
-{
-	OperationBase *op;
-	EBookBackendMAPI *ebbm;
-	EBookBackendMAPIPrivate *priv;
-
-	g_return_if_fail (backend != NULL);
-	g_return_if_fail (E_IS_BOOK_BACKEND_MAPI (backend));
-
-	ebbm = E_BOOK_BACKEND_MAPI (backend);
-	priv = ebbm->priv;
-	g_return_if_fail (priv != NULL);
-
-	g_object_ref (ebbm);
-	if (book)
-		g_object_ref (book);
-	if (cancellable)
-		g_object_ref (cancellable);
-
-	op = g_new0 (OperationBase, 1);
-	op->ot = ot;
-	op->book = book;
-	op->opid = opid;
-	op->cancellable = cancellable;
-
-	e_mapi_operation_queue_push (priv->op_queue, op);
-}
-
-static void
 str_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cancellable, const gchar *str, OperationType ot)
 {
 	OperationStr *op;
@@ -1217,13 +1177,6 @@ str_slist_op_abstract (EBookBackend *backend, EDataBook *book, guint32 opid, GCa
 	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
-#define BASE_OP_DEF(_func, _ot)								\
-static void										\
-_func (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cancellable)	\
-{											\
-	base_op_abstract (backend, book, opid, cancellable, _ot);			\
-}
-
 #define STR_OP_DEF(_func, _ot)							\
 static void									\
 _func (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cancellable, const gchar *str)	\
@@ -1238,7 +1191,6 @@ _func (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cance
 	str_slist_op_abstract (backend, book, opid, cancellable, str_slist, _ot);	\
 }
 
-BASE_OP_DEF (ebbm_op_remove, OP_REMOVE)
 STR_SLIST_OP_DEF (ebbm_op_create_contacts, OP_CREATE_CONTACTS)
 STR_SLIST_OP_DEF (ebbm_op_modify_contacts, OP_MODIFY_CONTACTS)
 STR_SLIST_OP_DEF (ebbm_op_remove_contacts, OP_REMOVE_CONTACTS)
@@ -1414,7 +1366,6 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 	object_class->dispose			= ebbm_dispose;
 
 	backend_class->open			= ebbm_op_open;
-	backend_class->remove			= ebbm_op_remove;
 	backend_class->create_contacts		= ebbm_op_create_contacts;
 	backend_class->remove_contacts		= ebbm_op_remove_contacts;
 	backend_class->modify_contacts		= ebbm_op_modify_contacts;
