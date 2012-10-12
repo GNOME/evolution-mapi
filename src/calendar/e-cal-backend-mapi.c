@@ -2509,7 +2509,7 @@ ecbm_start_view (ECalBackend *backend, EDataCalView *view)
 
 	g_mutex_lock (priv->mutex);
 
-	cbsexp = e_data_cal_view_get_object_sexp (view);
+	cbsexp = e_data_cal_view_get_sexp (view);
 
 	if (!cbsexp) {
 		g_mutex_unlock (priv->mutex);
@@ -2521,7 +2521,7 @@ ecbm_start_view (ECalBackend *backend, EDataCalView *view)
 		return;
 	}
 
-	sexp = e_data_cal_view_get_text (view);
+	sexp = e_cal_backend_sexp_text (cbsexp);
 	if (!sexp || !strcmp (sexp, "#t"))
 		search_needed = FALSE;
 

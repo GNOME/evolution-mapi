@@ -762,10 +762,14 @@ ebbm_book_view_thread (gpointer data)
 
 			e_book_backend_mapi_update_view_by_cache (bvtd->ebma, bvtd->book_view, &error);
 		} else if (ebmac->op_list_known_uids && ebmac->op_transfer_contacts) {
-			const gchar *sexp = e_data_book_view_get_card_query (bvtd->book_view);
+			EBookBackendSExp *sexp;
+			const gchar *query;
+
+			sexp = e_data_book_view_get_sexp (bvtd->book_view);
+			query = e_book_backend_sexp_text (sexp);
 
 			/* search only if not searching for everything */
-			if (sexp && *sexp && g_ascii_strcasecmp (sexp, "(contains \"x-evolution-any-field\" \"\")") != 0) {
+			if (query && *query && g_ascii_strcasecmp (query, "(contains \"x-evolution-any-field\" \"\")") != 0) {
 				struct ListKnownUidsData lku = { 0 };
 				GHashTable *local_known_uids, *server_known_uids;
 
@@ -777,7 +781,7 @@ ebbm_book_view_thread (gpointer data)
 				lku.uid_to_rev = server_known_uids;
 				lku.latest_last_modify = 0;
 
-				ebmac->op_list_known_uids (bvtd->ebma, e_mapi_book_utils_build_sexp_restriction, (gpointer) sexp, &lku, bvtd->cancellable, &error);
+				ebmac->op_list_known_uids (bvtd->ebma, e_mapi_book_utils_build_sexp_restriction, (gpointer) query, &lku, bvtd->cancellable, &error);
 
 				if (!g_cancellable_is_cancelled (bvtd->cancellable)) {
 					GSList *uids = NULL;
@@ -1479,6 +1483,7 @@ e_book_backend_mapi_update_view_by_cache (EBookBackendMAPI *ebma, EDataBookView 
 {
 	gint i = 0;
 	const gchar *query = NULL;
+	EBookBackendSExp *sexp;
 	EBookBackendSqliteDB *db = NULL;
 	GSList *hits, *l;
 
@@ -1487,7 +1492,9 @@ e_book_backend_mapi_update_view_by_cache (EBookBackendMAPI *ebma, EDataBookView 
 	g_return_if_fail (book_view != NULL);
 	g_return_if_fail (E_IS_DATA_BOOK_VIEW (book_view));
 
-	query = e_data_book_view_get_card_query (book_view);
+	sexp = e_data_book_view_get_sexp (book_view);
+	query = e_book_backend_sexp_text (sexp);
+
 	e_book_backend_mapi_get_db (ebma, &db);
 
 	g_return_if_fail (db != NULL);
