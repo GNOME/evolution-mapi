@@ -1,3 +1,12 @@
+evolution-mapi 3.7.1 2012-10-22
+-------------------------------
+
+Miscellanous:
+	EBookBackendMAPI: Remove the remove() implementation. (Matthew Barnes)
+	ECalBackendMAPI: Remove the remove() implementation. (Matthew Barnes)
+	Adapt to EBookBackend API changes. (Matthew Barnes)
+	Adapt to EDataBookView and EDataCalView API changes. (Matthew Barnes)
+
 evolution-mapi 3.6.0 2012-09-24
 -------------------------------
 
