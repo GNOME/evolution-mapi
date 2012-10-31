@@ -82,35 +82,6 @@ mapi_backend_queue_auth_session (EMapiBackend *backend)
 		NULL, NULL, NULL);
 }
 
-static void
-add_remote_sources (EMapiBackend *backend)
-{
-	GList *old_sources, *iter;
-	ESourceRegistryServer *registry;
-
-	registry = e_collection_backend_ref_server (E_COLLECTION_BACKEND (backend));
-	old_sources = e_collection_backend_claim_all_resources (E_COLLECTION_BACKEND (backend));
-	for (iter = old_sources; iter; iter = iter->next) {
-		ESource *source = iter->data;
-		ESourceMapiFolder *extension;
-		const gchar *foreign_username;
-
-		if (!e_source_has_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER))
-			continue;
-
-		/* foreign folders are just added */
-		extension = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
-		foreign_username = e_source_mapi_folder_get_foreign_username (extension);
-		if (e_source_mapi_folder_is_public (extension) || (foreign_username && *foreign_username)) {
-			e_server_side_source_set_writable (E_SERVER_SIDE_SOURCE (source), TRUE);
-			e_server_side_source_set_remote_deletable (E_SERVER_SIDE_SOURCE (source), TRUE);
-			e_source_registry_server_add_source (registry, source);
-		}
-	}
-	g_list_free_full (old_sources, g_object_unref);
-	g_object_unref (registry);
-}
-
 struct SyndFoldersData
 {
 	EMapiBackend *backend;
@@ -256,6 +227,37 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 		e_source_registry_server_remove_source (server, source);
 	}
 
+	all_sources = e_collection_backend_claim_all_resources (E_COLLECTION_BACKEND (backend));
+	for (citer = all_sources; citer; citer = citer->next) {
+		ESource *source = citer->data;
+		ESourceMapiFolder *extension;
+		const gchar *foreign_username;
+
+		if (!e_source_has_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER))
+			continue;
+
+		/* foreign folders are just added */
+		extension = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
+		foreign_username = e_source_mapi_folder_get_foreign_username (extension);
+		if (e_source_mapi_folder_is_public (extension) || (foreign_username && *foreign_username)) {
+			e_server_side_source_set_writable (E_SERVER_SIDE_SOURCE (source), TRUE);
+			e_server_side_source_set_remote_deletable (E_SERVER_SIDE_SOURCE (source), TRUE);
+			e_source_registry_server_add_source (server, source);
+		} else if (!has_gal && e_source_has_extension (source, E_SOURCE_EXTENSION_ADDRESS_BOOK)) {
+			ESourceAddressBook *book_ext;
+
+			book_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_ADDRESS_BOOK);
+			has_gal = g_strcmp0 ("mapigal", e_source_backend_get_backend_name (E_SOURCE_BACKEND (book_ext))) == 0;
+			if (has_gal)
+				e_source_registry_server_add_source (server, source);
+			else
+				e_source_remove_sync (source, NULL, NULL);
+		} else {
+			e_source_remove_sync (source, NULL, NULL);
+		}
+	}
+	g_list_free_full (all_sources, g_object_unref);
+
 	/* add GAL, if not there already */
 	if (!has_gal) {
 		ESource *source;
@@ -291,8 +293,6 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 
 		g_object_unref (source);
 	}
-
-	add_remote_sources (backend);
 
 	g_list_free_full (configured, g_object_unref);
 	g_object_unref (server);
