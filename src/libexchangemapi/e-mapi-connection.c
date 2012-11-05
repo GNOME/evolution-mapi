@@ -6461,7 +6461,7 @@ e_mapi_connection_notification_thread (gpointer user_data)
 	priv = conn->priv;
 
 	while (g_hash_table_size (priv->known_notifications) > 0) {
-		GTimeVal tv;
+		gint64 end_time;
 
 		LOCK (NULL, NULL, NULL);
 		/* this returns MAPI_E_INVALID_PARAMETER when there
@@ -6471,11 +6471,10 @@ e_mapi_connection_notification_thread (gpointer user_data)
 		UNLOCK ();
 
 		/* poll not so often */
-		g_get_current_time (&tv);
-		g_time_val_add (&tv, G_USEC_PER_SEC * priv->notification_poll_seconds);
+		end_time = g_get_monotonic_time () + (G_TIME_SPAN_SECOND * priv->notification_poll_seconds);
 
 		e_flag_clear (priv->notification_flag);
-		e_flag_timed_wait (priv->notification_flag, &tv);
+		e_flag_wait_until (priv->notification_flag, end_time);
 	}
 
 	return NULL;
