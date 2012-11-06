@@ -62,8 +62,8 @@ G_DEFINE_TYPE_WITH_CODE (ECalBackendMAPI, e_cal_backend_mapi, E_TYPE_CAL_BACKEND
 	G_IMPLEMENT_INTERFACE (E_TYPE_SOURCE_AUTHENTICATOR, e_cal_backend_mapi_authenticator_init))
 
 typedef struct {
-	GCond *cond;
-	GMutex *mutex;
+	GCond cond;
+	GMutex mutex;
 	gboolean exit;
 } SyncDelta;
 
@@ -77,13 +77,13 @@ struct _ECalBackendMAPIPrivate {
 	EMapiConnection *conn;
 
 	/* A mutex to control access to the private structure */
-	GMutex			*mutex;
+	GMutex			mutex;
 	ECalBackendStore	*store;
 	gboolean		read_only;
 	gchar			*uri;
 	gboolean		mode_changed;
-	GMutex			*updating_mutex;
-	GMutex			*is_updating_mutex;
+	GMutex			updating_mutex;
+	GMutex			is_updating_mutex;
 	gboolean		is_updating;
 
 	/* timeout handler for syncing sendoptions */
@@ -157,7 +157,7 @@ static void		e_cal_backend_mapi_maybe_disconnect	(ECalBackendMAPI *cbma, const G
 
 #define CACHE_REFRESH_INTERVAL 600000
 
-static GStaticMutex auth_mutex = G_STATIC_MUTEX_INIT;
+static GMutex auth_mutex;
 
 static void
 mapi_error_to_edc_error (GError **perror, const GError *mapi_error, EDataCalCallStatus code, const gchar *context)
@@ -375,8 +375,8 @@ ecbm_refresh (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, GE
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
-	if (priv && priv->dlock && priv->dlock->cond)
-		g_cond_signal (priv->dlock->cond);
+	if (priv && priv->dlock)
+		g_cond_signal (&priv->dlock->cond);
 }
 
 #if 0
@@ -770,11 +770,11 @@ update_local_cache (ECalBackendMAPI *cbmapi, GCancellable *cancellable)
 	if (!e_backend_get_online (E_BACKEND (cbmapi)))
 		return FALSE;
 
-	g_mutex_lock (priv->is_updating_mutex);
+	g_mutex_lock (&priv->is_updating_mutex);
 	priv->is_updating = TRUE;
-	g_mutex_unlock (priv->is_updating_mutex);
+	g_mutex_unlock (&priv->is_updating_mutex);
 
-	g_mutex_lock (priv->updating_mutex);
+	g_mutex_lock (&priv->updating_mutex);
 
 	conn = e_cal_backend_mapi_get_connection (cbmapi, cancellable, &mapi_error);
 	if (!conn) {
@@ -888,11 +888,11 @@ update_local_cache (ECalBackendMAPI *cbmapi, GCancellable *cancellable)
  cleanup:
 	if (conn)
 		g_object_unref (conn);
-	g_mutex_unlock (priv->updating_mutex);
+	g_mutex_unlock (&priv->updating_mutex);
 
-	g_mutex_lock (priv->is_updating_mutex);
+	g_mutex_lock (&priv->is_updating_mutex);
 	priv->is_updating = FALSE;
-	g_mutex_unlock (priv->is_updating_mutex);
+	g_mutex_unlock (&priv->is_updating_mutex);
 
 	notify_view_completed (cbmapi);
 
@@ -911,7 +911,7 @@ ecbm_get_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable,
 
 	priv = cbmapi->priv;
 
-	g_mutex_lock (priv->mutex);
+	g_mutex_lock (&priv->mutex);
 
 	/* search the object in the cache */
 	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
@@ -920,14 +920,14 @@ ecbm_get_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable,
 		/* the object is not in the backend store, double check that it's
 		 * also not on the server to prevent for a race condition where we
 		 * might otherwise mistakenly generate a new UID */
-		g_mutex_unlock (priv->mutex);
+		g_mutex_unlock (&priv->mutex);
 		update_local_cache (cbmapi, cancellable);
-		g_mutex_lock (priv->mutex);
+		g_mutex_lock (&priv->mutex);
 		comp = e_cal_backend_store_get_component (priv->store, uid, rid);
 	}
 
 	if (comp) {
-		g_mutex_unlock (priv->mutex);
+		g_mutex_unlock (&priv->mutex);
 		if (e_cal_backend_get_kind (E_CAL_BACKEND (backend)) ==
 		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp)))
 			*object = e_cal_component_get_as_string (comp);
@@ -937,7 +937,7 @@ ecbm_get_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable,
 		g_object_unref (comp);
 
 	} else {
-		g_mutex_unlock (priv->mutex);
+		g_mutex_unlock (&priv->mutex);
 	}
 
 	if (!object || !*object)
@@ -958,7 +958,7 @@ ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
-	g_mutex_lock (priv->mutex);
+	g_mutex_lock (&priv->mutex);
 
 	if (!strcmp (sexp, "#t"))
 		search_needed = FALSE;
@@ -966,7 +966,7 @@ ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 	cbsexp = e_cal_backend_sexp_new (sexp);
 
 	if (!cbsexp) {
-		g_mutex_unlock (priv->mutex);
+		g_mutex_unlock (&priv->mutex);
 		g_propagate_error (perror, EDC_ERROR (InvalidQuery));
 		return;
 	}
@@ -991,7 +991,7 @@ ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 
 	g_slist_free_full (components, g_object_unref);
 	g_object_unref (cbsexp);
-	g_mutex_unlock (priv->mutex);
+	g_mutex_unlock (&priv->mutex);
 }
 
 static void
@@ -1023,7 +1023,7 @@ delta_thread (gpointer data)
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
 	GCancellable *cancellable;
-	GTimeVal timeout;
+	gint64 end_time;
 
 	cbmapi = (ECalBackendMAPI *)(data);
 	g_return_val_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), NULL);
@@ -1031,29 +1031,25 @@ delta_thread (gpointer data)
 	priv = cbmapi->priv;
 	cancellable = g_object_ref (priv->cancellable);
 
-	timeout.tv_sec = 0;
-	timeout.tv_usec = 0;
-
 	while (!g_cancellable_is_cancelled (cancellable)) {
 		update_local_cache (cbmapi, cancellable);
 
-		g_mutex_lock (priv->dlock->mutex);
+		g_mutex_lock (&priv->dlock->mutex);
 
 		if (priv->dlock->exit)
 			break;
 
-		g_get_current_time (&timeout);
-		g_time_val_add (&timeout, get_cache_refresh_interval () * 1000);
-		g_cond_timed_wait (priv->dlock->cond, priv->dlock->mutex, &timeout);
+		end_time = g_get_monotonic_time () + get_cache_refresh_interval () * G_TIME_SPAN_SECOND;
+		g_cond_wait_until (&priv->dlock->cond, &priv->dlock->mutex, end_time);
 
 		if (priv->dlock->exit)
 			break;
 
-		g_mutex_unlock (priv->dlock->mutex);
+		g_mutex_unlock (&priv->dlock->mutex);
 	}
 
 	g_object_unref (cancellable);
-	g_mutex_unlock (priv->dlock->mutex);
+	g_mutex_unlock (&priv->dlock->mutex);
 	priv->dthread = NULL;
 
 	return NULL;
@@ -1071,21 +1067,21 @@ run_delta_thread (ECalBackendMAPI *cbmapi)
 
 	/* If the thread is already running just return back */
 	if (priv->dthread) {
-		g_cond_signal (priv->dlock->cond);
+		g_cond_signal (&priv->dlock->cond);
 		return;
 	}
 
 	if (!priv->dlock) {
 		priv->dlock = g_new0 (SyncDelta, 1);
-		priv->dlock->mutex = g_mutex_new ();
-		priv->dlock->cond = g_cond_new ();
+		g_mutex_init (&priv->dlock->mutex);
+		g_cond_init (&priv->dlock->cond);
 	}
 
 	priv->dlock->exit = FALSE;
-	priv->dthread = g_thread_create ((GThreadFunc) delta_thread, cbmapi, TRUE, &error);
+	priv->dthread = g_thread_try_new (NULL, (GThreadFunc) delta_thread, cbmapi, &error);
 	if (!priv->dthread) {
-		g_warning (G_STRLOC ": %s", error->message);
-		g_error_free (error);
+		g_warning (G_STRLOC ": %s", error ? error->message : "Unknown error");
+		g_clear_error (&error);
 	}
 }
 
@@ -1169,7 +1165,7 @@ ecbm_connect_user (ECalBackend *backend,
 	EMapiConnection *old_conn;
 	GError *mapi_error = NULL;
 
-	g_static_mutex_lock (&auth_mutex);
+	g_mutex_lock (&auth_mutex);
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
@@ -1221,18 +1217,18 @@ ecbm_connect_user (ECalBackend *backend,
 			mapi_error_to_edc_error (perror, mapi_error, OtherError, NULL);
 		if (mapi_error)
 			g_error_free (mapi_error);
-		g_static_mutex_unlock (&auth_mutex);
+		g_mutex_unlock (&auth_mutex);
 		return is_network_error ? E_SOURCE_AUTHENTICATION_ERROR : E_SOURCE_AUTHENTICATION_REJECTED;
 	}
 
 	if (mapi_error) {
 		/* do not set error when authentication was rejected */
 		g_error_free (mapi_error);
-		g_static_mutex_unlock (&auth_mutex);
+		g_mutex_unlock (&auth_mutex);
 		return E_SOURCE_AUTHENTICATION_REJECTED;
 	}
 
-	g_static_mutex_unlock (&auth_mutex);
+	g_mutex_unlock (&auth_mutex);
 
 	if (!priv->fid) {
 		g_propagate_error (perror, EDC_ERROR_EX (OtherError, "No folder ID set"));
@@ -1362,7 +1358,7 @@ ecbm_open (ECalBackend *backend,
 		return;
 	}
 
-	g_mutex_lock (priv->mutex);
+	g_mutex_lock (&priv->mutex);
 
 	cbmapi->priv->read_only = FALSE;
 
@@ -1376,7 +1372,7 @@ ecbm_open (ECalBackend *backend,
 	priv->store = e_cal_backend_file_store_new (cache_dir);
 
 	if (!priv->store) {
-		g_mutex_unlock (priv->mutex);
+		g_mutex_unlock (&priv->mutex);
 		g_propagate_error (perror, EDC_ERROR_EX (OtherError, _("Could not create cache file")));
 		e_cal_backend_notify_opened (backend, EDC_ERROR_EX (OtherError, _("Could not create cache file")));
 		return;
@@ -1393,13 +1389,13 @@ ecbm_open (ECalBackend *backend,
 		offline_extension = e_source_get_extension (esource, E_SOURCE_EXTENSION_OFFLINE);
 
 		if (!e_source_offline_get_stay_synchronized (offline_extension)) {
-			g_mutex_unlock (priv->mutex);
+			g_mutex_unlock (&priv->mutex);
 			g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
 			e_cal_backend_notify_opened (backend, EDC_ERROR (RepositoryOffline));
 			return;
 		}
 
-		g_mutex_unlock (priv->mutex);
+		g_mutex_unlock (&priv->mutex);
 		e_cal_backend_notify_online (backend, FALSE);
 		e_cal_backend_notify_readonly (backend, priv->read_only);
 		e_cal_backend_notify_opened (backend, NULL);
@@ -1417,7 +1413,7 @@ ecbm_open (ECalBackend *backend,
 		priv->foreign_username = NULL;
 	}
 
-	g_mutex_unlock (priv->mutex);
+	g_mutex_unlock (&priv->mutex);
 
 	e_cal_backend_notify_online (backend, TRUE);
 	e_cal_backend_notify_readonly (backend, priv->read_only);
@@ -2325,9 +2321,9 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 			case ICAL_METHOD_REPLY : {
 				ECalComponent *cache_comp;
 
-				g_mutex_lock (priv->mutex);
+				g_mutex_lock (&priv->mutex);
 				cache_comp = e_cal_backend_store_get_component (priv->store, uid, NULL);
-				g_mutex_unlock (priv->mutex);
+				g_mutex_unlock (&priv->mutex);
 				if (cache_comp) {
 					gboolean any_changed = FALSE;
 					GSList *reply_attendees = NULL, *ri, *cache_attendees = NULL, *ci;
@@ -2507,12 +2503,12 @@ ecbm_start_view (ECalBackend *backend, EDataCalView *view)
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
-	g_mutex_lock (priv->mutex);
+	g_mutex_lock (&priv->mutex);
 
 	cbsexp = e_data_cal_view_get_sexp (view);
 
 	if (!cbsexp) {
-		g_mutex_unlock (priv->mutex);
+		g_mutex_unlock (&priv->mutex);
 
 		err = EDC_ERROR (InvalidQuery);
 		e_data_cal_view_notify_complete (view, err);
@@ -2543,12 +2539,12 @@ ecbm_start_view (ECalBackend *backend, EDataCalView *view)
 	}
 
 	g_slist_free_full (components, g_object_unref);
-	g_mutex_unlock (priv->mutex);
+	g_mutex_unlock (&priv->mutex);
 
-	g_mutex_lock (priv->is_updating_mutex);
+	g_mutex_lock (&priv->is_updating_mutex);
 	if (!priv->is_updating)
 		e_data_cal_view_notify_complete (view, NULL /* Success */);
-	g_mutex_unlock (priv->is_updating_mutex);
+	g_mutex_unlock (&priv->is_updating_mutex);
 }
 
 static void
@@ -2563,7 +2559,7 @@ ecbm_notify_online_cb (ECalBackend *backend, GParamSpec *pspec)
 
 	online = e_backend_get_online (E_BACKEND (backend));
 
-	g_mutex_lock (priv->mutex);
+	g_mutex_lock (&priv->mutex);
 
 	priv->mode_changed = TRUE;
 	if (online) {
@@ -2577,7 +2573,7 @@ ecbm_notify_online_cb (ECalBackend *backend, GParamSpec *pspec)
 
 	e_cal_backend_notify_readonly (backend, priv->read_only);
 	e_cal_backend_notify_online (backend, online);
-	g_mutex_unlock (priv->mutex);
+	g_mutex_unlock (&priv->mutex);
 }
 
 static icaltimezone *
@@ -3498,17 +3494,17 @@ ecbm_finalize (GObject *object)
 	}
 
 	if (priv->dlock) {
-		g_mutex_lock (priv->dlock->mutex);
+		g_mutex_lock (&priv->dlock->mutex);
 		priv->dlock->exit = TRUE;
-		g_mutex_unlock (priv->dlock->mutex);
+		g_mutex_unlock (&priv->dlock->mutex);
 
-		g_cond_signal (priv->dlock->cond);
+		g_cond_signal (&priv->dlock->cond);
 
 		if (priv->dthread)
 			g_thread_join (priv->dthread);
 
-		g_mutex_free (priv->dlock->mutex);
-		g_cond_free (priv->dlock->cond);
+		g_mutex_clear (&priv->dlock->mutex);
+		g_cond_clear (&priv->dlock->cond);
 		g_free (priv->dlock);
 		priv->dthread = NULL;
 	}
@@ -3518,20 +3514,9 @@ ecbm_finalize (GObject *object)
 		priv->op_queue = NULL;
 	}
 
-	if (priv->mutex) {
-		g_mutex_free (priv->mutex);
-		priv->mutex = NULL;
-	}
-
-	if (priv->updating_mutex) {
-		g_mutex_free (priv->updating_mutex);
-		priv->updating_mutex = NULL;
-	}
-
-	if (priv->is_updating_mutex) {
-		g_mutex_free (priv->is_updating_mutex);
-		priv->is_updating_mutex = NULL;
-	}
+	g_mutex_clear (&priv->mutex);
+	g_mutex_clear (&priv->updating_mutex);
+	g_mutex_clear (&priv->is_updating_mutex);
 
 	if (priv->store) {
 		g_object_unref (priv->store);
@@ -3612,9 +3597,9 @@ e_cal_backend_mapi_init (ECalBackendMAPI *cbmapi)
 	priv->sendoptions_sync_timeout = 0;
 
 	/* create the mutex for thread safety */
-	priv->mutex = g_mutex_new ();
-	priv->updating_mutex = g_mutex_new ();
-	priv->is_updating_mutex = g_mutex_new ();
+	g_mutex_init (&priv->mutex);
+	g_mutex_init (&priv->updating_mutex);
+	g_mutex_init (&priv->is_updating_mutex);
 	priv->is_updating = FALSE;
 	priv->op_queue = e_mapi_operation_queue_new ((EMapiOperationQueueFunc) ecbm_operation_cb, cbmapi);
 	priv->last_refresh = -1;

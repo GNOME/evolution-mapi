@@ -63,7 +63,7 @@ struct _CamelMapiStorePrivate {
 
 	gboolean folders_synced; /* whether were synced folder list already */
 
-	GStaticRecMutex updates_lock;
+	GRecMutex updates_lock;
 	GCancellable *updates_cancellable; /* cancelled on dispose or disconnect */
 	GSList *update_folder_names; /* gchar *foldername */
 	guint update_folder_id;
@@ -965,7 +965,7 @@ stop_pending_updates (CamelMapiStore *mapi_store)
 
 	priv = mapi_store->priv;
 
-	g_static_rec_mutex_lock (&priv->updates_lock);
+	g_rec_mutex_lock (&priv->updates_lock);
 	if (priv->updates_cancellable) {
 		g_cancellable_cancel (priv->updates_cancellable);
 		g_object_unref (priv->updates_cancellable);
@@ -987,7 +987,7 @@ stop_pending_updates (CamelMapiStore *mapi_store)
 		priv->update_folder_list_id = 0;
 	}
 
-	g_static_rec_mutex_unlock (&priv->updates_lock);
+	g_rec_mutex_unlock (&priv->updates_lock);
 }
 
 static void
@@ -1039,7 +1039,7 @@ mapi_store_finalize (GObject *object)
 	if (priv->container_hash != NULL)
 		g_hash_table_destroy (priv->container_hash);
 
-	g_static_rec_mutex_free (&priv->updates_lock);
+	g_rec_mutex_clear (&priv->updates_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_mapi_store_parent_class)->finalize (object);
@@ -2033,7 +2033,7 @@ camel_mapi_store_init (CamelMapiStore *mapi_store)
 {
 	mapi_store->priv = G_TYPE_INSTANCE_GET_PRIVATE (mapi_store, CAMEL_TYPE_MAPI_STORE, CamelMapiStorePrivate);
 
-	g_static_rec_mutex_init (&mapi_store->priv->updates_lock);
+	g_rec_mutex_init (&mapi_store->priv->updates_lock);
 	mapi_store->priv->updates_cancellable = NULL;
 	mapi_store->priv->update_folder_names = NULL;
 	mapi_store->priv->update_folder_id = 0;
@@ -2289,6 +2289,7 @@ run_update_thread (CamelMapiStore *mapi_store,
 		   GSList *foldernames)
 {
 	struct ScheduleUpdateData *sud;
+	GThread *thread;
 
 	g_return_if_fail (mapi_store != NULL);
 	g_return_if_fail (cancellable != NULL);
@@ -2298,7 +2299,8 @@ run_update_thread (CamelMapiStore *mapi_store,
 	sud->cancellable = g_object_ref (cancellable);
 	sud->foldernames = foldernames;
 
-	g_thread_create (camel_mapi_folder_update_thread, sud, FALSE, NULL);
+	thread = g_thread_new (NULL, camel_mapi_folder_update_thread, sud);
+	g_thread_unref (thread);
 }
 
 static gboolean
@@ -2315,9 +2317,9 @@ folder_update_cb (gpointer user_data)
 	g_return_val_if_fail (sud->mapi_store != NULL, FALSE);
 	g_return_val_if_fail (sud->mapi_store->priv != NULL, FALSE);
 
-	g_static_rec_mutex_lock (&sud->mapi_store->priv->updates_lock);
+	g_rec_mutex_lock (&sud->mapi_store->priv->updates_lock);
 	if (sud->expected_id != sud->mapi_store->priv->update_folder_id) {
-		g_static_rec_mutex_unlock (&sud->mapi_store->priv->updates_lock);
+		g_rec_mutex_unlock (&sud->mapi_store->priv->updates_lock);
 		return FALSE;
 	}
 
@@ -2330,7 +2332,7 @@ folder_update_cb (gpointer user_data)
 	else
 		g_slist_free_full (foldernames, g_free);
 
-	g_static_rec_mutex_unlock (&sud->mapi_store->priv->updates_lock);
+	g_rec_mutex_unlock (&sud->mapi_store->priv->updates_lock);
 
 	return FALSE;
 }
@@ -2369,10 +2371,10 @@ schedule_folder_update (CamelMapiStore *mapi_store, mapi_id_t fid)
 	if (!foldername)
 		return;
 
-	g_static_rec_mutex_lock (&mapi_store->priv->updates_lock);
+	g_rec_mutex_lock (&mapi_store->priv->updates_lock);
 	if (!mapi_store->priv->updates_cancellable ||
 	    g_slist_find_custom (mapi_store->priv->update_folder_names, foldername, (GCompareFunc) g_ascii_strcasecmp) != 0) {
-		g_static_rec_mutex_unlock (&mapi_store->priv->updates_lock);
+		g_rec_mutex_unlock (&mapi_store->priv->updates_lock);
 		return;
 	}
 
@@ -2386,7 +2388,7 @@ schedule_folder_update (CamelMapiStore *mapi_store, mapi_id_t fid)
 	mapi_store->priv->update_folder_id = g_timeout_add_seconds_full (G_PRIORITY_LOW, 5, folder_update_cb, sud, free_schedule_update_data);
 	sud->expected_id = mapi_store->priv->update_folder_id;
 
-	g_static_rec_mutex_unlock (&mapi_store->priv->updates_lock);
+	g_rec_mutex_unlock (&mapi_store->priv->updates_lock);
 }
 
 static gboolean
@@ -2402,9 +2404,9 @@ folder_list_update_cb (gpointer user_data)
 	g_return_val_if_fail (sud->mapi_store != NULL, FALSE);
 	g_return_val_if_fail (sud->mapi_store->priv != NULL, FALSE);
 
-	g_static_rec_mutex_lock (&sud->mapi_store->priv->updates_lock);
+	g_rec_mutex_lock (&sud->mapi_store->priv->updates_lock);
 	if (sud->expected_id != sud->mapi_store->priv->update_folder_list_id) {
-		g_static_rec_mutex_unlock (&sud->mapi_store->priv->updates_lock);
+		g_rec_mutex_unlock (&sud->mapi_store->priv->updates_lock);
 		return FALSE;
 	}
 
@@ -2414,7 +2416,7 @@ folder_list_update_cb (gpointer user_data)
 	if (!g_cancellable_is_cancelled (sud->cancellable))
 		run_update_thread (sud->mapi_store, sud->cancellable, NULL);
 
-	g_static_rec_mutex_unlock (&sud->mapi_store->priv->updates_lock);
+	g_rec_mutex_unlock (&sud->mapi_store->priv->updates_lock);
 
 	return FALSE;
 }
@@ -2427,9 +2429,9 @@ schedule_folder_list_update (CamelMapiStore *mapi_store)
 	g_return_if_fail (mapi_store != NULL);
 	g_return_if_fail (mapi_store->priv != NULL);
 
-	g_static_rec_mutex_lock (&mapi_store->priv->updates_lock);
+	g_rec_mutex_lock (&mapi_store->priv->updates_lock);
 	if (!mapi_store->priv->updates_cancellable) {
-		g_static_rec_mutex_unlock (&mapi_store->priv->updates_lock);
+		g_rec_mutex_unlock (&mapi_store->priv->updates_lock);
 		return;
 	}
 
@@ -2442,7 +2444,7 @@ schedule_folder_list_update (CamelMapiStore *mapi_store)
 	mapi_store->priv->update_folder_list_id = g_timeout_add_seconds_full (G_PRIORITY_LOW, 5, folder_list_update_cb, sud, free_schedule_update_data);
 	sud->expected_id = mapi_store->priv->update_folder_list_id;
 
-	g_static_rec_mutex_unlock (&mapi_store->priv->updates_lock);
+	g_rec_mutex_unlock (&mapi_store->priv->updates_lock);
 }
 
 static void

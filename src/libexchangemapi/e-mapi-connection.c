@@ -202,7 +202,7 @@ struct _EMapiConnectionPrivate {
 	GHashTable *foreign_stores;	/* username (gchar *) => msg_store (mapi_object_t *); opened foreign stores */
 
 	GSList *folders;		/* list of ExchangeMapiFolder pointers */
-	GStaticRecMutex folders_lock;	/* lock for 'folders' variable */
+	GRecMutex folders_lock;		/* lock for 'folders' variable */
 
 	GHashTable *named_ids;		/* cache of named ids; key is a folder ID, value is a hash table
 					   of named_id to prop_id in that respective folder */
@@ -291,11 +291,11 @@ disconnect (EMapiConnectionPrivate *priv,
 	if (!priv->session)
 		return;
 
-	g_static_rec_mutex_lock (&priv->folders_lock);
+	g_rec_mutex_lock (&priv->folders_lock);
 	if (priv->folders)
 		e_mapi_folder_free_list (priv->folders);
 	priv->folders = NULL;
-	g_static_rec_mutex_unlock (&priv->folders_lock);
+	g_rec_mutex_unlock (&priv->folders_lock);
 
 	if (priv->has_public_store)
 		mapi_object_release (&priv->public_store);
@@ -429,7 +429,7 @@ e_mapi_connection_finalize (GObject *object)
 
 		UNLOCK ();
 		e_mapi_cancellable_rec_mutex_clear (&priv->session_lock);
-		g_static_rec_mutex_free (&priv->folders_lock);
+		g_rec_mutex_clear (&priv->folders_lock);
 
 		e_mapi_utils_destroy_mapi_context (priv->mapi_ctx);
 		priv->mapi_ctx = NULL;
@@ -477,7 +477,7 @@ e_mapi_connection_init (EMapiConnection *conn)
 	g_return_if_fail (conn->priv != NULL);
 
 	e_mapi_cancellable_rec_mutex_init (&conn->priv->session_lock);
-	g_static_rec_mutex_init (&conn->priv->folders_lock);
+	g_rec_mutex_init (&conn->priv->folders_lock);
 
 	conn->priv->session = NULL;
 	conn->priv->profile = NULL;
@@ -5083,10 +5083,10 @@ e_mapi_connection_remove_folder (EMapiConnection *conn,
 	mapi_object_release (&obj_parent);
 
 	if (folder) {
-		g_static_rec_mutex_lock (&priv->folders_lock);
+		g_rec_mutex_lock (&priv->folders_lock);
 		priv->folders = g_slist_remove (priv->folders, folder);
 		e_mapi_folder_free (folder);
-		g_static_rec_mutex_unlock (&priv->folders_lock);
+		g_rec_mutex_unlock (&priv->folders_lock);
 	}
 
 	UNLOCK ();
@@ -6188,7 +6188,7 @@ e_mapi_connection_peek_folders_list (EMapiConnection *conn)
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, NULL);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, NULL);
 
-	g_static_rec_mutex_lock (&priv->folders_lock);
+	g_rec_mutex_lock (&priv->folders_lock);
 
 	if (!priv->folders) {
 		LOCK (NULL, NULL, NULL);
@@ -6196,7 +6196,7 @@ e_mapi_connection_peek_folders_list (EMapiConnection *conn)
 		UNLOCK ();
 	}
 
-	g_static_rec_mutex_unlock (&priv->folders_lock);
+	g_rec_mutex_unlock (&priv->folders_lock);
 
 	return priv->folders;
 }
@@ -6544,7 +6544,7 @@ e_mapi_connection_enable_notifications (EMapiConnection *conn,
 		if (priv->notification_thread) {
 			e_flag_set (priv->notification_flag);
 		} else {
-			priv->notification_thread = g_thread_create (e_mapi_connection_notification_thread, conn, TRUE, NULL);
+			priv->notification_thread = g_thread_new (NULL, e_mapi_connection_notification_thread, conn);
 		}
 	} else {
 		make_mapi_error (perror, "Subscribe", ms);

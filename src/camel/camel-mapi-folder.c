@@ -47,14 +47,14 @@
 #define d(x)
 
 #define CAMEL_MAPI_FOLDER_LOCK(f, l) \
-	(g_static_mutex_lock(&((CamelMapiFolder *)f)->priv->l))
+	(g_mutex_lock(&((CamelMapiFolder *)f)->priv->l))
 #define CAMEL_MAPI_FOLDER_UNLOCK(f, l) \
-	(g_static_mutex_unlock(&((CamelMapiFolder *)f)->priv->l))
+	(g_mutex_unlock(&((CamelMapiFolder *)f)->priv->l))
 
 extern gint camel_application_is_exiting;
 
 struct _CamelMapiFolderPrivate {
-	GStaticMutex search_lock;	/* for locking the search object */
+	GMutex search_lock;	/* for locking the search object */
 
 	gchar *foreign_username;
 };
@@ -1106,6 +1106,17 @@ mapi_folder_dispose (GObject *object)
 }
 
 static void
+mapi_folder_finalize (GObject *object)
+{
+	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (object);
+
+	g_mutex_clear (&mapi_folder->priv->search_lock);
+
+	/* Chain up to parent's finalize() method. */
+	G_OBJECT_CLASS (camel_mapi_folder_parent_class)->finalize (object);
+}
+
+static void
 mapi_folder_constructed (GObject *object)
 {
 	CamelNetworkSettings *network_settings;
@@ -1966,6 +1977,7 @@ camel_mapi_folder_class_init (CamelMapiFolderClass *class)
 
 	object_class = G_OBJECT_CLASS (class);
 	object_class->dispose = mapi_folder_dispose;
+	object_class->finalize = mapi_folder_finalize;
 	object_class->constructed = mapi_folder_constructed;
 
 	folder_class = CAMEL_FOLDER_CLASS (class);
@@ -1997,9 +2009,7 @@ camel_mapi_folder_init (CamelMapiFolder *mapi_folder)
 
 	folder->folder_flags = CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY;
 
-#ifdef ENABLE_THREADS
-	g_static_mutex_init(&mapi_folder->priv->search_lock);
-#endif
+	g_mutex_init (&mapi_folder->priv->search_lock);
 
 	mapi_folder->need_rescan = TRUE;
 }

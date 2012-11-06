@@ -1372,6 +1372,7 @@ unref_object_in_thread (gpointer ptr)
 void
 e_mapi_utils_unref_in_thread (GObject *object)
 {
+	GThread *thread;
 	GError *error = NULL;
 
 	if (!object)
@@ -1379,7 +1380,10 @@ e_mapi_utils_unref_in_thread (GObject *object)
 
 	g_return_if_fail (G_IS_OBJECT (object));
 
-	if (!g_thread_create (unref_object_in_thread, object, FALSE, &error)) {
+	thread = g_thread_try_new (NULL, unref_object_in_thread, object, &error);
+	if (thread) {
+		g_thread_unref (thread);
+	} else {
 		g_warning ("%s: Failed to run thread: %s", G_STRFUNC, error ? error->message : "Unknown error");
 		g_object_unref (object);
 	}

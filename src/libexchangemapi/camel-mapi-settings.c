@@ -23,7 +23,7 @@
 	((obj), CAMEL_TYPE_MAPI_SETTINGS, CamelMapiSettingsPrivate))
 
 struct _CamelMapiSettingsPrivate {
-	GMutex *property_lock;
+	GMutex property_lock;
 
 	gboolean check_all;
 	gboolean filter_junk;
@@ -259,7 +259,7 @@ mapi_settings_finalize (GObject *object)
 
 	priv = CAMEL_MAPI_SETTINGS_GET_PRIVATE (object);
 
-	g_mutex_free (priv->property_lock);
+	g_mutex_clear (&priv->property_lock);
 
 	g_free (priv->domain);
 	g_free (priv->profile);
@@ -412,7 +412,7 @@ static void
 camel_mapi_settings_init (CamelMapiSettings *settings)
 {
 	settings->priv = CAMEL_MAPI_SETTINGS_GET_PRIVATE (settings);
-	settings->priv->property_lock = g_mutex_new ();
+	g_mutex_init (&settings->priv->property_lock);
 }
 
 gboolean
@@ -453,12 +453,12 @@ camel_mapi_settings_dup_domain (CamelMapiSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_MAPI_SETTINGS (settings), NULL);
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	protected = camel_mapi_settings_get_domain (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	return duplicate;
 }
@@ -473,17 +473,17 @@ camel_mapi_settings_set_domain (CamelMapiSettings *settings,
 	if (domain == NULL)
 		domain = "";
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	if (g_strcmp0 (settings->priv->domain, domain) == 0) {
-		g_mutex_unlock (settings->priv->property_lock);
+		g_mutex_unlock (&settings->priv->property_lock);
 		return;
 	}
 
 	g_free (settings->priv->domain);
 	settings->priv->domain = g_strdup (domain);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "domain");
 }
@@ -570,12 +570,12 @@ camel_mapi_settings_dup_profile (CamelMapiSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_MAPI_SETTINGS (settings), NULL);
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	protected = camel_mapi_settings_get_profile (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	return duplicate;
 }
@@ -586,17 +586,17 @@ camel_mapi_settings_set_profile (CamelMapiSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_MAPI_SETTINGS (settings));
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	if (g_strcmp0 (settings->priv->profile, profile) == 0) {
-		g_mutex_unlock (settings->priv->property_lock);
+		g_mutex_unlock (&settings->priv->property_lock);
 		return;
 	}
 
 	g_free (settings->priv->profile);
 	settings->priv->profile = g_strdup (profile);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "profile");
 }
@@ -617,12 +617,12 @@ camel_mapi_settings_dup_realm (CamelMapiSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_MAPI_SETTINGS (settings), NULL);
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	protected = camel_mapi_settings_get_realm (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	return duplicate;
 }
@@ -637,17 +637,17 @@ camel_mapi_settings_set_realm (CamelMapiSettings *settings,
 	if (realm == NULL)
 		realm = "";
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	if (g_strcmp0 (settings->priv->realm, realm) == 0) {
-		g_mutex_unlock (settings->priv->property_lock);
+		g_mutex_unlock (&settings->priv->property_lock);
 		return;
 	}
 
 	g_free (settings->priv->realm);
 	settings->priv->realm = g_strdup (realm);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "realm");
 }

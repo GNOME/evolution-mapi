@@ -27,8 +27,8 @@
 
 static void thread_func_cb (gpointer data, gpointer pqueue);
 
-#define LOCK()   g_mutex_lock   (priv->lock)
-#define UNLOCK() g_mutex_unlock (priv->lock)
+#define LOCK()   g_mutex_lock   (&priv->lock)
+#define UNLOCK() g_mutex_unlock (&priv->lock)
 
 /* GObject foo - begin */
 
@@ -36,7 +36,7 @@ G_DEFINE_TYPE (EMapiOperationQueue, e_mapi_operation_queue, G_TYPE_OBJECT)
 
 struct _EMapiOperationQueuePrivate
 {
-	GMutex *lock;
+	GMutex lock;
 	GThreadPool *pool;
 	EMapiOperationQueueFunc worker_cb;
 	gpointer user_data;
@@ -67,7 +67,7 @@ e_mapi_operation_queue_dispose (GObject *object)
 
 		UNLOCK ();
 
-		g_mutex_free (priv->lock);
+		g_mutex_clear (&priv->lock);
 	}
 
 	if (G_OBJECT_CLASS (e_mapi_operation_queue_parent_class)->dispose)
@@ -97,7 +97,7 @@ e_mapi_operation_queue_init (EMapiOperationQueue *queue)
 	priv = queue->priv;
 	g_return_if_fail (priv != NULL);
 
-	priv->lock = g_mutex_new ();
+	g_mutex_init (&priv->lock);
 	priv->pool = g_thread_pool_new (thread_func_cb, queue, 1, FALSE, NULL);
 	priv->worker_cb = NULL;
 	priv->user_data = NULL;

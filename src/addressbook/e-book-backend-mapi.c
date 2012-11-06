@@ -346,7 +346,7 @@ ebbm_maybe_invoke_cache_update (EBookBackendMAPI *ebma)
 
 		g_cancellable_reset (priv->update_cache);
 		priv->server_dirty = FALSE;
-		priv->update_cache_thread = g_thread_create (ebbm_update_cache_cb, ebma, TRUE, NULL);
+		priv->update_cache_thread = g_thread_new (NULL, ebbm_update_cache_cb, ebma);
 		if (!priv->update_cache_thread)
 			g_object_unref (ebma);
 	}
@@ -1053,6 +1053,7 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 		OperationBookView *opbv = (OperationBookView *) op;
 
 		if (!cancelled && e_book_backend_mapi_book_view_is_running (ebma, opbv->book_view)) {
+			GThread *thread;
 			GError *err = NULL;
 			struct BookViewThreadData *bvtd = g_new0 (struct BookViewThreadData, 1);
 
@@ -1067,7 +1068,7 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 
 			g_mutex_unlock (&ebma->priv->running_views_lock);
 
-			g_thread_create (ebbm_book_view_thread, bvtd, FALSE, &err);
+			thread = g_thread_try_new (NULL, ebbm_book_view_thread, bvtd, &err);
 
 			if (err) {
 				error = EDB_ERROR_EX (OTHER_ERROR, err->message);
@@ -1075,6 +1076,9 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 				g_error_free (error);
 				g_error_free (err);
 			}
+
+			if (thread)
+				g_thread_unref (thread);
 		}
 
 		g_object_unref (opbv->book_view);

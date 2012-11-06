@@ -31,7 +31,7 @@
 
 #define MAPPING_SEPARATOR "~~~"
 
-static GStaticRecMutex mutex = G_STATIC_REC_MUTEX_INIT;
+static GRecMutex mutex;
 
 static GHashTable *mapi_to_ical = NULL;
 static GHashTable *ical_to_mapi = NULL;
@@ -43,9 +43,9 @@ e_mapi_cal_tz_util_get_mapi_equivalent (const gchar *ical_tz_location)
 
 	g_return_val_if_fail ((ical_tz_location && *ical_tz_location), NULL);
 
-	g_static_rec_mutex_lock(&mutex);
+	g_rec_mutex_lock(&mutex);
 	if (!e_mapi_cal_tz_util_populate()) {
-		g_static_rec_mutex_unlock(&mutex);
+		g_rec_mutex_unlock(&mutex);
 		return NULL;
 	}
 
@@ -53,7 +53,7 @@ e_mapi_cal_tz_util_get_mapi_equivalent (const gchar *ical_tz_location)
 
 	retval = g_hash_table_lookup (ical_to_mapi, ical_tz_location);
 
-	g_static_rec_mutex_unlock(&mutex);
+	g_rec_mutex_unlock(&mutex);
 
 	return retval;
 }
@@ -65,9 +65,9 @@ e_mapi_cal_tz_util_get_ical_equivalent (const gchar *mapi_tz_location)
 
 	g_return_val_if_fail ((mapi_tz_location && *mapi_tz_location), NULL);
 
-	g_static_rec_mutex_lock(&mutex);
+	g_rec_mutex_lock(&mutex);
 	if (!e_mapi_cal_tz_util_populate()) {
-		g_static_rec_mutex_unlock(&mutex);
+		g_rec_mutex_unlock(&mutex);
 		return NULL;
 	}
 
@@ -75,7 +75,7 @@ e_mapi_cal_tz_util_get_ical_equivalent (const gchar *mapi_tz_location)
 
 	retval = g_hash_table_lookup (mapi_to_ical, mapi_tz_location);
 
-	g_static_rec_mutex_unlock(&mutex);
+	g_rec_mutex_unlock(&mutex);
 
 	return retval;
 }
@@ -137,9 +137,9 @@ e_mapi_cal_tz_util_ical_from_zone_struct (const guint8 *lpb,
 	memcpy (&stdBias, lpb, 4); lpb += 4;
 	memcpy (&dstBias, lpb, 4); lpb += 4;
 
-	g_static_rec_mutex_lock (&mutex);
+	g_rec_mutex_lock (&mutex);
 	if (!e_mapi_cal_tz_util_populate ()) {
-		g_static_rec_mutex_unlock (&mutex);
+		g_rec_mutex_unlock (&mutex);
 		return NULL;
 	}
 
@@ -169,7 +169,7 @@ e_mapi_cal_tz_util_ical_from_zone_struct (const guint8 *lpb,
 			res = location;
 	}
 
-	g_static_rec_mutex_unlock (&mutex);
+	g_rec_mutex_unlock (&mutex);
 
 	return res;
 }
@@ -177,9 +177,9 @@ e_mapi_cal_tz_util_ical_from_zone_struct (const guint8 *lpb,
 void
 e_mapi_cal_tz_util_destroy (void)
 {
-	g_static_rec_mutex_lock(&mutex);
+	g_rec_mutex_lock(&mutex);
 	if (!(mapi_to_ical && ical_to_mapi)) {
-		g_static_rec_mutex_unlock(&mutex);
+		g_rec_mutex_unlock(&mutex);
 		return;
 	}
 
@@ -190,7 +190,7 @@ e_mapi_cal_tz_util_destroy (void)
 	mapi_to_ical = NULL;
 	ical_to_mapi = NULL;
 
-	g_static_rec_mutex_unlock(&mutex);
+	g_rec_mutex_unlock(&mutex);
 }
 
 static void
@@ -218,9 +218,9 @@ e_mapi_cal_tz_util_populate (void)
 	gchar *mtoi_fn = NULL, *itom_fn = NULL;
 	GMappedFile *mtoi_mf = NULL, *itom_mf = NULL;
 
-	g_static_rec_mutex_lock(&mutex);
+	g_rec_mutex_lock(&mutex);
 	if (mapi_to_ical && ical_to_mapi) {
-		g_static_rec_mutex_unlock(&mutex);
+		g_rec_mutex_unlock(&mutex);
 		return TRUE;
 	}
 
@@ -249,7 +249,7 @@ e_mapi_cal_tz_util_populate (void)
 			g_mapped_file_free (itom_mf);
 #endif
 
-		g_static_rec_mutex_unlock(&mutex);
+		g_rec_mutex_unlock(&mutex);
 		return FALSE;
 	}
 
@@ -280,7 +280,7 @@ e_mapi_cal_tz_util_populate (void)
 		g_mapped_file_free (itom_mf);
 #endif
 
-		g_static_rec_mutex_unlock(&mutex);
+		g_rec_mutex_unlock(&mutex);
 		return FALSE;
 	}
 
@@ -294,7 +294,7 @@ e_mapi_cal_tz_util_populate (void)
 
 	d(e_mapi_cal_tz_util_dump ());
 
-	g_static_rec_mutex_unlock(&mutex);
+	g_rec_mutex_unlock(&mutex);
 
 	return TRUE;
 }
@@ -340,12 +340,12 @@ e_mapi_cal_tz_util_dump (void)
 	guint i;
 	GList *keys, *values, *l, *m;
 
-	g_static_rec_mutex_lock(&mutex);
+	g_rec_mutex_lock(&mutex);
 
 	e_mapi_cal_tz_util_dump_ical_tzs ();
 
 	if (!(mapi_to_ical && ical_to_mapi)) {
-		g_static_rec_mutex_unlock(&mutex);
+		g_rec_mutex_unlock(&mutex);
 		return;
 	}
 
@@ -377,7 +377,7 @@ e_mapi_cal_tz_util_dump (void)
 	g_list_free (keys);
 	g_list_free (values);
 
-	g_static_rec_mutex_unlock(&mutex);
+	g_rec_mutex_unlock(&mutex);
 }
 
 #define TZDEFINITION_FLAG_VALID_GUID     0x0001 // the guid is valid
