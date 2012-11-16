@@ -618,8 +618,6 @@ ebbm_get_backend_property (EBookBackendMAPI *ebma, const gchar *prop_name, gchar
 		*prop_value = e_data_book_string_slist_to_comma_string (fields);
 
 		g_slist_free (fields);
-	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_SUPPORTED_AUTH_METHODS)) {
-		*prop_value = g_strdup ("plain/password");
 	} else {
 		processed = FALSE;
 	}
