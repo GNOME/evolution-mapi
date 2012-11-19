@@ -1,3 +1,19 @@
+evolution-mapi 3.7.2 2012-11-19
+-------------------------------
+
+Miscellanous:
+	Avoid re-add of a GAL ESource (Milan Crha)
+	Replace e_flag_timed_wait() with e_flag_wait_until() (Milan Crha)
+	Replace deprecated GLib symbols (as of GLib 2.34.x) (Milan Crha)
+	Introduce --enable-strict configure option (Milan Crha)
+	Drop check for BOOK_BACKEND_PROPERTY_SUPPORTED_AUTH_METHODS. (Matthew Barnes)
+
+Translations:
+	Christian Kirbach (de)
+	Shankar Prasad (kn)
+	Мирослав Николић (sr)
+	Мирослав Николић (sr@latin)
+
 evolution-mapi 3.7.1 2012-10-22
 -------------------------------
 
