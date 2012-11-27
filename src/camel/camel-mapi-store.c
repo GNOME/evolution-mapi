@@ -491,6 +491,8 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 		return TRUE;
 	}
 
+	camel_store_summary_lock (store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
+
 	/* remember all folders in cache before update */
 	old_cache_folders = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 	count = camel_store_summary_count (store->summary);
@@ -647,6 +649,8 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 
 	priv->folders_synced = TRUE;
 
+	camel_store_summary_unlock (store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
+
 	return TRUE;
 }
 
@@ -757,6 +761,7 @@ mapi_get_folder_info_offline (CamelStore *store,
 
 	path = mapi_concat (top, "*");
 
+	camel_store_summary_lock (mapi_store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
 	count = camel_store_summary_count (mapi_store->summary);
 	for (i = 0; i < count; i++) {
 		CamelStoreInfo *si = camel_store_summary_index (mapi_store->summary, i);
@@ -862,6 +867,7 @@ mapi_get_folder_info_offline (CamelStore *store,
 		g_object_unref (registry);
 
 	g_free (profile);
+	camel_store_summary_unlock (mapi_store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
 
 	return fi;
 }
@@ -915,6 +921,8 @@ mapi_rename_folder_infos (CamelMapiStore *mapi_store, const gchar *old_name, con
 	g_return_if_fail (old_name != NULL);
 	g_return_if_fail (new_name != NULL);
 
+	camel_store_summary_lock (mapi_store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
+
 	olen = strlen (old_name);
 	sz = camel_store_summary_count (mapi_store->summary);
 	for (i = 0; i < sz; i++) {
@@ -953,6 +961,8 @@ mapi_rename_folder_infos (CamelMapiStore *mapi_store, const gchar *old_name, con
 		}
 		camel_store_summary_info_free (mapi_store->summary, si);
 	}
+
+	camel_store_summary_unlock (mapi_store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
 }
 
 static void
@@ -2770,9 +2780,12 @@ static void
 mapi_folders_update_hash_tables_from_cache (CamelMapiStore *store)
 {
 	CamelStoreSummary *summary = store->summary;
-	gint summary_count = camel_store_summary_count (summary);
+	gint summary_count;
 	guint i = 0;
 
+	camel_store_summary_lock (store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
+
+	summary_count = camel_store_summary_count (summary);
 	for (i = 0; i < summary_count; i++) {
 		CamelMapiStoreInfo *msi = (CamelMapiStoreInfo *) camel_store_summary_index (summary, i);
 		gchar *fid, *pid;
@@ -2789,6 +2802,8 @@ mapi_folders_update_hash_tables_from_cache (CamelMapiStore *store)
 		g_free (fid);
 		g_free (pid);
 	}
+
+	camel_store_summary_unlock (store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
 }
 
 /* static const gchar * */
