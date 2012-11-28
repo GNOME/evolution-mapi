@@ -2,387 +2,423 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 #
-# Krishna Babu K <kkrothap@redhat.com>, 2009, 2010.
+# Krishna Babu K <kkrothap@redhat.com>, 2009, 2010, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: te\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-mapi\n"
-"POT-Creation-Date: 2010-07-20 07:07+0000\n"
-"PO-Revision-Date: 2010-07-21 18:09+0530\n"
-"Last-Translator: Krishna Babu K <kkrothap@redhat.com>\n"
+"product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
+"POT-Creation-Date: 2012-10-13 20:37+0000\n"
+"PO-Revision-Date: 2012-11-23 14:32+0530\n"
+"Last-Translator: Krishnababu Krothapalli <kkrothap@redhat.com>\n"
 "Language-Team: Telugu <en@li.org>\n"
+"Language: te\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.11.4\n"
+"X-Generator: Lokalize 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n!=1);\n"
 "\n"
 "\n"
 "\n"
 "\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:672
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:674
-msgid "Global Address List"
-msgstr ""
+#: ../src/addressbook/e-book-backend-mapi.c:748
+msgid "Searching"
+msgstr "అన్వేషిస్తోంది"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:987
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:229
-#, c-format
-msgid "Enter Password for %s@%s"
-msgstr "%s@%s కొరకు సంకేతపదమును ప్రవేశపెట్టండి"
+#: ../src/addressbook/e-book-backend-mapi.c:1738
+#: ../src/calendar/e-cal-backend-mapi.c:193
+#: ../src/calendar/e-cal-backend-mapi.c:542
+#: ../src/camel/camel-mapi-folder.c:1871 ../src/camel/camel-mapi-folder.c:1947
+msgid "Unknown error"
+msgstr "తెలియని దోషం"
 
-#. NOTE: A good way would be display the list of username entries
-#. using GtkEntryCompletion in the username gtkentry. But plugins
-#. as of now does not have access to it
-#. TODO : Fix strings
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:133
-msgid "Select username"
-msgstr "వినియోగదారి నామము యెంపికచేయుము"
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:432
+#: ../src/calendar/e-cal-backend-mapi.c:411
+msgid "Failed to remove public folder"
+msgstr "పబ్లిక్ సంచయం తీసివేయుటకు విఫలమైంది"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
-msgid "Full name"
-msgstr "పూర్తినామము"
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:468
+msgid "The backend does not support bulk additions"
+msgstr "పెద్దమొత్తం చేర్పులు బాకెండ్‌చే తోడ్పాటునీయబడదు"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:148
-#, fuzzy
-msgid "Username"
-msgstr "వినియోగదారి నామము"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:217
-msgid ""
-"Server, username and domain name cannot be empty. Please fill them with "
-"correct values."
-msgstr "సేవిక, వినియోగదారినామము మరియు డొమైన్ నామము ఖాళీగా వుండలేవు. దయచేసి వాటిని సరైన విలువలతో దిద్దుము."
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:273
-msgid "Authentication finished successfully."
-msgstr "ధృవీకరణ సమర్ధవంతంగా ముగించబడింది."
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:279
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:290
-msgid "Authentication failed."
-msgstr "ప్రామాణీకరించుట విఫలమైనది."
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:368
-msgid "_Domain name:"
-msgstr "డొమైన్ నామము (_D):"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:378
-msgid "_Authenticate"
-msgstr "దృవీకరించు(_A)"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:388
-msgid "_Use secure connection"
-msgstr "సురక్షిత అనుసంధానమును వుపయోగించుము (_U)"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:523
-msgid "Personal Folders"
-msgstr "వ్యక్తిగత సంచయాలు"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:658
-msgid "_Location:"
-msgstr "స్థానము(_L):"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:775
-#, c-format
-msgid "Failed to create address book '%s': %s"
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:778
-#, c-format
-msgid "Failed to create address book '%s'"
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:882
-#, c-format
-msgid "Failed to create calendar '%s': %s"
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:885
-#, c-format
-msgid "Failed to create calendar '%s'"
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:100
-msgid "Folder"
-msgstr "ఫోల్డర్"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:105
-msgid "Size"
-msgstr "పరిమాణము"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:128
-msgid "Unable to retrieve folder size information"
-msgstr "ఫోల్డర్ పరిమాణ సమాచారమును పొందలేక పోయింది"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:169
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:368
-msgid "Folder Size"
-msgstr "ఫోల్డర్ పరిమాణము"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:180
-#, fuzzy
-msgid "Fetching folder list…"
-msgstr "పోల్డర్ జాబితాను తెచ్చుకొంటోంది..."
-
-#. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:353
-msgid "Miscellaneous"
-msgstr "నానావిధమైన"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:366
-msgid "View the size of all Exchange folders"
-msgstr "అన్ని ఎక్సుచేంజ్ ఫోల్డర్ల పరిమాణమును దర్శించుము"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:379
-#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
-msgid "Exchange Settings"
-msgstr "ఎక్సుచేంజ్ అమరికలు"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:388
-#, fuzzy
-msgid "Folder size"
-msgstr "ఫోల్డర్ పరిమాణము (_F)"
-
-#: ../src/addressbook/e-book-backend-mapi.c:726
-#: ../src/calendar/e-cal-backend-mapi.c:1749
-#: ../src/calendar/e-cal-backend-mapi.c:2235
-#, fuzzy
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:510
+#: ../src/calendar/e-cal-backend-mapi.c:1766
+#: ../src/calendar/e-cal-backend-mapi.c:2277
 msgid "Failed to create item on a server"
-msgstr "MAPI సేవికను పరస్పరం మార్చుకొనుటకు దృవీకరించలేక పోతోంది."
+msgstr "ఒక సేవికపై అంశమును సృష్టించుటకు విఫలమైను"
 
-#: ../src/addressbook/e-book-backend-mapi.c:855
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:627
+msgid "The backend does not support bulk modifications"
+msgstr "పెద్దమొత్తం సవరింపులను బాకెండ్ తోడ్పాటునీయదు"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:672
 #: ../src/calendar/e-cal-backend-mapi.c:1979
 msgid "Failed to modify item on a server"
-msgstr ""
+msgstr "అంశము లేదా సేవిక సవరించుటకు విఫలమైంది"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1125
-#: ../src/addressbook/e-book-backend-mapi.c:1414
-#: ../src/addressbook/e-book-backend-mapi.c:1436
-#: ../src/calendar/e-cal-backend-mapi.c:1255
-#: ../src/calendar/e-cal-backend-mapi.c:1276
-#, fuzzy
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:848
 msgid "Failed to fetch items from a server"
-msgstr "సేవికనుండి మార్పులను పొందుటలో దోషము."
+msgstr "సేవికనుండి అంశములను పొందుటలో విఫలమైంది."
 
-#: ../src/addressbook/e-book-backend-mapi.c:1645
-#: ../src/addressbook/e-book-backend-mapi-gal.c:313
-msgid "Cannot connect"
-msgstr ""
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. %d is an index of the contact.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:866
+#, c-format
+msgid "Caching contact %d"
+msgstr "క్యాచింగ్ పరిచయం %d"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1766
-#: ../src/calendar/e-cal-backend-mapi.c:329
-msgid "Failed to remove public folder"
-msgstr ""
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. The first %d is an index of the contact,
+#. the second %d is total count of conacts on the server.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:870
+#, c-format
+msgid "Caching contact %d/%d"
+msgstr "క్యాచింగ్ పరిచయం %d/%d"
 
-#. To translators : This is used to cache the downloaded contacts from GAL.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:925
+msgid "Failed to count server contacts"
+msgstr "సేవిక పరిచయాలను లెక్కించుటలో విఫలమైను"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:983
+msgid "Failed to list items from a server"
+msgstr "సేవికనుండి అంశములను జాబితా చేయుటలో విఫలమైంది"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1064
+msgid "Failed to transfer contacts from a server"
+msgstr "ఒక సేవిక నుండి పరిచయాలను బదిలీ చేయుటకు విఫలమైంది"
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. %d is an index of the GAL entry.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:153
+#, c-format
+msgid "Caching GAL contact %d"
+msgstr "క్యాచింగ్ GAL పరిచయం %d"
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
 #. The first %d is an index of the GAL entry,
 #. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:170
+#: ../src/addressbook/e-book-backend-mapi-gal.c:157
 #, c-format
-msgid "Caching GAL entry %d/%d"
-msgstr ""
+msgid "Caching GAL contact %d/%d"
+msgstr "క్యాచింగ్ GAL పరిచయం %d/%d"
 
-#. To translators : This is used to cache the downloaded contacts from GAL.
-#. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:174
-#, c-format
-msgid "Caching GAL entry %d"
-msgstr ""
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:214
+#: ../src/addressbook/e-book-backend-mapi-gal.c:229
+#: ../src/addressbook/e-book-backend-mapi-gal.c:313
 msgid "Failed to fetch GAL entries"
-msgstr ""
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:645
-msgid "Searching"
-msgstr ""
-
-#. To translators : Here Evolution MAPI downloads the entries from the GAL server
-#: ../src/addressbook/e-book-backend-mapi-gal.c:665
-msgid "Downloading GAL entries from server…"
-msgstr ""
-
-#: ../src/addressbook/e-book-backend-mapi-utils.c:460
-#: ../src/calendar/e-cal-backend-mapi.c:131
-msgid "Uknown error"
-msgstr ""
+msgstr "GAL పరిచయాలను వెతుకిపట్టుటకు విఫలమైంది"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:374
+#: ../src/calendar/e-cal-backend-mapi.c:481
 #, c-format
 msgid "Loading items in folder %s"
-msgstr "ఫోల్డర్ %sనందు అంశములను లోడుచేయుచున్నది"
+msgstr "సంచయం %sనందు అంశములను లోడుచేయుచున్నది"
 
-#: ../src/calendar/e-cal-backend-mapi.c:730
-#: ../src/calendar/e-cal-backend-mapi.c:756
-#: ../src/calendar/e-cal-backend-mapi.c:803
-#: ../src/calendar/e-cal-backend-mapi.c:882
-#: ../src/calendar/e-cal-backend-mapi.c:905
-#, fuzzy, c-format
-msgid "Failed to fetch changes from a server: %s"
-msgstr "సేవికనుండి మార్పులను పొందుటలో దోషము."
+#: ../src/calendar/e-cal-backend-mapi.c:834
+#, c-format
+msgid "Failed to open folder: %s"
+msgstr "సంచయం తెరుచుటకు విఫలమైను: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:735
-#: ../src/calendar/e-cal-backend-mapi.c:761
-#: ../src/calendar/e-cal-backend-mapi.c:808
-#: ../src/calendar/e-cal-backend-mapi.c:887
-#: ../src/calendar/e-cal-backend-mapi.c:910
-#, fuzzy
-msgid "Failed to fetch changes from a server"
-msgstr "సేవికనుండి మార్పులను పొందుటలో దోషము."
+#: ../src/calendar/e-cal-backend-mapi.c:842
+#, c-format
+msgid "Failed to get folder properties: %s"
+msgstr "సంచయం లక్ష్యాలను పొందుటకు విఫలమైంది: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1388
-msgid "Could not create thread for populating cache"
-msgstr "క్యాచి ని ప్రసిద్దిచెందించుటకు తంతిని సృష్టించలేకపోయింది"
+#: ../src/calendar/e-cal-backend-mapi.c:883
+#, c-format
+msgid "Failed to list objects: %s"
+msgstr "ఆబ్జక్టులను జాబితా చేయుటకు విఫలమైంది: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1453
+#: ../src/calendar/e-cal-backend-mapi.c:909
+#, c-format
+msgid "Failed to transfer objects: %s"
+msgstr "ఆబ్జక్టులను సరఫరా చేయుటకు విఫలమైంది: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:928
+#, c-format
+msgid "Failed to close folder: %s"
+msgstr "సంచయం మూయుటకు విఫలమైంది: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1425
+#: ../src/calendar/e-cal-backend-mapi.c:1426
 msgid "Could not create cache file"
 msgstr "క్యాచి దస్త్రాన్ని సృష్టించలేవు"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1873
+#: ../src/calendar/e-cal-backend-mapi.c:1887
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
 msgstr ""
-"పునరావృత నియామకంయొక్క వొంటరి సంభవాలను సవరించు మద్దతు యింకా రాలేదు. సేవికనందు నియామకంకు యెటువంటి "
+"పునరావృత నియామకంయొక్క వొంటరి సంభవాలను సవరించు మద్దతు యింకా రాలేదు. సేవికనందు "
+"నియామకంకు యెటువంటి "
 "మార్పు జరగలేదు."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2483
+#: ../src/calendar/e-cal-backend-mapi.c:2092
+msgid "Cannot remove items from a server"
+msgstr "ఒక సేవికనుండి అంశాలను తీసివేయలేదు"
+
+#: ../src/calendar/e-cal-backend-mapi.c:2529
 msgid "Failed to get Free/Busy data"
-msgstr ""
+msgstr "తీరిక/తీరికలేని డాటా పొందుటకు విఫలమైంది"
 
-#: ../src/camel/camel-mapi-folder.c:357
+#: ../src/camel/camel-mapi-folder.c:777
 #, c-format
-msgid "Updating local summary cache for new messages in %s"
-msgstr "%s లోని కొత్త సందేశాల కొరకు స్థానిక సంక్షింప్త సమాచారాన్ని నవీకరిస్తోంది"
+msgid "Refreshing folder '%s'"
+msgstr "'%s' సంచయాన్ని తాజాపరుస్తోంది"
 
-#: ../src/camel/camel-mapi-folder.c:593
+#: ../src/camel/camel-mapi-folder.c:844
 #, c-format
-msgid "Retrieving message IDs from server for %s"
-msgstr "%s కొరకు సేవికనుండి సందేశపు IDలను పొందుచున్నది"
+#| msgid "Loading items in folder %s"
+msgid "Downloading messages in folder '%s'"
+msgstr "సంచయం '%s' నందు సందేశాలను డౌన్‌లోడ్ చేస్తోంది"
 
-#: ../src/camel/camel-mapi-folder.c:623
-#, c-format
-msgid "Removing deleted messages from cache in %s"
-msgstr "%s నందలి క్యాచీనుండి తొలగించిన సందేశములను తీసివేయుచున్నది"
-
-#. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:949
-#, c-format
-msgid "Fetching summary information for new messages in %s"
-msgstr "%s లో కొత్త సందేశాల కొరకు సంక్షింప్తమైన సమాచారాన్ని తీసుకువస్తున్నది"
-
-#: ../src/camel/camel-mapi-folder.c:1072 ../src/camel/camel-mapi-folder.c:1207
-#: ../src/camel/camel-mapi-folder.c:1217
+#: ../src/camel/camel-mapi-folder.c:931 ../src/camel/camel-mapi-folder.c:1512
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "లైనువెలుపలి సంవిధానంలో ఈ సందేశం అందుబాటులో లేదు."
 
-#: ../src/camel/camel-mapi-folder.c:1089
-#, fuzzy, c-format
+#: ../src/camel/camel-mapi-folder.c:941 ../src/camel/camel-mapi-folder.c:959
+#, c-format
 msgid "Fetching items failed: %s"
-msgstr "అంశములను తెచ్చుట విఫలమైంది"
+msgstr "అంశములను తెచ్చుట విఫలమైంది: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1094
+#: ../src/camel/camel-mapi-folder.c:946 ../src/camel/camel-mapi-folder.c:964
 msgid "Fetching items failed"
 msgstr "అంశములను తెచ్చుట విఫలమైంది"
 
-#: ../src/camel/camel-mapi-folder.c:1167
+#: ../src/camel/camel-mapi-folder.c:1204
+#, c-format
+msgid "Cannot append message to folder '%s'"
+msgstr "సందేశమును సంచయం '%s'కు జోడించలేము"
+
+#: ../src/camel/camel-mapi-folder.c:1213 ../src/camel/camel-mapi-folder.c:1241
+#, c-format
+msgid "Offline."
+msgstr "ఆఫ్‌లైన్."
+
+#: ../src/camel/camel-mapi-folder.c:1322
+#, c-format
+msgid "Failed to empty Trash: %s"
+msgstr "చెత్తను ఖాళీచేయుటకు విఫలమైంది: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1328
+msgid "Failed to empty Trash"
+msgstr "చెత్తను ఖాళీచేయుటకు విఫలమైంద"
+
+#: ../src/camel/camel-mapi-folder.c:1497
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "%s సందేశాన్ని తీసుకురాలేకపోయింది: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1168
+#: ../src/camel/camel-mapi-folder.c:1498
 msgid "No such message"
 msgstr "ఏటువంటి సందేశం లేదు"
 
-#: ../src/camel/camel-mapi-folder.c:1243
-#, fuzzy, c-format
+#: ../src/camel/camel-mapi-folder.c:1523 ../src/camel/camel-mapi-folder.c:1553
+#, c-format
 msgid "Could not get message: %s"
-msgstr "సందేశాన్ని తీసుకురాలేకపోయింది"
+msgstr "సందేశాన్ని పొందలేక పోయింది: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1249 ../src/camel/camel-mapi-folder.c:1262
+#: ../src/camel/camel-mapi-folder.c:1529 ../src/camel/camel-mapi-folder.c:1560
 #, c-format
 msgid "Could not get message"
 msgstr "సందేశాన్ని తీసుకురాలేకపోయింది"
 
-#: ../src/camel/camel-mapi-folder.c:1399
-#, c-format
-msgid "Failed to empty Trash: %s"
-msgstr ""
+#: ../src/camel/camel-mapi-folder.c:1927
+msgid "Receive quota"
+msgstr "కోటా స్వీకరించెను"
 
-#: ../src/camel/camel-mapi-folder.c:1404
-msgid "Failed to empty Trash"
-msgstr ""
+#: ../src/camel/camel-mapi-folder.c:1933
+msgid "Send quota"
+msgstr "కోటా పంపెను"
 
-#: ../src/camel/camel-mapi-folder.c:1540 ../src/camel/camel-mapi-folder.c:1561
-msgid "Unknown error"
-msgstr ""
+#: ../src/camel/camel-mapi-folder.c:1952
+msgid "No quota information available"
+msgstr "ఏ కోటా సమాచారం అందుబాటులో లేదు"
 
-#: ../src/camel/camel-mapi-folder.c:1623
-#, c-format
-msgid "Cannot append message to folder '%s'"
-msgstr "సందేశమును ఫోల్డర్ '%s'కు జోడించలేము"
-
-#: ../src/camel/camel-mapi-folder.c:1631 ../src/camel/camel-mapi-folder.c:1656
-#, fuzzy, c-format
-msgid "Offline."
-msgstr "ఆఫ్‌లైన్. '%s'"
-
-#: ../src/camel/camel-mapi-folder.c:1802
+#: ../src/camel/camel-mapi-folder.c:2055
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s కొరకు సంక్షింప్తమును నింపలేకపోయింది"
 
-#: ../src/camel/camel-mapi-provider.c:44
+#: ../src/camel/camel-mapi-provider.c:45
 msgid "Checking for new mail"
 msgstr "కొత్త తపాలా కొరకు తనిఖీచేస్తున్నది"
 
-#: ../src/camel/camel-mapi-provider.c:46
+#: ../src/camel/camel-mapi-provider.c:47
 msgid "C_heck for new messages in all folders"
 msgstr "అన్ని సంచయాలలో కొత్త సందేశాల కొరకు తనిఖీ చేయుము(_h)"
 
-#: ../src/camel/camel-mapi-provider.c:50
+#: ../src/camel/camel-mapi-provider.c:51
 msgid "Options"
 msgstr "ఇచ్ఛాపూర్వకాలు"
 
-#: ../src/camel/camel-mapi-provider.c:52
+#: ../src/camel/camel-mapi-provider.c:53
 msgid "Automatically synchroni_ze account locally"
 msgstr "స్వయంచాలకంగా ఖాతా స్థానికంగా ఏకకాలం చేయబడుతుంది(_z)"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:55
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "ఈ సేవికపై కొత్త సందేశాల కొరకు వడపోతను అనుసంధించు (_A)"
 
-#: ../src/camel/camel-mapi-provider.c:57
+#: ../src/camel/camel-mapi-provider.c:58
 msgid "Check new messages for _Junk contents"
 msgstr "నిరర్ధక సారములకొరకు కొత్త సందేశాలను పరిశీలించుము(_J)"
 
-#: ../src/camel/camel-mapi-provider.c:59
+#: ../src/camel/camel-mapi-provider.c:60
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "ఇన్‌బాక్స్‍ సంచయంనందు నిరర్ధక సందేశములు కొరకు మాత్రమే పరిశీలించుము(_e)"
 
-#: ../src/camel/camel-mapi-provider.c:70
-#, fuzzy
-msgid "For accessing Microsoft Exchange/OpenChange servers using MAPI"
-msgstr "MAPI వుపయోగించి Microsoft Exchange / OpenChange సేవికలను యాక్సిస్ చేయుటకు"
+#: ../src/camel/camel-mapi-provider.c:62
+#: ../src/configuration/e-mapi-config-utils.c:1632
+msgid "Lis_ten for server notifications"
+msgstr "సేవిక ప్రకటనల కొరకు విను (_t)"
 
-#: ../src/camel/camel-mapi-provider.c:85
+#: ../src/camel/camel-mapi-provider.c:73
+msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
+msgstr ""
+"Microsoft Exchange 2007/OpenChange సేవికలను MAPI ద్వారా యాక్సెస్ చేయుటకు"
+
+#: ../src/camel/camel-mapi-provider.c:88
 msgid "Password"
 msgstr "రహస్యపదం"
 
-#: ../src/camel/camel-mapi-provider.c:86
-#, fuzzy
+#: ../src/camel/camel-mapi-provider.c:89
 msgid ""
 "This option will connect to the OpenChange server using a plaintext password."
-msgstr "ఈ ఐచ్చికము సాదాపాఠపు సంకేతపదమును వుపయోగించి Openchange సేవికకు అనుసంధానించబడుతుంది."
+msgstr ""
+"సాదాపాఠం సంకేతపదం వుపయోగించి యీ ఐచ్చికం OpenChange సేవికకు అనుసంధానమగును."
+
+#: ../src/camel/camel-mapi-sasl-krb.c:28
+msgid "Kerberos"
+msgstr "కేర్బరోస్"
+
+#: ../src/camel/camel-mapi-sasl-krb.c:30
+msgid "This option will connect to the server using kerberos key."
+msgstr "కేర్బరోస్ కీ వుపయోగించి యీ ఐచ్చికం సేవికకు అనుసంధానమగును."
+
+#: ../src/camel/camel-mapi-store.c:133 ../src/camel/camel-mapi-store.c:175
+msgid "Cannot find folder in a local cache"
+msgstr "స్థానిక మిషన్ నందు సంచయం కనుగొనలేము"
+
+#: ../src/camel/camel-mapi-store.c:481 ../src/camel/camel-mapi-store.c:1183
+#| msgid "Folder list not available in offline mode."
+msgid "Folder list is not available in offline mode"
+msgstr "సంచయం జాబితా అనునది ఆప్‌లైన్ రీతినందు అందుబాటులోలేదు"
+
+#: ../src/camel/camel-mapi-store.c:858
+#| msgid "All Public Folders"
+msgid "No public folder found"
+msgstr "ఏ పబ్లిక్ సంచయం కనబడలేదు"
+
+#: ../src/camel/camel-mapi-store.c:858
+msgid "No folder found"
+msgstr "ఏ సంచయం కనుగొనలేదు"
+
+#: ../src/camel/camel-mapi-store.c:1205 ../src/camel/camel-mapi-store.c:2148
+#, c-format
+msgid "Connecting to '%s'"
+msgstr "'%s' కు అనుసంధానమౌతోంది"
+
+#: ../src/camel/camel-mapi-store.c:1264
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI folders in offline mode"
+msgstr "ఆప్‌లైన్ రీతినందు MAPI సంచయాలను సృష్టించలేదు"
+
+#: ../src/camel/camel-mapi-store.c:1271
+#, c-format
+msgid "Cannot create new folder '%s'"
+msgstr "కొత్త సంచయం '%s' సృష్టించలేక పోయింది"
+
+#: ../src/camel/camel-mapi-store.c:1280
+#, c-format
+msgid "Authentication failed"
+msgstr "ప్రామాణీకరణ విఫలమైంది"
+
+#: ../src/camel/camel-mapi-store.c:1290
+msgid "MAPI folders can be created only within mailbox of the logged user"
+msgstr ""
+"లాగైన వాడుకరి యొక్క మెయిల్‌బాక్స్ నందు మాత్రమే MAPI సంచయాలు సృష్టించబడగలవు"
+
+#: ../src/camel/camel-mapi-store.c:1303 ../src/camel/camel-mapi-store.c:1408
+#, c-format
+msgid "Cannot find folder '%s'"
+msgstr "కొత్త సంచయం '%s' కనుగొనలేక పోయింది"
+
+#: ../src/camel/camel-mapi-store.c:1353
+#, c-format
+msgid "Cannot create folder '%s': %s"
+msgstr "సంచయం '%s' సృష్టించలేక పోయింది: %s"
+
+#: ../src/camel/camel-mapi-store.c:1359
+#, c-format
+msgid "Cannot create folder '%s'"
+msgstr "సంచయం '%s' సృష్టించలేక పోయింది"
+
+#: ../src/camel/camel-mapi-store.c:1386 ../src/camel/camel-mapi-store.c:1398
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot delete MAPI folders in offline mode"
+msgstr "ఆఫ్‌లైన్ రీతినందు MAPI సంచయాలను తొలగించలేదు."
+
+#: ../src/camel/camel-mapi-store.c:1448
+#, c-format
+msgid "Cannot remove folder '%s': %s"
+msgstr "సంచయం '%s' తీసివేయలేదు: %s"
+
+#: ../src/camel/camel-mapi-store.c:1456
+#, c-format
+msgid "Cannot remove folder '%s'"
+msgstr "సంచయం '%s' తీసివేయలేక పోయింది"
+
+#: ../src/camel/camel-mapi-store.c:1485 ../src/camel/camel-mapi-store.c:1500
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot rename MAPI folders in offline mode"
+msgstr "ఆఫ్‌లైన్ రీతినందు MAPI సంచయాలను పునఃనామకరణ చేయలేదు"
+
+#: ../src/camel/camel-mapi-store.c:1511
+#, c-format
+msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
+msgstr "MAPI సంచయం '%s' పునఃనామకరణ చేయలేము. సంచయం లేదు."
+
+#: ../src/camel/camel-mapi-store.c:1522
+#, c-format
+msgid "Cannot rename MAPI default folder '%s' to '%s'"
+msgstr "MAPI అప్రమేయ సంచయం '%s'ను '%s'కు పునఃనామకరణ చేయలేము"
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1548 ../src/camel/camel-mapi-store.c:1581
+#: ../src/camel/camel-mapi-store.c:1659
+#, c-format
+msgid "Cannot rename MAPI folder '%s' to '%s'"
+msgstr "MAPI సంచయం '%s'ను '%s'కు పునఃనామకరణ చేయలేము"
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#. The last '%s' is a detailed error message.
+#: ../src/camel/camel-mapi-store.c:1573 ../src/camel/camel-mapi-store.c:1652
+#, c-format
+msgid "Cannot rename MAPI folder '%s' to '%s': %s"
+msgstr "MAPI సంచయం '%s'ను '%s'కు పునఃనామకరణ చేయలేము: %s"
+
+#: ../src/camel/camel-mapi-store.c:1755
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot subscribe MAPI folders in offline mode"
+msgstr "MAPI సంచయంలను ఆఫ్‌లైన్ రీతినందు సబ్‌స్క్రైబ్ చేయలేదు"
+
+#: ../src/camel/camel-mapi-store.c:1772
+#, c-format
+msgid "Folder '%s' not found"
+msgstr "సంచయం '%s' కనుగొనలేదు"
+
+#: ../src/camel/camel-mapi-store.c:1890
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot unsubscribe MAPI folders in offline mode"
+msgstr "MAPI సంచయంలను ఆఫ్‌లైన్ రీతినందు అన్‌సబ్‌స్క్రైబ్ చేయలేదు"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:315 ../src/camel/camel-mapi-transport.c:133
+#: ../src/camel/camel-mapi-store.c:2103
+#: ../src/camel/camel-mapi-transport.c:191
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "MAPI సేవిక %s మార్చుము"
@@ -390,176 +426,798 @@ msgstr "MAPI సేవిక %s మార్చుము"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:319 ../src/camel/camel-mapi-transport.c:136
+#: ../src/camel/camel-mapi-store.c:2107
+#: ../src/camel/camel-mapi-transport.c:194
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "%s కొరకు %sపైన MAPI సేవను పరస్పరం మార్చుకొనుము"
 
-#. To translators : First %s : is the error text or the reason
-#. for prompting the user if it is available.
-#. Second %s is : Username.
-#. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:361
+#: ../src/camel/camel-mapi-store.c:2133
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot connect MAPI store in offline mode"
+msgstr "ఆఫ్‌లైన్ రీతినందు MAPI నిల్వ అనుసంధానం కాలేదు"
+
+#: ../src/camel/camel-mapi-store.c:2178
 #, c-format
-msgid "%s Please enter the MAPI password for %s@%s"
-msgstr "%s దయచేసి %s@%s కొరకు MAPI సంకేతపదమును ప్రవేశపెట్టుము"
+msgid "Mailbox '%s' is full, no new messages will be received or sent."
+msgstr ""
+"మెయిల్‌బాక్స్ '%s' పూర్తైంది, ఏ కొత్త సందేశాలు స్వీకరించబోదు లేదా పంపబోదు."
 
-#: ../src/camel/camel-mapi-store.c:376
+#: ../src/camel/camel-mapi-store.c:2180
 #, c-format
-msgid "You did not enter a password."
-msgstr "నీవు రహస్యపదమును ప్రవేశపెట్టలేదు."
+msgid ""
+"Mailbox '%s' is near its size limit, message send will be disabled soon."
+msgstr ""
+"మెయిల్‌బాక్స్ '%s' అనునది దాని పరిమాణ పరిధికి దగ్గరలో వుంది, పంపిన సందేశం "
+"త్వరలో అచేతనమగును."
 
-#: ../src/camel/camel-mapi-store.c:384
-#, fuzzy, c-format
-msgid "Unable to authenticate to Exchange MAPI server: %s"
-msgstr "MAPI సేవికను పరస్పరం మార్చుకొనుటకు దృవీకరించలేక పోతోంది."
-
-#: ../src/camel/camel-mapi-store.c:387
-#, fuzzy
-msgid "Unable to authenticate to Exchange MAPI server"
-msgstr "MAPI సేవికను పరస్పరం మార్చుకొనుటకు దృవీకరించలేక పోతోంది."
-
-#: ../src/camel/camel-mapi-store.c:563
+#: ../src/camel/camel-mapi-store.c:2184
 #, c-format
-msgid "Cannot create MAPI folders in offline mode."
-msgstr "MAPI ఫోల్డర్లను ఆఫ్‌లైన్ రీతినందు సృష్టించలేక పోయింది."
+msgid "Mailbox '%s' is full, no new messages will be received."
+msgstr "మెయిల్‌బాక్స్ '%s' పూర్తైంది, ఏ కొత్త సందేశాలు స్వీకరించబోదు."
 
-#: ../src/camel/camel-mapi-store.c:570
-#, fuzzy, c-format
-msgid "Cannot create new folder '%s'"
-msgstr "కొత్త సంచయం `%s' సృష్టించలేక పోయింది"
-
-#: ../src/camel/camel-mapi-store.c:584
+#: ../src/camel/camel-mapi-store.c:2186
 #, c-format
-msgid "Authentication failed"
-msgstr "ప్రామాణీకరణ విఫలమైంది"
+msgid "Mailbox '%s' is near its size limit."
+msgstr "మెయిల్‌బాక్స్ '%s' అనునది దాని పరిమాణ పరిధికి దగ్గరలో వుంది."
 
-#: ../src/camel/camel-mapi-store.c:609
-#, fuzzy, c-format
-msgid "Cannot create folder '%s': %s"
-msgstr "కొత్త సంచయం `%s' సృష్టించలేక పోయింది"
+#: ../src/camel/camel-mapi-store.c:2598
+#| msgid "Authentication failed"
+msgid "Authentication password not available"
+msgstr "ధృవీకరణ సంకేతపదం అందుబాటులోలేదు"
 
-#: ../src/camel/camel-mapi-store.c:614
-#, fuzzy, c-format
-msgid "Cannot create folder '%s'"
-msgstr "కొత్త సంచయం `%s' సృష్టించలేక పోయింది"
-
-#: ../src/camel/camel-mapi-store.c:707
-#, fuzzy, c-format
-msgid "Cannot remove folder '%s': %s"
-msgstr "MAPI ఫోల్డర్ `%s'ను `%s'కు పునఃనామకరణ చేయలేము"
-
-#: ../src/camel/camel-mapi-store.c:714
-#, fuzzy, c-format
-msgid "Cannot remove folder '%s'"
-msgstr "కొత్త సంచయం `%s' సృష్టించలేక పోయింది"
-
-#: ../src/camel/camel-mapi-store.c:804
-#, fuzzy, c-format
-msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
-msgstr "MAPI సంచయం `%s' పునఃనామకరణ చేయలేము. ఫోల్డరు లేదు."
-
-#: ../src/camel/camel-mapi-store.c:816
-#, fuzzy, c-format
-msgid "Cannot rename MAPI default folder '%s' to '%s'."
-msgstr "MAPI అప్రమేయ ఫోల్డరు `%s'ను `%s'కు పునఃనామకరణ చేయలేము."
-
-#. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:843 ../src/camel/camel-mapi-store.c:868
-#: ../src/camel/camel-mapi-store.c:930
-#, fuzzy, c-format
-msgid "Cannot rename MAPI folder '%s' to '%s'"
-msgstr "MAPI ఫోల్డర్ `%s'ను `%s'కు పునఃనామకరణ చేయలేము"
-
-#. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:861 ../src/camel/camel-mapi-store.c:924
-#, fuzzy, c-format
-msgid "Cannot rename MAPI folder '%s' to '%s': %s"
-msgstr "MAPI ఫోల్డర్ `%s'ను `%s'కు పునఃనామకరణ చేయలేము"
-
-#: ../src/camel/camel-mapi-store.c:1493
-#, c-format
-msgid "Folder list not available in offline mode."
-msgstr "ఆఫ్‌లైను రీతినందు ఫోల్డరు అందుబాటులో లేదు."
-
-#: ../src/camel/camel-mapi-transport.c:99
-#: ../src/camel/camel-mapi-transport.c:120
+#: ../src/camel/camel-mapi-transport.c:142
+#: ../src/camel/camel-mapi-transport.c:164
 #, c-format
 msgid "Could not send message."
 msgstr "సందేశమును పంపలేక పోయింది."
 
-#: ../src/camel/camel-mapi-transport.c:115
-#, fuzzy, c-format
+#: ../src/camel/camel-mapi-transport.c:159
+#, c-format
 msgid "Could not send message: %s"
-msgstr "సందేశమును పంపలేక పోయింది."
+msgstr "సందేశమును పంపలేక పోయింది: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:100
+#: ../src/collection/e-mapi-backend.c:273
+msgid "Global Address List"
+msgstr "గ్లోబల్ యాక్సెస్ జాబితా"
+
+#: ../src/collection/e-mapi-backend.c:591
+#: ../src/collection/e-mapi-backend.c:678
+#, c-format
+msgid "Data source '%s' does not represent a MAPI folder"
+msgstr "దత్తాంశ మూలం '%s' MAPI సంచయంను తెలుపదు"
+
+#: ../src/configuration/e-book-config-mapigal.c:63
+msgid "Allow _partial search results"
+msgstr "పాక్షిక అన్వేషణ ఫలితాలను అనుమతించు (_p)"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:126
+msgid "Select username"
+msgstr "వినియోగదారి నామము యెంపికచేయుము"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:136
+msgid "Full name"
+msgstr "పూర్తినామము"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:141
+msgid "Username"
+msgstr "వాడుకరిపేరు"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:168
+msgid ""
+"There are more users with similar user name on a server.\n"
+"Please select that you would like to use from the below list."
+msgstr ""
+"సేవికపైన వొకే వాడుకరిపేరుతో చాలా వాడుకరులు వున్నారు.\n"
+"మీరు వుపయోగించుటకు యిష్టపడుతున్నది కింది జాబితానుండి యెంపికచేయండి."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:396
+msgid "Authentication finished successfully."
+msgstr "ధృవీకరణ సమర్ధవంతంగా ముగించబడింది."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:398
+#: ../src/configuration/e-mail-config-mapi-backend.c:519
+msgid "Authentication failed."
+msgstr "ప్రామాణీకరించుట విఫలమైనది."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:460
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot authenticate MAPI accounts in offline mode"
+msgstr "MAPI సంచయంలను ఆఫ్‌లైన్ రీతినందు ధృవీకరించలేదు"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:489
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"సేవిక, వినియోగదారినామము మరియు డొమైన్ నామము ఖాళీగా వుండలేవు. దయచేసి వాటిని "
+"సరైన విలువలతో దిద్దుము."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:492
+#| msgid ""
+#| "Server, username and domain name cannot be empty. Please fill them with "
+#| "correct values."
+msgid ""
+"Realm name cannot be empty when kerberos is selected. Please fill them with "
+"correct values."
+msgstr ""
+"కేర్బరోస్ యెంపికచేసినప్పుడు రియాల్మ్ పేరు ఖాళీ కాలేదు. వాటిని సరైన విలువలతో "
+"సరిదిద్దు."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:513
+msgid "Connecting to the server, please wait..."
+msgstr "సేవికకు అనుసంధానమౌతోంది. దయచేసి వేచివుండి..."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:721
+msgid "Configuration"
+msgstr "ఆకృతీకరణ"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:730
+msgid "_Server:"
+msgstr "సేవిక (_S):"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:747
+msgid "User_name:"
+msgstr "వాడుకరి పేరు:"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:772
+msgid "_Domain name:"
+msgstr "డొమైన్ నామము (_D):"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:785
+msgid "_Authenticate"
+msgstr "దృవీకరించు(_A)"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:793
+msgid "_Use secure connection"
+msgstr "సురక్షిత అనుసంధానమును వుపయోగించుము (_U)"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:808
+msgid "_Kerberos authentication"
+msgstr "కెర్బరోస్ ధృవీకరణ (_K)"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:820
+#| msgid "_Domain name:"
+msgid "_Realm name:"
+msgstr "రియాల్మ్ పేరు (_R):"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:186
+#: ../src/configuration/e-mail-config-mapi-page.c:247
+#| msgid "Exchange Settings"
+msgid "MAPI Settings"
+msgstr "MAPI అమరికలు"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:192
+msgid "View the size of all Exchange folders"
+msgstr "అన్ని ఎక్సుచేంజ్ సంచయంల పరిమాణమును దర్శించుము"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:196
+#| msgid "Folder Size"
+msgid "Folder _Size"
+msgstr "సంచయం పరిమాణము (_S)"
+
+#: ../src/configuration/e-mapi-config-utils.c:454
+msgid "Folder"
+msgstr "సంచయం"
+
+#: ../src/configuration/e-mapi-config-utils.c:459
+msgid "Size"
+msgstr "పరిమాణము"
+
+#: ../src/configuration/e-mapi-config-utils.c:482
+#: ../src/configuration/e-mapi-config-utils.c:486
+msgid "Unable to retrieve folder size information"
+msgstr "సంచయం పరిమాణ సమాచారమును పొందలేక పోయింది"
+
+#: ../src/configuration/e-mapi-config-utils.c:552
+msgid "Folder Size"
+msgstr "సంచయం పరిమాణము"
+
+#: ../src/configuration/e-mapi-config-utils.c:566
+msgid "Fetching folder list…"
+msgstr "సంచయం జాబితాను తెచ్చుకొంటోంది..."
+
+#: ../src/configuration/e-mapi-config-utils.c:732
+#, c-format
+msgid "Cannot edit permissions of folder '%s', choose other folder."
+msgstr "సంచయం '%s' యొక్క అనుమతులను సరికూర్చలేదు, వేరే సంచయం సృష్టించు."
+
+#: ../src/configuration/e-mapi-config-utils.c:795
+msgid "Folder size..."
+msgstr "సంచయం పరిమాణము..."
+
+#: ../src/configuration/e-mapi-config-utils.c:802
+msgid "Subscribe to folder of other user..."
+msgstr "ఇతర వాడుకరి యొక్క సంచయంకు సబ్‌స్క్రైబ్ అవ్వు..."
+
+#: ../src/configuration/e-mapi-config-utils.c:811
+#: ../src/configuration/e-mapi-config-utils.c:1089
+#: ../src/configuration/e-mapi-config-utils.c:1119
+#: ../src/configuration/e-mapi-config-utils.c:1149
+#: ../src/configuration/e-mapi-config-utils.c:1179
+msgid "Permissions..."
+msgstr "అనుమతులు..."
+
+#: ../src/configuration/e-mapi-config-utils.c:813
+msgid "Edit MAPI folder permissions"
+msgstr "MAPI సంచయం అనుమతులు సరికూర్చు"
+
+#: ../src/configuration/e-mapi-config-utils.c:1091
+msgid "Edit MAPI calendar permissions"
+msgstr "MAPI కాలెండర్ అనుమతులు సరికూర్చు"
+
+#: ../src/configuration/e-mapi-config-utils.c:1121
+msgid "Edit MAPI tasks permissions"
+msgstr "MAPI కర్తవ్యాల అనుమతులు సరికూర్చు"
+
+#: ../src/configuration/e-mapi-config-utils.c:1151
+msgid "Edit MAPI memos permissions"
+msgstr " MAPI మెమోల పరిమితులు సరికూర్చు"
+
+#: ../src/configuration/e-mapi-config-utils.c:1181
+msgid "Edit MAPI contacts permissions"
+msgstr "MAPI పరిచయాల అనుమతులు సరికూర్చు"
+
+#: ../src/configuration/e-mapi-config-utils.c:1354
+msgid "Personal Folders"
+msgstr "వ్యక్తిగత సంచయాలు"
+
+#: ../src/configuration/e-mapi-config-utils.c:1585
+msgid "Searching remote MAPI folder structure, please wait..."
+msgstr "దూరస్థ MAPI సంచయం ఆకృతి అన్వేషిస్తోంది, దయచేసి వేచివుండు..."
+
+#: ../src/configuration/e-mapi-config-utils.c:1653
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI calendar in offline mode"
+msgstr "ఆఫ్‌లైన్ రీతినందు MAPI కాలెండర్ సృష్టించలేక పోయింది"
+
+#: ../src/configuration/e-mapi-config-utils.c:1656
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI task list in offline mode"
+msgstr "ఆఫ్‌లైన్ రీతినందు MAPI కర్తవ్య జాబితాను సృష్టించలేదు"
+
+#: ../src/configuration/e-mapi-config-utils.c:1659
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI memo list in offline mode"
+msgstr "ఆఫ్‌లైన్ రీతినందు MAPI మెమో జాబితా సృష్టించలేదు"
+
+#: ../src/configuration/e-mapi-config-utils.c:1662
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI address book in offline mode"
+msgstr "ఆఫ్‌లైన్ రీతినందు  MAPI చిరునామా పుస్తకం సృష్టించలేదు"
+
+#: ../src/configuration/e-mapi-config-utils.c:1666
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI source in offline mode"
+msgstr "ఆఫ్‌లైన్ రీతినందు MAPI మూలం సృష్టించలేదు"
+
+#: ../src/configuration/e-mapi-config-utils.c:1686
+msgid "_Location:"
+msgstr "స్థానము(_L):"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:89
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "ఏదీకాదు"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:90
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "యజమాని"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:100
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "సరికూర్పరి ప్రచురిస్తోంది"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:109
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "సరికూర్పరి"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:117
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "ప్రచురణ మూలకర్త"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:124
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "ములకర్త"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:130
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "సరికూర్చని మూలకర్త"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:135
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "పరిశీలకులు"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:138
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "సహాయకుడు"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:141
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "మలచిన"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:274
+msgid "Writing folder permissions, please wait..."
+msgstr "సంచయం అనుమతులను వ్రాయచున్నది, దయచేసి వేచివుండు..."
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:780
+#: ../src/configuration/e-mapi-search-gal-user.c:524
+msgctxt "User"
+msgid "Anonymous"
+msgstr "పేరులేని"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
+#: ../src/configuration/e-mapi-search-gal-user.c:521
+msgctxt "User"
+msgid "Default"
+msgstr "అప్రమేయం"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
+msgctxt "User"
+msgid "Unknown"
+msgstr "తెలియని"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:876
+#: ../src/configuration/e-mapi-search-gal-user.c:597
+msgid "Name"
+msgstr "పేరు"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:882
+msgid "Permission level"
+msgstr "అనుమతి స్థాయి"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:935
+msgid "Edit MAPI folder permissions..."
+msgstr "MAPI సంచయం అనుమతులు సరికూర్చు..."
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:960
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:610
+msgid "Account:"
+msgstr "ఖాతా:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:986
+#| msgid "Folder Size"
+msgid "Folder name:"
+msgstr "సంచయం పేరు:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1007
+#| msgid "Folder"
+msgid "Folder ID:"
+msgstr "సంచయం ఐడి:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1066
+msgid "Permissions"
+msgstr "అనుమతులు"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1087
+msgid "Permi_ssion level:"
+msgstr "అనుమతి స్థాయి (_s):"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1115
+msgctxt "Permissions"
+msgid "Read"
+msgstr "చదువు"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1126
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1189
+msgctxt "Permissions"
+msgid "None"
+msgstr "ఏదీకాదు"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1131
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "పూర్తి వివరాలు"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1136
+msgctxt "Permissions"
+msgid "Simple Free/Busy"
+msgstr "సాధారణ తీరిక/తీరికలేని"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1140
+msgctxt "Permissions"
+msgid "Detailed Free/Busy"
+msgstr "విశదీకృత తీరిక/తీరికలేని"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1147
+msgctxt "Permissions"
+msgid "Write"
+msgstr "వ్రాయి"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1158
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "అంశాలను సృష్టించు"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "ఉపసంచయాలను సృష్టించు"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr "స్వంతవి సరిచేయి"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1170
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "అన్నిటిని సరిచేయి"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1178
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "అంశాలను తొలగించు"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1194
+msgctxt "Permissions"
+msgid "Own"
+msgstr "స్వంతవి"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1199
+msgctxt "Permissions"
+msgid "All"
+msgstr "అన్ని"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1205
+msgctxt "Permissions"
+msgid "Other"
+msgstr "ఇతర"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1216
+#| msgid "Folder Size"
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "సంచయం యజమాని"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
+#| msgid "Folder"
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr "సంచయం సంప్రదింపు"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr "సంచయం కనబడుతోంది"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1279
+msgid "Reading folder permissions, please wait..."
+msgstr "సంచయ అనుమతులను చదువుట, దయచేసి వేచివుండు..."
+
+#: ../src/configuration/e-mapi-search-gal-user.c:223
+msgid "No users found"
+msgstr "ఏ వాడుకరులు కనబడలేదు"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:226
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "ఒక వాడుకరిని కనుగొనెను"
+msgstr[1] "%d వాడుకరులను కనుగొనెను."
+
+#: ../src/configuration/e-mapi-search-gal-user.c:231
+#, c-format
+msgid "Found %d user, but showing only first %d"
+msgid_plural "Found %d users, but showing only first %d"
+msgstr[0] "%d వాడుకరి కనుగొనెను, అయితే మొదటి %d మాత్రమే చూపుతోంది"
+msgstr[1] "%d వాడుకరులను కనుగొనెను, అయితే మొదటి %d మాత్రమే చూపుతోంది"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:516
+#: ../src/configuration/e-mapi-search-gal-user.c:707
+msgid "Search for a user"
+msgstr "వాడుకరి కొరకు అన్వేషిస్తోంది"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:532
+msgid "Searching..."
+msgstr "అన్వేషిస్తోంది..."
+
+#: ../src/configuration/e-mapi-search-gal-user.c:603
+msgid "E-mail"
+msgstr "ఈ-మెయిల్"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:644
+msgid "Choose MAPI user..."
+msgstr "MAPI వాడుకరి యెంచు..."
+
+#: ../src/configuration/e-mapi-search-gal-user.c:667
+msgid "_Search:"
+msgstr "అన్వేషించు (_S):"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:90
+#, c-format
+msgid "Cannot add folder, folder already exists as '%s'"
+msgstr "సంచయం జతచేయలేదు, సంచయం యిప్పటికే '%s' వలె వుంది"
+
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. Example result: "Mailbox - John Smith"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:115
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox - %s"
+msgstr "మెయిల్‌బాక్స్ - %s"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:144
+#, c-format
+msgid "Cannot add folder, failed to add to store's summary"
+msgstr "సంచయం జతచేయలేదు , నిల్వ యొక్క సంగ్రహంకు జతచేయుటకు విఫలమైంది"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:326
+#, c-format
+msgid ""
+"Folder '%s' not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr ""
+"సంచయం '%s' కనుగొనలేదు. ఒకవేళ అది వుండివండదు లేదా మీరు దానిని యాక్సెస్ చేయుటకు "
+"అనుమతి "
+"కలిగిలేరు."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:356
+msgid "Cannot add folder, cannot determine folder's type"
+msgstr "సంచయాన్ని జతచేయలేదు , సంచయం యొక్క రకాన్ని నిర్ణయించలేదు"
+
+#. Translators: This is used to name foreign folder.
+#. The first '%s' is replaced with user name to whom the folder belongs,
+#. the second '%s' is replaced with folder name.
+#. Example result: "John Smith - Calendar"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:397
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s - %s"
+msgstr "%s - %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:492
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:688
+msgid "Inbox"
+msgstr "ఇన్బాక్స్"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:494
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
+msgid "Contacts"
+msgstr "పరిచయాలు"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:496
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:690
+msgid "Calendar"
+msgstr "క్యాలెండర్"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:498
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:691
+msgid "Memos"
+msgstr "మెమోలు"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:500
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:692
+msgid "Tasks"
+msgstr "కర్తవ్యాలు"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:513
+#, c-format
+msgid "Testing availability of folder '%s' of user '%s', please wait..."
+msgstr ""
+"సంచయం '%s' యొక్క వాడుకరి '%s' యొక్క పరీక్షణా అందుబాటు, దయచేసి వేచివుండు..."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:589
+msgid "Subscribe to folder of other MAPI user..."
+msgstr "వేరొక MAPI వాడుకరి యొక్క సంచయంకు సబ్‌స్క్రైబ్ అవ్వుము..."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:638
+msgid "User"
+msgstr "వాడుకరి"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:645
+msgid "_User:"
+msgstr "వాడుకరి (_U):"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:658
+msgid "C_hoose..."
+msgstr "ఎంచు (_h)..."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:673
+#| msgid "Folder Size"
+msgid "_Folder name:"
+msgstr "సంచయం పేరు (_F):"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2059
+msgctxt "MeetingResp"
+msgid "Accepted:"
+msgstr "అంగీకరించెను:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2064
+msgctxt "MeetingResp"
+msgid "Tentative:"
+msgstr "తాత్కాలిక:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2069
+msgctxt "MeetingResp"
+msgid "Declined:"
+msgstr "తిరస్కరించిన:"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:140
 msgid "Failed to login into the server"
-msgstr ""
+msgstr "సేవికకు లాగిన్ అవ్వుటకు విఫలమైంది"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:101
+#: ../src/libexchangemapi/e-mapi-connection.c:141
 msgid "Cannot create more sessions, session limit was reached"
-msgstr ""
+msgstr "మరిన్ని సెషన్లను సృష్టించలేదు, సెషన్ పరిమితి చేరుకొంది"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:102
+#: ../src/libexchangemapi/e-mapi-connection.c:142
 msgid "User cancelled operation"
-msgstr ""
+msgstr "ఆపరేషన్‌ను వాడుకరి రద్దుచేసెను"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:103
+#: ../src/libexchangemapi/e-mapi-connection.c:143
 msgid "Unable to abort"
-msgstr ""
+msgstr "విరమించలేదు"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:104
+#: ../src/libexchangemapi/e-mapi-connection.c:144
 msgid "Network error"
-msgstr ""
+msgstr "నెట్వర్కు దోషం"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:105
+#: ../src/libexchangemapi/e-mapi-connection.c:145
 msgid "Disk error"
-msgstr ""
+msgstr "డిస్కు దోషం"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:106
+#: ../src/libexchangemapi/e-mapi-connection.c:146
 msgid "Password change required"
-msgstr ""
+msgstr "సంకేతపదం మార్పు అవసరమైంది"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:107
-#, fuzzy
+#: ../src/libexchangemapi/e-mapi-connection.c:147
 msgid "Password expired"
-msgstr "రహస్యపదం"
+msgstr "సంకేతపదం గడువుతీరెెను"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:108
+#: ../src/libexchangemapi/e-mapi-connection.c:148
 msgid "Invalid workstation account"
-msgstr ""
+msgstr "చెల్లని వర్కుస్టేషన్ ఖాతా"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:109
+#: ../src/libexchangemapi/e-mapi-connection.c:149
 msgid "Invalid access time"
-msgstr ""
+msgstr "చెల్లని యాక్సెస్ సమయం"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:110
+#: ../src/libexchangemapi/e-mapi-connection.c:150
 msgid "Account is disabled"
-msgstr ""
+msgstr "ఖాతా అచేతనమైను"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:111
+#: ../src/libexchangemapi/e-mapi-connection.c:151
 msgid "End of session"
-msgstr ""
+msgstr "సెషన్ యొక్క ముగింపు"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:116
+#: ../src/libexchangemapi/e-mapi-connection.c:152
+msgid "MAPI is not initialized or connected"
+msgstr "MAPI సిద్దంకాలేదు లేదా అనుసంధానంకాలేదు"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:153
+msgid "Permission denied"
+msgstr "అనుమతి తిరస్కరించబడెను"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:154
+msgid "Mailbox quota exceeded"
+msgstr "మెయిల్‌బాక్స్ కోటా మించెను"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:162
 #, c-format
 msgid "MAPI error %s (0x%x) occurred"
-msgstr ""
+msgstr "MAPI దోషం %s (0x%x) యెదురైను"
 
 #. Translators: The first '%s' is replaced with an error context,
 #. aka where the error occurred, the second '%s' is replaced with
 #. the error message.
-#: ../src/libexchangemapi/exchange-mapi-connection.c:126
+#: ../src/libexchangemapi/e-mapi-connection.c:179
 #, c-format
 msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
-msgstr ""
+msgstr "%s: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3275
+#: ../src/libexchangemapi/e-mapi-connection.c:743
+#, c-format
+msgid "Server '%s' cannot be reached"
+msgstr "సేవిక '%s' చేరుకోలేదు"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:864
+#, c-format
+msgid "Folder name '%s' is not a known default folder name, nor folder ID."
+msgstr ""
+"సంచయం పేరు '%s' అనునది తెలిసిన అప్రమేయ సంచయం పేరు కాదు, సంచయం ఐడి కాదు."
+
+#: ../src/libexchangemapi/e-mapi-connection.c:1195
+#, c-format
+msgid "Failed to open store for user '%s'"
+msgstr "వాడుకరి '%s' కొరకు నిల్వ తెరుచుటకు విఫలమైను"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:1203
+#, c-format
+msgid "Folder of user '%s' not found"
+msgstr "వాడుకరి '%s' యొక్క సంచయం కనబడలేదు"
+
+#. Translators: %s is replaced with an email address which was found ambiguous on a remote server
+#: ../src/libexchangemapi/e-mapi-connection.c:3686
+#, c-format
+msgid "Recipient '%s' is ambiguous"
+msgstr "స్వీకర్త '%s' అనిశ్చయం"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:4565
+#, c-format
+msgid ""
+"Search result exceeded allowed size limit. Use more specific search term, "
+"please"
+msgstr ""
+"అన్వేషణ ఫలితాలు అనుమతించిన పరిమాణ పరిధిని దాటినవి. దయచేసి, మరింత నిర్దిష్ట "
+"అన్వేషణ పదం వుపయోగించు"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6165
 msgid "All Public Folders"
 msgstr "అన్ని పబ్లిక్ సంచయాలు"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6422
+#, c-format
+msgid "User name '%s' is ambiguous"
+msgstr "వాడుకరి పేరు '%s' అనిశ్చయం"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6425
+#, c-format
+msgid "User name '%s' not found"
+msgstr "వాడుకరి పేరు '%s' కనుగొనలేదు"
+
+#: ../src/libexchangemapi/e-mapi-folder.c:332
+msgid "Cannot add folder, unsupported folder type"
+msgstr "సంచయం జతచేయ లేదు, తోడ్పాటునీయని సంచయం రకం"
+
+#: ../src/libexchangemapi/e-mapi-folder.c:335
+msgid "Cannot add folder, master source not found"
+msgstr "సంచయం జతచేయలేదు, మాస్టర్ మూలం కనబడలేదు"
+
+#~ msgid "Enter Password for %s@%s"
+#~ msgstr "%s@%s కొరకు సంకేతపదమును ప్రవేశపెట్టండి"
+
+#~ msgid "Miscellaneous"
+#~ msgstr "నానావిధమైన"
+
+#, fuzzy
+#~ msgid "Failed to fetch changes from a server"
+#~ msgstr "సేవికనుండి మార్పులను పొందుటలో దోషము."
+
+#~ msgid "Could not create thread for populating cache"
+#~ msgstr "క్యాచి ని ప్రసిద్దిచెందించుటకు తంతిని సృష్టించలేకపోయింది"
+
+#~ msgid "Updating local summary cache for new messages in %s"
+#~ msgstr "%s లోని కొత్త సందేశాల కొరకు స్థానిక సంక్షింప్త సమాచారాన్ని నవీకరిస్తోంది"
+
+#~ msgid "Retrieving message IDs from server for %s"
+#~ msgstr "%s కొరకు సేవికనుండి సందేశపు IDలను పొందుచున్నది"
+
+#~ msgid "Removing deleted messages from cache in %s"
+#~ msgstr "%s నందలి క్యాచీనుండి తొలగించిన సందేశములను తీసివేయుచున్నది"
+
+#~ msgid "Fetching summary information for new messages in %s"
+#~ msgstr "%s లో కొత్త సందేశాల కొరకు సంక్షింప్తమైన సమాచారాన్ని తీసుకువస్తున్నది"
+
+#~ msgid "%s Please enter the MAPI password for %s@%s"
+#~ msgstr "%s దయచేసి %s@%s కొరకు MAPI సంకేతపదమును ప్రవేశపెట్టుము"
+
+#~ msgid "You did not enter a password."
+#~ msgstr "నీవు రహస్యపదమును ప్రవేశపెట్టలేదు."
+
+#, fuzzy
+#~ msgid "Unable to authenticate to Exchange MAPI server: %s"
+#~ msgstr "MAPI సేవికను పరస్పరం మార్చుకొనుటకు దృవీకరించలేక పోతోంది."
+
+#, fuzzy
+#~ msgid "Unable to authenticate to Exchange MAPI server"
+#~ msgstr "MAPI సేవికను పరస్పరం మార్చుకొనుటకు దృవీకరించలేక పోతోంది."
 
 #~ msgid "Folders Size"
 #~ msgstr "ఫోల్డర్ల పరిమాణము"
