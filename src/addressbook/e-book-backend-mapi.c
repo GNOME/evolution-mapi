@@ -111,47 +111,41 @@ get_current_time_ms (void)
 	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 
-static gboolean
-pick_view_cb (EDataBookView *view, gpointer user_data)
-{
-	EDataBookView **pick = user_data;
-
-	g_return_val_if_fail (user_data != NULL, FALSE);
-
-	/* just always use the first book view */
-	*pick = view;
-	return view == NULL;
-}
-
 static EDataBookView *
 ebbm_pick_book_view (EBookBackendMAPI *ebma)
 {
 	EDataBookView *pick = NULL;
+	GList *list;
 
-	e_book_backend_foreach_view (E_BOOK_BACKEND (ebma), pick_view_cb, &pick);
+	list = e_book_backend_list_views (E_BOOK_BACKEND (ebma));
+
+	if (list != NULL) {
+		/* Note we return a new reference. */
+		pick = g_object_ref (list->data);
+	}
+
+	g_list_free_full (list, (GDestroyNotify) g_object_unref);
 
 	return pick;
-}
-
-static gboolean
-complete_view_cb (EDataBookView *view, gpointer user_data)
-{
-	EBookBackendMAPI *ebma = user_data;
-
-	g_return_val_if_fail (ebma != NULL, FALSE);
-
-	if (e_book_backend_mapi_book_view_is_running (ebma, view))
-		e_book_backend_mapi_update_view_by_cache (ebma, view, NULL);
-
-	e_data_book_view_notify_complete (view, NULL);
-
-	return TRUE;
 }
 
 static void
 complete_views (EBookBackendMAPI *ebma)
 {
-	e_book_backend_foreach_view (E_BOOK_BACKEND (ebma), complete_view_cb, ebma);
+	GList *list, *link;
+
+	list = e_book_backend_list_views (E_BOOK_BACKEND (ebma));
+
+	for (link = list; link != NULL; link = g_list_next (link)) {
+		EDataBookView *view = E_DATA_BOOK_VIEW (link->data);
+
+		if (e_book_backend_mapi_book_view_is_running (ebma, view))
+			e_book_backend_mapi_update_view_by_cache (ebma, view, NULL);
+
+		e_data_book_view_notify_complete (view, NULL);
+	}
+
+	g_list_free_full (list, (GDestroyNotify) g_object_unref);
 }
 
 static void
@@ -1557,8 +1551,10 @@ e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma,
 		book_view = ebbm_pick_book_view (ebma);
 
 	if (book_view) {
-		if (!e_book_backend_mapi_book_view_is_running (ebma, book_view))
+		if (!e_book_backend_mapi_book_view_is_running (ebma, book_view)) {
+			g_object_unref (book_view);
 			return FALSE;
+		}
 
 		if (index > 0 && last_notification && current_time - *last_notification > 333) {
 			gchar *status_msg = NULL;
@@ -1574,6 +1570,8 @@ e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma,
 
 			*last_notification = current_time;
 		}
+
+		g_object_unref (book_view);
 	}
 
 	if (!pbook_view && g_cancellable_is_cancelled (priv->update_cache))

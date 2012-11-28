@@ -66,7 +66,6 @@ typedef struct
 	void (*op_modify_contacts) (EBookBackendMAPI *ebma, GCancellable *cancellable, const GSList *vcards, GSList **modified_contacts, GError **error);
 	void (*op_get_contact) (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *id, gchar **vcard, GError **error);
 	void (*op_get_contact_list) (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *query, GSList **vCards, GError **error);
-	void (*op_authenticate_user) (EBookBackendMAPI *ebma, GCancellable *cancellable, ECredentials *credentials, GError **error);
 
 	/* called when online state changes on the backend */
 	void (*op_connection_status_changed) (EBookBackendMAPI *ebma, gboolean is_online);

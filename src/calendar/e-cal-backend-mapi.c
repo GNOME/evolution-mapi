@@ -398,64 +398,62 @@ get_element_type (icalcomponent_kind kind)
 }
 #endif
 
-struct EMAPIProgressData
-{
-	gint percent;
-	const gchar *msg;
-};
-
-static gboolean
-view_progress_cb (EDataCalView *view, gpointer user_data)
-{
-	struct EMAPIProgressData *pd = user_data;
-
-	g_return_val_if_fail (pd != NULL, FALSE);
-
-	if (!e_data_cal_view_is_completed (view) && !e_data_cal_view_is_stopped (view))
-		e_data_cal_view_notify_progress (view, pd->percent, pd->msg);
-
-	/* continue with the next */
-	return TRUE;
-}
-
 static void
 notify_view_progress (ECalBackendMAPI *cbmapi, guint index, guint total)
 {
-	struct EMAPIProgressData pd = { 0 };
+	GList *list, *link;
 	gchar *progress_string;
+	gint percent = -1;
 
 	if (total > 0)
-		pd.percent = index * 100 / total;
-	else
-		pd.percent = -1;
+		percent = index * 100 / total;
 
-	if (pd.percent > 100)
-		pd.percent = 99;
+	if (percent > 100)
+		percent = 99;
 
 	/* To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server. */
 	progress_string = g_strdup_printf (_("Loading items in folder %s"),
 				e_source_get_display_name (e_backend_get_source (E_BACKEND (cbmapi))));
 
-	pd.msg = progress_string;
+	list = e_cal_backend_list_views (E_CAL_BACKEND (cbmapi));
 
-	e_cal_backend_foreach_view (E_CAL_BACKEND (cbmapi), view_progress_cb, &pd);
+	for (link = list; link != NULL; link = g_list_next (link)) {
+		EDataCalView *view = E_DATA_CAL_VIEW (link->data);
+
+		if (e_data_cal_view_is_completed (view))
+			continue;
+
+		if (e_data_cal_view_is_stopped (view))
+			continue;
+
+		e_data_cal_view_notify_progress (view, percent, progress_string);
+	}
+
+	g_list_free_full (list, (GDestroyNotify) g_object_unref);
 
 	g_free (progress_string);
-}
-
-static gboolean
-view_completed_cb (EDataCalView *view, gpointer user_data)
-{
-	if (!e_data_cal_view_is_completed (view) && !e_data_cal_view_is_stopped (view))
-		e_data_cal_view_notify_complete (view, NULL);
-
-	return TRUE;
 }
 
 static void
 notify_view_completed (ECalBackendMAPI *cbmapi)
 {
-	e_cal_backend_foreach_view (E_CAL_BACKEND (cbmapi), view_completed_cb, NULL);
+	GList *list, *link;
+
+	list = e_cal_backend_list_views (E_CAL_BACKEND (cbmapi));
+
+	for (link = list; link != NULL; link = g_list_next (link)) {
+		EDataCalView *view = E_DATA_CAL_VIEW (link->data);
+
+		if (e_data_cal_view_is_completed (view))
+			continue;
+
+		if (e_data_cal_view_is_stopped (view))
+			continue;
+
+		e_data_cal_view_notify_complete (view, NULL);
+	}
+
+	g_list_free_full (list, (GDestroyNotify) g_object_unref);
 }
 
 static icaltimezone *
