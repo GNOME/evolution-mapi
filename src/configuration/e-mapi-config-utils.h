@@ -22,8 +22,6 @@
 #include <gtk/gtk.h>
 
 #include <shell/e-shell-view.h>
-#include <misc/e-source-config.h>
-#include <misc/e-source-config-backend.h>
 
 #include "e-mapi-connection.h"
 #include "camel-mapi-settings.h"

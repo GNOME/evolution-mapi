@@ -20,8 +20,6 @@
 #include <config.h>
 #endif
 
-#include <misc/e-book-source-config.h>
-
 #include "e-book-config-mapi.h"
 #include "e-mapi-config-utils.h"
 

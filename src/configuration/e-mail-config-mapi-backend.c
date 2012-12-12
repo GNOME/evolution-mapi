@@ -26,7 +26,6 @@
 #include <libebackend/libebackend.h>
 #include <libedataserver/libedataserver.h>
 
-#include <e-util/e-dialog-utils.h>
 #include <mail/e-mail-config-auth-check.h>
 #include <mail/e-mail-config-receiving-page.h>
 #include <shell/e-shell.h>

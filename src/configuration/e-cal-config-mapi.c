@@ -20,8 +20,6 @@
 #include <config.h>
 #endif
 
-#include <misc/e-cal-source-config.h>
-
 #include "e-cal-config-mapi.h"
 #include "e-mapi-config-utils.h"
 

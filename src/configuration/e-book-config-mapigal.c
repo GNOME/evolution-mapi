@@ -22,8 +22,6 @@
 
 #include <glib/gi18n-lib.h>
 
-#include <misc/e-book-source-config.h>
-
 #include "e-source-mapi-folder.h"
 #include "e-book-config-mapigal.h"
 
