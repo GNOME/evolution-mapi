@@ -2198,7 +2198,7 @@ mapi_connect_sync (CamelService *service,
 			}
 
 			if (msg) {
-				camel_session_alert_user (session, CAMEL_SESSION_ALERT_WARNING, msg, NULL);
+				camel_session_alert_user (session, CAMEL_SESSION_ALERT_WARNING, msg, NULL, cancellable);
 				g_free (msg);
 			}
 		}
