@@ -1,3 +1,21 @@
+evolution-mapi 3.7.3 2012-12-17
+-------------------------------
+
+Bugs:
+	Bug #671053 - Lock CamelStoreSummary on folder list update (Milan Crha)
+
+Miscellanous:
+	Use version-based GLib/GDK/GTK+ warnings. (Matthew Barnes)
+	Use EDS_DISABLE_DEPRECATED for --enable-strict. (Matthew Barnes)
+	Do not generate a ChangeLog file from 'git log' (Milan Crha)
+	Adapt to Evolution library consolidation. (Matthew Barnes)
+	Adapt to camel_session_alert_user() prototype change (Milan Crha)
+
+Translations:
+	Krishnababu Krothapalli (te)
+	Sayak Sarkar (bn_IN)
+	Dr.T.Vasudevan (ta)
+
 evolution-mapi 3.7.2 2012-11-19
 -------------------------------
 
