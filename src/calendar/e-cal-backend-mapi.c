@@ -459,16 +459,11 @@ notify_view_completed (ECalBackendMAPI *cbmapi)
 static icaltimezone *
 resolve_tzid (const char *tzid, gpointer user_data)
 {
-	icaltimezone *zone;
+	ETimezoneCache *timezone_cache;
 
-	zone = (!strcmp (tzid, "UTC"))
-		? icaltimezone_get_utc_timezone ()
-		: icaltimezone_get_builtin_timezone_from_tzid (tzid);
+	timezone_cache = E_TIMEZONE_CACHE (user_data);
 
-	if (!zone)
-		zone = e_cal_backend_internal_get_timezone (E_CAL_BACKEND (user_data), tzid);
-
-	return zone;
+	return e_timezone_cache_get_timezone (timezone_cache, tzid);
 }
 
 static void
@@ -981,7 +976,7 @@ ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 		if (e_cal_backend_get_kind (E_CAL_BACKEND (backend)) ==
 				icalcomponent_isa (e_cal_component_get_icalcomponent (comp))) {
 			if ((!search_needed) ||
-					(e_cal_backend_sexp_match_comp (cbsexp, comp, E_CAL_BACKEND (backend)))) {
+					(e_cal_backend_sexp_match_comp (cbsexp, comp, E_TIMEZONE_CACHE (backend)))) {
 				*objects = g_slist_append (*objects, e_cal_component_get_as_string (comp));
 			}
 		}
@@ -1367,7 +1362,7 @@ ecbm_open (ECalBackend *backend,
 
 	/* Always create cache here */
 	cache_dir = e_cal_backend_get_cache_dir (backend);
-	priv->store = e_cal_backend_file_store_new (cache_dir);
+	priv->store = e_cal_backend_store_new (cache_dir, E_TIMEZONE_CACHE (backend));
 
 	if (!priv->store) {
 		g_mutex_unlock (&priv->mutex);
@@ -1617,8 +1612,6 @@ free_server_data (struct cal_cbdata *cbdata)
 	_des = g_strdup (_new);				\
 	} G_STMT_END
 
-static icaltimezone *ecbm_internal_get_timezone (ECalBackend *backend, const gchar *tzid);
-
 static void
 ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *calobj, gchar **uid, ECalComponent **new_ecalcomp, GError **error)
 {
@@ -1682,7 +1675,7 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		cbdata.ownername = g_strdup (ecbm_get_owner_name (cbmapi));
 		cbdata.owneridtype = (gchar *) "SMTP";
 		cbdata.ownerid = g_strdup (ecbm_get_owner_email (cbmapi));
-		cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) ecbm_internal_get_timezone;
+		cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) e_timezone_cache_get_timezone;
 		cbdata.get_tz_data = cbmapi;
 
 		/* Create an appointment */
@@ -1864,7 +1857,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	/* rid = e_cal_component_get_recurid_as_string (comp); */
 
 	cbdata.kind = kind;
-	cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) ecbm_internal_get_timezone;
+	cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) e_timezone_cache_get_timezone;
 	cbdata.get_tz_data = cbmapi;
 
 	conn = e_cal_backend_mapi_get_connection (cbmapi, cancellable, &mapi_error);
@@ -2149,7 +2142,7 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 			free_and_dupe_str (cbdata.ownername, ecbm_get_owner_name (cbmapi));
 			free_and_dupe_str (cbdata.owneridtype, "SMTP");
 			free_and_dupe_str (cbdata.ownerid, ecbm_get_owner_email (cbmapi));
-			cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) ecbm_internal_get_timezone;
+			cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) e_timezone_cache_get_timezone;
 			cbdata.get_tz_data = cbmapi;
 
 			e_cal_component_get_uid (comp, &compuid);
@@ -2394,11 +2387,13 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 static void
 ecbm_get_timezone (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *tzid, gchar **object, GError **error)
 {
+	ETimezoneCache *timezone_cache;
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
 	icaltimezone *zone = NULL;
 
 	cbmapi = (ECalBackendMAPI *) backend;
+	timezone_cache = E_TIMEZONE_CACHE (backend);
 
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (tzid != NULL, InvalidArg);
@@ -2406,7 +2401,7 @@ ecbm_get_timezone (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 	priv = cbmapi->priv;
 	e_return_data_cal_error_if_fail (priv != NULL, InvalidArg);
 
-	zone = ecbm_internal_get_timezone (E_CAL_BACKEND (backend), tzid);
+	zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
 
 	if (!zone) {
 		g_propagate_error (error, e_data_cal_create_error (ObjectNotFound, NULL));
@@ -2427,15 +2422,14 @@ static void
 ecbm_add_timezone (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *tzobj, GError **error)
 {
 	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
+	ETimezoneCache *timezone_cache;
 	icalcomponent *tz_comp;
 
 	cbmapi = (ECalBackendMAPI *) backend;
+	timezone_cache = E_TIMEZONE_CACHE (backend);
 
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 	e_return_data_cal_error_if_fail (tzobj != NULL, InvalidArg);
-
-	priv = cbmapi->priv;
 
 	tz_comp = icalparser_parse_string (tzobj);
 	if (!tz_comp) {
@@ -2447,9 +2441,7 @@ ecbm_add_timezone (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 		icaltimezone *zone;
 		zone = icaltimezone_new ();
 		icaltimezone_set_component (zone, tz_comp);
-
-		e_cal_backend_store_put_timezone (priv->store, zone);
-
+		e_timezone_cache_add_timezone (timezone_cache, zone);
 		icaltimezone_free (zone, 1);
 	}
 }
@@ -2530,7 +2522,7 @@ ecbm_start_view (ECalBackend *backend, EDataCalView *view)
 		if (e_cal_backend_get_kind (E_CAL_BACKEND (backend)) ==
 				icalcomponent_isa (e_cal_component_get_icalcomponent (comp))) {
 			if ((!search_needed) ||
-					(e_cal_backend_sexp_match_comp (cbsexp, comp, E_CAL_BACKEND (backend)))) {
+					(e_cal_backend_sexp_match_comp (cbsexp, comp, E_TIMEZONE_CACHE (backend)))) {
 				e_data_cal_view_notify_components_added_1 (view, comp);
 			}
 		}
@@ -2572,56 +2564,6 @@ ecbm_notify_online_cb (ECalBackend *backend, GParamSpec *pspec)
 	e_cal_backend_notify_readonly (backend, priv->read_only);
 	e_cal_backend_notify_online (backend, online);
 	g_mutex_unlock (&priv->mutex);
-}
-
-static icaltimezone *
-ecbm_internal_get_timezone (ECalBackend *backend, const gchar *tzid)
-{
-	ECalBackendMAPI *cbmapi;
-	icaltimezone *zone;
-
-	cbmapi = E_CAL_BACKEND_MAPI (backend);
-
-	g_return_val_if_fail (cbmapi != NULL, NULL);
-	g_return_val_if_fail (cbmapi->priv != NULL, NULL);
-	g_return_val_if_fail (tzid != NULL, NULL);
-
-	if (tzid && g_str_equal (tzid, "*default-zone*"))
-		zone = icaltimezone_get_utc_timezone ();
-	else
-		zone = (icaltimezone *) e_cal_backend_store_get_timezone (cbmapi->priv->store, tzid);
-
-	if (!zone && E_CAL_BACKEND_CLASS (e_cal_backend_mapi_parent_class)->internal_get_timezone)
-		zone = E_CAL_BACKEND_CLASS (e_cal_backend_mapi_parent_class)->internal_get_timezone (backend, tzid);
-
-	if (!zone) {
-		if (!tzid || !*tzid)
-			return NULL;
-
-		zone = icaltimezone_get_builtin_timezone_from_tzid (tzid);
-
-		if (!zone) {
-			const gchar *s, *slash1 = NULL, *slash2 = NULL;
-
-			/* get builtin by a location, if any */
-			for (s = tzid; *s; s++) {
-				if (*s == '/') {
-					slash1 = slash2;
-					slash2 = s;
-				}
-			}
-
-			if (slash1)
-				zone = icaltimezone_get_builtin_timezone (slash1 + 1);
-			else if (slash2)
-				zone = icaltimezone_get_builtin_timezone (tzid);
-		}
-
-		if (!zone)
-			zone = icaltimezone_get_utc_timezone ();
-	}
-
-	return zone;
 }
 
 /* Async OP functions, data structures and so on */
@@ -3573,9 +3515,6 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 	backend_class->add_timezone = ecbm_op_add_timezone;
 	backend_class->get_free_busy = ecbm_op_get_free_busy;
 	backend_class->start_view = ecbm_op_start_view;
-
-	/* functions done synchronously */
-	backend_class->internal_get_timezone = ecbm_internal_get_timezone;
 }
 
 static void
