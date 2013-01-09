@@ -3459,6 +3459,7 @@ ecbm_finalize (GObject *object)
 	g_mutex_clear (&priv->is_updating_mutex);
 
 	if (priv->store) {
+		e_cal_backend_store_save (priv->store);
 		g_object_unref (priv->store);
 		priv->store = NULL;
 	}
