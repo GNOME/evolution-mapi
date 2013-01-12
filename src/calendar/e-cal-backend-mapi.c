@@ -3204,7 +3204,7 @@ ecbm_op_create_objects (ECalBackend *backend,
 	op->base.cal = cal;
 	op->base.opid = opid;
 	op->base.cancellable = cancellable;
-	op->calobjs = e_util_copy_string_slist (NULL, calobjs);
+	op->calobjs = g_slist_copy_deep (calobjs, (GCopyFunc) g_strdup, NULL);
 
 	e_mapi_operation_queue_push (priv->op_queue, op);
 }
@@ -3239,7 +3239,7 @@ ecbm_op_modify_objects (ECalBackend *backend,
 	op->base.cal = cal;
 	op->base.opid = opid;
 	op->base.cancellable = cancellable;
-	op->calobjs = e_util_copy_string_slist (NULL, calobjs);
+	op->calobjs = g_slist_copy_deep (calobjs, (GCopyFunc) g_strdup, NULL);
 	op->mod = mod;
 
 	e_mapi_operation_queue_push (priv->op_queue, op);
