@@ -933,10 +933,10 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 
 			e_data_book_respond_create_contacts (op->book, op->opid, error, added_contacts);
 
-			e_util_free_object_slist (added_contacts);
+			g_slist_free_full (added_contacts, (GDestroyNotify) g_object_unref);
 		}
 
-		e_util_free_string_slist (ops->str_slist);
+		g_slist_free_full (ops->str_slist, (GDestroyNotify) g_free);
 	} break;
 	case OP_REMOVE_CONTACTS: {
 		OperationStrSlist *ops = (OperationStrSlist *) op;
@@ -970,7 +970,7 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 			g_slist_free (removed_ids);
 		}
 
-		e_util_free_string_slist (ops->str_slist);
+		g_slist_free_full (ops->str_slist, (GDestroyNotify) g_free);
 	} break;
 	case OP_MODIFY_CONTACTS: {
 		OperationStrSlist *ops = (OperationStrSlist *) op;
@@ -997,10 +997,10 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 
 			e_data_book_respond_modify_contacts (op->book, op->opid, error, modified_contacts);
 
-			e_util_free_object_slist (modified_contacts);
+			g_slist_free_full (modified_contacts, (GDestroyNotify) g_object_unref);
 		}
 
-		e_util_free_string_slist (ops->str_slist);
+		g_slist_free_full (ops->str_slist, (GDestroyNotify) g_free);
 	} break;
 	case OP_GET_CONTACT: {
 		OperationStr *ops = (OperationStr *) op;

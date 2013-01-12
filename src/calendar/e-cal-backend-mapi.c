@@ -2725,11 +2725,11 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 			e_data_cal_respond_create_objects (op->cal, op->opid, error, uids, new_components);
 
 			/* free memory */
-			e_util_free_string_slist (uids);
+			g_slist_free_full (uids, (GDestroyNotify) g_free);
 			e_util_free_nullable_object_slist (new_components);
 		}
 
-		e_util_free_string_slist (opc->calobjs);
+		g_slist_free_full (opc->calobjs, (GDestroyNotify) g_free);
 	} break;
 	case OP_MODIFY_OBJECTS: {
 		OperationModify *opm = (OperationModify *) op;
@@ -2763,7 +2763,7 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 			e_util_free_nullable_object_slist (new_components);
 		}
 
-		e_util_free_string_slist (opm->calobjs);
+		g_slist_free_full (opm->calobjs, (GDestroyNotify) g_free);
 	} break;
 	case OP_REMOVE_OBJECTS: {
 		OperationRemove *opr = (OperationRemove *) op;
