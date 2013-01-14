@@ -128,7 +128,7 @@ mapi_send_to_sync (CamelTransport *transport,
 			}
 		}
 
-		g_list_free_full (services, (GDestroyNotify) g_object_unref);
+		g_list_free_full (services, g_object_unref);
 	}
 
 	conn = e_mapi_connection_find (profile);

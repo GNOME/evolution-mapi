@@ -429,7 +429,7 @@ notify_view_progress (ECalBackendMAPI *cbmapi, guint index, guint total)
 		e_data_cal_view_notify_progress (view, percent, progress_string);
 	}
 
-	g_list_free_full (list, (GDestroyNotify) g_object_unref);
+	g_list_free_full (list, g_object_unref);
 
 	g_free (progress_string);
 }
@@ -453,7 +453,7 @@ notify_view_completed (ECalBackendMAPI *cbmapi)
 		e_data_cal_view_notify_complete (view, NULL);
 	}
 
-	g_list_free_full (list, (GDestroyNotify) g_object_unref);
+	g_list_free_full (list, g_object_unref);
 }
 
 static icaltimezone *
@@ -2725,11 +2725,11 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 			e_data_cal_respond_create_objects (op->cal, op->opid, error, uids, new_components);
 
 			/* free memory */
-			g_slist_free_full (uids, (GDestroyNotify) g_free);
+			g_slist_free_full (uids, g_free);
 			e_util_free_nullable_object_slist (new_components);
 		}
 
-		g_slist_free_full (opc->calobjs, (GDestroyNotify) g_free);
+		g_slist_free_full (opc->calobjs, g_free);
 	} break;
 	case OP_MODIFY_OBJECTS: {
 		OperationModify *opm = (OperationModify *) op;
@@ -2763,7 +2763,7 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 			e_util_free_nullable_object_slist (new_components);
 		}
 
-		g_slist_free_full (opm->calobjs, (GDestroyNotify) g_free);
+		g_slist_free_full (opm->calobjs, g_free);
 	} break;
 	case OP_REMOVE_OBJECTS: {
 		OperationRemove *opr = (OperationRemove *) op;
@@ -3204,7 +3204,7 @@ ecbm_op_create_objects (ECalBackend *backend,
 	op->base.cal = cal;
 	op->base.opid = opid;
 	op->base.cancellable = cancellable;
-	op->calobjs = g_slist_copy_deep (calobjs, (GCopyFunc) g_strdup, NULL);
+	op->calobjs = g_slist_copy_deep ((GSList *) calobjs, (GCopyFunc) g_strdup, NULL);
 
 	e_mapi_operation_queue_push (priv->op_queue, op);
 }
@@ -3239,7 +3239,7 @@ ecbm_op_modify_objects (ECalBackend *backend,
 	op->base.cal = cal;
 	op->base.opid = opid;
 	op->base.cancellable = cancellable;
-	op->calobjs = g_slist_copy_deep (calobjs, (GCopyFunc) g_strdup, NULL);
+	op->calobjs = g_slist_copy_deep ((GSList *) calobjs, (GCopyFunc) g_strdup, NULL);
 	op->mod = mod;
 
 	e_mapi_operation_queue_push (priv->op_queue, op);

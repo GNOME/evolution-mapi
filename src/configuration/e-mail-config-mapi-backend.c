@@ -802,7 +802,7 @@ mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		G_BINDING_SYNC_CREATE,
 		transform_security_method_to_boolean,
 		transform_boolean_to_security_method,
-		NULL, (GDestroyNotify) NULL);
+		NULL, NULL);
 
 	krb_sso = gtk_check_button_new_with_mnemonic (_("_Kerberos authentication"));
 	gtk_widget_set_hexpand (secure_conn, TRUE);

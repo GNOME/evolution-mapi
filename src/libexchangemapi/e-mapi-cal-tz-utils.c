@@ -253,17 +253,11 @@ e_mapi_cal_tz_util_populate (void)
 		return FALSE;
 	}
 
-	mapi_to_ical = g_hash_table_new_full   ((GHashFunc) g_str_hash,
-						(GEqualFunc) g_str_equal,
-						(GDestroyNotify) g_free,
-						(GDestroyNotify) g_free);
+	mapi_to_ical = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
 	file_contents_to_hashtable (g_mapped_file_get_contents (mtoi_mf), mapi_to_ical);
 
-	ical_to_mapi = g_hash_table_new_full   ((GHashFunc) g_str_hash,
-						(GEqualFunc) g_str_equal,
-						(GDestroyNotify) g_free,
-						(GDestroyNotify) g_free);
+	ical_to_mapi = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
 	file_contents_to_hashtable (g_mapped_file_get_contents (itom_mf), ical_to_mapi);
 

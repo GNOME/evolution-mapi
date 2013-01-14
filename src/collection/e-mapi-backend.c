@@ -804,10 +804,10 @@ e_mapi_backend_init (EMapiBackend *backend)
 	backend->priv = E_MAPI_BACKEND_GET_PRIVATE (backend);
 
 	backend->priv->folders = g_hash_table_new_full (
-		(GHashFunc) g_str_hash,
-		(GEqualFunc) g_str_equal,
-		(GDestroyNotify) g_free,
-		(GDestroyNotify) g_object_unref);
+		g_str_hash,
+		g_str_equal,
+		g_free,
+		g_object_unref);
 }
 
 void
