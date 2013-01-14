@@ -1,3 +1,18 @@
+evolution-mapi 3.7.4 2013-01-14
+-------------------------------
+
+Miscellanous:
+	Adapt to libedata-cal API changes. (Matthew Barnes)
+	Save changes before finalizing ECalBackendStore. (Matthew Barnes)
+	Revert "Save changes before finalizing ECalBackendStore." (Matthew Barnes)
+	Avoid deprecated libedataserver APIs. (Matthew Barnes)
+	Bump minimum GLib requirement to 2.34 to match E-D-S. (Matthew Barnes)
+	Avoid deprecated libedataserver APIs. (Matthew Barnes)
+	Remove redundant type casts and fix newly introduced compiler warnings (Milan Crha)
+
+Translations:
+	Rafael Ferreira (pt_BR)
+
 evolution-mapi 3.7.3 2012-12-17
 -------------------------------
 
