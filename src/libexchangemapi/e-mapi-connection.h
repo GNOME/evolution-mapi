@@ -115,6 +115,8 @@ gboolean		e_mapi_attachment_get_bin_prop	(EMapiAttachment *attachment,
 							 uint32_t proptag,
 							 uint64_t *cb,
 							 const uint8_t **lpb);
+gboolean		e_mapi_attachment_contains_prop	(EMapiAttachment *attachment,
+							 uint32_t proptag);
 
 EMapiObject *		e_mapi_object_new		(TALLOC_CTX *mem_ctx);
 void			e_mapi_object_free		(EMapiObject *object);
@@ -132,6 +134,8 @@ gboolean		e_mapi_object_get_bin_prop	(EMapiObject *object,
 							 uint32_t proptag,
 							 uint64_t *cb,
 							 const uint8_t **lpb);
+gboolean		e_mapi_object_contains_prop	(EMapiObject *object,
+							 uint32_t proptag);
 
 #define E_MAPI_PERMISSION_MEMBER_ID_ANONYMOUS_CLIENT	(~((uint64_t) 0))
 #define E_MAPI_PERMISSION_MEMBER_ID_DEFAULT_USER	((uint64_t) 0)
