@@ -891,13 +891,31 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 	icalcomponent_set_summary (ical_comp, str);
 
 	ui32 = e_mapi_util_find_array_propval (&object->properties, PidTagInternetCodepage);
-	str = e_mapi_util_find_array_propval (&object->properties, PidTagBody);
-	if (str) {
+	if (e_mapi_object_contains_prop (object, PidTagBody)) {
+		uint64_t text_cb = 0;
+		const uint8_t *text_lpb = NULL;
 		gchar *utf8_str = NULL;
-		uint32_t proptag = e_mapi_util_find_array_proptag (&object->properties, PidTagBody);
+		uint32_t proptag;
 
-		if (e_mapi_utils_ensure_utf8_string (proptag, ui32, (const guint8 *) str, strlen (str), &utf8_str))
-			str = utf8_str;
+		proptag = e_mapi_util_find_array_proptag (&object->properties, PidTagBody);
+		if (!proptag) {
+			EMapiStreamedProp *stream = e_mapi_object_get_streamed (object, PidTagBody);
+			if (stream)
+				proptag = stream->proptag;
+			else
+				proptag = PidTagBody;
+		}
+
+		if (e_mapi_object_get_bin_prop (object, proptag, &text_cb, &text_lpb)) {
+			if (e_mapi_utils_ensure_utf8_string (proptag, ui32, text_lpb, text_cb, &utf8_str))
+				str = utf8_str;
+			else if (text_lpb [text_cb] != 0) {
+				utf8_str = g_strndup ((const gchar *) text_lpb, text_cb);
+				str = utf8_str;
+			}
+		} else {
+			str = "";
+		}
 
 		icalcomponent_set_description (ical_comp, str);
 

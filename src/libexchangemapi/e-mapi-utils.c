@@ -331,7 +331,7 @@ e_mapi_util_find_array_proptag (struct mapi_SPropValue_array *properties, uint32
 		}
 	}
 
-	return proptag;
+	return 0;
 }
 
 enum MAPISTATUS

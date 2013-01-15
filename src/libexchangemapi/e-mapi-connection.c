@@ -2132,8 +2132,8 @@ has_embedded_message_with_html (EMapiObject *object)
 		if (!attach->embedded_object)
 			continue;
 
-		if (e_mapi_util_find_array_propval (&attach->embedded_object->properties, PidTagHtml) &&
-		    !e_mapi_util_find_array_propval (&attach->embedded_object->properties, PidTagBody))
+		if (e_mapi_object_contains_prop (attach->embedded_object, PidTagHtml) &&
+		    !e_mapi_object_contains_prop (attach->embedded_object, PidTagBody))
 			return TRUE;
 
 		if (has_embedded_message_with_html (attach->embedded_object))
@@ -2232,8 +2232,8 @@ traverse_attachments_for_body (EMapiConnection *conn,
 			mapi_object_init (&obj_attach);
 			mapi_object_init (&obj_embedded);
 
-			if (e_mapi_util_find_array_propval (&attach->embedded_object->properties, PidTagHtml) &&
-			    !e_mapi_util_find_array_propval (&attach->embedded_object->properties, PidTagBody)) {
+			if (e_mapi_object_contains_prop (attach->embedded_object, PidTagHtml) &&
+			    !e_mapi_object_contains_prop (attach->embedded_object, PidTagBody)) {
 				struct SPropTagArray *tags;
 
 				if (OpenAttach (obj_message, *pattach_num, &obj_attach) != MAPI_E_SUCCESS)
@@ -2312,7 +2312,7 @@ ensure_additional_properties_cb (EMapiConnection *conn,
 	for (ii = 0; ii < G_N_ELEMENTS (additional_properties); ii++) {
 		uint32_t prop = additional_properties[ii].orig_proptag;
 
-		if (!e_mapi_util_find_array_propval (&object->properties, prop)) {
+		if (!e_mapi_object_contains_prop (object, prop)) {
 			if (get_namedid_name (prop)) {
 				prop = e_mapi_connection_resolve_named_prop (conn, eap->obj_folder, prop, cancellable, NULL);
 			}
@@ -2545,7 +2545,7 @@ fetch_object_attachment_cb (EMapiConnection *conn,
 
 	attach_method = e_mapi_util_find_row_propval (srow, PidTagAttachMethod);
 	if (attach_method && *attach_method == ATTACH_BY_VALUE) {
-		if (!e_mapi_util_find_array_propval (&attachment->properties, PidTagAttachDataBinary)) {
+		if (!e_mapi_attachment_contains_prop (attachment, PidTagAttachDataBinary)) {
 			uint64_t cb = 0;
 			uint8_t *lpb = NULL;
 
@@ -2668,7 +2668,7 @@ e_mapi_connection_fetch_object_internal (EMapiConnection *conn,
 	talloc_free (np_nameid);
 
 	/* ensure certain properties */
-	if (!e_mapi_util_find_array_propval (&object->properties, PidTagHtml)) {
+	if (!e_mapi_object_contains_prop (object, PidTagHtml)) {
 		uint8_t best_body = 0;
 
 		if (GetBestBody (obj_message, &best_body) == MAPI_E_SUCCESS && best_body == olEditorHTML) {
@@ -2685,7 +2685,7 @@ e_mapi_connection_fetch_object_internal (EMapiConnection *conn,
 		}
 	}
 
-	if (!e_mapi_util_find_array_propval (&object->properties, PidTagBody)) {
+	if (!e_mapi_object_contains_prop (object, PidTagBody)) {
 		uint64_t cb = 0;
 		uint8_t *lpb = NULL;
 
@@ -3012,7 +3012,7 @@ internal_get_summary_cb (EMapiConnection *conn,
 		for (ii = 0; ii < gsd->prop_count; ii++) {
 			/* skip errors and already included properties */
 			if ((gsd->lpProps[ii].ulPropTag & 0xFFFF) == PT_ERROR
-			    || e_mapi_util_find_array_propval (&object->properties, gsd->lpProps[ii].ulPropTag))
+			    || e_mapi_object_contains_prop (object, gsd->lpProps[ii].ulPropTag))
 				continue;
 
 			object->properties.cValues++;
@@ -7125,6 +7125,16 @@ e_mapi_attachment_get_bin_prop (EMapiAttachment *attachment,
 	return FALSE;
 }
 
+gboolean
+e_mapi_attachment_contains_prop (EMapiAttachment *attachment,
+				 uint32_t proptag)
+{
+	g_return_val_if_fail (attachment != NULL, FALSE);
+
+	return e_mapi_attachment_get_streamed (attachment, proptag) != NULL ||
+	       e_mapi_util_find_array_propval (&attachment->properties, proptag) != NULL;
+}
+
 EMapiObject *
 e_mapi_object_new (TALLOC_CTX *mem_ctx)
 {
@@ -7270,7 +7280,7 @@ e_mapi_object_get_bin_prop (EMapiObject *object,
 			    const uint8_t **lpb)
 {
 	EMapiStreamedProp *streamed;
-	const struct SBinary_short *bin;
+	gconstpointer value;
 
 	g_return_val_if_fail (object != NULL, FALSE);
 	g_return_val_if_fail (cb != NULL, FALSE);
@@ -7287,15 +7297,37 @@ e_mapi_object_get_bin_prop (EMapiObject *object,
 		return TRUE;
 	}
 
-	bin = e_mapi_util_find_array_propval (&object->properties, proptag);
-	if (bin) {
-		*cb = bin->cb;
-		*lpb = bin->lpb;
+	value = e_mapi_util_find_array_propval (&object->properties, proptag);
+	if (value) {
+		if ((proptag & 0xFFFF) == PT_BINARY) {
+			const struct SBinary_short *bin = value;
 
-		return TRUE;
+			*cb = bin->cb;
+			*lpb = bin->lpb;
+
+			return TRUE;
+		}
+
+		if ((proptag & 0xFFFF) == PT_STRING8 ||
+		    (proptag & 0xFFFF) == PT_UNICODE) {
+			*cb = strlen (value);
+			*lpb = value;
+
+			return TRUE;
+		}
 	}
 
 	return FALSE;
+}
+
+gboolean
+e_mapi_object_contains_prop (EMapiObject *object,
+			     uint32_t proptag)
+{
+	g_return_val_if_fail (object != NULL, FALSE);
+
+	return e_mapi_object_get_streamed (object, proptag) != NULL ||
+	       e_mapi_util_find_array_propval (&object->properties, proptag) != NULL;
 }
 
 EMapiPermissionEntry *
