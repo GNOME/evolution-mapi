@@ -358,7 +358,12 @@ build_ical_string (EMapiConnection *conn,
 }
 
 static void
-classify_attachments (EMapiConnection *conn, EMapiAttachment *attachments, const gchar *msg_class, GSList **inline_attachments, GSList **noninline_attachments)
+classify_attachments (EMapiConnection *conn,
+		      EMapiAttachment *attachments,
+		      gboolean can_inline_attachments,
+		      const gchar *msg_class,
+		      GSList **inline_attachments,
+		      GSList **noninline_attachments)
 {
 	EMapiAttachment *attach;
 	gboolean is_smime = msg_class && strstr (msg_class, ".SMIME.") > msg_class;
@@ -588,8 +593,10 @@ classify_attachments (EMapiConnection *conn, EMapiAttachment *attachments, const
 
 		/* Content-ID */
 		content_id = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachContentId);
-		if (content_id && !is_apple && !is_smime) {
+		if (content_id)
 			camel_mime_part_set_content_id (part, content_id);
+
+		if (content_id && !is_apple && !is_smime && can_inline_attachments) {
 			*inline_attachments = g_slist_append (*inline_attachments, part);
 		} else
 			*noninline_attachments = g_slist_append (*noninline_attachments, part);
@@ -851,7 +858,7 @@ e_mapi_mail_utils_object_to_message (EMapiConnection *conn, /* const */ EMapiObj
 	inline_attachments = NULL;
 	noninline_attachments = NULL;
 	msg_class = e_mapi_util_find_array_propval (&object->properties, PidTagMessageClass);
-	classify_attachments (conn, object->attachments, msg_class, &inline_attachments, &noninline_attachments);
+	classify_attachments (conn, object->attachments, e_mapi_object_contains_prop (object, PidTagHtml), msg_class, &inline_attachments, &noninline_attachments);
 
 	build_calendar = msg_class && g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_PREFIX);
 	if (build_calendar) {
@@ -863,7 +870,13 @@ e_mapi_mail_utils_object_to_message (EMapiConnection *conn, /* const */ EMapiObj
 	build_alternative = !build_calendar
 		&& e_mapi_object_contains_prop (object, PidTagHtml)
 		&& e_mapi_object_contains_prop (object, PidTagBody);
-	build_related = !build_calendar && !build_alternative && inline_attachments;
+	build_related = !build_calendar && !build_alternative && inline_attachments
+		&& e_mapi_object_contains_prop (object, PidTagHtml);
+
+	if (!build_alternative && !build_related && inline_attachments) {
+		noninline_attachments = g_slist_concat (noninline_attachments, inline_attachments);
+		inline_attachments = NULL;
+	}
 
 	if (build_calendar) {
 		g_return_val_if_fail (ical_string != NULL, msg);
