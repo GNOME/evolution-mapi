@@ -2121,7 +2121,7 @@ e_mapi_connection_list_objects (EMapiConnection *conn,
 }
 
 static gboolean
-has_embedded_message_with_html (EMapiObject *object)
+has_embedded_message_without_body (EMapiObject *object)
 {
 	EMapiAttachment *attach;
 
@@ -2132,11 +2132,10 @@ has_embedded_message_with_html (EMapiObject *object)
 		if (!attach->embedded_object)
 			continue;
 
-		if (e_mapi_object_contains_prop (attach->embedded_object, PidTagHtml) &&
-		    !e_mapi_object_contains_prop (attach->embedded_object, PidTagBody))
+		if (!e_mapi_object_contains_prop (attach->embedded_object, PidTagBody))
 			return TRUE;
 
-		if (has_embedded_message_with_html (attach->embedded_object))
+		if (has_embedded_message_without_body (attach->embedded_object))
 			return TRUE;
 	}
 
@@ -2215,9 +2214,6 @@ traverse_attachments_for_body (EMapiConnection *conn,
 	g_return_if_fail (mem_ctx != NULL);
 	g_return_if_fail (obj_message != NULL);
 
-	if (!has_embedded_message_with_html (object))
-		return;
-
 	for (attach = object->attachments; attach && !g_cancellable_is_cancelled (cancellable); attach = attach->next) {
 		if (attach->embedded_object) {
 			const uint32_t *pattach_num;
@@ -2232,8 +2228,7 @@ traverse_attachments_for_body (EMapiConnection *conn,
 			mapi_object_init (&obj_attach);
 			mapi_object_init (&obj_embedded);
 
-			if (e_mapi_object_contains_prop (attach->embedded_object, PidTagHtml) &&
-			    !e_mapi_object_contains_prop (attach->embedded_object, PidTagBody)) {
+			if (!e_mapi_object_contains_prop (attach->embedded_object, PidTagBody)) {
 				struct SPropTagArray *tags;
 
 				if (OpenAttach (obj_message, *pattach_num, &obj_attach) != MAPI_E_SUCCESS)
@@ -2253,7 +2248,7 @@ traverse_attachments_for_body (EMapiConnection *conn,
 				talloc_free (tags);
 			}
 
-			if (has_embedded_message_with_html (attach->embedded_object)) {
+			if (has_embedded_message_without_body (attach->embedded_object)) {
 				if (!have_embedded) {
 					if (OpenAttach (obj_message, *pattach_num, &obj_attach) != MAPI_E_SUCCESS)
 						continue;
@@ -2302,7 +2297,7 @@ ensure_additional_properties_cb (EMapiConnection *conn,
 		{ PidNameContentClass, MAPI_E_RESERVED }
 	};
 	struct EnsureAdditionalPropertiesData *eap = user_data;
-	gboolean need_any = FALSE, need_attachments;
+	gboolean need_any = FALSE;
 	uint32_t ii;
 
 	g_return_val_if_fail (eap != NULL, FALSE);
@@ -2324,10 +2319,8 @@ ensure_additional_properties_cb (EMapiConnection *conn,
 		need_any = need_any || prop != MAPI_E_RESERVED;
 	}
 
-	need_attachments = has_embedded_message_with_html (object);
-
 	/* Fast-transfer transfers only Html or Body, never both */
-	if (need_any || need_attachments) {
+	if (need_any || has_embedded_message_without_body (object)) {
 		const mapi_id_t *mid;
 
 		mid = e_mapi_util_find_array_propval (&object->properties, PidTagMid);
@@ -2375,8 +2368,7 @@ ensure_additional_properties_cb (EMapiConnection *conn,
 					talloc_free (tags);
 				}
 
-				if (need_attachments)
-					traverse_attachments_for_body (conn, mem_ctx, object, &obj_message, cancellable, perror);
+				traverse_attachments_for_body (conn, mem_ctx, object, &obj_message, cancellable, perror);
 			}
 
 			mapi_object_release (&obj_message);
