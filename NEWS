@@ -1,3 +1,16 @@
+evolution-mapi 3.6.3 2013-01-22
+-------------------------------
+
+Bugs:
+	Bug #691772 - Long text/html message constructed as text/plain only (Milan Crha)
+	Bug #691834 - Body of attached message not shown (Milan Crha)
+
+Translations:
+	Krishnababu Krothapalli (te)
+	Sayak Sarkar (bn_IN)
+	Shantha kumar (ta)
+	Rafael Ferreira (pt_BR)
+
 evolution-mapi 3.6.2 2012-11-12
 -------------------------------
 
