@@ -1577,9 +1577,9 @@ e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma,
 	if (!pbook_view && g_cancellable_is_cancelled (priv->update_cache))
 		return FALSE;
 
-	e_book_backend_sqlitedb_add_contact (priv->db,
+	e_book_backend_sqlitedb_new_contact (priv->db,
 					     EMA_EBB_CACHE_FOLDERID, contact,
-					     FALSE, &error);
+					     TRUE, &error);
 
 	/* commit not often than each minute, also to not lose data already transferred */
 	if (cache_is_locked && current_time - priv->last_db_commit_time >= 60000) {
