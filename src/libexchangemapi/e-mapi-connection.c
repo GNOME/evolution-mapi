@@ -427,10 +427,6 @@ e_mapi_connection_finalize (GObject *object)
 			g_hash_table_destroy (priv->foreign_stores);
 		priv->foreign_stores = NULL;
 
-		UNLOCK ();
-		e_mapi_cancellable_rec_mutex_clear (&priv->session_lock);
-		g_rec_mutex_clear (&priv->folders_lock);
-
 		e_mapi_utils_destroy_mapi_context (priv->mapi_ctx);
 		priv->mapi_ctx = NULL;
 
@@ -443,6 +439,11 @@ e_mapi_connection_finalize (GObject *object)
 		if (priv->registry)
 			g_object_unref (priv->registry);
 		priv->registry = NULL;
+
+		UNLOCK ();
+
+		e_mapi_cancellable_rec_mutex_clear (&priv->session_lock);
+		g_rec_mutex_clear (&priv->folders_lock);
 	}
 
 	if (G_OBJECT_CLASS (e_mapi_connection_parent_class)->finalize)
@@ -755,6 +756,8 @@ e_mapi_connection_connected (EMapiConnection *conn)
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 
+	LOCK (NULL, NULL, FALSE);
+
 	res = priv->session != NULL;
 	if (res) {
 		struct mapi_profile profile = { 0 };
@@ -764,6 +767,8 @@ e_mapi_connection_connected (EMapiConnection *conn)
 			ShutDown (&profile);
 		}
 	}
+
+	UNLOCK ();
 
 	return res;
 }
@@ -991,6 +996,7 @@ e_mapi_connection_get_store_quotas (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (receive_quota != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (send_quota != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
+	LOCK (cancellable, perror, FALSE);
 	use_store = obj_store;
 	if (!use_store)
 		use_store = &priv->msg_store;
@@ -999,7 +1005,6 @@ e_mapi_connection_get_store_quotas (EMapiConnection *conn,
 	*receive_quota = -1;
 	*send_quota = -1;
 
-	LOCK (cancellable, perror, FALSE);
 	mem_ctx = talloc_new (priv->session);
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
