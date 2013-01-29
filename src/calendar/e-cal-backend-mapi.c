@@ -1794,7 +1794,7 @@ find_my_response (ECalBackendMAPI *cbmapi, ECalComponent *comp)
 }
 
 static void
-ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *calobj, CalObjModType mod, ECalComponent **old_ecalcomp, ECalComponent **new_ecalcomp, GError **error)
+ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *calobj, ECalObjModType mod, ECalComponent **old_ecalcomp, ECalComponent **new_ecalcomp, GError **error)
 {
 	ECalBackendMAPI *cbmapi;
         ECalBackendMAPIPrivate *priv;
@@ -1825,7 +1825,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		return;
 	}
 
-	if (mod != CALOBJ_MOD_ALL) {
+	if (mod != E_CAL_OBJ_MOD_ALL) {
 		g_propagate_error (error, EDC_ERROR_EX (OtherError, _("Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server.")));
 		return;
 	}
@@ -1948,7 +1948,7 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 static void
 ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable,
-				  const gchar *uid, const gchar *rid, CalObjModType mod,
+				  const gchar *uid, const gchar *rid, ECalObjModType mod,
 				  ECalComponent **old_ecalcomp, ECalComponent **new_ecalcomp, GError **error)
 {
 	ECalBackendMAPI *cbmapi;
@@ -1991,7 +1991,7 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 	conn = e_cal_backend_mapi_get_connection (cbmapi, cancellable, &mapi_error);
 
-	if (mod == CALOBJ_MOD_THIS && rid && *rid) {
+	if (mod == E_CAL_OBJ_MOD_THIS && rid && *rid) {
 		gchar *new_calobj = NULL;
 		struct icaltimetype time_rid;
 
@@ -1999,7 +1999,7 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		time_rid = icaltime_from_string (rid);
 		e_cal_util_remove_instances (icalcomp, time_rid, mod);
 		new_calobj = icalcomponent_as_ical_string_r (icalcomp);
-		ecbm_modify_object (backend, cal, cancellable, new_calobj, CALOBJ_MOD_ALL, old_ecalcomp, new_ecalcomp, &err);
+		ecbm_modify_object (backend, cal, cancellable, new_calobj, E_CAL_OBJ_MOD_ALL, old_ecalcomp, new_ecalcomp, &err);
 		g_free (new_calobj);
 	} else if (conn) {
 		mapi_object_t obj_folder;
@@ -2297,7 +2297,7 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 				} else {
 					g_free (comp_str);
 					comp_str = e_cal_component_get_as_string (comp);
-					ecbm_modify_object (backend, cal, cancellable, comp_str, CALOBJ_MOD_ALL, &old_ecalcomp, &new_ecalcomp, &err);
+					ecbm_modify_object (backend, cal, cancellable, comp_str, E_CAL_OBJ_MOD_ALL, &old_ecalcomp, &new_ecalcomp, &err);
 				}
 				g_free (comp_str);
 
@@ -2305,7 +2305,7 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 					stop = TRUE;
 				break;
 			case ICAL_METHOD_CANCEL :
-				ecbm_remove_object (backend, cal, cancellable, uid, rid, CALOBJ_MOD_THIS, &old_ecalcomp, &new_ecalcomp, &err);
+				ecbm_remove_object (backend, cal, cancellable, uid, rid, E_CAL_OBJ_MOD_THIS, &old_ecalcomp, &new_ecalcomp, &err);
 				if (err)
 					stop = TRUE;
 				break;
@@ -2349,7 +2349,7 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 						e_cal_component_set_attendee_list (cache_comp, cache_attendees);
 
 						comp_str = e_cal_component_get_as_string (cache_comp);
-						ecbm_modify_object (backend, cal, cancellable, comp_str, CALOBJ_MOD_ALL, &old_ecalcomp, &new_ecalcomp, &err);
+						ecbm_modify_object (backend, cal, cancellable, comp_str, E_CAL_OBJ_MOD_ALL, &old_ecalcomp, &new_ecalcomp, &err);
 
 						g_free (comp_str);
 					}
@@ -2611,14 +2611,14 @@ typedef struct {
 	OperationBase base;
 
 	GSList *calobjs;
-	CalObjModType mod;
+	ECalObjModType mod;
 } OperationModify;
 
 typedef struct {
 	OperationBase base;
 
 	GSList *ids;
-	CalObjModType mod;
+	ECalObjModType mod;
 } OperationRemove;
 
 typedef struct {
@@ -2787,7 +2787,7 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 					ECalComponentId *id = g_new0 (ECalComponentId, 1);
 					id->uid = g_strdup (ecid->uid);
 
-					if (opr->mod == CALOBJ_MOD_THIS)
+					if (opr->mod == E_CAL_OBJ_MOD_THIS)
 						id->rid = g_strdup (ecid->rid);
 
 					ids = g_slist_prepend (ids, id);
@@ -3215,7 +3215,7 @@ ecbm_op_modify_objects (ECalBackend *backend,
 			guint32 opid,
 			GCancellable *cancellable,
 			const GSList *calobjs,
-			CalObjModType mod)
+			ECalObjModType mod)
 {
 	OperationModify *op;
 	ECalBackendMAPI *cbmapi;
@@ -3251,7 +3251,7 @@ ecbm_op_remove_objects (ECalBackend *backend,
 			guint32 opid,
 			GCancellable *cancellable,
 			const GSList *ids,
-			CalObjModType mod)
+			ECalObjModType mod)
 {
 	OperationRemove *op;
 	GSList *iter;
