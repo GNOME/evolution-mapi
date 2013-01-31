@@ -489,10 +489,8 @@ ebbm_open (EBookBackendMAPI *ebma,
 	const gchar *cache_dir;
 	GError *error = NULL;
 
-	if (e_book_backend_is_opened (E_BOOK_BACKEND (ebma))) {
-		e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), NULL /* Success */);
+	if (e_book_backend_is_opened (E_BOOK_BACKEND (ebma)))
 		return;
-	}
 
 	offline_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_OFFLINE);
 	priv->marked_for_offline = e_source_offline_get_stay_synchronized (offline_extension);
@@ -516,7 +514,7 @@ ebbm_open (EBookBackendMAPI *ebma,
 		return;
 	}
 
-	e_book_backend_notify_readonly (E_BOOK_BACKEND (ebma), TRUE);
+	e_book_backend_set_writable (E_BOOK_BACKEND (ebma), FALSE);
 
 	ebbm_notify_connection_status (ebma, e_backend_get_online (E_BACKEND (ebma)));
 
@@ -524,25 +522,20 @@ ebbm_open (EBookBackendMAPI *ebma,
 	if (!e_backend_get_online (E_BACKEND (ebma)) &&
 	    !priv->marked_for_offline) {
 		g_propagate_error (perror, EDB_ERROR (OFFLINE_UNAVAILABLE));
-		e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), EDB_ERROR (OFFLINE_UNAVAILABLE));
 		return;
 	}
 
 	/* Once aunthentication in address book works this can be removed */
 	if (!e_backend_get_online (E_BACKEND (ebma))) {
-		e_book_backend_notify_online (E_BOOK_BACKEND (ebma), FALSE);
-		e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), NULL /* Success */);
+		e_backend_set_online (E_BACKEND (ebma), FALSE);
 		return;
 	}
 
-	e_book_backend_notify_online (E_BOOK_BACKEND (ebma), TRUE);
+	e_backend_set_online (E_BACKEND (ebma), TRUE);
 
 	e_book_backend_mapi_ensure_connected (ebma, cancellable, &error);
 
-	if (error && perror)
-		g_propagate_error (perror, g_error_copy (error));
-
-	e_book_backend_notify_opened (E_BOOK_BACKEND (ebma), error);
+	g_propagate_error (perror, error);
 }
 
 static ESourceAuthenticationResult
@@ -632,7 +625,7 @@ ebbm_notify_online_cb (EBookBackend *backend, GParamSpec *pspec)
 		e_book_backend_mapi_lock_connection (ebma);
 
 		if (!online) {
-			e_book_backend_notify_readonly (backend, TRUE);
+			e_book_backend_set_writable (backend, FALSE);
 			ebbm_notify_connection_status (ebma, FALSE);
 
 			if (priv->conn) {
@@ -646,7 +639,7 @@ ebbm_notify_online_cb (EBookBackend *backend, GParamSpec *pspec)
 		e_book_backend_mapi_unlock_connection (ebma);
 	}
 
-	e_book_backend_notify_online (backend, online);
+	e_backend_set_online (E_BACKEND (backend), online);
 }
 
 static void

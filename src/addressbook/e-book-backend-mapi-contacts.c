@@ -348,7 +348,7 @@ ebbm_contacts_connection_status_changed (EBookBackendMAPI *ebma, gboolean is_onl
 	ESource *source;
 	ESourceMapiFolder *ext_mapi_folder;
 
-	e_book_backend_notify_readonly (E_BOOK_BACKEND (ebma), !is_online);
+	e_book_backend_set_writable (E_BOOK_BACKEND (ebma), is_online);
 
 	if (!is_online)
 		return;

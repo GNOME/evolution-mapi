@@ -1235,7 +1235,7 @@ ecbm_connect_user (ECalBackend *backend,
 
 	/* We have established a connection */
 	if (priv->store && priv->fid) {
-		e_cal_backend_notify_online (E_CAL_BACKEND (cbmapi), TRUE);
+		e_backend_set_online (E_BACKEND (cbmapi), TRUE);
 
 		if (priv->mode_changed && !priv->dthread) {
 			priv->mode_changed = FALSE;
@@ -1334,10 +1334,8 @@ ecbm_open (ECalBackend *backend,
 	const gchar *cache_dir;
 	GError *error = NULL;
 
-	if (e_cal_backend_is_opened (backend)) {
-		e_cal_backend_notify_opened (backend, NULL);
+	if (e_cal_backend_is_opened (backend))
 		return /* Success */;
-	}
 
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
@@ -1347,7 +1345,6 @@ ecbm_open (ECalBackend *backend,
 	fid = e_source_mapi_folder_get_id (ext_mapi_folder);
 	if (!fid) {
 		g_propagate_error (perror, EDC_ERROR_EX (OtherError, "No folder ID set"));
-		e_cal_backend_notify_opened (backend, EDC_ERROR_EX (OtherError, "No folder ID set"));
 		return;
 	}
 
@@ -1367,7 +1364,6 @@ ecbm_open (ECalBackend *backend,
 	if (!priv->store) {
 		g_mutex_unlock (&priv->mutex);
 		g_propagate_error (perror, EDC_ERROR_EX (OtherError, _("Could not create cache file")));
-		e_cal_backend_notify_opened (backend, EDC_ERROR_EX (OtherError, _("Could not create cache file")));
 		return;
 	}
 
@@ -1384,14 +1380,12 @@ ecbm_open (ECalBackend *backend,
 		if (!e_source_offline_get_stay_synchronized (offline_extension)) {
 			g_mutex_unlock (&priv->mutex);
 			g_propagate_error (perror, EDC_ERROR (RepositoryOffline));
-			e_cal_backend_notify_opened (backend, EDC_ERROR (RepositoryOffline));
 			return;
 		}
 
 		g_mutex_unlock (&priv->mutex);
-		e_cal_backend_notify_online (backend, FALSE);
-		e_cal_backend_notify_readonly (backend, priv->read_only);
-		e_cal_backend_notify_opened (backend, NULL);
+		e_backend_set_online (E_BACKEND (backend), FALSE);
+		e_cal_backend_set_writable (backend, !priv->read_only);
 		return /* Success */;
 	}
 
@@ -1408,15 +1402,12 @@ ecbm_open (ECalBackend *backend,
 
 	g_mutex_unlock (&priv->mutex);
 
-	e_cal_backend_notify_online (backend, TRUE);
-	e_cal_backend_notify_readonly (backend, priv->read_only);
+	e_backend_set_online (E_BACKEND (backend), TRUE);
+	e_cal_backend_set_writable (backend, !priv->read_only);
 
 	e_cal_backend_mapi_ensure_connected (cbmapi, cancellable, &error);
 
-	if (error && perror)
-		g_propagate_error (perror, g_error_copy (error));
-
-	e_cal_backend_notify_opened (backend, error);
+	g_propagate_error (perror, error);
 }
 
 
@@ -2561,8 +2552,8 @@ ecbm_notify_online_cb (ECalBackend *backend, GParamSpec *pspec)
 		priv->conn = NULL;
 	}
 
-	e_cal_backend_notify_readonly (backend, priv->read_only);
-	e_cal_backend_notify_online (backend, online);
+	e_cal_backend_set_writable (backend, !priv->read_only);
+	e_backend_set_online (E_BACKEND (backend), online);
 	g_mutex_unlock (&priv->mutex);
 }
 
