@@ -756,7 +756,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 	CamelMapiStoreInfo *msi = NULL;
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
 	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (folder);
-	EMapiConnection *conn = camel_mapi_store_get_connection (mapi_store, cancellable, mapi_error);
+	EMapiConnection *conn = camel_mapi_store_ref_connection (mapi_store, cancellable, mapi_error);
 	struct FolderBasicPropertiesData fbp;
 	struct GatherChangedObjectsData gco;
 	mapi_object_t obj_folder;
@@ -782,6 +782,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 	if (!msi) {
 		camel_operation_pop_message (cancellable);
 		camel_folder_thaw (folder);
+		g_object_unref (conn);
 
 		g_return_val_if_fail (msi != NULL, FALSE);
 
@@ -882,6 +883,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 		msi->last_obj_total = fbp.obj_total;
 	}
 
+	g_object_unref (conn);
 	if (mapi_error && *mapi_error)
 		camel_mapi_store_maybe_disconnect (mapi_store, *mapi_error);
 
@@ -1217,7 +1219,7 @@ mapi_folder_append_message_sync (CamelFolder *folder,
 		return FALSE;
 	}
 
-	conn = camel_mapi_store_get_connection (mapi_store, cancellable, error);
+	conn = camel_mapi_store_ref_connection (mapi_store, cancellable, error);
 	if (!conn) {
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
@@ -1243,6 +1245,8 @@ mapi_folder_append_message_sync (CamelFolder *folder,
 	if (mid) {
 		mapi_refresh_folder (folder, cancellable, error);
 	} else {
+		g_object_unref (conn);
+
 		if (mapi_error) {
 			if (!e_mapi_utils_propagate_cancelled_error (mapi_error, error))
 				g_set_error_literal (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC, mapi_error->message);
@@ -1254,6 +1258,8 @@ mapi_folder_append_message_sync (CamelFolder *folder,
 
 		return FALSE;
 	}
+
+	g_object_unref (conn);
 
 	if (appended_uid)
 		*appended_uid = e_mapi_util_mapi_id_to_string (mid);
@@ -1286,7 +1292,7 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 
 	mapi_folder = CAMEL_MAPI_FOLDER (folder);
 	mapi_store = CAMEL_MAPI_STORE (parent_store);
-	conn = camel_mapi_store_get_connection (mapi_store, cancellable, error);
+	conn = camel_mapi_store_ref_connection (mapi_store, cancellable, error);
 
 	if (!conn)
 		return FALSE;
@@ -1338,6 +1344,8 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 				_("Failed to empty Trash"));
 		}
+
+		g_object_unref (conn);
 
 		return status;
 	}
@@ -1409,6 +1417,7 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 		camel_folder_changed (folder, changes);
 
 	camel_folder_change_info_free (changes);
+	g_object_unref (conn);
 
 	return TRUE;
 }
@@ -1543,7 +1552,7 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 		return NULL;
 	}
 
-	conn = camel_mapi_store_get_connection (mapi_store, cancellable, error);
+	conn = camel_mapi_store_ref_connection (mapi_store, cancellable, error);
 	if (!conn)
 		return NULL;
 
@@ -1555,6 +1564,8 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 
 		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, NULL);
 	}
+
+	g_object_unref (conn);
 
 	if (!msg) {
 		if (mapi_error) {
@@ -1632,7 +1643,7 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 	folder_id =  camel_mapi_store_folder_id_lookup (mapi_store, full_name);
 	e_mapi_util_mapi_id_from_string (folder_id, &fid);
 
-	conn = camel_mapi_store_get_connection (mapi_store, cancellable, error);
+	conn = camel_mapi_store_ref_connection (mapi_store, cancellable, error);
 	if (!conn)
 		return FALSE;
 
@@ -1786,6 +1797,8 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 	g_slist_foreach (to_free, (GFunc) g_free, NULL);
 	g_slist_free (to_free);
 
+	g_object_unref (conn);
+
 	if (mapi_error) {
 		camel_mapi_store_maybe_disconnect (mapi_store, mapi_error);
 		g_clear_error (&mapi_error);
@@ -1829,12 +1842,15 @@ mapi_folder_transfer_messages_to_sync (CamelFolder *source,
 
 	source_parent_store = camel_folder_get_parent_store (source);
 	mapi_store = CAMEL_MAPI_STORE (source_parent_store);
-	conn = camel_mapi_store_get_connection (mapi_store, cancellable, error);
+	conn = camel_mapi_store_ref_connection (mapi_store, cancellable, error);
 
 	if (!conn || !CAMEL_IS_MAPI_FOLDER (source) || !CAMEL_IS_MAPI_FOLDER (destination) ||
 	    (CAMEL_MAPI_FOLDER (source)->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC) != 0 ||
 	    (CAMEL_MAPI_FOLDER (destination)->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC) != 0) {
 		CamelFolderClass *folder_class;
+
+		if (conn)
+			g_object_unref (conn);
 
 		/* because cannot use MAPI to copy/move messages with public folders,
 		   thus fallback to per-message copy/move */
@@ -1852,8 +1868,10 @@ mapi_folder_transfer_messages_to_sync (CamelFolder *source,
 	offline = CAMEL_OFFLINE_STORE (destination_parent_store);
 
 	/* check for offline operation */
-	if (!camel_offline_store_get_online (offline))
+	if (!camel_offline_store_get_online (offline)) {
+		g_object_unref (conn);
 		return FALSE;
+	}
 
 	src_mapi_folder = CAMEL_MAPI_FOLDER (source);
 	des_mapi_folder = CAMEL_MAPI_FOLDER (destination);
@@ -1900,6 +1918,8 @@ mapi_folder_transfer_messages_to_sync (CamelFolder *source,
 	g_slist_foreach (src_msg_ids, (GFunc) g_free, NULL);
 	g_slist_free (src_msg_ids);
 
+	g_object_unref (conn);
+
 	/* update the destination folder to notice new messages */
 	if (success)
 		success = mapi_folder_refresh_info_sync (destination, cancellable, error);
@@ -1928,11 +1948,8 @@ mapi_folder_get_quota_info_sync (CamelFolder *folder,
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (mapi_store)))
 		return NULL;
 
-	conn = camel_mapi_store_get_connection (mapi_store, cancellable, error);
-	if (conn && e_mapi_connection_get_store_quotas (
-		conn, NULL,
-		&current_size, &receive_quota, &send_quota,
-		cancellable, &mapi_error)) {
+	conn = camel_mapi_store_ref_connection (mapi_store, cancellable, error);
+	if (conn && e_mapi_connection_get_store_quotas (conn, NULL, &current_size, &receive_quota, &send_quota, cancellable, &mapi_error)) {
 		if (current_size != -1) {
 			if (receive_quota != -1) {
 				quota_info = camel_folder_quota_info_new (_("Receive quota"), current_size, receive_quota);
@@ -1949,6 +1966,9 @@ mapi_folder_get_quota_info_sync (CamelFolder *folder,
 			}
 		}
 	}
+
+	if (conn)
+		g_object_unref (conn);
 
 	if (!quota_info) {
 		if (mapi_error) {
