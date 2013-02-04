@@ -1,3 +1,16 @@
+evolution-mapi 3.7.5 2013-02-04
+-------------------------------
+
+Bugs:
+	Bug #691772 - Long text/html message constructed as text/plain only (Milan Crha)
+	Bug #691834 - Body of attached message not shown (Milan Crha)
+	Bug #692371 - Crash under e_mapi_connection_connected() (Milan Crha)
+
+Miscellanous:
+	Adapt to recent EBookBackendSQLiteDB API changes (deprecated symbols) (Milan Crha)
+	Fix a build break caused by CalObjModType => ECalObjModType (Milan Crha)
+	Fix a build break caused by EBook/CalBackend API deprecation (Milan Crha)
+
 evolution-mapi 3.7.4 2013-01-14
 -------------------------------
 
