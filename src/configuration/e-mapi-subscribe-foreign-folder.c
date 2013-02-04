@@ -292,8 +292,10 @@ check_foreign_folder_thread (GObject *with_object,
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
 		return;
 
-	conn = camel_mapi_store_get_connection (CAMEL_MAPI_STORE (with_object), cancellable, perror);
+	conn = camel_mapi_store_ref_connection (CAMEL_MAPI_STORE (with_object), cancellable, perror);
 	if (!conn || !e_mapi_connection_connected (conn)) {
+		if (conn)
+			g_object_unref (conn);
 		make_mapi_error (perror, "EMapiConnection", MAPI_E_NOT_INITIALIZED);
 		return;
 	}
@@ -308,12 +310,14 @@ check_foreign_folder_thread (GObject *with_object,
 			NULL, NULL,
 			check_foreign_username_resolved_cb, cffd,
 			cancellable, perror)) {
+			g_object_unref (conn);
 			make_mapi_error (perror, "e_mapi_connection_resolve_username", MAPI_E_CALL_FAILED);
 			return;
 		}
 	}
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		g_object_unref (conn);
 		return;
 	}
 
@@ -327,15 +331,18 @@ check_foreign_folder_thread (GObject *with_object,
 				cffd->orig_foldername);
 		}
 
+		g_object_unref (conn);
 		g_propagate_error (perror, local_error);
 		return;
 	}
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		g_object_unref (conn);
 		return;
 	}
 
 	if (!e_mapi_connection_open_foreign_folder (conn, cffd->username, fid, &obj_folder, cancellable, perror)) {
+		g_object_unref (conn);
 		make_mapi_error (perror, "e_mapi_connection_open_foreign_folder", MAPI_E_CALL_FAILED);
 		return;
 	}
@@ -347,10 +354,12 @@ check_foreign_folder_thread (GObject *with_object,
 		make_mapi_error (perror, "e_mapi_connection_get_folder_properties", MAPI_E_CALL_FAILED);
 
 		e_mapi_connection_close_folder (conn, &obj_folder, cancellable, perror);
+		g_object_unref (conn);
 		return;
 	}
 
 	e_mapi_connection_close_folder (conn, &obj_folder, cancellable, perror);
+	g_object_unref (conn);
 
 	if (!cffd->folder_container_class) {
 		g_propagate_error (perror, g_error_new_literal (E_MAPI_ERROR, MAPI_E_CALL_FAILED, _("Cannot add folder, cannot determine folder's type")));
@@ -530,6 +539,7 @@ pick_gal_user_clicked_cb (GtkButton *button,
 {
 	GtkEntry *entry;
 	CamelMapiStore *mapi_store;
+	EMapiConnection *conn;
 	gchar *text, *display_name = NULL, *dn = NULL;
 	EMapiGalUserType searched_type = E_MAPI_GAL_USER_NONE;
 
@@ -543,8 +553,9 @@ pick_gal_user_clicked_cb (GtkButton *button,
 
 	text = g_strstrip (g_strdup (gtk_entry_get_text (entry)));
 
-	if (e_mapi_search_gal_user_modal (GTK_WINDOW (dialog),
-					  camel_mapi_store_get_connection (mapi_store, NULL, NULL),
+	conn = camel_mapi_store_ref_connection (mapi_store, NULL, NULL);
+	if (conn && e_mapi_search_gal_user_modal (GTK_WINDOW (dialog),
+					  conn,
 					  text,
 					  &searched_type,
 					  &display_name,
@@ -557,6 +568,9 @@ pick_gal_user_clicked_cb (GtkButton *button,
 			g_object_set_data_full (G_OBJECT (entry), STR_MAPI_DIRECT_USER_NAME, g_strdup (strrchr (dn, '=') + 1), g_free);
 		}
 	}
+
+	if (conn)
+		g_object_unref (conn);
 
 	g_free (text);
 	g_free (display_name);

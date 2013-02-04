@@ -53,7 +53,8 @@
 #define d(x)
 
 struct _CamelMapiStorePrivate {
-	EMapiConnection *conn;
+	EMapiConnection *connection;
+	GStaticRecMutex connection_lock;
 
 	GHashTable *id_hash; /*get names from ids*/
 	GHashTable *name_hash;/*get ids from names*/
@@ -196,9 +197,17 @@ cms_peek_folder_store (CamelMapiStore *mapi_store,
 static gboolean
 check_for_connection (CamelService *service, GError **error)
 {
-	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
+	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (service);
+	gboolean connected;
 
-	return store && store->priv->conn && e_mapi_connection_connected (store->priv->conn);
+	if (!mapi_store)
+		return FALSE;
+
+	g_static_rec_mutex_lock (&mapi_store->priv->connection_lock);
+	connected = mapi_store->priv->connection && e_mapi_connection_connected (mapi_store->priv->connection);
+	g_static_rec_mutex_unlock (&mapi_store->priv->connection_lock);
+
+	return connected;
 }
 
 /* escapes backslashes with \5C and forward slashes with \2F */
@@ -474,6 +483,7 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 	guint32 count, i;
 	GHashTable *old_cache_folders;
 	GError *err = NULL;
+	EMapiConnection *conn;
 
 	if (!camel_mapi_store_connected (store, cancellable, NULL)) {
 		g_set_error_literal (
@@ -482,12 +492,17 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 		return FALSE;
 	}
 
-	status = e_mapi_connection_get_folders_list (priv->conn, &folder_list, camel_mapi_update_operation_progress_cb, NULL, cancellable, &err);
+	conn = camel_mapi_store_ref_connection (store, cancellable, error);
+	if (!conn)
+		return FALSE;
+
+	status = e_mapi_connection_get_folders_list (conn, &folder_list, camel_mapi_update_operation_progress_cb, NULL, cancellable, &err);
 	if (!status) {
 		camel_mapi_store_maybe_disconnect (store, err);
 
 		g_warning ("Could not get folder list (%s)\n", err ? err->message : "Unknown error");
 		g_clear_error (&err);
+		g_object_unref (conn);
 		return TRUE;
 	}
 
@@ -516,7 +531,7 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 		GError *err = NULL;
 
 		/*Consult the name <-> fid hash table for a FID.*/
-		status = e_mapi_connection_get_pf_folders_list (priv->conn, &folder_list, camel_mapi_update_operation_progress_cb, NULL, cancellable, &err);
+		status = e_mapi_connection_get_pf_folders_list (conn, &folder_list, camel_mapi_update_operation_progress_cb, NULL, cancellable, &err);
 		if (!status)
 			g_warning ("Could not get Public folder list (%s)\n", err ? err->message : "Unknown error");
 
@@ -646,6 +661,7 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 	g_slist_free (list);
 
 	priv->folders_synced = TRUE;
+	g_object_unref (conn);
 
 	return TRUE;
 }
@@ -1007,12 +1023,14 @@ mapi_store_dispose (GObject *object)
 		mapi_store->summary = NULL;
 	}
 
-	if (priv->conn != NULL) {
-		g_signal_handlers_disconnect_by_func (priv->conn, camel_mapi_store_server_notification_cb, object);
+	g_static_rec_mutex_lock (&mapi_store->priv->connection_lock);
+	if (priv->connection != NULL) {
+		g_signal_handlers_disconnect_by_func (priv->connection, camel_mapi_store_server_notification_cb, object);
 
-		g_object_unref (priv->conn);
-		priv->conn = NULL;
+		g_object_unref (priv->connection);
+		priv->connection = NULL;
 	}
+	g_static_rec_mutex_unlock (&mapi_store->priv->connection_lock);
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (camel_mapi_store_parent_class)->dispose (object);
@@ -1039,6 +1057,7 @@ mapi_store_finalize (GObject *object)
 	if (priv->container_hash != NULL)
 		g_hash_table_destroy (priv->container_hash);
 
+	g_static_rec_mutex_free (&priv->connection_lock);
 	g_static_rec_mutex_free (&priv->updates_lock);
 
 	/* Chain up to parent's finalize() method. */
@@ -1306,9 +1325,14 @@ mapi_store_create_folder_sync (CamelStore *store,
 	e_mapi_util_mapi_id_from_string (parent_id, &parent_fid);
 	new_folder_id = 0;
 
-	conn = priv->conn;
-	if (!cms_open_folder (mapi_store, conn, parent_fid, &obj_folder, cancellable, error))
+	conn = camel_mapi_store_ref_connection (mapi_store, cancellable, error);
+	if (!conn)
 		return NULL;
+
+	if (!cms_open_folder (mapi_store, conn, parent_fid, &obj_folder, cancellable, error)) {
+		g_object_unref (conn);
+		return NULL;
+	}
 
 	if (!e_mapi_connection_create_folder (conn, &obj_folder, folder_name, IPF_NOTE, &new_folder_id, cancellable, &mapi_error))
 		new_folder_id = 0;
@@ -1360,6 +1384,8 @@ mapi_store_create_folder_sync (CamelStore *store,
 		}
 	}
 
+	g_object_unref (conn);
+
 	return root;
 
 }
@@ -1373,6 +1399,7 @@ mapi_store_delete_folder_sync (CamelStore *store,
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
 	CamelMapiStorePrivate  *priv = mapi_store->priv;
 	CamelMapiStoreInfo *msi;
+	EMapiConnection *conn;
 	mapi_object_t *obj_store = NULL;
 	const gchar *folder_id;
 	mapi_id_t folder_fid;
@@ -1411,6 +1438,10 @@ mapi_store_delete_folder_sync (CamelStore *store,
 
 	e_mapi_util_mapi_id_from_string (folder_id, &folder_fid);
 
+	conn = camel_mapi_store_ref_connection (mapi_store, cancellable, error);
+	if (!conn)
+		return FALSE;
+
 	msi = (CamelMapiStoreInfo *) camel_mapi_store_summary_get_folder_id (mapi_store->summary, folder_fid);
 	if (!msi ||
 	    (msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC) != 0 ||
@@ -1419,10 +1450,12 @@ mapi_store_delete_folder_sync (CamelStore *store,
 		   even when there are folder delete permissons on the folder
 		*/
 		status = TRUE;
-	} else if (cms_peek_folder_store (mapi_store, priv->conn, folder_fid, &obj_store, cancellable, &local_error))
-		status = e_mapi_connection_remove_folder (priv->conn, obj_store, folder_fid, cancellable, &local_error);
+	} else if (cms_peek_folder_store (mapi_store, conn, folder_fid, &obj_store, cancellable, &local_error))
+		status = e_mapi_connection_remove_folder (conn, obj_store, folder_fid, cancellable, &local_error);
 	else
 		status = FALSE;
+
+	g_object_unref (conn);
 
 	if (status) {
 		success = mapi_forget_folder (mapi_store, folder_name, &local_error);
@@ -1470,6 +1503,7 @@ mapi_store_rename_folder_sync (CamelStore *store,
 {
 	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (store);
 	CamelMapiStorePrivate  *priv = mapi_store->priv;
+	EMapiConnection *conn;
 	CamelStoreInfo *si = NULL;
 	CamelService *service;
 	const gchar *user_cache_dir;
@@ -1552,18 +1586,28 @@ mapi_store_rename_folder_sync (CamelStore *store,
 		return FALSE;
 	}
 
+	conn = camel_mapi_store_ref_connection (mapi_store, cancellable, error);
+	if (!conn) {
+		g_free (old_parent);
+		g_free (new_parent);
+
+		return FALSE;
+	}
+
 	if (tmp == NULL || g_str_equal (old_parent, new_parent)) {
 		gchar *folder_id;
 		gboolean status = FALSE;
 		mapi_object_t obj_folder;
 
-		if (cms_open_folder (mapi_store, priv->conn, old_fid, &obj_folder, cancellable, &local_error)) {
-			status = e_mapi_connection_rename_folder (priv->conn, &obj_folder, tmp ? tmp : new_name, cancellable, &local_error);
-			e_mapi_connection_close_folder (priv->conn, &obj_folder, cancellable, &local_error);
+		if (cms_open_folder (mapi_store, conn, old_fid, &obj_folder, cancellable, &local_error)) {
+			status = e_mapi_connection_rename_folder (conn, &obj_folder, tmp ? tmp : new_name, cancellable, &local_error);
+			e_mapi_connection_close_folder (conn, &obj_folder, cancellable, &local_error);
 		}
 
 		/* renaming in the same folder, thus no MoveFolder necessary */
 		if (!status) {
+			g_object_unref (conn);
+
 			if (local_error) {
 				if (!e_mapi_utils_propagate_cancelled_error (local_error, error))
 					g_set_error (
@@ -1632,19 +1676,21 @@ mapi_store_rename_folder_sync (CamelStore *store,
 			   e_mapi_util_mapi_id_from_string (new_parent_fid_str, &new_parent_fid)) {
 				mapi_object_t src_obj_folder, src_parent_obj_folder, des_obj_folder;
 
-				if (cms_open_folder (mapi_store, priv->conn, old_fid, &src_obj_folder, cancellable, &local_error)) {
-					if (cms_open_folder (mapi_store, priv->conn, old_parent_fid, &src_parent_obj_folder, cancellable, &local_error)) {
-						if (cms_open_folder (mapi_store, priv->conn, new_parent_fid, &des_obj_folder, cancellable, &local_error)) {
-							status = e_mapi_connection_move_folder (priv->conn, &src_obj_folder, &src_parent_obj_folder, &des_obj_folder, tmp, cancellable, &local_error);
-							e_mapi_connection_close_folder (priv->conn, &des_obj_folder, cancellable, &local_error);
+				if (cms_open_folder (mapi_store, conn, old_fid, &src_obj_folder, cancellable, &local_error)) {
+					if (cms_open_folder (mapi_store, conn, old_parent_fid, &src_parent_obj_folder, cancellable, &local_error)) {
+						if (cms_open_folder (mapi_store, conn, new_parent_fid, &des_obj_folder, cancellable, &local_error)) {
+							status = e_mapi_connection_move_folder (conn, &src_obj_folder, &src_parent_obj_folder, &des_obj_folder, tmp, cancellable, &local_error);
+							e_mapi_connection_close_folder (conn, &des_obj_folder, cancellable, &local_error);
 						}
-						e_mapi_connection_close_folder (priv->conn, &src_parent_obj_folder, cancellable, &local_error);
+						e_mapi_connection_close_folder (conn, &src_parent_obj_folder, cancellable, &local_error);
 					}
-					e_mapi_connection_close_folder (priv->conn, &src_obj_folder, cancellable, &local_error);
+					e_mapi_connection_close_folder (conn, &src_obj_folder, cancellable, &local_error);
 				}
 			}
 
 			if (!status) {
+				g_object_unref (conn);
+
 				if (local_error) {
 					if (!e_mapi_utils_propagate_cancelled_error (local_error, error))
 						g_set_error (
@@ -1680,6 +1726,8 @@ mapi_store_rename_folder_sync (CamelStore *store,
 
 		g_free (folder_id);
 	}
+
+	g_object_unref (conn);
 
 	si = camel_store_summary_path (mapi_store->summary, old_name);
 	if (si) {
@@ -2033,6 +2081,7 @@ camel_mapi_store_init (CamelMapiStore *mapi_store)
 {
 	mapi_store->priv = G_TYPE_INSTANCE_GET_PRIVATE (mapi_store, CAMEL_TYPE_MAPI_STORE, CamelMapiStorePrivate);
 
+	g_static_rec_mutex_init (&mapi_store->priv->connection_lock);
 	g_static_rec_mutex_init (&mapi_store->priv->updates_lock);
 	mapi_store->priv->updates_cancellable = NULL;
 	mapi_store->priv->update_folder_names = NULL;
@@ -2120,6 +2169,7 @@ mapi_connect_sync (CamelService *service,
                    GError **error)
 {
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
+	EMapiConnection *conn;
 	CamelServiceConnectionStatus status;
 	CamelSession *session;
 	CamelSettings *settings;
@@ -2164,11 +2214,14 @@ mapi_connect_sync (CamelService *service,
 
 	camel_store_summary_save (store->summary);
 
-	if (e_mapi_connection_get_store_quotas (
-		store->priv->conn, NULL,
-		&current_size, &receive_quota, &send_quota,
-		cancellable, NULL)) {
+	conn = camel_mapi_store_ref_connection (store, cancellable, error);
+	if (!conn) {
+		g_free (name);
 
+		return FALSE;
+	}
+
+	if (e_mapi_connection_get_store_quotas (conn, NULL, &current_size, &receive_quota, &send_quota, cancellable, NULL)) {
 		if (current_size != -1) {
 			gchar *msg = NULL;
 
@@ -2194,6 +2247,7 @@ mapi_connect_sync (CamelService *service,
 		}
 	}
 
+	g_object_unref (conn);
 	g_free (name);
 
 	return TRUE;
@@ -2209,16 +2263,18 @@ mapi_disconnect_sync (CamelService *service,
 
 	stop_pending_updates (store);
 
-	if (store->priv->conn) {
-		g_signal_handlers_disconnect_by_func (store->priv->conn, camel_mapi_store_server_notification_cb, store);
-		e_mapi_connection_disable_notifications (store->priv->conn, NULL, cancellable, error);
+	g_static_rec_mutex_lock (&store->priv->connection_lock);
+	if (store->priv->connection) {
+		g_signal_handlers_disconnect_by_func (store->priv->connection, camel_mapi_store_server_notification_cb, store);
+		e_mapi_connection_disable_notifications (store->priv->connection, NULL, cancellable, error);
 
 		/* Close the mapi subsystem */
-		e_mapi_connection_disconnect (store->priv->conn, clean, clean ? cancellable : NULL, error);
+		e_mapi_connection_disconnect (store->priv->connection, clean, clean ? cancellable : NULL, error);
 
-		g_object_unref (store->priv->conn);
-		store->priv->conn = NULL;
+		g_object_unref (store->priv->connection);
+		store->priv->connection = NULL;
 	}
+	g_static_rec_mutex_unlock (&store->priv->connection_lock);
 
 	store->priv->folders_synced = FALSE;
 
@@ -2602,20 +2658,21 @@ mapi_authenticate_sync (CamelService *service,
 	}
 
 	password_str = g_string_new (password);
-	store->priv->conn = e_mapi_connection_new (
+	g_static_rec_mutex_lock (&store->priv->connection_lock);
+	store->priv->connection = e_mapi_connection_new (
 		e_mail_session_get_registry (E_MAIL_SESSION (camel_service_get_session (service))),
 		profile, password_str, cancellable, &mapi_error);
 	g_string_free (password_str, TRUE);
-	if (store->priv->conn && e_mapi_connection_connected (store->priv->conn)) {
+	if (store->priv->connection && e_mapi_connection_connected (store->priv->connection)) {
 		result = CAMEL_AUTHENTICATION_ACCEPTED;
 
 		if (!store->priv->updates_cancellable)
 			store->priv->updates_cancellable = g_cancellable_new ();
 
-		g_signal_connect (store->priv->conn, "server-notification", G_CALLBACK (camel_mapi_store_server_notification_cb), store);
+		g_signal_connect (store->priv->connection, "server-notification", G_CALLBACK (camel_mapi_store_server_notification_cb), store);
 
 		if (camel_mapi_settings_get_listen_notifications (mapi_settings))
-			e_mapi_connection_enable_notifications (store->priv->conn, NULL, 0, NULL, NULL);
+			e_mapi_connection_enable_notifications (store->priv->connection, NULL, 0, NULL, NULL);
 	} else if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_LOGON_FAILED)) {
 		g_clear_error (&mapi_error);
 		result = CAMEL_AUTHENTICATION_REJECTED;
@@ -2638,6 +2695,7 @@ mapi_authenticate_sync (CamelService *service,
 		result = CAMEL_AUTHENTICATION_ERROR;
 	}
 
+	g_static_rec_mutex_unlock (&store->priv->connection_lock);
 	g_object_unref (settings);
 
 	return result;
@@ -2719,8 +2777,12 @@ camel_mapi_store_maybe_disconnect (CamelMapiStore *mapi_store,
 	g_return_if_fail (CAMEL_IS_MAPI_STORE (mapi_store));
 
 	/* no error or already disconnected */
-	if (!mapi_error || !mapi_store->priv->conn)
+	g_static_rec_mutex_lock (&mapi_store->priv->connection_lock);
+	if (!mapi_error || !mapi_store->priv->connection) {
+		g_static_rec_mutex_unlock (&mapi_store->priv->connection_lock);
 		return;
+	}
+	g_static_rec_mutex_unlock (&mapi_store->priv->connection_lock);
 
 	if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR) ||
 	    g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_CALL_FAILED))
@@ -2858,18 +2920,26 @@ camel_mapi_store_folder_lookup (CamelMapiStore *mapi_store, const gchar *folder_
 }
 
 EMapiConnection *
-camel_mapi_store_get_connection (CamelMapiStore *mapi_store,
+camel_mapi_store_ref_connection (CamelMapiStore *mapi_store,
 				 GCancellable *cancellable,
 				 GError **error)
 {
+	EMapiConnection *conn;
+
 	g_return_val_if_fail (mapi_store != NULL, NULL);
 	g_return_val_if_fail (CAMEL_IS_MAPI_STORE (mapi_store), NULL);
 	g_return_val_if_fail (mapi_store->priv != NULL, NULL);
 
-	if (!mapi_store->priv->conn)
+	g_static_rec_mutex_lock (&mapi_store->priv->connection_lock);
+	if (!mapi_store->priv->connection)
 		camel_mapi_store_connected (mapi_store, cancellable, error);
 
-	return mapi_store->priv->conn;
+	conn = mapi_store->priv->connection;
+	if (conn)
+		g_object_ref (conn);
+	g_static_rec_mutex_unlock (&mapi_store->priv->connection_lock);
+
+	return conn;
 }
 
 /* ppath contains proposed path, this only makes sure that it's a unique path */
