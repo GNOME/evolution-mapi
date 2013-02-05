@@ -320,7 +320,7 @@ mail_config_mapi_authenticator_try_password_sync (ESourceAuthenticator *auth,
 		&mapi_error);
 
 	if (mapi_error) {
-		gboolean is_network_error = g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR);
+		gboolean is_network_error = mapi_error && mapi_error->domain != E_MAPI_ERROR;
 
 		g_warn_if_fail (!mapi_authenticator->success);
 		mapi_authenticator->success = FALSE;
