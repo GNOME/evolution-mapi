@@ -392,8 +392,7 @@ ebbm_connect_user (EBookBackendMAPI *ebma,
 			g_object_unref (old_conn);
 
 		if (!priv->conn || mapi_error) {
-			gboolean is_network_error = g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR) ||
-				(mapi_error && mapi_error->domain != E_MAPI_ERROR);
+			gboolean is_network_error = mapi_error && mapi_error->domain != E_MAPI_ERROR;
 
 			if (priv->conn) {
 				g_object_unref (priv->conn);

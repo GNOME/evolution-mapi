@@ -2685,16 +2685,10 @@ mapi_authenticate_sync (CamelService *service,
 
 		if (camel_mapi_settings_get_listen_notifications (mapi_settings))
 			e_mapi_connection_enable_notifications (store->priv->connection, NULL, 0, NULL, NULL);
-	} else if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_LOGON_FAILED)) {
+	} else if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_LOGON_FAILED) ||
+		   g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR)) {
 		g_clear_error (&mapi_error);
 		result = CAMEL_AUTHENTICATION_REJECTED;
-	} else if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR)) {
-		g_set_error_literal (
-			error, CAMEL_SERVICE_ERROR,
-			CAMEL_SERVICE_ERROR_UNAVAILABLE,
-			mapi_error->message);
-		g_clear_error (&mapi_error);
-		result = CAMEL_AUTHENTICATION_ERROR;
 	} else {
 		/* mapi_error should be set */
 		g_return_val_if_fail (

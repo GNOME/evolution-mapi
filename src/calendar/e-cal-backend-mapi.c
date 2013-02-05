@@ -1203,8 +1203,7 @@ ecbm_connect_user (ECalBackend *backend,
 			g_signal_connect (priv->conn, "server-notification", G_CALLBACK (ecbm_server_notification_cb), cbmapi);
 		}
 	} else {
-		gboolean is_network_error = g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR) ||
-			(mapi_error && mapi_error->domain != E_MAPI_ERROR);
+		gboolean is_network_error = mapi_error && mapi_error->domain != E_MAPI_ERROR;
 
 		if (is_network_error)
 			mapi_error_to_edc_error (perror, mapi_error, OtherError, NULL);
