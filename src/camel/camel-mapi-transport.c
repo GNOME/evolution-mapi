@@ -104,8 +104,10 @@ mapi_send_to_sync (CamelTransport *transport,
 	if (!profile) {
 		/* try to find corresponding CamelStore with profile name filled */
 		const gchar *my_uid = camel_service_get_uid (service);
-		CamelSession *session = camel_service_get_session (service);
+		CamelSession *session;
 		GList *services, *s;
+
+		session = camel_service_ref_session (service);
 
 		services = camel_session_list_services (session);
 		for (s = services; s && my_uid && !profile; s = s->next) {
@@ -129,6 +131,8 @@ mapi_send_to_sync (CamelTransport *transport,
 		}
 
 		g_list_free_full (services, g_object_unref);
+
+		g_object_unref (session);
 	}
 
 	conn = e_mapi_connection_find (profile);

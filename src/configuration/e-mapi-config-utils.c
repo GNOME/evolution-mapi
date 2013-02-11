@@ -664,7 +664,7 @@ action_folder_size_cb (GtkAction *action,
 		ESourceRegistry *registry;
 		ESource *source;
 
-		session = camel_service_get_session (CAMEL_SERVICE (store));
+		session = camel_service_ref_session (CAMEL_SERVICE (store));
 		registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
 		source = e_source_registry_ref_source (registry, camel_service_get_uid (CAMEL_SERVICE (store)));
 
@@ -676,6 +676,8 @@ action_folder_size_cb (GtkAction *action,
 		g_object_unref (settings);
 
 		g_object_unref (source); 
+
+		g_object_unref (session);
 	}
 
 	g_free (profile);

@@ -413,7 +413,7 @@ check_foreign_folder_idle (GObject *with_object,
 
 	g_object_unref (settings);
 
-	session = camel_service_get_session (CAMEL_SERVICE (mapi_store));
+	session = camel_service_ref_session (CAMEL_SERVICE (mapi_store));
 	if (E_IS_MAIL_SESSION (session))
 		registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
 
@@ -438,6 +438,8 @@ check_foreign_folder_idle (GObject *with_object,
 		/* to not destroy the dialog on error */
 		cffd->folder_id = 0;
 	}
+
+	g_object_unref (session);
 
 	g_free (folder_name);
 	g_free (profile);

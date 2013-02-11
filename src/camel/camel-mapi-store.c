@@ -2194,15 +2194,18 @@ mapi_connect_sync (CamelService *service,
 		return FALSE;
 	}
 
-	session = camel_service_get_session (service);
+	session = camel_service_ref_session (service);
 
 	status = camel_service_get_connection_status (service);
 	if (status == CAMEL_SERVICE_DISCONNECTED) {
+		g_object_unref (session);
 		return FALSE;
 	}
 
-	if (check_for_connection (service, NULL))
+	if (check_for_connection (service, NULL)) {
+		g_object_unref (session);
 		return TRUE;
+	}
 
 	name = camel_service_get_name (service, TRUE);
 	camel_operation_push_message (cancellable, _("Connecting to '%s'"), name);
@@ -2213,6 +2216,7 @@ mapi_connect_sync (CamelService *service,
 
 	if (!camel_session_authenticate_sync (session, service, empd.krb_sso ? "MAPIKRB" : NULL, cancellable, error)) {
 		camel_operation_pop_message (cancellable);
+		g_object_unref (session);
 		g_free (name);
 		return FALSE;
 	}
@@ -2226,6 +2230,7 @@ mapi_connect_sync (CamelService *service,
 
 	conn = camel_mapi_store_ref_connection (store, cancellable, error);
 	if (!conn) {
+		g_object_unref (session);
 		g_free (name);
 
 		return FALSE;
@@ -2259,6 +2264,8 @@ mapi_connect_sync (CamelService *service,
 
 	g_object_unref (conn);
 	g_free (name);
+
+	g_object_unref (session);
 
 	return TRUE;
 }
@@ -2630,6 +2637,7 @@ mapi_authenticate_sync (CamelService *service,
 {
 	CamelAuthenticationResult result;
 	CamelMapiStore *store = CAMEL_MAPI_STORE (service);
+	CamelSession *session;
 	CamelSettings *settings;
 	CamelMapiSettings *mapi_settings;
 	CamelNetworkSettings *network_settings;
@@ -2671,9 +2679,11 @@ mapi_authenticate_sync (CamelService *service,
 
 	password_str = g_string_new (password);
 	g_rec_mutex_lock (&store->priv->connection_lock);
+	session = camel_service_ref_session (service);
 	store->priv->connection = e_mapi_connection_new (
-		e_mail_session_get_registry (E_MAIL_SESSION (camel_service_get_session (service))),
+		e_mail_session_get_registry (E_MAIL_SESSION (session)),
 		profile, password_str, cancellable, &mapi_error);
+	g_object_unref (session);
 	g_string_free (password_str, TRUE);
 	if (store->priv->connection && e_mapi_connection_connected (store->priv->connection)) {
 		result = CAMEL_AUTHENTICATION_ACCEPTED;
