@@ -760,12 +760,15 @@ e_mapi_connection_connected (EMapiConnection *conn)
 
 	res = priv->session != NULL;
 	if (res) {
-		struct mapi_profile profile = { 0 };
+		struct mapi_profile *profile;
 
-		if (MAPI_E_SUCCESS == OpenProfile (priv->mapi_ctx, &profile, priv->profile, NULL)) {
-			res = can_reach_mapi_server (profile.server, NULL, perror);
-			ShutDown (&profile);
+		profile = talloc_zero (priv->mapi_ctx, struct mapi_profile);
+		if (MAPI_E_SUCCESS == OpenProfile (priv->mapi_ctx, profile, priv->profile, NULL)) {
+			res = can_reach_mapi_server (profile->server, NULL, perror);
+			ShutDown (profile);
 		}
+
+		talloc_free (profile);
 	}
 
 	UNLOCK ();
@@ -6734,7 +6737,7 @@ mapi_profile_load (ESourceRegistry *registry,
 {
 	enum MAPISTATUS	ms = MAPI_E_SUCCESS;
 	struct mapi_session *session = NULL;
-	struct mapi_profile profile = { 0 };
+	struct mapi_profile *profile;
 	guint32 debug_log_level = 0;
 
 	e_return_val_mapi_error_if_fail (mapi_ctx != NULL, MAPI_E_INVALID_PARAMETER, NULL);
@@ -6752,13 +6755,14 @@ mapi_profile_load (ESourceRegistry *registry,
 		SetMAPIDebugLevel (mapi_ctx, debug_log_level);
 	}
 
-	if (MAPI_E_SUCCESS == OpenProfile (mapi_ctx, &profile, profname, NULL)) {
-		if (!can_reach_mapi_server (profile.server, cancellable, perror)) {
-			ShutDown (&profile);
+	profile = talloc_zero (mapi_ctx, struct mapi_profile);
+	if (MAPI_E_SUCCESS == OpenProfile (mapi_ctx, profile, profname, NULL)) {
+		if (!can_reach_mapi_server (profile->server, cancellable, perror)) {
+			ShutDown (profile);
 			goto cleanup;
 		}
 
-		ShutDown (&profile);
+		ShutDown (profile);
 	}
 
 	e_mapi_debug_print("Loading profile %s ", profname);
@@ -6773,6 +6777,7 @@ mapi_profile_load (ESourceRegistry *registry,
 	}
 
  cleanup:
+	talloc_free (profile);
 	e_mapi_utils_global_unlock ();
 	e_mapi_debug_print ("%s: Leaving %s ", G_STRLOC, G_STRFUNC);
 
