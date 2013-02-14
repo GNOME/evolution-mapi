@@ -53,6 +53,8 @@ gboolean	e_mapi_util_mapi_id_from_string		(const gchar *str, mapi_id_t *id);
 gconstpointer	e_mapi_util_find_SPropVal_array_propval	(struct SPropValue *values, uint32_t proptag);
 gconstpointer	e_mapi_util_find_row_propval		(struct SRow *aRow,
 							 uint32_t proptag);
+gconstpointer	e_mapi_util_find_propertyrow_propval	(struct PropertyRow_r *rRow,
+							 uint32_t proptag);
 gconstpointer	e_mapi_util_find_array_propval		(struct mapi_SPropValue_array *properties,
 							 uint32_t proptag);
 uint32_t	e_mapi_util_find_array_proptag		(struct mapi_SPropValue_array *properties,

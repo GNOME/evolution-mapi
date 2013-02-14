@@ -76,43 +76,6 @@ typedef enum {
     MeetInfoUpdate = 0x0409
 } IconIndex;
 
-#if 0
-typedef enum {
-    olEditorText = 1,
-    olEditorHTML = 2,
-    olEditorRTF = 3,
-    olEditorWord = 4
-} OlEditorType; /* PR_MESSAGE_EDITOR_FORMAT type */
-
-typedef enum {
-    olFolderDeletedItems = 3,
-    olFolderOutbox = 4,
-    olFolderSentMail = 5,
-    olFolderInbox = 6,
-    olFolderCalendar = 9,
-    olFolderContacts = 10,
-    olFolderJournal = 11,
-    olFolderNotes = 12,
-    olFolderTasks = 13,
-    olFolderDrafts = 16,
-    olPublicFoldersAllPublicFolders = 18,
-    olFolderConflicts = 19,
-    olFolderSyncIssues = 20,
-    olFolderLocalFailures = 21,
-    olFolderServerFailures = 22,
-    olFolderJunk = 23,
-    olFolderRssFeeds = 25,
-    olFolderToDo = 28,
-    olFolderManagedEmail = 29
-} OlDefaultFolders;
-
-#define	olFolderTopInformationStore	1
-#define	olFolderCommonView		8
-#define	olFolderFinder			24
-#define	olFolderPublicRoot		25
-#define	olFolderPublicIPMSubtree	26
-#endif
-
 /* APPOINTMENTS */
 typedef enum {
     olOrganizer = 0,
@@ -185,59 +148,12 @@ typedef enum {
     olTaskDecline = 3
 } OlTaskResponse;
 
-#if 0
-typedef enum {
-    olNewTask = 0,
-    olDelegatedTask = 1,
-    olOwnTask = 2
-} OlTaskOwnership;
-
-typedef enum {
-    olTaskNotStarted = 0,
-    olTaskInProgress = 1,
-    olTaskComplete = 2,
-    olTaskWaiting = 3,
-    olTaskDeferred = 4
-} OlTaskStatus;
-#endif
-
-/* NOTES */
-#if 0
-typedef enum {
-    olBlue = 0,
-    olGreen = 1,
-    olPink = 2,
-    olYellow = 3,
-    olWhite = 4
-} OlNoteColor;
-#endif
-
-/* RECURRENCE (APPOINTMENTS/MEETINGS/TASKS) */
-typedef enum {
-    rectypeNone = 0,
-    rectypeDaily = 1,
-    rectypeWeekly = 2,
-    rectypeMonthly = 3,
-    rectypeYearly = 4
-} OlRecurrenceType;
-
 typedef enum {
     olApptNotRecurring = 0,
     olApptMaster = 1,
     olApptOccurrence = 2,
     olApptException = 3
 } OlRecurrenceState;
-
-#if 0
-typedef enum {
-    olRecursDaily = 0,
-    olRecursWeekly = 1,
-    olRecursMonthly = 2,
-    olRecursMonthNth = 3,
-    olRecursYearly = 5,
-    olRecursYearNth = 6
-} OlRecurrencePatternType;
-#endif
 
 #define IPM_CONTACT				"IPM.Contact"
 #define IPM_DISTLIST				"IPM.DistList"

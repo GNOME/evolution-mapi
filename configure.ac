@@ -27,7 +27,7 @@ dnl Required Packages
 dnl *******************
 m4_define([eds_minimum_version], [ema_version])
 m4_define([evo_minimum_version], [ema_version])
-m4_define([libmapi_minimum_version], [1.0])
+m4_define([libmapi_minimum_version], [2.0])
 
 dnl Keep these two definitions in agreement.
 m4_define([glib_minimum_version], [2.34])

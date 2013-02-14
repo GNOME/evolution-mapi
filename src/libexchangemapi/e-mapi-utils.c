@@ -269,6 +269,30 @@ e_mapi_util_find_row_propval (struct SRow *aRow, uint32_t proptag)
 	return (find_SPropValue_data(aRow, proptag));
 }
 
+gconstpointer
+e_mapi_util_find_propertyrow_propval (struct PropertyRow_r *rRow,
+				      uint32_t proptag)
+{
+	if (((proptag & 0xFFFF) == PT_STRING8) ||
+	    ((proptag & 0xFFFF) == PT_UNICODE)) {
+		gconstpointer str = NULL;
+
+		proptag = (proptag & 0xFFFF0000) | PT_UNICODE;
+		str = find_PropertyValue_data (rRow, proptag);
+		if (str)
+			return str;
+
+		proptag = (proptag & 0xFFFF0000) | PT_STRING8;
+		str = find_PropertyValue_data (rRow, proptag);
+		if (str)
+			return str;
+
+		return NULL;
+	}
+
+	return find_PropertyValue_data (rRow, proptag);
+}
+
 /*
  * Retrieve the property value for a given mapi_SPropValue_array and property tag.
  *

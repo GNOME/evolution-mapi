@@ -3573,6 +3573,7 @@ add_object_recipients (EMapiConnection *conn,
 	enum MAPISTATUS	ms;
 	struct SPropTagArray *tags;
 	struct SRowSet *rows = NULL;
+	struct PropertyRowSet_r *prop_rows = NULL;
 	struct PropertyTagArray_r *flagList = NULL;
 	EResolveNamedIDsData *named_ids_list = NULL;
 	guint named_ids_len = 0;
@@ -3664,7 +3665,7 @@ add_object_recipients (EMapiConnection *conn,
 			g_hash_table_destroy (replace_hash);
 	}
 
-	ms = ResolveNames (priv->session, users, tags, &rows, &flagList, MAPI_UNICODE);
+	ms = ResolveNames (priv->session, users, tags, &prop_rows, &flagList, MAPI_UNICODE);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "ResolveNames", ms);
 		goto cleanup;
@@ -3672,8 +3673,11 @@ add_object_recipients (EMapiConnection *conn,
 
 	g_assert (count == flagList->cValues);
 
-	if (!rows) /* This happens when there are ZERO RESOLVED recipients */
-		rows = talloc_zero (mem_ctx, struct SRowSet);
+	rows = talloc_zero (mem_ctx, struct SRowSet);
+
+	/* 'prop_rows == NULL' happens when there are none resolved recipients */
+	if (prop_rows)
+		cast_PropertyRowSet_to_SRowSet (mem_ctx, prop_rows, rows);
 
 	for (ii = 0, jj = 0; ii < count; ii++) {
 		recipient = recips[ii];
@@ -3716,6 +3720,7 @@ add_object_recipients (EMapiConnection *conn,
 
  cleanup:
 	talloc_free (rows);
+	talloc_free (prop_rows);
 	talloc_free (flagList);
 
 	UNLOCK ();
@@ -4144,6 +4149,62 @@ e_mapi_connection_modify_object (EMapiConnection *conn,
 }
 
 static void
+e_mapi_cast_SPropValue_to_PropertyValue (struct SPropValue *spropvalue,
+					 struct PropertyValue_r *propvalue)
+{
+	propvalue->ulPropTag = spropvalue->ulPropTag;
+
+	switch (spropvalue->ulPropTag & 0xFFFF) {
+	case PT_BOOLEAN:
+		propvalue->value.b = spropvalue->value.b;
+		break;
+	case PT_I2:
+		propvalue->value.i = spropvalue->value.i;
+		break;
+	case PT_LONG:
+		propvalue->value.l = spropvalue->value.l;
+		break;
+	case PT_STRING8:
+		propvalue->value.lpszA = spropvalue->value.lpszA;
+		break;
+	case PT_UNICODE:
+		propvalue->value.lpszW = spropvalue->value.lpszW;
+		break;
+	case PT_SYSTIME:
+		propvalue->value.ft = spropvalue->value.ft;
+		break;
+	case PT_CLSID:
+		propvalue->value.lpguid = spropvalue->value.lpguid;
+		break;
+	case PT_SVREID:
+	case PT_BINARY:
+		propvalue->value.bin = spropvalue->value.bin;
+		break;
+        case PT_ERROR:
+                propvalue->value.err = spropvalue->value.err;
+		break;
+	case PT_MV_LONG:
+		propvalue->value.MVl = spropvalue->value.MVl;
+		break;
+	case PT_MV_STRING8:
+		propvalue->value.MVszA = spropvalue->value.MVszA;
+		break;
+        case PT_MV_UNICODE:
+		propvalue->value.MVszW = spropvalue->value.MVszW;
+		break;
+	case PT_MV_CLSID:
+		propvalue->value.MVguid = spropvalue->value.MVguid;
+		break;
+	case PT_MV_BINARY:
+		propvalue->value.MVbin = spropvalue->value.MVbin;
+		break;
+        default:
+                g_warning ("%s: unhandled conversion case: 0x%x", G_STRFUNC, (spropvalue->ulPropTag & 0xFFFF));
+		break;
+	}
+}
+
+static void
 convert_mapi_SRestriction_to_Restriction_r (struct mapi_SRestriction *restriction,
 					    struct Restriction_r *rr,
 					    TALLOC_CTX *mem_ctx,
@@ -4158,11 +4219,13 @@ convert_mapi_SRestriction_to_Restriction_r (struct mapi_SRestriction *restrictio
 
 	#define copy(x, y) rr->res.x = restriction->res.y
 	#define copy_prop(pprop, mprop)	{							\
-			rr->res.pprop = talloc_zero (mem_ctx, struct SPropValue);		\
+			struct SPropValue *helper = talloc_zero (mem_ctx, struct SPropValue);	\
+			rr->res.pprop = talloc_zero (mem_ctx, struct PropertyValue_r);		\
 			g_return_if_fail (rr->res.pprop != NULL);				\
 			rr->res.pprop->ulPropTag = restriction->res.mprop.ulPropTag;		\
 			rr->res.pprop->dwAlignPad = 0;						\
-			cast_SPropValue (mem_ctx, &(restriction->res.mprop), rr->res.pprop);	\
+			cast_SPropValue (mem_ctx, &(restriction->res.mprop), helper);		\
+			e_mapi_cast_SPropValue_to_PropertyValue (helper, rr->res.pprop);	\
 		}
 	#define check_proptag(x) {								\
 			proptag = x;								\
@@ -4269,7 +4332,7 @@ process_gal_rows_chunk (EMapiConnection *conn,
 			TALLOC_CTX *mem_ctx,
 			uint32_t rows_offset,
 			uint32_t rows_total,
-			struct SRowSet *rows,
+			struct PropertyRowSet_r *rows,
 			struct PropertyTagArray_r *mids,
 			ForeachTableRowCB cb,
 			gpointer user_data,
@@ -4286,25 +4349,33 @@ process_gal_rows_chunk (EMapiConnection *conn,
 	e_return_val_mapi_error_if_fail (rows->cRows <= mids->cValues, MAPI_E_INVALID_PARAMETER, MAPI_E_INVALID_PARAMETER);
 
 	for (ii = 0; ii < rows->cRows; ii++) {
-		struct SRow *row = &rows->aRow[ii];
+		struct SRow *row;
 		int64_t mid = mids->aulPropTag[ii];
+
+		row = talloc_zero (mem_ctx, struct SRow);
+		cast_PropertyRow_to_SRow (mem_ctx, &rows->aRow[ii], row);
 
 		/* add the temporary mid as a PidTagMid */
 		if (!e_mapi_utils_add_spropvalue (mem_ctx, &row->lpProps, &row->cValues, PidTagMid, &mid)) {
 			ms = MAPI_E_CALL_FAILED;
 			make_mapi_error (perror, "e_mapi_utils_add_spropvalue", ms);
+			talloc_free (row);
 			break;
 		}
 
 		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 			ms = MAPI_E_USER_CANCEL;
+			talloc_free (row);
 			break;
 		}
 
 		if (!cb (conn, mem_ctx, row, rows_offset + ii + 1, rows_total, user_data, cancellable, perror)) {
 			ms = MAPI_E_USER_CANCEL;
+			talloc_free (row);
 			break;
 		}
+
+		talloc_free (row);
 	}
 
 	return ms;
@@ -4313,7 +4384,7 @@ process_gal_rows_chunk (EMapiConnection *conn,
 static enum MAPISTATUS
 foreach_gal_tablerow (EMapiConnection *conn,
 		      TALLOC_CTX *mem_ctx,
-		      struct SRowSet *first_rows,
+		      struct PropertyRowSet_r *first_rows,
 		      struct PropertyTagArray_r *all_mids,
 		      struct SPropTagArray *propTagArray,
 		      ForeachTableRowCB cb,
@@ -4322,7 +4393,7 @@ foreach_gal_tablerow (EMapiConnection *conn,
 		      GError **perror)
 {
 	enum MAPISTATUS ms;
-	struct SRowSet *rows = NULL;
+	struct PropertyRowSet_r *rows = NULL;
 	struct PropertyTagArray_r *to_query = NULL;
 	uint32_t  midspos;
 
@@ -4442,7 +4513,7 @@ e_mapi_connection_list_gal_objects (EMapiConnection *conn,
 	TALLOC_CTX *mem_ctx;
 	struct SPropTagArray *propTagArray = NULL;
 	struct Restriction_r *use_restriction = NULL;
-	struct SRowSet *rows = NULL;
+	struct PropertyRowSet_r *rows = NULL;
 	struct PropertyTagArray_r *pMIds = NULL;
 	struct ListObjectsInternalData loi_data;
 
@@ -4674,7 +4745,7 @@ e_mapi_connection_transfer_gal_objects (EMapiConnection *conn,
 	TALLOC_CTX *mem_ctx;
 	struct PropertyTagArray_r *ids = NULL;
 	struct SPropTagArray *propTagArray = NULL;
-	struct SRowSet rows;
+	struct PropertyRowSet_r rows;
 	struct TransferGALObjectData tgo;
 	GHashTable *reverse_replace_hash = NULL;
 	EResolveNamedIDsData *named_ids_list = NULL;
@@ -6212,7 +6283,7 @@ e_mapi_connection_ex_to_smtp (EMapiConnection *conn,
 	enum MAPISTATUS	ms;
 	TALLOC_CTX		*mem_ctx;
 	struct SPropTagArray	*SPropTagArray;
-	struct SRowSet		*SRowSet = NULL;
+	struct PropertyRowSet_r *rowSet = NULL;
 	struct PropertyTagArray_r *flaglist = NULL;
 	const gchar		*str_array[2];
 	gchar			*smtp_addr = NULL;
@@ -6233,28 +6304,28 @@ e_mapi_connection_ex_to_smtp (EMapiConnection *conn,
 					  PR_DISPLAY_NAME_UNICODE,
 					  PR_SMTP_ADDRESS_UNICODE);
 
-	ms = ResolveNames (priv->session, (const gchar **)str_array, SPropTagArray, &SRowSet, &flaglist, MAPI_UNICODE);
+	ms = ResolveNames (priv->session, (const gchar **) str_array, SPropTagArray, &rowSet, &flaglist, MAPI_UNICODE);
 	if (ms != MAPI_E_SUCCESS) {
-		talloc_free (SRowSet);
+		talloc_free (rowSet);
 		talloc_free (flaglist);
 
-		SRowSet = NULL;
+		rowSet = NULL;
 		flaglist = NULL;
 
-		ms = ResolveNames (priv->session, (const gchar **)str_array, SPropTagArray, &SRowSet, &flaglist, 0);
+		ms = ResolveNames (priv->session, (const gchar **)str_array, SPropTagArray, &rowSet, &flaglist, 0);
 	}
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 		ms = MAPI_E_USER_CANCEL;
 	}
 
-	if (ms == MAPI_E_SUCCESS && SRowSet && SRowSet->cRows == 1) {
-		smtp_addr = g_strdup (e_mapi_util_find_row_propval (SRowSet->aRow, PR_SMTP_ADDRESS_UNICODE));
+	if (ms == MAPI_E_SUCCESS && rowSet && rowSet->cRows == 1) {
+		smtp_addr = g_strdup (e_mapi_util_find_propertyrow_propval (rowSet->aRow, PR_SMTP_ADDRESS_UNICODE));
 		if (display_name)
-			*display_name = g_strdup (e_mapi_util_find_row_propval (SRowSet->aRow, PR_DISPLAY_NAME_UNICODE));
+			*display_name = g_strdup (e_mapi_util_find_propertyrow_propval (rowSet->aRow, PR_DISPLAY_NAME_UNICODE));
 	}
 
-	talloc_free (SRowSet);
+	talloc_free (rowSet);
 	talloc_free (flaglist);
 	talloc_free (mem_ctx);
 
@@ -6279,7 +6350,7 @@ e_mapi_connection_resolve_username (EMapiConnection *conn,
 	enum MAPISTATUS ms;
 	TALLOC_CTX *mem_ctx;
 	struct SPropTagArray *tag_array;
-	struct SRowSet *rows = NULL;
+	struct PropertyRowSet_r *rows = NULL;
 	struct PropertyTagArray_r *flaglist = NULL;
 	const gchar *str_array[2];
 	EResolveNamedIDsData *named_ids_list = NULL;
@@ -6380,10 +6451,18 @@ e_mapi_connection_resolve_username (EMapiConnection *conn,
 			struct mapi_SPropValue_array *properties;
 			struct SRow *row;
 
-			row = &rows->aRow[qq];
+			row = talloc_zero (mem_ctx, struct SRow);
+			if (!row) {
+				UNLOCK();
+				e_return_val_mapi_error_if_fail (properties != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+			}
+
+			cast_PropertyRow_to_SRow (mem_ctx, &rows->aRow[qq], row);
+
 			properties = talloc_zero (mem_ctx, struct mapi_SPropValue_array);
 			if (!properties) {
 				UNLOCK();
+				talloc_free (row);
 				e_return_val_mapi_error_if_fail (properties != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 			}
 
@@ -6408,10 +6487,12 @@ e_mapi_connection_resolve_username (EMapiConnection *conn,
 				ms = MAPI_E_CALL_FAILED;
 				make_mapi_error (perror, "callback", ms);
 				talloc_free (properties);
+				talloc_free (row);
 				break;
 			}
 
 			talloc_free (properties);
+			talloc_free (row);
 		}
 
 		if (replace_hash)
@@ -6784,7 +6865,8 @@ mapi_profile_load (ESourceRegistry *registry,
 }
 
 static int
-create_profile_fallback_callback (struct SRowSet *rowset, gconstpointer data)
+create_profile_fallback_callback (struct PropertyRowSet_r *rowset,
+				  gconstpointer data)
 {
 	guint32	ii;
 	const gchar *username = (const gchar *) data;
@@ -6793,7 +6875,7 @@ create_profile_fallback_callback (struct SRowSet *rowset, gconstpointer data)
 	for (ii = 0; ii < rowset->cRows; ii++) {
 		const gchar *account_name;
 
-		account_name = e_mapi_util_find_row_propval (&(rowset->aRow[ii]), PR_ACCOUNT_UNICODE);
+		account_name = e_mapi_util_find_propertyrow_propval (&(rowset->aRow[ii]), PR_ACCOUNT_UNICODE);
 
 		if (account_name && g_strcmp0 (username, account_name) == 0)
 			return ii;

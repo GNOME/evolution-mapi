@@ -102,7 +102,7 @@ transform_boolean_to_security_method (GBinding *binding,
 struct ECreateProfileData
 {
 	const gchar *username;
-	struct SRowSet *rowset;
+	struct PropertyRowSet_r *rowset;
 	gint index;
 	EFlag *flag;
 };
@@ -148,8 +148,8 @@ create_profile_callback_in_main (gpointer user_data)
 	gtk_tree_view_set_model (GTK_TREE_VIEW (view), GTK_TREE_MODEL (store));
 
 	for (i = 0; i < cpd->rowset->cRows; i++) {
-		const gchar *fullname = e_mapi_util_find_row_propval (&(cpd->rowset->aRow[i]), PidTagDisplayName);
-		const gchar *account = e_mapi_util_find_row_propval (&(cpd->rowset->aRow[i]), PidTagAccount);
+		const gchar *fullname = e_mapi_util_find_propertyrow_propval (&(cpd->rowset->aRow[i]), PidTagDisplayName);
+		const gchar *account = e_mapi_util_find_propertyrow_propval (&(cpd->rowset->aRow[i]), PidTagAccount);
 
 		if (fullname && account) {
 			gtk_list_store_append (store, &iter);
@@ -194,7 +194,7 @@ create_profile_callback_in_main (gpointer user_data)
 /* Callback for ProcessNetworkProfile. If we have more than one username,
  we need to let the user select. */
 static gint
-create_profile_callback_in_thread (struct SRowSet *rowset,
+create_profile_callback_in_thread (struct PropertyRowSet_r *rowset,
 				   gconstpointer data)
 {
 	struct ECreateProfileData cpd;
@@ -203,7 +203,7 @@ create_profile_callback_in_thread (struct SRowSet *rowset,
 
 	/* If we can find the exact username, then find & return its index. */
 	for (i = 0; i < rowset->cRows; i++) {
-		const gchar *account = e_mapi_util_find_row_propval (&(rowset->aRow[i]), PidTagAccount);
+		const gchar *account = e_mapi_util_find_propertyrow_propval (&(rowset->aRow[i]), PidTagAccount);
 
 		if (account && g_strcmp0 (username, account) == 0)
 			return i;
