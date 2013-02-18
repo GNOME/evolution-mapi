@@ -1,3 +1,18 @@
+evolution-mapi 3.7.90 2013-02-18
+--------------------------------
+
+Bugs:
+	Bug #692373 - Crash when using finalizing connection (Milan Crha)
+	Bug #693181 - Does not ask for password after its change (Milan Crha)
+
+Miscellanous:
+	Use camel_service_ref_session(). (Matthew Barnes)
+	Call OpenProfile() with talloc-allocated 'profile' parameter (Milan Crha)
+	Bump OpenChange dependency to 2.0 and adapt code to API changes (Milan Crha)
+
+Translations:
+	Piotr Drąg (pl)
+
 evolution-mapi 3.7.5 2013-02-04
 -------------------------------
 
