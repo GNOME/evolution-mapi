@@ -808,6 +808,10 @@ e_mapi_backend_init (EMapiBackend *backend)
 		g_str_equal,
 		g_free,
 		g_object_unref);
+
+	g_signal_connect (
+		backend, "notify::online",
+		G_CALLBACK (mapi_backend_populate), NULL);
 }
 
 void
