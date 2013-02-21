@@ -1307,6 +1307,60 @@ e_book_backend_mapi_init (EBookBackendMAPI *ebma)
 		G_CALLBACK (ebbm_notify_online_cb), NULL);
 }
 
+static gboolean
+ebbm_get_destination_address (EBackend *backend,
+			      gchar **host,
+			      guint16 *port)
+{
+	ESourceRegistry *registry;
+	ESource *source;
+	gboolean result = FALSE;
+
+	g_return_val_if_fail (port != NULL, FALSE);
+	g_return_val_if_fail (host != NULL, FALSE);
+
+	registry = e_book_backend_get_registry (E_BOOK_BACKEND (backend));
+	source = e_backend_get_source (backend);
+
+	/* Sanity checking */
+	if (!registry || !source || !e_source_get_parent (source))
+		return FALSE;
+
+	source = e_source_registry_ref_source (registry, e_source_get_parent (source));
+	if (!source)
+		return FALSE;
+
+	if (e_source_has_extension (source, E_SOURCE_EXTENSION_AUTHENTICATION)) {
+		ESourceAuthentication *auth = e_source_get_extension (source, E_SOURCE_EXTENSION_AUTHENTICATION);
+
+		*host = g_strdup (e_source_authentication_get_host (auth));
+		*port = e_source_authentication_get_port (auth);
+
+		if (!*port)
+			*port = 135;
+
+		result = *host && **host;
+		if (!result) {
+			g_free (*host);
+			*host = NULL;
+		}
+	}
+
+	g_object_unref (source);
+
+	return result;
+}
+
+static void
+ebbm_constructed (GObject *object)
+{
+	G_OBJECT_CLASS (e_book_backend_mapi_parent_class)->constructed (object);
+
+	/* Reset the connectable, it steals data from Authentication extension,
+	   where is written no address */
+	e_backend_set_connectable (E_BACKEND (object), NULL);
+}
+
 static void
 ebbm_dispose (GObject *object)
 {
@@ -1351,21 +1405,26 @@ static void
 e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 {
 	GObjectClass  *object_class = G_OBJECT_CLASS (klass);
-	EBookBackendClass *backend_class = E_BOOK_BACKEND_CLASS (klass);
+	EBackendClass *backend_class = E_BACKEND_CLASS (klass);
+	EBookBackendClass *book_backend_class = E_BOOK_BACKEND_CLASS (klass);
 
 	g_type_class_add_private (klass, sizeof (EBookBackendMAPIPrivate));
 
+	object_class->constructed		= ebbm_constructed;
 	object_class->dispose			= ebbm_dispose;
 
-	backend_class->open			= ebbm_op_open;
-	backend_class->create_contacts		= ebbm_op_create_contacts;
-	backend_class->remove_contacts		= ebbm_op_remove_contacts;
-	backend_class->modify_contacts		= ebbm_op_modify_contacts;
-	backend_class->get_contact		= ebbm_op_get_contact;
-	backend_class->get_contact_list		= ebbm_op_get_contact_list;
-	backend_class->start_view		= ebbm_op_start_view;
-	backend_class->stop_view		= ebbm_op_stop_view;
-	backend_class->get_backend_property	= ebbm_op_get_backend_property;
+	backend_class->get_destination_address	= ebbm_get_destination_address;
+
+	book_backend_class->open		= ebbm_op_open;
+	book_backend_class->create_contacts	= ebbm_op_create_contacts;
+	book_backend_class->remove_contacts	= ebbm_op_remove_contacts;
+	book_backend_class->modify_contacts	= ebbm_op_modify_contacts;
+	book_backend_class->get_contact		= ebbm_op_get_contact;
+	book_backend_class->get_contact_list	= ebbm_op_get_contact_list;
+	book_backend_class->start_view		= ebbm_op_start_view;
+	book_backend_class->stop_view		= ebbm_op_stop_view;
+	book_backend_class->get_backend_property= ebbm_op_get_backend_property;
+
 	klass->op_open				= ebbm_open;
 	klass->op_remove			= ebbm_remove;
 	klass->op_get_contact			= ebbm_get_contact;

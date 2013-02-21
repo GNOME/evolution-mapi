@@ -3380,6 +3380,60 @@ ecbm_op_get_free_busy (ECalBackend *backend, EDataCal *cal, guint32 opid, GCance
 	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
+static gboolean
+ecbm_get_destination_address (EBackend *backend,
+			      gchar **host,
+			      guint16 *port)
+{
+	ESourceRegistry *registry;
+	ESource *source;
+	gboolean result = FALSE;
+
+	g_return_val_if_fail (port != NULL, FALSE);
+	g_return_val_if_fail (host != NULL, FALSE);
+
+	registry = e_cal_backend_get_registry (E_CAL_BACKEND (backend));
+	source = e_backend_get_source (backend);
+
+	/* Sanity checking */
+	if (!registry || !source || !e_source_get_parent (source))
+		return FALSE;
+
+	source = e_source_registry_ref_source (registry, e_source_get_parent (source));
+	if (!source)
+		return FALSE;
+
+	if (e_source_has_extension (source, E_SOURCE_EXTENSION_AUTHENTICATION)) {
+		ESourceAuthentication *auth = e_source_get_extension (source, E_SOURCE_EXTENSION_AUTHENTICATION);
+
+		*host = g_strdup (e_source_authentication_get_host (auth));
+		*port = e_source_authentication_get_port (auth);
+
+		if (!*port)
+			*port = 135;
+
+		result = *host && **host;
+		if (!result) {
+			g_free (*host);
+			*host = NULL;
+		}
+	}
+
+	g_object_unref (source);
+
+	return result;
+}
+
+static void
+ecbm_constructed (GObject *object)
+{
+	G_OBJECT_CLASS (e_cal_backend_mapi_parent_class)->constructed (object);
+
+	/* Reset the connectable, it steals data from Authentication extension,
+	   where is written no address */
+	e_backend_set_connectable (E_BACKEND (object), NULL);
+}
+
 static void
 ecbm_dispose (GObject *object)
 {
@@ -3480,31 +3534,36 @@ static void
 e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 {
 	GObjectClass *object_class;
-	ECalBackendClass *backend_class;
+	EBackendClass *backend_class;
+	ECalBackendClass *cal_backend_class;
 
-	object_class = (GObjectClass *) class;
-	backend_class = (ECalBackendClass *) class;
+	object_class = G_OBJECT_CLASS (class);
+	backend_class = E_BACKEND_CLASS (class);
+	cal_backend_class = E_CAL_BACKEND_CLASS (class);
 
-	object_class->finalize = ecbm_finalize;
+	object_class->constructed = ecbm_constructed;
 	object_class->dispose = ecbm_dispose;
+	object_class->finalize = ecbm_finalize;
+
+	backend_class->get_destination_address = ecbm_get_destination_address;
 
 	/* functions done asynchronously */
-	backend_class->get_backend_property = ecbm_op_get_backend_property;
-	backend_class->open = ecbm_op_open;
-	backend_class->refresh = ecbm_op_refresh;
-	backend_class->get_object = ecbm_op_get_object;
-	backend_class->get_object_list = ecbm_op_get_object_list;
-	backend_class->get_attachment_uris = ecbm_op_get_attachment_uris;
-	backend_class->create_objects = ecbm_op_create_objects;
-	backend_class->modify_objects = ecbm_op_modify_objects;
-	backend_class->remove_objects = ecbm_op_remove_objects;
-	backend_class->discard_alarm = ecbm_op_discard_alarm;
-	backend_class->receive_objects = ecbm_op_receive_objects;
-	backend_class->send_objects = ecbm_op_send_objects;
-	backend_class->get_timezone = ecbm_op_get_timezone;
-	backend_class->add_timezone = ecbm_op_add_timezone;
-	backend_class->get_free_busy = ecbm_op_get_free_busy;
-	backend_class->start_view = ecbm_op_start_view;
+	cal_backend_class->get_backend_property = ecbm_op_get_backend_property;
+	cal_backend_class->open = ecbm_op_open;
+	cal_backend_class->refresh = ecbm_op_refresh;
+	cal_backend_class->get_object = ecbm_op_get_object;
+	cal_backend_class->get_object_list = ecbm_op_get_object_list;
+	cal_backend_class->get_attachment_uris = ecbm_op_get_attachment_uris;
+	cal_backend_class->create_objects = ecbm_op_create_objects;
+	cal_backend_class->modify_objects = ecbm_op_modify_objects;
+	cal_backend_class->remove_objects = ecbm_op_remove_objects;
+	cal_backend_class->discard_alarm = ecbm_op_discard_alarm;
+	cal_backend_class->receive_objects = ecbm_op_receive_objects;
+	cal_backend_class->send_objects = ecbm_op_send_objects;
+	cal_backend_class->get_timezone = ecbm_op_get_timezone;
+	cal_backend_class->add_timezone = ecbm_op_add_timezone;
+	cal_backend_class->get_free_busy = ecbm_op_get_free_busy;
+	cal_backend_class->start_view = ecbm_op_start_view;
 }
 
 static void
