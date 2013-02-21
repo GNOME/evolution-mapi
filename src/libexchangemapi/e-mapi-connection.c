@@ -5348,8 +5348,8 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 				}
 			}
 
-			/* 2010 server can return call_failed when didn't find any properties */
-			if (ms == MAPI_E_CALL_FAILED)
+			/* 2010 server can return call_failed or no_support when didn't find any properties */
+			if (ms == MAPI_E_CALL_FAILED || ms == MAPI_E_NO_SUPPORT)
 				ms = MAPI_E_NOT_FOUND;
 
 			if (ms == MAPI_E_NOT_FOUND || ms == MAPI_E_SUCCESS) {
