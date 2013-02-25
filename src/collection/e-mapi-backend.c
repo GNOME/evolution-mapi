@@ -303,19 +303,44 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 	return FALSE;
 }
 
+static ESourceAuthenticationResult
+mapi_backend_try_password_sync (ESourceAuthenticator *authenticator,
+				const GString *password,
+				GCancellable *cancellable,
+				GError **error);
+
+static gpointer
+mapi_backend_authenticate_kerberos_thread (gpointer user_data)
+{
+	EMapiBackend *mapi_backend = user_data;
+	CamelMapiSettings *mapi_settings;
+
+	g_return_val_if_fail (E_IS_MAPI_BACKEND (mapi_backend), NULL);
+
+	mapi_settings = mapi_backend_get_settings (mapi_backend);
+	e_mapi_util_trigger_krb_auth_from_settings (mapi_settings, NULL);
+
+	mapi_backend_try_password_sync (E_SOURCE_AUTHENTICATOR (mapi_backend), NULL, NULL, NULL);
+
+	g_object_unref (mapi_backend);
+
+	return NULL;
+}
+
 static void
 mapi_backend_queue_auth_session (EMapiBackend *backend)
 {
+	CamelMapiSettings *mapi_settings;
+
+	mapi_settings = mapi_backend_get_settings (backend);
+
 	if (!e_backend_get_online (E_BACKEND (backend))) {
 		struct SyndFoldersData *sfd;
-		CamelMapiSettings *settings;
-
-		settings = mapi_backend_get_settings (backend);
 
 		sfd = g_new0 (struct SyndFoldersData, 1);
 		sfd->folders = NULL;
 		sfd->backend = g_object_ref (backend);
-		sfd->profile = camel_mapi_settings_dup_profile (settings);
+		sfd->profile = camel_mapi_settings_dup_profile (mapi_settings);
 
 		mapi_backend_sync_folders_idle_cb (sfd);
 		sync_folders_data_free (sfd);
@@ -324,6 +349,16 @@ mapi_backend_queue_auth_session (EMapiBackend *backend)
 	}
 
 	backend->priv->need_update_folders = FALSE;
+
+	/* kerberos doesn't use passwords, do it directly */
+	if (camel_mapi_settings_get_kerberos (mapi_settings)) {
+		GThread *thread;
+
+		thread = g_thread_new (NULL, mapi_backend_authenticate_kerberos_thread, g_object_ref (backend));
+		g_thread_unref (thread);
+
+		return;
+	}
 
 	/* For now at least, we don't need to know the
 	 * results, so no callback function is needed. */
