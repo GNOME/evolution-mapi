@@ -1368,6 +1368,17 @@ ecbm_open (ECalBackend *backend,
 
 	e_cal_backend_store_load (priv->store);
 
+	g_free (priv->foreign_username);
+
+	priv->fid = fid;
+	priv->is_public_folder = e_source_mapi_folder_is_public (ext_mapi_folder);
+	priv->foreign_username = e_source_mapi_folder_dup_foreign_username (ext_mapi_folder);
+
+	if (priv->foreign_username && !*priv->foreign_username) {
+		g_free (priv->foreign_username);
+		priv->foreign_username = NULL;
+	}
+
 	/* Not for remote */
 	if (!e_backend_get_online (E_BACKEND (backend))) {
 		ESourceOffline *offline_extension;
@@ -1386,17 +1397,6 @@ ecbm_open (ECalBackend *backend,
 		e_backend_set_online (E_BACKEND (backend), FALSE);
 		e_cal_backend_set_writable (backend, !priv->read_only);
 		return /* Success */;
-	}
-
-	g_free (priv->foreign_username);
-
-	priv->fid = fid;
-	priv->is_public_folder = e_source_mapi_folder_is_public (ext_mapi_folder);
-	priv->foreign_username = e_source_mapi_folder_dup_foreign_username (ext_mapi_folder);
-
-	if (priv->foreign_username && !*priv->foreign_username) {
-		g_free (priv->foreign_username);
-		priv->foreign_username = NULL;
 	}
 
 	g_mutex_unlock (&priv->mutex);

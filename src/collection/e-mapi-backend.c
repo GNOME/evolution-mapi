@@ -69,19 +69,6 @@ mapi_backend_get_settings (EMapiBackend *backend)
 	return CAMEL_MAPI_SETTINGS (settings);
 }
 
-static void
-mapi_backend_queue_auth_session (EMapiBackend *backend)
-{
-	backend->priv->need_update_folders = FALSE;
-
-	/* For now at least, we don't need to know the
-	 * results, so no callback function is needed. */
-	e_backend_authenticate (
-		E_BACKEND (backend),
-		E_SOURCE_AUTHENTICATOR (backend),
-		NULL, NULL, NULL);
-}
-
 struct SyndFoldersData
 {
 	EMapiBackend *backend;
@@ -112,7 +99,7 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 	ESourceRegistryServer *server;
 	EMapiBackend *backend;
 	GSList *mapi_folders;
-	gboolean has_gal = FALSE;
+	gboolean has_gal = FALSE, is_online;
 	gint color_seed;
 
 	g_return_val_if_fail (sfd != NULL, FALSE);
@@ -121,6 +108,7 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 
 	backend = sfd->backend;
 	mapi_folders = sfd->folders;
+	is_online = e_backend_get_online (E_BACKEND (backend));
 
 	server = e_collection_backend_ref_server (E_COLLECTION_BACKEND (backend));
 	all_sources = e_source_registry_server_list_sources (server, NULL);
@@ -192,7 +180,7 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 	}
 
 	/* those which left are either mail sources, GAL or removed from the server */
-	for (citer = configured; citer; citer = citer->next) {
+	for (citer = configured; citer && is_online; citer = citer->next) {
 		ESource *source = citer->data;
 		ESourceMapiFolder *folder_ext;
 		const gchar *foreign_user_name;
@@ -232,6 +220,7 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 		ESource *source = citer->data;
 		ESourceMapiFolder *extension;
 		const gchar *foreign_username;
+		gboolean remove = FALSE;
 
 		if (!e_source_has_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER))
 			continue;
@@ -251,9 +240,23 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 			if (has_gal)
 				e_source_registry_server_add_source (server, source);
 			else
-				e_source_remove_sync (source, NULL, NULL);
+				remove = TRUE;
 		} else {
-			e_source_remove_sync (source, NULL, NULL);
+			remove = TRUE;
+		}
+
+		if (remove) {
+			/* in online mode remove means remove, while in offline mode
+			   there are used only discovered sources from the last run,
+			   thus re-add them all
+			*/
+			if (is_online) {
+				e_source_remove_sync (source, NULL, NULL);
+			} else {
+				e_server_side_source_set_writable (E_SERVER_SIDE_SOURCE (source), TRUE);
+				e_server_side_source_set_remote_deletable (E_SERVER_SIDE_SOURCE (source), TRUE);
+				e_source_registry_server_add_source (server, source);
+			}
 		}
 	}
 	g_list_free_full (all_sources, g_object_unref);
@@ -298,6 +301,36 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 	g_object_unref (server);
 
 	return FALSE;
+}
+
+static void
+mapi_backend_queue_auth_session (EMapiBackend *backend)
+{
+	if (!e_backend_get_online (E_BACKEND (backend))) {
+		struct SyndFoldersData *sfd;
+		CamelMapiSettings *settings;
+
+		settings = mapi_backend_get_settings (backend);
+
+		sfd = g_new0 (struct SyndFoldersData, 1);
+		sfd->folders = NULL;
+		sfd->backend = g_object_ref (backend);
+		sfd->profile = camel_mapi_settings_dup_profile (settings);
+
+		mapi_backend_sync_folders_idle_cb (sfd);
+		sync_folders_data_free (sfd);
+
+		return;
+	}
+
+	backend->priv->need_update_folders = FALSE;
+
+	/* For now at least, we don't need to know the
+	 * results, so no callback function is needed. */
+	e_backend_authenticate (
+		E_BACKEND (backend),
+		E_SOURCE_AUTHENTICATOR (backend),
+		NULL, NULL, NULL);
 }
 
 static void
@@ -375,8 +408,7 @@ mapi_backend_populate (ECollectionBackend *backend)
 	mapi_backend->priv->need_update_folders = TRUE;
 
 	/* do not do anything, if account is disabled */
-	if (!e_source_get_enabled (source) ||
-	    !e_backend_get_online (E_BACKEND (backend)))
+	if (!e_source_get_enabled (source))
 		return;
 
 	/* We test authentication passwords by attempting to synchronize
