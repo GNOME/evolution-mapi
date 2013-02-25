@@ -2547,12 +2547,11 @@ ecbm_notify_online_cb (ECalBackend *backend, GParamSpec *pspec)
 	} else {
 		priv->read_only = TRUE;
 
-		g_object_unref (priv->conn);
+		e_mapi_utils_unref_in_thread (G_OBJECT (priv->conn));
 		priv->conn = NULL;
 	}
 
 	e_cal_backend_set_writable (backend, !priv->read_only);
-	e_backend_set_online (E_BACKEND (backend), online);
 	g_mutex_unlock (&priv->mutex);
 }
 

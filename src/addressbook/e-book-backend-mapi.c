@@ -628,7 +628,7 @@ ebbm_notify_online_cb (EBookBackend *backend, GParamSpec *pspec)
 			ebbm_notify_connection_status (ebma, FALSE);
 
 			if (priv->conn) {
-				g_object_unref (priv->conn);
+				e_mapi_utils_unref_in_thread (G_OBJECT (priv->conn));
 				priv->conn = NULL;
 			}
 		} else {
@@ -637,8 +637,6 @@ ebbm_notify_online_cb (EBookBackend *backend, GParamSpec *pspec)
 
 		e_book_backend_mapi_unlock_connection (ebma);
 	}
-
-	e_backend_set_online (E_BACKEND (backend), online);
 }
 
 static void
