@@ -6818,7 +6818,6 @@ mapi_profile_load (ESourceRegistry *registry,
 	enum MAPISTATUS	ms = MAPI_E_SUCCESS;
 	struct mapi_session *session = NULL;
 	struct mapi_profile *profile;
-	guint32 debug_log_level = 0;
 
 	e_return_val_mapi_error_if_fail (mapi_ctx != NULL, MAPI_E_INVALID_PARAMETER, NULL);
 	e_return_val_mapi_error_if_fail (profname != NULL, MAPI_E_INVALID_PARAMETER, NULL);
@@ -6827,13 +6826,6 @@ mapi_profile_load (ESourceRegistry *registry,
 		return NULL;
 
 	e_mapi_debug_print("%s: Entering %s ", G_STRLOC, G_STRFUNC);
-
-	/* Initialize libmapi logger*/
-	if (g_getenv ("LIBMAPI_DEBUG")) {
-		debug_log_level = atoi (g_getenv ("LIBMAPI_DEBUG"));
-		SetMAPIDumpData (mapi_ctx, TRUE);
-		SetMAPIDebugLevel (mapi_ctx, debug_log_level);
-	}
 
 	profile = talloc_zero (mapi_ctx, struct mapi_profile);
 	if (MAPI_E_SUCCESS == OpenProfile (mapi_ctx, profile, profname, NULL)) {
