@@ -1117,6 +1117,13 @@ e_mapi_utils_create_mapi_context (struct mapi_context **mapi_ctx, GError **perro
 
 	g_free (profpath);
 
+	/* Initialize libmapi logger */
+	if (*mapi_ctx && g_getenv ("LIBMAPI_DEBUG")) {
+		guint32 debug_log_level = atoi (g_getenv ("LIBMAPI_DEBUG"));
+		SetMAPIDumpData (*mapi_ctx, TRUE);
+		SetMAPIDebugLevel (*mapi_ctx, debug_log_level);
+	}
+
 	e_mapi_utils_global_unlock ();
 
 	return TRUE;
