@@ -223,12 +223,12 @@ search_gal_finish_idle (gpointer user_data)
 			gtk_label_set_text (GTK_LABEL (pgu->info_label), _("No users found"));
 		} else if (added == sid->found_total) {
 			gchar *str;
-			str = g_strdup_printf (ngettext ("Found one user", "Found %d users", added), added);
+			str = g_strdup_printf (dngettext (GETTEXT_PACKAGE, "Found one user", "Found %d users", added), added);
 			gtk_label_set_text (GTK_LABEL (pgu->info_label), str);
 			g_free (str);
 		} else {
 			gchar *str;
-			str = g_strdup_printf (ngettext ("Found %d user, but showing only first %d", "Found %d users, but showing only first %d", sid->found_total), sid->found_total, added);
+			str = g_strdup_printf (dngettext (GETTEXT_PACKAGE, "Found %d user, but showing only first %d", "Found %d users, but showing only first %d", sid->found_total), sid->found_total, added);
 			gtk_label_set_text (GTK_LABEL (pgu->info_label), str);
 			g_free (str);
 		}
