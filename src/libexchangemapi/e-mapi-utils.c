@@ -841,6 +841,24 @@ e_mapi_util_trigger_krb_auth (const EMapiProfileData *empd,
 	return success && !local_error;
 }
 
+gboolean
+e_mapi_util_trigger_krb_auth_from_settings (CamelMapiSettings *mapi_settings,
+					    GError **error)
+{
+	EMapiProfileData empd = { 0 };
+	CamelNetworkSettings *network_settings;
+
+	g_return_val_if_fail (CAMEL_IS_MAPI_SETTINGS (mapi_settings), FALSE);
+
+	network_settings = CAMEL_NETWORK_SETTINGS (mapi_settings);
+
+	empd.server = camel_network_settings_get_host (network_settings);
+	empd.username = camel_network_settings_get_user (network_settings);
+
+	e_mapi_util_profiledata_from_settings (&empd, mapi_settings);
+
+	return e_mapi_util_trigger_krb_auth (&empd, error);
+}
 
 /**
  * e_mapi_util_profile_name:

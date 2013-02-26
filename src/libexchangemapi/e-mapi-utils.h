@@ -85,6 +85,9 @@ gchar *		e_mapi_util_profile_name		(struct mapi_context *mapi_ctx,
 							 gboolean migrate);
 gboolean	e_mapi_util_trigger_krb_auth		(const EMapiProfileData *empd,
 							 GError **error);
+gboolean	e_mapi_util_trigger_krb_auth_from_settings
+							(CamelMapiSettings *mapi_settings,
+							 GError **error);
 
 gboolean	e_mapi_utils_add_spropvalue		(TALLOC_CTX *mem_ctx,
 							 struct SPropValue **values_array,

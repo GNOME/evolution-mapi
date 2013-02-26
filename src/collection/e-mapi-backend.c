@@ -69,10 +69,54 @@ mapi_backend_get_settings (EMapiBackend *backend)
 	return CAMEL_MAPI_SETTINGS (settings);
 }
 
+static ESourceAuthenticationResult
+mapi_backend_try_password_sync (ESourceAuthenticator *authenticator,
+				const GString *password,
+				GCancellable *cancellable,
+				GError **error);
+
+static gpointer
+mapi_backend_authenticate_kerberos_thread (gpointer user_data)
+{
+	EMapiBackend *mapi_backend = user_data;
+	CamelMapiSettings *mapi_settings;
+	GError *error = NULL;
+
+	g_return_val_if_fail (E_IS_MAPI_BACKEND (mapi_backend), NULL);
+
+	mapi_settings = mapi_backend_get_settings (mapi_backend);
+	e_mapi_util_trigger_krb_auth_from_settings (mapi_settings, &error);
+
+	if (error) {
+		g_warning ("[evolution-mapi] Failed to trigger KrbAuthDialog: %s", error->message);
+		g_clear_error (&error);
+	}
+
+	mapi_backend_try_password_sync (E_SOURCE_AUTHENTICATOR (mapi_backend), NULL, NULL, NULL);
+
+	g_object_unref (mapi_backend);
+
+	return NULL;
+}
+
 static void
 mapi_backend_queue_auth_session (EMapiBackend *backend)
 {
+	CamelMapiSettings *mapi_settings;
+
+	mapi_settings = mapi_backend_get_settings (backend);
+
 	backend->priv->need_update_folders = FALSE;
+
+	/* kerberos doesn't use passwords, do it directly */
+	if (camel_mapi_settings_get_kerberos (mapi_settings)) {
+		GThread *thread;
+
+		thread = g_thread_new (NULL, mapi_backend_authenticate_kerberos_thread, g_object_ref (backend));
+		g_thread_unref (thread);
+
+		return;
+	}
 
 	/* For now at least, we don't need to know the
 	 * results, so no callback function is needed. */
