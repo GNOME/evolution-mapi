@@ -1598,6 +1598,8 @@ e_book_backend_mapi_notify_contact_update (EBookBackendMAPI *ebma,
 	   it can happen when cache is filling and the book view started later */
 	if (!book_view)
 		book_view = ebbm_pick_book_view (ebma);
+	else
+		g_object_ref (book_view);
 
 	if (book_view) {
 		if (!e_book_backend_mapi_book_view_is_running (ebma, book_view)) {
