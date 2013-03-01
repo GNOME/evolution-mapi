@@ -1990,10 +1990,155 @@ replace_mapi_SRestriction_named_ids (struct mapi_SRestriction *restriction,
 	#undef check_proptag
 }
 
+static void
+remove_unknown_proptags_mapi_SRestriction_rec (struct mapi_SRestriction *restriction,
+					       TALLOC_CTX *mem_ctx,
+					       GSList **new_rests)
+{
+	gint ii;
+	GSList *sub_rests = NULL, *iter;
+
+	if (!restriction)
+		return;
+
+	g_return_if_fail (mem_ctx != NULL);
+
+	#define proptag_is_ok(x) (((uint32_t) (x)) != 0 && ((uint32_t) (x)) != MAPI_E_RESERVED)
+
+	switch (restriction->rt) {
+	case RES_AND:
+		for (ii = 0; ii < restriction->res.resAnd.cRes; ii++) {
+			remove_unknown_proptags_mapi_SRestriction_rec ((struct mapi_SRestriction *) &(restriction->res.resAnd.res[ii]), mem_ctx, &sub_rests);
+		}
+
+		if (sub_rests) {
+			struct mapi_SRestriction *rest = talloc_zero (mem_ctx, struct mapi_SRestriction);
+			g_return_if_fail (rest != NULL);
+
+			rest->rt = RES_AND;
+			rest->res.resAnd.cRes = g_slist_length (sub_rests);
+			rest->res.resAnd.res = talloc_zero_array (mem_ctx, struct mapi_SRestriction_and, rest->res.resAnd.cRes + 1);
+			g_return_if_fail (rest->res.resAnd.res != NULL);
+
+			for (iter = sub_rests, ii = 0; iter; iter = iter->next, ii++) {
+				struct mapi_SRestriction *subrest = iter->data;
+
+				g_return_if_fail (subrest != NULL);
+
+				rest->res.resAnd.res[ii].rt = subrest->rt;
+				rest->res.resAnd.res[ii].res = subrest->res;
+			}
+
+			*new_rests = g_slist_append (*new_rests, rest);
+		}
+		break;
+	case RES_OR:
+		for (ii = 0; ii < restriction->res.resOr.cRes; ii++) {
+			remove_unknown_proptags_mapi_SRestriction_rec ((struct mapi_SRestriction *) &(restriction->res.resOr.res[ii]), mem_ctx, &sub_rests);
+		}
+
+		if (sub_rests) {
+			struct mapi_SRestriction *rest = talloc_zero (mem_ctx, struct mapi_SRestriction);
+			g_return_if_fail (rest != NULL);
+
+			rest->rt = RES_OR;
+			rest->res.resOr.cRes = g_slist_length (sub_rests);
+			rest->res.resOr.res = talloc_zero_array (mem_ctx, struct mapi_SRestriction_or, rest->res.resOr.cRes + 1);
+			g_return_if_fail (rest->res.resOr.res != NULL);
+
+			for (iter = sub_rests, ii = 0; iter; iter = iter->next, ii++) {
+				struct mapi_SRestriction *subrest = iter->data;
+
+				g_return_if_fail (subrest != NULL);
+
+				rest->res.resOr.res[ii].rt = subrest->rt;
+				rest->res.resOr.res[ii].res = subrest->res;
+			}
+
+			*new_rests = g_slist_append (*new_rests, rest);
+		}
+		break;
+	#ifdef HAVE_RES_NOT_SUPPORTED
+	case RES_NOT:
+		remove_unknown_proptags_mapi_SRestriction_rec (restriction->res.resNot.res, mem_ctx, &sub_rests);
+		if (sub_rests) {
+			struct mapi_SRestriction *rest = talloc_zero (esp->mem_ctx, struct mapi_SRestriction);
+			g_return_if_fail (rest != NULL);
+
+			rest->rt = RES_NOT;
+			res->res.resNot.res = sub_rests->data;
+		}
+		break;
+	#endif
+	case RES_CONTENT:
+		if (proptag_is_ok (restriction->res.resContent.ulPropTag) &&
+		    proptag_is_ok (restriction->res.resContent.lpProp.ulPropTag)) {
+			*new_rests = g_slist_append (*new_rests, restriction);
+		}
+		break;
+	case RES_PROPERTY:
+		if (proptag_is_ok (restriction->res.resProperty.ulPropTag) &&
+		    proptag_is_ok (restriction->res.resProperty.lpProp.ulPropTag)) {
+			*new_rests = g_slist_append (*new_rests, restriction);
+		}
+		break;
+	case RES_COMPAREPROPS:
+		if (proptag_is_ok (restriction->res.resCompareProps.ulPropTag1) &&
+		    proptag_is_ok (restriction->res.resCompareProps.ulPropTag2)) {
+			*new_rests = g_slist_append (*new_rests, restriction);
+		}
+		break;
+	case RES_BITMASK:
+		if (proptag_is_ok (restriction->res.resBitmask.ulPropTag)) {
+			*new_rests = g_slist_append (*new_rests, restriction);
+		}
+		break;
+	case RES_SIZE:
+		if (proptag_is_ok (restriction->res.resSize.ulPropTag)) {
+			*new_rests = g_slist_append (*new_rests, restriction);
+		}
+		break;
+	case RES_EXIST:
+		if (proptag_is_ok (restriction->res.resExist.ulPropTag)) {
+			*new_rests = g_slist_append (*new_rests, restriction);
+		}
+		break;
+	default:
+		g_warn_if_reached ();
+		break;
+	}
+
+	#undef proptag_is_ok
+
+	g_slist_free (sub_rests);
+}
+
+static void
+remove_unknown_proptags_mapi_SRestriction (struct mapi_SRestriction **prestrictions,
+					   TALLOC_CTX *mem_ctx)
+{
+	GSList *new_rests = NULL;
+
+	g_return_if_fail (mem_ctx != NULL);
+
+	remove_unknown_proptags_mapi_SRestriction_rec (*prestrictions, mem_ctx, &new_rests);
+
+	if (new_rests) {
+		g_return_if_fail (g_slist_length (new_rests) == 1);
+
+		*prestrictions = new_rests->data;
+
+		g_slist_free (new_rests);
+	} else {
+		*prestrictions = NULL;
+	}
+}
+
 static gboolean
 change_mapi_SRestriction_named_ids (EMapiConnection *conn,
 				    mapi_object_t *obj_folder,
-				    struct mapi_SRestriction *restrictions,
+				    TALLOC_CTX *mem_ctx,
+				    struct mapi_SRestriction **prestrictions,
 				    GCancellable *cancellable,
 				    GError **perror)
 {
@@ -2004,9 +2149,10 @@ change_mapi_SRestriction_named_ids (EMapiConnection *conn,
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 	e_return_val_mapi_error_if_fail (obj_folder != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
-	e_return_val_mapi_error_if_fail (restrictions != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (prestrictions != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+	e_return_val_mapi_error_if_fail (*prestrictions != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 
-	gather_mapi_SRestriction_named_ids (restrictions, &named_ids_list, &named_ids_len);
+	gather_mapi_SRestriction_named_ids (*prestrictions, &named_ids_list, &named_ids_len);
 
 	if (!named_ids_list)
 		return TRUE;
@@ -2017,12 +2163,14 @@ change_mapi_SRestriction_named_ids (EMapiConnection *conn,
 		GHashTable *replace_hash = prepare_maybe_replace_hash (named_ids_list, named_ids_len, TRUE);
 
 		if (replace_hash) {
-			replace_mapi_SRestriction_named_ids (restrictions, replace_hash);
+			replace_mapi_SRestriction_named_ids (*prestrictions, replace_hash);
 			g_hash_table_destroy (replace_hash);
 		}
 	}
 
 	g_free (named_ids_list);
+
+	remove_unknown_proptags_mapi_SRestriction (prestrictions, mem_ctx); 
 
 	return res;
 }
@@ -2094,23 +2242,25 @@ e_mapi_connection_list_objects (EMapiConnection *conn,
 		}
 
 		if (restrictions) {
-			change_mapi_SRestriction_named_ids (conn, obj_folder, restrictions, cancellable, perror);
+			change_mapi_SRestriction_named_ids (conn, obj_folder, mem_ctx, &restrictions, cancellable, perror);
 
 			if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 				ms = MAPI_E_USER_CANCEL;
 				goto cleanup;
 			}
 
-			/* Applying any restriction that are set. */
-			ms = Restrict (&obj_table, restrictions, NULL);
-			if (ms != MAPI_E_SUCCESS) {
-				make_mapi_error (perror, "Restrict", ms);
-				goto cleanup;
-			}
+			if (restrictions) {
+				/* Applying any restriction that are set. */
+				ms = Restrict (&obj_table, restrictions, NULL);
+				if (ms != MAPI_E_SUCCESS) {
+					make_mapi_error (perror, "Restrict", ms);
+					goto cleanup;
+				}
 
-			if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
-				ms = MAPI_E_USER_CANCEL;
-				goto cleanup;
+				if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+					ms = MAPI_E_USER_CANCEL;
+					goto cleanup;
+				}
 			}
 		}
 	}
@@ -4264,6 +4414,150 @@ convert_mapi_SRestriction_to_Restriction_r (struct mapi_SRestriction *restrictio
 	#undef copy
 }
 
+static void
+remove_unknown_proptags_Restriction_r_rec (struct Restriction_r *restriction,
+					   TALLOC_CTX *mem_ctx,
+					   GSList **new_rests)
+{
+	gint ii;
+	GSList *sub_rests = NULL, *iter;
+
+	if (!restriction)
+		return;
+
+	g_return_if_fail (mem_ctx != NULL);
+
+	#define proptag_is_ok(x) (((uint32_t) (x)) != 0 && ((uint32_t) (x)) != MAPI_E_RESERVED)
+
+	switch (restriction->rt) {
+	case RES_AND:
+		for (ii = 0; ii < restriction->res.resAnd.cRes; ii++) {
+			remove_unknown_proptags_Restriction_r_rec (&(restriction->res.resAnd.lpRes[ii]), mem_ctx, &sub_rests);
+		}
+
+		if (sub_rests) {
+			struct Restriction_r *rest = talloc_zero (mem_ctx, struct Restriction_r);
+			g_return_if_fail (rest != NULL);
+
+			rest->rt = RES_AND;
+			rest->res.resAnd.cRes = g_slist_length (sub_rests);
+			rest->res.resAnd.lpRes = talloc_zero_array (mem_ctx, struct Restriction_r, rest->res.resAnd.cRes + 1);
+			g_return_if_fail (rest->res.resAnd.lpRes != NULL);
+
+			for (iter = sub_rests, ii = 0; iter; iter = iter->next, ii++) {
+				struct Restriction_r *subrest = iter->data;
+
+				g_return_if_fail (subrest != NULL);
+
+				rest->res.resAnd.lpRes[ii].rt = subrest->rt;
+				rest->res.resAnd.lpRes[ii].res = subrest->res;
+			}
+
+			*new_rests = g_slist_append (*new_rests, rest);
+		}
+		break;
+	case RES_OR:
+		for (ii = 0; ii < restriction->res.resOr.cRes; ii++) {
+			remove_unknown_proptags_Restriction_r_rec (&(restriction->res.resOr.lpRes[ii]), mem_ctx, &sub_rests);
+		}
+
+		if (sub_rests) {
+			struct Restriction_r *rest = talloc_zero (mem_ctx, struct Restriction_r);
+			g_return_if_fail (rest != NULL);
+
+			rest->rt = RES_OR;
+			rest->res.resOr.cRes = g_slist_length (sub_rests);
+			rest->res.resOr.lpRes = talloc_zero_array (mem_ctx, struct Restriction_r, rest->res.resOr.cRes + 1);
+			g_return_if_fail (rest->res.resOr.lpRes != NULL);
+
+			for (iter = sub_rests, ii = 0; iter; iter = iter->next, ii++) {
+				struct Restriction_r *subrest = iter->data;
+
+				g_return_if_fail (subrest != NULL);
+
+				rest->res.resOr.lpRes[ii].rt = subrest->rt;
+				rest->res.resOr.lpRes[ii].res = subrest->res;
+			}
+
+			*new_rests = g_slist_append (*new_rests, rest);
+		}
+		break;
+	#ifdef HAVE_RES_NOT_SUPPORTED
+	case RES_NOT:
+		remove_unknown_proptags_Restriction_r_rec (restriction->res.resNot.lpRes, mem_ctx, &sub_rests);
+		if (sub_rests) {
+			struct Restriction_r *rest = talloc_zero (esp->mem_ctx, struct Restriction_r);
+			g_return_if_fail (rest != NULL);
+
+			rest->rt = RES_NOT;
+			res->res.resNot.lpRes = sub_rests->data;
+		}
+		break;
+	#endif
+	case RES_CONTENT:
+		if (proptag_is_ok (restriction->res.resContent.ulPropTag) &&
+		    proptag_is_ok (restriction->res.resContent.lpProp->ulPropTag)) {
+			*new_rests = g_slist_append (*new_rests, restriction);
+		}
+		break;
+	case RES_PROPERTY:
+		if (proptag_is_ok (restriction->res.resProperty.ulPropTag) &&
+		    proptag_is_ok (restriction->res.resProperty.lpProp->ulPropTag)) {
+			*new_rests = g_slist_append (*new_rests, restriction);
+		}
+		break;
+	case RES_COMPAREPROPS:
+		if (proptag_is_ok (restriction->res.resCompareProps.ulPropTag1) &&
+		    proptag_is_ok (restriction->res.resCompareProps.ulPropTag2)) {
+			*new_rests = g_slist_append (*new_rests, restriction);
+		}
+		break;
+	case RES_BITMASK:
+		if (proptag_is_ok (restriction->res.resBitMask.ulPropTag)) {
+			*new_rests = g_slist_append (*new_rests, restriction);
+		}
+		break;
+	case RES_SIZE:
+		if (proptag_is_ok (restriction->res.resSize.ulPropTag)) {
+			*new_rests = g_slist_append (*new_rests, restriction);
+		}
+		break;
+	case RES_EXIST:
+		if (proptag_is_ok (restriction->res.resExist.ulPropTag)) {
+			*new_rests = g_slist_append (*new_rests, restriction);
+		}
+		break;
+	default:
+		g_warn_if_reached ();
+		break;
+	}
+
+	#undef proptag_is_ok
+
+	g_slist_free (sub_rests);
+}
+
+static void
+remove_unknown_proptags_Restriction_r (struct Restriction_r **prestrictions,
+				       TALLOC_CTX *mem_ctx)
+{
+	GSList *new_rests = NULL;
+
+	g_return_if_fail (mem_ctx != NULL);
+
+	remove_unknown_proptags_Restriction_r_rec (*prestrictions, mem_ctx, &new_rests);
+
+	if (new_rests) {
+		g_return_if_fail (g_slist_length (new_rests) == 1);
+
+		*prestrictions = new_rests->data;
+
+		g_slist_free (new_rests);
+	} else {
+		*prestrictions = NULL;
+	}
+}
+
 static enum MAPISTATUS
 process_gal_rows_chunk (EMapiConnection *conn,
 			TALLOC_CTX *mem_ctx,
@@ -4501,6 +4795,8 @@ e_mapi_connection_list_gal_objects (EMapiConnection *conn,
 				use_restriction = talloc_zero (mem_ctx, struct Restriction_r);
 				convert_mapi_SRestriction_to_Restriction_r (restrictions, use_restriction, mem_ctx, NULL);
 			}
+
+			remove_unknown_proptags_Restriction_r (&use_restriction, mem_ctx);
 
 			if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
 				ms = MAPI_E_USER_CANCEL;
@@ -4759,7 +5055,7 @@ e_mapi_connection_transfer_gal_objects (EMapiConnection *conn,
 
 				propTagArray->aulPropTag[jj] = proptag;
 
-				if (proptag == MAPI_E_RESERVED)
+				if (proptag == MAPI_E_RESERVED || proptag == 0)
 					propTagArray->cValues--;
 				else
 					jj++;
