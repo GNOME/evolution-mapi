@@ -1,3 +1,24 @@
+evolution-mapi 3.7.91 2013-03-04
+--------------------------------
+
+Bugs:
+	Bug #685882 - NspiGetIDsFromNames failure with MAPI_E_NO_SUPPORT (Milan Crha)
+	Bug #693345 - dngettext should be used instead of ngettext (Milan Crha)
+	Bug #694786 - Ref count issue on a book view update (Milan Crha)
+	Bug #694786 - Do not use unknown property tags in restrictions (Milan Crha)
+
+Miscellanous:
+	Listen for EBackend::online property changes (Milan Crha)
+	Listen and act on EBackend's online state changes (Milan Crha)
+	Unref connection in a dedicated thread on EBackend::online change (Milan Crha)
+	Claim sources even when in offline (Milan Crha)
+	Teach collection backend about Kerberos authentication (Milan Crha)
+	Allow debugging of an account Authenticate process (Milan Crha)
+	e-mapi-backend: Remove display-name synchronization on mail sources. (Matthew Barnes)
+
+Translations:
+	Alexandre Franke (fr)
+
 evolution-mapi 3.7.90 2013-02-18
 --------------------------------
 
