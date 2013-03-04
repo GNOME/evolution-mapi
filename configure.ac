@@ -228,11 +228,6 @@ AC_SUBST(libmapi_ldif_dir)
 mapidatadir=`$PKG_CONFIG --variable=privdatadir evolution-data-server-$EDS_PACKAGE`/mapi
 AC_SUBST(mapidatadir)
 
-dnl *************
-dnl Gtk Doc stuff
-dnl *************
-GTK_DOC_CHECK(1.9)
-
 dnl **************************
 dnl Makefiles, generated .pc's
 dnl **************************
