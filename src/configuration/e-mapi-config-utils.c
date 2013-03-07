@@ -691,7 +691,9 @@ action_subscribe_foreign_folder_cb (GtkAction *action,
 {
 	gchar *profile;
 	GtkWindow *parent;
+	EShell *shell;
 	EShellBackend *backend;
+	EClientCache *client_cache;
 	CamelSession *session = NULL;
 	CamelStore *store = NULL;
 
@@ -703,7 +705,10 @@ action_subscribe_foreign_folder_cb (GtkAction *action,
 	backend = e_shell_view_get_shell_backend (shell_view);
 	g_object_get (G_OBJECT (backend), "session", &session, NULL);
 
-	e_mapi_subscribe_foreign_folder (parent, session, store);
+	shell = e_shell_backend_get_shell (backend);
+	client_cache = e_shell_get_client_cache (shell);
+
+	e_mapi_subscribe_foreign_folder (parent, session, store, client_cache);
 
 	g_object_unref (session);
 	g_object_unref (store);
