@@ -1,3 +1,19 @@
+evolution-mapi 3.6.4 2013-03-07
+-------------------------------
+
+Bugs:
+	Bug #692371 - Crash under e_mapi_connection_connected() (Milan Crha)
+	Bug #692373 - Crash when using finalizing connection (Milan Crha)
+	Bug #693181 - Does not ask for password after its change (Milan Crha)
+	Bug #685882 - NspiGetIDsFromNames failure with MAPI_E_NO_SUPPORT (Milan Crha)
+	Bug #694786 - Ref count issue on a book view update (Milan Crha)
+	Bug #694786 - Do not use unknown property tags in restrictions (Milan Crha)
+
+Miscellanous:
+	Call OpenProfile() with talloc-allocated 'profile' parameter (Milan Crha)
+	Allow debugging of an account Authenticate process (Milan Crha)
+	Teach collection backend about Kerberos authentication (Milan Crha)
+
 evolution-mapi 3.6.3 2013-01-22
 -------------------------------
 
