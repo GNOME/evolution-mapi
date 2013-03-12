@@ -1920,8 +1920,10 @@ mapi_folder_transfer_messages_to_sync (CamelFolder *source,
 
 	g_object_unref (conn);
 
-	/* update the destination folder to notice new messages */
-	if (success)
+	/* update destination folder only if not frozen, to not update
+	   for each single message transfer during filtering
+	 */
+	if (success && !camel_folder_is_frozen (destination))
 		success = mapi_folder_refresh_info_sync (destination, cancellable, error);
 
 	return success;
