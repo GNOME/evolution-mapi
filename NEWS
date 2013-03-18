@@ -1,3 +1,13 @@
+evolution-mapi 3.7.92 2013-03-18
+--------------------------------
+
+Bugs:
+	Bug #690433 - Do not refresh folder on every message transfer (Milan Crha)
+
+Miscellaneous:
+	Drop GTK_DOC_CHECK from configure.ac (Milan Crha)
+	e_mapi_subscribe_foreign_folder: Add an EClientCache parameter. (Matthew Barnes)
+
 evolution-mapi 3.7.91 2013-03-04
 --------------------------------
 
