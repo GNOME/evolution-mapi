@@ -582,33 +582,37 @@ ebbm_remove (EBookBackendMAPI *ebma, GCancellable *cancellable, GError **error)
 	e_book_backend_mapi_unlock_connection (ebma);
 }
 
-static gboolean
-ebbm_get_backend_property (EBookBackendMAPI *ebma, const gchar *prop_name, gchar **prop_value, GError **error)
+static gchar *
+ebbm_get_backend_property (EBookBackend *backend,
+                           const gchar *prop_name)
 {
-	gboolean processed = TRUE;
+	EBookBackendMAPI *ebma;
 
-	g_return_val_if_fail (ebma != NULL, FALSE);
-	g_return_val_if_fail (prop_name != NULL, FALSE);
-	g_return_val_if_fail (prop_value != NULL, FALSE);
+	g_return_val_if_fail (prop_name != NULL, NULL);
+
+	ebma = E_BOOK_BACKEND_MAPI (backend);
 
 	if (g_str_equal (prop_name, CLIENT_BACKEND_PROPERTY_CAPABILITIES)) {
 		if (e_book_backend_mapi_is_marked_for_offline (ebma))
-			*prop_value = g_strdup ("net,bulk-removes,contact-lists,do-initial-query");
+			return g_strdup ("net,bulk-removes,contact-lists,do-initial-query");
 		else
-			*prop_value = g_strdup ("net,bulk-removes,contact-lists");
+			return g_strdup ("net,bulk-removes,contact-lists");
 	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_REQUIRED_FIELDS)) {
-		*prop_value = g_strdup (e_contact_field_name (E_CONTACT_FILE_AS));
+		return g_strdup (e_contact_field_name (E_CONTACT_FILE_AS));
 	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_SUPPORTED_FIELDS)) {
-		GSList *fields = e_mapi_book_utils_get_supported_contact_fields ();
+		GSList *fields;
+		gchar *prop_value;
 
-		*prop_value = e_data_book_string_slist_to_comma_string (fields);
-
+		fields = e_mapi_book_utils_get_supported_contact_fields ();
+		prop_value = e_data_book_string_slist_to_comma_string (fields);
 		g_slist_free (fields);
-	} else {
-		processed = FALSE;
+
+		return prop_value;
 	}
 
-	return processed;
+	/* Chain up to parent's get_backend_property() method. */
+	return E_BOOK_BACKEND_CLASS (e_book_backend_mapi_parent_class)->
+		get_backend_property (backend, prop_name);
 }
 
 static void
@@ -830,8 +834,7 @@ typedef enum {
 	OP_GET_CONTACT,
 	OP_GET_CONTACT_LIST,
 	OP_START_BOOK_VIEW,
-	OP_STOP_BOOK_VIEW,
-	OP_GET_BACKEND_PROPERTY
+	OP_STOP_BOOK_VIEW
 } OperationType;
 
 typedef struct {
@@ -1074,21 +1077,6 @@ ebbm_operation_cb (OperationBase *op, gboolean cancelled, EBookBackend *backend)
 
 		g_object_unref (opbv->book_view);
 	} break;
-	case OP_GET_BACKEND_PROPERTY: {
-		OperationStr *ops = (OperationStr *) op;
-		const gchar *prop_name = ops->str;
-
-		if (!cancelled) {
-			gchar *prop_value = NULL;
-
-			if (ebbm_get_backend_property (ebma, prop_name, &prop_value, &error))
-				e_data_book_respond_get_backend_property (op->book, op->opid, error, prop_value);
-			else
-				(* E_BOOK_BACKEND_CLASS (e_book_backend_mapi_parent_class)->get_backend_property) (backend, op->book, op->opid, op->cancellable, prop_name);
-		}
-
-		g_free (ops->str);
-	} break;
 	}
 
 	if (op->cancellable)
@@ -1186,7 +1174,6 @@ STR_SLIST_OP_DEF (ebbm_op_modify_contacts, OP_MODIFY_CONTACTS)
 STR_SLIST_OP_DEF (ebbm_op_remove_contacts, OP_REMOVE_CONTACTS)
 STR_OP_DEF  (ebbm_op_get_contact, OP_GET_CONTACT)
 STR_OP_DEF  (ebbm_op_get_contact_list, OP_GET_CONTACT_LIST)
-STR_OP_DEF  (ebbm_op_get_backend_property, OP_GET_BACKEND_PROPERTY)
 
 static void
 ebbm_op_open (EBookBackend *backend, EDataBook *book, guint32 opid, GCancellable *cancellable, gboolean only_if_exists)
@@ -1421,7 +1408,7 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 	book_backend_class->get_contact_list	= ebbm_op_get_contact_list;
 	book_backend_class->start_view		= ebbm_op_start_view;
 	book_backend_class->stop_view		= ebbm_op_stop_view;
-	book_backend_class->get_backend_property= ebbm_op_get_backend_property;
+	book_backend_class->get_backend_property= ebbm_get_backend_property;
 
 	klass->op_open				= ebbm_open;
 	klass->op_remove			= ebbm_remove;
