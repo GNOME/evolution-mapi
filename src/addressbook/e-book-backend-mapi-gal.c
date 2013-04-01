@@ -246,9 +246,6 @@ ebbm_gal_get_contacts_count (EBookBackendMAPI *ebma,
 	EMapiConnection *conn;
 	GError *mapi_error = NULL;
 
-	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (obj_total != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
 	e_book_backend_mapi_lock_connection (ebma);
 
 	conn = e_book_backend_mapi_get_connection (ebma, cancellable, &mapi_error);

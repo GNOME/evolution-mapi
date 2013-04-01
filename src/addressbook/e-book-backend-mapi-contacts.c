@@ -395,11 +395,7 @@ ebbm_contacts_remove (EBookBackendMAPI *ebma, GCancellable *cancellable, GError 
 	EBookBackendMAPIContactsPrivate *priv;
 	GError *mapi_error = NULL;
 
-	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
-
 	priv = E_BOOK_BACKEND_MAPI_CONTACTS (ebma)->priv;
-	e_return_data_book_error_if_fail (priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	if (E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_remove)
 		E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_remove (ebma, cancellable, &mapi_error);
@@ -443,7 +439,6 @@ static void
 ebbm_contacts_create_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable, const GSList *vcards, GSList **added_contacts, GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
-	EBookBackendMAPIContactsPrivate *priv;
 	EMapiConnection *conn;
 	EMapiCreateitemData mcd;
 	GError *mapi_error = NULL;
@@ -453,16 +448,7 @@ ebbm_contacts_create_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable
 	gchar *id;
 	EContact *contact;
 
-	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (vcards != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (added_contacts != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
 	ebmac = E_BOOK_BACKEND_MAPI_CONTACTS (ebma);
-	e_return_data_book_error_if_fail (ebmac != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
-	priv = ebmac->priv;
-	e_return_data_book_error_if_fail (priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	if (vcards->next) {
 		g_propagate_error (error, EDB_ERROR_EX (NOT_SUPPORTED, _("The backend does not support bulk additions")));
@@ -531,23 +517,13 @@ static void
 ebbm_contacts_remove_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable, const GSList *id_list, GSList **removed_ids, GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
-	EBookBackendMAPIContactsPrivate *priv;
 	EMapiConnection *conn;
 	GError *mapi_error = NULL;
 	GSList *to_remove;
 	const GSList *l;
 	mapi_object_t obj_folder;
 
-	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (id_list != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (removed_ids != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
 	ebmac = E_BOOK_BACKEND_MAPI_CONTACTS (ebma);
-	e_return_data_book_error_if_fail (ebmac != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
-	priv = ebmac->priv;
-	e_return_data_book_error_if_fail (priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	e_book_backend_mapi_lock_connection (ebma);
 
@@ -605,23 +581,13 @@ static void
 ebbm_contacts_modify_contacts (EBookBackendMAPI *ebma, GCancellable *cancellable, const GSList *vcards, GSList **modified_contacts, GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
-	EBookBackendMAPIContactsPrivate *priv;
 	EMapiConnection *conn;
 	EMapiCreateitemData mcd;
 	EContact *contact;
 	GError *mapi_error = NULL;
 	mapi_id_t mid;
 
-	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (vcards != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (modified_contacts != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
 	ebmac = E_BOOK_BACKEND_MAPI_CONTACTS (ebma);
-	e_return_data_book_error_if_fail (ebmac != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
-	priv = ebmac->priv;
-	e_return_data_book_error_if_fail (priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	if (vcards->next != NULL) {
 		g_propagate_error (error, EDB_ERROR_EX (NOT_SUPPORTED, _("The backend does not support bulk modifications")));
@@ -688,7 +654,6 @@ static void
 ebbm_contacts_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *id, gchar **vcard, GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
-	EBookBackendMAPIContactsPrivate *priv;
 	EMapiConnection *conn;
 	mapi_id_t mid;
 	mapi_object_t obj_folder;
@@ -696,16 +661,7 @@ ebbm_contacts_get_contact (EBookBackendMAPI *ebma, GCancellable *cancellable, co
 	gboolean status, has_obj_folder;
 	GError *mapi_error = NULL;
 
-	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (id != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (vcard != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
 	ebmac = E_BOOK_BACKEND_MAPI_CONTACTS (ebma);
-	e_return_data_book_error_if_fail (ebmac != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
-	priv = ebmac->priv;
-	e_return_data_book_error_if_fail (priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	if (E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_get_contact)
 		E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_get_contact (ebma, cancellable, id, vcard, &mapi_error);
@@ -777,7 +733,6 @@ static void
 ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellable, const gchar *query, GSList **vCards, GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
-	EBookBackendMAPIContactsPrivate *priv;
 	EMapiConnection *conn;
 	GError *mapi_error = NULL;
 	gboolean status;
@@ -785,16 +740,7 @@ ebbm_contacts_get_contact_list (EBookBackendMAPI *ebma, GCancellable *cancellabl
 	GSList *mids = NULL;
 	struct TransferContactsData tcd = { 0 };
 
-	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (query != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (vCards != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
 	ebmac = E_BOOK_BACKEND_MAPI_CONTACTS (ebma);
-	e_return_data_book_error_if_fail (ebmac != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
-	priv = ebmac->priv;
-	e_return_data_book_error_if_fail (priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	if (E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_get_contact_list)
 		E_BOOK_BACKEND_MAPI_CLASS (e_book_backend_mapi_contacts_parent_class)->op_get_contact_list (ebma, cancellable, query, vCards, &mapi_error);
@@ -883,12 +829,7 @@ ebbm_contacts_get_contacts_count (EBookBackendMAPI *ebma,
 	mapi_object_t obj_folder;
 	GError *mapi_error = NULL;
 
-	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (obj_total != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
 	ebmac = E_BOOK_BACKEND_MAPI_CONTACTS (ebma);
-	e_return_data_book_error_if_fail (ebmac != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (ebmac->priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	e_book_backend_mapi_lock_connection (ebma);
 
@@ -943,14 +884,7 @@ ebbm_contacts_list_known_uids (EBookBackendMAPI *ebma,
 	mapi_object_t obj_folder;
 	GError *mapi_error = NULL;
 
-	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (lku != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (lku->uid_to_rev != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
 	ebmac = E_BOOK_BACKEND_MAPI_CONTACTS (ebma);
-	e_return_data_book_error_if_fail (ebmac != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (ebmac->priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	e_book_backend_mapi_lock_connection (ebma);
 
@@ -996,21 +930,13 @@ ebbm_contacts_transfer_contacts (EBookBackendMAPI *ebma,
 				 GError **error)
 {
 	EBookBackendMAPIContacts *ebmac;
-	EBookBackendMAPIContactsPrivate *priv;
 	EMapiConnection *conn;
 	struct TransferContactsData tcd = { 0 };
 	mapi_object_t obj_folder;
 	gboolean status;
 	GError *mapi_error = NULL;
 
-	e_return_data_book_error_if_fail (ebma != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-	e_return_data_book_error_if_fail (E_IS_BOOK_BACKEND_MAPI_CONTACTS (ebma), E_DATA_BOOK_STATUS_INVALID_ARG);
-
 	ebmac = E_BOOK_BACKEND_MAPI_CONTACTS (ebma);
-	e_return_data_book_error_if_fail (ebmac != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
-
-	priv = ebmac->priv;
-	e_return_data_book_error_if_fail (priv != NULL, E_DATA_BOOK_STATUS_INVALID_ARG);
 
 	e_book_backend_mapi_lock_connection (ebma);
 
