@@ -901,7 +901,6 @@ ecbm_get_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable,
 	ECalComponent *comp;
 
 	cbmapi = (ECalBackendMAPI *)(backend);
-	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
 
 	priv = cbmapi->priv;
 
@@ -1622,10 +1621,6 @@ ecbm_create_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
 
-	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
-	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
-	e_return_data_cal_error_if_fail (new_ecalcomp != NULL, InvalidArg);
-
 	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
 		return;
@@ -1808,9 +1803,6 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 
 	kind = e_cal_backend_get_kind (backend);
 
-	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
-	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
-
 	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
 		return;
@@ -1954,8 +1946,6 @@ ecbm_remove_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 	priv = cbmapi->priv;
 
-	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
-
 	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
 		return;
@@ -2060,9 +2050,6 @@ ecbm_send_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 	cbmapi = E_CAL_BACKEND_MAPI (backend);
 
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
-
-	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
-	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
 
 	conn = e_cal_backend_mapi_get_connection (cbmapi, cancellable, &mapi_error);
 	if (!conn) {
@@ -2239,9 +2226,6 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 	priv = cbmapi->priv;
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
 
-	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
-	e_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
-
 	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (error, EDC_ERROR (RepositoryOffline));
 		return;
@@ -2379,18 +2363,9 @@ static void
 ecbm_get_timezone (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *tzid, gchar **object, GError **error)
 {
 	ETimezoneCache *timezone_cache;
-	ECalBackendMAPI *cbmapi;
-	ECalBackendMAPIPrivate *priv;
 	icaltimezone *zone = NULL;
 
-	cbmapi = (ECalBackendMAPI *) backend;
 	timezone_cache = E_TIMEZONE_CACHE (backend);
-
-	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
-	e_return_data_cal_error_if_fail (tzid != NULL, InvalidArg);
-
-	priv = cbmapi->priv;
-	e_return_data_cal_error_if_fail (priv != NULL, InvalidArg);
 
 	zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
 
@@ -2412,15 +2387,10 @@ ecbm_get_timezone (ECalBackend *backend, EDataCal *cal, GCancellable *cancellabl
 static void
 ecbm_add_timezone (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *tzobj, GError **error)
 {
-	ECalBackendMAPI *cbmapi;
 	ETimezoneCache *timezone_cache;
 	icalcomponent *tz_comp;
 
-	cbmapi = (ECalBackendMAPI *) backend;
 	timezone_cache = E_TIMEZONE_CACHE (backend);
-
-	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
-	e_return_data_cal_error_if_fail (tzobj != NULL, InvalidArg);
 
 	tz_comp = icalparser_parse_string (tzobj);
 	if (!tz_comp) {
