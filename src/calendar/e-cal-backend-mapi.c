@@ -302,42 +302,41 @@ ecbm_get_user_email (ECalBackendMAPI *cbmapi)
 	return ecbm_get_owner_email (cbmapi);
 }
 
-static gboolean
-ecbm_get_backend_property (ECalBackend *backend, EDataCal *cal, const gchar *prop_name, gchar **prop_value, GError **perror)
+static gchar *
+ecbm_get_backend_property (ECalBackend *backend,
+                           const gchar *prop_name)
 {
-	gboolean processed = TRUE;
-
-	g_return_val_if_fail (backend != NULL, FALSE);
-	g_return_val_if_fail (prop_name != NULL, FALSE);
-	g_return_val_if_fail (prop_value != NULL, FALSE);
+	g_return_val_if_fail (prop_name != NULL, NULL);
 
 	if (g_str_equal (prop_name, CLIENT_BACKEND_PROPERTY_CAPABILITIES)) {
-		*prop_value = g_strdup (
-				CAL_STATIC_CAPABILITY_NO_ALARM_REPEAT ","
-				CAL_STATIC_CAPABILITY_NO_AUDIO_ALARMS ","
-				CAL_STATIC_CAPABILITY_NO_EMAIL_ALARMS ","
-				CAL_STATIC_CAPABILITY_NO_PROCEDURE_ALARMS ","
-				CAL_STATIC_CAPABILITY_ONE_ALARM_ONLY ","
-				CAL_STATIC_CAPABILITY_REMOVE_ALARMS ","
-				CAL_STATIC_CAPABILITY_NO_THISANDFUTURE ","
-				CAL_STATIC_CAPABILITY_NO_THISANDPRIOR ","
-				CAL_STATIC_CAPABILITY_CREATE_MESSAGES ","
-				CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK ","
-				CAL_STATIC_CAPABILITY_NO_CONV_TO_RECUR ","
-				CAL_STATIC_CAPABILITY_HAS_UNACCEPTED_MEETING ","
-				CAL_STATIC_CAPABILITY_REFRESH_SUPPORTED
-				  );
+		return g_strjoin (
+			",",
+			CAL_STATIC_CAPABILITY_NO_ALARM_REPEAT,
+			CAL_STATIC_CAPABILITY_NO_AUDIO_ALARMS,
+			CAL_STATIC_CAPABILITY_NO_EMAIL_ALARMS,
+			CAL_STATIC_CAPABILITY_NO_PROCEDURE_ALARMS,
+			CAL_STATIC_CAPABILITY_ONE_ALARM_ONLY,
+			CAL_STATIC_CAPABILITY_REMOVE_ALARMS,
+			CAL_STATIC_CAPABILITY_NO_THISANDFUTURE,
+			CAL_STATIC_CAPABILITY_NO_THISANDPRIOR,
+			CAL_STATIC_CAPABILITY_CREATE_MESSAGES,
+			CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK,
+			CAL_STATIC_CAPABILITY_NO_CONV_TO_RECUR,
+			CAL_STATIC_CAPABILITY_HAS_UNACCEPTED_MEETING,
+			CAL_STATIC_CAPABILITY_REFRESH_SUPPORTED,
+			NULL);
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
 		ECalBackendMAPI *cbmapi;
 
 		cbmapi = E_CAL_BACKEND_MAPI (backend);
 
-		*prop_value = g_strdup (ecbm_get_user_email (cbmapi));
+		return g_strdup (ecbm_get_user_email (cbmapi));
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_ALARM_EMAIL_ADDRESS)) {
 		/* We don't support email alarms. This should not have been called. */
-		*prop_value = NULL;
+		return NULL;
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_DEFAULT_OBJECT)) {
 		ECalComponent *comp;
+		gchar *prop_value;
 
 		comp = e_cal_component_new ();
 
@@ -353,17 +352,19 @@ ecbm_get_backend_property (ECalBackend *backend, EDataCal *cal, const gchar *pro
 			break;
 		default:
 			g_object_unref (comp);
-			g_propagate_error (perror, EDC_ERROR (ObjectNotFound));
-			return TRUE;
+			return NULL;
 		}
 
-		*prop_value = e_cal_component_get_as_string (comp);
+		prop_value = e_cal_component_get_as_string (comp);
+
 		g_object_unref (comp);
-	} else {
-		processed = FALSE;
+
+		return prop_value;
 	}
 
-	return processed;
+	/* Chain up to parent's get_backend_property() method. */
+	return E_CAL_BACKEND_CLASS (e_cal_backend_mapi_parent_class)->
+		get_backend_property (backend, prop_name);
 }
 
 static void
@@ -2558,7 +2559,6 @@ ecbm_notify_online_cb (ECalBackend *backend, GParamSpec *pspec)
 /* Async OP functions, data structures and so on */
 
 typedef enum {
-	OP_GET_BACKEND_PROPERTY,
 	OP_OPEN,
 	OP_REFRESH,
 	OP_CREATE_OBJECTS,
@@ -2657,20 +2657,6 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 	cancelled = cancelled || (op->cancellable && g_cancellable_is_cancelled (op->cancellable));
 
 	switch (op->ot) {
-	case OP_GET_BACKEND_PROPERTY: {
-		OperationStr *ops1 = (OperationStr *) op;
-		if (!cancelled) {
-			gchar *value = NULL;
-
-			if (ecbm_get_backend_property (backend, op->cal, ops1->str, &value, &error) || error)
-				e_data_cal_respond_get_backend_property (op->cal, op->opid, error, value);
-			else
-				(* E_CAL_BACKEND_CLASS (e_cal_backend_mapi_parent_class)->get_backend_property) (backend, op->cal, op->opid, op->cancellable, ops1->str);
-
-			g_free (value);
-		}
-		g_free (ops1->str);
-	} break;
 	case OP_OPEN: {
 		OperationOpen *opo = (OperationOpen *) op;
 
@@ -3161,7 +3147,6 @@ ecbm_op_open (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *c
 	e_mapi_operation_queue_push (priv->op_queue, op);
 }
 
-STR_OP_DEF (ecbm_op_get_backend_property, OP_GET_BACKEND_PROPERTY)
 BASE_OP_DEF (ecbm_op_refresh, OP_REFRESH)
 
 static void
@@ -3547,7 +3532,7 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 	backend_class->get_destination_address = ecbm_get_destination_address;
 
 	/* functions done asynchronously */
-	cal_backend_class->get_backend_property = ecbm_op_get_backend_property;
+	cal_backend_class->get_backend_property = ecbm_get_backend_property;
 	cal_backend_class->open = ecbm_op_open;
 	cal_backend_class->refresh = ecbm_op_refresh;
 	cal_backend_class->get_object = ecbm_op_get_object;
