@@ -752,11 +752,7 @@ mapi_backend_delete_resource_sync (ECollectionBackend *backend,
 		E_BACKEND (backend), settings, mapi_backend_delete_resource_cb, source, cancellable, error))
 		return FALSE;
 
-	server = e_collection_backend_ref_server (backend);
-	e_source_registry_server_remove_source (server, source);
-	g_object_unref (server);
-
-	return TRUE;
+	return e_source_remove_sync (source, cancellable, error);
 }
 
 static ESourceAuthenticationResult
