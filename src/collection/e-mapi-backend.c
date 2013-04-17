@@ -726,7 +726,6 @@ mapi_backend_delete_resource_sync (ECollectionBackend *backend,
                                    GCancellable *cancellable,
                                    GError **error)
 {
-	ESourceRegistryServer *server;
 	CamelMapiSettings *settings;
 	ESourceMapiFolder *folder_ext;
 	const gchar *foreign_username;
