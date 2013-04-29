@@ -1,3 +1,17 @@
+evolution-mapi 3.9.1 2013-04-29
+-------------------------------
+
+Miscellaneous:
+	EBookBackendMAPI: Convert get_backend_property() method. (Matthew Barnes)
+	ECalBackendMAPI: Convert get_backend_property() method. (Matthew Barnes)
+	Replace removed error-return macros (Milan Crha)
+	EMapiBackend: Remove resources with e_source_remove_sync(). (Matthew Barnes)
+	Fix a compiler warning about unused variable (Milan Crha)
+
+Translations:
+	Sweta Kothari (gu)
+	ManojKumar Giri (or)
+
 evolution-mapi 3.7.92 2013-03-18
 --------------------------------
 
