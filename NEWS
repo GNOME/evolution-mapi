@@ -1,3 +1,10 @@
+evolution-mapi 3.8.2 2013-05-13
+-------------------------------
+
+Miscellaneous:
+	EMapiBackend: Remove resources with e_source_remove_sync(). (Matthew Barnes)
+	Fix a compiler warning about unused variable (Milan Crha)
+
 evolution-mapi 3.8.1 2013-04-15
 -------------------------------
 
