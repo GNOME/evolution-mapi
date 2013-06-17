@@ -1,3 +1,14 @@
+evolution-mapi 3.9.3 2013-06-17
+-------------------------------
+
+Bugs:
+	Bug #702276 - Deadlock when connecting to a server (Milan Crha)
+
+Translations:
+	Kjartan Maraas (nb)
+	Marián Čavojský (sk)
+	Dimitris Spingos (el)
+
 evolution-mapi 3.9.2 2013-05-27
 -------------------------------
 
