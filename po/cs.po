@@ -259,7 +259,7 @@ msgstr "Automaticky lokálně _synchronizovat účet"
 #. i18n: copy from evolution:camel-imap-provider.c
 #: ../src/camel/camel-mapi-provider.c:56
 msgid "_Apply filters to new messages in Inbox on this server"
-msgstr "_Použít filtry na nové zprávy ve složce Příchozí na tomto serveru"
+msgstr "_Použít filtry na nové zprávy ve složce Přijatá na tomto serveru"
 
 #: ../src/camel/camel-mapi-provider.c:58
 msgid "Check new messages for _Junk contents"
@@ -267,7 +267,7 @@ msgstr "_Hledat nevyžádanou poštu mezi novými zprávami"
 
 #: ../src/camel/camel-mapi-provider.c:60
 msgid "Only check for Junk messag_es in the Inbox folder"
-msgstr "Hledat nevyžádanou poštu jen ve složce _Příchozí"
+msgstr "Hledat nevyžádanou poštu jen ve složce _Přijatá"
 
 #: ../src/camel/camel-mapi-provider.c:62
 #: ../src/configuration/e-mapi-config-utils.c:1630
