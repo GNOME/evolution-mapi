@@ -1,186 +1,68 @@
 # translation of evolution-mapi.HEAD.po to Greek
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-#
 # Jennie Petoumenou <epetoumenou@gmail.com>, 2009.
 # Fotis Tsamis <ftsamis@gmail.com>, 2009.
 # Fotis Tsamis <ftsamis@gmail.com>, 2010.
+# Dimitris Spingos (Δημήτρης Σπίγγος) <dmtrs32@gmail.com>, 2013.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi.HEAD\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-08-23 12:02+0300\n"
-"PO-Revision-Date: 2010-08-22 20:50+0200\n"
-"Last-Translator: Michael Kotsarinis <mk73628@gmail.com>\n"
-"Language-Team: Greek <team@gnome.gr>\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product"
+"=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
+"POT-Creation-Date: 2013-06-14 18:33+0000\n"
+"PO-Revision-Date: 2013-07-19 17:00+0300\n"
+"Last-Translator: Dimitris Spingos (Δημήτρης Σπίγγος) <dmtrs32@gmail.com>\n"
+"Language-Team: team@gnome.gr\n"
+"Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.11.4\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Virtaal 0.7.1\n"
+"X-Project-Style: gnome\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:668
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:670
-msgid "Global Address List"
-msgstr "Γενική λίστα διευθύνσεων"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:983
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:229
-#, c-format
-msgid "Enter Password for %s@%s"
-msgstr "Εισαγωγή κωδικού για τον %s@%s"
-
-#. NOTE: A good way would be display the list of username entries
-#. using GtkEntryCompletion in the username gtkentry. But plugins
-#. as of now does not have access to it
-#. TODO : Fix strings
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:133
-msgid "Select username"
-msgstr "Επιλέξτε όνομα χρήστη"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
-msgid "Full name"
-msgstr "Πλήρες όνομα"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:148
-msgid "Username"
-msgstr "Όνομα χρήστη"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:217
-msgid ""
-"Server, username and domain name cannot be empty. Please fill them with "
-"correct values."
-msgstr ""
-"Είναι υποχρεωτική η συμπλήρωση του διακομιστή, του ονόματος χρήστη και του "
-"ονόματος τομέα. Παρακαλώ, εισάγετε τις κατάλληλες τιμές."
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:273
-msgid "Authentication finished successfully."
-msgstr "Η πιστοποίηση ολοκληρώθηκε επιτυχώς."
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:279
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:290
-msgid "Authentication failed."
-msgstr "Αποτυχία πιστοποίησης."
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:368
-msgid "_Domain name:"
-msgstr "Όνομα _τομέα:"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:378
-msgid "_Authenticate"
-msgstr "_Πιστοποίηση"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:388
-msgid "_Use secure connection"
-msgstr "Χρήση _ασφαλούς σύνδεσης"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:523
-msgid "Personal Folders"
-msgstr "Προσωπικοί φάκελοι"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:658
-msgid "_Location:"
-msgstr "_Τοποθεσία:"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:775
-#, c-format
-msgid "Failed to create address book '%s': %s"
-msgstr "Αποτυχία δημιουργίας βιβλίου διευθύνσεων '%s':%s"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:778
-#, c-format
-msgid "Failed to create address book '%s'"
-msgstr "Αποτυχία δημιουργίας βιβλίου διευθύνσεων '%s'"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:882
-#, c-format
-msgid "Failed to create calendar '%s': %s"
-msgstr "Αποτυχία δημιουργίας ημερολογίου '%s': %s"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:885
-#, c-format
-msgid "Failed to create calendar '%s'"
-msgstr "Δεν είναι δυνατή η δημιουργία του ημερολογίου '%s'"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:100
-msgid "Folder"
-msgstr "Φάκελος"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:105
-msgid "Size"
-msgstr "Μέγεθος"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:128
-msgid "Unable to retrieve folder size information"
-msgstr "Αδυναμία λήψης πληροφοριών μεγέθους φακέλου"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:169
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:367
-msgid "Folder Size"
-msgstr "Μέγεθος φακέλου"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:180
-msgid "Fetching folder list…"
-msgstr "Λήψη της λίστας φακέλων..."
-
-#. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:352
-msgid "Miscellaneous"
-msgstr "Διάφορα"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:365
-msgid "View the size of all Exchange folders"
-msgstr "Εμφάνιση του μεγέθους όλων των φακέλων του Exchange"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:378
-#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
-msgid "Exchange Settings"
-msgstr "Ρυθμίσεις του Exchange"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:387
-msgid "Folder size"
-msgstr "Μέγεθος φακέλου"
-
-#: ../src/addressbook/e-book-backend-mapi.c:539
-msgid "Cannot connect"
-msgstr "Αδυναμία σύνδεσης"
-
-#: ../src/addressbook/e-book-backend-mapi.c:682
+#: ../src/addressbook/e-book-backend-mapi.c:730
 msgid "Searching"
 msgstr "Αναζήτηση"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1935
-#: ../src/calendar/e-cal-backend-mapi.c:132
-msgid "Uknown error"
+#: ../src/addressbook/e-book-backend-mapi.c:1747
+#: ../src/calendar/e-cal-backend-mapi.c:193
+#: ../src/calendar/e-cal-backend-mapi.c:490
+#: ../src/camel/camel-mapi-folder.c:1900 ../src/camel/camel-mapi-folder.c:1980
+msgid "Unknown error"
 msgstr "Άγνωστο σφάλμα"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:713
-#: ../src/calendar/e-cal-backend-mapi.c:319
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:432
 msgid "Failed to remove public folder"
 msgstr "Αποτυχία αφαίρεσης δημόσιου φακέλου"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:770
-#: ../src/calendar/e-cal-backend-mapi.c:1727
-#: ../src/calendar/e-cal-backend-mapi.c:2219
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:468
+msgid "The backend does not support bulk additions"
+msgstr "Η υποστήριξη δεν υποστηρίζει μαζικές προσθήκες"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:510
+#: ../src/calendar/e-cal-backend-mapi.c:1698
+#: ../src/calendar/e-cal-backend-mapi.c:2209
 msgid "Failed to create item on a server"
 msgstr "Αποτυχία δημιουργίας αντικειμένου σε εξυπηρετητή"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:896
-#: ../src/calendar/e-cal-backend-mapi.c:1960
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:627
+msgid "The backend does not support bulk modifications"
+msgstr "Δεν υποστηρίζονται μαζικές τροποποιήσεις"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:672
+#: ../src/calendar/e-cal-backend-mapi.c:1911
 msgid "Failed to modify item on a server"
 msgstr "Αποτυχία τροποποίησης αντικειμένου σε διακομιστή"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1043
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1109
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1160
-#: ../src/calendar/e-cal-backend-mapi.c:1253
-#: ../src/calendar/e-cal-backend-mapi.c:1274
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:848
 msgid "Failed to fetch items from a server"
 msgstr "Αποτυχία λήψης αντικειμένων από διακομιστή"
 
 #. Translators : This is used to cache the downloaded contacts from a server.
 #. %d is an index of the contact.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1061
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:866
 #, c-format
 msgid "Caching contact %d"
 msgstr "Εισαγωγή της επαφής %d στη μνήμη cache"
@@ -188,14 +70,29 @@ msgstr "Εισαγωγή της επαφής %d στη μνήμη cache"
 #. Translators : This is used to cache the downloaded contacts from a server.
 #. The first %d is an index of the contact,
 #. the second %d is total count of conacts on the server.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1065
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:870
 #, c-format
 msgid "Caching contact %d/%d"
 msgstr "Εισαγωγή της επαφής %d/%d στη μνήμη cache"
 
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:925
+#| msgid "Failed to login into the server"
+msgid "Failed to count server contacts"
+msgstr "Αποτυχία μέτρησης επαφών διακομιστή"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:983
+#| msgid "Failed to fetch items from a server"
+msgid "Failed to list items from a server"
+msgstr "Αποτυχία απαρίθμησης στοιχείων από διακομιστή"
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1064
+#| msgid "Failed to fetch items from a server"
+msgid "Failed to transfer contacts from a server"
+msgstr "Αποτυχία μεταφοράς επαφών από διακομιστή"
+
 #. Translators : This is used to cache the downloaded contacts from GAL.
 #. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:127
+#: ../src/addressbook/e-book-backend-mapi-gal.c:153
 #, c-format
 msgid "Caching GAL contact %d"
 msgstr "Εισαγωγή της επαφής %d στη μνήμη cache"
@@ -203,49 +100,57 @@ msgstr "Εισαγωγή της επαφής %d στη μνήμη cache"
 #. Translators : This is used to cache the downloaded contacts from GAL.
 #. The first %d is an index of the GAL entry,
 #. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:131
+#: ../src/addressbook/e-book-backend-mapi-gal.c:157
 #, c-format
 msgid "Caching GAL contact %d/%d"
 msgstr "Εισαγωγή της επαφής %d/%d στη μνήμη cache"
 
-#: ../src/addressbook/e-book-backend-mapi-gal.c:162
-#: ../src/addressbook/e-book-backend-mapi-gal.c:197
+#: ../src/addressbook/e-book-backend-mapi-gal.c:229
+#: ../src/addressbook/e-book-backend-mapi-gal.c:313
 msgid "Failed to fetch GAL entries"
 msgstr "Αδυναμία πρόσκτησης εγγραφών GAL"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:364
+#: ../src/calendar/e-cal-backend-mapi.c:415
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Φόρτωση αντικειμένων στο φάκελο %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:724
-#: ../src/calendar/e-cal-backend-mapi.c:750
-#: ../src/calendar/e-cal-backend-mapi.c:797
-#: ../src/calendar/e-cal-backend-mapi.c:876
-#: ../src/calendar/e-cal-backend-mapi.c:899
+#: ../src/calendar/e-cal-backend-mapi.c:782
 #, c-format
-msgid "Failed to fetch changes from a server: %s"
-msgstr "Αποτυχία λήψης αλλαγών από τον διακομιστή: %s"
+#| msgid "Failed to remove public folder"
+msgid "Failed to open folder: %s"
+msgstr "Αποτυχία ανοίγματος φακέλου: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:729
-#: ../src/calendar/e-cal-backend-mapi.c:755
-#: ../src/calendar/e-cal-backend-mapi.c:802
-#: ../src/calendar/e-cal-backend-mapi.c:881
-#: ../src/calendar/e-cal-backend-mapi.c:904
-msgid "Failed to fetch changes from a server"
-msgstr "Αποτυχία λήψης αλλαγών από τον διακομιστή"
+#: ../src/calendar/e-cal-backend-mapi.c:790
+#, c-format
+#| msgid "Failed to create calendar '%s': %s"
+msgid "Failed to get folder properties: %s"
+msgstr "Αποτυχία λήψης ιδιοτήτων φακέλου: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1387
-msgid "Could not create thread for populating cache"
-msgstr ""
-"Δεν ήταν δυνατή η δημιουργία νήματος για το γέμισμα της προσωρινής μνήμης"
+#: ../src/calendar/e-cal-backend-mapi.c:831
+#, c-format
+#| msgid "Failed to empty Trash: %s"
+msgid "Failed to list objects: %s"
+msgstr "Αποτυχία απαρίθμησης αντικειμένων: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1449
+#: ../src/calendar/e-cal-backend-mapi.c:857
+#, c-format
+#| msgid "Failed to empty Trash: %s"
+msgid "Failed to transfer objects: %s"
+msgstr "Αποτυχία μεταφοράς αντικειμένων: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:876
+#, c-format
+#| msgid "Failed to remove public folder"
+msgid "Failed to close folder: %s"
+msgstr "Αποτυχία κλεισίματος φακέλου: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1365
 msgid "Could not create cache file"
 msgstr "Δεν ήταν δυνατή η δημιουργία του αρχείου προσωρινής μνήμης"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1854
+#: ../src/calendar/e-cal-backend-mapi.c:1819
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -253,144 +158,287 @@ msgstr ""
 "Η τροποποίηση μίας μόνο εμφάνισης ενός επαναλαμβανόμενου ραντεβού δεν έχει "
 "ακόμα υλοποιηθεί. Δεν πραγματοποιήθηκε αλλαγή του ραντεβού στον εξυπηρετητή."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2467
+#: ../src/calendar/e-cal-backend-mapi.c:2024
+#| msgid "Failed to fetch items from a server"
+msgid "Cannot remove items from a server"
+msgstr "Αποτυχία αφαίρεσης στοιχείων από διακομιστή"
+
+#: ../src/calendar/e-cal-backend-mapi.c:2460
 msgid "Failed to get Free/Busy data"
 msgstr "Αποτυχία λήψης δεδομένων Free/Busy"
 
-#: ../src/camel/camel-mapi-folder.c:357
+#: ../src/camel/camel-mapi-folder.c:777
 #, c-format
-msgid "Updating local summary cache for new messages in %s"
-msgstr ""
-"Γϊνεται ενημέρωση των τοπικών περιλήψεων της μνήμης cache για νέα μηνύματα "
-"στο %s"
+#| msgid "Fetching folder list…"
+msgid "Refreshing folder '%s'"
+msgstr "Ανανεώνεται ο φάκελος '%s'"
 
-#: ../src/camel/camel-mapi-folder.c:593
+#: ../src/camel/camel-mapi-folder.c:845
 #, c-format
-msgid "Retrieving message IDs from server for %s"
-msgstr "Ανάκτηση ταυτότητας (ID) των μηνυμάτων από τον διακομιστή για %s"
+#| msgid "Loading items in folder %s"
+msgid "Downloading messages in folder '%s'"
+msgstr "Μεταφόρτωση μηνυμάτων στον φάκελο '%s'"
 
-#: ../src/camel/camel-mapi-folder.c:623
-#, c-format
-msgid "Removing deleted messages from cache in %s"
-msgstr "Αφαίρεση διαγραμμένων μηνυμάτων από την μνήμη cache σε %s"
-
-#. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:948
-#, c-format
-msgid "Fetching summary information for new messages in %s"
-msgstr "Λήψη περιληπτικών πληροφοριών για νέα μηνύματα στο %s"
-
-#: ../src/camel/camel-mapi-folder.c:1071 ../src/camel/camel-mapi-folder.c:1206
-#: ../src/camel/camel-mapi-folder.c:1216
+#: ../src/camel/camel-mapi-folder.c:933 ../src/camel/camel-mapi-folder.c:1532
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Αυτό το μήνυμα δεν είναι διαθέσιμο σε λειτουργία εκτός σύνδεσης."
 
-#: ../src/camel/camel-mapi-folder.c:1088
+#: ../src/camel/camel-mapi-folder.c:943 ../src/camel/camel-mapi-folder.c:961
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Η λήψη αντικειμένων απέτυχε: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1093
+#: ../src/camel/camel-mapi-folder.c:948 ../src/camel/camel-mapi-folder.c:966
 msgid "Fetching items failed"
 msgstr "Η λήψη αντικειμένων απέτυχε"
 
-#: ../src/camel/camel-mapi-folder.c:1166
-#, c-format
-msgid "Cannot get message %s: %s"
-msgstr "Αδυναμία λήψης του μηνύματος %s: %s"
-
-#: ../src/camel/camel-mapi-folder.c:1167
-msgid "No such message"
-msgstr "Δεν υπάρχει τέτοιο μήνυμα"
-
-#: ../src/camel/camel-mapi-folder.c:1242
-#, c-format
-msgid "Could not get message: %s"
-msgstr "Αδυναμία λήψης του μηνύματος: %s"
-
-#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1261
-#, c-format
-msgid "Could not get message"
-msgstr "Αδυναμία λήψης του μηνύματος"
-
-#: ../src/camel/camel-mapi-folder.c:1398
-#, c-format
-msgid "Failed to empty Trash: %s"
-msgstr "Αποτυχία αδειάσματος Απορριμμάτων: %s"
-
-#: ../src/camel/camel-mapi-folder.c:1403
-msgid "Failed to empty Trash"
-msgstr "Αποτυχία αδειάσματος Απορριμμάτων"
-
-#: ../src/camel/camel-mapi-folder.c:1539 ../src/camel/camel-mapi-folder.c:1560
-msgid "Unknown error"
-msgstr "Άγνωστο σφάλμα"
-
-#: ../src/camel/camel-mapi-folder.c:1622
+#: ../src/camel/camel-mapi-folder.c:1217
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Αδυναμία προσθήκης του μηνύματος στον φάκελο '%s'"
 
-#: ../src/camel/camel-mapi-folder.c:1630 ../src/camel/camel-mapi-folder.c:1655
+#: ../src/camel/camel-mapi-folder.c:1226 ../src/camel/camel-mapi-folder.c:1256
 #, c-format
 msgid "Offline."
 msgstr "Εκτός σύνδεσης."
 
-#: ../src/camel/camel-mapi-folder.c:1801
+#: ../src/camel/camel-mapi-folder.c:1339
+#, c-format
+msgid "Failed to empty Trash: %s"
+msgstr "Αποτυχία αδειάσματος Απορριμμάτων: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1345
+msgid "Failed to empty Trash"
+msgstr "Αποτυχία αδειάσματος Απορριμμάτων"
+
+#: ../src/camel/camel-mapi-folder.c:1517
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "Αδυναμία λήψης του μηνύματος %s: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1518
+msgid "No such message"
+msgstr "Δεν υπάρχει τέτοιο μήνυμα"
+
+#: ../src/camel/camel-mapi-folder.c:1543 ../src/camel/camel-mapi-folder.c:1575
+#, c-format
+msgid "Could not get message: %s"
+msgstr "Αδυναμία λήψης του μηνύματος: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1549 ../src/camel/camel-mapi-folder.c:1582
+#, c-format
+msgid "Could not get message"
+msgstr "Αδυναμία λήψης του μηνύματος"
+
+#: ../src/camel/camel-mapi-folder.c:1957
+msgid "Receive quota"
+msgstr "Λήψη ποσόστωσης"
+
+#: ../src/camel/camel-mapi-folder.c:1963
+msgid "Send quota"
+msgstr "Αποστολή ποσόστωσης"
+
+#: ../src/camel/camel-mapi-folder.c:1985
+msgid "No quota information available"
+msgstr "Χωρίς διαθέσιμες πληροφορίες ποσόστωσης"
+
+#: ../src/camel/camel-mapi-folder.c:2087
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Αδυναμία φόρτωσης της σύνοψης για το %s"
 
-#: ../src/camel/camel-mapi-provider.c:44
+#: ../src/camel/camel-mapi-provider.c:45
 msgid "Checking for new mail"
 msgstr "Έλεγχος για νέα μηνύματα"
 
-#: ../src/camel/camel-mapi-provider.c:46
+#: ../src/camel/camel-mapi-provider.c:47
 msgid "C_heck for new messages in all folders"
 msgstr "Έλεγ_χος για νέα μηνύματα σε όλους τους φακέλους"
 
-#: ../src/camel/camel-mapi-provider.c:50
+#: ../src/camel/camel-mapi-provider.c:51
 msgid "Options"
 msgstr "Επιλογές"
 
-#: ../src/camel/camel-mapi-provider.c:52
+#: ../src/camel/camel-mapi-provider.c:53
 msgid "Automatically synchroni_ze account locally"
-msgstr "Αυτόματος συγχρονισμός του λογαριασμού τοπικά"
+msgstr "Αυτόματος σ_υγχρονισμός του λογαριασμού τοπικά"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:55
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
 "_Εφαρμογή φίλτρων για νέα μηνύματα στα Εισερχόμενα σε αυτόν τον εξυπηρετητή"
 
-#: ../src/camel/camel-mapi-provider.c:57
+#: ../src/camel/camel-mapi-provider.c:58
 msgid "Check new messages for _Junk contents"
 msgstr "Έλεγχος νέων μηνυμάτων για ανεπι_θύμητο περιεχόμενο"
 
-#: ../src/camel/camel-mapi-provider.c:59
+#: ../src/camel/camel-mapi-provider.c:60
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr ""
-"Να γίνεται έλεγχος για ανεπιθύμητα μηνύματα μόνο στο φάκελο Εισερχόμενα"
+"Να γίνεται έλεγχος για ανεπιθύμητα μη_νύματα μόνο στο φάκελο Εισερχόμενα"
 
-#: ../src/camel/camel-mapi-provider.c:70
-msgid "For accessing Microsoft Exchange/OpenChange servers using MAPI"
+#: ../src/camel/camel-mapi-provider.c:62
+#: ../src/configuration/e-mapi-config-utils.c:1642
+msgid "Lis_ten for server notifications"
+msgstr "Α_κρόαση για ειδοποιήσεις διακομιστή"
+
+#: ../src/camel/camel-mapi-provider.c:73
+#| msgid "For accessing Microsoft Exchange/OpenChange servers using MAPI"
+msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr ""
-"Για την πρόσβαση εξυπηρετητών Microsoft Exchange/OpenChange με χρήση MAPI"
+"Για την πρόσβαση διακομιστών Microsoft Exchange 2007/OpenChange με χρήση "
+"MAPI"
 
-#: ../src/camel/camel-mapi-provider.c:85
+#: ../src/camel/camel-mapi-provider.c:88
 msgid "Password"
 msgstr "Συνθηματικό"
 
-#: ../src/camel/camel-mapi-provider.c:86
+#: ../src/camel/camel-mapi-provider.c:89
 msgid ""
 "This option will connect to the OpenChange server using a plaintext password."
 msgstr ""
 "Αυτή η επιλογή θα κάνει χρήση συνθηματικού χωρίς κρυπτογράφηση για σύνδεση "
 "με τον εξυπηρετητή OpenChange."
 
+#: ../src/camel/camel-mapi-sasl-krb.c:28
+msgid "Kerberos"
+msgstr "Kerberos"
+
+#: ../src/camel/camel-mapi-sasl-krb.c:30
+#| msgid ""
+#| "This option will connect to the OpenChange server using a plaintext "
+#| "password."
+msgid "This option will connect to the server using kerberos key."
+msgstr ""
+"Με αυτήν την επιλογή θα γίνει σύνδεση με τον διακομιστή χρησιμοποιώντας το "
+"κλειδί kerberos."
+
+#: ../src/camel/camel-mapi-store.c:134 ../src/camel/camel-mapi-store.c:176
+msgid "Cannot find folder in a local cache"
+msgstr "Αδύνατη η εύρεση φακέλου σε τοπική κρυφή μνήμη"
+
+#: ../src/camel/camel-mapi-store.c:491 ../src/camel/camel-mapi-store.c:1212
+#| msgid "Folder list not available in offline mode."
+msgid "Folder list is not available in offline mode"
+msgstr "Η λίστα των φακέλων δεν είναι διαθέσιμη σε λειτουργία εκτός σύνδεσης"
+
+#: ../src/camel/camel-mapi-store.c:879
+#| msgid "All Public Folders"
+msgid "No public folder found"
+msgstr "Δεν βρέθηκε δημόσιος φάκελος"
+
+#: ../src/camel/camel-mapi-store.c:879
+msgid "No folder found"
+msgstr "Δεν βρέθηκε φάκελος"
+
+#: ../src/camel/camel-mapi-store.c:1234 ../src/camel/camel-mapi-store.c:2211
+#, c-format
+msgid "Connecting to '%s'"
+msgstr "Συνδέεται με το '%s'"
+
+#: ../src/camel/camel-mapi-store.c:1293
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI folders in offline mode"
+msgstr "Αδύνατη η δημιουργία φακέλων MAPI σε λειτουργία χωρίς σύνδεση."
+
+#: ../src/camel/camel-mapi-store.c:1300
+#, c-format
+msgid "Cannot create new folder '%s'"
+msgstr "Δεν είναι δυνατή η δημιουργία του φακέλου '%s'"
+
+#: ../src/camel/camel-mapi-store.c:1309
+#, c-format
+msgid "Authentication failed"
+msgstr "Αποτυχία πιστοποίησης"
+
+#: ../src/camel/camel-mapi-store.c:1319
+msgid "MAPI folders can be created only within mailbox of the logged user"
+msgstr ""
+"Οι φάκελοι MAPI μπορούν να δημιουργηθούν μόνο μέσα στο γραμματοκιβώτιο του "
+"συνδεμένου χρήστη"
+
+#: ../src/camel/camel-mapi-store.c:1332 ../src/camel/camel-mapi-store.c:1445
+#, c-format
+#| msgid "Cannot create folder '%s'"
+msgid "Cannot find folder '%s'"
+msgstr "Αδύνατη η εύρεση του φακέλου '%s'"
+
+#: ../src/camel/camel-mapi-store.c:1387
+#, c-format
+msgid "Cannot create folder '%s': %s"
+msgstr "Δεν είναι δυνατή η δημιουργία του φακέλου '%s': %s"
+
+#: ../src/camel/camel-mapi-store.c:1393
+#, c-format
+msgid "Cannot create folder '%s'"
+msgstr "Δεν είναι δυνατή η δημιουργία του φακέλου '%s'"
+
+#: ../src/camel/camel-mapi-store.c:1423 ../src/camel/camel-mapi-store.c:1435
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot delete MAPI folders in offline mode"
+msgstr "Αδύνατη η διαγραφή φακέλων MAPI σε λειτουργία χωρίς σύνδεση."
+
+#: ../src/camel/camel-mapi-store.c:1491
+#, c-format
+msgid "Cannot remove folder '%s': %s"
+msgstr "Αδυναμία απομάκρυνσης φακέλου '%s':/%s"
+
+#: ../src/camel/camel-mapi-store.c:1499
+#, c-format
+msgid "Cannot remove folder '%s'"
+msgstr "Δεν είναι δυνατή η αφαίρεση του φακέλου '%s'"
+
+#: ../src/camel/camel-mapi-store.c:1529 ../src/camel/camel-mapi-store.c:1544
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot rename MAPI folders in offline mode"
+msgstr "Αδύνατη η μετονομασία φακέλων MAPI σε λειτουργία χωρίς σύνδεση."
+
+#: ../src/camel/camel-mapi-store.c:1555
+#, c-format
+#| msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
+msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
+msgstr "Αδύνατη η μετονομασία του φακέλου MAPI '%s'. Ανύπαρκτος φάκελος."
+
+#: ../src/camel/camel-mapi-store.c:1566
+#, c-format
+#| msgid "Cannot rename MAPI default folder '%s' to '%s'."
+msgid "Cannot rename MAPI default folder '%s' to '%s'"
+msgstr "Αδύνατη η μετονομασία του προεπιλεγμένου φακέλου MAPI από '%s' σε '%s'."
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1592 ../src/camel/camel-mapi-store.c:1635
+#: ../src/camel/camel-mapi-store.c:1715
+#, c-format
+msgid "Cannot rename MAPI folder '%s' to '%s'"
+msgstr "Δεν είναι δυνατή η μετονομασία του φακέλου MAPI από '%s' σε '%s'"
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#. The last '%s' is a detailed error message.
+#: ../src/camel/camel-mapi-store.c:1627 ../src/camel/camel-mapi-store.c:1708
+#, c-format
+msgid "Cannot rename MAPI folder '%s' to '%s': %s"
+msgstr "Δεν είναι δυνατή η μετονομασία του φακέλου MAPI από '%s' σε '%s': %s"
+
+#: ../src/camel/camel-mapi-store.c:1813
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot subscribe MAPI folders in offline mode"
+msgstr "Αδύνατη η εγγραφή σε φακέλους MAPI με λειτουργία χωρίς σύνδεση."
+
+#: ../src/camel/camel-mapi-store.c:1830
+#, c-format
+msgid "Folder '%s' not found"
+msgstr "Ο φάκελος '%s' δεν βρέθηκε"
+
+#: ../src/camel/camel-mapi-store.c:1948
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot unsubscribe MAPI folders in offline mode"
+msgstr "Αδύνατη η απεγγραφή φακέλων MAPI σε λειτουργία χωρίς σύνδεση."
+
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:315 ../src/camel/camel-mapi-transport.c:133
+#: ../src/camel/camel-mapi-store.c:2162
+#: ../src/camel/camel-mapi-transport.c:195
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Εξυπηρετητή Exchange MAPI %s"
@@ -398,179 +446,830 @@ msgstr "Εξυπηρετητή Exchange MAPI %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:319 ../src/camel/camel-mapi-transport.c:136
+#: ../src/camel/camel-mapi-store.c:2166
+#: ../src/camel/camel-mapi-transport.c:198
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Υπηρεσία Exchange MAPI για το %s στο %s"
 
-#. To translators : First %s : is the error text or the reason
-#. for prompting the user if it is available.
-#. Second %s is : Username.
-#. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:361
-#, c-format
-msgid "%s Please enter the MAPI password for %s@%s"
-msgstr "%s Παρακαλούμε, εισάγετε το συνθηματικό MAPI για %s@%s"
+#: ../src/camel/camel-mapi-store.c:2193
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot connect MAPI store in offline mode"
+msgstr "Αδύνατη η σύνδεση με αποθήκη MAPI σε λειτουργία χωρίς σύνδεση."
 
-#: ../src/camel/camel-mapi-store.c:376
+#: ../src/camel/camel-mapi-store.c:2246
 #, c-format
-msgid "You did not enter a password."
-msgstr "Δεν εισήχθηκε συνθηματικό."
-
-#: ../src/camel/camel-mapi-store.c:384
-#, c-format
-msgid "Unable to authenticate to Exchange MAPI server: %s"
-msgstr "Αδυναμία πιστοποίησης στον εξυπηρετητή Exchange MAPI: %s"
-
-#: ../src/camel/camel-mapi-store.c:387
-msgid "Unable to authenticate to Exchange MAPI server"
-msgstr "Αδυναμία πιστοποίησης στον εξυπηρετητή Exchange MAPI"
-
-#: ../src/camel/camel-mapi-store.c:563
-#, c-format
-msgid "Cannot create MAPI folders in offline mode."
+msgid "Mailbox '%s' is full, no new messages will be received or sent."
 msgstr ""
-"Δεν είναι δυνατή η δημιουργία φακέλων MAPI σε λειτουργία χωρίς σύνδεση."
+"Το γραμματοκιβώτιο '%s' είναι γεμάτο, δεν θα ληφθούν ή δεν θα αποσταλούν νέα "
+"μηνύματα."
 
-#: ../src/camel/camel-mapi-store.c:570
+#: ../src/camel/camel-mapi-store.c:2248
 #, c-format
-msgid "Cannot create new folder '%s'"
-msgstr "Δεν είναι δυνατή η δημιουργία του φακέλου '%s'"
-
-#: ../src/camel/camel-mapi-store.c:584
-#, c-format
-msgid "Authentication failed"
-msgstr "Αποτυχία πιστοποίησης"
-
-#: ../src/camel/camel-mapi-store.c:609
-#, c-format
-msgid "Cannot create folder '%s': %s"
-msgstr "Δεν είναι δυνατή η δημιουργία του φακέλου '%s': %s"
-
-#: ../src/camel/camel-mapi-store.c:614
-#, c-format
-msgid "Cannot create folder '%s'"
-msgstr "Δεν είναι δυνατή η δημιουργία του φακέλου '%s'"
-
-#: ../src/camel/camel-mapi-store.c:707
-#, c-format
-msgid "Cannot remove folder '%s': %s"
-msgstr "Αδυναμία απομάκρυνσης φακέλου '%s':/%s"
-
-#: ../src/camel/camel-mapi-store.c:714
-#, c-format
-msgid "Cannot remove folder '%s'"
-msgstr "Δεν είναι δυνατή η αφαίρεση του φακέλου '%s'"
-
-#: ../src/camel/camel-mapi-store.c:804
-#, c-format
-msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
+msgid ""
+"Mailbox '%s' is near its size limit, message send will be disabled soon."
 msgstr ""
-"Δεν είναι δυνατή η μετονομασία του φακέλου MAPI '%s'. Ανύπαρκτος φάκελος."
+"Το γραμματοκιβώτιο '%s' είναι κοντά στο όριο μεγέθους του, η αποστολή "
+"μηνυμάτων θα απενεργοποιηθεί σύντομα."
 
-#: ../src/camel/camel-mapi-store.c:816
+#: ../src/camel/camel-mapi-store.c:2252
 #, c-format
-msgid "Cannot rename MAPI default folder '%s' to '%s'."
-msgstr ""
-"Δεν είναι δυνατή η μετονομασία του προεπιλεγμένου φακέλου MAPI από '%s' σε '%"
-"s'."
+msgid "Mailbox '%s' is full, no new messages will be received."
+msgstr "Το γραμματοκιβώτιο '%s' είναι γεμάτο, δεν θα ληφθούν νέα μηνύματα."
 
-#. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:843 ../src/camel/camel-mapi-store.c:868
-#: ../src/camel/camel-mapi-store.c:930
+#: ../src/camel/camel-mapi-store.c:2254
 #, c-format
-msgid "Cannot rename MAPI folder '%s' to '%s'"
-msgstr "Δεν είναι δυνατή η μετονομασία του φακέλου MAPI από '%s' σε '%s'"
+msgid "Mailbox '%s' is near its size limit."
+msgstr "Το γραμματοκιβώτιο '%s' είναι κοντά στο όριο μεγέθους του."
 
-#. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:861 ../src/camel/camel-mapi-store.c:924
-#, c-format
-msgid "Cannot rename MAPI folder '%s' to '%s': %s"
-msgstr "Δεν είναι δυνατή η μετονομασία του φακέλου MAPI από '%s' σε '%s': %s"
+#: ../src/camel/camel-mapi-store.c:2674
+#| msgid "Authentication failed"
+msgid "Authentication password not available"
+msgstr "Ο κωδικός πιστοποίησης δεν είναι διαθέσιμος"
 
-#: ../src/camel/camel-mapi-store.c:1493
-#, c-format
-msgid "Folder list not available in offline mode."
-msgstr "Η λίστα των φακέλων δεν είναι διαθέσιμη σε λειτουργία εκτός σύνδεσης."
-
-#: ../src/camel/camel-mapi-transport.c:99
-#: ../src/camel/camel-mapi-transport.c:120
+#: ../src/camel/camel-mapi-transport.c:146
+#: ../src/camel/camel-mapi-transport.c:168
 #, c-format
 msgid "Could not send message."
 msgstr "Δεν ήταν δυνατή η αποστολή του μηνύματος."
 
-#: ../src/camel/camel-mapi-transport.c:115
+#: ../src/camel/camel-mapi-transport.c:163
 #, c-format
 msgid "Could not send message: %s"
 msgstr "Δεν ήταν δυνατή η αποστολή του μηνύματος: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:101
+#: ../src/collection/e-mapi-backend.c:278
+msgid "Global Address List"
+msgstr "Γενική λίστα διευθύνσεων"
+
+#: ../src/collection/e-mapi-backend.c:651
+#: ../src/collection/e-mapi-backend.c:737
+#, c-format
+msgid "Data source '%s' does not represent a MAPI folder"
+msgstr "Η πηγή δεδομένων '%s' δεν αντιστοιχεί έναν φάκελο MAPI"
+
+#: ../src/configuration/e-book-config-mapigal.c:61
+msgid "Allow _partial search results"
+msgstr "Να επιτρέπονται _μερικά αποτελέσματα αναζήτησης"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:125
+msgid "Select username"
+msgstr "Επιλέξτε όνομα χρήστη"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:135
+msgid "Full name"
+msgstr "Πλήρες όνομα"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:140
+msgid "Username"
+msgstr "Όνομα χρήστη"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:167
+msgid ""
+"There are more users with similar user name on a server.\n"
+"Please select that you would like to use from the below list."
+msgstr ""
+"Υπάρχουν περισσότεροι χρήστες με παρόμοιο όνομα χρήστη σε έναν διακομιστή.\n"
+"Παρακαλούμε επιλέξτε αυτό που θα θέλατε να χρησιμοποιήσετε από την παρακάτω "
+"λίστα."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:395
+msgid "Authentication finished successfully."
+msgstr "Η πιστοποίηση ολοκληρώθηκε επιτυχώς."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:397
+#: ../src/configuration/e-mail-config-mapi-backend.c:518
+msgid "Authentication failed."
+msgstr "Αποτυχία πιστοποίησης."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:459
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot authenticate MAPI accounts in offline mode"
+msgstr "Αδύνατη η πιστοποίηση λογαριασμών MAPI σε λειτουργία χωρίς σύνδεση."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:488
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"Είναι υποχρεωτική η συμπλήρωση του διακομιστή, του ονόματος χρήστη και του "
+"ονόματος τομέα. Παρακαλώ, εισάγετε τις κατάλληλες τιμές."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:491
+#| msgid ""
+#| "Server, username and domain name cannot be empty. Please fill them with "
+#| "correct values."
+msgid ""
+"Realm name cannot be empty when kerberos is selected. Please fill them with "
+"correct values."
+msgstr ""
+"Το όνομα πεδίου δεν μπορεί να είναι κενό όταν επιλέγεται ο kerberos. "
+"Παρακαλούμε συμπληρώστε τα με σωστές τιμές."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:512
+msgid "Connecting to the server, please wait..."
+msgstr "Συνδέεται με τον διακομιστή, παρακαλούμε περιμένετε..."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:720
+msgid "Configuration"
+msgstr "Ρύθμιση"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:729
+msgid "_Server:"
+msgstr "_Διακομιστής:"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:746
+#| msgid "Username"
+msgid "User_name:"
+msgstr "Ό_νομα χρήστη:"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:771
+msgid "_Domain name:"
+msgstr "Όνομα _τομέα:"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:784
+msgid "_Authenticate"
+msgstr "_Πιστοποίηση"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:792
+msgid "_Use secure connection"
+msgstr "Χρήση _ασφαλούς σύνδεσης"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:807
+msgid "_Kerberos authentication"
+msgstr "Πιστοποίηση _Kerberos"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:819
+#| msgid "_Domain name:"
+msgid "_Realm name:"
+msgstr "Όνομα _πεδίου:"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:186
+#: ../src/configuration/e-mail-config-mapi-page.c:247
+#| msgid "Exchange Settings"
+msgid "MAPI Settings"
+msgstr "Ρυθμίσεις MAPI"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:192
+msgid "View the size of all Exchange folders"
+msgstr "Εμφάνιση του μεγέθους όλων των φακέλων του Exchange"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:196
+#| msgid "Folder Size"
+msgid "Folder _Size"
+msgstr "Μέ_γεθος φακέλου"
+
+#: ../src/configuration/e-mapi-config-utils.c:455
+msgid "Folder"
+msgstr "Φάκελος"
+
+#: ../src/configuration/e-mapi-config-utils.c:460
+msgid "Size"
+msgstr "Μέγεθος"
+
+#: ../src/configuration/e-mapi-config-utils.c:483
+#: ../src/configuration/e-mapi-config-utils.c:487
+msgid "Unable to retrieve folder size information"
+msgstr "Αδυναμία λήψης πληροφοριών μεγέθους φακέλου"
+
+#: ../src/configuration/e-mapi-config-utils.c:554
+msgid "Folder Size"
+msgstr "Μέγεθος φακέλου"
+
+#: ../src/configuration/e-mapi-config-utils.c:568
+msgid "Fetching folder list…"
+msgstr "Λήψη της λίστας φακέλων..."
+
+#: ../src/configuration/e-mapi-config-utils.c:742
+#, c-format
+msgid "Cannot edit permissions of folder '%s', choose other folder."
+msgstr "Αδύνατη η επεξεργασία αδειών του φακέλου '%s', επιλέξτε άλλον φάκελο."
+
+#: ../src/configuration/e-mapi-config-utils.c:805
+#| msgid "Folder size"
+msgid "Folder size..."
+msgstr "Μέγεθος φακέλου..."
+
+#: ../src/configuration/e-mapi-config-utils.c:812
+msgid "Subscribe to folder of other user..."
+msgstr "Εγγραφείτε στον φάκελο του άλλου χρήστη..."
+
+#: ../src/configuration/e-mapi-config-utils.c:821
+#: ../src/configuration/e-mapi-config-utils.c:1099
+#: ../src/configuration/e-mapi-config-utils.c:1129
+#: ../src/configuration/e-mapi-config-utils.c:1159
+#: ../src/configuration/e-mapi-config-utils.c:1189
+msgid "Permissions..."
+msgstr "Δικαιώματα..."
+
+#: ../src/configuration/e-mapi-config-utils.c:823
+msgid "Edit MAPI folder permissions"
+msgstr "Επεξεργασία των δικαιωμάτων φακέλου MAPI"
+
+#: ../src/configuration/e-mapi-config-utils.c:1101
+msgid "Edit MAPI calendar permissions"
+msgstr "Επεξεργασία δικαιωμάτων ημερολογίου MAPI"
+
+#: ../src/configuration/e-mapi-config-utils.c:1131
+msgid "Edit MAPI tasks permissions"
+msgstr "Επεξεργασία δικαιωμάτων εργασιών MAPI"
+
+#: ../src/configuration/e-mapi-config-utils.c:1161
+msgid "Edit MAPI memos permissions"
+msgstr "Επεξεργασία δικαιωμάτων υπενθυμίσεων MAPI"
+
+#: ../src/configuration/e-mapi-config-utils.c:1191
+msgid "Edit MAPI contacts permissions"
+msgstr "Επεξεργασία των δικαιωμάτων επαφών MAPI"
+
+#: ../src/configuration/e-mapi-config-utils.c:1364
+msgid "Personal Folders"
+msgstr "Προσωπικοί φάκελοι"
+
+#: ../src/configuration/e-mapi-config-utils.c:1595
+msgid "Searching remote MAPI folder structure, please wait..."
+msgstr "Αναζήτηση δομής φακέλου απομακρυσμένου MAPI, παρακαλούμε περιμένετε..."
+
+#: ../src/configuration/e-mapi-config-utils.c:1663
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI calendar in offline mode"
+msgstr "Αδύνατη η δημιουργία ημερολογίου MAPI σε λειτουργία χωρίς σύνδεση."
+
+#: ../src/configuration/e-mapi-config-utils.c:1666
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI task list in offline mode"
+msgstr "Αδύνατη η δημιουργία λίστας εργασιών MAPI σε λειτουργία χωρίς σύνδεση."
+
+#: ../src/configuration/e-mapi-config-utils.c:1669
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI memo list in offline mode"
+msgstr ""
+"Αδύνατη η δημιουργία λίστας υπενθυμίσεων MAPI σε λειτουργία χωρίς σύνδεση."
+
+#: ../src/configuration/e-mapi-config-utils.c:1672
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI address book in offline mode"
+msgstr ""
+"Αδύνατη η δημιουργία βιβλίου διευθύνσεων MAPI σε λειτουργία χωρίς σύνδεση."
+
+#: ../src/configuration/e-mapi-config-utils.c:1676
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI source in offline mode"
+msgstr "Αδύνατη η δημιουργία πηγής MAPI σε λειτουργία χωρίς σύνδεση."
+
+#: ../src/configuration/e-mapi-config-utils.c:1696
+msgid "_Location:"
+msgstr "_Τοποθεσία:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:89
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "Κανένα"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:90
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "Ιδιοκτήτης"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:100
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "Επεξεργαστής δημοσιεύσεων"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:109
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "Επεξεργαστής"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:117
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "Συντάκτης δημοσιεύσεων"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:124
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "Συντάκτης"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:130
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "Συντάκτης χωρίς δικαιώματα επεξεργασίας"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:135
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "Διορθωτής"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:138
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "Συντελεστής"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:141
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "Προσαρμοσμένο"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:274
+msgid "Writing folder permissions, please wait..."
+msgstr "Εγγραφή δικαιωμάτων φακέλου, παρακαλούμε περιμένετε..."
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:780
+#: ../src/configuration/e-mapi-search-gal-user.c:527
+msgctxt "User"
+msgid "Anonymous"
+msgstr "Ανώνυμος"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
+#: ../src/configuration/e-mapi-search-gal-user.c:524
+msgctxt "User"
+msgid "Default"
+msgstr "Προεπιλεγμένος"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
+#| msgid "Unknown error"
+msgctxt "User"
+msgid "Unknown"
+msgstr "Άγνωστος"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:876
+#: ../src/configuration/e-mapi-search-gal-user.c:600
+msgid "Name"
+msgstr "Όνομα"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:882
+msgid "Permission level"
+msgstr "Επίπεδο δικαιωμάτων"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:935
+msgid "Edit MAPI folder permissions..."
+msgstr "Επεξεργασία των δικαιωμάτων φακέλου MAPI..."
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:960
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:626
+msgid "Account:"
+msgstr "Λογαριασμός:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:986
+#| msgid "Folder Size"
+msgid "Folder name:"
+msgstr "Όνομα φακέλου:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1007
+#| msgid "Folder"
+msgid "Folder ID:"
+msgstr "Αναγνωριστικό φακέλου:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1066
+msgid "Permissions"
+msgstr "Δικαιώματα"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1087
+msgid "Permi_ssion level:"
+msgstr "Ε_πίπεδο δικαιωμάτων:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1115
+msgctxt "Permissions"
+msgid "Read"
+msgstr "Ανάγνωση"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1126
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1189
+msgctxt "Permissions"
+msgid "None"
+msgstr "Κανένα"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1131
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "Πλήρεις λεπτομέρειες"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1136
+msgctxt "Permissions"
+msgid "Simple Free/Busy"
+msgstr "Απλή διαθεσιμότητα"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1140
+#| msgid "Failed to get Free/Busy data"
+msgctxt "Permissions"
+msgid "Detailed Free/Busy"
+msgstr "Λεπτομερής διαθεσιμότητα"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1147
+msgctxt "Permissions"
+msgid "Write"
+msgstr "Εγγραφή"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1158
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "Δημιουργία στοιχείων"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
+#| msgid "Cannot create folder '%s'"
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "Δημιουργία υποφακέλων"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr "Επεξεργασία ιδιοκτησιών"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1170
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "Επεξεργασία όλων"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1178
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "Διαγραφή στοιχείων"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1194
+msgctxt "Permissions"
+msgid "Own"
+msgstr "Ιδιοκτησία"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1199
+msgctxt "Permissions"
+msgid "All"
+msgstr "Όλα"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1205
+msgctxt "Permissions"
+msgid "Other"
+msgstr "Άλλα"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1216
+#| msgid "Folder Size"
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "Ιδιοκτήτης φακέλου"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
+#| msgid "Folder"
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr "Επαφή φακέλου"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
+#| msgid "Folder size"
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr "Ορατός φάκελος"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1279
+msgid "Reading folder permissions, please wait..."
+msgstr "Ανάγνωση δικαιωμάτων φακέλου, παρακαλούμε περιμένετε..."
+
+#: ../src/configuration/e-mapi-search-gal-user.c:223
+msgid "No users found"
+msgstr "Δε βρέθηκαν χρήστες"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:226
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "Βρέθηκε ένας χρήστης"
+msgstr[1] "Βρέθηκαν %d χρήστες"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:231
+#, c-format
+msgid "Found %d user, but showing only first %d"
+msgid_plural "Found %d users, but showing only first %d"
+msgstr[0] "Βρέθηκε %d χρήστης, αλλά εμφανίζεται μόνο ο πρώτος %d"
+msgstr[1] "Βρέθηκαν %d χρήστες, αλλά εμφανίζεται μόνο οι πρώτοι %d"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:519
+#: ../src/configuration/e-mapi-search-gal-user.c:710
+msgid "Search for a user"
+msgstr "Αναζήτηση χρήστη"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:535
+#| msgid "Searching"
+msgid "Searching..."
+msgstr "Αναζήτηση..."
+
+#: ../src/configuration/e-mapi-search-gal-user.c:606
+msgid "E-mail"
+msgstr "Ηλεκτρονικό ταχυδρομείο"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:647
+msgid "Choose MAPI user..."
+msgstr "Επιλέξτε χρήστη MAPI..."
+
+#: ../src/configuration/e-mapi-search-gal-user.c:670
+#| msgid "Searching"
+msgid "_Search:"
+msgstr "_Αναζήτηση:"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:89
+#, c-format
+msgid "Cannot add folder, folder already exists as '%s'"
+msgstr "Αδύνατη η προσθήκη φακέλου, ο φάκελος υπάρχει ήδη ως '%s'"
+
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. Example result: "Mailbox - John Smith"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:114
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox - %s"
+msgstr "Γραμματοκιβώτιο του - %s"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:143
+#, c-format
+msgid "Cannot add folder, failed to add to store's summary"
+msgstr "Αδύνατη η προσθήκη φακέλου, αποτυχία προσθήκης περίληψης αποθήκευσης"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:329
+#, c-format
+msgid ""
+"Folder '%s' not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr ""
+"Ο φάκελος '%s' δεν βρέθηκε. Είτε δεν υπάρχει ή δεν έχετε το δικαίωμα "
+"πρόσβασης του."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:364
+msgid "Cannot add folder, cannot determine folder's type"
+msgstr ""
+"Αδύνατη η προσθήκη φακέλου, δεν μπορεί να προσδιοριστεί ο τύπος του φακέλου"
+
+#. Translators: This is used to name foreign folder.
+#. The first '%s' is replaced with user name to whom the folder belongs,
+#. the second '%s' is replaced with folder name.
+#. Example result: "John Smith - Calendar"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:405
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s - %s"
+msgstr "%s - %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:502
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:704
+msgid "Inbox"
+msgstr "Εισερχόμενα"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:504
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:705
+msgid "Contacts"
+msgstr "Επαφές"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:506
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:706
+msgid "Calendar"
+msgstr "Ημερολόγιο"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:508
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:707
+msgid "Memos"
+msgstr "Υπενθυμίσεις"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:510
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:708
+msgid "Tasks"
+msgstr "Εργασίες"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:523
+#, c-format
+msgid "Testing availability of folder '%s' of user '%s', please wait..."
+msgstr ""
+"Έλεγχος διαθεσιμότητας του φακέλου '%s' του χρήστη '%s', παρακαλούμε "
+"περιμένετε..."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:605
+msgid "Subscribe to folder of other MAPI user..."
+msgstr "Εγγραφείτε στον φάκελο του άλλου χρήστη MAPI..."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:654
+#| msgid "Username"
+msgid "User"
+msgstr "Χρήστης"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:661
+msgid "_User:"
+msgstr "_Χρήστης:"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:674
+msgid "C_hoose..."
+msgstr "Επι_λογή..."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
+#| msgid "Folder Size"
+msgid "_Folder name:"
+msgstr "Όνομα _φακέλου:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2077
+msgctxt "MeetingResp"
+msgid "Accepted:"
+msgstr "Αποδεκτή:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2082
+msgctxt "MeetingResp"
+msgid "Tentative:"
+msgstr "Αβέβαιη:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2087
+msgctxt "MeetingResp"
+msgid "Declined:"
+msgstr "Απορριπτέα:"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:140
 msgid "Failed to login into the server"
 msgstr "Αποτυχία σύνδεσης στο διακομιστή"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:102
+#: ../src/libexchangemapi/e-mapi-connection.c:141
 msgid "Cannot create more sessions, session limit was reached"
 msgstr ""
 "Αδύνατη η δημιουργία περισσότερων συνεδριών, έχετε φτάσει το όριο συνεδριών."
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:103
+#: ../src/libexchangemapi/e-mapi-connection.c:142
 msgid "User cancelled operation"
 msgstr "Ο χρήστης ακύρωσε την εργασία"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:104
+#: ../src/libexchangemapi/e-mapi-connection.c:143
 msgid "Unable to abort"
 msgstr "Αδυναμία ακύρωσης"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:105
+#: ../src/libexchangemapi/e-mapi-connection.c:144
 msgid "Network error"
 msgstr "Σφάλμα δικτύου"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:106
+#: ../src/libexchangemapi/e-mapi-connection.c:145
 msgid "Disk error"
 msgstr "Σφάλμα δίσκου"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:107
+#: ../src/libexchangemapi/e-mapi-connection.c:146
 msgid "Password change required"
 msgstr "Απαιτείται αλλαγή κωδικού πρόσβασης"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:108
+#: ../src/libexchangemapi/e-mapi-connection.c:147
 msgid "Password expired"
 msgstr "Το συνθηματικό έληξε"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:109
+#: ../src/libexchangemapi/e-mapi-connection.c:148
 msgid "Invalid workstation account"
 msgstr "Μη έγκυρος λογαριασμός σταθμού εργασίας"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:110
+#: ../src/libexchangemapi/e-mapi-connection.c:149
 msgid "Invalid access time"
 msgstr "Μη έγκυρος χρόνος προσπέλασης"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:111
+#: ../src/libexchangemapi/e-mapi-connection.c:150
 msgid "Account is disabled"
 msgstr "Ο λογαριασμός είναι απενεργοποιημένος"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:112
+#: ../src/libexchangemapi/e-mapi-connection.c:151
 msgid "End of session"
 msgstr "Τέλος συνεδρίας"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:120
+#: ../src/libexchangemapi/e-mapi-connection.c:152
+msgid "MAPI is not initialized or connected"
+msgstr "Το MAPI δεν είναι αρχικοποιημένο ή συνδεμένο"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:153
+msgid "Permission denied"
+msgstr "Άρνηση πρόσβασης"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:154
+msgid "Mailbox quota exceeded"
+msgstr "Η ποσόστωση γραμματοκιβωτίου ξεπεράστηκε"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:162
 #, c-format
 msgid "MAPI error %s (0x%x) occurred"
-msgstr "Συνέβη σφάλμα MAPI %s (0x%x) "
+msgstr "Συνέβη σφάλμα MAPI %s (0x%x)"
 
 #. Translators: The first '%s' is replaced with an error context,
 #. aka where the error occurred, the second '%s' is replaced with
 #. the error message.
-#: ../src/libexchangemapi/exchange-mapi-connection.c:130
+#: ../src/libexchangemapi/e-mapi-connection.c:179
 #, c-format
 msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3242
+#: ../src/libexchangemapi/e-mapi-connection.c:744
+#, c-format
+msgid "Server '%s' cannot be reached"
+msgstr "Αδύνατη η επικοινωνία με τον διακομιστή '%s'"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:872
+#, c-format
+msgid "Folder name '%s' is not a known default folder name, nor folder ID."
+msgstr ""
+"Το όνομα φακέλου '%s' δεν είναι ένα γνωστό προεπιλεγμένο όνομα φακέλου, ούτε "
+"αναγνωριστικό φακέλου."
+
+#: ../src/libexchangemapi/e-mapi-connection.c:1203
+#, c-format
+#| msgid "Failed to create calendar '%s'"
+msgid "Failed to open store for user '%s'"
+msgstr "Αποτυχία ανοίγματος αποθήκης για τον χρήστη '%s'"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:1211
+#, c-format
+msgid "Folder of user '%s' not found"
+msgstr "Ο φάκελος του χρήστη '%s' δεν βρέθηκε"
+
+#. Translators: %s is replaced with an email address which was found ambiguous on a remote server
+#: ../src/libexchangemapi/e-mapi-connection.c:3840
+#, c-format
+msgid "Recipient '%s' is ambiguous"
+msgstr "Ο παραλήπτης '%s' είναι ασαφής"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:4932
+#, c-format
+msgid ""
+"Search result exceeded allowed size limit. Use more specific search term, "
+"please"
+msgstr ""
+"Το αποτέλεσμα αναζήτησης ξεπέρασε το επιτρεπόμενο όριο μεγέθους. "
+"Παρακαλούμε, χρησιμοποιήστε πιο συγκεκριμένο όρο αναζήτησης."
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6532
 msgid "All Public Folders"
 msgstr "Όλοι οι δημόσιοι φάκελοι"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6799
+#, c-format
+msgid "User name '%s' is ambiguous"
+msgstr "Το όνομα χρήστη '%s' είναι ασαφές"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6802
+#, c-format
+msgid "User name '%s' not found"
+msgstr "Το όνομα χρήστη '%s' δεν βρέθηκε"
+
+#: ../src/libexchangemapi/e-mapi-folder.c:332
+msgid "Cannot add folder, unsupported folder type"
+msgstr "Αδύνατη η προσθήκη φακέλου, ανυποστήρικτος τύπος φακέλου"
+
+#: ../src/libexchangemapi/e-mapi-folder.c:335
+msgid "Cannot add folder, master source not found"
+msgstr "Αδύνατη η προσθήκη φακέλου, η κύρια πηγή δεν βρέθηκε"
+
+#~ msgid "Enter Password for %s@%s"
+#~ msgstr "Εισαγωγή κωδικού για τον %s@%s"
+
+#~ msgid "Failed to create address book '%s': %s"
+#~ msgstr "Αποτυχία δημιουργίας βιβλίου διευθύνσεων '%s':%s"
+
+#~ msgid "Failed to create address book '%s'"
+#~ msgstr "Αποτυχία δημιουργίας βιβλίου διευθύνσεων '%s'"
+
+#~ msgid "Miscellaneous"
+#~ msgstr "Διάφορα"
+
+#~ msgid "Cannot connect"
+#~ msgstr "Αδυναμία σύνδεσης"
+
+#~ msgid "Uknown error"
+#~ msgstr "Άγνωστο σφάλμα"
+
+#~ msgid "Failed to fetch changes from a server: %s"
+#~ msgstr "Αποτυχία λήψης αλλαγών από τον διακομιστή: %s"
+
+#~ msgid "Failed to fetch changes from a server"
+#~ msgstr "Αποτυχία λήψης αλλαγών από τον διακομιστή"
+
+#~ msgid "Could not create thread for populating cache"
+#~ msgstr ""
+#~ "Δεν ήταν δυνατή η δημιουργία νήματος για το γέμισμα της προσωρινής μνήμης"
+
+#~ msgid "Updating local summary cache for new messages in %s"
+#~ msgstr ""
+#~ "Γϊνεται ενημέρωση των τοπικών περιλήψεων της μνήμης cache για νέα "
+#~ "μηνύματα στο %s"
+
+#~ msgid "Retrieving message IDs from server for %s"
+#~ msgstr "Ανάκτηση ταυτότητας (ID) των μηνυμάτων από τον διακομιστή για %s"
+
+#~ msgid "Removing deleted messages from cache in %s"
+#~ msgstr "Αφαίρεση διαγραμμένων μηνυμάτων από την μνήμη cache σε %s"
+
+#~ msgid "Fetching summary information for new messages in %s"
+#~ msgstr "Λήψη περιληπτικών πληροφοριών για νέα μηνύματα στο %s"
+
+#~ msgid "%s Please enter the MAPI password for %s@%s"
+#~ msgstr "%s Παρακαλούμε, εισάγετε το συνθηματικό MAPI για %s@%s"
+
+#~ msgid "You did not enter a password."
+#~ msgstr "Δεν εισήχθηκε συνθηματικό."
+
+#~ msgid "Unable to authenticate to Exchange MAPI server: %s"
+#~ msgstr "Αδυναμία πιστοποίησης στον εξυπηρετητή Exchange MAPI: %s"
+
+#~ msgid "Unable to authenticate to Exchange MAPI server"
+#~ msgstr "Αδυναμία πιστοποίησης στον εξυπηρετητή Exchange MAPI"
 
 #~ msgid "Downloading GAL entries from server…"
 #~ msgstr "Λήψη των εγγραφών GAL από τον διακομιστή..."
