@@ -892,48 +892,104 @@ update_local_cache (ECalBackendMAPI *cbmapi, GCancellable *cancellable)
 	return success;
 }
 
+/* to not depend on added function in 3.8.4 */
+static gchar *
+e_mapi_cal_backend_store_get_components_by_uid_as_ical_string (ECalBackendStore *store,
+							       const gchar *uid)
+{
+	GSList *comps;
+	gchar *ical_string = NULL;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_STORE (store), NULL);
+	g_return_val_if_fail (uid != NULL, NULL);
+
+	comps = e_cal_backend_store_get_components_by_uid (store, uid);
+	if (!comps)
+		return NULL;
+
+	if (!comps->next) {
+		ical_string = e_cal_component_get_as_string (comps->data);
+	} else {
+		GSList *citer;
+		icalcomponent *icalcomp;
+
+		/* if we have detached recurrences, return a VCALENDAR */
+		icalcomp = e_cal_util_new_top_level ();
+
+		for (citer = comps; citer; citer = g_slist_next (citer)) {
+			ECalComponent *comp = citer->data;
+
+			icalcomponent_add_component (
+				icalcomp,
+				icalcomponent_new_clone (e_cal_component_get_icalcomponent (comp)));
+		}
+
+		ical_string = icalcomponent_as_ical_string_r (icalcomp);
+
+		icalcomponent_free (icalcomp);
+	}
+
+	g_slist_free_full (comps, g_object_unref);
+
+	return ical_string;
+}
+
 static void
 ecbm_get_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable, const gchar *uid, const gchar *rid, gchar **object, GError **error)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
-	ECalComponent *comp;
 
 	cbmapi = (ECalBackendMAPI *)(backend);
 	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
+	e_return_data_cal_error_if_fail (object != NULL, InvalidArg);
 
 	priv = cbmapi->priv;
 
 	g_mutex_lock (&priv->mutex);
 
-	/* search the object in the cache */
-	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
+	if (rid && *rid) {
+		ECalComponent *comp;
 
-	if (!comp) {
-		/* the object is not in the backend store, double check that it's
-		 * also not on the server to prevent for a race condition where we
-		 * might otherwise mistakenly generate a new UID */
-		g_mutex_unlock (&priv->mutex);
-		update_local_cache (cbmapi, cancellable);
-		g_mutex_lock (&priv->mutex);
+		/* search the object in the cache */
 		comp = e_cal_backend_store_get_component (priv->store, uid, rid);
-	}
 
-	if (comp) {
-		g_mutex_unlock (&priv->mutex);
-		if (e_cal_backend_get_kind (E_CAL_BACKEND (backend)) ==
-		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp)))
+		if (!comp) {
+			/* the object is not in the backend store, double check that it's
+			 * also not on the server to prevent for a race condition where we
+			 * might otherwise mistakenly generate a new UID */
+			g_mutex_unlock (&priv->mutex);
+			update_local_cache (cbmapi, cancellable);
+			g_mutex_lock (&priv->mutex);
+			comp = e_cal_backend_store_get_component (priv->store, uid, rid);
+		}
+
+		if (comp) {
+			g_mutex_unlock (&priv->mutex);
+
 			*object = e_cal_component_get_as_string (comp);
-		else
-			*object = NULL;
 
-		g_object_unref (comp);
-
+			g_object_unref (comp);
+		} else {
+			g_mutex_unlock (&priv->mutex);
+		}
 	} else {
+		*object = e_mapi_cal_backend_store_get_components_by_uid_as_ical_string (priv->store, uid);
+		if (!*object && e_backend_get_online (E_BACKEND (backend))) {
+			/* the object is not in the backend store, double check that it's
+			 * also not on the server to prevent for a race condition where we
+			 * might otherwise mistakenly generate a new UID */
+			g_mutex_unlock (&priv->mutex);
+			update_local_cache (cbmapi, cancellable);
+			g_mutex_lock (&priv->mutex);
+
+			*object = e_mapi_cal_backend_store_get_components_by_uid_as_ical_string (priv->store, uid);
+		}
+
 		g_mutex_unlock (&priv->mutex);
 	}
 
-	if (!object || !*object)
+	if (!*object)
 		g_propagate_error (error, EDC_ERROR (ObjectNotFound));
 }
 
