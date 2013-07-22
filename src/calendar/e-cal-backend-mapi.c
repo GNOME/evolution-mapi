@@ -898,43 +898,57 @@ ecbm_get_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellable,
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
-	ECalComponent *comp;
 
 	cbmapi = (ECalBackendMAPI *)(backend);
 	e_mapi_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (cbmapi), InvalidArg);
+	e_mapi_return_data_cal_error_if_fail (object != NULL, InvalidArg);
 
 	priv = cbmapi->priv;
 
 	g_mutex_lock (&priv->mutex);
 
-	/* search the object in the cache */
-	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
+	if (rid && *rid) {
+		ECalComponent *comp;
 
-	if (!comp) {
-		/* the object is not in the backend store, double check that it's
-		 * also not on the server to prevent for a race condition where we
-		 * might otherwise mistakenly generate a new UID */
-		g_mutex_unlock (&priv->mutex);
-		update_local_cache (cbmapi, cancellable);
-		g_mutex_lock (&priv->mutex);
+		/* search the object in the cache */
 		comp = e_cal_backend_store_get_component (priv->store, uid, rid);
-	}
 
-	if (comp) {
-		g_mutex_unlock (&priv->mutex);
-		if (e_cal_backend_get_kind (E_CAL_BACKEND (backend)) ==
-		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp)))
+		if (!comp) {
+			/* the object is not in the backend store, double check that it's
+			 * also not on the server to prevent for a race condition where we
+			 * might otherwise mistakenly generate a new UID */
+			g_mutex_unlock (&priv->mutex);
+			update_local_cache (cbmapi, cancellable);
+			g_mutex_lock (&priv->mutex);
+			comp = e_cal_backend_store_get_component (priv->store, uid, rid);
+		}
+
+		if (comp) {
+			g_mutex_unlock (&priv->mutex);
+
 			*object = e_cal_component_get_as_string (comp);
-		else
-			*object = NULL;
 
-		g_object_unref (comp);
-
+			g_object_unref (comp);
+		} else {
+			g_mutex_unlock (&priv->mutex);
+		}
 	} else {
+		*object = e_cal_backend_store_get_components_by_uid_as_ical_string (priv->store, uid);
+		if (!*object && e_backend_get_online (E_BACKEND (backend))) {
+			/* the object is not in the backend store, double check that it's
+			 * also not on the server to prevent for a race condition where we
+			 * might otherwise mistakenly generate a new UID */
+			g_mutex_unlock (&priv->mutex);
+			update_local_cache (cbmapi, cancellable);
+			g_mutex_lock (&priv->mutex);
+
+			*object = e_cal_backend_store_get_components_by_uid_as_ical_string (priv->store, uid);
+		}
+
 		g_mutex_unlock (&priv->mutex);
 	}
 
-	if (!object || !*object)
+	if (!*object)
 		g_propagate_error (error, EDC_ERROR (ObjectNotFound));
 }
 
