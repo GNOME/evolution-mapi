@@ -1,3 +1,13 @@
+evolution-mapi 3.8.4 2013-07-23
+-------------------------------
+
+Bugs:
+	Bug #702276 - Deadlock when connecting to a server (Milan Crha)
+	Bug #704618 - Missing detached instances in get_object() response (Milan Crha)
+
+Translations:
+	Dimitris Spingos (el)
+
 evolution-mapi 3.8.3 2013-06-10
 -------------------------------
 
