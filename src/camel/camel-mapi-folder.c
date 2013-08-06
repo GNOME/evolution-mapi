@@ -393,6 +393,13 @@ update_message_info (CamelMessageInfo *info,
 	pread_receipt = e_mapi_util_find_array_propval (&object->properties, PidTagReadReceiptRequested);
 	msg_class = e_mapi_util_find_array_propval (&object->properties, PidTagMessageClass);
 
+	if (!minfo->info.size) {
+		const uint32_t *msg_size;
+
+		msg_size = e_mapi_util_find_array_propval (&object->properties, PidTagMessageSize);
+		minfo->info.size = msg_size ? *msg_size : 0;
+	}
+
 	if (msg_class && g_str_has_prefix (msg_class, "REPORT.IPM.Note.IPNRN"))
 		pread_receipt = NULL;
 
@@ -439,6 +446,26 @@ update_message_info (CamelMessageInfo *info,
 	camel_folder_summary_touch (minfo->info.summary);
 }
 
+static gsize
+camel_mapi_get_message_size (CamelMimeMessage *msg)
+{
+	CamelStream *null;
+	CamelDataWrapper *dw;
+	gsize sz;
+
+	if (!CAMEL_IS_DATA_WRAPPER (msg))
+		return 0;
+
+	dw = CAMEL_DATA_WRAPPER (msg);
+	null = camel_stream_null_new ();
+	/* do not 'decode', let's be interested in the raw message size */
+	camel_data_wrapper_write_to_stream_sync (dw, null, NULL, NULL);
+	sz = CAMEL_STREAM_NULL (null)->written;
+	g_object_unref (null);
+
+	return sz;
+}
+
 struct GatherObjectSummaryData
 {
 	CamelFolder *folder;
@@ -461,14 +488,14 @@ remove_removed_uids_cb (gpointer uid_str, gpointer value, gpointer user_data)
 }
 
 static gboolean
-gather_object_offline_cb (EMapiConnection *conn,
-			  TALLOC_CTX *mem_ctx,
-			  /* const */ EMapiObject *object,
-			  guint32 obj_index,
-			  guint32 obj_total,
-			  gpointer user_data,
-			  GCancellable *cancellable,
-			  GError **perror)
+gather_object_for_offline_cb (EMapiConnection *conn,
+			      TALLOC_CTX *mem_ctx,
+			      /* const */ EMapiObject *object,
+			      guint32 obj_index,
+			      guint32 obj_total,
+			      gpointer user_data,
+			      GCancellable *cancellable,
+			      GError **perror)
 {
 	struct GatherObjectSummaryData *gos = user_data;
 	CamelMimeMessage *msg;
@@ -523,6 +550,9 @@ gather_object_offline_cb (EMapiConnection *conn,
 			minfo->info.uid = camel_pstring_strdup (uid_str);
 
 			update_message_info (info, object, is_new, gos->is_public_folder, user_has_read);
+
+			if (!minfo->info.size)
+				minfo->info.size = camel_mapi_get_message_size (msg);
 
 			camel_folder_summary_add (gos->folder->summary, info);
 			camel_message_info_ref (info);
@@ -844,7 +874,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 		if (full_download) {
 			camel_operation_push_message (cancellable, _("Downloading messages in folder '%s'"), camel_folder_get_display_name (folder));
 
-			status = e_mapi_connection_transfer_objects (conn, &obj_folder, gco.to_update, gather_object_offline_cb, &gos, cancellable, mapi_error);
+			status = e_mapi_connection_transfer_objects (conn, &obj_folder, gco.to_update, gather_object_for_offline_cb, &gos, cancellable, mapi_error);
 
 			camel_operation_pop_message (cancellable);
 		} else {
