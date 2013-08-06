@@ -420,7 +420,7 @@ e_mapi_fast_transfer_internal (EMapiConnection *conn,
 		if (ms != MAPI_E_SUCCESS)
 			break;
 
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		if (g_cancellable_is_cancelled (cancellable)) {
 			ms = MAPI_E_USER_CANCEL;
 			break;
 		}

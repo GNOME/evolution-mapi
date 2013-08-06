@@ -232,13 +232,17 @@ build_body_part_content (CamelMimePart *part, EMapiObject *object, uint32_t prop
 				str_cb = strlen (in_utf8);
 			}
 
-			camel_mime_part_set_content (part, (const gchar *) str_lpb, str_cb, type);
+			/* cannot set an empty content */
+			if (!str_cb)
+				camel_mime_part_set_content (part, " ", 1, type);
+			else
+				camel_mime_part_set_content (part, (const gchar *) str_lpb, str_cb, type);
 		}
 
 		g_free (in_utf8);
 		g_free (buff);
 	} else
-		camel_mime_part_set_content (part, " ", strlen (" "), "text/plain");
+		camel_mime_part_set_content (part, " ", 1, "text/plain");
 }
 
 static gboolean

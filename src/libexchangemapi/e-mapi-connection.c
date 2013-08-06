@@ -2452,6 +2452,7 @@ ensure_additional_properties_cb (EMapiConnection *conn,
 		uint32_t orig_proptag, use_proptag;
 	} additional_properties[] = {
 		{ PidTagBody, MAPI_E_RESERVED },
+		{ PidTagMessageSize, MAPI_E_RESERVED },
 		{ PidNameContentClass, MAPI_E_RESERVED }
 	};
 	struct EnsureAdditionalPropertiesData *eap = user_data;
@@ -2461,6 +2462,9 @@ ensure_additional_properties_cb (EMapiConnection *conn,
 	g_return_val_if_fail (eap != NULL, FALSE);
 	g_return_val_if_fail (eap->cb != NULL, FALSE);
 	g_return_val_if_fail (object != NULL, FALSE);
+
+	if (g_cancellable_is_cancelled (cancellable))
+		return FALSE;
 
 	for (ii = 0; ii < G_N_ELEMENTS (additional_properties); ii++) {
 		uint32_t prop = additional_properties[ii].orig_proptag;
@@ -2478,7 +2482,7 @@ ensure_additional_properties_cb (EMapiConnection *conn,
 	}
 
 	/* Fast-transfer transfers only Html or Body, never both */
-	if (need_any || has_embedded_message_without_body (object)) {
+	if (!g_cancellable_is_cancelled (cancellable) && (need_any || has_embedded_message_without_body (object))) {
 		const mapi_id_t *mid;
 
 		mid = e_mapi_util_find_array_propval (&object->properties, PidTagMid);
@@ -3074,7 +3078,10 @@ e_mapi_connection_transfer_objects (EMapiConnection *conn,
 				mapi_id_array_add_id (&ids, *pmid);
 		}
 
-		if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
+		if (g_cancellable_is_cancelled (cancellable)) {
+			if (perror && !*perror)
+				g_cancellable_set_error_if_cancelled (cancellable, perror);
+
 			ms = MAPI_E_USER_CANCEL;
 			mapi_id_array_release (&ids);
 			goto cleanup;
@@ -3153,6 +3160,9 @@ internal_get_summary_cb (EMapiConnection *conn,
 	g_return_val_if_fail (gsd != NULL, FALSE);
 	g_return_val_if_fail (gsd->cb != NULL, FALSE);
 	g_return_val_if_fail (object != NULL, FALSE);
+
+	if (g_cancellable_is_cancelled (cancellable))
+		return FALSE;
 
 	/* also include properties received from GetProps,
 	   as those like PR_MID are not included by default */
