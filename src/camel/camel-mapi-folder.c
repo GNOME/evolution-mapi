@@ -2133,14 +2133,6 @@ camel_mapi_folder_new (CamelStore *store,
 		return NULL;
 	}
 
-/*	journal_file = g_strdup_printf ("%s/journal", g_strdup_printf ("%s-%s",folder_name, "dir")); */
-/*	mapi_folder->journal = camel_mapi_journal_new (mapi_folder, journal_file); */
-/*	g_free (journal_file); */
-/*	if (!mapi_folder->journal) { */
-/*		g_object_unref (folder); */
-/*		return NULL; */
-/*	} */
-
 	if (filter_inbox) {
 		CamelFolderInfo *fi;
 
