@@ -480,10 +480,11 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 	gboolean subscription_list = FALSE;
 	CamelFolderInfo *info = NULL;
 	CamelMapiStoreInfo *msi = NULL;
-	guint32 count, i;
 	GHashTable *old_cache_folders;
 	GError *err = NULL;
 	EMapiConnection *conn;
+	GPtrArray *array;
+	gint ii;
 
 	if (!camel_mapi_store_connected (store, cancellable, NULL)) {
 		g_set_error_literal (
@@ -506,15 +507,11 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 		return TRUE;
 	}
 
-	camel_store_summary_lock (store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
-
 	/* remember all folders in cache before update */
 	old_cache_folders = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-	count = camel_store_summary_count (store->summary);
-	for (i = 0; i < count; i++) {
-		msi = (CamelMapiStoreInfo *) camel_store_summary_index (store->summary, i);
-		if (msi == NULL)
-			continue;
+	array = camel_store_summary_array (store->summary);
+	for (ii = 0; ii < array->len; ii++) {
+		msi = g_ptr_array_index (array, ii);
 
 		/* those whose left in old_cache_folders are removed at the end,
 		   which is not good for public and foreign folders, thus preserve
@@ -524,9 +521,8 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 		    ((msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC_REAL) != 0 &&
 		    (msi->mapi_folder_flags & CAMEL_STORE_INFO_FOLDER_SUBSCRIBED) == 0))
 			g_hash_table_insert (old_cache_folders, g_strdup (camel_store_info_path (store->summary, (CamelStoreInfo *) msi)), GINT_TO_POINTER (1));
-
-		camel_store_summary_info_unref (store->summary, (CamelStoreInfo *) msi);
 	}
+	camel_store_summary_array_free (store->summary, array);
 
 	subscription_list = (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST);
 	if (subscription_list) {
@@ -665,8 +661,6 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 	priv->folders_synced = TRUE;
 	g_object_unref (conn);
 
-	camel_store_summary_unlock (store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
-
 	return TRUE;
 }
 
@@ -741,11 +735,12 @@ mapi_get_folder_info_offline (CamelStore *store,
 	ESourceRegistry *registry = NULL;
 	GList *my_sources = NULL;
 	GPtrArray *folders;
+	GPtrArray *array;
 	gchar *path;
-	gint i, count;
 	gboolean subscribed, subscription_list = FALSE;
 	gboolean has_public_folders = FALSE, has_foreign_folders = FALSE;
 	gchar *profile;
+	guint ii;
 
 	subscription_list = (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST);
 	subscribed = (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED);
@@ -777,14 +772,14 @@ mapi_get_folder_info_offline (CamelStore *store,
 
 	path = mapi_concat (top, "*");
 
-	camel_store_summary_lock (mapi_store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
-	count = camel_store_summary_count (mapi_store->summary);
-	for (i = 0; i < count; i++) {
-		CamelStoreInfo *si = camel_store_summary_index (mapi_store->summary, i);
-		CamelMapiStoreInfo *msi = (CamelMapiStoreInfo *) si;
+	array = camel_store_summary_array (mapi_store->summary);
 
-		if (si == NULL)
-			continue;
+	for (ii = 0; ii < array->len; ii++) {
+		CamelStoreInfo *si;
+		CamelMapiStoreInfo *msi;
+
+		si = g_ptr_array_index (array, ii);
+		msi = (CamelMapiStoreInfo *) si;
 
 		/* Allow only All Public Folders hierarchy;
 		   Subscribed public folders are those in Favorites/... - skip them too */
@@ -792,7 +787,6 @@ mapi_get_folder_info_offline (CamelStore *store,
 		    ((msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC) == 0 ||
 		    (msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC_REAL) == 0 ||
 		    (msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN) != 0)) {
-			camel_store_summary_info_unref (mapi_store->summary, si);
 			continue;
 		}
 
@@ -801,7 +795,6 @@ mapi_get_folder_info_offline (CamelStore *store,
 		    (((si->flags & CAMEL_STORE_INFO_FOLDER_SUBSCRIBED) == 0 &&
 		     (msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PERSONAL) == 0) ||
 		    (!subscription_list && (msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC_REAL) != 0))) {
-			camel_store_summary_info_unref (mapi_store->summary, si);
 			continue;
 		}
 
@@ -810,7 +803,6 @@ mapi_get_folder_info_offline (CamelStore *store,
 		    (si->flags & CAMEL_STORE_INFO_FOLDER_SUBSCRIBED) != 0 &&
 		    ((msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC) != 0 ||
 		     (msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN) != 0)) {
-			camel_store_summary_info_unref (mapi_store->summary, si);
 			continue;
 		}
 
@@ -847,8 +839,9 @@ mapi_get_folder_info_offline (CamelStore *store,
 
 			g_ptr_array_add (folders, fi);
 		}
-		camel_store_summary_info_unref (mapi_store->summary, si);
 	}
+
+	camel_store_summary_array_free (mapi_store->summary, array);
 
 	if (!subscription_list && !*top) {
 		if (has_public_folders) {
@@ -883,7 +876,6 @@ mapi_get_folder_info_offline (CamelStore *store,
 		g_object_unref (registry);
 
 	g_free (profile);
-	camel_store_summary_unlock (mapi_store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
 
 	return fi;
 }
@@ -930,23 +922,23 @@ mapi_forget_folder (CamelMapiStore *mapi_store, const gchar *folder_name, GError
 static void
 mapi_rename_folder_infos (CamelMapiStore *mapi_store, const gchar *old_name, const gchar *new_name)
 {
-	gint sz, i, olen;
+	gint olen;
 	CamelStoreInfo *si = NULL;
+	GPtrArray *array;
+	guint ii;
 
 	g_return_if_fail (mapi_store != NULL);
 	g_return_if_fail (old_name != NULL);
 	g_return_if_fail (new_name != NULL);
 
-	camel_store_summary_lock (mapi_store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
-
 	olen = strlen (old_name);
-	sz = camel_store_summary_count (mapi_store->summary);
-	for (i = 0; i < sz; i++) {
+
+	array = camel_store_summary_array (mapi_store->summary);
+
+	for (ii = 0; ii < array->len; ii++) {
 		const gchar *full_name;
 
-		si = camel_store_summary_index (mapi_store->summary, i);
-		if (!si)
-			continue;
+		si = g_ptr_array_index (array, ii);
 
 		full_name = camel_store_info_path (mapi_store->summary, si);
 		if (full_name && g_str_has_prefix (full_name, old_name) && !g_str_equal (full_name, old_name) &&
@@ -975,10 +967,9 @@ mapi_rename_folder_infos (CamelMapiStore *mapi_store, const gchar *old_name, con
 				g_free (fid_str);
 			}
 		}
-		camel_store_summary_info_unref (mapi_store->summary, si);
 	}
 
-	camel_store_summary_unlock (mapi_store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
+	camel_store_summary_array_free (mapi_store->summary, array);
 }
 
 static void
@@ -2845,31 +2836,27 @@ mapi_update_folder_hash_tables (CamelMapiStore *store, const gchar *full_name, c
 static void
 mapi_folders_update_hash_tables_from_cache (CamelMapiStore *store)
 {
-	CamelStoreSummary *summary = store->summary;
-	gint summary_count;
-	guint i = 0;
+	GPtrArray *array;
+	guint ii;
 
-	camel_store_summary_lock (store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
+	array = camel_store_summary_array (store->summary);
 
-	summary_count = camel_store_summary_count (summary);
-	for (i = 0; i < summary_count; i++) {
-		CamelMapiStoreInfo *msi = (CamelMapiStoreInfo *) camel_store_summary_index (summary, i);
+	for (ii = 0; ii < array->len; ii++) {
+		CamelMapiStoreInfo *msi;
 		gchar *fid, *pid;
 
-		if (msi == NULL)
-			continue;
+		msi = g_ptr_array_index (array, ii);
 
 		fid = e_mapi_util_mapi_id_to_string (msi->folder_id);
 		pid = e_mapi_util_mapi_id_to_string (msi->parent_id);
 
-		mapi_update_folder_hash_tables (store, camel_store_info_path (summary, (CamelStoreInfo *) msi), fid, pid);
+		mapi_update_folder_hash_tables (store, camel_store_info_path (store->summary, (CamelStoreInfo *) msi), fid, pid);
 
-		camel_store_summary_info_unref (summary, (CamelStoreInfo *) msi);
 		g_free (fid);
 		g_free (pid);
 	}
 
-	camel_store_summary_unlock (store->summary, CAMEL_STORE_SUMMARY_SUMMARY_LOCK);
+	camel_store_summary_array_free (store->summary, array);
 }
 
 /* static const gchar * */

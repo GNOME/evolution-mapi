@@ -57,10 +57,11 @@ add_foreign_folder_to_camel (CamelMapiStore *mapi_store,
 			     const gchar *display_foldername,
 			     GError **perror)
 {
-	gint ii, sz;
 	gboolean res = TRUE;
 	gchar *parent_path = NULL;
 	CamelStoreInfo *parent_si = NULL;
+	GPtrArray *array;
+	guint ii;
 
 	g_return_val_if_fail (mapi_store != NULL, FALSE);
 	g_return_val_if_fail (mapi_store->summary != NULL, FALSE);
@@ -70,14 +71,13 @@ add_foreign_folder_to_camel (CamelMapiStore *mapi_store,
 	g_return_val_if_fail (display_username != NULL, FALSE);
 	g_return_val_if_fail (display_foldername != NULL, FALSE);
 
-	sz = camel_store_summary_count (mapi_store->summary);
-	for (ii = 0; res && ii < sz; ii++) {
+	array = camel_store_summary_array (mapi_store->summary);
+
+	for (ii = 0; res && ii < array->len; ii++) {
 		CamelStoreInfo *si;
 		CamelMapiStoreInfo *msi;
 
-		si = camel_store_summary_index (mapi_store->summary, ii);
-		if (!si)
-			continue;
+		si = g_ptr_array_index (array, ii);
 
 		msi = (CamelMapiStoreInfo *) si;
 
@@ -98,9 +98,9 @@ add_foreign_folder_to_camel (CamelMapiStore *mapi_store,
 					G_STRFUNC, camel_store_info_path (mapi_store->summary, si), msi->foreign_username, foreign_username);
 			}
 		}
-
-		camel_store_summary_info_unref (mapi_store->summary, si);
 	}
+
+	camel_store_summary_array_free (mapi_store->summary, array);
 
 	if (res) {
 		gchar *path;

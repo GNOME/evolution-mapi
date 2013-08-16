@@ -260,15 +260,17 @@ CamelStoreInfo *
 camel_mapi_store_summary_get_folder_id (CamelStoreSummary *s, mapi_id_t folder_id)
 {
 	CamelStoreInfo *adept = NULL;
-	gint ii, count;
+	GPtrArray *array;
+	guint ii;
 
-	count = camel_store_summary_count (s);
-	for (ii = 0; ii < count; ii++) {
-		CamelStoreInfo *si = camel_store_summary_index (s, ii);
-		CamelMapiStoreInfo *msi = (CamelMapiStoreInfo *) si;
+	array = camel_store_summary_array (s);
 
-		if (si == NULL)
-			continue;
+	for (ii = 0; ii < array->len; ii++) {
+		CamelStoreInfo *si;
+		CamelMapiStoreInfo *msi;
+
+		si = g_ptr_array_index (array, ii);
+		msi = (CamelMapiStoreInfo *) si;
 
 		if (msi->folder_id == folder_id) {
 			/* public folders can be stored in a summary twice, once as "All Public Folders/..."
@@ -277,8 +279,11 @@ camel_mapi_store_summary_get_folder_id (CamelStoreSummary *s, mapi_id_t folder_i
 			*/
 			if ((msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC_REAL) == 0) {
 				if (adept)
-					camel_store_summary_info_unref (s, adept);
-				return si;
+					camel_store_summary_info_free (s, adept);
+
+				adept = si;
+				camel_store_summary_info_ref (s, adept);
+				break;
 			} else {
 				if (adept)
 					camel_store_summary_info_unref (s, adept);
@@ -286,9 +291,9 @@ camel_mapi_store_summary_get_folder_id (CamelStoreSummary *s, mapi_id_t folder_i
 				camel_store_summary_info_ref (s, adept);
 			}
 		}
-
-		camel_store_summary_info_unref (s, si);
 	}
+
+	camel_store_summary_array_free (s, array);
 
 	return adept;
 }
