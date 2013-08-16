@@ -160,6 +160,11 @@ mail_config_mapi_page_dispose (GObject *object)
 		priv->account_source = NULL;
 	}
 
+	if (priv->registry != NULL) {
+		g_object_unref (priv->registry);
+		priv->registry = NULL;
+	}
+
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (e_mail_config_mapi_page_parent_class)->dispose (object);
 }
