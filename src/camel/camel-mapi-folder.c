@@ -1237,7 +1237,7 @@ mapi_folder_append_message_sync (CamelFolder *folder,
 	si = camel_store_summary_path (mapi_store->summary, full_name);
 	if (si) {
 		folder_flags = si->flags;
-		camel_store_summary_info_free (mapi_store->summary, si);
+		camel_store_summary_info_unref (mapi_store->summary, si);
 	}
 
 	if (((folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH) ||
@@ -2169,7 +2169,7 @@ camel_mapi_folder_new (CamelStore *store,
 			folder->folder_flags |= CAMEL_FOLDER_IS_TRASH;
 		else if ((si->flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_JUNK)
 			folder->folder_flags |= CAMEL_FOLDER_IS_JUNK;
-		camel_store_summary_info_free (mapi_store->summary, si);
+		camel_store_summary_info_unref (mapi_store->summary, si);
 	} else {
 		g_warning ("%s: cannot find '%s' in known folders", G_STRFUNC, folder_name);
 	}

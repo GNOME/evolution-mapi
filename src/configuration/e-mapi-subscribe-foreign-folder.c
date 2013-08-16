@@ -99,7 +99,7 @@ add_foreign_folder_to_camel (CamelMapiStore *mapi_store,
 			}
 		}
 
-		camel_store_summary_info_free (mapi_store->summary, si);
+		camel_store_summary_info_unref (mapi_store->summary, si);
 	}
 
 	if (res) {
@@ -147,7 +147,7 @@ add_foreign_folder_to_camel (CamelMapiStore *mapi_store,
 	}
 
 	if (parent_si)
-		camel_store_summary_info_free (mapi_store->summary, parent_si);
+		camel_store_summary_info_unref (mapi_store->summary, parent_si);
 	g_free (parent_path);
 
 	return res;
