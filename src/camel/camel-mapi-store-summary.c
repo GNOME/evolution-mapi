@@ -279,7 +279,7 @@ camel_mapi_store_summary_get_folder_id (CamelStoreSummary *s, mapi_id_t folder_i
 			*/
 			if ((msi->mapi_folder_flags & CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC_REAL) == 0) {
 				if (adept)
-					camel_store_summary_info_free (s, adept);
+					camel_store_summary_info_unref (s, adept);
 
 				adept = si;
 				camel_store_summary_info_ref (s, adept);
