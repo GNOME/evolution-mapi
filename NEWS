@@ -1,3 +1,16 @@
+evolution-mapi 3.9.90 2013-08-19
+--------------------------------
+
+Bugs:
+	Bug #700885 - Message size is 0 when downloading for offline (Milan Crha)
+
+Miscellaneous:
+	Remove a reference to dropped CamelOfflineJournal (Milan Crha)
+	Fix an ESourceRegistry leak (Fabiano Fidêncio)
+	Adapt to CamelStoreSummary API changes. (Matthew Barnes)
+	Avoid camel_store_summary_index(). (Matthew Barnes)
+	Really do not use deprecated camel_store_summary_info_free() (Milan Crha)
+
 evolution-mapi 3.9.5 2013-07-29
 -------------------------------
 
