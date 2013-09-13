@@ -382,7 +382,7 @@ classify_attachments (EMapiConnection *conn,
 		const uint32_t *ui32;
 		uint64_t data_cb = 0;
 		const uint8_t *data_lpb = NULL;
-		gboolean is_apple;
+		gboolean is_apple, is_message;
 		guint32 apple_data_len = 0, apple_resource_len = 0;
 
 		if (!e_mapi_attachment_get_bin_prop (attach, PidTagAttachDataBinary, &data_cb, &data_lpb) && !attach->embedded_object) {
@@ -394,12 +394,14 @@ classify_attachments (EMapiConnection *conn,
 
 		/* Content-Type */
 		ui32 = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachMethod);
-		if (ui32 && *ui32 == ATTACH_EMBEDDED_MSG) {
+		is_message = ui32 && *ui32 == ATTACH_EMBEDDED_MSG;
+		if (is_message) {
 			mime_type = "message/rfc822";
 		} else {
 			mime_type = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachMimeTag);
 			if (!mime_type)
 				mime_type = "application/octet-stream";
+			is_message = g_ascii_strcasecmp (mime_type, "message/rfc822") == 0;
 		}
 
 		if (is_apple) {
@@ -584,7 +586,7 @@ classify_attachments (EMapiConnection *conn,
 			content_type = camel_mime_part_get_content_type (part);
 			if (content_type && camel_content_type_is (content_type, "text", "*"))
 				camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_QUOTEDPRINTABLE);
-			else if (!ui32 || *ui32 != ATTACH_EMBEDDED_MSG)
+			else if (!is_message)
 				camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
 		}
 
