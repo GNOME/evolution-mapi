@@ -1,3 +1,9 @@
+evolution-mapi 3.9.92 2013-09-16
+--------------------------------
+
+Miscellaneous:
+	Do not encode message/rfc822 attachments into base64 (Milan Crha)
+
 evolution-mapi 3.9.90 2013-08-19
 --------------------------------
 
