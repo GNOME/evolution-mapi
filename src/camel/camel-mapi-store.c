@@ -317,7 +317,7 @@ mapi_get_folder_with_type (CamelStore *store, guint folder_type, GCancellable *c
 		fi = next;
 	}
 
-	camel_store_free_folder_info (store, all_fi);
+	camel_folder_info_free (all_fi);
 
 	return folder;
 }
@@ -2053,7 +2053,6 @@ camel_mapi_store_class_init (CamelMapiStoreClass *class)
 
 	store_class = CAMEL_STORE_CLASS (class);
 	store_class->can_refresh_folder = mapi_store_can_refresh_folder;
-	store_class->free_folder_info = camel_store_free_folder_info_full;
 	store_class->get_folder_sync = mapi_store_get_folder_sync;
 	store_class->get_folder_info_sync = mapi_store_get_folder_info_sync;
 	store_class->get_junk_folder_sync = mapi_store_get_junk_folder_sync;

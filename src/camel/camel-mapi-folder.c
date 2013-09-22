@@ -240,7 +240,7 @@ add_message_to_cache (CamelMapiFolder *mapi_folder, const gchar *uid, CamelMimeM
 	folder = CAMEL_FOLDER (mapi_folder);
 	g_return_if_fail (folder != NULL);
 
-	camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+	camel_folder_summary_lock (folder->summary);
 
 	if ((cache_stream = camel_data_cache_add (mapi_folder->cache, "cache", uid, NULL))) {
 		if (camel_data_wrapper_write_to_stream_sync ((CamelDataWrapper *) (*msg), cache_stream, cancellable, NULL) == -1
@@ -266,7 +266,7 @@ add_message_to_cache (CamelMapiFolder *mapi_folder, const gchar *uid, CamelMimeM
 		g_object_unref (cache_stream);
 	}
 
-	camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+	camel_folder_summary_unlock (folder->summary);
 }
 
 struct GatherChangedObjectsData
@@ -344,7 +344,7 @@ gather_changed_objects_to_slist (EMapiConnection *conn,
 				}
 			}
 
-			camel_message_info_free (info);
+			camel_message_info_unref (info);
 		}
 	} else {
 		update = TRUE;
@@ -536,7 +536,7 @@ gather_object_for_offline_cb (EMapiConnection *conn,
 				info = camel_folder_summary_get (gos->folder->summary, uid_str);
 				if (info) {
 					user_has_read = (camel_message_info_flags (info) & CAMEL_MESSAGE_SEEN) != 0;
-					camel_message_info_free (info);
+					camel_message_info_unref (info);
 				}
 			}
 
@@ -566,7 +566,7 @@ gather_object_for_offline_cb (EMapiConnection *conn,
 
 			add_message_to_cache (CAMEL_MAPI_FOLDER (gos->folder), uid_str, &msg, cancellable);
 
-			camel_message_info_free (info);
+			camel_message_info_unref (info);
 		} else {
 			g_debug ("%s: Failed to create message info from message", G_STRFUNC);
 		}
@@ -764,7 +764,7 @@ gather_object_summary_cb (EMapiConnection *conn,
 			camel_folder_change_info_change_uid (gos->changes, camel_message_info_uid (info));
 		}
 
-		camel_message_info_free (info);
+		camel_message_info_unref (info);
 	}
 
 	if (obj_total > 0)
@@ -1103,7 +1103,7 @@ mapi_set_message_flags (CamelFolder *folder,
 
 	res = camel_message_info_set_flags (info, flags, set);
 
-	camel_message_info_free (info);
+	camel_message_info_unref (info);
 	return res;
 }
 
@@ -1403,7 +1403,7 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 			}
 			deleted_items_uid = g_slist_prepend (deleted_items_uid, (gpointer) uid);
 		}
-		camel_message_info_free (info);
+		camel_message_info_unref (info);
 	}
 
 	camel_folder_summary_free_array (known_uids);
@@ -1428,11 +1428,11 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 		if (status) {
 			while (deleted_items_uid) {
 				const gchar *uid = (gchar *)deleted_items_uid->data;
-				camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+				camel_folder_summary_lock (folder->summary);
 				camel_folder_change_info_remove_uid (changes, uid);
 				camel_folder_summary_remove_uid (folder->summary, uid);
 				camel_data_cache_remove(mapi_folder->cache, "cache", uid, NULL);
-				camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+				camel_folder_summary_unlock (folder->summary);
 				deleted_items_uid = g_slist_next (deleted_items_uid);
 			}
 		}
@@ -1551,7 +1551,7 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 
 	msg = mapi_folder_get_message_cached (folder, uid, cancellable);
 	if (msg != NULL) {
-		camel_message_info_free (&mi->info);
+		camel_message_info_unref (&mi->info);
 		return msg;
 	}
 
@@ -1560,7 +1560,7 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 			error, CAMEL_SERVICE_ERROR,
 			CAMEL_SERVICE_ERROR_UNAVAILABLE,
 			_("This message is not available in offline mode."));
-		camel_message_info_free (&mi->info);
+		camel_message_info_unref (&mi->info);
 		return NULL;
 	}
 
@@ -1578,7 +1578,7 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 				CAMEL_SERVICE_ERROR_INVALID,
 				_("Could not get message"));
 		}
-		camel_message_info_free (&mi->info);
+		camel_message_info_unref (&mi->info);
 		return NULL;
 	}
 
@@ -1611,13 +1611,13 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 				CAMEL_SERVICE_ERROR_INVALID,
 				_("Could not get message"));
 		}
-		camel_message_info_free (&mi->info);
+		camel_message_info_unref (&mi->info);
 		return NULL;
 	}
 
 	add_message_to_cache (mapi_folder, uid, &msg, cancellable);
 
-	camel_message_info_free (&mi->info);
+	camel_message_info_unref (&mi->info);
 
 	return msg;
 }
@@ -1679,7 +1679,7 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 
 	is_junk_folder = (mapi_folder->camel_folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_JUNK;
 
-	camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+	camel_folder_summary_lock (folder->summary);
 	camel_folder_summary_prepare_fetch_all (folder->summary, NULL);
 
 	known_uids = camel_folder_summary_get_array (folder->summary);
@@ -1698,7 +1698,7 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 
 			/* Why are we getting so much noise here :-/ */
 			if (!e_mapi_util_mapi_id_from_string (uid, mid)) {
-				camel_message_info_free (info);
+				camel_message_info_unref (info);
 				g_free (mid);
 				continue;
 			}
@@ -1708,7 +1708,7 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 
 			diff.changed &= folder->permanent_flags;
 			if (!diff.changed) {
-				camel_message_info_free (info);
+				camel_message_info_unref (info);
 				g_free (mid);
 				continue;
 			}
@@ -1739,11 +1739,11 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 		}
 
 		if (info)
-			camel_message_info_free (info);
+			camel_message_info_unref (info);
 	}
 
 	camel_folder_summary_free_array (known_uids);
-	camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+	camel_folder_summary_unlock (folder->summary);
 
 	/*
 	   Sync up the READ changes before deleting the message.
@@ -1806,10 +1806,10 @@ mapi_folder_synchronize_sync (CamelFolder *folder,
 			changes = camel_folder_change_info_new ();
 		camel_folder_change_info_remove_uid (changes, deleted_msg_uid);
 
-		camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+		camel_folder_summary_lock (folder->summary);
 		camel_folder_summary_remove_uid (folder->summary, deleted_msg_uid);
 		camel_data_cache_remove(mapi_folder->cache, "cache", deleted_msg_uid, NULL);
-		camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+		camel_folder_summary_unlock (folder->summary);
 
 		g_free (deleted_msg_uid);
 	}
@@ -2142,7 +2142,7 @@ camel_mapi_folder_new (CamelStore *store,
 				folder->folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
 			}
 
-			camel_store_free_folder_info (store, fi);
+			camel_folder_info_free (fi);
 		}
 	}
 

@@ -57,6 +57,7 @@ camel_mapi_store_summary_class_init (CamelMapiStoreSummaryClass *class)
 	CamelStoreSummaryClass *store_summary_class;
 
 	store_summary_class = CAMEL_STORE_SUMMARY_CLASS (class);
+	store_summary_class->store_info_size = sizeof (CamelMapiStoreInfo);
 	store_summary_class->summary_header_load = summary_header_load;
 	store_summary_class->summary_header_save = summary_header_save;
 	store_summary_class->store_info_load = store_info_load;
@@ -68,10 +69,6 @@ camel_mapi_store_summary_class_init (CamelMapiStoreSummaryClass *class)
 static void
 camel_mapi_store_summary_init (CamelMapiStoreSummary *mapi_store_summary)
 {
-	CamelStoreSummary *store_summary;
-
-	store_summary = CAMEL_STORE_SUMMARY (mapi_store_summary);
-	store_summary->store_info_size = sizeof (CamelMapiStoreInfo);
 }
 
 static gint
