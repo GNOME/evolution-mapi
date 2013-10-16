@@ -374,6 +374,195 @@ e_mapi_cal_tz_util_dump (void)
 	g_rec_mutex_unlock(&mutex);
 }
 
+static void
+write_icaltime_as_systemtime (GByteArray *ba,
+			      struct icaltimetype icaltime)
+{
+	guint16 flag16;
+
+	/* wYear */
+	flag16 = icaltime.year;
+	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
+
+	/* wMonth */
+	flag16 = icaltime.month;
+	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
+
+	/* wDayOfWeek */
+	flag16 = icaltime.year == 0 ? 0 : icaltime_day_of_week (icaltime);
+	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
+
+	/* wDay */
+	flag16 = icaltime.day;
+	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
+
+	/* wHour */
+	flag16 = icaltime.hour;
+	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
+
+	/* wMinute */
+	flag16 = icaltime.minute;
+	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
+
+	/* wSecond */
+	flag16 = icaltime.second;
+	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
+
+	/* wMilliseconds */
+	flag16 = 0;
+	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
+}
+
+static void
+write_tz_rule (GByteArray *ba,
+	       gboolean is_recur,
+	       guint32 bias,
+	       guint32 standard_bias,
+	       guint32 daylight_bias,
+	       struct icaltimetype standard_date,
+	       struct icaltimetype daylight_date)
+{
+	guint8 flag8;
+	guint16 flag16;
+
+	g_return_if_fail (ba != NULL);
+
+	/* Major version */
+	flag8 = 0x02;
+	g_byte_array_append (ba, (const guint8 *) &flag8, sizeof (guint8));
+	
+	/* Minor version */
+	flag8 = 0x01;
+	g_byte_array_append (ba, (const guint8 *) &flag8, sizeof (guint8));
+
+	/* Reserved */
+	flag16 = 0x003e;
+	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
+
+	/* TZRule flags */
+	flag16 = 0;
+	if (is_recur)
+		flag16 |= 1;
+	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
+
+	/* wYear */
+	flag16 = standard_date.year;
+	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
+
+	/* X - 14 times 0x00 */
+	flag8 = 0x00;
+	for (flag16 = 0; flag16 < 14; flag16++) {
+		g_byte_array_append (ba, (const guint8 *) &flag8, sizeof (guint8));
+	}
+
+	/* lBias */
+	g_byte_array_append (ba, (const guint8 *) &bias, sizeof (guint32));
+
+	/* lStandardBias */
+	g_byte_array_append (ba, (const guint8 *) &standard_bias, sizeof (guint32));
+
+	/* lDaylightBias */
+	g_byte_array_append (ba, (const guint8 *) &daylight_bias, sizeof (guint32));
+
+	/* stStandardDate */
+	write_icaltime_as_systemtime (ba, standard_date);
+
+	/* stDaylightDate */
+	write_icaltime_as_systemtime (ba, daylight_date);
+}
+
+static void
+extract_bias_and_date (icalcomponent *comp,
+		       guint32 *bias,
+		       struct icaltimetype *start)
+{
+	icalproperty *prop;
+	gint tzoffset;
+
+	g_return_if_fail (comp != NULL);
+	g_return_if_fail (bias != NULL);
+	g_return_if_fail (start != NULL);
+
+	prop = icalcomponent_get_first_property (comp, ICAL_TZOFFSETTO_PROPERTY);
+	if (prop)
+		tzoffset = icalproperty_get_tzoffsetto (prop);
+	else
+		tzoffset = 0;
+
+	*bias = tzoffset / 60;
+	*start = icalcomponent_get_dtstart (comp);
+}
+
+static void
+write_tz_rule_comps (GByteArray *ba,
+		     gboolean is_recur,
+		     icalcomponent *standardcomp,
+		     icalcomponent *daylightcomp,
+		     icaltimezone *zone)
+{
+	struct icaltimetype standard_date, daylight_date, current_time;
+	guint32 bias, standard_bias, daylight_bias;
+
+	g_return_if_fail (ba != NULL);
+	g_return_if_fail (standardcomp != NULL);
+	g_return_if_fail (daylightcomp != NULL);
+
+	extract_bias_and_date (standardcomp, &standard_bias, &standard_date);
+	extract_bias_and_date (daylightcomp, &daylight_bias, &daylight_date);
+
+	current_time = icaltime_current_time_with_zone (zone);
+	bias = current_time.is_daylight ? daylight_bias : standard_bias;
+
+	write_tz_rule (ba, is_recur, bias, standard_bias, daylight_bias, standard_date, daylight_date);
+}
+
+static void
+add_timezone_rules (GByteArray *ba,
+		    gboolean is_recur,
+		    icalcomponent *vtimezone,
+		    icaltimezone *zone)
+{
+	gboolean any_added = FALSE;
+
+	g_return_if_fail (ba != NULL);
+
+	if (vtimezone) {
+		icalcomponent *subcomp, *standardcomp = NULL, *daylightcomp = NULL;
+
+		for (subcomp = icalcomponent_get_first_component (vtimezone, ICAL_ANY_COMPONENT);
+		     subcomp;
+		     subcomp = icalcomponent_get_next_component (vtimezone, ICAL_ANY_COMPONENT)) {
+			if (icalcomponent_isa (subcomp) == ICAL_XSTANDARD_COMPONENT)
+				standardcomp = subcomp;
+			if (icalcomponent_isa (subcomp) == ICAL_XDAYLIGHT_COMPONENT)
+				daylightcomp = subcomp;
+			if (standardcomp && daylightcomp) {
+				write_tz_rule_comps (ba, is_recur, standardcomp, daylightcomp, zone);
+
+				any_added = TRUE;
+				standardcomp = NULL;
+				daylightcomp = NULL;
+			}
+		}
+
+		if (standardcomp || daylightcomp) {
+			if (!standardcomp)
+				standardcomp = daylightcomp;
+			write_tz_rule_comps (ba, is_recur, standardcomp, daylightcomp, zone);
+			any_added = TRUE;
+		}
+	}
+
+	/* at least one should be always added, make it UTC */
+	if (!any_added) {
+		struct icaltimetype fake_utc;
+
+		memset (&fake_utc, 0, sizeof (struct icaltimetype));
+
+		write_tz_rule (ba, is_recur, 0, 0, 0, fake_utc, fake_utc);
+	}
+}
+
 #define TZDEFINITION_FLAG_VALID_GUID     0x0001 // the guid is valid
 #define TZDEFINITION_FLAG_VALID_KEYNAME  0x0002 // the keyname is valid
 #define TZ_MAX_RULES          1024 
@@ -383,13 +572,29 @@ e_mapi_cal_tz_util_dump (void)
 void
 e_mapi_cal_util_mapi_tz_to_bin (const gchar *mapi_tzid,
 				struct SBinary_short *bin,
-				TALLOC_CTX *mem_ctx)
+				TALLOC_CTX *mem_ctx,
+				gboolean is_recur)
 {
 	GByteArray *ba;
 	guint8 flag8;
 	guint16 flag16;
 	gunichar2 *buf;
 	glong items_written;
+	icaltimezone *zone = NULL;
+	icalcomponent *vtimezone;
+	gint rules = 0;
+	const gchar *ical_location = e_mapi_cal_tz_util_get_ical_equivalent (mapi_tzid);
+
+	if (ical_location && *ical_location)
+		zone = icaltimezone_get_builtin_timezone (ical_location);
+	if (!zone)
+		zone = icaltimezone_get_utc_timezone ();
+	vtimezone = icaltimezone_get_component (zone);
+	if (vtimezone)
+		rules = (icalcomponent_count_components (vtimezone, ICAL_XSTANDARD_COMPONENT) + 
+			 icalcomponent_count_components (vtimezone, ICAL_XDAYLIGHT_COMPONENT)) / 2;
+	if (!rules)
+		rules = 1;
 
 	ba = g_byte_array_new ();
 
@@ -401,8 +606,8 @@ e_mapi_cal_util_mapi_tz_to_bin (const gchar *mapi_tzid,
 	ba = g_byte_array_append (ba, (const guint8 *)buf, (sizeof (gunichar2) * items_written));
 	g_free (buf);
 
-	/* number of rules *//* FIXME: Need to support rules */
-	flag16 = 0x0000;
+	/* number of rules */
+	flag16 = rules;
 	ba = g_byte_array_append (ba, (const guint8 *)&flag16, sizeof (guint16));
 
 	/* wFlags: we know only keyname based names */
@@ -421,7 +626,8 @@ e_mapi_cal_util_mapi_tz_to_bin (const gchar *mapi_tzid,
 	flag8 = TZ_BIN_VERSION_MAJOR;
 	ba = g_byte_array_prepend (ba, (const guint8 *)&flag8, sizeof (guint8));
 
-	/* Rules may now be appended here */
+	/* Rules */
+	add_timezone_rules (ba, is_recur, vtimezone, zone);
 
 	bin->cb = ba->len;
 	bin->lpb = talloc_memdup (mem_ctx, ba->data, ba->len);

@@ -296,6 +296,10 @@ arp_to_gba(const struct ema_AppointmentRecurrencePattern *arp, GByteArray *gba)
 	for (i = 0; i < arp->ExceptionCount; ++i) {
 		ee_to_gba (&arp->ExtendedException[i], arp, i, gba);
 	}
+	GBA_APPEND_LVAL (gba, arp->ReservedBlock2Size);
+	if (arp->ReservedBlock2Size) {
+		GBA_APPEND (gba, arp->ReservedBlock2, arp->ReservedBlock2Size);
+	}
 }
 
 static gboolean
@@ -499,6 +503,13 @@ gba_to_arp(const GByteArray *gba, ptrdiff_t *off,
 			g_return_val_if_fail (gba_to_ee (gba, off, &arp->ExtendedException[i], arp, i),
 			                      FALSE);
 		}
+	}
+
+	GBA_DEREF_OFFSET (gba, *off, arp->ReservedBlock2Size, guint32);
+	if (arp->ReservedBlock2Size) {
+		arp->ReservedBlock2 = g_new (gchar, arp->ReservedBlock2Size);
+		GBA_MEMCPY_OFFSET (gba, *off, arp->ReservedBlock2,
+		                   arp->ReservedBlock2Size);
 	}
 
 	return TRUE;

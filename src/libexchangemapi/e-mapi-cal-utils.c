@@ -1859,8 +1859,15 @@ e_mapi_cal_utils_comp_to_object (EMapiConnection *conn,
 		/* Start TZ */
 		mapi_tzid = e_mapi_cal_tz_util_get_mapi_equivalent ((dtstart_tz_location && *dtstart_tz_location) ? dtstart_tz_location : "UTC");
 		if (mapi_tzid && *mapi_tzid) {
-			e_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &start_tz, object);
+			e_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &start_tz, object, FALSE);
 			set_value (PidLidAppointmentTimeZoneDefinitionStartDisplay, &start_tz);
+
+			if (e_cal_component_has_recurrences (comp)) {
+				struct SBinary_short recur_tz;
+
+				e_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &recur_tz, object, TRUE);
+				set_value (PidLidAppointmentTimeZoneDefinitionRecur, &recur_tz);
+			}
 		}
 		set_value (PidLidTimeZoneDescription, mapi_tzid ? mapi_tzid : "");
 
@@ -1873,7 +1880,7 @@ e_mapi_cal_utils_comp_to_object (EMapiConnection *conn,
 		/* End TZ */
 		mapi_tzid = e_mapi_cal_tz_util_get_mapi_equivalent ((dtend_tz_location && *dtend_tz_location) ? dtend_tz_location : "UTC");
 		if (mapi_tzid && *mapi_tzid) {
-			e_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &end_tz, object);
+			e_mapi_cal_util_mapi_tz_to_bin (mapi_tzid, &end_tz, object, FALSE);
 			set_value (PidLidAppointmentTimeZoneDefinitionEndDisplay, &end_tz);
 		}
 
