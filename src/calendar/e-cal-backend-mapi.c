@@ -1421,7 +1421,8 @@ ecbm_open (ECalBackend *backend,
 
 	e_cal_backend_mapi_ensure_connected (cbmapi, cancellable, &error);
 
-	g_propagate_error (perror, error);
+	if (error)
+		g_propagate_error (perror, error);
 }
 
 
