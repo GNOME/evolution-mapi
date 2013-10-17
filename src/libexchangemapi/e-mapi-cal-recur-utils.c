@@ -181,7 +181,7 @@ rp_to_gba(const struct ema_RecurrencePattern *rp, GByteArray *gba)
 		            sizeof (guint32) * rp->DeletedInstanceCount);
 	}
 	GBA_APPEND_LVAL(gba, rp->ModifiedInstanceCount);
-	if ( rp->DeletedInstanceCount ) {
+	if ( rp->ModifiedInstanceCount ) {
 		GBA_APPEND (gba, rp->ModifiedInstanceDates,
 		            sizeof (guint32) * rp->ModifiedInstanceCount);
 	}
