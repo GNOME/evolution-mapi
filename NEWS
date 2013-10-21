@@ -1,3 +1,12 @@
+evolution-mapi 3.11.1 2013-10-21
+--------------------------------
+
+Miscellaneous:
+	Adapt to Camel API changes. (Matthew Barnes)
+	Book/Cal backends - do not call g_propagate_error() when there is no error (Milan Crha)
+	Recurring events not shown on Exchange 2010 servers (Milan Crha)
+	Fix a copy&paste error, found by a Coverity Scan (Milan Crha)
+
 evolution-mapi 3.10.0 2013-09-23
 --------------------------------
 
