@@ -231,7 +231,7 @@ static void
 add_message_to_cache (CamelMapiFolder *mapi_folder, const gchar *uid, CamelMimeMessage **msg, GCancellable *cancellable)
 {
 	CamelFolder *folder;
-	CamelStream *cache_stream;
+	GIOStream *base_stream;
 
 	g_return_if_fail (mapi_folder != NULL);
 	g_return_if_fail (msg != NULL);
@@ -242,7 +242,13 @@ add_message_to_cache (CamelMapiFolder *mapi_folder, const gchar *uid, CamelMimeM
 
 	camel_folder_summary_lock (folder->summary);
 
-	if ((cache_stream = camel_data_cache_add (mapi_folder->cache, "cache", uid, NULL))) {
+	base_stream = camel_data_cache_add (mapi_folder->cache, "cache", uid, NULL);
+	if (base_stream != NULL) {
+		CamelStream *cache_stream;
+
+		cache_stream = camel_stream_new (base_stream);
+		g_object_unref (base_stream);
+
 		if (camel_data_wrapper_write_to_stream_sync ((CamelDataWrapper *) (*msg), cache_stream, cancellable, NULL) == -1
 		    || camel_stream_flush (cache_stream, cancellable, NULL) == -1) {
 			camel_data_cache_remove (mapi_folder->cache, "cache", uid, NULL);
@@ -1459,17 +1465,23 @@ mapi_folder_get_message_cached (CamelFolder *folder,
 {
 	CamelMapiFolder *mapi_folder;
 	CamelMimeMessage *msg = NULL;
-	CamelStream *stream, *cache_stream;
+	CamelStream *stream;
+	GIOStream *base_stream;
 
 	mapi_folder = CAMEL_MAPI_FOLDER (folder);
 
 	if (!camel_folder_summary_check_uid (folder->summary, message_uid))
 		return NULL;
 
-	cache_stream  = camel_data_cache_get (mapi_folder->cache, "cache", message_uid, NULL);
 	stream = camel_stream_mem_new ();
-	if (cache_stream) {
+
+	base_stream = camel_data_cache_get (mapi_folder->cache, "cache", message_uid, NULL);
+	if (base_stream != NULL) {
+		CamelStream *cache_stream;
 		GError *local_error = NULL;
+
+		cache_stream = camel_stream_new (base_stream);
+		g_object_unref (base_stream);
 
 		msg = camel_mime_message_new ();
 
