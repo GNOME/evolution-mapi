@@ -35,7 +35,7 @@
 #include <errno.h>
 
 #include <libmapi/libmapi.h>
-#include <libemail-engine/e-mail-session.h>
+#include <libemail-engine/libemail-engine.h>
 
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
