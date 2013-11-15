@@ -101,8 +101,10 @@ e_mapi_cancellable_rec_mutex_lock (EMapiCancellableRecMutex *rec_mutex,
 	}
 
 	if (g_cancellable_is_cancelled (cancellable)) {
-		if (error && !*error)
+		if (error && !*error) {
+			/* coverity[unchecked_value] */
 			g_cancellable_set_error_if_cancelled (cancellable, error);
+		}
 		g_mutex_unlock (&rec_mutex->cond_mutex);
 		return FALSE;
 	}

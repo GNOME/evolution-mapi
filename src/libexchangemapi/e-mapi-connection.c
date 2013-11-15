@@ -2777,8 +2777,12 @@ e_mapi_connection_fetch_object_internal (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	if (object->properties.lpProps)
-		object->properties.lpProps = talloc_steal (object, object->properties.lpProps);
+	if (!object->properties.lpProps) {
+		/* kinf of success, no properties received */
+		goto cleanup;
+	}
+
+	object->properties.lpProps = talloc_steal (object, object->properties.lpProps);
 
 	/* to transform named ids to their PidLid or PidName tags, like the fast-transfer does */
 	ms = QueryNamedProperties (obj_message, 0, NULL, &np_count, &np_propID, &np_nameid);
@@ -3079,8 +3083,10 @@ e_mapi_connection_transfer_objects (EMapiConnection *conn,
 		}
 
 		if (g_cancellable_is_cancelled (cancellable)) {
-			if (perror && !*perror)
+			if (perror && !*perror) {
+				/* coverity[unchecked_value] */
 				g_cancellable_set_error_if_cancelled (cancellable, perror);
+			}
 
 			ms = MAPI_E_USER_CANCEL;
 			mapi_id_array_release (&ids);
@@ -5744,7 +5750,8 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 
 					if (e_mapi_connection_open_default_folder (conn, olFolderContacts, &obj_contacts, cancellable, NULL)) {
 						/* always keep MAPI_E_NOT_FOUND, thus the later processing on the storing of saved items is skipped */
-						e_mapi_connection_resolve_named_props (conn, &obj_contacts, named_ids_list, named_ids_n_elems, cancellable, NULL);
+						if (!e_mapi_connection_resolve_named_props (conn, &obj_contacts, named_ids_list, named_ids_n_elems, cancellable, NULL))
+							ms = MAPI_E_NOT_FOUND;
 						e_mapi_connection_close_folder (conn, &obj_contacts, cancellable, NULL);
 					}
 				}
@@ -6754,7 +6761,7 @@ e_mapi_connection_resolve_username (EMapiConnection *conn,
 			replace_hash = prepare_maybe_replace_hash (named_ids_list, named_ids_len, FALSE);
 
 		for (qq = 0; qq < rows->cRows; qq++) {
-			struct mapi_SPropValue_array *properties;
+			struct mapi_SPropValue_array *properties = NULL;
 			struct SRow *row;
 
 			row = talloc_zero (mem_ctx, struct SRow);

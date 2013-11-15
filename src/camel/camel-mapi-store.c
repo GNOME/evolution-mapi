@@ -2941,7 +2941,8 @@ camel_mapi_store_ref_connection (CamelMapiStore *mapi_store,
 	if (!mapi_store->priv->connection) {
 		g_rec_mutex_unlock (&mapi_store->priv->connection_lock);
 
-		camel_mapi_store_connected (mapi_store, cancellable, error);
+		if (!camel_mapi_store_connected (mapi_store, cancellable, error))
+			return NULL;
 
 		g_rec_mutex_lock (&mapi_store->priv->connection_lock);
 	}

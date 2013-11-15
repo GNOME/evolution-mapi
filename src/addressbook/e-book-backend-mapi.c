@@ -748,7 +748,7 @@ ebbm_book_view_thread (gpointer data)
 			ebbm_maybe_invoke_cache_update (bvtd->ebma);
 
 			e_book_backend_mapi_update_view_by_cache (bvtd->ebma, bvtd->book_view, &error);
-		} else if (ebmac->op_list_known_uids && ebmac->op_transfer_contacts) {
+		} else if (ebmac && ebmac->op_list_known_uids && ebmac->op_transfer_contacts) {
 			EBookBackendSExp *sexp;
 			const gchar *query;
 

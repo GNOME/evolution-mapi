@@ -1671,6 +1671,7 @@ e_mapi_config_utils_insert_widgets (ESourceConfigBackend *backend,
 		case E_MAPI_FOLDER_TYPE_CONTACT:
 			msg = _("Cannot create MAPI address book in offline mode");
 			break;
+		/* coverity[dead_error_begin] */
 		default:
 			g_warn_if_reached ();
 			msg = _("Cannot create MAPI source in offline mode");

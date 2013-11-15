@@ -605,6 +605,7 @@ gather_object_summary_cb (EMapiConnection *conn,
 	const gchar *transport_headers;
 	CamelMessageInfo *info;
 	gboolean is_new = FALSE;
+	gboolean user_has_read;
 
 	g_return_val_if_fail (gos != NULL, FALSE);
 	g_return_val_if_fail (gos->folder != NULL, FALSE);
@@ -648,9 +649,9 @@ gather_object_summary_cb (EMapiConnection *conn,
 			if (camel_mime_part_construct_from_parser_sync (part, parser, NULL, NULL)) {
 				info = camel_folder_summary_info_new_from_header (gos->folder->summary, part->headers);
 				if (info) {
-					CamelMapiMessageInfo *minfo = (CamelMapiMessageInfo *) info;
 					const uint32_t *msg_size;
 
+					minfo = (CamelMapiMessageInfo *) info;
 					minfo->info.uid = camel_pstring_strdup (uid_str);
 
 					msg_size = e_mapi_util_find_array_propval (&object->properties, PidTagMessageSize);
@@ -687,11 +688,6 @@ gather_object_summary_cb (EMapiConnection *conn,
 			minfo->info.date_sent = e_mapi_util_filetime_to_time_t (submit_time);
 			minfo->info.date_received = e_mapi_util_filetime_to_time_t (delivery_time);
 			minfo->info.size = msg_size ? *msg_size : 0;
-
-			if (minfo->info.date_sent != 0)
-				minfo->info.date_sent = minfo->info.date_sent;
-			if (minfo->info.date_received != 0)
-				minfo->info.date_received = minfo->info.date_received;
 
 			/* Threading related properties */
 			mapi_set_message_id (minfo, message_id);
@@ -747,31 +743,27 @@ gather_object_summary_cb (EMapiConnection *conn,
 		}
 
 		minfo = (CamelMapiMessageInfo *) info;
-		if (minfo) {
-			if (minfo->info.date_sent == 0)
-				minfo->info.date_sent = minfo->info.date_received;
-			if (minfo->info.date_received == 0)
-				minfo->info.date_received = minfo->info.date_sent;
-		}
+		if (minfo->info.date_sent == 0)
+			minfo->info.date_sent = minfo->info.date_received;
+		if (minfo->info.date_received == 0)
+			minfo->info.date_received = minfo->info.date_sent;
 	}
 
-	if (info) {
-		gboolean user_has_read = (camel_message_info_flags (info) & CAMEL_MESSAGE_SEEN) != 0;
+	user_has_read = (camel_message_info_flags (info) & CAMEL_MESSAGE_SEEN) != 0;
 
-		update_message_info (info, object, is_new, gos->is_public_folder, user_has_read);
+	update_message_info (info, object, is_new, gos->is_public_folder, user_has_read);
 
-		if (is_new) {
-			camel_folder_summary_add (gos->folder->summary, info);
-			camel_folder_change_info_add_uid (gos->changes, camel_message_info_uid (info));
-			camel_folder_change_info_recent_uid (gos->changes, camel_message_info_uid (info));
+	if (is_new) {
+		camel_folder_summary_add (gos->folder->summary, info);
+		camel_folder_change_info_add_uid (gos->changes, camel_message_info_uid (info));
+		camel_folder_change_info_recent_uid (gos->changes, camel_message_info_uid (info));
 
-			camel_message_info_ref (info);
-		} else {
-			camel_folder_change_info_change_uid (gos->changes, camel_message_info_uid (info));
-		}
-
-		camel_message_info_unref (info);
+		camel_message_info_ref (info);
+	} else {
+		camel_folder_change_info_change_uid (gos->changes, camel_message_info_uid (info));
 	}
+
+	camel_message_info_unref (info);
 
 	if (obj_total > 0)
 		camel_operation_progress (cancellable, obj_index * 100 / obj_total);

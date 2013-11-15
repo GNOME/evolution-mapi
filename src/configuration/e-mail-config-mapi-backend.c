@@ -453,7 +453,6 @@ validate_credentials_cb (GtkWidget *widget,
 	CamelNetworkSettings *network_settings;
 	const gchar *host;
 	const gchar *user;
-	GError *error = NULL;
 
 	if (!e_mapi_config_utils_is_online ()) {
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Cannot authenticate MAPI accounts in offline mode"));
@@ -517,9 +516,6 @@ validate_credentials_cb (GtkWidget *widget,
 	} else {
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Authentication failed."));
 	}
-
-	if (error)
-		g_error_free (error);
 
 	if (empd.password) {
 		memset (empd.password->str, 0, empd.password->len);
