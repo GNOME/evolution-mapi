@@ -24,6 +24,7 @@ Africa/Freetown~~~Greenwich Standard Time
 Africa/Gaborone~~~South Africa Standard Time
 Africa/Harare~~~South Africa Standard Time
 Africa/Johannesburg~~~South Africa Standard Time
+Africa/Juba~~~E. Africa Standard Time
 Africa/Kampala~~~E. Africa Standard Time
 Africa/Khartoum~~~E. Africa Standard Time
 Africa/Kigali~~~Egypt Standard Time
@@ -62,13 +63,16 @@ America/Argentina/Jujuy~~~SA Eastern Standard Time
 America/Argentina/La_Rioja~~~SA Eastern Standard Time
 America/Argentina/Mendoza~~~SA Eastern Standard Time
 America/Argentina/Rio_Gallegos~~~SA Eastern Standard Time
+America/Argentina/Salta~~~SA Eastern Standard Time
 America/Argentina/San_Juan~~~SA Eastern Standard Time
+America/Argentina/San_Luis~~~SA Eastern Standard Time
 America/Argentina/Tucuman~~~SA Eastern Standard Time
 America/Argentina/Ushuaia~~~SA Eastern Standard Time
 America/Aruba~~~Venezuela Standard Time
 America/Asuncion~~~SA Eastern Standard Time
 America/Atikokan~~~US Eastern Standard Time
 America/Bahia~~~E. South America Standard Time
+America/Bahia_Banderas~~~Central Standard Time (Mexico)
 America/Barbados~~~SA Western Standard Time
 America/Belem~~~E. South America Standard Time
 America/Belize~~~Mexico Standard Time
@@ -85,6 +89,7 @@ America/Cayman~~~SA Pacific Standard Time
 America/Chicago~~~Central Standard Time
 America/Chihuahua~~~Mexico Standard Time 2
 America/Costa_Rica~~~Central America Standard Time
+America/Creston~~~Mountain Standard Time
 America/Cuiaba~~~E. South America Standard Time
 America/Curacao~~~Venezuela Standard Time
 America/Danmarkshavn~~~GMT Standard Time
@@ -123,16 +128,21 @@ America/Jamaica~~~SA Pacific Standard Time
 America/Juneau~~~Alaskan Standard Time
 America/Kentucky/Louisville~~~US Eastern Standard Time
 America/Kentucky/Monticello~~~US Eastern Standard Time
+America/Kralendijk~~~Venezuela Standard Time
 America/La_Paz~~~SA Western Standard Time
 America/Lima~~~SA Pacific Standard Time
 America/Los_Angeles~~~Pacific Standard Time
+America/Lower_Princes~~~Venezuela Standard Time
 America/Maceio~~~E. South America Standard Time
 America/Managua~~~Central America Standard Time
 America/Manaus~~~Central Brazilian Standard Time
+America/Marigot~~~SA Western Standard Time
 America/Martinique~~~SA Western Standard Time
+America/Matamoros~~~Central Standard Time
 America/Mazatlan~~~Mountain Standard Time (Mexico)
 America/Menominee~~~Central Standard Time
 America/Merida~~~Central America Standard Time
+America/Metlakatla~~~Alaskan Standard Time
 America/Mexico_City~~~Mexico Standard Time
 America/Miquelon~~~Greenland Standard Time
 America/Moncton~~~Atlantic Standard Time
@@ -145,8 +155,10 @@ America/New_York~~~Eastern Standard Time
 America/Nipigon~~~Eastern Standard Time
 America/Nome~~~Alaskan Standard Time
 America/Noronha~~~Mid-Atlantic Standard Time
+America/North_Dakota/Beulah~~~Central Standard Time
 America/North_Dakota/Center~~~Central Standard Time
 America/North_Dakota/New_Salem~~~Central Standard Time
+America/Ojinaga~~~Mexico Standard Time 2
 America/Panama~~~SA Pacific Standard Time
 America/Pangnirtung~~~Eastern Standard Time
 America/Paramaribo~~~Venezuela Standard Time
@@ -161,11 +173,15 @@ America/Recife~~~E. South America Standard Time
 America/Regina~~~Central America Standard Time
 America/Resolute~~~Eastern Standard Time
 America/Rio_Branco~~~SA Pacific Standard Time
+America/Santa_Isabel~~~Pacific Standard Time (Mexico)
+America/Santarem~~~E. South America Standard Time
 America/Santiago~~~Pacific SA Standard Time
 America/Santo_Domingo~~~SA Western Standard Time
 America/Sao_Paulo~~~Mid-Atlantic Standard Time
 America/Scoresbysund~~~Azores Standard Time
 America/Shiprock~~~US Mountain Standard Time
+America/Sitka~~~Alaskan Standard Time
+America/St_Barthelemy~~~SA Western Standard Time
 America/St_Johns~~~Newfoundland Standard Time
 America/St_Kitts~~~SA Western Standard Time
 America/St_Lucia~~~SA Western Standard Time
@@ -186,6 +202,7 @@ America/Yellowknife~~~Mountain Standard Time
 Antarctica/Casey~~~GMT Standard Time
 Antarctica/Davis~~~SE Asia Standard Time
 Antarctica/DumontDUrville~~~West Pacific Standard Time
+Antarctica/Macquarie~~~Central Pacific Standard Time
 Antarctica/Mawson~~~GMT Standard Time
 Antarctica/McMurdo~~~Tonga Standard Time
 Antarctica/Palmer~~~Greenland Standard Time
@@ -220,6 +237,8 @@ Asia/Dubai~~~Iran Standard Time
 Asia/Dushanbe~~~West Asia Standard Time
 Asia/Gaza~~~Israel Standard Time
 Asia/Harbin~~~China Standard Time
+Asia/Hebron~~~Israel Standard Time
+Asia/Ho_Chi_Minh~~~North Asia Standard Time
 Asia/Hong_Kong~~~China Standard Time
 Asia/Hovd~~~North Asia Standard Time
 Asia/Irkutsk~~~North Asia East Standard Time
@@ -230,7 +249,8 @@ Asia/Kabul~~~Afghanistan Standard Time
 Asia/Kamchatka~~~Fiji Standard Time
 Asia/Karachi~~~West Asia Standard Time
 Asia/Kashgar~~~China Standard Time
-Asia/Katmandu~~~Nepal Standard Time
+Asia/Kathmandu~~~Nepal Standard Time
+Asia/Khandyga~~~Yakutsk Standard Time
 Asia/Krasnoyarsk~~~North Asia Standard Time
 Asia/Kuala_Lumpur~~~Singapore Standard Time
 Asia/Kuching~~~Taipei Standard Time
@@ -241,6 +261,7 @@ Asia/Makassar~~~Taipei Standard Time
 Asia/Manila~~~Taipei Standard Time
 Asia/Muscat~~~Arabian Standard Time
 Asia/Nicosia~~~Israel Standard Time
+Asia/Novokuznetsk~~~N. Central Asia Standard Time
 Asia/Novosibirsk~~~N. Central Asia Standard Time
 Asia/Omsk~~~N. Central Asia Standard Time
 Asia/Oral~~~Ekaterinburg Standard Time
@@ -265,6 +286,7 @@ Asia/Thimphu~~~Central Asia Standard Time
 Asia/Tokyo~~~Tokyo Standard Time
 Asia/Ulaanbaatar~~~North Asia East Standard Time
 Asia/Urumqi~~~China Standard Time
+Asia/Ust-Nera~~~Yakutsk Standard Time
 Asia/Vientiane~~~SE Asia Standard Time
 Asia/Vladivostok~~~Vladivostok Standard Time
 Asia/Yakutsk~~~Yakutsk Standard Time
@@ -302,6 +324,7 @@ Europe/Bratislava~~~Central Europe Standard Time
 Europe/Brussels~~~Romance Standard Time
 Europe/Bucharest~~~E. Europe Standard Time
 Europe/Budapest~~~Central Europe Standard Time
+Europe/Busingen~~~W. Europe Standard Time
 Europe/Chisinau~~~FLE Standard Time
 Europe/Copenhagen~~~Romance Standard Time
 Europe/Dublin~~~GMT Standard Time
@@ -362,6 +385,7 @@ Indian/Reunion~~~Iran Standard Time
 Pacific/Apia~~~Dateline Standard Time
 Pacific/Auckland~~~New Zealand Standard Time
 Pacific/Chatham~~~Tonga Standard Time
+Pacific/Chuuk~~~West Pacific Standard Time
 Pacific/Easter~~~SA Pacific Standard Time
 Pacific/Efate~~~Central Pacific Standard Time
 Pacific/Enderbury~~~Tonga Standard Time
@@ -387,6 +411,7 @@ Pacific/Noumea~~~Central Pacific Standard Time
 Pacific/Pago_Pago~~~Samoa Standard Time
 Pacific/Palau~~~Yakutsk Standard Time
 Pacific/Pitcairn~~~Pacific Standard Time
+Pacific/Pohnpei~~~Central Pacific Standard Time
 Pacific/Ponape~~~Central Pacific Standard Time
 Pacific/Port_Moresby~~~West Pacific Standard Time
 Pacific/Rarotonga~~~Hawaiian Standard Time
