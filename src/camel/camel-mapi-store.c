@@ -1762,14 +1762,6 @@ mapi_store_rename_folder_sync (CamelStore *store,
 }
 
 static gboolean
-mapi_store_noop_sync (CamelStore *store,
-                      GCancellable *cancellable,
-                      GError **error)
-{
-	return TRUE;
-}
-
-static gboolean
 mapi_store_folder_is_subscribed (CamelSubscribable *subscribable,
                                  const gchar *folder_name)
 {
@@ -2060,7 +2052,6 @@ camel_mapi_store_class_init (CamelMapiStoreClass *class)
 	store_class->create_folder_sync = mapi_store_create_folder_sync;
 	store_class->delete_folder_sync = mapi_store_delete_folder_sync;
 	store_class->rename_folder_sync = mapi_store_rename_folder_sync;
-	store_class->noop_sync = mapi_store_noop_sync;
 }
 
 static void
