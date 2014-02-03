@@ -1,3 +1,11 @@
+evolution-mapi 3.11.5 2014-02-03
+--------------------------------
+
+Miscellaneous:
+	Improve the timezone tables (Fabiano Fidêncio)
+	Remove mapi_store_noop_sync(). (Matthew Barnes)
+	Memo does not support Start Date property (Fabiano Fidêncio)
+
 evolution-mapi 3.11.4 2014-01-13
 --------------------------------
 
