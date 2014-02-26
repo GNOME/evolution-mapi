@@ -72,7 +72,7 @@ struct _CamelMapiStorePrivate {
 };
 
 /* Forward Declarations */
-static void camel_subscribable_init (CamelSubscribableInterface *interface);
+static void camel_subscribable_init (CamelSubscribableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE (
 	CamelMapiStore,
@@ -2055,11 +2055,11 @@ camel_mapi_store_class_init (CamelMapiStoreClass *class)
 }
 
 static void
-camel_subscribable_init (CamelSubscribableInterface *interface)
+camel_subscribable_init (CamelSubscribableInterface *iface)
 {
-	interface->folder_is_subscribed = mapi_store_folder_is_subscribed;
-	interface->subscribe_folder_sync = mapi_store_subscribe_folder_sync;
-	interface->unsubscribe_folder_sync = mapi_store_unsubscribe_folder_sync;
+	iface->folder_is_subscribed = mapi_store_folder_is_subscribed;
+	iface->subscribe_folder_sync = mapi_store_subscribe_folder_sync;
+	iface->unsubscribe_folder_sync = mapi_store_unsubscribe_folder_sync;
 }
 
 /*

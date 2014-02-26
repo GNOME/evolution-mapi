@@ -42,7 +42,7 @@ struct _EMapiBackendPrivate {
 	gboolean need_update_folders;
 };
 
-static void e_mapi_backend_authenticator_init (ESourceAuthenticatorInterface *interface);
+static void e_mapi_backend_authenticator_init (ESourceAuthenticatorInterface *iface);
 
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (
 	EMapiBackend,
@@ -848,9 +848,9 @@ e_mapi_backend_class_finalize (EMapiBackendClass *class)
 }
 
 static void
-e_mapi_backend_authenticator_init (ESourceAuthenticatorInterface *interface)
+e_mapi_backend_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
-	interface->try_password_sync = mapi_backend_try_password_sync;
+	iface->try_password_sync = mapi_backend_try_password_sync;
 }
 
 static void

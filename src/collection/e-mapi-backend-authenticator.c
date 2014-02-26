@@ -91,7 +91,7 @@ mapi_config_utils_authenticator_try_password_sync (ESourceAuthenticator *auth,
 
 GType e_mapi_backend_authenticator_get_type (void) G_GNUC_CONST;
 
-static void e_mapi_backend_authenticator_authenticator_init (ESourceAuthenticatorInterface *interface);
+static void e_mapi_backend_authenticator_authenticator_init (ESourceAuthenticatorInterface *iface);
 
 G_DEFINE_TYPE_EXTENDED (EMapiBackendAuthenticator, e_mapi_backend_authenticator, G_TYPE_OBJECT, 0,
 	G_IMPLEMENT_INTERFACE (E_TYPE_SOURCE_AUTHENTICATOR, e_mapi_backend_authenticator_authenticator_init))
@@ -116,9 +116,9 @@ e_mapi_backend_authenticator_class_init (EMapiBackendAuthenticatorClass *class)
 }
 
 static void
-e_mapi_backend_authenticator_authenticator_init (ESourceAuthenticatorInterface *interface)
+e_mapi_backend_authenticator_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
-	interface->try_password_sync = mapi_config_utils_authenticator_try_password_sync;
+	iface->try_password_sync = mapi_config_utils_authenticator_try_password_sync;
 }
 
 static void

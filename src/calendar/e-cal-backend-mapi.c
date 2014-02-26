@@ -56,7 +56,7 @@
 #define EDC_ERROR(_code) e_data_cal_create_error (_code, NULL)
 #define EDC_ERROR_EX(_code, _msg) e_data_cal_create_error (_code, _msg)
 
-static void e_cal_backend_mapi_authenticator_init (ESourceAuthenticatorInterface *interface);
+static void e_cal_backend_mapi_authenticator_init (ESourceAuthenticatorInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE (ECalBackendMAPI, e_cal_backend_mapi, E_TYPE_CAL_BACKEND,
 	G_IMPLEMENT_INTERFACE (E_TYPE_SOURCE_AUTHENTICATOR, e_cal_backend_mapi_authenticator_init))
@@ -3567,9 +3567,9 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 }
 
 static void
-e_cal_backend_mapi_authenticator_init (ESourceAuthenticatorInterface *interface)
+e_cal_backend_mapi_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
-	interface->try_password_sync = ecbm_try_password_sync;
+	iface->try_password_sync = ecbm_try_password_sync;
 }
 
 static void

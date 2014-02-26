@@ -42,7 +42,7 @@
 
 #include "e-book-backend-mapi.h"
 
-static void e_book_backend_mapi_authenticator_init (ESourceAuthenticatorInterface *interface);
+static void e_book_backend_mapi_authenticator_init (ESourceAuthenticatorInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE (EBookBackendMAPI, e_book_backend_mapi, E_TYPE_BOOK_BACKEND,
 	G_IMPLEMENT_INTERFACE (E_TYPE_SOURCE_AUTHENTICATOR, e_book_backend_mapi_authenticator_init))
@@ -1425,9 +1425,9 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 }
 
 static void
-e_book_backend_mapi_authenticator_init (ESourceAuthenticatorInterface *interface)
+e_book_backend_mapi_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
-	interface->try_password_sync = ebbm_try_password_sync;
+	iface->try_password_sync = ebbm_try_password_sync;
 }
 
 const gchar *

@@ -48,7 +48,7 @@ enum {
 	PROP_SOURCE_REGISTRY
 };
 
-static void e_mail_config_mapi_page_interface_init (EMailConfigPageInterface *interface);
+static void e_mail_config_mapi_page_interface_init (EMailConfigPageInterface *iface);
 
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (EMailConfigMapiPage, e_mail_config_mapi_page, GTK_TYPE_BOX, 0,
 	G_IMPLEMENT_INTERFACE_DYNAMIC (E_TYPE_MAIL_CONFIG_PAGE, e_mail_config_mapi_page_interface_init))
@@ -247,10 +247,10 @@ e_mail_config_mapi_page_class_finalize (EMailConfigMapiPageClass *class)
 }
 
 static void
-e_mail_config_mapi_page_interface_init (EMailConfigPageInterface *interface)
+e_mail_config_mapi_page_interface_init (EMailConfigPageInterface *iface)
 {
-	interface->title = _("MAPI Settings");
-	interface->sort_order = E_MAIL_CONFIG_MAPI_PAGE_SORT_ORDER;
+	iface->title = _("MAPI Settings");
+	iface->sort_order = E_MAIL_CONFIG_MAPI_PAGE_SORT_ORDER;
 }
 
 static void

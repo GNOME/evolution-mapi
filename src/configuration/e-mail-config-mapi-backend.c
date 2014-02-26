@@ -341,7 +341,7 @@ mail_config_mapi_authenticator_try_password_sync (ESourceAuthenticator *auth,
 
 GType e_mail_config_mapi_authenticator_get_type (void) G_GNUC_CONST;
 
-static void e_mail_config_mapi_authenticator_authenticator_init (ESourceAuthenticatorInterface *interface);
+static void e_mail_config_mapi_authenticator_authenticator_init (ESourceAuthenticatorInterface *iface);
 
 G_DEFINE_TYPE_EXTENDED (EMailConfigMapiAuthenticator, e_mail_config_mapi_authenticator, G_TYPE_OBJECT, 0,
 	G_IMPLEMENT_INTERFACE (E_TYPE_SOURCE_AUTHENTICATOR, e_mail_config_mapi_authenticator_authenticator_init))
@@ -371,9 +371,9 @@ e_mail_config_mapi_authenticator_class_init (EMailConfigMapiAuthenticatorClass *
 }
 
 static void
-e_mail_config_mapi_authenticator_authenticator_init (ESourceAuthenticatorInterface *interface)
+e_mail_config_mapi_authenticator_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
-	interface->try_password_sync = mail_config_mapi_authenticator_try_password_sync;
+	iface->try_password_sync = mail_config_mapi_authenticator_try_password_sync;
 }
 
 static void
