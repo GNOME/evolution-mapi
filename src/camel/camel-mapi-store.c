@@ -1147,30 +1147,6 @@ mapi_store_get_folder_sync (CamelStore *store,
 	gchar *folder_dir;
 
 	si = camel_store_summary_path (mapi_store->summary, folder_name);
-	if (!si && (flags & CAMEL_STORE_FOLDER_CREATE) == CAMEL_STORE_FOLDER_CREATE) {
-		gchar *name, *tmp;
-		const gchar *parent;
-		CamelFolderInfo *folder_info;
-
-		tmp = g_strdup (folder_name);
-		if (!(name = strrchr (tmp, '/'))) {
-			name = tmp;
-			parent = "";
-		} else {
-			*name++ = '\0';
-			parent = tmp;
-		}
-
-		folder_info = mapi_store_create_folder_sync (
-			store, parent, name, cancellable, error);
-		g_free (tmp);
-
-		if (!folder_info)
-			return NULL;
-
-		camel_folder_info_free (folder_info);
-	}
-
 	if (si)
 		camel_store_summary_info_unref (mapi_store->summary, si);
 
