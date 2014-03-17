@@ -1,3 +1,9 @@
+evolution-mapi 3.11.92 2014-03-17
+---------------------------------
+
+Miscellaneous:
+	mapi_store_get_folder_sync: Remove CAMEL_STORE_FOLDER_CREATE branch. (Matthew Barnes)
+
 evolution-mapi 3.11.91 2014-03-03
 ---------------------------------
 
