@@ -6,7 +6,8 @@ AM_CPPFLAGS =					\
 	$(LIBEBACKEND_CFLAGS)			\
 	$(LIBEBOOK_CFLAGS)			\
 	$(LIBEDATABOOK_CFLAGS)			\
-	$(LIBMAPI_CFLAGS)
+	$(LIBMAPI_CFLAGS)			\
+	$(CODE_COVERAGE_CFLAGS)
 
 ebook_backend_LTLIBRARIES = libebookbackendmapi.la
 
@@ -27,6 +28,6 @@ libebookbackendmapi_la_LIBADD =			\
 	$(LIBMAPI_LIBS)
 
 libebookbackendmapi_la_LDFLAGS =		\
-	-module -avoid-version $(NO_UNDEFINED)
+	-module -avoid-version $(NO_UNDEFINED) $(CODE_COVERAGE_LDFLAGS)
 
 -include $(top_srcdir)/git.mk

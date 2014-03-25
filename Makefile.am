@@ -1,6 +1,8 @@
 SUBDIRS = src po
 DIST_SUBDIRS= src po
 
+@GNOME_CODE_COVERAGE_RULES@
+
 EXTRA_DIST = 			\
 	ChangeLog		\
 	intltool-merge.in	\

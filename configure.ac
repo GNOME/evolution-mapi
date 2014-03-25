@@ -137,6 +137,8 @@ AC_PROG_LIBTOOL
 
 PKG_PROG_PKG_CONFIG
 
+GNOME_CODE_COVERAGE
+
 dnl *****************************
 dnl Check for GNOME Platform
 dnl *****************************

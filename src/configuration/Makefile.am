@@ -14,6 +14,7 @@ module_mapi_configuration_la_CPPFLAGS =			\
 	$(EVOLUTION_MAIL_CFLAGS)			\
 	$(EVOLUTION_SHELL_CFLAGS)			\
 	$(LIBMAPI_CFLAGS)				\
+	$(CODE_COVERAGE_CFLAGS)				\
 	$(NULL)
 
 module_mapi_configuration_la_SOURCES =		\
@@ -53,6 +54,6 @@ module_mapi_configuration_la_LIBADD =		\
 	$(NULL)
 
 module_mapi_configuration_la_LDFLAGS = \
-	-module -avoid-version $(NO_UNDEFINED)
+	-module -avoid-version $(NO_UNDEFINED) $(CODE_COVERAGE_LDFLAGS)
 
 -include $(top_srcdir)/git.mk

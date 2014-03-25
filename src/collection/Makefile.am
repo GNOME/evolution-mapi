@@ -11,6 +11,7 @@ module_mapi_backend_la_CPPFLAGS =		\
 	$(LIBEBACKEND_CFLAGS)			\
 	$(LIBMAPI_CFLAGS)			\
 	$(CAMEL_CFLAGS)				\
+	$(CODE_COVERAGE_CFLAGS)			\
 	$(NULL)
 
 module_mapi_backend_la_SOURCES =	\
@@ -32,7 +33,7 @@ module_mapi_backend_la_LIBADD =		\
 	$(NULL)
 
 module_mapi_backend_la_LDFLAGS = \
-	-module -avoid-version $(NO_UNDEFINED) \
+	-module -avoid-version $(NO_UNDEFINED) $(CODE_COVERAGE_LDFLAGS) \
 	$(NULL)
 
 -include $(top_srcdir)/git.mk

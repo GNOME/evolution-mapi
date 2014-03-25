@@ -6,8 +6,9 @@ AM_CPPFLAGS =					\
 	$(LIBEBACKEND_CFLAGS)			\
 	$(LIBECAL_CFLAGS)			\
 	$(LIBEDATACAL_CFLAGS)			\
-	$(LIBMAPI_CFLAGS) \
-	$(CAMEL_CFLAGS)
+	$(LIBMAPI_CFLAGS)			\
+	$(CAMEL_CFLAGS)				\
+	$(CODE_COVERAGE_CFLAGS)
 
 ecal_backend_LTLIBRARIES = libecalbackendmapi.la
 
@@ -25,7 +26,7 @@ libecalbackendmapi_la_LIBADD =			\
 	$(CAMEL_LIBS)
 
 libecalbackendmapi_la_LDFLAGS =			\
-	-module -avoid-version $(NO_UNDEFINED)
+	-module -avoid-version $(NO_UNDEFINED) $(CODE_COVERAGE_LDFLAGS)
 
 
 -include $(top_srcdir)/git.mk

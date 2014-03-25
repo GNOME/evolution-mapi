@@ -11,6 +11,7 @@ AM_CPPFLAGS = -I.. 				\
 	$(CAMEL_CFLAGS)				\
 	$(LIBECAL_CFLAGS)			\
         $(LIBMAPI_CFLAGS)                       \
+	$(CODE_COVERAGE_CFLAGS)			\
 	-DEXCHANGE_MAPI_LOCALEDIR=\"$(localedir)\" \
 	-DG_LOG_DOMAIN=\"camel-mapi-provider\"
 
@@ -31,7 +32,8 @@ noinst_HEADERS =         			\
 	camel-mapi-store-summary.h         	\
 	camel-mapi-transport.h
 
-libcamelmapi_la_LDFLAGS = -avoid-version -module $(NO_UNDEFINED)
+libcamelmapi_la_LDFLAGS = -avoid-version -module $(NO_UNDEFINED) $(CODE_COVERAGE_LDFLAGS)
+
 libcamelmapi_la_LIBADD = 			\
 	$(top_builddir)/src/libexchangemapi/libexchangemapi-1.0.la \
 	$(EVOLUTION_MAIL_LIBS)			\

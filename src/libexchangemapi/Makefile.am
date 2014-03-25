@@ -8,7 +8,8 @@ AM_CPPFLAGS =						\
 	$(LIBEBOOK_CFLAGS)				\
 	$(LIBECAL_CFLAGS)				\
 	$(LIBMAPI_CFLAGS)				\
-	$(CAMEL_CFLAGS)
+	$(CAMEL_CFLAGS)					\
+	$(CODE_COVERAGE_CFLAGS)
 
 
 lib_LTLIBRARIES = libexchangemapi-1.0.la
@@ -55,7 +56,7 @@ libexchangemapi_1_0_la_LIBADD =			\
 	$(LIBMAPI_LIBS)				\
 	$(CAMEL_LIBS)
 
-libexchangemapi_1_0_la_LDFLAGS = $(NO_UNDEFINED)
+libexchangemapi_1_0_la_LDFLAGS = $(NO_UNDEFINED) $(CODE_COVERAGE_LDFLAGS)
 
 libexchangemapiincludedir = $(edataserver_privincludedir)/mapi
 
