@@ -58,6 +58,60 @@ enum {
 	COLS_MAX
 };
 
+static gboolean
+e_mapi_binding_transform_text_non_null (GBinding *binding,
+					const GValue *source_value,
+					GValue *target_value,
+					gpointer user_data)
+{
+	const gchar *str;
+
+	g_return_val_if_fail (G_IS_BINDING (binding), FALSE);
+	g_return_val_if_fail (source_value != NULL, FALSE);
+	g_return_val_if_fail (target_value != NULL, FALSE);
+
+	str = g_value_get_string (source_value);
+	if (!str)
+		str = "";
+
+	g_value_set_string (target_value, str);
+
+	return TRUE;
+}
+
+static GBinding *
+e_mapi_binding_bind_object_text_property (gpointer source,
+					  const gchar *source_property,
+					  gpointer target,
+					  const gchar *target_property,
+					  GBindingFlags flags)
+{
+	GObjectClass *klass;
+	GParamSpec *property;
+
+	g_return_val_if_fail (G_IS_OBJECT (source), NULL);
+	g_return_val_if_fail (source_property != NULL, NULL);
+	g_return_val_if_fail (G_IS_OBJECT (target), NULL);
+	g_return_val_if_fail (target_property != NULL, NULL);
+
+	klass = G_OBJECT_GET_CLASS (source);
+	property = g_object_class_find_property (klass, source_property);
+	g_return_val_if_fail (property != NULL, NULL);
+	g_return_val_if_fail (property->value_type == G_TYPE_STRING, NULL);
+
+	klass = G_OBJECT_GET_CLASS (target);
+	property = g_object_class_find_property (klass, target_property);
+	g_return_val_if_fail (property != NULL, NULL);
+	g_return_val_if_fail (property->value_type == G_TYPE_STRING, NULL);
+
+	return g_object_bind_property_full (source, source_property,
+					    target, target_property,
+					    flags,
+					    e_mapi_binding_transform_text_non_null,
+					    e_mapi_binding_transform_text_non_null,
+					    NULL, NULL);
+}
+
 static void
 tree_selection_changed (GtkTreeSelection *selection, GtkDialog *dialog)
 {
@@ -729,7 +783,7 @@ mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_widget_set_hexpand (entry, TRUE);
 	gtk_label_set_mnemonic_widget (GTK_LABEL (label), entry);
 
-	g_object_bind_property (
+	e_mapi_binding_bind_object_text_property (
 		settings, "host",
 		entry, "text",
 		G_BINDING_BIDIRECTIONAL |
@@ -746,7 +800,7 @@ mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_widget_set_hexpand (entry, TRUE);
 	gtk_label_set_mnemonic_widget (GTK_LABEL (label), entry);
 
-	g_object_bind_property (
+	e_mapi_binding_bind_object_text_property (
 		settings, "user",
 		entry, "text",
 		G_BINDING_BIDIRECTIONAL |
@@ -771,7 +825,7 @@ mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_label_set_mnemonic_widget (GTK_LABEL (label), entry);
 	gtk_widget_set_hexpand (entry, TRUE);
 	gtk_container_add (GTK_CONTAINER (hgrid), entry);
-	g_object_bind_property (
+	e_mapi_binding_bind_object_text_property (
 		settings, "domain",
 		entry, "text",
 		G_BINDING_BIDIRECTIONAL |
@@ -828,7 +882,7 @@ mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_widget_set_hexpand (entry, TRUE);
 	gtk_label_set_mnemonic_widget (GTK_LABEL (label), entry);
 
-	g_object_bind_property (
+	e_mapi_binding_bind_object_text_property (
 		settings, "realm",
 		entry, "text",
 		G_BINDING_BIDIRECTIONAL |
