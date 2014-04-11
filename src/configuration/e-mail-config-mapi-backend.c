@@ -729,7 +729,7 @@ mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_widget_set_hexpand (entry, TRUE);
 	gtk_label_set_mnemonic_widget (GTK_LABEL (label), entry);
 
-	g_object_bind_property (
+	e_binding_bind_object_text_property (
 		settings, "host",
 		entry, "text",
 		G_BINDING_BIDIRECTIONAL |
@@ -746,7 +746,7 @@ mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_widget_set_hexpand (entry, TRUE);
 	gtk_label_set_mnemonic_widget (GTK_LABEL (label), entry);
 
-	g_object_bind_property (
+	e_binding_bind_object_text_property (
 		settings, "user",
 		entry, "text",
 		G_BINDING_BIDIRECTIONAL |
@@ -771,7 +771,7 @@ mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_label_set_mnemonic_widget (GTK_LABEL (label), entry);
 	gtk_widget_set_hexpand (entry, TRUE);
 	gtk_container_add (GTK_CONTAINER (hgrid), entry);
-	g_object_bind_property (
+	e_binding_bind_object_text_property (
 		settings, "domain",
 		entry, "text",
 		G_BINDING_BIDIRECTIONAL |
@@ -828,7 +828,7 @@ mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_widget_set_hexpand (entry, TRUE);
 	gtk_label_set_mnemonic_widget (GTK_LABEL (label), entry);
 
-	g_object_bind_property (
+	e_binding_bind_object_text_property (
 		settings, "realm",
 		entry, "text",
 		G_BINDING_BIDIRECTIONAL |
