@@ -189,6 +189,20 @@ LIBS=$save_libs
 AC_MSG_RESULT([$ac_cv_have_rns])
 
 dnl ****************************
+dnl Check for OpenChange 2.1 fast-transfer tags availability
+dnl ****************************
+AC_MSG_CHECKING([libmapi fast-transfer tags])
+save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
+save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
+AC_LINK_IFELSE([AC_LANG_PROGRAM(
+	[[#include <libmapi/libmapi.h>]],
+	[[uint32_t tag; tag = StartMessage; tag = EndMessage; tag = StartRecip; tag = EndToRecip; tag = NewAttach; tag = EndAttach; tag = StartEmbed; tag = EndEmbed;]])],
+	[AC_DEFINE(HAVE_FAST_TRANSFER_TAGS_2_1, 1, [libmapi supports fast-transfer tags from OpenChange 2.1]) ac_cv_have_ftt21=yes],[ac_cv_have_ftt21=no])
+CFLAGS=$save_cflags
+LIBS=$save_libs
+AC_MSG_RESULT([$ac_cv_have_ftt21])
+
+dnl ****************************
 dnl Expose version information
 dnl ****************************
 API_VERSION=$EDS_PACKAGE

@@ -686,11 +686,10 @@ populate_ical_attendees (EMapiConnection *conn,
 		PidTagNickname,
 		PidTagRecipientDisplayName,
 		PidTagDisplayName,
-		PidTag7BitDisplayName
+		PidTagAddressBookDisplayNamePrintable
 	};
 
 	const uint32_t email_proptags[] = {
-		PidTagPrimarySmtpAddress,
 		PidTagSmtpAddress
 	};
 
@@ -1352,7 +1351,6 @@ e_mapi_cal_utils_add_organizer (EMapiObject *object,
 		set_value (PidTagEmailAddress, email);
 
 		set_value (PidTagSmtpAddress, email);
-		set_value (PidTagPrimarySmtpAddress, email);
 
 		ui32 = 0;
 		set_value (PidTagSendInternetEncoding, &ui32);
@@ -1433,9 +1431,7 @@ e_mapi_cal_utils_add_recipients (EMapiObject *object,
 
 		set_value (PidTagAddressType, "SMTP");
 		set_value (PidTagEmailAddress, email);
-
 		set_value (PidTagSmtpAddress, email);
-		set_value (PidTagPrimarySmtpAddress, email);
 
 		ui32 = 0;
 		set_value (PidTagSendInternetEncoding, &ui32);
