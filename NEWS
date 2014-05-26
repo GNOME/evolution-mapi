@@ -1,3 +1,9 @@
+evolution-mapi 3.13.2 2014-05-26
+--------------------------------
+
+Bugs:
+	Bug #729028 - Adapt to OpenChange 2.1 API changes (Jordi Mallach)
+
 evolution-mapi 3.13.1 2014-04-28
 --------------------------------
 
