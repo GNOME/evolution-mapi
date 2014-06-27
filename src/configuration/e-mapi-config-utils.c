@@ -27,6 +27,8 @@
 #include <gtk/gtk.h>
 #include <libedataserver/libedataserver.h>
 
+#include <e-util/e-util.h>
+
 #include <mail/em-folder-tree.h>
 #include <shell/e-shell.h>
 #include <shell/e-shell-sidebar.h>
@@ -169,8 +171,8 @@ e_mapi_config_utils_run_in_thread_with_feedback_general (GtkWindow *parent,
 
 	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
-	spinner = gtk_spinner_new ();
-	gtk_spinner_start (GTK_SPINNER (spinner));
+	spinner = e_spinner_new ();
+	e_spinner_start (E_SPINNER (spinner));
 	gtk_box_pack_start (GTK_BOX (box), spinner, FALSE, FALSE, 0);
 
 	label = gtk_label_new (description);
@@ -563,8 +565,8 @@ e_mapi_config_utils_run_folder_size_dialog (ESourceRegistry *registry,
 
 	content_area = GTK_BOX (gtk_dialog_get_content_area (fsd->dialog));
 
-	spinner = gtk_spinner_new ();
-	gtk_spinner_start (GTK_SPINNER (spinner));
+	spinner = e_spinner_new ();
+	e_spinner_start (E_SPINNER (spinner));
 	spinner_label = gtk_label_new (_("Fetching folder list…"));
 
 	fsd->spinner_grid = GTK_GRID (gtk_grid_new ());
