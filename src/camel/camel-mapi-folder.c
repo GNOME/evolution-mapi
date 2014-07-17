@@ -1159,6 +1159,9 @@ mapi_folder_constructed (GObject *object)
 	gchar *host;
 	gchar *user;
 
+	/* Chain up to parent's method. */
+	G_OBJECT_CLASS (camel_mapi_folder_parent_class)->constructed (object);
+
 	folder = CAMEL_FOLDER (object);
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
