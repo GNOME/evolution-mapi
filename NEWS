@@ -1,3 +1,14 @@
+evolution-mapi 3.13.4 2014-07-28
+--------------------------------
+
+Miscellaneous:
+	Replace GtkSpinner with Evolution's ESpinner (Milan Crha)
+	Adapt evolution-mapi to support backend-per-process (Fabiano Fidêncio)
+	Add missing chain-up to parent's constructed() method (Milan Crha)
+
+Translations:
+	Inaki Larranaga Murgoitio (eu)
+
 evolution-mapi 3.13.2 2014-05-26
 --------------------------------
 
