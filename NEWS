@@ -1,3 +1,12 @@
+evolution-mapi 3.12.5 2014-08-11
+--------------------------------
+
+Miscellaneous:
+	Add missing chain-up to parent's constructed() method (Milan Crha)
+
+Translations:
+	Inaki Larranaga Murgoitio (eu)
+
 evolution-mapi 3.12.2 2014-05-12
 --------------------------------
 
