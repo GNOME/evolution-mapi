@@ -3,8 +3,15 @@ DIST_SUBDIRS= src po
 
 @GNOME_CODE_COVERAGE_RULES@
 
+@INTLTOOL_XML_NOMERGE_RULE@
+metainfodir = $(datadir)/appdata
+metainfo_in_files = evolution-mapi.metainfo.xml.in
+metainfo_files = $(metainfo_in_files:.xml.in=.xml)
+dist_metainfo_DATA = $(metainfo_files)
+
 EXTRA_DIST = 			\
 	ChangeLog		\
+	$(metainfo_in_files)	\
 	intltool-merge.in	\
 	intltool-update.in	\
 	intltool-extract.in	
@@ -12,6 +19,8 @@ EXTRA_DIST = 			\
 CLEANFILES = 	intltool-merge	\
 		intltool-update	\
 		intltool-extract	
+
+DISTCLEANFILES = $(metainfo_files)
 
 MAINTAINERCLEANFILES =					\
 	$(srcdir)/aclocal.m4				\
