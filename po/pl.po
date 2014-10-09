@@ -5,15 +5,15 @@
 # gnomepl@aviary.pl
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Wadim Dziedzic <wdziedzic@aviary.pl>, 2009.
-# Piotr Drąg <piotrdrag@gmail.com>, 2009-2013.
+# Piotr Drąg <piotrdrag@gmail.com>, 2009-2014.
 # Tomasz Dominikowski <dominikowski@gmail.com>, 2009.
-# Aviary.pl <gnomepl@aviary.pl>, 2009-2013.
+# Aviary.pl <gnomepl@aviary.pl>, 2009-2014.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-02-17 15:41+0100\n"
-"PO-Revision-Date: 2013-02-17 15:42+0100\n"
+"POT-Creation-Date: 2014-10-09 17:45+0200\n"
+"PO-Revision-Date: 2014-10-09 17:47+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -25,14 +25,23 @@ msgstr ""
 "X-Poedit-Language: Polish\n"
 "X-Poedit-Country: Poland\n"
 
-#: ../src/addressbook/e-book-backend-mapi.c:732
+#: ../evolution-mapi.metainfo.xml.in.h:1
+msgid "Exchange MAPI"
+msgstr "Exchange MAPI"
+
+#: ../evolution-mapi.metainfo.xml.in.h:2 ../src/camel/camel-mapi-provider.c:73
+msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
+msgstr ""
+"Dostęp do serwerów Microsoft Exchange 2007/OpenChange przez protokół MAPI"
+
+#: ../src/addressbook/e-book-backend-mapi.c:735
 msgid "Searching"
 msgstr "Wyszukiwanie"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1688
+#: ../src/addressbook/e-book-backend-mapi.c:1735
 #: ../src/calendar/e-cal-backend-mapi.c:193
-#: ../src/calendar/e-cal-backend-mapi.c:490
-#: ../src/camel/camel-mapi-folder.c:1900 ../src/camel/camel-mapi-folder.c:1978
+#: ../src/calendar/e-cal-backend-mapi.c:492
+#: ../src/camel/camel-mapi-folder.c:1937 ../src/camel/camel-mapi-folder.c:2017
 msgid "Unknown error"
 msgstr "Nieznany błąd"
 
@@ -45,8 +54,8 @@ msgid "The backend does not support bulk additions"
 msgstr "Mechanizm nie obsługuje dodawania całości"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:510
-#: ../src/calendar/e-cal-backend-mapi.c:1698
-#: ../src/calendar/e-cal-backend-mapi.c:2209
+#: ../src/calendar/e-cal-backend-mapi.c:1715
+#: ../src/calendar/e-cal-backend-mapi.c:2226
 msgid "Failed to create item on a server"
 msgstr "Utworzenie elementu na serwerze się nie powiodło"
 
@@ -55,7 +64,7 @@ msgid "The backend does not support bulk modifications"
 msgstr "Mechanizm nie obsługuje modyfikacji całości"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:672
-#: ../src/calendar/e-cal-backend-mapi.c:1911
+#: ../src/calendar/e-cal-backend-mapi.c:1928
 msgid "Failed to modify item on a server"
 msgstr "Zmodyfikowanie elementu na serwerze się nie powiodło"
 
@@ -111,41 +120,41 @@ msgid "Failed to fetch GAL entries"
 msgstr "Pobranie wpisów GAL się nie powiodło"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:415
+#: ../src/calendar/e-cal-backend-mapi.c:417
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Wczytywanie elementów w katalogu %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:782
+#: ../src/calendar/e-cal-backend-mapi.c:784
 #, c-format
 msgid "Failed to open folder: %s"
 msgstr "Otwarcie katalogu się nie powiodło: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:790
+#: ../src/calendar/e-cal-backend-mapi.c:792
 #, c-format
 msgid "Failed to get folder properties: %s"
 msgstr "Uzyskanie właściwości katalogu się nie powiodło: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:831
+#: ../src/calendar/e-cal-backend-mapi.c:833
 #, c-format
 msgid "Failed to list objects: %s"
 msgstr "Wyświetlenie listy obiektów się nie powiodło: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:857
+#: ../src/calendar/e-cal-backend-mapi.c:859
 #, c-format
 msgid "Failed to transfer objects: %s"
 msgstr "Przesłanie obiektów się nie powiodło: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:876
+#: ../src/calendar/e-cal-backend-mapi.c:878
 #, c-format
 msgid "Failed to close folder: %s"
 msgstr "Zamknięcie katalogu się nie powiodło: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1365
+#: ../src/calendar/e-cal-backend-mapi.c:1381
 msgid "Could not create cache file"
 msgstr "Nie można utworzyć pliku pamięci podręcznej"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1819
+#: ../src/calendar/e-cal-backend-mapi.c:1836
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -153,89 +162,89 @@ msgstr ""
 "Obsługa modyfikowania pojedynczych instancji powtarzającego się spotkania "
 "nie jest zaimplementowana. Nie dokonano żadnych zmian spotkania na serwerze."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2024
+#: ../src/calendar/e-cal-backend-mapi.c:2041
 msgid "Cannot remove items from a server"
 msgstr "Nie można usunąć elementów z serwera"
 
-#: ../src/calendar/e-cal-backend-mapi.c:2460
+#: ../src/calendar/e-cal-backend-mapi.c:2477
 msgid "Failed to get Free/Busy data"
 msgstr "Pobranie informacji zajętości się nie powiodło"
 
-#: ../src/camel/camel-mapi-folder.c:777
+#: ../src/camel/camel-mapi-folder.c:805
 #, c-format
 msgid "Refreshing folder '%s'"
 msgstr "Odświeżanie katalogu \"%s\""
 
-#: ../src/camel/camel-mapi-folder.c:845
+#: ../src/camel/camel-mapi-folder.c:873
 #, c-format
 msgid "Downloading messages in folder '%s'"
 msgstr "Pobieranie wiadomości w katalogu \"%s\""
 
-#: ../src/camel/camel-mapi-folder.c:933 ../src/camel/camel-mapi-folder.c:1532
+#: ../src/camel/camel-mapi-folder.c:961 ../src/camel/camel-mapi-folder.c:1569
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Ta wiadomość nie jest dostępna w trybie offline."
 
-#: ../src/camel/camel-mapi-folder.c:943 ../src/camel/camel-mapi-folder.c:961
+#: ../src/camel/camel-mapi-folder.c:971 ../src/camel/camel-mapi-folder.c:989
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Pobranie elementów się nie powiodło: %s"
 
-#: ../src/camel/camel-mapi-folder.c:948 ../src/camel/camel-mapi-folder.c:966
+#: ../src/camel/camel-mapi-folder.c:976 ../src/camel/camel-mapi-folder.c:994
 msgid "Fetching items failed"
 msgstr "Pobranie elementów się nie powiodło"
 
-#: ../src/camel/camel-mapi-folder.c:1217
+#: ../src/camel/camel-mapi-folder.c:1248
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Nie można dodać wiadomości do katalogu \"%s\""
 
-#: ../src/camel/camel-mapi-folder.c:1226 ../src/camel/camel-mapi-folder.c:1256
+#: ../src/camel/camel-mapi-folder.c:1257 ../src/camel/camel-mapi-folder.c:1287
 #, c-format
 msgid "Offline."
 msgstr "Offline."
 
-#: ../src/camel/camel-mapi-folder.c:1339
+#: ../src/camel/camel-mapi-folder.c:1370
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "Opróżnienie kosza się nie powiodło: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1345
+#: ../src/camel/camel-mapi-folder.c:1376
 msgid "Failed to empty Trash"
 msgstr "Opróżnienie kosza się nie powiodło"
 
-#: ../src/camel/camel-mapi-folder.c:1517
+#: ../src/camel/camel-mapi-folder.c:1554
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Nie można pobrać wiadomości %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1518
+#: ../src/camel/camel-mapi-folder.c:1555
 msgid "No such message"
 msgstr "Nie ma takiej wiadomości"
 
-#: ../src/camel/camel-mapi-folder.c:1543 ../src/camel/camel-mapi-folder.c:1575
+#: ../src/camel/camel-mapi-folder.c:1580 ../src/camel/camel-mapi-folder.c:1612
 #, c-format
 msgid "Could not get message: %s"
 msgstr "Nie można pobrać wiadomości: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1549 ../src/camel/camel-mapi-folder.c:1582
+#: ../src/camel/camel-mapi-folder.c:1586 ../src/camel/camel-mapi-folder.c:1619
 #, c-format
 msgid "Could not get message"
 msgstr "Nie można pobrać wiadomości"
 
-#: ../src/camel/camel-mapi-folder.c:1955
+#: ../src/camel/camel-mapi-folder.c:1994
 msgid "Receive quota"
 msgstr "Odbierz przydział"
 
-#: ../src/camel/camel-mapi-folder.c:1961
+#: ../src/camel/camel-mapi-folder.c:2000
 msgid "Send quota"
 msgstr "Wyślij przydział"
 
-#: ../src/camel/camel-mapi-folder.c:1983
+#: ../src/camel/camel-mapi-folder.c:2022
 msgid "No quota information available"
 msgstr "Brak dostępnych informacji o przydziale"
 
-#: ../src/camel/camel-mapi-folder.c:2085
+#: ../src/camel/camel-mapi-folder.c:2124
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nie można wczytać podsumowania dla %s"
@@ -270,14 +279,9 @@ msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "S_zukanie niechcianych treści tylko w katalogu przychodzących"
 
 #: ../src/camel/camel-mapi-provider.c:62
-#: ../src/configuration/e-mapi-config-utils.c:1637
+#: ../src/configuration/e-mapi-config-utils.c:1642
 msgid "Lis_ten for server notifications"
 msgstr "_Nasłuchiwanie powiadomień serwera"
-
-#: ../src/camel/camel-mapi-provider.c:73
-msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
-msgstr ""
-"Dostęp do serwerów Microsoft Exchange 2007/OpenChange przez protokół MAPI"
 
 #: ../src/camel/camel-mapi-provider.c:88
 msgid "Password"
@@ -302,115 +306,115 @@ msgstr "Ta opcja umożliwia połączenie z serwerem używając klucza Kerberos."
 msgid "Cannot find folder in a local cache"
 msgstr "Nie można odnaleźć katalogu w lokalnej pamięci podręcznej"
 
-#: ../src/camel/camel-mapi-store.c:491 ../src/camel/camel-mapi-store.c:1212
+#: ../src/camel/camel-mapi-store.c:492 ../src/camel/camel-mapi-store.c:1179
 msgid "Folder list is not available in offline mode"
 msgstr "Lista katalogów nie jest dostępna w trybie offline"
 
-#: ../src/camel/camel-mapi-store.c:879
+#: ../src/camel/camel-mapi-store.c:872
 msgid "No public folder found"
 msgstr "Nie odnaleziono publicznego katalogu"
 
-#: ../src/camel/camel-mapi-store.c:879
+#: ../src/camel/camel-mapi-store.c:872
 msgid "No folder found"
 msgstr "Nie odnaleziono katalogu"
 
-#: ../src/camel/camel-mapi-store.c:1234 ../src/camel/camel-mapi-store.c:2211
+#: ../src/camel/camel-mapi-store.c:1201 ../src/camel/camel-mapi-store.c:2168
 #, c-format
 msgid "Connecting to '%s'"
 msgstr "Łączenie z \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:1293
+#: ../src/camel/camel-mapi-store.c:1260
 msgid "Cannot create MAPI folders in offline mode"
 msgstr "Nie można utworzyć katalogów MAPI w trybie offline"
 
-#: ../src/camel/camel-mapi-store.c:1300
+#: ../src/camel/camel-mapi-store.c:1267
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "Nie można utworzyć nowego katalogu \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:1309
+#: ../src/camel/camel-mapi-store.c:1276
 #, c-format
 msgid "Authentication failed"
 msgstr "Uwierzytelnianie się nie powiodło"
 
-#: ../src/camel/camel-mapi-store.c:1319
+#: ../src/camel/camel-mapi-store.c:1286
 msgid "MAPI folders can be created only within mailbox of the logged user"
 msgstr ""
 "Katalogi MAPI mogą być tworzone tylko w skrzynce pocztowej zalogowanego "
 "użytkownika"
 
-#: ../src/camel/camel-mapi-store.c:1332 ../src/camel/camel-mapi-store.c:1445
+#: ../src/camel/camel-mapi-store.c:1299 ../src/camel/camel-mapi-store.c:1412
 #, c-format
 msgid "Cannot find folder '%s'"
 msgstr "Nie można odnaleźć katalogu \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:1387
+#: ../src/camel/camel-mapi-store.c:1354
 #, c-format
 msgid "Cannot create folder '%s': %s"
 msgstr "Nie można utworzyć katalogu \"%s\": %s"
 
-#: ../src/camel/camel-mapi-store.c:1393
+#: ../src/camel/camel-mapi-store.c:1360
 #, c-format
 msgid "Cannot create folder '%s'"
 msgstr "Nie można utworzyć katalogu \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:1423 ../src/camel/camel-mapi-store.c:1435
+#: ../src/camel/camel-mapi-store.c:1390 ../src/camel/camel-mapi-store.c:1402
 msgid "Cannot delete MAPI folders in offline mode"
 msgstr "Nie można usunąć katalogów MAPI w trybie offline"
 
-#: ../src/camel/camel-mapi-store.c:1491
+#: ../src/camel/camel-mapi-store.c:1458
 #, c-format
 msgid "Cannot remove folder '%s': %s"
 msgstr "Nie można usunąć katalogu \"%s\": %s"
 
-#: ../src/camel/camel-mapi-store.c:1499
+#: ../src/camel/camel-mapi-store.c:1466
 #, c-format
 msgid "Cannot remove folder '%s'"
 msgstr "Nie można usunąć katalogu \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:1529 ../src/camel/camel-mapi-store.c:1544
+#: ../src/camel/camel-mapi-store.c:1496 ../src/camel/camel-mapi-store.c:1511
 msgid "Cannot rename MAPI folders in offline mode"
 msgstr "Nie można zmienić nazwy katalogów MAPI w trybie offline"
 
-#: ../src/camel/camel-mapi-store.c:1555
+#: ../src/camel/camel-mapi-store.c:1522
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
 msgstr "Nie można zmienić nazwy katalogu MAPI \"%s\". Katalog nie istnieje"
 
-#: ../src/camel/camel-mapi-store.c:1566
+#: ../src/camel/camel-mapi-store.c:1533
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'"
 msgstr "Nie można zmienić nazwy domyślnego katalogu MAPI \"%s\" na \"%s\""
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1592 ../src/camel/camel-mapi-store.c:1635
-#: ../src/camel/camel-mapi-store.c:1715
+#: ../src/camel/camel-mapi-store.c:1559 ../src/camel/camel-mapi-store.c:1602
+#: ../src/camel/camel-mapi-store.c:1682
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "Nie można zmienić nazwy katalogu MAPI z \"%s\" na \"%s\""
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
 #. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1627 ../src/camel/camel-mapi-store.c:1708
+#: ../src/camel/camel-mapi-store.c:1594 ../src/camel/camel-mapi-store.c:1675
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "Nie można zmienić nazwy katalogu MAPI z \"%s\" na \"%s\": %s"
 
-#: ../src/camel/camel-mapi-store.c:1813
+#: ../src/camel/camel-mapi-store.c:1772
 msgid "Cannot subscribe MAPI folders in offline mode"
 msgstr "Nie można subskrybować katalogów MAPI w trybie offline"
 
-#: ../src/camel/camel-mapi-store.c:1830
+#: ../src/camel/camel-mapi-store.c:1789
 #, c-format
 msgid "Folder '%s' not found"
 msgstr "Nie odnaleziono katalogu \"%s\""
 
-#: ../src/camel/camel-mapi-store.c:1948
+#: ../src/camel/camel-mapi-store.c:1907
 msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr "Nie można usunąć subskrypcji katalogów MAPI w trybie offline"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:2162
+#: ../src/camel/camel-mapi-store.c:2119
 #: ../src/camel/camel-mapi-transport.c:195
 #, c-format
 msgid "Exchange MAPI server %s"
@@ -419,24 +423,24 @@ msgstr "Serwer Exchange MAPI %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:2166
+#: ../src/camel/camel-mapi-store.c:2123
 #: ../src/camel/camel-mapi-transport.c:198
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Usługa Exchange MAPI dla %s na serwerze %s"
 
-#: ../src/camel/camel-mapi-store.c:2193
+#: ../src/camel/camel-mapi-store.c:2150
 msgid "Cannot connect MAPI store in offline mode"
 msgstr "Nie można połączyć przechowalni MAPI w trybie offline"
 
-#: ../src/camel/camel-mapi-store.c:2246
+#: ../src/camel/camel-mapi-store.c:2203
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received or sent."
 msgstr ""
 "Skrzynka pocztowa \"%s\" jest pełna. Żadne nowe wiadomości nie zostaną "
 "pobrane ani wysłane."
 
-#: ../src/camel/camel-mapi-store.c:2248
+#: ../src/camel/camel-mapi-store.c:2205
 #, c-format
 msgid ""
 "Mailbox '%s' is near its size limit, message send will be disabled soon."
@@ -444,19 +448,19 @@ msgstr ""
 "Skrzynka pocztowa \"%s\" jest blisko ograniczenia rozmiaru. Wysyłanie "
 "wiadomości zostanie niedługo wyłączone."
 
-#: ../src/camel/camel-mapi-store.c:2252
+#: ../src/camel/camel-mapi-store.c:2209
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received."
 msgstr ""
 "Skrzynka pocztowa \"%s\" jest pełna. Żadne nowe wiadomości nie zostaną "
 "pobrane."
 
-#: ../src/camel/camel-mapi-store.c:2254
+#: ../src/camel/camel-mapi-store.c:2211
 #, c-format
 msgid "Mailbox '%s' is near its size limit."
 msgstr "Skrzynka pocztowa \"%s\" jest blisko ograniczenia rozmiaru."
 
-#: ../src/camel/camel-mapi-store.c:2674
+#: ../src/camel/camel-mapi-store.c:2631
 msgid "Authentication password not available"
 msgstr "Hasło uwierzytelniania jest niedostępne"
 
@@ -471,12 +475,12 @@ msgstr "Nie można wysłać wiadomości."
 msgid "Could not send message: %s"
 msgstr "Nie można wysłać wiadomości: %s"
 
-#: ../src/collection/e-mapi-backend.c:275
+#: ../src/collection/e-mapi-backend.c:278
 msgid "Global Address List"
 msgstr "Ogólna lista adresowa"
 
-#: ../src/collection/e-mapi-backend.c:591
-#: ../src/collection/e-mapi-backend.c:678
+#: ../src/collection/e-mapi-backend.c:651
+#: ../src/collection/e-mapi-backend.c:737
 #, c-format
 msgid "Data source '%s' does not represent a MAPI folder"
 msgstr "Źródło danych \"%s\" nie odpowiada katalogowi MAPI"
@@ -485,19 +489,19 @@ msgstr "Źródło danych \"%s\" nie odpowiada katalogowi MAPI"
 msgid "Allow _partial search results"
 msgstr "Umożliwienie _częściowych wyników wyszukiwania"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:125
+#: ../src/configuration/e-mail-config-mapi-backend.c:179
 msgid "Select username"
 msgstr "Proszę wybrać nazwę użytkownika"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:135
+#: ../src/configuration/e-mail-config-mapi-backend.c:189
 msgid "Full name"
 msgstr "Imię i nazwisko"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:140
+#: ../src/configuration/e-mail-config-mapi-backend.c:194
 msgid "Username"
 msgstr "Nazwa użytkownika"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:167
+#: ../src/configuration/e-mail-config-mapi-backend.c:221
 msgid ""
 "There are more users with similar user name on a server.\n"
 "Please select that you would like to use from the below list."
@@ -505,20 +509,20 @@ msgstr ""
 "Na serwerze jest więcej użytkowników o podobnej nazwie.\n"
 "Proszę wybrać jedną z poniższej listy."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:395
+#: ../src/configuration/e-mail-config-mapi-backend.c:449
 msgid "Authentication finished successfully."
 msgstr "Uwierzytelnianie zakończone powodzeniem."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:397
-#: ../src/configuration/e-mail-config-mapi-backend.c:518
+#: ../src/configuration/e-mail-config-mapi-backend.c:451
+#: ../src/configuration/e-mail-config-mapi-backend.c:571
 msgid "Authentication failed."
 msgstr "Uwierzytelnianie się nie powiodło."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:459
+#: ../src/configuration/e-mail-config-mapi-backend.c:512
 msgid "Cannot authenticate MAPI accounts in offline mode"
 msgstr "Nie można uwierzytelnić katalogów MAPI w trybie offline"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:488
+#: ../src/configuration/e-mail-config-mapi-backend.c:541
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -526,7 +530,7 @@ msgstr ""
 "Nazwy serwera, użytkownika i domeny nie mogą być puste. Proszę wprowadzić "
 "poprawne wartości."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:491
+#: ../src/configuration/e-mail-config-mapi-backend.c:544
 msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
@@ -534,52 +538,52 @@ msgstr ""
 "Nazwa obszaru nie może być pusta, jeśli wybrano Kerberos. Proszę wprowadzić "
 "poprawne wartości."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:512
+#: ../src/configuration/e-mail-config-mapi-backend.c:565
 msgid "Connecting to the server, please wait..."
 msgstr "Łączenie z serwerem, proszę czekać..."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:720
+#: ../src/configuration/e-mail-config-mapi-backend.c:770
 msgid "Configuration"
 msgstr "Konfiguracja"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:729
+#: ../src/configuration/e-mail-config-mapi-backend.c:779
 msgid "_Server:"
 msgstr "_Serwer:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:746
+#: ../src/configuration/e-mail-config-mapi-backend.c:796
 msgid "User_name:"
 msgstr "_Nazwa użytkownika:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:771
+#: ../src/configuration/e-mail-config-mapi-backend.c:821
 msgid "_Domain name:"
 msgstr "_Nazwa domeny:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:784
+#: ../src/configuration/e-mail-config-mapi-backend.c:834
 msgid "_Authenticate"
 msgstr "_Uwierzytelnij"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:792
+#: ../src/configuration/e-mail-config-mapi-backend.c:842
 msgid "_Use secure connection"
 msgstr "_Użycie bezpiecznego połączenia"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:807
+#: ../src/configuration/e-mail-config-mapi-backend.c:857
 msgid "_Kerberos authentication"
 msgstr "Uwierzytelnianie _Kerberos"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:819
+#: ../src/configuration/e-mail-config-mapi-backend.c:869
 msgid "_Realm name:"
 msgstr "Nazwa _obszaru:"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:186
-#: ../src/configuration/e-mail-config-mapi-page.c:247
+#: ../src/configuration/e-mail-config-mapi-page.c:191
+#: ../src/configuration/e-mail-config-mapi-page.c:252
 msgid "MAPI Settings"
 msgstr "Ustawienia MAPI"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:192
+#: ../src/configuration/e-mail-config-mapi-page.c:197
 msgid "View the size of all Exchange folders"
 msgstr "Wyświetla rozmiar wszystkich katalogów programu Exchange"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:196
+#: ../src/configuration/e-mail-config-mapi-page.c:201
 msgid "Folder _Size"
 msgstr "_Rozmiar katalogu"
 
@@ -604,76 +608,76 @@ msgstr "Rozmiar katalogu"
 msgid "Fetching folder list…"
 msgstr "Pobieranie listy katalogów…"
 
-#: ../src/configuration/e-mapi-config-utils.c:737
+#: ../src/configuration/e-mapi-config-utils.c:742
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr "Nie można modyfikować uprawnień katalogu \"%s\", proszę wybrać inny."
 
-#: ../src/configuration/e-mapi-config-utils.c:800
+#: ../src/configuration/e-mapi-config-utils.c:805
 msgid "Folder size..."
 msgstr "Rozmiar katalogu..."
 
-#: ../src/configuration/e-mapi-config-utils.c:807
+#: ../src/configuration/e-mapi-config-utils.c:812
 msgid "Subscribe to folder of other user..."
 msgstr "Subskrybuj katalog innego użytkownika..."
 
-#: ../src/configuration/e-mapi-config-utils.c:816
-#: ../src/configuration/e-mapi-config-utils.c:1094
-#: ../src/configuration/e-mapi-config-utils.c:1124
-#: ../src/configuration/e-mapi-config-utils.c:1154
-#: ../src/configuration/e-mapi-config-utils.c:1184
+#: ../src/configuration/e-mapi-config-utils.c:821
+#: ../src/configuration/e-mapi-config-utils.c:1099
+#: ../src/configuration/e-mapi-config-utils.c:1129
+#: ../src/configuration/e-mapi-config-utils.c:1159
+#: ../src/configuration/e-mapi-config-utils.c:1189
 msgid "Permissions..."
 msgstr "Uprawnienia..."
 
-#: ../src/configuration/e-mapi-config-utils.c:818
+#: ../src/configuration/e-mapi-config-utils.c:823
 msgid "Edit MAPI folder permissions"
 msgstr "Modyfikacja uprawnień katalogu MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1096
+#: ../src/configuration/e-mapi-config-utils.c:1101
 msgid "Edit MAPI calendar permissions"
 msgstr "Modyfikacja uprawnień  MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1126
+#: ../src/configuration/e-mapi-config-utils.c:1131
 msgid "Edit MAPI tasks permissions"
 msgstr "Modyfikacja uprawnień zadań MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1156
+#: ../src/configuration/e-mapi-config-utils.c:1161
 msgid "Edit MAPI memos permissions"
 msgstr "Modyfikacja uprawnień notatek MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1186
+#: ../src/configuration/e-mapi-config-utils.c:1191
 msgid "Edit MAPI contacts permissions"
 msgstr "Modyfikacja uprawnień kontaktów MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1359
+#: ../src/configuration/e-mapi-config-utils.c:1364
 msgid "Personal Folders"
 msgstr "Katalogi osobiste"
 
-#: ../src/configuration/e-mapi-config-utils.c:1590
+#: ../src/configuration/e-mapi-config-utils.c:1595
 msgid "Searching remote MAPI folder structure, please wait..."
 msgstr "Wyszukiwanie zdalnej struktury katalogów MAPI, proszę czekać..."
 
-#: ../src/configuration/e-mapi-config-utils.c:1658
+#: ../src/configuration/e-mapi-config-utils.c:1663
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Nie można utworzyć kalendarza MAPI w trybie offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1661
+#: ../src/configuration/e-mapi-config-utils.c:1666
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "Nie można utworzyć listy zadań MAPI w trybie offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1664
+#: ../src/configuration/e-mapi-config-utils.c:1669
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "Nie można utworzyć listy notatek MAPI w trybie offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1667
+#: ../src/configuration/e-mapi-config-utils.c:1672
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "Nie można utworzyć książki adresowej MAPI w trybie offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1671
+#: ../src/configuration/e-mapi-config-utils.c:1677
 msgid "Cannot create MAPI source in offline mode"
 msgstr "Nie można utworzyć źródła MAPI w trybie offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1691
+#: ../src/configuration/e-mapi-config-utils.c:1697
 msgid "_Location:"
 msgstr "_Położenie:"
 
@@ -762,7 +766,7 @@ msgid "Edit MAPI folder permissions..."
 msgstr "Modyfikuj uprawnienia katalogu MAPI..."
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:960
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:625
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:626
 msgid "Account:"
 msgstr "Konto:"
 
@@ -960,27 +964,27 @@ msgstr "%s - %s"
 
 #. convert well-known names to their non-localized form
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:502
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:703
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:704
 msgid "Inbox"
 msgstr "Odebrane"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:504
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:704
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:705
 msgid "Contacts"
 msgstr "Kontakty"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:506
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:705
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:706
 msgid "Calendar"
 msgstr "Kalendarz"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:508
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:706
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:707
 msgid "Memos"
 msgstr "Notatki"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:510
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:707
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:708
 msgid "Tasks"
 msgstr "Zadania"
 
@@ -990,40 +994,40 @@ msgid "Testing availability of folder '%s' of user '%s', please wait..."
 msgstr ""
 "Testowanie dostępności katalogu \"%s\" użytkownika \"%s\", proszę czekać..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:604
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:605
 msgid "Subscribe to folder of other MAPI user..."
 msgstr "Subskrybuj katalog innego użytkownika MAPI..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:653
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:654
 msgid "User"
 msgstr "Użytkownik"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:660
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:661
 msgid "_User:"
 msgstr "_Użytkownik:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:673
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:674
 msgid "C_hoose..."
 msgstr "_Wybierz..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:688
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
 msgid "_Folder name:"
 msgstr "Nazwa _katalogu:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2077
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2080
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Zaakceptowano:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2082
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2085
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Wstępnie:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2087
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2090
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Odmówiono:"
@@ -1125,12 +1129,12 @@ msgid "Folder of user '%s' not found"
 msgstr "Nie odnaleziono katalogu użytkownika \"%s\""
 
 #. Translators: %s is replaced with an email address which was found ambiguous on a remote server
-#: ../src/libexchangemapi/e-mapi-connection.c:3690
+#: ../src/libexchangemapi/e-mapi-connection.c:3856
 #, c-format
 msgid "Recipient '%s' is ambiguous"
 msgstr "Odbiorca \"%s\" jest niejednoznaczny"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:4636
+#: ../src/libexchangemapi/e-mapi-connection.c:4948
 #, c-format
 msgid ""
 "Search result exceeded allowed size limit. Use more specific search term, "
@@ -1139,16 +1143,16 @@ msgstr ""
 "Wyniki wyszukiwania przekraczają dozwolone ograniczenie rozmiaru. Proszę "
 "użyć bardziej konkretnego terminu wyszukiwania"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6236
+#: ../src/libexchangemapi/e-mapi-connection.c:6549
 msgid "All Public Folders"
 msgstr "Wszystkie katalogi publiczne"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6503
+#: ../src/libexchangemapi/e-mapi-connection.c:6816
 #, c-format
 msgid "User name '%s' is ambiguous"
 msgstr "Nazwa użytkownika \"%s\" jest niejednoznaczna"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6506
+#: ../src/libexchangemapi/e-mapi-connection.c:6819
 #, c-format
 msgid "User name '%s' not found"
 msgstr "Nie odnaleziono nazwy użytkownika \"%s\""
