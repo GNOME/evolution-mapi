@@ -1,7 +1,7 @@
 SUBDIRS = src po
 DIST_SUBDIRS= src po
 
-@INTLTOOL_XML_NOMERGE_RULE@
+@INTLTOOL_XML_RULE@
 metainfodir = $(datadir)/appdata
 metainfo_in_files = evolution-mapi.metainfo.xml.in
 metainfo_files = $(metainfo_in_files:.xml.in=.xml)
