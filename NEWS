@@ -1,3 +1,17 @@
+evolution-mapi 3.12.7 2014-10-13
+--------------------------------
+
+Miscellaneous:
+	Add evolution-mapi.metainfo.xml file (Milan Crha)
+	Use INTLTOOL_XML_RULE for appdata files (Milan Crha)
+
+Translations:
+	Gábor Kelemen (hu)
+	Piotr Drąg (pl)
+	Мирослав Николић (sr)
+	Мирослав Николић (sr@latin)
+	Andika Triwidada (id)
+
 evolution-mapi 3.12.5 2014-08-11
 --------------------------------
 
