@@ -141,7 +141,7 @@ make_mapi_error (GError **perror, const gchar *context, enum MAPISTATUS mapi_sta
 	err (MAPI_E_SESSION_LIMIT,			_("Cannot create more sessions, session limit was reached"));
 	err (MAPI_E_USER_CANCEL,			_("User cancelled operation"));
 	err (MAPI_E_UNABLE_TO_ABORT,			_("Unable to abort"));
-	err (MAPI_E_NETWORK_ERROR,			_("Network error"));
+	err (ecRpcFailed,				_("Network error"));
 	err (MAPI_E_DISK_ERROR,				_("Disk error"));
 	err (MAPI_E_PASSWORD_CHANGE_REQUIRED,		_("Password change required"));
 	err (MAPI_E_PASSWORD_EXPIRED,			_("Password expired"));

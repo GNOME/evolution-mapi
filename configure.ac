@@ -203,6 +203,23 @@ LIBS=$save_libs
 AC_MSG_RESULT([$ac_cv_have_ftt21])
 
 dnl ****************************
+dnl Check for OpenChange 2.2 ecRpcFailed
+dnl ****************************
+AC_MSG_CHECKING([libmapi ecRpcFailed error code])
+save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
+save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
+AC_LINK_IFELSE([AC_LANG_PROGRAM(
+	[[#include <libmapi/libmapi.h>]],
+	[[uint32_t err = ecRpcFailed;]])],
+	[AC_DEFINE(HAVE_ECPRCFAILED_ERROR, 1, [libmapi defines ecRpcFailed error code]) ac_cv_have_ecrpcfailed=yes],[ac_cv_have_ecrpcfailed=no])
+CFLAGS=$save_cflags
+LIBS=$save_libs
+if [ test "x$ac_cv_have_ecrpcfailed" = "xno" ] ; then
+	CFLAGS="-DecRpcFailed=MAPI_E_NETWORK_ERROR $CFLAGS"
+fi
+AC_MSG_RESULT([$ac_cv_have_ecrpcfailed])
+
+dnl ****************************
 dnl Expose version information
 dnl ****************************
 API_VERSION=$EDS_PACKAGE
