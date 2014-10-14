@@ -2653,7 +2653,7 @@ mapi_authenticate_sync (CamelService *service,
 		if (camel_mapi_settings_get_listen_notifications (mapi_settings))
 			e_mapi_connection_enable_notifications (store->priv->connection, NULL, 0, NULL, NULL);
 	} else if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_LOGON_FAILED) ||
-		   g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR)) {
+		   g_error_matches (mapi_error, E_MAPI_ERROR, ecRpcFailed)) {
 		g_clear_error (&mapi_error);
 		result = CAMEL_AUTHENTICATION_REJECTED;
 	} else {
@@ -2757,10 +2757,10 @@ camel_mapi_store_maybe_disconnect (CamelMapiStore *mapi_store,
 	}
 	g_rec_mutex_unlock (&mapi_store->priv->connection_lock);
 
-	if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR) ||
+	if (g_error_matches (mapi_error, E_MAPI_ERROR, ecRpcFailed) ||
 	    g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_CALL_FAILED))
 		camel_service_disconnect_sync (CAMEL_SERVICE (mapi_store),
-			!g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR),
+			!g_error_matches (mapi_error, E_MAPI_ERROR, ecRpcFailed),
 			NULL, NULL);
 }
 

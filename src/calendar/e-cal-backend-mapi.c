@@ -179,7 +179,7 @@ mapi_error_to_edc_error (GError **perror, const GError *mapi_error, EDataCalCall
 		case MAPI_E_PASSWORD_EXPIRED:
 			code = AuthenticationRequired;
 			break;
-		case MAPI_E_NETWORK_ERROR:
+		case ecRpcFailed:
 			code = RepositoryOffline;
 			break;
 		default:
@@ -1304,10 +1304,10 @@ e_cal_backend_mapi_maybe_disconnect (ECalBackendMAPI *cbma,
 	if (!mapi_error || !cbma->priv->conn)
 		return;
 
-	if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR) ||
+	if (g_error_matches (mapi_error, E_MAPI_ERROR, ecRpcFailed) ||
 	    g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_CALL_FAILED)) {
 		e_mapi_connection_disconnect (cbma->priv->conn,
-			!g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR),
+			!g_error_matches (mapi_error, E_MAPI_ERROR, ecRpcFailed),
 			NULL, NULL);
 		g_object_unref (cbma->priv->conn);
 		cbma->priv->conn = NULL;

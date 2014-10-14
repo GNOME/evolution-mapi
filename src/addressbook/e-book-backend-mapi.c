@@ -466,10 +466,10 @@ e_book_backend_mapi_maybe_disconnect (EBookBackendMAPI *ebma,
 	if (!mapi_error || !ebma->priv->conn)
 		return;
 
-	if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR) ||
+	if (g_error_matches (mapi_error, E_MAPI_ERROR, ecRpcFailed) ||
 	    g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_CALL_FAILED)) {
 		e_mapi_connection_disconnect (ebma->priv->conn,
-			!g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_NETWORK_ERROR),
+			!g_error_matches (mapi_error, E_MAPI_ERROR, ecRpcFailed),
 			NULL, NULL);
 		g_object_unref (ebma->priv->conn);
 		ebma->priv->conn = NULL;
@@ -1721,7 +1721,7 @@ mapi_error_to_edb_error (GError **perror, const GError *mapi_error, EDataBookSta
 		case MAPI_E_PASSWORD_EXPIRED:
 			code = E_DATA_BOOK_STATUS_AUTHENTICATION_REQUIRED;
 			break;
-		case MAPI_E_NETWORK_ERROR:
+		case ecRpcFailed:
 			code = E_DATA_BOOK_STATUS_REPOSITORY_OFFLINE;
 			break;
 		default:
