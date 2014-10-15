@@ -81,7 +81,6 @@ struct _ECalBackendMAPIPrivate {
 	ECalBackendStore	*store;
 	gboolean		read_only;
 	gchar			*uri;
-	gboolean		mode_changed;
 	GMutex			updating_mutex;
 	GMutex			is_updating_mutex;
 	gboolean		is_updating;
@@ -1252,13 +1251,8 @@ ecbm_connect_user (ECalBackend *backend,
 	if (priv->store && priv->fid) {
 		e_backend_set_online (E_BACKEND (cbmapi), TRUE);
 
-		if (priv->mode_changed && !priv->dthread) {
-			priv->mode_changed = FALSE;
-			run_delta_thread (cbmapi);
-		}
+		run_delta_thread (cbmapi);
 	}
-
-	priv->mode_changed = FALSE;
 
 	return E_SOURCE_AUTHENTICATION_ACCEPTED;
 }
@@ -2558,7 +2552,6 @@ ecbm_notify_online_cb (ECalBackend *backend, GParamSpec *pspec)
 
 	g_mutex_lock (&priv->mutex);
 
-	priv->mode_changed = TRUE;
 	if (online) {
 		priv->read_only = FALSE;
 	} else {
