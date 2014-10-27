@@ -1,3 +1,25 @@
+evolution-mapi 3.13.7 2014-10-27
+--------------------------------
+
+Bug Fixes:
+	Bug 653157 - Enable extra compiler warnings in maintainer mode only (Milan Crha)
+	Bug 738512 - Build break with OpenChange 2.2 (Milan Crha)
+
+Miscellaneous:
+	Add evolution-mapi.metainfo.xml file (Milan Crha)
+	Use INTLTOOL_XML_RULE for appdata files (Milan Crha)
+	Always update local calendar content after successfully connected (Milan Crha)
+
+Translations:
+	Saibal Ray (bn_IN)
+	Nilamdyuti Goswami (as)
+	Piotr Drąg (pl)
+	Andika Triwidada (id)
+	Sweta Kothari (gu)
+	Мирослав Николић (sr)
+	Мирослав Николић (sr@latin)
+	Marek Černocký (cs)
+
 evolution-mapi 3.13.6 2014-09-22
 --------------------------------
 
