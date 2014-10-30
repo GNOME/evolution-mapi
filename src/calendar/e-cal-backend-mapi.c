@@ -2270,19 +2270,14 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 		icalcomponent *subcomp = icalcomponent_get_first_component (icalcomp, kind);
 		while (subcomp && !stop) {
 			ECalComponent *comp = e_cal_component_new ();
+			ECalObjModType mod;
 			gchar *rid = NULL;
 			const gchar *uid;
 			gchar *comp_str;
 			ECalComponent *old_ecalcomp = NULL, *new_ecalcomp = NULL;
 
 			e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
-
-			/* FIXME: Add support for recurrences */
-			if (e_cal_component_has_recurrences (comp)) {
-				g_object_unref (comp);
-				g_propagate_error (error, EDC_ERROR_EX (OtherError, "No support for recurrences"));
-				return;
-			}
+			mod = e_cal_component_is_instance (comp) ? E_CAL_OBJ_MOD_THIS : E_CAL_OBJ_MOD_ALL;
 
 			e_cal_component_get_uid (comp, &uid);
 			rid = e_cal_component_get_recurid_as_string (comp);
@@ -2298,7 +2293,7 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 				} else {
 					g_free (comp_str);
 					comp_str = e_cal_component_get_as_string (comp);
-					ecbm_modify_object (backend, cal, cancellable, comp_str, E_CAL_OBJ_MOD_ALL, &old_ecalcomp, &new_ecalcomp, &err);
+					ecbm_modify_object (backend, cal, cancellable, comp_str, mod, &old_ecalcomp, &new_ecalcomp, &err);
 				}
 				g_free (comp_str);
 
@@ -2350,7 +2345,7 @@ ecbm_receive_objects (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 						e_cal_component_set_attendee_list (cache_comp, cache_attendees);
 
 						comp_str = e_cal_component_get_as_string (cache_comp);
-						ecbm_modify_object (backend, cal, cancellable, comp_str, E_CAL_OBJ_MOD_ALL, &old_ecalcomp, &new_ecalcomp, &err);
+						ecbm_modify_object (backend, cal, cancellable, comp_str, mod, &old_ecalcomp, &new_ecalcomp, &err);
 
 						g_free (comp_str);
 					}
