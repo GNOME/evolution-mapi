@@ -1,3 +1,17 @@
+evolution-mapi 3.12.8 2014-11-10
+--------------------------------
+
+Bug Fixes:
+	Bug 738512 - Build break with OpenChange 2.2 (Milan Crha)
+	Bug 683552 - Cannot receive recurring meetings (Milan Crha)
+
+Miscellaneous:
+	Always update local calendar content after successfully connected (Milan Crha)
+
+Translations:
+	Rafael Ferreira (pt_BR)
+	Marek Černocký (cs)
+
 evolution-mapi 3.12.7 2014-10-13
 --------------------------------
 
