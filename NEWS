@@ -1,3 +1,13 @@
+evolution-mapi 3.13.8 2014-11-24
+--------------------------------
+
+Bug Fixes:
+	Bug 683552 - Cannot receive recurring meetings (Milan Crha)
+
+Translations:
+	Rafael Ferreira (pt_BR)
+	Tom Tryfonidis (el)
+
 evolution-mapi 3.13.7 2014-10-27
 --------------------------------
 
