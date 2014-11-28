@@ -3,35 +3,45 @@
 # This file is distributed under the same license as the evolution-mapi package.
 #
 # Gabor Kelemen <kelemeng at gnome dot hu>, 2009, 2010, 2011, 2012.
-# Balázs Úr <urbalazs at gmail dot com>, 2011.
+# Balázs Úr <urbalazs at gmail dot com>, 2011, 2014.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-09-22 02:47+0200\n"
-"PO-Revision-Date: 2012-09-22 02:48+0200\n"
-"Last-Translator: Gabor Kelemen <kelemeng at gnome dot hu>\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
+"POT-Creation-Date: 2014-11-28 17:31+0000\n"
+"PO-Revision-Date: 2014-11-28 23:49+0100\n"
+"Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
 "Language-Team: Hungarian <gnome-hu-list at gnome dot org>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.11.4\n"
+"X-Generator: Lokalize 1.2\n"
 "Plural-Forms:  nplurals=2; plural=(n != 1);\n"
 
-#: ../src/addressbook/e-book-backend-mapi.c:748
+#: ../evolution-mapi.metainfo.xml.in.h:1
+#| msgid "Exchange MAPI server %s"
+msgid "Exchange MAPI"
+msgstr "Exchange MAPI"
+
+#: ../evolution-mapi.metainfo.xml.in.h:2 ../src/camel/camel-mapi-provider.c:73
+msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
+msgstr ""
+"Microsoft Exchange 2007/OpenChange kiszolgálók elérése MAPI használatával"
+
+#: ../src/addressbook/e-book-backend-mapi.c:735
 msgid "Searching"
 msgstr "Keresés"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1738
-#: ../src/calendar/e-cal-backend-mapi.c:193
-#: ../src/calendar/e-cal-backend-mapi.c:542
-#: ../src/camel/camel-mapi-folder.c:1871 ../src/camel/camel-mapi-folder.c:1947
+#: ../src/addressbook/e-book-backend-mapi.c:1735
+#: ../src/calendar/e-cal-backend-mapi.c:192
+#: ../src/calendar/e-cal-backend-mapi.c:491
+#: ../src/camel/camel-mapi-folder.c:1937 ../src/camel/camel-mapi-folder.c:2017
 msgid "Unknown error"
 msgstr "Ismeretlen hiba"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:432
-#: ../src/calendar/e-cal-backend-mapi.c:411
 msgid "Failed to remove public folder"
 msgstr "A nyilvános mappa eltávolítása meghiúsult"
 
@@ -40,8 +50,8 @@ msgid "The backend does not support bulk additions"
 msgstr "A háttérprogram nem támogatja a tömeges hozzáadásokat"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:510
-#: ../src/calendar/e-cal-backend-mapi.c:1766
-#: ../src/calendar/e-cal-backend-mapi.c:2277
+#: ../src/calendar/e-cal-backend-mapi.c:1709
+#: ../src/calendar/e-cal-backend-mapi.c:2220
 msgid "Failed to create item on a server"
 msgstr "Nem sikerült létrehozni az elemet a kiszolgálón"
 
@@ -50,7 +60,7 @@ msgid "The backend does not support bulk modifications"
 msgstr "A háttérprogram nem támogatja a tömeges módosításokat"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:672
-#: ../src/calendar/e-cal-backend-mapi.c:1979
+#: ../src/calendar/e-cal-backend-mapi.c:1922
 msgid "Failed to modify item on a server"
 msgstr "Nem sikerült módosítani az elemet a kiszolgálón"
 
@@ -106,42 +116,41 @@ msgid "Failed to fetch GAL entries"
 msgstr "A GAL-bejegyzések letöltése meghiúsult"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:481
+#: ../src/calendar/e-cal-backend-mapi.c:416
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Elemek letöltése a(z) %s mappába"
 
-#: ../src/calendar/e-cal-backend-mapi.c:834
+#: ../src/calendar/e-cal-backend-mapi.c:783
 #, c-format
 msgid "Failed to open folder: %s"
 msgstr "A mappa megnyitása meghiúsult: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:842
+#: ../src/calendar/e-cal-backend-mapi.c:791
 #, c-format
 msgid "Failed to get folder properties: %s"
 msgstr "A mappa tulajdonságainak lekérése meghiúsult: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:883
+#: ../src/calendar/e-cal-backend-mapi.c:832
 #, c-format
 msgid "Failed to list objects: %s"
 msgstr "Nem sikerült felsorolni az objektumokat: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:909
+#: ../src/calendar/e-cal-backend-mapi.c:858
 #, c-format
 msgid "Failed to transfer objects: %s"
 msgstr "Nem sikerült átvinni az objektumokat: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:928
+#: ../src/calendar/e-cal-backend-mapi.c:877
 #, c-format
 msgid "Failed to close folder: %s"
 msgstr "A mappa bezárása meghiúsult: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1425
-#: ../src/calendar/e-cal-backend-mapi.c:1426
+#: ../src/calendar/e-cal-backend-mapi.c:1375
 msgid "Could not create cache file"
 msgstr "Nem lehet létrehozni a gyorsítótár fájlt"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1887
+#: ../src/calendar/e-cal-backend-mapi.c:1830
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -149,89 +158,89 @@ msgstr ""
 "Ismétlődő értekezlet egyedi példányainak módosítása még nem támogatott. Az "
 "értekezlet nem módosult a kiszolgálón."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2092
+#: ../src/calendar/e-cal-backend-mapi.c:2035
 msgid "Cannot remove items from a server"
 msgstr "Nem lehet eltávolítani az elemeket a kiszolgálóról"
 
-#: ../src/calendar/e-cal-backend-mapi.c:2529
+#: ../src/calendar/e-cal-backend-mapi.c:2466
 msgid "Failed to get Free/Busy data"
 msgstr "Nem sikerült lekérni a szabad/elfoglalt adatokat"
 
-#: ../src/camel/camel-mapi-folder.c:777
+#: ../src/camel/camel-mapi-folder.c:805
 #, c-format
 msgid "Refreshing folder '%s'"
 msgstr "„%s” mappa frissítése"
 
-#: ../src/camel/camel-mapi-folder.c:844
+#: ../src/camel/camel-mapi-folder.c:873
 #, c-format
 msgid "Downloading messages in folder '%s'"
 msgstr "Üzenetek letöltése a(z) „%s” mappából"
 
-#: ../src/camel/camel-mapi-folder.c:931 ../src/camel/camel-mapi-folder.c:1512
+#: ../src/camel/camel-mapi-folder.c:961 ../src/camel/camel-mapi-folder.c:1569
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Ez az üzenet nem érhető el kapcsolat nélküli módban."
 
-#: ../src/camel/camel-mapi-folder.c:941 ../src/camel/camel-mapi-folder.c:959
+#: ../src/camel/camel-mapi-folder.c:971 ../src/camel/camel-mapi-folder.c:989
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Az elemek letöltése meghiúsult: %s"
 
-#: ../src/camel/camel-mapi-folder.c:946 ../src/camel/camel-mapi-folder.c:964
+#: ../src/camel/camel-mapi-folder.c:976 ../src/camel/camel-mapi-folder.c:994
 msgid "Fetching items failed"
 msgstr "Az elemek letöltése meghiúsult"
 
-#: ../src/camel/camel-mapi-folder.c:1204
+#: ../src/camel/camel-mapi-folder.c:1248
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Nem fűzhető az üzenet a következő mappához: „%s”"
 
-#: ../src/camel/camel-mapi-folder.c:1213 ../src/camel/camel-mapi-folder.c:1241
+#: ../src/camel/camel-mapi-folder.c:1257 ../src/camel/camel-mapi-folder.c:1287
 #, c-format
 msgid "Offline."
 msgstr "Kapcsolat nélkül."
 
-#: ../src/camel/camel-mapi-folder.c:1322
+#: ../src/camel/camel-mapi-folder.c:1370
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "Nem sikerült a Kukát üríteni: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1328
+#: ../src/camel/camel-mapi-folder.c:1376
 msgid "Failed to empty Trash"
 msgstr "Nem sikerült a Kukát üríteni"
 
-#: ../src/camel/camel-mapi-folder.c:1497
+#: ../src/camel/camel-mapi-folder.c:1554
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Nem sikerült betölteni a levelet: %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1498
+#: ../src/camel/camel-mapi-folder.c:1555
 msgid "No such message"
 msgstr "Nincs ilyen üzenet"
 
-#: ../src/camel/camel-mapi-folder.c:1523 ../src/camel/camel-mapi-folder.c:1553
+#: ../src/camel/camel-mapi-folder.c:1580 ../src/camel/camel-mapi-folder.c:1612
 #, c-format
 msgid "Could not get message: %s"
 msgstr "Nem sikerült az üzenetet letölteni: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1529 ../src/camel/camel-mapi-folder.c:1560
+#: ../src/camel/camel-mapi-folder.c:1586 ../src/camel/camel-mapi-folder.c:1619
 #, c-format
 msgid "Could not get message"
 msgstr "Nem sikerült az üzenetet letölteni"
 
-#: ../src/camel/camel-mapi-folder.c:1927
+#: ../src/camel/camel-mapi-folder.c:1994
 msgid "Receive quota"
 msgstr "Fogadási kvóta"
 
-#: ../src/camel/camel-mapi-folder.c:1933
+#: ../src/camel/camel-mapi-folder.c:2000
 msgid "Send quota"
 msgstr "Küldési kvóta"
 
-#: ../src/camel/camel-mapi-folder.c:1952
+#: ../src/camel/camel-mapi-folder.c:2022
 msgid "No quota information available"
 msgstr "Nem érhetők el kvótainformációk"
 
-#: ../src/camel/camel-mapi-folder.c:2055
+#: ../src/camel/camel-mapi-folder.c:2124
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nem sikerült betölteni %s összefoglalóját"
@@ -268,20 +277,17 @@ msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Levélszemét keresése _csak a Beérkezett üzenetek mappában"
 
 #: ../src/camel/camel-mapi-provider.c:62
-#: ../src/configuration/e-mapi-config-utils.c:1632
+#: ../src/configuration/e-mapi-config-utils.c:1644
 msgid "Lis_ten for server notifications"
 msgstr "_Kiszolgáló értesítéseinek figyelése"
-
-#: ../src/camel/camel-mapi-provider.c:73
-msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
-msgstr "Microsoft Exchange 2007/OpenChange kiszolgálók elérése MAPI használatával"
 
 #: ../src/camel/camel-mapi-provider.c:88
 msgid "Password"
 msgstr "Jelszó"
 
 #: ../src/camel/camel-mapi-provider.c:89
-msgid "This option will connect to the OpenChange server using a plaintext password."
+msgid ""
+"This option will connect to the OpenChange server using a plaintext password."
 msgstr ""
 "Ez a lehetőség az OpenChange kiszolgálóhoz egyszerű szöveges jelszóval "
 "csatlakozik."
@@ -294,120 +300,120 @@ msgstr "Kerberos"
 msgid "This option will connect to the server using kerberos key."
 msgstr "Kapcsolódás a kiszolgálóhoz Kerberos kulcs használatával."
 
-#: ../src/camel/camel-mapi-store.c:133 ../src/camel/camel-mapi-store.c:175
+#: ../src/camel/camel-mapi-store.c:134 ../src/camel/camel-mapi-store.c:176
 msgid "Cannot find folder in a local cache"
 msgstr "A mappa nem található meg helyi gyorsítótárban"
 
-#: ../src/camel/camel-mapi-store.c:481 ../src/camel/camel-mapi-store.c:1183
+#: ../src/camel/camel-mapi-store.c:492 ../src/camel/camel-mapi-store.c:1179
 msgid "Folder list is not available in offline mode"
 msgstr "A mappalista nem érhető el kapcsolat nélküli módban"
 
-#: ../src/camel/camel-mapi-store.c:858
+#: ../src/camel/camel-mapi-store.c:872
 msgid "No public folder found"
 msgstr "Nem található nyilvános mappa"
 
-#: ../src/camel/camel-mapi-store.c:858
+#: ../src/camel/camel-mapi-store.c:872
 msgid "No folder found"
 msgstr "Nem található mappa"
 
-#: ../src/camel/camel-mapi-store.c:1205 ../src/camel/camel-mapi-store.c:2148
+#: ../src/camel/camel-mapi-store.c:1201 ../src/camel/camel-mapi-store.c:2168
 #, c-format
 msgid "Connecting to '%s'"
 msgstr "Kapcsolódás a következőhöz: „%s”"
 
-#: ../src/camel/camel-mapi-store.c:1264
+#: ../src/camel/camel-mapi-store.c:1260
 msgid "Cannot create MAPI folders in offline mode"
 msgstr "Nem lehet MAPI mappákat létrehozni kapcsolat nélküli módban"
 
-#: ../src/camel/camel-mapi-store.c:1271
+#: ../src/camel/camel-mapi-store.c:1267
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "Nem hozható létre az új „%s” mappa"
 
-#: ../src/camel/camel-mapi-store.c:1280
+#: ../src/camel/camel-mapi-store.c:1276
 #, c-format
 msgid "Authentication failed"
 msgstr "Hitelesítés sikertelen"
 
-#: ../src/camel/camel-mapi-store.c:1290
+#: ../src/camel/camel-mapi-store.c:1286
 msgid "MAPI folders can be created only within mailbox of the logged user"
 msgstr ""
 "MAPI mappák csak a bejelentkezett felhasználó postafiókján belül hozhatók "
 "létre"
 
-#: ../src/camel/camel-mapi-store.c:1303 ../src/camel/camel-mapi-store.c:1408
+#: ../src/camel/camel-mapi-store.c:1299 ../src/camel/camel-mapi-store.c:1412
 #, c-format
 msgid "Cannot find folder '%s'"
 msgstr "Nem található a(z) „%s” mappa"
 
-#: ../src/camel/camel-mapi-store.c:1353
+#: ../src/camel/camel-mapi-store.c:1354
 #, c-format
 msgid "Cannot create folder '%s': %s"
 msgstr "Nem lehet létrehozni a(z) „%s” mappát: %s"
 
-#: ../src/camel/camel-mapi-store.c:1359
+#: ../src/camel/camel-mapi-store.c:1360
 #, c-format
 msgid "Cannot create folder '%s'"
 msgstr "Nem lehet létrehozni a(z) „%s” mappát"
 
-#: ../src/camel/camel-mapi-store.c:1386 ../src/camel/camel-mapi-store.c:1398
+#: ../src/camel/camel-mapi-store.c:1390 ../src/camel/camel-mapi-store.c:1402
 msgid "Cannot delete MAPI folders in offline mode"
 msgstr "Nem lehet MAPI mappákat törölni kapcsolat nélküli módban"
 
-#: ../src/camel/camel-mapi-store.c:1448
+#: ../src/camel/camel-mapi-store.c:1458
 #, c-format
 msgid "Cannot remove folder '%s': %s"
 msgstr "Nem távolítható el a(z) „%s” mappa: %s"
 
-#: ../src/camel/camel-mapi-store.c:1456
+#: ../src/camel/camel-mapi-store.c:1466
 #, c-format
 msgid "Cannot remove folder '%s'"
 msgstr "Nem távolítható el a(z) „%s” mappa"
 
-#: ../src/camel/camel-mapi-store.c:1485 ../src/camel/camel-mapi-store.c:1500
+#: ../src/camel/camel-mapi-store.c:1496 ../src/camel/camel-mapi-store.c:1511
 msgid "Cannot rename MAPI folders in offline mode"
 msgstr "Nem lehet MAPI mappákat átnevezni kapcsolat nélküli módban"
 
-#: ../src/camel/camel-mapi-store.c:1511
+#: ../src/camel/camel-mapi-store.c:1522
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
 msgstr "Nem nevezhető át a nem létező „%s” MAPI mappa"
 
-#: ../src/camel/camel-mapi-store.c:1522
+#: ../src/camel/camel-mapi-store.c:1533
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'"
 msgstr "Nem nevezhető át az alapértelmezett „%s” MAPI mappa erre: „%s”"
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1548 ../src/camel/camel-mapi-store.c:1581
-#: ../src/camel/camel-mapi-store.c:1659
+#: ../src/camel/camel-mapi-store.c:1559 ../src/camel/camel-mapi-store.c:1602
+#: ../src/camel/camel-mapi-store.c:1682
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "Nem nevezhető át a(z) „%s” MAPI mappa erre: „%s”"
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
 #. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1573 ../src/camel/camel-mapi-store.c:1652
+#: ../src/camel/camel-mapi-store.c:1594 ../src/camel/camel-mapi-store.c:1675
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "Nem nevezhető át a(z) „%s” MAPI mappa erre: „%s”: %s"
 
-#: ../src/camel/camel-mapi-store.c:1755
+#: ../src/camel/camel-mapi-store.c:1772
 msgid "Cannot subscribe MAPI folders in offline mode"
 msgstr "Nem lehet MAPI mappákra feliratkozni kapcsolat nélküli módban"
 
-#: ../src/camel/camel-mapi-store.c:1772
+#: ../src/camel/camel-mapi-store.c:1789
 #, c-format
 msgid "Folder '%s' not found"
 msgstr "A(z) „%s” mappa nem található"
 
-#: ../src/camel/camel-mapi-store.c:1890
+#: ../src/camel/camel-mapi-store.c:1907
 msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr "Nem lehet MAPI mappákról leiratkozni kapcsolat nélküli módban"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:2103
-#: ../src/camel/camel-mapi-transport.c:191
+#: ../src/camel/camel-mapi-store.c:2119
+#: ../src/camel/camel-mapi-transport.c:195
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI kiszolgáló %s"
@@ -415,80 +421,82 @@ msgstr "Exchange MAPI kiszolgáló %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:2107
-#: ../src/camel/camel-mapi-transport.c:194
+#: ../src/camel/camel-mapi-store.c:2123
+#: ../src/camel/camel-mapi-transport.c:198
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Exchange MAPI szolgáltatás %s számára ezen: %s"
 
-#: ../src/camel/camel-mapi-store.c:2133
+#: ../src/camel/camel-mapi-store.c:2150
 msgid "Cannot connect MAPI store in offline mode"
 msgstr "Nem lehet a MAPI tárolóhoz kapcsolódni kapcsolat nélküli módban"
 
-#: ../src/camel/camel-mapi-store.c:2178
+#: ../src/camel/camel-mapi-store.c:2203
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received or sent."
-msgstr "A(Z) „%s” postafiók tele van, nem lesznek új levelek fogadva vagy küldve."
+msgstr ""
+"A(Z) „%s” postafiók tele van, nem lesznek új levelek fogadva vagy küldve."
 
-#: ../src/camel/camel-mapi-store.c:2180
+#: ../src/camel/camel-mapi-store.c:2205
 #, c-format
-msgid "Mailbox '%s' is near its size limit, message send will be disabled soon."
+msgid ""
+"Mailbox '%s' is near its size limit, message send will be disabled soon."
 msgstr ""
 "A(z) „%s” postafiók közelít a méretkorlátjához, az üzenetküldés hamarosan "
 "kikapcsolásra kerül."
 
-#: ../src/camel/camel-mapi-store.c:2184
+#: ../src/camel/camel-mapi-store.c:2209
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received."
 msgstr "A(Z) „%s” postafiók tele van, nem lesznek új levelek fogadva."
 
-#: ../src/camel/camel-mapi-store.c:2186
+#: ../src/camel/camel-mapi-store.c:2211
 #, c-format
 msgid "Mailbox '%s' is near its size limit."
 msgstr "A(z) „%s” postafiók közelít a méretkorlátjához."
 
-#: ../src/camel/camel-mapi-store.c:2598
+#: ../src/camel/camel-mapi-store.c:2631
 msgid "Authentication password not available"
 msgstr "A hitelesítési jelszó nem érhető el"
 
-#: ../src/camel/camel-mapi-transport.c:142
-#: ../src/camel/camel-mapi-transport.c:164
+#: ../src/camel/camel-mapi-transport.c:146
+#: ../src/camel/camel-mapi-transport.c:168
 #, c-format
 msgid "Could not send message."
 msgstr "Az üzenet nem küldhető el."
 
-#: ../src/camel/camel-mapi-transport.c:159
+#: ../src/camel/camel-mapi-transport.c:163
 #, c-format
 msgid "Could not send message: %s"
 msgstr "Nem sikerült elküldeni a levelet: %s"
 
-#: ../src/collection/e-mapi-backend.c:273
+#: ../src/collection/e-mapi-backend.c:278
 msgid "Global Address List"
 msgstr "Globális címlista"
 
-#: ../src/collection/e-mapi-backend.c:591
-#: ../src/collection/e-mapi-backend.c:678
+#: ../src/collection/e-mapi-backend.c:651
+#: ../src/collection/e-mapi-backend.c:737
 #, c-format
 msgid "Data source '%s' does not represent a MAPI folder"
 msgstr "A(z) „%s” adatforrás nem egy MAPI mappát képvisel"
 
-#: ../src/configuration/e-book-config-mapigal.c:63
+#: ../src/configuration/e-book-config-mapigal.c:61
 msgid "Allow _partial search results"
 msgstr "_Részleges találatok engedélyezése"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:126
+#: ../src/configuration/e-mail-config-mapi-backend.c:125
 msgid "Select username"
 msgstr "Válasszon felhasználónevet"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:136
+#: ../src/configuration/e-mail-config-mapi-backend.c:135
 msgid "Full name"
 msgstr "Teljes név"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:141
+#: ../src/configuration/e-mail-config-mapi-backend.c:140
 msgid "Username"
 msgstr "Felhasználónév"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:168
+#: ../src/configuration/e-mail-config-mapi-backend.c:167
 msgid ""
 "There are more users with similar user name on a server.\n"
 "Please select that you would like to use from the below list."
@@ -496,20 +504,20 @@ msgstr ""
 "Több felhasználó van a kiszolgálón hasonló felhasználónévvel.\n"
 "Válassza ki a lenti listából a használni kívántat."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:396
+#: ../src/configuration/e-mail-config-mapi-backend.c:395
 msgid "Authentication finished successfully."
 msgstr "A hitelesítés sikeres."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:398
-#: ../src/configuration/e-mail-config-mapi-backend.c:519
+#: ../src/configuration/e-mail-config-mapi-backend.c:397
+#: ../src/configuration/e-mail-config-mapi-backend.c:517
 msgid "Authentication failed."
 msgstr "A hitelesítés meghiúsult."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:460
+#: ../src/configuration/e-mail-config-mapi-backend.c:458
 msgid "Cannot authenticate MAPI accounts in offline mode"
 msgstr "Nem lehet MAPI mappákat hitelesíteni kapcsolat nélküli módban"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:489
+#: ../src/configuration/e-mail-config-mapi-backend.c:487
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -517,7 +525,7 @@ msgstr ""
 "A kiszolgáló, felhasználónév és tartomány nem lehet üres. Töltse ki ezeket "
 "helyes értékekkel."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:492
+#: ../src/configuration/e-mail-config-mapi-backend.c:490
 msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
@@ -525,146 +533,147 @@ msgstr ""
 "A tartomány nem lehet üres Kerberos kiválasztásakor. Töltse ki ezeket helyes "
 "értékekkel."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:513
+#: ../src/configuration/e-mail-config-mapi-backend.c:511
 msgid "Connecting to the server, please wait..."
 msgstr "Kapcsolódás a kiszolgálóhoz, kis türelmet…"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:721
+#: ../src/configuration/e-mail-config-mapi-backend.c:716
 msgid "Configuration"
 msgstr "Beállítás"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:730
+#: ../src/configuration/e-mail-config-mapi-backend.c:725
 msgid "_Server:"
 msgstr "_Kiszolgáló:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:747
+#: ../src/configuration/e-mail-config-mapi-backend.c:742
 msgid "User_name:"
 msgstr "_Felhasználónév:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:772
+#: ../src/configuration/e-mail-config-mapi-backend.c:767
 msgid "_Domain name:"
 msgstr "_Tartománynév:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:785
+#: ../src/configuration/e-mail-config-mapi-backend.c:780
 msgid "_Authenticate"
 msgstr "_Hitelesítés"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:793
+#: ../src/configuration/e-mail-config-mapi-backend.c:788
 msgid "_Use secure connection"
 msgstr "Bi_ztonságos kapcsolat használata"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:808
+#: ../src/configuration/e-mail-config-mapi-backend.c:803
 msgid "_Kerberos authentication"
 msgstr "_Kerberos hitelesítés"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:820
+#: ../src/configuration/e-mail-config-mapi-backend.c:815
 msgid "_Realm name:"
 msgstr "_Tartománynév:"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:186
-#: ../src/configuration/e-mail-config-mapi-page.c:247
+#: ../src/configuration/e-mail-config-mapi-page.c:191
+#: ../src/configuration/e-mail-config-mapi-page.c:252
 msgid "MAPI Settings"
 msgstr "MAPI beállításai"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:192
+#: ../src/configuration/e-mail-config-mapi-page.c:197
 msgid "View the size of all Exchange folders"
 msgstr "Az összes Exchange mappa méretének megjelenítése"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:196
+#: ../src/configuration/e-mail-config-mapi-page.c:201
 msgid "Folder _Size"
 msgstr "Mappa mé_rete"
 
-#: ../src/configuration/e-mapi-config-utils.c:454
+#: ../src/configuration/e-mapi-config-utils.c:457
 msgid "Folder"
 msgstr "Mappa"
 
-#: ../src/configuration/e-mapi-config-utils.c:459
+#: ../src/configuration/e-mapi-config-utils.c:462
 msgid "Size"
 msgstr "Méret"
 
-#: ../src/configuration/e-mapi-config-utils.c:482
-#: ../src/configuration/e-mapi-config-utils.c:486
+#: ../src/configuration/e-mapi-config-utils.c:485
+#: ../src/configuration/e-mapi-config-utils.c:489
 msgid "Unable to retrieve folder size information"
 msgstr "A mappaméret-információk nem kérhetők le"
 
-#: ../src/configuration/e-mapi-config-utils.c:552
+#: ../src/configuration/e-mapi-config-utils.c:556
 msgid "Folder Size"
 msgstr "Mappa mérete"
 
-#: ../src/configuration/e-mapi-config-utils.c:566
+#: ../src/configuration/e-mapi-config-utils.c:570
 msgid "Fetching folder list…"
 msgstr "Mappalista letöltése…"
 
-#: ../src/configuration/e-mapi-config-utils.c:732
+#: ../src/configuration/e-mapi-config-utils.c:744
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
-msgstr "Nem szerkeszthetők a(z) „%s” mappa jogosultságai, válasszon másik mappát."
+msgstr ""
+"Nem szerkeszthetők a(z) „%s” mappa jogosultságai, válasszon másik mappát."
 
-#: ../src/configuration/e-mapi-config-utils.c:795
+#: ../src/configuration/e-mapi-config-utils.c:807
 msgid "Folder size..."
 msgstr "Mappa mérete…"
 
-#: ../src/configuration/e-mapi-config-utils.c:802
+#: ../src/configuration/e-mapi-config-utils.c:814
 msgid "Subscribe to folder of other user..."
 msgstr "Feliratkozás más felhasználó mappájára…"
 
-#: ../src/configuration/e-mapi-config-utils.c:811
-#: ../src/configuration/e-mapi-config-utils.c:1089
-#: ../src/configuration/e-mapi-config-utils.c:1119
-#: ../src/configuration/e-mapi-config-utils.c:1149
-#: ../src/configuration/e-mapi-config-utils.c:1179
+#: ../src/configuration/e-mapi-config-utils.c:823
+#: ../src/configuration/e-mapi-config-utils.c:1101
+#: ../src/configuration/e-mapi-config-utils.c:1131
+#: ../src/configuration/e-mapi-config-utils.c:1161
+#: ../src/configuration/e-mapi-config-utils.c:1191
 msgid "Permissions..."
 msgstr "Jogosultságok…"
 
-#: ../src/configuration/e-mapi-config-utils.c:813
+#: ../src/configuration/e-mapi-config-utils.c:825
 msgid "Edit MAPI folder permissions"
 msgstr "MAPI mappajogosultságok szerkesztése"
 
-#: ../src/configuration/e-mapi-config-utils.c:1091
+#: ../src/configuration/e-mapi-config-utils.c:1103
 msgid "Edit MAPI calendar permissions"
 msgstr "MAPI naptárjogosultságok szerkesztése"
 
-#: ../src/configuration/e-mapi-config-utils.c:1121
+#: ../src/configuration/e-mapi-config-utils.c:1133
 msgid "Edit MAPI tasks permissions"
 msgstr "MAPI feladatjogosultságok szerkesztése"
 
-#: ../src/configuration/e-mapi-config-utils.c:1151
+#: ../src/configuration/e-mapi-config-utils.c:1163
 msgid "Edit MAPI memos permissions"
 msgstr "MAPI feljegyzésjogosultságok szerkesztése"
 
-#: ../src/configuration/e-mapi-config-utils.c:1181
+#: ../src/configuration/e-mapi-config-utils.c:1193
 msgid "Edit MAPI contacts permissions"
 msgstr "MAPI névjegyjogosultságok szerkesztése"
 
-#: ../src/configuration/e-mapi-config-utils.c:1354
+#: ../src/configuration/e-mapi-config-utils.c:1366
 msgid "Personal Folders"
 msgstr "Személyes mappák"
 
-#: ../src/configuration/e-mapi-config-utils.c:1585
+#: ../src/configuration/e-mapi-config-utils.c:1597
 msgid "Searching remote MAPI folder structure, please wait..."
 msgstr "Távoli MAPI mappaszerkezet keresése, kis türelmet…"
 
-#: ../src/configuration/e-mapi-config-utils.c:1653
+#: ../src/configuration/e-mapi-config-utils.c:1665
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Nem lehet MAPI naptárat létrehozni kapcsolat nélküli módban"
 
-#: ../src/configuration/e-mapi-config-utils.c:1656
+#: ../src/configuration/e-mapi-config-utils.c:1668
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "Nem lehet MAPI feladatlistát létrehozni kapcsolat nélküli módban"
 
-#: ../src/configuration/e-mapi-config-utils.c:1659
+#: ../src/configuration/e-mapi-config-utils.c:1671
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "Nem lehet MAPI feljegyzéslistát létrehozni kapcsolat nélküli módban"
 
-#: ../src/configuration/e-mapi-config-utils.c:1662
+#: ../src/configuration/e-mapi-config-utils.c:1674
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "Nem lehet MAPI címjegyzéket létrehozni kapcsolat nélküli módban"
 
-#: ../src/configuration/e-mapi-config-utils.c:1666
+#: ../src/configuration/e-mapi-config-utils.c:1679
 msgid "Cannot create MAPI source in offline mode"
 msgstr "Nem lehet MAPI forrást létrehozni kapcsolat nélküli módban"
 
-#: ../src/configuration/e-mapi-config-utils.c:1686
+#: ../src/configuration/e-mapi-config-utils.c:1699
 msgid "_Location:"
 msgstr "He_ly:"
 
@@ -723,13 +732,13 @@ msgid "Writing folder permissions, please wait..."
 msgstr "Mappajogosultságok írása, kis türelmet…"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:780
-#: ../src/configuration/e-mapi-search-gal-user.c:524
+#: ../src/configuration/e-mapi-search-gal-user.c:527
 msgctxt "User"
 msgid "Anonymous"
 msgstr "Anonymous"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:782
-#: ../src/configuration/e-mapi-search-gal-user.c:521
+#: ../src/configuration/e-mapi-search-gal-user.c:524
 msgctxt "User"
 msgid "Default"
 msgstr "Alapértelmezett"
@@ -740,7 +749,7 @@ msgid "Unknown"
 msgstr "Ismeretlen"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:876
-#: ../src/configuration/e-mapi-search-gal-user.c:597
+#: ../src/configuration/e-mapi-search-gal-user.c:600
 msgid "Name"
 msgstr "Név"
 
@@ -753,7 +762,7 @@ msgid "Edit MAPI folder permissions..."
 msgstr "MAPI mappajogosultságok szerkesztése…"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:960
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:610
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:626
 msgid "Account:"
 msgstr "Fiók:"
 
@@ -881,28 +890,28 @@ msgid_plural "Found %d users, but showing only first %d"
 msgstr[0] "%d felhasználó található, de csak az első %d jelenik meg"
 msgstr[1] "%d felhasználó található, de csak az első %d jelenik meg"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:516
-#: ../src/configuration/e-mapi-search-gal-user.c:707
+#: ../src/configuration/e-mapi-search-gal-user.c:519
+#: ../src/configuration/e-mapi-search-gal-user.c:710
 msgid "Search for a user"
 msgstr "Felhasználó keresése"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:532
+#: ../src/configuration/e-mapi-search-gal-user.c:535
 msgid "Searching..."
 msgstr "Keresés…"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:603
+#: ../src/configuration/e-mapi-search-gal-user.c:606
 msgid "E-mail"
 msgstr "E-mail"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:644
+#: ../src/configuration/e-mapi-search-gal-user.c:647
 msgid "Choose MAPI user..."
 msgstr "Válasszon MAPI felhasználót…"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:667
+#: ../src/configuration/e-mapi-search-gal-user.c:670
 msgid "_Search:"
 msgstr "_Keresés:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:90
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:89
 #, c-format
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "A mappa nem vehető fel, mert már létezik „%s” néven"
@@ -910,18 +919,18 @@ msgstr "A mappa nem vehető fel, mert már létezik „%s” néven"
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. Example result: "Mailbox - John Smith"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:115
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:114
 #, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox - %s"
 msgstr "%s postafiókja"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:144
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:143
 #, c-format
 msgid "Cannot add folder, failed to add to store's summary"
 msgstr "Nem vehető fel mappa, nem sikerült hozzáadni a tároló összegzéséhez"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:326
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:329
 #, c-format
 msgid ""
 "Folder '%s' not found. Either it does not exist or you do not have "
@@ -930,7 +939,7 @@ msgstr ""
 "A mappa („%s”) nem található. Vagy nem létezik, vagy nincs jogosultsága "
 "elérni."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:356
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:364
 msgid "Cannot add folder, cannot determine folder's type"
 msgstr "Nem vehető fel a mappa, nem határozható meg a mappa típusa"
 
@@ -939,79 +948,79 @@ msgstr "Nem vehető fel a mappa, nem határozható meg a mappa típusa"
 #. the second '%s' is replaced with folder name.
 #. Example result: "John Smith - Calendar"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:397
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:405
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s - %s"
 msgstr "%s – %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:492
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:688
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:502
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:704
 msgid "Inbox"
 msgstr "Beérkezett üzenetek"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:494
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:504
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:705
 msgid "Contacts"
 msgstr "Névjegyek"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:496
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:690
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:506
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:706
 msgid "Calendar"
 msgstr "Naptár"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:498
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:691
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:508
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:707
 msgid "Memos"
 msgstr "Feljegyzések"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:500
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:692
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:510
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:708
 msgid "Tasks"
 msgstr "Feladatok"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:513
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:523
 #, c-format
 msgid "Testing availability of folder '%s' of user '%s', please wait..."
 msgstr ""
 "„%2$s” felhasználó „%1$s” mappájának elérhetőségének tesztelése, kis "
 "türelmet…"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:589
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:605
 msgid "Subscribe to folder of other MAPI user..."
 msgstr "Feliratkozás más MAPI felhasználó mappájára…"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:638
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:654
 msgid "User"
 msgstr "Felhasználó"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:645
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:661
 msgid "_User:"
 msgstr "_Felhasználó:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:658
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:674
 msgid "C_hoose..."
 msgstr "_Válasszon…"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:673
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
 msgid "_Folder name:"
 msgstr "_Mappa neve:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2059
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2080
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Elfogadva:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2064
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2085
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Feltételes:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2069
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2090
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Elutasítva:"
@@ -1090,35 +1099,35 @@ msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:743
+#: ../src/libexchangemapi/e-mapi-connection.c:744
 #, c-format
 msgid "Server '%s' cannot be reached"
 msgstr "A kiszolgáló („%s”) nem érhető el"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:864
+#: ../src/libexchangemapi/e-mapi-connection.c:872
 #, c-format
 msgid "Folder name '%s' is not a known default folder name, nor folder ID."
 msgstr ""
 "A mappanév („%s”) nem egy ismert alapértelmezett mappanév vagy "
 "mappaazonosító."
 
-#: ../src/libexchangemapi/e-mapi-connection.c:1195
+#: ../src/libexchangemapi/e-mapi-connection.c:1203
 #, c-format
 msgid "Failed to open store for user '%s'"
 msgstr "A(z) „%s” felhasználó tárolójának megnyitása meghiúsult"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:1203
+#: ../src/libexchangemapi/e-mapi-connection.c:1211
 #, c-format
 msgid "Folder of user '%s' not found"
 msgstr "A(z) „%s” felhasználó mappája nem található"
 
 #. Translators: %s is replaced with an email address which was found ambiguous on a remote server
-#: ../src/libexchangemapi/e-mapi-connection.c:3686
+#: ../src/libexchangemapi/e-mapi-connection.c:3856
 #, c-format
 msgid "Recipient '%s' is ambiguous"
 msgstr "A(z) „%s” címzett nem egyértelmű"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:4565
+#: ../src/libexchangemapi/e-mapi-connection.c:4948
 #, c-format
 msgid ""
 "Search result exceeded allowed size limit. Use more specific search term, "
@@ -1127,16 +1136,16 @@ msgstr ""
 "A találatlista túllépte az engedélyezett méretkorlátot. Használjon "
 "konkrétabb keresőkifejezést."
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6165
+#: ../src/libexchangemapi/e-mapi-connection.c:6549
 msgid "All Public Folders"
 msgstr "Minden nyilvános mappa"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6422
+#: ../src/libexchangemapi/e-mapi-connection.c:6816
 #, c-format
 msgid "User name '%s' is ambiguous"
 msgstr "A felhasználónév („%s”) nem egyértelmű"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6425
+#: ../src/libexchangemapi/e-mapi-connection.c:6819
 #, c-format
 msgid "User name '%s' not found"
 msgstr "A felhasználónév („%s”) nem található"
