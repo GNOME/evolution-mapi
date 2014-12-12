@@ -2,15 +2,15 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 #
-# Shankar Prasad <svenkate@redhat.com>, 2009, 2012.
+# Shankar Prasad <svenkate@redhat.com>, 2009, 2012, 2014.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi.gnome-2-28.kn\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2012-08-17 08:58+0000\n"
-"PO-Revision-Date: 2012-11-05 17:23+0530\n"
-"Last-Translator: Shankar Prasad <svenkate@redhat.com>\n"
+"POT-Creation-Date: 2014-12-12 05:34+0000\n"
+"PO-Revision-Date: 2014-12-12 17:07+0530\n"
+"Last-Translator: Shankar Prasad <svenkate AT redhat Dot com>\n"
 "Language-Team: Kannada <en@li.org>\n"
 "Language: kn\n"
 "MIME-Version: 1.0\n"
@@ -19,19 +19,29 @@ msgstr ""
 "X-Generator: Lokalize 1.5\n"
 "Plural-Forms:  nplurals=2; plural=(n != 1);\n"
 
-#: ../src/addressbook/e-book-backend-mapi.c:748
+#: ../evolution-mapi.metainfo.xml.in.h:1
+#| msgid "Exchange MAPI server %s"
+msgid "Exchange MAPI"
+msgstr "Exchange MAPI"
+
+#: ../evolution-mapi.metainfo.xml.in.h:2 ../src/camel/camel-mapi-provider.c:73
+msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
+msgstr ""
+"MAPI ಅನ್ನು ಬಳಸಿಕೊಂಡು  Microsoft Exchange 2007/ OpenChange ಪೂರೈಕೆಗಣಕಗಳನ್ನು "
+"ನಿಲುಕಿಸಿಕೊಳ್ಳಲು"
+
+#: ../src/addressbook/e-book-backend-mapi.c:735
 msgid "Searching"
 msgstr "ಹುಡುಕಲಾಗುತ್ತಿದೆ"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1738
-#: ../src/calendar/e-cal-backend-mapi.c:193
-#: ../src/calendar/e-cal-backend-mapi.c:542
-#: ../src/camel/camel-mapi-folder.c:1871 ../src/camel/camel-mapi-folder.c:1947
+#: ../src/addressbook/e-book-backend-mapi.c:1735
+#: ../src/calendar/e-cal-backend-mapi.c:192
+#: ../src/calendar/e-cal-backend-mapi.c:491
+#: ../src/camel/camel-mapi-folder.c:1937 ../src/camel/camel-mapi-folder.c:2017
 msgid "Unknown error"
 msgstr "ಗೊತ್ತಿರದ ದೋಷ"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:432
-#: ../src/calendar/e-cal-backend-mapi.c:411
 msgid "Failed to remove public folder"
 msgstr "ಸಾರ್ವಜನಿಕ ಕಡತಕೋಶವನ್ನು ತೆಗೆದುಹಾಕಲು ವಿಫಲವಾಗಿದೆ"
 
@@ -40,9 +50,8 @@ msgid "The backend does not support bulk additions"
 msgstr "ಹಿನ್ನೆಲೆಯು ಒಟ್ಟು ಪ್ರಮಾಣದಲ್ಲಿ ಸೇರಿಸುವುದಕ್ಕೆ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:510
-#: ../src/calendar/e-cal-backend-mapi.c:1766
-#: ../src/calendar/e-cal-backend-mapi.c:2277
-#| msgid "Unable to authenticate to Exchange MAPI server."
+#: ../src/calendar/e-cal-backend-mapi.c:1709
+#: ../src/calendar/e-cal-backend-mapi.c:2220
 msgid "Failed to create item on a server"
 msgstr "ಪೂರೈಕೆಗಣಕದಲ್ಲಿ ಅಂಶವನ್ನು ರಚಿಸುವಲ್ಲಿ  ವಿಫಲವಾಗಿದೆ"
 
@@ -51,12 +60,11 @@ msgid "The backend does not support bulk modifications"
 msgstr "ಹಿನ್ನೆಲೆಯು ಒಟ್ಟು ಪ್ರಮಾಣದಲ್ಲಿ  ಮಾರ್ಪಡಿಸುವುದಕ್ಕೆ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:672
-#: ../src/calendar/e-cal-backend-mapi.c:1979
+#: ../src/calendar/e-cal-backend-mapi.c:1922
 msgid "Failed to modify item on a server"
 msgstr "ಪೂರೈಕೆಗಣಕದಲ್ಲಿ ಅಂಶವನ್ನು ಬದಲಾಯಿಸುವಲ್ಲಿ  ವಿಫಲವಾಗಿದೆ"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:848
-#| msgid "Error fetching changes from the server."
 msgid "Failed to fetch items from a server"
 msgstr "ಪೂರೈಕೆಗಣಕದ ಅಂಶಗಳನ್ನು ಪಡೆಯುವಲ್ಲಿ ವಿಫಲವಾಗಿದೆ"
 
@@ -108,43 +116,41 @@ msgid "Failed to fetch GAL entries"
 msgstr "GAL ನಮೂದುಗಳನ್ನು ಪಡೆಯುವಲ್ಲಿ ವಿಫಲತೆ ಉಂಟಾಗಿದೆ"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:481
+#: ../src/calendar/e-cal-backend-mapi.c:416
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "ಅಂಶಗಳನ್ನು ಪತ್ರಕೋಶ %s ಗೆ ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ"
 
-#: ../src/calendar/e-cal-backend-mapi.c:834
+#: ../src/calendar/e-cal-backend-mapi.c:783
 #, c-format
-#| msgid "Loading items in folder %s"
 msgid "Failed to open folder: %s"
 msgstr "ಕಡತಕೋಶವನ್ನು ತೆರೆಯುವಲ್ಲಿ ವಿಫಲತೆ ಉಂಟಾಗಿದೆ: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:842
+#: ../src/calendar/e-cal-backend-mapi.c:791
 #, c-format
 msgid "Failed to get folder properties: %s"
 msgstr "ಕಡತಕೋಶದ ಗುಣಗಳನ್ನು ಪಡೆಯುವಲ್ಲಿ ವಿಫಲತೆ:%s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:883
+#: ../src/calendar/e-cal-backend-mapi.c:832
 #, c-format
 msgid "Failed to list objects: %s"
 msgstr "ವಸ್ತುಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡುವಲ್ಲಿ ವಿಫಲತೆ: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:909
+#: ../src/calendar/e-cal-backend-mapi.c:858
 #, c-format
 msgid "Failed to transfer objects: %s"
 msgstr "ವಸ್ತುಗಳನ್ನು ವರ್ಗಾವಣೆ ಮಾಡುವಲ್ಲಿ ವಿಫಲತೆ: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:928
+#: ../src/calendar/e-cal-backend-mapi.c:877
 #, c-format
 msgid "Failed to close folder: %s"
 msgstr "ಕಡತಕೋಶವನ್ನು ಮುಚ್ಚುವಲ್ಲಿ ವಿಫಲತೆ: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1425
-#: ../src/calendar/e-cal-backend-mapi.c:1426
+#: ../src/calendar/e-cal-backend-mapi.c:1375
 msgid "Could not create cache file"
 msgstr "ಕ್ಯಾಶೆ ಕಡತವನ್ನು ರಚಿಸಲಾಗಲಿಲ್ಲ"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1887
+#: ../src/calendar/e-cal-backend-mapi.c:1830
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -153,94 +159,89 @@ msgstr ""
 "ಕಾರ್ಯರೂಪಕ್ಕೆ ತಂದಿಲ್ಲ. ಪೂರೈಕೆಗಣಕದ ಅಪಾಯಿಂಟ್‌ಮೆಂಟಿಗೆ ಯಾವುದೆ ಬದಲಾವಣೆಯನ್ನು "
 "ಮಾಡಲಾಗಿಲ್ಲ."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2092
+#: ../src/calendar/e-cal-backend-mapi.c:2035
 msgid "Cannot remove items from a server"
 msgstr "ಒಂದು ಪೂರೈಕೆಗಣಕದಿಂದ ಅಂಶಗಳನ್ನು ತೆಗೆದುಹಾಕಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
-#: ../src/calendar/e-cal-backend-mapi.c:2529
+#: ../src/calendar/e-cal-backend-mapi.c:2466
 msgid "Failed to get Free/Busy data"
 msgstr "ಬಿಡುವು/ಕಾರ್ಯನಿರತ ಮಾಹಿತಿಯನ್ನು ಪಡೆಯುವಲ್ಲಿ ವಿಫಲತೆ"
 
-#: ../src/camel/camel-mapi-folder.c:777
+#: ../src/camel/camel-mapi-folder.c:805
 #, c-format
-#| msgid "Fetching folder list ..."
 msgid "Refreshing folder '%s'"
 msgstr "'%s' ಪತ್ರಕೋಶವನ್ನು ಪುನಶ್ಚೇತನಗೊಳಿಸಲಾಗುತ್ತಿದೆ"
 
-#: ../src/camel/camel-mapi-folder.c:844
+#: ../src/camel/camel-mapi-folder.c:873
 #, c-format
-#| msgid "Loading items in folder %s"
 msgid "Downloading messages in folder '%s'"
 msgstr "'%s' ಪತ್ರಕೋಶಗಳಲ್ಲಿನ ಸಂದೇಶಗಳನ್ನು ಇಳಿಸಿಕೊಳ್ಳಲಾಗುತ್ತಿದೆ ಮಾಡಲಾಗುತ್ತಿದೆ"
 
-#: ../src/camel/camel-mapi-folder.c:931 ../src/camel/camel-mapi-folder.c:1512
+#: ../src/camel/camel-mapi-folder.c:961 ../src/camel/camel-mapi-folder.c:1569
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "ಈ ಸಂದೇಶವು ಆಫ್‌ಲೈನ್‌ ಸ್ಥಿತಿಯಲ್ಲಿ ಲಭ್ಯವಿರುವುದಿಲ್ಲ."
 
-#: ../src/camel/camel-mapi-folder.c:941 ../src/camel/camel-mapi-folder.c:959
+#: ../src/camel/camel-mapi-folder.c:971 ../src/camel/camel-mapi-folder.c:989
 #, c-format
-#| msgid "Fetching items failed"
 msgid "Fetching items failed: %s"
 msgstr "ಅಂಶಗಳನ್ನು ಪಡೆಯುವಲ್ಲಿ ವಿಫಲತೆ:%s"
 
-#: ../src/camel/camel-mapi-folder.c:946 ../src/camel/camel-mapi-folder.c:964
+#: ../src/camel/camel-mapi-folder.c:976 ../src/camel/camel-mapi-folder.c:994
 msgid "Fetching items failed"
 msgstr "ಅಂಶಗಳನ್ನು ಪಡೆಯುವಲ್ಲಿ ವಿಫಲತೆ"
 
-#: ../src/camel/camel-mapi-folder.c:1204
+#: ../src/camel/camel-mapi-folder.c:1248
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "ಪತ್ರಕೋಶ '%s' ಗೆ ಸಂದೇಶವನ್ನು ಸೇರಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-folder.c:1213 ../src/camel/camel-mapi-folder.c:1241
+#: ../src/camel/camel-mapi-folder.c:1257 ../src/camel/camel-mapi-folder.c:1287
 #, c-format
-#| msgid "Offline. '%s'"
 msgid "Offline."
 msgstr "ಆಫ್‌ಲೈನ್."
 
-#: ../src/camel/camel-mapi-folder.c:1322
+#: ../src/camel/camel-mapi-folder.c:1370
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "ಕಸದ ಬುಟ್ಟಿಯನ್ನು ಬರಿದು ಮಾಡುವಲ್ಲಿ ವಿಫಲತೆ:%s"
 
-#: ../src/camel/camel-mapi-folder.c:1328
+#: ../src/camel/camel-mapi-folder.c:1376
 msgid "Failed to empty Trash"
 msgstr "ಕಸದ ಬುಟ್ಟಿಯನ್ನು ಬರಿದು ಮಾಡುವಲ್ಲಿ ವಿಫಲತೆ"
 
-#: ../src/camel/camel-mapi-folder.c:1497
+#: ../src/camel/camel-mapi-folder.c:1554
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "%s ಸಂದೇಶವನ್ನು ಪಡೆದುಕೊಳ್ಳಲಾಗಲಿಲ್ಲ: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1498
+#: ../src/camel/camel-mapi-folder.c:1555
 msgid "No such message"
 msgstr "ಅಂತಹ ಯಾವುದೆ ಸಂದೇಶವಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-folder.c:1523 ../src/camel/camel-mapi-folder.c:1553
+#: ../src/camel/camel-mapi-folder.c:1580 ../src/camel/camel-mapi-folder.c:1612
 #, c-format
-#| msgid "Could not get message"
 msgid "Could not get message: %s"
 msgstr "ಸಂದೇಶವನ್ನು ಪಡೆದುಕೊಳ್ಳಲಾಗಲಿಲ್ಲ: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1529 ../src/camel/camel-mapi-folder.c:1560
+#: ../src/camel/camel-mapi-folder.c:1586 ../src/camel/camel-mapi-folder.c:1619
 #, c-format
 msgid "Could not get message"
 msgstr "ಸಂದೇಶವನ್ನು ಪಡೆದುಕೊಳ್ಳಲಾಗಲಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-folder.c:1927
+#: ../src/camel/camel-mapi-folder.c:1994
 msgid "Receive quota"
 msgstr "ಸ್ವೀಕರಿಸುವ ಕೋಟಾ"
 
-#: ../src/camel/camel-mapi-folder.c:1933
+#: ../src/camel/camel-mapi-folder.c:2000
 msgid "Send quota"
 msgstr "ಕಳುಹಿಸುವ ಕೋಟಾ"
 
-#: ../src/camel/camel-mapi-folder.c:1952
+#: ../src/camel/camel-mapi-folder.c:2022
 msgid "No quota information available"
 msgstr "ಯಾವುದೆ ಕೋಟಾ ಮಾಹಿತಿಯು ಲಭ್ಯವಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-folder.c:2055
+#: ../src/camel/camel-mapi-folder.c:2124
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s ಗಾಗಿ ಸಾರಾಂಶವನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
@@ -276,25 +277,15 @@ msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "ಕೇವಲ ಒಳಪೆಟ್ಟಿಗೆ ಪತ್ರಕೋಶದಲ್ಲಿ ಮಾತ್ರವೆ ಕಸ ಸಂದೇಶಕ್ಕಾಗಿ ನೋಡು (_e)"
 
 #: ../src/camel/camel-mapi-provider.c:62
-#: ../src/configuration/e-mapi-config-utils.c:1630
+#: ../src/configuration/e-mapi-config-utils.c:1642
 msgid "Lis_ten for server notifications"
 msgstr "ಪೂರೈಕೆಗಣಕದ ಸೂಚನೆಗಳಿಗಾಗಿ ಆಲಿಸು (_t)"
-
-#: ../src/camel/camel-mapi-provider.c:73
-#| msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
-msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
-msgstr ""
-"MAPI ಅನ್ನು ಬಳಸಿಕೊಂಡು  Microsoft Exchange 2007/ OpenChange ಪೂರೈಕೆಗಣಕಗಳನ್ನು "
-"ನಿಲುಕಿಸಿಕೊಳ್ಳಲು"
 
 #: ../src/camel/camel-mapi-provider.c:88
 msgid "Password"
 msgstr "ಗುಪ್ತಪದ"
 
 #: ../src/camel/camel-mapi-provider.c:89
-#| msgid ""
-#| "This option will connect to the Openchange server using a plaintext "
-#| "password."
 msgid ""
 "This option will connect to the OpenChange server using a plaintext password."
 msgstr ""
@@ -307,147 +298,126 @@ msgid "Kerberos"
 msgstr "ಕರ್ಬರೋಸ್"
 
 #: ../src/camel/camel-mapi-sasl-krb.c:30
-#| msgid ""
-#| "This option will connect to the Openchange server using a plaintext "
-#| "password."
 msgid "This option will connect to the server using kerberos key."
 msgstr ""
-"ಈ ಆಯ್ಕೆಯು ಕರ್ಬರೋಸ್ ಕೀಲಿಯನ್ನು ಬಳಸಿಕೊಂಡು ಪೂರೈಕೆಗಣಕದೊಂದಿಗೆ "
-"ಸಂಪರ್ಕಸಾಧಿಸುತ್ತದೆ."
+"ಈ ಆಯ್ಕೆಯು ಕರ್ಬರೋಸ್ ಕೀಲಿಯನ್ನು ಬಳಸಿಕೊಂಡು ಪೂರೈಕೆಗಣಕದೊಂದಿಗೆ ಸಂಪರ್ಕಸಾಧಿಸುತ್ತದೆ."
 
-#: ../src/camel/camel-mapi-store.c:133 ../src/camel/camel-mapi-store.c:175
+#: ../src/camel/camel-mapi-store.c:134 ../src/camel/camel-mapi-store.c:176
 msgid "Cannot find folder in a local cache"
 msgstr "ಒಂದು ಸ್ಥಳೀಯ ಕ್ಯಾಶೆಯಲ್ಲಿ ಪತ್ರಕೋಶವು ಕಂಡುಬಂದಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-store.c:481 ../src/camel/camel-mapi-store.c:1183
-#| msgid "Folder list not available in offline mode."
+#: ../src/camel/camel-mapi-store.c:492 ../src/camel/camel-mapi-store.c:1179
 msgid "Folder list is not available in offline mode"
 msgstr "ಪತ್ರಕೋಶದ ಪಟ್ಟಿಯು ಆಫ್‌ಲೈನಿನ ಸ್ಥಿತಿಯಲ್ಲಿ ಲಭ್ಯವಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-store.c:858
-#| msgid "All Public Folders"
+#: ../src/camel/camel-mapi-store.c:872
 msgid "No public folder found"
 msgstr "ಯಾವುದೆ ಸಾರ್ವಜನಿಕ ಪತ್ರಕೋಶವು ಕಂಡುಬಂದಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-store.c:858
+#: ../src/camel/camel-mapi-store.c:872
 msgid "No folder found"
 msgstr "ಯಾವುದೆ ಪತ್ರಕೋಶವು ಕಂಡುಬಂದಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-store.c:1205 ../src/camel/camel-mapi-store.c:2148
+#: ../src/camel/camel-mapi-store.c:1201 ../src/camel/camel-mapi-store.c:2168
 #, c-format
 msgid "Connecting to '%s'"
 msgstr "'%s' ನೊಂದಿಗೆ ಸಂಪರ್ಕಸಾಧಿಸಲಾಗುತ್ತಿದೆ"
 
-#: ../src/camel/camel-mapi-store.c:1264
-#| msgid "Cannot create MAPI folders in offline mode."
+#: ../src/camel/camel-mapi-store.c:1260
 msgid "Cannot create MAPI folders in offline mode"
 msgstr "ಆಫ್‌ಲೈನಿನ ಸ್ಥಿತಿಯಲ್ಲಿ MAPI ಪತ್ರಕೋಶಗಳನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."
 
-#: ../src/camel/camel-mapi-store.c:1271
+#: ../src/camel/camel-mapi-store.c:1267
 #, c-format
-#| msgid "Cannot create new folder `%s'"
 msgid "Cannot create new folder '%s'"
 msgstr "ಹೊಸ ಪತ್ರಕೋಶ '%s' ಅನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-store.c:1280
+#: ../src/camel/camel-mapi-store.c:1276
 #, c-format
 msgid "Authentication failed"
 msgstr "ದೃಢೀಕರಣವು ವಿಫಲಗೊಂಡಿದೆ"
 
-#: ../src/camel/camel-mapi-store.c:1290
+#: ../src/camel/camel-mapi-store.c:1286
 msgid "MAPI folders can be created only within mailbox of the logged user"
 msgstr ""
 "MAPI ಪತ್ರಕೋಶಗಳನ್ನು ಒಳಗೆ ಪ್ರವೇಶಿಸಿದ ಬಳಕೆದಾರರ ಅಂಚೆಪಟ್ಟಿಗೆಯಲ್ಲಿ ಮಾತ್ರ ರಚಿಸಲು "
 "ಸಾಧ್ಯವಿರುತ್ತದೆ"
 
-#: ../src/camel/camel-mapi-store.c:1303 ../src/camel/camel-mapi-store.c:1408
+#: ../src/camel/camel-mapi-store.c:1299 ../src/camel/camel-mapi-store.c:1412
 #, c-format
-#| msgid "Cannot create new folder `%s'"
 msgid "Cannot find folder '%s'"
 msgstr "ಹೊಸ ಪತ್ರಕೋಶ '%s' ಕಂಡುಬಂದಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-store.c:1353
+#: ../src/camel/camel-mapi-store.c:1354
 #, c-format
-#| msgid "Cannot create new folder `%s'"
 msgid "Cannot create folder '%s': %s"
 msgstr "'%s' ಪತ್ರಕೋಶವನ್ನು ನಿರ್ಮಿಸಲಾಗಿಲ್ಲ: %s"
 
-#: ../src/camel/camel-mapi-store.c:1359
+#: ../src/camel/camel-mapi-store.c:1360
 #, c-format
-#| msgid "Cannot create new folder `%s'"
 msgid "Cannot create folder '%s'"
 msgstr "'%s' ಪತ್ರಕೋಶವನ್ನು ನಿರ್ಮಿಸಲಾಗಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-store.c:1386 ../src/camel/camel-mapi-store.c:1398
-#| msgid "Cannot create MAPI folders in offline mode."
+#: ../src/camel/camel-mapi-store.c:1390 ../src/camel/camel-mapi-store.c:1402
 msgid "Cannot delete MAPI folders in offline mode"
 msgstr "ಆಫ್‌ಲೈನಿನ ಸ್ಥಿತಿಯಲ್ಲಿ MAPI ಪತ್ರಕೋಶಗಳನ್ನು ಅಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-store.c:1448
+#: ../src/camel/camel-mapi-store.c:1458
 #, c-format
-#| msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgid "Cannot remove folder '%s': %s"
 msgstr "ಪತ್ರಕೋಶವನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿಲ್ಲ: '%s': %s"
 
-#: ../src/camel/camel-mapi-store.c:1456
+#: ../src/camel/camel-mapi-store.c:1466
 #, c-format
-#| msgid "Cannot create new folder `%s'"
 msgid "Cannot remove folder '%s'"
 msgstr "'%s' ಪತ್ರಕೋಶವನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-store.c:1485 ../src/camel/camel-mapi-store.c:1500
-#| msgid "Cannot create MAPI folders in offline mode."
+#: ../src/camel/camel-mapi-store.c:1496 ../src/camel/camel-mapi-store.c:1511
 msgid "Cannot rename MAPI folders in offline mode"
 msgstr "ಆಫ್‌ಲೈನಿನ ಸ್ಥಿತಿಯಲ್ಲಿ MAPI ಪತ್ರಕೋಶಗಳನ್ನು ಮರಳಿ ಹೆಸರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."
 
-#: ../src/camel/camel-mapi-store.c:1511
+#: ../src/camel/camel-mapi-store.c:1522
 #, c-format
-#| msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
 msgstr "MAPI ಪತ್ರಕೋಶ '%s' ಅನ್ನು ಮರುಹೆಸರಿಸಲಾಗಿಲ್ಲ. ಪತ್ರಕೋಶವು ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-store.c:1522
+#: ../src/camel/camel-mapi-store.c:1533
 #, c-format
-#| msgid "Cannot rename MAPI default folder `%s' to `%s'."
 msgid "Cannot rename MAPI default folder '%s' to '%s'"
 msgstr ""
 "MAPI ಪೂರ್ವನಿಯೋಜಿತ ಪತ್ರಕೋಶ '%s' ದ ಹೆಸರನ್ನು '%s' ಗೆ ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1548 ../src/camel/camel-mapi-store.c:1581
-#: ../src/camel/camel-mapi-store.c:1659
+#: ../src/camel/camel-mapi-store.c:1559 ../src/camel/camel-mapi-store.c:1602
+#: ../src/camel/camel-mapi-store.c:1682
 #, c-format
-#| msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "MAPI ಪತ್ರಕೋಶ '%s' ದ ಹೆಸರನ್ನು '%s' ಗೆ ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
 #. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1573 ../src/camel/camel-mapi-store.c:1652
+#: ../src/camel/camel-mapi-store.c:1594 ../src/camel/camel-mapi-store.c:1675
 #, c-format
-#| msgid "Cannot rename MAPI folder `%s' to `%s'"
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "MAPI ಪತ್ರಕೋಶ '%s' ದ ಹೆಸರನ್ನು '%s' ಗೆ ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ: %s"
 
-#: ../src/camel/camel-mapi-store.c:1755
-#| msgid "Cannot create MAPI folders in offline mode."
+#: ../src/camel/camel-mapi-store.c:1772
 msgid "Cannot subscribe MAPI folders in offline mode"
 msgstr "ಆಫ್‌ಲೈನಿನ ಸ್ಥಿತಿಯಲ್ಲಿ MAPI ಪತ್ರಕೋಶಗಳನ್ನು ಚಂದಾದಾರಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-store.c:1772
+#: ../src/camel/camel-mapi-store.c:1789
 #, c-format
 msgid "Folder '%s' not found"
 msgstr "'%s' ಪತ್ರಕೋಶವು ಕಂಡುಬಂದಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-store.c:1890
-#| msgid "Cannot create MAPI folders in offline mode."
+#: ../src/camel/camel-mapi-store.c:1907
 msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr ""
 "ಆಫ್‌ಲೈನಿನ ಸ್ಥಿತಿಯಲ್ಲಿ MAPI ಪತ್ರಕೋಶಗಳ ಚಂದಾದಾರಿಕೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:2103
-#: ../src/camel/camel-mapi-transport.c:191
+#: ../src/camel/camel-mapi-store.c:2119
+#: ../src/camel/camel-mapi-transport.c:195
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI ಪೂರೈಕೆಗಣಕ %s"
@@ -455,25 +425,24 @@ msgstr "Exchange MAPI ಪೂರೈಕೆಗಣಕ %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:2107
-#: ../src/camel/camel-mapi-transport.c:194
+#: ../src/camel/camel-mapi-store.c:2123
+#: ../src/camel/camel-mapi-transport.c:198
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "%s %s ನಲ್ಲಿನ Exchange MAPI ಸೇವೆ"
 
-#: ../src/camel/camel-mapi-store.c:2133
-#| msgid "Cannot create MAPI folders in offline mode."
+#: ../src/camel/camel-mapi-store.c:2150
 msgid "Cannot connect MAPI store in offline mode"
 msgstr "ಆಫ್‌ಲೈನ್ ಸ್ಥಿತಿಯಲ್ಲಿ MAPI ಶೇಖರಣೆಯನ್ನು ಜೋಡಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-store.c:2178
+#: ../src/camel/camel-mapi-store.c:2203
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received or sent."
 msgstr ""
 "ಅಂಚೆಪೆಟ್ಟಿಗೆ '%s' ಭರ್ತಿಯಾಗಿದೆ, ಯಾವುದೆ ಹೊಸ ಸಂದೇಶಗಳನ್ನು ಸ್ವೀಕರಿಸಲಾಗುವುದಿಲ್ಲ ಅಥವ "
 "ಕಳುಹಿಸಲಾಗುವುದಿಲ್ಲ."
 
-#: ../src/camel/camel-mapi-store.c:2180
+#: ../src/camel/camel-mapi-store.c:2205
 #, c-format
 msgid ""
 "Mailbox '%s' is near its size limit, message send will be disabled soon."
@@ -481,62 +450,59 @@ msgstr ""
 "ಅಂಚೆಪೆಟ್ಟಿಗೆ '%s' ತನ್ನ ಗಾತ್ರದ ಮಿತಿಯನ್ನು ಸಮೀಪಿಸಿದೆ, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆಯನ್ನು "
 "ಸದ್ಯದಲ್ಲಿಯೆ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗುತ್ತದೆ."
 
-#: ../src/camel/camel-mapi-store.c:2184
+#: ../src/camel/camel-mapi-store.c:2209
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received."
 msgstr ""
 "ಅಂಚೆಪೆಟ್ಟಿಗೆ '%s' ಭರ್ತಿಯಾಗಿದೆ, ಯಾವುದೆ ಹೊಸ ಸಂದೇಶಗಳನ್ನು ಸ್ವೀಕರಿಸಲಾಗುವುದಿಲ್ಲ."
 
-#: ../src/camel/camel-mapi-store.c:2186
+#: ../src/camel/camel-mapi-store.c:2211
 #, c-format
 msgid "Mailbox '%s' is near its size limit."
 msgstr "ಅಂಚೆಪೆಟ್ಟಿಗೆ '%s' ತನ್ನ ಗಾತ್ರದ ಮಿತಿಯನ್ನು ಸಮೀಪಿಸಿದೆ."
 
-#: ../src/camel/camel-mapi-store.c:2598
-#| msgid "Authentication failed"
+#: ../src/camel/camel-mapi-store.c:2631
 msgid "Authentication password not available"
 msgstr "ದೃಢೀಕರಣ ಗುಪ್ತಪದವು ಲಭ್ಯವಿಲ್ಲ"
 
-#: ../src/camel/camel-mapi-transport.c:142
-#: ../src/camel/camel-mapi-transport.c:164
+#: ../src/camel/camel-mapi-transport.c:146
+#: ../src/camel/camel-mapi-transport.c:168
 #, c-format
 msgid "Could not send message."
 msgstr "ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ."
 
-#: ../src/camel/camel-mapi-transport.c:159
+#: ../src/camel/camel-mapi-transport.c:163
 #, c-format
-#| msgid "Could not send message."
 msgid "Could not send message: %s"
 msgstr "ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ:%s"
 
-#: ../src/collection/e-mapi-backend.c:269
+#: ../src/collection/e-mapi-backend.c:278
 msgid "Global Address List"
 msgstr "ಜಾಗತಿಕ ವಿಳಾಸ ಪಟ್ಟಿ"
 
-#: ../src/collection/e-mapi-backend.c:517
-#: ../src/collection/e-mapi-backend.c:560
+#: ../src/collection/e-mapi-backend.c:651
+#: ../src/collection/e-mapi-backend.c:737
 #, c-format
 msgid "Data source '%s' does not represent a MAPI folder"
 msgstr "ದತ್ತಾಂಶ ಆಕರ '%s' ಯಾವುದೆ ಒಂದು MAPI ಪತ್ರಕೋಶವನ್ನು ಪ್ರತಿನಿಧಿಸುವುದಿಲ್ಲ"
 
-#: ../src/configuration/e-book-config-mapigal.c:63
+#: ../src/configuration/e-book-config-mapigal.c:61
 msgid "Allow _partial search results"
 msgstr "ಆಂಶಿಕ ಹುಡುಕಾಟದ ಫಲಿತಾಂಶಗಳನ್ನು ಅನುಮತಿಸು (_p)"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:126
+#: ../src/configuration/e-mail-config-mapi-backend.c:179
 msgid "Select username"
 msgstr "ಬಳಕೆದಾರ ಹೆಸರನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:136
+#: ../src/configuration/e-mail-config-mapi-backend.c:189
 msgid "Full name"
 msgstr "ಪೂರ್ಣ ಹೆಸರು"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:141
-#| msgid "User name"
+#: ../src/configuration/e-mail-config-mapi-backend.c:194
 msgid "Username"
 msgstr "ಬಳಕೆದಾರಹೆಸರು"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:168
+#: ../src/configuration/e-mail-config-mapi-backend.c:221
 msgid ""
 "There are more users with similar user name on a server.\n"
 "Please select that you would like to use from the below list."
@@ -544,21 +510,20 @@ msgstr ""
 "ಒಂದು ಪೂರೈಕೆಗಣಕದಲ್ಲಿ ಇದೇ ಹೆಸರಿನ ಹಲವಾರು ಬಳಕೆದಾರರು ಇದ್ದಾರೆ.\n"
 "ನೀವು ಬಳಸಬೇಕಿರುವುದನ್ನು ಈ ಕೆಳಗಿನ ಪಟ್ಟಿಯಿಂದ ಆಯ್ಕೆ ಮಾಡಿ."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:396
+#: ../src/configuration/e-mail-config-mapi-backend.c:449
 msgid "Authentication finished successfully."
 msgstr "ದೃಢೀಕರಣವು ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:398
-#: ../src/configuration/e-mail-config-mapi-backend.c:519
+#: ../src/configuration/e-mail-config-mapi-backend.c:451
+#: ../src/configuration/e-mail-config-mapi-backend.c:571
 msgid "Authentication failed."
 msgstr "ದೃಢೀಕರಣವು ವಿಫಲಗೊಂಡಿದೆ."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:460
-#| msgid "Cannot create MAPI folders in offline mode."
+#: ../src/configuration/e-mail-config-mapi-backend.c:512
 msgid "Cannot authenticate MAPI accounts in offline mode"
 msgstr "ಆಫ್‌ಲೈನಿನ ಸ್ಥಿತಿಯಲ್ಲಿ MAPI ಖಾತೆಗಳನ್ನು ದೃಢೀಕರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:489
+#: ../src/configuration/e-mail-config-mapi-backend.c:541
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -567,170 +532,157 @@ msgstr ""
 "ಅವನ್ನು "
 "ಸೂಕ್ತ ಮೌಲ್ಯಗಳಿಂದ ತುಂಬಿಸಿ."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:492
-#| msgid ""
-#| "Server, username and domain name cannot be empty. Please fill them with "
-#| "correct values."
+#: ../src/configuration/e-mail-config-mapi-backend.c:544
 msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
 msgstr ""
 "ಕರ್ಬರೋಸ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿದಾಗ, ಕ್ಷೇತ್ರದ ಹೆಸರುಗಳು ಖಾಲಿ ಇರುವಂತಿಲ್ಲ. ದಯವಿಟ್ಟು "
-"ಅವನ್ನು ಸೂಕ್ತ ಮೌಲ್ಯಗಳಿಂದ ತುಂಬಿಸಿ."
+"ಅವನ್ನು ಸೂಕ್ತ "
+"ಮೌಲ್ಯಗಳಿಂದ ತುಂಬಿಸಿ."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:513
+#: ../src/configuration/e-mail-config-mapi-backend.c:565
 msgid "Connecting to the server, please wait..."
 msgstr "ಪೂರೈಕೆಗಣಕದೊಂದಿಗೆ ಸಂಪರ್ಕ ಹೊಂದಲಾಗುತ್ತಿದೆ, ದಯವಿಟ್ಟು ಕಾಯಿರಿ..."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:721
+#: ../src/configuration/e-mail-config-mapi-backend.c:770
 msgid "Configuration"
 msgstr "ಸಂರಚನೆ"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:730
+#: ../src/configuration/e-mail-config-mapi-backend.c:779
 msgid "_Server:"
 msgstr "ಪೂರೈಕೆಗಣಕ (_S):"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:747
-#| msgid "User name"
+#: ../src/configuration/e-mail-config-mapi-backend.c:796
 msgid "User_name:"
 msgstr "ಬಳಕೆದಾರ ಹೆಸರು (_n):"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:772
+#: ../src/configuration/e-mail-config-mapi-backend.c:821
 msgid "_Domain name:"
 msgstr "ಡೊಮೈನಿನ ಹೆಸರು(_D):"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:785
+#: ../src/configuration/e-mail-config-mapi-backend.c:834
 msgid "_Authenticate"
 msgstr "ದೃಢೀಕರಿಸು(_A)"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:793
+#: ../src/configuration/e-mail-config-mapi-backend.c:842
 msgid "_Use secure connection"
 msgstr "ಸುರಕ್ಷಾ ಸಂಪರ್ಕವನ್ನು ಬಳಸು (_U)"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:808
+#: ../src/configuration/e-mail-config-mapi-backend.c:857
 msgid "_Kerberos authentication"
 msgstr "ಕರ್ಬರೋಸ್ ದೃಢೀಕರಣ (_K)"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:820
-#| msgid "_Domain name:"
+#: ../src/configuration/e-mail-config-mapi-backend.c:869
 msgid "_Realm name:"
 msgstr "ಕ್ಷೇತ್ರದ ಹೆಸರು (_R):"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:186
-#: ../src/configuration/e-mail-config-mapi-page.c:247
-#| msgid "Exchange Settings"
+#: ../src/configuration/e-mail-config-mapi-page.c:191
+#: ../src/configuration/e-mail-config-mapi-page.c:252
 msgid "MAPI Settings"
 msgstr "MAPI ಸಿದ್ಧತೆಗಳು"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:192
+#: ../src/configuration/e-mail-config-mapi-page.c:197
 msgid "View the size of all Exchange folders"
 msgstr "ಎಲ್ಲಾ ಎಕ್ಸ್‌ಚೇಂಜ್ ಪತ್ರಕೋಶಗಳ ಗಾತ್ರವನ್ನು ನೋಡಿ"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:196
-#| msgid "Folder Size"
+#: ../src/configuration/e-mail-config-mapi-page.c:201
 msgid "Folder _Size"
 msgstr "ಪತ್ರಕೋಶದ ಗಾತ್ರ (_S)"
 
-#: ../src/configuration/e-mapi-config-utils.c:454
+#: ../src/configuration/e-mapi-config-utils.c:455
 msgid "Folder"
 msgstr "ಪತ್ರಕೋಶ"
 
-#: ../src/configuration/e-mapi-config-utils.c:459
+#: ../src/configuration/e-mapi-config-utils.c:460
 msgid "Size"
 msgstr "ಗಾತ್ರ"
 
-#: ../src/configuration/e-mapi-config-utils.c:482
-#: ../src/configuration/e-mapi-config-utils.c:486
+#: ../src/configuration/e-mapi-config-utils.c:483
+#: ../src/configuration/e-mapi-config-utils.c:487
 msgid "Unable to retrieve folder size information"
 msgstr "ಕಡತಕೋಶದ ಗಾತ್ರವನ್ನು ಮರಳಿ ಪಡೆಯಲಾಗಿಲ್ಲ"
 
-#: ../src/configuration/e-mapi-config-utils.c:552
+#: ../src/configuration/e-mapi-config-utils.c:554
 msgid "Folder Size"
 msgstr "ಪತ್ರಕೋಶ ಗಾತ್ರ"
 
-#: ../src/configuration/e-mapi-config-utils.c:566
-#| msgid "Fetching folder list ..."
+#: ../src/configuration/e-mapi-config-utils.c:568
 msgid "Fetching folder list…"
 msgstr "ಪತ್ರಕೋಶದ ಪಟ್ಟಿಯನ್ನು ಪಡೆಯಲಾಗುತ್ತಿದೆ ..."
 
-#: ../src/configuration/e-mapi-config-utils.c:732
+#: ../src/configuration/e-mapi-config-utils.c:742
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr ""
 "'%s' ಪತ್ರಕೋಶದ ಅನುಮತಿಗಳನ್ನು ಸಂಪಾದಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ, ಬೇರೊಂದು ಪತ್ರಕೋಶವನ್ನು ಆಯ್ಕೆ "
 "ಮಾಡಿ."
 
-#: ../src/configuration/e-mapi-config-utils.c:795
-#| msgid "_Folder size"
+#: ../src/configuration/e-mapi-config-utils.c:805
 msgid "Folder size..."
 msgstr "ಪತ್ರಕೋಶದ ಗಾತ್ರ..."
 
-#: ../src/configuration/e-mapi-config-utils.c:802
+#: ../src/configuration/e-mapi-config-utils.c:812
 msgid "Subscribe to folder of other user..."
 msgstr "ಇತರೆ ಬಳಕೆದಾರರ ಪತ್ರಕೋಶಕ್ಕೆ ಚಂದಾದಾರನಾಗು..."
 
-#: ../src/configuration/e-mapi-config-utils.c:811
-#: ../src/configuration/e-mapi-config-utils.c:1091
-#: ../src/configuration/e-mapi-config-utils.c:1121
-#: ../src/configuration/e-mapi-config-utils.c:1151
-#: ../src/configuration/e-mapi-config-utils.c:1181
+#: ../src/configuration/e-mapi-config-utils.c:821
+#: ../src/configuration/e-mapi-config-utils.c:1099
+#: ../src/configuration/e-mapi-config-utils.c:1129
+#: ../src/configuration/e-mapi-config-utils.c:1159
+#: ../src/configuration/e-mapi-config-utils.c:1189
 msgid "Permissions..."
 msgstr "ಅನುಮತಿಗಳು..."
 
-#: ../src/configuration/e-mapi-config-utils.c:813
+#: ../src/configuration/e-mapi-config-utils.c:823
 msgid "Edit MAPI folder permissions"
 msgstr "MAPI ಪತ್ರಕೋಶದ ಅನುಮತಿಗಳನ್ನು ಸಂಪಾದಿಸು"
 
-#: ../src/configuration/e-mapi-config-utils.c:1093
+#: ../src/configuration/e-mapi-config-utils.c:1101
 msgid "Edit MAPI calendar permissions"
 msgstr "MAPI ಕ್ಯಾಲೆಂಡರ್ ಅನುಮತಿಗಳನ್ನು ಸಂಪಾದಿಸು"
 
-#: ../src/configuration/e-mapi-config-utils.c:1123
+#: ../src/configuration/e-mapi-config-utils.c:1131
 msgid "Edit MAPI tasks permissions"
 msgstr "MAPI ಕಾರ್ಯಗಳ ಅನುಮತಿಗಳನ್ನು ಸಂಪಾದಿಸು"
 
-#: ../src/configuration/e-mapi-config-utils.c:1153
+#: ../src/configuration/e-mapi-config-utils.c:1161
 msgid "Edit MAPI memos permissions"
 msgstr "MAPI ಮೆಮೊಗಳ ಅನುಮತಿಗಳನ್ನು ಸಂಪಾದಿಸು"
 
-#: ../src/configuration/e-mapi-config-utils.c:1183
+#: ../src/configuration/e-mapi-config-utils.c:1191
 msgid "Edit MAPI contacts permissions"
 msgstr "MAPI ಸಂಪರ್ಕಗಳ ಅನುಮತಿಗಳನ್ನು ಸಂಪಾದಿಸು"
 
-#: ../src/configuration/e-mapi-config-utils.c:1356
+#: ../src/configuration/e-mapi-config-utils.c:1364
 msgid "Personal Folders"
 msgstr "ವೈಯಕ್ತಿಕ ಪತ್ರಕೋಶಗಳು"
 
-#: ../src/configuration/e-mapi-config-utils.c:1583
+#: ../src/configuration/e-mapi-config-utils.c:1595
 msgid "Searching remote MAPI folder structure, please wait..."
 msgstr "ದೂರಸ್ಥ MAPI ಪತ್ರಕೋಶದ ರಚನೆಗಾಗಿ ಹುಡುಕಲಾಗುತ್ತಿದೆ, ದಯವಿಟ್ಟು ಕಾಯಿರಿ..."
 
-#: ../src/configuration/e-mapi-config-utils.c:1651
-#| msgid "Cannot create MAPI folders in offline mode."
+#: ../src/configuration/e-mapi-config-utils.c:1663
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "ಆಫ್‌ಲೈನಿನ ಸ್ಥಿತಿಯಲ್ಲಿ MAPI ಕ್ಯಾಲೆಂಡರನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"
 
-#: ../src/configuration/e-mapi-config-utils.c:1654
-#| msgid "Cannot create MAPI folders in offline mode."
+#: ../src/configuration/e-mapi-config-utils.c:1666
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "ಆಫ್‌ಲೈನಿನ ಸ್ಥಿತಿಯಲ್ಲಿ MAPI ಕಾರ್ಯದ ಪಟ್ಟಿಯನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"
 
-#: ../src/configuration/e-mapi-config-utils.c:1657
-#| msgid "Cannot create MAPI folders in offline mode."
+#: ../src/configuration/e-mapi-config-utils.c:1669
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "ಆಫ್‌ಲೈನಿನ ಸ್ಥಿತಿಯಲ್ಲಿ MAPI ಮೆಮೊ ಪಟ್ಟಿಯನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"
 
-#: ../src/configuration/e-mapi-config-utils.c:1660
-#| msgid "Cannot create MAPI folders in offline mode."
+#: ../src/configuration/e-mapi-config-utils.c:1672
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "ಆಫ್‌ಲೈನಿನ ಸ್ಥಿತಿಯಲ್ಲಿ MAPI ವಿಳಾಸ ಪುಸ್ತಕವನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"
 
-#: ../src/configuration/e-mapi-config-utils.c:1664
-#| msgid "Cannot create MAPI folders in offline mode."
+#: ../src/configuration/e-mapi-config-utils.c:1677
 msgid "Cannot create MAPI source in offline mode"
 msgstr "ಆಫ್‌ಲೈನಿನ ಸ್ಥಿತಿಯಲ್ಲಿ MAPI ಮೂಲವನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"
 
-#: ../src/configuration/e-mapi-config-utils.c:1684
+#: ../src/configuration/e-mapi-config-utils.c:1697
 msgid "_Location:"
 msgstr "ಸ್ಥಳ(_L):"
 
@@ -789,13 +741,13 @@ msgid "Writing folder permissions, please wait..."
 msgstr "ಪತ್ರಕೋಶದ ಅನುಮತಿಗಳನ್ನು ಬರೆಯಲಾಗುತ್ತಿದೆ, ದಯವಿಟ್ಟು ಕಾಯಿರಿ..."
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:780
-#: ../src/configuration/e-mapi-search-gal-user.c:524
+#: ../src/configuration/e-mapi-search-gal-user.c:527
 msgctxt "User"
 msgid "Anonymous"
 msgstr "ಅನಾಮಧೇಯ"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:782
-#: ../src/configuration/e-mapi-search-gal-user.c:521
+#: ../src/configuration/e-mapi-search-gal-user.c:524
 msgctxt "User"
 msgid "Default"
 msgstr "ಪೂರ್ವನಿಯೋಜಿತ"
@@ -806,7 +758,7 @@ msgid "Unknown"
 msgstr "ಗೊತ್ತಿರದ"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:876
-#: ../src/configuration/e-mapi-search-gal-user.c:597
+#: ../src/configuration/e-mapi-search-gal-user.c:600
 msgid "Name"
 msgstr "ಹೆಸರು"
 
@@ -819,17 +771,15 @@ msgid "Edit MAPI folder permissions..."
 msgstr "MAPI ಪತ್ರಕೋಶದ ಅನುಮತಿಗಳನ್ನು ಸಂಪಾದಿಸು..."
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:960
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:610
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:626
 msgid "Account:"
 msgstr "ಖಾತೆ:"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:986
-#| msgid "Folder Size"
 msgid "Folder name:"
 msgstr "ಪತ್ರಕೋಶದ ಹೆಸರು:"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:1007
-#| msgid "Folder"
 msgid "Folder ID:"
 msgstr "ಪತ್ರಕೋಶದ ID:"
 
@@ -878,7 +828,6 @@ msgid "Create items"
 msgstr "ಅಂಶಗಳನ್ನು ರಚಿಸು"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
-#| msgid "Cannot create new folder `%s'"
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "ಉಪಪತ್ರಕೋಶಗಳನ್ನು ರಚಿಸು"
@@ -914,19 +863,16 @@ msgid "Other"
 msgstr "ಇತರೆ"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:1216
-#| msgid "Folder Size"
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "ಪತ್ರಕೋಶದ ಮಾಲಿಕ"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
-#| msgid "Folder"
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "ಪತ್ರಕೋಶದ ಸಂಪರ್ಕ"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
-#| msgid "_Folder size"
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "ಪತ್ರಕೋಶದ ಗೋಚರ"
@@ -955,28 +901,28 @@ msgstr[0] ""
 msgstr[1] ""
 "%d ಬಳಕೆದಾರರು ಕಂಡುಬಂದಿದ್ದಾರೆ, ಆದರೆ ಕೇವಲ ಮೊದಲಿನ %d ಅನ್ನು ಮಾತ್ರ ತೋರಿಸಲಾಗುತ್ತಿದೆ"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:516
-#: ../src/configuration/e-mapi-search-gal-user.c:707
+#: ../src/configuration/e-mapi-search-gal-user.c:519
+#: ../src/configuration/e-mapi-search-gal-user.c:710
 msgid "Search for a user"
 msgstr "ಬಳಕೆದಾರರಿಗಾಗಿ ಹುಡುಕು"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:532
+#: ../src/configuration/e-mapi-search-gal-user.c:535
 msgid "Searching..."
 msgstr "ಹುಡುಕಲಾಗುತ್ತಿದೆ..."
 
-#: ../src/configuration/e-mapi-search-gal-user.c:603
+#: ../src/configuration/e-mapi-search-gal-user.c:606
 msgid "E-mail"
 msgstr "ಇ-ಮೈಲ್‌"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:644
+#: ../src/configuration/e-mapi-search-gal-user.c:647
 msgid "Choose MAPI user..."
 msgstr "MAPI ಬಳಕೆದಾರನನ್ನು ಆರಿಸು..."
 
-#: ../src/configuration/e-mapi-search-gal-user.c:667
+#: ../src/configuration/e-mapi-search-gal-user.c:670
 msgid "_Search:"
 msgstr "ಹುಡುಕು (_S):"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:90
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:89
 #, c-format
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "ಪತ್ರಕೋಶವನ್ನು ಸೇರಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ, '%s' ಪತ್ರಕೋಶವು ಈಗಾಗಲೆ ಇದೆ"
@@ -984,28 +930,29 @@ msgstr "ಪತ್ರಕೋಶವನ್ನು ಸೇರಿಸಲು ಸಾಧ್�
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. Example result: "Mailbox - John Smith"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:115
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:114
 #, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox - %s"
 msgstr "ಅಂಚೆಪೆಟ್ಟಿಗೆ - %s"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:144
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:143
 #, c-format
 msgid "Cannot add folder, failed to add to store's summary"
 msgstr ""
 "ಪತ್ರಕೋಶವನ್ನು ಸೇರಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ, ಶೇಖರಣೆಯ ಸಾರಾಂಶವನ್ನು ಸೇರಿಸುವಲ್ಲಿ ವಿಫಲಗೊಂಡಿದೆ"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:326
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:329
 #, c-format
 msgid ""
 "Folder '%s' not found. Either it does not exist or you do not have "
 "permission to access it."
 msgstr ""
 "'%s' ಪತ್ರಕೋಶವು ಕಂಡುಬಂದಿಲ್ಲ. ಒಂದೊ ಅದು ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ ಅಥವ ಅದನ್ನು "
-"ನಿಲುಕಿಸಿಕೊಳ್ಳಲು ನೀವು ಅನುಮತಿಯನ್ನು ಹೊಂದಿಲ್ಲ."
+"ನಿಲುಕಿಸಿಕೊಳ್ಳಲು "
+"ನೀವು ಅನುಮತಿಯನ್ನು ಹೊಂದಿಲ್ಲ."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:356
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:364
 msgid "Cannot add folder, cannot determine folder's type"
 msgstr ""
 "ಪತ್ರಕೋಶವನ್ನು ಸೇರಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ, ಪತ್ರಕೋಶದ ಬಗೆಯನ್ನು ನಿರ್ಧರಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
@@ -1015,81 +962,79 @@ msgstr ""
 #. the second '%s' is replaced with folder name.
 #. Example result: "John Smith - Calendar"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:397
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:405
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s - %s"
 msgstr "%s - %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:492
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:688
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:502
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:704
 msgid "Inbox"
 msgstr "ಒಳಪೆಟ್ಟಿಗೆ"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:494
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:504
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:705
 msgid "Contacts"
 msgstr "ಸಂಪರ್ಕವಿಳಾಸಗಳು"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:496
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:690
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:506
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:706
 msgid "Calendar"
 msgstr "ಕ್ಯಾಲೆಂಡರ್"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:498
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:691
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:508
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:707
 msgid "Memos"
 msgstr "ಮೆಮೊಗಳು"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:500
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:692
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:510
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:708
 msgid "Tasks"
 msgstr "ಕಾರ್ಯಗಳು"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:513
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:523
 #, c-format
 msgid "Testing availability of folder '%s' of user '%s', please wait..."
 msgstr ""
 "'%s' ಪತ್ರಕೋಶದ ಲಭ್ಯತೆಯನ್ನು ('%s' ಬಳಕೆದಾರನ) ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ, ದಯವಿಟ್ಟು "
 "ಕಾಯಿರಿ..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:589
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:605
 msgid "Subscribe to folder of other MAPI user..."
 msgstr "ಇತರೆ MAPI ಬಳಕೆದಾರರ ಪತ್ರಕೋಶಕ್ಕೆ ಚಂದಾದಾರನಾಗು..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:638
-#| msgid "User name"
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:654
 msgid "User"
 msgstr "ಬಳಕೆದಾರ"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:645
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:661
 msgid "_User:"
 msgstr "ಬಳಕೆದಾರ (_U):"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:658
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:674
 msgid "C_hoose..."
 msgstr "ಆರಿಸು (_h)..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:673
-#| msgid "_Folder size"
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
 msgid "_Folder name:"
 msgstr "ಪತ್ರಕೋಶದ ಗಾತ್ರ (_F):"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2048
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2080
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "ಅಂಗೀಕರಿಸಲಾಗಿದೆ:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2052
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2085
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "ಪ್ರಾಯಶಃ:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2056
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2090
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "ತಿರಸ್ಕರಿಸಲ್ಪಟ್ಟಿದೆ:"
@@ -1123,7 +1068,6 @@ msgid "Password change required"
 msgstr "ಗುಪ್ತಪದವನ್ನು ಬದಲಾಯಿಸುವ ಅಗತ್ಯವಿದೆ"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:147
-#| msgid "Password"
 msgid "Password expired"
 msgstr "ಗುಪ್ತಪದದ ವಾಯಿದೆ ತೀರಿದೆ"
 
@@ -1169,52 +1113,53 @@ msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:743
+#: ../src/libexchangemapi/e-mapi-connection.c:744
 #, c-format
 msgid "Server '%s' cannot be reached"
 msgstr "'%s' ಪೂರೈಕೆಗಣಕವನ್ನು ತಲುಪಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:864
+#: ../src/libexchangemapi/e-mapi-connection.c:872
 #, c-format
 msgid "Folder name '%s' is not a known default folder name, nor folder ID."
 msgstr ""
 "'%s' ಎನ್ನುವ ಪತ್ರಕೋಶದ ಹೆಸರು ಅಥವ  ಪತ್ರಕೋಶದ ID ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ತಿಳಿದಿಲ್ಲ."
 
-#: ../src/libexchangemapi/e-mapi-connection.c:1195
+#: ../src/libexchangemapi/e-mapi-connection.c:1203
 #, c-format
 msgid "Failed to open store for user '%s'"
 msgstr "'%s' ಬಳಕೆದಾರನಿಗಾಗಿ ಶೇಖರಣೆಯನ್ನು ತೆರೆಯುವಲ್ಲಿ ವಿಫಲತೆ ಉಂಟಾಗಿದೆ"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:1203
+#: ../src/libexchangemapi/e-mapi-connection.c:1211
 #, c-format
 msgid "Folder of user '%s' not found"
 msgstr "'%s' ಬಳಕೆದಾರ ಪತ್ರಕೋಶವು ಕಂಡುಬಂದಿಲ್ಲ"
 
 #. Translators: %s is replaced with an email address which was found ambiguous on a remote server
-#: ../src/libexchangemapi/e-mapi-connection.c:3686
+#: ../src/libexchangemapi/e-mapi-connection.c:3856
 #, c-format
 msgid "Recipient '%s' is ambiguous"
 msgstr "'%s' ಸ್ವೀಕರಿಸುವವರು ಅನಿಶ್ಚಿತವಾಗಿದ್ದಾರೆ"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:4565
+#: ../src/libexchangemapi/e-mapi-connection.c:4948
 #, c-format
 msgid ""
 "Search result exceeded allowed size limit. Use more specific search term, "
 "please"
 msgstr ""
 "ಹುಡುಕು ಫಲಿತಾಂಶವು ಅನುಮತಿ ಇರುವ ಗಾತ್ರದ ಮಿತಿಯನ್ನು ಮೀರಿದೆ. ದಯವಿಟ್ಟು ಹೆಚ್ಚು "
-"ನಿಶ್ಚಿತವಾದ ಹುಡುಕು ಪದವನ್ನು ಬಳಸಿ."
+"ನಿಶ್ಚಿತವಾದ "
+"ಹುಡುಕು ಪದವನ್ನು ಬಳಸಿ."
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6165
+#: ../src/libexchangemapi/e-mapi-connection.c:6549
 msgid "All Public Folders"
 msgstr "ಎಲ್ಲಾ ಸಾರ್ವಜನಿಕ ಪತ್ರಕೋಶಗಳು"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6422
+#: ../src/libexchangemapi/e-mapi-connection.c:6816
 #, c-format
 msgid "User name '%s' is ambiguous"
 msgstr "'%s' ಬಳಕೆದಾರರ ಹೆಸರು ಅನಿಶ್ಚಿತವಾಗಿದೆ"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6425
+#: ../src/libexchangemapi/e-mapi-connection.c:6819
 #, c-format
 msgid "User name '%s' not found"
 msgstr "'%s' ಬಳಕೆದಾರ ಹೆಸರು ಕಂಡು ಬಂದಿಲ್ಲ"
