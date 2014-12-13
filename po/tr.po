@@ -4,87 +4,163 @@
 #
 #
 # Baris Cicek <baris@teamforce.name.tr>, 2009.
+# Muhammet Kara <muhammetk@gmail.com>, 2014.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-03-17 00:26+0200\n"
-"PO-Revision-Date: 2009-02-20 18:22+0200\n"
-"Last-Translator: Baris Cicek <baris@teamforce.name.tr>\n"
-"Language-Team: Turkish <gnome-turk@gnome.org>\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
+"POT-Creation-Date: 2014-10-08 09:55+0000\n"
+"PO-Revision-Date: 2014-12-13 10:55+0200\n"
+"Last-Translator: Muhammet Kara <muhammetk@gmail.com>\n"
+"Language-Team: Türkçe <gnome-turk@gnome.org>\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Gtranslator 2.91.6\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:592
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:119
-#, c-format
-msgid "Enter Password for %s@%s"
-msgstr "%s@%s için Parola Girin"
+#: ../evolution-mapi.metainfo.xml.in.h:1
+#, fuzzy
+#| msgid "Exchange MAPI server %s"
+msgid "Exchange MAPI"
+msgstr "Exchange MAPI sunucusu %s"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:109
-msgid ""
-"Server, username and domain name cannot be empty. Please fill them with "
-"correct values."
+#: ../evolution-mapi.metainfo.xml.in.h:2 ../src/camel/camel-mapi-provider.c:73
+#, fuzzy
+#| msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr ""
-"Sunucu, kullanıcı ismi ve alan adı boş olamaz. Lütfen onları doğru değerler\n"
-"ile doldurun."
+"MAPI kullanan Microsoft Exchange / OpenChange sunucularına erişmek için"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
-msgid "Authentication finished successfully."
-msgstr "Kimlik doğrulama başarıyla tamamlandı."
+#: ../src/addressbook/e-book-backend-mapi.c:735
+msgid "Searching"
+msgstr "Aranıyor"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:149
-msgid "Authentication failed."
-msgstr "Kimlik doğrulama başarısız oldu."
+#: ../src/addressbook/e-book-backend-mapi.c:1735
+#: ../src/calendar/e-cal-backend-mapi.c:193
+#: ../src/calendar/e-cal-backend-mapi.c:492
+#: ../src/camel/camel-mapi-folder.c:1937 ../src/camel/camel-mapi-folder.c:2017
+msgid "Unknown error"
+msgstr "Bilinmeyen hata"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:211
-msgid "_Domain name:"
-msgstr "_Alan ismi:"
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:432
+msgid "Failed to remove public folder"
+msgstr ""
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:221
-msgid "_Authenticate"
-msgstr "_Kimlik Doğrula"
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:468
+msgid "The backend does not support bulk additions"
+msgstr ""
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:323
-msgid "Personal Folders"
-msgstr "Kişisel Klasörler"
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:510
+#: ../src/calendar/e-cal-backend-mapi.c:1715
+#: ../src/calendar/e-cal-backend-mapi.c:2226
+#, fuzzy
+#| msgid "Unable to authenticate to Exchange MAPI server."
+msgid "Failed to create item on a server"
+msgstr "Exchange MAPI sunucusuyla kimlik doğrulama yapılamadı."
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:386
-msgid "_Location:"
-msgstr "_Konum:"
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:627
+msgid "The backend does not support bulk modifications"
+msgstr ""
 
-#: ../src/calendar/e-cal-backend-mapi.c:115
-#: ../src/calendar/e-cal-backend-mapi.c:1053
-#: ../src/camel/camel-mapi-store.c:457
-msgid "Authentication failed"
-msgstr "Kimlik doğrulama başarısız oldu"
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:672
+#: ../src/calendar/e-cal-backend-mapi.c:1928
+msgid "Failed to modify item on a server"
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:848
+#, fuzzy
+#| msgid "Error fetching changes from the server."
+msgid "Failed to fetch items from a server"
+msgstr "Sunucudan değişiklikler alınırken hata."
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. %d is an index of the contact.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:866
+#, c-format
+msgid "Caching contact %d"
+msgstr ""
+
+#. Translators : This is used to cache the downloaded contacts from a server.
+#. The first %d is an index of the contact,
+#. the second %d is total count of conacts on the server.
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:870
+#, c-format
+msgid "Caching contact %d/%d"
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:925
+msgid "Failed to count server contacts"
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:983
+msgid "Failed to list items from a server"
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1064
+msgid "Failed to transfer contacts from a server"
+msgstr ""
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. %d is an index of the GAL entry.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:153
+#, c-format
+msgid "Caching GAL contact %d"
+msgstr ""
+
+#. Translators : This is used to cache the downloaded contacts from GAL.
+#. The first %d is an index of the GAL entry,
+#. the second %d is total count of entries in GAL.
+#: ../src/addressbook/e-book-backend-mapi-gal.c:157
+#, c-format
+msgid "Caching GAL contact %d/%d"
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-mapi-gal.c:229
+#: ../src/addressbook/e-book-backend-mapi-gal.c:313
+msgid "Failed to fetch GAL entries"
+msgstr ""
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:391
+#: ../src/calendar/e-cal-backend-mapi.c:417
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Klasör %s içindeki öğeler yükleniyor"
 
-#. FIXME: String : We need to restart evolution-data-server
-#: ../src/calendar/e-cal-backend-mapi.c:581
-#: ../src/calendar/e-cal-backend-mapi.c:592
-#: ../src/calendar/e-cal-backend-mapi.c:618
-msgid "Error fetching changes from the server."
-msgstr "Sunucudan değişiklikler alınırken hata."
+#: ../src/calendar/e-cal-backend-mapi.c:784
+#, c-format
+#| msgid "Loading items in folder %s"
+msgid "Failed to open folder: %s"
+msgstr "Klasörü açma başarısız oldu: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:973
-#: ../src/calendar/e-cal-backend-mapi.c:983
-#: ../src/calendar/e-cal-backend-mapi.c:1088
-#: ../src/calendar/e-cal-backend-mapi.c:1170
+#: ../src/calendar/e-cal-backend-mapi.c:792
+#, c-format
+msgid "Failed to get folder properties: %s"
+msgstr "Klasör özelliklerini alma başarısız oldu: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:833
+#, c-format
+msgid "Failed to list objects: %s"
+msgstr "Nesneleri listeleme başarısız oldu: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:859
+#, c-format
+msgid "Failed to transfer objects: %s"
+msgstr "Nesneleri aktarma başarısız oldu: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:878
+#, c-format
+msgid "Failed to close folder: %s"
+msgstr "Klasörü kapatma başarısız oldu: %s"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1381
 msgid "Could not create cache file"
 msgstr "Önbellek dosyası oluşturulamadı"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1099
-msgid "Could not create thread for populating cache"
-msgstr "Önbellek oluşturmak için thread oluşturulamadı"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1513
+#: ../src/calendar/e-cal-backend-mapi.c:1836
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -92,179 +168,1085 @@ msgstr ""
 "Tekrarlanan bir randevunun tek bir oluşumunu değiştirme desteği henüz "
 "uygulanmadı. Sunucuda randevu için için hiçbir değişiklik yapılmadı."
 
-#: ../src/camel/camel-mapi-folder.c:333 ../src/camel/camel-mapi-folder.c:669
-#, c-format
-msgid "Fetching summary information for new messages in %s"
-msgstr "%s içindeki yeni iletiler için özet bilgiler alınıyor"
+#: ../src/calendar/e-cal-backend-mapi.c:2041
+msgid "Cannot remove items from a server"
+msgstr "Ögeler sunucudan silinemiyor"
 
-#: ../src/camel/camel-mapi-folder.c:662 ../src/camel/camel-mapi-folder.c:1221
-#: ../src/camel/camel-mapi-folder.c:1229
+#: ../src/calendar/e-cal-backend-mapi.c:2477
+msgid "Failed to get Free/Busy data"
+msgstr "Boşta/Meşgul verisini alma başarısız oldu"
+
+#: ../src/camel/camel-mapi-folder.c:805
+#, c-format
+msgid "Refreshing folder '%s'"
+msgstr "'%s' klasörü tazeleniyor"
+
+#: ../src/camel/camel-mapi-folder.c:873
+#, c-format
+#| msgid "Loading items in folder %s"
+msgid "Downloading messages in folder '%s'"
+msgstr "'%s' klasöründeki iletiler indiriliyor"
+
+#: ../src/camel/camel-mapi-folder.c:961 ../src/camel/camel-mapi-folder.c:1569
+#, c-format
 msgid "This message is not available in offline mode."
 msgstr "Bu ileti çevirim dışı kipte mevcut değil."
 
-#: ../src/camel/camel-mapi-folder.c:679
+#: ../src/camel/camel-mapi-folder.c:971 ../src/camel/camel-mapi-folder.c:989
+#, c-format
+#| msgid "Fetching items failed"
+msgid "Fetching items failed: %s"
+msgstr "Ögeleri alma başarısız oldu: %s"
+
+#: ../src/camel/camel-mapi-folder.c:976 ../src/camel/camel-mapi-folder.c:994
 msgid "Fetching items failed"
 msgstr "Öğeleri alma başarısız oldu"
 
-#: ../src/camel/camel-mapi-folder.c:1185
+#: ../src/camel/camel-mapi-folder.c:1248
 #, c-format
-msgid ""
-"Cannot get message: %s\n"
-"  %s"
-msgstr ""
-"İleti alınamıyor: %s\n"
-"  %s"
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot append message to folder '%s'"
+msgstr "İleti '%s' klasörüne eklenemiyor"
 
-#: ../src/camel/camel-mapi-folder.c:1185
-msgid "No such message"
-msgstr "Böyle bir ileti yok"
+#: ../src/camel/camel-mapi-folder.c:1257 ../src/camel/camel-mapi-folder.c:1287
+#, c-format
+msgid "Offline."
+msgstr "Çevrimdışı."
 
-#: ../src/camel/camel-mapi-folder.c:1197
-msgid "Message fetching cancelled by user."
-msgstr "İleti alma kullanıcı tarafından iptal edildi."
+#: ../src/camel/camel-mapi-folder.c:1370
+#, c-format
+msgid "Failed to empty Trash: %s"
+msgstr "Çöpü boşaltma başarısız oldu: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1204
+#: ../src/camel/camel-mapi-folder.c:1376
+msgid "Failed to empty Trash"
+msgstr "Çöpü boşaltma başarısız oldu"
+
+#: ../src/camel/camel-mapi-folder.c:1554
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "İleti %s alınamıyor: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1258
+#: ../src/camel/camel-mapi-folder.c:1555
+msgid "No such message"
+msgstr "Böyle bir ileti yok"
+
+#: ../src/camel/camel-mapi-folder.c:1580 ../src/camel/camel-mapi-folder.c:1612
+#, fuzzy, c-format
+#| msgid "Could not get message"
+msgid "Could not get message: %s"
+msgstr "İleti alınamadı"
+
+#: ../src/camel/camel-mapi-folder.c:1586 ../src/camel/camel-mapi-folder.c:1619
+#, c-format
 msgid "Could not get message"
 msgstr "İleti alınamadı"
 
-#: ../src/camel/camel-mapi-folder.c:1609
+#: ../src/camel/camel-mapi-folder.c:1994
+msgid "Receive quota"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:2000
+msgid "Send quota"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:2022
+msgid "No quota information available"
+msgstr ""
+
+#: ../src/camel/camel-mapi-folder.c:2124
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s için özet yüklenemedi"
 
-#: ../src/camel/camel-mapi-provider.c:51
+#: ../src/camel/camel-mapi-provider.c:45
 msgid "Checking for new mail"
 msgstr "Yeni posta için kontrol ediliyor"
 
-#: ../src/camel/camel-mapi-provider.c:53
+#: ../src/camel/camel-mapi-provider.c:47
 msgid "C_heck for new messages in all folders"
 msgstr "Tüm klasörlerde yeni iletileri _kontrol et"
 
-#. i18n: GAL is an Outlookism, AD is a Windowsism
-#: ../src/camel/camel-mapi-provider.c:66
-msgid "Global Address List / Active Directory"
-msgstr "Genel Adres Listes / Aktif Dizin"
-
-#. i18n: "Global Catalog" is a Windowsism, but it's a
-#. technical term and may not have translations?
-#: ../src/camel/camel-mapi-provider.c:70
-msgid "_Global Catalog server name:"
-msgstr "_Genel Katalog sunucusu ismi:"
-
-#: ../src/camel/camel-mapi-provider.c:72
-#, c-format
-msgid "_Limit number of GAL responses: %s"
-msgstr "GAL cevap sayısı _sınırı: %s"
-
-#: ../src/camel/camel-mapi-provider.c:75
+#: ../src/camel/camel-mapi-provider.c:51
 msgid "Options"
 msgstr "Seçenekler"
 
-#: ../src/camel/camel-mapi-provider.c:77
+#: ../src/camel/camel-mapi-provider.c:53
 msgid "Automatically synchroni_ze account locally"
 msgstr "Hesabı kendiliğinden yerel olarak _eşzamanlandır"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:80
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
 "Bu sunucudaki Gelen Kutusu içindeki tüm yeni iletilere filtreleri _uygula"
 
-#: ../src/camel/camel-mapi-provider.c:82
+#: ../src/camel/camel-mapi-provider.c:58
 msgid "Check new messages for _Junk contents"
 msgstr "_Gereksiz içerikleri için yeni iletileri kontrol et"
 
-#: ../src/camel/camel-mapi-provider.c:84
+#: ../src/camel/camel-mapi-provider.c:60
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Sadece Gelen Kutusu içindeki i_letileri Gereksiz için kontrol et"
 
-#: ../src/camel/camel-mapi-provider.c:96
-msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
+#: ../src/camel/camel-mapi-provider.c:62
+#: ../src/configuration/e-mapi-config-utils.c:1644
+msgid "Lis_ten for server notifications"
 msgstr ""
-"MAPI kullanan Microsoft Exchange / OpenChange sunucularına erişmek için"
 
-#: ../src/camel/camel-mapi-provider.c:111
+#: ../src/camel/camel-mapi-provider.c:88
 msgid "Password"
 msgstr "Parola"
 
-#: ../src/camel/camel-mapi-provider.c:112
+#: ../src/camel/camel-mapi-provider.c:89
+#, fuzzy
+#| msgid ""
+#| "This option will connect to the Openchange server using a plaintext "
+#| "password."
 msgid ""
-"This option will connect to the Openchange server using a plaintext password."
+"This option will connect to the OpenChange server using a plaintext password."
 msgstr ""
 "Bu seçenek Openchange sunucusuna bağlanırken düz metin parola kullanır."
 
-#: ../src/camel/camel-mapi-store.c:61
-msgid "Favorites"
-msgstr "Sık Kullanılanlar"
+#: ../src/camel/camel-mapi-sasl-krb.c:28
+msgid "Kerberos"
+msgstr ""
 
-#: ../src/camel/camel-mapi-store.c:62
-msgid "All Public Folders"
+#: ../src/camel/camel-mapi-sasl-krb.c:30
+#, fuzzy
+#| msgid ""
+#| "This option will connect to the Openchange server using a plaintext "
+#| "password."
+msgid "This option will connect to the server using kerberos key."
+msgstr ""
+"Bu seçenek Openchange sunucusuna bağlanırken düz metin parola kullanır."
+
+#: ../src/camel/camel-mapi-store.c:134 ../src/camel/camel-mapi-store.c:176
+msgid "Cannot find folder in a local cache"
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:492 ../src/camel/camel-mapi-store.c:1179
+#, fuzzy
+#| msgid "Folder list not available in offline mode."
+msgid "Folder list is not available in offline mode"
+msgstr "Çevirim dışı kipde klasör listesi mevcut değil."
+
+#: ../src/camel/camel-mapi-store.c:872
+#, fuzzy
+#| msgid "All Public Folders"
+msgid "No public folder found"
 msgstr "Tüm Genel Klasörler"
 
-#: ../src/camel/camel-mapi-store.c:262 ../src/camel/camel-mapi-transport.c:347
+#: ../src/camel/camel-mapi-store.c:872
+msgid "No folder found"
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:1201 ../src/camel/camel-mapi-store.c:2168
+#, c-format
+msgid "Connecting to '%s'"
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:1260
+#, fuzzy
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI folders in offline mode"
+msgstr "Çevirim dışı kipte MAPI klasörleri oluşturulamıyor."
+
+#: ../src/camel/camel-mapi-store.c:1267
+#, fuzzy, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot create new folder '%s'"
+msgstr "Yeni klasör `%s' oluşturulamıyor"
+
+#: ../src/camel/camel-mapi-store.c:1276
+#, c-format
+msgid "Authentication failed"
+msgstr "Kimlik doğrulama başarısız oldu"
+
+#: ../src/camel/camel-mapi-store.c:1286
+msgid "MAPI folders can be created only within mailbox of the logged user"
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:1299 ../src/camel/camel-mapi-store.c:1412
+#, fuzzy, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot find folder '%s'"
+msgstr "Yeni klasör `%s' oluşturulamıyor"
+
+#: ../src/camel/camel-mapi-store.c:1354
+#, fuzzy, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot create folder '%s': %s"
+msgstr "Yeni klasör `%s' oluşturulamıyor"
+
+#: ../src/camel/camel-mapi-store.c:1360
+#, fuzzy, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot create folder '%s'"
+msgstr "Yeni klasör `%s' oluşturulamıyor"
+
+#: ../src/camel/camel-mapi-store.c:1390 ../src/camel/camel-mapi-store.c:1402
+#, fuzzy
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot delete MAPI folders in offline mode"
+msgstr "Çevirim dışı kipte MAPI klasörleri oluşturulamıyor."
+
+#: ../src/camel/camel-mapi-store.c:1458
+#, fuzzy, c-format
+#| msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgid "Cannot remove folder '%s': %s"
+msgstr "`%s' MAPI klasörü `%s' olarak adlandırılamıyor"
+
+#: ../src/camel/camel-mapi-store.c:1466
+#, fuzzy, c-format
+#| msgid "Cannot create new folder `%s'"
+msgid "Cannot remove folder '%s'"
+msgstr "Yeni klasör `%s' oluşturulamıyor"
+
+#: ../src/camel/camel-mapi-store.c:1496 ../src/camel/camel-mapi-store.c:1511
+#, fuzzy
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot rename MAPI folders in offline mode"
+msgstr "Çevirim dışı kipte MAPI klasörleri oluşturulamıyor."
+
+#: ../src/camel/camel-mapi-store.c:1522
+#, fuzzy, c-format
+#| msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
+msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
+msgstr "MAPI klasörü `%s' yeniden adlandırılamıyor. Klasör mevcut değil."
+
+#: ../src/camel/camel-mapi-store.c:1533
+#, fuzzy, c-format
+#| msgid "Cannot rename MAPI default folder `%s' to `%s'."
+msgid "Cannot rename MAPI default folder '%s' to '%s'"
+msgstr "MAPI `%s' öntanımlı klasörü `%s' olarak yeniden adlandırılamadı."
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1559 ../src/camel/camel-mapi-store.c:1602
+#: ../src/camel/camel-mapi-store.c:1682
+#, fuzzy, c-format
+#| msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgid "Cannot rename MAPI folder '%s' to '%s'"
+msgstr "`%s' MAPI klasörü `%s' olarak adlandırılamıyor"
+
+#. Translators: '%s to %s' is current name of the folder and new name of the folder.
+#. The last '%s' is a detailed error message.
+#: ../src/camel/camel-mapi-store.c:1594 ../src/camel/camel-mapi-store.c:1675
+#, fuzzy, c-format
+#| msgid "Cannot rename MAPI folder `%s' to `%s'"
+msgid "Cannot rename MAPI folder '%s' to '%s': %s"
+msgstr "`%s' MAPI klasörü `%s' olarak adlandırılamıyor"
+
+#: ../src/camel/camel-mapi-store.c:1772
+#, fuzzy
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot subscribe MAPI folders in offline mode"
+msgstr "Çevirim dışı kipte MAPI klasörleri oluşturulamıyor."
+
+#: ../src/camel/camel-mapi-store.c:1789
+#, c-format
+msgid "Folder '%s' not found"
+msgstr ""
+
+#: ../src/camel/camel-mapi-store.c:1907
+#, fuzzy
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot unsubscribe MAPI folders in offline mode"
+msgstr "Çevirim dışı kipte MAPI klasörleri oluşturulamıyor."
+
+#. Translators: The %s is replaced with a server's host name
+#: ../src/camel/camel-mapi-store.c:2119
+#: ../src/camel/camel-mapi-transport.c:195
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI sunucusu %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#: ../src/camel/camel-mapi-store.c:266 ../src/camel/camel-mapi-transport.c:349
+#. Translators: The first %s is replaced with a user name, the second with a server's host name
+#: ../src/camel/camel-mapi-store.c:2123
+#: ../src/camel/camel-mapi-transport.c:198
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "%s için %s üzerindeki Exchange MAPI sunucusu"
 
-#. To translators : First %s : is the error text or the reason
-#. for prompting the user if it is available.
-#. Second %s is : Username.
-#. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:304
-#, c-format
-msgid "%s Please enter the MAPI password for %s@%s"
-msgstr "%s Lütfen %s@%s için MAPI parolası girin"
-
-#: ../src/camel/camel-mapi-store.c:317
-msgid "You did not enter a password."
-msgstr "Bir parola girmediniz."
-
-#: ../src/camel/camel-mapi-store.c:325
-#, c-format
-msgid "Unable to authenticate to Exchange MAPI server."
-msgstr "Exchange MAPI sunucusuyla kimlik doğrulama yapılamadı."
-
-#: ../src/camel/camel-mapi-store.c:441
-msgid "Cannot create MAPI folders in offline mode."
+#: ../src/camel/camel-mapi-store.c:2150
+#, fuzzy
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot connect MAPI store in offline mode"
 msgstr "Çevirim dışı kipte MAPI klasörleri oluşturulamıyor."
 
-#: ../src/camel/camel-mapi-store.c:446
+#: ../src/camel/camel-mapi-store.c:2203
 #, c-format
-msgid "Cannot create new folder `%s'"
-msgstr "Yeni klasör `%s' oluşturulamıyor"
+msgid "Mailbox '%s' is full, no new messages will be received or sent."
+msgstr ""
 
-#: ../src/camel/camel-mapi-store.c:657
+#: ../src/camel/camel-mapi-store.c:2205
 #, c-format
-msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
-msgstr "MAPI klasörü `%s' yeniden adlandırılamıyor. Klasör mevcut değil."
+msgid ""
+"Mailbox '%s' is near its size limit, message send will be disabled soon."
+msgstr ""
 
-#: ../src/camel/camel-mapi-store.c:668
+#: ../src/camel/camel-mapi-store.c:2209
 #, c-format
-msgid "Cannot rename MAPI default folder `%s' to `%s'."
-msgstr "MAPI `%s' öntanımlı klasörü `%s' olarak yeniden adlandırılamadı."
+msgid "Mailbox '%s' is full, no new messages will be received."
+msgstr ""
 
-#: ../src/camel/camel-mapi-store.c:686
+#: ../src/camel/camel-mapi-store.c:2211
 #, c-format
-msgid "Cannot rename MAPI folder `%s' to `%s'"
-msgstr "`%s' MAPI klasörü `%s' olarak adlandırılamıyor"
+msgid "Mailbox '%s' is near its size limit."
+msgstr ""
 
-#: ../src/camel/camel-mapi-store.c:1111
-msgid "Folder list not available in offline mode."
-msgstr "Çevirim dışı kipde klasör listesi mevcut değil."
+#: ../src/camel/camel-mapi-store.c:2631
+#, fuzzy
+#| msgid "Authentication failed"
+msgid "Authentication password not available"
+msgstr "Kimlik doğrulama başarısız oldu"
 
-#. Fixme : Set a better error message. Would be helful in troubleshooting.
-#: ../src/camel/camel-mapi-transport.c:335
+#: ../src/camel/camel-mapi-transport.c:146
+#: ../src/camel/camel-mapi-transport.c:168
+#, c-format
 msgid "Could not send message."
 msgstr "İleti gönderilemedi."
+
+#: ../src/camel/camel-mapi-transport.c:163
+#, fuzzy, c-format
+#| msgid "Could not send message."
+msgid "Could not send message: %s"
+msgstr "İleti gönderilemedi."
+
+#: ../src/collection/e-mapi-backend.c:278
+#, fuzzy
+#| msgid "Global Address List / Active Directory"
+msgid "Global Address List"
+msgstr "Genel Adres Listes / Aktif Dizin"
+
+#: ../src/collection/e-mapi-backend.c:651
+#: ../src/collection/e-mapi-backend.c:737
+#, c-format
+msgid "Data source '%s' does not represent a MAPI folder"
+msgstr ""
+
+#: ../src/configuration/e-book-config-mapigal.c:61
+msgid "Allow _partial search results"
+msgstr ""
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:125
+msgid "Select username"
+msgstr ""
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:135
+msgid "Full name"
+msgstr ""
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:140
+msgid "Username"
+msgstr ""
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:167
+msgid ""
+"There are more users with similar user name on a server.\n"
+"Please select that you would like to use from the below list."
+msgstr ""
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:395
+msgid "Authentication finished successfully."
+msgstr "Kimlik doğrulama başarıyla tamamlandı."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:397
+#: ../src/configuration/e-mail-config-mapi-backend.c:517
+msgid "Authentication failed."
+msgstr "Kimlik doğrulama başarısız oldu."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:458
+#, fuzzy
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot authenticate MAPI accounts in offline mode"
+msgstr "Çevirim dışı kipte MAPI klasörleri oluşturulamıyor."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:487
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"Sunucu, kullanıcı ismi ve alan adı boş olamaz. Lütfen onları doğru değerler\n"
+"ile doldurun."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:490
+#, fuzzy
+#| msgid ""
+#| "Server, username and domain name cannot be empty. Please fill them with "
+#| "correct values."
+msgid ""
+"Realm name cannot be empty when kerberos is selected. Please fill them with "
+"correct values."
+msgstr ""
+"Sunucu, kullanıcı ismi ve alan adı boş olamaz. Lütfen onları doğru değerler\n"
+"ile doldurun."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:511
+msgid "Connecting to the server, please wait..."
+msgstr ""
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:716
+msgid "Configuration"
+msgstr ""
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:725
+msgid "_Server:"
+msgstr ""
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:742
+msgid "User_name:"
+msgstr ""
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:767
+msgid "_Domain name:"
+msgstr "_Alan ismi:"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:780
+msgid "_Authenticate"
+msgstr "_Kimlik Doğrula"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:788
+msgid "_Use secure connection"
+msgstr ""
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:803
+msgid "_Kerberos authentication"
+msgstr ""
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:815
+#, fuzzy
+#| msgid "_Domain name:"
+msgid "_Realm name:"
+msgstr "_Alan ismi:"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:191
+#: ../src/configuration/e-mail-config-mapi-page.c:252
+msgid "MAPI Settings"
+msgstr ""
+
+#: ../src/configuration/e-mail-config-mapi-page.c:197
+msgid "View the size of all Exchange folders"
+msgstr ""
+
+#: ../src/configuration/e-mail-config-mapi-page.c:201
+msgid "Folder _Size"
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:457
+msgid "Folder"
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:462
+msgid "Size"
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:485
+#: ../src/configuration/e-mapi-config-utils.c:489
+msgid "Unable to retrieve folder size information"
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:556
+msgid "Folder Size"
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:570
+msgid "Fetching folder list…"
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:744
+#, c-format
+msgid "Cannot edit permissions of folder '%s', choose other folder."
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:807
+msgid "Folder size..."
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:814
+msgid "Subscribe to folder of other user..."
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:823
+#: ../src/configuration/e-mapi-config-utils.c:1101
+#: ../src/configuration/e-mapi-config-utils.c:1131
+#: ../src/configuration/e-mapi-config-utils.c:1161
+#: ../src/configuration/e-mapi-config-utils.c:1191
+msgid "Permissions..."
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:825
+msgid "Edit MAPI folder permissions"
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:1103
+msgid "Edit MAPI calendar permissions"
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:1133
+msgid "Edit MAPI tasks permissions"
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:1163
+msgid "Edit MAPI memos permissions"
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:1193
+msgid "Edit MAPI contacts permissions"
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:1366
+msgid "Personal Folders"
+msgstr "Kişisel Klasörler"
+
+#: ../src/configuration/e-mapi-config-utils.c:1597
+msgid "Searching remote MAPI folder structure, please wait..."
+msgstr ""
+
+#: ../src/configuration/e-mapi-config-utils.c:1665
+#, fuzzy
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI calendar in offline mode"
+msgstr "Çevirim dışı kipte MAPI klasörleri oluşturulamıyor."
+
+#: ../src/configuration/e-mapi-config-utils.c:1668
+#, fuzzy
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI task list in offline mode"
+msgstr "Çevirim dışı kipte MAPI klasörleri oluşturulamıyor."
+
+#: ../src/configuration/e-mapi-config-utils.c:1671
+#, fuzzy
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI memo list in offline mode"
+msgstr "Çevirim dışı kipte MAPI klasörleri oluşturulamıyor."
+
+#: ../src/configuration/e-mapi-config-utils.c:1674
+#, fuzzy
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI address book in offline mode"
+msgstr "Çevirim dışı kipte MAPI klasörleri oluşturulamıyor."
+
+#: ../src/configuration/e-mapi-config-utils.c:1679
+#, fuzzy
+#| msgid "Cannot create MAPI folders in offline mode."
+msgid "Cannot create MAPI source in offline mode"
+msgstr "Çevirim dışı kipte MAPI klasörleri oluşturulamıyor."
+
+#: ../src/configuration/e-mapi-config-utils.c:1699
+msgid "_Location:"
+msgstr "_Konum:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:89
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:90
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:100
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:109
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:117
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:124
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:130
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:135
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:138
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:141
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:274
+msgid "Writing folder permissions, please wait..."
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:780
+#: ../src/configuration/e-mapi-search-gal-user.c:527
+msgctxt "User"
+msgid "Anonymous"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
+#: ../src/configuration/e-mapi-search-gal-user.c:524
+msgctxt "User"
+msgid "Default"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
+msgctxt "User"
+msgid "Unknown"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:876
+#: ../src/configuration/e-mapi-search-gal-user.c:600
+msgid "Name"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:882
+msgid "Permission level"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:935
+msgid "Edit MAPI folder permissions..."
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:960
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:626
+msgid "Account:"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:986
+msgid "Folder name:"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1007
+msgid "Folder ID:"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1066
+msgid "Permissions"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1087
+msgid "Permi_ssion level:"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1115
+msgctxt "Permissions"
+msgid "Read"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1126
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1189
+msgctxt "Permissions"
+msgid "None"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1131
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1136
+msgctxt "Permissions"
+msgid "Simple Free/Busy"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1140
+msgctxt "Permissions"
+msgid "Detailed Free/Busy"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1147
+msgctxt "Permissions"
+msgid "Write"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1158
+msgctxt "Permissions"
+msgid "Create items"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
+#, fuzzy
+#| msgid "Cannot create new folder `%s'"
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "Yeni klasör `%s' oluşturulamıyor"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1170
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1178
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1194
+msgctxt "Permissions"
+msgid "Own"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1199
+msgctxt "Permissions"
+msgid "All"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1205
+msgctxt "Permissions"
+msgid "Other"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1216
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr ""
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1279
+msgid "Reading folder permissions, please wait..."
+msgstr ""
+
+#: ../src/configuration/e-mapi-search-gal-user.c:223
+msgid "No users found"
+msgstr ""
+
+#: ../src/configuration/e-mapi-search-gal-user.c:226
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ../src/configuration/e-mapi-search-gal-user.c:231
+#, c-format
+msgid "Found %d user, but showing only first %d"
+msgid_plural "Found %d users, but showing only first %d"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ../src/configuration/e-mapi-search-gal-user.c:519
+#: ../src/configuration/e-mapi-search-gal-user.c:710
+msgid "Search for a user"
+msgstr ""
+
+#: ../src/configuration/e-mapi-search-gal-user.c:535
+msgid "Searching..."
+msgstr "Aranıyor..."
+
+#: ../src/configuration/e-mapi-search-gal-user.c:606
+msgid "E-mail"
+msgstr "E-posta"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:647
+msgid "Choose MAPI user..."
+msgstr ""
+
+#: ../src/configuration/e-mapi-search-gal-user.c:670
+msgid "_Search:"
+msgstr "_Ara:"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:89
+#, c-format
+msgid "Cannot add folder, folder already exists as '%s'"
+msgstr ""
+
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. Example result: "Mailbox - John Smith"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:114
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox - %s"
+msgstr ""
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:143
+#, c-format
+msgid "Cannot add folder, failed to add to store's summary"
+msgstr ""
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:329
+#, c-format
+msgid ""
+"Folder '%s' not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr ""
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:364
+msgid "Cannot add folder, cannot determine folder's type"
+msgstr ""
+
+#. Translators: This is used to name foreign folder.
+#. The first '%s' is replaced with user name to whom the folder belongs,
+#. the second '%s' is replaced with folder name.
+#. Example result: "John Smith - Calendar"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:405
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s - %s"
+msgstr ""
+
+#. convert well-known names to their non-localized form
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:502
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:704
+msgid "Inbox"
+msgstr ""
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:504
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:705
+msgid "Contacts"
+msgstr ""
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:506
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:706
+msgid "Calendar"
+msgstr "Takvim"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:508
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:707
+msgid "Memos"
+msgstr ""
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:510
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:708
+msgid "Tasks"
+msgstr "Görevler"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:523
+#, c-format
+msgid "Testing availability of folder '%s' of user '%s', please wait..."
+msgstr ""
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:605
+msgid "Subscribe to folder of other MAPI user..."
+msgstr ""
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:654
+msgid "User"
+msgstr "Kullanıcı"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:661
+msgid "_User:"
+msgstr "K_ullanıcı:"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:674
+msgid "C_hoose..."
+msgstr ""
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
+#, fuzzy
+#| msgid "_Domain name:"
+msgid "_Folder name:"
+msgstr "_Alan ismi:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2080
+msgctxt "MeetingResp"
+msgid "Accepted:"
+msgstr ""
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2085
+msgctxt "MeetingResp"
+msgid "Tentative:"
+msgstr ""
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2090
+msgctxt "MeetingResp"
+msgid "Declined:"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:140
+msgid "Failed to login into the server"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:141
+msgid "Cannot create more sessions, session limit was reached"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:142
+msgid "User cancelled operation"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:143
+msgid "Unable to abort"
+msgstr "İptal edilemedi"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:144
+msgid "Network error"
+msgstr "Ağ hatası"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:145
+msgid "Disk error"
+msgstr "Disk hatası"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:146
+msgid "Password change required"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:147
+#| msgid "Password"
+msgid "Password expired"
+msgstr "Parolanın süresi dolmuş"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:148
+msgid "Invalid workstation account"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:149
+msgid "Invalid access time"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:150
+msgid "Account is disabled"
+msgstr "Hesap devre dışı bırakılmış"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:151
+msgid "End of session"
+msgstr "Oturum sonu"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:152
+msgid "MAPI is not initialized or connected"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:153
+msgid "Permission denied"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:154
+msgid "Mailbox quota exceeded"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:162
+#, c-format
+msgid "MAPI error %s (0x%x) occurred"
+msgstr ""
+
+#. Translators: The first '%s' is replaced with an error context,
+#. aka where the error occurred, the second '%s' is replaced with
+#. the error message.
+#: ../src/libexchangemapi/e-mapi-connection.c:179
+#, c-format
+msgctxt "EXCHANGEMAPI_ERROR"
+msgid "%s: %s"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:744
+#, c-format
+msgid "Server '%s' cannot be reached"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:872
+#, c-format
+msgid "Folder name '%s' is not a known default folder name, nor folder ID."
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:1203
+#, c-format
+msgid "Failed to open store for user '%s'"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:1211
+#, c-format
+msgid "Folder of user '%s' not found"
+msgstr ""
+
+#. Translators: %s is replaced with an email address which was found ambiguous on a remote server
+#: ../src/libexchangemapi/e-mapi-connection.c:3856
+#, c-format
+msgid "Recipient '%s' is ambiguous"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:4948
+#, c-format
+msgid ""
+"Search result exceeded allowed size limit. Use more specific search term, "
+"please"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6549
+msgid "All Public Folders"
+msgstr "Tüm Genel Klasörler"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6816
+#, c-format
+msgid "User name '%s' is ambiguous"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6819
+#, c-format
+msgid "User name '%s' not found"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-folder.c:332
+msgid "Cannot add folder, unsupported folder type"
+msgstr ""
+
+#: ../src/libexchangemapi/e-mapi-folder.c:335
+msgid "Cannot add folder, master source not found"
+msgstr ""
+
+#~ msgid "Enter Password for %s@%s"
+#~ msgstr "%s@%s için Parola Girin"
+
+#~ msgid "Could not create thread for populating cache"
+#~ msgstr "Önbellek oluşturmak için thread oluşturulamadı"
+
+#~ msgid "Fetching summary information for new messages in %s"
+#~ msgstr "%s içindeki yeni iletiler için özet bilgiler alınıyor"
+
+#~ msgid ""
+#~ "Cannot get message: %s\n"
+#~ "  %s"
+#~ msgstr ""
+#~ "İleti alınamıyor: %s\n"
+#~ "  %s"
+
+#~ msgid "Message fetching cancelled by user."
+#~ msgstr "İleti alma kullanıcı tarafından iptal edildi."
+
+#~ msgid "_Global Catalog server name:"
+#~ msgstr "_Genel Katalog sunucusu ismi:"
+
+#~ msgid "_Limit number of GAL responses: %s"
+#~ msgstr "GAL cevap sayısı _sınırı: %s"
+
+#~ msgid "Favorites"
+#~ msgstr "Sık Kullanılanlar"
+
+#~ msgid "%s Please enter the MAPI password for %s@%s"
+#~ msgstr "%s Lütfen %s@%s için MAPI parolası girin"
+
+#~ msgid "You did not enter a password."
+#~ msgstr "Bir parola girmediniz."
