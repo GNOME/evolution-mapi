@@ -237,12 +237,12 @@ struct _EMapiConnectionClass {
 GType			e_mapi_connection_get_type		(void);
 EMapiConnection *	e_mapi_connection_new			(ESourceRegistry *registry,
 								 const gchar *profile,
-								 const GString *password,
+								 const ENamedParameters *credentials,
 								 GCancellable *cancellable,
 								 GError **perror);
 EMapiConnection *	e_mapi_connection_find			(const gchar *profile);
 gboolean		e_mapi_connection_reconnect		(EMapiConnection *conn,
-								 const GString *password,
+								 const ENamedParameters *credentials,
 								 GCancellable *cancellable,
 								 GError **perror);
 gboolean		e_mapi_connection_disconnect		(EMapiConnection *conn,
@@ -525,7 +525,7 @@ gboolean		e_mapi_connection_disable_notifications	(EMapiConnection *conn,
 
 typedef struct {
 	const gchar *username;
-	GString *password;
+	ENamedParameters *credentials;
 	const gchar *domain;
 	const gchar *server;
 	gboolean use_ssl;

@@ -30,8 +30,8 @@ m4_define([evo_minimum_version], [ema_version])
 m4_define([libmapi_minimum_version], [2.0])
 
 dnl Keep these two definitions in agreement.
-m4_define([glib_minimum_version], [2.34])
-m4_define([glib_encoded_version], [GLIB_VERSION_2_34])
+m4_define([glib_minimum_version], [2.40])
+m4_define([glib_encoded_version], [GLIB_VERSION_2_40])
 
 dnl Keep these two definitions in agreement.
 m4_define([gdk_minimum_version], [3.0])

@@ -242,7 +242,7 @@ validate_credentials_test (ESourceRegistry *registry,
 		status = FALSE;
 		profname = e_mapi_util_profile_name (mapi_ctx, empd, FALSE);
 
-		conn = e_mapi_connection_new (registry, profname, empd->password, cancellable, perror);
+		conn = e_mapi_connection_new (registry, profname, empd->credentials, cancellable, perror);
 		if (conn) {
 			status = e_mapi_connection_connected (conn);
 			g_object_unref (conn);
@@ -267,12 +267,7 @@ validate_credentials_test (ESourceRegistry *registry,
 	return success;
 }
 
-typedef struct _EMailConfigMapiAuthenticator EMailConfigMapiAuthenticator;
-typedef struct _EMailConfigMapiAuthenticatorClass EMailConfigMapiAuthenticatorClass;
-
-struct _EMailConfigMapiAuthenticator {
-	GObject parent;
-
+typedef struct _TryCredentialsData {
 	gchar *username;
 	gchar *domain;
 	gchar *server;
@@ -282,103 +277,76 @@ struct _EMailConfigMapiAuthenticator {
 	CamelMapiSettings *mapi_settings;
 	EMailConfigServiceBackend *backend;
 	gboolean success;
-};
+} TryCredentialsData;
 
-struct _EMailConfigMapiAuthenticatorClass {
-	GObjectClass parent_class;
-};
-
-static ESourceAuthenticationResult
-mail_config_mapi_authenticator_try_password_sync (ESourceAuthenticator *auth,
-						  const GString *password,
-						  GCancellable *cancellable,
-						  GError **error)
+static void
+try_credentials_data_free (gpointer ptr)
 {
-	EMailConfigMapiAuthenticator *mapi_authenticator = (EMailConfigMapiAuthenticator *) auth;
+	TryCredentialsData *data = ptr;
+
+	if (data) {
+		g_free (data->username);
+		g_free (data->domain);
+		g_free (data->server);
+		g_free (data->krb_realm);
+		g_object_unref (data->mapi_settings);
+		g_object_unref (data->backend);
+		g_free (data);
+	}
+}
+
+static gboolean
+mail_config_mapi_try_credentials_sync (ECredentialsPrompter *prompter,
+				       ESource *source,
+				       const ENamedParameters *credentials,
+				       gboolean *out_authenticated,
+				       gpointer user_data,
+				       GCancellable *cancellable,
+				       GError **error)
+{
+	TryCredentialsData *data = user_data;
 	EMailConfigServicePage *page;
 	ESourceRegistry *registry;
 	EMapiProfileData empd = { 0 };
 	GError *mapi_error = NULL;
 
-	empd.username = mapi_authenticator->username;
-	empd.domain = mapi_authenticator->domain;
-	empd.server = mapi_authenticator->server;
-	empd.password = (GString *) password;
-	empd.use_ssl = mapi_authenticator->use_ssl;
-	empd.krb_sso = mapi_authenticator->krb_sso;
-	empd.krb_realm = mapi_authenticator->krb_realm;
+	empd.username = data->username;
+	empd.domain = data->domain;
+	empd.server = data->server;
+	empd.credentials = (ENamedParameters *) credentials;
+	empd.use_ssl = data->use_ssl;
+	empd.krb_sso = data->krb_sso;
+	empd.krb_realm = data->krb_realm;
 
-	page = e_mail_config_service_backend_get_page (mapi_authenticator->backend);
+	page = e_mail_config_service_backend_get_page (data->backend);
 	registry = e_mail_config_service_page_get_registry (page);
 
-	mapi_authenticator->success = validate_credentials_test (
+	data->success = validate_credentials_test (
 		registry,
 		&empd, 
-		mapi_authenticator->mapi_settings,
+		data->mapi_settings,
 		cancellable,
 		&mapi_error);
 
 	if (mapi_error) {
 		gboolean is_network_error = mapi_error && mapi_error->domain != E_MAPI_ERROR;
 
-		g_warn_if_fail (!mapi_authenticator->success);
-		mapi_authenticator->success = FALSE;
+		g_warn_if_fail (!data->success);
+		data->success = FALSE;
 
 		if (is_network_error)
 			g_propagate_error (error, mapi_error);
 		else
 			g_clear_error (&mapi_error);
 
-		return is_network_error ? E_SOURCE_AUTHENTICATION_ERROR : E_SOURCE_AUTHENTICATION_REJECTED;
+		return is_network_error ? FALSE : TRUE;
 	}
 
-	g_warn_if_fail (mapi_authenticator->success);
+	g_warn_if_fail (data->success);
 
-	return E_SOURCE_AUTHENTICATION_ACCEPTED;
-}
+	*out_authenticated = data->success;
 
-#define E_TYPE_MAIL_CONFIG_MAPI_AUTHENTICATOR (e_mail_config_mapi_authenticator_get_type ())
-
-GType e_mail_config_mapi_authenticator_get_type (void) G_GNUC_CONST;
-
-static void e_mail_config_mapi_authenticator_authenticator_init (ESourceAuthenticatorInterface *iface);
-
-G_DEFINE_TYPE_EXTENDED (EMailConfigMapiAuthenticator, e_mail_config_mapi_authenticator, G_TYPE_OBJECT, 0,
-	G_IMPLEMENT_INTERFACE (E_TYPE_SOURCE_AUTHENTICATOR, e_mail_config_mapi_authenticator_authenticator_init))
-
-static void
-mail_config_mapi_authenticator_finalize (GObject *object)
-{
-	EMailConfigMapiAuthenticator *mapi_authenticator = (EMailConfigMapiAuthenticator *) object;
-
-	g_free (mapi_authenticator->username);
-	g_free (mapi_authenticator->domain);
-	g_free (mapi_authenticator->server);
-	g_free (mapi_authenticator->krb_realm);
-	g_object_unref (mapi_authenticator->mapi_settings);
-	g_object_unref (mapi_authenticator->backend);
-
-	G_OBJECT_CLASS (e_mail_config_mapi_authenticator_parent_class)->finalize (object);
-}
-
-static void
-e_mail_config_mapi_authenticator_class_init (EMailConfigMapiAuthenticatorClass *class)
-{
-	GObjectClass *object_class;
-
-	object_class = G_OBJECT_CLASS (class);
-	object_class->finalize = mail_config_mapi_authenticator_finalize;
-}
-
-static void
-e_mail_config_mapi_authenticator_authenticator_init (ESourceAuthenticatorInterface *iface)
-{
-	iface->try_password_sync = mail_config_mapi_authenticator_try_password_sync;
-}
-
-static void
-e_mail_config_mapi_authenticator_init (EMailConfigMapiAuthenticator *mapi_authenticator)
-{
+	return TRUE;
 }
 
 static void
@@ -387,11 +355,11 @@ validate_credentials_idle (GObject *button,
 			   GCancellable *cancellable,
 			   GError **perror)
 {
-	EMailConfigMapiAuthenticator *mapi_authenticator = user_data;
+	TryCredentialsData *data = user_data;
 
-	g_return_if_fail (mapi_authenticator != NULL);
+	g_return_if_fail (data != NULL);
 
-	if (mapi_authenticator->success)
+	if (data->success)
 		e_notice (NULL, GTK_MESSAGE_INFO, "%s", _("Authentication finished successfully."));
 	else
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Authentication failed."));
@@ -403,43 +371,45 @@ validate_credentials_thread (GObject *button,
 			     GCancellable *cancellable,
 			     GError **perror)
 {
-	EMailConfigMapiAuthenticator *mapi_authenticator = user_data;
+	TryCredentialsData *data = user_data;
 	EMailConfigServicePage *page;
 	ESourceRegistry *registry;
 
-	g_return_if_fail (mapi_authenticator != NULL);
+	g_return_if_fail (data != NULL);
 
-	page = e_mail_config_service_backend_get_page (mapi_authenticator->backend);
+	page = e_mail_config_service_backend_get_page (data->backend);
 	registry = e_mail_config_service_page_get_registry (page);
 
-	if (mapi_authenticator->krb_sso) {
+	if (data->krb_sso) {
 		GError *error = NULL;
 		EMapiProfileData empd = { 0 };
 
-		empd.username = mapi_authenticator->username;
-		empd.domain = mapi_authenticator->domain;
-		empd.server = mapi_authenticator->server;
-		empd.use_ssl = mapi_authenticator->use_ssl;
-		empd.krb_sso = mapi_authenticator->krb_sso;
-		empd.krb_realm = mapi_authenticator->krb_realm;
+		empd.username = data->username;
+		empd.domain = data->domain;
+		empd.server = data->server;
+		empd.use_ssl = data->use_ssl;
+		empd.krb_sso = data->krb_sso;
+		empd.krb_realm = data->krb_realm;
 
 		e_mapi_util_trigger_krb_auth (&empd, &error);
 		g_clear_error (&error);
 
-		mapi_authenticator->success = validate_credentials_test (
+		data->success = validate_credentials_test (
 			registry,
 			&empd, 
-			mapi_authenticator->mapi_settings,
+			data->mapi_settings,
 			cancellable,
 			perror);
 	} else {
+		EShell *shell;
 		ESource *source;
 
-		source = e_mail_config_service_backend_get_source (mapi_authenticator->backend);
+		shell = e_shell_get_default ();
+		source = e_mail_config_service_backend_get_source (data->backend);
 
-		e_source_registry_authenticate_sync (
-			registry, source, E_SOURCE_AUTHENTICATOR (mapi_authenticator),
-			cancellable, perror);
+		e_credentials_prompter_loop_prompt_sync (e_shell_get_credentials_prompter (shell),
+			source, E_CREDENTIALS_PROMPTER_PROMPT_FLAG_ALLOW_SOURCE_SAVE,
+			mail_config_mapi_try_credentials_sync, data, cancellable, perror);
 	}
 }
 
@@ -492,35 +462,30 @@ validate_credentials_cb (GtkWidget *widget,
 	}
 
 	if (COMPLETE_PROFILEDATA (&empd)) {
-		EMailConfigMapiAuthenticator *mapi_authenticator;
+		TryCredentialsData *data = g_new0 (TryCredentialsData, 1);
 
-		mapi_authenticator = g_object_new (E_TYPE_MAIL_CONFIG_MAPI_AUTHENTICATOR, NULL);
-
-		mapi_authenticator->username = g_strdup (empd.username);
-		mapi_authenticator->domain = g_strdup (empd.domain);
-		mapi_authenticator->server = g_strdup (empd.server);
-		mapi_authenticator->use_ssl = empd.use_ssl;
-		mapi_authenticator->krb_sso = empd.krb_sso;
-		mapi_authenticator->krb_realm = g_strdup (empd.krb_realm);
-		mapi_authenticator->mapi_settings = g_object_ref (mapi_settings);
-		mapi_authenticator->backend = g_object_ref (backend);
-		mapi_authenticator->success = FALSE;
+		data->username = g_strdup (empd.username);
+		data->domain = g_strdup (empd.domain);
+		data->server = g_strdup (empd.server);
+		data->use_ssl = empd.use_ssl;
+		data->krb_sso = empd.krb_sso;
+		data->krb_realm = g_strdup (empd.krb_realm);
+		data->mapi_settings = g_object_ref (mapi_settings);
+		data->backend = g_object_ref (backend);
+		data->success = FALSE;
 
 		e_mapi_config_utils_run_in_thread_with_feedback_modal (e_mapi_config_utils_get_widget_toplevel_window (widget),
 			G_OBJECT (widget),
 			_("Connecting to the server, please wait..."),
 			validate_credentials_thread,
 			validate_credentials_idle,
-			mapi_authenticator,
-			g_object_unref);
+			data,
+			try_credentials_data_free);
 	} else {
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Authentication failed."));
 	}
 
-	if (empd.password) {
-		memset (empd.password->str, 0, empd.password->len);
-		g_string_free (empd.password, TRUE);
-	}
+	g_warn_if_fail (empd.credentials == NULL);
 }
 
 static ESource *

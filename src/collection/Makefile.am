@@ -18,8 +18,6 @@ module_mapi_backend_la_SOURCES =	\
 	module-mapi-backend.c		\
 	e-mapi-backend.c		\
 	e-mapi-backend.h		\
-	e-mapi-backend-authenticator.c	\
-	e-mapi-backend-authenticator.h	\
 	e-mapi-backend-factory.c	\
 	e-mapi-backend-factory.h	\
 	$(NULL)

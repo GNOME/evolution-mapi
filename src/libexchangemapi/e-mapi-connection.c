@@ -49,7 +49,7 @@
 static void register_connection (EMapiConnection *conn);
 static void unregister_connection (EMapiConnection *conn);
 static gboolean mapi_profile_create (struct mapi_context *mapi_ctx, const EMapiProfileData *empd, mapi_profile_callback_t callback, gconstpointer data, GCancellable *cancellable, GError **perror, gboolean use_locking);
-static struct mapi_session *mapi_profile_load (ESourceRegistry *registry, struct mapi_context *mapi_ctx, const gchar *profname, const gchar *password, GCancellable *cancellable, GError **perror);
+static struct mapi_session *mapi_profile_load (ESourceRegistry *registry, struct mapi_context *mapi_ctx, const gchar *profname, const ENamedParameters *credentials, GCancellable *cancellable, GError **perror);
 
 /* GObject foo - begin */
 
@@ -589,7 +589,7 @@ e_mapi_connection_find (const gchar *profile)
 EMapiConnection *
 e_mapi_connection_new (ESourceRegistry *registry,
 		       const gchar *profile,
-		       const GString *password,
+		       const ENamedParameters *credentials,
 		       GCancellable *cancellable,
 		       GError **perror)
 {
@@ -604,7 +604,7 @@ e_mapi_connection_new (ESourceRegistry *registry,
 	if (!e_mapi_utils_create_mapi_context (&mapi_ctx, perror))
 		return NULL;
 
-	session = mapi_profile_load (registry, mapi_ctx, profile, password ? password->str : NULL, cancellable, perror);
+	session = mapi_profile_load (registry, mapi_ctx, profile, credentials, cancellable, perror);
 	if (!session) {
 		e_mapi_utils_destroy_mapi_context (mapi_ctx);
 		return NULL;
@@ -671,7 +671,7 @@ e_mapi_connection_disconnect (EMapiConnection *conn,
 
 gboolean
 e_mapi_connection_reconnect (EMapiConnection *conn,
-			     const GString *password,
+			     const ENamedParameters *credentials,
 			     GCancellable *cancellable,
 			     GError **perror)
 {
@@ -685,7 +685,7 @@ e_mapi_connection_reconnect (EMapiConnection *conn,
 	if (priv->session)
 		e_mapi_connection_disconnect (conn, FALSE, cancellable, perror);
 
-	priv->session = mapi_profile_load (priv->registry, priv->mapi_ctx, priv->profile, password ? password->str : NULL, cancellable, perror);
+	priv->session = mapi_profile_load (priv->registry, priv->mapi_ctx, priv->profile, credentials, cancellable, perror);
 	if (!priv->session) {
 		e_mapi_debug_print ("%s: %s: Login failed ", G_STRLOC, G_STRFUNC);
 		UNLOCK ();
@@ -7014,7 +7014,7 @@ struct tcp_data
 	ESourceRegistry *registry;
 	struct mapi_context *mapi_ctx;
 	const gchar *profname;
-	const gchar *password;
+	const ENamedParameters *credentials;
 	GCancellable *cancellable;
 	GError **perror;
 
@@ -7051,13 +7051,13 @@ try_create_profile_main_thread_cb (struct tcp_data *data)
 		network_settings = CAMEL_NETWORK_SETTINGS (settings);
 
 		empd.server = camel_network_settings_get_host (network_settings);
-		empd.username = camel_network_settings_get_user (network_settings);
+		if (data->credentials && e_named_parameters_get (data->credentials, E_SOURCE_CREDENTIAL_USERNAME))
+			empd.username = e_named_parameters_get (data->credentials, E_SOURCE_CREDENTIAL_USERNAME);
+		else
+			empd.username = camel_network_settings_get_user (network_settings);
 		e_mapi_util_profiledata_from_settings (&empd, CAMEL_MAPI_SETTINGS (settings));
 
-		if (data->password)
-			empd.password = g_string_new (data->password);
-		else
-			data->password = NULL;
+		empd.credentials = (ENamedParameters *) data->credentials;
 
 		if (COMPLETE_PROFILEDATA (&empd)) {
 			gchar *profname = e_mapi_util_profile_name (data->mapi_ctx, &empd, FALSE);
@@ -7068,12 +7068,6 @@ try_create_profile_main_thread_cb (struct tcp_data *data)
 			}
 
 			g_free (profname);
-		}
-
-		if (empd.password) {
-			if (empd.password->len)
-				memset (empd.password->str, 0, empd.password->len);
-			g_string_free (empd.password, TRUE);
 		}
 	}
 
@@ -7088,7 +7082,7 @@ static gboolean
 try_create_profile (ESourceRegistry *registry,
 		    struct mapi_context *mapi_ctx,
 		    const gchar *profname,
-		    const gchar *password,
+		    const ENamedParameters *credentials,
 		    GCancellable *cancellable,
 		    GError **perror)
 {
@@ -7101,7 +7095,7 @@ try_create_profile (ESourceRegistry *registry,
 	data.registry = registry;
 	data.mapi_ctx = mapi_ctx;
 	data.profname = profname;
-	data.password = password;
+	data.credentials = credentials;
 	data.eflag = e_flag_new ();
 	data.has_profile = FALSE;
 	data.cancellable = cancellable;
@@ -7124,7 +7118,7 @@ static struct mapi_session *
 mapi_profile_load (ESourceRegistry *registry,
 		   struct mapi_context *mapi_ctx,
 		   const gchar *profname,
-		   const gchar *password,
+		   const ENamedParameters *credentials,
 		   GCancellable *cancellable,
 		   GError **perror)
 {
@@ -7152,9 +7146,14 @@ mapi_profile_load (ESourceRegistry *registry,
 
 	e_mapi_debug_print("Loading profile %s ", profname);
 
-	ms = MapiLogonEx (mapi_ctx, &session, profname, password);
-	if (ms == MAPI_E_NOT_FOUND && try_create_profile (registry, mapi_ctx, profname, password, cancellable, perror))
-		ms = MapiLogonEx (mapi_ctx, &session, profname, password);
+	if (credentials && e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_USERNAME)) {
+		mapi_profile_add_string_attr (mapi_ctx, profname, "username", e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_USERNAME));
+	}
+
+	ms = MapiLogonEx (mapi_ctx, &session, profname, credentials ? e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_PASSWORD) : NULL);
+	if (ms == MAPI_E_NOT_FOUND && try_create_profile (registry, mapi_ctx, profname, credentials, cancellable, perror))
+		ms = MapiLogonEx (mapi_ctx, &session, profname,
+		credentials ? e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_PASSWORD) : NULL);
 
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "MapiLogonEx", ms);
@@ -7212,7 +7211,7 @@ mapi_profile_create (struct mapi_context *mapi_ctx,
 	}
 
 	/*We need all the params before proceeding.*/
-	e_return_val_mapi_error_if_fail (COMPLETE_PROFILEDATA (empd) && (empd->krb_sso || (empd->password && empd->password->len)),
+	e_return_val_mapi_error_if_fail (COMPLETE_PROFILEDATA (empd) && (empd->krb_sso || (empd->credentials)),
 					 MAPI_E_INVALID_PARAMETER, FALSE);
 
 	if (!can_reach_mapi_server (empd->server, cancellable, perror))
@@ -7232,8 +7231,8 @@ mapi_profile_create (struct mapi_context *mapi_ctx,
 	ms = DeleteProfile (mapi_ctx, profname);
 	/* don't bother to check error - it would be valid if we got an error */
 
-	ms = CreateProfile (mapi_ctx, profname, empd->username,
-			    empd->krb_sso ? NULL : empd->password->str, OC_PROFILE_NOPASSWORD);
+	ms = CreateProfile (mapi_ctx, profname, empd->username, empd->krb_sso ? NULL :
+		e_named_parameters_get (empd->credentials, E_SOURCE_CREDENTIAL_PASSWORD), OC_PROFILE_NOPASSWORD);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "CreateProfile", ms);
 		goto cleanup;
@@ -7265,8 +7264,8 @@ mapi_profile_create (struct mapi_context *mapi_ctx,
 
 	/* Login now */
 	e_mapi_debug_print("Logging into the server... ");
-	ms = MapiLogonProvider (mapi_ctx, &session, profname, empd->krb_sso ? NULL : empd->password->str,
-				PROVIDER_ID_NSPI);
+	ms = MapiLogonProvider (mapi_ctx, &session, profname, empd->krb_sso ? NULL :
+		e_named_parameters_get (empd->credentials, E_SOURCE_CREDENTIAL_PASSWORD), PROVIDER_ID_NSPI);
 	if (ms != MAPI_E_SUCCESS) {
 		make_mapi_error (perror, "MapiLogonProvider", ms);
 		e_mapi_debug_print ("Deleting profile %s ", profname);

@@ -56,10 +56,7 @@
 #define EDC_ERROR(_code) e_data_cal_create_error (_code, NULL)
 #define EDC_ERROR_EX(_code, _msg) e_data_cal_create_error (_code, _msg)
 
-static void e_cal_backend_mapi_authenticator_init (ESourceAuthenticatorInterface *iface);
-
-G_DEFINE_TYPE_WITH_CODE (ECalBackendMAPI, e_cal_backend_mapi, E_TYPE_CAL_BACKEND,
-	G_IMPLEMENT_INTERFACE (E_TYPE_SOURCE_AUTHENTICATOR, e_cal_backend_mapi_authenticator_init))
+G_DEFINE_TYPE (ECalBackendMAPI, e_cal_backend_mapi, E_TYPE_CAL_BACKEND)
 
 typedef struct {
 	GCond cond;
@@ -1163,14 +1160,16 @@ ecbm_server_notification_cb (EMapiConnection *conn,
 
 static ESourceAuthenticationResult
 ecbm_connect_user (ECalBackend *backend,
+		   const ENamedParameters *credentials,
+		   gboolean update_connection_status,
 		   GCancellable *cancellable,
-		   const GString *password,
 		   GError **perror)
 {
 	ECalBackendMAPI *cbmapi;
 	ECalBackendMAPIPrivate *priv;
 	CamelMapiSettings *settings;
 	EMapiConnection *old_conn;
+	ESource *source;
 	GError *mapi_error = NULL;
 
 	g_mutex_lock (&auth_mutex);
@@ -1180,15 +1179,19 @@ ecbm_connect_user (ECalBackend *backend,
 
 	old_conn = priv->conn;
 	settings = ecbm_get_collection_settings (cbmapi);
+	source = e_backend_get_source (E_BACKEND (cbmapi));
+
+	if (update_connection_status)
+		e_source_set_connection_status (source, E_SOURCE_CONNECTION_STATUS_CONNECTING);
 
 	priv->conn = e_mapi_connection_new (
 		e_cal_backend_get_registry (backend),
-		camel_mapi_settings_get_profile (settings), password, cancellable, &mapi_error);
+		camel_mapi_settings_get_profile (settings), credentials, cancellable, &mapi_error);
 	if (!priv->conn) {
 		priv->conn = e_mapi_connection_find (camel_mapi_settings_get_profile (settings));
 		if (priv->conn
 		    && !e_mapi_connection_connected (priv->conn)) {
-			e_mapi_connection_reconnect (priv->conn, password, cancellable, &mapi_error);
+			e_mapi_connection_reconnect (priv->conn, credentials, cancellable, &mapi_error);
 		}
 	}
 
@@ -1197,10 +1200,11 @@ ecbm_connect_user (ECalBackend *backend,
 
 	if (priv->conn && e_mapi_connection_connected (priv->conn)) {
 		/* Success */
-		ESource *source;
 		ESourceMapiFolder *ext_mapi_folder;
 
-		source = e_backend_get_source (E_BACKEND (cbmapi));
+		if (update_connection_status)
+			e_source_set_connection_status (source, E_SOURCE_CONNECTION_STATUS_CONNECTED);
+
 		ext_mapi_folder = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
 		if (ext_mapi_folder && e_source_mapi_folder_get_server_notification (ext_mapi_folder)) {
 			mapi_object_t obj_folder;
@@ -1220,8 +1224,13 @@ ecbm_connect_user (ECalBackend *backend,
 	} else {
 		gboolean is_network_error = mapi_error && mapi_error->domain != E_MAPI_ERROR;
 
-		if (is_network_error)
+		if (is_network_error) {
+			if (update_connection_status)
+				e_source_set_connection_status (source, E_SOURCE_CONNECTION_STATUS_DISCONNECTED);
 			mapi_error_to_edc_error (perror, mapi_error, OtherError, NULL);
+		} else if (update_connection_status) {
+			e_source_set_connection_status (source, E_SOURCE_CONNECTION_STATUS_DISCONNECTED);
+		}
 		if (mapi_error)
 			g_error_free (mapi_error);
 		g_mutex_unlock (&auth_mutex);
@@ -1273,10 +1282,9 @@ e_cal_backend_mapi_ensure_connected (ECalBackendMAPI *cbma,
 	settings = ecbm_get_collection_settings (cbma);
 
 	if (!camel_mapi_settings_get_kerberos (settings) ||
-	    ecbm_connect_user (E_CAL_BACKEND (cbma), cancellable, NULL, &local_error) != E_SOURCE_AUTHENTICATION_ACCEPTED) {
-		e_backend_authenticate_sync (
-			E_BACKEND (cbma),
-			E_SOURCE_AUTHENTICATOR (cbma),
+	    ecbm_connect_user (E_CAL_BACKEND (cbma), NULL, TRUE, cancellable, &local_error) != E_SOURCE_AUTHENTICATION_ACCEPTED) {
+		e_backend_credentials_required_sync (E_BACKEND (cbma),
+			E_SOURCE_CREDENTIALS_REASON_REQUIRED, NULL, 0, NULL,
 			cancellable, &local_error);
 	}
 
@@ -1422,12 +1430,14 @@ ecbm_open (ECalBackend *backend,
 
 
 static ESourceAuthenticationResult
-ecbm_try_password_sync (ESourceAuthenticator *authenticator,
-			const GString *password,
+ecbm_authenticate_sync (EBackend *backend,
+			const ENamedParameters *credentials,
+			gchar **out_certificate_pem,
+			GTlsCertificateFlags *out_certificate_errors,
 			GCancellable *cancellable,
 			GError **error)
 {
-	return ecbm_connect_user (E_CAL_BACKEND (authenticator), cancellable, password, error);
+	return ecbm_connect_user (E_CAL_BACKEND (backend), credentials, FALSE, cancellable, error);
 }
 
 static gboolean
@@ -3534,6 +3544,7 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 	object_class->finalize = ecbm_finalize;
 
 	backend_class->get_destination_address = ecbm_get_destination_address;
+	backend_class->authenticate_sync = ecbm_authenticate_sync;
 
 	/* functions done asynchronously */
 	cal_backend_class->get_backend_property = ecbm_get_backend_property;
@@ -3552,12 +3563,6 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *class)
 	cal_backend_class->add_timezone = ecbm_op_add_timezone;
 	cal_backend_class->get_free_busy = ecbm_op_get_free_busy;
 	cal_backend_class->start_view = ecbm_op_start_view;
-}
-
-static void
-e_cal_backend_mapi_authenticator_init (ESourceAuthenticatorInterface *iface)
-{
-	iface->try_password_sync = ecbm_try_password_sync;
 }
 
 static void

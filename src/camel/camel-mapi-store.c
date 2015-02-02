@@ -2602,7 +2602,7 @@ mapi_authenticate_sync (CamelService *service,
 	const gchar *profile;
 	const gchar *password;
 	GError *mapi_error = NULL;
-	GString *password_str;
+	ENamedParameters *credentials;
 
 	settings = camel_service_ref_settings (service);
 	mapi_settings = CAMEL_MAPI_SETTINGS (settings);
@@ -2634,14 +2634,15 @@ mapi_authenticate_sync (CamelService *service,
 		}
 	}
 
-	password_str = g_string_new (password);
+	credentials = e_named_parameters_new ();
+	e_named_parameters_set (credentials, E_SOURCE_CREDENTIAL_PASSWORD, password);
 	g_rec_mutex_lock (&store->priv->connection_lock);
 	session = camel_service_ref_session (service);
 	store->priv->connection = e_mapi_connection_new (
 		e_mail_session_get_registry (E_MAIL_SESSION (session)),
-		profile, password_str, cancellable, &mapi_error);
+		profile, credentials, cancellable, &mapi_error);
 	g_object_unref (session);
-	g_string_free (password_str, TRUE);
+	e_named_parameters_free (credentials);
 	if (store->priv->connection && e_mapi_connection_connected (store->priv->connection)) {
 		result = CAMEL_AUTHENTICATION_ACCEPTED;
 

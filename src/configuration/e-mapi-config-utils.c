@@ -26,6 +26,7 @@
 
 #include <gtk/gtk.h>
 #include <libedataserver/libedataserver.h>
+#include <libedataserverui/libedataserverui.h>
 
 #include <e-util/e-util.h>
 
@@ -246,97 +247,50 @@ e_mapi_config_utils_run_in_thread_with_feedback_modal (GtkWindow *parent,
 	e_mapi_config_utils_run_in_thread_with_feedback_general (parent, with_object, description, thread_func, idle_func, user_data, free_user_data, TRUE);
 }
 
-typedef struct _EMapiConfigUtilsAuthenticator EMapiConfigUtilsAuthenticator;
-typedef struct _EMapiConfigUtilsAuthenticatorClass EMapiConfigUtilsAuthenticatorClass;
-
-struct _EMapiConfigUtilsAuthenticator {
-	GObject parent;
-
+typedef struct _TryCredentialsData {
 	ESourceRegistry *registry;
 	CamelMapiSettings *mapi_settings;
 	EMapiConnection *conn;
-};
+} TryCredentialsData;
 
-struct _EMapiConfigUtilsAuthenticatorClass {
-	GObjectClass parent_class;
-};
-
-static ESourceAuthenticationResult
-mapi_config_utils_authenticator_try_password_sync (ESourceAuthenticator *auth,
-						   const GString *password,
-						   GCancellable *cancellable,
-						   GError **error)
+static gboolean
+mapi_config_utils_try_credentials_sync (ECredentialsPrompter *prompter,
+					ESource *source,
+					const ENamedParameters *credentials,
+					gboolean *out_authenticated,
+					gpointer user_data,
+					GCancellable *cancellable,
+					GError **error)
 {
-	EMapiConfigUtilsAuthenticator *authenticator = (EMapiConfigUtilsAuthenticator *) auth;
+	TryCredentialsData *data = user_data;
 	EMapiProfileData empd = { 0 };
 	CamelNetworkSettings *network_settings;
 	GError *mapi_error = NULL;
 
-	network_settings = CAMEL_NETWORK_SETTINGS (authenticator->mapi_settings);
+	network_settings = CAMEL_NETWORK_SETTINGS (data->mapi_settings);
 
 	empd.server = camel_network_settings_get_host (network_settings);
 	empd.username = camel_network_settings_get_user (network_settings);
-	e_mapi_util_profiledata_from_settings (&empd, authenticator->mapi_settings);
+	e_mapi_util_profiledata_from_settings (&empd, data->mapi_settings);
 
-	authenticator->conn = e_mapi_connection_new (
-		authenticator->registry,
-		camel_mapi_settings_get_profile (authenticator->mapi_settings),
-		password, cancellable, &mapi_error);
+	data->conn = e_mapi_connection_new (
+		data->registry,
+		camel_mapi_settings_get_profile (data->mapi_settings),
+		credentials, cancellable, &mapi_error);
 
 	if (mapi_error) {
-		g_warn_if_fail (!authenticator->conn);
-		authenticator->conn = NULL;
+		g_warn_if_fail (!data->conn);
+		data->conn = NULL;
 
 		g_propagate_error (error, mapi_error);
 
-		return E_SOURCE_AUTHENTICATION_ERROR;
+		return FALSE;
 	}
 
-	g_warn_if_fail (authenticator->conn);
+	g_warn_if_fail (data->conn);
+	*out_authenticated = TRUE;
 
-	return E_SOURCE_AUTHENTICATION_ACCEPTED;
-}
-
-#define E_TYPE_MAPI_CONFIG_UTILS_AUTHENTICATOR (e_mapi_config_utils_authenticator_get_type ())
-
-GType e_mapi_config_utils_authenticator_get_type (void) G_GNUC_CONST;
-
-static void e_mapi_config_utils_authenticator_authenticator_init (ESourceAuthenticatorInterface *iface);
-
-G_DEFINE_TYPE_EXTENDED (EMapiConfigUtilsAuthenticator, e_mapi_config_utils_authenticator, G_TYPE_OBJECT, 0,
-	G_IMPLEMENT_INTERFACE (E_TYPE_SOURCE_AUTHENTICATOR, e_mapi_config_utils_authenticator_authenticator_init))
-
-static void
-mapi_config_utils_authenticator_finalize (GObject *object)
-{
-	EMapiConfigUtilsAuthenticator *authenticator = (EMapiConfigUtilsAuthenticator *) object;
-
-	g_object_unref (authenticator->registry);
-	g_object_unref (authenticator->mapi_settings);
-	if (authenticator->conn)
-		g_object_unref (authenticator->conn);
-
-	G_OBJECT_CLASS (e_mapi_config_utils_authenticator_parent_class)->finalize (object);
-}
-
-static void
-e_mapi_config_utils_authenticator_class_init (EMapiConfigUtilsAuthenticatorClass *class)
-{
-	GObjectClass *object_class;
-
-	object_class = G_OBJECT_CLASS (class);
-	object_class->finalize = mapi_config_utils_authenticator_finalize;
-}
-
-static void
-e_mapi_config_utils_authenticator_authenticator_init (ESourceAuthenticatorInterface *iface)
-{
-	iface->try_password_sync = mapi_config_utils_authenticator_try_password_sync;
-}
-
-static void
-e_mapi_config_utils_authenticator_init (EMapiConfigUtilsAuthenticator *authenticator)
-{
+	return TRUE;
 }
 
 EMapiConnection	*
@@ -380,19 +334,25 @@ e_mapi_config_utils_open_connection_for (GtkWindow *parent,
 
 			conn = e_mapi_connection_new (registry, profile, NULL, cancellable, &local_error);
 		} else {
-			EMapiConfigUtilsAuthenticator *authenticator = g_object_new (E_TYPE_MAPI_CONFIG_UTILS_AUTHENTICATOR, NULL);
+			EShell *shell;
+			TryCredentialsData data;
 
-			authenticator->mapi_settings = g_object_ref (mapi_settings);
-			authenticator->registry = g_object_ref (registry);
+			shell = e_shell_get_default ();
 
-			e_source_registry_authenticate_sync (
-				registry, source, E_SOURCE_AUTHENTICATOR (authenticator),
-				cancellable, &local_error);
+			data.mapi_settings = g_object_ref (mapi_settings);
+			data.registry = g_object_ref (registry);
+			data.conn = NULL;
 
-			if (authenticator->conn)
-				conn = g_object_ref (authenticator->conn);
+			e_credentials_prompter_loop_prompt_sync (e_shell_get_credentials_prompter (shell),
+				source, E_CREDENTIALS_PROMPTER_PROMPT_FLAG_ALLOW_SOURCE_SAVE,
+				mapi_config_utils_try_credentials_sync, &data, cancellable, &local_error);
 
-			g_object_unref (authenticator);
+			if (data.conn)
+				conn = g_object_ref (data.conn);
+
+			g_clear_object (&data.mapi_settings);
+			g_clear_object (&data.registry);
+			g_clear_object (&data.conn);
 		}
 	}
 
