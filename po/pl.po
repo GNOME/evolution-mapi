@@ -5,15 +5,15 @@
 # gnomepl@aviary.pl
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Wadim Dziedzic <wdziedzic@aviary.pl>, 2009.
-# Piotr Drąg <piotrdrag@gmail.com>, 2009-2014.
+# Piotr Drąg <piotrdrag@gmail.com>, 2009-2015.
 # Tomasz Dominikowski <dominikowski@gmail.com>, 2009.
-# Aviary.pl <gnomepl@aviary.pl>, 2009-2014.
+# Aviary.pl <gnomepl@aviary.pl>, 2009-2015.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-09 17:45+0200\n"
-"PO-Revision-Date: 2014-10-09 17:47+0200\n"
+"POT-Creation-Date: 2015-02-08 13:59+0100\n"
+"PO-Revision-Date: 2015-02-08 14:00+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -34,13 +34,13 @@ msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr ""
 "Dostęp do serwerów Microsoft Exchange 2007/OpenChange przez protokół MAPI"
 
-#: ../src/addressbook/e-book-backend-mapi.c:735
+#: ../src/addressbook/e-book-backend-mapi.c:744
 msgid "Searching"
 msgstr "Wyszukiwanie"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1735
-#: ../src/calendar/e-cal-backend-mapi.c:193
-#: ../src/calendar/e-cal-backend-mapi.c:492
+#: ../src/addressbook/e-book-backend-mapi.c:1739
+#: ../src/calendar/e-cal-backend-mapi.c:189
+#: ../src/calendar/e-cal-backend-mapi.c:488
 #: ../src/camel/camel-mapi-folder.c:1937 ../src/camel/camel-mapi-folder.c:2017
 msgid "Unknown error"
 msgstr "Nieznany błąd"
@@ -54,8 +54,8 @@ msgid "The backend does not support bulk additions"
 msgstr "Mechanizm nie obsługuje dodawania całości"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:510
-#: ../src/calendar/e-cal-backend-mapi.c:1715
-#: ../src/calendar/e-cal-backend-mapi.c:2226
+#: ../src/calendar/e-cal-backend-mapi.c:1719
+#: ../src/calendar/e-cal-backend-mapi.c:2230
 msgid "Failed to create item on a server"
 msgstr "Utworzenie elementu na serwerze się nie powiodło"
 
@@ -64,7 +64,7 @@ msgid "The backend does not support bulk modifications"
 msgstr "Mechanizm nie obsługuje modyfikacji całości"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:672
-#: ../src/calendar/e-cal-backend-mapi.c:1928
+#: ../src/calendar/e-cal-backend-mapi.c:1932
 msgid "Failed to modify item on a server"
 msgstr "Zmodyfikowanie elementu na serwerze się nie powiodło"
 
@@ -120,41 +120,41 @@ msgid "Failed to fetch GAL entries"
 msgstr "Pobranie wpisów GAL się nie powiodło"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:417
+#: ../src/calendar/e-cal-backend-mapi.c:413
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Wczytywanie elementów w katalogu %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:784
+#: ../src/calendar/e-cal-backend-mapi.c:780
 #, c-format
 msgid "Failed to open folder: %s"
 msgstr "Otwarcie katalogu się nie powiodło: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:792
+#: ../src/calendar/e-cal-backend-mapi.c:788
 #, c-format
 msgid "Failed to get folder properties: %s"
 msgstr "Uzyskanie właściwości katalogu się nie powiodło: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:833
+#: ../src/calendar/e-cal-backend-mapi.c:829
 #, c-format
 msgid "Failed to list objects: %s"
 msgstr "Wyświetlenie listy obiektów się nie powiodło: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:859
+#: ../src/calendar/e-cal-backend-mapi.c:855
 #, c-format
 msgid "Failed to transfer objects: %s"
 msgstr "Przesłanie obiektów się nie powiodło: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:878
+#: ../src/calendar/e-cal-backend-mapi.c:874
 #, c-format
 msgid "Failed to close folder: %s"
 msgstr "Zamknięcie katalogu się nie powiodło: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1381
+#: ../src/calendar/e-cal-backend-mapi.c:1383
 msgid "Could not create cache file"
 msgstr "Nie można utworzyć pliku pamięci podręcznej"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1836
+#: ../src/calendar/e-cal-backend-mapi.c:1840
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -162,11 +162,11 @@ msgstr ""
 "Obsługa modyfikowania pojedynczych instancji powtarzającego się spotkania "
 "nie jest zaimplementowana. Nie dokonano żadnych zmian spotkania na serwerze."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2041
+#: ../src/calendar/e-cal-backend-mapi.c:2045
 msgid "Cannot remove items from a server"
 msgstr "Nie można usunąć elementów z serwera"
 
-#: ../src/calendar/e-cal-backend-mapi.c:2477
+#: ../src/calendar/e-cal-backend-mapi.c:2476
 msgid "Failed to get Free/Busy data"
 msgstr "Pobranie informacji zajętości się nie powiodło"
 
@@ -279,7 +279,7 @@ msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "S_zukanie niechcianych treści tylko w katalogu przychodzących"
 
 #: ../src/camel/camel-mapi-provider.c:62
-#: ../src/configuration/e-mapi-config-utils.c:1642
+#: ../src/configuration/e-mapi-config-utils.c:1604
 msgid "Lis_ten for server notifications"
 msgstr "_Nasłuchiwanie powiadomień serwera"
 
@@ -475,12 +475,16 @@ msgstr "Nie można wysłać wiadomości."
 msgid "Could not send message: %s"
 msgstr "Nie można wysłać wiadomości: %s"
 
-#: ../src/collection/e-mapi-backend.c:278
+#: ../src/collection/e-mapi-backend.c:77
+msgid "Cannot connect, no credentials provided"
+msgstr "Nie można połączyć. Nie podano żadnych danych uwierzytelniających"
+
+#: ../src/collection/e-mapi-backend.c:339
 msgid "Global Address List"
 msgstr "Ogólna lista adresowa"
 
-#: ../src/collection/e-mapi-backend.c:651
-#: ../src/collection/e-mapi-backend.c:737
+#: ../src/collection/e-mapi-backend.c:688
+#: ../src/collection/e-mapi-backend.c:785
 #, c-format
 msgid "Data source '%s' does not represent a MAPI folder"
 msgstr "Źródło danych \"%s\" nie odpowiada katalogowi MAPI"
@@ -489,19 +493,19 @@ msgstr "Źródło danych \"%s\" nie odpowiada katalogowi MAPI"
 msgid "Allow _partial search results"
 msgstr "Umożliwienie _częściowych wyników wyszukiwania"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:179
+#: ../src/configuration/e-mail-config-mapi-backend.c:125
 msgid "Select username"
 msgstr "Proszę wybrać nazwę użytkownika"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:189
+#: ../src/configuration/e-mail-config-mapi-backend.c:135
 msgid "Full name"
 msgstr "Imię i nazwisko"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:194
+#: ../src/configuration/e-mail-config-mapi-backend.c:140
 msgid "Username"
 msgstr "Nazwa użytkownika"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:221
+#: ../src/configuration/e-mail-config-mapi-backend.c:167
 msgid ""
 "There are more users with similar user name on a server.\n"
 "Please select that you would like to use from the below list."
@@ -509,20 +513,20 @@ msgstr ""
 "Na serwerze jest więcej użytkowników o podobnej nazwie.\n"
 "Proszę wybrać jedną z poniższej listy."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:449
+#: ../src/configuration/e-mail-config-mapi-backend.c:363
 msgid "Authentication finished successfully."
 msgstr "Uwierzytelnianie zakończone powodzeniem."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:451
-#: ../src/configuration/e-mail-config-mapi-backend.c:571
+#: ../src/configuration/e-mail-config-mapi-backend.c:365
+#: ../src/configuration/e-mail-config-mapi-backend.c:485
 msgid "Authentication failed."
 msgstr "Uwierzytelnianie się nie powiodło."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:512
+#: ../src/configuration/e-mail-config-mapi-backend.c:428
 msgid "Cannot authenticate MAPI accounts in offline mode"
 msgstr "Nie można uwierzytelnić katalogów MAPI w trybie offline"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:541
+#: ../src/configuration/e-mail-config-mapi-backend.c:457
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -530,7 +534,7 @@ msgstr ""
 "Nazwy serwera, użytkownika i domeny nie mogą być puste. Proszę wprowadzić "
 "poprawne wartości."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:544
+#: ../src/configuration/e-mail-config-mapi-backend.c:460
 msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
@@ -538,39 +542,39 @@ msgstr ""
 "Nazwa obszaru nie może być pusta, jeśli wybrano Kerberos. Proszę wprowadzić "
 "poprawne wartości."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:565
+#: ../src/configuration/e-mail-config-mapi-backend.c:479
 msgid "Connecting to the server, please wait..."
 msgstr "Łączenie z serwerem, proszę czekać..."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:770
+#: ../src/configuration/e-mail-config-mapi-backend.c:681
 msgid "Configuration"
 msgstr "Konfiguracja"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:779
+#: ../src/configuration/e-mail-config-mapi-backend.c:690
 msgid "_Server:"
 msgstr "_Serwer:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:796
+#: ../src/configuration/e-mail-config-mapi-backend.c:707
 msgid "User_name:"
 msgstr "_Nazwa użytkownika:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:821
+#: ../src/configuration/e-mail-config-mapi-backend.c:732
 msgid "_Domain name:"
 msgstr "_Nazwa domeny:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:834
+#: ../src/configuration/e-mail-config-mapi-backend.c:745
 msgid "_Authenticate"
 msgstr "_Uwierzytelnij"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:842
+#: ../src/configuration/e-mail-config-mapi-backend.c:753
 msgid "_Use secure connection"
 msgstr "_Użycie bezpiecznego połączenia"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:857
+#: ../src/configuration/e-mail-config-mapi-backend.c:768
 msgid "_Kerberos authentication"
 msgstr "Uwierzytelnianie _Kerberos"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:869
+#: ../src/configuration/e-mail-config-mapi-backend.c:780
 msgid "_Realm name:"
 msgstr "Nazwa _obszaru:"
 
@@ -587,97 +591,97 @@ msgstr "Wyświetla rozmiar wszystkich katalogów programu Exchange"
 msgid "Folder _Size"
 msgstr "_Rozmiar katalogu"
 
-#: ../src/configuration/e-mapi-config-utils.c:455
+#: ../src/configuration/e-mapi-config-utils.c:417
 msgid "Folder"
 msgstr "Katalog"
 
-#: ../src/configuration/e-mapi-config-utils.c:460
+#: ../src/configuration/e-mapi-config-utils.c:422
 msgid "Size"
 msgstr "Rozmiar"
 
-#: ../src/configuration/e-mapi-config-utils.c:483
-#: ../src/configuration/e-mapi-config-utils.c:487
+#: ../src/configuration/e-mapi-config-utils.c:445
+#: ../src/configuration/e-mapi-config-utils.c:449
 msgid "Unable to retrieve folder size information"
 msgstr "Nie można pobrać informacji o rozmiarze katalogu"
 
-#: ../src/configuration/e-mapi-config-utils.c:554
+#: ../src/configuration/e-mapi-config-utils.c:516
 msgid "Folder Size"
 msgstr "Rozmiar katalogu"
 
-#: ../src/configuration/e-mapi-config-utils.c:568
+#: ../src/configuration/e-mapi-config-utils.c:530
 msgid "Fetching folder list…"
 msgstr "Pobieranie listy katalogów…"
 
-#: ../src/configuration/e-mapi-config-utils.c:742
+#: ../src/configuration/e-mapi-config-utils.c:704
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr "Nie można modyfikować uprawnień katalogu \"%s\", proszę wybrać inny."
 
-#: ../src/configuration/e-mapi-config-utils.c:805
+#: ../src/configuration/e-mapi-config-utils.c:767
 msgid "Folder size..."
 msgstr "Rozmiar katalogu..."
 
-#: ../src/configuration/e-mapi-config-utils.c:812
+#: ../src/configuration/e-mapi-config-utils.c:774
 msgid "Subscribe to folder of other user..."
 msgstr "Subskrybuj katalog innego użytkownika..."
 
-#: ../src/configuration/e-mapi-config-utils.c:821
-#: ../src/configuration/e-mapi-config-utils.c:1099
-#: ../src/configuration/e-mapi-config-utils.c:1129
-#: ../src/configuration/e-mapi-config-utils.c:1159
-#: ../src/configuration/e-mapi-config-utils.c:1189
+#: ../src/configuration/e-mapi-config-utils.c:783
+#: ../src/configuration/e-mapi-config-utils.c:1061
+#: ../src/configuration/e-mapi-config-utils.c:1091
+#: ../src/configuration/e-mapi-config-utils.c:1121
+#: ../src/configuration/e-mapi-config-utils.c:1151
 msgid "Permissions..."
 msgstr "Uprawnienia..."
 
-#: ../src/configuration/e-mapi-config-utils.c:823
+#: ../src/configuration/e-mapi-config-utils.c:785
 msgid "Edit MAPI folder permissions"
 msgstr "Modyfikacja uprawnień katalogu MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1101
+#: ../src/configuration/e-mapi-config-utils.c:1063
 msgid "Edit MAPI calendar permissions"
 msgstr "Modyfikacja uprawnień  MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1131
+#: ../src/configuration/e-mapi-config-utils.c:1093
 msgid "Edit MAPI tasks permissions"
 msgstr "Modyfikacja uprawnień zadań MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1161
+#: ../src/configuration/e-mapi-config-utils.c:1123
 msgid "Edit MAPI memos permissions"
 msgstr "Modyfikacja uprawnień notatek MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1191
+#: ../src/configuration/e-mapi-config-utils.c:1153
 msgid "Edit MAPI contacts permissions"
 msgstr "Modyfikacja uprawnień kontaktów MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1364
+#: ../src/configuration/e-mapi-config-utils.c:1326
 msgid "Personal Folders"
 msgstr "Katalogi osobiste"
 
-#: ../src/configuration/e-mapi-config-utils.c:1595
+#: ../src/configuration/e-mapi-config-utils.c:1557
 msgid "Searching remote MAPI folder structure, please wait..."
 msgstr "Wyszukiwanie zdalnej struktury katalogów MAPI, proszę czekać..."
 
-#: ../src/configuration/e-mapi-config-utils.c:1663
+#: ../src/configuration/e-mapi-config-utils.c:1625
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Nie można utworzyć kalendarza MAPI w trybie offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1666
+#: ../src/configuration/e-mapi-config-utils.c:1628
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "Nie można utworzyć listy zadań MAPI w trybie offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1669
+#: ../src/configuration/e-mapi-config-utils.c:1631
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "Nie można utworzyć listy notatek MAPI w trybie offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1672
+#: ../src/configuration/e-mapi-config-utils.c:1634
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "Nie można utworzyć książki adresowej MAPI w trybie offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1677
+#: ../src/configuration/e-mapi-config-utils.c:1639
 msgid "Cannot create MAPI source in offline mode"
 msgstr "Nie można utworzyć źródła MAPI w trybie offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1697
+#: ../src/configuration/e-mapi-config-utils.c:1659
 msgid "_Location:"
 msgstr "_Położenie:"
 
