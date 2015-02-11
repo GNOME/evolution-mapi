@@ -32,8 +32,6 @@
 
 #define STREAM_SIZE 4000
 
-extern gint camel_application_is_exiting;
-
 void
 e_mapi_mail_utils_decode_email_address (EMapiConnection *conn,
 					struct mapi_SPropValue_array *properties,

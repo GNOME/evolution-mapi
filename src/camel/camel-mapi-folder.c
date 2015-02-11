@@ -51,8 +51,6 @@
 #define CAMEL_MAPI_FOLDER_UNLOCK(f, l) \
 	(g_mutex_unlock(&((CamelMapiFolder *)f)->priv->l))
 
-extern gint camel_application_is_exiting;
-
 struct _CamelMapiFolderPrivate {
 	GMutex search_lock;	/* for locking the search object */
 
