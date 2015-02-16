@@ -1,3 +1,16 @@
+evolution-mapi 3.13.90 2015-02-16
+---------------------------------
+
+Miscellaneous:
+	Move authentication of backends back to the client (Milan Crha)
+	Remove unused declarations of camel_application_is_exiting variable (Milan Crha)
+
+Translations:
+	Marek Černocký (cs)
+	Inaki Larranaga Murgoitio (eu)
+	Piotr Drąg (pl)
+	Balázs Úr (hu)
+
 evolution-mapi 3.13.10 2015-01-26
 ---------------------------------
 
