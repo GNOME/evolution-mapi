@@ -756,7 +756,7 @@ mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_grid_attach (content_grid, secure_conn, 1, irow, 1, 1);
 	irow++;
 
-	g_object_bind_property_full (
+	e_binding_bind_property_full (
 		settings, "security-method",
 		secure_conn, "active",
 		G_BINDING_BIDIRECTIONAL |
@@ -768,7 +768,7 @@ mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	krb_sso = gtk_check_button_new_with_mnemonic (_("_Kerberos authentication"));
 	gtk_widget_set_hexpand (secure_conn, TRUE);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		settings, "kerberos",
 		krb_sso, "active",
 		G_BINDING_BIDIRECTIONAL |
@@ -780,7 +780,7 @@ mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	label = gtk_label_new_with_mnemonic (_("_Realm name:"));
 	gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		settings, "kerberos",
 		label, "sensitive",
 		G_BINDING_SYNC_CREATE);
@@ -799,7 +799,7 @@ mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		G_BINDING_BIDIRECTIONAL |
 		G_BINDING_SYNC_CREATE);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		settings, "kerberos",
 		entry, "sensitive",
 		G_BINDING_SYNC_CREATE);
@@ -811,7 +811,7 @@ mail_config_mapi_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	extension = e_source_get_extension (source, E_SOURCE_EXTENSION_COLLECTION);
 
 	/* The collection identity is the user name. */
-	g_object_bind_property (
+	e_binding_bind_property (
 		settings, "user",
 		extension, "identity",
 		G_BINDING_BIDIRECTIONAL |

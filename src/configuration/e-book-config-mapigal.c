@@ -62,7 +62,7 @@ book_config_mapigal_insert_widgets (ESourceConfigBackend *backend,
 	e_source_config_insert_widget (config, scratch_source, NULL, widget);
 	gtk_widget_show (widget);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		folder_ext, "allow-partial",
 		widget, "active",
 		G_BINDING_BIDIRECTIONAL |

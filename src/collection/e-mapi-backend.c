@@ -546,7 +546,7 @@ mapi_backend_child_added (ECollectionBackend *backend,
 		auth_child_extension = e_source_get_extension (
 			child_source, extension_name);
 
-		g_object_bind_property (
+		e_binding_bind_property (
 			collection_extension, "identity",
 			auth_child_extension, "user",
 			G_BINDING_SYNC_CREATE);
