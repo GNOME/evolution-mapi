@@ -2,35 +2,47 @@
 # This file is distributed under the same license as the evolution-mapi package.
 # Copyright © 2009-2010 Free Software Foundation, Inc.
 # Žygimantas Beručka <zygis@gnome.org>, 2009, 2010.
+# Aurimas Černius <aurisc4@gmail.com>, 2015.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution.HEAD\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2012-08-17 08:58+0000\n"
-"PO-Revision-Date: 2012-09-14 23:04+0300\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
+"POT-Creation-Date: 2015-03-15 17:38+0000\n"
+"PO-Revision-Date: 2015-03-15 20:51+0200\n"
 "Last-Translator: Aurimas Černius <aurisc4@gmail.com>\n"
 "Language-Team: Lithuanian <gnome-lt@lists.akl.lt>\n"
 "Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Virtaal 0.6.1\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n"
+"%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Gtranslator 2.91.6\n"
 
-#: ../src/addressbook/e-book-backend-mapi.c:748
+#: ../evolution-mapi.metainfo.xml.in.h:1
+#| msgid "Exchange MAPI server %s"
+msgid "Exchange MAPI"
+msgstr "Exchange MAPI"
+
+#: ../evolution-mapi.metainfo.xml.in.h:2 ../src/camel/camel-mapi-provider.c:73
+msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
+msgstr ""
+"Prieigai prie Microsoft Exchange 2007/OpenChange serverių naudojant MAPI"
+
+#: ../src/addressbook/e-book-backend-mapi.c:744
 msgid "Searching"
 msgstr "Ieškoma"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1738
-#: ../src/calendar/e-cal-backend-mapi.c:193
-#: ../src/calendar/e-cal-backend-mapi.c:542
-#: ../src/camel/camel-mapi-folder.c:1871
-#: ../src/camel/camel-mapi-folder.c:1947
+#: ../src/addressbook/e-book-backend-mapi.c:1739
+#: ../src/calendar/e-cal-backend-mapi.c:189
+#: ../src/calendar/e-cal-backend-mapi.c:488
+#: ../src/camel/camel-mapi-folder.c:1935 ../src/camel/camel-mapi-folder.c:2015
 msgid "Unknown error"
 msgstr "Nežinoma klaida"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:432
-#: ../src/calendar/e-cal-backend-mapi.c:411
 msgid "Failed to remove public folder"
 msgstr "Nepavyko pašalinti viešojo aplanko"
 
@@ -39,8 +51,8 @@ msgid "The backend does not support bulk additions"
 msgstr "Realizacija nepalaiko masinių pridėjimų"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:510
-#: ../src/calendar/e-cal-backend-mapi.c:1766
-#: ../src/calendar/e-cal-backend-mapi.c:2277
+#: ../src/calendar/e-cal-backend-mapi.c:1719
+#: ../src/calendar/e-cal-backend-mapi.c:2230
 msgid "Failed to create item on a server"
 msgstr "Nepavyko sukurti serveryje elemento"
 
@@ -49,7 +61,7 @@ msgid "The backend does not support bulk modifications"
 msgstr "Realizacija nepalaiko masinių pakeitimų"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:672
-#: ../src/calendar/e-cal-backend-mapi.c:1979
+#: ../src/calendar/e-cal-backend-mapi.c:1932
 msgid "Failed to modify item on a server"
 msgstr "Nepavyko pakeisti serveryje elemento"
 
@@ -105,134 +117,131 @@ msgid "Failed to fetch GAL entries"
 msgstr "Nepavyko gauti GAL įrašų"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:481
+#: ../src/calendar/e-cal-backend-mapi.c:413
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Įkeliami aplanke %s esantys elementai"
 
-#: ../src/calendar/e-cal-backend-mapi.c:834
+#: ../src/calendar/e-cal-backend-mapi.c:780
 #, c-format
 msgid "Failed to open folder: %s"
 msgstr "Nepavyko atverti aplanko: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:842
+#: ../src/calendar/e-cal-backend-mapi.c:788
 #, c-format
 msgid "Failed to get folder properties: %s"
 msgstr "Nepavyko gauti aplanko savybių: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:883
+#: ../src/calendar/e-cal-backend-mapi.c:829
 #, c-format
 msgid "Failed to list objects: %s"
 msgstr "Nepavyko gauti objektų: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:909
+#: ../src/calendar/e-cal-backend-mapi.c:855
 #, c-format
 msgid "Failed to transfer objects: %s"
 msgstr "Nepavyko perduoti objektų: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:928
+#: ../src/calendar/e-cal-backend-mapi.c:874
 #, c-format
 msgid "Failed to close folder: %s"
 msgstr "Nepavyko užverti aplanko: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1425
-#: ../src/calendar/e-cal-backend-mapi.c:1426
+#: ../src/calendar/e-cal-backend-mapi.c:1383
 msgid "Could not create cache file"
 msgstr "Nepavyko sukurti podėlio failo"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1887
-msgid "Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server."
-msgstr "Vienų pasikartojančių paskyrimų egzempliorių taisymas kol kas nepalaikomas. Paskyrimas serveryje buvo nepakeistas."
+#: ../src/calendar/e-cal-backend-mapi.c:1840
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+msgstr ""
+"Vienų pasikartojančių paskyrimų egzempliorių taisymas kol kas nepalaikomas. "
+"Paskyrimas serveryje buvo nepakeistas."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2092
+#: ../src/calendar/e-cal-backend-mapi.c:2045
 msgid "Cannot remove items from a server"
 msgstr "Nepavyksta šalinti elementų iš serverio"
 
-#: ../src/calendar/e-cal-backend-mapi.c:2529
+#: ../src/calendar/e-cal-backend-mapi.c:2476
 msgid "Failed to get Free/Busy data"
 msgstr "Nepavyko gauti užimtumo duomenų"
 
-#: ../src/camel/camel-mapi-folder.c:777
+#: ../src/camel/camel-mapi-folder.c:803
 #, c-format
 msgid "Refreshing folder '%s'"
 msgstr "Atnaujinamas aplankas „%s“"
 
-#: ../src/camel/camel-mapi-folder.c:844
+#: ../src/camel/camel-mapi-folder.c:871
 #, c-format
 msgid "Downloading messages in folder '%s'"
 msgstr "Parsiunčiami aplanko „%s“ laiškai"
 
-#: ../src/camel/camel-mapi-folder.c:931
-#: ../src/camel/camel-mapi-folder.c:1512
+#: ../src/camel/camel-mapi-folder.c:959 ../src/camel/camel-mapi-folder.c:1567
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Šis laiškas neprieinamas atsijungimo veiksenoje."
 
-#: ../src/camel/camel-mapi-folder.c:941
-#: ../src/camel/camel-mapi-folder.c:959
+#: ../src/camel/camel-mapi-folder.c:969 ../src/camel/camel-mapi-folder.c:987
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Nepavyko atsiųsti elementų: %s"
 
-#: ../src/camel/camel-mapi-folder.c:946
-#: ../src/camel/camel-mapi-folder.c:964
+#: ../src/camel/camel-mapi-folder.c:974 ../src/camel/camel-mapi-folder.c:992
 msgid "Fetching items failed"
 msgstr "Nepavyko atsiųsti elementų"
 
-#: ../src/camel/camel-mapi-folder.c:1204
+#: ../src/camel/camel-mapi-folder.c:1246
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Nepavyko pridurti laiško prie aplanko „%s“"
 
-#: ../src/camel/camel-mapi-folder.c:1213
-#: ../src/camel/camel-mapi-folder.c:1241
+#: ../src/camel/camel-mapi-folder.c:1255 ../src/camel/camel-mapi-folder.c:1285
 #, c-format
 msgid "Offline."
 msgstr "Atsijungta."
 
-#: ../src/camel/camel-mapi-folder.c:1322
+#: ../src/camel/camel-mapi-folder.c:1368
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "Nepavyko išvalyti šiukšlinės: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1328
+#: ../src/camel/camel-mapi-folder.c:1374
 msgid "Failed to empty Trash"
 msgstr "Nepavyko išvalyti šiukšlinės"
 
-#: ../src/camel/camel-mapi-folder.c:1497
+#: ../src/camel/camel-mapi-folder.c:1552
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Nepavyko gauti laiško %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1498
+#: ../src/camel/camel-mapi-folder.c:1553
 msgid "No such message"
 msgstr "Nėra tokio laiško"
 
-#: ../src/camel/camel-mapi-folder.c:1523
-#: ../src/camel/camel-mapi-folder.c:1553
+#: ../src/camel/camel-mapi-folder.c:1578 ../src/camel/camel-mapi-folder.c:1610
 #, c-format
 msgid "Could not get message: %s"
 msgstr "Nepavyko gauti laiško: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1529
-#: ../src/camel/camel-mapi-folder.c:1560
+#: ../src/camel/camel-mapi-folder.c:1584 ../src/camel/camel-mapi-folder.c:1617
 #, c-format
 msgid "Could not get message"
 msgstr "Nepavyko gauti laiško"
 
-#: ../src/camel/camel-mapi-folder.c:1927
+#: ../src/camel/camel-mapi-folder.c:1992
 msgid "Receive quota"
 msgstr "Gavimo kvota"
 
-#: ../src/camel/camel-mapi-folder.c:1933
+#: ../src/camel/camel-mapi-folder.c:1998
 msgid "Send quota"
 msgstr "Siuntimo kvota"
 
-#: ../src/camel/camel-mapi-folder.c:1952
+#: ../src/camel/camel-mapi-folder.c:2020
 msgid "No quota information available"
 msgstr "Nėra kvotos informacijos"
 
-#: ../src/camel/camel-mapi-folder.c:2055
+#: ../src/camel/camel-mapi-folder.c:2122
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nepavyko įkelti %s santraukos"
@@ -256,7 +265,9 @@ msgstr "Automatiškai sinchroni_zuoti paskyrą šiame kompiuteryje"
 #. i18n: copy from evolution:camel-imap-provider.c
 #: ../src/camel/camel-mapi-provider.c:56
 msgid "_Apply filters to new messages in Inbox on this server"
-msgstr "_Taikyti filtrus naujiems laiškams, esantiems Gautų laiškų aplanke šiame serveryje"
+msgstr ""
+"_Taikyti filtrus naujiems laiškams, esantiems Gautų laiškų aplanke šiame "
+"serveryje"
 
 #: ../src/camel/camel-mapi-provider.c:58
 msgid "Check new messages for _Junk contents"
@@ -267,21 +278,20 @@ msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Tikrinti, ar nėra bru_kalo tik Gautų laiškų aplanke"
 
 #: ../src/camel/camel-mapi-provider.c:62
-#: ../src/configuration/e-mapi-config-utils.c:1630
+#: ../src/configuration/e-mapi-config-utils.c:1604
 msgid "Lis_ten for server notifications"
 msgstr "Klausy_tis serverio pranešimų"
-
-#: ../src/camel/camel-mapi-provider.c:73
-msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
-msgstr "Prieigai prie Microsoft Exchange 2007/OpenChange serverių naudojant MAPI"
 
 #: ../src/camel/camel-mapi-provider.c:88
 msgid "Password"
 msgstr "Slaptažodis"
 
 #: ../src/camel/camel-mapi-provider.c:89
-msgid "This option will connect to the OpenChange server using a plaintext password."
-msgstr "Ši parinktis leidžia prisijungti prie OpenChange serverio naudojant grynojo teksto slaptažodį."
+msgid ""
+"This option will connect to the OpenChange server using a plaintext password."
+msgstr ""
+"Ši parinktis leidžia prisijungti prie OpenChange serverio naudojant grynojo "
+"teksto slaptažodį."
 
 #: ../src/camel/camel-mapi-sasl-krb.c:28
 msgid "Kerberos"
@@ -291,126 +301,119 @@ msgstr "Kerberos"
 msgid "This option will connect to the server using kerberos key."
 msgstr "Ši parinktis prisijungs prie serverio naudojant kerberos raktą."
 
-#: ../src/camel/camel-mapi-store.c:133
-#: ../src/camel/camel-mapi-store.c:175
+#: ../src/camel/camel-mapi-store.c:134 ../src/camel/camel-mapi-store.c:176
 msgid "Cannot find folder in a local cache"
 msgstr "Nepavyko rasti aplanko vietiniam podėliui"
 
-#: ../src/camel/camel-mapi-store.c:481
-#: ../src/camel/camel-mapi-store.c:1183
+#: ../src/camel/camel-mapi-store.c:492 ../src/camel/camel-mapi-store.c:1179
 msgid "Folder list is not available in offline mode"
 msgstr "Aplankų sąrašas neprieinamas atsijungimo veiksenoje."
 
-#: ../src/camel/camel-mapi-store.c:858
+#: ../src/camel/camel-mapi-store.c:872
 msgid "No public folder found"
 msgstr "Nerasta viešųjų aplankų"
 
-#: ../src/camel/camel-mapi-store.c:858
+#: ../src/camel/camel-mapi-store.c:872
 msgid "No folder found"
 msgstr "Nerastas aplankas"
 
-#: ../src/camel/camel-mapi-store.c:1205
-#: ../src/camel/camel-mapi-store.c:2148
+#: ../src/camel/camel-mapi-store.c:1201 ../src/camel/camel-mapi-store.c:2168
 #, c-format
 msgid "Connecting to '%s'"
 msgstr "Jungiamasi prie „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1264
+#: ../src/camel/camel-mapi-store.c:1260
 msgid "Cannot create MAPI folders in offline mode"
 msgstr "Nepavyko sukurti MAPI aplankų atsijungimo veiksenoje"
 
-#: ../src/camel/camel-mapi-store.c:1271
+#: ../src/camel/camel-mapi-store.c:1267
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "Nepavyko sukurti naujo aplanko „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1280
+#: ../src/camel/camel-mapi-store.c:1276
 #, c-format
 msgid "Authentication failed"
 msgstr "Nepavyko nustatyti tapatybės"
 
-#: ../src/camel/camel-mapi-store.c:1290
+#: ../src/camel/camel-mapi-store.c:1286
 msgid "MAPI folders can be created only within mailbox of the logged user"
-msgstr "MAPI aplankai gali būti sukurti tik prisijungusio naudotojo pašto dėžėje"
+msgstr ""
+"MAPI aplankai gali būti sukurti tik prisijungusio naudotojo pašto dėžėje"
 
-#: ../src/camel/camel-mapi-store.c:1303
-#: ../src/camel/camel-mapi-store.c:1408
+#: ../src/camel/camel-mapi-store.c:1299 ../src/camel/camel-mapi-store.c:1412
 #, c-format
 msgid "Cannot find folder '%s'"
 msgstr "Nepavyko rasti aplanko „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1353
+#: ../src/camel/camel-mapi-store.c:1354
 #, c-format
 msgid "Cannot create folder '%s': %s"
 msgstr "Nepavyko sukurti aplanko „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1359
+#: ../src/camel/camel-mapi-store.c:1360
 #, c-format
 msgid "Cannot create folder '%s'"
 msgstr "Nepavyko sukurti aplanko „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1386
-#: ../src/camel/camel-mapi-store.c:1398
+#: ../src/camel/camel-mapi-store.c:1390 ../src/camel/camel-mapi-store.c:1402
 msgid "Cannot delete MAPI folders in offline mode"
 msgstr "Nepavyko ištrinti MAPI aplankų atsijungimo veiksenoje"
 
-#: ../src/camel/camel-mapi-store.c:1448
+#: ../src/camel/camel-mapi-store.c:1458
 #, c-format
 msgid "Cannot remove folder '%s': %s"
 msgstr "Nepavyko pašalinti aplanko „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1456
+#: ../src/camel/camel-mapi-store.c:1466
 #, c-format
 msgid "Cannot remove folder '%s'"
 msgstr "Nepavyko pašalinti aplanko „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1485
-#: ../src/camel/camel-mapi-store.c:1500
+#: ../src/camel/camel-mapi-store.c:1496 ../src/camel/camel-mapi-store.c:1511
 msgid "Cannot rename MAPI folders in offline mode"
 msgstr "Nepavyko pervadinti MAPI aplankų atsijungimo veiksenoje"
 
-#: ../src/camel/camel-mapi-store.c:1511
+#: ../src/camel/camel-mapi-store.c:1522
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
 msgstr "Nepavyko pervadinti MAPI aplanko „%s“. Tokio aplanko nėra"
 
-#: ../src/camel/camel-mapi-store.c:1522
+#: ../src/camel/camel-mapi-store.c:1533
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'"
 msgstr "Nepavyko pervadinti MAPI numatytojo aplanko „%s“ į „%s“"
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1548
-#: ../src/camel/camel-mapi-store.c:1581
-#: ../src/camel/camel-mapi-store.c:1659
+#: ../src/camel/camel-mapi-store.c:1559 ../src/camel/camel-mapi-store.c:1602
+#: ../src/camel/camel-mapi-store.c:1682
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "Nepavyko pervadinti MAPI aplanko „%s“ į „%s“"
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
 #. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1573
-#: ../src/camel/camel-mapi-store.c:1652
+#: ../src/camel/camel-mapi-store.c:1594 ../src/camel/camel-mapi-store.c:1675
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "Nepavyko pervadinti MAPI aplanko „%s“ į „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1755
+#: ../src/camel/camel-mapi-store.c:1772
 msgid "Cannot subscribe MAPI folders in offline mode"
 msgstr "Nepavyko užsisakyti MAPI aplankų atsijungimo veiksenoje"
 
-#: ../src/camel/camel-mapi-store.c:1772
+#: ../src/camel/camel-mapi-store.c:1789
 #, c-format
 msgid "Folder '%s' not found"
 msgstr "Nerastas aplankas „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1890
+#: ../src/camel/camel-mapi-store.c:1907
 msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr "Nepavyko atsisakyti MAPI aplankų atsijungimo veiksenoje"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:2103
-#: ../src/camel/camel-mapi-transport.c:191
+#: ../src/camel/camel-mapi-store.c:2119
+#: ../src/camel/camel-mapi-transport.c:195
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI serveris %s"
@@ -418,78 +421,86 @@ msgstr "Exchange MAPI serveris %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:2107
-#: ../src/camel/camel-mapi-transport.c:194
+#: ../src/camel/camel-mapi-store.c:2123
+#: ../src/camel/camel-mapi-transport.c:198
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Exchange MAPI tarnyba naudotojui %s serveryje %s"
 
-#: ../src/camel/camel-mapi-store.c:2133
+#: ../src/camel/camel-mapi-store.c:2150
 msgid "Cannot connect MAPI store in offline mode"
 msgstr "Nepavyko prisijungti prie MAPI saugyklos atsijungimo veiksenoje"
 
-#: ../src/camel/camel-mapi-store.c:2178
+#: ../src/camel/camel-mapi-store.c:2203
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received or sent."
 msgstr "Pašto dėžė „%s“ yra pilna, nauji laiškai nebus gaunami arba siunčiami."
 
-#: ../src/camel/camel-mapi-store.c:2180
+#: ../src/camel/camel-mapi-store.c:2205
 #, c-format
-msgid "Mailbox '%s' is near its size limit, message send will be disabled soon."
-msgstr "Pašto dėžė „%s“ artėja prie dydžio limito, laiškų siuntimas tuoj bus išjungtas."
+msgid ""
+"Mailbox '%s' is near its size limit, message send will be disabled soon."
+msgstr ""
+"Pašto dėžė „%s“ artėja prie dydžio limito, laiškų siuntimas tuoj bus "
+"išjungtas."
 
-#: ../src/camel/camel-mapi-store.c:2184
+#: ../src/camel/camel-mapi-store.c:2209
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received."
 msgstr "Pašto dėžė „%s“ yra pilna, nauji laiškai nebus gaunami."
 
-#: ../src/camel/camel-mapi-store.c:2186
+#: ../src/camel/camel-mapi-store.c:2211
 #, c-format
 msgid "Mailbox '%s' is near its size limit."
 msgstr "Pašto dėžė „%s“ artėja prie dydžio ribos."
 
-#: ../src/camel/camel-mapi-store.c:2598
+#: ../src/camel/camel-mapi-store.c:2631
 msgid "Authentication password not available"
 msgstr "Neprieinamas tapatybės patvirtinimo slaptažodis"
 
-#: ../src/camel/camel-mapi-transport.c:142
-#: ../src/camel/camel-mapi-transport.c:164
+#: ../src/camel/camel-mapi-transport.c:146
+#: ../src/camel/camel-mapi-transport.c:168
 #, c-format
 msgid "Could not send message."
 msgstr "Nepavyko išsiųsti laiško."
 
-#: ../src/camel/camel-mapi-transport.c:159
+#: ../src/camel/camel-mapi-transport.c:163
 #, c-format
 msgid "Could not send message: %s"
 msgstr "Nepavyko išsiųsti laiško: %s"
 
-#: ../src/collection/e-mapi-backend.c:269
+#: ../src/collection/e-mapi-backend.c:77
+#| msgid "Cannot connect MAPI store in offline mode"
+msgid "Cannot connect, no credentials provided"
+msgstr "Nepavyko prisijungti, nepateikti įgaliojimai"
+
+#: ../src/collection/e-mapi-backend.c:339
 msgid "Global Address List"
 msgstr "Visuotinis adresų sąrašas / Aktyvusis katalogas"
 
-#: ../src/collection/e-mapi-backend.c:517
-#: ../src/collection/e-mapi-backend.c:560
+#: ../src/collection/e-mapi-backend.c:688
+#: ../src/collection/e-mapi-backend.c:785
 #, c-format
 msgid "Data source '%s' does not represent a MAPI folder"
 msgstr "Duomenų šaltinis „%s“ nereprezentuoja MAPI aplanko"
 
-#: ../src/configuration/e-book-config-mapigal.c:63
+#: ../src/configuration/e-book-config-mapigal.c:61
 msgid "Allow _partial search results"
 msgstr "Leisti _dalinius paieškos rezultatus"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:126
+#: ../src/configuration/e-mail-config-mapi-backend.c:125
 msgid "Select username"
 msgstr "Pasirinkite naudotojo vardą"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:136
+#: ../src/configuration/e-mail-config-mapi-backend.c:135
 msgid "Full name"
 msgstr "Visas vardas"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:141
+#: ../src/configuration/e-mail-config-mapi-backend.c:140
 msgid "Username"
 msgstr "Naudotojo vardas"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:168
+#: ../src/configuration/e-mail-config-mapi-backend.c:167
 msgid ""
 "There are more users with similar user name on a server.\n"
 "Please select that you would like to use from the below list."
@@ -497,167 +508,175 @@ msgstr ""
 "Yra daugiau naudotojų su panašiu naudotojo vardu serveryje.\n"
 "Pasirinkite, kurį norite naudoti iš žemiau esančio sąrašo."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:396
+#: ../src/configuration/e-mail-config-mapi-backend.c:363
 msgid "Authentication finished successfully."
 msgstr "Tapatybė nustatyta sėkmingai."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:398
-#: ../src/configuration/e-mail-config-mapi-backend.c:519
+#: ../src/configuration/e-mail-config-mapi-backend.c:365
+#: ../src/configuration/e-mail-config-mapi-backend.c:485
 msgid "Authentication failed."
 msgstr "Nepavyko nustatyti tapatybės."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:460
+#: ../src/configuration/e-mail-config-mapi-backend.c:428
 msgid "Cannot authenticate MAPI accounts in offline mode"
 msgstr "Nepavyko patvirtinti MAPI tapatybės atsijungimo veiksenoje"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:489
-msgid "Server, username and domain name cannot be empty. Please fill them with correct values."
-msgstr "Serverio, naudotojo vardo ir srities vardai turi būti nurodyti. Įveskite teisingas reikšmės."
+#: ../src/configuration/e-mail-config-mapi-backend.c:457
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"Serverio, naudotojo vardo ir srities vardai turi būti nurodyti. Įveskite "
+"teisingas reikšmės."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:492
-msgid "Realm name cannot be empty when kerberos is selected. Please fill them with correct values."
-msgstr "Srities vardas turi būti nurodytas, kai pasirinktas kerberos. Įveskite teisingas reikšmės."
+#: ../src/configuration/e-mail-config-mapi-backend.c:460
+msgid ""
+"Realm name cannot be empty when kerberos is selected. Please fill them with "
+"correct values."
+msgstr ""
+"Srities vardas turi būti nurodytas, kai pasirinktas kerberos. Įveskite "
+"teisingas reikšmės."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:513
+#: ../src/configuration/e-mail-config-mapi-backend.c:479
 msgid "Connecting to the server, please wait..."
 msgstr "Jungiamasi prie serverio, palaukite..."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:721
+#: ../src/configuration/e-mail-config-mapi-backend.c:681
 msgid "Configuration"
 msgstr "Konfigūracija"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:730
+#: ../src/configuration/e-mail-config-mapi-backend.c:690
 msgid "_Server:"
 msgstr "_Serveris:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:747
+#: ../src/configuration/e-mail-config-mapi-backend.c:707
 msgid "User_name:"
 msgstr "_Naudotojo vardas:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:772
+#: ../src/configuration/e-mail-config-mapi-backend.c:732
 msgid "_Domain name:"
 msgstr "_Srities vardas:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:785
+#: ../src/configuration/e-mail-config-mapi-backend.c:745
 msgid "_Authenticate"
 msgstr "_Nustatyti tapatybę"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:793
+#: ../src/configuration/e-mail-config-mapi-backend.c:753
 msgid "_Use secure connection"
 msgstr "_Naudoti saugų ryšį"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:808
+#: ../src/configuration/e-mail-config-mapi-backend.c:768
 msgid "_Kerberos authentication"
 msgstr "_Kerberos tapatybės patvirtinimas"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:820
+#: ../src/configuration/e-mail-config-mapi-backend.c:780
 msgid "_Realm name:"
 msgstr "S_rities vardas:"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:186
-#: ../src/configuration/e-mail-config-mapi-page.c:247
+#: ../src/configuration/e-mail-config-mapi-page.c:191
+#: ../src/configuration/e-mail-config-mapi-page.c:252
 msgid "MAPI Settings"
 msgstr "MAPI nustatymai"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:192
+#: ../src/configuration/e-mail-config-mapi-page.c:197
 msgid "View the size of all Exchange folders"
 msgstr "Žiūrėti visų Exchange aplankų dydį"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:196
+#: ../src/configuration/e-mail-config-mapi-page.c:201
 msgid "Folder _Size"
 msgstr "Aplanko dydi_s"
 
-#: ../src/configuration/e-mapi-config-utils.c:454
+#: ../src/configuration/e-mapi-config-utils.c:417
 msgid "Folder"
 msgstr "Aplankas"
 
-#: ../src/configuration/e-mapi-config-utils.c:459
+#: ../src/configuration/e-mapi-config-utils.c:422
 msgid "Size"
 msgstr "Dydis"
 
-#: ../src/configuration/e-mapi-config-utils.c:482
-#: ../src/configuration/e-mapi-config-utils.c:486
+#: ../src/configuration/e-mapi-config-utils.c:445
+#: ../src/configuration/e-mapi-config-utils.c:449
 msgid "Unable to retrieve folder size information"
 msgstr "Nepavyko gauti aplankų dydžio informacijos"
 
-#: ../src/configuration/e-mapi-config-utils.c:552
+#: ../src/configuration/e-mapi-config-utils.c:516
 msgid "Folder Size"
 msgstr "Aplanko dydis"
 
-#: ../src/configuration/e-mapi-config-utils.c:566
+#: ../src/configuration/e-mapi-config-utils.c:530
 msgid "Fetching folder list…"
 msgstr "Gaunamas aplankų sąrašas…"
 
-#: ../src/configuration/e-mapi-config-utils.c:732
+#: ../src/configuration/e-mapi-config-utils.c:704
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr "Nepavyksta keisti aplanko „%s“ leidimų, pasirinkite kitą aplanką."
 
-#: ../src/configuration/e-mapi-config-utils.c:795
+#: ../src/configuration/e-mapi-config-utils.c:767
 msgid "Folder size..."
 msgstr "Aplanko dydis..."
 
-#: ../src/configuration/e-mapi-config-utils.c:802
+#: ../src/configuration/e-mapi-config-utils.c:774
 msgid "Subscribe to folder of other user..."
 msgstr "Užsisakyti kito naudotojo aplanką..."
 
-#: ../src/configuration/e-mapi-config-utils.c:811
+#: ../src/configuration/e-mapi-config-utils.c:783
+#: ../src/configuration/e-mapi-config-utils.c:1061
 #: ../src/configuration/e-mapi-config-utils.c:1091
 #: ../src/configuration/e-mapi-config-utils.c:1121
 #: ../src/configuration/e-mapi-config-utils.c:1151
-#: ../src/configuration/e-mapi-config-utils.c:1181
 msgid "Permissions..."
 msgstr "Leidimai..."
 
-#: ../src/configuration/e-mapi-config-utils.c:813
+#: ../src/configuration/e-mapi-config-utils.c:785
 msgid "Edit MAPI folder permissions"
 msgstr "Keisti MAPI aplanko leidimus"
 
-#: ../src/configuration/e-mapi-config-utils.c:1093
+#: ../src/configuration/e-mapi-config-utils.c:1063
 msgid "Edit MAPI calendar permissions"
 msgstr "Keisti MAPI kalendoriaus leidimus"
 
-#: ../src/configuration/e-mapi-config-utils.c:1123
+#: ../src/configuration/e-mapi-config-utils.c:1093
 msgid "Edit MAPI tasks permissions"
 msgstr "Keisti MAPI užduočių leidimus"
 
-#: ../src/configuration/e-mapi-config-utils.c:1153
+#: ../src/configuration/e-mapi-config-utils.c:1123
 msgid "Edit MAPI memos permissions"
 msgstr "Keisti MAPI raštelių leidimus"
 
-#: ../src/configuration/e-mapi-config-utils.c:1183
+#: ../src/configuration/e-mapi-config-utils.c:1153
 msgid "Edit MAPI contacts permissions"
 msgstr "Keisti MAPI kontaktų leidimus"
 
-#: ../src/configuration/e-mapi-config-utils.c:1356
+#: ../src/configuration/e-mapi-config-utils.c:1326
 msgid "Personal Folders"
 msgstr "Asmeniniai aplankai"
 
-#: ../src/configuration/e-mapi-config-utils.c:1583
+#: ../src/configuration/e-mapi-config-utils.c:1557
 msgid "Searching remote MAPI folder structure, please wait..."
 msgstr "Ieškoma nutolusio MAPI aplankų struktūra, palaukite..."
 
-#: ../src/configuration/e-mapi-config-utils.c:1651
+#: ../src/configuration/e-mapi-config-utils.c:1625
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Nepavyko sukurti MAPI kalendoriaus atsijungimo veiksenoje"
 
-#: ../src/configuration/e-mapi-config-utils.c:1654
+#: ../src/configuration/e-mapi-config-utils.c:1628
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "Nepavyko sukurti MAPI užduočių sąrašo atsijungimo veiksenoje"
 
-#: ../src/configuration/e-mapi-config-utils.c:1657
+#: ../src/configuration/e-mapi-config-utils.c:1631
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "Nepavyko sukurti MAPI raštelių sąrašo atsijungimo veiksenoje"
 
-#: ../src/configuration/e-mapi-config-utils.c:1660
+#: ../src/configuration/e-mapi-config-utils.c:1634
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "Nepavyko sukurti MAPI adresų knygos atsijungimo veiksenoje"
 
-#: ../src/configuration/e-mapi-config-utils.c:1664
+#: ../src/configuration/e-mapi-config-utils.c:1639
 msgid "Cannot create MAPI source in offline mode"
 msgstr "Nepavyko sukurti MAPI šaltinio atsijungimo veiksenoje"
 
-#: ../src/configuration/e-mapi-config-utils.c:1684
+#: ../src/configuration/e-mapi-config-utils.c:1659
 msgid "_Location:"
 msgstr "_Vieta:"
 
@@ -716,13 +735,13 @@ msgid "Writing folder permissions, please wait..."
 msgstr "Rašomi aplanko leidimai, palaukite..."
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:780
-#: ../src/configuration/e-mapi-search-gal-user.c:524
+#: ../src/configuration/e-mapi-search-gal-user.c:527
 msgctxt "User"
 msgid "Anonymous"
 msgstr "Anonimas"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:782
-#: ../src/configuration/e-mapi-search-gal-user.c:521
+#: ../src/configuration/e-mapi-search-gal-user.c:524
 msgctxt "User"
 msgid "Default"
 msgstr "Numatyta"
@@ -733,7 +752,7 @@ msgid "Unknown"
 msgstr "Nežinoma"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:876
-#: ../src/configuration/e-mapi-search-gal-user.c:597
+#: ../src/configuration/e-mapi-search-gal-user.c:600
 msgid "Name"
 msgstr "Vardas"
 
@@ -746,7 +765,7 @@ msgid "Edit MAPI folder permissions..."
 msgstr "Keisti MAPI aplanko leidimus..."
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:960
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:610
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:626
 msgid "Account:"
 msgstr "Paskyra:"
 
@@ -876,28 +895,28 @@ msgstr[0] "Rastas %d naudotojas, bet rodomi tik pirmi %d"
 msgstr[1] "Rasti %d naudotojai, bet rodomi tik pirmi %d"
 msgstr[2] "Rasta %d naudotojų, bet rodomi tik pirmi %d"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:516
-#: ../src/configuration/e-mapi-search-gal-user.c:707
+#: ../src/configuration/e-mapi-search-gal-user.c:519
+#: ../src/configuration/e-mapi-search-gal-user.c:710
 msgid "Search for a user"
 msgstr "Ieškoti naudotojo"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:532
+#: ../src/configuration/e-mapi-search-gal-user.c:535
 msgid "Searching..."
 msgstr "Ieškoma..."
 
-#: ../src/configuration/e-mapi-search-gal-user.c:603
+#: ../src/configuration/e-mapi-search-gal-user.c:606
 msgid "E-mail"
 msgstr "El. paštas"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:644
+#: ../src/configuration/e-mapi-search-gal-user.c:647
 msgid "Choose MAPI user..."
 msgstr "Pasirinkite MAPI naudotoją..."
 
-#: ../src/configuration/e-mapi-search-gal-user.c:667
+#: ../src/configuration/e-mapi-search-gal-user.c:670
 msgid "_Search:"
 msgstr "_Ieškoti:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:90
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:89
 #, c-format
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "Nepavyksta pridėti aplanko, jau yra „%s“ aplankas"
@@ -905,23 +924,26 @@ msgstr "Nepavyksta pridėti aplanko, jau yra „%s“ aplankas"
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. Example result: "Mailbox - John Smith"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:115
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:114
 #, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox - %s"
 msgstr "Pašto dėžė - %s"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:144
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:143
 #, c-format
 msgid "Cannot add folder, failed to add to store's summary"
 msgstr "Nepavyksta pridėti aplanko, nepavyko pridėti saugyklos santraukos"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:326
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:329
 #, c-format
-msgid "Folder '%s' not found. Either it does not exist or you do not have permission to access it."
-msgstr "Aplankas „%s“ nerastas. Jo arba nėra, arba jūs neturite leidimų jį pasiekti."
+msgid ""
+"Folder '%s' not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr ""
+"Aplankas „%s“ nerastas. Jo arba nėra, arba jūs neturite leidimų jį pasiekti."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:356
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:364
 msgid "Cannot add folder, cannot determine folder's type"
 msgstr "Nepavyksta pridėti aplanko, nepavyksta nustatyti aplanko tipo"
 
@@ -930,77 +952,79 @@ msgstr "Nepavyksta pridėti aplanko, nepavyksta nustatyti aplanko tipo"
 #. the second '%s' is replaced with folder name.
 #. Example result: "John Smith - Calendar"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:397
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:405
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s - %s"
 msgstr "%s - %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:492
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:688
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:502
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:704
 msgid "Inbox"
 msgstr "Gauti laiškai"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:494
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:504
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:705
 msgid "Contacts"
 msgstr "Kontaktai"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:496
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:690
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:506
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:706
 msgid "Calendar"
 msgstr "Kalendorius"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:498
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:691
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:508
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:707
 msgid "Memos"
 msgstr "Rašteliai"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:500
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:692
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:510
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:708
 msgid "Tasks"
 msgstr "Užduotys"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:513
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:523
 #, c-format
 msgid "Testing availability of folder '%s' of user '%s', please wait..."
-msgstr "Tikrinamas aplanko „%s“, priklausančio naudotojui „%s“ prieinamumas, palaukite..."
+msgstr ""
+"Tikrinamas aplanko „%s“, priklausančio naudotojui „%s“ prieinamumas, "
+"palaukite..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:589
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:605
 msgid "Subscribe to folder of other MAPI user..."
 msgstr "Užsisakyti kito MAPI naudotojo aplanką..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:638
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:654
 msgid "User"
 msgstr "Naudotojas"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:645
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:661
 msgid "_User:"
 msgstr "Na_udotojas:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:658
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:674
 msgid "C_hoose..."
 msgstr "_Pasirinkti..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:673
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
 msgid "_Folder name:"
 msgstr "_Aplanko pavadinimas:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2048
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2080
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Sutikta:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2052
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2085
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Ketinama:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2056
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2090
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Atmesta:"
@@ -1079,47 +1103,53 @@ msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:743
+#: ../src/libexchangemapi/e-mapi-connection.c:744
 #, c-format
 msgid "Server '%s' cannot be reached"
 msgstr "Nepavyksta pasiekti serverio „%s“"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:864
+#: ../src/libexchangemapi/e-mapi-connection.c:872
 #, c-format
 msgid "Folder name '%s' is not a known default folder name, nor folder ID."
-msgstr "Aplanko pavadinimas „%s“ nėra nei žinomas numatytasis aplanko pavadinimas, nei aplanko ID"
+msgstr ""
+"Aplanko pavadinimas „%s“ nėra nei žinomas numatytasis aplanko pavadinimas, "
+"nei aplanko ID"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:1195
+#: ../src/libexchangemapi/e-mapi-connection.c:1203
 #, c-format
 msgid "Failed to open store for user '%s'"
 msgstr "Nepavyko atverti naudotojo „%s“ saugyklos"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:1203
+#: ../src/libexchangemapi/e-mapi-connection.c:1211
 #, c-format
 msgid "Folder of user '%s' not found"
 msgstr "Naudotojo „%s“ aplankas nerastas"
 
 #. Translators: %s is replaced with an email address which was found ambiguous on a remote server
-#: ../src/libexchangemapi/e-mapi-connection.c:3686
+#: ../src/libexchangemapi/e-mapi-connection.c:3856
 #, c-format
 msgid "Recipient '%s' is ambiguous"
 msgstr "Gavėjas „%s“ yra nevienareikšmis"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:4565
+#: ../src/libexchangemapi/e-mapi-connection.c:4948
 #, c-format
-msgid "Search result exceeded allowed size limit. Use more specific search term, please"
-msgstr "Paieškos rezultatai viršijus leistiną dydžio ribą. Naudokite detalesnę paiešką"
+msgid ""
+"Search result exceeded allowed size limit. Use more specific search term, "
+"please"
+msgstr ""
+"Paieškos rezultatai viršijus leistiną dydžio ribą. Naudokite detalesnę "
+"paiešką"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6165
+#: ../src/libexchangemapi/e-mapi-connection.c:6549
 msgid "All Public Folders"
 msgstr "Visi viešieji aplankai"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6422
+#: ../src/libexchangemapi/e-mapi-connection.c:6816
 #, c-format
 msgid "User name '%s' is ambiguous"
 msgstr "Naudotojo vardas „%s“ yra nevienareikšmis"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6425
+#: ../src/libexchangemapi/e-mapi-connection.c:6819
 #, c-format
 msgid "User name '%s' not found"
 msgstr "Naudotojo vardas „%s“ nerastas"
@@ -1131,4 +1161,3 @@ msgstr "Nepavyksta pridėti aplanko, nepalaikomas aplanko tipas"
 #: ../src/libexchangemapi/e-mapi-folder.c:335
 msgid "Cannot add folder, master source not found"
 msgstr "Nepavyksta pridėti aplanko, pagrindinis šaltinis nerastas"
-
