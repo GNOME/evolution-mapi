@@ -2144,6 +2144,10 @@ mapi_connect_sync (CamelService *service,
 	uint64_t current_size = -1, receive_quota = -1, send_quota = -1;
 	gchar *name;
 
+	/* Chain up to parent's method. */
+	if (!CAMEL_SERVICE_CLASS (camel_mapi_store_parent_class)->connect_sync (service, cancellable, error))
+		return FALSE;
+
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
 		g_set_error_literal (
 			error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
@@ -2252,7 +2256,8 @@ mapi_disconnect_sync (CamelService *service,
 
 	store->priv->folders_synced = FALSE;
 
-	return TRUE;
+	/* Chain up to parent's method. */
+	return CAMEL_SERVICE_CLASS (camel_mapi_store_parent_class)->disconnect_sync (service, clean, cancellable, error);
 }
 
 struct ScheduleUpdateData
