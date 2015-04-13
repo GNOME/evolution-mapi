@@ -1,3 +1,9 @@
+evolution-mapi 3.16.1 2015-04-13
+--------------------------------
+
+Bug Fixes:
+	Bug 747500 - Mail account connection settings change requires restart (Milan Crha)
+
 evolution-mapi 3.16.0 2015-03-23
 --------------------------------
 
