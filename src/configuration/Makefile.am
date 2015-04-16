@@ -45,6 +45,7 @@ module_mapi_configuration_la_SOURCES =		\
 
 module_mapi_configuration_la_LIBADD =		\
 	$(top_builddir)/src/libexchangemapi/libexchangemapi-1.0.la \
+	$(top_builddir)/src/camel/libcamelmapi.la \
 	$(LIBECAL_LIBS)				\
 	$(LIBEDATASERVER_LIBS)			\
 	$(CAMEL_LIBS)				\
