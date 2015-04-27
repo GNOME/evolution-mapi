@@ -1,3 +1,17 @@
+evolution-mapi 3.17.1 2015-04-27
+--------------------------------
+
+Bug Fixes:
+	Bug 746395 - Let the provider store sent messages on its own (Milan Crha)
+	Bug 747500 - Mail account connection settings change requires restart (Milan Crha)
+
+Miscellaneous:
+	Use common property lock provided by ESourceExtension (Milan Crha)
+	Add missing libcamelmapi library to link with module-mapi-configuration (Milan Crha)
+
+Translations:
+	Jordi Mas (ca)
+
 evolution-mapi 3.16.0 2015-03-23
 --------------------------------
 
