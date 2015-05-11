@@ -1,3 +1,9 @@
+evolution-mapi 3.16.2 2015-05-11
+--------------------------------
+
+Miscellaneous:
+	Add missing libcamelmapi library to link with module-mapi-configuration (Milan Crha)
+
 evolution-mapi 3.16.1 2015-04-13
 --------------------------------
 
