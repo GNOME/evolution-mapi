@@ -187,42 +187,42 @@ dnl Check for struct mapi_SNotRestriction availability
 dnl see http://tracker.openchange.org/issues/377
 dnl ****************************
 AC_MSG_CHECKING([libmapi struct mapi_SNotRestriction])
-save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
-save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
+save_cflags="$CFLAGS"; CFLAGS="$LIBMAPI_CFLAGS $CFLAGS"
+save_libs="$LIBS"; LIBS="$LIBMAPI_LIBS $LIBS"
 AC_LINK_IFELSE([AC_LANG_PROGRAM(
 	[[#include <libmapi/libmapi.h>]],
 	[[struct mapi_SNotRestriction snot; snot.res->rt = RES_NOT]])],
 	[AC_DEFINE(HAVE_RES_NOT_SUPPORTED, 1, [libmapi supports RES_NOT restrictions]) ac_cv_have_rns=yes],[ac_cv_have_rns=no])
-CFLAGS=$save_cflags
-LIBS=$save_libs
+CFLAGS="$save_cflags"
+LIBS="$save_libs"
 AC_MSG_RESULT([$ac_cv_have_rns])
 
 dnl ****************************
 dnl Check for OpenChange 2.1 fast-transfer tags availability
 dnl ****************************
 AC_MSG_CHECKING([libmapi fast-transfer tags])
-save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
-save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
+save_cflags="$CFLAGS"; CFLAGS="$LIBMAPI_CFLAGS $CFLAGS"
+save_libs="$LIBS"; LIBS="$LIBMAPI_LIBS $LIBS"
 AC_LINK_IFELSE([AC_LANG_PROGRAM(
 	[[#include <libmapi/libmapi.h>]],
 	[[uint32_t tag; tag = StartMessage; tag = EndMessage; tag = StartRecip; tag = EndToRecip; tag = NewAttach; tag = EndAttach; tag = StartEmbed; tag = EndEmbed;]])],
 	[AC_DEFINE(HAVE_FAST_TRANSFER_TAGS_2_1, 1, [libmapi supports fast-transfer tags from OpenChange 2.1]) ac_cv_have_ftt21=yes],[ac_cv_have_ftt21=no])
-CFLAGS=$save_cflags
-LIBS=$save_libs
+CFLAGS="$save_cflags"
+LIBS="$save_libs"
 AC_MSG_RESULT([$ac_cv_have_ftt21])
 
 dnl ****************************
 dnl Check for OpenChange 2.2 ecRpcFailed
 dnl ****************************
 AC_MSG_CHECKING([libmapi ecRpcFailed error code])
-save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
-save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
+save_cflags="$CFLAGS"; CFLAGS="$LIBMAPI_CFLAGS $CFLAGS"
+save_libs="$LIBS"; LIBS="$LIBMAPI_LIBS $LIBS"
 AC_LINK_IFELSE([AC_LANG_PROGRAM(
 	[[#include <libmapi/libmapi.h>]],
 	[[uint32_t err = ecRpcFailed;]])],
 	[AC_DEFINE(HAVE_ECPRCFAILED_ERROR, 1, [libmapi defines ecRpcFailed error code]) ac_cv_have_ecrpcfailed=yes],[ac_cv_have_ecrpcfailed=no])
-CFLAGS=$save_cflags
-LIBS=$save_libs
+CFLAGS="$save_cflags"
+LIBS="$save_libs"
 if [ test "x$ac_cv_have_ecrpcfailed" = "xno" ] ; then
 	CFLAGS="-DecRpcFailed=MAPI_E_NETWORK_ERROR $CFLAGS"
 fi
@@ -232,14 +232,14 @@ dnl ****************************
 dnl Check for OpenChange 2.3 QueryRows
 dnl ****************************
 AC_MSG_CHECKING([libmapi QueryRows arguments])
-save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
-save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
+save_cflags="$CFLAGS"; CFLAGS="$LIBMAPI_CFLAGS $CFLAGS"
+save_libs="$LIBS"; LIBS="$LIBMAPI_LIBS $LIBS"
 AC_LINK_IFELSE([AC_LANG_PROGRAM(
 	[[#include <libmapi/libmapi.h>]],
 	[[QueryRows(NULL, 1, TBL_ADVANCE, TBL_FORWARD_READ, NULL);]])],
 	[AC_DEFINE(HAVE_QUERYROWS_FORWARDREAD, 1, [libmapi defines QueryRows with ForwardRead argument]) ac_cv_have_queryrows_forwardread=yes],[ac_cv_have_queryrows_forwardread=no])
-CFLAGS=$save_cflags
-LIBS=$save_libs
+CFLAGS="$save_cflags"
+LIBS="$save_libs"
 AC_MSG_RESULT([$ac_cv_have_queryrows_forwardread])
 
 
