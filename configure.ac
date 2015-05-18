@@ -229,6 +229,21 @@ fi
 AC_MSG_RESULT([$ac_cv_have_ecrpcfailed])
 
 dnl ****************************
+dnl Check for OpenChange 2.3 QueryRows
+dnl ****************************
+AC_MSG_CHECKING([libmapi QueryRows arguments])
+save_cflags=$CFLAGS; CFLAGS=$LIBMAPI_CFLAGS
+save_libs=$LIBS; LIBS="$LIBMAPI_LIBS"
+AC_LINK_IFELSE([AC_LANG_PROGRAM(
+	[[#include <libmapi/libmapi.h>]],
+	[[QueryRows(NULL, 1, TBL_ADVANCE, TBL_FORWARD_READ, NULL);]])],
+	[AC_DEFINE(HAVE_QUERYROWS_FORWARDREAD, 1, [libmapi defines QueryRows with ForwardRead argument]) ac_cv_have_queryrows_forwardread=yes],[ac_cv_have_queryrows_forwardread=no])
+CFLAGS=$save_cflags
+LIBS=$save_libs
+AC_MSG_RESULT([$ac_cv_have_queryrows_forwardread])
+
+
+dnl ****************************
 dnl Expose version information
 dnl ****************************
 API_VERSION=$EDS_PACKAGE

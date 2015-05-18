@@ -1523,7 +1523,11 @@ foreach_tablerow (EMapiConnection *conn,
 			break;
 
 		/* Fill the table columns with data from the rows */
-		ms = QueryRows (obj_table, count, TBL_ADVANCE, &SRowSet);
+		ms = QueryRows (obj_table, count, TBL_ADVANCE,
+			#ifdef HAVE_QUERYROWS_FORWARDREAD
+			TBL_FORWARD_READ,
+			#endif
+			&SRowSet);
 		if (ms != MAPI_E_SUCCESS) {
 			make_mapi_error (perror, "QueryRows", ms);
 			break;
