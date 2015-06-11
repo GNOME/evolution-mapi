@@ -273,7 +273,7 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 				continue;
 		}
 
-		e_source_registry_server_remove_source (server, source);
+		e_source_remove_sync (source, NULL, NULL);
 	}
 
 	all_sources = e_collection_backend_claim_all_resources (E_COLLECTION_BACKEND (backend));
