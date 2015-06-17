@@ -3841,7 +3841,10 @@ add_object_recipients (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	g_assert (count == flagList->cValues);
+	if (count != flagList->cValues) {
+		g_warn_if_reached ();
+		goto cleanup;
+	}
 
 	rows = talloc_zero (mem_ctx, struct SRowSet);
 
@@ -5667,14 +5670,14 @@ e_mapi_connection_resolve_named_props  (EMapiConnection *conn,
 		uint32_t prop_count = nameid->count;
 		struct PropertyName_r *names = talloc_zero_array (mem_ctx, struct PropertyName_r, prop_count + 1);
 
-		g_assert (names != NULL);
+		g_return_val_if_fail (names != NULL, FALSE);
 
 		SPropTagArray = talloc_zero (mem_ctx, struct SPropTagArray);
-		g_assert (SPropTagArray != NULL);
+		g_return_val_if_fail (SPropTagArray != NULL, FALSE);
 
 		SPropTagArray->cValues = nameid->count;
 		SPropTagArray->aulPropTag = talloc_zero_array (mem_ctx, enum MAPITAGS, SPropTagArray->cValues + 1);
-		g_assert (SPropTagArray->aulPropTag != NULL);
+		g_return_val_if_fail (SPropTagArray->aulPropTag != NULL, FALSE);
 
 		j = 0;
 		for (i = 0; i < nameid->count; i++) {
@@ -7383,13 +7386,13 @@ e_mapi_recipient_new (TALLOC_CTX *mem_ctx)
 	EMapiRecipient *recipient;
 
 	recipient = talloc_zero (mem_ctx, EMapiRecipient);
-	g_assert (recipient != NULL);
+	g_return_val_if_fail (recipient != NULL, NULL);
 
 	recipient->properties.cValues = 0;
 	recipient->properties.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, 1);
 	recipient->next = NULL;
 
-	g_assert (recipient->properties.lpProps != NULL);
+	g_return_val_if_fail (recipient->properties.lpProps != NULL, NULL);
 
 	return recipient;
 }
@@ -7410,7 +7413,7 @@ e_mapi_attachment_new (TALLOC_CTX *mem_ctx)
 	EMapiAttachment *attachment;
 
 	attachment = talloc_zero (mem_ctx, EMapiAttachment);
-	g_assert (attachment != NULL);
+	g_return_val_if_fail (attachment != NULL, NULL);
 
 	attachment->properties.cValues = 0;
 	attachment->properties.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, 1);
@@ -7419,7 +7422,7 @@ e_mapi_attachment_new (TALLOC_CTX *mem_ctx)
 	attachment->embedded_object = NULL;
 	attachment->next = NULL;
 
-	g_assert (attachment->properties.lpProps != NULL);
+	g_return_val_if_fail (attachment->properties.lpProps != NULL, NULL);
 
 	return attachment;
 }
@@ -7532,7 +7535,7 @@ e_mapi_object_new (TALLOC_CTX *mem_ctx)
 	EMapiObject *object;
 
 	object = talloc_zero (mem_ctx, EMapiObject);
-	g_assert (object != NULL);
+	g_return_val_if_fail (object != NULL, NULL);
 
 	object->properties.cValues = 0;
 	object->properties.lpProps = talloc_zero_array (mem_ctx, struct mapi_SPropValue, 1);
@@ -7542,7 +7545,7 @@ e_mapi_object_new (TALLOC_CTX *mem_ctx)
 	object->attachments = NULL;
 	object->parent = NULL;
 
-	g_assert (object->properties.lpProps != NULL);
+	g_return_val_if_fail (object->properties.lpProps != NULL, NULL);
 
 	return object;
 }
