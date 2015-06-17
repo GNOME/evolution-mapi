@@ -198,6 +198,8 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 
 		source = e_mapi_utils_get_source_for_folder (configured, sfd->profile, e_mapi_folder_get_id (folder));
 		if (source) {
+			e_source_set_enabled (source, TRUE);
+
 			if (g_strcmp0 (e_source_get_display_name (source), e_mapi_folder_get_name (folder)) != 0)
 				e_source_set_display_name (source, e_mapi_folder_get_name (folder));
 
@@ -230,6 +232,7 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 				NULL,
 				NULL)) {
 				color_seed++;
+				e_source_set_enabled (source, TRUE);
 				e_server_side_source_set_writable (E_SERVER_SIDE_SOURCE (source), TRUE);
 				e_server_side_source_set_remote_deletable (E_SERVER_SIDE_SOURCE (source), TRUE);
 				e_source_registry_server_add_source (server, source);
