@@ -1,3 +1,14 @@
+evolution-mapi 3.16.4 2015-07-13
+--------------------------------
+
+Bug Fixes:
+	Bug 471791 - Move away from g_asserts to g_ret* (Milan Crha)
+
+Miscellaneous:
+	configure.ac: Do not override localedir variable (Milan Crha)
+	Use e_source_remove_sync() instead of e_source_registry_server_remove_source() (Milan Crha)
+	Make sure collection child sources are enabled when created (Milan Crha)
+
 evolution-mapi 3.16.3 2015-06-08
 --------------------------------
 
