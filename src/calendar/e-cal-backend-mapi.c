@@ -2976,7 +2976,7 @@ ecbm_operation_cb (OperationBase *op, gboolean cancelled, ECalBackend *backend)
 
 			if (freebusy)
 				e_data_cal_report_free_busy_data (op->cal, freebusy);
-			e_data_cal_respond_get_free_busy (op->cal, op->opid, error);
+			e_data_cal_respond_get_free_busy (op->cal, op->opid, error, freebusy);
 
 			g_slist_foreach (freebusy, (GFunc) g_free, NULL);
 			g_slist_free (freebusy);
