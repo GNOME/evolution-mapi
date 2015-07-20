@@ -1,3 +1,9 @@
+evolution-mapi 3.17.4 2015-07-20
+--------------------------------
+
+Bug Fixes:
+	Bug 692361 - e_cal_client_get_free_busy() broken (Milan Crha)
+
 evolution-mapi 3.17.3 2015-06-22
 --------------------------------
 
