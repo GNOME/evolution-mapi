@@ -6123,7 +6123,7 @@ get_folder_hierarchy_cb (EMapiConnection *conn,
 			name, klass, *fid, unread ? *unread : 0, total ? *total : 0, folder_size ? *folder_size : 0);
 
 		folder = e_mapi_folder_new (name, klass, gfh->folder_hier, *fid, pid ? *pid : gfh->folder_id,
-						   child ? *child : 0, unread ? *unread : 0, total ? *total : 0);
+						   child ? *child : 0, unread ? *unread : -1, total ? *total : -1);
 
 		folder->size = folder_size ? *folder_size : 0;
 
@@ -6553,7 +6553,7 @@ e_mapi_connection_get_pf_folders_list (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	folder = e_mapi_folder_new (_("All Public Folders"), IPF_NOTE, 0, mailbox_id, 0, 0, 0, 0);
+	folder = e_mapi_folder_new (_("All Public Folders"), IPF_NOTE, 0, mailbox_id, 0, 0, -1, -1);
 	folder->is_default = TRUE;
 	folder->default_type = olPublicFoldersAllPublicFolders;
 	*mapi_folders = g_slist_prepend (*mapi_folders, folder);
