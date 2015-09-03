@@ -39,6 +39,7 @@ struct _EMapiBackendPrivate {
 	GHashTable *folders;
 
 	gboolean need_update_folders;
+	gulong source_changed_handler_id;
 
 	GMutex credentials_lock;
 	ENamedParameters *credentials;
@@ -435,10 +436,6 @@ mapi_backend_constructed (GObject *object)
 	 *     of weird races with clients trying to create folders. */
 	e_server_side_source_set_remote_creatable (
 		E_SERVER_SIDE_SOURCE (source), TRUE);
-
-	g_signal_connect (
-		source, "changed",
-		G_CALLBACK (mapi_backend_source_changed_cb), backend);
 }
 
 static void
@@ -449,6 +446,11 @@ mapi_backend_dispose (GObject *object)
 	priv = E_MAPI_BACKEND_GET_PRIVATE (object);
 
 	g_hash_table_remove_all (priv->folders);
+
+	if (priv->source_changed_handler_id) {
+		g_signal_handler_disconnect (e_backend_get_source (E_BACKEND (object)), priv->source_changed_handler_id);
+		priv->source_changed_handler_id = 0;
+	}
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (e_mapi_backend_parent_class)->dispose (object);
@@ -483,6 +485,11 @@ mapi_backend_populate (ECollectionBackend *backend)
 	/* do not do anything, if account is disabled */
 	if (!e_source_get_enabled (source))
 		return;
+
+	if (!mapi_backend->priv->source_changed_handler_id)
+		mapi_backend->priv->source_changed_handler_id = g_signal_connect (
+			source, "changed",
+			G_CALLBACK (mapi_backend_source_changed_cb), backend);
 
 	/* We test authentication passwords by attempting to synchronize
 	 * the folder hierarchy.  Since we want to synchronize the folder
