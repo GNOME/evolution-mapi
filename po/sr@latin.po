@@ -1,15 +1,15 @@
 # Serbian translation of evolution-mapi
-# Courtesy of Prevod.org team (http://prevod.org/) -- 2009—2014.
+# Courtesy of Prevod.org team (http://prevod.org/) -- 2009—2015.
 # This file is distributed under the same license as the evolution-mapi package.
 # Milan Skočić <milan.skocic@gmail.com>, 2010.
-# Miroslav Nikolić <miroslavnikolic@rocketmail.com>, 2011—2014.
+# Miroslav Nikolić <miroslavnikolic@rocketmail.com>, 2011—2015.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product"
 "=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2014-10-15 16:01+0000\n"
-"PO-Revision-Date: 2014-10-24 21:44+0200\n"
+"POT-Creation-Date: 2015-12-29 06:17+0000\n"
+"PO-Revision-Date: 2015-12-29 10:08+0200\n"
 "Last-Translator: Miroslav Nikolić <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: Serbian <gnom@prevod.org>\n"
 "Language: sr\n"
@@ -21,7 +21,6 @@ msgstr ""
 "X-Project-Style: gnome\n"
 
 #: ../evolution-mapi.metainfo.xml.in.h:1
-#| msgid "Exchange MAPI server %s"
 msgid "Exchange MAPI"
 msgstr "MAPI razmena"
 
@@ -30,14 +29,14 @@ msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr ""
 "Za pristup serverima Majkrosoft razmene 2007/ Slobodne izmene kroz MAPI"
 
-#: ../src/addressbook/e-book-backend-mapi.c:735
+#: ../src/addressbook/e-book-backend-mapi.c:744
 msgid "Searching"
 msgstr "Pretražujem"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1735
-#: ../src/calendar/e-cal-backend-mapi.c:192
-#: ../src/calendar/e-cal-backend-mapi.c:491
-#: ../src/camel/camel-mapi-folder.c:1937 ../src/camel/camel-mapi-folder.c:2017
+#: ../src/addressbook/e-book-backend-mapi.c:1739
+#: ../src/calendar/e-cal-backend-mapi.c:189
+#: ../src/calendar/e-cal-backend-mapi.c:488
+#: ../src/camel/camel-mapi-folder.c:1935 ../src/camel/camel-mapi-folder.c:2015
 msgid "Unknown error"
 msgstr "Nepoznata greška"
 
@@ -50,8 +49,8 @@ msgid "The backend does not support bulk additions"
 msgstr "Pozadinac ne podržava grupno dodavanje"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:510
-#: ../src/calendar/e-cal-backend-mapi.c:1709
-#: ../src/calendar/e-cal-backend-mapi.c:2220
+#: ../src/calendar/e-cal-backend-mapi.c:1719
+#: ../src/calendar/e-cal-backend-mapi.c:2230
 msgid "Failed to create item on a server"
 msgstr "Nisam uspeo da stvorim stavku na serveru"
 
@@ -60,7 +59,7 @@ msgid "The backend does not support bulk modifications"
 msgstr "Pozadinac ne podržava grupno uređivanje"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:672
-#: ../src/calendar/e-cal-backend-mapi.c:1922
+#: ../src/calendar/e-cal-backend-mapi.c:1932
 msgid "Failed to modify item on a server"
 msgstr "Nisam uspeo da izmenim stavku na serveru"
 
@@ -116,41 +115,41 @@ msgid "Failed to fetch GAL entries"
 msgstr "Nisam uspeo da preuzmem GAL unose"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:416
+#: ../src/calendar/e-cal-backend-mapi.c:413
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Učitavam stavke u fasciklu %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:783
+#: ../src/calendar/e-cal-backend-mapi.c:780
 #, c-format
 msgid "Failed to open folder: %s"
 msgstr "Nisam uspeo da otvorim fasciklu: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:791
+#: ../src/calendar/e-cal-backend-mapi.c:788
 #, c-format
 msgid "Failed to get folder properties: %s"
 msgstr "Nisam uspeo da dobavim svojstva fascikle: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:832
+#: ../src/calendar/e-cal-backend-mapi.c:829
 #, c-format
 msgid "Failed to list objects: %s"
 msgstr "Nisam uspeo da ispišem objekte: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:858
+#: ../src/calendar/e-cal-backend-mapi.c:855
 #, c-format
 msgid "Failed to transfer objects: %s"
 msgstr "Nisam uspeo da prebacim objekte: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:877
+#: ../src/calendar/e-cal-backend-mapi.c:874
 #, c-format
 msgid "Failed to close folder: %s"
 msgstr "Nisam uspeo da zatvorim fasciklu: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1375
+#: ../src/calendar/e-cal-backend-mapi.c:1383
 msgid "Could not create cache file"
 msgstr "Ne mogu da napravim datoteku za ostavu"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1830
+#: ../src/calendar/e-cal-backend-mapi.c:1840
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -158,89 +157,89 @@ msgstr ""
 "Promena jednog zakazanog sastanka, koji se ponavlja, još uvek ne postoji. "
 "Promene neće biti zapisane na serveru."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2035
+#: ../src/calendar/e-cal-backend-mapi.c:2045
 msgid "Cannot remove items from a server"
 msgstr "Ne mogu da uklonim stavke sa servera"
 
-#: ../src/calendar/e-cal-backend-mapi.c:2471
+#: ../src/calendar/e-cal-backend-mapi.c:2476
 msgid "Failed to get Free/Busy data"
 msgstr "Nisam uspeo da nabavim podatke slobodno/zauzeto"
 
-#: ../src/camel/camel-mapi-folder.c:805
+#: ../src/camel/camel-mapi-folder.c:803
 #, c-format
 msgid "Refreshing folder '%s'"
 msgstr "Osvežavam fasciklu „%s“"
 
-#: ../src/camel/camel-mapi-folder.c:873
+#: ../src/camel/camel-mapi-folder.c:871
 #, c-format
 msgid "Downloading messages in folder '%s'"
 msgstr "Preuzimam poruke u fasciklu „%s“"
 
-#: ../src/camel/camel-mapi-folder.c:961 ../src/camel/camel-mapi-folder.c:1569
+#: ../src/camel/camel-mapi-folder.c:959 ../src/camel/camel-mapi-folder.c:1567
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Ova poruka nije dostupna u režimu van mreže."
 
-#: ../src/camel/camel-mapi-folder.c:971 ../src/camel/camel-mapi-folder.c:989
+#: ../src/camel/camel-mapi-folder.c:969 ../src/camel/camel-mapi-folder.c:987
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Nisam uspeo da preuzmem stavke: %s"
 
-#: ../src/camel/camel-mapi-folder.c:976 ../src/camel/camel-mapi-folder.c:994
+#: ../src/camel/camel-mapi-folder.c:974 ../src/camel/camel-mapi-folder.c:992
 msgid "Fetching items failed"
 msgstr "Ne mogu da preuzmem stavke"
 
-#: ../src/camel/camel-mapi-folder.c:1248
+#: ../src/camel/camel-mapi-folder.c:1246
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Ne mogu da dodam poruku u fasciklu „%s“"
 
-#: ../src/camel/camel-mapi-folder.c:1257 ../src/camel/camel-mapi-folder.c:1287
+#: ../src/camel/camel-mapi-folder.c:1255 ../src/camel/camel-mapi-folder.c:1285
 #, c-format
 msgid "Offline."
 msgstr "Van mreže."
 
-#: ../src/camel/camel-mapi-folder.c:1370
+#: ../src/camel/camel-mapi-folder.c:1368
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "Nisam uspeo da ispraznim korpu: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1376
+#: ../src/camel/camel-mapi-folder.c:1374
 msgid "Failed to empty Trash"
 msgstr "Nisam uspeo da ispraznim korpu"
 
-#: ../src/camel/camel-mapi-folder.c:1554
+#: ../src/camel/camel-mapi-folder.c:1552
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Ne mogu da dobavim poruku %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1555
+#: ../src/camel/camel-mapi-folder.c:1553
 msgid "No such message"
 msgstr "Nema takve poruke"
 
-#: ../src/camel/camel-mapi-folder.c:1580 ../src/camel/camel-mapi-folder.c:1612
+#: ../src/camel/camel-mapi-folder.c:1578 ../src/camel/camel-mapi-folder.c:1610
 #, c-format
 msgid "Could not get message: %s"
 msgstr "Ne mogu da dobavim poruku: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1586 ../src/camel/camel-mapi-folder.c:1619
+#: ../src/camel/camel-mapi-folder.c:1584 ../src/camel/camel-mapi-folder.c:1617
 #, c-format
 msgid "Could not get message"
 msgstr "Ne mogu da dobavim poruku"
 
-#: ../src/camel/camel-mapi-folder.c:1994
+#: ../src/camel/camel-mapi-folder.c:1992
 msgid "Receive quota"
 msgstr "Primam normu"
 
-#: ../src/camel/camel-mapi-folder.c:2000
+#: ../src/camel/camel-mapi-folder.c:1998
 msgid "Send quota"
 msgstr "Šaljem normu"
 
-#: ../src/camel/camel-mapi-folder.c:2022
+#: ../src/camel/camel-mapi-folder.c:2020
 msgid "No quota information available"
 msgstr "Nisu dostupni podaci o normi"
 
-#: ../src/camel/camel-mapi-folder.c:2124
+#: ../src/camel/camel-mapi-folder.c:2122
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Ne mogu da učitam pregled za %s"
@@ -275,7 +274,7 @@ msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "_Traži đubre samo u fascikli Sanduče"
 
 #: ../src/camel/camel-mapi-provider.c:62
-#: ../src/configuration/e-mapi-config-utils.c:1644
+#: ../src/configuration/e-mapi-config-utils.c:1604
 msgid "Lis_ten for server notifications"
 msgstr "_Osluškuj za obaveštenjima servera"
 
@@ -314,7 +313,7 @@ msgstr "Nisam pronašao javne fascikle"
 msgid "No folder found"
 msgstr "Nisam pronašao fasciklu"
 
-#: ../src/camel/camel-mapi-store.c:1201 ../src/camel/camel-mapi-store.c:2168
+#: ../src/camel/camel-mapi-store.c:1201 ../src/camel/camel-mapi-store.c:2172
 #, c-format
 msgid "Connecting to '%s'"
 msgstr "Povezujem se sa „%s“"
@@ -410,8 +409,7 @@ msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr "Ne mogu da poništim pretplatu MAPI fascikli u režimu van mreže"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:2119
-#: ../src/camel/camel-mapi-transport.c:195
+#: ../src/camel/camel-mapi-store.c:2119 ../src/camel/camel-mapi-transport.c:196
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "MAPI server za razmenu %s"
@@ -419,23 +417,22 @@ msgstr "MAPI server za razmenu %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:2123
-#: ../src/camel/camel-mapi-transport.c:198
+#: ../src/camel/camel-mapi-store.c:2123 ../src/camel/camel-mapi-transport.c:199
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "MAPI servis razmene za %s na %s"
 
-#: ../src/camel/camel-mapi-store.c:2150
+#: ../src/camel/camel-mapi-store.c:2154
 msgid "Cannot connect MAPI store in offline mode"
 msgstr "Ne mogu da povežem MAPI radnju u režimu van mreže"
 
-#: ../src/camel/camel-mapi-store.c:2203
+#: ../src/camel/camel-mapi-store.c:2207
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received or sent."
 msgstr ""
 "Sanduče „%s“ je puno, nijedna nova poruka neće biti ni primljena ni poslata."
 
-#: ../src/camel/camel-mapi-store.c:2205
+#: ../src/camel/camel-mapi-store.c:2209
 #, c-format
 msgid ""
 "Mailbox '%s' is near its size limit, message send will be disabled soon."
@@ -443,37 +440,42 @@ msgstr ""
 "Sanduče „%s“ se približava ograničenju svoje veličine, slanje poruka će uskoro "
 "biti isključeno."
 
-#: ../src/camel/camel-mapi-store.c:2209
+#: ../src/camel/camel-mapi-store.c:2213
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received."
 msgstr "Sanduče „%s“ je puno, nijedna nova poruka neće biti primljena."
 
-#: ../src/camel/camel-mapi-store.c:2211
+#: ../src/camel/camel-mapi-store.c:2215
 #, c-format
 msgid "Mailbox '%s' is near its size limit."
 msgstr "Sanduče „%s“ je blizu ograničenja svoje veličine."
 
-#: ../src/camel/camel-mapi-store.c:2631
+#: ../src/camel/camel-mapi-store.c:2636
 msgid "Authentication password not available"
 msgstr "Lozinka potvrde identiteta nije dostupna"
 
-#: ../src/camel/camel-mapi-transport.c:146
-#: ../src/camel/camel-mapi-transport.c:168
+#: ../src/camel/camel-mapi-transport.c:147
+#: ../src/camel/camel-mapi-transport.c:169
 #, c-format
 msgid "Could not send message."
 msgstr "Ne mogu da pošaljem poruku."
 
-#: ../src/camel/camel-mapi-transport.c:163
+#: ../src/camel/camel-mapi-transport.c:164
 #, c-format
 msgid "Could not send message: %s"
 msgstr "Ne mogu da pošaljem poruku: %s"
 
-#: ../src/collection/e-mapi-backend.c:278
+#: ../src/collection/e-mapi-backend.c:78
+#| msgid "Cannot connect MAPI store in offline mode"
+msgid "Cannot connect, no credentials provided"
+msgstr "Ne mogu da se povežem, nisu obezbeđena punomoćstva"
+
+#: ../src/collection/e-mapi-backend.c:343
 msgid "Global Address List"
 msgstr "Opšti spisak adresa"
 
-#: ../src/collection/e-mapi-backend.c:651
-#: ../src/collection/e-mapi-backend.c:737
+#: ../src/collection/e-mapi-backend.c:698
+#: ../src/collection/e-mapi-backend.c:795
 #, c-format
 msgid "Data source '%s' does not represent a MAPI folder"
 msgstr "Izvor podataka „%s“ ne predstavlja MAPI fasciklu"
@@ -502,20 +504,20 @@ msgstr ""
 "Ima nekoliko korisnika sa sličnim korisničkim imenom na serveru.\n"
 "Izaberite ono koje želite da koristite sa donjeg spiska."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:395
+#: ../src/configuration/e-mail-config-mapi-backend.c:363
 msgid "Authentication finished successfully."
 msgstr "Prijava je uspela."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:397
-#: ../src/configuration/e-mail-config-mapi-backend.c:517
+#: ../src/configuration/e-mail-config-mapi-backend.c:365
+#: ../src/configuration/e-mail-config-mapi-backend.c:485
 msgid "Authentication failed."
 msgstr "Prijava nije uspela."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:458
+#: ../src/configuration/e-mail-config-mapi-backend.c:428
 msgid "Cannot authenticate MAPI accounts in offline mode"
 msgstr "Ne mogu da potvrdim identitet MAPI naloga u režimu van mreže."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:487
+#: ../src/configuration/e-mail-config-mapi-backend.c:457
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -523,7 +525,7 @@ msgstr ""
 "Server, korisničko ime i naziv domena ne mogu biti prazni. Popunite ih "
 "ispravnim vrednostima."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:490
+#: ../src/configuration/e-mail-config-mapi-backend.c:460
 msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
@@ -531,39 +533,39 @@ msgstr ""
 "Naziv područja ne može biti prazno kada je izabran kerberos. Popunite ih "
 "ispravnim vrednostima."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:511
+#: ../src/configuration/e-mail-config-mapi-backend.c:479
 msgid "Connecting to the server, please wait..."
 msgstr "Povezujem se sa serverom, molim sačekajte malko..."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:716
+#: ../src/configuration/e-mail-config-mapi-backend.c:681
 msgid "Configuration"
 msgstr "Podešavanje"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:725
+#: ../src/configuration/e-mail-config-mapi-backend.c:690
 msgid "_Server:"
 msgstr "_Server:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:742
+#: ../src/configuration/e-mail-config-mapi-backend.c:707
 msgid "User_name:"
 msgstr "Korisničko _ime:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:767
+#: ../src/configuration/e-mail-config-mapi-backend.c:732
 msgid "_Domain name:"
 msgstr "_Ime domena:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:780
+#: ../src/configuration/e-mail-config-mapi-backend.c:745
 msgid "_Authenticate"
 msgstr "Prij_avi me"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:788
+#: ../src/configuration/e-mail-config-mapi-backend.c:753
 msgid "_Use secure connection"
 msgstr "Koristi _bezbedne veze"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:803
+#: ../src/configuration/e-mail-config-mapi-backend.c:768
 msgid "_Kerberos authentication"
 msgstr "_Kerberos potvrda identiteta"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:815
+#: ../src/configuration/e-mail-config-mapi-backend.c:780
 msgid "_Realm name:"
 msgstr "Ime _područja:"
 
@@ -580,98 +582,98 @@ msgstr "Prikaži veličinu svih fascikli za razmenu"
 msgid "Folder _Size"
 msgstr "_Veličina fascikle"
 
-#: ../src/configuration/e-mapi-config-utils.c:457
+#: ../src/configuration/e-mapi-config-utils.c:417
 msgid "Folder"
 msgstr "Fascikla"
 
-#: ../src/configuration/e-mapi-config-utils.c:462
+#: ../src/configuration/e-mapi-config-utils.c:422
 msgid "Size"
 msgstr "Veličina"
 
-#: ../src/configuration/e-mapi-config-utils.c:485
-#: ../src/configuration/e-mapi-config-utils.c:489
+#: ../src/configuration/e-mapi-config-utils.c:445
+#: ../src/configuration/e-mapi-config-utils.c:449
 msgid "Unable to retrieve folder size information"
 msgstr "Ne mogu da pronađem podatke o veličini fascikle"
 
-#: ../src/configuration/e-mapi-config-utils.c:556
+#: ../src/configuration/e-mapi-config-utils.c:516
 msgid "Folder Size"
 msgstr "Veličina fascikle"
 
-#: ../src/configuration/e-mapi-config-utils.c:570
+#: ../src/configuration/e-mapi-config-utils.c:530
 msgid "Fetching folder list…"
 msgstr "Preuzimam spisak fascikli…"
 
-#: ../src/configuration/e-mapi-config-utils.c:744
+#: ../src/configuration/e-mapi-config-utils.c:704
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr ""
 "Ne mogu da uredim ovlašćenja za fasciklu „%s“, izaberite drugu fasciklu."
 
-#: ../src/configuration/e-mapi-config-utils.c:807
+#: ../src/configuration/e-mapi-config-utils.c:767
 msgid "Folder size..."
 msgstr "Veličina fascikle..."
 
-#: ../src/configuration/e-mapi-config-utils.c:814
+#: ../src/configuration/e-mapi-config-utils.c:774
 msgid "Subscribe to folder of other user..."
 msgstr "Prijavi se na fasciklu drugog korisnika..."
 
-#: ../src/configuration/e-mapi-config-utils.c:823
-#: ../src/configuration/e-mapi-config-utils.c:1101
-#: ../src/configuration/e-mapi-config-utils.c:1131
-#: ../src/configuration/e-mapi-config-utils.c:1161
-#: ../src/configuration/e-mapi-config-utils.c:1191
+#: ../src/configuration/e-mapi-config-utils.c:783
+#: ../src/configuration/e-mapi-config-utils.c:1061
+#: ../src/configuration/e-mapi-config-utils.c:1091
+#: ../src/configuration/e-mapi-config-utils.c:1121
+#: ../src/configuration/e-mapi-config-utils.c:1151
 msgid "Permissions..."
 msgstr "Ovlašćenja..."
 
-#: ../src/configuration/e-mapi-config-utils.c:825
+#: ../src/configuration/e-mapi-config-utils.c:785
 msgid "Edit MAPI folder permissions"
 msgstr "Uredi ovlašćenja MAPI fascikle"
 
-#: ../src/configuration/e-mapi-config-utils.c:1103
+#: ../src/configuration/e-mapi-config-utils.c:1063
 msgid "Edit MAPI calendar permissions"
 msgstr "Uredi ovlašćenja MAPI kalendara"
 
-#: ../src/configuration/e-mapi-config-utils.c:1133
+#: ../src/configuration/e-mapi-config-utils.c:1093
 msgid "Edit MAPI tasks permissions"
 msgstr "Uredi ovlašćenja MAPI zadataka"
 
-#: ../src/configuration/e-mapi-config-utils.c:1163
+#: ../src/configuration/e-mapi-config-utils.c:1123
 msgid "Edit MAPI memos permissions"
 msgstr "Uredi ovlašćenja MAPI zadataka"
 
-#: ../src/configuration/e-mapi-config-utils.c:1193
+#: ../src/configuration/e-mapi-config-utils.c:1153
 msgid "Edit MAPI contacts permissions"
 msgstr "Uredi ovlašćenja MAPI kontakata"
 
-#: ../src/configuration/e-mapi-config-utils.c:1366
+#: ../src/configuration/e-mapi-config-utils.c:1326
 msgid "Personal Folders"
 msgstr "Lične fascikle"
 
-#: ../src/configuration/e-mapi-config-utils.c:1597
+#: ../src/configuration/e-mapi-config-utils.c:1557
 msgid "Searching remote MAPI folder structure, please wait..."
 msgstr "Tražim strukturu udaljene MAPI fascikle, sačekajte..."
 
-#: ../src/configuration/e-mapi-config-utils.c:1665
+#: ../src/configuration/e-mapi-config-utils.c:1625
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Ne mogu da napravim MAPI kalendar u režimu van mreže"
 
-#: ../src/configuration/e-mapi-config-utils.c:1668
+#: ../src/configuration/e-mapi-config-utils.c:1628
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "Ne mogu da napravim MAPI zadatak u režimu van mreže"
 
-#: ../src/configuration/e-mapi-config-utils.c:1671
+#: ../src/configuration/e-mapi-config-utils.c:1631
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "Ne mogu da napravim MAPI belešku u režimu van mreže"
 
-#: ../src/configuration/e-mapi-config-utils.c:1674
+#: ../src/configuration/e-mapi-config-utils.c:1634
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "Ne mogu da napravim MAPI adresar u režimu van mreže"
 
-#: ../src/configuration/e-mapi-config-utils.c:1679
+#: ../src/configuration/e-mapi-config-utils.c:1639
 msgid "Cannot create MAPI source in offline mode"
 msgstr "Ne mogu da napravim MAPI izvor u režimu van mreže"
 
-#: ../src/configuration/e-mapi-config-utils.c:1699
+#: ../src/configuration/e-mapi-config-utils.c:1659
 msgid "_Location:"
 msgstr "_Mesto:"
 
@@ -1121,12 +1123,12 @@ msgid "Folder of user '%s' not found"
 msgstr "Nisam pronašao fasciklu korisnika „%s“"
 
 #. Translators: %s is replaced with an email address which was found ambiguous on a remote server
-#: ../src/libexchangemapi/e-mapi-connection.c:3856
+#: ../src/libexchangemapi/e-mapi-connection.c:3863
 #, c-format
 msgid "Recipient '%s' is ambiguous"
 msgstr "Primalac „%s“ je nejasan"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:4948
+#: ../src/libexchangemapi/e-mapi-connection.c:4955
 #, c-format
 msgid ""
 "Search result exceeded allowed size limit. Use more specific search term, "
@@ -1135,16 +1137,16 @@ msgstr ""
 "Rezultat pretrage je premašio dopušteno ograničenje veličine. Koristite "
 "određenije izraze pretrage"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6549
+#: ../src/libexchangemapi/e-mapi-connection.c:6556
 msgid "All Public Folders"
 msgstr "Sve javne fascikle"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6816
+#: ../src/libexchangemapi/e-mapi-connection.c:6823
 #, c-format
 msgid "User name '%s' is ambiguous"
 msgstr "Korisničko ime „%s“ nije jasno"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6819
+#: ../src/libexchangemapi/e-mapi-connection.c:6826
 #, c-format
 msgid "User name '%s' not found"
 msgstr "Nisam pronašao korisničko ime „%s“"
