@@ -732,7 +732,7 @@ mapi_get_folder_info_offline (CamelStore *store,
 	CamelSettings *settings;
 	CamelMapiSettings *mapi_settings;
 	CamelFolderInfo *fi;
-	ESourceRegistry *registry = NULL;
+	CamelSession *session = NULL;
 	GList *my_sources = NULL;
 	GPtrArray *folders;
 	GPtrArray *array;
@@ -755,11 +755,13 @@ mapi_get_folder_info_offline (CamelStore *store,
 	folders = g_ptr_array_new ();
 
 	if (subscription_list) {
-		GError *local_error = NULL;
+		session = camel_service_ref_session (CAMEL_SERVICE (store));
+		if (session) {
+			ESourceRegistry *registry;
+			GList *all_sources;
 
-		registry = e_source_registry_new_sync (cancellable, &local_error);
-		if (registry) {
-			GList *all_sources = e_source_registry_list_sources (registry, NULL);
+			registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
+			all_sources = e_source_registry_list_sources (registry, NULL);
 
 			my_sources = e_mapi_utils_filter_sources_for_profile (all_sources, profile);
 
@@ -872,8 +874,7 @@ mapi_get_folder_info_offline (CamelStore *store,
 			_("No public folder found") : _("No folder found"));
 
 	g_list_free_full (my_sources, g_object_unref);
-	if (registry)
-		g_object_unref (registry);
+	g_clear_object (&session);
 
 	g_free (profile);
 
