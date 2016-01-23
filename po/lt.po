@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: evolution.HEAD\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2015-03-15 17:38+0000\n"
-"PO-Revision-Date: 2015-03-15 20:51+0200\n"
+"POT-Creation-Date: 2016-01-22 10:31+0000\n"
+"PO-Revision-Date: 2016-01-08 12:54+0200\n"
 "Last-Translator: Aurimas Černius <aurisc4@gmail.com>\n"
 "Language-Team: Lithuanian <gnome-lt@lists.akl.lt>\n"
 "Language: lt\n"
@@ -19,10 +19,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n"
 "%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Gtranslator 2.91.6\n"
+"X-Generator: Poedit 1.8.6\n"
 
 #: ../evolution-mapi.metainfo.xml.in.h:1
-#| msgid "Exchange MAPI server %s"
 msgid "Exchange MAPI"
 msgstr "Exchange MAPI"
 
@@ -256,7 +255,7 @@ msgstr "_Ieškoti naujų laiškų visuose aplankuose"
 
 #: ../src/camel/camel-mapi-provider.c:51
 msgid "Options"
-msgstr "Parinktys"
+msgstr "Parametrai"
 
 #: ../src/camel/camel-mapi-provider.c:53
 msgid "Automatically synchroni_ze account locally"
@@ -290,8 +289,8 @@ msgstr "Slaptažodis"
 msgid ""
 "This option will connect to the OpenChange server using a plaintext password."
 msgstr ""
-"Ši parinktis leidžia prisijungti prie OpenChange serverio naudojant grynojo "
-"teksto slaptažodį."
+"Šis parametras leidžia prisijungti prie OpenChange serverio naudojant "
+"grynojo teksto slaptažodį."
 
 #: ../src/camel/camel-mapi-sasl-krb.c:28
 msgid "Kerberos"
@@ -299,121 +298,120 @@ msgstr "Kerberos"
 
 #: ../src/camel/camel-mapi-sasl-krb.c:30
 msgid "This option will connect to the server using kerberos key."
-msgstr "Ši parinktis prisijungs prie serverio naudojant kerberos raktą."
+msgstr "Šis parametras prisijungs prie serverio naudojant kerberos raktą."
 
 #: ../src/camel/camel-mapi-store.c:134 ../src/camel/camel-mapi-store.c:176
 msgid "Cannot find folder in a local cache"
 msgstr "Nepavyko rasti aplanko vietiniam podėliui"
 
-#: ../src/camel/camel-mapi-store.c:492 ../src/camel/camel-mapi-store.c:1179
+#: ../src/camel/camel-mapi-store.c:492 ../src/camel/camel-mapi-store.c:1180
 msgid "Folder list is not available in offline mode"
 msgstr "Aplankų sąrašas neprieinamas atsijungimo veiksenoje."
 
-#: ../src/camel/camel-mapi-store.c:872
+#: ../src/camel/camel-mapi-store.c:874
 msgid "No public folder found"
 msgstr "Nerasta viešųjų aplankų"
 
-#: ../src/camel/camel-mapi-store.c:872
+#: ../src/camel/camel-mapi-store.c:874
 msgid "No folder found"
 msgstr "Nerastas aplankas"
 
-#: ../src/camel/camel-mapi-store.c:1201 ../src/camel/camel-mapi-store.c:2168
+#: ../src/camel/camel-mapi-store.c:1202 ../src/camel/camel-mapi-store.c:2173
 #, c-format
 msgid "Connecting to '%s'"
 msgstr "Jungiamasi prie „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1260
+#: ../src/camel/camel-mapi-store.c:1261
 msgid "Cannot create MAPI folders in offline mode"
 msgstr "Nepavyko sukurti MAPI aplankų atsijungimo veiksenoje"
 
-#: ../src/camel/camel-mapi-store.c:1267
+#: ../src/camel/camel-mapi-store.c:1268
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "Nepavyko sukurti naujo aplanko „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1276
+#: ../src/camel/camel-mapi-store.c:1277
 #, c-format
 msgid "Authentication failed"
 msgstr "Nepavyko nustatyti tapatybės"
 
-#: ../src/camel/camel-mapi-store.c:1286
+#: ../src/camel/camel-mapi-store.c:1287
 msgid "MAPI folders can be created only within mailbox of the logged user"
 msgstr ""
 "MAPI aplankai gali būti sukurti tik prisijungusio naudotojo pašto dėžėje"
 
-#: ../src/camel/camel-mapi-store.c:1299 ../src/camel/camel-mapi-store.c:1412
+#: ../src/camel/camel-mapi-store.c:1300 ../src/camel/camel-mapi-store.c:1413
 #, c-format
 msgid "Cannot find folder '%s'"
 msgstr "Nepavyko rasti aplanko „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1354
+#: ../src/camel/camel-mapi-store.c:1355
 #, c-format
 msgid "Cannot create folder '%s': %s"
 msgstr "Nepavyko sukurti aplanko „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1360
+#: ../src/camel/camel-mapi-store.c:1361
 #, c-format
 msgid "Cannot create folder '%s'"
 msgstr "Nepavyko sukurti aplanko „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1390 ../src/camel/camel-mapi-store.c:1402
+#: ../src/camel/camel-mapi-store.c:1391 ../src/camel/camel-mapi-store.c:1403
 msgid "Cannot delete MAPI folders in offline mode"
 msgstr "Nepavyko ištrinti MAPI aplankų atsijungimo veiksenoje"
 
-#: ../src/camel/camel-mapi-store.c:1458
+#: ../src/camel/camel-mapi-store.c:1459
 #, c-format
 msgid "Cannot remove folder '%s': %s"
 msgstr "Nepavyko pašalinti aplanko „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1466
+#: ../src/camel/camel-mapi-store.c:1467
 #, c-format
 msgid "Cannot remove folder '%s'"
 msgstr "Nepavyko pašalinti aplanko „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1496 ../src/camel/camel-mapi-store.c:1511
+#: ../src/camel/camel-mapi-store.c:1497 ../src/camel/camel-mapi-store.c:1512
 msgid "Cannot rename MAPI folders in offline mode"
 msgstr "Nepavyko pervadinti MAPI aplankų atsijungimo veiksenoje"
 
-#: ../src/camel/camel-mapi-store.c:1522
+#: ../src/camel/camel-mapi-store.c:1523
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
 msgstr "Nepavyko pervadinti MAPI aplanko „%s“. Tokio aplanko nėra"
 
-#: ../src/camel/camel-mapi-store.c:1533
+#: ../src/camel/camel-mapi-store.c:1534
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'"
 msgstr "Nepavyko pervadinti MAPI numatytojo aplanko „%s“ į „%s“"
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1559 ../src/camel/camel-mapi-store.c:1602
-#: ../src/camel/camel-mapi-store.c:1682
+#: ../src/camel/camel-mapi-store.c:1560 ../src/camel/camel-mapi-store.c:1603
+#: ../src/camel/camel-mapi-store.c:1683
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "Nepavyko pervadinti MAPI aplanko „%s“ į „%s“"
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
 #. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1594 ../src/camel/camel-mapi-store.c:1675
+#: ../src/camel/camel-mapi-store.c:1595 ../src/camel/camel-mapi-store.c:1676
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "Nepavyko pervadinti MAPI aplanko „%s“ į „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1772
+#: ../src/camel/camel-mapi-store.c:1773
 msgid "Cannot subscribe MAPI folders in offline mode"
 msgstr "Nepavyko užsisakyti MAPI aplankų atsijungimo veiksenoje"
 
-#: ../src/camel/camel-mapi-store.c:1789
+#: ../src/camel/camel-mapi-store.c:1790
 #, c-format
 msgid "Folder '%s' not found"
 msgstr "Nerastas aplankas „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1907
+#: ../src/camel/camel-mapi-store.c:1908
 msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr "Nepavyko atsisakyti MAPI aplankų atsijungimo veiksenoje"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:2119
-#: ../src/camel/camel-mapi-transport.c:195
+#: ../src/camel/camel-mapi-store.c:2120 ../src/camel/camel-mapi-transport.c:196
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI serveris %s"
@@ -421,22 +419,21 @@ msgstr "Exchange MAPI serveris %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:2123
-#: ../src/camel/camel-mapi-transport.c:198
+#: ../src/camel/camel-mapi-store.c:2124 ../src/camel/camel-mapi-transport.c:199
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Exchange MAPI tarnyba naudotojui %s serveryje %s"
 
-#: ../src/camel/camel-mapi-store.c:2150
+#: ../src/camel/camel-mapi-store.c:2155
 msgid "Cannot connect MAPI store in offline mode"
 msgstr "Nepavyko prisijungti prie MAPI saugyklos atsijungimo veiksenoje"
 
-#: ../src/camel/camel-mapi-store.c:2203
+#: ../src/camel/camel-mapi-store.c:2208
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received or sent."
 msgstr "Pašto dėžė „%s“ yra pilna, nauji laiškai nebus gaunami arba siunčiami."
 
-#: ../src/camel/camel-mapi-store.c:2205
+#: ../src/camel/camel-mapi-store.c:2210
 #, c-format
 msgid ""
 "Mailbox '%s' is near its size limit, message send will be disabled soon."
@@ -444,42 +441,41 @@ msgstr ""
 "Pašto dėžė „%s“ artėja prie dydžio limito, laiškų siuntimas tuoj bus "
 "išjungtas."
 
-#: ../src/camel/camel-mapi-store.c:2209
+#: ../src/camel/camel-mapi-store.c:2214
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received."
 msgstr "Pašto dėžė „%s“ yra pilna, nauji laiškai nebus gaunami."
 
-#: ../src/camel/camel-mapi-store.c:2211
+#: ../src/camel/camel-mapi-store.c:2216
 #, c-format
 msgid "Mailbox '%s' is near its size limit."
 msgstr "Pašto dėžė „%s“ artėja prie dydžio ribos."
 
-#: ../src/camel/camel-mapi-store.c:2631
+#: ../src/camel/camel-mapi-store.c:2637
 msgid "Authentication password not available"
 msgstr "Neprieinamas tapatybės patvirtinimo slaptažodis"
 
-#: ../src/camel/camel-mapi-transport.c:146
-#: ../src/camel/camel-mapi-transport.c:168
+#: ../src/camel/camel-mapi-transport.c:147
+#: ../src/camel/camel-mapi-transport.c:169
 #, c-format
 msgid "Could not send message."
 msgstr "Nepavyko išsiųsti laiško."
 
-#: ../src/camel/camel-mapi-transport.c:163
+#: ../src/camel/camel-mapi-transport.c:164
 #, c-format
 msgid "Could not send message: %s"
 msgstr "Nepavyko išsiųsti laiško: %s"
 
-#: ../src/collection/e-mapi-backend.c:77
-#| msgid "Cannot connect MAPI store in offline mode"
+#: ../src/collection/e-mapi-backend.c:78
 msgid "Cannot connect, no credentials provided"
 msgstr "Nepavyko prisijungti, nepateikti įgaliojimai"
 
-#: ../src/collection/e-mapi-backend.c:339
+#: ../src/collection/e-mapi-backend.c:343
 msgid "Global Address List"
 msgstr "Visuotinis adresų sąrašas / Aktyvusis katalogas"
 
-#: ../src/collection/e-mapi-backend.c:688
-#: ../src/collection/e-mapi-backend.c:785
+#: ../src/collection/e-mapi-backend.c:698
+#: ../src/collection/e-mapi-backend.c:795
 #, c-format
 msgid "Data source '%s' does not represent a MAPI folder"
 msgstr "Duomenų šaltinis „%s“ nereprezentuoja MAPI aplanko"
@@ -1126,12 +1122,12 @@ msgid "Folder of user '%s' not found"
 msgstr "Naudotojo „%s“ aplankas nerastas"
 
 #. Translators: %s is replaced with an email address which was found ambiguous on a remote server
-#: ../src/libexchangemapi/e-mapi-connection.c:3856
+#: ../src/libexchangemapi/e-mapi-connection.c:3863
 #, c-format
 msgid "Recipient '%s' is ambiguous"
 msgstr "Gavėjas „%s“ yra nevienareikšmis"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:4948
+#: ../src/libexchangemapi/e-mapi-connection.c:4955
 #, c-format
 msgid ""
 "Search result exceeded allowed size limit. Use more specific search term, "
@@ -1140,16 +1136,16 @@ msgstr ""
 "Paieškos rezultatai viršijus leistiną dydžio ribą. Naudokite detalesnę "
 "paiešką"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6549
+#: ../src/libexchangemapi/e-mapi-connection.c:6556
 msgid "All Public Folders"
 msgstr "Visi viešieji aplankai"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6816
+#: ../src/libexchangemapi/e-mapi-connection.c:6823
 #, c-format
 msgid "User name '%s' is ambiguous"
 msgstr "Naudotojo vardas „%s“ yra nevienareikšmis"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6819
+#: ../src/libexchangemapi/e-mapi-connection.c:6826
 #, c-format
 msgid "User name '%s' not found"
 msgstr "Naudotojo vardas „%s“ nerastas"
