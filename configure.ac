@@ -7,6 +7,7 @@ m4_define([ema_version], [3.19.90])
 AC_PREREQ(2.58)
 AC_INIT([evolution-mapi], [ema_version], [http://bugzilla.gnome.org/browse.cgi?product=evolution-mapi])
 AM_INIT_AUTOMAKE([gnu 1.9 dist-xz no-dist-gzip -Wno-portability])
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR(README)
 AC_CONFIG_HEADERS(config.h)
 
