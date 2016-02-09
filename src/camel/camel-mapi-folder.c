@@ -173,27 +173,24 @@ mapi_set_message_id (CamelMapiMessageInfo *mapi_mi, const gchar *message_id)
 static void
 mapi_set_message_references (CamelMapiMessageInfo *mapi_mi, const gchar *references, const gchar *in_reply_to)
 {
-	struct _camel_header_references *refs, *irt, *scan;
+	GSList *refs, *irt, *scan;
 	guint8 *digest;
 	gint count;
 	gsize length;
 	CamelMessageInfoBase *mi = &mapi_mi->info;
 
 	refs = camel_header_references_decode (references);
-	irt = camel_header_references_inreplyto_decode (in_reply_to);
+	irt = camel_header_references_decode (in_reply_to);
 	if (refs || irt) {
 		if (irt) {
 			/* The References field is populated from the "References" and/or "In-Reply-To"
 			   headers. If both headers exist, take the first thing in the In-Reply-To header
 			   that looks like a Message-ID, and append it to the References header. */
 
-			if (refs)
-				irt->next = refs;
-
-			refs = irt;
+			refs = g_slist_concat (irt, refs);
 		}
 
-		count = camel_header_references_list_size(&refs);
+		count = g_slist_length (refs);
 		mi->references = g_malloc(sizeof(*mi->references) + ((count-1) * sizeof(mi->references->references[0])));
 
 		length = g_checksum_type_get_length (G_CHECKSUM_MD5);
@@ -205,16 +202,16 @@ mapi_set_message_references (CamelMapiMessageInfo *mapi_mi, const gchar *referen
 			GChecksum *checksum;
 
 			checksum = g_checksum_new (G_CHECKSUM_MD5);
-			g_checksum_update (checksum, (guchar *) scan->id, -1);
+			g_checksum_update (checksum, (guchar *) scan->data, -1);
 			g_checksum_get_digest (checksum, digest, &length);
 			g_checksum_free (checksum);
 
 			memcpy(mi->references->references[count].id.hash, digest, sizeof(mi->message_id.id.hash));
 			count++;
-			scan = scan->next;
+			scan = g_slist_next (scan);
 		}
 		mi->references->size = count;
-		camel_header_references_list_clear(&refs);
+		g_slist_free_full (refs, g_free);
 	}
 }
 
