@@ -1,3 +1,16 @@
+evolution-mapi 3.19.90 2016-02-15
+---------------------------------
+
+Bug Fixes:
+	Bug 761346 - More Camel introspection fixes (Milan Crha)
+
+Miscellaneous:
+	[Camel] Reuse existing ESourceRegistry (Milan Crha)
+	Do not require gnome-common to run autogen.sh (Milan Crha)
+
+Translations:
+	Aurimas Černius (lt)
+
 evolution-mapi 3.19.4 2016-01-18
 --------------------------------
 
