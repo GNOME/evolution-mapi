@@ -1284,7 +1284,7 @@ mapi_store_create_folder_sync (CamelStore *store,
 		g_set_error_literal (
 			error, CAMEL_SERVICE_ERROR,
 			CAMEL_SERVICE_ERROR_UNAVAILABLE,
-			_("MAPI folders can be created only within mailbox of the logged user"));
+			_("MAPI folders can be created only within mailbox of the logged in user"));
 		return NULL;
 	}
 
@@ -2152,7 +2152,7 @@ mapi_connect_sync (CamelService *service,
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
 		g_set_error_literal (
 			error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
-			_("Cannot connect MAPI store in offline mode"));
+			_("Cannot connect to MAPI store in offline mode"));
 		return FALSE;
 	}
 
