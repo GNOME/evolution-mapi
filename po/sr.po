@@ -2,14 +2,14 @@
 # Courtesy of Prevod.org team (http://prevod.org/) -- 2009—2015.
 # This file is distributed under the same license as the evolution-mapi package.
 # Milan Skočić <milan.skocic@gmail.com>, 2010.
-# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2011—2015.
+# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2011—2015, 2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product"
 "=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2015-12-29 06:17+0000\n"
-"PO-Revision-Date: 2015-12-29 10:08+0200\n"
+"POT-Creation-Date: 2016-03-25 06:31+0000\n"
+"PO-Revision-Date: 2016-03-25 11:37+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: Serbian <gnom@prevod.org>\n"
 "Language: sr\n"
@@ -36,7 +36,7 @@ msgstr "Претражујем"
 #: ../src/addressbook/e-book-backend-mapi.c:1739
 #: ../src/calendar/e-cal-backend-mapi.c:189
 #: ../src/calendar/e-cal-backend-mapi.c:488
-#: ../src/camel/camel-mapi-folder.c:1935 ../src/camel/camel-mapi-folder.c:2015
+#: ../src/camel/camel-mapi-folder.c:1932 ../src/camel/camel-mapi-folder.c:2012
 msgid "Unknown error"
 msgstr "Непозната грешка"
 
@@ -165,81 +165,81 @@ msgstr "Не могу да уклоним ставке са сервера"
 msgid "Failed to get Free/Busy data"
 msgstr "Нисам успео да набавим податке слободно/заузето"
 
-#: ../src/camel/camel-mapi-folder.c:803
+#: ../src/camel/camel-mapi-folder.c:800
 #, c-format
 msgid "Refreshing folder '%s'"
 msgstr "Освежавам фасциклу „%s“"
 
-#: ../src/camel/camel-mapi-folder.c:871
+#: ../src/camel/camel-mapi-folder.c:868
 #, c-format
 msgid "Downloading messages in folder '%s'"
 msgstr "Преузимам поруке у фасциклу „%s“"
 
-#: ../src/camel/camel-mapi-folder.c:959 ../src/camel/camel-mapi-folder.c:1567
+#: ../src/camel/camel-mapi-folder.c:956 ../src/camel/camel-mapi-folder.c:1564
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Ова порука није доступна у режиму ван мреже."
 
-#: ../src/camel/camel-mapi-folder.c:969 ../src/camel/camel-mapi-folder.c:987
+#: ../src/camel/camel-mapi-folder.c:966 ../src/camel/camel-mapi-folder.c:984
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Нисам успео да преузмем ставке: %s"
 
-#: ../src/camel/camel-mapi-folder.c:974 ../src/camel/camel-mapi-folder.c:992
+#: ../src/camel/camel-mapi-folder.c:971 ../src/camel/camel-mapi-folder.c:989
 msgid "Fetching items failed"
 msgstr "Не могу да преузмем ставке"
 
-#: ../src/camel/camel-mapi-folder.c:1246
+#: ../src/camel/camel-mapi-folder.c:1243
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Не могу да додам поруку у фасциклу „%s“"
 
-#: ../src/camel/camel-mapi-folder.c:1255 ../src/camel/camel-mapi-folder.c:1285
+#: ../src/camel/camel-mapi-folder.c:1252 ../src/camel/camel-mapi-folder.c:1282
 #, c-format
 msgid "Offline."
 msgstr "Ван мреже."
 
-#: ../src/camel/camel-mapi-folder.c:1368
+#: ../src/camel/camel-mapi-folder.c:1365
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "Нисам успео да испразним корпу: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1374
+#: ../src/camel/camel-mapi-folder.c:1371
 msgid "Failed to empty Trash"
 msgstr "Нисам успео да испразним корпу"
 
-#: ../src/camel/camel-mapi-folder.c:1552
+#: ../src/camel/camel-mapi-folder.c:1549
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Не могу да добавим поруку %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1553
+#: ../src/camel/camel-mapi-folder.c:1550
 msgid "No such message"
 msgstr "Нема такве поруке"
 
-#: ../src/camel/camel-mapi-folder.c:1578 ../src/camel/camel-mapi-folder.c:1610
+#: ../src/camel/camel-mapi-folder.c:1575 ../src/camel/camel-mapi-folder.c:1607
 #, c-format
 msgid "Could not get message: %s"
 msgstr "Не могу да добавим поруку: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1584 ../src/camel/camel-mapi-folder.c:1617
+#: ../src/camel/camel-mapi-folder.c:1581 ../src/camel/camel-mapi-folder.c:1614
 #, c-format
 msgid "Could not get message"
 msgstr "Не могу да добавим поруку"
 
-#: ../src/camel/camel-mapi-folder.c:1992
+#: ../src/camel/camel-mapi-folder.c:1989
 msgid "Receive quota"
 msgstr "Примам норму"
 
-#: ../src/camel/camel-mapi-folder.c:1998
+#: ../src/camel/camel-mapi-folder.c:1995
 msgid "Send quota"
 msgstr "Шаљем норму"
 
-#: ../src/camel/camel-mapi-folder.c:2020
+#: ../src/camel/camel-mapi-folder.c:2017
 msgid "No quota information available"
 msgstr "Нису доступни подаци о норми"
 
-#: ../src/camel/camel-mapi-folder.c:2122
+#: ../src/camel/camel-mapi-folder.c:2119
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Не могу да учитам преглед за %s"
@@ -301,115 +301,116 @@ msgstr "Ова опција ће повезати на сервер корист
 msgid "Cannot find folder in a local cache"
 msgstr "Не могу да пронађем фасциклу у месној остави"
 
-#: ../src/camel/camel-mapi-store.c:492 ../src/camel/camel-mapi-store.c:1179
+#: ../src/camel/camel-mapi-store.c:492 ../src/camel/camel-mapi-store.c:1180
 msgid "Folder list is not available in offline mode"
 msgstr "Листа фасцикли није доступна у режиму ван мреже"
 
-#: ../src/camel/camel-mapi-store.c:872
+#: ../src/camel/camel-mapi-store.c:874
 msgid "No public folder found"
 msgstr "Нисам пронашао јавне фасцикле"
 
-#: ../src/camel/camel-mapi-store.c:872
+#: ../src/camel/camel-mapi-store.c:874
 msgid "No folder found"
 msgstr "Нисам пронашао фасциклу"
 
-#: ../src/camel/camel-mapi-store.c:1201 ../src/camel/camel-mapi-store.c:2172
+#: ../src/camel/camel-mapi-store.c:1202 ../src/camel/camel-mapi-store.c:2173
 #, c-format
 msgid "Connecting to '%s'"
 msgstr "Повезујем се са „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1260
+#: ../src/camel/camel-mapi-store.c:1261
 msgid "Cannot create MAPI folders in offline mode"
 msgstr "Не могу да направим МАПИ фасциклу у режиму ван мреже"
 
-#: ../src/camel/camel-mapi-store.c:1267
+#: ../src/camel/camel-mapi-store.c:1268
 #, c-format
 msgid "Cannot create new folder '%s'"
 msgstr "Не могу да направим нову фасциклу „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1276
+#: ../src/camel/camel-mapi-store.c:1277
 #, c-format
 msgid "Authentication failed"
 msgstr "Пријава није успела"
 
-#: ../src/camel/camel-mapi-store.c:1286
-msgid "MAPI folders can be created only within mailbox of the logged user"
+#: ../src/camel/camel-mapi-store.c:1287
+#| msgid "MAPI folders can be created only within mailbox of the logged user"
+msgid "MAPI folders can be created only within mailbox of the logged in user"
 msgstr ""
 "МАПИ фасцикле могу бити направљене само унутар сандучета пријављеног "
 "корисника"
 
-#: ../src/camel/camel-mapi-store.c:1299 ../src/camel/camel-mapi-store.c:1412
+#: ../src/camel/camel-mapi-store.c:1300 ../src/camel/camel-mapi-store.c:1413
 #, c-format
 msgid "Cannot find folder '%s'"
 msgstr "Не могу да нађем фасциклу „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1354
+#: ../src/camel/camel-mapi-store.c:1355
 #, c-format
 msgid "Cannot create folder '%s': %s"
 msgstr "Не могу да направим фасциклу „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1360
+#: ../src/camel/camel-mapi-store.c:1361
 #, c-format
 msgid "Cannot create folder '%s'"
 msgstr "Не могу да направим фасциклу „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1390 ../src/camel/camel-mapi-store.c:1402
+#: ../src/camel/camel-mapi-store.c:1391 ../src/camel/camel-mapi-store.c:1403
 msgid "Cannot delete MAPI folders in offline mode"
 msgstr "Не могу да обришем МАПИ фасциклу у режиму ван мреже"
 
-#: ../src/camel/camel-mapi-store.c:1458
+#: ../src/camel/camel-mapi-store.c:1459
 #, c-format
 msgid "Cannot remove folder '%s': %s"
 msgstr "Не могу да уклоним фасциклу „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1466
+#: ../src/camel/camel-mapi-store.c:1467
 #, c-format
 msgid "Cannot remove folder '%s'"
 msgstr "Не могу да уклоним фасциклу „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1496 ../src/camel/camel-mapi-store.c:1511
+#: ../src/camel/camel-mapi-store.c:1497 ../src/camel/camel-mapi-store.c:1512
 msgid "Cannot rename MAPI folders in offline mode"
 msgstr "Не могу да преименујем МАПИ фасциклу у режиму ван мреже"
 
-#: ../src/camel/camel-mapi-store.c:1522
+#: ../src/camel/camel-mapi-store.c:1523
 #, c-format
 msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
 msgstr "Не могу да преименујем МАПИ фасциклу „%s“. Фасцикла не постоји"
 
-#: ../src/camel/camel-mapi-store.c:1533
+#: ../src/camel/camel-mapi-store.c:1534
 #, c-format
 msgid "Cannot rename MAPI default folder '%s' to '%s'"
 msgstr "Не могу да преименујем основну МАПИ фасциклу „%s“ у „%s“"
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1559 ../src/camel/camel-mapi-store.c:1602
-#: ../src/camel/camel-mapi-store.c:1682
+#: ../src/camel/camel-mapi-store.c:1560 ../src/camel/camel-mapi-store.c:1603
+#: ../src/camel/camel-mapi-store.c:1683
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgstr "Не могу да преименујем МАПИ фасциклу „%s“ у „%s“"
 
 #. Translators: '%s to %s' is current name of the folder and new name of the folder.
 #. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1594 ../src/camel/camel-mapi-store.c:1675
+#: ../src/camel/camel-mapi-store.c:1595 ../src/camel/camel-mapi-store.c:1676
 #, c-format
 msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgstr "Не могу да преименујем МАПИ фасциклу „%s“ у „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1772
+#: ../src/camel/camel-mapi-store.c:1773
 msgid "Cannot subscribe MAPI folders in offline mode"
 msgstr "Не могу да претплатим МАПИ фасцикле у режиму ван мреже"
 
-#: ../src/camel/camel-mapi-store.c:1789
+#: ../src/camel/camel-mapi-store.c:1790
 #, c-format
 msgid "Folder '%s' not found"
 msgstr "Нисам пронашао фасциклу „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1907
+#: ../src/camel/camel-mapi-store.c:1908
 msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr "Не могу да поништим претплату МАПИ фасцикли у режиму ван мреже"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:2119 ../src/camel/camel-mapi-transport.c:196
+#: ../src/camel/camel-mapi-store.c:2120 ../src/camel/camel-mapi-transport.c:196
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "МАПИ сервер за размену %s"
@@ -417,22 +418,23 @@ msgstr "МАПИ сервер за размену %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:2123 ../src/camel/camel-mapi-transport.c:199
+#: ../src/camel/camel-mapi-store.c:2124 ../src/camel/camel-mapi-transport.c:199
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "МАПИ сервис размене за %s на %s"
 
-#: ../src/camel/camel-mapi-store.c:2154
-msgid "Cannot connect MAPI store in offline mode"
-msgstr "Не могу да повежем МАПИ радњу у режиму ван мреже"
+#: ../src/camel/camel-mapi-store.c:2155
+#| msgid "Cannot connect MAPI store in offline mode"
+msgid "Cannot connect to MAPI store in offline mode"
+msgstr "Не могу да се повежем на МАПИ радњу у режиму ван мреже"
 
-#: ../src/camel/camel-mapi-store.c:2207
+#: ../src/camel/camel-mapi-store.c:2208
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received or sent."
 msgstr ""
 "Сандуче „%s“ је пуно, ниједна нова порука неће бити ни примљена ни послата."
 
-#: ../src/camel/camel-mapi-store.c:2209
+#: ../src/camel/camel-mapi-store.c:2210
 #, c-format
 msgid ""
 "Mailbox '%s' is near its size limit, message send will be disabled soon."
@@ -440,17 +442,17 @@ msgstr ""
 "Сандуче „%s“ се приближава ограничењу своје величине, слање порука ће ускоро "
 "бити искључено."
 
-#: ../src/camel/camel-mapi-store.c:2213
+#: ../src/camel/camel-mapi-store.c:2214
 #, c-format
 msgid "Mailbox '%s' is full, no new messages will be received."
 msgstr "Сандуче „%s“ је пуно, ниједна нова порука неће бити примљена."
 
-#: ../src/camel/camel-mapi-store.c:2215
+#: ../src/camel/camel-mapi-store.c:2216
 #, c-format
 msgid "Mailbox '%s' is near its size limit."
 msgstr "Сандуче „%s“ је близу ограничења своје величине."
 
-#: ../src/camel/camel-mapi-store.c:2636
+#: ../src/camel/camel-mapi-store.c:2637
 msgid "Authentication password not available"
 msgstr "Лозинка потврде идентитета није доступна"
 
@@ -466,7 +468,6 @@ msgid "Could not send message: %s"
 msgstr "Не могу да пошаљем поруку: %s"
 
 #: ../src/collection/e-mapi-backend.c:78
-#| msgid "Cannot connect MAPI store in offline mode"
 msgid "Cannot connect, no credentials provided"
 msgstr "Не могу да се повежем, нису обезбеђена пуномоћства"
 
