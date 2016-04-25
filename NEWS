@@ -1,3 +1,20 @@
+evolution-mapi 3.21.1 2016-04-25
+--------------------------------
+
+Bug Fixes:
+	Bug 764109 - Typo in error message (Sebastian Rasmussen)
+
+Translations:
+	Sebastian Rasmussen (sv)
+	Мирослав Николић (sr)
+	Мирослав Николић (sr@latin)
+	Balázs Úr (hu)
+	Piotr Drąg (pl)
+	Mario Blättermann (de)
+	Rafael Fontenelle (pt_BR)
+	Marek Černocký (cs)
+	Daniel Mustieles (es)
+
 evolution-mapi 3.20.0 2016-03-21
 --------------------------------
 
