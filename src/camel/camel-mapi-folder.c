@@ -1892,9 +1892,6 @@ mapi_folder_transfer_messages_to_sync (CamelFolder *source,
 			transferred_uids, cancellable, error);
 	}
 
-	if (!conn)
-		return FALSE;
-
 	destination_parent_store = camel_folder_get_parent_store (destination);
 
 	offline = CAMEL_OFFLINE_STORE (destination_parent_store);
