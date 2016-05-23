@@ -1,3 +1,12 @@
+evolution-mapi 3.21.2 2016-05-23
+--------------------------------
+
+Miscellaneous:
+	Fix an issue found by Coverity Scan (Milan Crha)
+
+Translations:
+	Tiago Santos (pt)
+
 evolution-mapi 3.21.1 2016-04-25
 --------------------------------
 
