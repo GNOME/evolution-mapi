@@ -773,7 +773,6 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 {
 	gboolean status, has_obj_folder;
 	gboolean full_download;
-	CamelSettings *settings;
 	CamelStore *store = camel_folder_get_parent_store (folder);
 	CamelStoreInfo *si = NULL;
 	CamelMapiStoreInfo *msi = NULL;
@@ -789,13 +788,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 
 	camel_folder_freeze (folder);
 
-	settings = camel_service_ref_settings (CAMEL_SERVICE (store));
-
-	full_download =
-		camel_offline_settings_get_stay_synchronized (CAMEL_OFFLINE_SETTINGS (settings)) ||
-		camel_offline_folder_get_offline_sync (CAMEL_OFFLINE_FOLDER (folder));
-
-	g_object_unref (settings);
+	full_download = camel_offline_folder_can_downsync (CAMEL_OFFLINE_FOLDER (folder));
 
 	camel_operation_push_message (cancellable, _("Refreshing folder '%s'"), camel_folder_get_display_name (folder));
 
