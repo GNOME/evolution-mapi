@@ -732,7 +732,7 @@ can_reach_mapi_server (const gchar *server_address,
 
 	g_return_val_if_fail (server_address != NULL, FALSE);
 
-	network_monitor = g_network_monitor_get_default ();
+	network_monitor = e_network_monitor_get_default ();
 	connectable = g_network_address_new (server_address, 135);
 	reachable = g_network_monitor_can_reach (network_monitor, connectable, cancellable, &local_error);
 	g_object_unref (connectable);
