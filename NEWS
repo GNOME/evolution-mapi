@@ -1,3 +1,9 @@
+evolution-mapi 3.20.3 2016-06-06
+--------------------------------
+
+Miscellaneous:
+	Fix an issue found by Coverity Scan (Milan Crha)
+
 evolution-mapi 3.20.1 2016-04-11
 --------------------------------
 
