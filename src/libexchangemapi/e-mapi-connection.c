@@ -120,6 +120,7 @@ make_mapi_error (GError **perror, const gchar *context, enum MAPISTATUS mapi_sta
 	const gchar *error_msg = NULL, *status_name;
 	gchar *to_free = NULL;
 	GQuark error_domain;
+	gint error_code;
 	GError *error;
 
 	if (!perror)
@@ -166,19 +167,20 @@ make_mapi_error (GError **perror, const gchar *context, enum MAPISTATUS mapi_sta
 	g_return_if_fail (error_msg != NULL);
 
 	error_domain = E_MAPI_ERROR;
+	error_code = mapi_status;
 
 	if (mapi_status == MAPI_E_USER_CANCEL) {
 		error_domain = G_IO_ERROR;
-		mapi_status = G_IO_ERROR_CANCELLED;
+		error_code = G_IO_ERROR_CANCELLED;
 	}
 
 	if (context && *context) {
 		/* Translators: The first '%s' is replaced with an error context,
 		   aka where the error occurred, the second '%s' is replaced with
 		   the error message. */
-		error = g_error_new (error_domain, mapi_status, C_("EXCHANGEMAPI_ERROR", "%s: %s"), context, error_msg);
+		error = g_error_new (error_domain, error_code, C_("EXCHANGEMAPI_ERROR", "%s: %s"), context, error_msg);
 	} else {
-		error = g_error_new_literal (error_domain, mapi_status, error_msg);
+		error = g_error_new_literal (error_domain, error_code, error_msg);
 	}
 
 	g_free (to_free);

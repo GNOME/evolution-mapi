@@ -146,16 +146,17 @@ ebbm_gal_get_status_message (EBookBackendMAPI *ebma, gint index, gint total)
 	if (index <= 0)
 		return NULL;
 
-	return g_strdup_printf (
-		total <= 0 ?
+	if (total <= 0)
+		return g_strdup_printf (
 			/* Translators : This is used to cache the downloaded contacts from GAL.
 			   %d is an index of the GAL entry. */
-			_("Caching GAL contact %d") :
-			/* Translators : This is used to cache the downloaded contacts from GAL.
-			   The first %d is an index of the GAL entry,
-			   the second %d is total count of entries in GAL. */
-			_("Caching GAL contact %d/%d"),
-		index, total);
+			_("Caching GAL contact %d"), index);
+
+	return g_strdup_printf (
+		/* Translators : This is used to cache the downloaded contacts from GAL.
+		   The first %d is an index of the GAL entry,
+		   the second %d is total count of entries in GAL. */
+		_("Caching GAL contact %d/%d"), index, total);
 }
 
 static void

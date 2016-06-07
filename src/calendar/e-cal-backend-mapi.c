@@ -965,7 +965,7 @@ ecbm_get_object_list (ECalBackend *backend, EDataCal *cal, GCancellable *cancell
 
 	g_mutex_lock (&priv->mutex);
 
-	if (!strcmp (sexp, "#t"))
+	if (g_str_equal (sexp, "#t"))
 		search_needed = FALSE;
 
 	cbsexp = e_cal_backend_sexp_new (sexp);
@@ -2514,7 +2514,7 @@ ecbm_start_view (ECalBackend *backend, EDataCalView *view)
 	}
 
 	sexp = e_cal_backend_sexp_text (cbsexp);
-	if (!sexp || !strcmp (sexp, "#t"))
+	if (!sexp || g_str_equal (sexp, "#t"))
 		search_needed = FALSE;
 
 	prunning_by_time = e_cal_backend_sexp_evaluate_occur_times (cbsexp, &occur_start, &occur_end);
