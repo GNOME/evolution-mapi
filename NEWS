@@ -1,3 +1,16 @@
+evolution-mapi 3.21.3 2016-06-20
+--------------------------------
+
+Bug Fixes:
+	Bug 766682 - Three-state value for 'download messages for offline' per folder (Milan Crha)
+
+Miscellaneous:
+	Use newly introduced ENetworkMonitor (Milan Crha)
+	Address some of the clang compiler warnings (Milan Crha)
+
+Translations:
+	Andika Triwidada (id)
+
 evolution-mapi 3.21.2 2016-05-23
 --------------------------------
 
