@@ -1202,7 +1202,7 @@ mapi_book_utils_sexp_to_restriction (TALLOC_CTX *mem_ctx, const gchar *sexp_quer
 
 	e_sexp_input_text (sexp, sexp_query, strlen (sexp_query));
 	if (e_sexp_parse (sexp) == -1) {
-		e_sexp_unref (sexp);
+		g_object_unref (sexp);
 		return NULL;
 	}
 
@@ -1215,7 +1215,7 @@ mapi_book_utils_sexp_to_restriction (TALLOC_CTX *mem_ctx, const gchar *sexp_quer
 
 	e_sexp_result_free (sexp, r);
 
-	e_sexp_unref (sexp);
+	g_object_unref (sexp);
 	g_ptr_array_free (esp.res_parts, TRUE);
 
 	return restriction;
