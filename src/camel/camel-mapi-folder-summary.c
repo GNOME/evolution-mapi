@@ -269,7 +269,7 @@ mapi_summary_clear (CamelFolderSummary *summary, gboolean uncache)
 		if (!(info = camel_folder_summary_get (summary, g_ptr_array_index (known_uids, i))))
 			continue;
 
-		uid = camel_message_info_uid (info);
+		uid = camel_message_info_get_uid (info);
 		camel_folder_change_info_remove_uid (changes, uid);
 		camel_folder_summary_remove_uid (summary, uid);
 		camel_message_info_unref (info);
