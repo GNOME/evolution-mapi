@@ -2,24 +2,24 @@
 # This file is distributed under the same license as the evolution-mapi package.
 # Copyright © 2009-2010 Free Software Foundation, Inc.
 # Žygimantas Beručka <zygis@gnome.org>, 2009, 2010.
-# Aurimas Černius <aurisc4@gmail.com>, 2015.
+# Aurimas Černius <aurisc4@gmail.com>, 2015, 2016.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution.HEAD\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2016-01-22 10:31+0000\n"
-"PO-Revision-Date: 2016-01-08 12:54+0200\n"
+"POT-Creation-Date: 2016-05-19 05:29+0000\n"
+"PO-Revision-Date: 2016-08-14 21:43+0300\n"
 "Last-Translator: Aurimas Černius <aurisc4@gmail.com>\n"
-"Language-Team: Lithuanian <gnome-lt@lists.akl.lt>\n"
+"Language-Team: Lietuvių <gnome-lt@lists.akl.lt>\n"
 "Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n"
 "%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 1.8.6\n"
+"X-Generator: Gtranslator 2.91.7\n"
 
 #: ../evolution-mapi.metainfo.xml.in.h:1
 msgid "Exchange MAPI"
@@ -37,7 +37,7 @@ msgstr "Ieškoma"
 #: ../src/addressbook/e-book-backend-mapi.c:1739
 #: ../src/calendar/e-cal-backend-mapi.c:189
 #: ../src/calendar/e-cal-backend-mapi.c:488
-#: ../src/camel/camel-mapi-folder.c:1935 ../src/camel/camel-mapi-folder.c:2015
+#: ../src/camel/camel-mapi-folder.c:1929 ../src/camel/camel-mapi-folder.c:2009
 msgid "Unknown error"
 msgstr "Nežinoma klaida"
 
@@ -166,81 +166,81 @@ msgstr "Nepavyksta šalinti elementų iš serverio"
 msgid "Failed to get Free/Busy data"
 msgstr "Nepavyko gauti užimtumo duomenų"
 
-#: ../src/camel/camel-mapi-folder.c:803
+#: ../src/camel/camel-mapi-folder.c:800
 #, c-format
 msgid "Refreshing folder '%s'"
 msgstr "Atnaujinamas aplankas „%s“"
 
-#: ../src/camel/camel-mapi-folder.c:871
+#: ../src/camel/camel-mapi-folder.c:868
 #, c-format
 msgid "Downloading messages in folder '%s'"
 msgstr "Parsiunčiami aplanko „%s“ laiškai"
 
-#: ../src/camel/camel-mapi-folder.c:959 ../src/camel/camel-mapi-folder.c:1567
+#: ../src/camel/camel-mapi-folder.c:956 ../src/camel/camel-mapi-folder.c:1564
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Šis laiškas neprieinamas atsijungimo veiksenoje."
 
-#: ../src/camel/camel-mapi-folder.c:969 ../src/camel/camel-mapi-folder.c:987
+#: ../src/camel/camel-mapi-folder.c:966 ../src/camel/camel-mapi-folder.c:984
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Nepavyko atsiųsti elementų: %s"
 
-#: ../src/camel/camel-mapi-folder.c:974 ../src/camel/camel-mapi-folder.c:992
+#: ../src/camel/camel-mapi-folder.c:971 ../src/camel/camel-mapi-folder.c:989
 msgid "Fetching items failed"
 msgstr "Nepavyko atsiųsti elementų"
 
-#: ../src/camel/camel-mapi-folder.c:1246
+#: ../src/camel/camel-mapi-folder.c:1243
 #, c-format
 msgid "Cannot append message to folder '%s'"
 msgstr "Nepavyko pridurti laiško prie aplanko „%s“"
 
-#: ../src/camel/camel-mapi-folder.c:1255 ../src/camel/camel-mapi-folder.c:1285
+#: ../src/camel/camel-mapi-folder.c:1252 ../src/camel/camel-mapi-folder.c:1282
 #, c-format
 msgid "Offline."
 msgstr "Atsijungta."
 
-#: ../src/camel/camel-mapi-folder.c:1368
+#: ../src/camel/camel-mapi-folder.c:1365
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "Nepavyko išvalyti šiukšlinės: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1374
+#: ../src/camel/camel-mapi-folder.c:1371
 msgid "Failed to empty Trash"
 msgstr "Nepavyko išvalyti šiukšlinės"
 
-#: ../src/camel/camel-mapi-folder.c:1552
+#: ../src/camel/camel-mapi-folder.c:1549
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Nepavyko gauti laiško %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1553
+#: ../src/camel/camel-mapi-folder.c:1550
 msgid "No such message"
 msgstr "Nėra tokio laiško"
 
-#: ../src/camel/camel-mapi-folder.c:1578 ../src/camel/camel-mapi-folder.c:1610
+#: ../src/camel/camel-mapi-folder.c:1575 ../src/camel/camel-mapi-folder.c:1607
 #, c-format
 msgid "Could not get message: %s"
 msgstr "Nepavyko gauti laiško: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1584 ../src/camel/camel-mapi-folder.c:1617
+#: ../src/camel/camel-mapi-folder.c:1581 ../src/camel/camel-mapi-folder.c:1614
 #, c-format
 msgid "Could not get message"
 msgstr "Nepavyko gauti laiško"
 
-#: ../src/camel/camel-mapi-folder.c:1992
+#: ../src/camel/camel-mapi-folder.c:1986
 msgid "Receive quota"
 msgstr "Gavimo kvota"
 
-#: ../src/camel/camel-mapi-folder.c:1998
+#: ../src/camel/camel-mapi-folder.c:1992
 msgid "Send quota"
 msgstr "Siuntimo kvota"
 
-#: ../src/camel/camel-mapi-folder.c:2020
+#: ../src/camel/camel-mapi-folder.c:2014
 msgid "No quota information available"
 msgstr "Nėra kvotos informacijos"
 
-#: ../src/camel/camel-mapi-folder.c:2122
+#: ../src/camel/camel-mapi-folder.c:2116
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nepavyko įkelti %s santraukos"
@@ -336,7 +336,8 @@ msgid "Authentication failed"
 msgstr "Nepavyko nustatyti tapatybės"
 
 #: ../src/camel/camel-mapi-store.c:1287
-msgid "MAPI folders can be created only within mailbox of the logged user"
+#| msgid "MAPI folders can be created only within mailbox of the logged user"
+msgid "MAPI folders can be created only within mailbox of the logged in user"
 msgstr ""
 "MAPI aplankai gali būti sukurti tik prisijungusio naudotojo pašto dėžėje"
 
@@ -425,7 +426,8 @@ msgid "Exchange MAPI service for %s on %s"
 msgstr "Exchange MAPI tarnyba naudotojui %s serveryje %s"
 
 #: ../src/camel/camel-mapi-store.c:2155
-msgid "Cannot connect MAPI store in offline mode"
+#| msgid "Cannot connect MAPI store in offline mode"
+msgid "Cannot connect to MAPI store in offline mode"
 msgstr "Nepavyko prisijungti prie MAPI saugyklos atsijungimo veiksenoje"
 
 #: ../src/camel/camel-mapi-store.c:2208
