@@ -51,7 +51,6 @@ struct _EBookBackendMAPIPrivate
 	GRecMutex conn_lock;
 	EMapiConnection *conn;
 	gchar *book_uid;
-	gboolean marked_for_offline;
 
 	GThread *update_cache_thread;
 	GCancellable *update_cache;
@@ -423,7 +422,7 @@ ebbm_connect_user (EBookBackendMAPI *ebma,
 
 		ebbm_notify_connection_status (ebma, TRUE);
 
-		if (!g_cancellable_is_cancelled (cancellable) && priv->marked_for_offline) {
+		if (!g_cancellable_is_cancelled (cancellable) && e_book_backend_mapi_is_marked_for_offline (ebma)) {
 			ebbm_maybe_invoke_cache_update (ebma);
 		}
 	}
@@ -491,15 +490,11 @@ ebbm_open (EBookBackendMAPI *ebma,
 {
 	EBookBackendMAPIPrivate *priv = ebma->priv;
 	ESource *source = e_backend_get_source (E_BACKEND (ebma));
-	ESourceOffline *offline_extension;
 	const gchar *cache_dir;
 	GError *error = NULL;
 
 	if (e_book_backend_is_opened (E_BOOK_BACKEND (ebma)))
 		return;
-
-	offline_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_OFFLINE);
-	priv->marked_for_offline = e_source_offline_get_stay_synchronized (offline_extension);
 
 	if (priv->book_uid)
 		g_free (priv->book_uid);
@@ -526,7 +521,7 @@ ebbm_open (EBookBackendMAPI *ebma,
 
 	/* Either we are in Online mode or this is marked for offline */
 	if (!e_backend_get_online (E_BACKEND (ebma)) &&
-	    !priv->marked_for_offline) {
+	    !e_book_backend_mapi_is_marked_for_offline (ebma)) {
 		g_propagate_error (perror, EDB_ERROR (OFFLINE_UNAVAILABLE));
 		return;
 	}
@@ -751,7 +746,7 @@ ebbm_book_view_thread (gpointer data)
 		if (ebmac && ebmac->op_book_view_thread)
 			ebmac->op_book_view_thread (bvtd->ebma, bvtd->book_view, priv->update_cache, &error);
 
-		if (priv->marked_for_offline) {
+		if (e_book_backend_mapi_is_marked_for_offline (bvtd->ebma)) {
 			e_book_backend_mapi_update_view_by_cache (bvtd->ebma, bvtd->book_view, &error);
 
 			ebbm_maybe_invoke_cache_update (bvtd->ebma);
@@ -1509,10 +1504,17 @@ e_book_backend_mapi_book_view_is_running (EBookBackendMAPI *ebma, EDataBookView 
 gboolean
 e_book_backend_mapi_is_marked_for_offline (EBookBackendMAPI *ebma)
 {
+	ESource *source;
+	ESourceOffline *offline_extension;
+
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_MAPI (ebma), FALSE);
 	g_return_val_if_fail (ebma->priv != NULL, FALSE);
 
-	return ebma->priv->marked_for_offline;
+	source = e_backend_get_source (E_BACKEND (ebma));
+
+	offline_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_OFFLINE);
+
+	return e_source_offline_get_stay_synchronized (offline_extension);
 }
 
 void
