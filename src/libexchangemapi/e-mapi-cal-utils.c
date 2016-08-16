@@ -453,7 +453,6 @@ populate_freebusy_data (struct Binary_r *bin, uint32_t month, uint32_t year, GSL
 	uint16_t	event_start;
 	uint16_t	event_end;
 	uint32_t	i;
-	uint32_t	hour;
 	uint32_t	day;
 	const gchar	*month_name;
 	uint32_t	minutes;
@@ -478,57 +477,47 @@ populate_freebusy_data (struct Binary_r *bin, uint32_t month, uint32_t year, GSL
 		event_start = (bin->lpb[i + 1] << 8) | bin->lpb[i];
 		event_end = (bin->lpb[i + 3] << 8) | bin->lpb[i + 2];
 
-		for (hour = 0; hour < 24; hour++) {
-			if (!(((event_start - (60 * hour)) % 1440) && (((event_start - (60 * hour)) % 1440) - 30))) {
-				struct icalperiodtype ipt;
-				icalproperty *icalprop;
-				icaltimetype itt;
+		if (event_start <= event_end) {
+			struct icalperiodtype ipt;
+			icalproperty *icalprop;
+			icaltimetype itt;
 
-				day = ((event_start - (60 * hour)) / 1440) + 1;
-				minutes = (event_start - (60 * hour)) % 1440;
-				real_month = month - (year * 16);
+			day = 1;
+			minutes = 0;
+			real_month = month - (year * 16);
 
-				date_string = g_strdup_printf ("%.2u-%.2u-%.2u", year, real_month, day);
-				start = g_strdup_printf ("%sT%.2u:%.2u:00Z", date_string, hour + daylight, minutes);
-				g_free (date_string);
+			date_string = g_strdup_printf ("%.2u-%.2u-%.2u", year, real_month, day);
+			start = g_strdup_printf ("%sT%.2u:%.2u:00Z", date_string, 0, minutes);
+			g_free (date_string);
 
-				day = ((event_end - (60 * hour)) / 1440) + 1;
-				minutes = (event_end - (60 * hour)) % 1440;
+			date_string = g_strdup_printf ("%.2u-%.2u-%.2u", year, real_month, day);
+			end = g_strdup_printf ("%sT%.2u:%.2u:00Z", date_string, 0, minutes);
+			g_free (date_string);
 
-				if (minutes >= 60) {
-					hour += minutes / 60;
-					minutes %= 60;
-				}
+			start_date = mapi_get_date_from_string (start) + (60 * event_start);
+			end_date = mapi_get_date_from_string (end) + (60 * event_end);
 
-				date_string = g_strdup_printf ("%.2u-%.2u-%.2u", year, real_month, day);
-				end = g_strdup_printf ("%sT%.2u:%.2u:00Z", date_string, hour + daylight, minutes);
-				g_free (date_string);
+			memset (&ipt, 0, sizeof (struct icalperiodtype));
 
-				start_date = mapi_get_date_from_string (start);
-				end_date = mapi_get_date_from_string (end);
+			itt = icaltime_from_timet_with_zone (start_date, 0, icaltimezone_get_utc_timezone ());
+			ipt.start = itt;
 
-				memset (&ipt, 0, sizeof (struct icalperiodtype));
+			itt = icaltime_from_timet_with_zone (end_date, 0, icaltimezone_get_utc_timezone ());
+			ipt.end = itt;
 
-				itt = icaltime_from_timet_with_zone (start_date, 0, icaltimezone_get_utc_timezone ());
-				ipt.start = itt;
+			icalcomp = e_cal_component_get_icalcomponent (comp);
+			icalprop = icalproperty_new_freebusy (ipt);
 
-				itt = icaltime_from_timet_with_zone (end_date, 0, icaltimezone_get_utc_timezone ());
-				ipt.end = itt;
+			if (!strcmp (accept_type, "Busy"))
+				icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "BUSY");
+			else if (!strcmp (accept_type, "Tentative"))
+				icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "BUSY-TENTATIVE");
+			else if (!strcmp (accept_type, "OutOfOffice"))
+				icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "BUSY-UNAVAILABLE");
 
-				icalcomp = e_cal_component_get_icalcomponent (comp);
-				icalprop = icalproperty_new_freebusy (ipt);
-
-				if (!strcmp (accept_type, "Busy"))
-					icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "BUSY");
-				else if (!strcmp (accept_type, "Tentative"))
-					icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "BUSY-TENTATIVE");
-				else if (!strcmp (accept_type, "OutOfOffice"))
-					icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "BUSY-UNAVAILABLE");
-
-				icalcomponent_add_property(icalcomp, icalprop);
-				g_free (start);
-				g_free (end);
-			}
+			icalcomponent_add_property(icalcomp, icalprop);
+			g_free (start);
+			g_free (end);
 		}
 	}
 }
