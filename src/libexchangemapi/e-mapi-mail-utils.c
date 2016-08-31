@@ -281,6 +281,40 @@ is_apple_attach (EMapiAttachment *attach, guint32 *data_len, guint32 *resource_l
 	return is_apple;
 }
 
+typedef struct {
+	GHashTable *tzids;
+	icalcomponent *icalcomp;
+} ForeachTZIDData;
+
+static void
+add_timezones_cb (icalparameter *param,
+		  gpointer data)
+{
+	ForeachTZIDData *tz_data = data;
+	const gchar *tzid;
+	icaltimezone *zone = NULL;
+	icalcomponent *vtimezone_comp;
+
+	/* Get the TZID string from the parameter. */
+	tzid = icalparameter_get_tzid (param);
+	if (!tzid || g_hash_table_lookup (tz_data->tzids, tzid))
+		return;
+
+	/* Look for the timezone */
+	zone = icaltimezone_get_builtin_timezone_from_tzid (tzid);
+	if (!zone)
+		return;
+
+	/* Convert it to a string and add it to the hash. */
+	vtimezone_comp = icaltimezone_get_component (zone);
+	if (!vtimezone_comp)
+		return;
+
+	icalcomponent_add_component (tz_data->icalcomp, icalcomponent_new_clone (vtimezone_comp));
+
+	g_hash_table_insert (tz_data->tzids, (gchar *) tzid, (gchar *) tzid);
+}
+
 static gchar *
 build_ical_string (EMapiConnection *conn,
 		   EMapiObject *object,
@@ -334,12 +368,25 @@ build_ical_string (EMapiConnection *conn,
 		return NULL;
 
 	if (ical_method != ICAL_METHOD_NONE || detached_components) {
+		ForeachTZIDData tz_data;
+		icalcomponent *clone;
+
+		clone = icalcomponent_new_clone (e_cal_component_get_icalcomponent (comp));
+
 		icalcomp = e_cal_util_new_top_level ();
 		if (ical_method != ICAL_METHOD_NONE)
 			icalcomponent_set_method (icalcomp, ical_method);
 
-		icalcomponent_add_component (icalcomp,
-			icalcomponent_new_clone (e_cal_component_get_icalcomponent (comp)));
+		tz_data.tzids = g_hash_table_new (g_str_hash, g_str_equal);
+		tz_data.icalcomp = icalcomp;
+
+		/* Add timezones first */
+		icalcomponent_foreach_tzid (clone, add_timezones_cb, &tz_data);
+
+		g_hash_table_destroy (tz_data.tzids);
+
+		/* Then the components */
+		icalcomponent_add_component (icalcomp, clone);
 		for (iter = detached_components; iter; iter = g_slist_next (iter)) {
 			icalcomponent_add_component (icalcomp,
 				icalcomponent_new_clone (e_cal_component_get_icalcomponent (iter->data)));
