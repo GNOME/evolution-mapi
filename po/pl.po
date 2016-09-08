@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-15 13:45+0200\n"
-"PO-Revision-Date: 2016-08-15 13:47+0200\n"
+"POT-Creation-Date: 2016-09-08 03:02+0200\n"
+"PO-Revision-Date: 2016-09-08 03:03+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -30,11 +30,11 @@ msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr ""
 "Dostęp do serwerów Microsoft Exchange 2007/OpenChange przez protokół MAPI"
 
-#: ../src/addressbook/e-book-backend-mapi.c:744
+#: ../src/addressbook/e-book-backend-mapi.c:739
 msgid "Searching"
 msgstr "Wyszukiwanie"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1739
+#: ../src/addressbook/e-book-backend-mapi.c:1741
 #: ../src/calendar/e-cal-backend-mapi.c:189
 #: ../src/calendar/e-cal-backend-mapi.c:488
 #: ../src/camel/camel-mapi-folder.c:1922 ../src/camel/camel-mapi-folder.c:2002
@@ -287,8 +287,8 @@ msgstr "Hasło"
 msgid ""
 "This option will connect to the OpenChange server using a plaintext password."
 msgstr ""
-"Ta opcja umożliwia połączenie z serwerem OpenChange używając nieszyfrowanego "
-"hasła."
+"Ta opcja umożliwia połączenie z serwerem OpenChange za pomocą "
+"nieszyfrowanego hasła."
 
 #: ../src/camel/camel-mapi-sasl-krb.c:28
 msgid "Kerberos"
@@ -296,7 +296,7 @@ msgstr "Kerberos"
 
 #: ../src/camel/camel-mapi-sasl-krb.c:30
 msgid "This option will connect to the server using kerberos key."
-msgstr "Ta opcja umożliwia połączenie z serwerem używając klucza Kerberos."
+msgstr "Ta opcja umożliwia połączenie z serwerem za pomocą klucza Kerberos."
 
 #: ../src/camel/camel-mapi-store.c:134 ../src/camel/camel-mapi-store.c:176
 msgid "Cannot find folder in a local cache"
@@ -1011,19 +1011,19 @@ msgid "_Folder name:"
 msgstr "Nazwa _katalogu:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2080
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2069
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Zaakceptowano:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2085
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2074
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Wstępnie:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2090
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2079
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Odmówiono:"
