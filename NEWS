@@ -1,3 +1,12 @@
+evolution-mapi 3.21.92 2016-09-12
+---------------------------------
+
+Miscellaneous:
+	Include timezone components in meeting invitation mails/components (Milan Crha)
+
+Translations:
+	Piotr Drąg (pl)
+
 evolution-mapi 3.21.91 2016-08-29
 ---------------------------------
 
