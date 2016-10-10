@@ -1,0 +1,57 @@
+set(extra_deps
+	camelmapi-priv
+)
+set(sources
+	module-mapi-configuration.c
+	e-book-config-mapi.c
+	e-book-config-mapi.h
+	e-book-config-mapigal.c
+	e-book-config-mapigal.h
+	e-cal-config-mapi.c
+	e-cal-config-mapi.h
+	e-mail-config-mapi-backend.c
+	e-mail-config-mapi-backend.h
+	e-mail-config-mapi-page.c
+	e-mail-config-mapi-page.h
+	e-mail-config-mapi-extension.c
+	e-mail-config-mapi-extension.h
+	e-mapi-config-ui-extension.c
+	e-mapi-config-ui-extension.h
+	e-mapi-config-utils.c
+	e-mapi-config-utils.h
+	e-mapi-edit-folder-permissions.c
+	e-mapi-edit-folder-permissions.h
+	e-mapi-search-gal-user.c
+	e-mapi-search-gal-user.h
+	e-mapi-subscribe-foreign-folder.c
+	e-mapi-subscribe-foreign-folder.h
+)
+set(extra_defines)
+set(extra_cflags
+	${EVOLUTION_MAIL_CFLAGS}
+	${EVOLUTION_SHELL_CFLAGS}
+	${LIBECAL_CFLAGS}
+	${LIBEBOOK_CFLAGS}
+)
+set(extra_incdirs
+	${EVOLUTION_MAIL_INCLUDE_DIRS}
+	${EVOLUTION_SHELL_INCLUDE_DIRS}
+	${LIBECAL_INCLUDE_DIRS}
+	${LIBEBOOK_INCLUDE_DIRS}
+)
+set(extra_ldflags
+	${EVOLUTION_MAIL_LDFLAGS}
+	${EVOLUTION_SHELL_LDFLAGS}
+	${LIBECAL_LDFLAGS}
+	${LIBEBOOK_LDFLAGS}
+)
+
+add_simple_module(module-mapi-configuration
+	sources
+	extra_deps
+	extra_defines
+	extra_cflags
+	extra_incdirs
+	extra_ldflags
+	"${evo_moduledir}"
+)

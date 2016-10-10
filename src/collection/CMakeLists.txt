@@ -1,0 +1,22 @@
+set(extra_deps)
+set(sources
+	module-mapi-backend.c
+	e-mapi-backend.c
+	e-mapi-backend.h
+	e-mapi-backend-factory.c
+	e-mapi-backend-factory.h
+)
+set(extra_defines)
+set(extra_cflags)
+set(extra_incdirs)
+set(extra_ldflags)
+
+add_simple_module(module-mapi-backend
+	sources
+	extra_deps
+	extra_defines
+	extra_cflags
+	extra_incdirs
+	extra_ldflags
+	"${eds_moduledir}"
+)

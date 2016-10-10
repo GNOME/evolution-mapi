@@ -17,9 +17,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "evolution-mapi-config.h"
 
 #include <camel/camel.h>
 #include <libecal/libecal.h>
