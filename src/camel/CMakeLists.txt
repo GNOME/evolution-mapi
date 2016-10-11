@@ -15,6 +15,8 @@ set(SOURCES
 	camel-mapi-folder.h
 	camel-mapi-folder-summary.c
 	camel-mapi-folder-summary.h
+	camel-mapi-message-info.c
+	camel-mapi-message-info.h
 	camel-mapi-sasl-krb.c
 	camel-mapi-sasl-krb.h
         camel-mapi-store.c

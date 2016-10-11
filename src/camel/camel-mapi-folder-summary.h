@@ -26,6 +26,8 @@
 
 #include <camel/camel.h>
 
+#include "camel-mapi-message-info.h"
+
 /* Standard GObject macros */
 #define CAMEL_TYPE_MAPI_FOLDER_SUMMARY \
 	(camel_mapi_folder_summary_get_type ())
@@ -47,23 +49,8 @@
 
 G_BEGIN_DECLS
 
-#define CAMEL_MAPI_MESSAGE_WITH_READ_RECEIPT (CAMEL_MESSAGE_FOLDER_FLAGGED << 1)
-
 typedef struct _CamelMapiFolderSummary CamelMapiFolderSummary;
 typedef struct _CamelMapiFolderSummaryClass CamelMapiFolderSummaryClass;
-typedef struct _CamelMapiMessageInfo CamelMapiMessageInfo;
-typedef struct _CamelMapiMessageContentInfo CamelMapiMessageContentInfo;
-
-struct _CamelMapiMessageInfo {
-	CamelMessageInfoBase info;
-
-	guint32 server_flags;
-	time_t last_modified; /* PidTagLastModificationTime of this message */
-};
-
-struct _CamelMapiMessageContentInfo {
-	CamelMessageContentInfo info;
-};
 
 struct _CamelMapiFolderSummary {
 	CamelFolderSummary parent;
