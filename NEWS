@@ -1,3 +1,20 @@
+evolution-mapi 3.23.1 2016-10-24
+--------------------------------
+
+* Evolution-MAPI uses CMake instead of autotools now. At the end of
+  the configure phase are printed all the available options and their
+  values. These can be used for the cmake command to tweak the build.
+
+Miscellaneous:
+	Convert from autotools to CMake (Milan Crha)
+	Require as hard dependency some dependencies (Milan Crha)
+	Add a helper script for a 'dist' target (Milan Crha)
+	Rename SHARE_INSTALL_DIR to SHARE_INSTALL_PREFIX (Milan Crha)
+	Hard-break `make dist` when there are uncommitted changes (Milan Crha)
+
+Translations:
+	Kjartan Maraas (nb)
+
 evolution-mapi 3.22.0 2016-09-19
 --------------------------------
 
