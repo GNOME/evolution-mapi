@@ -1553,7 +1553,7 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 	if ((create_flags & E_MAPI_CREATE_FLAG_SUBMIT) == 0) {
 		time_t msg_time = 0;
 		gint msg_time_offset = 0;
-		GArray *headers;
+		CamelNameValueArray *headers;
 
 		if (namep && *namep)
 			set_value (PidTagSentRepresentingName, namep);
@@ -1586,17 +1586,21 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 		headers = camel_medium_get_headers (CAMEL_MEDIUM (message));
 		if (headers) {
 			GString *hstr = g_string_new ("");
+			guint len;
 
-			for (ii = 0; ii < headers->len; ii++) {
-				CamelMediumHeader *h = &g_array_index (headers, CamelMediumHeader, ii);
+			len = camel_name_value_array_get_length (headers);
 
-				if (!h->name || !*h->name || g_ascii_strncasecmp (h->name, "X-Evolution", 11) == 0)
+			for (ii = 0; ii < len; ii++) {
+				const gchar *header_name = NULL, *header_value = NULL;
+
+				if (!camel_name_value_array_get (headers, ii, &header_name, &header_value) ||
+				    !header_name || !*header_name || g_ascii_strncasecmp (header_name, "X-Evolution", 11) == 0)
 					continue;
 
-				g_string_append_printf (hstr, "%s: %s\n", h->name, h->value ? h->value : "");
+				g_string_append_printf (hstr, "%s: %s\n", header_name, header_value ? header_value : "");
 			}
 
-			camel_medium_free_headers (CAMEL_MEDIUM (message), headers);
+			camel_name_value_array_free (headers);
 
 			if (hstr->len && hstr->str)
 				set_value (PidTagTransportMessageHeaders, hstr->str);
