@@ -1583,7 +1583,7 @@ e_mapi_mail_utils_message_to_object (struct _CamelMimeMessage *message,
 			set_value (PidTagMessageDeliveryTime, &msg_date);
 		}
 
-		headers = camel_medium_get_headers (CAMEL_MEDIUM (message));
+		headers = camel_medium_dup_headers (CAMEL_MEDIUM (message));
 		if (headers) {
 			GString *hstr = g_string_new ("");
 			guint len;
