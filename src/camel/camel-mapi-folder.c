@@ -1290,7 +1290,7 @@ mapi_folder_expunge_sync (CamelFolder *folder,
 		gint ii;
 
 		/* get deleted messages from all active folders too */
-		folders = camel_object_bag_list (parent_store->folders);
+		folders = camel_store_dup_opened_folders (parent_store);
 		for (ii = 0; ii < folders->len; ii++) {
 			CamelFolder *opened_folder = CAMEL_FOLDER (folders->pdata[ii]);
 			CamelMapiFolder *mf;
