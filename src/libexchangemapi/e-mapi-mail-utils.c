@@ -458,7 +458,7 @@ classify_attachments (EMapiConnection *conn,
 		if (!filename || !*filename)
 			filename = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachFilename);
 		camel_mime_part_set_filename (part, filename);
-		camel_content_type_set_param (((CamelDataWrapper *) part)->mime_type, "name", filename);
+		camel_content_type_set_param (camel_data_wrapper_get_mime_type_field (CAMEL_DATA_WRAPPER (part)), "name", filename);
 
 		if (is_apple) {
 			CamelMultipart *mp;
