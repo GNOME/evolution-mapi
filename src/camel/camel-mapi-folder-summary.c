@@ -36,8 +36,8 @@
 #define CAMEL_MAPI_FOLDER_SUMMARY_VERSION (1)
 
 /*Prototypes*/
-static CamelFIRecord* mapi_summary_header_to_db (CamelFolderSummary *, GError **error);
-static gboolean mapi_summary_header_from_db (CamelFolderSummary *, CamelFIRecord *fir);
+static CamelFIRecord *mapi_summary_header_save (CamelFolderSummary *, GError **error);
+static gboolean mapi_summary_header_load (CamelFolderSummary *, CamelFIRecord *fir);
 
 /*End of Prototypes*/
 
@@ -50,8 +50,8 @@ camel_mapi_folder_summary_class_init (CamelMapiFolderSummaryClass *class)
 
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (class);
 	folder_summary_class->message_info_type = CAMEL_TYPE_MAPI_MESSAGE_INFO;
-	folder_summary_class->summary_header_to_db = mapi_summary_header_to_db;
-	folder_summary_class->summary_header_from_db = mapi_summary_header_from_db;
+	folder_summary_class->summary_header_save = mapi_summary_header_save;
+	folder_summary_class->summary_header_load = mapi_summary_header_load;
 }
 
 static void
@@ -75,7 +75,7 @@ camel_mapi_folder_summary_new (CamelFolder *folder)
 
 	summary = g_object_new (CAMEL_TYPE_MAPI_FOLDER_SUMMARY, "folder", folder, NULL);
 
-	if (!camel_folder_summary_load_from_db (summary, &local_error)) {
+	if (!camel_folder_summary_load (summary, &local_error)) {
 		/* FIXME: Isn't this dangerous ? We clear the summary
 		if it cannot be loaded, for some random reason.
 		We need to pass the ex and find out why it is not loaded etc. ? */
@@ -89,7 +89,7 @@ camel_mapi_folder_summary_new (CamelFolder *folder)
 }
 
 static gboolean
-mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
+mapi_summary_header_load (CamelFolderSummary *summary, CamelFIRecord *fir)
 {
 	CamelMapiFolderSummary *mapi_summary = CAMEL_MAPI_FOLDER_SUMMARY (summary);
 	CamelFolderSummaryClass *folder_summary_class;
@@ -98,7 +98,7 @@ mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (
 		camel_mapi_folder_summary_parent_class);
 
-	if (!folder_summary_class->summary_header_from_db (summary, fir))
+	if (!folder_summary_class->summary_header_load (summary, fir))
 		return FALSE;
 
 	part = fir->bdata;
@@ -110,14 +110,14 @@ mapi_summary_header_from_db (CamelFolderSummary *summary, CamelFIRecord *fir)
 }
 
 static CamelFIRecord *
-mapi_summary_header_to_db (CamelFolderSummary *summary, GError **error)
+mapi_summary_header_save (CamelFolderSummary *summary, GError **error)
 {
 	CamelFolderSummaryClass *folder_summary_class;
 	struct _CamelFIRecord *fir;
 
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (camel_mapi_folder_summary_parent_class);
 
-	fir = folder_summary_class->summary_header_to_db (summary, error);
+	fir = folder_summary_class->summary_header_save (summary, error);
 
 	if (!fir)
 		return NULL;

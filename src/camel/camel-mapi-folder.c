@@ -894,7 +894,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 	if (mapi_error && *mapi_error)
 		camel_mapi_store_maybe_disconnect (mapi_store, *mapi_error);
 
-	camel_folder_summary_save_to_db (camel_folder_get_folder_summary (folder), NULL);
+	camel_folder_summary_save (camel_folder_get_folder_summary (folder), NULL);
 	camel_folder_thaw (folder);
 
 	return status;
@@ -1042,7 +1042,7 @@ mapi_folder_dispose (GObject *object)
 	CamelFolder *folder = CAMEL_FOLDER (object);
 	CamelMapiFolder *mapi_folder = CAMEL_MAPI_FOLDER (object);
 
-	camel_folder_summary_save_to_db (camel_folder_get_folder_summary (folder), NULL);
+	camel_folder_summary_save (camel_folder_get_folder_summary (folder), NULL);
 
 	if (mapi_folder->cache != NULL) {
 		g_object_unref (mapi_folder->cache);
