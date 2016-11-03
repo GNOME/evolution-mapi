@@ -439,21 +439,11 @@ update_message_info (CamelMessageInfo *info,
 static gsize
 camel_mapi_get_message_size (CamelMimeMessage *msg)
 {
-	CamelStream *null;
-	CamelDataWrapper *dw;
-	gsize sz;
-
 	if (!CAMEL_IS_DATA_WRAPPER (msg))
 		return 0;
 
-	dw = CAMEL_DATA_WRAPPER (msg);
-	null = camel_stream_null_new ();
 	/* do not 'decode', let's be interested in the raw message size */
-	camel_data_wrapper_write_to_stream_sync (dw, null, NULL, NULL);
-	sz = CAMEL_STREAM_NULL (null)->written;
-	g_object_unref (null);
-
-	return sz;
+	return camel_data_wrapper_calculate_size_sync (CAMEL_DATA_WRAPPER (msg), NULL, NULL);
 }
 
 struct GatherObjectSummaryData
