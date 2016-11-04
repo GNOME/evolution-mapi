@@ -621,7 +621,9 @@ gather_object_summary_cb (EMapiConnection *conn,
 			g_object_unref (stream);
 
 			if (camel_mime_part_construct_from_parser_sync (part, parser, NULL, NULL)) {
-				info = camel_folder_summary_info_new_from_header (camel_folder_get_folder_summary (gos->folder), part->headers);
+				info = camel_folder_summary_info_new_from_headers (
+					camel_folder_get_folder_summary (gos->folder),
+					camel_medium_get_headers (CAMEL_MEDIUM (part)));
 				if (info) {
 					const uint32_t *msg_size;
 

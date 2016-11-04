@@ -778,20 +778,27 @@ e_mapi_mail_utils_object_to_message (EMapiConnection *conn, /* const */ EMapiObj
 		g_object_unref (stream);
 
 		if (camel_mime_part_construct_from_parser_sync (part, parser, NULL, NULL)) {
-			struct _camel_header_raw *h;
+			const CamelNameValueArray *headers;
+			CamelMedium *msg_medium = CAMEL_MEDIUM (msg);
+			guint ii, len;
 
-			for (h = part->headers; h; h = h->next) {
-				const gchar *value = h->value;
+			headers = camel_medium_get_headers (CAMEL_MEDIUM (part));
+			len = camel_name_value_array_get_length (headers);
+
+			for (ii = 0; ii < len; ii++) {
+				const gchar *header_name = NULL, *header_value = NULL;
 
 				/* skip all headers describing content of a message,
 				   because it's overwritten on message decomposition */
-				if (g_ascii_strncasecmp (h->name, "Content", 7) == 0)
+				if (!camel_name_value_array_get (headers, ii, &header_name, &header_value) ||
+				    !header_name ||
+				    g_ascii_strncasecmp (header_name, "Content", 7) == 0)
 					continue;
 
-				while (value && camel_mime_is_lwsp (*value))
-					value++;
+				while (header_value && camel_mime_is_lwsp (*header_value))
+					header_value++;
 
-				camel_medium_add_header (CAMEL_MEDIUM (msg), h->name, value);
+				camel_medium_add_header (msg_medium, header_name, header_value);
 			}
 		}
 
