@@ -2088,10 +2088,9 @@ mapi_store_constructed (GObject *object)
 	/*priv->parent_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free); / * folder ID to its parent folder ID */
 	priv->default_folders = g_hash_table_new_full (g_int_hash, g_int_equal, g_free, g_free); /* default folder type to folder ID */
 	priv->container_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-	store->flags &= ~CAMEL_STORE_VJUNK;
-	store->flags &= ~CAMEL_STORE_VTRASH;
 
-	store->flags |= CAMEL_STORE_REAL_JUNK_FOLDER | CAMEL_STORE_USE_CACHE_DIR;
+	camel_store_set_flags (store, (camel_store_get_flags (store) & ~(CAMEL_STORE_VJUNK | CAMEL_STORE_VTRASH)) |
+		CAMEL_STORE_REAL_JUNK_FOLDER | CAMEL_STORE_USE_CACHE_DIR);
 
 	g_free (path);
 }
