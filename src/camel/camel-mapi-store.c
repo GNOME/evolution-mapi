@@ -1515,9 +1515,9 @@ mapi_store_rename_folder_sync (CamelStore *store,
 	/* Need a full name of a folder */
 	old_fid_str = camel_mapi_store_folder_id_lookup (mapi_store, old_name);
 	if (!old_fid_str) {
-		/*To translators : '%s' is current name of the folder */
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			/* Translators: '%s' is current name of the folder */
 			_("Cannot rename MAPI folder '%s'. Folder does not exist"),
 			old_name);
 		return FALSE;
@@ -1525,10 +1525,10 @@ mapi_store_rename_folder_sync (CamelStore *store,
 
 	/*Do not allow rename for system folders.*/
 	if (mapi_fid_is_system_folder (mapi_store, old_fid_str)) {
-		/*To translators : '%s to %s' is current name of the folder  and
-		 new name of the folder.*/
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			/* Translators: '%s to %s' is current name of the folder and
+			   new name of the folder.*/
 			_("Cannot rename MAPI default folder '%s' to '%s'"),
 			old_name, new_name);
 		return FALSE;

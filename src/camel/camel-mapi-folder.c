@@ -1469,11 +1469,11 @@ mapi_folder_get_message_sync (CamelFolder *folder,
 
 	mi = camel_folder_summary_get (camel_folder_get_folder_summary (folder), uid);
 	if (mi == NULL) {
-		/* Translators: The first %s is replaced with a message ID,
-		   the second %s is replaced with a detailed error string */
 		g_set_error (
 			error, CAMEL_FOLDER_ERROR,
 			CAMEL_FOLDER_ERROR_INVALID_UID,
+			/* Translators: The first %s is replaced with a message ID,
+			   the second %s is replaced with a detailed error string */
 			_("Cannot get message %s: %s"), uid,
 			_("No such message"));
 		return NULL;
