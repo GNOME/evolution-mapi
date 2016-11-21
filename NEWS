@@ -1,3 +1,16 @@
+evolution-mapi 3.23.2 2016-11-21
+--------------------------------
+
+Bug Fixes:
+	Bug 769573 - Allow also time part set for Tasks, not only date part (Milan Crha)
+	Bug 773659 - Don't set CFLAGS returned by pkg-config as CMAKE_REQUIRED_FLAGS (Milan Crha)
+	Bug 764065 - [Camel] Port more classes to GObject (Milan Crha)
+	Bug 774524 - Translator comments are missing in the .pot/.po files (Piotr Drąg)
+
+Miscellaneous:
+	Do not require C++ compiler, when not used (Milan Crha)
+	Ensure CMAKE_SKIP_RPATH is OFF, the RPATH is used here (Milan Crha)
+
 evolution-mapi 3.23.1 2016-10-24
 --------------------------------
 
