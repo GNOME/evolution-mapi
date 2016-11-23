@@ -699,7 +699,7 @@ action_folder_permissions_mail_cb (GtkAction *action,
 
 	si = camel_store_summary_path (mapi_store->summary, folder_path);
 	if (!si) {
-		e_notice (parent, GTK_MESSAGE_ERROR, _("Cannot edit permissions of folder '%s', choose other folder."), folder_path);
+		e_notice (parent, GTK_MESSAGE_ERROR, _("Cannot edit permissions of folder “%s”, choose other folder."), folder_path);
 	} else {
 		CamelMapiStoreInfo *msi = (CamelMapiStoreInfo *) si;
 		ESourceRegistry *registry = e_shell_get_registry (e_shell_window_get_shell (shell_window));

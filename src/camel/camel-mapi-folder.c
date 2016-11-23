@@ -773,7 +773,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 
 	full_download = camel_offline_folder_can_downsync (CAMEL_OFFLINE_FOLDER (folder));
 
-	camel_operation_push_message (cancellable, _("Refreshing folder '%s'"), camel_folder_get_display_name (folder));
+	camel_operation_push_message (cancellable, _("Refreshing folder “%s”"), camel_folder_get_display_name (folder));
 
 	si = camel_mapi_store_summary_get_folder_id (mapi_store->summary, mapi_folder->folder_id);
 	msi = (CamelMapiStoreInfo *) si;
@@ -841,7 +841,7 @@ camel_mapi_folder_fetch_summary (CamelFolder *folder, GCancellable *cancellable,
 			g_hash_table_foreach (gco.removed_uids, remove_removed_uids_cb, &gos);
 
 		if (full_download) {
-			camel_operation_push_message (cancellable, _("Downloading messages in folder '%s'"), camel_folder_get_display_name (folder));
+			camel_operation_push_message (cancellable, _("Downloading messages in folder “%s”"), camel_folder_get_display_name (folder));
 
 			status = e_mapi_connection_transfer_objects (conn, &obj_folder, gco.to_update, gather_object_for_offline_cb, &gos, cancellable, mapi_error);
 
@@ -1167,7 +1167,7 @@ mapi_folder_append_message_sync (CamelFolder *folder,
 	    ((folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_OUTBOX)) {
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Cannot append message to folder '%s'"),
+			_("Cannot append message to folder “%s”"),
 			full_name);
 		return FALSE;
 	}

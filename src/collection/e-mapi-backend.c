@@ -693,7 +693,7 @@ mapi_backend_create_resource_sync (ECollectionBackend *backend,
 		g_set_error (
 			error, G_IO_ERROR,
 			G_IO_ERROR_INVALID_ARGUMENT,
-			_("Data source '%s' does not represent a MAPI folder"),
+			_("Data source “%s” does not represent a MAPI folder"),
 			e_source_get_display_name (source));
 		return FALSE;
 	}
@@ -790,7 +790,7 @@ mapi_backend_delete_resource_sync (ECollectionBackend *backend,
 		g_set_error (
 			error, G_IO_ERROR,
 			G_IO_ERROR_INVALID_ARGUMENT,
-			_("Data source '%s' does not represent a MAPI folder"),
+			_("Data source “%s” does not represent a MAPI folder"),
 			e_source_get_display_name (source));
 		return FALSE;
 	}

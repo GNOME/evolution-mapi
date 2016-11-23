@@ -1197,7 +1197,7 @@ mapi_store_get_folder_info_sync (CamelStore *store,
 			if (status == CAMEL_SERVICE_DISCONNECTED) {
 				gchar *name = camel_service_get_name (service, TRUE);
 
-				camel_operation_push_message (cancellable, _("Connecting to '%s'"), name);
+				camel_operation_push_message (cancellable, _("Connecting to “%s”"), name);
 				camel_service_connect_sync (service, cancellable, NULL);
 				camel_operation_pop_message (cancellable);
 
@@ -1263,7 +1263,7 @@ mapi_store_create_folder_sync (CamelStore *store,
 	if (mapi_fid_is_system_folder (mapi_store, camel_mapi_store_folder_id_lookup (mapi_store, folder_name))) {
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Cannot create new folder '%s'"),
+			_("Cannot create new folder “%s”"),
 			folder_name);
 		return NULL;
 	}
@@ -1295,7 +1295,7 @@ mapi_store_create_folder_sync (CamelStore *store,
 		g_set_error (
 			error, CAMEL_SERVICE_ERROR,
 			CAMEL_SERVICE_ERROR_UNAVAILABLE,
-			_("Cannot find folder '%s'"), parent_name ? parent_name : "");
+			_("Cannot find folder “%s”"), parent_name ? parent_name : "");
 		return NULL;
 	}
 	e_mapi_util_mapi_id_from_string (parent_id, &parent_fid);
@@ -1350,13 +1350,13 @@ mapi_store_create_folder_sync (CamelStore *store,
 			if (!e_mapi_utils_propagate_cancelled_error (mapi_error, error))
 				g_set_error (
 					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-					_("Cannot create folder '%s': %s"), folder_name, mapi_error->message);
+					_("Cannot create folder “%s”: %s"), folder_name, mapi_error->message);
 			camel_mapi_store_maybe_disconnect (mapi_store, mapi_error);
 			g_error_free (mapi_error);
 		} else {
 			g_set_error (
 				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				_("Cannot create folder '%s'"), folder_name);
+				_("Cannot create folder “%s”"), folder_name);
 		}
 	}
 
@@ -1408,7 +1408,7 @@ mapi_store_delete_folder_sync (CamelStore *store,
 		g_set_error (
 			error, CAMEL_SERVICE_ERROR,
 			CAMEL_SERVICE_ERROR_UNAVAILABLE,
-			_("Cannot find folder '%s'"), folder_name);
+			_("Cannot find folder “%s”"), folder_name);
 		return FALSE;
 	}
 
@@ -1454,7 +1454,7 @@ mapi_store_delete_folder_sync (CamelStore *store,
 			if (!e_mapi_utils_propagate_cancelled_error (local_error, error))
 				g_set_error (
 					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-					_("Cannot remove folder '%s': %s"),
+					_("Cannot remove folder “%s”: %s"),
 					folder_name, local_error->message);
 
 			camel_mapi_store_maybe_disconnect (mapi_store, local_error);
@@ -1462,7 +1462,7 @@ mapi_store_delete_folder_sync (CamelStore *store,
 		} else {
 			g_set_error (
 				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				_("Cannot remove folder '%s'"),
+				_("Cannot remove folder “%s”"),
 				folder_name);
 		}
 	}
@@ -1517,8 +1517,8 @@ mapi_store_rename_folder_sync (CamelStore *store,
 	if (!old_fid_str) {
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			/* Translators: '%s' is current name of the folder */
-			_("Cannot rename MAPI folder '%s'. Folder does not exist"),
+			/* Translators: “%s” is current name of the folder */
+			_("Cannot rename MAPI folder “%s”. Folder does not exist"),
 			old_name);
 		return FALSE;
 	}
@@ -1527,9 +1527,9 @@ mapi_store_rename_folder_sync (CamelStore *store,
 	if (mapi_fid_is_system_folder (mapi_store, old_fid_str)) {
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			/* Translators: '%s to %s' is current name of the folder and
+			/* Translators: “%s to %s” is current name of the folder  and
 			   new name of the folder.*/
-			_("Cannot rename MAPI default folder '%s' to '%s'"),
+			_("Cannot rename MAPI default folder “%s” to “%s”"),
 			old_name, new_name);
 		return FALSE;
 	}
@@ -1555,7 +1555,7 @@ mapi_store_rename_folder_sync (CamelStore *store,
 	if (!e_mapi_util_mapi_id_from_string (old_fid_str, &old_fid)) {
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Cannot rename MAPI folder '%s' to '%s'"),
+			_("Cannot rename MAPI folder “%s” to “%s”"),
 			old_name, new_name);
 		g_free (old_parent);
 		g_free (new_parent);
@@ -1588,17 +1588,17 @@ mapi_store_rename_folder_sync (CamelStore *store,
 				if (!e_mapi_utils_propagate_cancelled_error (local_error, error))
 					g_set_error (
 						error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-						/* Translators: '%s to %s' is current name of the folder and new name of the folder.
-						   The last '%s' is a detailed error message. */
-						_("Cannot rename MAPI folder '%s' to '%s': %s"),
+						/* Translators: “%s to %s” is current name of the folder and new name of the folder.
+						   The last “%s” is a detailed error message. */
+						_("Cannot rename MAPI folder “%s” to “%s”: %s"),
 						old_name, new_name, local_error->message);
 				camel_mapi_store_maybe_disconnect (mapi_store, local_error);
 				g_error_free (local_error);
 			} else {
 				g_set_error (
 					error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-					/* Translators: '%s to %s' is current name of the folder and new name of the folder. */
-					_("Cannot rename MAPI folder '%s' to '%s'"),
+					/* Translators: “%s to %s” is current name of the folder and new name of the folder. */
+					_("Cannot rename MAPI folder “%s” to “%s”"),
 					old_name, new_name);
 			}
 
@@ -1671,14 +1671,14 @@ mapi_store_rename_folder_sync (CamelStore *store,
 					if (!e_mapi_utils_propagate_cancelled_error (local_error, error))
 						g_set_error (
 							error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-							_("Cannot rename MAPI folder '%s' to '%s': %s"),
+							_("Cannot rename MAPI folder “%s” to “%s”: %s"),
 							old_name, new_name, local_error->message);
 					camel_mapi_store_maybe_disconnect (mapi_store, local_error);
 					g_error_free (local_error);
 				} else {
 					g_set_error (
 						error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-						_("Cannot rename MAPI folder '%s' to '%s'"),
+						_("Cannot rename MAPI folder “%s” to “%s”"),
 						old_name, new_name);
 				}
 				g_free (old_parent);
@@ -1785,7 +1785,7 @@ mapi_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 	if (!si) {
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Folder '%s' not found"), folder_name);
+			_("Folder “%s” not found"), folder_name);
 
 		return FALSE;
 	}
@@ -2167,7 +2167,7 @@ mapi_connect_sync (CamelService *service,
 	}
 
 	name = camel_service_get_name (service, TRUE);
-	camel_operation_push_message (cancellable, _("Connecting to '%s'"), name);
+	camel_operation_push_message (cancellable, _("Connecting to “%s”"), name);
 
 	settings = camel_service_ref_settings (service);
 	e_mapi_util_profiledata_from_settings (&empd, CAMEL_MAPI_SETTINGS (settings));
@@ -2202,15 +2202,15 @@ mapi_connect_sync (CamelService *service,
 			/* warn/alert when the last 1% lefts from the size quota */
 			if (send_quota != -1 && current_size * 0.95 >= send_quota) {
 				if (send_quota != -1 && current_size >= send_quota) {
-					msg = g_strdup_printf (_("Mailbox '%s' is full, no new messages will be received or sent."), name);
+					msg = g_strdup_printf (_("Mailbox “%s” is full, no new messages will be received or sent."), name);
 				} else {
-					msg = g_strdup_printf (_("Mailbox '%s' is near its size limit, message send will be disabled soon."), name);
+					msg = g_strdup_printf (_("Mailbox “%s” is near its size limit, message send will be disabled soon."), name);
 				}
 			} else if (receive_quota != -1 && current_size * 0.95 >= receive_quota) {
 				if (current_size >= receive_quota) {
-					msg = g_strdup_printf (_("Mailbox '%s' is full, no new messages will be received."), name);
+					msg = g_strdup_printf (_("Mailbox “%s” is full, no new messages will be received."), name);
 				} else {
-					msg = g_strdup_printf (_("Mailbox '%s' is near its size limit."), name);
+					msg = g_strdup_printf (_("Mailbox “%s” is near its size limit."), name);
 				}
 			}
 

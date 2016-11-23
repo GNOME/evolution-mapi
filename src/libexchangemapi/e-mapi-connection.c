@@ -741,7 +741,7 @@ can_reach_mapi_server (const gchar *server_address,
 		if (local_error)
 			g_propagate_error (perror, local_error);
 		else
-			g_set_error (perror, G_IO_ERROR, G_IO_ERROR_HOST_UNREACHABLE, _("Server '%s' cannot be reached"), server_address);
+			g_set_error (perror, G_IO_ERROR, G_IO_ERROR_HOST_UNREACHABLE, _("Server “%s” cannot be reached"), server_address);
 	}
 
 	return reachable;
@@ -869,7 +869,7 @@ e_mapi_connection_test_foreign_folder (EMapiConnection *conn,
 			def_folder_id = olFolderJunk;
 		} else if (!e_mapi_util_mapi_id_from_string (folder_name, &foreign_fid)) {
 			ms = MAPI_E_CALL_FAILED;
-			g_propagate_error (perror, g_error_new (E_MAPI_ERROR, ms, _("Folder name '%s' is not a known default folder name, nor folder ID."), folder_name));
+			g_propagate_error (perror, g_error_new (E_MAPI_ERROR, ms, _("Folder name “%s” is not a known default folder name, nor folder ID."), folder_name));
 			goto cleanup;
 		}
 
@@ -1200,7 +1200,7 @@ e_mapi_connection_open_foreign_folder (EMapiConnection *conn,
 	if (!ensure_foreign_store (conn->priv, username, &msg_store, perror)) {
 		ms = MAPI_E_CALL_FAILED;
 		if (perror && !*perror)
-			g_propagate_error (perror, g_error_new (E_MAPI_ERROR, ms, _("Failed to open store for user '%s'"), username));
+			g_propagate_error (perror, g_error_new (E_MAPI_ERROR, ms, _("Failed to open store for user “%s”"), username));
 	} else {
 		ms = MAPI_E_SUCCESS;
 	}
@@ -1208,7 +1208,7 @@ e_mapi_connection_open_foreign_folder (EMapiConnection *conn,
 	if (ms == MAPI_E_SUCCESS) {
 		ms = OpenFolder (msg_store, fid, obj_folder);
 		if (ms == MAPI_E_NOT_FOUND)
-			g_propagate_error (perror, g_error_new (E_MAPI_ERROR, ms, _("Folder of user '%s' not found"), username));
+			g_propagate_error (perror, g_error_new (E_MAPI_ERROR, ms, _("Folder of user “%s” not found"), username));
 		else if (ms != MAPI_E_SUCCESS)
 			make_mapi_error (perror, "OpenFolder", ms);
 	}
@@ -3860,7 +3860,7 @@ add_object_recipients (EMapiConnection *conn,
 			 * However, if we do still get an ambiguous entry, we can't handle it :-( */
 			ms = MAPI_E_AMBIGUOUS_RECIP;
 			/* Translators: %s is replaced with an email address which was found ambiguous on a remote server */
-			g_set_error (perror, E_MAPI_ERROR, ms, _("Recipient '%s' is ambiguous"), users[ii]);
+			g_set_error (perror, E_MAPI_ERROR, ms, _("Recipient “%s” is ambiguous"), users[ii]);
 			goto cleanup;
 		} else if (flagList->aulPropTag[ii] == MAPI_UNRESOLVED) {
 			uint32_t last;
@@ -6820,10 +6820,10 @@ e_mapi_connection_resolve_username (EMapiConnection *conn,
 	} else if (ms == MAPI_E_SUCCESS) {
 		if (flaglist && flaglist->aulPropTag[0] == MAPI_AMBIGUOUS) {
 			ms = MAPI_E_AMBIGUOUS_RECIP;
-			g_set_error (perror, E_MAPI_ERROR, ms, _("User name '%s' is ambiguous"), to_resolve);
+			g_set_error (perror, E_MAPI_ERROR, ms, _("User name “%s” is ambiguous"), to_resolve);
 		} else {
 			ms = MAPI_E_NOT_FOUND;
-			g_set_error (perror, E_MAPI_ERROR, ms, _("User name '%s' not found"), to_resolve);
+			g_set_error (perror, E_MAPI_ERROR, ms, _("User name “%s” not found"), to_resolve);
 		}
 	}
 

@@ -84,7 +84,7 @@ add_foreign_folder_to_camel (CamelMapiStore *mapi_store,
 			res = FALSE;
 			g_propagate_error (perror,
 				g_error_new (E_MAPI_ERROR, MAPI_E_INVALID_PARAMETER,
-				_("Cannot add folder, folder already exists as '%s'"), camel_store_info_path (mapi_store->summary, si)));
+				_("Cannot add folder, folder already exists as “%s”"), camel_store_info_path (mapi_store->summary, si)));
 		} else if (parent_fid != 0 && msi->folder_id == parent_fid) {
 			if (g_strcmp0 (foreign_username, msi->foreign_username) == 0) {
 				g_free (parent_path);
@@ -107,9 +107,9 @@ add_foreign_folder_to_camel (CamelMapiStore *mapi_store,
 			gchar *mailbox;
 
 			/* Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
-			   Example result: "Mailbox - John Smith"
+			   Example result: "Mailbox — John Smith"
 			*/
-			mailbox = g_strdup_printf (C_("ForeignFolder", "Mailbox - %s"), display_username);
+			mailbox = g_strdup_printf (C_("ForeignFolder", "Mailbox — %s"), display_username);
 			parent_path = g_strdup_printf ("%s/%s", DISPLAY_NAME_FOREIGN_FOLDERS, mailbox);
 
 			g_free (mailbox);
@@ -138,7 +138,7 @@ add_foreign_folder_to_camel (CamelMapiStore *mapi_store,
 			res = FALSE;
 			g_propagate_error (perror,
 				g_error_new (E_MAPI_ERROR, MAPI_E_INVALID_PARAMETER,
-				_("Cannot add folder, failed to add to store's summary")));
+				_("Cannot add folder, failed to add to store’s summary")));
 		}
 
 		g_free (path);
@@ -324,7 +324,7 @@ check_foreign_folder_thread (GObject *with_object,
 		if (g_error_matches (local_error, E_MAPI_ERROR, MAPI_E_NOT_FOUND)) {
 			g_clear_error (&local_error);
 			local_error = g_error_new (E_MAPI_ERROR, MAPI_E_NOT_FOUND,
-				_("Folder '%s' not found. Either it does not exist or you do not have permission to access it."),
+				_("Folder “%s” not found. Either it does not exist or you do not have permission to access it."),
 				cffd->orig_foldername);
 		}
 
@@ -359,7 +359,7 @@ check_foreign_folder_thread (GObject *with_object,
 	g_object_unref (conn);
 
 	if (!cffd->folder_container_class) {
-		g_propagate_error (perror, g_error_new_literal (E_MAPI_ERROR, MAPI_E_CALL_FAILED, _("Cannot add folder, cannot determine folder's type")));
+		g_propagate_error (perror, g_error_new_literal (E_MAPI_ERROR, MAPI_E_CALL_FAILED, _("Cannot add folder, cannot determine folder’s type")));
 		return;
 	}
 
@@ -398,9 +398,9 @@ check_foreign_folder_idle (GObject *with_object,
 	/* Translators: This is used to name foreign folder.
 	   The first '%s' is replaced with user name to whom the folder belongs,
 	   the second '%s' is replaced with folder name.
-	   Example result: "John Smith - Calendar"
+	   Example result: "John Smith — Calendar"
 	*/
-	folder_name = g_strdup_printf (C_("ForeignFolder", "%s - %s"), base_username, base_foldername);
+	folder_name = g_strdup_printf (C_("ForeignFolder", "%s — %s"), base_username, base_foldername);
 
 	mapi_store = CAMEL_MAPI_STORE (with_object);
 
@@ -518,7 +518,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 	cffd->folder_id = 0;
 	cffd->parent_folder_id = 0;
 
-	description = g_strdup_printf (_("Testing availability of folder '%s' of user '%s', please wait..."), cffd->orig_foldername, cffd->username);
+	description = g_strdup_printf (_("Testing availability of folder “%s” of user “%s”, please wait..."), cffd->orig_foldername, cffd->username);
 
 	e_mapi_config_utils_run_in_thread_with_feedback (
 		GTK_WINDOW (dialog),
