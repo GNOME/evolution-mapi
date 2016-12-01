@@ -1,7 +1,7 @@
 # Evolution-MAPI build script
 
-cmake_minimum_required(VERSION 3.0)
-cmake_policy(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
+cmake_policy(VERSION 3.1)
 
 project(evolution-mapi
 	VERSION 3.23.3
