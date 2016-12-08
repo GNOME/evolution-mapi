@@ -1836,15 +1836,16 @@ ecbm_modify_object (ECalBackend *backend, EDataCal *cal, GCancellable *cancellab
 		return;
 	}
 
-	if (mod != E_CAL_OBJ_MOD_ALL) {
-		g_propagate_error (error, EDC_ERROR_EX (OtherError, _("Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server.")));
-		return;
-	}
-
 	/* check the component for validity */
 	icalcomp = icalparser_parse_string (calobj);
 	if (!icalcomp) {
 		g_propagate_error (error, EDC_ERROR (InvalidObject));
+		return;
+	}
+
+	if (mod != E_CAL_OBJ_MOD_ALL && e_cal_util_component_is_instance (icalcomp)) {
+		icalcomponent_free (icalcomp);
+		g_propagate_error (error, EDC_ERROR_EX (OtherError, _("Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server.")));
 		return;
 	}
 
