@@ -1,3 +1,9 @@
+evolution-mapi 3.22.3 2016-12-12
+--------------------------------
+
+Bug Fixes:
+	Bug 775843 - Rejects to modify regular (non-recurring) appointment (Milan Crha)
+
 evolution-mapi 3.22.0 2016-09-19
 --------------------------------
 
