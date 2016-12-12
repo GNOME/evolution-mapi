@@ -15,6 +15,8 @@ set(sources
 	e-mail-config-mapi-page.h
 	e-mail-config-mapi-extension.c
 	e-mail-config-mapi-extension.h
+	e-mail-config-mapi-offline-options.c
+	e-mail-config-mapi-offline-options.h
 	e-mapi-config-ui-extension.c
 	e-mapi-config-ui-extension.h
 	e-mapi-config-utils.c
