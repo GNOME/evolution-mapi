@@ -543,9 +543,13 @@ update_permission_dialog_by_level_combo (GObject *dialog)
 	if (ii < 0 || ii >= G_N_ELEMENTS (predefined_levels) - 1)
 		return;
 
-	rights = folder_permissions_dialog_to_rights (dialog);
-	rights = predefined_levels[ii].rights | (rights & (E_MAPI_PERMISSION_BIT_FREE_BUSY_DETAILED |
-		E_MAPI_PERMISSION_BIT_FREE_BUSY_SIMPLE));
+	if (!predefined_levels[ii].rights) {
+		rights = predefined_levels[ii].rights;
+	} else {
+		rights = folder_permissions_dialog_to_rights (dialog);
+		rights = predefined_levels[ii].rights | (rights & (E_MAPI_PERMISSION_BIT_FREE_BUSY_DETAILED |
+			E_MAPI_PERMISSION_BIT_FREE_BUSY_SIMPLE));
+	}
 
 	widgets->updating = TRUE;
 	update_folder_permissions_by_rights (dialog, rights);
