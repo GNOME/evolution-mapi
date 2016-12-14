@@ -2013,11 +2013,20 @@ camel_mapi_folder_new (CamelStore *store,
 	const gchar *short_name;
 	CamelStoreInfo *si;
 	gboolean filter_inbox;
+	gboolean offline_limit_by_age = FALSE;
+	CamelTimeUnit offline_limit_unit;
+	gint offline_limit_value;
 
 	service = CAMEL_SERVICE (store);
 	settings = camel_service_ref_settings (service);
 
-	filter_inbox = camel_store_settings_get_filter_inbox (CAMEL_STORE_SETTINGS (settings));
+	g_object_get (
+		settings,
+		"filter-inbox", &filter_inbox,
+		"limit-by-age", &offline_limit_by_age,
+		"limit-unit", &offline_limit_unit,
+		"limit-value", &offline_limit_value,
+		NULL);
 
 	g_object_unref (settings);
 
@@ -2061,6 +2070,25 @@ camel_mapi_folder_new (CamelStore *store,
 	if (!mapi_folder->cache) {
 		g_object_unref (folder);
 		return NULL;
+	}
+
+	if (camel_offline_folder_can_downsync (CAMEL_OFFLINE_FOLDER (folder))) {
+		time_t when = (time_t) 0;
+
+		if (offline_limit_by_age)
+			when = camel_time_value_apply (when, offline_limit_unit, offline_limit_value);
+
+		if (when <= (time_t) 0)
+			when = (time_t) -1;
+
+		/* Ensure cache will expire when set up, otherwise
+		 * it causes redownload of messages too soon. */
+		camel_data_cache_set_expire_age (mapi_folder->cache, when);
+		camel_data_cache_set_expire_access (mapi_folder->cache, when);
+	} else {
+		/* Set cache expiration for one week. */
+		camel_data_cache_set_expire_age (mapi_folder->cache, 60 * 60 * 24 * 7);
+		camel_data_cache_set_expire_access (mapi_folder->cache, 60 * 60 * 24 * 7);
 	}
 
 	if (filter_inbox) {
