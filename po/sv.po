@@ -9,22 +9,22 @@ msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2016-11-23 17:28+0000\n"
-"PO-Revision-Date: 2016-11-29 00:04+0100\n"
-"Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
+"POT-Creation-Date: 2016-12-19 14:58+0000\n"
+"PO-Revision-Date: 2016-12-21 23:24+0100\n"
+"Last-Translator: Josef Andersson <josef.andersson@fripost.org>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 1.8.11\n"
+"X-Generator: Poedit 1.8.9\n"
 
 #: ../evolution-mapi.metainfo.xml.in.h:1
 msgid "Exchange MAPI"
 msgstr "Exchange MAPI"
 
-#: ../evolution-mapi.metainfo.xml.in.h:2 ../src/camel/camel-mapi-provider.c:71
+#: ../evolution-mapi.metainfo.xml.in.h:2 ../src/camel/camel-mapi-provider.c:72
 msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr "För åtkomst till Microsoft Exchange 2007/OpenChange-servrar med MAPI"
 
@@ -49,7 +49,7 @@ msgstr "Bakänden saknar stöd för satsvisa tillägg"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:508
 #: ../src/calendar/e-cal-backend-mapi.c:1718
-#: ../src/calendar/e-cal-backend-mapi.c:2229
+#: ../src/calendar/e-cal-backend-mapi.c:2230
 msgid "Failed to create item on a server"
 msgstr "Misslyckades med att skapa objekt på en server"
 
@@ -58,7 +58,7 @@ msgid "The backend does not support bulk modifications"
 msgstr "Bakänden saknar stöd för satsvisa ändringar"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:670
-#: ../src/calendar/e-cal-backend-mapi.c:1931
+#: ../src/calendar/e-cal-backend-mapi.c:1932
 msgid "Failed to modify item on a server"
 msgstr "Misslyckades med att ändra objekt på en server"
 
@@ -148,7 +148,7 @@ msgstr "Misslyckades med att stänga mapp: %s"
 msgid "Could not create cache file"
 msgstr "Kunde inte skapa cachefilen"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1839
+#: ../src/calendar/e-cal-backend-mapi.c:1847
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -156,11 +156,11 @@ msgstr ""
 "Stöd för ändring av enstaka instanser för ett återkommande möte har ännu "
 "inte implementerats. Ingen ändring gjordes till mötet på servern."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2044
+#: ../src/calendar/e-cal-backend-mapi.c:2045
 msgid "Cannot remove items from a server"
 msgstr "Kan inte ta bort objekt från en server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:2475
+#: ../src/calendar/e-cal-backend-mapi.c:2476
 msgid "Failed to get Free/Busy data"
 msgstr "Misslyckades med att hämta Ledig/Upptagen-data"
 
@@ -240,7 +240,7 @@ msgstr "Sändningskvot"
 msgid "No quota information available"
 msgstr "Ingen kvotinformation tillgänglig"
 
-#: ../src/camel/camel-mapi-folder.c:2045
+#: ../src/camel/camel-mapi-folder.c:2054
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Kunde inte läsa in sammandrag för %s"
@@ -257,33 +257,33 @@ msgstr "L_eta efter nya meddelanden i alla mappar"
 msgid "Options"
 msgstr "Alternativ"
 
-#: ../src/camel/camel-mapi-provider.c:51
-msgid "Automatically synchroni_ze account locally"
-msgstr "Syn_kronisera automatiskt kontot lokalt"
-
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:54
+#: ../src/camel/camel-mapi-provider.c:52
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Tillämpa filter för nya meddelanden i Inkorg på denna server"
 
-#: ../src/camel/camel-mapi-provider.c:56
+#: ../src/camel/camel-mapi-provider.c:54
 msgid "Check new messages for _Junk contents"
 msgstr "Kontrollera nya meddelanden efter _skräppost"
 
-#: ../src/camel/camel-mapi-provider.c:58
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Kontrollera endast I_nkorgsmappen efter skräppost"
 
-#: ../src/camel/camel-mapi-provider.c:60
+#: ../src/camel/camel-mapi-provider.c:58
 #: ../src/configuration/e-mapi-config-utils.c:1602
 msgid "Lis_ten for server notifications"
 msgstr "_Lyssna efter serveraviseringar"
 
-#: ../src/camel/camel-mapi-provider.c:86
+#: ../src/camel/camel-mapi-provider.c:60
+msgid "Synchroni_ze remote mail locally in all folders"
+msgstr "Synkronise_ra fjärrpost lokalt i alla mappar"
+
+#: ../src/camel/camel-mapi-provider.c:87
 msgid "Password"
 msgstr "Lösenord"
 
-#: ../src/camel/camel-mapi-provider.c:87
+#: ../src/camel/camel-mapi-provider.c:88
 msgid ""
 "This option will connect to the OpenChange server using a plaintext password."
 msgstr ""
@@ -734,144 +734,144 @@ msgstr "Anpassad"
 msgid "Writing folder permissions, please wait..."
 msgstr "Skriver mapprättigheter, vänta…"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:778
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
 #: ../src/configuration/e-mapi-search-gal-user.c:525
 msgctxt "User"
 msgid "Anonymous"
 msgstr "Anonym"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:780
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
 #: ../src/configuration/e-mapi-search-gal-user.c:522
 msgctxt "User"
 msgid "Default"
 msgstr "Standard"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:786
 msgctxt "User"
 msgid "Unknown"
 msgstr "Okänd"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:874
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:878
 #: ../src/configuration/e-mapi-search-gal-user.c:598
 msgid "Name"
 msgstr "Namn"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:880
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:884
 msgid "Permission level"
 msgstr "Rättighetsnivå"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:933
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:937
 msgid "Edit MAPI folder permissions..."
 msgstr "Redigera rättigheter för MAPI-mapp…"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:958
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:962
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:624
 msgid "Account:"
 msgstr "Konto:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:984
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:988
 msgid "Folder name:"
 msgstr "Mappnamn:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1005
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1009
 msgid "Folder ID:"
 msgstr "Mapp-ID:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1064
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1068
 msgid "Permissions"
 msgstr "Rättigheter"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1085
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1089
 msgid "Permi_ssion level:"
 msgstr "Rättighetsn_ivå:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1113
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1117
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Läs"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1124
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1187
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1128
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1191
 msgctxt "Permissions"
 msgid "None"
 msgstr "Ingen"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1129
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1133
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "Fullständiga detaljer"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1134
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1138
 msgctxt "Permissions"
 msgid "Simple Free/Busy"
 msgstr "Enkel Ledig/Upptagen"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1138
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1142
 msgctxt "Permissions"
 msgid "Detailed Free/Busy"
 msgstr "Detaljerad Ledig/Upptagen"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1145
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1149
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Skriv"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1156
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1160
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "Skapa objekt"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1160
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1164
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Skapa undermappar"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1164
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1168
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "Redigera egna"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1168
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1172
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "Redigera alla"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1176
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1180
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Ta bort objekt"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1192
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1196
 msgctxt "Permissions"
 msgid "Own"
 msgstr "Egna"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1197
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1201
 msgctxt "Permissions"
 msgid "All"
 msgstr "Alla"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1203
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1207
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Andra"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1214
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1218
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Mappägare"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1218
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1222
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Mappkontakt"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1222
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1226
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Mappsynlighet"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1277
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1281
 msgid "Reading folder permissions, please wait..."
 msgstr "Läser mapprättigheter, vänta…"
 
@@ -1157,6 +1157,9 @@ msgstr "Kan inte lägga till mapp, mapptyp stöds ej"
 #: ../src/libexchangemapi/e-mapi-folder.c:333
 msgid "Cannot add folder, master source not found"
 msgstr "Kan inte lägga till mapp, huvudkälla inte funnen"
+
+#~ msgid "Automatically synchroni_ze account locally"
+#~ msgstr "Syn_kronisera automatiskt kontot lokalt"
 
 #~ msgctxt "ForeignFolder"
 #~ msgid "%s - %s"
