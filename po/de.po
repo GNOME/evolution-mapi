@@ -2,7 +2,7 @@
 # Copyright (C) 2009 Free Software Foundation, Inc.
 # This file is distributed under the same license as the evolution-mapi package.
 # Andre Klapper <ak-47@gmx.net>, 2009.
-# Mario Blättermann <mario.blaettermann@gmail.com>, 2009-2012, 2015-2016.
+# Mario Blättermann <mario.blaettermann@gmail.com>, 2009-2012, 2015-2017.
 # Hendrik Richter <hendrikr@gnome.org>, 2009.
 # Christian Kirbach <Christian.Kirbach@googlemail.com>, 2009-2010.
 # Daniel Winzen <d@winzen4.de>, 2012.
@@ -11,9 +11,9 @@ msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2016-11-23 17:28+0000\n"
-"PO-Revision-Date: 2016-11-26 12:12+0100\n"
-"Last-Translator: Christian Kirbach <christian.kirbach@gmail.com>\n"
+"POT-Creation-Date: 2016-12-19 14:58+0000\n"
+"PO-Revision-Date: 2017-02-04 19:31+0100\n"
+"Last-Translator: Mario Blättermann <mario.blaettermann@gmail.com>\n"
 "Language-Team: Deutsch <gnome-de@gnome.org>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
@@ -27,7 +27,7 @@ msgstr ""
 msgid "Exchange MAPI"
 msgstr "Exchange MAPI"
 
-#: ../evolution-mapi.metainfo.xml.in.h:2 ../src/camel/camel-mapi-provider.c:71
+#: ../evolution-mapi.metainfo.xml.in.h:2 ../src/camel/camel-mapi-provider.c:72
 msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr ""
 "Für den Zugriff auf Microsoft Exchange 2007-/OpenChange-Server über MAPI"
@@ -53,7 +53,7 @@ msgstr "Das Backend unterstützt keine Massenhinzufügungen"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:508
 #: ../src/calendar/e-cal-backend-mapi.c:1718
-#: ../src/calendar/e-cal-backend-mapi.c:2229
+#: ../src/calendar/e-cal-backend-mapi.c:2230
 msgid "Failed to create item on a server"
 msgstr "Fehler beim Erstellen des Objekts auf dem Server"
 
@@ -62,7 +62,7 @@ msgid "The backend does not support bulk modifications"
 msgstr "Das Backend unterstützt keine Massenänderungen"
 
 #: ../src/addressbook/e-book-backend-mapi-contacts.c:670
-#: ../src/calendar/e-cal-backend-mapi.c:1931
+#: ../src/calendar/e-cal-backend-mapi.c:1932
 msgid "Failed to modify item on a server"
 msgstr "Bearbeiten eines Objekts auf einem Server ist fehlgeschlagen"
 
@@ -152,7 +152,7 @@ msgstr "Ordner konnte nicht geschlossen werden: %s"
 msgid "Could not create cache file"
 msgstr "Zwischenspeicherdatei konnte nicht erzeugt werden"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1839
+#: ../src/calendar/e-cal-backend-mapi.c:1847
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -161,11 +161,11 @@ msgstr ""
 "nicht unterstützt. Der auf dem Server gespeicherte Termin wurde daher nicht "
 "verändert."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2044
+#: ../src/calendar/e-cal-backend-mapi.c:2045
 msgid "Cannot remove items from a server"
 msgstr "Objekte können nicht vom Server gelöscht werden"
 
-#: ../src/calendar/e-cal-backend-mapi.c:2475
+#: ../src/calendar/e-cal-backend-mapi.c:2476
 msgid "Failed to get Free/Busy data"
 msgstr "Holen der Verfügbarkeitsdaten ist fehlgeschlagen"
 
@@ -245,7 +245,7 @@ msgstr "Speicherplatzbegrenzung senden"
 msgid "No quota information available"
 msgstr "Keine Speicherplatzinformationen verfügbar"
 
-#: ../src/camel/camel-mapi-folder.c:2045
+#: ../src/camel/camel-mapi-folder.c:2054
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Zusammenfassung für »%s« konnte nicht geladen werden"
@@ -262,33 +262,33 @@ msgstr "In _allen Ordnern nach neuen E-Mails schauen"
 msgid "Options"
 msgstr "Optionen"
 
-#: ../src/camel/camel-mapi-provider.c:51
-msgid "Automatically synchroni_ze account locally"
-msgstr "Konto automatisch lokal a_bgleichen"
-
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:54
+#: ../src/camel/camel-mapi-provider.c:52
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "Filter auf neue Nachrichten im Eingang dieses Servers an_wenden"
 
-#: ../src/camel/camel-mapi-provider.c:56
+#: ../src/camel/camel-mapi-provider.c:54
 msgid "Check new messages for _Junk contents"
 msgstr "Neue Nachrichten auf _unerwünschten Inhalt prüfen"
 
-#: ../src/camel/camel-mapi-provider.c:58
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Ausschließlich den _Eingang auf unerwünschte Nachrichten prüfen"
 
-#: ../src/camel/camel-mapi-provider.c:60
+#: ../src/camel/camel-mapi-provider.c:58
 #: ../src/configuration/e-mapi-config-utils.c:1602
 msgid "Lis_ten for server notifications"
 msgstr "Nach Benachrich_tigungen des Servers lauschen"
 
-#: ../src/camel/camel-mapi-provider.c:86
+#: ../src/camel/camel-mapi-provider.c:60
+msgid "Synchroni_ze remote mail locally in all folders"
+msgstr "Entfernte E-Mails automatisch lokal in allen Ordnern a_bgleichen"
+
+#: ../src/camel/camel-mapi-provider.c:87
 msgid "Password"
 msgstr "Passwort"
 
-#: ../src/camel/camel-mapi-provider.c:87
+#: ../src/camel/camel-mapi-provider.c:88
 msgid ""
 "This option will connect to the OpenChange server using a plaintext password."
 msgstr ""
@@ -747,144 +747,144 @@ msgstr "Benutzerdefiniert"
 msgid "Writing folder permissions, please wait..."
 msgstr "Ordner-Zugriffsrechte werden gelesen, bitte warten …"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:778
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
 #: ../src/configuration/e-mapi-search-gal-user.c:525
 msgctxt "User"
 msgid "Anonymous"
 msgstr "Anonym"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:780
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
 #: ../src/configuration/e-mapi-search-gal-user.c:522
 msgctxt "User"
 msgid "Default"
 msgstr "Vorgabe"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:786
 msgctxt "User"
 msgid "Unknown"
 msgstr "Unbekannt"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:874
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:878
 #: ../src/configuration/e-mapi-search-gal-user.c:598
 msgid "Name"
 msgstr "Name"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:880
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:884
 msgid "Permission level"
 msgstr "Stufe der Zugriffsrechte"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:933
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:937
 msgid "Edit MAPI folder permissions..."
 msgstr "MAPI-Ordner-Zugriffsrechte bearbeiten …"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:958
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:962
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:624
 msgid "Account:"
 msgstr "Konto:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:984
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:988
 msgid "Folder name:"
 msgstr "Ordnername:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1005
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1009
 msgid "Folder ID:"
 msgstr "Ordnerkennung:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1064
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1068
 msgid "Permissions"
 msgstr "Berechtigungen"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1085
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1089
 msgid "Permi_ssion level:"
 msgstr "Stufe der Zugriff_srechte:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1113
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1117
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Lesen"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1124
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1187
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1128
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1191
 msgctxt "Permissions"
 msgid "None"
 msgstr "Kein"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1129
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1133
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "Vollständige Details"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1134
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1138
 msgctxt "Permissions"
 msgid "Simple Free/Busy"
 msgstr "Verfügbarkeitsinformationen (einfach)"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1138
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1142
 msgctxt "Permissions"
 msgid "Detailed Free/Busy"
 msgstr "Verfügbarkeitsinformationen (erweitert)"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1145
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1149
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Schreiben"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1156
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1160
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "Objekte anlegen"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1160
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1164
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Unterordner anlegen"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1164
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1168
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "Eigene bearbeiten"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1168
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1172
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "Alle bearbeiten"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1176
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1180
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Objekte löschen"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1192
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1196
 msgctxt "Permissions"
 msgid "Own"
 msgstr "Eigene"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1197
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1201
 msgctxt "Permissions"
 msgid "All"
 msgstr "Alle"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1203
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1207
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Andere"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1214
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1218
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Eigentümer des Ordners"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1218
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1222
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Ordnerkontakt"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1222
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1226
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Ordner sichtbar"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1277
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1281
 msgid "Reading folder permissions, please wait..."
 msgstr "Ordner-Zugriffsrechte werden gelesen, bitte warten …"
 
@@ -1183,6 +1183,9 @@ msgstr ""
 #: ../src/libexchangemapi/e-mapi-folder.c:333
 msgid "Cannot add folder, master source not found"
 msgstr "Ordner kann nicht hinzugefügt werden, Hauptquelle wurde nicht gefunden"
+
+#~ msgid "Automatically synchroni_ze account locally"
+#~ msgstr "Konto automatisch lokal a_bgleichen"
 
 #~ msgctxt "ForeignFolder"
 #~ msgid "%s - %s"
