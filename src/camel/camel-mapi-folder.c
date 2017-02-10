@@ -2091,6 +2091,10 @@ camel_mapi_folder_new (CamelStore *store,
 		camel_data_cache_set_expire_access (mapi_folder->cache, 60 * 60 * 24 * 7);
 	}
 
+	camel_binding_bind_property (store, "online",
+		mapi_folder->cache, "expire-enabled",
+		G_BINDING_SYNC_CREATE);
+
 	if (filter_inbox) {
 		CamelFolderInfo *fi;
 
