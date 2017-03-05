@@ -2,75 +2,73 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 #
-# Iñaki Larrañaga Murgoitio <dooteo@zundan.com>, 2009, 2010, 2014, 2015.
+# Iñaki Larrañaga Murgoitio <dooteo@zundan.com>, 2009, 2010, 2014, 2015, 2017.
 # Edurne Labaka <elabaka@uzei.com>, 2015.
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2015-02-07 12:08+0100\n"
-"PO-Revision-Date: 2015-02-07 12:09+0100\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-03-05 11:53+0100\n"
+"PO-Revision-Date: 2017-03-04 20:06+0100\n"
 "Last-Translator: Iñaki Larrañaga Murgoitio <dooteo@zundan.com>\n"
-"Language-Team: Basque <librezale@librezale.org>\n"
+"Language-Team: Basque <librezale@librezale.eus>\n"
 "Language: eu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 1.4\n"
+"X-Generator: Lokalize 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ../evolution-mapi.metainfo.xml.in.h:1
 msgid "Exchange MAPI"
 msgstr "Exchange MAPI"
 
-#: ../evolution-mapi.metainfo.xml.in.h:2 ../src/camel/camel-mapi-provider.c:73
+#: ../evolution-mapi.metainfo.xml.in.h:2 ../src/camel/camel-mapi-provider.c:72
 msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr ""
 "Microsoft Exchange 2007/ OpenChange zerbitzariak atzitzeko MAPI erabiliz"
 
-#: ../src/addressbook/e-book-backend-mapi.c:744
+#: ../src/addressbook/e-book-backend-mapi.c:737
 msgid "Searching"
 msgstr "Bilatzen"
 
 #: ../src/addressbook/e-book-backend-mapi.c:1739
-#: ../src/calendar/e-cal-backend-mapi.c:189
-#: ../src/calendar/e-cal-backend-mapi.c:488
-#: ../src/camel/camel-mapi-folder.c:1937 ../src/camel/camel-mapi-folder.c:2017
+#: ../src/calendar/e-cal-backend-mapi.c:187
+#: ../src/calendar/e-cal-backend-mapi.c:487
+#: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1942
 msgid "Unknown error"
 msgstr "Errore ezezaguna"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:432
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:430
 msgid "Failed to remove public folder"
 msgstr "Huts egin du karpeta publikoa kentzean"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:468
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:466
 msgid "The backend does not support bulk additions"
 msgstr "Motorrak ez du gehitze masiborik onartzen"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:510
-#: ../src/calendar/e-cal-backend-mapi.c:1719
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:508
+#: ../src/calendar/e-cal-backend-mapi.c:1718
 #: ../src/calendar/e-cal-backend-mapi.c:2230
 msgid "Failed to create item on a server"
 msgstr "Huts egin du elementua zerbitzarian sortzean"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:627
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:625
 msgid "The backend does not support bulk modifications"
 msgstr "Motorrak ez du aldaketa masiborik onartzen"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:672
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:670
 #: ../src/calendar/e-cal-backend-mapi.c:1932
 msgid "Failed to modify item on a server"
 msgstr "Huts egin du elementua zerbitzarian aldatzean"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:848
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:846
 msgid "Failed to fetch items from a server"
 msgstr "Huts egin du elementuak zerbitzaritik eskuratzean"
 
 #. Translators : This is used to cache the downloaded contacts from a server.
 #. %d is an index of the contact.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:866
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:864
 #, c-format
 msgid "Caching contact %d"
 msgstr "%d. kontaktua eskuratzen"
@@ -83,21 +81,21 @@ msgstr "%d. kontaktua eskuratzen"
 msgid "Caching contact %d/%d"
 msgstr "%d/%d kontaktua eskuratzen"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:925
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:924
 msgid "Failed to count server contacts"
 msgstr "Huts egin du zerbitzariaren kontaktuak zenbatzean"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:983
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:982
 msgid "Failed to list items from a server"
 msgstr "Huts egin du elementuak zerbitzaritik zerrendatzean"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1064
+#: ../src/addressbook/e-book-backend-mapi-contacts.c:1063
 msgid "Failed to transfer contacts from a server"
 msgstr "Huts egin du kontaktuak zerbitzaritik transferitzean"
 
 #. Translators : This is used to cache the downloaded contacts from GAL.
 #. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:153
+#: ../src/addressbook/e-book-backend-mapi-gal.c:151
 #, c-format
 msgid "Caching GAL contact %d"
 msgstr "%d. GAL kontaktua eskuratzen"
@@ -110,47 +108,47 @@ msgstr "%d. GAL kontaktua eskuratzen"
 msgid "Caching GAL contact %d/%d"
 msgstr "%d/%d GAL kontaktua eskuratzen"
 
-#: ../src/addressbook/e-book-backend-mapi-gal.c:229
-#: ../src/addressbook/e-book-backend-mapi-gal.c:313
+#: ../src/addressbook/e-book-backend-mapi-gal.c:228
+#: ../src/addressbook/e-book-backend-mapi-gal.c:312
 msgid "Failed to fetch GAL entries"
 msgstr "Huts egin du GAL sarrerak eskuratzean"
 
 #. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:413
+#: ../src/calendar/e-cal-backend-mapi.c:412
 #, c-format
 msgid "Loading items in folder %s"
 msgstr "Elementuak kargatzen %s karpetan"
 
-#: ../src/calendar/e-cal-backend-mapi.c:780
+#: ../src/calendar/e-cal-backend-mapi.c:779
 #, c-format
 msgid "Failed to open folder: %s"
 msgstr "Huts egin du karpeta irekitzean: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:788
+#: ../src/calendar/e-cal-backend-mapi.c:787
 #, c-format
 msgid "Failed to get folder properties: %s"
 msgstr "Huts egin du karpetaren propietateak lortzean: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:829
+#: ../src/calendar/e-cal-backend-mapi.c:828
 #, c-format
 msgid "Failed to list objects: %s"
 msgstr "Huts egin du objektuak zerrendatzean: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:855
+#: ../src/calendar/e-cal-backend-mapi.c:854
 #, c-format
 msgid "Failed to transfer objects: %s"
 msgstr "Huts egin du objektuak transferitzean: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:874
+#: ../src/calendar/e-cal-backend-mapi.c:873
 #, c-format
 msgid "Failed to close folder: %s"
 msgstr "Huts egin du karpeta ixtean: %s"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1383
+#: ../src/calendar/e-cal-backend-mapi.c:1382
 msgid "Could not create cache file"
 msgstr "Ezin izan da cacheko fitxategia sortu"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1840
+#: ../src/calendar/e-cal-backend-mapi.c:1847
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -166,144 +164,146 @@ msgstr "Ezin dira elementuak zerbitzaritik kendu"
 msgid "Failed to get Free/Busy data"
 msgstr "Huts egin du Libre/Lanpetuta datuak eskuratzean"
 
-#: ../src/camel/camel-mapi-folder.c:805
-#, c-format
-msgid "Refreshing folder '%s'"
+#: ../src/camel/camel-mapi-folder.c:776
+#, fuzzy, c-format
+msgid "Refreshing folder “%s”"
 msgstr "'%s' karpeta freskatzen"
 
-#: ../src/camel/camel-mapi-folder.c:873
-#, c-format
-msgid "Downloading messages in folder '%s'"
+#: ../src/camel/camel-mapi-folder.c:844
+#, fuzzy, c-format
+msgid "Downloading messages in folder “%s”"
 msgstr "Mezuak '%s' karpetara deskargatzen"
 
-#: ../src/camel/camel-mapi-folder.c:961 ../src/camel/camel-mapi-folder.c:1569
+#: ../src/camel/camel-mapi-folder.c:932 ../src/camel/camel-mapi-folder.c:1492
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Mezu hau ez dago eskuragarri lineaz kanpoko moduan."
 
-#: ../src/camel/camel-mapi-folder.c:971 ../src/camel/camel-mapi-folder.c:989
+#: ../src/camel/camel-mapi-folder.c:942 ../src/camel/camel-mapi-folder.c:960
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Huts egin du elementuak eskuratzean: %s"
 
-#: ../src/camel/camel-mapi-folder.c:976 ../src/camel/camel-mapi-folder.c:994
+#: ../src/camel/camel-mapi-folder.c:947 ../src/camel/camel-mapi-folder.c:965
 msgid "Fetching items failed"
 msgstr "Huts egin du elementuak eskuratzean"
 
-#: ../src/camel/camel-mapi-folder.c:1248
-#, c-format
-msgid "Cannot append message to folder '%s'"
+#: ../src/camel/camel-mapi-folder.c:1170
+#, fuzzy, c-format
+msgid "Cannot append message to folder “%s”"
 msgstr "Ezin zaio mezua '%s' karpetari erantsi"
 
-#: ../src/camel/camel-mapi-folder.c:1257 ../src/camel/camel-mapi-folder.c:1287
+#: ../src/camel/camel-mapi-folder.c:1179 ../src/camel/camel-mapi-folder.c:1209
 #, c-format
 msgid "Offline."
 msgstr "Lineaz kanpo."
 
-#: ../src/camel/camel-mapi-folder.c:1370
+#: ../src/camel/camel-mapi-folder.c:1293
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "Huts egin du Zakarrontzia hustean: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1376
+#: ../src/camel/camel-mapi-folder.c:1299
 msgid "Failed to empty Trash"
 msgstr "Huts egin du Zakarrontzia hustean"
 
-#: ../src/camel/camel-mapi-folder.c:1554
+#. Translators: The first %s is replaced with a message ID,
+#. the second %s is replaced with a detailed error string
+#: ../src/camel/camel-mapi-folder.c:1477
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Ezin da %s mezua eskuratu: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1555
+#: ../src/camel/camel-mapi-folder.c:1478
 msgid "No such message"
 msgstr "Ez dago halako mezurik"
 
-#: ../src/camel/camel-mapi-folder.c:1580 ../src/camel/camel-mapi-folder.c:1612
+#: ../src/camel/camel-mapi-folder.c:1503 ../src/camel/camel-mapi-folder.c:1537
 #, c-format
 msgid "Could not get message: %s"
 msgstr "Ezin izan da mezua eskuratu: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1586 ../src/camel/camel-mapi-folder.c:1619
+#: ../src/camel/camel-mapi-folder.c:1509 ../src/camel/camel-mapi-folder.c:1544
 #, c-format
 msgid "Could not get message"
 msgstr "Ezin izan da mezua eskuratu"
 
-#: ../src/camel/camel-mapi-folder.c:1994
+#: ../src/camel/camel-mapi-folder.c:1919
 msgid "Receive quota"
 msgstr "Jaso aipua"
 
-#: ../src/camel/camel-mapi-folder.c:2000
+#: ../src/camel/camel-mapi-folder.c:1925
 msgid "Send quota"
 msgstr "Bidali aipua"
 
-#: ../src/camel/camel-mapi-folder.c:2022
+#: ../src/camel/camel-mapi-folder.c:1947
 msgid "No quota information available"
 msgstr "Ez dago aipuaren informaziorik eskuragarri"
 
-#: ../src/camel/camel-mapi-folder.c:2124
+#: ../src/camel/camel-mapi-folder.c:2054
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Ezin izan da %s(r)en laburpena kargatu"
 
-#: ../src/camel/camel-mapi-provider.c:45
+#: ../src/camel/camel-mapi-provider.c:43
 msgid "Checking for new mail"
 msgstr "Mezu berririk dagoen begiratzen"
 
-#: ../src/camel/camel-mapi-provider.c:47
+#: ../src/camel/camel-mapi-provider.c:45
 msgid "C_heck for new messages in all folders"
 msgstr "_Begiratu mezu berriak karpeta guztietan"
 
-#: ../src/camel/camel-mapi-provider.c:51
+#: ../src/camel/camel-mapi-provider.c:49
 msgid "Options"
 msgstr "Aukerak"
 
-#: ../src/camel/camel-mapi-provider.c:53
-msgid "Automatically synchroni_ze account locally"
-msgstr "_Sinkronizatu automatikoki lokaleko kontua"
-
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:56
+#: ../src/camel/camel-mapi-provider.c:52
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Aplikatu iragazkiak zerbitzariko sarrerako ontziko mezu berriei"
 
-#: ../src/camel/camel-mapi-provider.c:58
+#: ../src/camel/camel-mapi-provider.c:54
 msgid "Check new messages for _Junk contents"
 msgstr "Begiratu mezu berriak eduki _baztergarriak dituzten"
 
-#: ../src/camel/camel-mapi-provider.c:60
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Begiratu mezu ba_ztergarriak sarrerako karpetan soilik"
 
-#: ../src/camel/camel-mapi-provider.c:62
-#: ../src/configuration/e-mapi-config-utils.c:1604
+#: ../src/camel/camel-mapi-provider.c:58
+#: ../src/configuration/e-mapi-config-utils.c:1602
 msgid "Lis_ten for server notifications"
 msgstr "_Entzun zerbitzariaren jakinarazpenei"
 
-#: ../src/camel/camel-mapi-provider.c:88
+#: ../src/camel/camel-mapi-provider.c:60
+msgid "Synchroni_ze remote mail locally in all folders"
+msgstr ""
+
+#: ../src/camel/camel-mapi-provider.c:87
 msgid "Password"
 msgstr "Pasahitza"
 
-#: ../src/camel/camel-mapi-provider.c:89
+#: ../src/camel/camel-mapi-provider.c:88
 msgid ""
 "This option will connect to the OpenChange server using a plaintext password."
 msgstr ""
 "Aukera honek OpenChange zerbitzariarekin konektatuko zaitu testu arrunteko "
 "pasahitzaren bidez."
 
-#: ../src/camel/camel-mapi-sasl-krb.c:28
+#: ../src/camel/camel-mapi-sasl-krb.c:26
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-mapi-sasl-krb.c:30
+#: ../src/camel/camel-mapi-sasl-krb.c:28
 msgid "This option will connect to the server using kerberos key."
 msgstr ""
 "Aukera honek zerbitzariarekin konektatuko zaitu Kerberos gakoa erabiliz."
 
-#: ../src/camel/camel-mapi-store.c:134 ../src/camel/camel-mapi-store.c:176
+#: ../src/camel/camel-mapi-store.c:132 ../src/camel/camel-mapi-store.c:174
 msgid "Cannot find folder in a local cache"
 msgstr "Ezin da karpeta lokaleko cachean aurkitu"
 
-#: ../src/camel/camel-mapi-store.c:492 ../src/camel/camel-mapi-store.c:1179
+#: ../src/camel/camel-mapi-store.c:490 ../src/camel/camel-mapi-store.c:1178
 msgid "Folder list is not available in offline mode"
 msgstr "Karpeten zerrenda ez dago eskuragarri lineaz kanpoko moduan"
 
@@ -315,104 +315,107 @@ msgstr "Ez da karpeta publikoa aurkitu"
 msgid "No folder found"
 msgstr "Ez da karpeta aurkitu"
 
-#: ../src/camel/camel-mapi-store.c:1201 ../src/camel/camel-mapi-store.c:2168
-#, c-format
-msgid "Connecting to '%s'"
+#: ../src/camel/camel-mapi-store.c:1200 ../src/camel/camel-mapi-store.c:2170
+#, fuzzy, c-format
+msgid "Connecting to “%s”"
 msgstr "'%s'(r)ekin konektatzen"
 
-#: ../src/camel/camel-mapi-store.c:1260
+#: ../src/camel/camel-mapi-store.c:1259
 msgid "Cannot create MAPI folders in offline mode"
 msgstr "Ezin da MAPI karpetarik sortu lineaz kanpoko moduan"
 
-#: ../src/camel/camel-mapi-store.c:1267
-#, c-format
-msgid "Cannot create new folder '%s'"
+#: ../src/camel/camel-mapi-store.c:1266
+#, fuzzy, c-format
+msgid "Cannot create new folder “%s”"
 msgstr "Ezin da '%s' karpeta berria sortu"
 
-#: ../src/camel/camel-mapi-store.c:1276
+#: ../src/camel/camel-mapi-store.c:1275
 #, c-format
 msgid "Authentication failed"
 msgstr "Huts egin du autentifikatzean"
 
-#: ../src/camel/camel-mapi-store.c:1286
-msgid "MAPI folders can be created only within mailbox of the logged user"
+#: ../src/camel/camel-mapi-store.c:1285
+msgid "MAPI folders can be created only within mailbox of the logged in user"
 msgstr ""
 "Saioa hasitako erabiltzailearen posta-kutxaren barruan soilik sor daiteke "
 "MAPI karpetak"
 
-#: ../src/camel/camel-mapi-store.c:1299 ../src/camel/camel-mapi-store.c:1412
-#, c-format
-msgid "Cannot find folder '%s'"
+#: ../src/camel/camel-mapi-store.c:1298 ../src/camel/camel-mapi-store.c:1411
+#, fuzzy, c-format
+msgid "Cannot find folder “%s”"
 msgstr "Ezin da '%s' karpeta aurkitu"
 
-#: ../src/camel/camel-mapi-store.c:1354
-#, c-format
-msgid "Cannot create folder '%s': %s"
+#: ../src/camel/camel-mapi-store.c:1353
+#, fuzzy, c-format
+msgid "Cannot create folder “%s”: %s"
 msgstr "Ezin da '%s' karpeta sortu: %s"
 
-#: ../src/camel/camel-mapi-store.c:1360
-#, c-format
-msgid "Cannot create folder '%s'"
+#: ../src/camel/camel-mapi-store.c:1359
+#, fuzzy, c-format
+msgid "Cannot create folder “%s”"
 msgstr "Ezin da '%s' karpeta sortu"
 
-#: ../src/camel/camel-mapi-store.c:1390 ../src/camel/camel-mapi-store.c:1402
+#: ../src/camel/camel-mapi-store.c:1389 ../src/camel/camel-mapi-store.c:1401
 msgid "Cannot delete MAPI folders in offline mode"
 msgstr "Ezin da MAPI karpetarik ezabatu lineaz kanpoko moduan"
 
-#: ../src/camel/camel-mapi-store.c:1458
-#, c-format
-msgid "Cannot remove folder '%s': %s"
+#: ../src/camel/camel-mapi-store.c:1457
+#, fuzzy, c-format
+msgid "Cannot remove folder “%s”: %s"
 msgstr "Ezin da '%s' MAPI karpeta kendu: %s"
 
-#: ../src/camel/camel-mapi-store.c:1466
-#, c-format
-msgid "Cannot remove folder '%s'"
+#: ../src/camel/camel-mapi-store.c:1465
+#, fuzzy, c-format
+msgid "Cannot remove folder “%s”"
 msgstr "Ezin da '%s' karpeta kendu"
 
-#: ../src/camel/camel-mapi-store.c:1496 ../src/camel/camel-mapi-store.c:1511
+#: ../src/camel/camel-mapi-store.c:1495 ../src/camel/camel-mapi-store.c:1510
 msgid "Cannot rename MAPI folders in offline mode"
 msgstr "Ezin da MAPI karpetak izenez aldatu lineaz kanpoko moduan"
 
-#: ../src/camel/camel-mapi-store.c:1522
-#, c-format
-msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
+#. Translators: “%s” is current name of the folder
+#: ../src/camel/camel-mapi-store.c:1521
+#, fuzzy, c-format
+msgid "Cannot rename MAPI folder “%s”. Folder does not exist"
 msgstr "Ezin da '%s' MAPI karpetaren izena aldatu. Karpeta ez da existitzen"
 
-#: ../src/camel/camel-mapi-store.c:1533
-#, c-format
-msgid "Cannot rename MAPI default folder '%s' to '%s'"
+#. Translators: “%s to %s” is current name of the folder  and
+#. new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1532
+#, fuzzy, c-format
+msgid "Cannot rename MAPI default folder “%s” to “%s”"
 msgstr "Ezin da '%s' MAPI karpeta lehenetsia '%s' izenera aldatu"
 
-#. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1559 ../src/camel/camel-mapi-store.c:1602
-#: ../src/camel/camel-mapi-store.c:1682
-#, c-format
-msgid "Cannot rename MAPI folder '%s' to '%s'"
+#. Translators: “%s to %s” is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1558 ../src/camel/camel-mapi-store.c:1601
+#: ../src/camel/camel-mapi-store.c:1681
+#, fuzzy, c-format
+msgid "Cannot rename MAPI folder “%s” to “%s”"
 msgstr "Ezin da '%s' MAPI karpeta '%s' izenera aldatu"
 
-#. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1594 ../src/camel/camel-mapi-store.c:1675
-#, c-format
-msgid "Cannot rename MAPI folder '%s' to '%s': %s"
+#. Translators: “%s to %s” is current name of the folder and new name of the folder.
+#. The last “%s” is a detailed error message.
+#: ../src/camel/camel-mapi-store.c:1593 ../src/camel/camel-mapi-store.c:1674
+#, fuzzy, c-format
+msgid "Cannot rename MAPI folder “%s” to “%s”: %s"
 msgstr "Ezin da '%s' MAPI karpeta '%s' izenera aldatu: %s"
 
-#: ../src/camel/camel-mapi-store.c:1772
+#: ../src/camel/camel-mapi-store.c:1771
 msgid "Cannot subscribe MAPI folders in offline mode"
 msgstr "Ezin da MAPI karpetetara harpidetu lineaz kanpoko moduan"
 
-#: ../src/camel/camel-mapi-store.c:1789
-#, c-format
-msgid "Folder '%s' not found"
+#: ../src/camel/camel-mapi-store.c:1788
+#, fuzzy, c-format
+msgid "Folder “%s” not found"
 msgstr "Ez da '%s' karpeta aurkitu"
 
-#: ../src/camel/camel-mapi-store.c:1907
+#: ../src/camel/camel-mapi-store.c:1906
 msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr "Ezin da MAPI karpetetatik harpidetza kendu lineaz kanpoko moduan"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:2119
-#: ../src/camel/camel-mapi-transport.c:195
+#: ../src/camel/camel-mapi-store.c:2117
+#: ../src/camel/camel-mapi-transport.c:194
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "%s  Exchange MAPI zerbitzaria"
@@ -420,85 +423,85 @@ msgstr "%s  Exchange MAPI zerbitzaria"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:2123
-#: ../src/camel/camel-mapi-transport.c:198
+#: ../src/camel/camel-mapi-store.c:2121
+#: ../src/camel/camel-mapi-transport.c:197
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "%s(r)en Exchange MAPI zerbitzua %s(e)n"
 
-#: ../src/camel/camel-mapi-store.c:2150
-msgid "Cannot connect MAPI store in offline mode"
+#: ../src/camel/camel-mapi-store.c:2152
+msgid "Cannot connect to MAPI store in offline mode"
 msgstr "Ezin da MAPI biltegiarekin konektatu lineaz kanpoko moduan"
 
-#: ../src/camel/camel-mapi-store.c:2203
-#, c-format
-msgid "Mailbox '%s' is full, no new messages will be received or sent."
+#: ../src/camel/camel-mapi-store.c:2205
+#, fuzzy, c-format
+msgid "Mailbox “%s” is full, no new messages will be received or sent."
 msgstr "'%s' postontzia beteta dago, ez da mezu berririk jasoko edo bidaliko."
 
-#: ../src/camel/camel-mapi-store.c:2205
-#, c-format
+#: ../src/camel/camel-mapi-store.c:2207
+#, fuzzy, c-format
 msgid ""
-"Mailbox '%s' is near its size limit, message send will be disabled soon."
+"Mailbox “%s” is near its size limit, message send will be disabled soon."
 msgstr ""
 "'%s' postontziaren tamaina gehienera iristen ari da, laster batean mezuak "
 "bidaltzea desgaituko da."
 
-#: ../src/camel/camel-mapi-store.c:2209
-#, c-format
-msgid "Mailbox '%s' is full, no new messages will be received."
+#: ../src/camel/camel-mapi-store.c:2211
+#, fuzzy, c-format
+msgid "Mailbox “%s” is full, no new messages will be received."
 msgstr "'%s' postontzia beteta dago, ez da mezu berririk jasoko."
 
-#: ../src/camel/camel-mapi-store.c:2211
-#, c-format
-msgid "Mailbox '%s' is near its size limit."
+#: ../src/camel/camel-mapi-store.c:2213
+#, fuzzy, c-format
+msgid "Mailbox “%s” is near its size limit."
 msgstr "'%s' postontziaren tamaina gehienera iristen ari da."
 
-#: ../src/camel/camel-mapi-store.c:2631
+#: ../src/camel/camel-mapi-store.c:2634
 msgid "Authentication password not available"
 msgstr "Autentifikazioaren pasahitza ez dago eskuragarri"
 
-#: ../src/camel/camel-mapi-transport.c:146
-#: ../src/camel/camel-mapi-transport.c:168
+#: ../src/camel/camel-mapi-transport.c:145
+#: ../src/camel/camel-mapi-transport.c:167
 #, c-format
 msgid "Could not send message."
 msgstr "Ezin izan da mezua bidali."
 
-#: ../src/camel/camel-mapi-transport.c:163
+#: ../src/camel/camel-mapi-transport.c:162
 #, c-format
 msgid "Could not send message: %s"
 msgstr "Ezin izan da mezua bidali: %s"
 
-#: ../src/collection/e-mapi-backend.c:77
+#: ../src/collection/e-mapi-backend.c:76
 msgid "Cannot connect, no credentials provided"
 msgstr "Ezin da konektatu, ez da kredentzialik eman"
 
-#: ../src/collection/e-mapi-backend.c:339
+#: ../src/collection/e-mapi-backend.c:341
 msgid "Global Address List"
 msgstr "Helbide-zerrenda globala (GAL)"
 
-#: ../src/collection/e-mapi-backend.c:688
-#: ../src/collection/e-mapi-backend.c:785
-#, c-format
-msgid "Data source '%s' does not represent a MAPI folder"
+#: ../src/collection/e-mapi-backend.c:696
+#: ../src/collection/e-mapi-backend.c:793
+#, fuzzy, c-format
+msgid "Data source “%s” does not represent a MAPI folder"
 msgstr "'%s' datu-iturburuak ez da MAPI karpeta bat"
 
-#: ../src/configuration/e-book-config-mapigal.c:61
+#: ../src/configuration/e-book-config-mapigal.c:59
 msgid "Allow _partial search results"
 msgstr "Baimendu bilaketaren emaitza _partzialak"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:125
+#: ../src/configuration/e-mail-config-mapi-backend.c:123
 msgid "Select username"
 msgstr "Hautatu erabiltzaile-izena"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:135
+#: ../src/configuration/e-mail-config-mapi-backend.c:133
 msgid "Full name"
 msgstr "Izen-deiturak"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:140
+#: ../src/configuration/e-mail-config-mapi-backend.c:138
 msgid "Username"
 msgstr "Erabiltzaile-izena"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:167
+#: ../src/configuration/e-mail-config-mapi-backend.c:165
 msgid ""
 "There are more users with similar user name on a server.\n"
 "Please select that you would like to use from the below list."
@@ -506,20 +509,20 @@ msgstr ""
 "Erabiltzaile-izen berdineko erabiltzaile gehiago daude zerbitzarian.\n"
 "Hautatu erabiltzea nahiko zenukeena azpiko zerrendatik"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:363
+#: ../src/configuration/e-mail-config-mapi-backend.c:361
 msgid "Authentication finished successfully."
 msgstr "Autentifikazioa ongi burutu da."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:365
-#: ../src/configuration/e-mail-config-mapi-backend.c:485
+#: ../src/configuration/e-mail-config-mapi-backend.c:363
+#: ../src/configuration/e-mail-config-mapi-backend.c:483
 msgid "Authentication failed."
 msgstr "Autentifikazioak huts egin du."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:428
+#: ../src/configuration/e-mail-config-mapi-backend.c:426
 msgid "Cannot authenticate MAPI accounts in offline mode"
 msgstr "Ezin da MAPI konturik autentifikatu lineaz kanpoko moduan"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:457
+#: ../src/configuration/e-mail-config-mapi-backend.c:455
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -527,7 +530,7 @@ msgstr ""
 "Zerbitzaria, erabiltzaile-izena eta domeinuaren izenak ezin dute hutsak "
 "izan. Bete itzazu balio egokiekin."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:460
+#: ../src/configuration/e-mail-config-mapi-backend.c:458
 msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
@@ -535,559 +538,560 @@ msgstr ""
 "Domeinuaren izena ezin da hutsik egon Kerberos hautatuta dagoenean. Bete "
 "itzazu balio egokiekin."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:479
+#: ../src/configuration/e-mail-config-mapi-backend.c:477
 msgid "Connecting to the server, please wait..."
 msgstr "Zerbitzariarekin konektatzean, itxaron..."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:681
+#: ../src/configuration/e-mail-config-mapi-backend.c:679
 msgid "Configuration"
 msgstr "Konfigurazioa"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:690
+#: ../src/configuration/e-mail-config-mapi-backend.c:688
 msgid "_Server:"
 msgstr "_Zerbitzaria:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:707
+#: ../src/configuration/e-mail-config-mapi-backend.c:705
 msgid "User_name:"
 msgstr "_Erabiltzaile-izena:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:732
+#: ../src/configuration/e-mail-config-mapi-backend.c:730
 msgid "_Domain name:"
 msgstr "_Domeinu-izena:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:745
+#: ../src/configuration/e-mail-config-mapi-backend.c:743
 msgid "_Authenticate"
 msgstr "_Autentifikatu"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:753
+#: ../src/configuration/e-mail-config-mapi-backend.c:751
 msgid "_Use secure connection"
 msgstr "_Erabili konexio segurua"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:768
+#: ../src/configuration/e-mail-config-mapi-backend.c:766
 msgid "_Kerberos authentication"
 msgstr "_Kerberos autentifikazioa"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:780
+#: ../src/configuration/e-mail-config-mapi-backend.c:778
 msgid "_Realm name:"
 msgstr "_Domeinu-izena:"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:191
-#: ../src/configuration/e-mail-config-mapi-page.c:252
+#: ../src/configuration/e-mail-config-mapi-page.c:189
+#: ../src/configuration/e-mail-config-mapi-page.c:250
 msgid "MAPI Settings"
 msgstr "MAPI ezarpenak"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:197
+#: ../src/configuration/e-mail-config-mapi-page.c:195
 msgid "View the size of all Exchange folders"
 msgstr "Ikusi Exchange-eko karpeta guztien tamaina"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:201
+#: ../src/configuration/e-mail-config-mapi-page.c:199
 msgid "Folder _Size"
 msgstr "Karpetaren _tamaina"
 
-#: ../src/configuration/e-mapi-config-utils.c:417
+#: ../src/configuration/e-mapi-config-utils.c:415
 msgid "Folder"
 msgstr "Karpeta"
 
-#: ../src/configuration/e-mapi-config-utils.c:422
+#: ../src/configuration/e-mapi-config-utils.c:420
 msgid "Size"
 msgstr "Tamaina"
 
-#: ../src/configuration/e-mapi-config-utils.c:445
-#: ../src/configuration/e-mapi-config-utils.c:449
+#: ../src/configuration/e-mapi-config-utils.c:443
+#: ../src/configuration/e-mapi-config-utils.c:447
 msgid "Unable to retrieve folder size information"
 msgstr "Ezin da karpetaren tamainaren informaziorik eskuratu"
 
-#: ../src/configuration/e-mapi-config-utils.c:516
+#: ../src/configuration/e-mapi-config-utils.c:514
 msgid "Folder Size"
 msgstr "Karpetaren tamaina"
 
-#: ../src/configuration/e-mapi-config-utils.c:530
+#: ../src/configuration/e-mapi-config-utils.c:528
 msgid "Fetching folder list…"
 msgstr "Karpeten zerrenda eskuratzen..."
 
-#: ../src/configuration/e-mapi-config-utils.c:704
-#, c-format
-msgid "Cannot edit permissions of folder '%s', choose other folder."
+#: ../src/configuration/e-mapi-config-utils.c:702
+#, fuzzy, c-format
+msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr ""
 "Ezin dira '%s' karpetaren baimenak editatu, aukeratu beste karpeta bat."
 
-#: ../src/configuration/e-mapi-config-utils.c:767
+#: ../src/configuration/e-mapi-config-utils.c:765
 msgid "Folder size..."
 msgstr "Karpetaren tamaina..."
 
-#: ../src/configuration/e-mapi-config-utils.c:774
+#: ../src/configuration/e-mapi-config-utils.c:772
 msgid "Subscribe to folder of other user..."
 msgstr "Harpidetu beste erabiltzaile baten karpetara..."
 
-#: ../src/configuration/e-mapi-config-utils.c:783
-#: ../src/configuration/e-mapi-config-utils.c:1061
-#: ../src/configuration/e-mapi-config-utils.c:1091
-#: ../src/configuration/e-mapi-config-utils.c:1121
-#: ../src/configuration/e-mapi-config-utils.c:1151
+#: ../src/configuration/e-mapi-config-utils.c:781
+#: ../src/configuration/e-mapi-config-utils.c:1059
+#: ../src/configuration/e-mapi-config-utils.c:1089
+#: ../src/configuration/e-mapi-config-utils.c:1119
+#: ../src/configuration/e-mapi-config-utils.c:1149
 msgid "Permissions..."
 msgstr "Baimenak..."
 
-#: ../src/configuration/e-mapi-config-utils.c:785
+#: ../src/configuration/e-mapi-config-utils.c:783
 msgid "Edit MAPI folder permissions"
 msgstr "Editatu MAPI-ren karpeta-baimenak"
 
-#: ../src/configuration/e-mapi-config-utils.c:1063
+#: ../src/configuration/e-mapi-config-utils.c:1061
 msgid "Edit MAPI calendar permissions"
 msgstr "Editatu MAPI-ren egutegi-baimenak"
 
-#: ../src/configuration/e-mapi-config-utils.c:1093
+#: ../src/configuration/e-mapi-config-utils.c:1091
 msgid "Edit MAPI tasks permissions"
 msgstr "Editatu MAPI-ren zeregin-baimenak"
 
-#: ../src/configuration/e-mapi-config-utils.c:1123
+#: ../src/configuration/e-mapi-config-utils.c:1121
 msgid "Edit MAPI memos permissions"
 msgstr "Editatu MAPI-ren zirkular-baimenak"
 
-#: ../src/configuration/e-mapi-config-utils.c:1153
+#: ../src/configuration/e-mapi-config-utils.c:1151
 msgid "Edit MAPI contacts permissions"
 msgstr "Editatu MAPI-ren kontaktu-baimenak"
 
-#: ../src/configuration/e-mapi-config-utils.c:1326
+#: ../src/configuration/e-mapi-config-utils.c:1324
 msgid "Personal Folders"
 msgstr "Karpeta pertsonalak"
 
-#: ../src/configuration/e-mapi-config-utils.c:1557
+#: ../src/configuration/e-mapi-config-utils.c:1555
 msgid "Searching remote MAPI folder structure, please wait..."
 msgstr "Urruneko MAPI karpetaren egitura bilatzen, itxaron..."
 
-#: ../src/configuration/e-mapi-config-utils.c:1625
+#: ../src/configuration/e-mapi-config-utils.c:1623
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Ezin da MAPI egutegirik sortu lineaz kanpoko moduan"
 
-#: ../src/configuration/e-mapi-config-utils.c:1628
+#: ../src/configuration/e-mapi-config-utils.c:1626
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "Ezin da MAPI zereginen zerrendarik sortu lineaz kanpoko moduan"
 
-#: ../src/configuration/e-mapi-config-utils.c:1631
+#: ../src/configuration/e-mapi-config-utils.c:1629
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "Ezin da MAPI zirkularren zerrendarik sortu lineaz kanpoko moduan"
 
-#: ../src/configuration/e-mapi-config-utils.c:1634
+#: ../src/configuration/e-mapi-config-utils.c:1632
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "Ezin da MAPI helbide-libururik sortu lineaz kanpoko moduan"
 
-#: ../src/configuration/e-mapi-config-utils.c:1639
+#: ../src/configuration/e-mapi-config-utils.c:1637
 msgid "Cannot create MAPI source in offline mode"
 msgstr "Ezin da MAPI iturbururik sortu lineaz kanpoko moduan"
 
-#: ../src/configuration/e-mapi-config-utils.c:1659
+#: ../src/configuration/e-mapi-config-utils.c:1657
 msgid "_Location:"
 msgstr "_Kokalekua:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:89
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:87
 msgctxt "PermissionsLevel"
 msgid "None"
 msgstr "Bat ere ez"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:90
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:88
 msgctxt "PermissionsLevel"
 msgid "Owner"
 msgstr "Jabea"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:100
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:98
 msgctxt "PermissionsLevel"
 msgid "Publishing Editor"
 msgstr "Argitalpenaren editorea"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:109
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:107
 msgctxt "PermissionsLevel"
 msgid "Editor"
 msgstr "Editorea"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:117
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:115
 msgctxt "PermissionsLevel"
 msgid "Publishing Author"
 msgstr "Argitalpenaren egilea"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:124
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:122
 msgctxt "PermissionsLevel"
 msgid "Author"
 msgstr "Egilea"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:130
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:128
 msgctxt "PermissionsLevel"
 msgid "Nonediting Author"
 msgstr "Egile ez-editatzailea"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:135
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:133
 msgctxt "PermissionsLevel"
 msgid "Reviewer"
 msgstr "Gainbegiratzailea"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:138
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:136
 msgctxt "PermissionsLevel"
 msgid "Contributor"
 msgstr "Laguntzailea"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:141
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:139
 msgctxt "PermissionsLevel"
 msgid "Custom"
 msgstr "Pertsonalizatua"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:274
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:272
 msgid "Writing folder permissions, please wait..."
 msgstr "Karpetaren baimenak idazten, itxaron..."
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:780
-#: ../src/configuration/e-mapi-search-gal-user.c:527
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
+#: ../src/configuration/e-mapi-search-gal-user.c:525
 msgctxt "User"
 msgid "Anonymous"
 msgstr "Anonimoa"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
-#: ../src/configuration/e-mapi-search-gal-user.c:524
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
+#: ../src/configuration/e-mapi-search-gal-user.c:522
 msgctxt "User"
 msgid "Default"
 msgstr "Lehenetsia"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:786
 msgctxt "User"
 msgid "Unknown"
 msgstr "Ezezaguna"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:876
-#: ../src/configuration/e-mapi-search-gal-user.c:600
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:878
+#: ../src/configuration/e-mapi-search-gal-user.c:598
 msgid "Name"
 msgstr "Izena"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:882
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:884
 msgid "Permission level"
 msgstr "Baimenen maila"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:935
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:937
 msgid "Edit MAPI folder permissions..."
 msgstr "Editatu MAPI-ren karpeta-baimenak..."
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:960
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:626
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:962
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:624
 msgid "Account:"
 msgstr "Kontua:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:986
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:988
 msgid "Folder name:"
 msgstr "Karpetaren izena:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1007
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1009
 msgid "Folder ID:"
 msgstr "Karpetaren IDa:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1066
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1068
 msgid "Permissions"
 msgstr "Baimenak"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1087
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1089
 msgid "Permi_ssion level:"
 msgstr "_Baimen-maila:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1115
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1117
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Irakurri"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1126
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1189
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1128
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1191
 msgctxt "Permissions"
 msgid "None"
 msgstr "Bat ere ez"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1131
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1133
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "Xehetasun osoak"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1136
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1138
 msgctxt "Permissions"
 msgid "Simple Free/Busy"
 msgstr "Libre/Lanpetuta bakuna"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1140
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1142
 msgctxt "Permissions"
 msgid "Detailed Free/Busy"
 msgstr "Libre/Lanpetuta xehea"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1147
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1149
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Idatzi"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1158
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1160
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "Sortu elementuak"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1164
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Sortu azpikarpetak"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1168
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "Editatu norberarena"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1170
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1172
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "Editatu denak"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1178
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1180
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Ezabatu elementuak"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1194
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1196
 msgctxt "Permissions"
 msgid "Own"
 msgstr "Norberarena"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1199
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1201
 msgctxt "Permissions"
 msgid "All"
 msgstr "Denak"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1205
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1207
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Bestelakoa"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1216
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1218
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Karpetaren jabea"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1222
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Karpetaren kontaktua"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1226
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Karpeta ikusgai"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1279
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1281
 msgid "Reading folder permissions, please wait..."
 msgstr "Karpetaren baimenak irakurtzen, itxaron..."
 
-#: ../src/configuration/e-mapi-search-gal-user.c:223
+#: ../src/configuration/e-mapi-search-gal-user.c:221
 msgid "No users found"
 msgstr "Ez da erabiltzailerik aurkitu"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:226
+#: ../src/configuration/e-mapi-search-gal-user.c:224
 #, c-format
 msgid "Found one user"
 msgid_plural "Found %d users"
 msgstr[0] "Erabiltzaile 1 aurkituta"
 msgstr[1] "%d erabiltzaile aurkituta"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:231
+#: ../src/configuration/e-mapi-search-gal-user.c:229
 #, c-format
 msgid "Found %d user, but showing only first %d"
 msgid_plural "Found %d users, but showing only first %d"
 msgstr[0] "%d erabiltzaile aurkituta, soilik aurreneko %d erakusten"
 msgstr[1] "%d erabiltzaile aurkituta, soilik aurreneko %d erakusten"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:519
-#: ../src/configuration/e-mapi-search-gal-user.c:710
+#: ../src/configuration/e-mapi-search-gal-user.c:517
+#: ../src/configuration/e-mapi-search-gal-user.c:708
 msgid "Search for a user"
 msgstr "Bilatu erabiltzailea"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:535
+#: ../src/configuration/e-mapi-search-gal-user.c:533
 msgid "Searching..."
 msgstr "Bilatzen…"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:606
+#: ../src/configuration/e-mapi-search-gal-user.c:604
 msgid "E-mail"
 msgstr "Helbide elektronikoa"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:647
+#: ../src/configuration/e-mapi-search-gal-user.c:645
 msgid "Choose MAPI user..."
 msgstr "Aukeratu MAPI-ren erabiltzailea..."
 
-#: ../src/configuration/e-mapi-search-gal-user.c:670
+#: ../src/configuration/e-mapi-search-gal-user.c:668
 msgid "_Search:"
 msgstr "_Bilatu:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:89
-#, c-format
-msgid "Cannot add folder, folder already exists as '%s'"
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:87
+#, fuzzy, c-format
+msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Ezin da karpeta gehitu, karpeta hori badago lehendik '%s' gisa"
 
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
-#. Example result: "Mailbox - John Smith"
+#. Example result: "Mailbox — John Smith"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:114
-#, c-format
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:112
+#, fuzzy, c-format
 msgctxt "ForeignFolder"
-msgid "Mailbox - %s"
+msgid "Mailbox — %s"
 msgstr "Postontzia - %s"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:143
-#, c-format
-msgid "Cannot add folder, failed to add to store's summary"
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:141
+#, fuzzy, c-format
+msgid "Cannot add folder, failed to add to store’s summary"
 msgstr "Ezin da karpeta gehitu, huts egin du biltegiaren laburpenari gehitzean"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:329
-#, c-format
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:327
+#, fuzzy, c-format
 msgid ""
-"Folder '%s' not found. Either it does not exist or you do not have "
+"Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
 msgstr ""
 "Ez da '%s' karpeta aurkitu. Edo ez da existitzen edo ez duzu hura irekitzeko "
 "baimenik."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:364
-msgid "Cannot add folder, cannot determine folder's type"
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:362
+#, fuzzy
+msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Ezin da karpeta gehitu: ezin da karpeta mota zehaztu"
 
 #. Translators: This is used to name foreign folder.
 #. The first '%s' is replaced with user name to whom the folder belongs,
 #. the second '%s' is replaced with folder name.
-#. Example result: "John Smith - Calendar"
+#. Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:405
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:403
 #, c-format
 msgctxt "ForeignFolder"
-msgid "%s - %s"
-msgstr "%s - %s"
+msgid "%s — %s"
+msgstr ""
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:502
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:704
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:500
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:702
 msgid "Inbox"
 msgstr "Sarrerako ontzia"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:504
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:705
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:502
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:703
 msgid "Contacts"
 msgstr "Kontaktuak"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:506
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:706
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:504
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:704
 msgid "Calendar"
 msgstr "Egutegia"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:508
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:707
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:506
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:705
 msgid "Memos"
 msgstr "Zirkularrak"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:510
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:708
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:508
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:706
 msgid "Tasks"
 msgstr "Zereginak"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:523
-#, c-format
-msgid "Testing availability of folder '%s' of user '%s', please wait..."
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:521
+#, fuzzy, c-format
+msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgstr ""
 "'%2$s' erabiltzailearen '%1$s' karpeta erabilgarri dagoen probatzen, "
 "itxaron..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:605
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:603
 msgid "Subscribe to folder of other MAPI user..."
 msgstr "Harpidetu MAPI-ren beste erabiltzaile baten karpetara..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:654
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:652
 msgid "User"
 msgstr "Erabiltzailea"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:661
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:659
 msgid "_User:"
 msgstr "_Erabiltzailea:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:674
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:672
 msgid "C_hoose..."
 msgstr "_Aukeratu..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:687
 msgid "_Folder name:"
 msgstr "_Karpetaren izena:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2080
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2067
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Onartuta:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2085
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2072
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Saiakera:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2090
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2077
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Ukatuta:"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:140
+#: ../src/libexchangemapi/e-mapi-connection.c:139
 msgid "Failed to login into the server"
 msgstr "Huts egin du saioa hastean zerbitzarian"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:141
+#: ../src/libexchangemapi/e-mapi-connection.c:140
 msgid "Cannot create more sessions, session limit was reached"
 msgstr "Ezin da saio gehiagorik sortu, saioen mugara iritsi da"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:142
+#: ../src/libexchangemapi/e-mapi-connection.c:141
 msgid "User cancelled operation"
 msgstr "Erabiltzaileak bertan behera utzitako eragiketa"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:143
+#: ../src/libexchangemapi/e-mapi-connection.c:142
 msgid "Unable to abort"
 msgstr "Ezin da abortatu"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:144
+#: ../src/libexchangemapi/e-mapi-connection.c:143
 msgid "Network error"
 msgstr "Sareko errorea"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:145
+#: ../src/libexchangemapi/e-mapi-connection.c:144
 msgid "Disk error"
 msgstr "Diskoaren errorea"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:146
+#: ../src/libexchangemapi/e-mapi-connection.c:145
 msgid "Password change required"
 msgstr "Pasahitza aldatzea eskatzen da"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:147
+#: ../src/libexchangemapi/e-mapi-connection.c:146
 msgid "Password expired"
 msgstr "Pasahitza iraungita"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:148
+#: ../src/libexchangemapi/e-mapi-connection.c:147
 msgid "Invalid workstation account"
 msgstr "Baliogabeko lanpostuaren kontua"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:149
+#: ../src/libexchangemapi/e-mapi-connection.c:148
 msgid "Invalid access time"
 msgstr "Baliogabeko sarbidetze-ordua"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:150
+#: ../src/libexchangemapi/e-mapi-connection.c:149
 msgid "Account is disabled"
 msgstr "Kontua desgaituta dago"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:151
+#: ../src/libexchangemapi/e-mapi-connection.c:150
 msgid "End of session"
 msgstr "Saioaren amaiera"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:152
+#: ../src/libexchangemapi/e-mapi-connection.c:151
 msgid "MAPI is not initialized or connected"
 msgstr "MAPI ez da hasieratu edo konektatu"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:153
+#: ../src/libexchangemapi/e-mapi-connection.c:152
 msgid "Permission denied"
 msgstr "Baimena ukatuta"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:154
+#: ../src/libexchangemapi/e-mapi-connection.c:153
 msgid "Mailbox quota exceeded"
 msgstr "Postontziaren kuota gaindituta"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:162
+#: ../src/libexchangemapi/e-mapi-connection.c:161
 #, c-format
 msgid "MAPI error %s (0x%x) occurred"
 msgstr "MAPI-ren '%s' errorea (0x%x) gertatu da"
@@ -1102,34 +1106,34 @@ msgid "%s: %s"
 msgstr "%s: %s"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:744
-#, c-format
-msgid "Server '%s' cannot be reached"
+#, fuzzy, c-format
+msgid "Server “%s” cannot be reached"
 msgstr "Ezin da '%s' zerbitzaria atzitu"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:872
-#, c-format
-msgid "Folder name '%s' is not a known default folder name, nor folder ID."
+#, fuzzy, c-format
+msgid "Folder name “%s” is not a known default folder name, nor folder ID."
 msgstr ""
 "'%s' izeneko karpeta ez da karpetaren izen lehenetsi ezagun bat, ezta "
 "karpetaren IDa ere"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:1203
-#, c-format
-msgid "Failed to open store for user '%s'"
+#, fuzzy, c-format
+msgid "Failed to open store for user “%s”"
 msgstr "Huts egin du '%s' erabiltzailearen biltegia gordetzean"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:1211
-#, c-format
-msgid "Folder of user '%s' not found"
+#, fuzzy, c-format
+msgid "Folder of user “%s” not found"
 msgstr "Ez da '%s' erabiltzailearen karpeta aurkitu"
 
 #. Translators: %s is replaced with an email address which was found ambiguous on a remote server
-#: ../src/libexchangemapi/e-mapi-connection.c:3856
-#, c-format
-msgid "Recipient '%s' is ambiguous"
+#: ../src/libexchangemapi/e-mapi-connection.c:3863
+#, fuzzy, c-format
+msgid "Recipient “%s” is ambiguous"
 msgstr "'%s' hartzailea anbiguoa da"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:4948
+#: ../src/libexchangemapi/e-mapi-connection.c:4955
 #, c-format
 msgid ""
 "Search result exceeded allowed size limit. Use more specific search term, "
@@ -1138,27 +1142,34 @@ msgstr ""
 "Bilaketaren emaitzak baimendutako tamaina gainditu du. Erabili bilaketaren "
 "termino zehatz gehiago"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6549
+#: ../src/libexchangemapi/e-mapi-connection.c:6556
 msgid "All Public Folders"
 msgstr "Karpeta publiko guztiak"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6816
-#, c-format
-msgid "User name '%s' is ambiguous"
+#: ../src/libexchangemapi/e-mapi-connection.c:6823
+#, fuzzy, c-format
+msgid "User name “%s” is ambiguous"
 msgstr "'%s' erabiltzaile-izena anbiguoa da"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6819
-#, c-format
-msgid "User name '%s' not found"
+#: ../src/libexchangemapi/e-mapi-connection.c:6826
+#, fuzzy, c-format
+msgid "User name “%s” not found"
 msgstr "Ez da '%s' erabiltzaile-izena aurkitu"
 
-#: ../src/libexchangemapi/e-mapi-folder.c:332
+#: ../src/libexchangemapi/e-mapi-folder.c:330
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Ezin da karpeta gehitu, karpeta mota hori ez da onartzen"
 
-#: ../src/libexchangemapi/e-mapi-folder.c:335
+#: ../src/libexchangemapi/e-mapi-folder.c:333
 msgid "Cannot add folder, master source not found"
 msgstr "Ezin da karpeta gehitu, iturburu nagusia ez da aurkitu"
+
+#~ msgid "Automatically synchroni_ze account locally"
+#~ msgstr "_Sinkronizatu automatikoki lokaleko kontua"
+
+#~ msgctxt "ForeignFolder"
+#~ msgid "%s - %s"
+#~ msgstr "%s - %s"
 
 #~ msgid "Enter Password for %s@%s"
 #~ msgstr "Idatzi %s@%s(r)en pasahitza"
