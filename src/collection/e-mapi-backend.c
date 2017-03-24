@@ -150,6 +150,38 @@ sync_folders_data_free (gpointer data)
 	g_free (sfd);
 }
 
+static void
+mapi_backend_update_enabled (ESource *data_source,
+			     ESource *collection_source)
+{
+	ESourceCollection *collection_extension = NULL;
+	gboolean part_enabled = TRUE;
+
+	g_return_if_fail (E_IS_SOURCE (data_source));
+
+	if (!collection_source || !e_source_get_enabled (collection_source)) {
+		e_source_set_enabled (data_source, FALSE);
+		return;
+	}
+
+	if (e_source_has_extension (collection_source, E_SOURCE_EXTENSION_COLLECTION))
+		collection_extension = e_source_get_extension (collection_source, E_SOURCE_EXTENSION_COLLECTION);
+
+	if (e_source_has_extension (data_source, E_SOURCE_EXTENSION_CALENDAR) ||
+	    e_source_has_extension (data_source, E_SOURCE_EXTENSION_TASK_LIST) ||
+	    e_source_has_extension (data_source, E_SOURCE_EXTENSION_MEMO_LIST)) {
+		part_enabled = !collection_extension || e_source_collection_get_calendar_enabled (collection_extension);
+	} else if (e_source_has_extension (data_source, E_SOURCE_EXTENSION_ADDRESS_BOOK)) {
+		part_enabled = !collection_extension || e_source_collection_get_contacts_enabled (collection_extension);
+	} else if (e_source_has_extension (data_source, E_SOURCE_EXTENSION_MAIL_ACCOUNT) ||
+		   e_source_has_extension (data_source, E_SOURCE_EXTENSION_MAIL_IDENTITY) ||
+		   e_source_has_extension (data_source, E_SOURCE_EXTENSION_MAIL_TRANSPORT)) {
+		part_enabled = !collection_extension || e_source_collection_get_mail_enabled (collection_extension);
+	}
+
+	e_source_set_enabled (data_source, part_enabled);
+}
+
 static gboolean
 mapi_backend_sync_folders_idle_cb (gpointer user_data)
 {
@@ -197,7 +229,7 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 
 		source = e_mapi_utils_get_source_for_folder (configured, sfd->profile, e_mapi_folder_get_id (folder));
 		if (source) {
-			e_source_set_enabled (source, TRUE);
+			mapi_backend_update_enabled (source, e_backend_get_source (E_BACKEND (backend)));
 
 			if (g_strcmp0 (e_source_get_display_name (source), e_mapi_folder_get_name (folder)) != 0)
 				e_source_set_display_name (source, e_mapi_folder_get_name (folder));
@@ -231,7 +263,7 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 				NULL,
 				NULL)) {
 				color_seed++;
-				e_source_set_enabled (source, TRUE);
+				mapi_backend_update_enabled (source, e_backend_get_source (E_BACKEND (backend)));
 				e_server_side_source_set_writable (E_SERVER_SIDE_SOURCE (source), TRUE);
 				e_server_side_source_set_remote_deletable (E_SERVER_SIDE_SOURCE (source), TRUE);
 				e_source_registry_server_add_source (server, source);
