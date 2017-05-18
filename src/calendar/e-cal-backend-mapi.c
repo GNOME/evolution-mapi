@@ -655,7 +655,7 @@ transfer_calendar_objects_cb (EMapiConnection *conn,
 	if (pmid)
 		use_uid = e_mapi_util_mapi_id_to_string (*pmid);
 	else
-		use_uid = e_cal_component_gen_uid ();
+		use_uid = e_util_generate_uid ();
 
 	comp = e_mapi_cal_util_object_to_comp (conn, object,
 		e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi)), FALSE,

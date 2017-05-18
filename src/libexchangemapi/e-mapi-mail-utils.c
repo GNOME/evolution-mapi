@@ -356,7 +356,7 @@ build_ical_string (EMapiConnection *conn,
 	if (pmid)
 		use_uid = e_mapi_util_mapi_id_to_string (*pmid);
 	else
-		use_uid = e_cal_component_gen_uid ();
+		use_uid = e_util_generate_uid ();
 
 	comp = e_mapi_cal_util_object_to_comp (conn, object, ical_kind, ical_method == ICAL_METHOD_REPLY, NULL, use_uid, &detached_components);
 
