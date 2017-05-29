@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef __E_BOOK_BACKEND_MAPI_CONTACTS_H__
-#define __E_BOOK_BACKEND_MAPI_CONTACTS_H__
+#ifndef E_BOOK_BACKEND_MAPI_CONTACTS_H
+#define E_BOOK_BACKEND_MAPI_CONTACTS_H
 
 #include "e-book-backend-mapi.h"
 
@@ -39,7 +39,7 @@ typedef struct _EBookBackendMAPIContactsPrivate EBookBackendMAPIContactsPrivate;
 
 typedef struct
 {
-	EBookBackendMAPI                 parent_object;
+	EBookBackendMAPI parent_object;
 	EBookBackendMAPIContactsPrivate *priv;
 } EBookBackendMAPIContacts;
 
@@ -48,9 +48,8 @@ typedef struct
 	EBookBackendMAPIClass parent_class;
 } EBookBackendMAPIContactsClass;
 
-EBookBackend *e_book_backend_mapi_contacts_new      (void);
 GType         e_book_backend_mapi_contacts_get_type (void);
 
 G_END_DECLS
 
-#endif /* __E_BOOK_BACKEND_MAPI_CONTACTS_H__ */
+#endif /* E_BOOK_BACKEND_MAPI_CONTACTS_H */

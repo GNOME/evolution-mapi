@@ -183,7 +183,7 @@ e_mapi_util_mapi_id_from_string (const gchar *str, mapi_id_t *id)
 {
 	gint n = 0;
 
-	if (str && *str)
+	if (str && *str && strlen (str) <= 16)
 		n = sscanf (str, "%016" G_GINT64_MODIFIER "X", id);
 
 	return (n == 1);

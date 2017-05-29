@@ -27,8 +27,6 @@ set(SOURCES
 	e-mapi-cal-recur-utils.h
 	e-mapi-mail-utils.c
 	e-mapi-mail-utils.h
-	e-mapi-operation-queue.c
-	e-mapi-operation-queue.h
 	e-source-mapi-folder.c
 	e-source-mapi-folder.h
 )
