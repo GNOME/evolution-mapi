@@ -1640,6 +1640,48 @@ ecb_mapi_send_objects_sync (ECalBackendSync *sync_backend,
 	icalcomponent_free (icalcomp);
 }
 
+static void
+ecb_mapi_get_free_busy_sync (ECalBackendSync *sync_backend,
+			     EDataCal *cal,
+			     GCancellable *cancellable,
+			     const GSList *users,
+			     time_t start,
+			     time_t end,
+			     GSList **freebusyobjs,
+			     GError **error)
+{
+	ECalBackendMAPI *cbmapi;
+	GError *mapi_error = NULL;
+
+	g_return_if_fail (E_IS_CAL_BACKEND_MAPI (sync_backend));
+
+	cbmapi = E_CAL_BACKEND_MAPI (sync_backend);
+
+	ecb_mapi_lock_connection (cbmapi);
+
+	if (!e_cal_meta_backend_ensure_connected_sync (E_CAL_META_BACKEND (cbmapi), cancellable, &mapi_error) ||
+	    !cbmapi->priv->conn) {
+		ecb_mapi_unlock_connection (cbmapi);
+
+		if (!mapi_error)
+			g_propagate_error (error, EDC_ERROR (RepositoryOffline));
+		else
+			ecb_mapi_error_to_edc_error (error, mapi_error, RepositoryOffline, NULL);
+		g_clear_error (&mapi_error);
+		return;
+	}
+
+	if (!e_mapi_cal_utils_get_free_busy_data (cbmapi->priv->conn, users, start, end, freebusyobjs, cancellable, &mapi_error)) {
+		ecb_mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to get Free/Busy data"));
+		ecb_mapi_maybe_disconnect (cbmapi, mapi_error);
+
+		if (mapi_error)
+			g_error_free (mapi_error);
+	}
+
+	ecb_mapi_unlock_connection (cbmapi);
+}
+
 static gboolean
 ecb_mapi_get_destination_address (EBackend *backend,
 				  gchar **host,
@@ -1772,6 +1814,7 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *klass)
 
 	sync_backend_class = E_CAL_BACKEND_SYNC_CLASS (klass);
 	sync_backend_class->send_objects_sync = ecb_mapi_send_objects_sync;
+	sync_backend_class->get_free_busy_sync = ecb_mapi_get_free_busy_sync;
 
 	backend_class = E_BACKEND_CLASS (klass);
 	backend_class->get_destination_address = ecb_mapi_get_destination_address;
