@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-04 10:02+0200\n"
-"PO-Revision-Date: 2017-06-04 10:03+0200\n"
+"POT-Creation-Date: 2017-06-11 15:19+0200\n"
+"PO-Revision-Date: 2017-06-11 15:20+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -77,6 +77,10 @@ msgid ""
 msgstr ""
 "Obsługa modyfikowania pojedynczych instancji powtarzającego się spotkania "
 "nie jest zaimplementowana. Nie dokonano żadnych zmian spotkania na serwerze."
+
+#: ../src/calendar/e-cal-backend-mapi.c:1675
+msgid "Failed to get Free/Busy data"
+msgstr "Pobranie informacji o zajętości się nie powiodło"
 
 #: ../src/camel/camel-mapi-folder.c:776
 #, c-format
