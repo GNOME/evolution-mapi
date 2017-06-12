@@ -1,24 +1,25 @@
 # Swedish translation for evolution-mapi.
-# Copyright © 2009-2016 Free Software Foundation, Inc.
+# Copyright © 2009-2017 Free Software Foundation, Inc.
 # This file is distributed under the same license as the evolution-mapi package.
 # Daniel Nylander <po@danielnylander.se>, 2009, 2010, 2011, 2012.
 # Sebastian Rasmussen <sebras@gmail.com>, 2016.
+# Anders Jonsson <anders.jonsson@norsjovallen.se>, 2017.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2016-12-19 14:58+0000\n"
-"PO-Revision-Date: 2016-12-21 23:24+0100\n"
-"Last-Translator: Josef Andersson <josef.andersson@fripost.org>\n"
+"POT-Creation-Date: 2017-06-06 08:12+0000\n"
+"PO-Revision-Date: 2017-06-12 18:58+0200\n"
+"Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 1.8.9\n"
+"X-Generator: Poedit 1.8.11\n"
 
 #: ../evolution-mapi.metainfo.xml.in.h:1
 msgid "Exchange MAPI"
@@ -28,127 +29,47 @@ msgstr "Exchange MAPI"
 msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr "För åtkomst till Microsoft Exchange 2007/OpenChange-servrar med MAPI"
 
-#: ../src/addressbook/e-book-backend-mapi.c:737
-msgid "Searching"
-msgstr "Söker"
-
-#: ../src/addressbook/e-book-backend-mapi.c:1739
-#: ../src/calendar/e-cal-backend-mapi.c:187
-#: ../src/calendar/e-cal-backend-mapi.c:487
+#: ../src/addressbook/e-book-backend-mapi.c:92
+#: ../src/calendar/e-cal-backend-mapi.c:100
 #: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1942
 msgid "Unknown error"
 msgstr "Okänt fel"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:430
-msgid "Failed to remove public folder"
-msgstr "Misslyckades med att ta bort publik mapp"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:466
-msgid "The backend does not support bulk additions"
-msgstr "Bakänden saknar stöd för satsvisa tillägg"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:508
-#: ../src/calendar/e-cal-backend-mapi.c:1718
-#: ../src/calendar/e-cal-backend-mapi.c:2230
-msgid "Failed to create item on a server"
-msgstr "Misslyckades med att skapa objekt på en server"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:625
-msgid "The backend does not support bulk modifications"
-msgstr "Bakänden saknar stöd för satsvisa ändringar"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:670
-#: ../src/calendar/e-cal-backend-mapi.c:1932
-msgid "Failed to modify item on a server"
-msgstr "Misslyckades med att ändra objekt på en server"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:846
-msgid "Failed to fetch items from a server"
-msgstr "Misslyckades med att hämta objekt från en server"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. %d is an index of the contact.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:864
-#, c-format
-msgid "Caching contact %d"
-msgstr "Mellanlagrar kontakt %d"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. The first %d is an index of the contact,
-#. the second %d is total count of conacts on the server.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:870
-#, c-format
-msgid "Caching contact %d/%d"
-msgstr "Mellanlagrar kontakt %d/%d"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:924
-msgid "Failed to count server contacts"
-msgstr "Misslyckades med att räkna serverkontakter"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:982
-msgid "Failed to list items from a server"
-msgstr "Misslyckades med att lista objekt från en server"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1063
-msgid "Failed to transfer contacts from a server"
-msgstr "Misslyckades med att överföra kontakter från en server"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:151
-#, c-format
-msgid "Caching GAL contact %d"
-msgstr "Mellanlagrar GAL-kontakt %d"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. The first %d is an index of the GAL entry,
-#. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:157
-#, c-format
-msgid "Caching GAL contact %d/%d"
-msgstr "Mellanlagrar GAL-kontakt %d/%d"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:228
-#: ../src/addressbook/e-book-backend-mapi-gal.c:312
+#: ../src/addressbook/e-book-backend-mapi.c:496
+#: ../src/addressbook/e-book-backend-mapi.c:680
 msgid "Failed to fetch GAL entries"
 msgstr "Misslyckades med att hämta GAL-poster"
 
-#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:412
-#, c-format
-msgid "Loading items in folder %s"
-msgstr "Läser in objekt i mappen %s"
+#: ../src/addressbook/e-book-backend-mapi.c:502
+msgid "Failed to transfer contacts from a server"
+msgstr "Misslyckades med att överföra kontakter från en server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:779
-#, c-format
-msgid "Failed to open folder: %s"
-msgstr "Misslyckades med att öppna mapp: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:687
+#: ../src/calendar/e-cal-backend-mapi.c:1105
+msgid "Failed to list items from a server"
+msgstr "Misslyckades med att lista objekt från en server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:787
-#, c-format
-msgid "Failed to get folder properties: %s"
-msgstr "Misslyckades med att hämta mappegenskaper: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:862
+#: ../src/calendar/e-cal-backend-mapi.c:1332
+msgid "Failed to modify item on a server"
+msgstr "Misslyckades med att ändra objekt på en server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:828
-#, c-format
-msgid "Failed to list objects: %s"
-msgstr "Misslyckades med att lista objekt: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:862
+#: ../src/calendar/e-cal-backend-mapi.c:1332
+#: ../src/calendar/e-cal-backend-mapi.c:1625
+msgid "Failed to create item on a server"
+msgstr "Misslyckades med att skapa objekt på en server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:854
-#, c-format
-msgid "Failed to transfer objects: %s"
-msgstr "Misslyckades med att överföra objekt: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:923
+#: ../src/calendar/e-cal-backend-mapi.c:1400
+msgid "Failed to remove item from a server"
+msgstr "Misslyckades med att ta bort objekt från en server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:873
-#, c-format
-msgid "Failed to close folder: %s"
-msgstr "Misslyckades med att stänga mapp: %s"
+#: ../src/calendar/e-cal-backend-mapi.c:881
+msgid "Failed to transfer objects from a server"
+msgstr "Misslyckades med att överföra objekt från en server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1382
-msgid "Could not create cache file"
-msgstr "Kunde inte skapa cachefilen"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1847
+#: ../src/calendar/e-cal-backend-mapi.c:1249
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -156,11 +77,7 @@ msgstr ""
 "Stöd för ändring av enstaka instanser för ett återkommande möte har ännu "
 "inte implementerats. Ingen ändring gjordes till mötet på servern."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2045
-msgid "Cannot remove items from a server"
-msgstr "Kan inte ta bort objekt från en server"
-
-#: ../src/calendar/e-cal-backend-mapi.c:2476
+#: ../src/calendar/e-cal-backend-mapi.c:1675
 msgid "Failed to get Free/Busy data"
 msgstr "Misslyckades med att hämta Ledig/Upptagen-data"
 
@@ -474,12 +391,12 @@ msgstr "Kunde inte skicka meddelandet: %s"
 msgid "Cannot connect, no credentials provided"
 msgstr "Kan inte ansluta, inga inloggningsuppgifter tillhandahölls"
 
-#: ../src/collection/e-mapi-backend.c:341
+#: ../src/collection/e-mapi-backend.c:373
 msgid "Global Address List"
 msgstr "Global adresslista"
 
-#: ../src/collection/e-mapi-backend.c:696
-#: ../src/collection/e-mapi-backend.c:793
+#: ../src/collection/e-mapi-backend.c:728
+#: ../src/collection/e-mapi-backend.c:825
 #, c-format
 msgid "Data source “%s” does not represent a MAPI folder"
 msgstr "Datakälla ”%s” representerar inte en MAPI-mapp"
@@ -1010,19 +927,19 @@ msgid "_Folder name:"
 msgstr "_Mappnamn:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2067
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2060
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Accepterat:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2072
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2065
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Preliminärt:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2077
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2070
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Avböjt:"
@@ -1157,6 +1074,57 @@ msgstr "Kan inte lägga till mapp, mapptyp stöds ej"
 #: ../src/libexchangemapi/e-mapi-folder.c:333
 msgid "Cannot add folder, master source not found"
 msgstr "Kan inte lägga till mapp, huvudkälla inte funnen"
+
+#~ msgid "Searching"
+#~ msgstr "Söker"
+
+#~ msgid "Failed to remove public folder"
+#~ msgstr "Misslyckades med att ta bort publik mapp"
+
+#~ msgid "The backend does not support bulk additions"
+#~ msgstr "Bakänden saknar stöd för satsvisa tillägg"
+
+#~ msgid "The backend does not support bulk modifications"
+#~ msgstr "Bakänden saknar stöd för satsvisa ändringar"
+
+#~ msgid "Caching contact %d"
+#~ msgstr "Mellanlagrar kontakt %d"
+
+#~ msgid "Caching contact %d/%d"
+#~ msgstr "Mellanlagrar kontakt %d/%d"
+
+#~ msgid "Failed to count server contacts"
+#~ msgstr "Misslyckades med att räkna serverkontakter"
+
+#~ msgid "Caching GAL contact %d"
+#~ msgstr "Mellanlagrar GAL-kontakt %d"
+
+#~ msgid "Caching GAL contact %d/%d"
+#~ msgstr "Mellanlagrar GAL-kontakt %d/%d"
+
+#~ msgid "Loading items in folder %s"
+#~ msgstr "Läser in objekt i mappen %s"
+
+#~ msgid "Failed to open folder: %s"
+#~ msgstr "Misslyckades med att öppna mapp: %s"
+
+#~ msgid "Failed to get folder properties: %s"
+#~ msgstr "Misslyckades med att hämta mappegenskaper: %s"
+
+#~ msgid "Failed to list objects: %s"
+#~ msgstr "Misslyckades med att lista objekt: %s"
+
+#~ msgid "Failed to transfer objects: %s"
+#~ msgstr "Misslyckades med att överföra objekt: %s"
+
+#~ msgid "Failed to close folder: %s"
+#~ msgstr "Misslyckades med att stänga mapp: %s"
+
+#~ msgid "Could not create cache file"
+#~ msgstr "Kunde inte skapa cachefilen"
+
+#~ msgid "Cannot remove items from a server"
+#~ msgstr "Kan inte ta bort objekt från en server"
 
 #~ msgid "Automatically synchroni_ze account locally"
 #~ msgstr "Syn_kronisera automatiskt kontot lokalt"
