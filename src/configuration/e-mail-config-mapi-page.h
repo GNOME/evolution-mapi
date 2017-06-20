@@ -50,12 +50,12 @@ typedef struct _EMailConfigMapiPageClass EMailConfigMapiPageClass;
 typedef struct _EMailConfigMapiPagePrivate EMailConfigMapiPagePrivate;
 
 struct _EMailConfigMapiPage {
-	GtkBox parent;
+	GtkScrolledWindow parent;
 	EMailConfigMapiPagePrivate *priv;
 };
 
 struct _EMailConfigMapiPageClass {
-	GtkBoxClass parent_class;
+	GtkScrolledWindowClass parent_class;
 };
 
 GType			e_mail_config_mapi_page_get_type		(void) G_GNUC_CONST;
