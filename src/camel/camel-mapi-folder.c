@@ -1869,6 +1869,7 @@ mapi_folder_transfer_messages_to_sync (CamelFolder *source,
 		for (i = 0; i < uids->len; i++) {
 			camel_folder_summary_remove_uid (source_summary, uids->pdata[i]);
 			camel_folder_change_info_remove_uid (changes, uids->pdata[i]);
+			camel_data_cache_remove (src_mapi_folder->cache, "cache", uids->pdata[i], NULL);
 		}
 		camel_folder_changed (source, changes);
 		camel_folder_change_info_free (changes);
