@@ -5,15 +5,15 @@
 # Andre Klapper <ak-47@gmx.net>, 2009.
 # Lucas Lommer <llommer@svn.gnome.org>, 2009.
 # Jiri Eischmann <jiri@eischmann.cz>, 2009, 2010, 2011, 2012.
-# Marek Černocký <marek@manet.cz>, 2010, 2011, 2012, 2016.
+# Marek Černocký <marek@manet.cz>, 2010, 2011, 2012, 2016, 2017.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2016-12-19 14:58+0000\n"
-"PO-Revision-Date: 2016-12-20 13:48+0100\n"
+"POT-Creation-Date: 2017-06-06 08:12+0000\n"
+"PO-Revision-Date: 2017-06-25 22:51+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>>\n"
 "Language: cs\n"
@@ -31,127 +31,47 @@ msgstr "Exchange MAPI"
 msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr "Pro přístup k serverům Microsoft Exchange 2007/OpenChange pomocí MAPI"
 
-#: ../src/addressbook/e-book-backend-mapi.c:737
-msgid "Searching"
-msgstr "Hledání"
-
-#: ../src/addressbook/e-book-backend-mapi.c:1739
-#: ../src/calendar/e-cal-backend-mapi.c:187
-#: ../src/calendar/e-cal-backend-mapi.c:487
+#: ../src/addressbook/e-book-backend-mapi.c:92
+#: ../src/calendar/e-cal-backend-mapi.c:100
 #: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1942
 msgid "Unknown error"
 msgstr "Neznámá chyba"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:430
-msgid "Failed to remove public folder"
-msgstr "Selhalo odstranění veřejné složky"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:466
-msgid "The backend does not support bulk additions"
-msgstr "Serverová část nepodporuje hromadné přidávání"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:508
-#: ../src/calendar/e-cal-backend-mapi.c:1718
-#: ../src/calendar/e-cal-backend-mapi.c:2230
-msgid "Failed to create item on a server"
-msgstr "Selhalo vytvoření složky na serveru"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:625
-msgid "The backend does not support bulk modifications"
-msgstr "Serverová část nepodporuje hromadné změny"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:670
-#: ../src/calendar/e-cal-backend-mapi.c:1932
-msgid "Failed to modify item on a server"
-msgstr "Selhala úprava složky na serveru"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:846
-msgid "Failed to fetch items from a server"
-msgstr "Selhalo stahování položek ze serveru"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. %d is an index of the contact.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:864
-#, c-format
-msgid "Caching contact %d"
-msgstr "Ukládání kontaktu %d do mezipaměti"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. The first %d is an index of the contact,
-#. the second %d is total count of conacts on the server.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:870
-#, c-format
-msgid "Caching contact %d/%d"
-msgstr "Ukládání kontaktu %d/%d do mezipaměti"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:924
-msgid "Failed to count server contacts"
-msgstr "Selhalo zjištění počtu kontaktů na serveru"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:982
-msgid "Failed to list items from a server"
-msgstr "Selhalo vypsání položek ze serveru"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1063
-msgid "Failed to transfer contacts from a server"
-msgstr "Selhal přenos kontaktů ze serveru"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:151
-#, c-format
-msgid "Caching GAL contact %d"
-msgstr "Ukládání kontaktu GAL %d do mezipaměti"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. The first %d is an index of the GAL entry,
-#. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:157
-#, c-format
-msgid "Caching GAL contact %d/%d"
-msgstr "Ukládání kontaktu GAL %d/%d do mezipaměti"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:228
-#: ../src/addressbook/e-book-backend-mapi-gal.c:312
+#: ../src/addressbook/e-book-backend-mapi.c:496
+#: ../src/addressbook/e-book-backend-mapi.c:680
 msgid "Failed to fetch GAL entries"
 msgstr "Selhalo stahování záznamů GAL"
 
-#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:412
-#, c-format
-msgid "Loading items in folder %s"
-msgstr "Nahrávání položek do složky %s"
+#: ../src/addressbook/e-book-backend-mapi.c:502
+msgid "Failed to transfer contacts from a server"
+msgstr "Selhal přenos kontaktů ze serveru"
 
-#: ../src/calendar/e-cal-backend-mapi.c:779
-#, c-format
-msgid "Failed to open folder: %s"
-msgstr "Selhalo otevření složky: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:687
+#: ../src/calendar/e-cal-backend-mapi.c:1105
+msgid "Failed to list items from a server"
+msgstr "Selhalo vypsání položek ze serveru"
 
-#: ../src/calendar/e-cal-backend-mapi.c:787
-#, c-format
-msgid "Failed to get folder properties: %s"
-msgstr "Selhalo získání vlastností složky: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:862
+#: ../src/calendar/e-cal-backend-mapi.c:1332
+msgid "Failed to modify item on a server"
+msgstr "Selhala úprava složky na serveru"
 
-#: ../src/calendar/e-cal-backend-mapi.c:828
-#, c-format
-msgid "Failed to list objects: %s"
-msgstr "Selhalo vypsání objektů: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:862
+#: ../src/calendar/e-cal-backend-mapi.c:1332
+#: ../src/calendar/e-cal-backend-mapi.c:1625
+msgid "Failed to create item on a server"
+msgstr "Selhalo vytvoření složky na serveru"
 
-#: ../src/calendar/e-cal-backend-mapi.c:854
-#, c-format
-msgid "Failed to transfer objects: %s"
-msgstr "Selhal přenos objektů: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:923
+#: ../src/calendar/e-cal-backend-mapi.c:1400
+msgid "Failed to remove item from a server"
+msgstr "Selhalo odstranění položky ze serveru"
 
-#: ../src/calendar/e-cal-backend-mapi.c:873
-#, c-format
-msgid "Failed to close folder: %s"
-msgstr "Selhalo zavření složky: %s"
+#: ../src/calendar/e-cal-backend-mapi.c:881
+msgid "Failed to transfer objects from a server"
+msgstr "Selhal přenos objektů ze serveru"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1382
-msgid "Could not create cache file"
-msgstr "Nelze vytvořit soubor pro mezipaměť"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1847
+#: ../src/calendar/e-cal-backend-mapi.c:1249
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -159,11 +79,7 @@ msgstr ""
 "Podpora pro úpravu jednotlivých výskytů opakujících se událostí není dosud "
 "implementována. Změna události na serveru nebyla provedena."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2045
-msgid "Cannot remove items from a server"
-msgstr "Nelze odstranit položky ze serveru"
-
-#: ../src/calendar/e-cal-backend-mapi.c:2476
+#: ../src/calendar/e-cal-backend-mapi.c:1675
 msgid "Failed to get Free/Busy data"
 msgstr "Selhalo získání údajů o volných/obsazených termínech"
 
@@ -477,12 +393,12 @@ msgstr "Nelze odeslat zprávu: %s"
 msgid "Cannot connect, no credentials provided"
 msgstr "Nelze připojit, nejsou poskytnuta žádná pověření"
 
-#: ../src/collection/e-mapi-backend.c:341
+#: ../src/collection/e-mapi-backend.c:373
 msgid "Global Address List"
 msgstr "Globální seznam adres"
 
-#: ../src/collection/e-mapi-backend.c:696
-#: ../src/collection/e-mapi-backend.c:793
+#: ../src/collection/e-mapi-backend.c:728
+#: ../src/collection/e-mapi-backend.c:825
 #, c-format
 msgid "Data source “%s” does not represent a MAPI folder"
 msgstr "Zdroj dat „%s“ se ve složce MAPI nenachází"
@@ -1014,19 +930,19 @@ msgid "_Folder name:"
 msgstr "Název _složky:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2067
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2060
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Schválené:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2072
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2065
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Předběžné:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2077
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2070
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Zamítnuté:"
@@ -1161,3 +1077,4 @@ msgstr "Nelze přidat složku, nepodporovaný typ složky"
 #: ../src/libexchangemapi/e-mapi-folder.c:333
 msgid "Cannot add folder, master source not found"
 msgstr "Nelze přidat složku, hlavní zdroj nebyl nalezen"
+
