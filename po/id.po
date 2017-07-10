@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2017-02-26 06:46+0000\n"
-"PO-Revision-Date: 2017-03-21 15:55+0700\n"
+"POT-Creation-Date: 2017-06-06 08:12+0000\n"
+"PO-Revision-Date: 2017-06-18 14:29+0700\n"
 "Last-Translator: Kukuh Syafaat <syafaatkukuh@gmail.com>\n"
 "Language-Team: GNOME Indonesian Translation Team <gnome@i15n.org>\n"
 "Language: id\n"
@@ -29,127 +29,47 @@ msgstr "MAPI Exchange"
 msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr "Untuk mengakses server Microsoft Exchange 2007/OpenChange dengan MAPI"
 
-#: ../src/addressbook/e-book-backend-mapi.c:737
-msgid "Searching"
-msgstr "Mencari"
-
-#: ../src/addressbook/e-book-backend-mapi.c:1739
-#: ../src/calendar/e-cal-backend-mapi.c:187
-#: ../src/calendar/e-cal-backend-mapi.c:487
+#: ../src/addressbook/e-book-backend-mapi.c:92
+#: ../src/calendar/e-cal-backend-mapi.c:100
 #: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1942
 msgid "Unknown error"
 msgstr "Kesalahan tak dikenal"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:430
-msgid "Failed to remove public folder"
-msgstr "Gagal menghapus folder publik"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:466
-msgid "The backend does not support bulk additions"
-msgstr "Backend tak mendukung penambahan bulk"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:508
-#: ../src/calendar/e-cal-backend-mapi.c:1718
-#: ../src/calendar/e-cal-backend-mapi.c:2230
-msgid "Failed to create item on a server"
-msgstr "Gagal membuat item pada server"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:625
-msgid "The backend does not support bulk modifications"
-msgstr "Backend tak mendukung pengubahan bulk"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:670
-#: ../src/calendar/e-cal-backend-mapi.c:1932
-msgid "Failed to modify item on a server"
-msgstr "Gagal mengubah item pada server"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:846
-msgid "Failed to fetch items from a server"
-msgstr "Gagal mengambil item dari server"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. %d is an index of the contact.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:864
-#, c-format
-msgid "Caching contact %d"
-msgstr "Menyinggahkan kontak %d"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. The first %d is an index of the contact,
-#. the second %d is total count of conacts on the server.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:870
-#, c-format
-msgid "Caching contact %d/%d"
-msgstr "Menyinggahkan kontak %d/%d"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:924
-msgid "Failed to count server contacts"
-msgstr "Gagal mencacah kontak server"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:982
-msgid "Failed to list items from a server"
-msgstr "Gagal membuat daftar butir dari suatu server"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1063
-msgid "Failed to transfer contacts from a server"
-msgstr "Gagal mentransfer kontak dari suatu server"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:151
-#, c-format
-msgid "Caching GAL contact %d"
-msgstr "Menyinggahkan kontak GAL %d"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. The first %d is an index of the GAL entry,
-#. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:157
-#, c-format
-msgid "Caching GAL contact %d/%d"
-msgstr "Menyinggahkan kontak GAL %d/%d"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:228
-#: ../src/addressbook/e-book-backend-mapi-gal.c:312
+#: ../src/addressbook/e-book-backend-mapi.c:496
+#: ../src/addressbook/e-book-backend-mapi.c:680
 msgid "Failed to fetch GAL entries"
 msgstr "Gagal mengambil entri GAL"
 
-#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:412
-#, c-format
-msgid "Loading items in folder %s"
-msgstr "Memuat item dalam folder %s"
+#: ../src/addressbook/e-book-backend-mapi.c:502
+msgid "Failed to transfer contacts from a server"
+msgstr "Gagal mentransfer kontak dari suatu server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:779
-#, c-format
-msgid "Failed to open folder: %s"
-msgstr "Gagal membuka folder: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:687
+#: ../src/calendar/e-cal-backend-mapi.c:1105
+msgid "Failed to list items from a server"
+msgstr "Gagal membuat daftar butir dari suatu server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:787
-#, c-format
-msgid "Failed to get folder properties: %s"
-msgstr "Gagal mendapat properti folder: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:862
+#: ../src/calendar/e-cal-backend-mapi.c:1332
+msgid "Failed to modify item on a server"
+msgstr "Gagal mengubah item pada server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:828
-#, c-format
-msgid "Failed to list objects: %s"
-msgstr "Gagal membuat daftar objek: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:862
+#: ../src/calendar/e-cal-backend-mapi.c:1332
+#: ../src/calendar/e-cal-backend-mapi.c:1625
+msgid "Failed to create item on a server"
+msgstr "Gagal membuat item pada server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:854
-#, c-format
-msgid "Failed to transfer objects: %s"
-msgstr "Gagal mentransfer objek: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:923
+#: ../src/calendar/e-cal-backend-mapi.c:1400
+msgid "Failed to remove item from a server"
+msgstr "Gagal menghapus item dari server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:873
-#, c-format
-msgid "Failed to close folder: %s"
-msgstr "Gagal menutup folder: %s"
+#: ../src/calendar/e-cal-backend-mapi.c:881
+msgid "Failed to transfer objects from a server"
+msgstr "Gagal mentransfer objek dari server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1382
-msgid "Could not create cache file"
-msgstr "Tidak dapat membuat berkas tembolok"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1847
+#: ../src/calendar/e-cal-backend-mapi.c:1249
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -157,11 +77,7 @@ msgstr ""
 "Dukungan untuk memodifikasi satu janji yang berulang belum "
 "diimplementasikan. Tidak ada perubahan pada janji di server."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2045
-msgid "Cannot remove items from a server"
-msgstr "Tak bisa menghapus item dari server"
-
-#: ../src/calendar/e-cal-backend-mapi.c:2476
+#: ../src/calendar/e-cal-backend-mapi.c:1675
 msgid "Failed to get Free/Busy data"
 msgstr "Gagal memperoleh data Luang/Sibuk"
 
@@ -472,12 +388,12 @@ msgstr "Tidak dapat mengirim pesan: %s"
 msgid "Cannot connect, no credentials provided"
 msgstr "Tak bisa menyambung, tidak ada kredensial yang diberikan"
 
-#: ../src/collection/e-mapi-backend.c:341
+#: ../src/collection/e-mapi-backend.c:373
 msgid "Global Address List"
 msgstr "Daftar Alamat Global"
 
-#: ../src/collection/e-mapi-backend.c:696
-#: ../src/collection/e-mapi-backend.c:793
+#: ../src/collection/e-mapi-backend.c:728
+#: ../src/collection/e-mapi-backend.c:825
 #, c-format
 msgid "Data source “%s” does not represent a MAPI folder"
 msgstr "Sumber data “%s” tak mewakili suatu folder MAPI"
@@ -1006,19 +922,19 @@ msgid "_Folder name:"
 msgstr "Nama _folder:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2067
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2060
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Diterima:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2072
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2065
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Tentatif:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2077
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2070
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Ditolak:"
@@ -1154,6 +1070,57 @@ msgstr "Tak bisa menambah folder, tipe folder tak didukung"
 #: ../src/libexchangemapi/e-mapi-folder.c:333
 msgid "Cannot add folder, master source not found"
 msgstr "Tak bisa menambah folder, sumber induk tak ditemukan"
+
+#~ msgid "Searching"
+#~ msgstr "Mencari"
+
+#~ msgid "Failed to remove public folder"
+#~ msgstr "Gagal menghapus folder publik"
+
+#~ msgid "The backend does not support bulk additions"
+#~ msgstr "Backend tak mendukung penambahan bulk"
+
+#~ msgid "The backend does not support bulk modifications"
+#~ msgstr "Backend tak mendukung pengubahan bulk"
+
+#~ msgid "Caching contact %d"
+#~ msgstr "Menyinggahkan kontak %d"
+
+#~ msgid "Caching contact %d/%d"
+#~ msgstr "Menyinggahkan kontak %d/%d"
+
+#~ msgid "Failed to count server contacts"
+#~ msgstr "Gagal mencacah kontak server"
+
+#~ msgid "Caching GAL contact %d"
+#~ msgstr "Menyinggahkan kontak GAL %d"
+
+#~ msgid "Caching GAL contact %d/%d"
+#~ msgstr "Menyinggahkan kontak GAL %d/%d"
+
+#~ msgid "Loading items in folder %s"
+#~ msgstr "Memuat item dalam folder %s"
+
+#~ msgid "Failed to open folder: %s"
+#~ msgstr "Gagal membuka folder: %s"
+
+#~ msgid "Failed to get folder properties: %s"
+#~ msgstr "Gagal mendapat properti folder: %s"
+
+#~ msgid "Failed to list objects: %s"
+#~ msgstr "Gagal membuat daftar objek: %s"
+
+#~ msgid "Failed to transfer objects: %s"
+#~ msgstr "Gagal mentransfer objek: %s"
+
+#~ msgid "Failed to close folder: %s"
+#~ msgstr "Gagal menutup folder: %s"
+
+#~ msgid "Could not create cache file"
+#~ msgstr "Tidak dapat membuat berkas tembolok"
+
+#~ msgid "Cannot remove items from a server"
+#~ msgstr "Tak bisa menghapus item dari server"
 
 #~ msgid "Automatically synchroni_ze account locally"
 #~ msgstr "_Secara otomatis menyelaraskan akun secara lokal"
