@@ -186,7 +186,7 @@ pkg_check_variable(libmapi_ldif_dir libmapi datadir)
 set(mapidatadir "${mapidatadir}/mapi")
 set(libmapi_ldif_dir "${libmapi_ldif_dir}/setup")
 
-SET(CMAKE_INSTALL_RPATH "${LIB_INSTALL_DIR}:${privlibdir}:${evo_privlibdir}")
+SET(CMAKE_INSTALL_RPATH "${privlibdir}:${evo_privlibdir}")
 
 if(WIN32)
 	# On Win32 there is no "rpath" mechanism. We install the private
