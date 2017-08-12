@@ -6,12 +6,12 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product"
+"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product"
 "=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2016-12-19 14:58+0000\n"
-"PO-Revision-Date: 2017-02-25 19:22+0200\n"
+"POT-Creation-Date: 2017-08-07 08:45+0000\n"
+"PO-Revision-Date: 2017-08-12 20:19+0200\n"
 "Last-Translator: Miroslav Nikolić <miroslavnikolic@rocketmail.com>\n"
-"Language-Team: Serbian <(nothing)>\n"
+"Language-Team: srpski <gnome-sr@googlegroups.org>\n"
 "Language: sr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -29,127 +29,49 @@ msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr ""
 "Za pristup serverima Majkrosoft razmene 2007/ Slobodne izmene kroz MAPI"
 
-#: ../src/addressbook/e-book-backend-mapi.c:737
-msgid "Searching"
-msgstr "Pretražujem"
-
-#: ../src/addressbook/e-book-backend-mapi.c:1739
-#: ../src/calendar/e-cal-backend-mapi.c:187
-#: ../src/calendar/e-cal-backend-mapi.c:487
-#: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1942
+#: ../src/addressbook/e-book-backend-mapi.c:92
+#: ../src/calendar/e-cal-backend-mapi.c:100
+#: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1943
 msgid "Unknown error"
 msgstr "Nepoznata greška"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:430
-msgid "Failed to remove public folder"
-msgstr "Nisam uspeo da uklonim javnu fasciklu"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:466
-msgid "The backend does not support bulk additions"
-msgstr "Pozadinac ne podržava grupno dodavanje"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:508
-#: ../src/calendar/e-cal-backend-mapi.c:1718
-#: ../src/calendar/e-cal-backend-mapi.c:2230
-msgid "Failed to create item on a server"
-msgstr "Nisam uspeo da stvorim stavku na serveru"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:625
-msgid "The backend does not support bulk modifications"
-msgstr "Pozadinac ne podržava grupno uređivanje"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:670
-#: ../src/calendar/e-cal-backend-mapi.c:1932
-msgid "Failed to modify item on a server"
-msgstr "Nisam uspeo da izmenim stavku na serveru"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:846
-msgid "Failed to fetch items from a server"
-msgstr "Nisam uspeo da preuzmem stavke sa servera"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. %d is an index of the contact.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:864
-#, c-format
-msgid "Caching contact %d"
-msgstr "Beležim kontakt br. %d"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. The first %d is an index of the contact,
-#. the second %d is total count of conacts on the server.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:870
-#, c-format
-msgid "Caching contact %d/%d"
-msgstr "Beležim kontakt br. %d od %d"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:924
-msgid "Failed to count server contacts"
-msgstr "Nisam uspeo da prebrojim kontakte na serveru"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:982
-msgid "Failed to list items from a server"
-msgstr "Nisam uspeo da ispišem stavke sa servera"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1063
-msgid "Failed to transfer contacts from a server"
-msgstr "Nisam uspeo da prebacim kontakte sa servera"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:151
-#, c-format
-msgid "Caching GAL contact %d"
-msgstr "Beležim GAL kontakt br. %d"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. The first %d is an index of the GAL entry,
-#. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:157
-#, c-format
-msgid "Caching GAL contact %d/%d"
-msgstr "Beležim GAL kontakt br. %d od %d"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:228
-#: ../src/addressbook/e-book-backend-mapi-gal.c:312
+#: ../src/addressbook/e-book-backend-mapi.c:496
+#: ../src/addressbook/e-book-backend-mapi.c:680
 msgid "Failed to fetch GAL entries"
 msgstr "Nisam uspeo da preuzmem GAL unose"
 
-#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:412
-#, c-format
-msgid "Loading items in folder %s"
-msgstr "Učitavam stavke u fasciklu %s"
+#: ../src/addressbook/e-book-backend-mapi.c:502
+msgid "Failed to transfer contacts from a server"
+msgstr "Nisam uspeo da prebacim kontakte sa servera"
 
-#: ../src/calendar/e-cal-backend-mapi.c:779
-#, c-format
-msgid "Failed to open folder: %s"
-msgstr "Nisam uspeo da otvorim fasciklu: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:687
+#: ../src/calendar/e-cal-backend-mapi.c:1105
+msgid "Failed to list items from a server"
+msgstr "Nisam uspeo da ispišem stavke sa servera"
 
-#: ../src/calendar/e-cal-backend-mapi.c:787
-#, c-format
-msgid "Failed to get folder properties: %s"
-msgstr "Nisam uspeo da dobavim svojstva fascikle: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:862
+#: ../src/calendar/e-cal-backend-mapi.c:1332
+msgid "Failed to modify item on a server"
+msgstr "Nisam uspeo da izmenim stavku na serveru"
 
-#: ../src/calendar/e-cal-backend-mapi.c:828
-#, c-format
-msgid "Failed to list objects: %s"
-msgstr "Nisam uspeo da ispišem objekte: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:862
+#: ../src/calendar/e-cal-backend-mapi.c:1332
+#: ../src/calendar/e-cal-backend-mapi.c:1625
+msgid "Failed to create item on a server"
+msgstr "Nisam uspeo da stvorim stavku na serveru"
 
-#: ../src/calendar/e-cal-backend-mapi.c:854
-#, c-format
-msgid "Failed to transfer objects: %s"
-msgstr "Nisam uspeo da prebacim objekte: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:923
+#: ../src/calendar/e-cal-backend-mapi.c:1400
+#| msgid "Failed to fetch items from a server"
+msgid "Failed to remove item from a server"
+msgstr "Nisam uspeo da uklonim stavke sa servera"
 
-#: ../src/calendar/e-cal-backend-mapi.c:873
-#, c-format
-msgid "Failed to close folder: %s"
-msgstr "Nisam uspeo da zatvorim fasciklu: %s"
+#: ../src/calendar/e-cal-backend-mapi.c:881
+#| msgid "Failed to transfer contacts from a server"
+msgid "Failed to transfer objects from a server"
+msgstr "Nisam uspeo da prebacim objekte sa servera"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1382
-msgid "Could not create cache file"
-msgstr "Ne mogu da napravim datoteku za ostavu"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1847
+#: ../src/calendar/e-cal-backend-mapi.c:1249
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -157,23 +79,17 @@ msgstr ""
 "Promena jednog zakazanog sastanka, koji se ponavlja, još uvek ne postoji. "
 "Promene neće biti zapisane na serveru."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2045
-msgid "Cannot remove items from a server"
-msgstr "Ne mogu da uklonim stavke sa servera"
-
-#: ../src/calendar/e-cal-backend-mapi.c:2476
+#: ../src/calendar/e-cal-backend-mapi.c:1675
 msgid "Failed to get Free/Busy data"
 msgstr "Nisam uspeo da nabavim podatke slobodno/zauzeto"
 
 #: ../src/camel/camel-mapi-folder.c:776
 #, c-format
-#| msgid "Refreshing folder '%s'"
 msgid "Refreshing folder “%s”"
 msgstr "Osvežavam fasciklu „%s“"
 
 #: ../src/camel/camel-mapi-folder.c:844
 #, c-format
-#| msgid "Downloading messages in folder '%s'"
 msgid "Downloading messages in folder “%s”"
 msgstr "Preuzimam poruke u fasciklu „%s“"
 
@@ -193,7 +109,6 @@ msgstr "Ne mogu da preuzmem stavke"
 
 #: ../src/camel/camel-mapi-folder.c:1170
 #, c-format
-#| msgid "Cannot append message to folder '%s'"
 msgid "Cannot append message to folder “%s”"
 msgstr "Ne mogu da dodam poruku u fasciklu „%s“"
 
@@ -232,19 +147,19 @@ msgstr "Ne mogu da dobavim poruku: %s"
 msgid "Could not get message"
 msgstr "Ne mogu da dobavim poruku"
 
-#: ../src/camel/camel-mapi-folder.c:1919
+#: ../src/camel/camel-mapi-folder.c:1920
 msgid "Receive quota"
 msgstr "Primam normu"
 
-#: ../src/camel/camel-mapi-folder.c:1925
+#: ../src/camel/camel-mapi-folder.c:1926
 msgid "Send quota"
 msgstr "Šaljem normu"
 
-#: ../src/camel/camel-mapi-folder.c:1947
+#: ../src/camel/camel-mapi-folder.c:1948
 msgid "No quota information available"
 msgstr "Nisu dostupni podaci o normi"
 
-#: ../src/camel/camel-mapi-folder.c:2054
+#: ../src/camel/camel-mapi-folder.c:2055
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Ne mogu da učitam pregled za %s"
@@ -320,7 +235,6 @@ msgstr "Nisam pronašao fasciklu"
 
 #: ../src/camel/camel-mapi-store.c:1200 ../src/camel/camel-mapi-store.c:2170
 #, c-format
-#| msgid "Connecting to '%s'"
 msgid "Connecting to “%s”"
 msgstr "Povezujem se sa „%s“"
 
@@ -330,7 +244,6 @@ msgstr "Ne mogu da napravim MAPI fasciklu u režimu van mreže"
 
 #: ../src/camel/camel-mapi-store.c:1266
 #, c-format
-#| msgid "Cannot create new folder '%s'"
 msgid "Cannot create new folder “%s”"
 msgstr "Ne mogu da napravim novu fasciklu „%s“"
 
@@ -347,19 +260,16 @@ msgstr ""
 
 #: ../src/camel/camel-mapi-store.c:1298 ../src/camel/camel-mapi-store.c:1411
 #, c-format
-#| msgid "Cannot find folder '%s'"
 msgid "Cannot find folder “%s”"
 msgstr "Ne mogu da nađem fasciklu „%s“"
 
 #: ../src/camel/camel-mapi-store.c:1353
 #, c-format
-#| msgid "Cannot create folder '%s': %s"
 msgid "Cannot create folder “%s”: %s"
 msgstr "Ne mogu da napravim fasciklu „%s“: %s"
 
 #: ../src/camel/camel-mapi-store.c:1359
 #, c-format
-#| msgid "Cannot create folder '%s'"
 msgid "Cannot create folder “%s”"
 msgstr "Ne mogu da napravim fasciklu „%s“"
 
@@ -369,13 +279,11 @@ msgstr "Ne mogu da obrišem MAPI fasciklu u režimu van mreže"
 
 #: ../src/camel/camel-mapi-store.c:1457
 #, c-format
-#| msgid "Cannot remove folder '%s': %s"
 msgid "Cannot remove folder “%s”: %s"
 msgstr "Ne mogu da uklonim fasciklu „%s“: %s"
 
 #: ../src/camel/camel-mapi-store.c:1465
 #, c-format
-#| msgid "Cannot remove folder '%s'"
 msgid "Cannot remove folder “%s”"
 msgstr "Ne mogu da uklonim fasciklu „%s“"
 
@@ -386,7 +294,6 @@ msgstr "Ne mogu da preimenujem MAPI fasciklu u režimu van mreže"
 #. Translators: “%s” is current name of the folder
 #: ../src/camel/camel-mapi-store.c:1521
 #, c-format
-#| msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
 msgid "Cannot rename MAPI folder “%s”. Folder does not exist"
 msgstr "Ne mogu da preimenujem MAPI fasciklu „%s“. Fascikla ne postoji"
 
@@ -394,7 +301,6 @@ msgstr "Ne mogu da preimenujem MAPI fasciklu „%s“. Fascikla ne postoji"
 #. new name of the folder.
 #: ../src/camel/camel-mapi-store.c:1532
 #, c-format
-#| msgid "Cannot rename MAPI default folder '%s' to '%s'"
 msgid "Cannot rename MAPI default folder “%s” to “%s”"
 msgstr "Ne mogu da preimenujem osnovnu MAPI fasciklu „%s“ u „%s“"
 
@@ -402,7 +308,6 @@ msgstr "Ne mogu da preimenujem osnovnu MAPI fasciklu „%s“ u „%s“"
 #: ../src/camel/camel-mapi-store.c:1558 ../src/camel/camel-mapi-store.c:1601
 #: ../src/camel/camel-mapi-store.c:1681
 #, c-format
-#| msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgid "Cannot rename MAPI folder “%s” to “%s”"
 msgstr "Ne mogu da preimenujem MAPI fasciklu „%s“ u „%s“"
 
@@ -410,7 +315,6 @@ msgstr "Ne mogu da preimenujem MAPI fasciklu „%s“ u „%s“"
 #. The last “%s” is a detailed error message.
 #: ../src/camel/camel-mapi-store.c:1593 ../src/camel/camel-mapi-store.c:1674
 #, c-format
-#| msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgid "Cannot rename MAPI folder “%s” to “%s”: %s"
 msgstr "Ne mogu da preimenujem MAPI fasciklu „%s“ u „%s“: %s"
 
@@ -420,7 +324,6 @@ msgstr "Ne mogu da pretplatim MAPI fascikle u režimu van mreže"
 
 #: ../src/camel/camel-mapi-store.c:1788
 #, c-format
-#| msgid "Folder '%s' not found"
 msgid "Folder “%s” not found"
 msgstr "Nisam pronašao fasciklu „%s“"
 
@@ -448,15 +351,12 @@ msgstr "Ne mogu da se povežem na MAPI radnju u režimu van mreže"
 
 #: ../src/camel/camel-mapi-store.c:2205
 #, c-format
-#| msgid "Mailbox '%s' is full, no new messages will be received or sent."
 msgid "Mailbox “%s” is full, no new messages will be received or sent."
 msgstr ""
 "Sanduče „%s“ je puno, nijedna nova poruka neće biti ni primljena ni poslata."
 
 #: ../src/camel/camel-mapi-store.c:2207
 #, c-format
-#| msgid ""
-#| "Mailbox '%s' is near its size limit, message send will be disabled soon."
 msgid ""
 "Mailbox “%s” is near its size limit, message send will be disabled soon."
 msgstr ""
@@ -465,13 +365,11 @@ msgstr ""
 
 #: ../src/camel/camel-mapi-store.c:2211
 #, c-format
-#| msgid "Mailbox '%s' is full, no new messages will be received."
 msgid "Mailbox “%s” is full, no new messages will be received."
 msgstr "Sanduče „%s“ je puno, nijedna nova poruka neće biti primljena."
 
 #: ../src/camel/camel-mapi-store.c:2213
 #, c-format
-#| msgid "Mailbox '%s' is near its size limit."
 msgid "Mailbox “%s” is near its size limit."
 msgstr "Sanduče „%s“ je blizu ograničenja svoje veličine."
 
@@ -494,14 +392,13 @@ msgstr "Ne mogu da pošaljem poruku: %s"
 msgid "Cannot connect, no credentials provided"
 msgstr "Ne mogu da se povežem, nisu obezbeđena punomoćstva"
 
-#: ../src/collection/e-mapi-backend.c:341
+#: ../src/collection/e-mapi-backend.c:373
 msgid "Global Address List"
 msgstr "Opšti spisak adresa"
 
-#: ../src/collection/e-mapi-backend.c:696
-#: ../src/collection/e-mapi-backend.c:793
+#: ../src/collection/e-mapi-backend.c:728
+#: ../src/collection/e-mapi-backend.c:825
 #, c-format
-#| msgid "Data source '%s' does not represent a MAPI folder"
 msgid "Data source “%s” does not represent a MAPI folder"
 msgstr "Izvor podataka „%s“ ne predstavlja MAPI fasciklu"
 
@@ -595,7 +492,7 @@ msgid "_Realm name:"
 msgstr "Ime _područja:"
 
 #: ../src/configuration/e-mail-config-mapi-page.c:189
-#: ../src/configuration/e-mail-config-mapi-page.c:250
+#: ../src/configuration/e-mail-config-mapi-page.c:252
 msgid "MAPI Settings"
 msgstr "MAPI podešavanja"
 
@@ -630,9 +527,9 @@ msgstr "Preuzimam spisak fascikli…"
 
 #: ../src/configuration/e-mapi-config-utils.c:702
 #, c-format
-#| msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
-msgstr "Ne mogu da uredim ovlašćenja za fasciklu „%s“, izaberite drugu fasciklu."
+msgstr ""
+"Ne mogu da uredim ovlašćenja za fasciklu „%s“, izaberite drugu fasciklu."
 
 #: ../src/configuration/e-mapi-config-utils.c:765
 msgid "Folder size..."
@@ -942,7 +839,6 @@ msgstr "_Potraži:"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:87
 #, c-format
-#| msgid "Cannot add folder, folder already exists as '%s'"
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Ne mogu da dodam fasciklu, fascikla već postoji kao „%s“"
 
@@ -951,23 +847,17 @@ msgstr "Ne mogu da dodam fasciklu, fascikla već postoji kao „%s“"
 #.
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:112
 #, c-format
-#| msgctxt "ForeignFolder"
-#| msgid "Mailbox - %s"
 msgctxt "ForeignFolder"
 msgid "Mailbox — %s"
 msgstr "Poštansko sanduče — %s"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:141
 #, c-format
-#| msgid "Cannot add folder, failed to add to store's summary"
 msgid "Cannot add folder, failed to add to store’s summary"
 msgstr "Ne mogu da dodam fasciklu, nisam uspeo da dodam u sažetak radnje"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:327
 #, c-format
-#| msgid ""
-#| "Folder '%s' not found. Either it does not exist or you do not have "
-#| "permission to access it."
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
@@ -976,7 +866,6 @@ msgstr ""
 "pristupite."
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:362
-#| msgid "Cannot add folder, cannot determine folder's type"
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Ne mogu da dodam fasciklu, ne mogu da odredim vrstu datoteke"
 
@@ -1019,7 +908,6 @@ msgstr "Zadaci"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:521
 #, c-format
-#| msgid "Testing availability of folder '%s' of user '%s', please wait..."
 msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgstr "Isprobavam dostupnost fascikle „%s“ korisnika „%s“, sačekajte..."
 
@@ -1044,19 +932,19 @@ msgid "_Folder name:"
 msgstr "Naziv _fascikle:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2067
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2060
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Prihvaćeno:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2072
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2065
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Privremeno:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2077
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2070
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Odbačeno:"
@@ -1137,33 +1025,28 @@ msgstr "%s: %s"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:744
 #, c-format
-#| msgid "Server '%s' cannot be reached"
 msgid "Server “%s” cannot be reached"
 msgstr "Ne mogu da pristupim serveru „%s“"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:872
 #, c-format
-#| msgid "Folder name '%s' is not a known default folder name, nor folder ID."
 msgid "Folder name “%s” is not a known default folder name, nor folder ID."
 msgstr ""
 "Naziv fascikle „%s“ nije poznat zadati naziv fascikle, niti IB fascikle."
 
 #: ../src/libexchangemapi/e-mapi-connection.c:1203
 #, c-format
-#| msgid "Failed to open store for user '%s'"
 msgid "Failed to open store for user “%s”"
 msgstr "Nisam uspeo da otvorim radnju za korisnika „%s“"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:1211
 #, c-format
-#| msgid "Folder of user '%s' not found"
 msgid "Folder of user “%s” not found"
 msgstr "Nisam pronašao fasciklu korisnika „%s“"
 
 #. Translators: %s is replaced with an email address which was found ambiguous on a remote server
 #: ../src/libexchangemapi/e-mapi-connection.c:3863
 #, c-format
-#| msgid "Recipient '%s' is ambiguous"
 msgid "Recipient “%s” is ambiguous"
 msgstr "Primalac „%s“ je nejasan"
 
@@ -1182,13 +1065,11 @@ msgstr "Sve javne fascikle"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:6823
 #, c-format
-#| msgid "User name '%s' is ambiguous"
 msgid "User name “%s” is ambiguous"
 msgstr "Korisničko ime „%s“ nije jasno"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:6826
 #, c-format
-#| msgid "User name '%s' not found"
 msgid "User name “%s” not found"
 msgstr "Nisam pronašao korisničko ime „%s“"
 
@@ -1199,6 +1080,57 @@ msgstr "Ne mogu da dodam fasciklu, nepodržana vrsta fascikle"
 #: ../src/libexchangemapi/e-mapi-folder.c:333
 msgid "Cannot add folder, master source not found"
 msgstr "Ne mogu da dodam fasciklu, nisam pronašao glavni izvor"
+
+#~ msgid "Searching"
+#~ msgstr "Pretražujem"
+
+#~ msgid "Failed to remove public folder"
+#~ msgstr "Nisam uspeo da uklonim javnu fasciklu"
+
+#~ msgid "The backend does not support bulk additions"
+#~ msgstr "Pozadinac ne podržava grupno dodavanje"
+
+#~ msgid "The backend does not support bulk modifications"
+#~ msgstr "Pozadinac ne podržava grupno uređivanje"
+
+#~ msgid "Caching contact %d"
+#~ msgstr "Beležim kontakt br. %d"
+
+#~ msgid "Caching contact %d/%d"
+#~ msgstr "Beležim kontakt br. %d od %d"
+
+#~ msgid "Failed to count server contacts"
+#~ msgstr "Nisam uspeo da prebrojim kontakte na serveru"
+
+#~ msgid "Caching GAL contact %d"
+#~ msgstr "Beležim GAL kontakt br. %d"
+
+#~ msgid "Caching GAL contact %d/%d"
+#~ msgstr "Beležim GAL kontakt br. %d od %d"
+
+#~ msgid "Loading items in folder %s"
+#~ msgstr "Učitavam stavke u fasciklu %s"
+
+#~ msgid "Failed to open folder: %s"
+#~ msgstr "Nisam uspeo da otvorim fasciklu: %s"
+
+#~ msgid "Failed to get folder properties: %s"
+#~ msgstr "Nisam uspeo da dobavim svojstva fascikle: %s"
+
+#~ msgid "Failed to list objects: %s"
+#~ msgstr "Nisam uspeo da ispišem objekte: %s"
+
+#~ msgid "Failed to transfer objects: %s"
+#~ msgstr "Nisam uspeo da prebacim objekte: %s"
+
+#~ msgid "Failed to close folder: %s"
+#~ msgstr "Nisam uspeo da zatvorim fasciklu: %s"
+
+#~ msgid "Could not create cache file"
+#~ msgstr "Ne mogu da napravim datoteku za ostavu"
+
+#~ msgid "Cannot remove items from a server"
+#~ msgstr "Ne mogu da uklonim stavke sa servera"
 
 #~ msgid "Automatically synchroni_ze account locally"
 #~ msgstr "_Sam lokalno usaglasi nalog"
