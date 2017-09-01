@@ -202,7 +202,7 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.in ${CMAKE_BINARY_DIR}/${PROJECT_NAM
 
 print_build_options()
 
-add_appdata_file(evolution-mapi.metainfo.xml.in evolution-mapi.metainfo.xml)
+add_appdata_file(org.gnome.Evolution-mapi.metainfo.xml.in org.gnome.Evolution-mapi.metainfo.xml)
 
 add_subdirectory(po)
 add_subdirectory(src)
