@@ -1,23 +1,23 @@
 # Hungarian translation of evolution-mapi
-# Copyright (C) 2009-2016 Free Software Foundation, Inc.
+# Copyright (C) 2009-2017 Free Software Foundation, Inc.
 # This file is distributed under the same license as the evolution-mapi package.
 #
 # Gabor Kelemen <kelemeng at gnome dot hu>, 2009, 2010, 2011, 2012, 2016, 2017.
-# Balázs Úr <urbalazs at gmail dot com>, 2011, 2014, 2015, 2016.
+# Balázs Úr <urbalazs at gmail dot com>, 2011, 2014, 2015, 2016, 2017.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2017-02-26 06:46+0000\n"
-"PO-Revision-Date: 2017-03-07 01:31+0100\n"
-"Last-Translator: Gabor Kelemen <kelemeng at ubuntu dot com>\n"
+"POT-Creation-Date: 2017-08-07 08:45+0000\n"
+"PO-Revision-Date: 2017-09-03 17:43+0200\n"
+"Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
 "Language-Team: Hungarian <openscope at googlegroups dot com>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 1.5\n"
+"X-Generator: Lokalize 1.2\n"
 "Plural-Forms:  nplurals=2; plural=(n != 1);\n"
 
 #: ../evolution-mapi.metainfo.xml.in.h:1
@@ -29,127 +29,49 @@ msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr ""
 "Microsoft Exchange 2007/OpenChange kiszolgálók elérése MAPI használatával"
 
-#: ../src/addressbook/e-book-backend-mapi.c:737
-msgid "Searching"
-msgstr "Keresés"
-
-#: ../src/addressbook/e-book-backend-mapi.c:1739
-#: ../src/calendar/e-cal-backend-mapi.c:187
-#: ../src/calendar/e-cal-backend-mapi.c:487
-#: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1942
+#: ../src/addressbook/e-book-backend-mapi.c:92
+#: ../src/calendar/e-cal-backend-mapi.c:100
+#: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1943
 msgid "Unknown error"
 msgstr "Ismeretlen hiba"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:430
-msgid "Failed to remove public folder"
-msgstr "A nyilvános mappa eltávolítása meghiúsult"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:466
-msgid "The backend does not support bulk additions"
-msgstr "A háttérprogram nem támogatja a tömeges hozzáadásokat"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:508
-#: ../src/calendar/e-cal-backend-mapi.c:1718
-#: ../src/calendar/e-cal-backend-mapi.c:2230
-msgid "Failed to create item on a server"
-msgstr "Nem sikerült létrehozni az elemet a kiszolgálón"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:625
-msgid "The backend does not support bulk modifications"
-msgstr "A háttérprogram nem támogatja a tömeges módosításokat"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:670
-#: ../src/calendar/e-cal-backend-mapi.c:1932
-msgid "Failed to modify item on a server"
-msgstr "Nem sikerült módosítani az elemet a kiszolgálón"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:846
-msgid "Failed to fetch items from a server"
-msgstr "Nem sikerült letölteni az elemeket a kiszolgálóról"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. %d is an index of the contact.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:864
-#, c-format
-msgid "Caching contact %d"
-msgstr "%d. névjegy gyorsítótárazása"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. The first %d is an index of the contact,
-#. the second %d is total count of conacts on the server.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:870
-#, c-format
-msgid "Caching contact %d/%d"
-msgstr "%d/%d névjegy gyorsítótárazása"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:924
-msgid "Failed to count server contacts"
-msgstr "Nem sikerült megszámolni a kiszolgáló névjegyeit"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:982
-msgid "Failed to list items from a server"
-msgstr "Nem sikerült felsorolni az elemeket a kiszolgálóról"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1063
-msgid "Failed to transfer contacts from a server"
-msgstr "Nem sikerült átvinni a névjegyeket a kiszolgálóról"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:151
-#, c-format
-msgid "Caching GAL contact %d"
-msgstr "%d. GAL-névjegy gyorsítótárazása"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. The first %d is an index of the GAL entry,
-#. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:157
-#, c-format
-msgid "Caching GAL contact %d/%d"
-msgstr "%d/%d GAL-névjegy gyorsítótárazása"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:228
-#: ../src/addressbook/e-book-backend-mapi-gal.c:312
+#: ../src/addressbook/e-book-backend-mapi.c:496
+#: ../src/addressbook/e-book-backend-mapi.c:680
 msgid "Failed to fetch GAL entries"
 msgstr "A GAL-bejegyzések letöltése meghiúsult"
 
-#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:412
-#, c-format
-msgid "Loading items in folder %s"
-msgstr "Elemek letöltése a(z) %s mappába"
+#: ../src/addressbook/e-book-backend-mapi.c:502
+msgid "Failed to transfer contacts from a server"
+msgstr "Nem sikerült átvinni a névjegyeket a kiszolgálóról"
 
-#: ../src/calendar/e-cal-backend-mapi.c:779
-#, c-format
-msgid "Failed to open folder: %s"
-msgstr "A mappa megnyitása meghiúsult: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:687
+#: ../src/calendar/e-cal-backend-mapi.c:1105
+msgid "Failed to list items from a server"
+msgstr "Nem sikerült felsorolni az elemeket a kiszolgálóról"
 
-#: ../src/calendar/e-cal-backend-mapi.c:787
-#, c-format
-msgid "Failed to get folder properties: %s"
-msgstr "A mappa tulajdonságainak lekérése meghiúsult: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:862
+#: ../src/calendar/e-cal-backend-mapi.c:1332
+msgid "Failed to modify item on a server"
+msgstr "Nem sikerült módosítani az elemet a kiszolgálón"
 
-#: ../src/calendar/e-cal-backend-mapi.c:828
-#, c-format
-msgid "Failed to list objects: %s"
-msgstr "Nem sikerült felsorolni az objektumokat: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:862
+#: ../src/calendar/e-cal-backend-mapi.c:1332
+#: ../src/calendar/e-cal-backend-mapi.c:1625
+msgid "Failed to create item on a server"
+msgstr "Nem sikerült létrehozni az elemet a kiszolgálón"
 
-#: ../src/calendar/e-cal-backend-mapi.c:854
-#, c-format
-msgid "Failed to transfer objects: %s"
-msgstr "Nem sikerült átvinni az objektumokat: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:923
+#: ../src/calendar/e-cal-backend-mapi.c:1400
+#| msgid "Failed to fetch items from a server"
+msgid "Failed to remove item from a server"
+msgstr "Nem sikerült eltávolítani az elemet a kiszolgálóról"
 
-#: ../src/calendar/e-cal-backend-mapi.c:873
-#, c-format
-msgid "Failed to close folder: %s"
-msgstr "A mappa bezárása meghiúsult: %s"
+#: ../src/calendar/e-cal-backend-mapi.c:881
+#| msgid "Failed to transfer contacts from a server"
+msgid "Failed to transfer objects from a server"
+msgstr "Nem sikerült letölteni az objektumokat a kiszolgálóról"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1382
-msgid "Could not create cache file"
-msgstr "Nem lehet létrehozni a gyorsítótár fájlt"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1847
+#: ../src/calendar/e-cal-backend-mapi.c:1249
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -157,11 +79,7 @@ msgstr ""
 "Ismétlődő értekezlet egyedi példányainak módosítása még nem támogatott. Az "
 "értekezlet nem módosult a kiszolgálón."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2045
-msgid "Cannot remove items from a server"
-msgstr "Nem lehet eltávolítani az elemeket a kiszolgálóról"
-
-#: ../src/calendar/e-cal-backend-mapi.c:2476
+#: ../src/calendar/e-cal-backend-mapi.c:1675
 msgid "Failed to get Free/Busy data"
 msgstr "Nem sikerült lekérni a szabad/elfoglalt adatokat"
 
@@ -229,19 +147,19 @@ msgstr "Nem sikerült az üzenetet letölteni: %s"
 msgid "Could not get message"
 msgstr "Nem sikerült az üzenetet letölteni"
 
-#: ../src/camel/camel-mapi-folder.c:1919
+#: ../src/camel/camel-mapi-folder.c:1920
 msgid "Receive quota"
 msgstr "Fogadási kvóta"
 
-#: ../src/camel/camel-mapi-folder.c:1925
+#: ../src/camel/camel-mapi-folder.c:1926
 msgid "Send quota"
 msgstr "Küldési kvóta"
 
-#: ../src/camel/camel-mapi-folder.c:1947
+#: ../src/camel/camel-mapi-folder.c:1948
 msgid "No quota information available"
 msgstr "Nem érhetők el kvótainformációk"
 
-#: ../src/camel/camel-mapi-folder.c:2054
+#: ../src/camel/camel-mapi-folder.c:2055
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nem sikerült betölteni %s összefoglalóját"
@@ -476,12 +394,12 @@ msgstr "Nem sikerült elküldeni a levelet: %s"
 msgid "Cannot connect, no credentials provided"
 msgstr "Nem lehet kapcsolódni, nincsenek hitelesítési adatok megadva"
 
-#: ../src/collection/e-mapi-backend.c:341
+#: ../src/collection/e-mapi-backend.c:373
 msgid "Global Address List"
 msgstr "Globális címlista"
 
-#: ../src/collection/e-mapi-backend.c:696
-#: ../src/collection/e-mapi-backend.c:793
+#: ../src/collection/e-mapi-backend.c:728
+#: ../src/collection/e-mapi-backend.c:825
 #, c-format
 msgid "Data source “%s” does not represent a MAPI folder"
 msgstr "A(z) „%s” adatforrás nem egy MAPI mappát képvisel"
@@ -576,7 +494,7 @@ msgid "_Realm name:"
 msgstr "_Tartománynév:"
 
 #: ../src/configuration/e-mail-config-mapi-page.c:189
-#: ../src/configuration/e-mail-config-mapi-page.c:250
+#: ../src/configuration/e-mail-config-mapi-page.c:252
 msgid "MAPI Settings"
 msgstr "MAPI beállításai"
 
@@ -1014,19 +932,19 @@ msgid "_Folder name:"
 msgstr "_Mappa neve:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2067
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2060
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Elfogadva:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2072
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2065
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Feltételes:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2077
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2070
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Elutasítva:"
@@ -1164,9 +1082,3 @@ msgstr "Nem vehető fel a mappa, nem támogatott a mappa típusa"
 msgid "Cannot add folder, master source not found"
 msgstr "Nem vehető fel a mappa, nem található az elsődleges forrás"
 
-#~ msgid "Automatically synchroni_ze account locally"
-#~ msgstr "_A felhasználói fiók automatikus szinkronizálása helyileg"
-
-#~ msgctxt "ForeignFolder"
-#~ msgid "%s - %s"
-#~ msgstr "%s – %s"
