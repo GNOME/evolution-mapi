@@ -34,8 +34,8 @@ add_definitions(-DGDK_VERSION_MAX_ALLOWED=${gdk_encoded_version})
 add_definitions(-DGLIB_VERSION_MIN_REQUIRED=${glib_encoded_version})
 add_definitions(-DGDK_VERSION_MIN_REQUIRED=${gdk_encoded_version})
 
-set(eds_minimum_version ${PROJECT_VERSION})
-set(evo_minimum_version ${PROJECT_VERSION})
+set(eds_minimum_version ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
+set(evo_minimum_version ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 set(libmapi_minimum_version 2.0)
 
 # Load modules from the source tree
