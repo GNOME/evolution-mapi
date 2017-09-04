@@ -2,7 +2,7 @@
 <!-- Copyright 2014 Evolution Team <evolution-hackers@gnome.org> -->
 <component type="addon">
 	<id>evolution-mapi</id>
-	<extends>org.gnome.Evolution.desktop</extends>
+	<extends>evolution.desktop</extends>
 	<_name>Exchange MAPI</_name>
 	<_summary>For accessing Microsoft Exchange 2007/OpenChange servers via MAPI
 	</_summary>
