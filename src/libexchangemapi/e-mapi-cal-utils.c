@@ -2170,20 +2170,29 @@ e_mapi_cal_utils_comp_to_object (EMapiConnection *conn,
 			prop = icalcomponent_get_first_property (ical_comp, ICAL_COMPLETED_PROPERTY);
 			completed = icalproperty_get_completed (prop);
 
-			completed.hour = completed.minute = completed.second = 0; completed.is_date = completed.is_utc = 1;
+			completed.hour = completed.minute = completed.second = 0;
+			completed.is_date = 1;
+			completed.zone = utc_zone;
+
 			tt = icaltime_as_timet (completed);
 			set_timet_value (PidLidTaskDateCompleted, tt);
 		}
 
 		/* Start */
-		dtstart.hour = dtstart.minute = dtstart.second = 0; dtstart.is_date = dtstart.is_utc = 1;
+		dtstart.hour = dtstart.minute = dtstart.second = 0;
+		dtstart.is_date = 1;
+		dtstart.zone = utc_zone;
+
 		tt = icaltime_as_timet (dtstart);
 		if (!icaltime_is_null_time (dtstart)) {
 			set_timet_value (PidLidTaskStartDate, tt);
 		}
 
 		/* Due */
-		dtend.hour = dtend.minute = dtend.second = 0; dtend.is_date = dtend.is_utc = 1;
+		dtend.hour = dtend.minute = dtend.second = 0;
+		dtend.is_date = 1;
+		dtend.zone = utc_zone;
+
 		tt = icaltime_as_timet (dtend);
 		if (!icaltime_is_null_time (dtend)) {
 			set_timet_value (PidLidTaskDueDate, tt);
