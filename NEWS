@@ -1,3 +1,18 @@
+evolution-mapi 3.27.1 2017-10-16
+--------------------------------
+
+Bug Fixes:
+	Bug 781645 - Skip GSettings schema compile when DESTDIR is set (Milan Crha)
+
+Miscellaneous:
+	Adapt to rename of evolution.desktop to org.gnome.Evolution.desktop (Milan Crha)
+	Use icaltime_is_utc() instead of icaltimetype::is_utc (Milan Crha)
+
+Translations:
+	Mario Blättermann (de)
+	Dušan Kazik (sk)
+	Aurimas Černius (lt)
+
 evolution-mapi 3.26.0 2017-09-11
 --------------------------------
 
