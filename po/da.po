@@ -12,9 +12,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2016-12-19 14:58+0000\n"
+"POT-Creation-Date: 2017-08-07 08:45+0000\n"
 "PO-Revision-Date: 2017-02-25 23:00+0200\n"
 "Last-Translator: Joe Hansen <joedalton2@yahoo.dk>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
@@ -33,127 +33,47 @@ msgstr "Exchange MAPI"
 msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr "Tilgå Microsoft Exchange 2007-/OpenChange-servere ved brug af MAPI"
 
-#: ../src/addressbook/e-book-backend-mapi.c:737
-msgid "Searching"
-msgstr "Søger"
-
-#: ../src/addressbook/e-book-backend-mapi.c:1739
-#: ../src/calendar/e-cal-backend-mapi.c:187
-#: ../src/calendar/e-cal-backend-mapi.c:487
-#: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1942
+#: ../src/addressbook/e-book-backend-mapi.c:92
+#: ../src/calendar/e-cal-backend-mapi.c:100
+#: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1943
 msgid "Unknown error"
 msgstr "Ukendt fejl"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:430
-msgid "Failed to remove public folder"
-msgstr "Kunne ikke fjerne offentlig mappe"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:466
-msgid "The backend does not support bulk additions"
-msgstr "Motoren understøtter ikke massetilføjelser"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:508
-#: ../src/calendar/e-cal-backend-mapi.c:1718
-#: ../src/calendar/e-cal-backend-mapi.c:2230
-msgid "Failed to create item on a server"
-msgstr "Kunne ikke oprette element på en server"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:625
-msgid "The backend does not support bulk modifications"
-msgstr "Motoren understøtter ikke masseændringer"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:670
-#: ../src/calendar/e-cal-backend-mapi.c:1932
-msgid "Failed to modify item on a server"
-msgstr "Kunne ikke ændre element på en server"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:846
-msgid "Failed to fetch items from a server"
-msgstr "Kunne ikke hente elementer fra en server"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. %d is an index of the contact.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:864
-#, c-format
-msgid "Caching contact %d"
-msgstr "Mellemlagrer kontakt %d"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. The first %d is an index of the contact,
-#. the second %d is total count of conacts on the server.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:870
-#, c-format
-msgid "Caching contact %d/%d"
-msgstr "Mellemlagrer kontakt %d/%d"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:924
-msgid "Failed to count server contacts"
-msgstr "Kunne ikke tælle serverkontakter"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:982
-msgid "Failed to list items from a server"
-msgstr "Kunne ikke vise elementer fra en server"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1063
-msgid "Failed to transfer contacts from a server"
-msgstr "Kunne ikke overføre kontakter fra en server"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:151
-#, c-format
-msgid "Caching GAL contact %d"
-msgstr "Mellemlagrer GAL-kontakt %d"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. The first %d is an index of the GAL entry,
-#. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:157
-#, c-format
-msgid "Caching GAL contact %d/%d"
-msgstr "Mellemlagrer GAL-kontakt %d/%d"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:228
-#: ../src/addressbook/e-book-backend-mapi-gal.c:312
+#: ../src/addressbook/e-book-backend-mapi.c:496
+#: ../src/addressbook/e-book-backend-mapi.c:680
 msgid "Failed to fetch GAL entries"
 msgstr "Kunne ikke hente GAL-poster"
 
-#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:412
-#, c-format
-msgid "Loading items in folder %s"
-msgstr "Indlæser elementer i mappen %s"
+#: ../src/addressbook/e-book-backend-mapi.c:502
+msgid "Failed to transfer contacts from a server"
+msgstr "Kunne ikke overføre kontakter fra en server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:779
-#, c-format
-msgid "Failed to open folder: %s"
-msgstr "Kunne ikke åbne mappe: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:687
+#: ../src/calendar/e-cal-backend-mapi.c:1105
+msgid "Failed to list items from a server"
+msgstr "Kunne ikke vise elementer fra en server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:787
-#, c-format
-msgid "Failed to get folder properties: %s"
-msgstr "Kunne ikke indhente mappe-egenskaber: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:862
+#: ../src/calendar/e-cal-backend-mapi.c:1332
+msgid "Failed to modify item on a server"
+msgstr "Kunne ikke ændre element på en server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:828
-#, c-format
-msgid "Failed to list objects: %s"
-msgstr "Kunne ikke vise objekter: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:862
+#: ../src/calendar/e-cal-backend-mapi.c:1332
+#: ../src/calendar/e-cal-backend-mapi.c:1625
+msgid "Failed to create item on a server"
+msgstr "Kunne ikke oprette element på en server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:854
-#, c-format
-msgid "Failed to transfer objects: %s"
-msgstr "Kunne ikke overføre objekter: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:923
+#: ../src/calendar/e-cal-backend-mapi.c:1400
+msgid "Failed to remove item from a server"
+msgstr "Kunne ikke fjerne elementet fra en server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:873
-#, c-format
-msgid "Failed to close folder: %s"
-msgstr "Kunne ikke lukke mappe: %s"
+#: ../src/calendar/e-cal-backend-mapi.c:881
+msgid "Failed to transfer objects from a server"
+msgstr "Kunne ikke overføre objekter fra en server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1382
-msgid "Could not create cache file"
-msgstr "Kunne ikke oprette mellemlagerfil"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1847
+#: ../src/calendar/e-cal-backend-mapi.c:1249
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -161,11 +81,7 @@ msgstr ""
 "Understøttelse for ændring af enkeltinstanser af en gentagen aftale er endnu "
 "ikke implementeret. Ingen ændring er lavet på aftalen på serveren."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2045
-msgid "Cannot remove items from a server"
-msgstr "Kan ikke fjerne elementer fra en server"
-
-#: ../src/calendar/e-cal-backend-mapi.c:2476
+#: ../src/calendar/e-cal-backend-mapi.c:1675
 msgid "Failed to get Free/Busy data"
 msgstr "Kunne ikke hente ledig/optaget-data"
 
@@ -233,19 +149,19 @@ msgstr "Kunne ikke hente besked: %s"
 msgid "Could not get message"
 msgstr "Kunne ikke hente e-brev"
 
-#: ../src/camel/camel-mapi-folder.c:1919
+#: ../src/camel/camel-mapi-folder.c:1920
 msgid "Receive quota"
 msgstr "Modtag kvota"
 
-#: ../src/camel/camel-mapi-folder.c:1925
+#: ../src/camel/camel-mapi-folder.c:1926
 msgid "Send quota"
 msgstr "Send kvota"
 
-#: ../src/camel/camel-mapi-folder.c:1947
+#: ../src/camel/camel-mapi-folder.c:1948
 msgid "No quota information available"
 msgstr "Ingen kvotainformation er tilgængelig"
 
-#: ../src/camel/camel-mapi-folder.c:2054
+#: ../src/camel/camel-mapi-folder.c:2055
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Kunne ikke indlæse oversigt for %s"
@@ -301,8 +217,7 @@ msgstr "Kerberos"
 
 #: ../src/camel/camel-mapi-sasl-krb.c:28
 msgid "This option will connect to the server using kerberos key."
-msgstr ""
-"Denne indstilling vil forbinde til serveren med en Kerberosnøgle."
+msgstr "Denne indstilling vil forbinde til serveren med en Kerberosnøgle."
 
 #: ../src/camel/camel-mapi-store.c:132 ../src/camel/camel-mapi-store.c:174
 msgid "Cannot find folder in a local cache"
@@ -341,7 +256,8 @@ msgstr "Godkendelse fejlede"
 
 #: ../src/camel/camel-mapi-store.c:1285
 msgid "MAPI folders can be created only within mailbox of the logged in user"
-msgstr "MAPI-mapper kan kun oprettes i brevbakke for brugeren, der er logget ind"
+msgstr ""
+"MAPI-mapper kan kun oprettes i brevbakke for brugeren, der er logget ind"
 
 #: ../src/camel/camel-mapi-store.c:1298 ../src/camel/camel-mapi-store.c:1411
 #, c-format
@@ -437,14 +353,16 @@ msgstr "Kan ikke forbinde til MAPI-lager i afkoblet tilstand"
 #: ../src/camel/camel-mapi-store.c:2205
 #, c-format
 msgid "Mailbox “%s” is full, no new messages will be received or sent."
-msgstr "Brevbakken \"%s\" er fuld, ingen nye beskeder vil blive modtaget eller sendt."
+msgstr ""
+"Brevbakken \"%s\" er fuld, ingen nye beskeder vil blive modtaget eller sendt."
 
 #: ../src/camel/camel-mapi-store.c:2207
 #, c-format
 msgid ""
 "Mailbox “%s” is near its size limit, message send will be disabled soon."
 msgstr ""
-"Brevbakken \"%s\" er nær sin størrelsesbegrænsning, udsendelse af beskeder vil snart blive deaktiveret."
+"Brevbakken \"%s\" er nær sin størrelsesbegrænsning, udsendelse af beskeder "
+"vil snart blive deaktiveret."
 
 #: ../src/camel/camel-mapi-store.c:2211
 #, c-format
@@ -475,12 +393,12 @@ msgstr "Kunne ikke afsende besked: %s"
 msgid "Cannot connect, no credentials provided"
 msgstr "Kan ikke forbinde, ingen akkreditiver angivet"
 
-#: ../src/collection/e-mapi-backend.c:341
+#: ../src/collection/e-mapi-backend.c:373
 msgid "Global Address List"
 msgstr "Global adresseliste (GAL)"
 
-#: ../src/collection/e-mapi-backend.c:696
-#: ../src/collection/e-mapi-backend.c:793
+#: ../src/collection/e-mapi-backend.c:728
+#: ../src/collection/e-mapi-backend.c:825
 #, c-format
 msgid "Data source “%s” does not represent a MAPI folder"
 msgstr "Datakilden »%s« repræsenterer ikke en MAPI-mappe"
@@ -575,7 +493,7 @@ msgid "_Realm name:"
 msgstr "_Områdenavn (realm):"
 
 #: ../src/configuration/e-mail-config-mapi-page.c:189
-#: ../src/configuration/e-mail-config-mapi-page.c:250
+#: ../src/configuration/e-mail-config-mapi-page.c:252
 msgid "MAPI Settings"
 msgstr "MAPI-indstillinger"
 
@@ -940,8 +858,8 @@ msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
 msgstr ""
-"Mappen \"%s\" blev ikke fundet. Enten findes den ikke, eller du har "
-"ikke rettighed til at tilgå den."
+"Mappen \"%s\" blev ikke fundet. Enten findes den ikke, eller du har ikke "
+"rettighed til at tilgå den."
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:362
 msgid "Cannot add folder, cannot determine folder’s type"
@@ -987,7 +905,9 @@ msgstr "Opgaver"
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:521
 #, c-format
 msgid "Testing availability of folder “%s” of user “%s”, please wait..."
-msgstr "Tester tilgængelighed for mappen \"%s\" for brugeren \"%s\", vent venligst ..."
+msgstr ""
+"Tester tilgængelighed for mappen \"%s\" for brugeren \"%s\", vent "
+"venligst ..."
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:603
 msgid "Subscribe to folder of other MAPI user..."
@@ -1010,19 +930,19 @@ msgid "_Folder name:"
 msgstr "_Mappenavn:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2067
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2060
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Accepteret:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2072
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2065
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Foreslået:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2077
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2070
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Afvist:"
@@ -1158,3 +1078,53 @@ msgstr "Kan ikke tilføje mappe. Mappetypen er ikke understøttet"
 msgid "Cannot add folder, master source not found"
 msgstr "Kan ikke tilføje mappe, masterkilden blev ikke fundet"
 
+#~ msgid "Searching"
+#~ msgstr "Søger"
+
+#~ msgid "Failed to remove public folder"
+#~ msgstr "Kunne ikke fjerne offentlig mappe"
+
+#~ msgid "The backend does not support bulk additions"
+#~ msgstr "Motoren understøtter ikke massetilføjelser"
+
+#~ msgid "The backend does not support bulk modifications"
+#~ msgstr "Motoren understøtter ikke masseændringer"
+
+#~ msgid "Caching contact %d"
+#~ msgstr "Mellemlagrer kontakt %d"
+
+#~ msgid "Caching contact %d/%d"
+#~ msgstr "Mellemlagrer kontakt %d/%d"
+
+#~ msgid "Failed to count server contacts"
+#~ msgstr "Kunne ikke tælle serverkontakter"
+
+#~ msgid "Caching GAL contact %d"
+#~ msgstr "Mellemlagrer GAL-kontakt %d"
+
+#~ msgid "Caching GAL contact %d/%d"
+#~ msgstr "Mellemlagrer GAL-kontakt %d/%d"
+
+#~ msgid "Loading items in folder %s"
+#~ msgstr "Indlæser elementer i mappen %s"
+
+#~ msgid "Failed to open folder: %s"
+#~ msgstr "Kunne ikke åbne mappe: %s"
+
+#~ msgid "Failed to get folder properties: %s"
+#~ msgstr "Kunne ikke indhente mappe-egenskaber: %s"
+
+#~ msgid "Failed to list objects: %s"
+#~ msgstr "Kunne ikke vise objekter: %s"
+
+#~ msgid "Failed to transfer objects: %s"
+#~ msgstr "Kunne ikke overføre objekter: %s"
+
+#~ msgid "Failed to close folder: %s"
+#~ msgstr "Kunne ikke lukke mappe: %s"
+
+#~ msgid "Could not create cache file"
+#~ msgstr "Kunne ikke oprette mellemlagerfil"
+
+#~ msgid "Cannot remove items from a server"
+#~ msgstr "Kan ikke fjerne elementer fra en server"
