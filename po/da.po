@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2017-08-07 08:45+0000\n"
+"POT-Creation-Date: 2017-10-22 13:03+0000\n"
 "PO-Revision-Date: 2017-02-25 23:00+0200\n"
 "Last-Translator: Joe Hansen <joedalton2@yahoo.dk>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
@@ -24,12 +24,13 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../evolution-mapi.metainfo.xml.in.h:1
+#: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:1
 msgid "Exchange MAPI"
 msgstr "Exchange MAPI"
 
 # ændret til imperativ.  Det må være en form for beskrivelse af programmets funktion
-#: ../evolution-mapi.metainfo.xml.in.h:2 ../src/camel/camel-mapi-provider.c:72
+#: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:2
+#: ../src/camel/camel-mapi-provider.c:72
 msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr "Tilgå Microsoft Exchange 2007-/OpenChange-servere ved brug af MAPI"
 
@@ -88,12 +89,12 @@ msgstr "Kunne ikke hente ledig/optaget-data"
 #: ../src/camel/camel-mapi-folder.c:776
 #, c-format
 msgid "Refreshing folder “%s”"
-msgstr "Opdaterer mappen \"%s\""
+msgstr "Opdaterer mappen “%s”"
 
 #: ../src/camel/camel-mapi-folder.c:844
 #, c-format
 msgid "Downloading messages in folder “%s”"
-msgstr "Henter beskeder i mappen \"%s\""
+msgstr "Henter beskeder i mappen “%s”"
 
 #: ../src/camel/camel-mapi-folder.c:932 ../src/camel/camel-mapi-folder.c:1492
 #, c-format
@@ -112,7 +113,7 @@ msgstr "Hentning af elementer fejlede"
 #: ../src/camel/camel-mapi-folder.c:1170
 #, c-format
 msgid "Cannot append message to folder “%s”"
-msgstr "Kan ikke tilføje besked til mappen \"%s\""
+msgstr "Kan ikke tilføje besked til mappen “%s”"
 
 #: ../src/camel/camel-mapi-folder.c:1179 ../src/camel/camel-mapi-folder.c:1209
 #, c-format
@@ -238,7 +239,7 @@ msgstr "Ingen mappe fundet"
 #: ../src/camel/camel-mapi-store.c:1200 ../src/camel/camel-mapi-store.c:2170
 #, c-format
 msgid "Connecting to “%s”"
-msgstr "Forbinder til \"%s\""
+msgstr "Forbinder til “%s”"
 
 #: ../src/camel/camel-mapi-store.c:1259
 msgid "Cannot create MAPI folders in offline mode"
@@ -247,7 +248,7 @@ msgstr "Kan ikke oprette MAPI-mapper i afkoblet tilstand"
 #: ../src/camel/camel-mapi-store.c:1266
 #, c-format
 msgid "Cannot create new folder “%s”"
-msgstr "Kan ikke oprette ny mappe \"%s\""
+msgstr "Kan ikke oprette ny mappe “%s”"
 
 #: ../src/camel/camel-mapi-store.c:1275
 #, c-format
@@ -262,17 +263,17 @@ msgstr ""
 #: ../src/camel/camel-mapi-store.c:1298 ../src/camel/camel-mapi-store.c:1411
 #, c-format
 msgid "Cannot find folder “%s”"
-msgstr "Kan ikke finde mappen \"%s\""
+msgstr "Kan ikke finde mappen “%s”"
 
 #: ../src/camel/camel-mapi-store.c:1353
 #, c-format
 msgid "Cannot create folder “%s”: %s"
-msgstr "Kan ikke oprette mappen \"%s\": %s"
+msgstr "Kan ikke oprette mappen “%s”: %s"
 
 #: ../src/camel/camel-mapi-store.c:1359
 #, c-format
 msgid "Cannot create folder “%s”"
-msgstr "Kan ikke oprette mappen \"%s\""
+msgstr "Kan ikke oprette mappen “%s”"
 
 #: ../src/camel/camel-mapi-store.c:1389 ../src/camel/camel-mapi-store.c:1401
 msgid "Cannot delete MAPI folders in offline mode"
@@ -281,12 +282,12 @@ msgstr "Kan ikke slette MAPI-mapper i afkoblet tilstand"
 #: ../src/camel/camel-mapi-store.c:1457
 #, c-format
 msgid "Cannot remove folder “%s”: %s"
-msgstr "Kan ikke fjerne mappen \"%s\": %s"
+msgstr "Kan ikke fjerne mappen “%s”: %s"
 
 #: ../src/camel/camel-mapi-store.c:1465
 #, c-format
 msgid "Cannot remove folder “%s”"
-msgstr "Kan ikke fjerne mappen \"%s\""
+msgstr "Kan ikke fjerne mappen “%s”"
 
 #: ../src/camel/camel-mapi-store.c:1495 ../src/camel/camel-mapi-store.c:1510
 msgid "Cannot rename MAPI folders in offline mode"
@@ -296,28 +297,28 @@ msgstr "Kan ikke omdøbe MAPI-mapper i afkoblet tilstand"
 #: ../src/camel/camel-mapi-store.c:1521
 #, c-format
 msgid "Cannot rename MAPI folder “%s”. Folder does not exist"
-msgstr "Kan ikke omdøbe MAPI-mappen \"%s\". Mappen findes ikke."
+msgstr "Kan ikke omdøbe MAPI-mappen “%s”. Mappen findes ikke."
 
 #. Translators: “%s to %s” is current name of the folder  and
 #. new name of the folder.
 #: ../src/camel/camel-mapi-store.c:1532
 #, c-format
 msgid "Cannot rename MAPI default folder “%s” to “%s”"
-msgstr "Kan ikke omdøbe MAPI-standardmappen \"%s\" til \"%s\"."
+msgstr "Kan ikke omdøbe MAPI-standardmappen “%s” til “%s”."
 
 #. Translators: “%s to %s” is current name of the folder and new name of the folder.
 #: ../src/camel/camel-mapi-store.c:1558 ../src/camel/camel-mapi-store.c:1601
 #: ../src/camel/camel-mapi-store.c:1681
 #, c-format
 msgid "Cannot rename MAPI folder “%s” to “%s”"
-msgstr "Kan ikke omdøbe MAPI-mappen \"%s\" til \"%s\""
+msgstr "Kan ikke omdøbe MAPI-mappen “%s” til “%s”"
 
 #. Translators: “%s to %s” is current name of the folder and new name of the folder.
 #. The last “%s” is a detailed error message.
 #: ../src/camel/camel-mapi-store.c:1593 ../src/camel/camel-mapi-store.c:1674
 #, c-format
 msgid "Cannot rename MAPI folder “%s” to “%s”: %s"
-msgstr "Kan ikke omdøbe MAPI-mappen \"%s\" til \"%s\": %s"
+msgstr "Kan ikke omdøbe MAPI-mappen “%s” til “%s”: %s"
 
 #: ../src/camel/camel-mapi-store.c:1771
 msgid "Cannot subscribe MAPI folders in offline mode"
@@ -326,7 +327,7 @@ msgstr "Kan ikke abonnere på MAPI-mapper i afkoblet tilstand"
 #: ../src/camel/camel-mapi-store.c:1788
 #, c-format
 msgid "Folder “%s” not found"
-msgstr "Mappen \"%s\" blev ikke fundet"
+msgstr "Mappen “%s” blev ikke fundet"
 
 #: ../src/camel/camel-mapi-store.c:1906
 msgid "Cannot unsubscribe MAPI folders in offline mode"
@@ -354,25 +355,25 @@ msgstr "Kan ikke forbinde til MAPI-lager i afkoblet tilstand"
 #, c-format
 msgid "Mailbox “%s” is full, no new messages will be received or sent."
 msgstr ""
-"Brevbakken \"%s\" er fuld, ingen nye beskeder vil blive modtaget eller sendt."
+"Brevbakken “%s” er fuld, ingen nye beskeder vil blive modtaget eller sendt."
 
 #: ../src/camel/camel-mapi-store.c:2207
 #, c-format
 msgid ""
 "Mailbox “%s” is near its size limit, message send will be disabled soon."
 msgstr ""
-"Brevbakken \"%s\" er nær sin størrelsesbegrænsning, udsendelse af beskeder "
-"vil snart blive deaktiveret."
+"Brevbakken “%s” er nær sin størrelsesbegrænsning, udsendelse af beskeder vil "
+"snart blive deaktiveret."
 
 #: ../src/camel/camel-mapi-store.c:2211
 #, c-format
 msgid "Mailbox “%s” is full, no new messages will be received."
-msgstr "Brevbakken \"%s\" er fuld, ingen nye beskeder vil blive modtaget."
+msgstr "Brevbakken “%s” er fuld, ingen nye beskeder vil blive modtaget."
 
 #: ../src/camel/camel-mapi-store.c:2213
 #, c-format
 msgid "Mailbox “%s” is near its size limit."
-msgstr "Brevbakken \"%s\" er tæt på sin størrelsesbegrænsning."
+msgstr "Brevbakken “%s” er tæt på sin størrelsesbegrænsning."
 
 #: ../src/camel/camel-mapi-store.c:2634
 msgid "Authentication password not available"
@@ -458,7 +459,7 @@ msgstr ""
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:477
 msgid "Connecting to the server, please wait..."
-msgstr "Forbinder til serveren, vent venligst ..."
+msgstr "Forbinder til serveren, vent venligst …"
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:679
 msgid "Configuration"
@@ -524,20 +525,20 @@ msgstr "Mappestørrelse"
 
 #: ../src/configuration/e-mapi-config-utils.c:528
 msgid "Fetching folder list…"
-msgstr "Henter mappeliste…"
+msgstr "Henter mappeliste …"
 
 #: ../src/configuration/e-mapi-config-utils.c:702
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
-msgstr "Kan ikke redigere rettigheder for mappen \"%s\". Vælg en anden mappe."
+msgstr "Kan ikke redigere rettigheder for mappen “%s”. Vælg en anden mappe."
 
 #: ../src/configuration/e-mapi-config-utils.c:765
 msgid "Folder size..."
-msgstr "Mappestørrelse ..."
+msgstr "Mappestørrelse …"
 
 #: ../src/configuration/e-mapi-config-utils.c:772
 msgid "Subscribe to folder of other user..."
-msgstr "Abonner på mappe fra en anden bruger ..."
+msgstr "Abonner på mappe fra en anden bruger …"
 
 #: ../src/configuration/e-mapi-config-utils.c:781
 #: ../src/configuration/e-mapi-config-utils.c:1059
@@ -545,7 +546,7 @@ msgstr "Abonner på mappe fra en anden bruger ..."
 #: ../src/configuration/e-mapi-config-utils.c:1119
 #: ../src/configuration/e-mapi-config-utils.c:1149
 msgid "Permissions..."
-msgstr "Rettigheder ..."
+msgstr "Rettigheder …"
 
 #: ../src/configuration/e-mapi-config-utils.c:783
 msgid "Edit MAPI folder permissions"
@@ -573,7 +574,7 @@ msgstr "Personlige mapper"
 
 #: ../src/configuration/e-mapi-config-utils.c:1555
 msgid "Searching remote MAPI folder structure, please wait..."
-msgstr "Søger i ekstern MAPI-mappestruktur, vent venligst ..."
+msgstr "Søger i ekstern MAPI-mappestruktur, vent venligst …"
 
 #: ../src/configuration/e-mapi-config-utils.c:1623
 msgid "Cannot create MAPI calendar in offline mode"
@@ -651,7 +652,7 @@ msgstr "Tilpasset"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:272
 msgid "Writing folder permissions, please wait..."
-msgstr "Skriver mapperettigheder, vent venligst ..."
+msgstr "Skriver mapperettigheder, vent venligst …"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:782
 #: ../src/configuration/e-mapi-search-gal-user.c:525
@@ -681,7 +682,7 @@ msgstr "Rettighedsniveau"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:937
 msgid "Edit MAPI folder permissions..."
-msgstr "Rediger MAPI-mapperettigheder ..."
+msgstr "Rediger MAPI-mapperettigheder …"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:962
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:624
@@ -792,7 +793,7 @@ msgstr "Mappe synlig"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:1281
 msgid "Reading folder permissions, please wait..."
-msgstr "Læser mapperettigheder, vent venligst ..."
+msgstr "Læser mapperettigheder, vent venligst …"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:221
 msgid "No users found"
@@ -819,7 +820,7 @@ msgstr "Søg efter en bruger"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:533
 msgid "Searching..."
-msgstr "Søger ..."
+msgstr "Søger …"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:604
 msgid "E-mail"
@@ -827,7 +828,7 @@ msgstr "E-mail"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:645
 msgid "Choose MAPI user..."
-msgstr "Vælg MAPI-bruger ..."
+msgstr "Vælg MAPI-bruger …"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:668
 msgid "_Search:"
@@ -836,7 +837,7 @@ msgstr "_Søgning:"
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:87
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
-msgstr "Kan ikke tilføje mappe, mappen findes allerede som \"%s\""
+msgstr "Kan ikke tilføje mappe, mappen findes allerede som “%s”"
 
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. Example result: "Mailbox — John Smith"
@@ -858,7 +859,7 @@ msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
 msgstr ""
-"Mappen \"%s\" blev ikke fundet. Enten findes den ikke, eller du har ikke "
+"Mappen “%s” blev ikke fundet. Enten findes den ikke, eller du har ikke "
 "rettighed til at tilgå den."
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:362
@@ -906,12 +907,11 @@ msgstr "Opgaver"
 #, c-format
 msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgstr ""
-"Tester tilgængelighed for mappen \"%s\" for brugeren \"%s\", vent "
-"venligst ..."
+"Tester tilgængelighed for mappen “%s” for brugeren “%s”, vent venligst …"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:603
 msgid "Subscribe to folder of other MAPI user..."
-msgstr "Abonner på mappe for en anden MAPI-bruger ..."
+msgstr "Abonner på mappe for en anden MAPI-bruger …"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:652
 msgid "User"
@@ -923,7 +923,7 @@ msgstr "_Bruger:"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:672
 msgid "C_hoose..."
-msgstr "_Vælg ..."
+msgstr "_Vælg …"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:687
 msgid "_Folder name:"
@@ -1024,28 +1024,28 @@ msgstr "%s: %s"
 #: ../src/libexchangemapi/e-mapi-connection.c:744
 #, c-format
 msgid "Server “%s” cannot be reached"
-msgstr "Serveren \"%s\" kan ikke nås"
+msgstr "Serveren “%s” kan ikke nås"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:872
 #, c-format
 msgid "Folder name “%s” is not a known default folder name, nor folder ID."
-msgstr "Mappenavnet \"%s\" er ikke et kendt mappenavn, eller mappe-id."
+msgstr "Mappenavnet “%s” er ikke et kendt mappenavn, eller mappe-id."
 
 #: ../src/libexchangemapi/e-mapi-connection.c:1203
 #, c-format
 msgid "Failed to open store for user “%s”"
-msgstr "Kunne ikke åbne lager for brugeren \"%s\""
+msgstr "Kunne ikke åbne lager for brugeren “%s”"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:1211
 #, c-format
 msgid "Folder of user “%s” not found"
-msgstr "Mappen for brugeren \"%s\" blev ikke fundet"
+msgstr "Mappen for brugeren “%s” blev ikke fundet"
 
 #. Translators: %s is replaced with an email address which was found ambiguous on a remote server
 #: ../src/libexchangemapi/e-mapi-connection.c:3863
 #, c-format
 msgid "Recipient “%s” is ambiguous"
-msgstr "Modtager \"%s\" er tvetydig"
+msgstr "Modtager “%s” er tvetydig"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:4955
 #, c-format
@@ -1063,12 +1063,12 @@ msgstr "Alle offentlige mapper"
 #: ../src/libexchangemapi/e-mapi-connection.c:6823
 #, c-format
 msgid "User name “%s” is ambiguous"
-msgstr "Brugernavnet \"%s\" er tvetydigt"
+msgstr "Brugernavnet “%s” er tvetydigt"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:6826
 #, c-format
 msgid "User name “%s” not found"
-msgstr "Brugernavnet \"%s\" blev ikke fundet"
+msgstr "Brugernavnet “%s” blev ikke fundet"
 
 #: ../src/libexchangemapi/e-mapi-folder.c:330
 msgid "Cannot add folder, unsupported folder type"
