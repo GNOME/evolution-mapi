@@ -33,6 +33,8 @@
 #include <libmapi/mapi_nameid.h>
 #include <libedataserver/libedataserver.h>
 
+#include <libexchangemapi/e-mapi-folder.h>
+
 /* Standard GObject macros */
 #define E_MAPI_TYPE_CONNECTION (e_mapi_connection_get_type ())
 #define E_MAPI_CONNECTION(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), E_MAPI_TYPE_CONNECTION, EMapiConnection))
@@ -461,6 +463,14 @@ gboolean		e_mapi_connection_copymove_items	(EMapiConnection *conn,
 								 mapi_object_t *des_obj_folder,
 								 gboolean do_copy,
 								 GSList *mids,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean		e_mapi_connection_get_subfolders_list	(EMapiConnection *conn,
+								 mapi_object_t *folder,
+								 EMapiFolderCategory folder_hier,
+								 GSList **mapi_folders,
+								 ProgressNotifyCB cb,
+								 gpointer cb_user_data,
 								 GCancellable *cancellable,
 								 GError **perror);
 gboolean		e_mapi_connection_get_folders_list	(EMapiConnection *conn,

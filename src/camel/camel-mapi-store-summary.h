@@ -58,7 +58,8 @@ enum CamelMapiStoreFolderFlags {
 	CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC	 = 1 << 1,
 	CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN	 = 1 << 2,
 	CAMEL_MAPI_STORE_FOLDER_FLAG_MAIL	 = 1 << 3,
-	CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC_REAL = 1 << 4 /* real public folder; the unreal is that under Favorites */
+	CAMEL_MAPI_STORE_FOLDER_FLAG_PUBLIC_REAL = 1 << 4, /* real public folder; the unreal is that under Favorites */
+	CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN_WITH_SUBFOLDERS = 1 << 5
 };
 
 enum {

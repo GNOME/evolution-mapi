@@ -42,6 +42,7 @@
 
 #define STR_USER_NAME_SELECTOR_ENTRY	"e-mapi-name-selector-entry"
 #define STR_FOLDER_NAME_COMBO		"e-mapi-folder-name-combo"
+#define STR_SUBFOLDERS_CHECK		"e-mapi-subfolders-check"
 #define STR_MAPI_CAMEL_SESSION		"e-mapi-camel-session"
 #define STR_MAPI_CAMEL_STORE		"e-mapi-camel-store"
 #define STR_MAPI_DIRECT_USER_NAME	"e-mapi-direct-user-name"
@@ -51,6 +52,7 @@ add_foreign_folder_to_camel (CamelMapiStore *mapi_store,
 			     const gchar *foreign_username,
 			     mapi_id_t folder_id,
 			     mapi_id_t parent_fid,
+			     gboolean include_subfolders,
 			     const gchar *display_username,
 			     const gchar *display_foldername,
 			     GError **perror)
@@ -122,7 +124,8 @@ add_foreign_folder_to_camel (CamelMapiStore *mapi_store,
 
 		if (camel_mapi_store_summary_add_from_full (mapi_store->summary, path, folder_id, parent_fid,
 			CAMEL_STORE_INFO_FOLDER_SUBSCRIBED | CAMEL_FOLDER_NOCHILDREN | CAMEL_FOLDER_SUBSCRIBED,
-			CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN | CAMEL_MAPI_STORE_FOLDER_FLAG_MAIL,
+			CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN | CAMEL_MAPI_STORE_FOLDER_FLAG_MAIL |
+			(include_subfolders ? CAMEL_MAPI_STORE_FOLDER_FLAG_FOREIGN_WITH_SUBFOLDERS : 0),
 			foreign_username)) {
 			if (parent_si) {
 				CamelMapiStoreInfo *msi = (CamelMapiStoreInfo *) parent_si;
@@ -172,6 +175,7 @@ name_entry_changed_cb (GObject *dialog)
 struct EMapiCheckForeignFolderData
 {
 	GtkWidget *dialog;
+	gboolean include_subfolders;
 	gchar *username;
 	gchar *direct_username;
 	gchar *user_displayname;
@@ -265,6 +269,11 @@ foreign_folder_get_props_cb (EMapiConnection *conn,
 	cffd->folder_displayname = g_strdup (e_mapi_util_find_array_propval (properties, PidTagDisplayName));
 	cffd->folder_container_class = g_strdup (e_mapi_util_find_array_propval (properties, PidTagContainerClass));
 	cffd->parent_folder_id = pid ? *pid : 0;
+
+	if (!cffd->folder_container_class) {
+		/* Default to mail folder */
+		cffd->folder_container_class = g_strdup (IPF_NOTE);
+	}
 
 	return TRUE;
 }
@@ -421,6 +430,7 @@ check_foreign_folder_idle (GObject *with_object,
 		cffd->username,
 		cffd->folder_id,
 		cffd->parent_folder_id,
+		cffd->include_subfolders,
 		base_username,
 		base_foldername,
 		perror)) ||
@@ -450,6 +460,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 	struct EMapiCheckForeignFolderData *cffd;
 	ENameSelectorEntry *entry;
 	GtkComboBoxText *combo_text;
+	GtkToggleButton *subfolders_check;
 	EDestinationStore *dest_store;
 	CamelStore *cstore;
 	gchar *description;
@@ -465,6 +476,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 
 	entry = g_object_get_data (dialog, STR_USER_NAME_SELECTOR_ENTRY);
 	combo_text = g_object_get_data (dialog, STR_FOLDER_NAME_COMBO);
+	subfolders_check = g_object_get_data (dialog, STR_SUBFOLDERS_CHECK);
 	cstore = g_object_get_data (dialog, STR_MAPI_CAMEL_STORE);
 
 	g_return_if_fail (entry != NULL);
@@ -517,6 +529,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 	cffd->use_foldername = use_foldername;
 	cffd->folder_id = 0;
 	cffd->parent_folder_id = 0;
+	cffd->include_subfolders = gtk_toggle_button_get_active (subfolders_check);
 
 	description = g_strdup_printf (_("Testing availability of folder “%s” of user “%s”, please wait..."), cffd->orig_foldername, cffd->username);
 
@@ -590,7 +603,7 @@ e_mapi_subscribe_foreign_folder (GtkWindow *parent,
 	ENameSelectorDialog *name_selector_dialog;
 	GObject *dialog;
 	GtkWidget *content;
-	GtkWidget *label, *widget, *entry;
+	GtkWidget *label, *widget, *entry, *check;
 	GtkGrid *grid;
 	GtkComboBoxText *combo_text;
 	gint row;
@@ -710,9 +723,15 @@ e_mapi_subscribe_foreign_folder (GtkWindow *parent,
 	gtk_grid_attach (grid, label, 0, row, 1, 1);
 	gtk_grid_attach (grid, widget, 1, row, 2, 1);
 
+	row++;
+
+	check = gtk_check_button_new_with_mnemonic (_("Include _subfolders"));
+	gtk_grid_attach (grid, check, 1, row, 2, 1);
+
 	/* remember widgets for later use */
 	g_object_set_data (dialog, STR_USER_NAME_SELECTOR_ENTRY, entry);
 	g_object_set_data (dialog, STR_FOLDER_NAME_COMBO, widget);
+	g_object_set_data (dialog, STR_SUBFOLDERS_CHECK, check);
 
 	g_object_set_data_full (dialog, STR_MAPI_CAMEL_SESSION, g_object_ref (session), g_object_unref);
 	g_object_set_data_full (dialog, STR_MAPI_CAMEL_STORE, g_object_ref (store), g_object_unref);
