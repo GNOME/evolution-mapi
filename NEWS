@@ -1,3 +1,13 @@
+evolution-mapi 3.27.3 2017-12-11
+--------------------------------
+
+Bug Fixes:
+	Bug 788373 - Option to subscribe to other user's folder with subfolders (Milan Crha)
+
+Translations:
+	Kukuh Syafaat (id)
+	Piotr Drąg (pl)
+
 evolution-mapi 3.27.2 2017-11-13
 --------------------------------
 
