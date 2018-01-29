@@ -5,17 +5,17 @@
 # Andre Klapper <ak-47@gmx.net>, 2009.
 # Lucas Lommer <llommer@svn.gnome.org>, 2009.
 # Jiri Eischmann <jiri@eischmann.cz>, 2009, 2010, 2011, 2012.
-# Marek Černocký <marek@manet.cz>, 2010, 2011, 2012, 2016, 2017.
+# Marek Černocký <marek@manet.cz>, 2010, 2011, 2012, 2016, 2017, 2018.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2017-06-06 08:12+0000\n"
-"PO-Revision-Date: 2017-06-25 22:51+0200\n"
+"POT-Creation-Date: 2017-12-04 11:05+0000\n"
+"PO-Revision-Date: 2018-01-29 06:58+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
-"Language-Team: čeština <gnome-cs-list@gnome.org>>\n"
+"Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,17 +23,18 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Gtranslator 2.91.7\n"
 
-#: ../evolution-mapi.metainfo.xml.in.h:1
+#: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:1
 msgid "Exchange MAPI"
 msgstr "Exchange MAPI"
 
-#: ../evolution-mapi.metainfo.xml.in.h:2 ../src/camel/camel-mapi-provider.c:72
+#: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:2
+#: ../src/camel/camel-mapi-provider.c:72
 msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr "Pro přístup k serverům Microsoft Exchange 2007/OpenChange pomocí MAPI"
 
 #: ../src/addressbook/e-book-backend-mapi.c:92
 #: ../src/calendar/e-cal-backend-mapi.c:100
-#: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1942
+#: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1943
 msgid "Unknown error"
 msgstr "Neznámá chyba"
 
@@ -147,19 +148,19 @@ msgstr "Nelze získat zprávu: %s"
 msgid "Could not get message"
 msgstr "Nelze získat zprávu"
 
-#: ../src/camel/camel-mapi-folder.c:1919
+#: ../src/camel/camel-mapi-folder.c:1920
 msgid "Receive quota"
 msgstr "Přijmout kvótu"
 
-#: ../src/camel/camel-mapi-folder.c:1925
+#: ../src/camel/camel-mapi-folder.c:1926
 msgid "Send quota"
 msgstr "Odeslat kvótu"
 
-#: ../src/camel/camel-mapi-folder.c:1947
+#: ../src/camel/camel-mapi-folder.c:1948
 msgid "No quota information available"
 msgstr "Informace o kvótě nejsou k dispozici"
 
-#: ../src/camel/camel-mapi-folder.c:2054
+#: ../src/camel/camel-mapi-folder.c:2055
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nelze načíst souhrn pro %s"
@@ -221,118 +222,118 @@ msgstr "Touto volbou se připojíte k serveru pomocí klíče kerberos."
 msgid "Cannot find folder in a local cache"
 msgstr "Nelze najít složku v místní mezipaměti"
 
-#: ../src/camel/camel-mapi-store.c:490 ../src/camel/camel-mapi-store.c:1178
+#: ../src/camel/camel-mapi-store.c:489 ../src/camel/camel-mapi-store.c:1182
 msgid "Folder list is not available in offline mode"
 msgstr "Seznam složek není k dispozici v režimu odpojení"
 
-#: ../src/camel/camel-mapi-store.c:872
+#: ../src/camel/camel-mapi-store.c:879
 msgid "No public folder found"
 msgstr "Nenalezena žádná veřejná složka"
 
-#: ../src/camel/camel-mapi-store.c:872
+#: ../src/camel/camel-mapi-store.c:879
 msgid "No folder found"
 msgstr "Nenalezena žádná složka"
 
-#: ../src/camel/camel-mapi-store.c:1200 ../src/camel/camel-mapi-store.c:2170
+#: ../src/camel/camel-mapi-store.c:1204 ../src/camel/camel-mapi-store.c:2272
 #, c-format
 msgid "Connecting to “%s”"
 msgstr "Připojuje se k „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1259
+#: ../src/camel/camel-mapi-store.c:1263
 msgid "Cannot create MAPI folders in offline mode"
 msgstr "Nelze vytvořit složky MAPI v režimu odpojení"
 
-#: ../src/camel/camel-mapi-store.c:1266
+#: ../src/camel/camel-mapi-store.c:1270
 #, c-format
 msgid "Cannot create new folder “%s”"
 msgstr "Nezdařilo se vytvořit novou složku „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1275
+#: ../src/camel/camel-mapi-store.c:1279
 #, c-format
 msgid "Authentication failed"
 msgstr "Ověření totožnosti selhalo"
 
-#: ../src/camel/camel-mapi-store.c:1285
+#: ../src/camel/camel-mapi-store.c:1289
 msgid "MAPI folders can be created only within mailbox of the logged in user"
 msgstr ""
 "Složky MAPI mohou být vytvořeny pouze v poštovní schránce přihlášeného "
 "uživatele"
 
-#: ../src/camel/camel-mapi-store.c:1298 ../src/camel/camel-mapi-store.c:1411
+#: ../src/camel/camel-mapi-store.c:1302 ../src/camel/camel-mapi-store.c:1415
 #, c-format
 msgid "Cannot find folder “%s”"
 msgstr "Nelze najít složku „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1353
+#: ../src/camel/camel-mapi-store.c:1357
 #, c-format
 msgid "Cannot create folder “%s”: %s"
 msgstr "Nelze vytvořit složku „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1359
+#: ../src/camel/camel-mapi-store.c:1363
 #, c-format
 msgid "Cannot create folder “%s”"
 msgstr "Nelze vytvořit složku „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1389 ../src/camel/camel-mapi-store.c:1401
+#: ../src/camel/camel-mapi-store.c:1393 ../src/camel/camel-mapi-store.c:1405
 msgid "Cannot delete MAPI folders in offline mode"
 msgstr "Nelze odstranit složky MAPI v režimu odpojení"
 
-#: ../src/camel/camel-mapi-store.c:1457
+#: ../src/camel/camel-mapi-store.c:1461
 #, c-format
 msgid "Cannot remove folder “%s”: %s"
 msgstr "Nelze odstranit složku „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1465
+#: ../src/camel/camel-mapi-store.c:1469
 #, c-format
 msgid "Cannot remove folder “%s”"
 msgstr "Nelze odstranit složku „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1495 ../src/camel/camel-mapi-store.c:1510
+#: ../src/camel/camel-mapi-store.c:1499 ../src/camel/camel-mapi-store.c:1514
 msgid "Cannot rename MAPI folders in offline mode"
 msgstr "Nelze přejmenovat složky MAPI v režimu odpojení"
 
 #. Translators: “%s” is current name of the folder
-#: ../src/camel/camel-mapi-store.c:1521
+#: ../src/camel/camel-mapi-store.c:1525
 #, c-format
 msgid "Cannot rename MAPI folder “%s”. Folder does not exist"
 msgstr "Nelze přejmenovat složku MAPI „%s“. Složka neexistuje"
 
 #. Translators: “%s to %s” is current name of the folder  and
 #. new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1532
+#: ../src/camel/camel-mapi-store.c:1536
 #, c-format
 msgid "Cannot rename MAPI default folder “%s” to “%s”"
 msgstr "Nelze přejmenovat výchozí složku MAPI „%s“ na „%s“"
 
 #. Translators: “%s to %s” is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1558 ../src/camel/camel-mapi-store.c:1601
-#: ../src/camel/camel-mapi-store.c:1681
+#: ../src/camel/camel-mapi-store.c:1562 ../src/camel/camel-mapi-store.c:1605
+#: ../src/camel/camel-mapi-store.c:1685
 #, c-format
 msgid "Cannot rename MAPI folder “%s” to “%s”"
 msgstr "Nelze přejmenovat složku MAPI „%s“ na „%s“"
 
 #. Translators: “%s to %s” is current name of the folder and new name of the folder.
 #. The last “%s” is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1593 ../src/camel/camel-mapi-store.c:1674
+#: ../src/camel/camel-mapi-store.c:1597 ../src/camel/camel-mapi-store.c:1678
 #, c-format
 msgid "Cannot rename MAPI folder “%s” to “%s”: %s"
 msgstr "Nelze přejmenovat složku MAPI „%s“ na „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1771
+#: ../src/camel/camel-mapi-store.c:1775
 msgid "Cannot subscribe MAPI folders in offline mode"
 msgstr "Nelze se přihlašovat ke složkám MAPI v režimu odpojení"
 
-#: ../src/camel/camel-mapi-store.c:1788
+#: ../src/camel/camel-mapi-store.c:1792
 #, c-format
 msgid "Folder “%s” not found"
 msgstr "Složka „%s“ nebyla nalezena"
 
-#: ../src/camel/camel-mapi-store.c:1906
+#: ../src/camel/camel-mapi-store.c:1917
 msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr "Nelze se odhlašovat od složek MAPI v režimu odpojení"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:2117 ../src/camel/camel-mapi-transport.c:194
+#: ../src/camel/camel-mapi-store.c:2219 ../src/camel/camel-mapi-transport.c:194
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Server Exchange MAPI %s"
@@ -340,23 +341,23 @@ msgstr "Server Exchange MAPI %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:2121 ../src/camel/camel-mapi-transport.c:197
+#: ../src/camel/camel-mapi-store.c:2223 ../src/camel/camel-mapi-transport.c:197
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Služba Exchange MAPI pro %s na %s"
 
-#: ../src/camel/camel-mapi-store.c:2152
+#: ../src/camel/camel-mapi-store.c:2254
 msgid "Cannot connect to MAPI store in offline mode"
 msgstr "Nelze připojit úložiště MAPI v režimu odpojení"
 
-#: ../src/camel/camel-mapi-store.c:2205
+#: ../src/camel/camel-mapi-store.c:2307
 #, c-format
 msgid "Mailbox “%s” is full, no new messages will be received or sent."
 msgstr ""
 "Poštovní schránka „%s“ je plná, žádné nové zprávy nebudou přijímány nebo "
 "odesílány."
 
-#: ../src/camel/camel-mapi-store.c:2207
+#: ../src/camel/camel-mapi-store.c:2309
 #, c-format
 msgid ""
 "Mailbox “%s” is near its size limit, message send will be disabled soon."
@@ -364,19 +365,29 @@ msgstr ""
 "Poštovní schránka „%s“ je blízko limitu své velikosti, odesílání zpráv bude "
 "brzo zakázáno."
 
-#: ../src/camel/camel-mapi-store.c:2211
+#: ../src/camel/camel-mapi-store.c:2313
 #, c-format
 msgid "Mailbox “%s” is full, no new messages will be received."
 msgstr "Poštovní schránka „%s“ je plná, žádné nové zprávy nebudou přijímány."
 
-#: ../src/camel/camel-mapi-store.c:2213
+#: ../src/camel/camel-mapi-store.c:2315
 #, c-format
 msgid "Mailbox “%s” is near its size limit."
 msgstr "Poštovní schránka „%s“ je blízko limitu své velikosti."
 
-#: ../src/camel/camel-mapi-store.c:2634
+#: ../src/camel/camel-mapi-store.c:2733
+#, c-format
+msgid "Cannot add folder “%s”, failed to add to store’s summary"
+msgstr ""
+"Nezdařilo se přidat složku „%s“, selhalo přidání do souhrnného úložiště"
+
+#: ../src/camel/camel-mapi-store.c:3020
 msgid "Authentication password not available"
 msgstr "Autentizační heslo není k dispozici"
+
+#: ../src/camel/camel-mapi-store.c:3056 ../src/camel/camel-mapi-store.c:3453
+msgid "Updating foreign folders"
+msgstr "Aktualizují se vzdálené složky"
 
 #: ../src/camel/camel-mapi-transport.c:145
 #: ../src/camel/camel-mapi-transport.c:167
@@ -493,7 +504,7 @@ msgid "_Realm name:"
 msgstr "Název sfé_ry:"
 
 #: ../src/configuration/e-mail-config-mapi-page.c:189
-#: ../src/configuration/e-mail-config-mapi-page.c:250
+#: ../src/configuration/e-mail-config-mapi-page.c:252
 msgid "MAPI Settings"
 msgstr "Nastavení MAPI"
 
@@ -684,7 +695,7 @@ msgid "Edit MAPI folder permissions..."
 msgstr "Upravit oprávnění složky MAPI…"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:962
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:624
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:637
 msgid "Account:"
 msgstr "Účet:"
 
@@ -835,7 +846,7 @@ msgstr "Zvolit uživatele MAPI…"
 msgid "_Search:"
 msgstr "_Hledat:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:87
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:89
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Nelze přidat složku, složka již existuje jako „%s“"
@@ -843,18 +854,18 @@ msgstr "Nelze přidat složku, složka již existuje jako „%s“"
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. Example result: "Mailbox — John Smith"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:112
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:114
 #, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox — %s"
 msgstr "Poštovní schránka – %s"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:141
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:144
 #, c-format
 msgid "Cannot add folder, failed to add to store’s summary"
 msgstr "Nelze přidat složku, selhalo přidání do souhrnného úložiště"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:327
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:336
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -863,7 +874,7 @@ msgstr ""
 "Složka „%s“ nebyla nalezena. Buď neexistuje, nebo k ní nemáte oprávnění pro "
 "přístup."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:362
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:371
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Nelze přidat složku, nelze určit typ složky"
 
@@ -872,62 +883,66 @@ msgstr "Nelze přidat složku, nelze určit typ složky"
 #. the second '%s' is replaced with folder name.
 #. Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:403
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:412
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:500
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:702
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:512
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:715
 msgid "Inbox"
 msgstr "Doručená pošta"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:502
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:703
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:514
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:716
 msgid "Contacts"
 msgstr "Kontakty"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:504
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:704
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:516
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:717
 msgid "Calendar"
 msgstr "Kalendář"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:506
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:705
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:518
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:718
 msgid "Memos"
 msgstr "Poznámky"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:508
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:706
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:520
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:719
 msgid "Tasks"
 msgstr "Úkoly"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:521
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:534
 #, c-format
 msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgstr "Testuje se dostupnost složky „%s“ uživatele „%s“, čekejte prosím…"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:603
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:616
 msgid "Subscribe to folder of other MAPI user..."
 msgstr "Číst složky jiného uživatele MAPI…"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:652
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:665
 msgid "User"
 msgstr "Uživatel"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:659
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:672
 msgid "_User:"
 msgstr "_Uživatel:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:672
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:685
 msgid "C_hoose..."
 msgstr "V_ybrat…"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:687
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:700
 msgid "_Folder name:"
 msgstr "Název _složky:"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:728
+msgid "Include _subfolders"
+msgstr "Včetně pod_složek"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
 #: ../src/libexchangemapi/e-mapi-cal-utils.c:2060
@@ -1056,16 +1071,16 @@ msgstr ""
 "Výsledky hledání překročily povolený limit. Použijte prosím konkrétnější "
 "termín."
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6556
+#: ../src/libexchangemapi/e-mapi-connection.c:6577
 msgid "All Public Folders"
 msgstr "Všechny veřejné složky"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6823
+#: ../src/libexchangemapi/e-mapi-connection.c:6885
 #, c-format
 msgid "User name “%s” is ambiguous"
 msgstr "Uživatelské jméno „%s“ je nejednoznačné"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6826
+#: ../src/libexchangemapi/e-mapi-connection.c:6888
 #, c-format
 msgid "User name “%s” not found"
 msgstr "Uživatelské jméno „%s“ nebylo nalezeno"
@@ -1077,4 +1092,3 @@ msgstr "Nelze přidat složku, nepodporovaný typ složky"
 #: ../src/libexchangemapi/e-mapi-folder.c:333
 msgid "Cannot add folder, master source not found"
 msgstr "Nelze přidat složku, hlavní zdroj nebyl nalezen"
-
