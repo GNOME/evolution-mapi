@@ -1226,7 +1226,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 			icalcomponent_set_status (ical_comp, get_taskstatus_from_prop (*status));
 			if (*status == olTaskComplete
 			    && e_mapi_util_find_array_datetime_propval (&t, &object->properties, PidLidTaskDateCompleted) == MAPI_E_SUCCESS) {
-				prop = icalproperty_new_completed (icaltime_from_timet_with_zone (t.tv_sec, 1, utc_zone));
+				prop = icalproperty_new_completed (icaltime_from_timet_with_zone (t.tv_sec, 0, utc_zone));
 				icalcomponent_add_property (ical_comp, prop);
 			}
 		}
