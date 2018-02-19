@@ -1,3 +1,10 @@
+evolution-mapi 3.27.91 2018-02-19
+---------------------------------
+
+Bug Fixes:
+	Bug 793104 - COMPLETED in libical 3.0+ is DATE-TIME only (Milan Crha)
+	Bug 793368 - Install AppStream metadata to /usr/share/metainfo/ (Jeremy Bicha)
+
 evolution-mapi 3.27.90 2018-02-05
 ---------------------------------
 
