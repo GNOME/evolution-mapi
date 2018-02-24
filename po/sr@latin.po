@@ -1,15 +1,15 @@
 # Serbian translation of evolution-mapi
-# Courtesy of Prevod.org team (http://prevod.org/) -- 2009—2017.
+# Courtesy of Prevod.org team (http://prevod.org/) -- 2009—2018.
 # This file is distributed under the same license as the evolution-mapi package.
 # Milan Skočić <milan.skocic@gmail.com>, 2010.
-# Miroslav Nikolić <miroslavnikolic@rocketmail.com>, 2011—2017.
+# Miroslav Nikolić <miroslavnikolic@rocketmail.com>, 2011—2018.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product"
 "=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2017-08-07 08:45+0000\n"
-"PO-Revision-Date: 2017-08-12 20:19+0200\n"
+"POT-Creation-Date: 2017-12-04 11:05+0000\n"
+"PO-Revision-Date: 2018-02-24 18:59+0200\n"
 "Last-Translator: Miroslav Nikolić <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: srpski <gnome-sr@googlegroups.org>\n"
 "Language: sr\n"
@@ -20,11 +20,12 @@ msgstr ""
 "n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Project-Style: gnome\n"
 
-#: ../evolution-mapi.metainfo.xml.in.h:1
+#: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:1
 msgid "Exchange MAPI"
 msgstr "MAPI razmena"
 
-#: ../evolution-mapi.metainfo.xml.in.h:2 ../src/camel/camel-mapi-provider.c:72
+#: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:2
+#: ../src/camel/camel-mapi-provider.c:72
 msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr ""
 "Za pristup serverima Majkrosoft razmene 2007/ Slobodne izmene kroz MAPI"
@@ -62,12 +63,10 @@ msgstr "Nisam uspeo da stvorim stavku na serveru"
 
 #: ../src/addressbook/e-book-backend-mapi.c:923
 #: ../src/calendar/e-cal-backend-mapi.c:1400
-#| msgid "Failed to fetch items from a server"
 msgid "Failed to remove item from a server"
 msgstr "Nisam uspeo da uklonim stavke sa servera"
 
 #: ../src/calendar/e-cal-backend-mapi.c:881
-#| msgid "Failed to transfer contacts from a server"
 msgid "Failed to transfer objects from a server"
 msgstr "Nisam uspeo da prebacim objekte sa servera"
 
@@ -221,118 +220,118 @@ msgstr "Ova opcija će povezati na server koristeći kerberos ključ."
 msgid "Cannot find folder in a local cache"
 msgstr "Ne mogu da pronađem fasciklu u mesnoj ostavi"
 
-#: ../src/camel/camel-mapi-store.c:490 ../src/camel/camel-mapi-store.c:1178
+#: ../src/camel/camel-mapi-store.c:489 ../src/camel/camel-mapi-store.c:1182
 msgid "Folder list is not available in offline mode"
 msgstr "Lista fascikli nije dostupna u režimu van mreže"
 
-#: ../src/camel/camel-mapi-store.c:872
+#: ../src/camel/camel-mapi-store.c:879
 msgid "No public folder found"
 msgstr "Nisam pronašao javne fascikle"
 
-#: ../src/camel/camel-mapi-store.c:872
+#: ../src/camel/camel-mapi-store.c:879
 msgid "No folder found"
 msgstr "Nisam pronašao fasciklu"
 
-#: ../src/camel/camel-mapi-store.c:1200 ../src/camel/camel-mapi-store.c:2170
+#: ../src/camel/camel-mapi-store.c:1204 ../src/camel/camel-mapi-store.c:2272
 #, c-format
 msgid "Connecting to “%s”"
 msgstr "Povezujem se sa „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1259
+#: ../src/camel/camel-mapi-store.c:1263
 msgid "Cannot create MAPI folders in offline mode"
 msgstr "Ne mogu da napravim MAPI fasciklu u režimu van mreže"
 
-#: ../src/camel/camel-mapi-store.c:1266
+#: ../src/camel/camel-mapi-store.c:1270
 #, c-format
 msgid "Cannot create new folder “%s”"
 msgstr "Ne mogu da napravim novu fasciklu „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1275
+#: ../src/camel/camel-mapi-store.c:1279
 #, c-format
 msgid "Authentication failed"
 msgstr "Prijava nije uspela"
 
-#: ../src/camel/camel-mapi-store.c:1285
+#: ../src/camel/camel-mapi-store.c:1289
 msgid "MAPI folders can be created only within mailbox of the logged in user"
 msgstr ""
 "MAPI fascikle mogu biti napravljene samo unutar sandučeta prijavljenog "
 "korisnika"
 
-#: ../src/camel/camel-mapi-store.c:1298 ../src/camel/camel-mapi-store.c:1411
+#: ../src/camel/camel-mapi-store.c:1302 ../src/camel/camel-mapi-store.c:1415
 #, c-format
 msgid "Cannot find folder “%s”"
 msgstr "Ne mogu da nađem fasciklu „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1353
+#: ../src/camel/camel-mapi-store.c:1357
 #, c-format
 msgid "Cannot create folder “%s”: %s"
 msgstr "Ne mogu da napravim fasciklu „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1359
+#: ../src/camel/camel-mapi-store.c:1363
 #, c-format
 msgid "Cannot create folder “%s”"
 msgstr "Ne mogu da napravim fasciklu „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1389 ../src/camel/camel-mapi-store.c:1401
+#: ../src/camel/camel-mapi-store.c:1393 ../src/camel/camel-mapi-store.c:1405
 msgid "Cannot delete MAPI folders in offline mode"
 msgstr "Ne mogu da obrišem MAPI fasciklu u režimu van mreže"
 
-#: ../src/camel/camel-mapi-store.c:1457
+#: ../src/camel/camel-mapi-store.c:1461
 #, c-format
 msgid "Cannot remove folder “%s”: %s"
 msgstr "Ne mogu da uklonim fasciklu „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1465
+#: ../src/camel/camel-mapi-store.c:1469
 #, c-format
 msgid "Cannot remove folder “%s”"
 msgstr "Ne mogu da uklonim fasciklu „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1495 ../src/camel/camel-mapi-store.c:1510
+#: ../src/camel/camel-mapi-store.c:1499 ../src/camel/camel-mapi-store.c:1514
 msgid "Cannot rename MAPI folders in offline mode"
 msgstr "Ne mogu da preimenujem MAPI fasciklu u režimu van mreže"
 
 #. Translators: “%s” is current name of the folder
-#: ../src/camel/camel-mapi-store.c:1521
+#: ../src/camel/camel-mapi-store.c:1525
 #, c-format
 msgid "Cannot rename MAPI folder “%s”. Folder does not exist"
 msgstr "Ne mogu da preimenujem MAPI fasciklu „%s“. Fascikla ne postoji"
 
 #. Translators: “%s to %s” is current name of the folder  and
 #. new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1532
+#: ../src/camel/camel-mapi-store.c:1536
 #, c-format
 msgid "Cannot rename MAPI default folder “%s” to “%s”"
 msgstr "Ne mogu da preimenujem osnovnu MAPI fasciklu „%s“ u „%s“"
 
 #. Translators: “%s to %s” is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1558 ../src/camel/camel-mapi-store.c:1601
-#: ../src/camel/camel-mapi-store.c:1681
+#: ../src/camel/camel-mapi-store.c:1562 ../src/camel/camel-mapi-store.c:1605
+#: ../src/camel/camel-mapi-store.c:1685
 #, c-format
 msgid "Cannot rename MAPI folder “%s” to “%s”"
 msgstr "Ne mogu da preimenujem MAPI fasciklu „%s“ u „%s“"
 
 #. Translators: “%s to %s” is current name of the folder and new name of the folder.
 #. The last “%s” is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1593 ../src/camel/camel-mapi-store.c:1674
+#: ../src/camel/camel-mapi-store.c:1597 ../src/camel/camel-mapi-store.c:1678
 #, c-format
 msgid "Cannot rename MAPI folder “%s” to “%s”: %s"
 msgstr "Ne mogu da preimenujem MAPI fasciklu „%s“ u „%s“: %s"
 
-#: ../src/camel/camel-mapi-store.c:1771
+#: ../src/camel/camel-mapi-store.c:1775
 msgid "Cannot subscribe MAPI folders in offline mode"
 msgstr "Ne mogu da pretplatim MAPI fascikle u režimu van mreže"
 
-#: ../src/camel/camel-mapi-store.c:1788
+#: ../src/camel/camel-mapi-store.c:1792
 #, c-format
 msgid "Folder “%s” not found"
 msgstr "Nisam pronašao fasciklu „%s“"
 
-#: ../src/camel/camel-mapi-store.c:1906
+#: ../src/camel/camel-mapi-store.c:1917
 msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr "Ne mogu da poništim pretplatu MAPI fascikli u režimu van mreže"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:2117 ../src/camel/camel-mapi-transport.c:194
+#: ../src/camel/camel-mapi-store.c:2219 ../src/camel/camel-mapi-transport.c:194
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "MAPI server za razmenu %s"
@@ -340,22 +339,22 @@ msgstr "MAPI server za razmenu %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:2121 ../src/camel/camel-mapi-transport.c:197
+#: ../src/camel/camel-mapi-store.c:2223 ../src/camel/camel-mapi-transport.c:197
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "MAPI servis razmene za %s na %s"
 
-#: ../src/camel/camel-mapi-store.c:2152
+#: ../src/camel/camel-mapi-store.c:2254
 msgid "Cannot connect to MAPI store in offline mode"
 msgstr "Ne mogu da se povežem na MAPI radnju u režimu van mreže"
 
-#: ../src/camel/camel-mapi-store.c:2205
+#: ../src/camel/camel-mapi-store.c:2307
 #, c-format
 msgid "Mailbox “%s” is full, no new messages will be received or sent."
 msgstr ""
 "Sanduče „%s“ je puno, nijedna nova poruka neće biti ni primljena ni poslata."
 
-#: ../src/camel/camel-mapi-store.c:2207
+#: ../src/camel/camel-mapi-store.c:2309
 #, c-format
 msgid ""
 "Mailbox “%s” is near its size limit, message send will be disabled soon."
@@ -363,19 +362,30 @@ msgstr ""
 "Sanduče „%s“ se približava ograničenju svoje veličine, slanje poruka će uskoro "
 "biti isključeno."
 
-#: ../src/camel/camel-mapi-store.c:2211
+#: ../src/camel/camel-mapi-store.c:2313
 #, c-format
 msgid "Mailbox “%s” is full, no new messages will be received."
 msgstr "Sanduče „%s“ je puno, nijedna nova poruka neće biti primljena."
 
-#: ../src/camel/camel-mapi-store.c:2213
+#: ../src/camel/camel-mapi-store.c:2315
 #, c-format
 msgid "Mailbox “%s” is near its size limit."
 msgstr "Sanduče „%s“ je blizu ograničenja svoje veličine."
 
-#: ../src/camel/camel-mapi-store.c:2634
+#: ../src/camel/camel-mapi-store.c:2733
+#, c-format
+#| msgid "Cannot add folder, failed to add to store’s summary"
+msgid "Cannot add folder “%s”, failed to add to store’s summary"
+msgstr "Ne mogu da dodam fasciklu „%s“, nisam uspeo da dodam u sažetak radnje"
+
+#: ../src/camel/camel-mapi-store.c:3020
 msgid "Authentication password not available"
 msgstr "Lozinka potvrde identiteta nije dostupna"
+
+#: ../src/camel/camel-mapi-store.c:3056 ../src/camel/camel-mapi-store.c:3453
+#| msgid "Loading items in folder %s"
+msgid "Updating foreign folders"
+msgstr "Osvežavam strane fascikle"
 
 #: ../src/camel/camel-mapi-transport.c:145
 #: ../src/camel/camel-mapi-transport.c:167
@@ -684,7 +694,7 @@ msgid "Edit MAPI folder permissions..."
 msgstr "Uredi ovlašćenja MAPI fascikle..."
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:962
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:624
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:637
 msgid "Account:"
 msgstr "Nalog:"
 
@@ -837,7 +847,7 @@ msgstr "Izaberi MAPI korisnika..."
 msgid "_Search:"
 msgstr "_Potraži:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:87
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:89
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Ne mogu da dodam fasciklu, fascikla već postoji kao „%s“"
@@ -845,18 +855,18 @@ msgstr "Ne mogu da dodam fasciklu, fascikla već postoji kao „%s“"
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. Example result: "Mailbox — John Smith"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:112
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:114
 #, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox — %s"
 msgstr "Poštansko sanduče — %s"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:141
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:144
 #, c-format
 msgid "Cannot add folder, failed to add to store’s summary"
 msgstr "Ne mogu da dodam fasciklu, nisam uspeo da dodam u sažetak radnje"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:327
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:336
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -865,7 +875,7 @@ msgstr ""
 "Nisam pronašao fasciklu „%s“. Ili ne postoji ili vi nemate ovlašćenja da joj "
 "pristupite."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:362
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:371
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Ne mogu da dodam fasciklu, ne mogu da odredim vrstu datoteke"
 
@@ -874,62 +884,68 @@ msgstr "Ne mogu da dodam fasciklu, ne mogu da odredim vrstu datoteke"
 #. the second '%s' is replaced with folder name.
 #. Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:403
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:412
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:500
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:702
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:512
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:715
 msgid "Inbox"
 msgstr "Sanduče"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:502
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:703
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:514
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:716
 msgid "Contacts"
 msgstr "Kontakti"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:504
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:704
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:516
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:717
 msgid "Calendar"
 msgstr "Kalendar"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:506
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:705
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:518
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:718
 msgid "Memos"
 msgstr "Beleške"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:508
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:706
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:520
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:719
 msgid "Tasks"
 msgstr "Zadaci"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:521
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:534
 #, c-format
 msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgstr "Isprobavam dostupnost fascikle „%s“ korisnika „%s“, sačekajte..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:603
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:616
 msgid "Subscribe to folder of other MAPI user..."
 msgstr "Prijavi se na fasciklu drugog MAPI korisnika..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:652
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:665
 msgid "User"
 msgstr "Korisnik"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:659
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:672
 msgid "_User:"
 msgstr "_Korisnik:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:672
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:685
 msgid "C_hoose..."
 msgstr "Iza_beri..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:687
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:700
 msgid "_Folder name:"
 msgstr "Naziv _fascikle:"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:728
+#| msgctxt "Permissions"
+#| msgid "Create subfolders"
+msgid "Include _subfolders"
+msgstr "Uključi _podfascikle"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
 #: ../src/libexchangemapi/e-mapi-cal-utils.c:2060
@@ -1059,16 +1075,16 @@ msgstr ""
 "Rezultat pretrage je premašio dopušteno ograničenje veličine. Koristite "
 "određenije izraze pretrage"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6556
+#: ../src/libexchangemapi/e-mapi-connection.c:6577
 msgid "All Public Folders"
 msgstr "Sve javne fascikle"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6823
+#: ../src/libexchangemapi/e-mapi-connection.c:6885
 #, c-format
 msgid "User name “%s” is ambiguous"
 msgstr "Korisničko ime „%s“ nije jasno"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6826
+#: ../src/libexchangemapi/e-mapi-connection.c:6888
 #, c-format
 msgid "User name “%s” not found"
 msgstr "Nisam pronašao korisničko ime „%s“"
@@ -1107,9 +1123,6 @@ msgstr "Ne mogu da dodam fasciklu, nisam pronašao glavni izvor"
 
 #~ msgid "Caching GAL contact %d/%d"
 #~ msgstr "Beležim GAL kontakt br. %d od %d"
-
-#~ msgid "Loading items in folder %s"
-#~ msgstr "Učitavam stavke u fasciklu %s"
 
 #~ msgid "Failed to open folder: %s"
 #~ msgstr "Nisam uspeo da otvorim fasciklu: %s"
