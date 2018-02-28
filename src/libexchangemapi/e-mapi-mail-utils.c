@@ -1171,6 +1171,24 @@ e_mapi_mail_content_stream_to_bin (CamelStream *content_stream,
 	*plpb = lpb;
 }
 
+static gboolean
+e_mapi_mail_part_is_attachment (CamelMimePart *part)
+{
+	const CamelContentDisposition *content_disposition;
+
+	g_return_val_if_fail (CAMEL_IS_MIME_PART (part), FALSE);
+
+	content_disposition = camel_mime_part_get_content_disposition (part);
+
+	if (!content_disposition)
+		return FALSE;
+
+	return content_disposition &&
+		content_disposition->disposition && (
+		g_ascii_strcasecmp (content_disposition->disposition, "attachment") == 0 ||
+		g_ascii_strcasecmp (content_disposition->disposition, "inline") == 0);
+}
+
 #define set_attach_value(pt,vl) {						\
 	if (!e_mapi_utils_add_property (&attach->properties, pt, vl, attach)) {	\
 		g_warning ("%s: Failed to set property 0x%x", G_STRFUNC, pt);	\
@@ -1404,9 +1422,13 @@ e_mapi_mail_do_multipart (EMapiObject *object,
 	CamelStream *content_stream;
 	CamelContentType *type;
 	CamelMimePart *part;
+	gboolean parent_is_alternative;
 	gint nn, ii;
 
 	g_return_val_if_fail (is_first != NULL, FALSE);
+
+	type = camel_data_wrapper_get_mime_type_field (CAMEL_DATA_WRAPPER (mp));
+	parent_is_alternative = type && camel_content_type_is (type, "multipart", "alternative");
 
 	nn = camel_multipart_get_number (mp);
 	for (ii = 0; ii < nn; ii++) {
@@ -1459,7 +1481,9 @@ e_mapi_mail_do_multipart (EMapiObject *object,
 		if (ii == 0 && (*is_first) && camel_content_type_is (type, "text", "plain")) {
 			e_mapi_mail_add_body (object, content_stream, PidTagBody, cancellable);
 			*is_first = FALSE;
-		} else if (camel_content_type_is (type, "text", "html")) {
+		} else if ((ii == 0 || parent_is_alternative) &&
+			   camel_content_type_is (type, "text", "html") &&
+			   !e_mapi_mail_part_is_attachment (part)) {
 			e_mapi_mail_add_body (object, content_stream, PidTagHtml, cancellable);
 		} else {
 			e_mapi_mail_add_attach (object, part, content_stream, cancellable);
