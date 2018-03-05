@@ -1,3 +1,15 @@
+evolution-mapi 3.27.92 2018-03-05
+---------------------------------
+
+Bug Fixes:
+	Bug 793835 - HTML attachment overwrites message text or get removed (Milan Crha)
+
+Translations:
+	Мирослав Николић (sr)
+	Мирослав Николић (sr@latin)
+	Balázs Úr (hu)
+	Mario Blättermann (de)
+
 evolution-mapi 3.27.91 2018-02-19
 ---------------------------------
 
