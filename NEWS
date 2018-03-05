@@ -1,3 +1,9 @@
+evolution-mapi 3.26.6 2018-03-05
+--------------------------------
+
+Bug Fixes:
+	Bug 793835 - HTML attachment overwrites message text or get removed (Milan Crha)
+
 evolution-mapi 3.26.3 2017-12-11
 --------------------------------
 
