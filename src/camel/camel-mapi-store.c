@@ -3004,10 +3004,7 @@ mapi_authenticate_sync (CamelService *service,
 	profile = camel_mapi_settings_get_profile (mapi_settings);
 
 	if (empd.krb_sso) {
-		if (!e_mapi_util_trigger_krb_auth (&empd, error)) {
-			g_object_unref (settings);
-			return CAMEL_AUTHENTICATION_ERROR;
-		}
+		e_mapi_util_trigger_krb_auth (&empd, NULL);
 
 		password = NULL;
 	} else {
