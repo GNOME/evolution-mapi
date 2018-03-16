@@ -1434,6 +1434,7 @@ ecb_mapi_get_backend_property (ECalBackend *backend,
 			CAL_STATIC_CAPABILITY_REFRESH_SUPPORTED,
 			CAL_STATIC_CAPABILITY_NO_MEMO_START_DATE,
 			CAL_STATIC_CAPABILITY_TASK_DATE_ONLY,
+			CAL_STATIC_CAPABILITY_TASK_NO_ALARM,
 			e_cal_meta_backend_get_capabilities (E_CAL_META_BACKEND (backend)),
 			NULL);
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
