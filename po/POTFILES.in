@@ -7,6 +7,7 @@ src/camel/camel-mapi-folder.c
 src/camel/camel-mapi-provider.c
 src/camel/camel-mapi-sasl-krb.c
 src/camel/camel-mapi-store.c
+src/camel/camel-mapi-store.h
 src/camel/camel-mapi-transport.c
 src/collection/e-mapi-backend.c
 src/configuration/e-book-config-mapigal.c
