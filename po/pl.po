@@ -1,17 +1,17 @@
 # Polish translation for evolution-mapi.
-# Copyright © 2009-2017 the evolution-mapi authors.
+# Copyright © 2009-2018 the evolution-mapi authors.
 # This file is distributed under the same license as the evolution-mapi package.
 # Wadim Dziedzic <wdziedzic@aviary.pl>, 2009.
-# Piotr Drąg <piotrdrag@gmail.com>, 2009-2017.
+# Piotr Drąg <piotrdrag@gmail.com>, 2009-2018.
 # Tomasz Dominikowski <dominikowski@gmail.com>, 2009.
-# Aviary.pl <community-poland@mozilla.org>, 2009-2017.
+# Aviary.pl <community-poland@mozilla.org>, 2009-2018.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-10 16:03+0100\n"
-"PO-Revision-Date: 2017-12-10 16:04+0100\n"
+"POT-Creation-Date: 2018-03-18 01:29+0100\n"
+"PO-Revision-Date: 2018-03-18 01:30+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -58,7 +58,7 @@ msgstr "Zmodyfikowanie elementu na serwerze się nie powiodło"
 
 #: ../src/addressbook/e-book-backend-mapi.c:862
 #: ../src/calendar/e-cal-backend-mapi.c:1332
-#: ../src/calendar/e-cal-backend-mapi.c:1625
+#: ../src/calendar/e-cal-backend-mapi.c:1626
 msgid "Failed to create item on a server"
 msgstr "Utworzenie elementu na serwerze się nie powiodło"
 
@@ -79,7 +79,7 @@ msgstr ""
 "Obsługa modyfikowania pojedynczych instancji powtarzającego się spotkania "
 "nie jest zaimplementowana. Nie dokonano żadnych zmian spotkania na serwerze."
 
-#: ../src/calendar/e-cal-backend-mapi.c:1675
+#: ../src/calendar/e-cal-backend-mapi.c:1676
 msgid "Failed to get Free/Busy data"
 msgstr "Pobranie informacji o zajętości się nie powiodło"
 
@@ -382,13 +382,21 @@ msgstr ""
 "Nie można dodać katalogu „%s”, dodanie do podsumowania przechowalni się nie "
 "powiodło"
 
-#: ../src/camel/camel-mapi-store.c:3020
+#: ../src/camel/camel-mapi-store.c:3017
 msgid "Authentication password not available"
 msgstr "Hasło uwierzytelniania jest niedostępne"
 
-#: ../src/camel/camel-mapi-store.c:3056 ../src/camel/camel-mapi-store.c:3453
+#: ../src/camel/camel-mapi-store.c:3053 ../src/camel/camel-mapi-store.c:3450
 msgid "Updating foreign folders"
 msgstr "Aktualizowanie obcych katalogów"
+
+#: ../src/camel/camel-mapi-store.h:53
+msgid "Favorites"
+msgstr "Ulubione"
+
+#: ../src/camel/camel-mapi-store.h:54
+msgid "Foreign folders"
+msgstr "Obce katalogi"
 
 #: ../src/camel/camel-mapi-transport.c:145
 #: ../src/camel/camel-mapi-transport.c:167
