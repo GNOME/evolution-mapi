@@ -13,8 +13,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product"
 "=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2017-12-04 11:05+0000\n"
-"PO-Revision-Date: 2018-01-08 20:06-0200\n"
+"POT-Creation-Date: 2018-03-18 00:06+0000\n"
+"PO-Revision-Date: 2018-03-24 15:37-0200\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
@@ -61,7 +61,7 @@ msgstr "Falha ao alterar item no servidor"
 
 #: ../src/addressbook/e-book-backend-mapi.c:862
 #: ../src/calendar/e-cal-backend-mapi.c:1332
-#: ../src/calendar/e-cal-backend-mapi.c:1625
+#: ../src/calendar/e-cal-backend-mapi.c:1626
 msgid "Failed to create item on a server"
 msgstr "Falha ao criar item no servidor"
 
@@ -83,7 +83,7 @@ msgstr ""
 "ainda não foi implementado. Nenhuma alteração para o compromisso foi feita "
 "no servidor."
 
-#: ../src/calendar/e-cal-backend-mapi.c:1675
+#: ../src/calendar/e-cal-backend-mapi.c:1676
 msgid "Failed to get Free/Busy data"
 msgstr "Falha ao obter dados livre/ocupado"
 
@@ -381,20 +381,27 @@ msgstr "A caixa de entrada “%s” está atingindo seu limite de tamanho."
 
 #: ../src/camel/camel-mapi-store.c:2733
 #, c-format
-#| msgid "Cannot add folder, failed to add to store’s summary"
 msgid "Cannot add folder “%s”, failed to add to store’s summary"
 msgstr ""
 "Não foi possível adicionar a pasta “%s”; falha ao adicionar ao sumário do "
 "armazenamento"
 
-#: ../src/camel/camel-mapi-store.c:3020
+#: ../src/camel/camel-mapi-store.c:3017
 msgid "Authentication password not available"
 msgstr "Senha de autenticação indisponível"
 
-#: ../src/camel/camel-mapi-store.c:3056 ../src/camel/camel-mapi-store.c:3453
-#| msgid "Loading items in folder %s"
+#: ../src/camel/camel-mapi-store.c:3053 ../src/camel/camel-mapi-store.c:3450
 msgid "Updating foreign folders"
 msgstr "Atualizando pastas externas"
+
+#: ../src/camel/camel-mapi-store.h:53
+msgid "Favorites"
+msgstr "Favoritos"
+
+#: ../src/camel/camel-mapi-store.h:54
+#| msgid "Updating foreign folders"
+msgid "Foreign folders"
+msgstr "Pastas externas"
 
 #: ../src/camel/camel-mapi-transport.c:145
 #: ../src/camel/camel-mapi-transport.c:167
@@ -951,8 +958,6 @@ msgid "_Folder name:"
 msgstr "Nome da _pasta:"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:728
-#| msgctxt "Permissions"
-#| msgid "Create subfolders"
 msgid "Include _subfolders"
 msgstr "Incluir _subpastas"
 
@@ -1266,9 +1271,6 @@ msgstr ""
 
 #~ msgid "Message fetching cancelled by user."
 #~ msgstr "Extração da mensagem cancelada pelo usuário."
-
-#~ msgid "Favorites"
-#~ msgstr "Favoritos"
 
 #~ msgid "_Global Catalog server name:"
 #~ msgstr "Nome do servidor de Catálogo _Global:"
