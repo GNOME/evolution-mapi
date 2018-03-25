@@ -12,8 +12,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2017-12-04 11:05+0000\n"
-"PO-Revision-Date: 2018-01-29 06:58+0100\n"
+"POT-Creation-Date: 2018-03-18 00:06+0000\n"
+"PO-Revision-Date: 2018-03-25 08:56+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -59,7 +59,7 @@ msgstr "Selhala úprava složky na serveru"
 
 #: ../src/addressbook/e-book-backend-mapi.c:862
 #: ../src/calendar/e-cal-backend-mapi.c:1332
-#: ../src/calendar/e-cal-backend-mapi.c:1625
+#: ../src/calendar/e-cal-backend-mapi.c:1626
 msgid "Failed to create item on a server"
 msgstr "Selhalo vytvoření složky na serveru"
 
@@ -80,7 +80,7 @@ msgstr ""
 "Podpora pro úpravu jednotlivých výskytů opakujících se událostí není dosud "
 "implementována. Změna události na serveru nebyla provedena."
 
-#: ../src/calendar/e-cal-backend-mapi.c:1675
+#: ../src/calendar/e-cal-backend-mapi.c:1676
 msgid "Failed to get Free/Busy data"
 msgstr "Selhalo získání údajů o volných/obsazených termínech"
 
@@ -381,13 +381,21 @@ msgid "Cannot add folder “%s”, failed to add to store’s summary"
 msgstr ""
 "Nezdařilo se přidat složku „%s“, selhalo přidání do souhrnného úložiště"
 
-#: ../src/camel/camel-mapi-store.c:3020
+#: ../src/camel/camel-mapi-store.c:3017
 msgid "Authentication password not available"
 msgstr "Autentizační heslo není k dispozici"
 
-#: ../src/camel/camel-mapi-store.c:3056 ../src/camel/camel-mapi-store.c:3453
+#: ../src/camel/camel-mapi-store.c:3053 ../src/camel/camel-mapi-store.c:3450
 msgid "Updating foreign folders"
 msgstr "Aktualizují se vzdálené složky"
+
+#: ../src/camel/camel-mapi-store.h:53
+msgid "Favorites"
+msgstr "Oblíbené"
+
+#: ../src/camel/camel-mapi-store.h:54
+msgid "Foreign folders"
+msgstr "Vzdálené složky"
 
 #: ../src/camel/camel-mapi-transport.c:145
 #: ../src/camel/camel-mapi-transport.c:167
