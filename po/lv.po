@@ -7,150 +7,73 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolutio"
-"n-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2016-03-05 06:19+0000\n"
-"PO-Revision-Date: 2016-03-05 17:11+0200\n"
+"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product"
+"=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
+"POT-Creation-Date: 2018-03-12 15:08+0000\n"
+"PO-Revision-Date: 2018-04-10 18:35+0200\n"
 "Last-Translator: Rūdolfs Mazurs <rudolfs.mazurs@gmail.com>\n"
 "Language-Team: Latvian <lata-l10n@googlegroups.com>\n"
 "Language: lv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : "
-"2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);"
+"\n"
 "X-Generator: Lokalize 2.0\n"
 
-#: ../evolution-mapi.metainfo.xml.in.h:1
-#| msgid "Exchange MAPI server %s"
+#: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:1
 msgid "Exchange MAPI"
 msgstr "Exchange MAPI"
 
-#: ../evolution-mapi.metainfo.xml.in.h:2 ../src/camel/camel-mapi-provider.c:73
+#: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:2
+#: ../src/camel/camel-mapi-provider.c:72
 msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr "Microsoft Exchange 2007/OpenChange serveru piekļuvei, izmantojot MAPI"
 
-#: ../src/addressbook/e-book-backend-mapi.c:744
-msgid "Searching"
-msgstr "Meklē"
-
-#: ../src/addressbook/e-book-backend-mapi.c:1739
-#: ../src/calendar/e-cal-backend-mapi.c:189
-#: ../src/calendar/e-cal-backend-mapi.c:488
-#: ../src/camel/camel-mapi-folder.c:1932 ../src/camel/camel-mapi-folder.c:2012
+#: ../src/addressbook/e-book-backend-mapi.c:92
+#: ../src/calendar/e-cal-backend-mapi.c:100
+#: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1943
 msgid "Unknown error"
 msgstr "Nezināma kļūda"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:432
-msgid "Failed to remove public folder"
-msgstr "Neizdevās izņemt publisku mapi"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:468
-msgid "The backend does not support bulk additions"
-msgstr "Aizmugure neatbalsta masveida pievienošanu"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:510
-#: ../src/calendar/e-cal-backend-mapi.c:1719
-#: ../src/calendar/e-cal-backend-mapi.c:2230
-msgid "Failed to create item on a server"
-msgstr "Neizdevās izveidot vienumu uz servera"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:627
-msgid "The backend does not support bulk modifications"
-msgstr "Aizmugure neatbalsta masveida izmaiņas"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:672
-#: ../src/calendar/e-cal-backend-mapi.c:1932
-msgid "Failed to modify item on a server"
-msgstr "Neizdevās modificēt vienumu uz servera"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:848
-msgid "Failed to fetch items from a server"
-msgstr "Neizdevās saņemt vienumu no servera"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. %d is an index of the contact.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:866
-#, c-format
-msgid "Caching contact %d"
-msgstr "Pieglabā kontaktu %d"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. The first %d is an index of the contact,
-#. the second %d is total count of conacts on the server.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:870
-#, c-format
-msgid "Caching contact %d/%d"
-msgstr "Pieglabā kontaktu %d/%d"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:925
-msgid "Failed to count server contacts"
-msgstr "Neizdevās saskaitīt servera kontaktus"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:983
-msgid "Failed to list items from a server"
-msgstr "Neizdevās uzskaitīt vienumus no servera"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1064
-msgid "Failed to transfer contacts from a server"
-msgstr "Neizdevās pārsūtīt kontaktus no servera"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:153
-#, c-format
-msgid "Caching GAL contact %d"
-msgstr "Pieglabā GAL kontaktu %d"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. The first %d is an index of the GAL entry,
-#. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:157
-#, c-format
-msgid "Caching GAL contact %d/%d"
-msgstr "Pieglabā GAL kontaktu %d/%d"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:229
-#: ../src/addressbook/e-book-backend-mapi-gal.c:313
+#: ../src/addressbook/e-book-backend-mapi.c:496
+#: ../src/addressbook/e-book-backend-mapi.c:680
 msgid "Failed to fetch GAL entries"
 msgstr "Neizdevās saņemt GAL ierakstus"
 
-#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:413
-#, c-format
-msgid "Loading items in folder %s"
-msgstr "Ielādē mapes %s vienumus"
+#: ../src/addressbook/e-book-backend-mapi.c:502
+msgid "Failed to transfer contacts from a server"
+msgstr "Neizdevās pārsūtīt kontaktus no servera"
 
-#: ../src/calendar/e-cal-backend-mapi.c:780
-#, c-format
-msgid "Failed to open folder: %s"
-msgstr "Neizdevās atvērt mapi — %s"
+#: ../src/addressbook/e-book-backend-mapi.c:687
+#: ../src/calendar/e-cal-backend-mapi.c:1105
+msgid "Failed to list items from a server"
+msgstr "Neizdevās uzskaitīt vienumus no servera"
 
-#: ../src/calendar/e-cal-backend-mapi.c:788
-#, c-format
-msgid "Failed to get folder properties: %s"
-msgstr "Neizdevās saņemt mapes īpašības — %s"
+#: ../src/addressbook/e-book-backend-mapi.c:862
+#: ../src/calendar/e-cal-backend-mapi.c:1332
+msgid "Failed to modify item on a server"
+msgstr "Neizdevās modificēt vienumu uz servera"
 
-#: ../src/calendar/e-cal-backend-mapi.c:829
-#, c-format
-msgid "Failed to list objects: %s"
-msgstr "Neizdevās uzskaitīt objektus — %s"
+#: ../src/addressbook/e-book-backend-mapi.c:862
+#: ../src/calendar/e-cal-backend-mapi.c:1332
+#: ../src/calendar/e-cal-backend-mapi.c:1625
+#: ../src/calendar/e-cal-backend-mapi.c:1626
+msgid "Failed to create item on a server"
+msgstr "Neizdevās izveidot vienumu uz servera"
 
-#: ../src/calendar/e-cal-backend-mapi.c:855
-#, c-format
-msgid "Failed to transfer objects: %s"
-msgstr "Neizdevās pārsūtīt objektus — %s"
+#: ../src/addressbook/e-book-backend-mapi.c:923
+#: ../src/calendar/e-cal-backend-mapi.c:1400
+#| msgid "Failed to fetch items from a server"
+msgid "Failed to remove item from a server"
+msgstr "Neizdevās izņemt vienumu no servera"
 
-#: ../src/calendar/e-cal-backend-mapi.c:874
-#, c-format
-msgid "Failed to close folder: %s"
-msgstr "Neizdevās aizvērt mapi — %s"
+#: ../src/calendar/e-cal-backend-mapi.c:881
+#| msgid "Failed to transfer contacts from a server"
+msgid "Failed to transfer objects from a server"
+msgstr "Neizdevās pārsūtīt objektus no servera"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1383
-msgid "Could not create cache file"
-msgstr "Neizdevās izveidot keša failu"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1840
+#: ../src/calendar/e-cal-backend-mapi.c:1249
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -158,256 +81,274 @@ msgstr ""
 "Atkārtojošās tikšanās atsevišķu instanču mainīšanas atbalsts nav vēl pilnībā "
 "ieviests. "
 
-#: ../src/calendar/e-cal-backend-mapi.c:2045
-msgid "Cannot remove items from a server"
-msgstr "Nevar izņemt vienumus no servera"
-
-#: ../src/calendar/e-cal-backend-mapi.c:2476
+#: ../src/calendar/e-cal-backend-mapi.c:1675
+#: ../src/calendar/e-cal-backend-mapi.c:1676
 msgid "Failed to get Free/Busy data"
 msgstr "Neizdevās iegūt brīvs/aizņemts datus"
 
-#: ../src/camel/camel-mapi-folder.c:800
-#, c-format
-msgid "Refreshing folder '%s'"
+#: ../src/camel/camel-mapi-folder.c:776
+#, c-format, c-format
+#| msgid "Refreshing folder '%s'"
+msgid "Refreshing folder “%s”"
 msgstr "Atsvaidzina mapi “%s”"
 
-#: ../src/camel/camel-mapi-folder.c:868
-#, c-format
-msgid "Downloading messages in folder '%s'"
+#: ../src/camel/camel-mapi-folder.c:844
+#, c-format, c-format
+#| msgid "Downloading messages in folder '%s'"
+msgid "Downloading messages in folder “%s”"
 msgstr "Lejupielādē vēstules mapē “%s”"
 
-#: ../src/camel/camel-mapi-folder.c:956 ../src/camel/camel-mapi-folder.c:1564
+#: ../src/camel/camel-mapi-folder.c:932 ../src/camel/camel-mapi-folder.c:1492
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Šī vēstule nav pieejama nesaistes režīmā."
 
-#: ../src/camel/camel-mapi-folder.c:966 ../src/camel/camel-mapi-folder.c:984
+#: ../src/camel/camel-mapi-folder.c:942 ../src/camel/camel-mapi-folder.c:960
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Neizdevās saņemt vienumus — %s"
 
-#: ../src/camel/camel-mapi-folder.c:971 ../src/camel/camel-mapi-folder.c:989
+#: ../src/camel/camel-mapi-folder.c:947 ../src/camel/camel-mapi-folder.c:965
 msgid "Fetching items failed"
 msgstr "Neizdevās saņemt vienumus"
 
-#: ../src/camel/camel-mapi-folder.c:1243
-#, c-format
-msgid "Cannot append message to folder '%s'"
+#: ../src/camel/camel-mapi-folder.c:1170
+#, c-format, c-format
+#| msgid "Cannot append message to folder '%s'"
+msgid "Cannot append message to folder “%s”"
 msgstr "Neizdodas ievietot vēstuli mapē “%s”"
 
-#: ../src/camel/camel-mapi-folder.c:1252 ../src/camel/camel-mapi-folder.c:1282
+#: ../src/camel/camel-mapi-folder.c:1179 ../src/camel/camel-mapi-folder.c:1209
 #, c-format
 msgid "Offline."
 msgstr "Nesaiste."
 
-#: ../src/camel/camel-mapi-folder.c:1365
+#: ../src/camel/camel-mapi-folder.c:1293
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "Neizdevās iztukšot miskasti — %s"
 
-#: ../src/camel/camel-mapi-folder.c:1371
+#: ../src/camel/camel-mapi-folder.c:1299
 msgid "Failed to empty Trash"
 msgstr "Neizdevās iztukšot miskasti"
 
-#: ../src/camel/camel-mapi-folder.c:1549
+#. Translators: The first %s is replaced with a message ID,
+#. the second %s is replaced with a detailed error string
+#: ../src/camel/camel-mapi-folder.c:1477
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Nevar saņemt vēstuli %s — %s"
 
-#: ../src/camel/camel-mapi-folder.c:1550
+#: ../src/camel/camel-mapi-folder.c:1478
 msgid "No such message"
 msgstr "Nav tādas vēstules"
 
-#: ../src/camel/camel-mapi-folder.c:1575 ../src/camel/camel-mapi-folder.c:1607
+#: ../src/camel/camel-mapi-folder.c:1503 ../src/camel/camel-mapi-folder.c:1537
 #, c-format
 msgid "Could not get message: %s"
 msgstr "Neizdevās saņemt vēstuli — %s"
 
-#: ../src/camel/camel-mapi-folder.c:1581 ../src/camel/camel-mapi-folder.c:1614
+#: ../src/camel/camel-mapi-folder.c:1509 ../src/camel/camel-mapi-folder.c:1544
 #, c-format
 msgid "Could not get message"
 msgstr "Neizdevās iegūt vēstuli"
 
-#: ../src/camel/camel-mapi-folder.c:1989
+#: ../src/camel/camel-mapi-folder.c:1920
 msgid "Receive quota"
 msgstr "Saņemšanas kvota"
 
-#: ../src/camel/camel-mapi-folder.c:1995
+#: ../src/camel/camel-mapi-folder.c:1926
 msgid "Send quota"
 msgstr "Sūtīšanas kvota"
 
-#: ../src/camel/camel-mapi-folder.c:2017
+#: ../src/camel/camel-mapi-folder.c:1948
 msgid "No quota information available"
 msgstr "Nav pieejama informācija par kvotām"
 
-#: ../src/camel/camel-mapi-folder.c:2119
+#: ../src/camel/camel-mapi-folder.c:2055
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nevarēja ielādēt %s kopsavilkumu"
 
-#: ../src/camel/camel-mapi-provider.c:45
+#: ../src/camel/camel-mapi-provider.c:43
 msgid "Checking for new mail"
 msgstr "Pārbauda jauno pastu"
 
-#: ../src/camel/camel-mapi-provider.c:47
+#: ../src/camel/camel-mapi-provider.c:45
 msgid "C_heck for new messages in all folders"
 msgstr "_Pārbaudīt visās mapēs, vai nav jaunu vēstuļu"
 
-#: ../src/camel/camel-mapi-provider.c:51
+#: ../src/camel/camel-mapi-provider.c:49
 msgid "Options"
 msgstr "Opcijas"
 
-#: ../src/camel/camel-mapi-provider.c:53
-msgid "Automatically synchroni_ze account locally"
-msgstr "Automātiski sinhroni_zē kontu lokāli"
-
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:56
+#: ../src/camel/camel-mapi-provider.c:52
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Attiecināt filtrus uz jaunajām vēstulēm iesūtnē šajā serverī"
 
-#: ../src/camel/camel-mapi-provider.c:58
+#: ../src/camel/camel-mapi-provider.c:54
 msgid "Check new messages for _Junk contents"
 msgstr "Pārbaudīt, vai jaunās vēstules nav _mēstules"
 
-#: ../src/camel/camel-mapi-provider.c:60
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Pārbaudīt mēstul_es tikai iesūtnes mapē"
 
-#: ../src/camel/camel-mapi-provider.c:62
-#: ../src/configuration/e-mapi-config-utils.c:1604
+#: ../src/camel/camel-mapi-provider.c:58
+#: ../src/configuration/e-mapi-config-utils.c:1602
 msgid "Lis_ten for server notifications"
 msgstr "Klausī_ties servera paziņojumus"
 
-#: ../src/camel/camel-mapi-provider.c:88
+#: ../src/camel/camel-mapi-provider.c:60
+msgid "Synchroni_ze remote mail locally in all folders"
+msgstr "Sinhroni_zēt lokāli attālinātā pasta visas mapes"
+
+#: ../src/camel/camel-mapi-provider.c:87
 msgid "Password"
 msgstr "Parole"
 
-#: ../src/camel/camel-mapi-provider.c:89
+#: ../src/camel/camel-mapi-provider.c:88
 msgid ""
 "This option will connect to the OpenChange server using a plaintext password."
 msgstr ""
 "Šī opcija savienos ar OpenChange serveri, izmantojot atklāta teksta paroli."
 
-#: ../src/camel/camel-mapi-sasl-krb.c:28
+#: ../src/camel/camel-mapi-sasl-krb.c:26
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-mapi-sasl-krb.c:30
+#: ../src/camel/camel-mapi-sasl-krb.c:28
 msgid "This option will connect to the server using kerberos key."
 msgstr "Šī opcija savienosies ar serveri, lietojot kerberos atslēgu."
 
-#: ../src/camel/camel-mapi-store.c:134 ../src/camel/camel-mapi-store.c:176
+#: ../src/camel/camel-mapi-store.c:132 ../src/camel/camel-mapi-store.c:174
 msgid "Cannot find folder in a local cache"
 msgstr "Nevar atrast mapi lokālajā kešā"
 
-#: ../src/camel/camel-mapi-store.c:492 ../src/camel/camel-mapi-store.c:1180
+#: ../src/camel/camel-mapi-store.c:489 ../src/camel/camel-mapi-store.c:1182
 msgid "Folder list is not available in offline mode"
 msgstr "Mapju saraksts nav pieejams nesaistes režīmā"
 
-#: ../src/camel/camel-mapi-store.c:874
+#: ../src/camel/camel-mapi-store.c:879
 msgid "No public folder found"
 msgstr "Nav atrastu publisku mapju"
 
-#: ../src/camel/camel-mapi-store.c:874
+#: ../src/camel/camel-mapi-store.c:879
 msgid "No folder found"
 msgstr "Nav atrastu mapju"
 
-#: ../src/camel/camel-mapi-store.c:1202 ../src/camel/camel-mapi-store.c:2173
-#, c-format
-msgid "Connecting to '%s'"
+#: ../src/camel/camel-mapi-store.c:1204 ../src/camel/camel-mapi-store.c:2272
+#, c-format, c-format
+#| msgid "Connecting to '%s'"
+msgid "Connecting to “%s”"
 msgstr "Savienojas ar “%s”"
 
-#: ../src/camel/camel-mapi-store.c:1261
+#: ../src/camel/camel-mapi-store.c:1263
 msgid "Cannot create MAPI folders in offline mode"
 msgstr "Nevar izveidot MAPI mapes nesaistes režīmā"
 
-#: ../src/camel/camel-mapi-store.c:1268
-#, c-format
-msgid "Cannot create new folder '%s'"
+#: ../src/camel/camel-mapi-store.c:1270
+#, c-format, c-format
+#| msgid "Cannot create new folder '%s'"
+msgid "Cannot create new folder “%s”"
 msgstr "Nevar izveidot jaunu mapi “%s”"
 
-#: ../src/camel/camel-mapi-store.c:1277
+#: ../src/camel/camel-mapi-store.c:1279
 #, c-format
 msgid "Authentication failed"
 msgstr "Autentifikācija neizdevās"
 
-#: ../src/camel/camel-mapi-store.c:1287
-msgid "MAPI folders can be created only within mailbox of the logged user"
+#: ../src/camel/camel-mapi-store.c:1289
+#| msgid "MAPI folders can be created only within mailbox of the logged user"
+msgid "MAPI folders can be created only within mailbox of the logged in user"
 msgstr "MAPI mapes var izveidot tikai ierakstījušos lietotāju pasta kastēs"
 
-#: ../src/camel/camel-mapi-store.c:1300 ../src/camel/camel-mapi-store.c:1413
-#, c-format
-msgid "Cannot find folder '%s'"
+#: ../src/camel/camel-mapi-store.c:1302 ../src/camel/camel-mapi-store.c:1415
+#, c-format, c-format
+#| msgid "Cannot find folder '%s'"
+msgid "Cannot find folder “%s”"
 msgstr "Nevar atrast mapi “%s”"
 
-#: ../src/camel/camel-mapi-store.c:1355
-#, c-format
-msgid "Cannot create folder '%s': %s"
+#: ../src/camel/camel-mapi-store.c:1357
+#, c-format, c-format
+#| msgid "Cannot create folder '%s': %s"
+msgid "Cannot create folder “%s”: %s"
 msgstr "Nevar izveidot mapi “%s” — %s"
 
-#: ../src/camel/camel-mapi-store.c:1361
-#, c-format
-msgid "Cannot create folder '%s'"
+#: ../src/camel/camel-mapi-store.c:1363
+#, c-format, c-format
+#| msgid "Cannot create folder '%s'"
+msgid "Cannot create folder “%s”"
 msgstr "Nevar izveidot mapi “%s”"
 
-#: ../src/camel/camel-mapi-store.c:1391 ../src/camel/camel-mapi-store.c:1403
+#: ../src/camel/camel-mapi-store.c:1393 ../src/camel/camel-mapi-store.c:1405
 msgid "Cannot delete MAPI folders in offline mode"
 msgstr "Nevar dzēst MAPI mapes nesaistes režīmā"
 
-#: ../src/camel/camel-mapi-store.c:1459
-#, c-format
-msgid "Cannot remove folder '%s': %s"
+#: ../src/camel/camel-mapi-store.c:1461
+#, c-format, c-format
+#| msgid "Cannot remove folder '%s': %s"
+msgid "Cannot remove folder “%s”: %s"
 msgstr "Nevar izņemt mapi “%s” — %s"
 
-#: ../src/camel/camel-mapi-store.c:1467
-#, c-format
-msgid "Cannot remove folder '%s'"
+#: ../src/camel/camel-mapi-store.c:1469
+#, c-format, c-format
+#| msgid "Cannot remove folder '%s'"
+msgid "Cannot remove folder “%s”"
 msgstr "Nevar izņemt mapi “%s”"
 
-#: ../src/camel/camel-mapi-store.c:1497 ../src/camel/camel-mapi-store.c:1512
+#: ../src/camel/camel-mapi-store.c:1499 ../src/camel/camel-mapi-store.c:1514
 msgid "Cannot rename MAPI folders in offline mode"
 msgstr "Nevar pārsaukt MAPI mapes nesaistes režīmā"
 
-#: ../src/camel/camel-mapi-store.c:1523
-#, c-format
-msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
+#. Translators: “%s” is current name of the folder
+#: ../src/camel/camel-mapi-store.c:1525
+#, c-format, c-format
+#| msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
+msgid "Cannot rename MAPI folder “%s”. Folder does not exist"
 msgstr "Nevar pārsaukt MAPI mapi “%s”. Mape neeksistē"
 
-#: ../src/camel/camel-mapi-store.c:1534
-#, c-format
-msgid "Cannot rename MAPI default folder '%s' to '%s'"
+#. Translators: “%s to %s” is current name of the folder  and
+#. new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1536
+#, c-format, c-format
+#| msgid "Cannot rename MAPI default folder '%s' to '%s'"
+msgid "Cannot rename MAPI default folder “%s” to “%s”"
 msgstr "Nevar pārsaukt MAPI noklusēto mapi “%s” uz “%s”"
 
-#. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1560 ../src/camel/camel-mapi-store.c:1603
-#: ../src/camel/camel-mapi-store.c:1683
-#, c-format
-msgid "Cannot rename MAPI folder '%s' to '%s'"
+#. Translators: “%s to %s” is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1562 ../src/camel/camel-mapi-store.c:1605
+#: ../src/camel/camel-mapi-store.c:1685
+#, c-format, c-format
+#| msgid "Cannot rename MAPI folder '%s' to '%s'"
+msgid "Cannot rename MAPI folder “%s” to “%s”"
 msgstr "Nevar pārsaukt MAPI mapi “%s” uz “%s”"
 
-#. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1595 ../src/camel/camel-mapi-store.c:1676
-#, c-format
-msgid "Cannot rename MAPI folder '%s' to '%s': %s"
+#. Translators: “%s to %s” is current name of the folder and new name of the folder.
+#. The last “%s” is a detailed error message.
+#: ../src/camel/camel-mapi-store.c:1597 ../src/camel/camel-mapi-store.c:1678
+#, c-format, c-format
+#| msgid "Cannot rename MAPI folder '%s' to '%s': %s"
+msgid "Cannot rename MAPI folder “%s” to “%s”: %s"
 msgstr "Nevar pārsaukt MAPI mapi “%s” uz “%s” — %s"
 
-#: ../src/camel/camel-mapi-store.c:1773
+#: ../src/camel/camel-mapi-store.c:1775
 msgid "Cannot subscribe MAPI folders in offline mode"
 msgstr "Nevar abonēt MAPI mapes nesaistes režīmā"
 
-#: ../src/camel/camel-mapi-store.c:1790
-#, c-format
-msgid "Folder '%s' not found"
+#: ../src/camel/camel-mapi-store.c:1792
+#, c-format, c-format
+#| msgid "Folder '%s' not found"
+msgid "Folder “%s” not found"
 msgstr "Mape “%s” nav atrasta"
 
-#: ../src/camel/camel-mapi-store.c:1908
+#: ../src/camel/camel-mapi-store.c:1917
 msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr "Nevar pārtraukt MAPI mapes abonēšanu nesaistes režīmā"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:2120 ../src/camel/camel-mapi-transport.c:196
+#: ../src/camel/camel-mapi-store.c:2219 ../src/camel/camel-mapi-transport.c:194
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Exchange MAPI serveris %s"
@@ -415,84 +356,104 @@ msgstr "Exchange MAPI serveris %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:2124 ../src/camel/camel-mapi-transport.c:199
+#: ../src/camel/camel-mapi-store.c:2223 ../src/camel/camel-mapi-transport.c:197
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Lietotāja %s Exchange MAPI serviss %s"
 
-#: ../src/camel/camel-mapi-store.c:2155
-msgid "Cannot connect MAPI store in offline mode"
+#: ../src/camel/camel-mapi-store.c:2254
+#| msgid "Cannot connect MAPI store in offline mode"
+msgid "Cannot connect to MAPI store in offline mode"
 msgstr "Nevar savienoties ar MAPI krātuvi nesaistes režīmā"
 
-#: ../src/camel/camel-mapi-store.c:2208
-#, c-format
-msgid "Mailbox '%s' is full, no new messages will be received or sent."
+#: ../src/camel/camel-mapi-store.c:2307
+#, c-format, c-format
+#| msgid "Mailbox '%s' is full, no new messages will be received or sent."
+msgid "Mailbox “%s” is full, no new messages will be received or sent."
 msgstr "Pastkaste “%s” ir pilna, nevarēs saņemt vai sūtīt jaunas vēstules."
 
-#: ../src/camel/camel-mapi-store.c:2210
-#, c-format
+#: ../src/camel/camel-mapi-store.c:2309
+#, c-format, c-format
+#| msgid ""
+#| "Mailbox '%s' is near its size limit, message send will be disabled soon."
 msgid ""
-"Mailbox '%s' is near its size limit, message send will be disabled soon."
+"Mailbox “%s” is near its size limit, message send will be disabled soon."
 msgstr ""
 "Pastkaste “%s” tuvojas izmēra limitam, vēstuļu sūtīšana drīz tiks deaktivēta."
 
-#: ../src/camel/camel-mapi-store.c:2214
-#, c-format
-msgid "Mailbox '%s' is full, no new messages will be received."
+#: ../src/camel/camel-mapi-store.c:2313
+#, c-format, c-format
+#| msgid "Mailbox '%s' is full, no new messages will be received."
+msgid "Mailbox “%s” is full, no new messages will be received."
 msgstr "Pastkaste “%s” ir pilna, nevarēs saņemt jaunas vēstules."
 
-#: ../src/camel/camel-mapi-store.c:2216
-#, c-format
-msgid "Mailbox '%s' is near its size limit."
+#: ../src/camel/camel-mapi-store.c:2315
+#, c-format, c-format
+#| msgid "Mailbox '%s' is near its size limit."
+msgid "Mailbox “%s” is near its size limit."
 msgstr "Pastkaste “%s” tuvojas izmēra limitam."
 
-#: ../src/camel/camel-mapi-store.c:2637
+#: ../src/camel/camel-mapi-store.c:2733
+#, c-format, c-format
+#| msgid "Cannot add folder, failed to add to store's summary"
+msgid "Cannot add folder “%s”, failed to add to store’s summary"
+msgstr "Nevar pievienot mapi “%s”, neizdevās pievienot krātuves kopsavilkumu"
+
+#: ../src/camel/camel-mapi-store.c:3020
+#: ../src/camel/camel-mapi-store.c:3017
 msgid "Authentication password not available"
 msgstr "Autentifikācijas parole nav pieejama"
 
-#: ../src/camel/camel-mapi-transport.c:147
-#: ../src/camel/camel-mapi-transport.c:169
+#: ../src/camel/camel-mapi-store.c:3056 ../src/camel/camel-mapi-store.c:3453
+#: ../src/camel/camel-mapi-store.c:3053
+#: ../src/camel/camel-mapi-store.c:3450
+#| msgid "Loading items in folder %s"
+msgid "Updating foreign folders"
+msgstr "Atjaunina ārējās mapes"
+
+#: ../src/camel/camel-mapi-transport.c:145
+#: ../src/camel/camel-mapi-transport.c:167
 #, c-format
 msgid "Could not send message."
 msgstr "Neizdevās nosūtīt vēstuli."
 
-#: ../src/camel/camel-mapi-transport.c:164
+#: ../src/camel/camel-mapi-transport.c:162
 #, c-format
 msgid "Could not send message: %s"
 msgstr "Neizdevās nosūtīt vēstuli — %s"
 
-#: ../src/collection/e-mapi-backend.c:78
-#| msgid "Cannot connect MAPI store in offline mode"
+#: ../src/collection/e-mapi-backend.c:76
 msgid "Cannot connect, no credentials provided"
 msgstr "Nevar savienoties, nav doti akreditācijas dati"
 
-#: ../src/collection/e-mapi-backend.c:343
+#: ../src/collection/e-mapi-backend.c:373
 msgid "Global Address List"
 msgstr "Globāls adrešu saraksts"
 
-#: ../src/collection/e-mapi-backend.c:698
-#: ../src/collection/e-mapi-backend.c:795
-#, c-format
-msgid "Data source '%s' does not represent a MAPI folder"
+#: ../src/collection/e-mapi-backend.c:728
+#: ../src/collection/e-mapi-backend.c:825
+#, c-format, c-format
+#| msgid "Data source '%s' does not represent a MAPI folder"
+msgid "Data source “%s” does not represent a MAPI folder"
 msgstr "Datu avots “%s” neatspoguļo MAPI mapi"
 
-#: ../src/configuration/e-book-config-mapigal.c:61
+#: ../src/configuration/e-book-config-mapigal.c:59
 msgid "Allow _partial search results"
 msgstr "Atļaut _daļējus meklēšanas rezultātus"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:125
+#: ../src/configuration/e-mail-config-mapi-backend.c:123
 msgid "Select username"
 msgstr "Izvēlieties lietotājvārdu"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:135
+#: ../src/configuration/e-mail-config-mapi-backend.c:133
 msgid "Full name"
 msgstr "Pilnais vārds"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:140
+#: ../src/configuration/e-mail-config-mapi-backend.c:138
 msgid "Username"
 msgstr "Lietotājvārds"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:167
+#: ../src/configuration/e-mail-config-mapi-backend.c:165
 msgid ""
 "There are more users with similar user name on a server.\n"
 "Please select that you would like to use from the below list."
@@ -500,20 +461,20 @@ msgstr ""
 "Uz servera ir vairāki lietotāji ar līdzīgiem lietotāja vārdiem.\n"
 "Lūdzu, izvēlieties no saraksta, kuru vēlaties izmantot."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:363
+#: ../src/configuration/e-mail-config-mapi-backend.c:361
 msgid "Authentication finished successfully."
 msgstr "Autentifikācija pabeigta veiksmīgi."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:365
-#: ../src/configuration/e-mail-config-mapi-backend.c:485
+#: ../src/configuration/e-mail-config-mapi-backend.c:363
+#: ../src/configuration/e-mail-config-mapi-backend.c:483
 msgid "Authentication failed."
 msgstr "Autentifikācija neizdevās."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:428
+#: ../src/configuration/e-mail-config-mapi-backend.c:426
 msgid "Cannot authenticate MAPI accounts in offline mode"
 msgstr "Nevar autentificēt MAPI kontus nesaistes režīmā"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:457
+#: ../src/configuration/e-mail-config-mapi-backend.c:455
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -521,7 +482,7 @@ msgstr ""
 "Serveris, lietotājvārds un domēna nosaukums nedrīkst būt tukšs. Lūdzu, "
 "aizpildiet tos ar korektām vērtībām."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:460
+#: ../src/configuration/e-mail-config-mapi-backend.c:458
 msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
@@ -529,349 +490,350 @@ msgstr ""
 "Nogabala nosaukums nedrīkst būt tukšs, kad ir izvēlēts kerberos. Lūdzu, "
 "aizpildiet tos ar korektām vērtībām."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:479
+#: ../src/configuration/e-mail-config-mapi-backend.c:477
 msgid "Connecting to the server, please wait..."
 msgstr "Savienojas ar serveri, lūdzu, uzgaidiet..."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:681
+#: ../src/configuration/e-mail-config-mapi-backend.c:679
 msgid "Configuration"
 msgstr "Konfigurācija"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:690
+#: ../src/configuration/e-mail-config-mapi-backend.c:688
 msgid "_Server:"
 msgstr "_Serveris:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:707
+#: ../src/configuration/e-mail-config-mapi-backend.c:705
 msgid "User_name:"
 msgstr "_Lietotājvārds:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:732
+#: ../src/configuration/e-mail-config-mapi-backend.c:730
 msgid "_Domain name:"
 msgstr "_Domēna nosaukums:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:745
+#: ../src/configuration/e-mail-config-mapi-backend.c:743
 msgid "_Authenticate"
 msgstr "_Autentificēt"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:753
+#: ../src/configuration/e-mail-config-mapi-backend.c:751
 msgid "_Use secure connection"
 msgstr "Lietot droš_u savienojumu"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:768
+#: ../src/configuration/e-mail-config-mapi-backend.c:766
 msgid "_Kerberos authentication"
 msgstr "_Kerberos autentifikācija"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:780
+#: ../src/configuration/e-mail-config-mapi-backend.c:778
 msgid "_Realm name:"
 msgstr "_Nogabala nosaukums:"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:191
+#: ../src/configuration/e-mail-config-mapi-page.c:189
 #: ../src/configuration/e-mail-config-mapi-page.c:252
 msgid "MAPI Settings"
 msgstr "MAPI iestatījumi"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:197
+#: ../src/configuration/e-mail-config-mapi-page.c:195
 msgid "View the size of all Exchange folders"
 msgstr "Rādīt visu Exchange mapju izmērus"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:201
+#: ../src/configuration/e-mail-config-mapi-page.c:199
 msgid "Folder _Size"
 msgstr "Mapes izmēr_s"
 
-#: ../src/configuration/e-mapi-config-utils.c:417
+#: ../src/configuration/e-mapi-config-utils.c:415
 msgid "Folder"
 msgstr "Mape"
 
-#: ../src/configuration/e-mapi-config-utils.c:422
+#: ../src/configuration/e-mapi-config-utils.c:420
 msgid "Size"
 msgstr "Izmērs"
 
-#: ../src/configuration/e-mapi-config-utils.c:445
-#: ../src/configuration/e-mapi-config-utils.c:449
+#: ../src/configuration/e-mapi-config-utils.c:443
+#: ../src/configuration/e-mapi-config-utils.c:447
 msgid "Unable to retrieve folder size information"
 msgstr "Neizdevās iegūt informāciju par mapes izmēru"
 
-#: ../src/configuration/e-mapi-config-utils.c:516
+#: ../src/configuration/e-mapi-config-utils.c:514
 msgid "Folder Size"
 msgstr "Mapes izmērs"
 
-#: ../src/configuration/e-mapi-config-utils.c:530
+#: ../src/configuration/e-mapi-config-utils.c:528
 msgid "Fetching folder list…"
 msgstr "Iegūst mapju sarakstu..."
 
-#: ../src/configuration/e-mapi-config-utils.c:704
-#, c-format
-msgid "Cannot edit permissions of folder '%s', choose other folder."
+#: ../src/configuration/e-mapi-config-utils.c:702
+#, c-format, c-format
+#| msgid "Cannot edit permissions of folder '%s', choose other folder."
+msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "Nevar rediģēt atļaujas mapei “%s”. Izvēlieties citu mapi."
 
-#: ../src/configuration/e-mapi-config-utils.c:767
+#: ../src/configuration/e-mapi-config-utils.c:765
 msgid "Folder size..."
 msgstr "Mapes izmērs..."
 
-#: ../src/configuration/e-mapi-config-utils.c:774
+#: ../src/configuration/e-mapi-config-utils.c:772
 msgid "Subscribe to folder of other user..."
 msgstr "Abonēt cita lietotāja mapi..."
 
-#: ../src/configuration/e-mapi-config-utils.c:783
-#: ../src/configuration/e-mapi-config-utils.c:1061
-#: ../src/configuration/e-mapi-config-utils.c:1091
-#: ../src/configuration/e-mapi-config-utils.c:1121
-#: ../src/configuration/e-mapi-config-utils.c:1151
+#: ../src/configuration/e-mapi-config-utils.c:781
+#: ../src/configuration/e-mapi-config-utils.c:1059
+#: ../src/configuration/e-mapi-config-utils.c:1089
+#: ../src/configuration/e-mapi-config-utils.c:1119
+#: ../src/configuration/e-mapi-config-utils.c:1149
 msgid "Permissions..."
 msgstr "Atļaujas..."
 
-#: ../src/configuration/e-mapi-config-utils.c:785
+#: ../src/configuration/e-mapi-config-utils.c:783
 msgid "Edit MAPI folder permissions"
 msgstr "Rediģēt MAPI mapju atļaujas"
 
-#: ../src/configuration/e-mapi-config-utils.c:1063
+#: ../src/configuration/e-mapi-config-utils.c:1061
 msgid "Edit MAPI calendar permissions"
 msgstr "Rediģēt MAPI kalendāru atļaujas"
 
-#: ../src/configuration/e-mapi-config-utils.c:1093
+#: ../src/configuration/e-mapi-config-utils.c:1091
 msgid "Edit MAPI tasks permissions"
 msgstr "Rediģēt MAPI uzdevumu atļaujas"
 
-#: ../src/configuration/e-mapi-config-utils.c:1123
+#: ../src/configuration/e-mapi-config-utils.c:1121
 msgid "Edit MAPI memos permissions"
 msgstr "Rediģēt MAPI memo atļaujas"
 
-#: ../src/configuration/e-mapi-config-utils.c:1153
+#: ../src/configuration/e-mapi-config-utils.c:1151
 msgid "Edit MAPI contacts permissions"
 msgstr "Rediģēt MAPI kontaktu atļaujas"
 
-#: ../src/configuration/e-mapi-config-utils.c:1326
+#: ../src/configuration/e-mapi-config-utils.c:1324
 msgid "Personal Folders"
 msgstr "Personiskās mapes"
 
-#: ../src/configuration/e-mapi-config-utils.c:1557
+#: ../src/configuration/e-mapi-config-utils.c:1555
 msgid "Searching remote MAPI folder structure, please wait..."
 msgstr "Meklē attālinātā MAPI mapju struktūrā. Lūdzu, uzgaidiet..."
 
-#: ../src/configuration/e-mapi-config-utils.c:1625
+#: ../src/configuration/e-mapi-config-utils.c:1623
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Nevar izveidot MAPI kalendāru nesaistes režīmā"
 
-#: ../src/configuration/e-mapi-config-utils.c:1628
+#: ../src/configuration/e-mapi-config-utils.c:1626
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "Nevar izveidot MAPI uzdevumu nesaistes režīmā"
 
-#: ../src/configuration/e-mapi-config-utils.c:1631
+#: ../src/configuration/e-mapi-config-utils.c:1629
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "Nevar izveidot MAPI memo nesaistes režīmā"
 
-#: ../src/configuration/e-mapi-config-utils.c:1634
+#: ../src/configuration/e-mapi-config-utils.c:1632
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "Nevar izveidot MAPI adrešu grāmatu nesaistes režīmā"
 
-#: ../src/configuration/e-mapi-config-utils.c:1639
+#: ../src/configuration/e-mapi-config-utils.c:1637
 msgid "Cannot create MAPI source in offline mode"
 msgstr "Nevar izveidot MAPI avotu nesaistes režīmā"
 
-#: ../src/configuration/e-mapi-config-utils.c:1659
+#: ../src/configuration/e-mapi-config-utils.c:1657
 msgid "_Location:"
 msgstr "_Atrašanās vieta:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:89
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:87
 msgctxt "PermissionsLevel"
 msgid "None"
 msgstr "Nekādas"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:90
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:88
 msgctxt "PermissionsLevel"
 msgid "Owner"
 msgstr "Īpašnieks"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:100
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:98
 msgctxt "PermissionsLevel"
 msgid "Publishing Editor"
 msgstr "Publicējošs redaktors"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:109
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:107
 msgctxt "PermissionsLevel"
 msgid "Editor"
 msgstr "Redaktors"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:117
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:115
 msgctxt "PermissionsLevel"
 msgid "Publishing Author"
 msgstr "Publicējošs autors"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:124
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:122
 msgctxt "PermissionsLevel"
 msgid "Author"
 msgstr "Autors"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:130
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:128
 msgctxt "PermissionsLevel"
 msgid "Nonediting Author"
 msgstr "Nerediģējošs autors"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:135
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:133
 msgctxt "PermissionsLevel"
 msgid "Reviewer"
 msgstr "Recenzents"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:138
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:136
 msgctxt "PermissionsLevel"
 msgid "Contributor"
 msgstr "Līdzstrādnieks"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:141
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:139
 msgctxt "PermissionsLevel"
 msgid "Custom"
 msgstr "Pielāgotas"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:274
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:272
 msgid "Writing folder permissions, please wait..."
 msgstr "Raksta mapes atļaujas. Lūdzu, uzgaidiet..."
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:780
-#: ../src/configuration/e-mapi-search-gal-user.c:527
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
+#: ../src/configuration/e-mapi-search-gal-user.c:525
 msgctxt "User"
 msgid "Anonymous"
 msgstr "Anonīms"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
-#: ../src/configuration/e-mapi-search-gal-user.c:524
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
+#: ../src/configuration/e-mapi-search-gal-user.c:522
 msgctxt "User"
 msgid "Default"
 msgstr "Noklusējuma"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:786
 msgctxt "User"
 msgid "Unknown"
 msgstr "Nezināms"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:876
-#: ../src/configuration/e-mapi-search-gal-user.c:600
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:878
+#: ../src/configuration/e-mapi-search-gal-user.c:598
 msgid "Name"
 msgstr "Nosaukums"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:882
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:884
 msgid "Permission level"
 msgstr "Pieejas līmenis"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:935
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:937
 msgid "Edit MAPI folder permissions..."
 msgstr "Rediģēt MAPI mapju atļaujas..."
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:960
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:626
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:962
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:637
 msgid "Account:"
 msgstr "Konts:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:986
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:988
 msgid "Folder name:"
 msgstr "Mapes nosaukums:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1007
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1009
 msgid "Folder ID:"
 msgstr "Mapes ID:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1066
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1068
 msgid "Permissions"
 msgstr "Atļaujas"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1087
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1089
 msgid "Permi_ssion level:"
 msgstr "Pieeja_s līmenis:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1115
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1117
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Lasīt"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1126
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1189
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1128
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1191
 msgctxt "Permissions"
 msgid "None"
 msgstr "Nekādas"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1131
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1133
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "Pilna informācija"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1136
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1138
 msgctxt "Permissions"
 msgid "Simple Free/Busy"
 msgstr "Vienkāršs brīvs/aizņemts"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1140
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1142
 msgctxt "Permissions"
 msgid "Detailed Free/Busy"
 msgstr "Detalizēts brīvs/aizņemts"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1147
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1149
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Rakstīt"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1158
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1160
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "Izveidot vienumus"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1164
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Izveidot apakšmapes"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1168
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "Rediģēt paša"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1170
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1172
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "Rediģēt visus"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1178
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1180
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Dzēst vienumus"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1194
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1196
 msgctxt "Permissions"
 msgid "Own"
 msgstr "Paša"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1199
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1201
 msgctxt "Permissions"
 msgid "All"
 msgstr "Visus"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1205
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1207
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Citu"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1216
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1218
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Mapes īpašnieks"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1222
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Mapes kontakts"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1226
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Mapes redzamība"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1279
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1281
 msgid "Reading folder permissions, please wait..."
 msgstr "Nolasa mapes atļaujas. Lūdzu, uzgaidiet..."
 
-#: ../src/configuration/e-mapi-search-gal-user.c:223
+#: ../src/configuration/e-mapi-search-gal-user.c:221
 msgid "No users found"
 msgstr "Nav atrastu lietotāju"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:226
+#: ../src/configuration/e-mapi-search-gal-user.c:224
 #, c-format
 msgid "Found one user"
 msgid_plural "Found %d users"
@@ -879,7 +841,7 @@ msgstr[0] "Atrasts %d lietotājs"
 msgstr[1] "Atrasti %d lietotāji"
 msgstr[2] "Atrastu %d lietotāju"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:231
+#: ../src/configuration/e-mapi-search-gal-user.c:229
 #, c-format
 msgid "Found %d user, but showing only first %d"
 msgid_plural "Found %d users, but showing only first %d"
@@ -887,200 +849,215 @@ msgstr[0] "Atrada %d lietotāju, bet rāda pirmos %d"
 msgstr[1] "Atrada %d lietotājus, bet rāda pirmos %d"
 msgstr[2] "Atrada %d lietotāju, bet rāda pirmos %d"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:519
-#: ../src/configuration/e-mapi-search-gal-user.c:710
+#: ../src/configuration/e-mapi-search-gal-user.c:517
+#: ../src/configuration/e-mapi-search-gal-user.c:708
 msgid "Search for a user"
 msgstr "Meklē lietotāju"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:535
+#: ../src/configuration/e-mapi-search-gal-user.c:533
 msgid "Searching..."
 msgstr "Meklē..."
 
-#: ../src/configuration/e-mapi-search-gal-user.c:606
+#: ../src/configuration/e-mapi-search-gal-user.c:604
 msgid "E-mail"
 msgstr "E-pasts"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:647
+#: ../src/configuration/e-mapi-search-gal-user.c:645
 msgid "Choose MAPI user..."
 msgstr "Izvēlieties MAPI lietotāju..."
 
-#: ../src/configuration/e-mapi-search-gal-user.c:670
+#: ../src/configuration/e-mapi-search-gal-user.c:668
 msgid "_Search:"
 msgstr "_Meklēt:"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:89
-#, c-format
-msgid "Cannot add folder, folder already exists as '%s'"
+#, c-format, c-format
+#| msgid "Cannot add folder, folder already exists as '%s'"
+msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Nevar pievienot mapi, jau ir mape ar nosaukumu “%s”"
 
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
-#. Example result: "Mailbox - John Smith"
+#. Example result: "Mailbox — John Smith"
 #.
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:114
-#, c-format
+#, c-format, c-format
+#| msgctxt "ForeignFolder"
+#| msgid "Mailbox - %s"
 msgctxt "ForeignFolder"
-msgid "Mailbox - %s"
+msgid "Mailbox — %s"
 msgstr "Pastkaste — %s"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:143
-#, c-format
-msgid "Cannot add folder, failed to add to store's summary"
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:144
+#, c-format, c-format
+#| msgid "Cannot add folder, failed to add to store's summary"
+msgid "Cannot add folder, failed to add to store’s summary"
 msgstr "Nevar pievienot mapi, neizdevās pievienot krātuves kopsavilkumu"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:329
-#, c-format
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:336
+#, c-format, c-format
+#| msgid ""
+#| "Folder '%s' not found. Either it does not exist or you do not have "
+#| "permission to access it."
 msgid ""
-"Folder '%s' not found. Either it does not exist or you do not have "
+"Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
 msgstr ""
 "Mape “%s” nav atrasta. Tā vai nu neeksistē, vai arī jums nav tiesību tai "
 "piekļūt."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:364
-msgid "Cannot add folder, cannot determine folder's type"
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:371
+#| msgid "Cannot add folder, cannot determine folder's type"
+msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Nevar pievienot mapi, nevar noteikt mapes veidu"
 
 #. Translators: This is used to name foreign folder.
 #. The first '%s' is replaced with user name to whom the folder belongs,
 #. the second '%s' is replaced with folder name.
-#. Example result: "John Smith - Calendar"
+#. Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:405
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:412
 #, c-format
 msgctxt "ForeignFolder"
-msgid "%s - %s"
+msgid "%s — %s"
 msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:502
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:704
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:512
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:715
 msgid "Inbox"
 msgstr "Iesūtne"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:504
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:705
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:514
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:716
 msgid "Contacts"
 msgstr "Kontakti"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:506
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:706
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:516
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:717
 msgid "Calendar"
 msgstr "Kalendārs"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:508
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:707
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:518
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:718
 msgid "Memos"
 msgstr "Memo"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:510
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:708
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:520
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:719
 msgid "Tasks"
 msgstr "Uzdevumi"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:523
-#, c-format
-msgid "Testing availability of folder '%s' of user '%s', please wait..."
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:534
+#, c-format, c-format
+#| msgid "Testing availability of folder '%s' of user '%s', please wait..."
+msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgstr "Pārbauda mapes “%s” no lietotāja “%s” pieejamību. Lūdzu, uzgaidiet..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:605
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:616
 msgid "Subscribe to folder of other MAPI user..."
 msgstr "Abonēt cita MAPI lietotāja mapi..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:654
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:665
 msgid "User"
 msgstr "Lietotājs"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:661
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:672
 msgid "_User:"
 msgstr "_Lietotājs:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:674
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:685
 msgid "C_hoose..."
 msgstr "I_zvēlēties..."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:700
 msgid "_Folder name:"
 msgstr "_Mapes nosaukums:"
 
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:728
+#| msgctxt "Permissions"
+#| msgid "Create subfolders"
+msgid "Include _subfolders"
+msgstr "Iekļaut _apakšmapes"
+
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2080
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2060
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Pieņemts:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2085
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2065
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Neskaidrs:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2090
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2070
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Noraidīts:"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:140
+#: ../src/libexchangemapi/e-mapi-connection.c:139
 msgid "Failed to login into the server"
 msgstr "Neizdevās ierakstīties serverī"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:141
+#: ../src/libexchangemapi/e-mapi-connection.c:140
 msgid "Cannot create more sessions, session limit was reached"
 msgstr "Nevar izveidot vairākas sesijas, sesiju limits ir sasniegts"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:142
+#: ../src/libexchangemapi/e-mapi-connection.c:141
 msgid "User cancelled operation"
 msgstr "Lietotājs atcēla darbību"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:143
+#: ../src/libexchangemapi/e-mapi-connection.c:142
 msgid "Unable to abort"
 msgstr "Nevar atcelt"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:144
+#: ../src/libexchangemapi/e-mapi-connection.c:143
 msgid "Network error"
 msgstr "Tīkla kļūda"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:145
+#: ../src/libexchangemapi/e-mapi-connection.c:144
 msgid "Disk error"
 msgstr "Diska kļūda"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:146
+#: ../src/libexchangemapi/e-mapi-connection.c:145
 msgid "Password change required"
 msgstr "Nepieciešama paroles maiņa"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:147
+#: ../src/libexchangemapi/e-mapi-connection.c:146
 msgid "Password expired"
 msgstr "Parolei beidzies derīguma termiņš"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:148
+#: ../src/libexchangemapi/e-mapi-connection.c:147
 msgid "Invalid workstation account"
 msgstr "Nederīgs darbstacijas konts"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:149
+#: ../src/libexchangemapi/e-mapi-connection.c:148
 msgid "Invalid access time"
 msgstr "Nederīgs piekļuves laiks"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:150
+#: ../src/libexchangemapi/e-mapi-connection.c:149
 msgid "Account is disabled"
 msgstr "Konts ir deaktivēts"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:151
+#: ../src/libexchangemapi/e-mapi-connection.c:150
 msgid "End of session"
 msgstr "Sesijas beigas"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:152
+#: ../src/libexchangemapi/e-mapi-connection.c:151
 msgid "MAPI is not initialized or connected"
 msgstr "MAPI nav inicializēts vai savienots"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:153
+#: ../src/libexchangemapi/e-mapi-connection.c:152
 msgid "Permission denied"
 msgstr "Pieeja liegta"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:154
+#: ../src/libexchangemapi/e-mapi-connection.c:153
 msgid "Mailbox quota exceeded"
 msgstr "Pastkastes kvota ir pārsniegta"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:162
+#: ../src/libexchangemapi/e-mapi-connection.c:161
 #, c-format
 msgid "MAPI error %s (0x%x) occurred"
 msgstr "Gadījās MAPI kļūda %s (0x%x)"
@@ -1095,30 +1072,35 @@ msgid "%s: %s"
 msgstr "%s — %s"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:744
-#, c-format
-msgid "Server '%s' cannot be reached"
+#, c-format, c-format
+#| msgid "Server '%s' cannot be reached"
+msgid "Server “%s” cannot be reached"
 msgstr "Nevar sasniegt serveri “%s”"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:872
-#, c-format
-msgid "Folder name '%s' is not a known default folder name, nor folder ID."
+#, c-format, c-format
+#| msgid "Folder name '%s' is not a known default folder name, nor folder ID."
+msgid "Folder name “%s” is not a known default folder name, nor folder ID."
 msgstr ""
 "Mapes nosaukums “%s” nav zināms noklusējuma mapes nosaukums, nedz mapes ID."
 
 #: ../src/libexchangemapi/e-mapi-connection.c:1203
-#, c-format
-msgid "Failed to open store for user '%s'"
+#, c-format, c-format
+#| msgid "Failed to open store for user '%s'"
+msgid "Failed to open store for user “%s”"
 msgstr "Neizdevās atvērt lietotāja “%s” krātuvi "
 
 #: ../src/libexchangemapi/e-mapi-connection.c:1211
-#, c-format
-msgid "Folder of user '%s' not found"
+#, c-format, c-format
+#| msgid "Folder of user '%s' not found"
+msgid "Folder of user “%s” not found"
 msgstr "Lietotāja “%s” mape nav atrasta"
 
 #. Translators: %s is replaced with an email address which was found ambiguous on a remote server
 #: ../src/libexchangemapi/e-mapi-connection.c:3863
-#, c-format
-msgid "Recipient '%s' is ambiguous"
+#, c-format, c-format
+#| msgid "Recipient '%s' is ambiguous"
+msgid "Recipient “%s” is ambiguous"
 msgstr "Saņēmējs “%s” ir neviennozīmīgs"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:4955
@@ -1130,27 +1112,84 @@ msgstr ""
 "Meklēšanas rezultāti pārsniedz izmēra limitu. Lūdzu, izmantojiet "
 "specifiskākus meklēšanas kritērijus"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6556
+#: ../src/libexchangemapi/e-mapi-connection.c:6577
 msgid "All Public Folders"
 msgstr "Visas publiskās mapes"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6823
-#, c-format
-msgid "User name '%s' is ambiguous"
-msgstr "Lietotājvārds “%s“ ir neviennozīmīgs"
+#: ../src/libexchangemapi/e-mapi-connection.c:6885
+#, c-format, c-format
+#| msgid "User name '%s' is ambiguous"
+msgid "User name “%s” is ambiguous"
+msgstr "Lietotājvārds “%s” ir neviennozīmīgs"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6826
-#, c-format
-msgid "User name '%s' not found"
+#: ../src/libexchangemapi/e-mapi-connection.c:6888
+#, c-format, c-format
+#| msgid "User name '%s' not found"
+msgid "User name “%s” not found"
 msgstr "Lietotājvārds “%s” nav atrasts"
 
-#: ../src/libexchangemapi/e-mapi-folder.c:332
+#: ../src/libexchangemapi/e-mapi-folder.c:330
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Nevar pievienot mapi, neatbalstīts mapes veids"
 
-#: ../src/libexchangemapi/e-mapi-folder.c:335
+#: ../src/libexchangemapi/e-mapi-folder.c:333
 msgid "Cannot add folder, master source not found"
 msgstr "Nevar pievienot mapi, nav atrasts galvenais avots"
+
+#~ msgid "Searching"
+#~ msgstr "Meklē"
+
+#~ msgid "Failed to remove public folder"
+#~ msgstr "Neizdevās izņemt publisku mapi"
+
+#~ msgid "The backend does not support bulk additions"
+#~ msgstr "Aizmugure neatbalsta masveida pievienošanu"
+
+#~ msgid "The backend does not support bulk modifications"
+#~ msgstr "Aizmugure neatbalsta masveida izmaiņas"
+
+#~ msgid "Caching contact %d"
+#~ msgstr "Pieglabā kontaktu %d"
+
+#~ msgid "Caching contact %d/%d"
+#~ msgstr "Pieglabā kontaktu %d/%d"
+
+#~ msgid "Failed to count server contacts"
+#~ msgstr "Neizdevās saskaitīt servera kontaktus"
+
+#~ msgid "Caching GAL contact %d"
+#~ msgstr "Pieglabā GAL kontaktu %d"
+
+#~ msgid "Caching GAL contact %d/%d"
+#~ msgstr "Pieglabā GAL kontaktu %d/%d"
+
+#~ msgid "Failed to open folder: %s"
+#~ msgstr "Neizdevās atvērt mapi — %s"
+
+#~ msgid "Failed to get folder properties: %s"
+#~ msgstr "Neizdevās saņemt mapes īpašības — %s"
+
+#~ msgid "Failed to list objects: %s"
+#~ msgstr "Neizdevās uzskaitīt objektus — %s"
+
+#~ msgid "Failed to transfer objects: %s"
+#~ msgstr "Neizdevās pārsūtīt objektus — %s"
+
+#~ msgid "Failed to close folder: %s"
+#~ msgstr "Neizdevās aizvērt mapi — %s"
+
+#~ msgid "Could not create cache file"
+#~ msgstr "Neizdevās izveidot keša failu"
+
+#~ msgid "Cannot remove items from a server"
+#~ msgstr "Nevar izņemt vienumus no servera"
+
+#~ msgid "Automatically synchroni_ze account locally"
+#~ msgstr "Automātiski sinhroni_zē kontu lokāli"
+
+#~ msgctxt "ForeignFolder"
+#~ msgid "%s - %s"
+#~ msgstr "%s — %s"
 
 #~ msgid "Enter Password for %s@%s"
 #~ msgstr "Ievadiet %s@%s paroli"
