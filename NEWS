@@ -1,3 +1,20 @@
+evolution-mapi 3.29.1 2018-04-16
+--------------------------------
+
+Miscellaneous:
+	Cannot use Kerberos without org.gnome.KrbAuthDialog D-Bus interface installed (Milan Crha)
+	Make it possible to disable Reminders for Tasks (Milan Crha)
+	Update POTFILES.in (Piotr Drąg)
+
+Translations:
+	Piotr Drąg (pl)
+	Aurimas Černius (lt)
+	Rafael Fontenelle (pt_BR)
+	Marek Černocký (cs)
+	Andika Triwidada (id)
+	Anders Jonsson (sv)
+	Rūdolfs Mazurs (lv)
+
 evolution-mapi 3.28.0 2018-03-12
 --------------------------------
 
