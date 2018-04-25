@@ -2990,7 +2990,7 @@ mapi_authenticate_sync (CamelService *service,
 	EMapiProfileData empd = { 0 };
 	const gchar *profile;
 	const gchar *password;
-	GError *mapi_error = NULL;
+	GError *mapi_error = NULL, *krb_error = NULL;
 	ENamedParameters *credentials;
 
 	settings = camel_service_ref_settings (service);
@@ -3004,8 +3004,7 @@ mapi_authenticate_sync (CamelService *service,
 	profile = camel_mapi_settings_get_profile (mapi_settings);
 
 	if (empd.krb_sso) {
-		e_mapi_util_trigger_krb_auth (&empd, NULL);
-
+		e_mapi_util_trigger_krb_auth (&empd, &krb_error);
 		password = NULL;
 	} else {
 		password = camel_service_get_password (service);
@@ -3058,8 +3057,9 @@ mapi_authenticate_sync (CamelService *service,
 		}
 
 		camel_store_summary_array_free (store->summary, array);
-	} else if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_LOGON_FAILED) ||
-		   g_error_matches (mapi_error, E_MAPI_ERROR, ecRpcFailed)) {
+	} else if (!krb_error && (
+		   g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_LOGON_FAILED) ||
+		   g_error_matches (mapi_error, E_MAPI_ERROR, ecRpcFailed))) {
 		g_clear_error (&mapi_error);
 		result = CAMEL_AUTHENTICATION_REJECTED;
 	} else {
@@ -3067,14 +3067,32 @@ mapi_authenticate_sync (CamelService *service,
 		g_return_val_if_fail (
 			mapi_error != NULL,
 			CAMEL_AUTHENTICATION_ERROR);
-		if (!e_mapi_utils_propagate_cancelled_error (mapi_error, error))
-			g_propagate_error (error, mapi_error);
-		else
+		if (!e_mapi_utils_propagate_cancelled_error (mapi_error, error)) {
+			if (krb_error && mapi_error) {
+				GError *new_error = g_error_new (mapi_error->domain, mapi_error->code,
+					/* Translators: the first '%s' is replaced with a generic error message,
+					   the second '%s' is replaced with additional error information. */
+					C_("gssapi_error", "%s (%s)"), mapi_error->message, krb_error->message);
+				g_propagate_error (error, new_error);
+			} else if (krb_error) {
+				g_propagate_error (error, krb_error);
+				krb_error = NULL;
+			} else if (mapi_error) {
+				g_propagate_error (error, mapi_error);
+				mapi_error = NULL;
+			}
+
 			g_clear_error (&mapi_error);
+			g_clear_error (&krb_error);
+		} else {
+			g_clear_error (&mapi_error);
+		}
 		result = CAMEL_AUTHENTICATION_ERROR;
 	}
 
 	g_rec_mutex_unlock (&store->priv->connection_lock);
+
+	g_clear_error (&krb_error);
 	g_object_unref (settings);
 	g_object_unref (session);
 

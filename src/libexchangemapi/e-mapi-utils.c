@@ -24,6 +24,7 @@
 #include "evolution-mapi-config.h"
 
 #include <glib.h>
+#include <glib/gi18n-lib.h>
 #include <gio/gio.h>
 
 #include <libedataserver/libedataserver.h>
@@ -847,6 +848,17 @@ e_mapi_util_trigger_krb_auth (const EMapiProfileData *empd,
 
 	if (local_error) {
 		g_dbus_error_strip_remote_error (local_error);
+
+		if (g_error_matches (local_error, G_DBUS_ERROR, G_DBUS_ERROR_SERVICE_UNKNOWN)) {
+			GError *new_error = g_error_new (G_DBUS_ERROR, G_DBUS_ERROR_SERVICE_UNKNOWN,
+				_("Cannot ask for Kerberos ticket. Obtain the ticket manually, like on command line with “kinit” or"
+				  " open “Online Accounts” in “Settings” and add the Kerberos account there. Reported error was: %s"),
+				local_error->message);
+
+			g_clear_error (&local_error);
+			local_error = new_error;
+		}
+
 		g_propagate_error (error, local_error);
 	}
 

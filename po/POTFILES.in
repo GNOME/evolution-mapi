@@ -20,3 +20,4 @@ src/configuration/e-mapi-subscribe-foreign-folder.c
 src/libexchangemapi/e-mapi-cal-utils.c
 src/libexchangemapi/e-mapi-connection.c
 src/libexchangemapi/e-mapi-folder.c
+src/libexchangemapi/e-mapi-utils.c

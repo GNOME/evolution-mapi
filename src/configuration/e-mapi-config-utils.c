@@ -327,10 +327,27 @@ e_mapi_config_utils_open_connection_for (GtkWindow *parent,
 
 	while (!conn && !g_cancellable_is_cancelled (cancellable) && !local_error) {
 		if (empd.krb_sso) {
-			e_mapi_util_trigger_krb_auth (&empd, &local_error);
-			g_clear_error (&local_error);
+			GError *krb_error = NULL;
+
+			e_mapi_util_trigger_krb_auth (&empd, &krb_error);
 
 			conn = e_mapi_connection_new (registry, profile, NULL, cancellable, &local_error);
+
+			if (!conn && krb_error) {
+				if (local_error) {
+					GError *new_error = g_error_new (local_error->domain, local_error->code,
+						/* Translators: the first '%s' is replaced with a generic error message,
+						   the second '%s' is replaced with additional error information. */
+						C_("gssapi_error", "%s (%s)"), local_error->message, krb_error->message);
+					g_clear_error (&local_error);
+					local_error = new_error;
+				} else {
+					local_error = krb_error;
+					krb_error = NULL;
+				}
+			}
+
+			g_clear_error (&krb_error);
 		} else {
 			EShell *shell;
 			TryCredentialsData data;

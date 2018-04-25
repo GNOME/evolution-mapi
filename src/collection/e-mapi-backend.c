@@ -863,7 +863,7 @@ mapi_backend_authenticate_sync (EBackend *backend,
 	EMapiConnection *conn;
 	CamelMapiSettings *settings;
 	GSList *mapi_folders = NULL;
-	GError *mapi_error = NULL;
+	GError *mapi_error = NULL, *krb_error = NULL;
 
 	g_return_val_if_fail (E_IS_MAPI_BACKEND (backend), E_SOURCE_AUTHENTICATION_ERROR);
 
@@ -871,7 +871,7 @@ mapi_backend_authenticate_sync (EBackend *backend,
 	settings = mapi_backend_get_settings (mapi_backend);
 
 	if (camel_mapi_settings_get_kerberos (settings))
-		e_mapi_util_trigger_krb_auth_from_settings (settings, NULL);
+		e_mapi_util_trigger_krb_auth_from_settings (settings, &krb_error);
 
 	conn = e_mapi_connection_new (NULL,
 		camel_mapi_settings_get_profile (settings),
@@ -886,10 +886,22 @@ mapi_backend_authenticate_sync (EBackend *backend,
 		    g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_PASSWORD_EXPIRED))
 			res = E_SOURCE_AUTHENTICATION_REJECTED;
 
-		if (res != E_SOURCE_AUTHENTICATION_REJECTED)
+		if (res != E_SOURCE_AUTHENTICATION_REJECTED) {
+			if (krb_error) {
+				GError *new_error = g_error_new (mapi_error->domain, mapi_error->code,
+					/* Translators: the first '%s' is replaced with a generic error message,
+					   the second '%s' is replaced with additional error information. */
+					C_("gssapi_error", "%s (%s)"), mapi_error->message, krb_error->message);
+				g_clear_error (&mapi_error);
+				mapi_error = new_error;
+			}
+
 			g_propagate_error (error, mapi_error);
-		else
+		} else {
 			g_clear_error (&mapi_error);
+		}
+
+		g_clear_error (&krb_error);
 
 		return res;
 	}
@@ -924,6 +936,7 @@ mapi_backend_authenticate_sync (EBackend *backend,
 
 	g_object_unref (conn);
 	g_clear_error (&mapi_error);
+	g_clear_error (&krb_error);
 
 	return E_SOURCE_AUTHENTICATION_ACCEPTED;
 }

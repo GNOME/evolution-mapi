@@ -379,7 +379,7 @@ validate_credentials_thread (GObject *button,
 	registry = e_mail_config_service_page_get_registry (page);
 
 	if (data->krb_sso) {
-		GError *error = NULL;
+		GError *krb_error = NULL, *local_error = NULL;
 		EMapiProfileData empd = { 0 };
 
 		empd.username = data->username;
@@ -389,15 +389,33 @@ validate_credentials_thread (GObject *button,
 		empd.krb_sso = data->krb_sso;
 		empd.krb_realm = data->krb_realm;
 
-		e_mapi_util_trigger_krb_auth (&empd, &error);
-		g_clear_error (&error);
+		e_mapi_util_trigger_krb_auth (&empd, &krb_error);
 
 		data->success = validate_credentials_test (
 			registry,
 			&empd, 
 			data->mapi_settings,
 			cancellable,
-			perror);
+			&local_error);
+
+		if (!data->success) {
+			if (krb_error && local_error) {
+				GError *new_error = g_error_new (local_error->domain, local_error->code,
+					/* Translators: the first '%s' is replaced with a generic error message,
+					   the second '%s' is replaced with additional error information. */
+					C_("gssapi_error", "%s (%s)"), local_error->message, krb_error->message);
+				g_propagate_error (perror, new_error);
+			} else if (krb_error) {
+				g_propagate_error (perror, krb_error);
+				krb_error = NULL;
+			} else if (local_error) {
+				g_propagate_error (perror, local_error);
+				local_error = NULL;
+			}
+		}
+
+		g_clear_error (&krb_error);
+		g_clear_error (&local_error);
 	} else {
 		EShell *shell;
 		ESource *source;
