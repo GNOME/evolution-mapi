@@ -13,8 +13,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product"
 "=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2018-03-18 00:06+0000\n"
-"PO-Revision-Date: 2018-03-24 15:37-0200\n"
+"POT-Creation-Date: 2018-04-25 15:15+0000\n"
+"PO-Revision-Date: 2018-05-02 18:53-0200\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
@@ -194,7 +194,7 @@ msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Verificar somente por mensag_ens spam na caixa de entrada"
 
 #: ../src/camel/camel-mapi-provider.c:58
-#: ../src/configuration/e-mapi-config-utils.c:1602
+#: ../src/configuration/e-mapi-config-utils.c:1619
 msgid "Lis_ten for server notifications"
 msgstr "Escu_tar notificações do servidor"
 
@@ -386,20 +386,29 @@ msgstr ""
 "Não foi possível adicionar a pasta “%s”; falha ao adicionar ao sumário do "
 "armazenamento"
 
-#: ../src/camel/camel-mapi-store.c:3017
+#: ../src/camel/camel-mapi-store.c:3016
 msgid "Authentication password not available"
 msgstr "Senha de autenticação indisponível"
 
-#: ../src/camel/camel-mapi-store.c:3053 ../src/camel/camel-mapi-store.c:3450
+#: ../src/camel/camel-mapi-store.c:3052 ../src/camel/camel-mapi-store.c:3468
 msgid "Updating foreign folders"
 msgstr "Atualizando pastas externas"
+
+#. Translators: the first '%s' is replaced with a generic error message,
+#. the second '%s' is replaced with additional error information.
+#: ../src/camel/camel-mapi-store.c:3075 ../src/collection/e-mapi-backend.c:894
+#: ../src/configuration/e-mail-config-mapi-backend.c:406
+#: ../src/configuration/e-mapi-config-utils.c:341
+#, c-format
+msgctxt "gssapi_error"
+msgid "%s (%s)"
+msgstr "%s (%s)"
 
 #: ../src/camel/camel-mapi-store.h:53
 msgid "Favorites"
 msgstr "Favoritos"
 
 #: ../src/camel/camel-mapi-store.h:54
-#| msgid "Updating foreign folders"
 msgid "Foreign folders"
 msgstr "Pastas externas"
 
@@ -457,15 +466,15 @@ msgid "Authentication finished successfully."
 msgstr "Autenticação concluída com sucesso."
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:363
-#: ../src/configuration/e-mail-config-mapi-backend.c:483
+#: ../src/configuration/e-mail-config-mapi-backend.c:501
 msgid "Authentication failed."
 msgstr "Falha na autenticação."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:426
+#: ../src/configuration/e-mail-config-mapi-backend.c:444
 msgid "Cannot authenticate MAPI accounts in offline mode"
 msgstr "Não é possível autenticar contas MAPI no modo offline"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:455
+#: ../src/configuration/e-mail-config-mapi-backend.c:473
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -473,7 +482,7 @@ msgstr ""
 "Servidor, nome de usuário e nome do domínio não podem estar vazios. Por "
 "favor, preencha-os com os valores corretos."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:458
+#: ../src/configuration/e-mail-config-mapi-backend.c:476
 msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
@@ -481,39 +490,39 @@ msgstr ""
 "O nome do território não pode ficar vazio quando Kerberos está selecionado. "
 "Por favor preencha-os com os valores corretos."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:477
+#: ../src/configuration/e-mail-config-mapi-backend.c:495
 msgid "Connecting to the server, please wait..."
 msgstr "Conectando ao servidor; por favor, aguarde..."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:679
+#: ../src/configuration/e-mail-config-mapi-backend.c:697
 msgid "Configuration"
 msgstr "Configuração"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:688
+#: ../src/configuration/e-mail-config-mapi-backend.c:706
 msgid "_Server:"
 msgstr "_Servidor:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:705
+#: ../src/configuration/e-mail-config-mapi-backend.c:723
 msgid "User_name:"
 msgstr "_Nome de usuário:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:730
+#: ../src/configuration/e-mail-config-mapi-backend.c:748
 msgid "_Domain name:"
 msgstr "Nome do _domínio:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:743
+#: ../src/configuration/e-mail-config-mapi-backend.c:761
 msgid "_Authenticate"
 msgstr "_Autenticar"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:751
+#: ../src/configuration/e-mail-config-mapi-backend.c:769
 msgid "_Use secure connection"
 msgstr "_Usar conexão segura"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:766
+#: ../src/configuration/e-mail-config-mapi-backend.c:784
 msgid "_Kerberos authentication"
 msgstr "Autenticação _Kerberos"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:778
+#: ../src/configuration/e-mail-config-mapi-backend.c:796
 msgid "_Realm name:"
 msgstr "Nome do _território:"
 
@@ -530,98 +539,98 @@ msgstr "Ver o tamanho de todas as pastas do Exchange"
 msgid "Folder _Size"
 msgstr "_Tamanho da pasta"
 
-#: ../src/configuration/e-mapi-config-utils.c:415
+#: ../src/configuration/e-mapi-config-utils.c:432
 msgid "Folder"
 msgstr "Pasta"
 
-#: ../src/configuration/e-mapi-config-utils.c:420
+#: ../src/configuration/e-mapi-config-utils.c:437
 msgid "Size"
 msgstr "Tamanho"
 
-#: ../src/configuration/e-mapi-config-utils.c:443
-#: ../src/configuration/e-mapi-config-utils.c:447
+#: ../src/configuration/e-mapi-config-utils.c:460
+#: ../src/configuration/e-mapi-config-utils.c:464
 msgid "Unable to retrieve folder size information"
 msgstr "Não foi possível recuperar as informações de tamanho da pasta"
 
-#: ../src/configuration/e-mapi-config-utils.c:514
+#: ../src/configuration/e-mapi-config-utils.c:531
 msgid "Folder Size"
 msgstr "Tamanho da pasta"
 
-#: ../src/configuration/e-mapi-config-utils.c:528
+#: ../src/configuration/e-mapi-config-utils.c:545
 msgid "Fetching folder list…"
 msgstr "Obtendo lista de pastas…"
 
-#: ../src/configuration/e-mapi-config-utils.c:702
+#: ../src/configuration/e-mapi-config-utils.c:719
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr ""
 "Não foi possível editar as permissões da pasta “%s”; escolha outra pasta."
 
-#: ../src/configuration/e-mapi-config-utils.c:765
+#: ../src/configuration/e-mapi-config-utils.c:782
 msgid "Folder size..."
 msgstr "Tamanho da pasta..."
 
-#: ../src/configuration/e-mapi-config-utils.c:772
+#: ../src/configuration/e-mapi-config-utils.c:789
 msgid "Subscribe to folder of other user..."
 msgstr "Inscrever-se a uma pasta de outro usuário..."
 
-#: ../src/configuration/e-mapi-config-utils.c:781
-#: ../src/configuration/e-mapi-config-utils.c:1059
-#: ../src/configuration/e-mapi-config-utils.c:1089
-#: ../src/configuration/e-mapi-config-utils.c:1119
-#: ../src/configuration/e-mapi-config-utils.c:1149
+#: ../src/configuration/e-mapi-config-utils.c:798
+#: ../src/configuration/e-mapi-config-utils.c:1076
+#: ../src/configuration/e-mapi-config-utils.c:1106
+#: ../src/configuration/e-mapi-config-utils.c:1136
+#: ../src/configuration/e-mapi-config-utils.c:1166
 msgid "Permissions..."
 msgstr "Permissões..."
 
-#: ../src/configuration/e-mapi-config-utils.c:783
+#: ../src/configuration/e-mapi-config-utils.c:800
 msgid "Edit MAPI folder permissions"
 msgstr "Editar permissões de pasta MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1061
+#: ../src/configuration/e-mapi-config-utils.c:1078
 msgid "Edit MAPI calendar permissions"
 msgstr "Editar permissões de calendário MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1091
+#: ../src/configuration/e-mapi-config-utils.c:1108
 msgid "Edit MAPI tasks permissions"
 msgstr "Editar permissões de tarefas MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1121
+#: ../src/configuration/e-mapi-config-utils.c:1138
 msgid "Edit MAPI memos permissions"
 msgstr "Editar permissões de anotações MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1151
+#: ../src/configuration/e-mapi-config-utils.c:1168
 msgid "Edit MAPI contacts permissions"
 msgstr "Editar permissões de contatos MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1324
+#: ../src/configuration/e-mapi-config-utils.c:1341
 msgid "Personal Folders"
 msgstr "Pastas pessoais"
 
-#: ../src/configuration/e-mapi-config-utils.c:1555
+#: ../src/configuration/e-mapi-config-utils.c:1572
 msgid "Searching remote MAPI folder structure, please wait..."
 msgstr "Pesquisando estrutura de pastas MAPI remota, por favor, aguarde..."
 
-#: ../src/configuration/e-mapi-config-utils.c:1623
+#: ../src/configuration/e-mapi-config-utils.c:1640
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Não é possível criar calendários MAPI no modo offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1626
+#: ../src/configuration/e-mapi-config-utils.c:1643
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "Não é possível criar listas de tarefas MAPI no modo offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1629
+#: ../src/configuration/e-mapi-config-utils.c:1646
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "Não é possível criar listas de anotações MAPI no modo offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1632
+#: ../src/configuration/e-mapi-config-utils.c:1649
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "Não é possível criar catálogos de endereços MAPI no modo offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1637
+#: ../src/configuration/e-mapi-config-utils.c:1654
 msgid "Cannot create MAPI source in offline mode"
 msgstr "Não é possível criar fontes MAPI no modo offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1657
+#: ../src/configuration/e-mapi-config-utils.c:1674
 msgid "_Location:"
 msgstr "_Localização:"
 
@@ -1112,6 +1121,17 @@ msgstr "Não foi possível adicionar a pasta; tipo de pasta não suportado"
 msgid "Cannot add folder, master source not found"
 msgstr ""
 "Não foi possível adicionar a pasta, pois a fonte mestre não foi encontrada"
+
+#: ../src/libexchangemapi/e-mapi-utils.c:854
+#, c-format
+msgid ""
+"Cannot ask for Kerberos ticket. Obtain the ticket manually, like on command "
+"line with “kinit” or open “Online Accounts” in “Settings” and add the "
+"Kerberos account there. Reported error was: %s"
+msgstr ""
+"Não foi possível pedir o tíquete Kerberos. Obtenha o tíquete manualmente, "
+"como na linha de comando com “kinit” ou abra “Contas on-line” em "
+"“Configurações” e adicione a conta Kerberos lá. O erro relatado foi: %s"
 
 #~ msgid "Searching"
 #~ msgstr "Pesquisando"
