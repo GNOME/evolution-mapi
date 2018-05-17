@@ -25,8 +25,9 @@
 #define E_MAPI_CAL_RECUR_UTILS_H
 
 #include <glib.h>
+#include <libecal/libecal.h>
 
-#include "e-mapi-cal-utils.h"
+#include "e-mapi-connection.h"
 
 G_BEGIN_DECLS
 

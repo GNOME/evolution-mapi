@@ -25,6 +25,7 @@
 
 #include <libecal/libecal.h>
 
+#include "e-mapi-cal-utils.h"
 #include "e-mapi-cal-recur-utils.h"
 
 /* Reader/Writer versions */
