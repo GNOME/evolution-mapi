@@ -23,6 +23,7 @@
 
 #include "evolution-mapi-config.h"
 
+#include "e-mapi-cal-utils.h"
 #include "e-mapi-cal-tz-utils.h"
 
 #define d(x) 

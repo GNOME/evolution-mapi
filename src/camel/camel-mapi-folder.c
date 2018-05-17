@@ -183,7 +183,7 @@ mapi_set_message_references (CamelMessageInfo *mi,
 	refs = camel_header_references_decode (references);
 	irt = camel_header_references_decode (in_reply_to);
 	if (refs || irt) {
-		GArray *references;
+		GArray *references_arr;
 
 		if (irt) {
 			/* The References field is populated from the "References" and/or "In-Reply-To"
@@ -193,7 +193,7 @@ mapi_set_message_references (CamelMessageInfo *mi,
 			refs = g_slist_concat (irt, refs);
 		}
 
-		references = g_array_sized_new (FALSE, FALSE, sizeof (guint64), g_slist_length (refs));
+		references_arr = g_array_sized_new (FALSE, FALSE, sizeof (guint64), g_slist_length (refs));
 
 		length = g_checksum_type_get_length (G_CHECKSUM_MD5);
 		digest = g_alloca (length);
@@ -208,12 +208,12 @@ mapi_set_message_references (CamelMessageInfo *mi,
 
 			memcpy (tmp_msgid.id.hash, digest, sizeof (tmp_msgid.id.hash));
 
-			g_array_append_val (references, tmp_msgid.id.id);
+			g_array_append_val (references_arr, tmp_msgid.id.id);
 		}
 
 		g_slist_free_full (refs, g_free);
 
-		camel_message_info_take_references (mi, references);
+		camel_message_info_take_references (mi, references_arr);
 	}
 }
 
