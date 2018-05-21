@@ -1,3 +1,15 @@
+evolution-mapi 3.29.2 2018-05-21
+--------------------------------
+
+Miscellaneous:
+	Claim detailed error when org.gnome.KrbAuthDialog not found (Milan Crha)
+	Address some of the compiler and static analyzers warnings (Milan Crha)
+
+Translations:
+	Piotr Drąg (pl)
+	Rafael Fontenelle (pt_BR)
+	Marek Černocký (cs)
+
 evolution-mapi 3.29.1 2018-04-16
 --------------------------------
 
