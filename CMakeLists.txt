@@ -6,7 +6,7 @@ cmake_policy(VERSION 3.1)
 project(evolution-mapi
 	VERSION 3.29.3
 	LANGUAGES C)
-set(PROJECT_BUGREPORT "http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-mapi")
+set(PROJECT_BUGREPORT "https://gitlab.gnome.org/GNOME/evolution-mapi/issues/")
 
 # Required for FindIntltool module
 set(GETTEXT_PACKAGE ${PROJECT_NAME})
