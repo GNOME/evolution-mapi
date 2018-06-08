@@ -954,6 +954,7 @@ update_mapi_source_entries_cb (EShellView *shell_view,
 	GtkActionGroup *action_group;
 	EShell *shell;
 	EShellWindow *shell_window;
+	ESource *source = NULL;
 	const gchar *group;
 	gboolean is_mapi_source, is_online;
 
@@ -971,7 +972,21 @@ update_mapi_source_entries_cb (EShellView *shell_view,
 	else
 		g_return_if_reached ();
 
-	is_mapi_source = get_selected_mapi_source (shell_view, NULL, NULL);
+	is_mapi_source = get_selected_mapi_source (shell_view, &source, NULL);
+
+	if (is_mapi_source) {
+		ESource *clicked_source = NULL;
+
+		g_object_get (G_OBJECT (shell_view), "clicked-source", &clicked_source, NULL);
+
+		if (clicked_source && clicked_source != source)
+			is_mapi_source = FALSE;
+
+		g_clear_object (&clicked_source);
+	}
+
+	g_clear_object (&source);
+
 	shell_window = e_shell_view_get_shell_window (shell_view);
 	shell = e_shell_window_get_shell (shell_window);
 
