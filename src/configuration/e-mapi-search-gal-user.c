@@ -530,7 +530,7 @@ search_term_changed_cb (GtkEntry *entry,
 		sid->cancellable = g_object_ref (pgu->cancellable);
 		sid->dialog = dialog;
 
-		gtk_label_set_text (GTK_LABEL (pgu->info_label), _("Searching..."));
+		gtk_label_set_text (GTK_LABEL (pgu->info_label), _("Searching…"));
 		pgu->schedule_search_id = g_timeout_add (333, schedule_search_cb, sid);
 	}
 }
@@ -642,7 +642,7 @@ e_mapi_search_gal_user_modal (GtkWindow *parent,
 	pgu->search_extra = 0; /* always none, as default/anonymous user cannot be added to permissions */
 
 	dialog = gtk_dialog_new_with_buttons (
-		_("Choose MAPI user..."),
+		_("Choose MAPI user…"),
 		parent,
 		GTK_DIALOG_DESTROY_WITH_PARENT,
 		GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE,

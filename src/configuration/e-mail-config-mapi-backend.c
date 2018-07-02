@@ -492,7 +492,7 @@ validate_credentials_cb (GtkWidget *widget,
 
 		e_mapi_config_utils_run_in_thread_with_feedback_modal (e_mapi_config_utils_get_widget_toplevel_window (widget),
 			G_OBJECT (widget),
-			_("Connecting to the server, please wait..."),
+			_("Connecting to the server, please wait…"),
 			validate_credentials_thread,
 			validate_credentials_idle,
 			data,

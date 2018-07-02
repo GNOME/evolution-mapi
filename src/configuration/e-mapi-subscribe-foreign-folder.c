@@ -587,7 +587,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 	cffd->parent_folder_id = 0;
 	cffd->include_subfolders = gtk_toggle_button_get_active (subfolders_check);
 
-	description = g_strdup_printf (_("Testing availability of folder “%s” of user “%s”, please wait..."), cffd->orig_foldername, cffd->username);
+	description = g_strdup_printf (_("Testing availability of folder “%s” of user “%s”, please wait…"), cffd->orig_foldername, cffd->username);
 
 	e_mapi_config_utils_run_in_thread_with_feedback (
 		GTK_WINDOW (dialog),
@@ -749,7 +749,7 @@ e_mapi_subscribe_foreign_folder (GtkWindow *parent,
 		g_return_if_fail (CAMEL_IS_MAPI_STORE (store));
 
 	dialog = G_OBJECT (gtk_dialog_new_with_buttons (
-		_("Subscribe to folder of other MAPI user..."),
+		_("Subscribe to folder of other MAPI user…"),
 		parent,
 		GTK_DIALOG_DESTROY_WITH_PARENT,
 		GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE,
@@ -813,7 +813,7 @@ e_mapi_subscribe_foreign_folder (GtkWindow *parent,
 		"vexpand", FALSE,
 		NULL);
 
-	widget = gtk_button_new_with_mnemonic (_("C_hoose..."));
+	widget = gtk_button_new_with_mnemonic (_("C_hoose…"));
 	g_object_set (G_OBJECT (entry),
 		"hexpand", TRUE,
 		"vexpand", FALSE,

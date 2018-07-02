@@ -269,7 +269,7 @@ edit_permissions_response_cb (GObject *dialog,
 	}
 
 	e_mapi_config_utils_run_in_thread_with_feedback (GTK_WINDOW (dialog), dialog,
-		_("Writing folder permissions, please wait..."),
+		_("Writing folder permissions, please wait…"),
 		write_folder_permissions_thread,
 		write_folder_permissions_idle,
 		write_entries, (GDestroyNotify) g_slist_free);
@@ -934,7 +934,7 @@ e_mapi_edit_folder_permissions (GtkWindow *parent,
 	widgets->foreign_username = g_strdup (foreign_username);
 
 	widgets->dialog = gtk_dialog_new_with_buttons (
-		_("Edit MAPI folder permissions..."),
+		_("Edit MAPI folder permissions…"),
 		parent,
 		GTK_DIALOG_DESTROY_WITH_PARENT,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
@@ -1278,7 +1278,7 @@ e_mapi_edit_folder_permissions (GtkWindow *parent,
 	found_entries = g_new0 (GSList *, 1);
 
 	e_mapi_config_utils_run_in_thread_with_feedback (GTK_WINDOW (dialog), dialog,
-		_("Reading folder permissions, please wait..."),
+		_("Reading folder permissions, please wait…"),
 		read_folder_permissions_thread,
 		read_folder_permissions_idle,
 		found_entries, folder_permissions_free_found_entries);

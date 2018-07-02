@@ -870,14 +870,14 @@ static GtkActionEntry mail_account_context_entries[] = {
 
 	{ "mail-mapi-folder-size",
 	  NULL,
-	  N_("Folder size..."),
+	  N_("Folder size…"),
 	  NULL,
 	  NULL,  /* XXX Add a tooltip! */
 	  G_CALLBACK (action_folder_size_cb) },
 
 	{ "mail-mapi-subscribe-foreign-folder",
 	  NULL,
-	  N_("Subscribe to folder of other user..."),
+	  N_("Subscribe to folder of other user…"),
 	  NULL,
 	  NULL,  /* XXX Add a tooltip! */
 	  G_CALLBACK (action_subscribe_foreign_folder_cb) }
@@ -886,7 +886,7 @@ static GtkActionEntry mail_account_context_entries[] = {
 static GtkActionEntry mail_folder_context_entries[] = {
 	{ "mail-mapi-folder-permissions",
 	  "folder-new",
-	  N_("Permissions..."),
+	  N_("Permissions…"),
 	  NULL,
 	  N_("Edit MAPI folder permissions"),
 	  G_CALLBACK (action_folder_permissions_mail_cb) }
@@ -1200,7 +1200,7 @@ static GtkActionEntry calendar_context_entries[] = {
 
 	{ "calendar-mapi-folder-permissions",
 	  "folder-new",
-	  N_("Permissions..."),
+	  N_("Permissions…"),
 	  NULL,
 	  N_("Edit MAPI calendar permissions"),
 	  G_CALLBACK (action_folder_permissions_source_cb) }
@@ -1237,7 +1237,7 @@ static GtkActionEntry tasks_context_entries[] = {
 
 	{ "tasks-mapi-folder-permissions",
 	  "folder-new",
-	  N_("Permissions..."),
+	  N_("Permissions…"),
 	  NULL,
 	  N_("Edit MAPI tasks permissions"),
 	  G_CALLBACK (action_folder_permissions_source_cb) }
@@ -1274,7 +1274,7 @@ static GtkActionEntry memos_context_entries[] = {
 
 	{ "memos-mapi-folder-permissions",
 	  "folder-new",
-	  N_("Permissions..."),
+	  N_("Permissions…"),
 	  NULL,
 	  N_("Edit MAPI memos permissions"),
 	  G_CALLBACK (action_folder_permissions_source_cb) }
@@ -1311,7 +1311,7 @@ static GtkActionEntry contacts_context_entries[] = {
 
 	{ "contacts-mapi-folder-permissions",
 	  "folder-new",
-	  N_("Permissions..."),
+	  N_("Permissions…"),
 	  NULL,
 	  N_("Edit MAPI contacts permissions"),
 	  G_CALLBACK (action_folder_permissions_source_cb) }
@@ -1724,7 +1724,7 @@ tree_view_mapped_cb (GObject *tree_view)
 
 	e_mapi_config_utils_run_in_thread_with_feedback (e_mapi_config_utils_get_widget_toplevel_window (fsd->tree_view),
 		G_OBJECT (fsd->source),
-		_("Searching remote MAPI folder structure, please wait..."),
+		_("Searching remote MAPI folder structure, please wait…"),
 		e_mapi_download_folder_structure_thread,
 		e_mapi_download_folder_structure_idle,
 		fsd,
