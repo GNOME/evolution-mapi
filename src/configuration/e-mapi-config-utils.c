@@ -1839,6 +1839,7 @@ e_mapi_config_utils_insert_widgets (ESourceConfigBackend *backend,
 		gtk_tree_view_append_column (GTK_TREE_VIEW (tree_view), column);
 		g_object_set (tree_view, "expander-column", column, "headers-visible", TRUE, NULL);
 		gtk_widget_set_sensitive (tree_view, is_new_source);
+		g_object_unref (tree_store);
 
 		scrolled_window = gtk_scrolled_window_new (NULL, NULL);
 		gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
