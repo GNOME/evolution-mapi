@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-29 17:59+0200\n"
-"PO-Revision-Date: 2018-04-29 18:00+0200\n"
+"POT-Creation-Date: 2018-07-08 16:50+0200\n"
+"PO-Revision-Date: 2018-07-08 16:52+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -190,7 +190,7 @@ msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "S_zukanie niechcianych treści tylko w katalogu przychodzących"
 
 #: ../src/camel/camel-mapi-provider.c:58
-#: ../src/configuration/e-mapi-config-utils.c:1619
+#: ../src/configuration/e-mapi-config-utils.c:1774
 msgid "Lis_ten for server notifications"
 msgstr "_Nasłuchiwanie powiadomień serwera"
 
@@ -487,7 +487,7 @@ msgstr ""
 "poprawne wartości."
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:495
-msgid "Connecting to the server, please wait..."
+msgid "Connecting to the server, please wait…"
 msgstr "Łączenie z serwerem, proszę czekać…"
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:697
@@ -556,76 +556,81 @@ msgstr "Rozmiar katalogu"
 msgid "Fetching folder list…"
 msgstr "Pobieranie listy katalogów…"
 
-#: ../src/configuration/e-mapi-config-utils.c:719
+#: ../src/configuration/e-mapi-config-utils.c:612
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:752
+msgid "Subscribe to folder of other MAPI user…"
+msgstr "Subskrybuj katalog innego użytkownika MAPI…"
+
+#: ../src/configuration/e-mapi-config-utils.c:810
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "Nie można modyfikować uprawnień katalogu „%s”, proszę wybrać inny."
 
-#: ../src/configuration/e-mapi-config-utils.c:782
-msgid "Folder size..."
+#: ../src/configuration/e-mapi-config-utils.c:873
+msgid "Folder size…"
 msgstr "Rozmiar katalogu…"
 
-#: ../src/configuration/e-mapi-config-utils.c:789
-msgid "Subscribe to folder of other user..."
+#: ../src/configuration/e-mapi-config-utils.c:880
+msgid "Subscribe to folder of other user…"
 msgstr "Subskrybuj katalog innego użytkownika…"
 
-#: ../src/configuration/e-mapi-config-utils.c:798
-#: ../src/configuration/e-mapi-config-utils.c:1076
-#: ../src/configuration/e-mapi-config-utils.c:1106
-#: ../src/configuration/e-mapi-config-utils.c:1136
-#: ../src/configuration/e-mapi-config-utils.c:1166
-msgid "Permissions..."
+#: ../src/configuration/e-mapi-config-utils.c:889
+#: ../src/configuration/e-mapi-config-utils.c:1203
+#: ../src/configuration/e-mapi-config-utils.c:1240
+#: ../src/configuration/e-mapi-config-utils.c:1277
+#: ../src/configuration/e-mapi-config-utils.c:1314
+msgid "Permissions…"
 msgstr "Uprawnienia…"
 
-#: ../src/configuration/e-mapi-config-utils.c:800
+#: ../src/configuration/e-mapi-config-utils.c:891
 msgid "Edit MAPI folder permissions"
 msgstr "Modyfikacja uprawnień katalogu MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1078
+#: ../src/configuration/e-mapi-config-utils.c:1205
 msgid "Edit MAPI calendar permissions"
 msgstr "Modyfikacja uprawnień kalendarza MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1108
+#: ../src/configuration/e-mapi-config-utils.c:1242
 msgid "Edit MAPI tasks permissions"
 msgstr "Modyfikacja uprawnień zadań MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1138
+#: ../src/configuration/e-mapi-config-utils.c:1279
 msgid "Edit MAPI memos permissions"
 msgstr "Modyfikacja uprawnień notatek MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1168
+#: ../src/configuration/e-mapi-config-utils.c:1316
 msgid "Edit MAPI contacts permissions"
 msgstr "Modyfikacja uprawnień kontaktów MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1341
+#: ../src/configuration/e-mapi-config-utils.c:1496
 msgid "Personal Folders"
 msgstr "Katalogi osobiste"
 
-#: ../src/configuration/e-mapi-config-utils.c:1572
-msgid "Searching remote MAPI folder structure, please wait..."
+#: ../src/configuration/e-mapi-config-utils.c:1727
+msgid "Searching remote MAPI folder structure, please wait…"
 msgstr "Wyszukiwanie zdalnej struktury katalogów MAPI, proszę czekać…"
 
-#: ../src/configuration/e-mapi-config-utils.c:1640
+#: ../src/configuration/e-mapi-config-utils.c:1795
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Nie można utworzyć kalendarza MAPI w trybie offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1643
+#: ../src/configuration/e-mapi-config-utils.c:1798
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "Nie można utworzyć listy zadań MAPI w trybie offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1646
+#: ../src/configuration/e-mapi-config-utils.c:1801
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "Nie można utworzyć listy notatek MAPI w trybie offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1649
+#: ../src/configuration/e-mapi-config-utils.c:1804
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "Nie można utworzyć książki adresowej MAPI w trybie offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1654
+#: ../src/configuration/e-mapi-config-utils.c:1809
 msgid "Cannot create MAPI source in offline mode"
 msgstr "Nie można utworzyć źródła MAPI w trybie offline"
 
-#: ../src/configuration/e-mapi-config-utils.c:1674
+#: ../src/configuration/e-mapi-config-utils.c:1829
 msgid "_Location:"
 msgstr "_Położenie:"
 
@@ -680,7 +685,7 @@ msgid "Custom"
 msgstr "Niestandardowy"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:272
-msgid "Writing folder permissions, please wait..."
+msgid "Writing folder permissions, please wait…"
 msgstr "Zapisywanie uprawnień katalogu, proszę czekać…"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:782
@@ -700,128 +705,128 @@ msgctxt "User"
 msgid "Unknown"
 msgstr "Nieznany"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:878
-#: ../src/configuration/e-mapi-search-gal-user.c:598
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:880
+#: ../src/configuration/e-mapi-search-gal-user.c:600
 msgid "Name"
 msgstr "Nazwa"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:884
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:886
 msgid "Permission level"
 msgstr "Poziom uprawnień"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:937
-msgid "Edit MAPI folder permissions..."
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:939
+msgid "Edit MAPI folder permissions…"
 msgstr "Modyfikuj uprawnienia katalogu MAPI…"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:962
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:637
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:964
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:773
 msgid "Account:"
 msgstr "Konto:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:988
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:990
 msgid "Folder name:"
 msgstr "Nazwa katalogu:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1009
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1011
 msgid "Folder ID:"
 msgstr "Identyfikator katalogu:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1068
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1070
 msgid "Permissions"
 msgstr "Uprawnienia"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1089
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1091
 msgid "Permi_ssion level:"
 msgstr "_Poziom uprawnień:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1117
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1119
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Odczyt"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1128
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1191
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1130
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1193
 msgctxt "Permissions"
 msgid "None"
 msgstr "Brak"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1133
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1135
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "Pełne informacje"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1138
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1140
 msgctxt "Permissions"
 msgid "Simple Free/Busy"
 msgstr "Proste informacje o zajętości"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1142
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1144
 msgctxt "Permissions"
 msgid "Detailed Free/Busy"
 msgstr "Szczegółowe informacje o zajętości"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1149
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1151
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Zapis"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1160
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "Tworzenie elementów"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1164
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Tworzenie podkatalogów"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1168
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1170
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "Modyfikowanie własnych"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1172
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1174
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "Modyfikowanie wszystkich"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1180
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1182
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Usuwanie elementów"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1196
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1198
 msgctxt "Permissions"
 msgid "Own"
 msgstr "Własne"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1201
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1203
 msgctxt "Permissions"
 msgid "All"
 msgstr "Wszystkie"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1207
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1209
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Inne"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1218
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Właściciel katalogu"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1222
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Kontakt katalogu"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1226
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1228
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Widoczność katalogu"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1281
-msgid "Reading folder permissions, please wait..."
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1283
+msgid "Reading folder permissions, please wait…"
 msgstr "Odczytywanie uprawnień katalogu, proszę czekać…"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:221
@@ -845,27 +850,27 @@ msgstr[1] "Odnaleziono %d użytkowników, ale wyświetlanie tylko pierwszych %d"
 msgstr[2] "Odnaleziono %d użytkowników, ale wyświetlanie tylko pierwszych %d"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:517
-#: ../src/configuration/e-mapi-search-gal-user.c:708
+#: ../src/configuration/e-mapi-search-gal-user.c:710
 msgid "Search for a user"
 msgstr "Wyszukiwanie użytkownika"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:533
-msgid "Searching..."
+msgid "Searching…"
 msgstr "Wyszukiwanie…"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:604
+#: ../src/configuration/e-mapi-search-gal-user.c:606
 msgid "E-mail"
 msgstr "E-mail"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:645
-msgid "Choose MAPI user..."
+#: ../src/configuration/e-mapi-search-gal-user.c:647
+msgid "Choose MAPI user…"
 msgstr "Wybierz użytkownika MAPI…"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:668
+#: ../src/configuration/e-mapi-search-gal-user.c:670
 msgid "_Search:"
 msgstr "Wy_szukiwanie:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:89
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:95
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Nie można dodać katalogu. Katalog już istnieje jako „%s”"
@@ -873,20 +878,20 @@ msgstr "Nie można dodać katalogu. Katalog już istnieje jako „%s”"
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. Example result: "Mailbox — John Smith"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:114
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:120
 #, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox — %s"
 msgstr "Skrzynka pocztowa — %s"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:144
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:150
 #, c-format
 msgid "Cannot add folder, failed to add to store’s summary"
 msgstr ""
 "Nie można dodać katalogu, dodanie do podsumowania przechowalni się nie "
 "powiodło"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:336
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:373
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -895,7 +900,7 @@ msgstr ""
 "Nie odnaleziono katalogu „%s”. Nie istnieje lub brak uprawnień do jego "
 "dostępu."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:371
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:408
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Nie można dodać katalogu, nie można ustalić jego typu"
 
@@ -904,64 +909,64 @@ msgstr "Nie można dodać katalogu, nie można ustalić jego typu"
 #. the second '%s' is replaced with folder name.
 #. Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:412
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:449
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:512
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:715
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:568
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:846
 msgid "Inbox"
 msgstr "Odebrane"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:514
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:716
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:570
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:847
 msgid "Contacts"
 msgstr "Kontakty"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:516
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:717
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:572
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:848
 msgid "Calendar"
 msgstr "Kalendarz"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:518
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:718
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:574
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:849
 msgid "Memos"
 msgstr "Notatki"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:520
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:719
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:576
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:850
 msgid "Tasks"
 msgstr "Zadania"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:534
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:590
 #, c-format
-msgid "Testing availability of folder “%s” of user “%s”, please wait..."
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
 msgstr "Testowanie dostępności katalogu „%s” użytkownika „%s”, proszę czekać…"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:616
-msgid "Subscribe to folder of other MAPI user..."
-msgstr "Subskrybuj katalog innego użytkownika MAPI…"
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:628
+msgid "Cannot search for user when the account is offline"
+msgstr "Nie można wyszukać użytkownika, kiedy konto jest w trybie offline"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:665
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:796
 msgid "User"
 msgstr "Użytkownik"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:672
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:803
 msgid "_User:"
 msgstr "_Użytkownik:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:685
-msgid "C_hoose..."
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:816
+msgid "C_hoose…"
 msgstr "_Wybierz…"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:700
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:831
 msgid "_Folder name:"
 msgstr "Nazwa _katalogu:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:728
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:859
 msgid "Include _subfolders"
 msgstr "_Dołączenie podkatalogów"
 
