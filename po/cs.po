@@ -10,10 +10,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
-"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2018-04-25 15:15+0000\n"
-"PO-Revision-Date: 2018-05-03 23:31+0200\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-mapi/issues\n"
+"POT-Creation-Date: 2018-07-02 12:46+0000\n"
+"PO-Revision-Date: 2018-09-06 14:12+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -191,7 +190,7 @@ msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Hledat nevyžádanou poštu jen ve složce _Přijatá"
 
 #: ../src/camel/camel-mapi-provider.c:58
-#: ../src/configuration/e-mapi-config-utils.c:1619
+#: ../src/configuration/e-mapi-config-utils.c:1774
 msgid "Lis_ten for server notifications"
 msgstr "Nasloucha_t oznámením od serveru"
 
@@ -486,7 +485,7 @@ msgstr ""
 "správné údaje."
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:495
-msgid "Connecting to the server, please wait..."
+msgid "Connecting to the server, please wait…"
 msgstr "Připojuje se k serveru, čekejte prosím…"
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:697
@@ -555,76 +554,81 @@ msgstr "Velikost složky"
 msgid "Fetching folder list…"
 msgstr "Probíhá stahování seznamu složek…"
 
-#: ../src/configuration/e-mapi-config-utils.c:719
+#: ../src/configuration/e-mapi-config-utils.c:612
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:752
+msgid "Subscribe to folder of other MAPI user…"
+msgstr "Číst složky jiného uživatele MAPI…"
+
+#: ../src/configuration/e-mapi-config-utils.c:810
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "Nelze upravovat oprávnění složky „%s“, zvolte jinou složku."
 
-#: ../src/configuration/e-mapi-config-utils.c:782
-msgid "Folder size..."
+#: ../src/configuration/e-mapi-config-utils.c:873
+msgid "Folder size…"
 msgstr "Velikost složky…"
 
-#: ../src/configuration/e-mapi-config-utils.c:789
-msgid "Subscribe to folder of other user..."
+#: ../src/configuration/e-mapi-config-utils.c:880
+msgid "Subscribe to folder of other user…"
 msgstr "Číst složky jiného uživatele…"
 
-#: ../src/configuration/e-mapi-config-utils.c:798
-#: ../src/configuration/e-mapi-config-utils.c:1076
-#: ../src/configuration/e-mapi-config-utils.c:1106
-#: ../src/configuration/e-mapi-config-utils.c:1136
-#: ../src/configuration/e-mapi-config-utils.c:1166
-msgid "Permissions..."
+#: ../src/configuration/e-mapi-config-utils.c:889
+#: ../src/configuration/e-mapi-config-utils.c:1203
+#: ../src/configuration/e-mapi-config-utils.c:1240
+#: ../src/configuration/e-mapi-config-utils.c:1277
+#: ../src/configuration/e-mapi-config-utils.c:1314
+msgid "Permissions…"
 msgstr "Oprávnění…"
 
-#: ../src/configuration/e-mapi-config-utils.c:800
+#: ../src/configuration/e-mapi-config-utils.c:891
 msgid "Edit MAPI folder permissions"
 msgstr "Upravit oprávnění složky MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1078
+#: ../src/configuration/e-mapi-config-utils.c:1205
 msgid "Edit MAPI calendar permissions"
 msgstr "Upravit oprávnění kalendáře MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1108
+#: ../src/configuration/e-mapi-config-utils.c:1242
 msgid "Edit MAPI tasks permissions"
 msgstr "Upravit oprávnění úkolů MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1138
+#: ../src/configuration/e-mapi-config-utils.c:1279
 msgid "Edit MAPI memos permissions"
 msgstr "Upravit oprávnění poznámek MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1168
+#: ../src/configuration/e-mapi-config-utils.c:1316
 msgid "Edit MAPI contacts permissions"
 msgstr "Upravit oprávnění kontaktů MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1341
+#: ../src/configuration/e-mapi-config-utils.c:1496
 msgid "Personal Folders"
 msgstr "Osobní složky"
 
-#: ../src/configuration/e-mapi-config-utils.c:1572
-msgid "Searching remote MAPI folder structure, please wait..."
+#: ../src/configuration/e-mapi-config-utils.c:1727
+msgid "Searching remote MAPI folder structure, please wait…"
 msgstr "Prohledávání struktury vzdálených složek MAPI, prosím čekejte…"
 
-#: ../src/configuration/e-mapi-config-utils.c:1640
+#: ../src/configuration/e-mapi-config-utils.c:1795
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Nelze vytvořit kalendář MAPI v režimu odpojení"
 
-#: ../src/configuration/e-mapi-config-utils.c:1643
+#: ../src/configuration/e-mapi-config-utils.c:1798
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "Nelze vytvořit seznam úkolů MAPI v režimu odpojení"
 
-#: ../src/configuration/e-mapi-config-utils.c:1646
+#: ../src/configuration/e-mapi-config-utils.c:1801
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "Nelze vytvořit seznam poznámek MAPI v režimu odpojení"
 
-#: ../src/configuration/e-mapi-config-utils.c:1649
+#: ../src/configuration/e-mapi-config-utils.c:1804
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "Nelze vytvořit adresář MAPI v režimu odpojení"
 
-#: ../src/configuration/e-mapi-config-utils.c:1654
+#: ../src/configuration/e-mapi-config-utils.c:1809
 msgid "Cannot create MAPI source in offline mode"
 msgstr "Nelze vytvořit zdroj MAPI v režimu odpojení"
 
-#: ../src/configuration/e-mapi-config-utils.c:1674
+#: ../src/configuration/e-mapi-config-utils.c:1829
 msgid "_Location:"
 msgstr "_Místo:"
 
@@ -679,7 +683,7 @@ msgid "Custom"
 msgstr "Vlastní"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:272
-msgid "Writing folder permissions, please wait..."
+msgid "Writing folder permissions, please wait…"
 msgstr "Zapisuje se oprávnění ke složce, prosím čekejte…"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:782
@@ -709,11 +713,11 @@ msgid "Permission level"
 msgstr "Úroveň oprávnění"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:937
-msgid "Edit MAPI folder permissions..."
+msgid "Edit MAPI folder permissions…"
 msgstr "Upravit oprávnění složky MAPI…"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:962
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:637
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:773
 msgid "Account:"
 msgstr "Účet:"
 
@@ -820,7 +824,7 @@ msgid "Folder visible"
 msgstr "Viditelná složka"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:1281
-msgid "Reading folder permissions, please wait..."
+msgid "Reading folder permissions, please wait…"
 msgstr "Čtou se oprávnění ke složce, prosím čekejte…"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:221
@@ -849,7 +853,7 @@ msgid "Search for a user"
 msgstr "Hledat uživatele"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:533
-msgid "Searching..."
+msgid "Searching…"
 msgstr "Hledá se…"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:604
@@ -857,14 +861,14 @@ msgid "E-mail"
 msgstr "E-mail"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:645
-msgid "Choose MAPI user..."
+msgid "Choose MAPI user…"
 msgstr "Zvolit uživatele MAPI…"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:668
 msgid "_Search:"
 msgstr "_Hledat:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:89
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:95
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Nelze přidat složku, složka již existuje jako „%s“"
@@ -872,18 +876,18 @@ msgstr "Nelze přidat složku, složka již existuje jako „%s“"
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. Example result: "Mailbox — John Smith"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:114
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:120
 #, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox — %s"
 msgstr "Poštovní schránka – %s"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:144
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:150
 #, c-format
 msgid "Cannot add folder, failed to add to store’s summary"
 msgstr "Nelze přidat složku, selhalo přidání do souhrnného úložiště"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:336
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:373
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -892,7 +896,7 @@ msgstr ""
 "Složka „%s“ nebyla nalezena. Buď neexistuje, nebo k ní nemáte oprávnění pro "
 "přístup."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:371
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:408
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Nelze přidat složku, nelze určit typ složky"
 
@@ -901,64 +905,64 @@ msgstr "Nelze přidat složku, nelze určit typ složky"
 #. the second '%s' is replaced with folder name.
 #. Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:412
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:449
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:512
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:715
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:568
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:846
 msgid "Inbox"
 msgstr "Doručená pošta"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:514
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:716
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:570
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:847
 msgid "Contacts"
 msgstr "Kontakty"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:516
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:717
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:572
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:848
 msgid "Calendar"
 msgstr "Kalendář"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:518
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:718
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:574
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:849
 msgid "Memos"
 msgstr "Poznámky"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:520
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:719
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:576
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:850
 msgid "Tasks"
 msgstr "Úkoly"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:534
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:590
 #, c-format
-msgid "Testing availability of folder “%s” of user “%s”, please wait..."
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
 msgstr "Testuje se dostupnost složky „%s“ uživatele „%s“, čekejte prosím…"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:616
-msgid "Subscribe to folder of other MAPI user..."
-msgstr "Číst složky jiného uživatele MAPI…"
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:628
+msgid "Cannot search for user when the account is offline"
+msgstr "Nelze hledat uživatele, když je účet v režimu odpojení"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:665
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:796
 msgid "User"
 msgstr "Uživatel"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:672
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:803
 msgid "_User:"
 msgstr "_Uživatel:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:685
-msgid "C_hoose..."
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:816
+msgid "C_hoose…"
 msgstr "V_ybrat…"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:700
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:831
 msgid "_Folder name:"
 msgstr "Název _složky:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:728
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:859
 msgid "Include _subfolders"
 msgstr "Včetně pod_složek"
 
