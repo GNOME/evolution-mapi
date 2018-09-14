@@ -260,7 +260,7 @@ msgstr "Ha fallat l'autenticació"
 #: ../src/camel/camel-mapi-store.c:1289
 msgid "MAPI folders can be created only within mailbox of the logged in user"
 msgstr ""
-"Les carpetes MAPI sols es poden crear dins de busties amb l'usuari connectat"
+"Les carpetes MAPI sols es poden crear dins de bústies amb l'usuari connectat"
 
 #: ../src/camel/camel-mapi-store.c:1302 ../src/camel/camel-mapi-store.c:1415
 #, c-format
@@ -487,15 +487,15 @@ msgid ""
 "correct values."
 msgstr ""
 "El servidor, el nom d'usuari i el nom del domini no poden ser buits."
-" Ompliu-lo amb valor correctes."
+" Ompliu-lo amb valors correctes."
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:476
 msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
 msgstr ""
-"El nom real no pot estar buit quan està kerberos seleccionat. Ompliu-lo amb"
-" valor correctes."
+"El nom real no pot estar buit quan kerberos està seleccionat. Ompliu-lo amb"
+" valors correctes."
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:495
 msgid "Connecting to the server, please wait…"
@@ -796,7 +796,7 @@ msgstr "Creació de subcarpetes"
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:1168
 msgctxt "Permissions"
 msgid "Edit own"
-msgstr "Edita només propis"
+msgstr "Edita només propi"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:1172
 msgctxt "Permissions"
@@ -1085,7 +1085,7 @@ msgstr "No es pot arribar al servidor «%s»"
 msgid "Folder name “%s” is not a known default folder name, nor folder ID."
 msgstr ""
 "El nom de la carpeta «%s» no és un nom de la carpeta predeterminada coneguda"
-" ni el ID de la carpeta."
+" ni l'ID de la carpeta."
 
 #: ../src/libexchangemapi/e-mapi-connection.c:1203
 #, c-format
