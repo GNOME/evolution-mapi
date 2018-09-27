@@ -986,10 +986,6 @@ e_mapi_backend_init (EMapiBackend *backend)
 		g_free,
 		g_object_unref);
 
-	g_signal_connect (
-		backend, "notify::online",
-		G_CALLBACK (mapi_backend_populate), NULL);
-
 	g_mutex_init (&backend->priv->credentials_lock);
 	backend->priv->credentials = NULL;
 }
