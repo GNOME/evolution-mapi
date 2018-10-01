@@ -6836,7 +6836,7 @@ e_mapi_connection_resolve_username (EMapiConnection *conn,
 			row = talloc_zero (mem_ctx, struct SRow);
 			if (!row) {
 				UNLOCK();
-				e_return_val_mapi_error_if_fail (properties != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
+				e_return_val_mapi_error_if_fail (row != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
 			}
 
 			cast_PropertyRow_to_SRow (mem_ctx, &rows->aRow[qq], row);
