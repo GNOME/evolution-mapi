@@ -5,6 +5,7 @@
 # Kenneth Nielsen <k.nielsen81@gmail.com>, 2010.
 # Ask Hjorth Larsen <asklarsen@gmail.com>, 2010.
 # Joe Hansen (joedalton2@yahoo.dk), 2011, 2017, 2018.
+# Alan Mortensen <alanmortensen.am@gmail.com>, 2018.
 #
 # inbox - > indbakke
 # mailbox -> brevbakke (taget fra selve programmets konventionsliste)
@@ -12,17 +13,17 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
-"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2017-12-20 17:00+0000\n"
-"PO-Revision-Date: 2018-01-28 23:00+0200\n"
-"Last-Translator: Joe Hansen <joedalton2@yahoo.dk>\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-mapi/issues\n"
+"POT-Creation-Date: 2018-07-02 12:46+0000\n"
+"PO-Revision-Date: 2018-09-06 20:22+0200\n"
+"Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
 "Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.8.7.1\n"
 
 #: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:1
 msgid "Exchange MAPI"
@@ -61,7 +62,7 @@ msgstr "Kunne ikke ændre element på en server"
 
 #: ../src/addressbook/e-book-backend-mapi.c:862
 #: ../src/calendar/e-cal-backend-mapi.c:1332
-#: ../src/calendar/e-cal-backend-mapi.c:1625
+#: ../src/calendar/e-cal-backend-mapi.c:1626
 msgid "Failed to create item on a server"
 msgstr "Kunne ikke oprette element på en server"
 
@@ -82,7 +83,7 @@ msgstr ""
 "Understøttelse for ændring af enkeltinstanser af en gentagen aftale er endnu "
 "ikke implementeret. Ingen ændring er lavet på aftalen på serveren."
 
-#: ../src/calendar/e-cal-backend-mapi.c:1675
+#: ../src/calendar/e-cal-backend-mapi.c:1676
 msgid "Failed to get Free/Busy data"
 msgstr "Kunne ikke hente ledig/optaget-data"
 
@@ -193,7 +194,7 @@ msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Kontrollér kun for s_pam-e-breve i indbakkemappen"
 
 #: ../src/camel/camel-mapi-provider.c:58
-#: ../src/configuration/e-mapi-config-utils.c:1602
+#: ../src/configuration/e-mapi-config-utils.c:1774
 msgid "Lis_ten for server notifications"
 msgstr "_Lyt efter serverpåmindelser"
 
@@ -380,13 +381,31 @@ msgstr "Brevbakken “%s” er tæt på sin størrelsesbegrænsning."
 msgid "Cannot add folder “%s”, failed to add to store’s summary"
 msgstr "Kan ikke tilføje mappen “%s”. Kunne ikke tilføje til lagerets resume"
 
-#: ../src/camel/camel-mapi-store.c:3020
+#: ../src/camel/camel-mapi-store.c:3016
 msgid "Authentication password not available"
 msgstr "Adgangskode for godkendelse er ikke tilgængelig"
 
-#: ../src/camel/camel-mapi-store.c:3056 ../src/camel/camel-mapi-store.c:3453
+#: ../src/camel/camel-mapi-store.c:3052 ../src/camel/camel-mapi-store.c:3468
 msgid "Updating foreign folders"
 msgstr "Opdaterer eksterne mapper"
+
+#. Translators: the first '%s' is replaced with a generic error message,
+#. the second '%s' is replaced with additional error information.
+#: ../src/camel/camel-mapi-store.c:3075 ../src/collection/e-mapi-backend.c:894
+#: ../src/configuration/e-mail-config-mapi-backend.c:406
+#: ../src/configuration/e-mapi-config-utils.c:341
+#, c-format
+msgctxt "gssapi_error"
+msgid "%s (%s)"
+msgstr "%s (%s)"
+
+#: ../src/camel/camel-mapi-store.h:53
+msgid "Favorites"
+msgstr "Favoritter"
+
+#: ../src/camel/camel-mapi-store.h:54
+msgid "Foreign folders"
+msgstr "Eksterne mapper"
 
 #: ../src/camel/camel-mapi-transport.c:145
 #: ../src/camel/camel-mapi-transport.c:167
@@ -442,15 +461,15 @@ msgid "Authentication finished successfully."
 msgstr "Godkendelse gennemført succesfuldt."
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:363
-#: ../src/configuration/e-mail-config-mapi-backend.c:483
+#: ../src/configuration/e-mail-config-mapi-backend.c:501
 msgid "Authentication failed."
 msgstr "Godkendelse fejlede."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:426
+#: ../src/configuration/e-mail-config-mapi-backend.c:444
 msgid "Cannot authenticate MAPI accounts in offline mode"
 msgstr "Kan ikke godkende MAPI-konti i afkoblet tilstand"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:455
+#: ../src/configuration/e-mail-config-mapi-backend.c:473
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -458,7 +477,7 @@ msgstr ""
 "Server-, bruger- og domænenavn skal udfyldes. Angiv venligst de korrekte "
 "værdier."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:458
+#: ../src/configuration/e-mail-config-mapi-backend.c:476
 msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
@@ -466,39 +485,39 @@ msgstr ""
 "Områdenavn (realm) kan ikke være tomt, når kerberos vælges. Angiv venligst "
 "de korrekte værdier."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:477
-msgid "Connecting to the server, please wait..."
+#: ../src/configuration/e-mail-config-mapi-backend.c:495
+msgid "Connecting to the server, please wait…"
 msgstr "Forbinder til serveren, vent venligst …"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:679
+#: ../src/configuration/e-mail-config-mapi-backend.c:697
 msgid "Configuration"
 msgstr "Konfiguration"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:688
+#: ../src/configuration/e-mail-config-mapi-backend.c:706
 msgid "_Server:"
 msgstr "_Server:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:705
+#: ../src/configuration/e-mail-config-mapi-backend.c:723
 msgid "User_name:"
 msgstr "_Brugernavn:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:730
+#: ../src/configuration/e-mail-config-mapi-backend.c:748
 msgid "_Domain name:"
 msgstr "_Domænenavn:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:743
+#: ../src/configuration/e-mail-config-mapi-backend.c:761
 msgid "_Authenticate"
 msgstr "_Godkend"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:751
+#: ../src/configuration/e-mail-config-mapi-backend.c:769
 msgid "_Use secure connection"
 msgstr "_Brug sikker forbindelse"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:766
+#: ../src/configuration/e-mail-config-mapi-backend.c:784
 msgid "_Kerberos authentication"
 msgstr "_Kerberosgodkendelse"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:778
+#: ../src/configuration/e-mail-config-mapi-backend.c:796
 msgid "_Realm name:"
 msgstr "_Områdenavn (realm):"
 
@@ -515,97 +534,102 @@ msgstr "Vis størrelsen af alle Exchange-mapper"
 msgid "Folder _Size"
 msgstr "_Mappestørrelse"
 
-#: ../src/configuration/e-mapi-config-utils.c:415
+#: ../src/configuration/e-mapi-config-utils.c:432
 msgid "Folder"
 msgstr "Mappe"
 
-#: ../src/configuration/e-mapi-config-utils.c:420
+#: ../src/configuration/e-mapi-config-utils.c:437
 msgid "Size"
 msgstr "Størrelse"
 
-#: ../src/configuration/e-mapi-config-utils.c:443
-#: ../src/configuration/e-mapi-config-utils.c:447
+#: ../src/configuration/e-mapi-config-utils.c:460
+#: ../src/configuration/e-mapi-config-utils.c:464
 msgid "Unable to retrieve folder size information"
 msgstr "Kan ikke indhente information om mappestørrelse"
 
-#: ../src/configuration/e-mapi-config-utils.c:514
+#: ../src/configuration/e-mapi-config-utils.c:531
 msgid "Folder Size"
 msgstr "Mappestørrelse"
 
-#: ../src/configuration/e-mapi-config-utils.c:528
+#: ../src/configuration/e-mapi-config-utils.c:545
 msgid "Fetching folder list…"
 msgstr "Henter mappeliste …"
 
-#: ../src/configuration/e-mapi-config-utils.c:702
+#: ../src/configuration/e-mapi-config-utils.c:612
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:752
+msgid "Subscribe to folder of other MAPI user…"
+msgstr "Abonner på en anden MAPI-brugers mappe …"
+
+#: ../src/configuration/e-mapi-config-utils.c:810
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "Kan ikke redigere rettigheder for mappen “%s”. Vælg en anden mappe."
 
-#: ../src/configuration/e-mapi-config-utils.c:765
-msgid "Folder size..."
+#: ../src/configuration/e-mapi-config-utils.c:873
+msgid "Folder size…"
 msgstr "Mappestørrelse …"
 
-#: ../src/configuration/e-mapi-config-utils.c:772
-msgid "Subscribe to folder of other user..."
-msgstr "Abonner på mappe fra en anden bruger …"
+#: ../src/configuration/e-mapi-config-utils.c:880
+msgid "Subscribe to folder of other user…"
+msgstr "Abonner på en anden brugers mappe …"
 
-#: ../src/configuration/e-mapi-config-utils.c:781
-#: ../src/configuration/e-mapi-config-utils.c:1059
-#: ../src/configuration/e-mapi-config-utils.c:1089
-#: ../src/configuration/e-mapi-config-utils.c:1119
-#: ../src/configuration/e-mapi-config-utils.c:1149
-msgid "Permissions..."
+#: ../src/configuration/e-mapi-config-utils.c:889
+#: ../src/configuration/e-mapi-config-utils.c:1203
+#: ../src/configuration/e-mapi-config-utils.c:1240
+#: ../src/configuration/e-mapi-config-utils.c:1277
+#: ../src/configuration/e-mapi-config-utils.c:1314
+msgid "Permissions…"
 msgstr "Rettigheder …"
 
-#: ../src/configuration/e-mapi-config-utils.c:783
+#: ../src/configuration/e-mapi-config-utils.c:891
 msgid "Edit MAPI folder permissions"
 msgstr "Rediger MAPI-mapperettigheder"
 
-#: ../src/configuration/e-mapi-config-utils.c:1061
+#: ../src/configuration/e-mapi-config-utils.c:1205
 msgid "Edit MAPI calendar permissions"
 msgstr "Rediger MAPI-kalenderettigheder"
 
-#: ../src/configuration/e-mapi-config-utils.c:1091
+#: ../src/configuration/e-mapi-config-utils.c:1242
 msgid "Edit MAPI tasks permissions"
 msgstr "Rediger MAPI-opgaverettigheder"
 
-#: ../src/configuration/e-mapi-config-utils.c:1121
+#: ../src/configuration/e-mapi-config-utils.c:1279
 msgid "Edit MAPI memos permissions"
 msgstr "Rediger MAPI-memoers rettigheder"
 
-#: ../src/configuration/e-mapi-config-utils.c:1151
+#: ../src/configuration/e-mapi-config-utils.c:1316
 msgid "Edit MAPI contacts permissions"
 msgstr "Rediger MAPI-kontakters rettigheder"
 
-#: ../src/configuration/e-mapi-config-utils.c:1324
+#: ../src/configuration/e-mapi-config-utils.c:1496
 msgid "Personal Folders"
 msgstr "Personlige mapper"
 
-#: ../src/configuration/e-mapi-config-utils.c:1555
-msgid "Searching remote MAPI folder structure, please wait..."
+#: ../src/configuration/e-mapi-config-utils.c:1727
+msgid "Searching remote MAPI folder structure, please wait…"
 msgstr "Søger i ekstern MAPI-mappestruktur, vent venligst …"
 
-#: ../src/configuration/e-mapi-config-utils.c:1623
+#: ../src/configuration/e-mapi-config-utils.c:1795
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Kan ikke oprette MAPI-kalender i afkoblet tilstand"
 
-#: ../src/configuration/e-mapi-config-utils.c:1626
+#: ../src/configuration/e-mapi-config-utils.c:1798
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "Kan ikke oprette MAPI-opgaveliste i afkoblet tilstand"
 
-#: ../src/configuration/e-mapi-config-utils.c:1629
+#: ../src/configuration/e-mapi-config-utils.c:1801
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "Kan ikke oprette MAPI-memoliste i afkoblet tilstand"
 
-#: ../src/configuration/e-mapi-config-utils.c:1632
+#: ../src/configuration/e-mapi-config-utils.c:1804
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "Kan ikke oprette MAPI-adressebog i afkoblet tilstand"
 
-#: ../src/configuration/e-mapi-config-utils.c:1637
+#: ../src/configuration/e-mapi-config-utils.c:1809
 msgid "Cannot create MAPI source in offline mode"
 msgstr "Kan ikke oprette MAPI-kilde i afkoblet tilstand"
 
-#: ../src/configuration/e-mapi-config-utils.c:1657
+#: ../src/configuration/e-mapi-config-utils.c:1829
 msgid "_Location:"
 msgstr "_Placering:"
 
@@ -660,7 +684,7 @@ msgid "Custom"
 msgstr "Tilpasset"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:272
-msgid "Writing folder permissions, please wait..."
+msgid "Writing folder permissions, please wait…"
 msgstr "Skriver mapperettigheder, vent venligst …"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:782
@@ -690,11 +714,11 @@ msgid "Permission level"
 msgstr "Rettighedsniveau"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:937
-msgid "Edit MAPI folder permissions..."
+msgid "Edit MAPI folder permissions…"
 msgstr "Rediger MAPI-mapperettigheder …"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:962
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:637
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:773
 msgid "Account:"
 msgstr "Konto:"
 
@@ -801,7 +825,7 @@ msgid "Folder visible"
 msgstr "Mappe synlig"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:1281
-msgid "Reading folder permissions, please wait..."
+msgid "Reading folder permissions, please wait…"
 msgstr "Læser mapperettigheder, vent venligst …"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:221
@@ -828,7 +852,7 @@ msgid "Search for a user"
 msgstr "Søg efter en bruger"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:533
-msgid "Searching..."
+msgid "Searching…"
 msgstr "Søger …"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:604
@@ -836,14 +860,14 @@ msgid "E-mail"
 msgstr "E-mail"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:645
-msgid "Choose MAPI user..."
+msgid "Choose MAPI user…"
 msgstr "Vælg MAPI-bruger …"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:668
 msgid "_Search:"
 msgstr "_Søgning:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:89
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:95
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Kan ikke tilføje mappe, mappen findes allerede som “%s”"
@@ -851,18 +875,18 @@ msgstr "Kan ikke tilføje mappe, mappen findes allerede som “%s”"
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. Example result: "Mailbox — John Smith"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:114
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:120
 #, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox — %s"
 msgstr "Brevbakke — %s"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:144
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:150
 #, c-format
 msgid "Cannot add folder, failed to add to store’s summary"
 msgstr "Kan ikke tilføje mappe. Kunne ikke tilføje til lagerets resume"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:336
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:373
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -871,7 +895,7 @@ msgstr ""
 "Mappen “%s” blev ikke fundet. Enten findes den ikke, eller du har ikke "
 "rettighed til at tilgå den."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:371
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:408
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Kan ikke tilføje mappe, kan ikke bestemme mappetypen"
 
@@ -880,65 +904,65 @@ msgstr "Kan ikke tilføje mappe, kan ikke bestemme mappetypen"
 #. the second '%s' is replaced with folder name.
 #. Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:412
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:449
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:512
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:715
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:568
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:846
 msgid "Inbox"
 msgstr "Indbakke"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:514
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:716
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:570
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:847
 msgid "Contacts"
 msgstr "Kontakter"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:516
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:717
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:572
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:848
 msgid "Calendar"
 msgstr "Kalender"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:518
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:718
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:574
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:849
 msgid "Memos"
 msgstr "Memoer"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:520
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:719
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:576
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:850
 msgid "Tasks"
 msgstr "Opgaver"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:534
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:590
 #, c-format
-msgid "Testing availability of folder “%s” of user “%s”, please wait..."
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
 msgstr ""
 "Tester tilgængelighed for mappen “%s” for brugeren “%s”, vent venligst …"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:616
-msgid "Subscribe to folder of other MAPI user..."
-msgstr "Abonner på mappe for en anden MAPI-bruger …"
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:628
+msgid "Cannot search for user when the account is offline"
+msgstr "Kan ikke søge efter bruger, når kontoen er offline"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:665
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:796
 msgid "User"
 msgstr "Bruger"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:672
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:803
 msgid "_User:"
 msgstr "_Bruger:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:685
-msgid "C_hoose..."
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:816
+msgid "C_hoose…"
 msgstr "_Vælg …"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:700
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:831
 msgid "_Folder name:"
 msgstr "_Mappenavn:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:728
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:859
 msgid "Include _subfolders"
 msgstr "Inkluder _undermapper"
 
@@ -1091,8 +1115,28 @@ msgstr "Kan ikke tilføje mappe. Mappetypen er ikke understøttet"
 msgid "Cannot add folder, master source not found"
 msgstr "Kan ikke tilføje mappe, masterkilden blev ikke fundet"
 
-#~ msgid "Searching"
-#~ msgstr "Søger"
+#: ../src/libexchangemapi/e-mapi-utils.c:854
+#, c-format
+msgid ""
+"Cannot ask for Kerberos ticket. Obtain the ticket manually, like on command "
+"line with “kinit” or open “Online Accounts” in “Settings” and add the "
+"Kerberos account there. Reported error was: %s"
+msgstr ""
+"Kan ikke spørge efter Kerberos-billet. Få billetten manuelt, f.eks. på "
+"kommandolinjen med “kinit” eller åbn “Onlinekonti” i “Indstillinger” og "
+"tilføj Kerberos-kontoen der. Den rapporterede fejl var: %s"
+
+#~ msgid "Folder size..."
+#~ msgstr "Mappestørrelse …"
+
+#~ msgid "Permissions..."
+#~ msgstr "Rettigheder …"
+
+#~ msgid "Edit MAPI folder permissions..."
+#~ msgstr "Rediger MAPI-mapperettigheder …"
+
+#~ msgid "Searching..."
+#~ msgstr "Søger …"
 
 #~ msgid "Failed to remove public folder"
 #~ msgstr "Kunne ikke fjerne offentlig mappe"
