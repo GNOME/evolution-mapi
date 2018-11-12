@@ -43,6 +43,8 @@ static CamelProviderConfEntry mapi_conf_entries[] = {
 	  N_("Checking for new mail") },
 	{ CAMEL_PROVIDER_CONF_CHECKBOX, "check-all", NULL,
 	  N_("C_heck for new messages in all folders"), "1" },
+	{ CAMEL_PROVIDER_CONF_CHECKBOX, "listen-notifications", NULL,
+	  N_("Lis_ten for server change notifications"), "1" },
 	{ CAMEL_PROVIDER_CONF_SECTION_END },
 
 	{ CAMEL_PROVIDER_CONF_SECTION_START, "generals", NULL,
@@ -54,8 +56,6 @@ static CamelProviderConfEntry mapi_conf_entries[] = {
 	  N_("Check new messages for _Junk contents"), "0" },
 	{ CAMEL_PROVIDER_CONF_CHECKBOX, "filter-junk-inbox", "filter-junk",
 	  N_("Only check for Junk messag_es in the Inbox folder"), "0" },
-	{ CAMEL_PROVIDER_CONF_CHECKBOX, "listen-notifications", NULL,
-	  N_("Lis_ten for server notifications"), "0" },
 	{ CAMEL_PROVIDER_CONF_CHECKBOX, "stay-synchronized", NULL,
 	  N_("Synchroni_ze remote mail locally in all folders"), "0" },
 	{ CAMEL_PROVIDER_CONF_PLACEHOLDER, "mapi-limit-by-age-placeholder", NULL },
