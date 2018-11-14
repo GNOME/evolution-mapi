@@ -331,6 +331,7 @@ parse_property_cb (struct SPropValue prop, void *closure)
 			} else if (prop.value.bin.cb > 65535) {
 				g_debug ("%s: PT_BINARY property 0x%X larger than 64KB (%d), will be truncated", G_STRFUNC, prop.ulPropTag, prop.value.bin.cb);
 			}
+			/* falls through */
 		case PT_BOOLEAN:
 		case PT_I2:
 		case PT_LONG:
