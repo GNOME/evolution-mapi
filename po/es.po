@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi.master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-mapi/issues\n"
-"POT-Creation-Date: 2018-09-03 15:27+0000\n"
-"PO-Revision-Date: 2018-10-02 15:20+0200\n"
+"POT-Creation-Date: 2018-11-12 19:45+0000\n"
+"PO-Revision-Date: 2018-11-15 12:32+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: es <gnome-es-list@gnome.org>\n"
 "Language: es\n"
@@ -170,28 +170,28 @@ msgstr "Comprobando si hay correo nuevo"
 msgid "C_heck for new messages in all folders"
 msgstr "_Comprobar si hay mensajes nuevos en todas las carpetas"
 
-#: ../src/camel/camel-mapi-provider.c:49
+#: ../src/camel/camel-mapi-provider.c:47
+#| msgid "Lis_ten for server notifications"
+msgid "Lis_ten for server change notifications"
+msgstr "E_scuchar las notificaciones de cambio del servidor"
+
+#: ../src/camel/camel-mapi-provider.c:51
 msgid "Options"
 msgstr "Opciones"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:52
+#: ../src/camel/camel-mapi-provider.c:54
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
 "_Aplicar filtros en mensajes nuevos en la Bandeja de entrada en este servidor"
 
-#: ../src/camel/camel-mapi-provider.c:54
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "Check new messages for _Junk contents"
 msgstr "Comprobar si el contenido de los mensajes nuevos es _SPAM"
 
-#: ../src/camel/camel-mapi-provider.c:56
+#: ../src/camel/camel-mapi-provider.c:58
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Sólo comprobar _mensajes de SPAM en la carpeta de entrada"
-
-#: ../src/camel/camel-mapi-provider.c:58
-#: ../src/configuration/e-mapi-config-utils.c:1774
-msgid "Lis_ten for server notifications"
-msgstr "E_scuchar las notificaciones del servidor"
 
 #: ../src/camel/camel-mapi-provider.c:60
 msgid "Synchroni_ze remote mail locally in all folders"
@@ -484,7 +484,6 @@ msgstr ""
 "seleccionado. Rellénelo con valores correctos."
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:495
-#| msgid "Connecting to the server, please wait..."
 msgid "Connecting to the server, please wait…"
 msgstr "Conectando al servidor, espere…"
 
@@ -556,7 +555,6 @@ msgstr "Obteniendo la lista de carpetas…"
 
 #: ../src/configuration/e-mapi-config-utils.c:612
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:752
-#| msgid "Subscribe to folder of other MAPI user..."
 msgid "Subscribe to folder of other MAPI user…"
 msgstr "Suscribirse a la carpeta de otro usuario MAPI…"
 
@@ -567,12 +565,10 @@ msgstr ""
 "No se pueden editar los permisos de la carpeta «%s», elija otra carpeta."
 
 #: ../src/configuration/e-mapi-config-utils.c:873
-#| msgid "Folder Size"
 msgid "Folder size…"
 msgstr "Tamaño de la carpeta…"
 
 #: ../src/configuration/e-mapi-config-utils.c:880
-#| msgid "Subscribe to folder of other user..."
 msgid "Subscribe to folder of other user…"
 msgstr "Suscribirse a la carpeta de otro usuario…"
 
@@ -581,7 +577,6 @@ msgstr "Suscribirse a la carpeta de otro usuario…"
 #: ../src/configuration/e-mapi-config-utils.c:1240
 #: ../src/configuration/e-mapi-config-utils.c:1277
 #: ../src/configuration/e-mapi-config-utils.c:1314
-#| msgid "Permissions"
 msgid "Permissions…"
 msgstr "Permisos:"
 
@@ -610,9 +605,12 @@ msgid "Personal Folders"
 msgstr "Carpetas personales"
 
 #: ../src/configuration/e-mapi-config-utils.c:1727
-#| msgid "Searching remote MAPI folder structure, please wait..."
 msgid "Searching remote MAPI folder structure, please wait…"
 msgstr "Buscando la estructura de carpetas MAPI remotas, espere…"
+
+#: ../src/configuration/e-mapi-config-utils.c:1774
+msgid "Lis_ten for server notifications"
+msgstr "E_scuchar las notificaciones del servidor"
 
 #: ../src/configuration/e-mapi-config-utils.c:1795
 msgid "Cannot create MAPI calendar in offline mode"
@@ -689,7 +687,6 @@ msgid "Custom"
 msgstr "Personalizado"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:272
-#| msgid "Writing folder permissions, please wait..."
 msgid "Writing folder permissions, please wait…"
 msgstr "Escribiendo los permisos de la carpeta, espere…"
 
@@ -720,7 +717,6 @@ msgid "Permission level"
 msgstr "Nivel de permisos"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:939
-#| msgid "Edit MAPI folder permissions"
 msgid "Edit MAPI folder permissions…"
 msgstr "Editar los permisos de la carpeta MAPI…"
 
@@ -832,7 +828,6 @@ msgid "Folder visible"
 msgstr "Carpeta visible"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:1283
-#| msgid "Reading folder permissions, please wait..."
 msgid "Reading folder permissions, please wait…"
 msgstr "Leyendo los permisos de la carpeta, espere…"
 
@@ -860,7 +855,6 @@ msgid "Search for a user"
 msgstr "Buscar un usuario"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:533
-#| msgid "Searching"
 msgid "Searching…"
 msgstr "Buscando…"
 
@@ -869,7 +863,6 @@ msgid "E-mail"
 msgstr "Correo-e"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:647
-#| msgid "Choose MAPI user..."
 msgid "Choose MAPI user…"
 msgstr "Elegir usuario MAPI…"
 
@@ -950,13 +943,11 @@ msgstr "Tareas"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:590
 #, c-format
-#| msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgid "Testing availability of folder “%s” of user “%s”, please wait…"
 msgstr ""
 "Verificando la disponibilidad de la carpeta «%s» del usuario «%s», espere…"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:628
-#| msgid "Cannot authenticate MAPI accounts in offline mode"
 msgid "Cannot search for user when the account is offline"
 msgstr "No se pueden autenticar las cuentas MAPI con la cuenta desconectada"
 
@@ -969,7 +960,6 @@ msgid "_User:"
 msgstr "_Usuario:"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:816
-#| msgid "C_hoose..."
 msgid "C_hoose…"
 msgstr "E_legir…"
 
