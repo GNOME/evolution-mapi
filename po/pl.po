@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-07-08 16:50+0200\n"
-"PO-Revision-Date: 2018-07-08 16:52+0200\n"
+"POT-Creation-Date: 2018-11-18 12:44+0100\n"
+"PO-Revision-Date: 2018-11-18 12:45+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -172,27 +172,26 @@ msgstr "Sprawdzanie nowej poczty"
 msgid "C_heck for new messages in all folders"
 msgstr "_Sprawdzanie nowych wiadomości we wszystkich katalogach"
 
-#: ../src/camel/camel-mapi-provider.c:49
+#: ../src/camel/camel-mapi-provider.c:47
+msgid "Lis_ten for server change notifications"
+msgstr "_Nasłuchiwanie powiadomień o zmianach na serwerze"
+
+#: ../src/camel/camel-mapi-provider.c:51
 msgid "Options"
 msgstr "Opcje"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:52
+#: ../src/camel/camel-mapi-provider.c:54
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Filtrowanie nowych wiadomości przychodzących na tym serwerze"
 
-#: ../src/camel/camel-mapi-provider.c:54
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "Check new messages for _Junk contents"
 msgstr "Sz_ukanie niechcianych treści w nowych wiadomościach"
 
-#: ../src/camel/camel-mapi-provider.c:56
+#: ../src/camel/camel-mapi-provider.c:58
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "S_zukanie niechcianych treści tylko w katalogu przychodzących"
-
-#: ../src/camel/camel-mapi-provider.c:58
-#: ../src/configuration/e-mapi-config-utils.c:1774
-msgid "Lis_ten for server notifications"
-msgstr "_Nasłuchiwanie powiadomień serwera"
 
 #: ../src/camel/camel-mapi-provider.c:60
 msgid "Synchroni_ze remote mail locally in all folders"
@@ -609,6 +608,10 @@ msgstr "Katalogi osobiste"
 #: ../src/configuration/e-mapi-config-utils.c:1727
 msgid "Searching remote MAPI folder structure, please wait…"
 msgstr "Wyszukiwanie zdalnej struktury katalogów MAPI, proszę czekać…"
+
+#: ../src/configuration/e-mapi-config-utils.c:1774
+msgid "Lis_ten for server notifications"
+msgstr "_Nasłuchiwanie powiadomień serwera"
 
 #: ../src/configuration/e-mapi-config-utils.c:1795
 msgid "Cannot create MAPI calendar in offline mode"
