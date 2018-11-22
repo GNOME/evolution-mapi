@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-mapi/issues\n"
-"POT-Creation-Date: 2018-07-02 12:46+0000\n"
-"PO-Revision-Date: 2018-07-04 17:28-0200\n"
+"POT-Creation-Date: 2018-11-12 19:45+0000\n"
+"PO-Revision-Date: 2018-11-22 06:47-0200\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
@@ -175,27 +175,27 @@ msgstr "Verificando por novas mensagens"
 msgid "C_heck for new messages in all folders"
 msgstr "_Verificar por novas mensagens em todas as pastas"
 
-#: ../src/camel/camel-mapi-provider.c:49
+#: ../src/camel/camel-mapi-provider.c:47
+#| msgid "Lis_ten for server notifications"
+msgid "Lis_ten for server change notifications"
+msgstr "Escu_tar notificações de alteração de servidor"
+
+#: ../src/camel/camel-mapi-provider.c:51
 msgid "Options"
 msgstr "Opções"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:52
+#: ../src/camel/camel-mapi-provider.c:54
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Aplicar filtros às novas mensagens na caixa de entrada deste servidor"
 
-#: ../src/camel/camel-mapi-provider.c:54
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "Check new messages for _Junk contents"
 msgstr "Verificar se as novas mensagens contém _spam"
 
-#: ../src/camel/camel-mapi-provider.c:56
+#: ../src/camel/camel-mapi-provider.c:58
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Verificar somente por mensag_ens spam na caixa de entrada"
-
-#: ../src/camel/camel-mapi-provider.c:58
-#: ../src/configuration/e-mapi-config-utils.c:1774
-msgid "Lis_ten for server notifications"
-msgstr "Escu_tar notificações do servidor"
 
 #: ../src/camel/camel-mapi-provider.c:60
 msgid "Synchroni_ze remote mail locally in all folders"
@@ -332,7 +332,8 @@ msgstr "Pasta “%s” não encontrada"
 
 #: ../src/camel/camel-mapi-store.c:1917
 msgid "Cannot unsubscribe MAPI folders in offline mode"
-msgstr "Não é possível cancelar a inscrição em pastas MAPI no modo desconectado"
+msgstr ""
+"Não é possível cancelar a inscrição em pastas MAPI no modo desconectado"
 
 #. Translators: The %s is replaced with a server's host name
 #: ../src/camel/camel-mapi-store.c:2219 ../src/camel/camel-mapi-transport.c:194
@@ -490,7 +491,6 @@ msgstr ""
 "Por favor preencha-os com os valores corretos."
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:495
-#| msgid "Connecting to the server, please wait..."
 msgid "Connecting to the server, please wait…"
 msgstr "Conectando ao servidor; por favor, aguarde…"
 
@@ -562,7 +562,6 @@ msgstr "Obtendo lista de pastas…"
 
 #: ../src/configuration/e-mapi-config-utils.c:612
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:752
-#| msgid "Subscribe to folder of other MAPI user..."
 msgid "Subscribe to folder of other MAPI user…"
 msgstr "Inscrever-se a uma pasta de outro usuário MAPI…"
 
@@ -573,12 +572,10 @@ msgstr ""
 "Não foi possível editar as permissões da pasta “%s”; escolha outra pasta."
 
 #: ../src/configuration/e-mapi-config-utils.c:873
-#| msgid "Folder Size"
 msgid "Folder size…"
 msgstr "Tamanho da pasta…"
 
 #: ../src/configuration/e-mapi-config-utils.c:880
-#| msgid "Subscribe to folder of other user..."
 msgid "Subscribe to folder of other user…"
 msgstr "Inscrever-se a uma pasta de outro usuário…"
 
@@ -587,7 +584,6 @@ msgstr "Inscrever-se a uma pasta de outro usuário…"
 #: ../src/configuration/e-mapi-config-utils.c:1240
 #: ../src/configuration/e-mapi-config-utils.c:1277
 #: ../src/configuration/e-mapi-config-utils.c:1314
-#| msgid "Permissions"
 msgid "Permissions…"
 msgstr "Permissões…"
 
@@ -616,9 +612,12 @@ msgid "Personal Folders"
 msgstr "Pastas pessoais"
 
 #: ../src/configuration/e-mapi-config-utils.c:1727
-#| msgid "Searching remote MAPI folder structure, please wait..."
 msgid "Searching remote MAPI folder structure, please wait…"
 msgstr "Pesquisando estrutura de pastas MAPI remota, por favor, aguarde…"
+
+#: ../src/configuration/e-mapi-config-utils.c:1774
+msgid "Lis_ten for server notifications"
+msgstr "Escu_tar notificações do servidor"
 
 #: ../src/configuration/e-mapi-config-utils.c:1795
 msgid "Cannot create MAPI calendar in offline mode"
@@ -695,7 +694,6 @@ msgid "Custom"
 msgstr "Personalizado"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:272
-#| msgid "Writing folder permissions, please wait..."
 msgid "Writing folder permissions, please wait…"
 msgstr "Gravando permissões da pasta; por favor, aguarde…"
 
@@ -716,129 +714,127 @@ msgctxt "User"
 msgid "Unknown"
 msgstr "Desconhecido"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:878
-#: ../src/configuration/e-mapi-search-gal-user.c:598
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:880
+#: ../src/configuration/e-mapi-search-gal-user.c:600
 msgid "Name"
 msgstr "Nome"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:884
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:886
 msgid "Permission level"
 msgstr "Nível de permissão"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:937
-#| msgid "Edit MAPI folder permissions"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:939
 msgid "Edit MAPI folder permissions…"
 msgstr "Editar permissões de pasta MAPI…"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:962
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:964
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:773
 msgid "Account:"
 msgstr "Conta:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:988
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:990
 msgid "Folder name:"
 msgstr "Nome da pasta:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1009
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1011
 msgid "Folder ID:"
 msgstr "ID da pasta:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1068
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1070
 msgid "Permissions"
 msgstr "Permissões"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1089
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1091
 msgid "Permi_ssion level:"
 msgstr "_Nível de permissão:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1117
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1119
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Leitura"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1128
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1191
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1130
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1193
 msgctxt "Permissions"
 msgid "None"
 msgstr "Nenhum"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1133
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1135
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "Todos os detalhes"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1138
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1140
 msgctxt "Permissions"
 msgid "Simple Free/Busy"
 msgstr "Livre/ocupado simples"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1142
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1144
 msgctxt "Permissions"
 msgid "Detailed Free/Busy"
 msgstr "Livre/ocupado detalhado"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1149
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1151
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Gravação"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1160
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "Criar itens"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1164
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Criar subpastas"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1168
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1170
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "Editar criados"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1172
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1174
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "Editar todos"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1180
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1182
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Excluir itens"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1196
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1198
 msgctxt "Permissions"
 msgid "Own"
 msgstr "Próprios"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1201
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1203
 msgctxt "Permissions"
 msgid "All"
 msgstr "Todos"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1207
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1209
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Outros"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1218
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Proprietário da pasta"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1222
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Contato da pasta"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1226
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1228
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Pasta visível"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1281
-#| msgid "Reading folder permissions, please wait..."
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1283
 msgid "Reading folder permissions, please wait…"
 msgstr "Lendo permissões da pasta; por favor, aguarde…"
 
@@ -861,25 +857,23 @@ msgstr[0] "%d usuário encontrado; mostrando apenas o primeiro"
 msgstr[1] "%d usuários encontrados; mostrando apenas os %d primeiros"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:517
-#: ../src/configuration/e-mapi-search-gal-user.c:708
+#: ../src/configuration/e-mapi-search-gal-user.c:710
 msgid "Search for a user"
 msgstr "Pesquisar por um usuário"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:533
-#| msgid "Searching"
 msgid "Searching…"
 msgstr "Pesquisando…"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:604
+#: ../src/configuration/e-mapi-search-gal-user.c:606
 msgid "E-mail"
 msgstr "E-mail"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:645
-#| msgid "Choose MAPI user..."
+#: ../src/configuration/e-mapi-search-gal-user.c:647
 msgid "Choose MAPI user…"
 msgstr "Escolher usuário MAPI…"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:668
+#: ../src/configuration/e-mapi-search-gal-user.c:670
 msgid "_Search:"
 msgstr "_Pesquisar:"
 
@@ -957,13 +951,11 @@ msgstr "Tarefas"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:590
 #, c-format
-#| msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgid "Testing availability of folder “%s” of user “%s”, please wait…"
 msgstr ""
 "Testando disponibilidade da pasta “%s” do usuário “%s”; por favor, aguarde…"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:628
-#| msgid "Cannot authenticate MAPI accounts in offline mode"
 msgid "Cannot search for user when the account is offline"
 msgstr "Não é possível pesquisar por usuário quando a conta está desconectada"
 
@@ -976,7 +968,6 @@ msgid "_User:"
 msgstr "_Usuário:"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:816
-#| msgid "C_hoose..."
 msgid "C_hoose…"
 msgstr "_Escolher…"
 
