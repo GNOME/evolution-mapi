@@ -1,16 +1,16 @@
 # Swedish translation for evolution-mapi.
-# Copyright © 2009-2018 Free Software Foundation, Inc.
+# Copyright © 2009-2019 Free Software Foundation, Inc.
 # This file is distributed under the same license as the evolution-mapi package.
 # Daniel Nylander <po@danielnylander.se>, 2009, 2010, 2011, 2012.
 # Sebastian Rasmussen <sebras@gmail.com>, 2016.
-# Anders Jonsson <anders.jonsson@norsjovallen.se>, 2017, 2018.
+# Anders Jonsson <anders.jonsson@norsjovallen.se>, 2017, 2018, 2019.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-mapi/issues\n"
-"POT-Creation-Date: 2018-09-03 15:27+0000\n"
-"PO-Revision-Date: 2018-09-05 11:59+0200\n"
+"POT-Creation-Date: 2018-11-12 19:45+0000\n"
+"PO-Revision-Date: 2019-01-02 21:13+0100\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 2.1.1\n"
+"X-Generator: Poedit 2.2\n"
 
 #: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:1
 msgid "Exchange MAPI"
@@ -170,27 +170,26 @@ msgstr "Letar efter ny e-post"
 msgid "C_heck for new messages in all folders"
 msgstr "L_eta efter nya meddelanden i alla mappar"
 
-#: ../src/camel/camel-mapi-provider.c:49
+#: ../src/camel/camel-mapi-provider.c:47
+msgid "Lis_ten for server change notifications"
+msgstr "_Lyssna efter ändringsaviseringar från server"
+
+#: ../src/camel/camel-mapi-provider.c:51
 msgid "Options"
 msgstr "Alternativ"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:52
+#: ../src/camel/camel-mapi-provider.c:54
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Tillämpa filter för nya meddelanden i Inkorg på denna server"
 
-#: ../src/camel/camel-mapi-provider.c:54
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "Check new messages for _Junk contents"
 msgstr "Kontrollera nya meddelanden efter _skräppost"
 
-#: ../src/camel/camel-mapi-provider.c:56
+#: ../src/camel/camel-mapi-provider.c:58
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Kontrollera endast I_nkorgsmappen efter skräppost"
-
-#: ../src/camel/camel-mapi-provider.c:58
-#: ../src/configuration/e-mapi-config-utils.c:1774
-msgid "Lis_ten for server notifications"
-msgstr "_Lyssna efter serveraviseringar"
 
 #: ../src/camel/camel-mapi-provider.c:60
 msgid "Synchroni_ze remote mail locally in all folders"
@@ -606,6 +605,10 @@ msgstr "Personliga mappar"
 #: ../src/configuration/e-mapi-config-utils.c:1727
 msgid "Searching remote MAPI folder structure, please wait…"
 msgstr "Söker genom MAPI-fjärrmappsstruktur, vänta…"
+
+#: ../src/configuration/e-mapi-config-utils.c:1774
+msgid "Lis_ten for server notifications"
+msgstr "_Lyssna efter serveraviseringar"
 
 #: ../src/configuration/e-mapi-config-utils.c:1795
 msgid "Cannot create MAPI calendar in offline mode"
