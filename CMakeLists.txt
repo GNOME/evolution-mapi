@@ -106,7 +106,7 @@ endif(ENABLE_MAINTAINER_MODE)
 setup_build_flags(${ENABLE_MAINTAINER_MODE})
 
 if(${ENABLE_MAINTAINER_MODE})
-	add_definitions(-DEDS_DISABLE_DEPRECATED=1)
+	add_definitions(-DCAMEL_DISABLE_DEPRECATED=1 -DEDS_DISABLE_DEPRECATED=1)
 endif(${ENABLE_MAINTAINER_MODE})
 
 pkg_check_modules(CAMEL REQUIRED camel-1.2>=${eds_minimum_version})
