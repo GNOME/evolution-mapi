@@ -1017,7 +1017,9 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 
 		if (e_mapi_util_find_array_datetime_propval (&t, &object->properties, PidLidAppointmentStartWhole) == MAPI_E_SUCCESS) {
 			icaltimezone *zone = dtstart_tz_location ? icaltimezone_get_builtin_timezone (dtstart_tz_location) : utc_zone;
-			prop = icalproperty_new_dtstart (icaltime_from_timet_with_zone (t.tv_sec, all_day, zone));
+			struct icaltimetype itt = icaltime_from_timet_with_zone (t.tv_sec, all_day, zone);
+			itt.zone = zone;
+			prop = icalproperty_new_dtstart (itt);
 			if (!all_day && zone && icaltimezone_get_tzid (zone)) {
 				icalproperty_add_parameter (prop, icalparameter_new_tzid (icaltimezone_get_tzid (zone)));
 			}
@@ -1040,12 +1042,15 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 
 		if (e_mapi_util_find_array_datetime_propval (&t, &object->properties, PidLidAppointmentEndWhole) == MAPI_E_SUCCESS) {
 			icaltimezone *zone;
+			struct icaltimetype itt;
 
 			if (!dtend_tz_location)
 				dtend_tz_location = dtstart_tz_location;
 
 			zone = dtend_tz_location ? icaltimezone_get_builtin_timezone (dtend_tz_location) : utc_zone;
-			prop = icalproperty_new_dtend (icaltime_from_timet_with_zone (t.tv_sec, all_day, zone));
+			itt = icaltime_from_timet_with_zone (t.tv_sec, all_day, zone);
+			itt.zone = zone;
+			prop = icalproperty_new_dtend (itt);
 			if (!all_day && zone && icaltimezone_get_tzid (zone)) {
 				icalproperty_add_parameter (prop, icalparameter_new_tzid (icaltimezone_get_tzid (zone)));
 			}
@@ -1199,8 +1204,8 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 				ECalComponentAlarmTrigger trigger;
 
 				trigger.type = E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START;
-				trigger.u.rel_duration = icaltime_subtract (icaltime_from_timet_with_zone (displaytime.tv_sec, 0, 0),
-									    icaltime_from_timet_with_zone (start.tv_sec, 0, 0));
+				trigger.u.rel_duration = icaltime_subtract (icaltime_from_timet_with_zone (displaytime.tv_sec, 0, NULL),
+									    icaltime_from_timet_with_zone (start.tv_sec, 0, NULL));
 
 				e_cal_component_alarm_set_action (e_alarm, E_CAL_COMPONENT_ALARM_DISPLAY);
 				e_cal_component_alarm_set_trigger (e_alarm, trigger);

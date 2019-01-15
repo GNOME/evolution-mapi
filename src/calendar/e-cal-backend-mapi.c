@@ -53,6 +53,10 @@
 #define EDC_ERROR(_code) e_data_cal_create_error (_code, NULL)
 #define EDC_ERROR_EX(_code, _msg) e_data_cal_create_error (_code, _msg)
 
+/* Current data version */
+#define EMA_DATA_VERSION	1
+#define EMA_DATA_VERSION_KEY	"ema-data-version"
+
 G_DEFINE_TYPE (ECalBackendMAPI, e_cal_backend_mapi, E_TYPE_CAL_META_BACKEND)
 
 struct _ECalBackendMAPIPrivate {
@@ -1727,6 +1731,76 @@ ecb_mapi_get_destination_address (EBackend *backend,
 	return result;
 }
 
+static gboolean
+ecb_mapi_update_tzid_cb (ECache *cache,
+			 const gchar *uid,
+			 const gchar *revision,
+			 const gchar *object,
+			 EOfflineState offline_state,
+			 gint ncols,
+			 const gchar *column_names[],
+			 const gchar *column_values[],
+			 gchar **out_revision,
+			 gchar **out_object,
+			 EOfflineState *out_offline_state,
+			 ECacheColumnValues **out_other_columns,
+			 gpointer user_data)
+{
+	icalcomponent *icomp;
+	icalproperty *prop;
+	gboolean changed = FALSE;
+
+	g_return_val_if_fail (object != NULL, FALSE);
+	g_return_val_if_fail (out_object != NULL, FALSE);
+
+	icomp = icalcomponent_new_from_string (object);
+	if (!icomp)
+		return TRUE;
+
+	prop = icalcomponent_get_first_property (icomp, ICAL_DTSTART_PROPERTY);
+	if (prop && icalproperty_get_first_parameter (prop, ICAL_TZID_PARAMETER)) {
+		struct icaltimetype itt;
+
+		itt = icalproperty_get_dtstart (prop);
+		if (icaltime_is_valid_time (itt) && icaltime_is_utc (itt)) {
+			itt.zone = NULL;
+			icalproperty_set_dtstart (prop, itt);
+			changed = TRUE;
+		}
+	}
+
+	prop = icalcomponent_get_first_property (icomp, ICAL_DTEND_PROPERTY);
+	if (prop && icalproperty_get_first_parameter (prop, ICAL_TZID_PARAMETER)) {
+		struct icaltimetype itt;
+
+		itt = icalproperty_get_dtend (prop);
+		if (icaltime_is_valid_time (itt) && icaltime_is_utc (itt)) {
+			itt.zone = NULL;
+			icalproperty_set_dtend (prop, itt);
+			changed = TRUE;
+		}
+	}
+
+	if (changed)
+		*out_object = icalcomponent_as_ical_string_r (icomp);
+
+	icalcomponent_free (icomp);
+
+	return TRUE;
+}
+
+static void
+ecb_mapi_migrate (ECalBackendMAPI *cbmapi,
+		  ECalCache *cal_cache,
+		  gint data_version)
+{
+	if (data_version < 1) {
+		/* DTSTART/DTEND stores with both TZID and 'Z' suffix */
+		e_cache_foreach_update (E_CACHE (cal_cache), E_CACHE_EXCLUDE_DELETED, NULL,
+			ecb_mapi_update_tzid_cb, NULL, NULL, NULL);
+	}
+}
+
 static gchar *
 ecb_mapi_dup_component_revision_cb (ECalCache *cal_cache,
 				    icalcomponent *icalcomp)
@@ -1750,6 +1824,7 @@ ecb_mapi_constructed (GObject *object)
 {
 	ECalBackendMAPI *cbmapi = E_CAL_BACKEND_MAPI (object);
 	ECalCache *cal_cache;
+	gint data_version;
 
 	/* Chaing up to parent's method */
 	G_OBJECT_CLASS (e_cal_backend_mapi_parent_class)->constructed (object);
@@ -1764,6 +1839,20 @@ ecb_mapi_constructed (GObject *object)
 
 	g_signal_connect (cal_cache, "dup-component-revision",
 		G_CALLBACK (ecb_mapi_dup_component_revision_cb), NULL);
+
+	data_version = e_cache_get_key_int (E_CACHE (cal_cache), EMA_DATA_VERSION_KEY, NULL);
+
+	if (EMA_DATA_VERSION != data_version) {
+		GError *local_error = NULL;
+
+		ecb_mapi_migrate (cbmapi, cal_cache, data_version);
+
+		if (!e_cache_set_key_int (E_CACHE (cal_cache), EMA_DATA_VERSION_KEY, EMA_DATA_VERSION, &local_error)) {
+			g_warning ("%s: Failed to store data version: %s\n", G_STRFUNC, local_error ? local_error->message : "Unknown error");
+		}
+
+		g_clear_error (&local_error);
+	}
 
 	g_clear_object (&cal_cache);
 }
