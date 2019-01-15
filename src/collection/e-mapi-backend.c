@@ -883,10 +883,15 @@ mapi_backend_authenticate_sync (EBackend *backend,
 		mapi_backend->priv->need_update_folders = TRUE;
 
 		if (g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_PASSWORD_CHANGE_REQUIRED) ||
-		    g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_PASSWORD_EXPIRED))
+		    g_error_matches (mapi_error, E_MAPI_ERROR, MAPI_E_PASSWORD_EXPIRED)) {
 			res = E_SOURCE_AUTHENTICATION_REJECTED;
+		} else if ((!mapi_error || mapi_error->domain == E_MAPI_ERROR) &&
+			   (!credentials || !e_named_parameters_count (credentials)) &&
+			   !camel_mapi_settings_get_kerberos (settings)) {
+			res = E_SOURCE_AUTHENTICATION_REQUIRED;
+		}
 
-		if (res != E_SOURCE_AUTHENTICATION_REJECTED) {
+		if (res == E_SOURCE_AUTHENTICATION_ERROR) {
 			if (krb_error) {
 				GError *new_error = g_error_new (mapi_error->domain, mapi_error->code,
 					/* Translators: the first '%s' is replaced with a generic error message,
