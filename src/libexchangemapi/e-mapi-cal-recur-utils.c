@@ -915,7 +915,7 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 			ECalComponentDateTime *dt = g_new0 (ECalComponentDateTime, 1);
 			time_t ictime = convert_recurrence_minutes_to_timet (rp->DeletedInstanceDates[i]);
 
-			tt = icaltime_from_timet_with_zone (ictime, 1, 0);
+			tt = icaltime_from_timet_with_zone (ictime, 1, NULL);
 
 			val = g_new0(struct icaltimetype, 1);
 			memcpy (val, &tt, sizeof(struct icaltimetype));
@@ -930,7 +930,7 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 	/* end date */
 	if (rp->EndType == END_AFTER_DATE) {
 		time_t ict = convert_recurrence_minutes_to_timet (rp->EndDate);
-		rt.until = icaltime_from_timet_with_zone (ict, 1, 0);
+		rt.until = icaltime_from_timet_with_zone (ict, 1, NULL);
 	}
 
 	/* Set the recurrence */
@@ -960,18 +960,18 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 			/* make a shallow clone of comp */
 			detached[i] = e_cal_component_clone (comp);
 
-			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->OriginalStartDate), 0, 0);
+			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->OriginalStartDate), 0, NULL);
 			rid.type = E_CAL_COMPONENT_RANGE_SINGLE;
 			rid.datetime.value = &tt;
 			rid.datetime.tzid = recur_zone ? icaltimezone_get_tzid (recur_zone) : "UTC";
 			e_cal_component_set_recurid (detached[i], &rid);
 
-			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->StartDateTime), 0, 0);
+			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->StartDateTime), 0, NULL);
 			edt.value = &tt;
 			edt.tzid = recur_zone ? icaltimezone_get_tzid (recur_zone) : "UTC";
 			e_cal_component_set_dtstart (detached[i], &edt);
 
-			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->EndDateTime), 0, 0);
+			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->EndDateTime), 0, NULL);
 			edt.value = &tt;
 			edt.tzid = recur_zone ? icaltimezone_get_tzid (recur_zone) : "UTC";
 			e_cal_component_set_dtend (detached[i], &edt);
