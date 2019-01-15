@@ -345,7 +345,13 @@ ebb_mapi_connect_sync (EBookMetaBackend *meta_backend,
 
 		g_clear_error (&mapi_error);
 
-		*out_auth_result = is_network_error ? E_SOURCE_AUTHENTICATION_ERROR : E_SOURCE_AUTHENTICATION_REJECTED;
+		if (is_network_error) {
+			*out_auth_result = E_SOURCE_AUTHENTICATION_ERROR;
+		} else if ((!credentials || !e_named_parameters_count (credentials)) && !camel_mapi_settings_get_kerberos (settings)) {
+			*out_auth_result = E_SOURCE_AUTHENTICATION_REQUIRED;
+		} else {
+			*out_auth_result = E_SOURCE_AUTHENTICATION_REJECTED;
+		}
 
 		return FALSE;
 	}
