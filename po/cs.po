@@ -5,14 +5,14 @@
 # Andre Klapper <ak-47@gmx.net>, 2009.
 # Lucas Lommer <llommer@svn.gnome.org>, 2009.
 # Jiri Eischmann <jiri@eischmann.cz>, 2009, 2010, 2011, 2012.
-# Marek Černocký <marek@manet.cz>, 2010, 2011, 2012, 2016, 2017, 2018.
+# Marek Černocký <marek@manet.cz>, 2010, 2011, 2012, 2016, 2017, 2018, 2019.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-mapi/issues\n"
-"POT-Creation-Date: 2018-07-02 12:46+0000\n"
-"PO-Revision-Date: 2018-09-06 14:12+0200\n"
+"POT-Creation-Date: 2019-01-15 17:10+0000\n"
+"PO-Revision-Date: 2019-01-16 17:30+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -32,46 +32,46 @@ msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr "Pro přístup k serverům Microsoft Exchange 2007/OpenChange pomocí MAPI"
 
 #: ../src/addressbook/e-book-backend-mapi.c:92
-#: ../src/calendar/e-cal-backend-mapi.c:100
+#: ../src/calendar/e-cal-backend-mapi.c:104
 #: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1943
 msgid "Unknown error"
 msgstr "Neznámá chyba"
 
-#: ../src/addressbook/e-book-backend-mapi.c:496
-#: ../src/addressbook/e-book-backend-mapi.c:680
+#: ../src/addressbook/e-book-backend-mapi.c:502
+#: ../src/addressbook/e-book-backend-mapi.c:686
 msgid "Failed to fetch GAL entries"
 msgstr "Selhalo stahování záznamů GAL"
 
-#: ../src/addressbook/e-book-backend-mapi.c:502
+#: ../src/addressbook/e-book-backend-mapi.c:508
 msgid "Failed to transfer contacts from a server"
 msgstr "Selhal přenos kontaktů ze serveru"
 
-#: ../src/addressbook/e-book-backend-mapi.c:687
-#: ../src/calendar/e-cal-backend-mapi.c:1105
+#: ../src/addressbook/e-book-backend-mapi.c:693
+#: ../src/calendar/e-cal-backend-mapi.c:1115
 msgid "Failed to list items from a server"
 msgstr "Selhalo vypsání položek ze serveru"
 
-#: ../src/addressbook/e-book-backend-mapi.c:862
-#: ../src/calendar/e-cal-backend-mapi.c:1332
+#: ../src/addressbook/e-book-backend-mapi.c:868
+#: ../src/calendar/e-cal-backend-mapi.c:1342
 msgid "Failed to modify item on a server"
 msgstr "Selhala úprava složky na serveru"
 
-#: ../src/addressbook/e-book-backend-mapi.c:862
-#: ../src/calendar/e-cal-backend-mapi.c:1332
-#: ../src/calendar/e-cal-backend-mapi.c:1626
+#: ../src/addressbook/e-book-backend-mapi.c:868
+#: ../src/calendar/e-cal-backend-mapi.c:1342
+#: ../src/calendar/e-cal-backend-mapi.c:1636
 msgid "Failed to create item on a server"
 msgstr "Selhalo vytvoření složky na serveru"
 
-#: ../src/addressbook/e-book-backend-mapi.c:923
-#: ../src/calendar/e-cal-backend-mapi.c:1400
+#: ../src/addressbook/e-book-backend-mapi.c:929
+#: ../src/calendar/e-cal-backend-mapi.c:1410
 msgid "Failed to remove item from a server"
 msgstr "Selhalo odstranění položky ze serveru"
 
-#: ../src/calendar/e-cal-backend-mapi.c:881
+#: ../src/calendar/e-cal-backend-mapi.c:891
 msgid "Failed to transfer objects from a server"
 msgstr "Selhal přenos objektů ze serveru"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1249
+#: ../src/calendar/e-cal-backend-mapi.c:1259
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -79,7 +79,7 @@ msgstr ""
 "Podpora pro úpravu jednotlivých výskytů opakujících se událostí není dosud "
 "implementována. Změna události na serveru nebyla provedena."
 
-#: ../src/calendar/e-cal-backend-mapi.c:1676
+#: ../src/calendar/e-cal-backend-mapi.c:1686
 msgid "Failed to get Free/Busy data"
 msgstr "Selhalo získání údajů o volných/obsazených termínech"
 
@@ -172,27 +172,26 @@ msgstr "Kontroluje se nová pošta"
 msgid "C_heck for new messages in all folders"
 msgstr "_Kontrolovat nové zprávy ve všech složkách"
 
-#: ../src/camel/camel-mapi-provider.c:49
+#: ../src/camel/camel-mapi-provider.c:47
+msgid "Lis_ten for server change notifications"
+msgstr "Nasloucha_t oznámením o změnách od serveru"
+
+#: ../src/camel/camel-mapi-provider.c:51
 msgid "Options"
 msgstr "Volby"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:52
+#: ../src/camel/camel-mapi-provider.c:54
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Použít filtry na nové zprávy ve složce Přijatá na tomto serveru"
 
-#: ../src/camel/camel-mapi-provider.c:54
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "Check new messages for _Junk contents"
 msgstr "_Hledat nevyžádanou poštu mezi novými zprávami"
 
-#: ../src/camel/camel-mapi-provider.c:56
+#: ../src/camel/camel-mapi-provider.c:58
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Hledat nevyžádanou poštu jen ve složce _Přijatá"
-
-#: ../src/camel/camel-mapi-provider.c:58
-#: ../src/configuration/e-mapi-config-utils.c:1774
-msgid "Lis_ten for server notifications"
-msgstr "Nasloucha_t oznámením od serveru"
 
 #: ../src/camel/camel-mapi-provider.c:60
 msgid "Synchroni_ze remote mail locally in all folders"
@@ -390,7 +389,7 @@ msgstr "Aktualizují se vzdálené složky"
 
 #. Translators: the first '%s' is replaced with a generic error message,
 #. the second '%s' is replaced with additional error information.
-#: ../src/camel/camel-mapi-store.c:3075 ../src/collection/e-mapi-backend.c:894
+#: ../src/camel/camel-mapi-store.c:3075 ../src/collection/e-mapi-backend.c:899
 #: ../src/configuration/e-mail-config-mapi-backend.c:406
 #: ../src/configuration/e-mapi-config-utils.c:341
 #, c-format
@@ -608,6 +607,10 @@ msgstr "Osobní složky"
 msgid "Searching remote MAPI folder structure, please wait…"
 msgstr "Prohledávání struktury vzdálených složek MAPI, prosím čekejte…"
 
+#: ../src/configuration/e-mapi-config-utils.c:1774
+msgid "Lis_ten for server notifications"
+msgstr "Nasloucha_t oznámením od serveru"
+
 #: ../src/configuration/e-mapi-config-utils.c:1795
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Nelze vytvořit kalendář MAPI v režimu odpojení"
@@ -703,127 +706,127 @@ msgctxt "User"
 msgid "Unknown"
 msgstr "Neznámý"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:878
-#: ../src/configuration/e-mapi-search-gal-user.c:598
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:880
+#: ../src/configuration/e-mapi-search-gal-user.c:600
 msgid "Name"
 msgstr "Jméno"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:884
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:886
 msgid "Permission level"
 msgstr "Úroveň oprávnění"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:937
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:939
 msgid "Edit MAPI folder permissions…"
 msgstr "Upravit oprávnění složky MAPI…"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:962
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:964
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:773
 msgid "Account:"
 msgstr "Účet:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:988
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:990
 msgid "Folder name:"
 msgstr "Název složky:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1009
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1011
 msgid "Folder ID:"
 msgstr "ID složky:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1068
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1070
 msgid "Permissions"
 msgstr "Oprávnění"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1089
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1091
 msgid "Permi_ssion level:"
 msgstr "Úro_veň oprávnění:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1117
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1119
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Čtení"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1128
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1191
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1130
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1193
 msgctxt "Permissions"
 msgid "None"
 msgstr "Žádná"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1133
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1135
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "Úplné podrobnosti"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1138
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1140
 msgctxt "Permissions"
 msgid "Simple Free/Busy"
 msgstr "Zjednodušeně volno/obsazeno"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1142
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1144
 msgctxt "Permissions"
 msgid "Detailed Free/Busy"
 msgstr "Podrobně volno/obsazeno"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1149
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1151
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Zápis"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1160
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "Vytvořit položky"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1164
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Vytvořit podsložky"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1168
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1170
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "Upravit vlastní"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1172
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1174
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "Upravit všechny"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1180
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1182
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Odstranit položky"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1196
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1198
 msgctxt "Permissions"
 msgid "Own"
 msgstr "Vlastní"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1201
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1203
 msgctxt "Permissions"
 msgid "All"
 msgstr "Všechna"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1207
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1209
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Ostatní"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1218
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Vlastník složky"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1222
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Kontakt složky"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1226
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1228
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Viditelná složka"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1281
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1283
 msgid "Reading folder permissions, please wait…"
 msgstr "Čtou se oprávnění ke složce, prosím čekejte…"
 
@@ -848,7 +851,7 @@ msgstr[1] "Nalezeni %d uživatelé, ale zobrazeno je pouze prvních %d"
 msgstr[2] "Nalezeno %d uživatelů, ale zobrazeno je pouze prvních %d"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:517
-#: ../src/configuration/e-mapi-search-gal-user.c:708
+#: ../src/configuration/e-mapi-search-gal-user.c:710
 msgid "Search for a user"
 msgstr "Hledat uživatele"
 
@@ -856,15 +859,15 @@ msgstr "Hledat uživatele"
 msgid "Searching…"
 msgstr "Hledá se…"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:604
+#: ../src/configuration/e-mapi-search-gal-user.c:606
 msgid "E-mail"
 msgstr "E-mail"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:645
+#: ../src/configuration/e-mapi-search-gal-user.c:647
 msgid "Choose MAPI user…"
 msgstr "Zvolit uživatele MAPI…"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:668
+#: ../src/configuration/e-mapi-search-gal-user.c:670
 msgid "_Search:"
 msgstr "_Hledat:"
 
@@ -967,19 +970,19 @@ msgid "Include _subfolders"
 msgstr "Včetně pod_složek"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2060
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2065
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Schválené:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2065
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2070
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Předběžné:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2070
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2075
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Zamítnuté:"
