@@ -1,3 +1,17 @@
+evolution-mapi 3.31.90 2019-02-04
+---------------------------------
+
+Bug Fixes:
+	I#1 - DTSTART/DTEND stored both with TZID and as UTC (Milan Crha)
+
+Miscellaneous:
+	Use also -DCAMEL_DISABLE_DEPRECATED=1 in the maintainer mode (Milan Crha)
+	Unnecessarily asks for the credentials from book and calendars (Milan Crha)
+
+Translations:
+	Marek Cernocky (cs)
+	Balázs Úr (hu)
+
 evolution-mapi 3.31.4 2019-01-07
 --------------------------------
 
