@@ -1,3 +1,12 @@
+evolution-mapi 3.30.5 2019-02-04
+--------------------------------
+
+Bug Fixes:
+	I#1 - DTSTART/DTEND stored both with TZID and as UTC (Milan Crha)
+
+Miscellaneous:
+	Unnecessarily asks for the credentials from book and calendars (Milan Crha)
+
 evolution-mapi 3.30.3 2018-12-10
 --------------------------------
 
