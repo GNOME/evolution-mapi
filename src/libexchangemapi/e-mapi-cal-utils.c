@@ -704,7 +704,7 @@ populate_ical_attendees (EMapiConnection *conn,
 			continue;
 		}
 
-		icalemail = g_strdup_printf ("MAILTO:%s", email);
+		icalemail = g_strdup_printf ("mailto:%s", email);
 
 		flags = e_mapi_util_find_array_propval (&recipient->properties, PidTagRecipientFlags);
 
@@ -1082,7 +1082,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 						&name, &email);
 
 					if (email) {
-						val = g_strdup_printf ("MAILTO:%s", email);
+						val = g_strdup_printf ("mailto:%s", email);
 						prop = icalproperty_new_organizer (val);
 						g_free (val);
 
@@ -1110,7 +1110,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 						&name, &email);
 
 					if (email) {
-						val = g_strdup_printf ("MAILTO:%s", email);
+						val = g_strdup_printf ("mailto:%s", email);
 						prop = icalproperty_new_attendee (val);
 						g_free (val);
 
@@ -1149,7 +1149,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 					&sent_name, &sent_email);
 
 				if (sent_email) {
-					val = g_strdup_printf ("MAILTO:%s", sent_email);
+					val = g_strdup_printf ("mailto:%s", sent_email);
 					prop = icalproperty_new_organizer (val);
 					g_free (val);
 
@@ -1161,7 +1161,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 
 					/* SENTBY */
 					if (email && g_utf8_collate (sent_email, email)) {
-						val = g_strdup_printf ("MAILTO:%s", email);
+						val = g_strdup_printf ("mailto:%s", email);
 						param = icalparameter_new_sentby (val);
 						icalproperty_add_parameter (prop, param);
 						g_free (val);

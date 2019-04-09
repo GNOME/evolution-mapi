@@ -555,7 +555,7 @@ ecb_mapi_find_my_response (ECalBackendMAPI *cbmapi,
 	gchar *att = NULL;
 	OlResponseStatus val = olResponseTentative;
 
-	att = g_strdup_printf ("MAILTO:%s", ecb_mapi_get_owner_email (cbmapi));
+	att = g_strdup_printf ("mailto:%s", ecb_mapi_get_owner_email (cbmapi));
 
 	for (attendee = icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY);
 	     attendee;
