@@ -1,3 +1,15 @@
+evolution-mapi 3.33.1 2019-04-22
+--------------------------------
+
+Bug Fixes:
+	eds-I#94 - Remove -Wabi from the default C++ warning flags (Milan Crha)
+
+Miscellaneous:
+	Use lower-case "mailto:" consistently in the code (Milan Crha)
+
+Translations:
+	Tim Sabsch (de)
+
 evolution-mapi 3.32.0 2019-03-11
 --------------------------------
 
