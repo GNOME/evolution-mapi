@@ -12,7 +12,7 @@ set(PROJECT_BUGREPORT "https://gitlab.gnome.org/GNOME/evolution-mapi/issues/")
 set(GETTEXT_PACKAGE ${PROJECT_NAME})
 set(GETTEXT_PO_DIR ${CMAKE_SOURCE_DIR}/po)
 
-# Required for 'disttest' and 'ditcheck' of DistTarget module
+# Required for 'disttest' and 'distcheck' of DistTarget module
 set(PROJECT_DISTCONFIGURE_PARAMS)
 
 # Keep these two definitions in agreement.
