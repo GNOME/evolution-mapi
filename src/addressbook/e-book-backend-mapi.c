@@ -42,9 +42,6 @@
 /* default value for "partial-count", upper bound of objects to download during partial search */
 #define DEFAULT_PARTIAL_COUNT 50
 
-#define EDB_ERROR(_code) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, NULL)
-#define EDB_ERROR_EX(_code, _msg) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, _msg)
-
 struct _EBookBackendMAPIPrivate
 {
 	GRecMutex conn_lock;
@@ -56,10 +53,10 @@ struct _EBookBackendMAPIPrivate
 G_DEFINE_TYPE (EBookBackendMAPI, e_book_backend_mapi, E_TYPE_BOOK_META_BACKEND)
 
 static void
-ebb_mapi_error_to_edb_error (GError **perror,
-			     const GError *mapi_error,
-			     EDataBookStatus code,
-			     const gchar *context)
+ebb_mapi_error_to_client_error (GError **perror,
+				const GError *mapi_error,
+				EClientError code,
+				const gchar *context)
 {
 	gchar *err_msg = NULL;
 
@@ -71,15 +68,15 @@ ebb_mapi_error_to_edb_error (GError **perror,
 		return;
 	}
 
-	if (code == E_DATA_BOOK_STATUS_OTHER_ERROR && mapi_error && mapi_error->domain == E_MAPI_ERROR) {
+	if (code == E_CLIENT_ERROR_OTHER_ERROR && mapi_error && mapi_error->domain == E_MAPI_ERROR) {
 		/* Change error to more accurate only with OTHER_ERROR */
 		switch (mapi_error->code) {
 		case MAPI_E_PASSWORD_CHANGE_REQUIRED:
 		case MAPI_E_PASSWORD_EXPIRED:
-			code = E_DATA_BOOK_STATUS_AUTHENTICATION_REQUIRED;
+			code = E_CLIENT_ERROR_AUTHENTICATION_REQUIRED;
 			break;
 		case ecRpcFailed:
-			code = E_DATA_BOOK_STATUS_REPOSITORY_OFFLINE;
+			code = E_CLIENT_ERROR_REPOSITORY_OFFLINE;
 			break;
 		default:
 			break;
@@ -89,7 +86,7 @@ ebb_mapi_error_to_edb_error (GError **perror,
 	if (context)
 		err_msg = g_strconcat (context, mapi_error ? ": " : NULL, mapi_error ? mapi_error->message : NULL, NULL);
 
-	g_propagate_error (perror, e_data_book_create_error (code, err_msg ? err_msg : mapi_error ? mapi_error->message : _("Unknown error")));
+	g_propagate_error (perror, e_client_error_create (code, err_msg ? err_msg : mapi_error ? mapi_error->message : _("Unknown error")));
 
 	g_free (err_msg);
 }
@@ -341,7 +338,7 @@ ebb_mapi_connect_sync (EBookMetaBackend *meta_backend,
 		ebb_mapi_unlock_connection (bbmapi);
 
 		if (is_network_error)
-			ebb_mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, NULL);
+			ebb_mapi_error_to_client_error (error, mapi_error, E_CLIENT_ERROR_OTHER_ERROR, NULL);
 
 		g_clear_error (&mapi_error);
 
@@ -518,7 +515,7 @@ ebb_mapi_load_multiple_sync (EBookBackendMAPI *bbmapi,
 
 	if (mapi_error) {
 		ebb_mapi_maybe_disconnect (bbmapi, mapi_error);
-		ebb_mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, error_text);
+		ebb_mapi_error_to_client_error (error, mapi_error, E_CLIENT_ERROR_OTHER_ERROR, error_text);
 		g_error_free (mapi_error);
 
 		success = FALSE;
@@ -703,7 +700,7 @@ ebb_mapi_list_existing_with_restrictions_sync (EBookMetaBackend *meta_backend,
 
 	if (mapi_error) {
 		ebb_mapi_maybe_disconnect (bbmapi, mapi_error);
-		ebb_mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, error_text);
+		ebb_mapi_error_to_client_error (error, mapi_error, E_CLIENT_ERROR_OTHER_ERROR, error_text);
 		g_error_free (mapi_error);
 
 		success = FALSE;
@@ -816,6 +813,7 @@ ebb_mapi_save_contact_sync (EBookMetaBackend *meta_backend,
 			    EConflictResolution conflict_resolution,
 			    /* const */ EContact *contact,
 			    const gchar *extra,
+			    guint32 opflags,
 			    gchar **out_new_uid,
 			    gchar **out_new_extra,
 			    GCancellable *cancellable,
@@ -836,7 +834,7 @@ ebb_mapi_save_contact_sync (EBookMetaBackend *meta_backend,
 	bbmapi = E_BOOK_BACKEND_MAPI (meta_backend);
 
 	if (e_book_backend_mapi_get_is_gal (bbmapi)) {
-		g_propagate_error (error, EDB_ERROR (PERMISSION_DENIED));
+		g_propagate_error (error, e_client_error_create (E_CLIENT_ERROR_PERMISSION_DENIED, NULL));
 		return FALSE;
 	}
 
@@ -864,7 +862,7 @@ ebb_mapi_save_contact_sync (EBookMetaBackend *meta_backend,
 
 	if (mapi_error || !mid) {
 		ebb_mapi_maybe_disconnect (bbmapi, mapi_error);
-		ebb_mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR,
+		ebb_mapi_error_to_client_error (error, mapi_error, E_CLIENT_ERROR_OTHER_ERROR,
 			overwrite_existing ? _("Failed to modify item on a server") : _("Failed to create item on a server"));
 		g_clear_error (&mapi_error);
 
@@ -885,6 +883,7 @@ ebb_mapi_remove_contact_sync (EBookMetaBackend *meta_backend,
 			      const gchar *uid,
 			      const gchar *extra,
 			      const gchar *object,
+			      guint32 opflags,
 			      GCancellable *cancellable,
 			      GError **error)
 {
@@ -899,7 +898,7 @@ ebb_mapi_remove_contact_sync (EBookMetaBackend *meta_backend,
 	bbmapi = E_BOOK_BACKEND_MAPI (meta_backend);
 
 	if (e_book_backend_mapi_get_is_gal (bbmapi)) {
-		g_propagate_error (error, EDB_ERROR (PERMISSION_DENIED));
+		g_propagate_error (error, e_client_error_create (E_CLIENT_ERROR_PERMISSION_DENIED, NULL));
 		return FALSE;
 	}
 
@@ -926,7 +925,7 @@ ebb_mapi_remove_contact_sync (EBookMetaBackend *meta_backend,
 
 	if (mapi_error || !mid) {
 		ebb_mapi_maybe_disconnect (bbmapi, mapi_error);
-		ebb_mapi_error_to_edb_error (error, mapi_error, E_DATA_BOOK_STATUS_OTHER_ERROR, _("Failed to remove item from a server"));
+		ebb_mapi_error_to_client_error (error, mapi_error, E_CLIENT_ERROR_OTHER_ERROR, _("Failed to remove item from a server"));
 		g_clear_error (&mapi_error);
 
 		success = FALSE;
@@ -1033,9 +1032,9 @@ ebb_mapi_get_backend_property (EBookBackend *backend,
 			e_book_meta_backend_get_capabilities (E_BOOK_META_BACKEND (backend)),
 			ebb_mapi_is_marked_for_offline (bbmapi) ? "do-initial-query" : NULL,
 			NULL);
-	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_REQUIRED_FIELDS)) {
+	} else if (g_str_equal (prop_name, E_BOOK_BACKEND_PROPERTY_REQUIRED_FIELDS)) {
 		return g_strdup (e_contact_field_name (E_CONTACT_FILE_AS));
-	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_SUPPORTED_FIELDS)) {
+	} else if (g_str_equal (prop_name, E_BOOK_BACKEND_PROPERTY_SUPPORTED_FIELDS)) {
 		GSList *fields;
 		gchar *prop_value;
 
