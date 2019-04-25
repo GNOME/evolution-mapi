@@ -1482,7 +1482,7 @@ ecb_mapi_get_backend_property (ECalBackend *backend,
 	}
 
 	/* Chain up to parent's method */
-	return E_CAL_BACKEND_CLASS (e_cal_backend_mapi_parent_class)->get_backend_property (backend, prop_name);
+	return E_CAL_BACKEND_CLASS (e_cal_backend_mapi_parent_class)->impl_get_backend_property (backend, prop_name);
 }
 
 static void
@@ -1953,7 +1953,7 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *klass)
 	meta_backend_class->remove_component_sync = ecb_mapi_remove_component_sync;
 
 	cal_backend_class = E_CAL_BACKEND_CLASS (klass);
-	cal_backend_class->get_backend_property = ecb_mapi_get_backend_property;
+	cal_backend_class->impl_get_backend_property = ecb_mapi_get_backend_property;
 
 	sync_backend_class = E_CAL_BACKEND_SYNC_CLASS (klass);
 	sync_backend_class->send_objects_sync = ecb_mapi_send_objects_sync;
