@@ -281,36 +281,36 @@ is_apple_attach (EMapiAttachment *attach, guint32 *data_len, guint32 *resource_l
 
 typedef struct {
 	GHashTable *tzids;
-	icalcomponent *icalcomp;
+	ICalComponent *icomp;
 } ForeachTZIDData;
 
 static void
-add_timezones_cb (icalparameter *param,
+add_timezones_cb (ICalParameter *param,
 		  gpointer data)
 {
 	ForeachTZIDData *tz_data = data;
 	const gchar *tzid;
-	icaltimezone *zone = NULL;
-	icalcomponent *vtimezone_comp;
+	ICalTimezone *zone = NULL;
+	ICalComponent *vtimezone_comp;
 
 	/* Get the TZID string from the parameter. */
-	tzid = icalparameter_get_tzid (param);
+	tzid = i_cal_parameter_get_tzid (param);
 	if (!tzid || g_hash_table_lookup (tz_data->tzids, tzid))
 		return;
 
 	/* Look for the timezone */
-	zone = icaltimezone_get_builtin_timezone_from_tzid (tzid);
+	zone = i_cal_timezone_get_builtin_timezone_from_tzid (tzid);
 	if (!zone)
 		return;
 
 	/* Convert it to a string and add it to the hash. */
-	vtimezone_comp = icaltimezone_get_component (zone);
+	vtimezone_comp = i_cal_timezone_get_component (zone);
 	if (!vtimezone_comp)
 		return;
 
-	icalcomponent_add_component (tz_data->icalcomp, icalcomponent_new_clone (vtimezone_comp));
+	i_cal_component_take_component (tz_data->icomp, i_cal_component_new_clone (vtimezone_comp));
 
-	g_hash_table_insert (tz_data->tzids, (gchar *) tzid, (gchar *) tzid);
+	g_hash_table_insert (tz_data->tzids, g_strdup (tzid), GINT_TO_POINTER (1));
 }
 
 static gchar *
@@ -319,11 +319,11 @@ build_ical_string (EMapiConnection *conn,
 		   const gchar *msg_class)
 {
 	gchar *ical_string = NULL, *use_uid;
-	icalcomponent_kind ical_kind = ICAL_NO_COMPONENT;
-	icalproperty_method ical_method = ICAL_METHOD_NONE;
+	ICalComponentKind kind = I_CAL_NO_COMPONENT;
+	ICalPropertyMethod method = I_CAL_METHOD_NONE;
 	const uint64_t *pmid;
 	ECalComponent *comp;
-	icalcomponent *icalcomp;
+	ICalComponent *icomp;
 	GSList *detached_components = NULL, *iter;
 
 	g_return_val_if_fail (conn != NULL, NULL);
@@ -331,23 +331,23 @@ build_ical_string (EMapiConnection *conn,
 	g_return_val_if_fail (msg_class != NULL, NULL);
 
 	if (g_ascii_strcasecmp (msg_class, IPM_SCHEDULE_MEETING_REQUEST) == 0) {
-		ical_method = ICAL_METHOD_REQUEST;
-		ical_kind = ICAL_VEVENT_COMPONENT;
+		method = I_CAL_METHOD_REQUEST;
+		kind = I_CAL_VEVENT_COMPONENT;
 	} else if (g_ascii_strcasecmp (msg_class, IPM_SCHEDULE_MEETING_CANCELED) == 0) {
-		ical_method = ICAL_METHOD_CANCEL;
-		ical_kind = ICAL_VEVENT_COMPONENT;
+		method = I_CAL_METHOD_CANCEL;
+		kind = I_CAL_VEVENT_COMPONENT;
 	} else if (g_str_has_prefix (msg_class, IPM_SCHEDULE_MEETING_RESP_PREFIX)) {
-		ical_method = ICAL_METHOD_REPLY;
-		ical_kind = ICAL_VEVENT_COMPONENT;
+		method = I_CAL_METHOD_REPLY;
+		kind = I_CAL_VEVENT_COMPONENT;
 	} else if (g_ascii_strcasecmp (msg_class, IPM_APPOINTMENT) == 0) {
-		ical_method = ICAL_METHOD_NONE;
-		ical_kind = ICAL_VEVENT_COMPONENT;
+		method = I_CAL_METHOD_NONE;
+		kind = I_CAL_VEVENT_COMPONENT;
 	} else if (g_ascii_strcasecmp (msg_class, IPM_TASK) == 0) {
-		ical_method = ICAL_METHOD_NONE;
-		ical_kind = ICAL_VTODO_COMPONENT;
+		method = I_CAL_METHOD_NONE;
+		kind = I_CAL_VTODO_COMPONENT;
 	} else if (g_ascii_strcasecmp (msg_class, IPM_STICKYNOTE) == 0) {
-		ical_method = ICAL_METHOD_NONE;
-		ical_kind = ICAL_VJOURNAL_COMPONENT;
+		method = I_CAL_METHOD_NONE;
+		kind = I_CAL_VJOURNAL_COMPONENT;
 	} else {
 		return NULL;
 	}
@@ -358,41 +358,41 @@ build_ical_string (EMapiConnection *conn,
 	else
 		use_uid = e_util_generate_uid ();
 
-	comp = e_mapi_cal_util_object_to_comp (conn, object, ical_kind, ical_method == ICAL_METHOD_REPLY, use_uid, &detached_components);
+	comp = e_mapi_cal_util_object_to_comp (conn, object, kind, method == I_CAL_METHOD_REPLY, use_uid, &detached_components);
 
 	g_free (use_uid);
 
 	if (!comp)
 		return NULL;
 
-	if (ical_method != ICAL_METHOD_NONE || detached_components) {
+	if (method != I_CAL_METHOD_NONE || detached_components) {
 		ForeachTZIDData tz_data;
-		icalcomponent *clone;
+		ICalComponent *clone;
 
-		clone = icalcomponent_new_clone (e_cal_component_get_icalcomponent (comp));
+		clone = i_cal_component_new_clone (e_cal_component_get_icalcomponent (comp));
 
-		icalcomp = e_cal_util_new_top_level ();
-		if (ical_method != ICAL_METHOD_NONE)
-			icalcomponent_set_method (icalcomp, ical_method);
+		icomp = e_cal_util_new_top_level ();
+		if (method != I_CAL_METHOD_NONE)
+			i_cal_component_set_method (icomp, method);
 
-		tz_data.tzids = g_hash_table_new (g_str_hash, g_str_equal);
-		tz_data.icalcomp = icalcomp;
+		tz_data.tzids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+		tz_data.icomp = icomp;
 
 		/* Add timezones first */
-		icalcomponent_foreach_tzid (clone, add_timezones_cb, &tz_data);
+		i_cal_component_foreach_tzid (clone, add_timezones_cb, &tz_data);
 
 		g_hash_table_destroy (tz_data.tzids);
 
 		/* Then the components */
-		icalcomponent_add_component (icalcomp, clone);
+		i_cal_component_take_component (icomp, clone);
 		for (iter = detached_components; iter; iter = g_slist_next (iter)) {
-			icalcomponent_add_component (icalcomp,
-				icalcomponent_new_clone (e_cal_component_get_icalcomponent (iter->data)));
+			i_cal_component_take_component (icomp,
+				i_cal_component_new_clone (e_cal_component_get_icalcomponent (iter->data)));
 		}
 
-		ical_string = icalcomponent_as_ical_string_r (icalcomp);
+		ical_string = i_cal_component_as_ical_string_r (icomp);
 
-		icalcomponent_free (icalcomp);
+		g_object_unref (icomp);
 	} else {
 		ical_string = e_cal_component_get_as_string (comp);
 	}

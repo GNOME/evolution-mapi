@@ -557,48 +557,72 @@ free_arp_contents(struct ema_AppointmentRecurrencePattern *arp)
 	}
 }
 
-static icalrecurrencetype_weekday
+static ICalRecurrenceWeekday
 get_ical_weekstart (uint32_t fdow)
 {
 	switch (fdow) {
-		case FirstDOW_Sunday	: return ICAL_SUNDAY_WEEKDAY;
-		case FirstDOW_Monday	: return ICAL_MONDAY_WEEKDAY;
-		case FirstDOW_Tuesday	: return ICAL_TUESDAY_WEEKDAY;
-		case FirstDOW_Wednesday : return ICAL_WEDNESDAY_WEEKDAY;
-		case FirstDOW_Thursday	: return ICAL_THURSDAY_WEEKDAY;
-		case FirstDOW_Friday	: return ICAL_FRIDAY_WEEKDAY;
-		case FirstDOW_Saturday	: return ICAL_SATURDAY_WEEKDAY;
-		default			: return ICAL_SUNDAY_WEEKDAY;
+	case FirstDOW_Sunday:
+		return I_CAL_SUNDAY_WEEKDAY;
+	case FirstDOW_Monday:
+		return I_CAL_MONDAY_WEEKDAY;
+	case FirstDOW_Tuesday:
+		return I_CAL_TUESDAY_WEEKDAY;
+	case FirstDOW_Wednesday:
+		return I_CAL_WEDNESDAY_WEEKDAY;
+	case FirstDOW_Thursday:
+		return I_CAL_THURSDAY_WEEKDAY;
+	case FirstDOW_Friday:
+		return I_CAL_FRIDAY_WEEKDAY;
+	case FirstDOW_Saturday:
+		return I_CAL_SATURDAY_WEEKDAY;
+	default:
+		return I_CAL_SUNDAY_WEEKDAY;
 	}
 }
 
 static uint32_t
-get_mapi_weekstart (icalrecurrencetype_weekday weekstart)
+get_mapi_weekstart (ICalRecurrenceWeekday weekstart)
 {
 	switch (weekstart) {
-		case ICAL_SUNDAY_WEEKDAY   : return FirstDOW_Sunday;
-		case ICAL_MONDAY_WEEKDAY   : return FirstDOW_Monday;
-		case ICAL_TUESDAY_WEEKDAY  : return FirstDOW_Tuesday;
-		case ICAL_WEDNESDAY_WEEKDAY: return FirstDOW_Wednesday;
-		case ICAL_THURSDAY_WEEKDAY : return FirstDOW_Thursday;
-		case ICAL_FRIDAY_WEEKDAY   : return FirstDOW_Friday;
-		case ICAL_SATURDAY_WEEKDAY : return FirstDOW_Saturday;
-		default			   : return FirstDOW_Sunday;
+	case I_CAL_SUNDAY_WEEKDAY:
+		return FirstDOW_Sunday;
+	case I_CAL_MONDAY_WEEKDAY:
+		return FirstDOW_Monday;
+	case I_CAL_TUESDAY_WEEKDAY:
+		return FirstDOW_Tuesday;
+	case I_CAL_WEDNESDAY_WEEKDAY:
+		return FirstDOW_Wednesday;
+	case I_CAL_THURSDAY_WEEKDAY:
+		return FirstDOW_Thursday;
+	case I_CAL_FRIDAY_WEEKDAY:
+		return FirstDOW_Friday;
+	case I_CAL_SATURDAY_WEEKDAY:
+		return FirstDOW_Saturday;
+	default:
+		return FirstDOW_Sunday;
 	}
 }
 
 static uint32_t
-get_mapi_day (icalrecurrencetype_weekday someday)
+get_mapi_day (ICalRecurrenceWeekday someday)
 {
 	switch (someday) {
-		case ICAL_SUNDAY_WEEKDAY   : return olSunday;
-		case ICAL_MONDAY_WEEKDAY   : return olMonday;
-		case ICAL_TUESDAY_WEEKDAY  : return olTuesday;
-		case ICAL_WEDNESDAY_WEEKDAY: return olWednesday;
-		case ICAL_THURSDAY_WEEKDAY : return olThursday;
-		case ICAL_FRIDAY_WEEKDAY   : return olFriday;
-		case ICAL_SATURDAY_WEEKDAY : return olSaturday;
-		default			   : return 0;
+	case I_CAL_SUNDAY_WEEKDAY:
+		return olSunday;
+	case I_CAL_MONDAY_WEEKDAY:
+		return olMonday;
+	case I_CAL_TUESDAY_WEEKDAY:
+		return olTuesday;
+	case I_CAL_WEDNESDAY_WEEKDAY:
+		return olWednesday;
+	case I_CAL_THURSDAY_WEEKDAY:
+		return olThursday;
+	case I_CAL_FRIDAY_WEEKDAY:
+		return olFriday;
+	case I_CAL_SATURDAY_WEEKDAY:
+		return olSaturday;
+	default:
+		return 0;
 	}
 }
 
@@ -715,9 +739,13 @@ check_calendar_type (guint16 type)
 }
 
 gboolean
-e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp, GSList **extra_detached, icaltimezone *recur_zone)
+e_mapi_cal_util_bin_to_rrule (const guint8 *lpb,
+			      guint32 cb,
+			      ECalComponent *comp,
+			      GSList **extra_detached,
+			      ICalTimezone *recur_zone)
 {
-	struct icalrecurrencetype rt;
+	ICalRecurrence *rt;
 	struct ema_AppointmentRecurrencePattern arp;
 	struct ema_RecurrencePattern *rp; /* Convenience pointer */
 	gboolean success = FALSE, check_calendar = FALSE;
@@ -735,7 +763,7 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 	fake_ba.data = (guint8 *) lpb;
 	fake_ba.len = cb;
 
-	icalrecurrencetype_clear (&rt);
+	rt = i_cal_recurrence_new ();
 
 	memset(&arp, 0, sizeof (struct ema_AppointmentRecurrencePattern));
 	if (! gba_to_arp (&fake_ba, &off, &arp))
@@ -746,7 +774,7 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 	/* FREQUENCY */
 
 	if (rp->RecurFrequency == RecurFrequency_Daily) {
-		rt.freq = ICAL_DAILY_RECURRENCE;
+		i_cal_recurrence_set_freq (rt, I_CAL_DAILY_RECURRENCE);
 
 		if (rp->PatternType == PatternType_Day) {
 			/* Daily every N days */
@@ -754,7 +782,7 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 			check_calendar = TRUE;
 
 			/* INTERVAL */
-			rt.interval = (short) (rp->Period / (24 * 60));
+			i_cal_recurrence_set_interval (rt, (short) (rp->Period / (24 * 60)));
 		} else if (rp->PatternType == PatternType_Week) {
 			/* Daily every weekday */
 
@@ -762,13 +790,13 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 
 			/* NOTE: Evolution does not handle daily-every-weekday
 			 * any different from a weekly recurrence.  */
-			rt.freq = ICAL_WEEKLY_RECURRENCE;
+			i_cal_recurrence_set_freq (rt, I_CAL_WEEKLY_RECURRENCE);
 
 			/* INTERVAL */
-			rt.interval = (short) (rp->Period);
+			i_cal_recurrence_set_interval (rt, (short) (rp->Period));
 		}
 	} else if (rp->RecurFrequency == RecurFrequency_Weekly) {
-		rt.freq = ICAL_WEEKLY_RECURRENCE;
+		i_cal_recurrence_set_freq (rt, I_CAL_WEEKLY_RECURRENCE);
 
 		if (rp->PatternType == PatternType_Week) {
 			/* weekly every N weeks (for all events and non-regenerating tasks) */
@@ -776,7 +804,7 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 			check_calendar = TRUE;
 
 			/* INTERVAL */
-			rt.interval = (short) (rp->Period);
+			i_cal_recurrence_set_interval (rt, (short) (rp->Period));
 		} else if (rp->PatternType == 0x0) {
 			/* weekly every N weeks (for all regenerating tasks) */
 
@@ -788,7 +816,7 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 		}
 
 	} else if (rp->RecurFrequency == RecurFrequency_Monthly) {
-		rt.freq = ICAL_MONTHLY_RECURRENCE;
+		i_cal_recurrence_set_freq (rt, I_CAL_MONTHLY_RECURRENCE);
 
 		if (rp->PatternType == PatternType_Month ||
 		    rp->PatternType == PatternType_MonthEnd) {
@@ -797,13 +825,13 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 			check_calendar = TRUE;
 
 			/* INTERVAL */
-			rt.interval = (short) (rp->Period);
+			i_cal_recurrence_set_interval (rt, (short) (rp->Period));
 
 			/* MONTH_DAY */
 			if (rp->PatternType == PatternType_Month)
-				rt.by_month_day[0] = (short) (rp->PatternTypeSpecific);
+				i_cal_recurrence_set_by_month_day (rt, 0, (short) (rp->PatternTypeSpecific));
 			else if (rp->PatternType == PatternType_MonthEnd)
-				rt.by_month_day[0] = (short) (-1);
+				i_cal_recurrence_set_by_month_day (rt, 0, (short) (-1));
 
 		} else if (rp->PatternType == PatternType_MonthNth) {
 			gboolean post_process = FALSE;
@@ -812,36 +840,36 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 			check_calendar = TRUE;
 
 			/* INTERVAL */
-			rt.interval = (short) (rp->Period);
+			i_cal_recurrence_set_interval (rt, (short) (rp->Period));
 
 			/* BITMASK */
 			if (rp->PatternTypeSpecific == olSunday)
-				rt.by_day[0] = ICAL_SUNDAY_WEEKDAY;
+				i_cal_recurrence_set_by_day (rt, 0, I_CAL_SUNDAY_WEEKDAY);
 			else if (rp->PatternTypeSpecific == olMonday)
-				rt.by_day[0] = ICAL_MONDAY_WEEKDAY;
+				i_cal_recurrence_set_by_day (rt, 0, I_CAL_MONDAY_WEEKDAY);
 			else if (rp->PatternTypeSpecific == olTuesday)
-				rt.by_day[0] = ICAL_TUESDAY_WEEKDAY;
+				i_cal_recurrence_set_by_day (rt, 0, I_CAL_TUESDAY_WEEKDAY);
 			else if (rp->PatternTypeSpecific == olWednesday)
-				rt.by_day[0] = ICAL_WEDNESDAY_WEEKDAY;
+				i_cal_recurrence_set_by_day (rt, 0, I_CAL_WEDNESDAY_WEEKDAY);
 			else if (rp->PatternTypeSpecific == olThursday)
-				rt.by_day[0] = ICAL_THURSDAY_WEEKDAY;
+				i_cal_recurrence_set_by_day (rt, 0, I_CAL_THURSDAY_WEEKDAY);
 			else if (rp->PatternTypeSpecific == olFriday)
-				rt.by_day[0] = ICAL_FRIDAY_WEEKDAY;
+				i_cal_recurrence_set_by_day (rt, 0, I_CAL_FRIDAY_WEEKDAY);
 			else if (rp->PatternTypeSpecific == olSaturday)
-				rt.by_day[0] = ICAL_SATURDAY_WEEKDAY;
+				i_cal_recurrence_set_by_day (rt, 0, I_CAL_SATURDAY_WEEKDAY);
 			else {
 				post_process = TRUE;
 			}
 
 			/* RecurrenceN */
 			if (!post_process) {
-				rt.by_set_pos[0] = get_ical_pos (rp->N);
-				if (rt.by_set_pos[0] == 0)
+				i_cal_recurrence_set_by_set_pos (rt, 0, get_ical_pos (rp->N));
+				if (i_cal_recurrence_get_by_set_pos (rt, 0) == 0)
 					goto cleanup;
 			} else {
 				if (rp->PatternTypeSpecific == (olSunday | olMonday | olTuesday | olWednesday | olThursday | olFriday | olSaturday)) {
-					rt.by_month_day[0] = get_ical_pos (rp->N);
-					if (rt.by_month_day[0] == 0)
+					i_cal_recurrence_set_by_month_day (rt, 0, get_ical_pos (rp->N));
+					if (i_cal_recurrence_get_by_month_day (rt, 0) == 0)
 						goto cleanup;
 				} else {
 				/* FIXME: Can we/LibICAL support any other types here? Namely, weekday and weekend-day */
@@ -852,7 +880,7 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 		}
 
 	} else if (rp->RecurFrequency == RecurFrequency_Yearly) {
-		rt.freq = ICAL_YEARLY_RECURRENCE;
+		i_cal_recurrence_set_freq (rt, I_CAL_YEARLY_RECURRENCE);
 
 		if (rp->PatternType == PatternType_Month) {
 			/* Yearly on day D of month M */
@@ -860,7 +888,7 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 			check_calendar = TRUE;
 
 			/* INTERVAL */
-			rt.interval = (short) (rp->Period / 12);
+			i_cal_recurrence_set_interval (rt, (short) (rp->Period / 12));
 
 		} else if (rp->PatternType == PatternType_MonthNth) {
 			/* Yearly on the Xth Y of month M */
@@ -881,19 +909,19 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 	      rp->PatternType == PatternType_Week) ) {
 		i = 0;
 		if (rp->PatternTypeSpecific & olSunday)
-			rt.by_day[i++] = ICAL_SUNDAY_WEEKDAY;
+			i_cal_recurrence_set_by_day (rt, i++, I_CAL_SUNDAY_WEEKDAY);
 		if (rp->PatternTypeSpecific & olMonday)
-			rt.by_day[i++] = ICAL_MONDAY_WEEKDAY;
+			i_cal_recurrence_set_by_day (rt, i++, I_CAL_MONDAY_WEEKDAY);
 		if (rp->PatternTypeSpecific & olTuesday)
-			rt.by_day[i++] = ICAL_TUESDAY_WEEKDAY;
+			i_cal_recurrence_set_by_day (rt, i++, I_CAL_TUESDAY_WEEKDAY);
 		if (rp->PatternTypeSpecific & olWednesday)
-			rt.by_day[i++] = ICAL_WEDNESDAY_WEEKDAY;
+			i_cal_recurrence_set_by_day (rt, i++, I_CAL_WEDNESDAY_WEEKDAY);
 		if (rp->PatternTypeSpecific & olThursday)
-			rt.by_day[i++] = ICAL_THURSDAY_WEEKDAY;
+			i_cal_recurrence_set_by_day (rt, i++, I_CAL_THURSDAY_WEEKDAY);
 		if (rp->PatternTypeSpecific & olFriday)
-			rt.by_day[i++] = ICAL_FRIDAY_WEEKDAY;
+			i_cal_recurrence_set_by_day (rt, i++, I_CAL_FRIDAY_WEEKDAY);
 		if (rp->PatternTypeSpecific & olSaturday)
-			rt.by_day[i++] = ICAL_SATURDAY_WEEKDAY;
+			i_cal_recurrence_set_by_day (rt, i++, I_CAL_SATURDAY_WEEKDAY);
 	}
 
 	/* Only some calendar types supported */
@@ -902,55 +930,56 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 
 	/* End Type - followed by Occurence count */
 	if (rp->EndType == END_AFTER_N_OCCURRENCES) {
-		rt.count = rp->OccurrenceCount;
+		i_cal_recurrence_set_count (rt, rp->OccurrenceCount);
 	}
 
 	/* week_start */
-	rt.week_start = get_ical_weekstart (rp->FirstDOW);
+	i_cal_recurrence_set_week_start (rt, get_ical_weekstart (rp->FirstDOW));
 
 	/* number of exceptions */
 	if (rp->DeletedInstanceCount) {
 		for (i = 0; i < rp->DeletedInstanceCount; ++i) {
-			struct icaltimetype tt, *val;
-			ECalComponentDateTime *dt = g_new0 (ECalComponentDateTime, 1);
+			ICalTime *tt;
 			time_t ictime = convert_recurrence_minutes_to_timet (rp->DeletedInstanceDates[i]);
 
-			tt = icaltime_from_timet_with_zone (ictime, 1, NULL);
+			tt = i_cal_time_from_timet_with_zone (ictime, 1, NULL);
 
-			val = g_new0(struct icaltimetype, 1);
-			memcpy (val, &tt, sizeof(struct icaltimetype));
-
-			dt->value = val;
-			dt->tzid = g_strdup ("UTC");
-
-			exdate_list = g_slist_append (exdate_list, dt);
+			exdate_list = g_slist_append (exdate_list, e_cal_component_datetime_new_take (tt, g_strdup ("UTC")));
 		}
 	}
 
 	/* end date */
 	if (rp->EndType == END_AFTER_DATE) {
+		ICalTime *itt;
+
 		time_t ict = convert_recurrence_minutes_to_timet (rp->EndDate);
-		rt.until = icaltime_from_timet_with_zone (ict, 1, NULL);
+
+		itt = i_cal_time_from_timet_with_zone (ict, 1, NULL);
+		i_cal_recurrence_set_until (rt, itt);
+		g_clear_object (&itt);
 	}
 
 	/* Set the recurrence */
 	{
 		GSList l;
 
-		l.data = &rt;
+		l.data = rt;
 		l.next = NULL;
 
-		e_cal_component_set_rrule_list (comp, &l);
-		e_cal_component_set_exdate_list (comp, exdate_list);
+		e_cal_component_set_rrules (comp, &l);
+		e_cal_component_set_exdates (comp, exdate_list);
 	}
+
+	g_slist_free_full (exdate_list, e_cal_component_datetime_free);
+	g_clear_object (&rt);
 
 	/* Modified exceptions */
 	if (arp.ExceptionCount && extra_detached) {
 		ECalComponent **detached = g_new0 (ECalComponent *,
 		                                   arp.ExceptionCount);
-		struct icaltimetype tt;
-		ECalComponentDateTime edt;
-		ECalComponentRange rid;
+		ICalTime *tt;
+		ECalComponentDateTime *edt;
+		ECalComponentRange *rid;
 
 		e_cal_component_commit_sequence (comp);
 
@@ -960,43 +989,45 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 			/* make a shallow clone of comp */
 			detached[i] = e_cal_component_clone (comp);
 
-			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->OriginalStartDate), 0, NULL);
-			rid.type = E_CAL_COMPONENT_RANGE_SINGLE;
-			rid.datetime.value = &tt;
-			rid.datetime.tzid = recur_zone ? icaltimezone_get_tzid (recur_zone) : "UTC";
-			e_cal_component_set_recurid (detached[i], &rid);
+			tt = i_cal_time_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->OriginalStartDate), 0, NULL);
+			rid = e_cal_component_range_new_take (E_CAL_COMPONENT_RANGE_SINGLE,
+				e_cal_component_datetime_new_take (tt, g_strdup (recur_zone ? i_cal_timezone_get_tzid (recur_zone) : "UTC")));
+			e_cal_component_set_recurid (detached[i], rid);
+			e_cal_component_range_free (rid);
 
-			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->StartDateTime), 0, NULL);
-			edt.value = &tt;
-			edt.tzid = recur_zone ? icaltimezone_get_tzid (recur_zone) : "UTC";
-			e_cal_component_set_dtstart (detached[i], &edt);
+			tt = i_cal_time_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->StartDateTime), 0, NULL);
+			edt = e_cal_component_datetime_new_take (tt, g_strdup (recur_zone ? i_cal_timezone_get_tzid (recur_zone) : "UTC"));
+			e_cal_component_set_dtstart (detached[i], edt);
+			e_cal_component_datetime_free (edt);
 
-			tt = icaltime_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->EndDateTime), 0, NULL);
-			edt.value = &tt;
-			edt.tzid = recur_zone ? icaltimezone_get_tzid (recur_zone) : "UTC";
-			e_cal_component_set_dtend (detached[i], &edt);
+			tt = i_cal_time_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->EndDateTime), 0, NULL);
+			edt = e_cal_component_datetime_new_take (tt, g_strdup (recur_zone ? i_cal_timezone_get_tzid (recur_zone) : "UTC"));
+			e_cal_component_set_dtend (detached[i], edt);
+			e_cal_component_datetime_free (edt);
 
-			e_cal_component_set_rdate_list (detached[i], NULL);
-			e_cal_component_set_rrule_list (detached[i], NULL);
-			e_cal_component_set_exdate_list (detached[i], NULL);
-			e_cal_component_set_exrule_list (detached[i], NULL);
+			e_cal_component_set_rdates (detached[i], NULL);
+			e_cal_component_set_rrules (detached[i], NULL);
+			e_cal_component_set_exdates (detached[i], NULL);
+			e_cal_component_set_exrules (detached[i], NULL);
 
 			if (ee->WideCharSubject) {
-				ECalComponentText txt = { 0 };
+				ECalComponentText *txt;
 				gchar *str;
 
 				str = g_convert (ee->WideCharSubject,
 				                 2 * ee->WideCharSubjectLength,
 				                 "UTF-8", "UTF-16", NULL, NULL,
 				                 NULL);
-				txt.value = str;
-				e_cal_component_set_summary (detached[i], &txt);
+				txt = e_cal_component_text_new (str ? str : "", NULL);
+				e_cal_component_set_summary (detached[i], txt);
+				e_cal_component_text_free (txt);
 				g_free (str);
 			} else if (ei->Subject) {
-				ECalComponentText txt = { 0 };
+				ECalComponentText *txt;
 
-				txt.value = ei->Subject;
-				e_cal_component_set_summary (detached[i], &txt);
+				txt = e_cal_component_text_new (ei->Subject, NULL);
+				e_cal_component_set_summary (detached[i], txt);
+				e_cal_component_text_free (txt);
 			}
 
 			/* FIXME: Handle MeetingType */
@@ -1031,54 +1062,76 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb, guint32 cb, ECalComponent *comp
 
 	success = TRUE;
 cleanup:
-	free_arp_contents(&arp);
+	free_arp_contents (&arp);
 	return success;
 }
 
 static guint32
 compute_startdate (ECalComponent *comp)
 {
-	ECalComponentDateTime dtstart;
+	ECalComponentDateTime *dtstart;
+	ICalTime *itt;
 	guint32 flag32;
 
-	e_cal_component_get_dtstart (comp, &dtstart);
-	dtstart.value->hour = dtstart.value->minute = dtstart.value->second = 0;
-	flag32 = convert_timet_to_recurrence_minutes (icaltime_as_timet_with_zone (*(dtstart.value), 0));
+	dtstart = e_cal_component_get_dtstart (comp);
+	if (!dtstart)
+		return 0;
 
-	e_cal_component_free_datetime (&dtstart);
+	itt = e_cal_component_datetime_get_value (dtstart);
+	i_cal_time_set_time (itt, 0, 0, 0);
+
+	flag32 = convert_timet_to_recurrence_minutes (i_cal_time_as_timet_with_zone (itt, NULL));
+
+	e_cal_component_datetime_free (dtstart);
 
 	return flag32;
 }
 
 static guint32
-compute_rdaily_firstdatetime (ECalComponent *comp, guint32 period)
+compute_rdaily_firstdatetime (ECalComponent *comp,
+			      guint32 period)
 {
 	return (compute_startdate (comp) % period);
 }
 
 static guint32
-compute_rweekly_firstdatetime (ECalComponent *comp, icalrecurrencetype_weekday week_start, guint32 period)
+compute_rweekly_firstdatetime (ECalComponent *comp,
+			       ICalRecurrenceWeekday week_start,
+			       guint32 period)
 {
-	ECalComponentDateTime dtstart;
+	ECalComponentDateTime *dtstart;
+	ICalTime *itt;
 	guint32 flag32;
 	gint cur_weekday = 0, weekstart_weekday = 0, diff = 0;
 	time_t t;
 
-	e_cal_component_get_dtstart (comp, &dtstart);
-	dtstart.value->hour = dtstart.value->minute = dtstart.value->second = 0;
-	cur_weekday = icaltime_day_of_week (*(dtstart.value));
-	t = icaltime_as_timet_with_zone (*(dtstart.value), 0);
-	e_cal_component_free_datetime (&dtstart);
+	dtstart = e_cal_component_get_dtstart (comp);
+	if (!dtstart)
+		return 0;
+
+	itt = e_cal_component_datetime_get_value (dtstart);
+	i_cal_time_set_time (itt, 0, 0, 0);
+	cur_weekday = i_cal_time_day_of_week (itt);
+	t = i_cal_time_as_timet_with_zone (itt, NULL);
+	e_cal_component_datetime_free (dtstart);
 
 	switch (week_start) {
-		case ICAL_SUNDAY_WEEKDAY	: weekstart_weekday = 1; break;
-		case ICAL_MONDAY_WEEKDAY	: weekstart_weekday = 2; break;
-		case ICAL_TUESDAY_WEEKDAY	: weekstart_weekday = 3; break;
-		case ICAL_WEDNESDAY_WEEKDAY	: weekstart_weekday = 4; break;
-		case ICAL_THURSDAY_WEEKDAY	: weekstart_weekday = 5; break;
-		case ICAL_FRIDAY_WEEKDAY	: weekstart_weekday = 6; break;
-		case ICAL_SATURDAY_WEEKDAY	: weekstart_weekday = 7; break;
-		default				: weekstart_weekday = 1; break;
+	case I_CAL_SUNDAY_WEEKDAY:
+		weekstart_weekday = 1; break;
+	case I_CAL_MONDAY_WEEKDAY:
+		weekstart_weekday = 2; break;
+	case I_CAL_TUESDAY_WEEKDAY:
+		weekstart_weekday = 3; break;
+	case I_CAL_WEDNESDAY_WEEKDAY:
+		weekstart_weekday = 4; break;
+	case I_CAL_THURSDAY_WEEKDAY:
+		weekstart_weekday = 5; break;
+	case I_CAL_FRIDAY_WEEKDAY:
+		weekstart_weekday = 6; break;
+	case I_CAL_SATURDAY_WEEKDAY:
+		weekstart_weekday = 7; break;
+	default:
+		weekstart_weekday = 1; break;
 	};
 
 	diff = cur_weekday - weekstart_weekday;
@@ -1096,15 +1149,20 @@ compute_rweekly_firstdatetime (ECalComponent *comp, icalrecurrencetype_weekday w
 
 /* The most fucked up algorithm ever conceived by (..you know who..) */
 static guint32
-compute_rmonthly_firstdatetime (ECalComponent *comp, guint32 period)
+compute_rmonthly_firstdatetime (ECalComponent *comp,
+				guint32 period)
 {
 	const guint8 dinm[] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-	ECalComponentDateTime dtstart;
+	ECalComponentDateTime *dtstart;
+	ICalTime *itt;
 	guint32 flag32, monthindex, i;
 
-	e_cal_component_get_dtstart (comp, &dtstart);
-	monthindex = (guint32)((((guint64)(12) * (dtstart.value->year - 1601)) + (dtstart.value->month - 1)) % period);
-	e_cal_component_free_datetime (&dtstart);
+	dtstart = e_cal_component_get_dtstart (comp);
+	if (!dtstart)
+		return 0;
+	itt = e_cal_component_datetime_get_value (dtstart);
+	monthindex = (guint32)((((guint64)(12) * (i_cal_time_get_year (itt)- 1601)) + (i_cal_time_get_month (itt) - 1)) % period);
+	e_cal_component_datetime_free (dtstart);
 
 	for (flag32 = 0, i = 0; i < monthindex; ++i)
 		flag32 += dinm[(i % 12) + 1] * 24 * 60;
@@ -1113,29 +1171,47 @@ compute_rmonthly_firstdatetime (ECalComponent *comp, guint32 period)
 }
 
 static guint32
-calculate_no_of_occurrences (ECalComponent *comp, const struct icalrecurrencetype *rt)
+calculate_no_of_occurrences (ECalComponent *comp,
+			     ICalRecurrence *rt)
 {
-	ECalComponentDateTime dtstart;
-	icalrecur_iterator *iter;
-	struct icaltimetype next;
+	ECalComponentDateTime *dtstart;
+	ICalRecurIterator *iter;
+	ICalTime *next, *prev = NULL;
 	guint32 count = 1;
 
-	e_cal_component_get_dtstart (comp, &dtstart);
+	dtstart = e_cal_component_get_dtstart (comp);
+	if (!dtstart)
+		return 1;
 
-	for (iter = icalrecur_iterator_new (*rt, *(dtstart.value)),
-	     next = icalrecur_iterator_next(iter);
-	     !icaltime_is_null_time(next);
-	     next = icalrecur_iterator_next(iter))
-		++count;
+	iter = i_cal_recur_iterator_new (rt, e_cal_component_datetime_get_value (dtstart));
+	if (iter) {
+		for (next = i_cal_recur_iterator_next (iter);
+		     next && !i_cal_time_is_null_time (next);
+		     g_object_unref (next), next = i_cal_recur_iterator_next (iter)) {
+			if (prev && !i_cal_time_is_null_time (prev) &&
+			    i_cal_time_compare (next, prev) == 0)
+				break;
 
-	icalrecur_iterator_free (iter);
-	e_cal_component_free_datetime (&dtstart);
+			g_clear_object (&prev);
+			prev = i_cal_time_new_clone (next);
+
+			count++;
+		}
+
+		g_clear_object (&iter);
+		g_clear_object (&prev);
+		g_clear_object (&next);
+	}
+
+	e_cal_component_datetime_free (dtstart);
 
 	return count;
 }
 
 static gint
-compare_guint32 (gconstpointer a, gconstpointer b, gpointer user_data)
+compare_guint32 (gconstpointer a,
+		 gconstpointer b,
+		 gpointer user_data)
 {
 	return (*((guint32 *) a) - *((guint32 *) b));
 }
@@ -1145,9 +1221,10 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
 			      struct SBinary_short *bin,
 			      TALLOC_CTX *mem_ctx)
 {
-	struct icalrecurrencetype *rt;
+	ICalRecurrence *rt;
+	ICalTime *until;
 	gint i;
-	GSList *rrule_list = NULL, *exdate_list = NULL;
+	GSList *rrule_list, *exdate_list;
 	GByteArray *ba = NULL;
 	struct ema_AppointmentRecurrencePattern arp;
 	struct ema_RecurrencePattern *rp; /* Convenience ptr */
@@ -1159,18 +1236,18 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
 	if (!e_cal_component_has_recurrences (comp))
 		return FALSE;
 
-	e_cal_component_get_rrule_list (comp, &rrule_list);
+	rrule_list = e_cal_component_get_rrules (comp);
 	if (g_slist_length (rrule_list) != 1) {
-		e_cal_component_free_recur_list (rrule_list);
+		g_slist_free_full (rrule_list, g_object_unref);
 		return FALSE;
 	}
 
-	e_cal_component_get_exdate_list (comp, &exdate_list);
+	exdate_list = e_cal_component_get_exdates (comp);
 
-	rt = (struct icalrecurrencetype *)(rrule_list->data);
+	rt = rrule_list->data;
 
 	ba = g_byte_array_new ();
-	memset(&arp, 0, sizeof (struct ema_AppointmentRecurrencePattern));
+	memset (&arp, 0, sizeof (struct ema_AppointmentRecurrencePattern));
 	rp = &arp.RecurrencePattern;
 
 	/* Reader Version */
@@ -1180,7 +1257,7 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
 	/* Calendar Type */
 	rp->CalendarType = CAL_DEFAULT;
 
-	if (rt->freq == ICAL_DAILY_RECURRENCE) {
+	if (i_cal_recurrence_get_freq (rt) == I_CAL_DAILY_RECURRENCE) {
 		rp->RecurFrequency = RecurFrequency_Daily;
 
 		/* Pattern Type - it would be PatternType_Day since we have
@@ -1189,14 +1266,14 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
 		rp->PatternType = PatternType_Day;
 
 		/* FirstDateTime */
-		rp->FirstDateTime = compute_rdaily_firstdatetime (comp, (rt->interval * (60 * 24)));
+		rp->FirstDateTime = compute_rdaily_firstdatetime (comp, (i_cal_recurrence_get_interval (rt) * (60 * 24)));
 
 		/* INTERVAL */
-		rp->Period = (rt->interval * (60 * 24));
+		rp->Period = (i_cal_recurrence_get_interval (rt) * (60 * 24));
 
 		/* No PatternTypeSpecific for PatternType_Day */
 
-	} else if (rt->freq == ICAL_WEEKLY_RECURRENCE) {
+	} else if (i_cal_recurrence_get_freq (rt) == I_CAL_WEEKLY_RECURRENCE) {
 		rp->RecurFrequency = RecurFrequency_Weekly;
 
 		/* Pattern Type - it would be PatternType_Week since we don't
@@ -1204,56 +1281,56 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
 		rp->PatternType = PatternType_Week;
 
 		/* FirstDateTime */
-		rp->FirstDateTime = compute_rweekly_firstdatetime (comp, rt->week_start, (rt->interval * (60 * 24 * 7)));
+		rp->FirstDateTime = compute_rweekly_firstdatetime (comp, i_cal_recurrence_get_week_start (rt), (i_cal_recurrence_get_interval (rt) * (60 * 24 * 7)));
 
 		/* INTERVAL */
-		rp->Period = rt->interval;
+		rp->Period = i_cal_recurrence_get_interval (rt);
 
 		/* BITMASK */
-		for (i = 0; i < ICAL_BY_DAY_SIZE; ++i) {
-			if (rt->by_day[i] == ICAL_SUNDAY_WEEKDAY)
+		for (i = 0; i < I_CAL_BY_DAY_SIZE; ++i) {
+			if (i_cal_recurrence_get_by_day (rt, i) == I_CAL_SUNDAY_WEEKDAY)
 				rp->PatternTypeSpecific |= olSunday;
-			else if (rt->by_day[i] == ICAL_MONDAY_WEEKDAY)
+			else if (i_cal_recurrence_get_by_day (rt, i) == I_CAL_MONDAY_WEEKDAY)
 				rp->PatternTypeSpecific |= olMonday;
-			else if (rt->by_day[i] == ICAL_TUESDAY_WEEKDAY)
+			else if (i_cal_recurrence_get_by_day (rt, i) == I_CAL_TUESDAY_WEEKDAY)
 				rp->PatternTypeSpecific |= olTuesday;
-			else if (rt->by_day[i] == ICAL_WEDNESDAY_WEEKDAY)
+			else if (i_cal_recurrence_get_by_day (rt, i) == I_CAL_WEDNESDAY_WEEKDAY)
 				rp->PatternTypeSpecific |= olWednesday;
-			else if (rt->by_day[i] == ICAL_THURSDAY_WEEKDAY)
+			else if (i_cal_recurrence_get_by_day (rt, i) == I_CAL_THURSDAY_WEEKDAY)
 				rp->PatternTypeSpecific |= olThursday;
-			else if (rt->by_day[i] == ICAL_FRIDAY_WEEKDAY)
+			else if (i_cal_recurrence_get_by_day (rt, i) == I_CAL_FRIDAY_WEEKDAY)
 				rp->PatternTypeSpecific |= olFriday;
-			else if (rt->by_day[i] == ICAL_SATURDAY_WEEKDAY)
+			else if (i_cal_recurrence_get_by_day (rt, i) == I_CAL_SATURDAY_WEEKDAY)
 				rp->PatternTypeSpecific |= olSaturday;
 			else
 				break;
 		}
 
-	} else if (rt->freq == ICAL_MONTHLY_RECURRENCE) {
+	} else if (i_cal_recurrence_get_freq (rt) == I_CAL_MONTHLY_RECURRENCE) {
 		guint16 pattern = 0x0; guint32 mask = 0x0, flag = 0x0;
 
 		rp->RecurFrequency = RecurFrequency_Monthly;
 
-		if (rt->by_month_day[0] >= 1 && rt->by_month_day[0] <= 31) {
+		if (i_cal_recurrence_get_by_month_day (rt, 0) >= 1 && i_cal_recurrence_get_by_month_day (rt, 0) <= 31) {
 			pattern = PatternType_Month;
-			flag = rt->by_month_day[0];
-		} else if (rt->by_month_day[0] == -1) {
+			flag = i_cal_recurrence_get_by_month_day (rt, 0);
+		} else if (i_cal_recurrence_get_by_month_day (rt, 0) == -1) {
 			pattern = PatternType_MonthNth;
 			mask = (olSunday | olMonday | olTuesday | olWednesday | olThursday | olFriday | olSaturday);
 			flag = RecurrenceN_Last;
-		} else if (rt->by_day[0] >= ICAL_SUNDAY_WEEKDAY && rt->by_day[0] <= ICAL_SATURDAY_WEEKDAY) {
+		} else if (i_cal_recurrence_get_by_day (rt, 0) >= I_CAL_SUNDAY_WEEKDAY && i_cal_recurrence_get_by_day (rt, 0) <= I_CAL_SATURDAY_WEEKDAY) {
 			pattern = PatternType_MonthNth;
-			mask = get_mapi_day (rt->by_day[0]);
-			flag = get_mapi_pos (rt->by_set_pos[0]);
+			mask = get_mapi_day (i_cal_recurrence_get_by_day (rt, 0));
+			flag = get_mapi_pos (i_cal_recurrence_get_by_set_pos (rt, 0));
 		}
 
 		rp->PatternType = pattern;
 
 		/* FirstDateTime */
-		rp->FirstDateTime = compute_rmonthly_firstdatetime (comp, rt->interval);
+		rp->FirstDateTime = compute_rmonthly_firstdatetime (comp, i_cal_recurrence_get_interval (rt));
 
 		/* INTERVAL */
-		rp->Period = rt->interval;
+		rp->Period = i_cal_recurrence_get_interval (rt);
 
 		if (pattern == PatternType_Month) {
 			rp->N = flag;
@@ -1270,7 +1347,7 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
 			g_warning ("Possibly setting incorrect values in the stream. ");
 		}
 
-	} else if (rt->freq == ICAL_YEARLY_RECURRENCE) {
+	} else if (i_cal_recurrence_get_freq (rt) == I_CAL_YEARLY_RECURRENCE) {
 		rp->RecurFrequency = RecurFrequency_Yearly;
 
 		/* Pattern Type - it would be PatternType_Month since we don't
@@ -1286,26 +1363,31 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
 
 		/* MONTH_DAY */
 		{
-			ECalComponentDateTime dtstart;
-			e_cal_component_get_dtstart (comp, &dtstart);
-			rp->PatternTypeSpecific = dtstart.value->day;
-			e_cal_component_free_datetime (&dtstart);
+			ECalComponentDateTime *dtstart;
+			dtstart = e_cal_component_get_dtstart (comp);
+			rp->PatternTypeSpecific = (dtstart && e_cal_component_datetime_get_value (dtstart)) ?
+				i_cal_time_get_day (e_cal_component_datetime_get_value (dtstart)) : 0;
+			e_cal_component_datetime_free (dtstart);
 		}
 	}
 
+	until = i_cal_recurrence_get_until (rt);
+
 	/* End Type followed by Occurence count */
-	if (!icaltime_is_null_time (rt->until)) {
+	if (until && !i_cal_time_is_null_time (until)) {
 		rp->EndType = END_AFTER_DATE;
 		rp->OccurrenceCount = calculate_no_of_occurrences (comp, rt);
-	} else if (rt->count) {
+	} else if (i_cal_recurrence_get_count (rt)) {
 		rp->EndType = END_AFTER_N_OCCURRENCES;
-		rp->OccurrenceCount = rt->count;
+		rp->OccurrenceCount = i_cal_recurrence_get_count (rt);
 	} else {
 		rp->EndType = END_NEVER_END;
 	}
 
+	g_clear_object (&until);
+
 	/* FirstDOW */
-	rp->FirstDOW = get_mapi_weekstart (rt->week_start);
+	rp->FirstDOW = get_mapi_weekstart (i_cal_recurrence_get_week_start (rt));
 
 	/* DeletedInstanceDates */
 	rp->DeletedInstanceCount = g_slist_length (exdate_list);
@@ -1316,9 +1398,17 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
 		                              rp->DeletedInstanceCount);
 		/* FIXME: This should include modified dates */
 		for (i = 0, l = exdate_list; l; ++i, l = l->next) {
-			dt = (ECalComponentDateTime *)(l->data);
-			dt->value->hour = dt->value->minute = dt->value->second = 0;
-			rp->DeletedInstanceDates[i] = convert_timet_to_recurrence_minutes (icaltime_as_timet_with_zone (*(dt->value), 0));
+			ICalTime *itt;
+
+			dt = l->data;
+
+			itt = e_cal_component_datetime_get_value (dt);
+			if (!itt)
+				continue;
+
+			i_cal_time_set_time (itt, 0, 0, 0);
+
+			rp->DeletedInstanceDates[i] = convert_timet_to_recurrence_minutes (i_cal_time_as_timet_with_zone (itt, NULL));
 		}
 
 		g_qsort_with_data (rp->DeletedInstanceDates,
@@ -1338,25 +1428,31 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
 			/* FIXME: named prop here? */
 			rp->EndDate = 0x5AE980DF;
 		else if (rp->EndType == END_AFTER_N_OCCURRENCES) {
-			ECalComponentDateTime dtstart;
-			gchar *rrule_str = icalrecurrencetype_as_string_r (rt);
-			time_t *array = g_new0 (time_t, rt->count);
+			ECalComponentDateTime *dtstart;
+			ICalTime *itt;
+			gchar *rrule_str = i_cal_recurrence_as_string_r (rt);
+			GArray *array;
 
-			e_cal_component_get_dtstart (comp, &dtstart);
-			dtstart.value->hour = dtstart.value->minute = dtstart.value->second = 0;
+			dtstart = e_cal_component_get_dtstart (comp);
+			itt = e_cal_component_datetime_get_value (dtstart);
+			i_cal_time_set_time (itt, 0, 0, 0);
 
-			icalrecur_expand_recurrence (rrule_str, icaltime_as_timet_with_zone (*(dtstart.value), 0), rt->count, array);
+			array = i_cal_recur_expand_recurrence (rrule_str, i_cal_time_as_timet_with_zone (itt, NULL), i_cal_recurrence_get_count (rt));
+			if (array) {
+				rp->EndDate = convert_timet_to_recurrence_minutes (g_array_index (array, time_t, i_cal_recurrence_get_count (rt) - 1));
+				g_array_unref (array);
+			} else {
+				g_warn_if_reached ();
+			}
 
-			rp->EndDate = convert_timet_to_recurrence_minutes (array[(rt->count) - 1]);
-
-			g_free (array);
 			g_free (rrule_str);
-			e_cal_component_free_datetime (&dtstart);
+			e_cal_component_datetime_free (dtstart);
 		} else if (rp->EndType == END_AFTER_DATE) {
-			struct icaltimetype until;
-			memcpy (&until, &(rt->until), sizeof(struct icaltimetype));
-			until.hour = until.minute = until.second = 0;
-			rp->EndDate = convert_timet_to_recurrence_minutes (icaltime_as_timet_with_zone (until, 0));
+			until = i_cal_recurrence_get_until (rt);
+			i_cal_time_set_time (until, 0, 0, 0);
+
+			rp->EndDate = convert_timet_to_recurrence_minutes (i_cal_time_as_timet_with_zone (until, NULL));
+			g_clear_object (&until);
 		}
 	}
 
@@ -1367,29 +1463,36 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
 
 	/* StartTimeOffset */
 	{
-		ECalComponentDateTime dtstart;
-		e_cal_component_get_dtstart (comp, &dtstart);
-		arp.StartTimeOffset = (dtstart.value->hour * 60) + dtstart.value->minute;
-		e_cal_component_free_datetime (&dtstart);
+		ECalComponentDateTime *dtstart;
+		ICalTime *itt;
+
+		dtstart = e_cal_component_get_dtstart (comp);
+		itt = e_cal_component_datetime_get_value (dtstart);
+
+		arp.StartTimeOffset = (i_cal_time_get_hour (itt) * 60) + i_cal_time_get_minute (itt);
+		e_cal_component_datetime_free (dtstart);
 	}
 
 	/* EndTimeOffset */
 	{
-		ECalComponentDateTime dtend;
-		e_cal_component_get_dtend (comp, &dtend);
-		arp.EndTimeOffset = (dtend.value->hour * 60) + dtend.value->minute;
-		e_cal_component_free_datetime (&dtend);
+		ECalComponentDateTime *dtend;
+		ICalTime *itt;
+
+		dtend = e_cal_component_get_dtend (comp);
+		itt = e_cal_component_datetime_get_value (dtend);
+		arp.EndTimeOffset = (i_cal_time_get_hour (itt) * 60) + i_cal_time_get_minute (itt);
+		e_cal_component_datetime_free (dtend);
 	}
 
 	/* FIXME: Add ExceptionInfo here */
 	/* FIXME: Add the ExtendedExceptionInfo here */
 
 	/* Reserved Block 2 Size */
-	arp_to_gba(&arp, ba);
+	arp_to_gba (&arp, ba);
 
-	free_arp_contents(&arp);
-	e_cal_component_free_exdate_list (exdate_list);
-	e_cal_component_free_recur_list (rrule_list);
+	free_arp_contents (&arp);
+	g_slist_free_full (exdate_list, e_cal_component_datetime_free);
+	g_slist_free_full (rrule_list, g_object_unref);
 
 	/*g_print ("\n== ICAL to MAPI == The recurrence blob data is as follows:\n");
 	for (i = 0; i < ba->len; ++i)
@@ -1403,4 +1506,3 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
 
 	return TRUE;
 }
-

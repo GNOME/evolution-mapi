@@ -49,7 +49,7 @@ typedef enum {
 } MAPIMeetingOptions;
 
 struct cal_cbdata {
-	gint kind;
+	ICalComponentKind kind;
 	ECalComponent *comp;
 	gboolean is_modify;
 
@@ -71,7 +71,7 @@ struct cal_cbdata {
 
 	/* custom callback to get timezone from a backend */
 	gpointer get_tz_data;
-	icaltimezone * (*get_timezone)(gpointer get_tz_data, const gchar *tzid);
+	ICalTimezone * (*get_timezone)(ETimezoneCache *get_tz_data, const gchar *tzid);
 };
 
 void		e_mapi_cal_util_generate_globalobjectid		(gboolean is_clean,
@@ -93,7 +93,7 @@ gboolean	e_mapi_cal_utils_get_free_busy_data		(EMapiConnection *conn,
 
 ECalComponent *	e_mapi_cal_util_object_to_comp			(EMapiConnection *conn,
 								 EMapiObject *object,
-								 icalcomponent_kind kind,
+								 ICalComponentKind kind,
 								 gboolean is_reply,
 								 const gchar *use_uid,
 								 GSList **detached_components);
@@ -104,9 +104,6 @@ gboolean	e_mapi_cal_utils_comp_to_object			(EMapiConnection *conn,
 								 gpointer user_data,
 								 GCancellable *cancellable,
 								 GError **perror);
-
-gchar *		e_mapi_cal_utils_get_icomp_x_prop		(icalcomponent *comp,
-								 const gchar *key);
 
 G_END_DECLS
 
