@@ -893,10 +893,17 @@ mapi_backend_authenticate_sync (EBackend *backend,
 
 		if (res == E_SOURCE_AUTHENTICATION_ERROR) {
 			if (krb_error) {
-				GError *new_error = g_error_new (mapi_error->domain, mapi_error->code,
-					/* Translators: the first '%s' is replaced with a generic error message,
-					   the second '%s' is replaced with additional error information. */
-					C_("gssapi_error", "%s (%s)"), mapi_error->message, krb_error->message);
+				GError *new_error;
+
+				if (mapi_error) {
+					new_error = g_error_new (mapi_error->domain, mapi_error->code,
+						/* Translators: the first '%s' is replaced with a generic error message,
+						   the second '%s' is replaced with additional error information. */
+						C_("gssapi_error", "%s (%s)"), mapi_error->message, krb_error->message);
+				} else {
+					new_error = g_error_copy (krb_error);
+				}
+
 				g_clear_error (&mapi_error);
 				mapi_error = new_error;
 			}
