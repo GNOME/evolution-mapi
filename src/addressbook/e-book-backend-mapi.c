@@ -1046,7 +1046,7 @@ ebb_mapi_get_backend_property (EBookBackend *backend,
 	}
 
 	/* Chain up to parent's method */
-	return E_BOOK_BACKEND_CLASS (e_book_backend_mapi_parent_class)->get_backend_property (backend, prop_name);
+	return E_BOOK_BACKEND_CLASS (e_book_backend_mapi_parent_class)->impl_get_backend_property (backend, prop_name);
 }
 
 static gboolean
@@ -1153,7 +1153,7 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 	meta_backend_class->search_uids_sync = ebb_mapi_search_uids_sync;
 
 	book_backend_class = E_BOOK_BACKEND_CLASS (klass);
-	book_backend_class->get_backend_property = ebb_mapi_get_backend_property;
+	book_backend_class->impl_get_backend_property = ebb_mapi_get_backend_property;
 
 	backend_class = E_BACKEND_CLASS (klass);
 	backend_class->get_destination_address = ebb_mapi_get_destination_address;
