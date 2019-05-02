@@ -85,7 +85,7 @@ e_mapi_tm_to_icaltime (struct tm *tm,
 {
 	ICalTime *itt;
 
-	itt = i_cal_time_null_time ();
+	itt = i_cal_time_new_null_time ();
 	i_cal_time_set_time (itt, 0, 0, 0);
 	i_cal_time_set_date (itt, tm->tm_year + 1900, dst ? 6 : 1, 1);
 	i_cal_time_set_timezone (itt, NULL);
@@ -512,7 +512,7 @@ write_tz_rule_comps (GByteArray *ba,
 	extract_bias_and_date (standardcomp, &standard_bias, &standard_date);
 	extract_bias_and_date (daylightcomp, &daylight_bias, &daylight_date);
 
-	current_time = i_cal_time_current_time_with_zone (zone);
+	current_time = i_cal_time_new_current_with_zone (zone);
 	bias = i_cal_time_is_daylight (current_time) ? daylight_bias : standard_bias;
 
 	write_tz_rule (ba, is_recur, bias, standard_bias, daylight_bias, standard_date, daylight_date);
@@ -566,7 +566,7 @@ add_timezone_rules (GByteArray *ba,
 	if (!any_added) {
 		ICalTime *fake_utc;
 
-		fake_utc = i_cal_time_null_time ();
+		fake_utc = i_cal_time_new_null_time ();
 
 		write_tz_rule (ba, is_recur, 0, 0, 0, fake_utc, fake_utc);
 
@@ -845,7 +845,7 @@ e_mapi_cal_util_mapi_tz_pidlidtimezone (ICalTimezone *ictz)
 		tz_has_dst = TRUE;
 
 	/* Calculate minutes east of UTC, what MS uses in this spec */
-	tt = i_cal_time_current_time_with_zone (ictz);
+	tt = i_cal_time_new_current_with_zone (ictz);
 	utc_offset = i_cal_timezone_get_utc_offset (ictz, tt, &tz_dst_now) / 60;
 	if (tz_dst_now)
 		utc_offset -= 60;

@@ -308,7 +308,7 @@ add_timezones_cb (ICalParameter *param,
 	if (!vtimezone_comp)
 		return;
 
-	i_cal_component_take_component (tz_data->icomp, i_cal_component_new_clone (vtimezone_comp));
+	i_cal_component_take_component (tz_data->icomp, i_cal_component_clone (vtimezone_comp));
 
 	g_hash_table_insert (tz_data->tzids, g_strdup (tzid), GINT_TO_POINTER (1));
 }
@@ -369,7 +369,7 @@ build_ical_string (EMapiConnection *conn,
 		ForeachTZIDData tz_data;
 		ICalComponent *clone;
 
-		clone = i_cal_component_new_clone (e_cal_component_get_icalcomponent (comp));
+		clone = i_cal_component_clone (e_cal_component_get_icalcomponent (comp));
 
 		icomp = e_cal_util_new_top_level ();
 		if (method != I_CAL_METHOD_NONE)
@@ -387,10 +387,10 @@ build_ical_string (EMapiConnection *conn,
 		i_cal_component_take_component (icomp, clone);
 		for (iter = detached_components; iter; iter = g_slist_next (iter)) {
 			i_cal_component_take_component (icomp,
-				i_cal_component_new_clone (e_cal_component_get_icalcomponent (iter->data)));
+				i_cal_component_clone (e_cal_component_get_icalcomponent (iter->data)));
 		}
 
-		ical_string = i_cal_component_as_ical_string_r (icomp);
+		ical_string = i_cal_component_as_ical_string (icomp);
 
 		g_object_unref (icomp);
 	} else {

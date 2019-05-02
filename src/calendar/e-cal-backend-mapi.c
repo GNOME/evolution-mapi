@@ -318,7 +318,7 @@ ecb_mapi_build_global_id_restriction (EMapiConnection *conn,
 
 		dtstamp = e_cal_component_get_dtstamp (comp);
 		if (!dtstamp)
-			dtstamp = i_cal_time_null_time ();
+			dtstamp = i_cal_time_new_null_time ();
 
 		e_mapi_util_time_t_to_filetime (i_cal_time_as_timet (dtstamp), &creation_time);
 		e_mapi_cal_util_generate_globalobjectid (FALSE, uid, NULL, (dtstamp && i_cal_time_get_year (dtstamp)) ? &creation_time : NULL, &sb);
@@ -999,7 +999,7 @@ ecb_mapi_preload_infos_sync (ECalBackendMAPI *cbmapi,
 						nfo = g_hash_table_lookup (infos, xmid);
 
 					if (nfo && !nfo->object)
-						nfo->object = i_cal_component_as_ical_string_r (icomp);
+						nfo->object = i_cal_component_as_ical_string (icomp);
 
 					g_free (xmid);
 				}
@@ -1071,8 +1071,8 @@ ecb_mapi_list_existing_uids_cb (EMapiConnection *conn,
 		ICalTime *itt;
 		gchar *rev;
 
-		itt = i_cal_time_from_timet_with_zone (object_data->last_modified, 0, i_cal_timezone_get_utc_timezone ());
-		rev = i_cal_time_as_ical_string_r (itt);
+		itt = i_cal_time_new_from_timet_with_zone (object_data->last_modified, 0, i_cal_timezone_get_utc_timezone ());
+		rev = i_cal_time_as_ical_string (itt);
 		g_clear_object (&itt);
 
 		*out_existing_objects = g_slist_prepend (*out_existing_objects,
@@ -1288,7 +1288,7 @@ ecb_mapi_save_component_sync (ECalMetaBackend *meta_backend,
 
 	cbmapi = E_CAL_BACKEND_MAPI (meta_backend);
 
-	icomp = i_cal_component_new_clone (e_cal_component_get_icalcomponent (instances->data));
+	icomp = i_cal_component_clone (e_cal_component_get_icalcomponent (instances->data));
 	no_increment = e_cal_util_component_remove_x_property (icomp, "X-EVOLUTION-IS-REPLY");
 
 	comp = e_cal_component_new_from_icalcomponent (icomp);
@@ -1552,7 +1552,7 @@ ecb_mapi_send_objects_sync (ECalBackendSync *sync_backend,
 			ICalTime *dtstamp;
 			mapi_object_t obj_folder;
 
-			comp = e_cal_component_new_from_icalcomponent (i_cal_component_new_clone (subcomp));
+			comp = e_cal_component_new_from_icalcomponent (i_cal_component_clone (subcomp));
 			if (!comp)
 				continue;
 
@@ -1595,7 +1595,7 @@ ecb_mapi_send_objects_sync (ECalBackendSync *sync_backend,
 
 			dtstamp = e_cal_component_get_dtstamp (comp);
 			if (!dtstamp)
-				dtstamp = i_cal_time_null_time ();
+				dtstamp = i_cal_time_new_null_time ();
 			e_mapi_util_time_t_to_filetime (i_cal_time_as_timet (dtstamp), &creation_time);
 
 			propval = e_cal_util_component_dup_x_property (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-EXREPTIME");
@@ -1830,7 +1830,7 @@ ecb_mapi_update_tzid_cb (ECache *cache,
 	g_clear_object (&prop);
 
 	if (changed)
-		*out_object = i_cal_component_as_ical_string_r (icomp);
+		*out_object = i_cal_component_as_ical_string (icomp);
 
 	g_object_unref (icomp);
 
@@ -1864,7 +1864,7 @@ ecb_mapi_dup_component_revision_cb (ECalCache *cal_cache,
 		return NULL;
 
 	itt = i_cal_property_get_lastmodified (prop);
-	res = i_cal_time_as_ical_string_r (itt);
+	res = i_cal_time_as_ical_string (itt);
 
 	g_clear_object (&prop);
 	g_clear_object (&itt);

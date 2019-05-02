@@ -262,7 +262,7 @@ e_mapi_cal_util_generate_globalobjectid (gboolean is_clean,
 
 	val32 = 0;
 	if (!is_clean && exception_replace_time) {
-		ICalTime *itt = i_cal_time_from_timet_with_zone (exception_replace_time->tv_sec, 0, i_cal_timezone_get_utc_timezone ());
+		ICalTime *itt = i_cal_time_new_from_timet_with_zone (exception_replace_time->tv_sec, 0, i_cal_timezone_get_utc_timezone ());
 
 		val32 |= (i_cal_time_get_year (itt) & 0xFF00) << 16;
 		val32 |= (i_cal_time_get_year (itt) & 0xFF) << 16;
@@ -538,13 +538,13 @@ populate_freebusy_data (struct Binary_r *bin,
 			start_date = mapi_get_date_from_string (start) + (60 * event_start);
 			end_date = mapi_get_date_from_string (end) + (60 * event_end);
 
-			period = i_cal_period_null_period ();
+			period = i_cal_period_new_null_period ();
 
-			itt = i_cal_time_from_timet_with_zone (start_date, 0, i_cal_timezone_get_utc_timezone ());
+			itt = i_cal_time_new_from_timet_with_zone (start_date, 0, i_cal_timezone_get_utc_timezone ());
 			i_cal_period_set_start (period, itt);
 			g_clear_object (&itt);
 
-			itt = i_cal_time_from_timet_with_zone (end_date, 0, i_cal_timezone_get_utc_timezone ());
+			itt = i_cal_time_new_from_timet_with_zone (end_date, 0, i_cal_timezone_get_utc_timezone ());
 			i_cal_period_set_end (period, itt);
 			g_clear_object (&itt);
 
@@ -638,8 +638,8 @@ e_mapi_cal_utils_get_free_busy_data (EMapiConnection *conn,
 		e_cal_component_commit_sequence (comp);
 		icomp = e_cal_component_get_icalcomponent (comp);
 
-		starttt = i_cal_time_from_timet_with_zone (start, 0, NULL);
-		endtt = i_cal_time_from_timet_with_zone (end, 0, NULL);
+		starttt = i_cal_time_new_from_timet_with_zone (start, 0, NULL);
+		endtt = i_cal_time_new_from_timet_with_zone (end, 0, NULL);
 		i_cal_component_set_dtstart (icomp, starttt);
 		i_cal_component_set_dtend (icomp, endtt);
 		g_clear_object (&starttt);
@@ -952,7 +952,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 
 	/* set dtstamp - in UTC */
 	if (e_mapi_util_find_array_datetime_propval (&t, &object->properties, PidTagCreationTime) == MAPI_E_SUCCESS) {
-		itt = i_cal_time_from_timet_with_zone (t.tv_sec, 0, utc_zone);
+		itt = i_cal_time_new_from_timet_with_zone (t.tv_sec, 0, utc_zone);
 		i_cal_component_set_dtstamp (icomp, itt);
 
 		prop = i_cal_property_new_created (itt);
@@ -961,7 +961,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 		g_clear_object (&itt);
 	} else {
 		/* created - in UTC */
-		itt = i_cal_time_current_time_with_zone (utc_zone);
+		itt = i_cal_time_new_current_with_zone (utc_zone);
 		prop = i_cal_property_new_created (itt);
 		i_cal_component_take_property (icomp, prop);
 		g_clear_object (&itt);
@@ -969,7 +969,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 
 	/* last modified - in UTC */
 	if (get_mapi_SPropValue_array_date_timeval (&t, &object->properties, PidTagLastModificationTime) == MAPI_E_SUCCESS) {
-		itt = i_cal_time_from_timet_with_zone (t.tv_sec, 0, utc_zone);
+		itt = i_cal_time_new_from_timet_with_zone (t.tv_sec, 0, utc_zone);
 		prop = i_cal_property_new_lastmodified (itt);
 		i_cal_component_take_property (icomp, prop);
 		g_clear_object (&itt);
@@ -1058,7 +1058,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 		if (e_mapi_util_find_array_datetime_propval (&t, &object->properties, PidLidAppointmentStartWhole) == MAPI_E_SUCCESS) {
 			ICalTimezone *zone = dtstart_tz_location ? i_cal_timezone_get_builtin_timezone (dtstart_tz_location) : utc_zone;
 
-			itt = i_cal_time_from_timet_with_zone (t.tv_sec, all_day, zone);
+			itt = i_cal_time_new_from_timet_with_zone (t.tv_sec, all_day, zone);
 			i_cal_time_set_timezone (itt, zone);
 			prop = i_cal_property_new_dtstart (itt);
 			if (!all_day && zone && i_cal_timezone_get_tzid (zone)) {
@@ -1090,7 +1090,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 				dtend_tz_location = dtstart_tz_location;
 
 			zone = dtend_tz_location ? i_cal_timezone_get_builtin_timezone (dtend_tz_location) : utc_zone;
-			itt = i_cal_time_from_timet_with_zone (t.tv_sec, all_day, zone);
+			itt = i_cal_time_new_from_timet_with_zone (t.tv_sec, all_day, zone);
 			i_cal_time_set_timezone (itt, zone);
 			prop = i_cal_property_new_dtend (itt);
 			if (!all_day && zone && i_cal_timezone_get_tzid (zone)) {
@@ -1247,8 +1247,8 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 				ICalDuration *duration;
 				ICalTime *itt1, *itt2;
 
-				itt1 = i_cal_time_from_timet_with_zone (displaytime.tv_sec, 0, NULL);
-				itt2 = i_cal_time_from_timet_with_zone (start.tv_sec, 0, NULL);
+				itt1 = i_cal_time_new_from_timet_with_zone (displaytime.tv_sec, 0, NULL);
+				itt2 = i_cal_time_new_from_timet_with_zone (start.tv_sec, 0, NULL);
 				duration = i_cal_time_subtract (itt1, itt2);
 				g_clear_object (&itt1);
 				g_clear_object (&itt2);
@@ -1271,13 +1271,13 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 
 		/* NOTE: Exchange tasks are DATE values, not DATE-TIME values, but maybe someday, we could expect Exchange to support it;) */
 		if (e_mapi_util_find_array_datetime_propval (&t, &object->properties, PidLidTaskStartDate) == MAPI_E_SUCCESS) {
-			itt = i_cal_time_from_timet_with_zone (t.tv_sec, 1, utc_zone);
+			itt = i_cal_time_new_from_timet_with_zone (t.tv_sec, 1, utc_zone);
 			i_cal_component_set_dtstart (icomp, itt);
 			g_clear_object (&itt);
 		}
 
 		if (e_mapi_util_find_array_datetime_propval (&t, &object->properties, PidLidTaskDueDate) == MAPI_E_SUCCESS) {
-			itt = i_cal_time_from_timet_with_zone (t.tv_sec, 1, utc_zone);
+			itt = i_cal_time_new_from_timet_with_zone (t.tv_sec, 1, utc_zone);
 			i_cal_component_set_due (icomp, itt);
 			g_clear_object (&itt);
 		}
@@ -1287,7 +1287,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 			i_cal_component_set_status (icomp, get_taskstatus_from_prop (*status));
 			if (*status == olTaskComplete
 			    && e_mapi_util_find_array_datetime_propval (&t, &object->properties, PidLidTaskDateCompleted) == MAPI_E_SUCCESS) {
-				itt = i_cal_time_from_timet_with_zone (t.tv_sec, 0, utc_zone);
+				itt = i_cal_time_new_from_timet_with_zone (t.tv_sec, 0, utc_zone);
 				prop = i_cal_property_new_completed (itt);
 				i_cal_component_take_property (icomp, prop);
 				g_clear_object (&itt);
@@ -1314,7 +1314,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 				ECalComponentAlarmTrigger *trigger;
 				ICalTime *abs_time;
 
-				abs_time = i_cal_time_from_timet_with_zone (abs.tv_sec, 0, utc_zone);
+				abs_time = i_cal_time_new_from_timet_with_zone (abs.tv_sec, 0, utc_zone);
 				trigger = e_cal_component_alarm_trigger_new_absolute (abs_time);
 				g_clear_object (&abs_time);
 
@@ -1329,7 +1329,7 @@ e_mapi_cal_util_object_to_comp (EMapiConnection *conn,
 
 	} else if (i_cal_component_isa (icomp) == I_CAL_VJOURNAL_COMPONENT) {
 		if (e_mapi_util_find_array_datetime_propval (&t, &object->properties, PidTagLastModificationTime) == MAPI_E_SUCCESS) {
-			itt = i_cal_time_from_timet_with_zone (t.tv_sec, 1, utc_zone);
+			itt = i_cal_time_new_from_timet_with_zone (t.tv_sec, 1, utc_zone);
 			i_cal_component_set_dtstart (icomp, itt);
 			g_clear_object (&itt);
 		}
@@ -2128,7 +2128,7 @@ e_mapi_cal_utils_comp_to_object (EMapiConnection *conn,
 			b = 1;
 			set_value (PidLidFInvited, &b);
 
-			itt = i_cal_time_current_time_with_zone (utc_zone);
+			itt = i_cal_time_new_current_with_zone (utc_zone);
 			tt = i_cal_time_as_timet (itt);
 			set_timet_value (PidLidAttendeeCriticalChange, tt);
 			g_clear_object (&itt);
@@ -2224,7 +2224,7 @@ e_mapi_cal_utils_comp_to_object (EMapiConnection *conn,
 			flag32 = mtgEmpty;
 			set_value (PidLidMeetingType, &flag32);
 
-			itt = i_cal_time_current_time_with_zone (utc_zone);
+			itt = i_cal_time_new_current_with_zone (utc_zone);
 			tt = i_cal_time_as_timet (itt);
 			set_timet_value (PidLidAppointmentReplyTime, tt);
 			g_clear_object (&itt);

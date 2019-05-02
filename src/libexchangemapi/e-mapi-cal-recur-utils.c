@@ -942,7 +942,7 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb,
 			ICalTime *tt;
 			time_t ictime = convert_recurrence_minutes_to_timet (rp->DeletedInstanceDates[i]);
 
-			tt = i_cal_time_from_timet_with_zone (ictime, 1, NULL);
+			tt = i_cal_time_new_from_timet_with_zone (ictime, 1, NULL);
 
 			exdate_list = g_slist_append (exdate_list, e_cal_component_datetime_new_take (tt, g_strdup ("UTC")));
 		}
@@ -954,7 +954,7 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb,
 
 		time_t ict = convert_recurrence_minutes_to_timet (rp->EndDate);
 
-		itt = i_cal_time_from_timet_with_zone (ict, 1, NULL);
+		itt = i_cal_time_new_from_timet_with_zone (ict, 1, NULL);
 		i_cal_recurrence_set_until (rt, itt);
 		g_clear_object (&itt);
 	}
@@ -989,18 +989,18 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb,
 			/* make a shallow clone of comp */
 			detached[i] = e_cal_component_clone (comp);
 
-			tt = i_cal_time_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->OriginalStartDate), 0, NULL);
+			tt = i_cal_time_new_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->OriginalStartDate), 0, NULL);
 			rid = e_cal_component_range_new_take (E_CAL_COMPONENT_RANGE_SINGLE,
 				e_cal_component_datetime_new_take (tt, g_strdup (recur_zone ? i_cal_timezone_get_tzid (recur_zone) : "UTC")));
 			e_cal_component_set_recurid (detached[i], rid);
 			e_cal_component_range_free (rid);
 
-			tt = i_cal_time_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->StartDateTime), 0, NULL);
+			tt = i_cal_time_new_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->StartDateTime), 0, NULL);
 			edt = e_cal_component_datetime_new_take (tt, g_strdup (recur_zone ? i_cal_timezone_get_tzid (recur_zone) : "UTC"));
 			e_cal_component_set_dtstart (detached[i], edt);
 			e_cal_component_datetime_free (edt);
 
-			tt = i_cal_time_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->EndDateTime), 0, NULL);
+			tt = i_cal_time_new_from_timet_with_zone (convert_recurrence_minutes_to_timet (ei->EndDateTime), 0, NULL);
 			edt = e_cal_component_datetime_new_take (tt, g_strdup (recur_zone ? i_cal_timezone_get_tzid (recur_zone) : "UTC"));
 			e_cal_component_set_dtend (detached[i], edt);
 			e_cal_component_datetime_free (edt);
@@ -1193,7 +1193,7 @@ calculate_no_of_occurrences (ECalComponent *comp,
 				break;
 
 			g_clear_object (&prev);
-			prev = i_cal_time_new_clone (next);
+			prev = i_cal_time_clone (next);
 
 			count++;
 		}
@@ -1430,7 +1430,7 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
 		else if (rp->EndType == END_AFTER_N_OCCURRENCES) {
 			ECalComponentDateTime *dtstart;
 			ICalTime *itt;
-			gchar *rrule_str = i_cal_recurrence_as_string_r (rt);
+			gchar *rrule_str = i_cal_recurrence_to_string (rt);
 			GArray *array;
 
 			dtstart = e_cal_component_get_dtstart (comp);
