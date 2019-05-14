@@ -1783,8 +1783,10 @@ e_mapi_config_utils_insert_widgets (ESourceConfigBackend *backend,
 
 	/* no extra options for subscribed folders */
 	if (e_source_mapi_folder_is_public (folder_ext) ||
-	    e_source_mapi_folder_get_foreign_username (folder_ext))
+	    e_source_mapi_folder_get_foreign_username (folder_ext)) {
+		e_source_config_add_refresh_interval (config, scratch_source);
 		return;
+	}
 
 	is_new_source = e_source_mapi_folder_get_id (folder_ext) == 0;
 	if (is_new_source && !e_mapi_config_utils_is_online ()) {
@@ -1873,6 +1875,8 @@ e_mapi_config_utils_insert_widgets (ESourceConfigBackend *backend,
 
 		e_source_config_insert_widget (config, scratch_source, NULL, GTK_WIDGET (content_grid));
 	}
+
+	e_source_config_add_refresh_interval (config, scratch_source);
 }
 
 gboolean
