@@ -26,8 +26,6 @@
 #include <glib/gi18n-lib.h>
 #include <gio/gio.h>
 
-#include <libical/icaltz-util.h>
-
 #include <libedata-cal/libedata-cal.h>
 #include <libedataserver/libedataserver.h>
 
@@ -50,8 +48,9 @@
 #define gmtime_r(tp,tmp) (gmtime(tp)?(*(tmp)=*gmtime(tp),(tmp)):0)
 #endif
 
-#define EDC_ERROR(_code) e_data_cal_create_error (_code, NULL)
-#define EDC_ERROR_EX(_code, _msg) e_data_cal_create_error (_code, _msg)
+#define EC_ERROR(_code) e_client_error_create (_code, NULL)
+#define EC_ERROR_EX(_code, _msg) e_client_error_create (_code, _msg)
+#define ECC_ERROR(_code) e_cal_client_error_create (_code, NULL)
 
 /* Current data version */
 #define EMA_DATA_VERSION	1
@@ -65,13 +64,14 @@ struct _ECalBackendMAPIPrivate {
 };
 
 static gchar *	ecb_mapi_dup_component_revision_cb	(ECalCache *cal_cache,
-							 icalcomponent *icalcomp);
+							 ICalComponent *icomp);
 
 static void
-ecb_mapi_error_to_edc_error (GError **perror,
-			     const GError *mapi_error,
-			     EDataCalCallStatus code,
-			     const gchar *context)
+ecb_mapi_error_to_client_error (GError **perror,
+				const GError *mapi_error,
+				GQuark domain,
+				gint code,
+				const gchar *context)
 {
 	gchar *err_msg = NULL;
 
@@ -83,15 +83,16 @@ ecb_mapi_error_to_edc_error (GError **perror,
 		return;
 	}
 
-	if (code == OtherError && mapi_error && mapi_error->domain == E_MAPI_ERROR) {
+	if (domain == E_CLIENT_ERROR && code == E_CLIENT_ERROR_OTHER_ERROR &&
+	    mapi_error && mapi_error->domain == E_MAPI_ERROR) {
 		/* Change error to more accurate only with OtherError */
 		switch (mapi_error->code) {
 		case MAPI_E_PASSWORD_CHANGE_REQUIRED:
 		case MAPI_E_PASSWORD_EXPIRED:
-			code = AuthenticationRequired;
+			code = E_CLIENT_ERROR_AUTHENTICATION_REQUIRED;
 			break;
 		case ecRpcFailed:
-			code = RepositoryOffline;
+			code = E_CLIENT_ERROR_REPOSITORY_OFFLINE;
 			break;
 		default:
 			break;
@@ -101,7 +102,7 @@ ecb_mapi_error_to_edc_error (GError **perror,
 	if (context)
 		err_msg = g_strconcat (context, mapi_error ? ": " : NULL, mapi_error ? mapi_error->message : NULL, NULL);
 
-	g_propagate_error (perror, EDC_ERROR_EX (code, err_msg ? err_msg : mapi_error ? mapi_error->message : _("Unknown error")));
+	g_set_error_literal (perror, domain, code, err_msg ? err_msg : mapi_error ? mapi_error->message : _("Unknown error"));
 
 	g_free (err_msg);
 }
@@ -204,20 +205,20 @@ ecb_mapi_maybe_disconnect (ECalBackendMAPI *cbmapi,
 }
 
 static void
-ecb_mapi_get_comp_mid (icalcomponent *icalcomp,
+ecb_mapi_get_comp_mid (ICalComponent *icomp,
 		       mapi_id_t *mid)
 {
 	gchar *x_mid;
 
-	g_return_if_fail (icalcomp != NULL);
+	g_return_if_fail (icomp != NULL);
 	g_return_if_fail (mid != NULL);
 
-	x_mid = e_mapi_cal_utils_get_icomp_x_prop (icalcomp, "X-EVOLUTION-MAPI-MID");
+	x_mid = e_cal_util_component_dup_x_property (icomp, "X-EVOLUTION-MAPI-MID");
 	if (x_mid) {
 		e_mapi_util_mapi_id_from_string (x_mid, mid);
 		g_free (x_mid);
 	} else {
-		e_mapi_util_mapi_id_from_string (icalcomponent_get_uid (icalcomp), mid);
+		e_mapi_util_mapi_id_from_string (i_cal_component_get_uid (icomp), mid);
 	}
 }
 
@@ -302,23 +303,27 @@ ecb_mapi_build_global_id_restriction (EMapiConnection *conn,
 	restriction->res.resProperty.relop = RELOP_EQ;
 	restriction->res.resProperty.ulPropTag = PidLidGlobalObjectId;
 
-	propval = e_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-GLOBALID");
+	propval = e_cal_util_component_dup_x_property (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-GLOBALID");
 	if (propval && *propval) {
 		gsize len = 0;
 
 		sb.lpb = g_base64_decode (propval, &len);
 		sb.cb = len;
 	} else {
-		struct icaltimetype ical_creation_time = { 0 };
+		ICalTime *dtstamp;
 		struct FILETIME creation_time = { 0 };
 		const gchar *uid;
 
-		uid = icalcomponent_get_uid (e_cal_component_get_icalcomponent (comp));
+		uid = e_cal_component_get_uid (comp);
 
-		e_cal_component_get_dtstamp (comp, &ical_creation_time);
+		dtstamp = e_cal_component_get_dtstamp (comp);
+		if (!dtstamp)
+			dtstamp = i_cal_time_new_null_time ();
 
-		e_mapi_util_time_t_to_filetime (icaltime_as_timet (ical_creation_time), &creation_time);
-		e_mapi_cal_util_generate_globalobjectid (FALSE, uid, NULL, ical_creation_time.year ? &creation_time : NULL, &sb);
+		e_mapi_util_time_t_to_filetime (i_cal_time_as_timet (dtstamp), &creation_time);
+		e_mapi_cal_util_generate_globalobjectid (FALSE, uid, NULL, (dtstamp && i_cal_time_get_year (dtstamp)) ? &creation_time : NULL, &sb);
+
+		g_clear_object (&dtstamp);
 	}
 	g_free (propval);
 
@@ -383,13 +388,13 @@ ecb_mapi_get_server_data (ECalBackendMAPI *cbmapi,
 			  GCancellable *cancellable)
 {
 	EMapiConnection *conn;
-	icalcomponent *icalcomp;
+	ICalComponent *icomp;
 	mapi_id_t mid;
 	mapi_object_t obj_folder;
 	GError *mapi_error = NULL;
 
-	icalcomp = e_cal_component_get_icalcomponent (comp);
-	ecb_mapi_get_comp_mid (icalcomp, &mid);
+	icomp = e_cal_component_get_icalcomponent (comp);
+	ecb_mapi_get_comp_mid (icomp, &mid);
 
 	conn = cbmapi->priv->conn;
 	if (!conn)
@@ -529,49 +534,64 @@ static gboolean
 ecb_mapi_modifier_is_organizer (ECalBackendMAPI *cbmapi,
 				ECalComponent *comp)
 {
-	ECalComponentOrganizer org;
+	ECalComponentOrganizer *org;
 	const gchar *ownerid, *orgid;
+	gboolean res;
 
 	if (!e_cal_component_has_organizer (comp))
 		return TRUE;
 
-	e_cal_component_get_organizer (comp, &org);
-	if (!g_ascii_strncasecmp (org.value, "mailto:", 7))
-		orgid = (org.value) + 7;
-	else
-		orgid = org.value;
+	org = e_cal_component_get_organizer (comp);
+	if (!org)
+		return TRUE;
+
+	orgid = e_cal_component_organizer_get_value (org);
+
+	if (orgid && !g_ascii_strncasecmp (orgid, "mailto:", 7))
+		orgid = orgid + 7;
 
 	ownerid = ecb_mapi_get_owner_email (cbmapi);
 
-	return g_ascii_strcasecmp (orgid, ownerid) == 0;
+	res = g_ascii_strcasecmp (orgid, ownerid) == 0;
+
+	e_cal_component_organizer_free (org);
+
+	return res;
 }
 
 static OlResponseStatus
 ecb_mapi_find_my_response (ECalBackendMAPI *cbmapi,
 			   ECalComponent *comp)
 {
-	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (comp);
-	icalproperty *attendee;
+	ICalComponent *icomp = e_cal_component_get_icalcomponent (comp);
+	ICalProperty *attendee;
 	gchar *att = NULL;
 	OlResponseStatus val = olResponseTentative;
 
 	att = g_strdup_printf ("mailto:%s", ecb_mapi_get_owner_email (cbmapi));
 
-	for (attendee = icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY);
+	for (attendee = i_cal_component_get_first_property (icomp, I_CAL_ATTENDEE_PROPERTY);
 	     attendee;
-	     attendee = icalcomponent_get_next_property (icalcomp, ICAL_ATTENDEE_PROPERTY)) {
-		const gchar *value = icalproperty_get_attendee (attendee);
+	     g_object_unref (attendee), attendee = i_cal_component_get_next_property (icomp, I_CAL_ATTENDEE_PROPERTY)) {
+		const gchar *value = i_cal_property_get_attendee (attendee);
 		if (!g_ascii_strcasecmp (value, att)) {
-			icalparameter *param = icalproperty_get_first_parameter (attendee, ICAL_PARTSTAT_PARAMETER);
+			ICalParameterPartstat partstat = I_CAL_PARTSTAT_NONE;
+			ICalParameter *param;
 
-			switch (icalparameter_get_partstat (param)) {
-			case ICAL_PARTSTAT_ACCEPTED:
+			param = i_cal_property_get_first_parameter (attendee, I_CAL_PARTSTAT_PARAMETER);
+			if (param) {
+				partstat = i_cal_parameter_get_partstat (param);
+				g_object_unref (param);
+			}
+
+			switch (partstat) {
+			case I_CAL_PARTSTAT_ACCEPTED:
 				val = olResponseAccepted;
 				break;
-			case ICAL_PARTSTAT_TENTATIVE:
+			case I_CAL_PARTSTAT_TENTATIVE:
 				val = olResponseTentative;
 				break;
-			case ICAL_PARTSTAT_DECLINED:
+			case I_CAL_PARTSTAT_DECLINED:
 				val = olResponseDeclined;
 				break;
 			default:
@@ -579,6 +599,7 @@ ecb_mapi_find_my_response (ECalBackendMAPI *cbmapi,
 				break;
 			}
 
+			g_object_unref (attendee);
 			break;
 		}
 	}
@@ -722,7 +743,7 @@ ecb_mapi_connect_sync (ECalMetaBackend *meta_backend,
 		ecb_mapi_unlock_connection (cbmapi);
 
 		if (is_network_error)
-			ecb_mapi_error_to_edc_error (error, mapi_error, OtherError, NULL);
+			ecb_mapi_error_to_client_error (error, mapi_error, E_CLIENT_ERROR, E_CLIENT_ERROR_OTHER_ERROR, NULL);
 
 		g_clear_error (&mapi_error);
 
@@ -792,8 +813,8 @@ ecb_mapi_disconnect_sync (ECalMetaBackend *meta_backend,
 
 typedef struct _LoadMultipleData {
 	ECalMetaBackend *meta_backend;
-	icalcomponent_kind kind;
-	GSList **out_components; /* icalcomponent * */
+	ICalComponentKind kind;
+	GSList **out_components; /* ICalComponent * */
 } LoadMultipleData;
 
 static gboolean
@@ -831,7 +852,7 @@ transfer_calendar_objects_cb (EMapiConnection *conn,
 		instances = g_slist_prepend (instances, comp);
 
 	if (instances) {
-		icalcomponent *icomp;
+		ICalComponent *icomp;
 
 		icomp = e_cal_meta_backend_merge_instances (lmd->meta_backend, instances, FALSE);
 		if (icomp)
@@ -846,7 +867,7 @@ transfer_calendar_objects_cb (EMapiConnection *conn,
 static gboolean
 ecb_mapi_load_multiple_sync (ECalBackendMAPI *cbmapi,
 			     const GSList *uids, /* gchar * */
-			     GSList **out_components, /* icalcomponent * */
+			     GSList **out_components, /* ICalComponent * */
 			     GCancellable *cancellable,
 			     GError **error)
 {
@@ -888,7 +909,7 @@ ecb_mapi_load_multiple_sync (ECalBackendMAPI *cbmapi,
 
 	if (mapi_error) {
 		ecb_mapi_maybe_disconnect (cbmapi, mapi_error);
-		ecb_mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to transfer objects from a server"));
+		ecb_mapi_error_to_client_error (error, mapi_error, E_CLIENT_ERROR, E_CLIENT_ERROR_OTHER_ERROR, _("Failed to transfer objects from a server"));
 		g_error_free (mapi_error);
 
 		success = FALSE;
@@ -947,28 +968,30 @@ ecb_mapi_preload_infos_sync (ECalBackendMAPI *cbmapi,
 		success = ecb_mapi_load_multiple_sync (cbmapi, uids, &components, cancellable, error);
 		if (success) {
 			for (link = components; link; link = g_slist_next (link)) {
-				icalcomponent *icomp = link->data;
+				ICalComponent *icomp = link->data;
 
 				if (icomp) {
 					ECalMetaBackendInfo *nfo;
 					const gchar *uid = NULL;
 					gchar *xmid = NULL;
 
-					if (icalcomponent_isa (icomp) == ICAL_VCALENDAR_COMPONENT) {
-						icalcomponent *subcomp;
-						icalcomponent_kind kind;
+					if (i_cal_component_isa (icomp) == I_CAL_VCALENDAR_COMPONENT) {
+						ICalComponent *subcomp;
+						ICalComponentKind kind;
 
 						kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbmapi));
 
-						for (subcomp = icalcomponent_get_first_component (icomp, kind);
+						for (subcomp = i_cal_component_get_first_component (icomp, kind);
 						     subcomp && !uid;
-						     subcomp = icalcomponent_get_next_component (icomp, kind)) {
-							uid = icalcomponent_get_uid (subcomp);
-							xmid = e_mapi_cal_utils_get_icomp_x_prop (subcomp, "X-EVOLUTION-MAPI-MID");
+						     g_object_unref (subcomp), subcomp = i_cal_component_get_next_component (icomp, kind)) {
+							uid = i_cal_component_get_uid (subcomp);
+							xmid = e_cal_util_component_dup_x_property (subcomp, "X-EVOLUTION-MAPI-MID");
 						}
+
+						g_clear_object (&subcomp);
 					} else {
-						uid = icalcomponent_get_uid (icomp);
-						xmid = e_mapi_cal_utils_get_icomp_x_prop (icomp, "X-EVOLUTION-MAPI-MID");
+						uid = i_cal_component_get_uid (icomp);
+						xmid = e_cal_util_component_dup_x_property (icomp, "X-EVOLUTION-MAPI-MID");
 					}
 
 					nfo = uid ? g_hash_table_lookup (infos, uid) : NULL;
@@ -976,14 +999,14 @@ ecb_mapi_preload_infos_sync (ECalBackendMAPI *cbmapi,
 						nfo = g_hash_table_lookup (infos, xmid);
 
 					if (nfo && !nfo->object)
-						nfo->object = icalcomponent_as_ical_string_r (icomp);
+						nfo->object = i_cal_component_as_ical_string (icomp);
 
 					g_free (xmid);
 				}
 			}
 		}
 
-		g_slist_free_full (components, (GDestroyNotify) icalcomponent_free);
+		g_slist_free_full (components, g_object_unref);
 	}
 
 	g_hash_table_destroy (infos);
@@ -1045,11 +1068,12 @@ ecb_mapi_list_existing_uids_cb (EMapiConnection *conn,
 
 	uid = e_mapi_util_mapi_id_to_string (object_data->mid);
 	if (uid) {
-		struct icaltimetype itt;
+		ICalTime *itt;
 		gchar *rev;
 
-		itt = icaltime_from_timet_with_zone (object_data->last_modified, 0, icaltimezone_get_utc_timezone ());
-		rev = icaltime_as_ical_string_r (itt);
+		itt = i_cal_time_new_from_timet_with_zone (object_data->last_modified, 0, i_cal_timezone_get_utc_timezone ());
+		rev = i_cal_time_as_ical_string (itt);
+		g_clear_object (&itt);
 
 		*out_existing_objects = g_slist_prepend (*out_existing_objects,
 			e_cal_meta_backend_info_new (uid, rev, NULL, uid));
@@ -1068,6 +1092,7 @@ ecb_mapi_populate_mid_to_gid_cb (ECalCache *cal_cache,
 				 const gchar *revision,
 				 const gchar *object,
 				 const gchar *extra,
+				 guint32 custom_flags,
 				 EOfflineState offline_state,
 				 gpointer user_data)
 {
@@ -1112,7 +1137,7 @@ ecb_mapi_list_existing_sync (ECalMetaBackend *meta_backend,
 
 	if (mapi_error) {
 		ecb_mapi_maybe_disconnect (cbmapi, mapi_error);
-		ecb_mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to list items from a server"));
+		ecb_mapi_error_to_client_error (error, mapi_error, E_CLIENT_ERROR, E_CLIENT_ERROR_OTHER_ERROR, _("Failed to list items from a server"));
 		g_error_free (mapi_error);
 
 		success = FALSE;
@@ -1161,7 +1186,7 @@ static gboolean
 ecb_mapi_load_component_sync (ECalMetaBackend *meta_backend,
 			      const gchar *uid,
 			      const gchar *extra,
-			      icalcomponent **out_component,
+			      ICalComponent **out_component,
 			      gchar **out_extra,
 			      GCancellable *cancellable,
 			      GError **error)
@@ -1216,7 +1241,7 @@ ecb_mapi_load_component_sync (ECalMetaBackend *meta_backend,
 		*out_component = components->data;
 		g_slist_free (components);
 	} else {
-		g_slist_free_full (components, (GDestroyNotify) icalcomponent_free);
+		g_slist_free_full (components, g_object_unref);
 	}
 
 	if (local_error)
@@ -1233,6 +1258,7 @@ ecb_mapi_save_component_sync (ECalMetaBackend *meta_backend,
 			      EConflictResolution conflict_resolution,
 			      const GSList *instances,
 			      const gchar *extra,
+			      guint32 opflags, /* bit-or of ECalOperationFlags */
 			      gchar **out_new_uid,
 			      gchar **out_new_extra,
 			      GCancellable *cancellable,
@@ -1240,7 +1266,7 @@ ecb_mapi_save_component_sync (ECalMetaBackend *meta_backend,
 {
 	ECalBackendMAPI *cbmapi;
 	ECalComponent *comp;
-	icalcomponent *icomp;
+	ICalComponent *icomp;
 	gboolean no_increment;
 	mapi_object_t obj_folder;
 	mapi_id_t mid = 0;
@@ -1255,19 +1281,19 @@ ecb_mapi_save_component_sync (ECalMetaBackend *meta_backend,
 
 	if (instances->next ||
 	    e_cal_component_is_instance (instances->data)) {
-		g_propagate_error (error, EDC_ERROR_EX (OtherError,
+		g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_OTHER_ERROR,
 			_("Support for modifying single instances of a recurring appointment is not yet implemented. No change was made to the appointment on the server.")));
 		return FALSE;
 	}
 
 	cbmapi = E_CAL_BACKEND_MAPI (meta_backend);
 
-	icomp = icalcomponent_new_clone (e_cal_component_get_icalcomponent (instances->data));
-	no_increment = e_cal_util_remove_x_property (icomp, "X-EVOLUTION-IS-REPLY");
+	icomp = i_cal_component_clone (e_cal_component_get_icalcomponent (instances->data));
+	no_increment = e_cal_util_component_remove_x_property (icomp, "X-EVOLUTION-IS-REPLY");
 
 	comp = e_cal_component_new_from_icalcomponent (icomp);
 	if (!comp) {
-		g_propagate_error (error, EDC_ERROR (InvalidObject));
+		g_propagate_error (error, ECC_ERROR (E_CAL_CLIENT_ERROR_INVALID_OBJECT));
 		return FALSE;
 	}
 
@@ -1282,7 +1308,7 @@ ecb_mapi_save_component_sync (ECalMetaBackend *meta_backend,
 		cbdata.comp = comp;
 		cbdata.is_modify = overwrite_existing;
 		cbdata.msgflags = MSGFLAG_READ;
-		cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) e_timezone_cache_get_timezone;
+		cbdata.get_timezone = e_timezone_cache_get_timezone;
 		cbdata.get_tz_data = cbmapi;
 
 		if (overwrite_existing) {
@@ -1338,7 +1364,7 @@ ecb_mapi_save_component_sync (ECalMetaBackend *meta_backend,
 
 	if (mapi_error || !mid) {
 		ecb_mapi_maybe_disconnect (cbmapi, mapi_error);
-		ecb_mapi_error_to_edc_error (error, mapi_error, OtherError,
+		ecb_mapi_error_to_client_error (error, mapi_error, E_CLIENT_ERROR, E_CLIENT_ERROR_OTHER_ERROR,
 			overwrite_existing ? _("Failed to modify item on a server") : _("Failed to create item on a server"));
 		g_clear_error (&mapi_error);
 
@@ -1361,6 +1387,7 @@ ecb_mapi_remove_component_sync (ECalMetaBackend *meta_backend,
 				const gchar *uid,
 				const gchar *extra,
 				const gchar *object,
+				guint32 opflags, /* bit-or of ECalOperationFlags */
 				GCancellable *cancellable,
 				GError **error)
 {
@@ -1375,12 +1402,12 @@ ecb_mapi_remove_component_sync (ECalMetaBackend *meta_backend,
 	cbmapi = E_CAL_BACKEND_MAPI (meta_backend);
 
 	if (object) {
-		icalcomponent *icomp;
+		ICalComponent *icomp;
 
-		icomp = icalcomponent_new_from_string (object);
+		icomp = i_cal_component_new_from_string (object);
 		if (icomp) {
 			ecb_mapi_get_comp_mid (icomp, &mid);
-			icalcomponent_free (icomp);
+			g_object_unref (icomp);
 		}
 	}
 
@@ -1407,7 +1434,7 @@ ecb_mapi_remove_component_sync (ECalMetaBackend *meta_backend,
 
 	if (mapi_error || !mid) {
 		ecb_mapi_maybe_disconnect (cbmapi, mapi_error);
-		ecb_mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to remove item from a server"));
+		ecb_mapi_error_to_client_error (error, mapi_error, E_CLIENT_ERROR, E_CLIENT_ERROR_OTHER_ERROR, _("Failed to remove item from a server"));
 		g_clear_error (&mapi_error);
 
 		success = FALSE;
@@ -1429,33 +1456,33 @@ ecb_mapi_get_backend_property (ECalBackend *backend,
 	if (g_str_equal (prop_name, CLIENT_BACKEND_PROPERTY_CAPABILITIES)) {
 		return g_strjoin (
 			",",
-			CAL_STATIC_CAPABILITY_NO_ALARM_REPEAT,
-			CAL_STATIC_CAPABILITY_NO_AUDIO_ALARMS,
-			CAL_STATIC_CAPABILITY_NO_EMAIL_ALARMS,
-			CAL_STATIC_CAPABILITY_NO_PROCEDURE_ALARMS,
-			CAL_STATIC_CAPABILITY_ONE_ALARM_ONLY,
-			CAL_STATIC_CAPABILITY_REMOVE_ALARMS,
-			CAL_STATIC_CAPABILITY_NO_THISANDFUTURE,
-			CAL_STATIC_CAPABILITY_NO_THISANDPRIOR,
-			CAL_STATIC_CAPABILITY_CREATE_MESSAGES,
-			CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK,
-			CAL_STATIC_CAPABILITY_NO_CONV_TO_RECUR,
-			CAL_STATIC_CAPABILITY_HAS_UNACCEPTED_MEETING,
-			CAL_STATIC_CAPABILITY_REFRESH_SUPPORTED,
-			CAL_STATIC_CAPABILITY_NO_MEMO_START_DATE,
-			CAL_STATIC_CAPABILITY_TASK_DATE_ONLY,
-			CAL_STATIC_CAPABILITY_TASK_NO_ALARM,
+			E_CAL_STATIC_CAPABILITY_NO_ALARM_REPEAT,
+			E_CAL_STATIC_CAPABILITY_NO_AUDIO_ALARMS,
+			E_CAL_STATIC_CAPABILITY_NO_EMAIL_ALARMS,
+			E_CAL_STATIC_CAPABILITY_NO_PROCEDURE_ALARMS,
+			E_CAL_STATIC_CAPABILITY_ONE_ALARM_ONLY,
+			E_CAL_STATIC_CAPABILITY_REMOVE_ALARMS,
+			E_CAL_STATIC_CAPABILITY_NO_THISANDFUTURE,
+			E_CAL_STATIC_CAPABILITY_NO_THISANDPRIOR,
+			E_CAL_STATIC_CAPABILITY_CREATE_MESSAGES,
+			E_CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK,
+			E_CAL_STATIC_CAPABILITY_NO_CONV_TO_RECUR,
+			E_CAL_STATIC_CAPABILITY_HAS_UNACCEPTED_MEETING,
+			E_CAL_STATIC_CAPABILITY_REFRESH_SUPPORTED,
+			E_CAL_STATIC_CAPABILITY_NO_MEMO_START_DATE,
+			E_CAL_STATIC_CAPABILITY_TASK_DATE_ONLY,
+			E_CAL_STATIC_CAPABILITY_TASK_NO_ALARM,
 			e_cal_meta_backend_get_capabilities (E_CAL_META_BACKEND (backend)),
 			NULL);
-	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
+	} else if (g_str_equal (prop_name, E_CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
 		return g_strdup (ecb_mapi_get_owner_email (cbmapi));
-	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_ALARM_EMAIL_ADDRESS)) {
+	} else if (g_str_equal (prop_name, E_CAL_BACKEND_PROPERTY_ALARM_EMAIL_ADDRESS)) {
 		/* We don't support email alarms. This should not have been called. */
 		return NULL;
 	}
 
 	/* Chain up to parent's method */
-	return E_CAL_BACKEND_CLASS (e_cal_backend_mapi_parent_class)->get_backend_property (backend, prop_name);
+	return E_CAL_BACKEND_CLASS (e_cal_backend_mapi_parent_class)->impl_get_backend_property (backend, prop_name);
 }
 
 static void
@@ -1463,18 +1490,19 @@ ecb_mapi_send_objects_sync (ECalBackendSync *sync_backend,
 			    EDataCal *cal,
 			    GCancellable *cancellable,
 			    const gchar *calobj,
+			    guint32 opflags, /* bit-or of ECalOperationFlags */
 			    GSList **users,
 			    gchar **modified_calobj,
 			    GError **error)
 {
 	ECalBackendMAPI *cbmapi;
 	EMapiConnection *conn;
-	icalcomponent_kind kind;
-	icalcomponent *icalcomp;
+	ICalComponentKind kind;
+	ICalComponent *icomp;
 	GError *mapi_error = NULL;
 
-	e_mapi_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_MAPI (sync_backend), InvalidArg);
-	e_mapi_return_data_cal_error_if_fail (calobj != NULL, InvalidArg);
+	e_mapi_return_client_error_if_fail (E_IS_CAL_BACKEND_MAPI (sync_backend), E_CLIENT_ERROR_INVALID_ARG);
+	e_mapi_return_client_error_if_fail (calobj != NULL, E_CLIENT_ERROR_INVALID_ARG);
 
 	cbmapi = E_CAL_BACKEND_MAPI (sync_backend);
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (sync_backend));
@@ -1486,9 +1514,9 @@ ecb_mapi_send_objects_sync (ECalBackendSync *sync_backend,
 		ecb_mapi_unlock_connection (cbmapi);
 
 		if (!mapi_error)
-			g_propagate_error (error, EDC_ERROR (RepositoryOffline));
+			g_propagate_error (error, EC_ERROR (E_CLIENT_ERROR_REPOSITORY_OFFLINE));
 		else
-			ecb_mapi_error_to_edc_error (error, mapi_error, RepositoryOffline, NULL);
+			ecb_mapi_error_to_client_error (error, mapi_error, E_CLIENT_ERROR, E_CLIENT_ERROR_REPOSITORY_OFFLINE, NULL);
 		g_clear_error (&mapi_error);
 		return;
 	}
@@ -1496,24 +1524,24 @@ ecb_mapi_send_objects_sync (ECalBackendSync *sync_backend,
 	conn = cbmapi->priv->conn;
 
 	/* check the component for validity */
-	icalcomp = icalparser_parse_string (calobj);
-	if (!icalcomp) {
+	icomp = i_cal_parser_parse_string (calobj);
+	if (!icomp) {
 		ecb_mapi_unlock_connection (cbmapi);
-		g_propagate_error (error, EDC_ERROR (InvalidObject));
+		g_propagate_error (error, ECC_ERROR (E_CAL_CLIENT_ERROR_INVALID_OBJECT));
 		return;
 	}
 
 	*modified_calobj = NULL;
 	*users = NULL;
 
-	if (icalcomponent_isa (icalcomp) == ICAL_VCALENDAR_COMPONENT) {
-		icalproperty_method method = icalcomponent_get_method (icalcomp);
-		icalcomponent *subcomp;
+	if (i_cal_component_isa (icomp) == I_CAL_VCALENDAR_COMPONENT) {
+		ICalPropertyMethod method = i_cal_component_get_method (icomp);
+		ICalComponent *subcomp;
 
-		for (subcomp = icalcomponent_get_first_component (icalcomp, kind);
+		for (subcomp = i_cal_component_get_first_component (icomp, kind);
 		     subcomp;
-		     subcomp = icalcomponent_get_next_component (icalcomp, kind)) {
-			ECalComponent *comp = e_cal_component_new ();
+		     g_object_unref (subcomp), subcomp = i_cal_component_get_next_component (icomp, kind)) {
+			ECalComponent *comp;
 			struct cal_cbdata cbdata = { 0 };
 			mapi_id_t mid = 0;
 			const gchar *compuid;
@@ -1521,10 +1549,12 @@ ecb_mapi_send_objects_sync (ECalBackendSync *sync_backend,
 			struct SBinary_short globalid = { 0 }, cleanglobalid = { 0 };
 			struct timeval *exception_repleace_time = NULL, ex_rep_time = { 0 };
 			struct FILETIME creation_time = { 0 };
-			struct icaltimetype ical_creation_time = { 0 };
+			ICalTime *dtstamp;
 			mapi_object_t obj_folder;
 
-			e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
+			comp = e_cal_component_new_from_icalcomponent (i_cal_component_clone (subcomp));
+			if (!comp)
+				continue;
 
 			cbdata.kind = kind;
 			cbdata.comp = comp;
@@ -1532,16 +1562,16 @@ ecb_mapi_send_objects_sync (ECalBackendSync *sync_backend,
 			cbdata.msgflags = MSGFLAG_READ | MSGFLAG_SUBMIT | MSGFLAG_UNSENT;
 
 			switch (method) {
-			case ICAL_METHOD_REQUEST:
+			case I_CAL_METHOD_REQUEST:
 				cbdata.meeting_type = MEETING_REQUEST;
 				cbdata.resp = olResponseNotResponded;
 				break;
-			case ICAL_METHOD_CANCEL:
+			case I_CAL_METHOD_CANCEL:
 				cbdata.meeting_type = MEETING_CANCEL;
 				cbdata.resp = olResponseNotResponded;
 				break;
-			case ICAL_METHOD_REPLY:
-			case ICAL_METHOD_RESPONSE:
+			case I_CAL_METHOD_REPLY:
+			case I_CAL_METHOD_RESPONSE:
 				cbdata.meeting_type = MEETING_RESPONSE;
 				cbdata.resp = ecb_mapi_find_my_response (cbmapi, comp);
 				break;
@@ -1558,15 +1588,17 @@ ecb_mapi_send_objects_sync (ECalBackendSync *sync_backend,
 			free_and_dupe_str (cbdata.ownername, ecb_mapi_get_owner_name (cbmapi));
 			free_and_dupe_str (cbdata.owneridtype, "SMTP");
 			free_and_dupe_str (cbdata.ownerid, ecb_mapi_get_owner_email (cbmapi));
-			cbdata.get_timezone = (icaltimezone * (*)(gpointer data, const gchar *tzid)) e_timezone_cache_get_timezone;
+			cbdata.get_timezone = e_timezone_cache_get_timezone;
 			cbdata.get_tz_data = cbmapi;
 
-			e_cal_component_get_uid (comp, &compuid);
+			compuid = e_cal_component_get_uid (comp);
 
-			e_cal_component_get_dtstamp (comp, &ical_creation_time);
-			e_mapi_util_time_t_to_filetime (icaltime_as_timet (ical_creation_time), &creation_time);
+			dtstamp = e_cal_component_get_dtstamp (comp);
+			if (!dtstamp)
+				dtstamp = i_cal_time_new_null_time ();
+			e_mapi_util_time_t_to_filetime (i_cal_time_as_timet (dtstamp), &creation_time);
 
-			propval = e_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-EXREPTIME");
+			propval = e_cal_util_component_dup_x_property (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-EXREPTIME");
 			if (propval && *propval) {
 				mapi_id_t val64 = 0;
 
@@ -1579,7 +1611,7 @@ ecb_mapi_send_objects_sync (ECalBackendSync *sync_backend,
 
 			/* inherit GlobalID from the source object, if available */
 			if (e_cal_component_get_icalcomponent (comp)) {
-				propval = e_mapi_cal_utils_get_icomp_x_prop (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-GLOBALID");
+				propval = e_cal_util_component_dup_x_property (e_cal_component_get_icalcomponent (comp), "X-EVOLUTION-MAPI-GLOBALID");
 				if (propval && *propval) {
 					gsize len = 0;
 
@@ -1604,9 +1636,13 @@ ecb_mapi_send_objects_sync (ECalBackendSync *sync_backend,
 			}
 
 			if (compuid) {
-				e_mapi_cal_util_generate_globalobjectid (FALSE, compuid, exception_repleace_time, ical_creation_time.year ? &creation_time : NULL, &globalid);
-				e_mapi_cal_util_generate_globalobjectid (TRUE,  compuid, exception_repleace_time, ical_creation_time.year ? &creation_time : NULL, &cleanglobalid);
+				e_mapi_cal_util_generate_globalobjectid (FALSE, compuid, exception_repleace_time,
+					(dtstamp && i_cal_time_get_year (dtstamp)) ? &creation_time : NULL, &globalid);
+				e_mapi_cal_util_generate_globalobjectid (TRUE,  compuid, exception_repleace_time,
+					(dtstamp && i_cal_time_get_year (dtstamp)) ? &creation_time : NULL, &cleanglobalid);
 			}
+
+			g_clear_object (&dtstamp);
 
 			if (cbdata.globalid)
 				e_mapi_util_free_sbinary_short (cbdata.globalid);
@@ -1633,7 +1669,7 @@ ecb_mapi_send_objects_sync (ECalBackendSync *sync_backend,
 			if (!mid) {
 				ecb_mapi_unlock_connection (cbmapi);
 				g_object_unref (comp);
-				ecb_mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to create item on a server"));
+				ecb_mapi_error_to_client_error (error, mapi_error, E_CLIENT_ERROR, E_CLIENT_ERROR_OTHER_ERROR, _("Failed to create item on a server"));
 				ecb_mapi_maybe_disconnect (cbmapi, mapi_error);
 				if (mapi_error)
 					g_error_free (mapi_error);
@@ -1648,7 +1684,7 @@ ecb_mapi_send_objects_sync (ECalBackendSync *sync_backend,
 
 	*modified_calobj = g_strdup (calobj);
 
-	icalcomponent_free (icalcomp);
+	g_object_unref (icomp);
 }
 
 static void
@@ -1675,15 +1711,15 @@ ecb_mapi_get_free_busy_sync (ECalBackendSync *sync_backend,
 		ecb_mapi_unlock_connection (cbmapi);
 
 		if (!mapi_error)
-			g_propagate_error (error, EDC_ERROR (RepositoryOffline));
+			g_propagate_error (error, EC_ERROR (E_CLIENT_ERROR_REPOSITORY_OFFLINE));
 		else
-			ecb_mapi_error_to_edc_error (error, mapi_error, RepositoryOffline, NULL);
+			ecb_mapi_error_to_client_error (error, mapi_error, E_CLIENT_ERROR, E_CLIENT_ERROR_REPOSITORY_OFFLINE, NULL);
 		g_clear_error (&mapi_error);
 		return;
 	}
 
 	if (!e_mapi_cal_utils_get_free_busy_data (cbmapi->priv->conn, users, start, end, freebusyobjs, cancellable, &mapi_error)) {
-		ecb_mapi_error_to_edc_error (error, mapi_error, OtherError, _("Failed to get Free/Busy data"));
+		ecb_mapi_error_to_client_error (error, mapi_error, E_CLIENT_ERROR, E_CLIENT_ERROR_OTHER_ERROR, _("Failed to get Free/Busy data"));
 		ecb_mapi_maybe_disconnect (cbmapi, mapi_error);
 
 		if (mapi_error)
@@ -1752,45 +1788,51 @@ ecb_mapi_update_tzid_cb (ECache *cache,
 			 ECacheColumnValues **out_other_columns,
 			 gpointer user_data)
 {
-	icalcomponent *icomp;
-	icalproperty *prop;
+	ICalComponent *icomp;
+	ICalProperty *prop;
 	gboolean changed = FALSE;
 
 	g_return_val_if_fail (object != NULL, FALSE);
 	g_return_val_if_fail (out_object != NULL, FALSE);
 
-	icomp = icalcomponent_new_from_string (object);
+	icomp = i_cal_component_new_from_string (object);
 	if (!icomp)
 		return TRUE;
 
-	prop = icalcomponent_get_first_property (icomp, ICAL_DTSTART_PROPERTY);
-	if (prop && icalproperty_get_first_parameter (prop, ICAL_TZID_PARAMETER)) {
-		struct icaltimetype itt;
+	prop = i_cal_component_get_first_property (icomp, I_CAL_DTSTART_PROPERTY);
+	if (prop && e_cal_util_property_has_parameter (prop, I_CAL_TZID_PARAMETER)) {
+		ICalTime *itt;
 
-		itt = icalproperty_get_dtstart (prop);
-		if (icaltime_is_valid_time (itt) && icaltime_is_utc (itt)) {
-			itt.zone = NULL;
-			icalproperty_set_dtstart (prop, itt);
+		itt = i_cal_property_get_dtstart (prop);
+		if (itt && i_cal_time_is_valid_time (itt) && i_cal_time_is_utc (itt)) {
+			i_cal_time_set_timezone (itt, NULL);
+			i_cal_property_set_dtstart (prop, itt);
 			changed = TRUE;
 		}
+
+		g_clear_object (&itt);
 	}
+	g_clear_object (&prop);
 
-	prop = icalcomponent_get_first_property (icomp, ICAL_DTEND_PROPERTY);
-	if (prop && icalproperty_get_first_parameter (prop, ICAL_TZID_PARAMETER)) {
-		struct icaltimetype itt;
+	prop = i_cal_component_get_first_property (icomp, I_CAL_DTEND_PROPERTY);
+	if (prop && e_cal_util_property_has_parameter (prop, I_CAL_TZID_PARAMETER)) {
+		ICalTime *itt;
 
-		itt = icalproperty_get_dtend (prop);
-		if (icaltime_is_valid_time (itt) && icaltime_is_utc (itt)) {
-			itt.zone = NULL;
-			icalproperty_set_dtend (prop, itt);
+		itt = i_cal_property_get_dtend (prop);
+		if (itt && i_cal_time_is_valid_time (itt) && i_cal_time_is_utc (itt)) {
+			i_cal_time_set_timezone (itt, NULL);
+			i_cal_property_set_dtend (prop, itt);
 			changed = TRUE;
 		}
+
+		g_clear_object (&itt);
 	}
+	g_clear_object (&prop);
 
 	if (changed)
-		*out_object = icalcomponent_as_ical_string_r (icomp);
+		*out_object = i_cal_component_as_ical_string (icomp);
 
-	icalcomponent_free (icomp);
+	g_object_unref (icomp);
 
 	return TRUE;
 }
@@ -1809,20 +1851,25 @@ ecb_mapi_migrate (ECalBackendMAPI *cbmapi,
 
 static gchar *
 ecb_mapi_dup_component_revision_cb (ECalCache *cal_cache,
-				    icalcomponent *icalcomp)
+				    ICalComponent *icomp)
 {
-	icalproperty *prop;
-	struct icaltimetype itt;
+	ICalProperty *prop;
+	ICalTime *itt;
+	gchar *res;
 
-	g_return_val_if_fail (icalcomp != NULL, NULL);
+	g_return_val_if_fail (I_CAL_IS_COMPONENT (icomp), NULL);
 
-	prop = icalcomponent_get_first_property (icalcomp, ICAL_LASTMODIFIED_PROPERTY);
+	prop = i_cal_component_get_first_property (icomp, I_CAL_LASTMODIFIED_PROPERTY);
 	if (!prop)
 		return NULL;
 
-	itt = icalproperty_get_lastmodified (prop);
+	itt = i_cal_property_get_lastmodified (prop);
+	res = i_cal_time_as_ical_string (itt);
 
-	return icaltime_as_ical_string_r (itt);
+	g_clear_object (&prop);
+	g_clear_object (&itt);
+
+	return res;
 }
 
 static void
@@ -1906,7 +1953,7 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *klass)
 	meta_backend_class->remove_component_sync = ecb_mapi_remove_component_sync;
 
 	cal_backend_class = E_CAL_BACKEND_CLASS (klass);
-	cal_backend_class->get_backend_property = ecb_mapi_get_backend_property;
+	cal_backend_class->impl_get_backend_property = ecb_mapi_get_backend_property;
 
 	sync_backend_class = E_CAL_BACKEND_SYNC_CLASS (klass);
 	sync_backend_class->send_objects_sync = ecb_mapi_send_objects_sync;

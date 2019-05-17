@@ -30,7 +30,7 @@
 #include "e-mapi-debug.h"
 #include "e-mapi-connection.h"
 
-#define e_mapi_return_data_cal_error_if_fail(expr, _code)			\
+#define e_mapi_return_client_error_if_fail(expr, _code)				\
 	G_STMT_START {								\
 		if (G_LIKELY (expr)) {						\
 		} else {							\
@@ -38,7 +38,7 @@
 				G_LOG_LEVEL_CRITICAL,				\
 				"file %s: line %d (%s): assertion `%s' failed",	\
 				__FILE__, __LINE__, G_STRFUNC, #expr);		\
-			g_set_error (error, E_DATA_CAL_ERROR, (_code),		\
+			g_set_error (error, E_CLIENT_ERROR, (_code),		\
 				"file %s: line %d (%s): assertion `%s' failed",	\
 				__FILE__, __LINE__, G_STRFUNC, #expr);		\
 			return;							\

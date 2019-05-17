@@ -79,40 +79,34 @@ e_mapi_cal_tz_util_get_ical_equivalent (const gchar *mapi_tz_location)
 	return retval;
 }
 
-static struct icaltimetype
-e_mapi_tm_to_icaltimetype (struct tm *tm,
-			   gboolean dst)
+static ICalTime *
+e_mapi_tm_to_icaltime (struct tm *tm,
+		       gboolean dst)
 {
-	struct icaltimetype itt;
+	ICalTime *itt;
 
-	memset (&itt, 0, sizeof (struct icaltimetype));
-
-	itt.second = 0;
-	itt.minute = 0;
-	itt.hour = 0;
-
-	itt.day = 1;
-	itt.month = dst ? 6 : 1;
-	itt.year = tm->tm_year + 1900;
-
-	itt.zone = NULL;
-	itt.is_date = 0;
+	itt = i_cal_time_new_null_time ();
+	i_cal_time_set_time (itt, 0, 0, 0);
+	i_cal_time_set_date (itt, tm->tm_year + 1900, dst ? 6 : 1, 1);
+	i_cal_time_set_timezone (itt, NULL);
+	i_cal_time_set_is_date (itt, FALSE);
 
 	return itt;
 }
 
 static gint
-get_offset (icaltimezone *zone,
+get_offset (ICalTimezone *zone,
 	    gboolean dst)
 {
 	struct tm local;
-	struct icaltimetype tt;
+	ICalTime *itt;
 	gint offset;
 	time_t now = time (NULL);
 
 	gmtime_r (&now, &local);
-	tt = e_mapi_tm_to_icaltimetype (&local, dst);
-	offset = icaltimezone_get_utc_offset (zone, &tt, NULL);
+	itt = e_mapi_tm_to_icaltime (&local, dst);
+	offset = i_cal_timezone_get_utc_offset (zone, itt, NULL);
+	g_clear_object (&itt);
 
 	return offset / -60;
 }
@@ -145,10 +139,10 @@ e_mapi_cal_tz_util_ical_from_zone_struct (const guint8 *lpb,
 	g_hash_table_iter_init (&iter, mapi_to_ical);
 	while (g_hash_table_iter_next (&iter, &key, &value)) {
 		const gchar *location = value;
-		icaltimezone *zone;
+		ICalTimezone *zone;
 		gint offset;
 
-		zone = icaltimezone_get_builtin_timezone (location);
+		zone = i_cal_timezone_get_builtin_timezone (location);
 		if (!zone)
 			continue;
 
@@ -295,36 +289,43 @@ e_mapi_cal_tz_util_populate (void)
 static void
 e_mapi_cal_tz_util_dump_ical_tzs (void)
 {
-	guint i;
-	icalarray *zones;
+	gint ii, nelems;
+	ICalArray *zones;
 	GList *l, *list_items = NULL;
 
 	/* Get the array of builtin timezones. */
-	zones = icaltimezone_get_builtin_timezones ();
+	zones = i_cal_timezone_get_builtin_timezones ();
+	nelems = i_cal_array_size (zones);
 
 	g_message("%s: %s: ", G_STRLOC, G_STRFUNC);
-	for (i = 0; i < zones->num_elements; i++) {
-		icaltimezone *zone;
+
+	for (ii = 0; ii < nelems; ii++) {
+		ICalTimezone *zone;
 		const gchar *tzid = NULL;
 
-		zone = icalarray_element_at (zones, i);
+		zone = i_cal_timezone_array_element_at (zones, ii);
+		if (!zone)
+			continue;
 
-		tzid = icaltimezone_get_tzid (zone);
+		tzid = i_cal_timezone_get_tzid (zone);
+		if (tzid)
+			list_items = g_list_prepend (list_items, g_strdup (tzid));
 
-		list_items = g_list_prepend (list_items, (gpointer)tzid);
+		g_object_unref (zone);
 	}
 
 	list_items = g_list_sort (list_items, (GCompareFunc) g_ascii_strcasecmp);
 
 	/* Put the "UTC" entry at the top of the combo's list. */
-	list_items = g_list_prepend (list_items, (gpointer)"UTC");
+	list_items = g_list_prepend (list_items, g_strdup ("UTC"));
 
-	for (l = list_items, i = 0; l != NULL; l = l->next, ++i)
-		g_print ("[%3d]\t%s\n", (i+1), (gchar *)(l->data));
+	for (l = list_items, ii = 0; l != NULL; l = l->next, ++ii) {
+		g_print ("[%3d]\t%s\n", (ii + 1), (gchar *)(l->data));
+	}
 
-//	icaltimezone_free_builtin_timezones ();
+	/* i_cal_timezone_free_builtin_timezones (); */
 
-	g_list_free (list_items);
+	g_list_free_full (list_items, g_free);
 }
 
 void
@@ -375,36 +376,36 @@ e_mapi_cal_tz_util_dump (void)
 
 static void
 write_icaltime_as_systemtime (GByteArray *ba,
-			      struct icaltimetype icaltime)
+			      ICalTime *itt)
 {
 	guint16 flag16;
 
 	/* wYear */
-	flag16 = icaltime.year;
+	flag16 = i_cal_time_get_year (itt);
 	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
 
 	/* wMonth */
-	flag16 = icaltime.month;
+	flag16 = i_cal_time_get_month (itt);
 	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
 
 	/* wDayOfWeek */
-	flag16 = icaltime.year == 0 ? 0 : icaltime_day_of_week (icaltime);
+	flag16 = i_cal_time_get_year (itt) == 0 ? 0 : i_cal_time_day_of_week (itt);
 	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
 
 	/* wDay */
-	flag16 = icaltime.day;
+	flag16 = i_cal_time_get_day (itt);
 	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
 
 	/* wHour */
-	flag16 = icaltime.hour;
+	flag16 = i_cal_time_get_hour (itt);
 	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
 
 	/* wMinute */
-	flag16 = icaltime.minute;
+	flag16 = i_cal_time_get_minute (itt);
 	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
 
 	/* wSecond */
-	flag16 = icaltime.second;
+	flag16 = i_cal_time_get_second (itt);
 	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
 
 	/* wMilliseconds */
@@ -418,8 +419,8 @@ write_tz_rule (GByteArray *ba,
 	       guint32 bias,
 	       guint32 standard_bias,
 	       guint32 daylight_bias,
-	       struct icaltimetype standard_date,
-	       struct icaltimetype daylight_date)
+	       ICalTime *standard_date,
+	       ICalTime *daylight_date)
 {
 	guint8 flag8;
 	guint16 flag16;
@@ -445,7 +446,7 @@ write_tz_rule (GByteArray *ba,
 	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
 
 	/* wYear */
-	flag16 = standard_date.year;
+	flag16 = i_cal_time_get_year (standard_date);
 	g_byte_array_append (ba, (const guint8 *) &flag16, sizeof (guint16));
 
 	/* X - 14 times 0x00 */
@@ -471,35 +472,37 @@ write_tz_rule (GByteArray *ba,
 }
 
 static void
-extract_bias_and_date (icalcomponent *comp,
+extract_bias_and_date (ICalComponent *icomp,
 		       guint32 *bias,
-		       struct icaltimetype *start)
+		       ICalTime **start)
 {
-	icalproperty *prop;
+	ICalProperty *prop;
 	gint tzoffset;
 
-	g_return_if_fail (comp != NULL);
+	g_return_if_fail (icomp != NULL);
 	g_return_if_fail (bias != NULL);
 	g_return_if_fail (start != NULL);
 
-	prop = icalcomponent_get_first_property (comp, ICAL_TZOFFSETTO_PROPERTY);
+	prop = i_cal_component_get_first_property (icomp, I_CAL_TZOFFSETTO_PROPERTY);
 	if (prop)
-		tzoffset = icalproperty_get_tzoffsetto (prop);
+		tzoffset = i_cal_property_get_tzoffsetto (prop);
 	else
 		tzoffset = 0;
 
 	*bias = tzoffset / 60;
-	*start = icalcomponent_get_dtstart (comp);
+	*start = i_cal_component_get_dtstart (icomp);
+
+	g_clear_object (&prop);
 }
 
 static void
 write_tz_rule_comps (GByteArray *ba,
 		     gboolean is_recur,
-		     icalcomponent *standardcomp,
-		     icalcomponent *daylightcomp,
-		     icaltimezone *zone)
+		     ICalComponent *standardcomp,
+		     ICalComponent *daylightcomp,
+		     ICalTimezone *zone)
 {
-	struct icaltimetype standard_date, daylight_date, current_time;
+	ICalTime *standard_date, *daylight_date, *current_time;
 	guint32 bias, standard_bias, daylight_bias;
 
 	g_return_if_fail (ba != NULL);
@@ -509,56 +512,65 @@ write_tz_rule_comps (GByteArray *ba,
 	extract_bias_and_date (standardcomp, &standard_bias, &standard_date);
 	extract_bias_and_date (daylightcomp, &daylight_bias, &daylight_date);
 
-	current_time = icaltime_current_time_with_zone (zone);
-	bias = current_time.is_daylight ? daylight_bias : standard_bias;
+	current_time = i_cal_time_new_current_with_zone (zone);
+	bias = i_cal_time_is_daylight (current_time) ? daylight_bias : standard_bias;
 
 	write_tz_rule (ba, is_recur, bias, standard_bias, daylight_bias, standard_date, daylight_date);
+
+	g_clear_object (&standard_date);
+	g_clear_object (&daylight_date);
+	g_clear_object (&current_time);
 }
 
 static void
 add_timezone_rules (GByteArray *ba,
 		    gboolean is_recur,
-		    icalcomponent *vtimezone,
-		    icaltimezone *zone)
+		    ICalComponent *vtimezone,
+		    ICalTimezone *zone)
 {
 	gboolean any_added = FALSE;
 
 	g_return_if_fail (ba != NULL);
 
 	if (vtimezone) {
-		icalcomponent *subcomp, *standardcomp = NULL, *daylightcomp = NULL;
+		ICalComponent *subcomp, *standardcomp = NULL, *daylightcomp = NULL;
 
-		for (subcomp = icalcomponent_get_first_component (vtimezone, ICAL_ANY_COMPONENT);
+		for (subcomp = i_cal_component_get_first_component (vtimezone, I_CAL_ANY_COMPONENT);
 		     subcomp;
-		     subcomp = icalcomponent_get_next_component (vtimezone, ICAL_ANY_COMPONENT)) {
-			if (icalcomponent_isa (subcomp) == ICAL_XSTANDARD_COMPONENT)
-				standardcomp = subcomp;
-			if (icalcomponent_isa (subcomp) == ICAL_XDAYLIGHT_COMPONENT)
-				daylightcomp = subcomp;
+		     g_object_unref (subcomp), subcomp = i_cal_component_get_next_component (vtimezone, I_CAL_ANY_COMPONENT)) {
+			if (i_cal_component_isa (subcomp) == I_CAL_XSTANDARD_COMPONENT)
+				standardcomp = g_object_ref (subcomp);
+			if (i_cal_component_isa (subcomp) == I_CAL_XDAYLIGHT_COMPONENT)
+				daylightcomp = g_object_ref (subcomp);
 			if (standardcomp && daylightcomp) {
 				write_tz_rule_comps (ba, is_recur, standardcomp, daylightcomp, zone);
 
 				any_added = TRUE;
-				standardcomp = NULL;
-				daylightcomp = NULL;
+				g_clear_object (&standardcomp);
+				g_clear_object (&daylightcomp);
 			}
 		}
 
 		if (standardcomp || daylightcomp) {
 			if (!standardcomp)
-				standardcomp = daylightcomp;
+				standardcomp = g_object_ref (daylightcomp);
 			write_tz_rule_comps (ba, is_recur, standardcomp, daylightcomp, zone);
 			any_added = TRUE;
 		}
+
+		g_clear_object (&standardcomp);
+		g_clear_object (&daylightcomp);
 	}
 
 	/* at least one should be always added, make it UTC */
 	if (!any_added) {
-		struct icaltimetype fake_utc;
+		ICalTime *fake_utc;
 
-		memset (&fake_utc, 0, sizeof (struct icaltimetype));
+		fake_utc = i_cal_time_new_null_time ();
 
 		write_tz_rule (ba, is_recur, 0, 0, 0, fake_utc, fake_utc);
+
+		g_object_unref (fake_utc);
 	}
 }
 
@@ -579,19 +591,19 @@ e_mapi_cal_util_mapi_tz_to_bin (const gchar *mapi_tzid,
 	guint16 flag16;
 	gunichar2 *buf;
 	glong items_written;
-	icaltimezone *zone = NULL;
-	icalcomponent *vtimezone;
+	ICalTimezone *zone = NULL;
+	ICalComponent *vtimezone;
 	gint rules = 0;
 	const gchar *ical_location = e_mapi_cal_tz_util_get_ical_equivalent (mapi_tzid);
 
 	if (ical_location && *ical_location)
-		zone = icaltimezone_get_builtin_timezone (ical_location);
+		zone = i_cal_timezone_get_builtin_timezone (ical_location);
 	if (!zone)
-		zone = icaltimezone_get_utc_timezone ();
-	vtimezone = icaltimezone_get_component (zone);
+		zone = i_cal_timezone_get_utc_timezone ();
+	vtimezone = i_cal_timezone_get_component (zone);
 	if (vtimezone)
-		rules = (icalcomponent_count_components (vtimezone, ICAL_XSTANDARD_COMPONENT) + 
-			 icalcomponent_count_components (vtimezone, ICAL_XDAYLIGHT_COMPONENT)) / 2;
+		rules = (i_cal_component_count_components (vtimezone, I_CAL_XSTANDARD_COMPONENT) +
+			 i_cal_component_count_components (vtimezone, I_CAL_XDAYLIGHT_COMPONENT)) / 2;
 	if (!rules)
 		rules = 1;
 
@@ -636,10 +648,12 @@ e_mapi_cal_util_mapi_tz_to_bin (const gchar *mapi_tzid,
 		g_print("0x%.2X ", ba->data[i]));
 
 	g_byte_array_free (ba, TRUE);
+	g_clear_object (&vtimezone);
 }
 
 gchar *
-e_mapi_cal_util_bin_to_mapi_tz (const guint8 *lpb, guint32 cb)
+e_mapi_cal_util_bin_to_mapi_tz (const guint8 *lpb,
+				guint32 cb)
 {
 	guint8 flag8;
 	guint16 flag16, cbHeader = 0;
@@ -815,24 +829,24 @@ nth_day_of_month (int year, int month, int wday, int ordinal)
 
 /* return the most-correct PidLidTimeZone value w.r.t. OXOCAL 2.2.5.6. */
 int
-e_mapi_cal_util_mapi_tz_pidlidtimezone (icaltimezone *ictz)
+e_mapi_cal_util_mapi_tz_pidlidtimezone (ICalTimezone *ictz)
 {
 	gboolean tz_dst_now = FALSE, tz_has_dst = FALSE;
 	int i, utc_offset = 0, best_index = 0, best_score = -1;
-	const char *tznames;
-	icaltimetype tt;
+	const gchar *tznames;
+	ICalTime *tt;
 
 	if (ictz == NULL)
 		return 0;
 
 	/* Simple hack to determine if our TZ has DST */
-	tznames = icaltimezone_get_tznames (ictz);
+	tznames = i_cal_timezone_get_tznames (ictz);
 	if (tznames && strchr (tznames, '/'))
 		tz_has_dst = TRUE;
 
 	/* Calculate minutes east of UTC, what MS uses in this spec */
-	tt = icaltime_current_time_with_zone (ictz);
-	utc_offset = icaltimezone_get_utc_offset (ictz, &tt, &tz_dst_now) / 60;
+	tt = i_cal_time_new_current_with_zone (ictz);
+	utc_offset = i_cal_timezone_get_utc_offset (ictz, tt, &tz_dst_now) / 60;
 	if (tz_dst_now)
 		utc_offset -= 60;
 
@@ -848,7 +862,7 @@ e_mapi_cal_util_mapi_tz_pidlidtimezone (icaltimezone *ictz)
 			score = 1;
 
 		if (score && tz_has_dst) {
-			sdt = nth_day_of_month (tt.year, pme->standard_wMonth,
+			sdt = nth_day_of_month (i_cal_time_get_year (tt), pme->standard_wMonth,
 			                        pme->standard_wDayOfWeek,
 			                        pme->standard_wDay);
 			/* add the transition hour and a second */
@@ -856,7 +870,7 @@ e_mapi_cal_util_mapi_tz_pidlidtimezone (icaltimezone *ictz)
 			pre_sdt = sdt - 2 * 60 * 60;
 			post_sdt = sdt + 2 * 60 * 60;
 
-			dst = nth_day_of_month (tt.year, pme->daylight_wMonth,
+			dst = nth_day_of_month (i_cal_time_get_year (tt), pme->daylight_wMonth,
 			                        pme->daylight_wDayOfWeek,
 			                        pme->daylight_wDay);
 			dst += (pme->daylight_wHour * 60 * 60) + 1;
@@ -891,6 +905,8 @@ e_mapi_cal_util_mapi_tz_pidlidtimezone (icaltimezone *ictz)
 			}
 		}
 	}
+
+	g_clear_object (&tt);
 
 	return best_index;
 }
