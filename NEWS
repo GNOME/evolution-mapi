@@ -1,3 +1,14 @@
+evolution-mapi 3.33.2 2019-05-20
+--------------------------------
+
+Bug Fixes:
+	eds-M!14 - Correct typo in a comment in the main CMakeLists.txt (Дилян Палаузов)
+
+Miscellaneous:
+	Add refresh interval options to non-mail sources (Milan Crha)
+	Port to libecal-2.0 and adapt to address book API changes (Milan Crha)
+	Provide now-required argument to i_cal_timezone_get_utc_offset() (Milan Crha)
+
 evolution-mapi 3.33.1 2019-04-22
 --------------------------------
 
