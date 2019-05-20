@@ -101,11 +101,12 @@ get_offset (ICalTimezone *zone,
 	struct tm local;
 	ICalTime *itt;
 	gint offset;
+	gint is_daylight = 0; /* Its value is ignored, but libical-glib 3.0.5 API requires it */
 	time_t now = time (NULL);
 
 	gmtime_r (&now, &local);
 	itt = e_mapi_tm_to_icaltime (&local, dst);
-	offset = i_cal_timezone_get_utc_offset (zone, itt, NULL);
+	offset = i_cal_timezone_get_utc_offset (zone, itt, &is_daylight);
 	g_clear_object (&itt);
 
 	return offset / -60;
