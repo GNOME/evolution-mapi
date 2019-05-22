@@ -5,12 +5,13 @@
 # Ekasari Nugraheni <iin@informatika.lipi.go.id>, 2010.
 # Dirgita <dirgitadevina@yahoo.co.id>, 2010.
 # Andika Triwidada <andika@gmail.com>, 2012, 2018.
+# Kukuh Syafaat <kukuhsyafaat@gnome.org>, 2017, 2018, 2019.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-mapi/issues\n"
-"POT-Creation-Date: 2018-11-12 19:45+0000\n"
-"PO-Revision-Date: 2018-11-15 23:21+0700\n"
+"POT-Creation-Date: 2019-02-11 12:09+0000\n"
+"PO-Revision-Date: 2019-05-22 14:04+0700\n"
 "Last-Translator: Kukuh Syafaat <kukuhsyafaat@gnome.org>\n"
 "Language-Team: GNOME Indonesian Translation Team <gnome@i15n.org>\n"
 "Language: id\n"
@@ -18,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:1
 msgid "Exchange MAPI"
@@ -30,46 +31,46 @@ msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr "Untuk mengakses server Microsoft Exchange 2007/OpenChange dengan MAPI"
 
 #: ../src/addressbook/e-book-backend-mapi.c:92
-#: ../src/calendar/e-cal-backend-mapi.c:100
+#: ../src/calendar/e-cal-backend-mapi.c:104
 #: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1943
 msgid "Unknown error"
 msgstr "Kesalahan tak dikenal"
 
-#: ../src/addressbook/e-book-backend-mapi.c:496
-#: ../src/addressbook/e-book-backend-mapi.c:680
+#: ../src/addressbook/e-book-backend-mapi.c:502
+#: ../src/addressbook/e-book-backend-mapi.c:686
 msgid "Failed to fetch GAL entries"
 msgstr "Gagal mengambil entri GAL"
 
-#: ../src/addressbook/e-book-backend-mapi.c:502
+#: ../src/addressbook/e-book-backend-mapi.c:508
 msgid "Failed to transfer contacts from a server"
 msgstr "Gagal mentransfer kontak dari suatu server"
 
-#: ../src/addressbook/e-book-backend-mapi.c:687
-#: ../src/calendar/e-cal-backend-mapi.c:1105
+#: ../src/addressbook/e-book-backend-mapi.c:693
+#: ../src/calendar/e-cal-backend-mapi.c:1115
 msgid "Failed to list items from a server"
 msgstr "Gagal membuat daftar butir dari suatu server"
 
-#: ../src/addressbook/e-book-backend-mapi.c:862
-#: ../src/calendar/e-cal-backend-mapi.c:1332
+#: ../src/addressbook/e-book-backend-mapi.c:868
+#: ../src/calendar/e-cal-backend-mapi.c:1342
 msgid "Failed to modify item on a server"
 msgstr "Gagal mengubah item pada server"
 
-#: ../src/addressbook/e-book-backend-mapi.c:862
-#: ../src/calendar/e-cal-backend-mapi.c:1332
-#: ../src/calendar/e-cal-backend-mapi.c:1626
+#: ../src/addressbook/e-book-backend-mapi.c:868
+#: ../src/calendar/e-cal-backend-mapi.c:1342
+#: ../src/calendar/e-cal-backend-mapi.c:1636
 msgid "Failed to create item on a server"
 msgstr "Gagal membuat item pada server"
 
-#: ../src/addressbook/e-book-backend-mapi.c:923
-#: ../src/calendar/e-cal-backend-mapi.c:1400
+#: ../src/addressbook/e-book-backend-mapi.c:929
+#: ../src/calendar/e-cal-backend-mapi.c:1410
 msgid "Failed to remove item from a server"
 msgstr "Gagal menghapus item dari server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:881
+#: ../src/calendar/e-cal-backend-mapi.c:891
 msgid "Failed to transfer objects from a server"
 msgstr "Gagal mentransfer objek dari server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1249
+#: ../src/calendar/e-cal-backend-mapi.c:1259
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -77,7 +78,7 @@ msgstr ""
 "Dukungan untuk memodifikasi satu janji yang berulang belum "
 "diimplementasikan. Tidak ada perubahan pada janji di server."
 
-#: ../src/calendar/e-cal-backend-mapi.c:1676
+#: ../src/calendar/e-cal-backend-mapi.c:1686
 msgid "Failed to get Free/Busy data"
 msgstr "Gagal memperoleh data Luang/Sibuk"
 
@@ -247,7 +248,7 @@ msgstr "Tidak dapat membuat folder baru \"%s\""
 #: ../src/camel/camel-mapi-store.c:1279
 #, c-format
 msgid "Authentication failed"
-msgstr "Otentikasi gagal"
+msgstr "Autentikasi gagal"
 
 #: ../src/camel/camel-mapi-store.c:1289
 msgid "MAPI folders can be created only within mailbox of the logged in user"
@@ -376,7 +377,7 @@ msgstr ""
 
 #: ../src/camel/camel-mapi-store.c:3016
 msgid "Authentication password not available"
-msgstr "Sandi otentikasi tak tersedia"
+msgstr "Sandi autentikasi tak tersedia"
 
 #: ../src/camel/camel-mapi-store.c:3052 ../src/camel/camel-mapi-store.c:3468
 msgid "Updating foreign folders"
@@ -384,7 +385,7 @@ msgstr "Memperbarui folder asing"
 
 #. Translators: the first '%s' is replaced with a generic error message,
 #. the second '%s' is replaced with additional error information.
-#: ../src/camel/camel-mapi-store.c:3075 ../src/collection/e-mapi-backend.c:894
+#: ../src/camel/camel-mapi-store.c:3075 ../src/collection/e-mapi-backend.c:899
 #: ../src/configuration/e-mail-config-mapi-backend.c:406
 #: ../src/configuration/e-mapi-config-utils.c:341
 #, c-format
@@ -451,16 +452,16 @@ msgstr ""
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:361
 msgid "Authentication finished successfully."
-msgstr "Otentikasi selesai dengan sukses."
+msgstr "Autentikasi selesai dengan sukses."
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:363
 #: ../src/configuration/e-mail-config-mapi-backend.c:501
 msgid "Authentication failed."
-msgstr "Otentikasi gagal."
+msgstr "Autentikasi gagal."
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:444
 msgid "Cannot authenticate MAPI accounts in offline mode"
-msgstr "Tak bisa mengotentikasi akun MAPI dalam mode luring"
+msgstr "Tak bisa mengautentikasi akun MAPI dalam mode luring"
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:473
 msgid ""
@@ -508,7 +509,7 @@ msgstr "G_unakan koneksi yang aman"
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:784
 msgid "_Kerberos authentication"
-msgstr "Otentikasi _Kerberos"
+msgstr "Autentikasi _Kerberos"
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:796
 msgid "_Realm name:"
@@ -963,19 +964,19 @@ msgid "Include _subfolders"
 msgstr "Sertakan _subfolder"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2060
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2065
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Diterima:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2065
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2070
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Tentatif:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2070
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2075
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Ditolak:"
