@@ -1,3 +1,13 @@
+evolution-mapi 3.33.3 2019-06-17
+--------------------------------
+
+Bug Fixes:
+	eds-I#120 - Fails to build with libasan using Clang (undefined symbols) (Milan Crha)
+	eds-M!15 - Fix typos in CMake modules (Дилян Палаузов)
+
+Translations:
+	Kukuh Syafaat (id)
+
 evolution-mapi 3.33.2 2019-05-20
 --------------------------------
 
