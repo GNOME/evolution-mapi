@@ -3418,7 +3418,7 @@ camel_mapi_store_announce_subscribed_folder (CamelMapiStore *mapi_store,
 	/* first announce about virtual parents */
 	for (ii = 0; parts[ii]; ii++) {
 		if (ii > 0)
-			g_string_append (partial_path, "/");
+			g_string_append_c (partial_path, '/');
 		g_string_append (partial_path, parts[ii]);
 
 		si = camel_store_summary_path (mapi_store->summary, partial_path->str);
