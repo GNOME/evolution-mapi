@@ -18,10 +18,6 @@
 
 #include "camel-mapi-settings.h"
 
-#define CAMEL_MAPI_SETTINGS_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), CAMEL_TYPE_MAPI_SETTINGS, CamelMapiSettingsPrivate))
-
 struct _CamelMapiSettingsPrivate {
 	GMutex property_lock;
 
@@ -57,6 +53,7 @@ G_DEFINE_TYPE_WITH_CODE (
 	CamelMapiSettings,
 	camel_mapi_settings,
 	CAMEL_TYPE_OFFLINE_SETTINGS,
+	G_ADD_PRIVATE (CamelMapiSettings)
 	G_IMPLEMENT_INTERFACE (
 		CAMEL_TYPE_NETWORK_SETTINGS, NULL))
 
@@ -257,7 +254,7 @@ mapi_settings_finalize (GObject *object)
 {
 	CamelMapiSettingsPrivate *priv;
 
-	priv = CAMEL_MAPI_SETTINGS_GET_PRIVATE (object);
+	priv = camel_mapi_settings_get_instance_private (CAMEL_MAPI_SETTINGS (object));
 
 	g_mutex_clear (&priv->property_lock);
 
@@ -273,8 +270,6 @@ static void
 camel_mapi_settings_class_init (CamelMapiSettingsClass *class)
 {
 	GObjectClass *object_class;
-
-	g_type_class_add_private (class, sizeof (CamelMapiSettingsPrivate));
 
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = mapi_settings_set_property;
@@ -411,7 +406,7 @@ camel_mapi_settings_class_init (CamelMapiSettingsClass *class)
 static void
 camel_mapi_settings_init (CamelMapiSettings *settings)
 {
-	settings->priv = CAMEL_MAPI_SETTINGS_GET_PRIVATE (settings);
+	settings->priv = camel_mapi_settings_get_instance_private (settings);
 	g_mutex_init (&settings->priv->property_lock);
 }
 

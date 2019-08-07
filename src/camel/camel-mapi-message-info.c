@@ -37,7 +37,7 @@ enum {
 	PROP_LAST_MODIFIED
 };
 
-G_DEFINE_TYPE (CamelMapiMessageInfo, camel_mapi_message_info, CAMEL_TYPE_MESSAGE_INFO_BASE)
+G_DEFINE_TYPE_WITH_PRIVATE (CamelMapiMessageInfo, camel_mapi_message_info, CAMEL_TYPE_MESSAGE_INFO_BASE)
 
 static CamelMessageInfo *
 mapi_message_info_clone (const CamelMessageInfo *mi,
@@ -163,8 +163,6 @@ camel_mapi_message_info_class_init (CamelMapiMessageInfoClass *class)
 	CamelMessageInfoClass *mi_class;
 	GObjectClass *object_class;
 
-	g_type_class_add_private (class, sizeof (CamelMapiMessageInfoPrivate));
-
 	mi_class = CAMEL_MESSAGE_INFO_CLASS (class);
 	mi_class->clone = mapi_message_info_clone;
 	mi_class->load = mapi_message_info_load;
@@ -212,7 +210,7 @@ camel_mapi_message_info_class_init (CamelMapiMessageInfoClass *class)
 static void
 camel_mapi_message_info_init (CamelMapiMessageInfo *mmi)
 {
-	mmi->priv = G_TYPE_INSTANCE_GET_PRIVATE (mmi, CAMEL_TYPE_MAPI_MESSAGE_INFO, CamelMapiMessageInfoPrivate);
+	mmi->priv = camel_mapi_message_info_get_instance_private (mmi);
 }
 
 guint32
