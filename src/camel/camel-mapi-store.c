@@ -76,6 +76,7 @@ G_DEFINE_TYPE_WITH_CODE (
 	CamelMapiStore,
 	camel_mapi_store,
 	CAMEL_TYPE_OFFLINE_STORE,
+	G_ADD_PRIVATE (CamelMapiStore)
 	G_IMPLEMENT_INTERFACE (
 		CAMEL_TYPE_SUBSCRIBABLE,
 		camel_subscribable_init))
@@ -2105,8 +2106,6 @@ camel_mapi_store_class_init (CamelMapiStoreClass *class)
 	/* register MAPIKRB auth type */
 	CAMEL_TYPE_MAPI_SASL_KRB;
 
-	g_type_class_add_private (class, sizeof (CamelMapiStorePrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->dispose = mapi_store_dispose;
 	object_class->finalize = mapi_store_finalize;
@@ -2147,7 +2146,7 @@ camel_subscribable_init (CamelSubscribableInterface *iface)
 static void
 camel_mapi_store_init (CamelMapiStore *mapi_store)
 {
-	mapi_store->priv = G_TYPE_INSTANCE_GET_PRIVATE (mapi_store, CAMEL_TYPE_MAPI_STORE, CamelMapiStorePrivate);
+	mapi_store->priv = camel_mapi_store_get_instance_private (mapi_store);
 
 	g_rec_mutex_init (&mapi_store->priv->connection_lock);
 	g_rec_mutex_init (&mapi_store->priv->updates_lock);
