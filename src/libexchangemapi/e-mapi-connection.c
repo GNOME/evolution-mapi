@@ -51,7 +51,7 @@ static struct mapi_session *mapi_profile_load (ESourceRegistry *registry, struct
 
 /* GObject foo - begin */
 
-G_DEFINE_TYPE (EMapiConnection, e_mapi_connection, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (EMapiConnection, e_mapi_connection, G_TYPE_OBJECT)
 
 /* These three macros require 'priv' variable of type EMapiConnectionPrivate */
 #define LOCK(_cclb,_err,_ret) G_STMT_START { 						\
@@ -455,8 +455,6 @@ e_mapi_connection_class_init (EMapiConnectionClass *klass)
 {
 	GObjectClass *object_class;
 
-	g_type_class_add_private (klass, sizeof (EMapiConnectionPrivate));
-
 	object_class = G_OBJECT_CLASS (klass);
 	object_class->dispose = e_mapi_connection_dispose;
 	object_class->finalize = e_mapi_connection_finalize;
@@ -474,7 +472,7 @@ e_mapi_connection_class_init (EMapiConnectionClass *klass)
 static void
 e_mapi_connection_init (EMapiConnection *conn)
 {
-	conn->priv = G_TYPE_INSTANCE_GET_PRIVATE (conn, E_MAPI_TYPE_CONNECTION, EMapiConnectionPrivate);
+	conn->priv = e_mapi_connection_get_instance_private (conn, E_MAPI_TYPE_CONNECTION, EMapiConnectionPrivate);
 	g_return_if_fail (conn->priv != NULL);
 
 	e_mapi_cancellable_rec_mutex_init (&conn->priv->session_lock);
