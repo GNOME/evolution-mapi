@@ -164,7 +164,7 @@ source_mapi_folder_finalize (GObject *object)
 {
 	ESourceMapiFolderPrivate *priv;
 
-	priv = e_source_mapi_folder_get_instance_private (E_SOURCE_MAPI_FOLDER (object));
+	priv = E_SOURCE_MAPI_FOLDER (object)->priv;
 
 	g_free (priv->foreign_username);
 
