@@ -102,7 +102,7 @@ static gboolean		mapi_folder_synchronize_sync
 						 GCancellable *cancellable,
 						 GError **error);
 
-G_DEFINE_TYPE (CamelMapiFolder, camel_mapi_folder, CAMEL_TYPE_OFFLINE_FOLDER)
+G_DEFINE_TYPE_WITH_PRIVATE (CamelMapiFolder, camel_mapi_folder, CAMEL_TYPE_OFFLINE_FOLDER)
 
 static GPtrArray *
 mapi_folder_search_by_expression (CamelFolder *folder,
@@ -1958,8 +1958,6 @@ camel_mapi_folder_class_init (CamelMapiFolderClass *class)
 	GObjectClass *object_class;
 	CamelFolderClass *folder_class;
 
-	g_type_class_add_private (class, sizeof (CamelMapiFolderPrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->dispose = mapi_folder_dispose;
 	object_class->finalize = mapi_folder_finalize;
@@ -1987,7 +1985,7 @@ camel_mapi_folder_init (CamelMapiFolder *mapi_folder)
 {
 	CamelFolder *folder = CAMEL_FOLDER (mapi_folder);
 
-	mapi_folder->priv = G_TYPE_INSTANCE_GET_PRIVATE (mapi_folder, CAMEL_TYPE_MAPI_FOLDER, CamelMapiFolderPrivate);
+	mapi_folder->priv = camel_mapi_folder_get_instance_private (mapi_folder);
 
 	camel_folder_set_flags (folder, CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY);
 

@@ -25,17 +25,17 @@
 
 #include "e-book-backend-mapi-gal.h"
 
-G_DEFINE_TYPE (EBookBackendMAPIGAL, e_book_backend_mapi_gal, E_TYPE_BOOK_BACKEND_MAPI)
-
 struct _EBookBackendMAPIGALPrivate
 {
 	gint32 unused;
 };
 
+G_DEFINE_TYPE_WITH_PRIVATE (EBookBackendMAPIGAL, e_book_backend_mapi_gal, E_TYPE_BOOK_BACKEND_MAPI)
+
 static void
 e_book_backend_mapi_gal_init (EBookBackendMAPIGAL *bbmgal)
 {
-	bbmgal->priv = G_TYPE_INSTANCE_GET_PRIVATE (bbmgal, E_TYPE_BOOK_BACKEND_MAPI_GAL, EBookBackendMAPIGALPrivate);
+	bbmgal->priv = e_book_backend_mapi_gal_get_instance_private (bbmgal);
 
 	e_book_backend_mapi_set_is_gal (E_BOOK_BACKEND_MAPI (bbmgal), TRUE);
 }
@@ -44,8 +44,6 @@ static void
 e_book_backend_mapi_gal_class_init (EBookBackendMAPIGALClass *klass)
 {
 	EBookMetaBackendClass *meta_backend_class;
-
-	g_type_class_add_private (klass, sizeof (EBookBackendMAPIGALPrivate));
 
 	meta_backend_class = E_BOOK_META_BACKEND_CLASS (klass);
 	meta_backend_class->backend_factory_type_name = "EBookBackendMapiGalFactory";

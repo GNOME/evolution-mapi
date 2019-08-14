@@ -56,12 +56,12 @@
 #define EMA_DATA_VERSION	1
 #define EMA_DATA_VERSION_KEY	"ema-data-version"
 
-G_DEFINE_TYPE (ECalBackendMAPI, e_cal_backend_mapi, E_TYPE_CAL_META_BACKEND)
-
 struct _ECalBackendMAPIPrivate {
 	GRecMutex conn_lock;
 	EMapiConnection *conn;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE (ECalBackendMAPI, e_cal_backend_mapi, E_TYPE_CAL_META_BACKEND)
 
 static gchar *	ecb_mapi_dup_component_revision_cb	(ECalCache *cal_cache,
 							 ICalComponent *icomp);
@@ -1941,8 +1941,6 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *klass)
 	ECalBackendSyncClass *sync_backend_class;
 	ECalMetaBackendClass *meta_backend_class;
 
-	g_type_class_add_private (klass, sizeof (ECalBackendMAPIPrivate));
-
 	meta_backend_class = E_CAL_META_BACKEND_CLASS (klass);
 	meta_backend_class->connect_sync = ecb_mapi_connect_sync;
 	meta_backend_class->disconnect_sync = ecb_mapi_disconnect_sync;
@@ -1971,7 +1969,7 @@ e_cal_backend_mapi_class_init (ECalBackendMAPIClass *klass)
 static void
 e_cal_backend_mapi_init (ECalBackendMAPI *cbmapi)
 {
-	cbmapi->priv = G_TYPE_INSTANCE_GET_PRIVATE (cbmapi, E_TYPE_CAL_BACKEND_MAPI, ECalBackendMAPIPrivate);
+	cbmapi->priv = e_cal_backend_mapi_get_instance_private (cbmapi);
 
 	g_rec_mutex_init (&cbmapi->priv->conn_lock);
 }

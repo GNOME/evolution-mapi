@@ -25,17 +25,17 @@
 
 #include "e-book-backend-mapi-contacts.h"
 
-G_DEFINE_TYPE (EBookBackendMAPIContacts, e_book_backend_mapi_contacts, E_TYPE_BOOK_BACKEND_MAPI)
-
 struct _EBookBackendMAPIContactsPrivate
 {
 	gint32 unused;
 };
 
+G_DEFINE_TYPE_WITH_PRIVATE (EBookBackendMAPIContacts, e_book_backend_mapi_contacts, E_TYPE_BOOK_BACKEND_MAPI)
+
 static void
 e_book_backend_mapi_contacts_init (EBookBackendMAPIContacts *bbmcontacts)
 {
-	bbmcontacts->priv = G_TYPE_INSTANCE_GET_PRIVATE (bbmcontacts, E_TYPE_BOOK_BACKEND_MAPI_CONTACTS, EBookBackendMAPIContactsPrivate);
+	bbmcontacts->priv = e_book_backend_mapi_contacts_get_instance_private (bbmcontacts);
 
 	e_book_backend_mapi_set_is_gal (E_BOOK_BACKEND_MAPI (bbmcontacts), FALSE);
 }
@@ -44,8 +44,6 @@ static void
 e_book_backend_mapi_contacts_class_init (EBookBackendMAPIContactsClass *klass)
 {
 	EBookMetaBackendClass *meta_backend_class;
-
-	g_type_class_add_private (klass, sizeof (EBookBackendMAPIContactsPrivate));
 
 	meta_backend_class = E_BOOK_META_BACKEND_CLASS (klass);
 	meta_backend_class->backend_factory_type_name = "EBookBackendMapiContactsFactory";

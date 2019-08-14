@@ -18,10 +18,6 @@
 
 #include "e-source-mapi-folder.h"
 
-#define E_SOURCE_MAPI_FOLDER_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_SOURCE_MAPI_FOLDER, ESourceMapiFolderPrivate))
-
 struct _ESourceMapiFolderPrivate {
 	guint64 fid;
 	guint64 parent_fid;
@@ -43,10 +39,12 @@ enum {
 	PROP_PARTIAL_COUNT
 };
 
-G_DEFINE_DYNAMIC_TYPE (
+G_DEFINE_DYNAMIC_TYPE_EXTENDED (
 	ESourceMapiFolder,
 	e_source_mapi_folder,
-	E_TYPE_SOURCE_EXTENSION)
+	E_TYPE_SOURCE_EXTENSION,
+	0,
+	G_ADD_PRIVATE_DYNAMIC (ESourceMapiFolder))
 
 static void
 source_mapi_folder_set_property (GObject *object,
@@ -166,7 +164,7 @@ source_mapi_folder_finalize (GObject *object)
 {
 	ESourceMapiFolderPrivate *priv;
 
-	priv = E_SOURCE_MAPI_FOLDER_GET_PRIVATE (object);
+	priv = E_SOURCE_MAPI_FOLDER (object)->priv;
 
 	g_free (priv->foreign_username);
 
@@ -179,8 +177,6 @@ e_source_mapi_folder_class_init (ESourceMapiFolderClass *class)
 {
 	GObjectClass *object_class;
 	ESourceExtensionClass *extension_class;
-
-	g_type_class_add_private (class, sizeof (ESourceMapiFolderPrivate));
 
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = source_mapi_folder_set_property;
@@ -283,7 +279,7 @@ e_source_mapi_folder_class_finalize (ESourceMapiFolderClass *class)
 static void
 e_source_mapi_folder_init (ESourceMapiFolder *extension)
 {
-	extension->priv = E_SOURCE_MAPI_FOLDER_GET_PRIVATE (extension);
+	extension->priv = e_source_mapi_folder_get_instance_private (extension);
 
 	extension->priv->fid = 0;
 	extension->priv->parent_fid = 0;
@@ -297,7 +293,7 @@ e_source_mapi_folder_init (ESourceMapiFolder *extension)
 void
 e_source_mapi_folder_type_register (GTypeModule *type_module)
 {
-	/* XXX G_DEFINE_DYNAMIC_TYPE declares a static type registration
+	/* XXX G_DEFINE_DYNAMIC_TYPE_EXTENDED declares a static type registration
 	 *     function, so we have to wrap it with a public function in
 	 *     order to register types from a separate compilation unit. */
 	e_source_mapi_folder_register_type (type_module);

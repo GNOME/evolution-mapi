@@ -36,18 +36,16 @@
 
 #include "e-mail-config-mapi-backend.h"
 
-#define E_MAIL_CONFIG_MAPI_BACKEND_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_MAIL_CONFIG_MAPI_BACKEND, EMailConfigMapiBackendPrivate))
-
 struct _EMailConfigMapiBackendPrivate {
 	gint unused;
 };
 
-G_DEFINE_DYNAMIC_TYPE (
+G_DEFINE_DYNAMIC_TYPE_EXTENDED (
 	EMailConfigMapiBackend,
 	e_mail_config_mapi_backend,
-	E_TYPE_MAIL_CONFIG_SERVICE_BACKEND)
+	E_TYPE_MAIL_CONFIG_SERVICE_BACKEND,
+	0,
+	G_ADD_PRIVATE_DYNAMIC (EMailConfigMapiBackend))
 
 enum {
 	COL_MAPI_FULL_NAME = 0,
@@ -916,9 +914,6 @@ e_mail_config_mapi_backend_class_init (EMailConfigMapiBackendClass *class)
 {
 	EMailConfigServiceBackendClass *backend_class;
 
-	g_type_class_add_private (
-		class, sizeof (EMailConfigMapiBackendPrivate));
-
 	backend_class = E_MAIL_CONFIG_SERVICE_BACKEND_CLASS (class);
 	backend_class->backend_name = "mapi";
 	backend_class->new_collection = mail_config_mapi_backend_new_collection;
@@ -935,7 +930,7 @@ e_mail_config_mapi_backend_class_finalize (EMailConfigMapiBackendClass *class)
 static void
 e_mail_config_mapi_backend_init (EMailConfigMapiBackend *backend)
 {
-	backend->priv = E_MAIL_CONFIG_MAPI_BACKEND_GET_PRIVATE (backend);
+	backend->priv = e_mail_config_mapi_backend_get_instance_private (backend);
 }
 
 void
