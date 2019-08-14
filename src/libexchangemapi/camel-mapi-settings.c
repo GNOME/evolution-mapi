@@ -254,7 +254,7 @@ mapi_settings_finalize (GObject *object)
 {
 	CamelMapiSettingsPrivate *priv;
 
-	priv = camel_mapi_settings_get_instance_private (CAMEL_MAPI_SETTINGS (object));
+	priv = CAMEL_MAPI_SETTINGS (object)->priv;
 
 	g_mutex_clear (&priv->property_lock);
 

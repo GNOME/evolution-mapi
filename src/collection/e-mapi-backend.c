@@ -469,7 +469,7 @@ mapi_backend_dispose (GObject *object)
 {
 	EMapiBackendPrivate *priv;
 
-	priv = e_mapi_backend_get_instance_private (E_MAPI_BACKEND (object));
+	priv = E_MAPI_BACKEND (object)->priv;
 
 	g_hash_table_remove_all (priv->folders);
 
@@ -487,7 +487,7 @@ mapi_backend_finalize (GObject *object)
 {
 	EMapiBackendPrivate *priv;
 
-	priv = e_mapi_backend_get_instance_private (E_MAPI_BACKEND (object));
+	priv = E_MAPI_BACKEND (object)->priv;
 
 	g_hash_table_destroy (priv->folders);
 
@@ -555,7 +555,7 @@ mapi_backend_child_added (ECollectionBackend *backend,
 	const gchar *extension_name;
 	gboolean is_mail = FALSE;
 
-	priv = e_mapi_backend_get_instance_private (E_MAPI_BACKEND (backend));
+	priv = E_MAPI_BACKEND (backend)->priv;
 
 	collection_source = e_backend_get_source (E_BACKEND (backend));
 
@@ -615,7 +615,7 @@ mapi_backend_child_removed (ECollectionBackend *backend,
 	EMapiBackendPrivate *priv;
 	const gchar *extension_name;
 
-	priv = e_mapi_backend_get_instance_private (E_MAPI_BACKEND (backend));
+	priv = E_MAPI_BACKEND (backend)->priv;
 
 	/* We track MAPI folders in a hash table by folder ID. */
 	extension_name = E_SOURCE_EXTENSION_MAPI_FOLDER;

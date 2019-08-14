@@ -148,7 +148,7 @@ mail_config_mapi_page_dispose (GObject *object)
 {
 	EMailConfigMapiPagePrivate *priv;
 
-	priv = e_mail_config_mapi_page_get_instance_private (E_MAIL_CONFIG_MAPI_PAGE (object));
+	priv = E_MAIL_CONFIG_MAPI_PAGE (object)->priv;
 
 	if (priv->account_source != NULL) {
 		g_object_unref (priv->account_source);
