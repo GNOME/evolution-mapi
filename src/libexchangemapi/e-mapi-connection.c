@@ -51,8 +51,6 @@ static struct mapi_session *mapi_profile_load (ESourceRegistry *registry, struct
 
 /* GObject foo - begin */
 
-G_DEFINE_TYPE (EMapiConnection, e_mapi_connection, G_TYPE_OBJECT)
-
 /* These three macros require 'priv' variable of type EMapiConnectionPrivate */
 #define LOCK(_cclb,_err,_ret) G_STMT_START { 						\
 	e_mapi_debug_print ("%s: %s: lock(session & global)", G_STRLOC, G_STRFUNC);	\
@@ -213,6 +211,8 @@ struct _EMapiConnectionPrivate {
 	enum MAPISTATUS	register_notification_result; /* MAPI_E_RESERVED if not called yet */
 	gint notification_poll_seconds; /* delay between polls, in seconds */
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE (EMapiConnection, e_mapi_connection, G_TYPE_OBJECT)
 
 enum {
 	SERVER_NOTIFICATION,
@@ -390,18 +390,15 @@ ensure_foreign_store (EMapiConnectionPrivate *priv,
 static void
 e_mapi_connection_dispose (GObject *object)
 {
-	EMapiConnectionPrivate *priv;
+	EMapiConnection *conn = E_MAPI_CONNECTION (object);
 
-	unregister_connection (E_MAPI_CONNECTION (object));
+	unregister_connection (conn);
 
-	priv = E_MAPI_CONNECTION (object)->priv;
-
-	if (priv) {
-		stop_all_notifications (priv);
+	if (conn->priv) {
+		stop_all_notifications (conn->priv);
 	}
 
-	if (G_OBJECT_CLASS (e_mapi_connection_parent_class)->dispose)
-		G_OBJECT_CLASS (e_mapi_connection_parent_class)->dispose (object);
+	G_OBJECT_CLASS (e_mapi_connection_parent_class)->dispose (object);
 }
 
 static void
@@ -415,30 +412,16 @@ e_mapi_connection_finalize (GObject *object)
 
 	if (priv) {
 		LOCK_VOID (NULL, NULL);
+
 		disconnect (priv, TRUE && e_mapi_connection_connected (conn));
-		g_free (priv->profile);
-		priv->profile = NULL;
 
-		if (priv->named_ids)
-			g_hash_table_destroy (priv->named_ids);
-		priv->named_ids = NULL;
-
-		if (priv->foreign_stores)
-			g_hash_table_destroy (priv->foreign_stores);
-		priv->foreign_stores = NULL;
-
-		e_mapi_utils_destroy_mapi_context (priv->mapi_ctx);
-		priv->mapi_ctx = NULL;
-
-		g_hash_table_destroy (priv->known_notifications);
-		priv->known_notifications = NULL;
-
-		e_flag_free (priv->notification_flag);
-		priv->notification_flag = NULL;
-
-		if (priv->registry)
-			g_object_unref (priv->registry);
-		priv->registry = NULL;
+		g_clear_pointer (&priv->profile, g_free);
+		g_clear_pointer (&priv->named_ids, g_hash_table_destroy);
+		g_clear_pointer (&priv->foreign_stores, g_hash_table_destroy);
+		g_clear_pointer (&priv->mapi_ctx, e_mapi_utils_destroy_mapi_context);
+		g_clear_pointer (&priv->known_notifications, g_hash_table_destroy);
+		g_clear_pointer (&priv->notification_flag, e_flag_free);
+		g_clear_object (&priv->registry);
 
 		UNLOCK ();
 
@@ -446,16 +429,13 @@ e_mapi_connection_finalize (GObject *object)
 		g_rec_mutex_clear (&priv->folders_lock);
 	}
 
-	if (G_OBJECT_CLASS (e_mapi_connection_parent_class)->finalize)
-		G_OBJECT_CLASS (e_mapi_connection_parent_class)->finalize (object);
+	G_OBJECT_CLASS (e_mapi_connection_parent_class)->finalize (object);
 }
 
 static void
 e_mapi_connection_class_init (EMapiConnectionClass *klass)
 {
 	GObjectClass *object_class;
-
-	g_type_class_add_private (klass, sizeof (EMapiConnectionPrivate));
 
 	object_class = G_OBJECT_CLASS (klass);
 	object_class->dispose = e_mapi_connection_dispose;
@@ -474,7 +454,7 @@ e_mapi_connection_class_init (EMapiConnectionClass *klass)
 static void
 e_mapi_connection_init (EMapiConnection *conn)
 {
-	conn->priv = G_TYPE_INSTANCE_GET_PRIVATE (conn, E_MAPI_TYPE_CONNECTION, EMapiConnectionPrivate);
+	conn->priv = e_mapi_connection_get_instance_private (conn);
 	g_return_if_fail (conn->priv != NULL);
 
 	e_mapi_cancellable_rec_mutex_init (&conn->priv->session_lock);

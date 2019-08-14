@@ -76,6 +76,7 @@ G_DEFINE_TYPE_WITH_CODE (
 	CamelMapiStore,
 	camel_mapi_store,
 	CAMEL_TYPE_OFFLINE_STORE,
+	G_ADD_PRIVATE (CamelMapiStore)
 	G_IMPLEMENT_INTERFACE (
 		CAMEL_TYPE_SUBSCRIBABLE,
 		camel_subscribable_init))
@@ -1043,26 +1044,16 @@ mapi_store_dispose (GObject *object)
 static void
 mapi_store_finalize (GObject *object)
 {
-	CamelMapiStorePrivate *priv;
+	CamelMapiStore *mapi_store = CAMEL_MAPI_STORE (object);
 
-	priv = CAMEL_MAPI_STORE (object)->priv;
+	g_clear_pointer (&mapi_store->priv->id_hash, g_hash_table_destroy);
+	g_clear_pointer (&mapi_store->priv->name_hash, g_hash_table_destroy);
+	g_clear_pointer (&mapi_store->priv->parent_hash, g_hash_table_destroy);
+	g_clear_pointer (&mapi_store->priv->default_folders, g_hash_table_destroy);
+	g_clear_pointer (&mapi_store->priv->container_hash, g_hash_table_destroy);
 
-	if (priv->id_hash != NULL)
-		g_hash_table_destroy (priv->id_hash);
-
-	if (priv->name_hash != NULL)
-		g_hash_table_destroy (priv->name_hash);
-
-	if (priv->parent_hash != NULL)
-		g_hash_table_destroy (priv->parent_hash);
-
-	if (priv->default_folders != NULL)
-		g_hash_table_destroy (priv->default_folders);
-	if (priv->container_hash != NULL)
-		g_hash_table_destroy (priv->container_hash);
-
-	g_rec_mutex_clear (&priv->connection_lock);
-	g_rec_mutex_clear (&priv->updates_lock);
+	g_rec_mutex_clear (&mapi_store->priv->connection_lock);
+	g_rec_mutex_clear (&mapi_store->priv->updates_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_mapi_store_parent_class)->finalize (object);
@@ -2105,8 +2096,6 @@ camel_mapi_store_class_init (CamelMapiStoreClass *class)
 	/* register MAPIKRB auth type */
 	CAMEL_TYPE_MAPI_SASL_KRB;
 
-	g_type_class_add_private (class, sizeof (CamelMapiStorePrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->dispose = mapi_store_dispose;
 	object_class->finalize = mapi_store_finalize;
@@ -2147,7 +2136,7 @@ camel_subscribable_init (CamelSubscribableInterface *iface)
 static void
 camel_mapi_store_init (CamelMapiStore *mapi_store)
 {
-	mapi_store->priv = G_TYPE_INSTANCE_GET_PRIVATE (mapi_store, CAMEL_TYPE_MAPI_STORE, CamelMapiStorePrivate);
+	mapi_store->priv = camel_mapi_store_get_instance_private (mapi_store);
 
 	g_rec_mutex_init (&mapi_store->priv->connection_lock);
 	g_rec_mutex_init (&mapi_store->priv->updates_lock);

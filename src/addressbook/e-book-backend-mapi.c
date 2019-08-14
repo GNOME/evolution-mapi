@@ -50,7 +50,7 @@ struct _EBookBackendMAPIPrivate
 	gboolean is_gal;
 };
 
-G_DEFINE_TYPE (EBookBackendMAPI, e_book_backend_mapi, E_TYPE_BOOK_META_BACKEND)
+G_DEFINE_TYPE_WITH_PRIVATE (EBookBackendMAPI, e_book_backend_mapi, E_TYPE_BOOK_META_BACKEND)
 
 static void
 ebb_mapi_error_to_client_error (GError **perror,
@@ -1138,8 +1138,6 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 	EBookBackendClass *book_backend_class;
 	EBookMetaBackendClass *meta_backend_class;
 
-	g_type_class_add_private (klass, sizeof (EBookBackendMAPIPrivate));
-
 	meta_backend_class = E_BOOK_META_BACKEND_CLASS (klass);
 	meta_backend_class->backend_module_filename = "libebookbackendmapi.so";
 	meta_backend_class->connect_sync = ebb_mapi_connect_sync;
@@ -1167,7 +1165,7 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 static void
 e_book_backend_mapi_init (EBookBackendMAPI *bbmapi)
 {
-	bbmapi->priv = G_TYPE_INSTANCE_GET_PRIVATE (bbmapi, E_TYPE_BOOK_BACKEND_MAPI, EBookBackendMAPIPrivate);
+	bbmapi->priv = e_book_backend_mapi_get_instance_private (bbmapi);
 
 	g_rec_mutex_init (&bbmapi->priv->conn_lock);
 }

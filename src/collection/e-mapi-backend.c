@@ -28,10 +28,6 @@
 
 #include "e-mapi-backend.h"
 
-#define E_MAPI_BACKEND_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_MAPI_BACKEND, EMapiBackendPrivate))
-
 struct _EMapiBackendPrivate {
 	/* Folder ID -> ESource */
 	GHashTable *folders;
@@ -43,7 +39,7 @@ struct _EMapiBackendPrivate {
 	ENamedParameters *credentials;
 };
 
-G_DEFINE_DYNAMIC_TYPE (EMapiBackend, e_mapi_backend, E_TYPE_COLLECTION_BACKEND)
+G_DEFINE_DYNAMIC_TYPE_EXTENDED (EMapiBackend, e_mapi_backend, E_TYPE_COLLECTION_BACKEND, 0, G_ADD_PRIVATE_DYNAMIC (EMapiBackend))
 
 typedef gboolean (* EMapiBackendAuthenticatorFunc) (EBackend *backend,
 						    CamelMapiSettings *settings,
@@ -471,15 +467,13 @@ mapi_backend_constructed (GObject *object)
 static void
 mapi_backend_dispose (GObject *object)
 {
-	EMapiBackendPrivate *priv;
+	EMapiBackend *mapi_backend = E_MAPI_BACKEND (object);
 
-	priv = E_MAPI_BACKEND_GET_PRIVATE (object);
+	g_hash_table_remove_all (mapi_backend->priv->folders);
 
-	g_hash_table_remove_all (priv->folders);
-
-	if (priv->source_changed_handler_id) {
-		g_signal_handler_disconnect (e_backend_get_source (E_BACKEND (object)), priv->source_changed_handler_id);
-		priv->source_changed_handler_id = 0;
+	if (mapi_backend->priv->source_changed_handler_id) {
+		g_signal_handler_disconnect (e_backend_get_source (E_BACKEND (object)), mapi_backend->priv->source_changed_handler_id);
+		mapi_backend->priv->source_changed_handler_id = 0;
 	}
 
 	/* Chain up to parent's dispose() method. */
@@ -489,14 +483,12 @@ mapi_backend_dispose (GObject *object)
 static void
 mapi_backend_finalize (GObject *object)
 {
-	EMapiBackendPrivate *priv;
+	EMapiBackend *mapi_backend = E_MAPI_BACKEND (object);
 
-	priv = E_MAPI_BACKEND_GET_PRIVATE (object);
+	g_hash_table_destroy (mapi_backend->priv->folders);
 
-	g_hash_table_destroy (priv->folders);
-
-	g_mutex_clear (&priv->credentials_lock);
-	e_named_parameters_free (priv->credentials);
+	g_mutex_clear (&mapi_backend->priv->credentials_lock);
+	e_named_parameters_free (mapi_backend->priv->credentials);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_mapi_backend_parent_class)->finalize (object);
@@ -554,12 +546,9 @@ static void
 mapi_backend_child_added (ECollectionBackend *backend,
                           ESource *child_source)
 {
-	EMapiBackendPrivate *priv;
 	ESource *collection_source;
 	const gchar *extension_name;
 	gboolean is_mail = FALSE;
-
-	priv = E_MAPI_BACKEND_GET_PRIVATE (backend);
 
 	collection_source = e_backend_get_source (E_BACKEND (backend));
 
@@ -601,10 +590,13 @@ mapi_backend_child_added (ECollectionBackend *backend,
 		extension = e_source_get_extension (
 			child_source, extension_name);
 		folder_id = e_mapi_util_mapi_id_to_string (e_source_mapi_folder_get_id (extension));
-		if (folder_id != NULL)
+		if (folder_id != NULL) {
+			EMapiBackend *mapi_backend = E_MAPI_BACKEND (backend);
+
 			g_hash_table_insert (
-				priv->folders, folder_id,
+				mapi_backend->priv->folders, folder_id,
 				g_object_ref (child_source));
+		}
 	}
 
 	/* Chain up to parent's child_added() method. */
@@ -616,10 +608,7 @@ static void
 mapi_backend_child_removed (ECollectionBackend *backend,
                             ESource *child_source)
 {
-	EMapiBackendPrivate *priv;
 	const gchar *extension_name;
-
-	priv = E_MAPI_BACKEND_GET_PRIVATE (backend);
 
 	/* We track MAPI folders in a hash table by folder ID. */
 	extension_name = E_SOURCE_EXTENSION_MAPI_FOLDER;
@@ -629,8 +618,11 @@ mapi_backend_child_removed (ECollectionBackend *backend,
 
 		extension = e_source_get_extension (child_source, extension_name);
 		folder_id = e_mapi_util_mapi_id_to_string (e_source_mapi_folder_get_id (extension));
-		if (folder_id != NULL)
-			g_hash_table_remove (priv->folders, folder_id);
+		if (folder_id != NULL) {
+			EMapiBackend *mapi_backend = E_MAPI_BACKEND (backend);
+
+			g_hash_table_remove (mapi_backend->priv->folders, folder_id);
+		}
 		g_free (folder_id);
 	}
 
@@ -960,8 +952,6 @@ e_mapi_backend_class_init (EMapiBackendClass *class)
 	EBackendClass *backend_class;
 	ECollectionBackendClass *collection_backend_class;
 
-	g_type_class_add_private (class, sizeof (EMapiBackendPrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->constructed = mapi_backend_constructed;
 	object_class->dispose = mapi_backend_dispose;
@@ -990,7 +980,7 @@ e_mapi_backend_class_finalize (EMapiBackendClass *class)
 static void
 e_mapi_backend_init (EMapiBackend *backend)
 {
-	backend->priv = E_MAPI_BACKEND_GET_PRIVATE (backend);
+	backend->priv = e_mapi_backend_get_instance_private (backend);
 
 	backend->priv->folders = g_hash_table_new_full (
 		g_str_hash,

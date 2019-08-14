@@ -28,10 +28,6 @@
 
 #include "e-mail-config-mapi-page.h"
 
-#define E_MAIL_CONFIG_MAPI_PAGE_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_MAIL_CONFIG_MAPI_PAGE, EMailConfigMapiPagePrivate))
-
 #define E_MAIL_CONFIG_MAPI_PAGE_SORT_ORDER \
 	(E_MAIL_CONFIG_SECURITY_PAGE_SORT_ORDER + 10)
 
@@ -49,6 +45,7 @@ enum {
 static void e_mail_config_mapi_page_interface_init (EMailConfigPageInterface *iface);
 
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (EMailConfigMapiPage, e_mail_config_mapi_page, GTK_TYPE_SCROLLED_WINDOW, 0,
+	G_ADD_PRIVATE_DYNAMIC (EMailConfigMapiPage)
 	G_IMPLEMENT_INTERFACE_DYNAMIC (E_TYPE_MAIL_CONFIG_PAGE, e_mail_config_mapi_page_interface_init))
 
 static void
@@ -149,19 +146,10 @@ mail_config_mapi_page_get_property (GObject *object,
 static void
 mail_config_mapi_page_dispose (GObject *object)
 {
-	EMailConfigMapiPagePrivate *priv;
+	EMailConfigMapiPage *mapi_page = E_MAIL_CONFIG_MAPI_PAGE (object);
 
-	priv = E_MAIL_CONFIG_MAPI_PAGE_GET_PRIVATE (object);
-
-	if (priv->account_source != NULL) {
-		g_object_unref (priv->account_source);
-		priv->account_source = NULL;
-	}
-
-	if (priv->registry != NULL) {
-		g_object_unref (priv->registry);
-		priv->registry = NULL;
-	}
+	g_clear_object (&mapi_page->priv->account_source);
+	g_clear_object (&mapi_page->priv->registry);
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (e_mail_config_mapi_page_parent_class)->dispose (object);
@@ -210,8 +198,6 @@ e_mail_config_mapi_page_class_init (EMailConfigMapiPageClass *class)
 {
 	GObjectClass *object_class;
 
-	g_type_class_add_private (class, sizeof (EMailConfigMapiPagePrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = mail_config_mapi_page_set_property;
 	object_class->get_property = mail_config_mapi_page_get_property;
@@ -256,7 +242,7 @@ e_mail_config_mapi_page_interface_init (EMailConfigPageInterface *iface)
 static void
 e_mail_config_mapi_page_init (EMailConfigMapiPage *page)
 {
-	page->priv = E_MAIL_CONFIG_MAPI_PAGE_GET_PRIVATE (page);
+	page->priv = e_mail_config_mapi_page_get_instance_private (page);
 }
 
 void
