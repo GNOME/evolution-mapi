@@ -223,11 +223,11 @@ msgstr "Aquesta opció us connectarà al servidor usant una clau Kerberos."
 
 #: ../src/camel/camel-mapi-store.c:132 ../src/camel/camel-mapi-store.c:174
 msgid "Cannot find folder in a local cache"
-msgstr "No es pot trobar la carpeta en una memòria cau local."
+msgstr "No es pot trobar la carpeta en una memòria cau local"
 
 #: ../src/camel/camel-mapi-store.c:489 ../src/camel/camel-mapi-store.c:1182
 msgid "Folder list is not available in offline mode"
-msgstr "La llista de carpetes no està disponible en mode fora de línia."
+msgstr "La llista de carpetes no està disponible en mode fora de línia"
 
 #: ../src/camel/camel-mapi-store.c:879
 msgid "No public folder found"
@@ -244,7 +244,7 @@ msgstr "S'està connectant a «%s»"
 
 #: ../src/camel/camel-mapi-store.c:1263
 msgid "Cannot create MAPI folders in offline mode"
-msgstr "No es poden crear carpetes MAPI en mode fora de línia."
+msgstr "No es poden crear carpetes MAPI en mode fora de línia"
 
 #: ../src/camel/camel-mapi-store.c:1270
 #, c-format
@@ -297,14 +297,14 @@ msgstr "No es pot suprimir la carpeta «%s»"
 
 #: ../src/camel/camel-mapi-store.c:1499 ../src/camel/camel-mapi-store.c:1514
 msgid "Cannot rename MAPI folders in offline mode"
-msgstr "No es pot canviar el nom a carpetes MAPI en mode fora de línia."
+msgstr "No es pot canviar el nom a carpetes MAPI en mode fora de líni"
 
 #. Translators: “%s” is current name of the folder
 #: ../src/camel/camel-mapi-store.c:1525
 #, c-format
 msgid "Cannot rename MAPI folder “%s”. Folder does not exist"
 msgstr ""
-"No es pot canviar el nom de la carpeta MAPI «%s». No existeix la carpeta."
+"No es pot canviar el nom de la carpeta MAPI «%s». No existeix la carpeta"
 
 #. Translators: “%s to %s” is current name of the folder  and
 #. new name of the folder.
@@ -312,7 +312,7 @@ msgstr ""
 #, c-format
 msgid "Cannot rename MAPI default folder “%s” to “%s”"
 msgstr ""
-"No es pot canviar el nom de la carpeta MAPI predeterminada «%s» a «%s»."
+"No es pot canviar el nom de la carpeta MAPI predeterminada «%s» a «%s»"
 
 #. Translators: “%s to %s” is current name of the folder and new name of the folder.
 #: ../src/camel/camel-mapi-store.c:1562 ../src/camel/camel-mapi-store.c:1605
@@ -332,7 +332,7 @@ msgstr "No es pot canviar el nom de la carpeta MAPI «%s» a «%s»: %s"
 
 #: ../src/camel/camel-mapi-store.c:1775
 msgid "Cannot subscribe MAPI folders in offline mode"
-msgstr "No es poden subscriure carpetes MAPI en mode fora de línia."
+msgstr "No es poden subscriure carpetes MAPI en mode fora de línia"
 
 #: ../src/camel/camel-mapi-store.c:1792
 #, c-format
@@ -342,7 +342,7 @@ msgstr "La carpeta «%s» no s'ha trobat"
 #: ../src/camel/camel-mapi-store.c:1917
 msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr ""
-"No es pot cancel·lar la subscripció de carpetes MAPI en mode fora de línia."
+"No es pot cancel·lar la subscripció de carpetes MAPI en mode fora de línia"
 
 #. Translators: The %s is replaced with a server's host name
 #: ../src/camel/camel-mapi-store.c:2219 ../src/camel/camel-mapi-transport.c:194
@@ -479,7 +479,7 @@ msgstr "Ha fallat l'autenticació."
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:444
 msgid "Cannot authenticate MAPI accounts in offline mode"
-msgstr "No es poden autenticar comptes MAPI en mode fora de línia."
+msgstr "No es poden autenticar comptes MAPI en mode fora de línia"
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:473
 msgid ""
@@ -625,23 +625,23 @@ msgstr "S'està cercant l'estructura de carpetes MAPI remota, espereu..."
 
 #: ../src/configuration/e-mapi-config-utils.c:1795
 msgid "Cannot create MAPI calendar in offline mode"
-msgstr "No es poden crear calendaris MAPI en mode fora de línia."
+msgstr "No es poden crear calendaris MAPI en mode fora de línia"
 
 #: ../src/configuration/e-mapi-config-utils.c:1798
 msgid "Cannot create MAPI task list in offline mode"
-msgstr "No es poden crear llistes de tasques MAPI en mode fora de línia."
+msgstr "No es poden crear llistes de tasques MAPI en mode fora de línia"
 
 #: ../src/configuration/e-mapi-config-utils.c:1801
 msgid "Cannot create MAPI memo list in offline mode"
-msgstr "No es poden crear llistes d'anotacions MAPI en mode fora de línia."
+msgstr "No es poden crear llistes d'anotacions MAPI en mode fora de línia"
 
 #: ../src/configuration/e-mapi-config-utils.c:1804
 msgid "Cannot create MAPI address book in offline mode"
-msgstr "No es poden crear llibres d'adreces MAPI en mode fora de línia."
+msgstr "No es poden crear llibres d'adreces MAPI en mode fora de línia"
 
 #: ../src/configuration/e-mapi-config-utils.c:1809
 msgid "Cannot create MAPI source in offline mode"
-msgstr "No es poden crear fonts MAPI en mode fora de línia."
+msgstr "No es poden crear fonts MAPI en mode fora de línia"
 
 #: ../src/configuration/e-mapi-config-utils.c:1829
 msgid "_Location:"
@@ -1101,7 +1101,7 @@ msgstr "La carpeta de l'usuari «%s» no s'ha trobat"
 #: ../src/libexchangemapi/e-mapi-connection.c:3863
 #, c-format
 msgid "Recipient “%s” is ambiguous"
-msgstr "El destinatari «%s» és ambigu "
+msgstr "El destinatari «%s» és ambigu"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:4955
 #, c-format
