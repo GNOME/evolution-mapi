@@ -281,7 +281,7 @@ msgstr "No s'ha pogut crear la carpeta «%s»"
 
 #: ../src/camel/camel-mapi-store.c:1393 ../src/camel/camel-mapi-store.c:1405
 msgid "Cannot delete MAPI folders in offline mode"
-msgstr "No es poden crear carpetes MAPI en mode fora de línia."
+msgstr "No es poden crear carpetes MAPI en mode fora de línia"
 
 #: ../src/camel/camel-mapi-store.c:1461
 #, c-format
@@ -297,7 +297,7 @@ msgstr "No es pot suprimir la carpeta «%s»"
 
 #: ../src/camel/camel-mapi-store.c:1499 ../src/camel/camel-mapi-store.c:1514
 msgid "Cannot rename MAPI folders in offline mode"
-msgstr "No es pot canviar el nom a carpetes MAPI en mode fora de líni"
+msgstr "No es pot canviar el nom a carpetes MAPI en mode fora de línia"
 
 #. Translators: “%s” is current name of the folder
 #: ../src/camel/camel-mapi-store.c:1525
@@ -690,7 +690,7 @@ msgstr "Revisor"
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:136
 msgctxt "PermissionsLevel"
 msgid "Contributor"
-msgstr "Contribuïdor "
+msgstr "Contribuïdor"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:139
 msgctxt "PermissionsLevel"
@@ -912,7 +912,7 @@ msgstr ""
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:408
 msgid "Cannot add folder, cannot determine folder’s type"
-msgstr "No es pot afegir la carpeta, no es pot determinar el tipus de carpeta "
+msgstr "No es pot afegir la carpeta, no es pot determinar el tipus de carpeta"
 
 #. Translators: This is used to name foreign folder.
 #. The first '%s' is replaced with user name to whom the folder belongs,
