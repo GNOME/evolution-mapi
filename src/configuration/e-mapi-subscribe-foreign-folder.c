@@ -245,7 +245,7 @@ e_mapi_check_foreign_folder_data_free (gpointer ptr)
 	if (cffd->folder_id && cffd->dialog)
 		gtk_widget_destroy (cffd->dialog);
 
-	g_free (cffd);
+	g_slice_free (struct EMapiCheckForeignFolderData, cffd);
 }
 
 static gboolean
@@ -577,7 +577,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 		use_foldername = g_strdup ("Tasks");
 	}
 
-	cffd = g_new0 (struct EMapiCheckForeignFolderData, 1);
+	cffd = g_slice_new0 (struct EMapiCheckForeignFolderData);
 	cffd->dialog = GTK_WIDGET (dialog);
 	cffd->username = g_strdup (username ? username : "");
 	cffd->direct_username = g_strdup (g_object_get_data (G_OBJECT (entry), STR_MAPI_DIRECT_USER_NAME));

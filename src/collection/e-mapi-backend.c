@@ -143,7 +143,7 @@ sync_folders_data_free (gpointer data)
 	e_mapi_folder_free_list (sfd->folders);
 	g_object_unref (sfd->backend);
 	g_free (sfd->profile);
-	g_free (sfd);
+	g_slice_free (struct SyndFoldersData, sfd);
 }
 
 static void
@@ -404,7 +404,7 @@ mapi_backend_queue_auth_session (EMapiBackend *backend)
 	if (!e_backend_get_online (E_BACKEND (backend))) {
 		struct SyndFoldersData *sfd;
 
-		sfd = g_new0 (struct SyndFoldersData, 1);
+		sfd = g_slice_new0 (struct SyndFoldersData);
 		sfd->folders = NULL;
 		sfd->backend = g_object_ref (backend);
 		sfd->profile = camel_mapi_settings_dup_profile (mapi_settings);
@@ -918,7 +918,7 @@ mapi_backend_authenticate_sync (EBackend *backend,
 		mapi_backend->priv->credentials = credentials ? e_named_parameters_new_clone (credentials) : NULL;
 		g_mutex_unlock (&mapi_backend->priv->credentials_lock);
 
-		sfd = g_new0 (struct SyndFoldersData, 1);
+		sfd = g_slice_new0 (struct SyndFoldersData);
 		sfd->folders = mapi_folders;
 		sfd->backend = g_object_ref (mapi_backend);
 		sfd->profile = camel_mapi_settings_dup_profile (settings);

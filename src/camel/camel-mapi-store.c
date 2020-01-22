@@ -2368,7 +2368,7 @@ free_schedule_update_data (gpointer ptr)
 	if (sud->cancellable)
 		g_object_unref (sud->cancellable);
 	g_slist_free_full (sud->foldernames, g_free);
-	g_free (sud);
+	g_slice_free (struct ScheduleUpdateData, sud);
 }
 
 static gpointer
@@ -2418,7 +2418,7 @@ run_update_thread (CamelMapiStore *mapi_store,
 	g_return_if_fail (mapi_store != NULL);
 	g_return_if_fail (cancellable != NULL);
 
-	sud = g_new0 (struct ScheduleUpdateData, 1);
+	sud = g_slice_new0 (struct ScheduleUpdateData);
 	sud->mapi_store = mapi_store;
 	sud->cancellable = g_object_ref (cancellable);
 	sud->foldernames = foldernames;
@@ -2502,7 +2502,7 @@ schedule_folder_update (CamelMapiStore *mapi_store, mapi_id_t fid)
 		return;
 	}
 
-	sud = g_new0 (struct ScheduleUpdateData, 1);
+	sud = g_slice_new0 (struct ScheduleUpdateData);
 	sud->cancellable = g_object_ref (mapi_store->priv->updates_cancellable);
 	sud->mapi_store = mapi_store;
 
@@ -2559,7 +2559,7 @@ schedule_folder_list_update (CamelMapiStore *mapi_store)
 		return;
 	}
 
-	sud = g_new0 (struct ScheduleUpdateData, 1);
+	sud = g_slice_new0 (struct ScheduleUpdateData);
 	sud->cancellable = g_object_ref (mapi_store->priv->updates_cancellable);
 	sud->mapi_store = mapi_store;
 

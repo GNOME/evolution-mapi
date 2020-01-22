@@ -71,7 +71,7 @@ e_mapi_search_gal_user_data_free (gpointer ptr)
 	}
 	g_object_unref (pgu->conn);
 	g_free (pgu->search_text);
-	g_free (pgu);
+	g_slice_free (struct EMapiSearchGalUserData, pgu);
 }
 
 struct EMapiGalSearchUser
@@ -122,7 +122,7 @@ e_mapi_search_idle_data_free (gpointer ptr)
 	g_object_unref (sid->cancellable);
 	g_free (sid->search_text);
 	g_slist_free_full (sid->found_users, e_mapi_search_gal_user_free);
-	g_free (sid);
+	g_slice_free (struct EMapiSearchIdleData, sid);
 }
 
 static void
@@ -526,7 +526,7 @@ search_term_changed_cb (GtkEntry *entry,
 	} else {
 		struct EMapiSearchIdleData *sid;
 
-		sid = g_new0 (struct EMapiSearchIdleData, 1);
+		sid = g_slice_new0 (struct EMapiSearchIdleData);
 		sid->cancellable = g_object_ref (pgu->cancellable);
 		sid->dialog = dialog;
 
@@ -639,7 +639,7 @@ e_mapi_search_gal_user_modal (GtkWindow *parent,
 	g_return_val_if_fail (searched_type != NULL, FALSE);
 	g_return_val_if_fail (display_name || email || entry_id || user_dn, FALSE);
 
-	pgu = g_new0 (struct EMapiSearchGalUserData, 1);
+	pgu = g_slice_new0 (struct EMapiSearchGalUserData);
 	pgu->conn = g_object_ref (conn);
 	pgu->search_extra = 0; /* always none, as default/anonymous user cannot be added to permissions */
 

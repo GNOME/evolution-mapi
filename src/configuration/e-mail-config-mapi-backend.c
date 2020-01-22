@@ -287,7 +287,7 @@ try_credentials_data_free (gpointer ptr)
 		g_free (data->krb_realm);
 		g_object_unref (data->mapi_settings);
 		g_object_unref (data->backend);
-		g_free (data);
+		g_slice_free (TryCredentialsData, data);
 	}
 }
 
@@ -476,7 +476,7 @@ validate_credentials_cb (GtkWidget *widget,
 	}
 
 	if (COMPLETE_PROFILEDATA (&empd)) {
-		TryCredentialsData *data = g_new0 (TryCredentialsData, 1);
+		TryCredentialsData *data = g_slice_new0 (TryCredentialsData);
 
 		data->username = g_strdup (empd.username);
 		data->domain = g_strdup (empd.domain);

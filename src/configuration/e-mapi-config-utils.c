@@ -80,7 +80,7 @@ free_run_with_feedback_data (gpointer ptr)
 
 	g_clear_error (&rfd->error);
 
-	g_free (rfd);
+	g_slice_free (struct RunWithFeedbackData, rfd);
 }
 
 static gboolean
@@ -184,7 +184,7 @@ e_mapi_config_utils_run_in_thread_with_feedback_general (GtkWindow *parent,
 	gtk_container_add (GTK_CONTAINER (content), box);
 	gtk_container_set_border_width (GTK_CONTAINER (content), 12);
 
-	rfd = g_new0 (struct RunWithFeedbackData, 1);
+	rfd = g_slice_new0 (struct RunWithFeedbackData);
 	rfd->parent = parent;
 	rfd->dialog = dialog;
 	rfd->cancellable = g_cancellable_new ();
@@ -477,7 +477,7 @@ mapi_settings_get_folder_size_idle (gpointer user_data)
 	g_object_unref (fsd->mapi_settings);
 	g_object_unref (fsd->cancellable);
 	g_clear_error (&fsd->error);
-	g_free (fsd);
+	g_slice_free (FolderSizeDialogData, fsd);
 
 	return FALSE;
 }
@@ -533,7 +533,7 @@ e_mapi_config_utils_run_folder_size_dialog (ESourceRegistry *registry,
 		GTK_STOCK_CLOSE, GTK_RESPONSE_ACCEPT,
 		NULL);
 
-	fsd = g_new0 (FolderSizeDialogData, 1);
+	fsd = g_slice_new0 (FolderSizeDialogData);
 	fsd->dialog = GTK_DIALOG (dialog);
 
 	gtk_window_set_default_size (GTK_WINDOW (fsd->dialog), 250, 300);
@@ -1615,7 +1615,7 @@ e_mapi_folder_structure_data_free (gpointer ptr)
 		g_object_unref (fsd->config);
 	g_object_unref (fsd->child_source);
 	g_object_unref (fsd->registry);
-	g_free (fsd);
+	g_slice_free (struct EMapiFolderStructureData, fsd);
 }
 
 static void
@@ -1711,7 +1711,7 @@ tree_view_mapped_cb (GObject *tree_view)
 
 	g_return_if_fail (parent_source != NULL);
 
-	fsd = g_new0 (struct EMapiFolderStructureData, 1);
+	fsd = g_slice_new0 (struct EMapiFolderStructureData);
 	fsd->folder_type = old_fsd->folder_type;
 	fsd->folders = NULL;
 	fsd->tree_view = g_object_ref (old_fsd->tree_view);
@@ -1857,7 +1857,7 @@ e_mapi_config_utils_insert_widgets (ESourceConfigBackend *backend,
 		if (e_mapi_config_utils_is_online ()) {
 			struct EMapiFolderStructureData *fsd;
 
-			fsd = g_new0 (struct EMapiFolderStructureData, 1);
+			fsd = g_slice_new0 (struct EMapiFolderStructureData);
 			fsd->folder_type = folder_type;
 			fsd->folders = NULL;
 			fsd->tree_view = g_object_ref (tree_view);
