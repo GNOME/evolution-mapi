@@ -832,8 +832,7 @@ set_attachments_to_comp (EMapiConnection *conn,
 			filename = e_mapi_util_find_array_propval (&attach->properties, PidTagAttachFilename);
 
 		base64 = g_base64_encode ((const guchar *) data_lpb, data_cb);
-		new_attach = i_cal_attach_new_from_data (base64, NULL, NULL);
-		g_free (base64);
+		new_attach = i_cal_attach_new_from_data (base64, (GFunc) g_free, NULL);
 
 		prop = i_cal_property_new_attach (new_attach);
 		g_object_unref (new_attach);
