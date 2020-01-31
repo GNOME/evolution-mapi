@@ -1,3 +1,10 @@
+evolution-mapi 3.35.90 2020-01-31
+---------------------------------
+
+Miscellaneous:
+	Prefer GSlice over heap allocation for short-lived structures (Milan Crha)
+	Benefit from new behavior of i_cal_attach_new_from_data() in libical-glib 3.0.7 (Milan Crha)
+
 evolution-mapi 3.35.3 2020-01-03
 --------------------------------
 
