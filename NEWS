@@ -1,3 +1,9 @@
+evolution-mapi 3.37.3 2020-07-03
+--------------------------------
+
+Miscellaneous:
+	PrintableOptions.cmake: Sync the file with Evolution changes (Milan Crha)
+
 evolution-mapi 3.37.2 2020-05-29
 --------------------------------
 
