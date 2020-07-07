@@ -4,256 +4,71 @@
 # Lucian Adrian Grijincu <lucian.grijincu@gmail.com>, 2009, 2010.
 msgid ""
 msgstr ""
-"Project-Id-Version: 1\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product"
-"=evolution-mapi\n"
-"POT-Creation-Date: 2010-08-02 23:46+0000\n"
-"PO-Revision-Date: 2010-08-04 17:39+0300\n"
-"Last-Translator: Lucian Adrian Grijincu <lucian.grijincu@gmail.com>\n"
+"Project-Id-Version: evolution-mapi.master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-mapi/issues\n"
+"POT-Creation-Date: 2020-05-29 11:30+0000\n"
+"PO-Revision-Date: 2020-07-07 18:42+0300\n"
+"Last-Translator: Florentina Mușat <florentina.musat.28@gmail.com>\n"
 "Language-Team: Romanian Gnome Team <gnomero-list@lists.sourceforge.net>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
-"20)) ? 1 : 2);;\n"
-"X-Generator: Virtaal 0.6.1\n"
+"20)) ? 1 : 2);\n"
+"X-Generator: Poedit 2.3.1\n"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:668
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:670
-#| msgid "Global Address List / Active Directory"
-msgid "Global Address List"
-msgstr "Listă de agende globale"
+#: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:1
+msgid "Exchange MAPI"
+msgstr "MAPI Exchange"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-listener.c:983
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:229
-#, c-format
-msgid "Enter Password for %s@%s"
-msgstr "Introduceți parola pentru %s@%s"
-
-#. NOTE: A good way would be display the list of username entries
-#. using GtkEntryCompletion in the username gtkentry. But plugins
-#. as of now does not have access to it
-#. TODO : Fix strings
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:133
-msgid "Select username"
-msgstr "Alegere nume utilizator"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:143
-msgid "Full name"
-msgstr "Nume complet"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:148
-#| msgid "User name"
-msgid "Username"
-msgstr "Nume utilizator"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:217
-msgid ""
-"Server, username and domain name cannot be empty. Please fill them with "
-"correct values."
+#: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:2
+#: ../src/camel/camel-mapi-provider.c:72
+msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr ""
-"Câmpurile server, nume utilizator și nume domeniu nu pot fi goale. "
-"Introduceți valori corecte."
+"Pentru accesarea serverelor Microsoft Exchange 2007/OpenChange via MAPI"
 
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:273
-msgid "Authentication finished successfully."
-msgstr "Autentificarea s-a finalizat cu succes."
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:279
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:290
-msgid "Authentication failed."
-msgstr "Autentificare eșuată."
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:368
-msgid "_Domain name:"
-msgstr "Nume _domeniu:"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:378
-msgid "_Authenticate"
-msgstr "_Autentifică"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:388
-msgid "_Use secure connection"
-msgstr "_Utilizează o conexiune securizată"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:523
-msgid "Personal Folders"
-msgstr "Dosare personale"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:658
-msgid "_Location:"
-msgstr "_Locație:"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:775
-#, c-format
-msgid "Failed to create address book '%s': %s"
-msgstr "Nu s-a putut crea agenda „%s”: %s"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:778
-#, c-format
-msgid "Failed to create address book '%s'"
-msgstr "Nu s-a putut crea agenda „%s”"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:882
-#, c-format
-msgid "Failed to create calendar '%s': %s"
-msgstr "Nu s-a putut crea calendarul „%s”: %s"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-setup.c:885
-#, c-format
-msgid "Failed to create calendar '%s'"
-msgstr "Nu s-a putut crea calendarul „%s”"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:100
-msgid "Folder"
-msgstr "Dosar"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:105
-msgid "Size"
-msgstr "Mărime"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:128
-msgid "Unable to retrieve folder size information"
-msgstr "Nu s-au putut obține informațiile despre mărimea dosarului"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:169
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:367
-msgid "Folder Size"
-msgstr "Mărime dosar"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:180
-#| msgid "Fetching folder list ..."
-msgid "Fetching folder list…"
-msgstr "Se obține lista dosarelor…"
-
-#. Miscellaneous settings
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:352
-msgid "Miscellaneous"
-msgstr "Diverse"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:365
-msgid "View the size of all Exchange folders"
-msgstr "Afișează mărimea tuturor dosarelor Exchange"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:378
-#: ../src/account-setup-eplugin/org-gnome-exchange-mapi.eplug.xml.h:1
-msgid "Exchange Settings"
-msgstr "Configurări Exchange"
-
-#: ../src/account-setup-eplugin/exchange-mapi-account-settings.c:387
-msgid "Folder size"
-msgstr "Mărime dosar"
-
-#: ../src/addressbook/e-book-backend-mapi.c:539
-msgid "Cannot connect"
-msgstr "Nu se poate conecta"
-
-#: ../src/addressbook/e-book-backend-mapi.c:682
-msgid "Searching"
-msgstr "Se caută"
-
-#: ../src/addressbook/e-book-backend-mapi.c:1935
-#: ../src/calendar/e-cal-backend-mapi.c:132
-msgid "Uknown error"
+#: ../src/addressbook/e-book-backend-mapi.c:89
+#: ../src/calendar/e-cal-backend-mapi.c:105
+#: ../src/camel/camel-mapi-folder.c:1873 ../src/camel/camel-mapi-folder.c:1957
+msgid "Unknown error"
 msgstr "Eroare necunoscută"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:713
-#: ../src/calendar/e-cal-backend-mapi.c:319
-msgid "Failed to remove public folder"
-msgstr "Nu s-a putut elimina dosarul public"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:770
-#: ../src/calendar/e-cal-backend-mapi.c:1726
-#: ../src/calendar/e-cal-backend-mapi.c:2218
-#| msgid "Unable to authenticate to Exchange MAPI server."
-msgid "Failed to create item on a server"
-msgstr "Nu s-a putut crea un element pe server"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:896
-#: ../src/calendar/e-cal-backend-mapi.c:1959
-msgid "Failed to modify item on a server"
-msgstr "Nu s-a putut modifica un element pe server"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1043
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1109
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1160
-#: ../src/calendar/e-cal-backend-mapi.c:1253
-#: ../src/calendar/e-cal-backend-mapi.c:1274
-#| msgid "Error fetching changes from the server."
-msgid "Failed to fetch items from a server"
-msgstr "Nu s-au putut obține elemente de pe server"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. %d is an index of the contact.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1061
-#, c-format
-msgid "Caching contact %d"
-msgstr "Se pune în cache contactul %d"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. The first %d is an index of the contact,
-#. the second %d is total count of conacts on the server.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1065
-#, c-format, 
-msgid "Caching contact %d/%d"
-msgstr "Se pune în cache contactul %d/%d"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:127
-#, c-format
-msgid "Caching GAL contact %d"
-msgstr "Se pune în cache contactul GAL %d"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. The first %d is an index of the GAL entry,
-#. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:131
-#, c-format
-#| msgid "Caching the GAL entries (%d/%d)... "
-msgid "Caching GAL contact %d/%d"
-msgstr "Se pune în cache contactul GAL %d/%d"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:162
-#: ../src/addressbook/e-book-backend-mapi-gal.c:197
+#: ../src/addressbook/e-book-backend-mapi.c:499
+#: ../src/addressbook/e-book-backend-mapi.c:683
 msgid "Failed to fetch GAL entries"
 msgstr "Nu s-au putut obține intrările GAL"
 
-#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:364
-#, c-format
-msgid "Loading items in folder %s"
-msgstr "Se încarcă elementele din dosarul %s"
+#: ../src/addressbook/e-book-backend-mapi.c:505
+msgid "Failed to transfer contacts from a server"
+msgstr "Nu s-au putut transfera contactele de la un server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:724
-#: ../src/calendar/e-cal-backend-mapi.c:750
-#: ../src/calendar/e-cal-backend-mapi.c:797
-#: ../src/calendar/e-cal-backend-mapi.c:876
-#: ../src/calendar/e-cal-backend-mapi.c:899
-#, c-format
-#| msgid "Error fetching changes from the server."
-msgid "Failed to fetch changes from a server: %s"
-msgstr "Eroare la obținerea modificărilor de pe server: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:690
+#: ../src/calendar/e-cal-backend-mapi.c:1140
+msgid "Failed to list items from a server"
+msgstr "Nu s-au putut lista elementele de la un server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:729
-#: ../src/calendar/e-cal-backend-mapi.c:755
-#: ../src/calendar/e-cal-backend-mapi.c:802
-#: ../src/calendar/e-cal-backend-mapi.c:881
-#: ../src/calendar/e-cal-backend-mapi.c:904
-#| msgid "Error fetching changes from the server."
-msgid "Failed to fetch changes from a server"
-msgstr "Eroare la obținerea modificărilor de pe server"
+#: ../src/addressbook/e-book-backend-mapi.c:866
+#: ../src/calendar/e-cal-backend-mapi.c:1368
+msgid "Failed to modify item on a server"
+msgstr "Nu s-a putut modifica un element pe server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1388
-msgid "Could not create thread for populating cache"
-msgstr "Nu s-a putut crea firul de execuție pentru popularea cache-ului"
+#: ../src/addressbook/e-book-backend-mapi.c:866
+#: ../src/calendar/e-cal-backend-mapi.c:1368
+#: ../src/calendar/e-cal-backend-mapi.c:1672
+msgid "Failed to create item on a server"
+msgstr "Nu s-a putut crea un element pe server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1450
-msgid "Could not create cache file"
-msgstr "Nu s-a putut crea fișierul cache"
+#: ../src/addressbook/e-book-backend-mapi.c:928
+#: ../src/calendar/e-cal-backend-mapi.c:1437
+msgid "Failed to remove item from a server"
+msgstr "Nu s-a putut elimina elementul de la un server"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1853
+#: ../src/calendar/e-cal-backend-mapi.c:912
+msgid "Failed to transfer objects from a server"
+msgstr "Nu s-au putut transfera obiectele de la un server"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1285
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -262,146 +77,259 @@ msgstr ""
 "unui eveniment recurent. Nu s-a făcut nici o modificare a întâlnirii pe "
 "server."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2466
+#: ../src/calendar/e-cal-backend-mapi.c:1722
 msgid "Failed to get Free/Busy data"
 msgstr "Nu s-au putut obține datele Liber/Ocupat"
 
-#: ../src/camel/camel-mapi-folder.c:357
+#: ../src/camel/camel-mapi-folder.c:776
 #, c-format
-msgid "Updating local summary cache for new messages in %s"
-msgstr "Se actualizează cache-ul local cu rezumatele noilor mesaje din %s"
+msgid "Refreshing folder “%s”"
+msgstr "Se reîmprospătează dosarul „%s”"
 
-#: ../src/camel/camel-mapi-folder.c:593
+#: ../src/camel/camel-mapi-folder.c:844
 #, c-format
-msgid "Retrieving message IDs from server for %s"
-msgstr "Se obțin identificatoarele mesajelor de la serverul %s"
+msgid "Downloading messages in folder “%s”"
+msgstr "Se descarcă mesajele în dosarul „%s”"
 
-#: ../src/camel/camel-mapi-folder.c:623
-#, c-format
-msgid "Removing deleted messages from cache in %s"
-msgstr "Se elimină mesajele șterse din cache din %s"
-
-#. TODO : Check for online state
-#: ../src/camel/camel-mapi-folder.c:948
-#, c-format
-#| msgid "Fetching summary information for new messages in"
-msgid "Fetching summary information for new messages in %s"
-msgstr "Se obțin rezumatele noilor mesaje din %s"
-
-#: ../src/camel/camel-mapi-folder.c:1071 ../src/camel/camel-mapi-folder.c:1206
-#: ../src/camel/camel-mapi-folder.c:1216
+#: ../src/camel/camel-mapi-folder.c:932 ../src/camel/camel-mapi-folder.c:1492
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Aceste mesaj nu este disponibil în modul deconectat."
 
-#: ../src/camel/camel-mapi-folder.c:1088
+#: ../src/camel/camel-mapi-folder.c:942 ../src/camel/camel-mapi-folder.c:960
 #, c-format
-#| msgid "Fetching items failed"
 msgid "Fetching items failed: %s"
 msgstr "Obținerea elementelor a eșuat: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1093
+#: ../src/camel/camel-mapi-folder.c:947 ../src/camel/camel-mapi-folder.c:965
 msgid "Fetching items failed"
 msgstr "Obținerea elementelor a eșuat"
 
-#: ../src/camel/camel-mapi-folder.c:1166
+#: ../src/camel/camel-mapi-folder.c:1170
 #, c-format
-msgid "Cannot get message %s: %s"
-msgstr "Nu s-a putut obține mesajul %s: %s"
+msgid "Cannot append message to folder “%s”"
+msgstr "Nu se poate adăuga mesajul la dosarul „%s”"
 
-#: ../src/camel/camel-mapi-folder.c:1167
-msgid "No such message"
-msgstr "Nu există un astfel de mesaj"
-
-#: ../src/camel/camel-mapi-folder.c:1242
-#, c-format
-#| msgid "Could not get message"
-msgid "Could not get message: %s"
-msgstr "Nu s-a putut obține mesajul: %s"
-
-#: ../src/camel/camel-mapi-folder.c:1248 ../src/camel/camel-mapi-folder.c:1261
-#, c-format
-msgid "Could not get message"
-msgstr "Nu s-a putut obține mesajul"
-
-#: ../src/camel/camel-mapi-folder.c:1398
-#, c-format
-msgid "Failed to empty Trash: %s"
-msgstr "Nu s-a putut goli coșul de gunoi: %s"
-
-#: ../src/camel/camel-mapi-folder.c:1403
-msgid "Failed to empty Trash"
-msgstr "Nu s-a putut goli coșul de gunoi"
-
-#: ../src/camel/camel-mapi-folder.c:1539 ../src/camel/camel-mapi-folder.c:1560
-msgid "Unknown error"
-msgstr "Eroare necunoscută"
-
-#: ../src/camel/camel-mapi-folder.c:1622
-#, c-format
-msgid "Cannot append message to folder '%s'"
-msgstr "Nu s-a putut adăuga mesajul în dosarul „%s”"
-
-#: ../src/camel/camel-mapi-folder.c:1630 ../src/camel/camel-mapi-folder.c:1655
+#: ../src/camel/camel-mapi-folder.c:1179 ../src/camel/camel-mapi-folder.c:1209
 #, c-format
 msgid "Offline."
 msgstr "Deconectat."
 
-#: ../src/camel/camel-mapi-folder.c:1801
+#: ../src/camel/camel-mapi-folder.c:1293
+#, c-format
+msgid "Failed to empty Trash: %s"
+msgstr "Nu s-a putut goli coșul de gunoi: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1299
+msgid "Failed to empty Trash"
+msgstr "Nu s-a putut goli coșul de gunoi"
+
+#. Translators: The first %s is replaced with a message ID,
+#. the second %s is replaced with a detailed error string
+#: ../src/camel/camel-mapi-folder.c:1477
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "Nu s-a putut obține mesajul %s: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1478
+msgid "No such message"
+msgstr "Nu există un astfel de mesaj"
+
+#: ../src/camel/camel-mapi-folder.c:1503 ../src/camel/camel-mapi-folder.c:1537
+#, c-format
+msgid "Could not get message: %s"
+msgstr "Nu s-a putut obține mesajul: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1509 ../src/camel/camel-mapi-folder.c:1544
+#, c-format
+msgid "Could not get message"
+msgstr "Nu s-a putut obține mesajul"
+
+#: ../src/camel/camel-mapi-folder.c:1934
+msgid "Receive quota"
+msgstr "Primește cota"
+
+#: ../src/camel/camel-mapi-folder.c:1940
+msgid "Send quota"
+msgstr "Trimite cota"
+
+#: ../src/camel/camel-mapi-folder.c:1962
+msgid "No quota information available"
+msgstr "Nu sunt disponibile informații despre cotă"
+
+#: ../src/camel/camel-mapi-folder.c:2067
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nu s-a putut încărca rezumatul pentru %s"
 
-#: ../src/camel/camel-mapi-provider.c:44
+#: ../src/camel/camel-mapi-provider.c:43
 msgid "Checking for new mail"
 msgstr "Se verifică mesajele noi"
 
-#: ../src/camel/camel-mapi-provider.c:46
+#: ../src/camel/camel-mapi-provider.c:45
 msgid "C_heck for new messages in all folders"
 msgstr "_Verifică mesajele noi din toate dosarele"
 
-#: ../src/camel/camel-mapi-provider.c:50
+#: ../src/camel/camel-mapi-provider.c:47
+msgid "Lis_ten for server change notifications"
+msgstr "Ascul_tă după înștiințări de modificări ale serverului"
+
+#: ../src/camel/camel-mapi-provider.c:51
 msgid "Options"
 msgstr "Opțiuni"
 
-#: ../src/camel/camel-mapi-provider.c:52
-msgid "Automatically synchroni_ze account locally"
-msgstr "Sincroni_zează automat local contul"
-
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:55
+#: ../src/camel/camel-mapi-provider.c:54
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Aplică filtre pentru noile mesaje din Inbox de pe acest server"
 
-#: ../src/camel/camel-mapi-provider.c:57
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "Check new messages for _Junk contents"
 msgstr "Identifică mesajele _spam dintre toate mesajele noi"
 
-#: ../src/camel/camel-mapi-provider.c:59
+#: ../src/camel/camel-mapi-provider.c:58
 msgid "Only check for Junk messag_es in the Inbox folder"
-msgstr "Identifică m_esajele spam doar din dosarul Inbox "
+msgstr "Verifică pentru m_esaje Spam doar în dosarul Inbox"
 
-#: ../src/camel/camel-mapi-provider.c:70
-#| msgid "For accessing Microsoft Exchange / OpenChange servers using MAPI"
-msgid "For accessing Microsoft Exchange/OpenChange servers using MAPI"
-msgstr "Pentru accesarea serverelor Microsoft Exchange/OpenChange folosind MAPI"
+#: ../src/camel/camel-mapi-provider.c:60
+msgid "Synchroni_ze remote mail locally in all folders"
+msgstr "Sincroni_zează mailul de la distanță local în toate dosarele"
 
-#: ../src/camel/camel-mapi-provider.c:85
+#: ../src/camel/camel-mapi-provider.c:87
 msgid "Password"
 msgstr "Parolă"
 
-#: ../src/camel/camel-mapi-provider.c:86
-#| msgid ""
-#| "This option will connect to the Openchange server using a plaintext "
-#| "password."
+#: ../src/camel/camel-mapi-provider.c:88
 msgid ""
 "This option will connect to the OpenChange server using a plaintext password."
 msgstr ""
 "Această opțiune va face conexiunea la un server OpenChange folosind o parolă "
 "în clar."
 
+#: ../src/camel/camel-mapi-sasl-krb.c:26
+msgid "Kerberos"
+msgstr "Kerberos"
+
+#: ../src/camel/camel-mapi-sasl-krb.c:28
+msgid "This option will connect to the server using kerberos key."
+msgstr "Această opțiune se va conecta la server utilizând cheia kerberos."
+
+#: ../src/camel/camel-mapi-store.c:133 ../src/camel/camel-mapi-store.c:175
+msgid "Cannot find folder in a local cache"
+msgstr "Nu se poate găsi dosarul într-un cache local"
+
+#: ../src/camel/camel-mapi-store.c:490 ../src/camel/camel-mapi-store.c:1173
+msgid "Folder list is not available in offline mode"
+msgstr "Lista de dosare nu este disponibilă în modul deconectat"
+
+#: ../src/camel/camel-mapi-store.c:880
+msgid "No public folder found"
+msgstr "Nu s-a găsit niciun dosar public"
+
+#: ../src/camel/camel-mapi-store.c:880
+msgid "No folder found"
+msgstr "Nu s-a găsit niciun dosar"
+
+#: ../src/camel/camel-mapi-store.c:1195 ../src/camel/camel-mapi-store.c:2261
+#, c-format
+msgid "Connecting to “%s”"
+msgstr "Se conectează la „%s”"
+
+#: ../src/camel/camel-mapi-store.c:1254
+msgid "Cannot create MAPI folders in offline mode"
+msgstr "Nu se pot crea dosare MAPI în modul deconectat"
+
+#: ../src/camel/camel-mapi-store.c:1261
+#, c-format
+msgid "Cannot create new folder “%s”"
+msgstr "Nu se poate crea dosarul nou „%s”"
+
+#: ../src/camel/camel-mapi-store.c:1270
+#, c-format
+msgid "Authentication failed"
+msgstr "Autentificare eșuată"
+
+#: ../src/camel/camel-mapi-store.c:1280
+msgid "MAPI folders can be created only within mailbox of the logged in user"
+msgstr ""
+"Dosarele MAPI pot fi create doar înăuntrul cutiei de mail a utilizatorului "
+"autentificat"
+
+#: ../src/camel/camel-mapi-store.c:1293 ../src/camel/camel-mapi-store.c:1406
+#, c-format
+msgid "Cannot find folder “%s”"
+msgstr "Nu se poate găsi dosarul „%s”"
+
+#: ../src/camel/camel-mapi-store.c:1348
+#, c-format
+msgid "Cannot create folder “%s”: %s"
+msgstr "Nu se poate crea dosarul „%s”: %s"
+
+#: ../src/camel/camel-mapi-store.c:1354
+#, c-format
+msgid "Cannot create folder “%s”"
+msgstr "Nu se poate crea dosarul „%s”"
+
+#: ../src/camel/camel-mapi-store.c:1384 ../src/camel/camel-mapi-store.c:1396
+msgid "Cannot delete MAPI folders in offline mode"
+msgstr "Nu se pot șterge dosarele MAPI în modul deconectat"
+
+#: ../src/camel/camel-mapi-store.c:1452
+#, c-format
+msgid "Cannot remove folder “%s”: %s"
+msgstr "Nu se poate elimina dosarul „%s”: %s"
+
+#: ../src/camel/camel-mapi-store.c:1460
+#, c-format
+msgid "Cannot remove folder “%s”"
+msgstr "Nu se poate elimina dosarul „%s”"
+
+#: ../src/camel/camel-mapi-store.c:1490 ../src/camel/camel-mapi-store.c:1505
+msgid "Cannot rename MAPI folders in offline mode"
+msgstr "Nu se pot redenumi dosarele MAPI în modul deconectat"
+
+#. Translators: “%s” is current name of the folder
+#: ../src/camel/camel-mapi-store.c:1516
+#, c-format
+msgid "Cannot rename MAPI folder “%s”. Folder does not exist"
+msgstr "Nu se poate redenumi dosarul MAPI „%s”. Dosarul nu există"
+
+#. Translators: “%s to %s” is current name of the folder  and
+#. new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1527
+#, c-format
+msgid "Cannot rename MAPI default folder “%s” to “%s”"
+msgstr "Nu se poate redenumi dosarul MAPI implicit „%s” la „%s”"
+
+#. Translators: “%s to %s” is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1553 ../src/camel/camel-mapi-store.c:1596
+#: ../src/camel/camel-mapi-store.c:1676
+#, c-format
+msgid "Cannot rename MAPI folder “%s” to “%s”"
+msgstr "Nu se poate redenumi dosarul MAPI „%s” la „%s”"
+
+#. Translators: “%s to %s” is current name of the folder and new name of the folder.
+#. The last “%s” is a detailed error message.
+#: ../src/camel/camel-mapi-store.c:1588 ../src/camel/camel-mapi-store.c:1669
+#, c-format
+msgid "Cannot rename MAPI folder “%s” to “%s”: %s"
+msgstr "Nu se poate redenumi dosarul MAPI „%s” la „%s”: %s"
+
+#: ../src/camel/camel-mapi-store.c:1766
+msgid "Cannot subscribe MAPI folders in offline mode"
+msgstr "Nu se pot abona dosarele MAPI în modul deconectat"
+
+#: ../src/camel/camel-mapi-store.c:1783
+#, c-format
+msgid "Folder “%s” not found"
+msgstr "Dosarul „%s” nu a fost găsit"
+
+#: ../src/camel/camel-mapi-store.c:1908
+msgid "Cannot unsubscribe MAPI folders in offline mode"
+msgstr "Nu se pot dezabona dosarele MAPI în modul deconectat"
+
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:315 ../src/camel/camel-mapi-transport.c:133
+#: ../src/camel/camel-mapi-store.c:2208 ../src/camel/camel-mapi-transport.c:194
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Server Exchange MAPI %s"
@@ -409,171 +337,717 @@ msgstr "Server Exchange MAPI %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:319 ../src/camel/camel-mapi-transport.c:136
+#: ../src/camel/camel-mapi-store.c:2212 ../src/camel/camel-mapi-transport.c:197
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Serviciu Exchange MAPI pentru %s pe %s"
 
-#. To translators : First %s : is the error text or the reason
-#. for prompting the user if it is available.
-#. Second %s is : Username.
-#. Third %s is : Server host name.
-#: ../src/camel/camel-mapi-store.c:361
+#: ../src/camel/camel-mapi-store.c:2243
+msgid "Cannot connect to MAPI store in offline mode"
+msgstr "Nu se poate conecta la stocarea MAPI în modul deconectat"
+
+#: ../src/camel/camel-mapi-store.c:2296
 #, c-format
-msgid "%s Please enter the MAPI password for %s@%s"
-msgstr "%s Introduceți parola MAPI pentru %s@%s"
+msgid "Mailbox “%s” is full, no new messages will be received or sent."
+msgstr ""
+"Cutia de mail „%s” este plină, nu vor fi recepționate sau trimise mesaje noi."
 
-#: ../src/camel/camel-mapi-store.c:376
+#: ../src/camel/camel-mapi-store.c:2298
 #, c-format
-msgid "You did not enter a password."
-msgstr "Nu ați introdus o parolă."
+msgid ""
+"Mailbox “%s” is near its size limit, message send will be disabled soon."
+msgstr ""
+"Cutia de mail „%s” este aproape de limita dimensiunii acesteia, trimiterea "
+"de mesaje va fi dezactivată în curând."
 
-#: ../src/camel/camel-mapi-store.c:384
+#: ../src/camel/camel-mapi-store.c:2302
 #, c-format
-#| msgid "Unable to authenticate to Exchange MAPI server."
-msgid "Unable to authenticate to Exchange MAPI server: %s"
-msgstr "Nu s-a putut autentifica la serverul Exchange MAPI: %s"
+msgid "Mailbox “%s” is full, no new messages will be received."
+msgstr "Cutia de mail „%s” este plină, nu vor fi recepționate mesaje noi."
 
-#: ../src/camel/camel-mapi-store.c:387
-#| msgid "Unable to authenticate to Exchange MAPI server."
-msgid "Unable to authenticate to Exchange MAPI server"
-msgstr "Nu s-a putut autentifica la serverul Exchange MAPI"
-
-#: ../src/camel/camel-mapi-store.c:563
+#: ../src/camel/camel-mapi-store.c:2304
 #, c-format
-msgid "Cannot create MAPI folders in offline mode."
-msgstr "Nu se pot crea dosare MAPI în modul deconectat."
+msgid "Mailbox “%s” is near its size limit."
+msgstr "Cutia de mail „%s” este aproape de limita dimensiunii acesteia."
 
-#: ../src/camel/camel-mapi-store.c:570
+#: ../src/camel/camel-mapi-store.c:2722
 #, c-format
-#| msgid "Cannot create new folder `%s'"
-msgid "Cannot create new folder '%s'"
-msgstr "Nu s-a putut crea dosarul nou „%s”"
+msgid "Cannot add folder “%s”, failed to add to store’s summary"
+msgstr ""
+"Nu se poate adăuga dosarul „%s”, a eșuat să se adauge la rezumatul stocării"
 
-#: ../src/camel/camel-mapi-store.c:584
+#: ../src/camel/camel-mapi-store.c:3005
+msgid "Authentication password not available"
+msgstr "Parola de autentificare nu este disponibilă"
+
+#: ../src/camel/camel-mapi-store.c:3041 ../src/camel/camel-mapi-store.c:3457
+msgid "Updating foreign folders"
+msgstr "Se actualizează dosarele străine"
+
+#. Translators: the first '%s' is replaced with a generic error message,
+#. the second '%s' is replaced with additional error information.
+#: ../src/camel/camel-mapi-store.c:3064 ../src/collection/e-mapi-backend.c:894
+#: ../src/configuration/e-mail-config-mapi-backend.c:404
+#: ../src/configuration/e-mapi-config-utils.c:341
 #, c-format
-msgid "Authentication failed"
-msgstr "Autentificare eșuată"
+msgctxt "gssapi_error"
+msgid "%s (%s)"
+msgstr "%s (%s)"
 
-#: ../src/camel/camel-mapi-store.c:609
-#, c-format
-#| msgid "Cannot create new folder `%s'"
-msgid "Cannot create folder '%s': %s"
-msgstr "Nu s-a putut crea dosarul „%s”: %s"
+#: ../src/camel/camel-mapi-store.h:53
+msgid "Favorites"
+msgstr "Favorite"
 
-#: ../src/camel/camel-mapi-store.c:614
-#, c-format
-#| msgid "Cannot create new folder `%s'"
-msgid "Cannot create folder '%s'"
-msgstr "Nu s-a putut crea dosarul „%s”"
+#: ../src/camel/camel-mapi-store.h:54
+msgid "Foreign folders"
+msgstr "Dosare străine"
 
-#: ../src/camel/camel-mapi-store.c:707
-#, c-format
-#| msgid "Cannot rename MAPI folder `%s' to `%s'"
-msgid "Cannot remove folder '%s': %s"
-msgstr "Nu s-a putut elimina dosarul „%s”: %s"
-
-#: ../src/camel/camel-mapi-store.c:714
-#, c-format
-#| msgid "Cannot create new folder `%s'"
-msgid "Cannot remove folder '%s'"
-msgstr "Nu s-a putut elimina dosarul „%s”"
-
-#: ../src/camel/camel-mapi-store.c:804
-#, c-format
-#| msgid "Cannot rename MAPI folder `%s'. Folder does not exist."
-msgid "Cannot rename MAPI folder '%s'. Folder does not exist."
-msgstr "Nu se poate redenumi dosarul MAPI „%s”. Dosarul nu există."
-
-#: ../src/camel/camel-mapi-store.c:816
-#, c-format
-#| msgid "Cannot rename MAPI default folder `%s' to `%s'."
-msgid "Cannot rename MAPI default folder '%s' to '%s'."
-msgstr "Nu se poate redenumi dosarul implicit MAPI „%s” la „%s”."
-
-#. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:843 ../src/camel/camel-mapi-store.c:868
-#: ../src/camel/camel-mapi-store.c:930
-#, c-format
-#| msgid "Cannot rename MAPI folder `%s' to `%s'"
-msgid "Cannot rename MAPI folder '%s' to '%s'"
-msgstr "Nu se poate redenumi dosarul MAPI „%s” la „%s”"
-
-#. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:861 ../src/camel/camel-mapi-store.c:924
-#, c-format
-#| msgid "Cannot rename MAPI folder `%s' to `%s'"
-msgid "Cannot rename MAPI folder '%s' to '%s': %s"
-msgstr "Nu se poate redenumi dosarul MAPI „%s” la „%s”: %s"
-
-#: ../src/camel/camel-mapi-store.c:1493
-#, c-format
-msgid "Folder list not available in offline mode."
-msgstr "Lista de dosare nu este disponibilă în modul deconectat."
-
-#: ../src/camel/camel-mapi-transport.c:99
-#: ../src/camel/camel-mapi-transport.c:120
+#: ../src/camel/camel-mapi-transport.c:145
+#: ../src/camel/camel-mapi-transport.c:167
 #, c-format
 msgid "Could not send message."
 msgstr "Nu s-a putut trimite mesajul."
 
-#: ../src/camel/camel-mapi-transport.c:115
+#: ../src/camel/camel-mapi-transport.c:162
 #, c-format
-#| msgid "Could not send message."
 msgid "Could not send message: %s"
 msgstr "Nu s-a putut trimite mesajul: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:101
+#: ../src/collection/e-mapi-backend.c:72
+msgid "Cannot connect, no credentials provided"
+msgstr "Nu se poate conecta, nu s-au furnizat certificări"
+
+#: ../src/collection/e-mapi-backend.c:369
+msgid "Global Address List"
+msgstr "Listă de agende globale"
+
+#: ../src/collection/e-mapi-backend.c:720
+#: ../src/collection/e-mapi-backend.c:817
+#, c-format
+msgid "Data source “%s” does not represent a MAPI folder"
+msgstr "Sursa de date „%s” nu reprezintă dosarul MAPI"
+
+#: ../src/configuration/e-book-config-mapigal.c:59
+msgid "Allow _partial search results"
+msgstr "Permite rezultate de căutare _parțiale"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:121
+msgid "Select username"
+msgstr "Alegere nume utilizator"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:131
+msgid "Full name"
+msgstr "Nume complet"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:136
+msgid "Username"
+msgstr "Nume utilizator"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:163
+msgid ""
+"There are more users with similar user name on a server.\n"
+"Please select that you would like to use from the below list."
+msgstr ""
+"Există mai mulți utilizatori cu un nume de utilizator similar pe un server.\n"
+"Selectați pe acel nume de utilizator pe care doriți să îl utilizați din "
+"lista de mai jos."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:359
+msgid "Authentication finished successfully."
+msgstr "Autentificarea s-a finalizat cu succes."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:361
+#: ../src/configuration/e-mail-config-mapi-backend.c:499
+msgid "Authentication failed."
+msgstr "Autentificare eșuată."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:442
+msgid "Cannot authenticate MAPI accounts in offline mode"
+msgstr "Nu se pot autentifica conturile MAPI în modul deconectat"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:471
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"Câmpurile server, nume utilizator și nume domeniu nu pot fi goale. "
+"Introduceți valori corecte."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:474
+msgid ""
+"Realm name cannot be empty when kerberos is selected. Please fill them with "
+"correct values."
+msgstr ""
+"Numele domeniului nu poate fi gol când kerberos este selectat. Completați-le "
+"cu valorile corecte."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:493
+msgid "Connecting to the server, please wait…"
+msgstr "Se conectează la server, așteptați…"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:695
+msgid "Configuration"
+msgstr "Configurație"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:704
+msgid "_Server:"
+msgstr "_Server:"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:721
+msgid "User_name:"
+msgstr "_Nume de utilizator:"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:746
+msgid "_Domain name:"
+msgstr "Nume _domeniu:"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:759
+msgid "_Authenticate"
+msgstr "_Autentifică"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:767
+msgid "_Use secure connection"
+msgstr "_Utilizează o conexiune securizată"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:782
+msgid "_Kerberos authentication"
+msgstr "Autentificare _Kerberos"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:794
+msgid "_Realm name:"
+msgstr "Nume de _domeniu:"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:177
+#: ../src/configuration/e-mail-config-mapi-page.c:238
+msgid "MAPI Settings"
+msgstr "Configurări MAPI"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:183
+msgid "View the size of all Exchange folders"
+msgstr "Afișează mărimea tuturor dosarelor Exchange"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:187
+msgid "Folder _Size"
+msgstr "Dimen_siune dosar"
+
+#: ../src/configuration/e-mapi-config-utils.c:432
+msgid "Folder"
+msgstr "Dosar"
+
+#: ../src/configuration/e-mapi-config-utils.c:437
+msgid "Size"
+msgstr "Mărime"
+
+#: ../src/configuration/e-mapi-config-utils.c:460
+#: ../src/configuration/e-mapi-config-utils.c:464
+msgid "Unable to retrieve folder size information"
+msgstr "Nu s-au putut obține informațiile despre mărimea dosarului"
+
+#: ../src/configuration/e-mapi-config-utils.c:531
+msgid "Folder Size"
+msgstr "Mărime dosar"
+
+#: ../src/configuration/e-mapi-config-utils.c:545
+msgid "Fetching folder list…"
+msgstr "Se obține lista dosarelor…"
+
+#: ../src/configuration/e-mapi-config-utils.c:612
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:752
+msgid "Subscribe to folder of other MAPI user…"
+msgstr "Abonare la dosarul altui utilizator MAPI…"
+
+#: ../src/configuration/e-mapi-config-utils.c:810
+#, c-format
+msgid "Cannot edit permissions of folder “%s”, choose other folder."
+msgstr "Nu se pot edita permisiunile dosarului „%s”, alegeți alt dosar."
+
+#: ../src/configuration/e-mapi-config-utils.c:873
+msgid "Folder size…"
+msgstr "Dimensiune dosar…"
+
+#: ../src/configuration/e-mapi-config-utils.c:880
+msgid "Subscribe to folder of other user…"
+msgstr "Abonare la dosarul altui utilizator…"
+
+#: ../src/configuration/e-mapi-config-utils.c:889
+#: ../src/configuration/e-mapi-config-utils.c:1203
+#: ../src/configuration/e-mapi-config-utils.c:1240
+#: ../src/configuration/e-mapi-config-utils.c:1277
+#: ../src/configuration/e-mapi-config-utils.c:1314
+msgid "Permissions…"
+msgstr "Permisiuni…"
+
+#: ../src/configuration/e-mapi-config-utils.c:891
+msgid "Edit MAPI folder permissions"
+msgstr "Editează permisiunile dosarului MAPI"
+
+#: ../src/configuration/e-mapi-config-utils.c:1205
+msgid "Edit MAPI calendar permissions"
+msgstr "Editează permisiunile calendarului MAPI"
+
+#: ../src/configuration/e-mapi-config-utils.c:1242
+msgid "Edit MAPI tasks permissions"
+msgstr "Editează permisiunile sarcinilor MAPI"
+
+#: ../src/configuration/e-mapi-config-utils.c:1279
+msgid "Edit MAPI memos permissions"
+msgstr "Editează permisiunile memo-urilor MAPI"
+
+#: ../src/configuration/e-mapi-config-utils.c:1316
+msgid "Edit MAPI contacts permissions"
+msgstr "Editează permisiunile contactelor MAPI"
+
+#: ../src/configuration/e-mapi-config-utils.c:1496
+msgid "Personal Folders"
+msgstr "Dosare personale"
+
+#: ../src/configuration/e-mapi-config-utils.c:1727
+msgid "Searching remote MAPI folder structure, please wait…"
+msgstr "Se caută structura de dosare MAPI de la distanță, așteptați…"
+
+#: ../src/configuration/e-mapi-config-utils.c:1774
+msgid "Lis_ten for server notifications"
+msgstr "Ascul_tă după înștiințări de la server"
+
+#: ../src/configuration/e-mapi-config-utils.c:1797
+msgid "Cannot create MAPI calendar in offline mode"
+msgstr "Nu se poate crea calendarul MAPI în modul deconectat"
+
+#: ../src/configuration/e-mapi-config-utils.c:1800
+msgid "Cannot create MAPI task list in offline mode"
+msgstr "Nu se poate crea lista de sarcini MAPI în modul deconectat"
+
+#: ../src/configuration/e-mapi-config-utils.c:1803
+msgid "Cannot create MAPI memo list in offline mode"
+msgstr "Nu se poate crea lista de memo-uri MAPI în modul deconectat"
+
+#: ../src/configuration/e-mapi-config-utils.c:1806
+msgid "Cannot create MAPI address book in offline mode"
+msgstr "Nu se poate crea agenda MAPI în modul deconectat"
+
+#: ../src/configuration/e-mapi-config-utils.c:1811
+msgid "Cannot create MAPI source in offline mode"
+msgstr "Nu se poate crea sursa MAPI în modul deconectat"
+
+#: ../src/configuration/e-mapi-config-utils.c:1831
+msgid "_Location:"
+msgstr "_Locație:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:87
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "Nimic"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:88
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "Deținător"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:98
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "Editor de publicare"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:107
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "Editor"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:115
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "Autor de publicare"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:122
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "Autor"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:128
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "Autor needitant"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:133
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "Recenzent"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:136
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "Contribuitor"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:139
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "Personalizat"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:272
+msgid "Writing folder permissions, please wait…"
+msgstr "Se scriu permisiunile dosarului, așteptați…"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
+#: ../src/configuration/e-mapi-search-gal-user.c:525
+msgctxt "User"
+msgid "Anonymous"
+msgstr "Anonim"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
+#: ../src/configuration/e-mapi-search-gal-user.c:522
+msgctxt "User"
+msgid "Default"
+msgstr "Implicit"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:786
+msgctxt "User"
+msgid "Unknown"
+msgstr "Necunoscut"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:880
+#: ../src/configuration/e-mapi-search-gal-user.c:600
+msgid "Name"
+msgstr "Nume"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:886
+msgid "Permission level"
+msgstr "Nivel de permisiune"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:939
+msgid "Edit MAPI folder permissions…"
+msgstr "Editează permisiunile dosarului MAPI…"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:964
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:773
+msgid "Account:"
+msgstr "Cont:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:990
+msgid "Folder name:"
+msgstr "Nume de dosar:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1011
+msgid "Folder ID:"
+msgstr "ID dosar:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1070
+msgid "Permissions"
+msgstr "Permisiuni"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1091
+msgid "Permi_ssion level:"
+msgstr "Nivel de permi_siune:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1119
+msgctxt "Permissions"
+msgid "Read"
+msgstr "Citește"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1130
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1193
+msgctxt "Permissions"
+msgid "None"
+msgstr "Nimic"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1135
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "Detalii complete"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1140
+msgctxt "Permissions"
+msgid "Simple Free/Busy"
+msgstr "Liber/Ocupat simplu"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1144
+msgctxt "Permissions"
+msgid "Detailed Free/Busy"
+msgstr "Liber/Ocupat detaliat"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1151
+msgctxt "Permissions"
+msgid "Write"
+msgstr "Scrie"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "Creează elemente"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "Creează subdosare"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1170
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr "Editează personale"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1174
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "Editează toate"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1182
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "Șterge elemente"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1198
+msgctxt "Permissions"
+msgid "Own"
+msgstr "Personale"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1203
+msgctxt "Permissions"
+msgid "All"
+msgstr "Toate"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1209
+msgctxt "Permissions"
+msgid "Other"
+msgstr "Altele"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "Deținător dosar"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr "Contact dosar"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1228
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr "Vizibilitate dosar"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1283
+msgid "Reading folder permissions, please wait…"
+msgstr "Se citesc permisiunile de dosar, așteptați…"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:221
+msgid "No users found"
+msgstr "Nu s-au găsit utilizatori"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:224
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "S-a găsit un utilizator"
+msgstr[1] "S-au găsit %d utilizatori"
+msgstr[2] "S-au găsit %d de utilizatori"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:229
+#, c-format
+msgid "Found %d user, but showing only first %d"
+msgid_plural "Found %d users, but showing only first %d"
+msgstr[0] "S-a găsit %d utilizator, dar se arată doar primii %d"
+msgstr[1] "S-au găsit %d utilizatori, dar se arată doar primii %d"
+msgstr[2] "S-au găsit %d de utilizatori, dar se arată doar primii %d"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:517
+#: ../src/configuration/e-mapi-search-gal-user.c:710
+msgid "Search for a user"
+msgstr "Caută pentru un utilizator"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:533
+msgid "Searching…"
+msgstr "Se caută…"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:606
+msgid "E-mail"
+msgstr "E-mail"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:647
+msgid "Choose MAPI user…"
+msgstr "Alege un utilizator MAPI…"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:670
+msgid "_Search:"
+msgstr "_Caută:"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:95
+#, c-format
+msgid "Cannot add folder, folder already exists as “%s”"
+msgstr "Nu se poate adăuga dosarul, dosarul există deja ca „%s”"
+
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. Example result: "Mailbox — John Smith"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:120
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox — %s"
+msgstr "Cutie de mail — %s"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:150
+#, c-format
+msgid "Cannot add folder, failed to add to store’s summary"
+msgstr "Nu se poate adăuga dosarul, a eșuat adăugarea la rezumatul stocării"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:373
+#, c-format
+msgid ""
+"Folder “%s” not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr ""
+"Dosarul „%s” nu a fost găsit. Ori nu există ori nu aveți permisiunea să îl "
+"accesați."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:408
+msgid "Cannot add folder, cannot determine folder’s type"
+msgstr "Nu se poate adăuga dosarul, nu se poate determina tipul dosarului"
+
+#. Translators: This is used to name foreign folder.
+#. The first '%s' is replaced with user name to whom the folder belongs,
+#. the second '%s' is replaced with folder name.
+#. Example result: "John Smith — Calendar"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:449
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s — %s"
+msgstr "%s — %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:568
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:846
+msgid "Inbox"
+msgstr "Inbox"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:570
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:847
+msgid "Contacts"
+msgstr "Contacte"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:572
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:848
+msgid "Calendar"
+msgstr "Calendar"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:574
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:849
+msgid "Memos"
+msgstr "Memo-uri"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:576
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:850
+msgid "Tasks"
+msgstr "Sarcini"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:590
+#, c-format
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
+msgstr ""
+"Se testează disponibilitatea dosarului „%s” al utilizatorului „%s”, "
+"așteptați…"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:628
+msgid "Cannot search for user when the account is offline"
+msgstr "Nu se poate căuta pentru utilizator când contul este deconectat"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:796
+msgid "User"
+msgstr "Utilizator"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:803
+msgid "_User:"
+msgstr "_Utilizator:"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:816
+msgid "C_hoose…"
+msgstr "_Alege…"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:831
+msgid "_Folder name:"
+msgstr "Nume de _dosar:"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:859
+msgid "Include _subfolders"
+msgstr "Include _subdosarele"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2191
+msgctxt "MeetingResp"
+msgid "Accepted:"
+msgstr "Acceptat:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2196
+msgctxt "MeetingResp"
+msgid "Tentative:"
+msgstr "Tentativ:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2201
+msgctxt "MeetingResp"
+msgid "Declined:"
+msgstr "Respins:"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:137
 msgid "Failed to login into the server"
 msgstr "Nu s-a reușit autentificarea la server"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:102
+#: ../src/libexchangemapi/e-mapi-connection.c:138
 msgid "Cannot create more sessions, session limit was reached"
 msgstr "Nu se mai pot crea sesiuni, s-a atins limita sesiunilor"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:103
+#: ../src/libexchangemapi/e-mapi-connection.c:139
 msgid "User cancelled operation"
 msgstr "Operație anulată de utilizator"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:104
+#: ../src/libexchangemapi/e-mapi-connection.c:140
 msgid "Unable to abort"
 msgstr "Nu se poate anula"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:105
+#: ../src/libexchangemapi/e-mapi-connection.c:141
 msgid "Network error"
 msgstr "Eroare de rețea"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:106
+#: ../src/libexchangemapi/e-mapi-connection.c:142
 msgid "Disk error"
 msgstr "Eroare de disc"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:107
+#: ../src/libexchangemapi/e-mapi-connection.c:143
 msgid "Password change required"
 msgstr "Este necesară o schimbare a parolei"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:108
-#| msgid "Password"
+#: ../src/libexchangemapi/e-mapi-connection.c:144
 msgid "Password expired"
 msgstr "Parola a expirat"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:109
+#: ../src/libexchangemapi/e-mapi-connection.c:145
 msgid "Invalid workstation account"
 msgstr "Cont de stație nevalid"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:110
+#: ../src/libexchangemapi/e-mapi-connection.c:146
 msgid "Invalid access time"
 msgstr "Timp de acces nevalid"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:111
+#: ../src/libexchangemapi/e-mapi-connection.c:147
 msgid "Account is disabled"
 msgstr "Cont dezactivat"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:112
+#: ../src/libexchangemapi/e-mapi-connection.c:148
 msgid "End of session"
 msgstr "Sfârșit de sesiune"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:120
+#: ../src/libexchangemapi/e-mapi-connection.c:149
+msgid "MAPI is not initialized or connected"
+msgstr "MAPI nu este inițializat sau conectat"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:150
+msgid "Permission denied"
+msgstr "Permisiune respinsă"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:151
+msgid "Mailbox quota exceeded"
+msgstr "Cota cutiei de mail depășită"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:159
 #, c-format
 msgid "MAPI error %s (0x%x) occurred"
 msgstr "A apărut o eroare MAPI %s (0x%x)"
@@ -581,15 +1055,165 @@ msgstr "A apărut o eroare MAPI %s (0x%x)"
 #. Translators: The first '%s' is replaced with an error context,
 #. aka where the error occurred, the second '%s' is replaced with
 #. the error message.
-#: ../src/libexchangemapi/exchange-mapi-connection.c:130
+#: ../src/libexchangemapi/e-mapi-connection.c:177
 #, c-format
 msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/exchange-mapi-connection.c:3242
+#: ../src/libexchangemapi/e-mapi-connection.c:724
+#, c-format
+msgid "Server “%s” cannot be reached"
+msgstr "Serverul „%s” nu poate fi ajuns"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:852
+#, c-format
+msgid "Folder name “%s” is not a known default folder name, nor folder ID."
+msgstr ""
+"Numele de dosar „%s” nu este un nume de dosar implicit cunoscut, nici un ID "
+"de dosar."
+
+#: ../src/libexchangemapi/e-mapi-connection.c:1183
+#, c-format
+msgid "Failed to open store for user “%s”"
+msgstr "Nu s-a putut deschide stocarea pentru utilizatorul „%s”"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:1191
+#, c-format
+msgid "Folder of user “%s” not found"
+msgstr "Dosarul utilizatorului „%s” nu a fost găsit"
+
+#. Translators: %s is replaced with an email address which was found ambiguous on a remote server
+#: ../src/libexchangemapi/e-mapi-connection.c:3843
+#, c-format
+msgid "Recipient “%s” is ambiguous"
+msgstr "Recipientul „%s” este ambiguu"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:4935
+#, c-format
+msgid ""
+"Search result exceeded allowed size limit. Use more specific search term, "
+"please"
+msgstr ""
+"Rezultatul căutării a depășit limita dimensiunii permise. Utilizați termeni "
+"de căutare mai specifici"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6557
 msgid "All Public Folders"
 msgstr "Toate dosarele publice"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6865
+#, c-format
+msgid "User name “%s” is ambiguous"
+msgstr "Numele de utilizator „%s” este ambiguu"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6868
+#, c-format
+msgid "User name “%s” not found"
+msgstr "Numele de utilizator „%s” nu a fost găsit"
+
+#: ../src/libexchangemapi/e-mapi-folder.c:330
+msgid "Cannot add folder, unsupported folder type"
+msgstr "Nu se poate adăuga dosarul, tip de dosar nesuportat"
+
+#: ../src/libexchangemapi/e-mapi-folder.c:333
+msgid "Cannot add folder, master source not found"
+msgstr "Nu se poate adăuga dosarul, sursa principală nu a fost găsită"
+
+#: ../src/libexchangemapi/e-mapi-utils.c:854
+#, c-format
+msgid ""
+"Cannot ask for Kerberos ticket. Obtain the ticket manually, like on command "
+"line with “kinit” or open “Online Accounts” in “Settings” and add the "
+"Kerberos account there. Reported error was: %s"
+msgstr ""
+"Nu se poate cere pentru un bilet Kerberos. Obțineți biletul manual, în linia "
+"de comandă cu „kinit” sau deschideți „Conturi conectate” în „Configurări” și "
+"adăugați contul Kerberos acolo. Eroarea raportată a fost: %s"
+
+#~ msgid "Enter Password for %s@%s"
+#~ msgstr "Introduceți parola pentru %s@%s"
+
+#~ msgid "Failed to create address book '%s': %s"
+#~ msgstr "Nu s-a putut crea agenda „%s”: %s"
+
+#~ msgid "Failed to create address book '%s'"
+#~ msgstr "Nu s-a putut crea agenda „%s”"
+
+#~ msgid "Failed to create calendar '%s': %s"
+#~ msgstr "Nu s-a putut crea calendarul „%s”: %s"
+
+#~ msgid "Failed to create calendar '%s'"
+#~ msgstr "Nu s-a putut crea calendarul „%s”"
+
+#~ msgid "Miscellaneous"
+#~ msgstr "Diverse"
+
+#~ msgid "Cannot connect"
+#~ msgstr "Nu se poate conecta"
+
+#~ msgid "Uknown error"
+#~ msgstr "Eroare necunoscută"
+
+#~ msgid "Failed to remove public folder"
+#~ msgstr "Nu s-a putut elimina dosarul public"
+
+#~ msgid "Caching contact %d"
+#~ msgstr "Se pune în cache contactul %d"
+
+#~ msgid "Caching contact %d/%d"
+#~ msgstr "Se pune în cache contactul %d/%d"
+
+#~ msgid "Caching GAL contact %d"
+#~ msgstr "Se pune în cache contactul GAL %d"
+
+#~| msgid "Caching the GAL entries (%d/%d)... "
+#~ msgid "Caching GAL contact %d/%d"
+#~ msgstr "Se pune în cache contactul GAL %d/%d"
+
+#~| msgid "Error fetching changes from the server."
+#~ msgid "Failed to fetch changes from a server: %s"
+#~ msgstr "Eroare la obținerea modificărilor de pe server: %s"
+
+#~| msgid "Error fetching changes from the server."
+#~ msgid "Failed to fetch changes from a server"
+#~ msgstr "Eroare la obținerea modificărilor de pe server"
+
+#~ msgid "Could not create thread for populating cache"
+#~ msgstr "Nu s-a putut crea firul de execuție pentru popularea cache-ului"
+
+#~ msgid "Could not create cache file"
+#~ msgstr "Nu s-a putut crea fișierul cache"
+
+#~ msgid "Updating local summary cache for new messages in %s"
+#~ msgstr "Se actualizează cache-ul local cu rezumatele noilor mesaje din %s"
+
+#~ msgid "Retrieving message IDs from server for %s"
+#~ msgstr "Se obțin identificatoarele mesajelor de la serverul %s"
+
+#~ msgid "Removing deleted messages from cache in %s"
+#~ msgstr "Se elimină mesajele șterse din cache din %s"
+
+#~| msgid "Fetching summary information for new messages in"
+#~ msgid "Fetching summary information for new messages in %s"
+#~ msgstr "Se obțin rezumatele noilor mesaje din %s"
+
+#~ msgid "Automatically synchroni_ze account locally"
+#~ msgstr "Sincroni_zează automat local contul"
+
+#~ msgid "%s Please enter the MAPI password for %s@%s"
+#~ msgstr "%s Introduceți parola MAPI pentru %s@%s"
+
+#~ msgid "You did not enter a password."
+#~ msgstr "Nu ați introdus o parolă."
+
+#~| msgid "Unable to authenticate to Exchange MAPI server."
+#~ msgid "Unable to authenticate to Exchange MAPI server: %s"
+#~ msgstr "Nu s-a putut autentifica la serverul Exchange MAPI: %s"
+
+#~| msgid "Unable to authenticate to Exchange MAPI server."
+#~ msgid "Unable to authenticate to Exchange MAPI server"
+#~ msgstr "Nu s-a putut autentifica la serverul Exchange MAPI"
 
 #~ msgid "Folders Size"
 #~ msgstr "Mărime dosare"
@@ -606,9 +1230,6 @@ msgstr "Toate dosarele publice"
 
 #~ msgid "Message fetching cancelled by user."
 #~ msgstr "Obținerea mesajului a fost anulată de utilizator."
-
-#~ msgid "Favorites"
-#~ msgstr "Favorite"
 
 #~ msgid "_Global Catalog server name:"
 #~ msgstr "Nume server catalog _global:"
