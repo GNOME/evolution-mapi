@@ -391,6 +391,8 @@ mapi_backend_sync_folders_idle_cb (gpointer user_data)
 	g_list_free_full (configured, g_object_unref);
 	g_object_unref (server);
 
+	e_collection_backend_thaw_populate (E_COLLECTION_BACKEND (backend));
+
 	return FALSE;
 }
 
@@ -409,7 +411,11 @@ mapi_backend_queue_auth_session (EMapiBackend *backend)
 		sfd->backend = g_object_ref (backend);
 		sfd->profile = camel_mapi_settings_dup_profile (mapi_settings);
 
+		/* Needed, because the mapi_backend_sync_folders_idle_cb() calls 'thaw' */
+		e_collection_backend_freeze_populate (E_COLLECTION_BACKEND (backend));
+
 		mapi_backend_sync_folders_idle_cb (sfd);
+
 		sync_folders_data_free (sfd);
 
 		return;
@@ -508,6 +514,11 @@ mapi_backend_populate (ECollectionBackend *backend)
 	if (!e_source_get_enabled (source))
 		return;
 
+	if (!e_collection_backend_freeze_populate (backend)) {
+		e_collection_backend_thaw_populate (backend);
+		return;
+	}
+
 	if (!mapi_backend->priv->source_changed_handler_id)
 		mapi_backend->priv->source_changed_handler_id = g_signal_connect (
 			source, "changed",
@@ -518,6 +529,8 @@ mapi_backend_populate (ECollectionBackend *backend)
 	 * hierarchy immediately on startup, schedule an authentication
 	 * session first thing. */
 	mapi_backend_queue_auth_session (mapi_backend);
+
+	e_collection_backend_thaw_populate (backend);
 }
 
 static gchar *
@@ -855,9 +868,12 @@ mapi_backend_authenticate_sync (EBackend *backend,
 	EMapiConnection *conn;
 	CamelMapiSettings *settings;
 	GSList *mapi_folders = NULL;
+	gboolean in_sync_folders = FALSE;
 	GError *mapi_error = NULL, *krb_error = NULL;
 
 	g_return_val_if_fail (E_IS_MAPI_BACKEND (backend), E_SOURCE_AUTHENTICATION_ERROR);
+
+	e_collection_backend_freeze_populate (E_COLLECTION_BACKEND (backend));
 
 	mapi_backend = E_MAPI_BACKEND (backend);
 	settings = mapi_backend_get_settings (mapi_backend);
@@ -907,6 +923,8 @@ mapi_backend_authenticate_sync (EBackend *backend,
 
 		g_clear_error (&krb_error);
 
+		e_collection_backend_thaw_populate (E_COLLECTION_BACKEND (backend));
+
 		return res;
 	}
 
@@ -929,6 +947,8 @@ mapi_backend_authenticate_sync (EBackend *backend,
 			sync_folders_data_free);
 
 		e_collection_backend_authenticate_children (E_COLLECTION_BACKEND (backend), credentials);
+
+		in_sync_folders = TRUE;
 	} else {
 		ESource *source = e_backend_get_source (backend);
 
@@ -941,6 +961,9 @@ mapi_backend_authenticate_sync (EBackend *backend,
 	g_object_unref (conn);
 	g_clear_error (&mapi_error);
 	g_clear_error (&krb_error);
+
+	if (!in_sync_folders)
+		e_collection_backend_thaw_populate (E_COLLECTION_BACKEND (backend));
 
 	return E_SOURCE_AUTHENTICATION_ACCEPTED;
 }
