@@ -1,3 +1,9 @@
+evolution-mapi 3.37.92 2020-09-04
+---------------------------------
+
+Bug Fixes:
+	eds-I#208 - Avoid race condition when refreshing collection backend (Milan Crha)
+
 evolution-mapi 3.37.90 2020-08-07
 ---------------------------------
 
