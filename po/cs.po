@@ -29,7 +29,7 @@ msgstr "Exchange MAPI"
 #: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:2
 #: ../src/camel/camel-mapi-provider.c:72
 msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
-msgstr "Pro přístup k serverům Microsoft Exchange 2007/OpenChange pomocí MAPI"
+msgstr "Přístup k serverům Microsoft Exchange 2007/OpenChange pomocí MAPI"
 
 #: ../src/addressbook/e-book-backend-mapi.c:92
 #: ../src/calendar/e-cal-backend-mapi.c:104
