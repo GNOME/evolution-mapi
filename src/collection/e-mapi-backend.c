@@ -441,13 +441,12 @@ mapi_backend_source_changed_cb (ESource *source,
 				EMapiBackend *backend)
 {
 	/* does nothing currently */
-	if (!e_source_get_enabled (source)) {
+	if (!e_collection_backend_get_part_enabled (E_COLLECTION_BACKEND (backend), E_COLLECTION_BACKEND_PART_ANY)) {
 		backend->priv->need_update_folders = TRUE;
 		return;
 	}
 
-	if (e_source_get_enabled (source) &&
-	    e_backend_get_online (E_BACKEND (backend)) &&
+	if (e_backend_get_online (E_BACKEND (backend)) &&
 	    backend->priv->need_update_folders)
 		mapi_backend_queue_auth_session (backend);
 }
@@ -511,7 +510,7 @@ mapi_backend_populate (ECollectionBackend *backend)
 	mapi_backend->priv->need_update_folders = TRUE;
 
 	/* do not do anything, if account is disabled */
-	if (!e_source_get_enabled (source))
+	if (!e_collection_backend_get_part_enabled (backend, E_COLLECTION_BACKEND_PART_ANY))
 		return;
 
 	if (!e_collection_backend_freeze_populate (backend)) {
