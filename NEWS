@@ -1,3 +1,16 @@
+evolution-mapi 3.39.1 2021-01-08
+--------------------------------
+
+Bug Fixes:
+	eds-I#281 - GLibTools.cmake: Use basename in glib-mkenums templates (Milan Crha)
+	eds-I#286 - Skip collection account refresh when parts disabled (Milan Crha)
+
+Miscellaneous:
+	GLibTools.cmake: Generate signal marshallers without source reference (Milan Crha)
+
+Translations:
+	Marek Černocký (cs)
+
 evolution-mapi 3.38.0 2020-09-11
 --------------------------------
 
