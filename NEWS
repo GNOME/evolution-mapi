@@ -1,3 +1,9 @@
+evolution-mapi 3.38.3 2021-01-08
+--------------------------------
+
+Bug Fixes:
+	eds-I#286 - Skip collection account refresh when parts disabled (Milan Crha)
+
 evolution-mapi 3.38.0 2020-09-11
 --------------------------------
 
