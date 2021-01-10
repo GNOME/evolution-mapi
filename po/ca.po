@@ -28,7 +28,7 @@ msgstr "MAPI Exchange"
 #: ../src/camel/camel-mapi-provider.c:72
 msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr ""
-"Per accedir a servidors Microsoft Exchange 2007/OpenChange mitjançant MAPI"
+"Per a accedir a servidors Microsoft Exchange 2007/OpenChange mitjançant MAPI"
 
 #: ../src/addressbook/e-book-backend-mapi.c:92
 #: ../src/calendar/e-cal-backend-mapi.c:100
@@ -196,7 +196,7 @@ msgstr "Només comprova el corre_u brossa a la safata d'entrada"
 #: ../src/camel/camel-mapi-provider.c:58
 #: ../src/configuration/e-mapi-config-utils.c:1774
 msgid "Lis_ten for server notifications"
-msgstr "Escolta el servidor per a les notificacions"
+msgstr "_Escolta el servidor per a les notificacions"
 
 #: ../src/camel/camel-mapi-provider.c:60
 msgid "Synchroni_ze remote mail locally in all folders"
@@ -311,10 +311,10 @@ msgstr ""
 #: ../src/camel/camel-mapi-store.c:1536
 #, c-format
 msgid "Cannot rename MAPI default folder “%s” to “%s”"
-msgstr ""
-"No es pot canviar el nom de la carpeta MAPI predeterminada «%s» a «%s»"
+msgstr "No es pot canviar el nom de la carpeta MAPI predeterminada «%s» a «%s»"
 
-#. Translators: “%s to %s” is current name of the folder and new name of the folder.
+#. Translators: “%s to %s” is current name of the folder and new name of the
+#. folder.
 #: ../src/camel/camel-mapi-store.c:1562 ../src/camel/camel-mapi-store.c:1605
 #: ../src/camel/camel-mapi-store.c:1685
 #, c-format
@@ -322,7 +322,8 @@ msgstr ""
 msgid "Cannot rename MAPI folder “%s” to “%s”"
 msgstr "No es pot canviar el nom de la carpeta MAPI «%s» a «%s»"
 
-#. Translators: “%s to %s” is current name of the folder and new name of the folder.
+#. Translators: “%s to %s” is current name of the folder and new name of the
+#. folder.
 #. The last “%s” is a detailed error message.
 #: ../src/camel/camel-mapi-store.c:1597 ../src/camel/camel-mapi-store.c:1678
 #, c-format
@@ -352,7 +353,8 @@ msgstr "Servidor MAPI Exchange %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#. Translators: The first %s is replaced with a user name, the second with a server's host name
+#. Translators: The first %s is replaced with a user name, the second with a
+#. server's host name
 #: ../src/camel/camel-mapi-store.c:2223 ../src/camel/camel-mapi-transport.c:197
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
@@ -373,8 +375,8 @@ msgstr ""
 msgid ""
 "Mailbox “%s” is near its size limit, message send will be disabled soon."
 msgstr ""
-"La bústia «%s» és prop de la seva capacitat límit, l'enviament de missatges"
-" es deshabilitarà aviat."
+"La bústia «%s» és prop de la seva capacitat límit, l'enviament de missatges "
+"es deshabilitarà aviat."
 
 #: ../src/camel/camel-mapi-store.c:2313
 #, c-format
@@ -486,16 +488,16 @@ msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
 msgstr ""
-"El servidor, el nom d'usuari i el nom del domini no poden ser buits."
-" Ompliu-lo amb valors correctes."
+"El servidor, el nom d'usuari i el nom del domini no poden ser buits. Ompliu-"
+"lo amb valors correctes."
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:476
 msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
 msgstr ""
-"El nom real no pot estar buit quan kerberos està seleccionat. Ompliu-lo amb"
-" valors correctes."
+"El nom real no pot estar buit quan kerberos està seleccionat. Ompliu-lo amb "
+"valors correctes."
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:495
 msgid "Connecting to the server, please wait…"
@@ -511,7 +513,7 @@ msgstr "_Servidor:"
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:723
 msgid "User_name:"
-msgstr "Nom d'usuari:"
+msgstr "N_om d'usuari:"
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:748
 msgid "_Domain name:"
@@ -887,9 +889,9 @@ msgstr "_Cerca:"
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "No s'ha pogut afegir la carpeta, la carpeta existeix com «%s»"
 
-#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. Translators: The '%s' is replaced with user name, to whom the foreign
+#. mailbox belongs.
 #. Example result: "Mailbox — John Smith"
-#.
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:120
 #, c-format
 msgctxt "ForeignFolder"
@@ -907,8 +909,8 @@ msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
 msgstr ""
-"No s'ha trobat la carpeta «%s». O bé no existeix o no teniu permís per"
-" accedir-hi."
+"No s'ha trobat la carpeta «%s». O bé no existeix o no teniu permís per a "
+"accedir-hi."
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:408
 msgid "Cannot add folder, cannot determine folder’s type"
@@ -918,7 +920,6 @@ msgstr "No es pot afegir la carpeta, no es pot determinar el tipus de carpeta"
 #. The first '%s' is replaced with user name to whom the folder belongs,
 #. the second '%s' is replaced with folder name.
 #. Example result: "John Smith — Calendar"
-#.
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:449
 #, c-format
 msgctxt "ForeignFolder"
@@ -955,8 +956,8 @@ msgstr "Tasques"
 #, c-format
 msgid "Testing availability of folder “%s” of user “%s”, please wait…"
 msgstr ""
-"S'està provant la disponibilitat de la carpeta «%s» de l'usuari «%s»,"
-" espereu..."
+"S'està provant la disponibilitat de la carpeta «%s» de l'usuari «%s», "
+"espereu..."
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:628
 msgid "Cannot search for user when the account is offline"
@@ -982,19 +983,22 @@ msgstr "_Nom de la carpeta:"
 msgid "Include _subfolders"
 msgstr "Inclou _subcarpetes"
 
-#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#. Translators: This is a meeting response prefix which will be shown in a
+#. message Subject
 #: ../src/libexchangemapi/e-mapi-cal-utils.c:2060
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Acceptat:"
 
-#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#. Translators: This is a meeting response prefix which will be shown in a
+#. message Subject
 #: ../src/libexchangemapi/e-mapi-cal-utils.c:2065
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Provisionalment:"
 
-#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#. Translators: This is a meeting response prefix which will be shown in a
+#. message Subject
 #: ../src/libexchangemapi/e-mapi-cal-utils.c:2070
 msgctxt "MeetingResp"
 msgid "Declined:"
@@ -1084,8 +1088,8 @@ msgstr "No es pot arribar al servidor «%s»"
 #, c-format
 msgid "Folder name “%s” is not a known default folder name, nor folder ID."
 msgstr ""
-"El nom de la carpeta «%s» no és un nom de la carpeta predeterminada coneguda"
-" ni l'ID de la carpeta."
+"El nom de la carpeta «%s» no és un nom de la carpeta predeterminada coneguda "
+"ni l'ID de la carpeta."
 
 #: ../src/libexchangemapi/e-mapi-connection.c:1203
 #, c-format
@@ -1097,7 +1101,8 @@ msgstr "No s'ha pogut obrir el magatzem per l'usuari «%s»"
 msgid "Folder of user “%s” not found"
 msgstr "La carpeta de l'usuari «%s» no s'ha trobat"
 
-#. Translators: %s is replaced with an email address which was found ambiguous on a remote server
+#. Translators: %s is replaced with an email address which was found ambiguous
+#. on a remote server
 #: ../src/libexchangemapi/e-mapi-connection.c:3863
 #, c-format
 msgid "Recipient “%s” is ambiguous"
@@ -1109,8 +1114,8 @@ msgid ""
 "Search result exceeded allowed size limit. Use more specific search term, "
 "please"
 msgstr ""
-"El resultat de la cerca supera el límit de mida permès. Utilitzeu un terme de"
-" cerca més específic"
+"El resultat de la cerca supera el límit de mida permès. Utilitzeu un terme "
+"de cerca més específic"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:6577
 msgid "All Public Folders"
@@ -1141,150 +1146,8 @@ msgid ""
 "line with “kinit” or open “Online Accounts” in “Settings” and add the "
 "Kerberos account there. Reported error was: %s"
 msgstr ""
-"No es pot sol·licitar l'entrada de Kerberos. Obteniu l'entrada manualment,"
-" com a la línia d'ordres amb «kinit» o obriu «Comptes en línia» a"
-" «Configuració» i afegiu-hi el compte de Kerberos. L'error notificat ha"
-" estat: %s"
+"No es pot sol·licitar l'entrada de Kerberos. Obteniu l'entrada manualment, "
+"com a la línia d'ordres amb «kinit» o obriu «Comptes en línia» a "
+"«Configuració» i afegiu-hi el compte de Kerberos. L'error notificat ha "
+"estat: %s"
 
-#~ msgid "Failed to remove public folder"
-#~ msgstr "No s'ha pogut suprimir el directori públic"
-
-#~ msgid "Caching contact %d"
-#~ msgstr "S'està desant a la memòria intermèdia el contacte %d"
-
-#~ msgid "Caching contact %d/%d"
-#~ msgstr "S'està desant a la memòria intermèdia el contacte %d/%d"
-
-#, fuzzy
-#~ msgid "Failed to count server contacts"
-#~ msgstr "No s'ha pogut autenticar al servidor"
-
-#~ msgid "Caching GAL contact %d"
-#~ msgstr "S'està desant a la memòria intermèdia el contacte de la LAG %d"
-
-#~ msgid "Caching GAL contact %d/%d"
-#~ msgstr "S'està desant a la memòria intermèdia el contacte de la LAG %d/%d"
-
-#, fuzzy
-#~ msgid "Failed to open folder: %s"
-#~ msgstr "No s'ha pogut suprimir el directori públic"
-
-#, fuzzy
-#~ msgid "Failed to get folder properties: %s"
-#~ msgstr "No s'ha pogut crear el calendari «%s»: %s"
-
-#, fuzzy
-#~ msgid "Failed to list objects: %s"
-#~ msgstr "No s'ha pogut buidar la paperera: %s"
-
-#, fuzzy
-#~ msgid "Failed to transfer objects: %s"
-#~ msgstr "No s'ha pogut buidar la paperera: %s"
-
-#, fuzzy
-#~ msgid "Failed to close folder: %s"
-#~ msgstr "No s'ha pogut suprimir el directori públic"
-
-#~ msgid "Could not create cache file"
-#~ msgstr "No s'ha pogut crear el fitxer de memòria cau"
-
-#, fuzzy
-#~ msgid "Cannot remove items from a server"
-#~ msgstr "No s'ha pogut recollir els elements del servidor"
-
-#~ msgid "Automatically synchroni_ze account locally"
-#~ msgstr "Sincronit_za el compte localment de manera automàtica"
-
-#, fuzzy
-#~ msgid "Folder size..."
-#~ msgstr "Mida de la carpeta"
-
-#, fuzzy
-#~ msgid "Searching..."
-#~ msgstr "S'està cercant"
-
-#~ msgid "Enter Password for %s@%s"
-#~ msgstr "Introduïu la contrasenya per a %s@%s"
-
-#~ msgid "Failed to create address book '%s': %s"
-#~ msgstr "No s'ha pogut crear la llibreta d'adreces «%s»: %s"
-
-#~ msgid "Failed to create address book '%s'"
-#~ msgstr "No s'ha pogut crear la llibreta d'adreces «%s»"
-
-#~ msgid "Miscellaneous"
-#~ msgstr "Miscel·lània"
-
-#~ msgid "Cannot connect"
-#~ msgstr "No s'ha pogut connectar"
-
-#~ msgid "Failed to fetch changes from a server: %s"
-#~ msgstr "No s'han pogut recollir els canvis del servidor: %s"
-
-#~ msgid "Failed to fetch changes from a server"
-#~ msgstr "No s'han pogut recollir els canvis del servidor"
-
-#~ msgid "Could not create thread for populating cache"
-#~ msgstr "No s'ha pogut crear el fil per emplenar la memòria cau"
-
-#~ msgid "Updating local summary cache for new messages in %s"
-#~ msgstr ""
-#~ "S'està actualitzant la memòria cau del resum local dels missatges nous a "
-#~ "%s"
-
-#~ msgid "Retrieving message IDs from server for %s"
-#~ msgstr ""
-#~ "S'estan obtenint els identificadors dels missatges del servidor per a %s"
-
-#~ msgid "Removing deleted messages from cache in %s"
-#~ msgstr "S'estan eliminant els missatges suprimits de la memòria cau a %s"
-
-#~ msgid "Fetching summary information for new messages in %s"
-#~ msgstr "S'està recollint la informació de resum dels missatges nous a %s"
-
-#~ msgid "%s Please enter the MAPI password for %s@%s"
-#~ msgstr "%s Introduïu la contrasenya MAPI per a %s@%s"
-
-#~ msgid "You did not enter a password."
-#~ msgstr "No heu introduït cap contrasenya."
-
-#~ msgid "Unable to authenticate to Exchange MAPI server: %s"
-#~ msgstr "No s'ha pogut autenticar al servidor MAPI Exchange: %s"
-
-#~ msgid "Unable to authenticate to Exchange MAPI server"
-#~ msgstr "No s'ha pogut autenticar al servidor MAPI Exchange"
-
-#~ msgid "Folders Size"
-#~ msgstr "Mida de les carpetes"
-
-#~ msgid "Downloading GAL entries from server..."
-#~ msgstr ""
-#~ "S'estan baixant les entrades de la llista d'adreces global (GAL) del "
-#~ "servidor..."
-
-#~ msgid ""
-#~ "Cannot get message: %s\n"
-#~ "  %s"
-#~ msgstr ""
-#~ "No s'ha pogut obtenir el missatge: %s\n"
-#~ "  %s"
-
-#~ msgid "Message fetching cancelled by user."
-#~ msgstr "L'usuari ha cancel·lat la recollida del missatge."
-
-#~ msgid "_Global Catalog server name:"
-#~ msgstr "Nom del servidor del _Global Catalog"
-
-#~ msgid "_Limit number of GAL responses: %s"
-#~ msgstr "_Limita el nombre de respostes de la GAL: %s"
-
-#~ msgid "Cannot rename MAPI folder `%s' to `%s'. Default folder."
-#~ msgstr ""
-#~ "No es pot canviar el nom de la carpeta MAPI «%s» a «%s». Carpeta "
-#~ "predeterminada."
-
-#~ msgid "MAPI server %s"
-#~ msgstr "Servidor MAPI %s"
-
-#~ msgid "MAPI service for %s on %s"
-#~ msgstr "Servei MAPI per a %s a %s"
