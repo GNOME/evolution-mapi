@@ -1,3 +1,13 @@
+evolution-mapi 3.39.2 2021-02-12
+--------------------------------
+
+Miscellaneous:
+	Sync GLibTools.cmake with Evolution-Data-Server (Milan Crha)
+
+Translations:
+	Jordi Mas (ca)
+	Мирослав Николић (sr)
+
 evolution-mapi 3.39.1 2021-01-08
 --------------------------------
 
