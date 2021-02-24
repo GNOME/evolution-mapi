@@ -1139,6 +1139,7 @@ e_book_backend_mapi_class_init (EBookBackendMAPIClass *klass)
 	EBookMetaBackendClass *meta_backend_class;
 
 	meta_backend_class = E_BOOK_META_BACKEND_CLASS (klass);
+	meta_backend_class->backend_module_directory = BACKENDDIR;
 	meta_backend_class->backend_module_filename = "libebookbackendmapi.so";
 	meta_backend_class->connect_sync = ebb_mapi_connect_sync;
 	meta_backend_class->disconnect_sync = ebb_mapi_disconnect_sync;
