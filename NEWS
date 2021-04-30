@@ -1,3 +1,12 @@
+evolution-mapi 3.40.1 2021-04-30
+--------------------------------
+
+Bug Fixes:
+	eds-M!68 - SetupBuildFlags.cmake: Correct testing of two compiler/linker build flags (Matt Turner)
+
+Miscellaneous:
+	PrintableOptions.cmake: Correct variable name comparison (Milan Crha)
+
 evolution-mapi 3.40.0 2021-03-19
 --------------------------------
 
