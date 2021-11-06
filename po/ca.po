@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-mapi/issues\n"
-"POT-Creation-Date: 2018-07-02 12:46+0000\n"
+"POT-Creation-Date: 2021-04-14 15:07+0000\n"
 "PO-Revision-Date: 2018-07-28 18:16+0100\n"
 "Last-Translator: Carles Ferrando Garcia <carles.ferrando@gmail.com>\n"
 "Language-Team: Catalan <info@softcatala.org>\n"
@@ -30,48 +30,47 @@ msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
 msgstr ""
 "Per a accedir a servidors Microsoft Exchange 2007/OpenChange mitjançant MAPI"
 
-#: ../src/addressbook/e-book-backend-mapi.c:92
-#: ../src/calendar/e-cal-backend-mapi.c:100
-#: ../src/camel/camel-mapi-folder.c:1859 ../src/camel/camel-mapi-folder.c:1943
+#: ../src/addressbook/e-book-backend-mapi.c:89
+#: ../src/calendar/e-cal-backend-mapi.c:105
+#: ../src/camel/camel-mapi-folder.c:1873 ../src/camel/camel-mapi-folder.c:1957
 msgid "Unknown error"
 msgstr "S'ha produït un error desconegut"
 
-#: ../src/addressbook/e-book-backend-mapi.c:496
-#: ../src/addressbook/e-book-backend-mapi.c:680
+#: ../src/addressbook/e-book-backend-mapi.c:499
+#: ../src/addressbook/e-book-backend-mapi.c:683
 msgid "Failed to fetch GAL entries"
 msgstr "No s'han pogut aconseguir les entrades de la LAG"
 
-#: ../src/addressbook/e-book-backend-mapi.c:502
+#: ../src/addressbook/e-book-backend-mapi.c:505
 msgid "Failed to transfer contacts from a server"
 msgstr "No s'ha pogut transferir els contactes del servidor"
 
-#: ../src/addressbook/e-book-backend-mapi.c:687
-#: ../src/calendar/e-cal-backend-mapi.c:1105
+#: ../src/addressbook/e-book-backend-mapi.c:690
+#: ../src/calendar/e-cal-backend-mapi.c:1140
 msgid "Failed to list items from a server"
 msgstr "No s'ha pogut enumerar els elements del servidor"
 
-#: ../src/addressbook/e-book-backend-mapi.c:862
-#: ../src/calendar/e-cal-backend-mapi.c:1332
+#: ../src/addressbook/e-book-backend-mapi.c:866
+#: ../src/calendar/e-cal-backend-mapi.c:1368
 msgid "Failed to modify item on a server"
 msgstr "No s'ha pogut modificar l'element en el servidor"
 
-#: ../src/addressbook/e-book-backend-mapi.c:862
-#: ../src/calendar/e-cal-backend-mapi.c:1332
-#: ../src/calendar/e-cal-backend-mapi.c:1626
+#: ../src/addressbook/e-book-backend-mapi.c:866
+#: ../src/calendar/e-cal-backend-mapi.c:1368
+#: ../src/calendar/e-cal-backend-mapi.c:1672
 msgid "Failed to create item on a server"
 msgstr "No s'ha pogut crear l'element al servidor"
 
-#: ../src/addressbook/e-book-backend-mapi.c:923
-#: ../src/calendar/e-cal-backend-mapi.c:1400
-#| msgid "Failed to fetch items from a server"
+#: ../src/addressbook/e-book-backend-mapi.c:928
+#: ../src/calendar/e-cal-backend-mapi.c:1437
 msgid "Failed to remove item from a server"
 msgstr "No s'ha pogut suprimir l'element del servidor"
 
-#: ../src/calendar/e-cal-backend-mapi.c:881
+#: ../src/calendar/e-cal-backend-mapi.c:912
 msgid "Failed to transfer objects from a server"
 msgstr "No s'han pogut transferir els objectes del servidor"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1249
+#: ../src/calendar/e-cal-backend-mapi.c:1285
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -80,7 +79,7 @@ msgstr ""
 "individuals d'una cita periòdica. No s'ha fet cap canvi a la cita al "
 "servidor."
 
-#: ../src/calendar/e-cal-backend-mapi.c:1676
+#: ../src/calendar/e-cal-backend-mapi.c:1722
 msgid "Failed to get Free/Busy data"
 msgstr "No s'han pogut obtenir les dades de lliure/ocupat"
 
@@ -110,7 +109,6 @@ msgstr "Ha fallat la recol·lecció d'elements"
 
 #: ../src/camel/camel-mapi-folder.c:1170
 #, c-format
-#| msgid "Cannot append message to folder '%s'"
 msgid "Cannot append message to folder “%s”"
 msgstr "No es pot afegir el missatge a la carpeta «%s»"
 
@@ -149,19 +147,19 @@ msgstr "No s'ha pogut obtenir el missatge: %s"
 msgid "Could not get message"
 msgstr "No s'ha pogut obtenir el missatge"
 
-#: ../src/camel/camel-mapi-folder.c:1920
+#: ../src/camel/camel-mapi-folder.c:1934
 msgid "Receive quota"
 msgstr "Rep la quota"
 
-#: ../src/camel/camel-mapi-folder.c:1926
+#: ../src/camel/camel-mapi-folder.c:1940
 msgid "Send quota"
 msgstr "Envia la quota"
 
-#: ../src/camel/camel-mapi-folder.c:1948
+#: ../src/camel/camel-mapi-folder.c:1962
 msgid "No quota information available"
 msgstr "No hi ha disponible informació sobre la quota"
 
-#: ../src/camel/camel-mapi-folder.c:2055
+#: ../src/camel/camel-mapi-folder.c:2067
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No s'ha pogut carregar el resum per a %s"
@@ -174,29 +172,28 @@ msgstr "S'està comprovant si hi ha correu nou"
 msgid "C_heck for new messages in all folders"
 msgstr "_Comprova si hi ha correu nou a totes les carpetes"
 
-#: ../src/camel/camel-mapi-provider.c:49
+#: ../src/camel/camel-mapi-provider.c:47
+msgid "Lis_ten for server change notifications"
+msgstr "_Escolta el servidor per a les notificacions de canvi"
+
+#: ../src/camel/camel-mapi-provider.c:51
 msgid "Options"
 msgstr "Opcions"
 
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:52
+#: ../src/camel/camel-mapi-provider.c:54
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
 "_Aplica els filtres als missatges nous de la safata d'entrada en aquest "
 "servidor"
 
-#: ../src/camel/camel-mapi-provider.c:54
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "Check new messages for _Junk contents"
 msgstr "Comprova si els missatges nous són _brossa"
 
-#: ../src/camel/camel-mapi-provider.c:56
+#: ../src/camel/camel-mapi-provider.c:58
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Només comprova el corre_u brossa a la safata d'entrada"
-
-#: ../src/camel/camel-mapi-provider.c:58
-#: ../src/configuration/e-mapi-config-utils.c:1774
-msgid "Lis_ten for server notifications"
-msgstr "_Escolta el servidor per a les notificacions"
 
 #: ../src/camel/camel-mapi-provider.c:60
 msgid "Synchroni_ze remote mail locally in all folders"
@@ -221,86 +218,81 @@ msgstr "Kerberos"
 msgid "This option will connect to the server using kerberos key."
 msgstr "Aquesta opció us connectarà al servidor usant una clau Kerberos."
 
-#: ../src/camel/camel-mapi-store.c:132 ../src/camel/camel-mapi-store.c:174
+#: ../src/camel/camel-mapi-store.c:133 ../src/camel/camel-mapi-store.c:175
 msgid "Cannot find folder in a local cache"
 msgstr "No es pot trobar la carpeta en una memòria cau local"
 
-#: ../src/camel/camel-mapi-store.c:489 ../src/camel/camel-mapi-store.c:1182
+#: ../src/camel/camel-mapi-store.c:490 ../src/camel/camel-mapi-store.c:1173
 msgid "Folder list is not available in offline mode"
 msgstr "La llista de carpetes no està disponible en mode fora de línia"
 
-#: ../src/camel/camel-mapi-store.c:879
+#: ../src/camel/camel-mapi-store.c:880
 msgid "No public folder found"
 msgstr "No s'han trobat carpetes públiques"
 
-#: ../src/camel/camel-mapi-store.c:879
+#: ../src/camel/camel-mapi-store.c:880
 msgid "No folder found"
 msgstr "No s'han trobat carpetes"
 
-#: ../src/camel/camel-mapi-store.c:1204 ../src/camel/camel-mapi-store.c:2272
+#: ../src/camel/camel-mapi-store.c:1195 ../src/camel/camel-mapi-store.c:2261
 #, c-format
 msgid "Connecting to “%s”"
 msgstr "S'està connectant a «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1263
+#: ../src/camel/camel-mapi-store.c:1254
 msgid "Cannot create MAPI folders in offline mode"
 msgstr "No es poden crear carpetes MAPI en mode fora de línia"
 
-#: ../src/camel/camel-mapi-store.c:1270
+#: ../src/camel/camel-mapi-store.c:1261
 #, c-format
-#| msgid "Cannot create new folder '%s'"
 msgid "Cannot create new folder “%s”"
 msgstr "No s'ha pogut crear la carpeta nova «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1279
+#: ../src/camel/camel-mapi-store.c:1270
 #, c-format
 msgid "Authentication failed"
 msgstr "Ha fallat l'autenticació"
 
-#: ../src/camel/camel-mapi-store.c:1289
+#: ../src/camel/camel-mapi-store.c:1280
 msgid "MAPI folders can be created only within mailbox of the logged in user"
 msgstr ""
 "Les carpetes MAPI sols es poden crear dins de bústies amb l'usuari connectat"
 
-#: ../src/camel/camel-mapi-store.c:1302 ../src/camel/camel-mapi-store.c:1415
+#: ../src/camel/camel-mapi-store.c:1293 ../src/camel/camel-mapi-store.c:1406
 #, c-format
 msgid "Cannot find folder “%s”"
 msgstr "No s'ha pogut trobar la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1357
+#: ../src/camel/camel-mapi-store.c:1348
 #, c-format
-#| msgid "Cannot create folder '%s': %s"
 msgid "Cannot create folder “%s”: %s"
 msgstr "No s'ha pogut crear la carpeta «%s»: %s"
 
-#: ../src/camel/camel-mapi-store.c:1363
+#: ../src/camel/camel-mapi-store.c:1354
 #, c-format
-#| msgid "Cannot create folder '%s'"
 msgid "Cannot create folder “%s”"
 msgstr "No s'ha pogut crear la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1393 ../src/camel/camel-mapi-store.c:1405
+#: ../src/camel/camel-mapi-store.c:1384 ../src/camel/camel-mapi-store.c:1396
 msgid "Cannot delete MAPI folders in offline mode"
 msgstr "No es poden crear carpetes MAPI en mode fora de línia"
 
-#: ../src/camel/camel-mapi-store.c:1461
+#: ../src/camel/camel-mapi-store.c:1452
 #, c-format
-#| msgid "Cannot remove folder '%s': %s"
 msgid "Cannot remove folder “%s”: %s"
 msgstr "No es pot suprimir la carpeta «%s»: %s"
 
-#: ../src/camel/camel-mapi-store.c:1469
+#: ../src/camel/camel-mapi-store.c:1460
 #, c-format
-#| msgid "Cannot remove folder '%s'"
 msgid "Cannot remove folder “%s”"
 msgstr "No es pot suprimir la carpeta «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1499 ../src/camel/camel-mapi-store.c:1514
+#: ../src/camel/camel-mapi-store.c:1490 ../src/camel/camel-mapi-store.c:1505
 msgid "Cannot rename MAPI folders in offline mode"
 msgstr "No es pot canviar el nom a carpetes MAPI en mode fora de línia"
 
 #. Translators: “%s” is current name of the folder
-#: ../src/camel/camel-mapi-store.c:1525
+#: ../src/camel/camel-mapi-store.c:1516
 #, c-format
 msgid "Cannot rename MAPI folder “%s”. Folder does not exist"
 msgstr ""
@@ -308,69 +300,64 @@ msgstr ""
 
 #. Translators: “%s to %s” is current name of the folder  and
 #. new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1536
+#: ../src/camel/camel-mapi-store.c:1527
 #, c-format
 msgid "Cannot rename MAPI default folder “%s” to “%s”"
 msgstr "No es pot canviar el nom de la carpeta MAPI predeterminada «%s» a «%s»"
 
-#. Translators: “%s to %s” is current name of the folder and new name of the
-#. folder.
-#: ../src/camel/camel-mapi-store.c:1562 ../src/camel/camel-mapi-store.c:1605
-#: ../src/camel/camel-mapi-store.c:1685
+#. Translators: “%s to %s” is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1553 ../src/camel/camel-mapi-store.c:1596
+#: ../src/camel/camel-mapi-store.c:1676
 #, c-format
-#| msgid "Cannot rename MAPI folder '%s' to '%s'"
 msgid "Cannot rename MAPI folder “%s” to “%s”"
 msgstr "No es pot canviar el nom de la carpeta MAPI «%s» a «%s»"
 
-#. Translators: “%s to %s” is current name of the folder and new name of the
-#. folder.
+#. Translators: “%s to %s” is current name of the folder and new name of the folder.
 #. The last “%s” is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1597 ../src/camel/camel-mapi-store.c:1678
+#: ../src/camel/camel-mapi-store.c:1588 ../src/camel/camel-mapi-store.c:1669
 #, c-format
-#| msgid "Cannot rename MAPI folder '%s' to '%s': %s"
 msgid "Cannot rename MAPI folder “%s” to “%s”: %s"
 msgstr "No es pot canviar el nom de la carpeta MAPI «%s» a «%s»: %s"
 
-#: ../src/camel/camel-mapi-store.c:1775
+#: ../src/camel/camel-mapi-store.c:1766
 msgid "Cannot subscribe MAPI folders in offline mode"
 msgstr "No es poden subscriure carpetes MAPI en mode fora de línia"
 
-#: ../src/camel/camel-mapi-store.c:1792
+#: ../src/camel/camel-mapi-store.c:1783
 #, c-format
 msgid "Folder “%s” not found"
 msgstr "La carpeta «%s» no s'ha trobat"
 
-#: ../src/camel/camel-mapi-store.c:1917
+#: ../src/camel/camel-mapi-store.c:1908
 msgid "Cannot unsubscribe MAPI folders in offline mode"
 msgstr ""
 "No es pot cancel·lar la subscripció de carpetes MAPI en mode fora de línia"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:2219 ../src/camel/camel-mapi-transport.c:194
+#: ../src/camel/camel-mapi-store.c:2208 ../src/camel/camel-mapi-transport.c:194
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Servidor MAPI Exchange %s"
 
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
-#. Translators: The first %s is replaced with a user name, the second with a
-#. server's host name
-#: ../src/camel/camel-mapi-store.c:2223 ../src/camel/camel-mapi-transport.c:197
+#. Translators: The first %s is replaced with a user name, the second with a server's host name
+#: ../src/camel/camel-mapi-store.c:2212 ../src/camel/camel-mapi-transport.c:197
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Servei MAPI Exchange per a %s a %s"
 
-#: ../src/camel/camel-mapi-store.c:2254
+#: ../src/camel/camel-mapi-store.c:2243
 msgid "Cannot connect to MAPI store in offline mode"
 msgstr "No es pot connectar a magatzems MAPI en mode fora de línia"
 
-#: ../src/camel/camel-mapi-store.c:2307
+#: ../src/camel/camel-mapi-store.c:2296
 #, c-format
 msgid "Mailbox “%s” is full, no new messages will be received or sent."
 msgstr ""
 "La bústia «%s» és plena, no es rebran missatges nous ni se'n podran enviar."
 
-#: ../src/camel/camel-mapi-store.c:2309
+#: ../src/camel/camel-mapi-store.c:2298
 #, c-format
 msgid ""
 "Mailbox “%s” is near its size limit, message send will be disabled soon."
@@ -378,35 +365,34 @@ msgstr ""
 "La bústia «%s» és prop de la seva capacitat límit, l'enviament de missatges "
 "es deshabilitarà aviat."
 
-#: ../src/camel/camel-mapi-store.c:2313
+#: ../src/camel/camel-mapi-store.c:2302
 #, c-format
 msgid "Mailbox “%s” is full, no new messages will be received."
 msgstr "La bústia «%s» és plena, no es rebran missatges nous."
 
-#: ../src/camel/camel-mapi-store.c:2315
+#: ../src/camel/camel-mapi-store.c:2304
 #, c-format
 msgid "Mailbox “%s” is near its size limit."
 msgstr "La bústia «%s» és prop de la seva capacitat límit."
 
-#: ../src/camel/camel-mapi-store.c:2733
+#: ../src/camel/camel-mapi-store.c:2722
 #, c-format
 msgid "Cannot add folder “%s”, failed to add to store’s summary"
 msgstr ""
 "No es pot afegir la carpeta «%s», error en afegir-la al resum del magatzem"
 
-#: ../src/camel/camel-mapi-store.c:3016
+#: ../src/camel/camel-mapi-store.c:3005
 msgid "Authentication password not available"
 msgstr "L'autenticació de la contrasenya no és disponible"
 
-#: ../src/camel/camel-mapi-store.c:3052 ../src/camel/camel-mapi-store.c:3468
-#| msgid "Loading items in folder %s"
+#: ../src/camel/camel-mapi-store.c:3041 ../src/camel/camel-mapi-store.c:3457
 msgid "Updating foreign folders"
 msgstr "S'estan actualitzant les carpetes alienes"
 
 #. Translators: the first '%s' is replaced with a generic error message,
 #. the second '%s' is replaced with additional error information.
-#: ../src/camel/camel-mapi-store.c:3075 ../src/collection/e-mapi-backend.c:894
-#: ../src/configuration/e-mail-config-mapi-backend.c:406
+#: ../src/camel/camel-mapi-store.c:3064 ../src/collection/e-mapi-backend.c:909
+#: ../src/configuration/e-mail-config-mapi-backend.c:404
 #: ../src/configuration/e-mapi-config-utils.c:341
 #, c-format
 msgctxt "gssapi_error"
@@ -432,16 +418,16 @@ msgstr "No s'ha pogut enviar el missatge."
 msgid "Could not send message: %s"
 msgstr "No s'ha pogut enviar el missatge: %s"
 
-#: ../src/collection/e-mapi-backend.c:76
+#: ../src/collection/e-mapi-backend.c:72
 msgid "Cannot connect, no credentials provided"
 msgstr "No es pot connectar, no s'han proporcionat credencials"
 
-#: ../src/collection/e-mapi-backend.c:373
+#: ../src/collection/e-mapi-backend.c:369
 msgid "Global Address List"
 msgstr "Llista d'adreces global"
 
-#: ../src/collection/e-mapi-backend.c:728
-#: ../src/collection/e-mapi-backend.c:825
+#: ../src/collection/e-mapi-backend.c:732
+#: ../src/collection/e-mapi-backend.c:829
 #, c-format
 msgid "Data source “%s” does not represent a MAPI folder"
 msgstr "La font de dades «%s» no representa una carpeta MAPI"
@@ -450,19 +436,19 @@ msgstr "La font de dades «%s» no representa una carpeta MAPI"
 msgid "Allow _partial search results"
 msgstr "Permet els resultats de cerques _parcials"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:123
+#: ../src/configuration/e-mail-config-mapi-backend.c:121
 msgid "Select username"
 msgstr "Seleccioneu el nom d'usuari"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:133
+#: ../src/configuration/e-mail-config-mapi-backend.c:131
 msgid "Full name"
 msgstr "Nom complet"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:138
+#: ../src/configuration/e-mail-config-mapi-backend.c:136
 msgid "Username"
 msgstr "Nom d'usuari"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:165
+#: ../src/configuration/e-mail-config-mapi-backend.c:163
 msgid ""
 "There are more users with similar user name on a server.\n"
 "Please select that you would like to use from the below list."
@@ -470,20 +456,20 @@ msgstr ""
 "Hi ha més usuaris amb nom d'usuari similar al servidor.\n"
 "Seleccioneu el que vulgueu utilitzar a la llista de sota."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:361
+#: ../src/configuration/e-mail-config-mapi-backend.c:359
 msgid "Authentication finished successfully."
 msgstr "Ha finalitzat satisfactòriament l'autenticació."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:363
-#: ../src/configuration/e-mail-config-mapi-backend.c:501
+#: ../src/configuration/e-mail-config-mapi-backend.c:361
+#: ../src/configuration/e-mail-config-mapi-backend.c:499
 msgid "Authentication failed."
 msgstr "Ha fallat l'autenticació."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:444
+#: ../src/configuration/e-mail-config-mapi-backend.c:442
 msgid "Cannot authenticate MAPI accounts in offline mode"
 msgstr "No es poden autenticar comptes MAPI en mode fora de línia"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:473
+#: ../src/configuration/e-mail-config-mapi-backend.c:471
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -491,7 +477,7 @@ msgstr ""
 "El servidor, el nom d'usuari i el nom del domini no poden ser buits. Ompliu-"
 "lo amb valors correctes."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:476
+#: ../src/configuration/e-mail-config-mapi-backend.c:474
 msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
@@ -499,52 +485,52 @@ msgstr ""
 "El nom real no pot estar buit quan kerberos està seleccionat. Ompliu-lo amb "
 "valors correctes."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:495
+#: ../src/configuration/e-mail-config-mapi-backend.c:493
 msgid "Connecting to the server, please wait…"
 msgstr "S'està connectant amb el servidor, espereu..."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:697
+#: ../src/configuration/e-mail-config-mapi-backend.c:695
 msgid "Configuration"
 msgstr "Configuració"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:706
+#: ../src/configuration/e-mail-config-mapi-backend.c:704
 msgid "_Server:"
 msgstr "_Servidor:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:723
+#: ../src/configuration/e-mail-config-mapi-backend.c:721
 msgid "User_name:"
 msgstr "N_om d'usuari:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:748
+#: ../src/configuration/e-mail-config-mapi-backend.c:746
 msgid "_Domain name:"
 msgstr "Nom del _domini:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:761
+#: ../src/configuration/e-mail-config-mapi-backend.c:759
 msgid "_Authenticate"
 msgstr "_Autentica"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:769
+#: ../src/configuration/e-mail-config-mapi-backend.c:767
 msgid "_Use secure connection"
 msgstr "_Utilitza una connexió segura"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:784
+#: ../src/configuration/e-mail-config-mapi-backend.c:782
 msgid "_Kerberos authentication"
 msgstr "Autenticació _Kerberos"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:796
+#: ../src/configuration/e-mail-config-mapi-backend.c:794
 msgid "_Realm name:"
 msgstr "Nom _real:"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:189
-#: ../src/configuration/e-mail-config-mapi-page.c:252
+#: ../src/configuration/e-mail-config-mapi-page.c:177
+#: ../src/configuration/e-mail-config-mapi-page.c:238
 msgid "MAPI Settings"
 msgstr "Paràmetres de MAPI"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:195
+#: ../src/configuration/e-mail-config-mapi-page.c:183
 msgid "View the size of all Exchange folders"
 msgstr "Mostra la mida de totes les carpetes de l'Exchange"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:199
+#: ../src/configuration/e-mail-config-mapi-page.c:187
 msgid "Folder _Size"
 msgstr "_Mida de la carpeta"
 
@@ -581,7 +567,6 @@ msgstr ""
 "No es poden editar els permisos de la carpeta «%s», trieu una altra carpeta."
 
 #: ../src/configuration/e-mapi-config-utils.c:873
-#| msgid "Folder Size"
 msgid "Folder size…"
 msgstr "Mida de la carpeta..."
 
@@ -625,27 +610,31 @@ msgstr "Carpetes personals"
 msgid "Searching remote MAPI folder structure, please wait…"
 msgstr "S'està cercant l'estructura de carpetes MAPI remota, espereu..."
 
-#: ../src/configuration/e-mapi-config-utils.c:1795
+#: ../src/configuration/e-mapi-config-utils.c:1774
+msgid "Lis_ten for server notifications"
+msgstr "_Escolta el servidor per a les notificacions"
+
+#: ../src/configuration/e-mapi-config-utils.c:1797
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "No es poden crear calendaris MAPI en mode fora de línia"
 
-#: ../src/configuration/e-mapi-config-utils.c:1798
+#: ../src/configuration/e-mapi-config-utils.c:1800
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "No es poden crear llistes de tasques MAPI en mode fora de línia"
 
-#: ../src/configuration/e-mapi-config-utils.c:1801
+#: ../src/configuration/e-mapi-config-utils.c:1803
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "No es poden crear llistes d'anotacions MAPI en mode fora de línia"
 
-#: ../src/configuration/e-mapi-config-utils.c:1804
+#: ../src/configuration/e-mapi-config-utils.c:1806
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "No es poden crear llibres d'adreces MAPI en mode fora de línia"
 
-#: ../src/configuration/e-mapi-config-utils.c:1809
+#: ../src/configuration/e-mapi-config-utils.c:1811
 msgid "Cannot create MAPI source in offline mode"
 msgstr "No es poden crear fonts MAPI en mode fora de línia"
 
-#: ../src/configuration/e-mapi-config-utils.c:1829
+#: ../src/configuration/e-mapi-config-utils.c:1831
 msgid "_Location:"
 msgstr "_Ubicació:"
 
@@ -720,127 +709,127 @@ msgctxt "User"
 msgid "Unknown"
 msgstr "Desconegut"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:878
-#: ../src/configuration/e-mapi-search-gal-user.c:598
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:880
+#: ../src/configuration/e-mapi-search-gal-user.c:600
 msgid "Name"
 msgstr "Nom"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:884
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:886
 msgid "Permission level"
 msgstr "Nivell de permisos"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:937
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:939
 msgid "Edit MAPI folder permissions…"
 msgstr "Edita els permisos de la carpeta MAPI…"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:962
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:964
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:773
 msgid "Account:"
 msgstr "Compte:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:988
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:990
 msgid "Folder name:"
 msgstr "Nom de la carpeta:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1009
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1011
 msgid "Folder ID:"
 msgstr "ID de la Carpeta:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1068
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1070
 msgid "Permissions"
 msgstr "Permisos"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1089
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1091
 msgid "Permi_ssion level:"
 msgstr "Nivell de permi_sos:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1117
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1119
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Lectura"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1128
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1191
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1130
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1193
 msgctxt "Permissions"
 msgid "None"
 msgstr "Cap"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1133
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1135
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "Tota la informació"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1138
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1140
 msgctxt "Permissions"
 msgid "Simple Free/Busy"
 msgstr "Simple lliure/ocupat"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1142
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1144
 msgctxt "Permissions"
 msgid "Detailed Free/Busy"
 msgstr "Detallat lliure/ocupat"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1149
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1151
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Escriptura"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1160
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "Creació d'elements"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1164
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Creació de subcarpetes"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1168
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1170
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "Edita només propi"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1172
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1174
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "Editar-ho tot"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1180
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1182
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Suprimir elements"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1196
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1198
 msgctxt "Permissions"
 msgid "Own"
 msgstr "Propis"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1201
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1203
 msgctxt "Permissions"
 msgid "All"
 msgstr "Tot"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1207
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1209
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Altres"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1218
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Propietari de la carpeta"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1222
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Contacte de la carpeta"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1226
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1228
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Carpeta visible"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1281
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1283
 msgid "Reading folder permissions, please wait…"
 msgstr "S'estan llegint els permisos de la carpeta, espereu..."
 
@@ -863,24 +852,23 @@ msgstr[0] "S'han trobat %d usuari, però sols es mostren el primer %d"
 msgstr[1] "S'han trobat %d usuaris, però sols es mostren els primers %d"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:517
-#: ../src/configuration/e-mapi-search-gal-user.c:708
+#: ../src/configuration/e-mapi-search-gal-user.c:710
 msgid "Search for a user"
 msgstr "Cerca un usuari"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:533
-#| msgid "Searching"
 msgid "Searching…"
 msgstr "S'està cercant..."
 
-#: ../src/configuration/e-mapi-search-gal-user.c:604
+#: ../src/configuration/e-mapi-search-gal-user.c:606
 msgid "E-mail"
 msgstr "Correu electrònic"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:645
+#: ../src/configuration/e-mapi-search-gal-user.c:647
 msgid "Choose MAPI user…"
 msgstr "Tria l'usuari MAPI..."
 
-#: ../src/configuration/e-mapi-search-gal-user.c:668
+#: ../src/configuration/e-mapi-search-gal-user.c:670
 msgid "_Search:"
 msgstr "_Cerca:"
 
@@ -889,9 +877,9 @@ msgstr "_Cerca:"
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "No s'ha pogut afegir la carpeta, la carpeta existeix com «%s»"
 
-#. Translators: The '%s' is replaced with user name, to whom the foreign
-#. mailbox belongs.
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. Example result: "Mailbox — John Smith"
+#.
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:120
 #, c-format
 msgctxt "ForeignFolder"
@@ -920,6 +908,7 @@ msgstr "No es pot afegir la carpeta, no es pot determinar el tipus de carpeta"
 #. The first '%s' is replaced with user name to whom the folder belongs,
 #. the second '%s' is replaced with folder name.
 #. Example result: "John Smith — Calendar"
+#.
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:449
 #, c-format
 msgctxt "ForeignFolder"
@@ -983,89 +972,86 @@ msgstr "_Nom de la carpeta:"
 msgid "Include _subfolders"
 msgstr "Inclou _subcarpetes"
 
-#. Translators: This is a meeting response prefix which will be shown in a
-#. message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2060
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2191
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Acceptat:"
 
-#. Translators: This is a meeting response prefix which will be shown in a
-#. message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2065
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2196
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Provisionalment:"
 
-#. Translators: This is a meeting response prefix which will be shown in a
-#. message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2070
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2201
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Rebutjat:"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:139
+#: ../src/libexchangemapi/e-mapi-connection.c:137
 msgid "Failed to login into the server"
 msgstr "No s'ha pogut autenticar al servidor"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:140
+#: ../src/libexchangemapi/e-mapi-connection.c:138
 msgid "Cannot create more sessions, session limit was reached"
 msgstr ""
 "No s'ha pogut crear més sessions, s'ha arribat al límit de sessions permeses"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:141
+#: ../src/libexchangemapi/e-mapi-connection.c:139
 msgid "User cancelled operation"
 msgstr "L'usuari ha cancel·lat l'operació"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:142
+#: ../src/libexchangemapi/e-mapi-connection.c:140
 msgid "Unable to abort"
 msgstr "No s'ha pogut avortar"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:143
+#: ../src/libexchangemapi/e-mapi-connection.c:141
 msgid "Network error"
 msgstr "S'ha produït un error de xarxa"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:144
+#: ../src/libexchangemapi/e-mapi-connection.c:142
 msgid "Disk error"
 msgstr "S'ha produït un error de disc"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:145
+#: ../src/libexchangemapi/e-mapi-connection.c:143
 msgid "Password change required"
 msgstr "Cal canviar la contrasenya"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:146
+#: ../src/libexchangemapi/e-mapi-connection.c:144
 msgid "Password expired"
 msgstr "La contrasenya ha expirat"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:147
+#: ../src/libexchangemapi/e-mapi-connection.c:145
 msgid "Invalid workstation account"
 msgstr "El compte de l'estació de treball no és vàlid"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:148
+#: ../src/libexchangemapi/e-mapi-connection.c:146
 msgid "Invalid access time"
 msgstr "L'hora d'accés no és vàlida"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:149
+#: ../src/libexchangemapi/e-mapi-connection.c:147
 msgid "Account is disabled"
 msgstr "El compte està inhabilitat"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:150
+#: ../src/libexchangemapi/e-mapi-connection.c:148
 msgid "End of session"
 msgstr "S'ha finalitzat la sessió"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:151
+#: ../src/libexchangemapi/e-mapi-connection.c:149
 msgid "MAPI is not initialized or connected"
 msgstr "MAPI no està inicialitzat o connectat"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:152
+#: ../src/libexchangemapi/e-mapi-connection.c:150
 msgid "Permission denied"
 msgstr "Permís denegat"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:153
+#: ../src/libexchangemapi/e-mapi-connection.c:151
 msgid "Mailbox quota exceeded"
 msgstr "S’ha excedit la quota de la bústia"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:161
+#: ../src/libexchangemapi/e-mapi-connection.c:159
 #, c-format
 msgid "MAPI error %s (0x%x) occurred"
 msgstr "S'ha produït l'error %s (0x%x) de MAPI"
@@ -1073,42 +1059,41 @@ msgstr "S'ha produït l'error %s (0x%x) de MAPI"
 #. Translators: The first '%s' is replaced with an error context,
 #. aka where the error occurred, the second '%s' is replaced with
 #. the error message.
-#: ../src/libexchangemapi/e-mapi-connection.c:179
+#: ../src/libexchangemapi/e-mapi-connection.c:177
 #, c-format
 msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:744
+#: ../src/libexchangemapi/e-mapi-connection.c:724
 #, c-format
 msgid "Server “%s” cannot be reached"
 msgstr "No es pot arribar al servidor «%s»"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:872
+#: ../src/libexchangemapi/e-mapi-connection.c:852
 #, c-format
 msgid "Folder name “%s” is not a known default folder name, nor folder ID."
 msgstr ""
 "El nom de la carpeta «%s» no és un nom de la carpeta predeterminada coneguda "
 "ni l'ID de la carpeta."
 
-#: ../src/libexchangemapi/e-mapi-connection.c:1203
+#: ../src/libexchangemapi/e-mapi-connection.c:1183
 #, c-format
 msgid "Failed to open store for user “%s”"
 msgstr "No s'ha pogut obrir el magatzem per l'usuari «%s»"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:1211
+#: ../src/libexchangemapi/e-mapi-connection.c:1191
 #, c-format
 msgid "Folder of user “%s” not found"
 msgstr "La carpeta de l'usuari «%s» no s'ha trobat"
 
-#. Translators: %s is replaced with an email address which was found ambiguous
-#. on a remote server
-#: ../src/libexchangemapi/e-mapi-connection.c:3863
+#. Translators: %s is replaced with an email address which was found ambiguous on a remote server
+#: ../src/libexchangemapi/e-mapi-connection.c:3843
 #, c-format
 msgid "Recipient “%s” is ambiguous"
 msgstr "El destinatari «%s» és ambigu"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:4955
+#: ../src/libexchangemapi/e-mapi-connection.c:4935
 #, c-format
 msgid ""
 "Search result exceeded allowed size limit. Use more specific search term, "
@@ -1117,16 +1102,16 @@ msgstr ""
 "El resultat de la cerca supera el límit de mida permès. Utilitzeu un terme "
 "de cerca més específic"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6577
+#: ../src/libexchangemapi/e-mapi-connection.c:6557
 msgid "All Public Folders"
 msgstr "Totes les carpetes públiques"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6885
+#: ../src/libexchangemapi/e-mapi-connection.c:6865
 #, c-format
 msgid "User name “%s” is ambiguous"
 msgstr "L'usuari amb nom «%s» és ambigu"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6888
+#: ../src/libexchangemapi/e-mapi-connection.c:6868
 #, c-format
 msgid "User name “%s” not found"
 msgstr "No s'ha trobat l'usuari amb nom «%s»"
@@ -1150,4 +1135,3 @@ msgstr ""
 "com a la línia d'ordres amb «kinit» o obriu «Comptes en línia» a "
 "«Configuració» i afegiu-hi el compte de Kerberos. L'error notificat ha "
 "estat: %s"
-
