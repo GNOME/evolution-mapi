@@ -443,7 +443,7 @@ mapi_settings_get_folder_size_idle (gpointer user_data)
 		/* Populate model with data */
 		for (fiter = fsd->folder_list; fiter;  fiter = fiter->next) {
 			EMapiFolder *folder = fiter->data;
-			gchar *folder_size = g_format_size (folder->size);
+			gchar *folder_size = g_format_size_full (folder->size, G_FORMAT_SIZE_IEC_UNITS);
 
 			gtk_list_store_append (store, &iter);
 			gtk_list_store_set (store, &iter,
