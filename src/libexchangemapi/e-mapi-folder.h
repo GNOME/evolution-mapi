@@ -66,7 +66,7 @@ typedef struct _EMapiFolder {
 	guint32 child_count;
 	guint32 unread_count;
 	guint32 total;
-	guint32 size;
+	guint64 size;
 
 	/* reserved */
 	gpointer reserved1;

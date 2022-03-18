@@ -6095,17 +6095,18 @@ get_folder_hierarchy_cb (EMapiConnection *conn,
 		const uint32_t *total = e_mapi_util_find_row_propval (srow, PR_CONTENT_COUNT);
 		const uint32_t *child = e_mapi_util_find_row_propval (srow, PR_FOLDER_CHILD_COUNT);
 		const uint32_t *folder_size = e_mapi_util_find_row_propval (srow, PR_MESSAGE_SIZE);
+		const uint64_t *folder_size_ex = e_mapi_util_find_row_propval (srow, PR_MESSAGE_SIZE_EXTENDED);
 
 		if (!klass)
 			klass = IPF_NOTE;
 
-		e_mapi_debug_print("|---+ %-15s : (Container class: %s %016" G_GINT64_MODIFIER "X) UnRead : %d Total : %d size : %d",
-			name, klass, *fid, unread ? *unread : 0, total ? *total : 0, folder_size ? *folder_size : 0);
+		e_mapi_debug_print("|---+ %-15s : (Container class: %s %016" G_GINT64_MODIFIER "X) UnRead : %d Total : %d size : %" G_GUINT64_FORMAT,
+			name, klass, *fid, unread ? *unread : 0, total ? *total : 0, folder_size_ex ? *folder_size_ex : ((guint64) (folder_size ? *folder_size : 0)));
 
 		folder = e_mapi_folder_new (name, klass, gfh->folder_hier, *fid, pid ? *pid : gfh->folder_id,
 						   child ? *child : 0, unread ? *unread : -1, total ? *total : -1);
 
-		folder->size = folder_size ? *folder_size : 0;
+		folder->size = folder_size_ex ? *folder_size_ex : folder_size ? *folder_size : 0;
 
 		*gfh->mapi_folders = g_slist_prepend (*gfh->mapi_folders, folder);
 	}
@@ -6147,7 +6148,7 @@ get_child_folders_of_folder (EMapiConnection *conn,
 		goto cleanup;
 	}
 
-	spropTagArray = set_SPropTagArray (mem_ctx, 8,
+	spropTagArray = set_SPropTagArray (mem_ctx, 9,
 					   PR_FID,
 					   PR_PARENT_FID,
 					   PR_CONTAINER_CLASS,
@@ -6155,6 +6156,7 @@ get_child_folders_of_folder (EMapiConnection *conn,
 					   PR_CONTENT_UNREAD,
 					   PR_CONTENT_COUNT,
 					   PR_MESSAGE_SIZE,
+					   PR_MESSAGE_SIZE_EXTENDED,
 					   PR_FOLDER_CHILD_COUNT);
 
 	ms = SetColumns (&obj_table, spropTagArray);
@@ -6422,6 +6424,8 @@ e_mapi_connection_get_folders_list (EMapiConnection *conn,
 	const gchar		*mailbox_owner_name = NULL;
 	const gchar		*mailbox_user_name = NULL;
 	const uint32_t          *mailbox_size = NULL;
+	const uint64_t		*mailbox_size_ex = NULL;
+
 
 	CHECK_CORRECT_CONN_AND_GET_PRIV (conn, FALSE);
 	e_return_val_mapi_error_if_fail (priv->session != NULL, MAPI_E_INVALID_PARAMETER, FALSE);
@@ -6433,10 +6437,11 @@ e_mapi_connection_get_folders_list (EMapiConnection *conn,
 	mem_ctx = talloc_new (priv->session);
 
 	/* Build the array of Mailbox properties we want to fetch */
-	SPropTagArray = set_SPropTagArray(mem_ctx, 0x4,
+	SPropTagArray = set_SPropTagArray(mem_ctx, 0x5,
 					  PR_DISPLAY_NAME_UNICODE,
 					  PR_MAILBOX_OWNER_NAME_UNICODE,
 					  PR_MESSAGE_SIZE,
+					  PR_MESSAGE_SIZE_EXTENDED,
 					  PidTagMailboxOwnerName);
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
@@ -6469,6 +6474,7 @@ e_mapi_connection_get_folders_list (EMapiConnection *conn,
 	mailbox_owner_name = (const gchar *) e_mapi_util_find_row_propval (&aRow, PR_MAILBOX_OWNER_NAME_UNICODE);
 	mailbox_user_name = (const gchar *) e_mapi_util_find_row_propval (&aRow, PidTagMailboxOwnerName);
 	mailbox_size = (const uint32_t *)e_mapi_util_find_row_propval  (&aRow, PR_MESSAGE_SIZE);
+	mailbox_size_ex = (const uint64_t *) e_mapi_util_find_row_propval (&aRow, PR_MESSAGE_SIZE_EXTENDED);
 
 	/* Prepare the directory listing */
 	ms = GetDefaultFolder (&priv->msg_store, &mailbox_id, olFolderTopInformationStore);
@@ -6487,7 +6493,7 @@ e_mapi_connection_get_folders_list (EMapiConnection *conn,
 					   E_MAPI_FOLDER_CATEGORY_PERSONAL, mailbox_id, 0, 0, 0 ,0);
 	folder->is_default = TRUE;
 	folder->default_type = olFolderTopInformationStore; /*Is this correct ?*/
-	folder->size = mailbox_size ? *mailbox_size : 0;
+	folder->size = mailbox_size_ex ? *mailbox_size_ex : mailbox_size ? *mailbox_size : 0;
 
 	*mapi_folders = g_slist_prepend (*mapi_folders, folder);
 
