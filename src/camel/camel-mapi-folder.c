@@ -1160,7 +1160,7 @@ mapi_folder_append_message_sync (CamelFolder *folder,
 	si = camel_store_summary_path (mapi_store->summary, full_name);
 	if (si) {
 		folder_flags = si->flags;
-		camel_store_summary_info_unref (mapi_store->summary, si);
+		camel_store_info_unref (si);
 	}
 
 	if (((folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH) ||
@@ -2145,7 +2145,7 @@ camel_mapi_folder_new (CamelStore *store,
 			add_folder_flags |= CAMEL_FOLDER_IS_TRASH;
 		else if ((si->flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_JUNK)
 			add_folder_flags |= CAMEL_FOLDER_IS_JUNK;
-		camel_store_summary_info_unref (mapi_store->summary, si);
+		camel_store_info_unref (si);
 
 		camel_folder_set_flags (folder, camel_folder_get_flags (folder) | add_folder_flags);
 	} else {

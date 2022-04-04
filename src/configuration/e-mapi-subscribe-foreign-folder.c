@@ -92,16 +92,17 @@ add_foreign_folder_to_camel (CamelMapiStore *mapi_store,
 			res = FALSE;
 			g_propagate_error (perror,
 				g_error_new (E_MAPI_ERROR, MAPI_E_INVALID_PARAMETER,
-				_("Cannot add folder, folder already exists as “%s”"), camel_store_info_path (mapi_store->summary, si)));
+				_("Cannot add folder, folder already exists as “%s”"), camel_store_info_get_path (si)));
 		} else if (parent_fid != 0 && msi->folder_id == parent_fid) {
 			if (g_strcmp0 (foreign_username, msi->foreign_username) == 0) {
 				g_free (parent_path);
-				parent_path = g_strdup (camel_store_info_path (mapi_store->summary, si));
-				parent_si = si;
-				camel_store_summary_info_ref (mapi_store->summary, parent_si);
+				if (parent_si)
+					camel_store_info_unref (parent_si);
+				parent_si = camel_store_info_ref (si);
+				parent_path = g_strdup (camel_store_info_get_path (parent_si));
 			} else {
 				g_debug ("%s: parent folder '%s' with other user '%s' than expected '%s', skipping chain",
-					G_STRFUNC, camel_store_info_path (mapi_store->summary, si), msi->foreign_username, foreign_username);
+					G_STRFUNC, camel_store_info_get_path (si), msi->foreign_username, foreign_username);
 			}
 		}
 	}
@@ -154,7 +155,7 @@ add_foreign_folder_to_camel (CamelMapiStore *mapi_store,
 	}
 
 	if (parent_si)
-		camel_store_summary_info_unref (mapi_store->summary, parent_si);
+		camel_store_info_unref (parent_si);
 	g_free (parent_path);
 
 	return res;
