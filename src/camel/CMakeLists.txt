@@ -42,7 +42,6 @@ target_compile_definitions(camelmapi-priv PRIVATE
 
 target_compile_options(camelmapi-priv PUBLIC
 	${CAMEL_CFLAGS}
-	${EVOLUTION_MAIL_CFLAGS}
 	${LIBEDATASERVER_CFLAGS}
 	${LIBECAL_CFLAGS}
 	${LIBMAPI_CFLAGS}
@@ -55,7 +54,6 @@ target_include_directories(camelmapi-priv PUBLIC
 	${CMAKE_SOURCE_DIR}/src
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CAMEL_INCLUDE_DIRS}
-	${EVOLUTION_MAIL_INCLUDE_DIRS}
 	${LIBEDATASERVER_INCLUDE_DIRS}
 	${LIBECAL_INCLUDE_DIRS}
 	${LIBMAPI_INCLUDE_DIRS}
@@ -64,7 +62,6 @@ target_include_directories(camelmapi-priv PUBLIC
 target_link_libraries(camelmapi-priv
 	${DEPENDENCIES}
 	${CAMEL_LDFLAGS}
-	${EVOLUTION_MAIL_LDFLAGS}
 	${LIBEDATASERVER_LDFLAGS}
 	${LIBECAL_LDFLAGS}
 	${LIBMAPI_LDFLAGS}
