@@ -33,7 +33,6 @@
 #include <errno.h>
 
 #include <libmapi/libmapi.h>
-#include <libemail-engine/libemail-engine.h>
 
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
@@ -766,12 +765,13 @@ mapi_get_folder_info_offline (CamelStore *store,
 			ESourceRegistry *registry;
 			GList *all_sources;
 
-			registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
+			registry = e_source_registry_new_sync (NULL, NULL);
 			all_sources = e_source_registry_list_sources (registry, NULL);
 
 			my_sources = e_mapi_utils_filter_sources_for_profile (all_sources, profile);
 
 			g_list_free_full (all_sources, g_object_unref);
+			g_clear_object (&registry);
 		}
 	}
 
@@ -2976,6 +2976,7 @@ mapi_authenticate_sync (CamelService *service,
 	CamelSettings *settings;
 	CamelMapiSettings *mapi_settings;
 	CamelNetworkSettings *network_settings;
+	ESourceRegistry *registry;
 	EMapiProfileData empd = { 0 };
 	const gchar *profile;
 	const gchar *password;
@@ -3012,10 +3013,10 @@ mapi_authenticate_sync (CamelService *service,
 	e_named_parameters_set (credentials, E_SOURCE_CREDENTIAL_PASSWORD, password);
 	g_rec_mutex_lock (&store->priv->connection_lock);
 	session = camel_service_ref_session (service);
-	store->priv->connection = e_mapi_connection_new (
-		e_mail_session_get_registry (E_MAIL_SESSION (session)),
-		profile, credentials, cancellable, &mapi_error);
+	registry = e_source_registry_new_sync (NULL, NULL);
+	store->priv->connection = e_mapi_connection_new (registry, profile, credentials, cancellable, &mapi_error);
 	e_named_parameters_free (credentials);
+	g_clear_object (&registry);
 	if (store->priv->connection && e_mapi_connection_connected (store->priv->connection)) {
 		GPtrArray *array;
 		guint ii;
