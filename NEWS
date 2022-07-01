@@ -1,3 +1,13 @@
+evolution-mapi 3.45.1 2022-07-01
+--------------------------------
+
+Bug Fixes:
+	eds-M!91 - CamelStoreSummary: Make CamelStoreInfo a boxed class
+
+Miscellaneous:
+	Correct display of folder size
+	build: Limit which parts link to the evolution libraries (and gtk+)
+
 evolution-mapi 3.44.0 2022-03-18
 --------------------------------
 
