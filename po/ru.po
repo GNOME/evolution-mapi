@@ -12,141 +12,71 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: ru\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-mapi&keywords=I18N+L10N&component=miscellaneous\n"
-"POT-Creation-Date: 2013-04-17 06:42+0000\n"
-"PO-Revision-Date: 2013-05-18 09:19+0300\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-mapi/issues\n"
+"POT-Creation-Date: 2022-05-27 06:05+0000\n"
+"PO-Revision-Date: 2022-09-16 10:51+0300\n"
 "Last-Translator: Yuri Myasoedov <omerta13@yandex.ru>\n"
 "Language-Team: Russian <gnome-cyr@gnome.org>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.5.4\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 3.1.1\n"
 
-#: ../src/addressbook/e-book-backend-mapi.c:734
-msgid "Searching"
-msgstr "Поиск"
+#: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:1
+msgid "Exchange MAPI"
+msgstr "Exchange MAPI"
 
-#: ../src/addressbook/e-book-backend-mapi.c:1734
-#: ../src/calendar/e-cal-backend-mapi.c:193
-#: ../src/calendar/e-cal-backend-mapi.c:491
-#: ../src/camel/camel-mapi-folder.c:1900 ../src/camel/camel-mapi-folder.c:1980
+#: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:2
+#: ../src/camel/camel-mapi-provider.c:72
+msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
+msgstr ""
+"Для доступа к серверам Microsoft Exchange 2007/OpenChange c использованием "
+"MAPI"
+
+#: ../src/addressbook/e-book-backend-mapi.c:89
+#: ../src/calendar/e-cal-backend-mapi.c:105
+#: ../src/camel/camel-mapi-folder.c:1873 ../src/camel/camel-mapi-folder.c:1957
 msgid "Unknown error"
 msgstr "Неизвестная ошибка"
 
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:432
-msgid "Failed to remove public folder"
-msgstr "Не удалось удалить общий каталог"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:468
-msgid "The backend does not support bulk additions"
-msgstr ""
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:510
-#: ../src/calendar/e-cal-backend-mapi.c:1699
-#: ../src/calendar/e-cal-backend-mapi.c:2210
-msgid "Failed to create item on a server"
-msgstr "Не удалось создать элемент на сервере"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:627
-msgid "The backend does not support bulk modifications"
-msgstr ""
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:672
-#: ../src/calendar/e-cal-backend-mapi.c:1912
-msgid "Failed to modify item on a server"
-msgstr "Не удалось изменить элемент на сервере"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:848
-msgid "Failed to fetch items from a server"
-msgstr "Не удалось получить элементы с сервера"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. %d is an index of the contact.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:866
-#, c-format
-msgid "Caching contact %d"
-msgstr "Кэширование контакта %d"
-
-#. Translators : This is used to cache the downloaded contacts from a server.
-#. The first %d is an index of the contact,
-#. the second %d is total count of conacts on the server.
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:870
-#, c-format
-msgid "Caching contact %d/%d"
-msgstr "Кэширование контакта %d/%d"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:925
-msgid "Failed to count server contacts"
-msgstr ""
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:983
-msgid "Failed to list items from a server"
-msgstr "Не удалось получить список элементов с сервера"
-
-#: ../src/addressbook/e-book-backend-mapi-contacts.c:1064
-msgid "Failed to transfer contacts from a server"
-msgstr "Не удалось перенести контакты с сервера"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. %d is an index of the GAL entry.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:153
-#, c-format
-msgid "Caching GAL contact %d"
-msgstr "Кэширование контакта GAL %d"
-
-#. Translators : This is used to cache the downloaded contacts from GAL.
-#. The first %d is an index of the GAL entry,
-#. the second %d is total count of entries in GAL.
-#: ../src/addressbook/e-book-backend-mapi-gal.c:157
-#, c-format
-msgid "Caching GAL contact %d/%d"
-msgstr "Кэширование контакта GAL %d/%d"
-
-#: ../src/addressbook/e-book-backend-mapi-gal.c:229
-#: ../src/addressbook/e-book-backend-mapi-gal.c:313
+#: ../src/addressbook/e-book-backend-mapi.c:499
+#: ../src/addressbook/e-book-backend-mapi.c:683
 msgid "Failed to fetch GAL entries"
 msgstr "Не удалось получить записи GAL"
 
-#. To translators: This message is displayed on the status bar when calendar/tasks/memo items are being fetched from the server.
-#: ../src/calendar/e-cal-backend-mapi.c:416
-#, c-format
-msgid "Loading items in folder %s"
-msgstr "Загрузка элементов в папку %s"
+#: ../src/addressbook/e-book-backend-mapi.c:505
+msgid "Failed to transfer contacts from a server"
+msgstr "Не удалось перенести контакты с сервера"
 
-#: ../src/calendar/e-cal-backend-mapi.c:783
-#, c-format
-msgid "Failed to open folder: %s"
-msgstr "Не удалось открыть папку: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:690
+#: ../src/calendar/e-cal-backend-mapi.c:1140
+msgid "Failed to list items from a server"
+msgstr "Не удалось получить список элементов с сервера"
 
-#: ../src/calendar/e-cal-backend-mapi.c:791
-#, c-format
-msgid "Failed to get folder properties: %s"
-msgstr "Не удалось получить свойства папки: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:866
+#: ../src/calendar/e-cal-backend-mapi.c:1368
+msgid "Failed to modify item on a server"
+msgstr "Не удалось изменить элемент на сервере"
 
-#: ../src/calendar/e-cal-backend-mapi.c:832
-#, c-format
-msgid "Failed to list objects: %s"
-msgstr "Не удалось получить список объектов: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:866
+#: ../src/calendar/e-cal-backend-mapi.c:1368
+#: ../src/calendar/e-cal-backend-mapi.c:1672
+msgid "Failed to create item on a server"
+msgstr "Не удалось создать элемент на сервере"
 
-#: ../src/calendar/e-cal-backend-mapi.c:858
-#, c-format
-msgid "Failed to transfer objects: %s"
-msgstr "Не удалось перенести объекты: %s"
+#: ../src/addressbook/e-book-backend-mapi.c:928
+#: ../src/calendar/e-cal-backend-mapi.c:1437
+msgid "Failed to remove item from a server"
+msgstr "Не удалось удалить элемент с сервера"
 
-#: ../src/calendar/e-cal-backend-mapi.c:877
-#, c-format
-msgid "Failed to close folder: %s"
-msgstr "Не удалось закрыть папку: %s"
+#: ../src/calendar/e-cal-backend-mapi.c:912
+msgid "Failed to transfer objects from a server"
+msgstr "Не удалось перенести объекты с сервера"
 
-#: ../src/calendar/e-cal-backend-mapi.c:1366
-msgid "Could not create cache file"
-msgstr "Не удалось создать файл кэша"
-
-#: ../src/calendar/e-cal-backend-mapi.c:1820
+#: ../src/calendar/e-cal-backend-mapi.c:1285
 msgid ""
 "Support for modifying single instances of a recurring appointment is not yet "
 "implemented. No change was made to the appointment on the server."
@@ -154,266 +84,257 @@ msgstr ""
 "Поддержка правки отдельных встреч в повторяющихся по расписанию встречах ещё "
 "не реализована. Данные на сервере останутся без изменений."
 
-#: ../src/calendar/e-cal-backend-mapi.c:2025
-msgid "Cannot remove items from a server"
-msgstr "Невозможно удалить элементы с сервера"
-
-#: ../src/calendar/e-cal-backend-mapi.c:2461
+#: ../src/calendar/e-cal-backend-mapi.c:1722
 msgid "Failed to get Free/Busy data"
 msgstr "Не удалось получить данные о занятости"
 
-#: ../src/camel/camel-mapi-folder.c:777
+#: ../src/camel/camel-mapi-folder.c:776
 #, c-format
-msgid "Refreshing folder '%s'"
+msgid "Refreshing folder “%s”"
 msgstr "Обновление папки «%s»"
 
-#: ../src/camel/camel-mapi-folder.c:845
+#: ../src/camel/camel-mapi-folder.c:844
 #, c-format
-msgid "Downloading messages in folder '%s'"
-msgstr "Загрузка элементов в папке %s"
+msgid "Downloading messages in folder “%s”"
+msgstr "Загрузка сообщений в папке «%s»"
 
-#: ../src/camel/camel-mapi-folder.c:933 ../src/camel/camel-mapi-folder.c:1532
+#: ../src/camel/camel-mapi-folder.c:932 ../src/camel/camel-mapi-folder.c:1492
 #, c-format
 msgid "This message is not available in offline mode."
 msgstr "Это сообщение не доступно в автономном режиме."
 
-#: ../src/camel/camel-mapi-folder.c:943 ../src/camel/camel-mapi-folder.c:961
+#: ../src/camel/camel-mapi-folder.c:942 ../src/camel/camel-mapi-folder.c:960
 #, c-format
 msgid "Fetching items failed: %s"
 msgstr "Не удалось загрузить элементы: %s"
 
-#: ../src/camel/camel-mapi-folder.c:948 ../src/camel/camel-mapi-folder.c:966
+#: ../src/camel/camel-mapi-folder.c:947 ../src/camel/camel-mapi-folder.c:965
 msgid "Fetching items failed"
 msgstr "Не удалось загрузить элементы"
 
-#: ../src/camel/camel-mapi-folder.c:1217
+#: ../src/camel/camel-mapi-folder.c:1170
 #, c-format
-msgid "Cannot append message to folder '%s'"
-msgstr "Нельзя добавлять сообщения в папку «%s»"
+msgid "Cannot append message to folder “%s”"
+msgstr "Невозможно добавить сообщение в папку «%s»"
 
-#: ../src/camel/camel-mapi-folder.c:1226 ../src/camel/camel-mapi-folder.c:1256
+#: ../src/camel/camel-mapi-folder.c:1179 ../src/camel/camel-mapi-folder.c:1209
 #, c-format
 msgid "Offline."
 msgstr "Автономно."
 
-#: ../src/camel/camel-mapi-folder.c:1339
+#: ../src/camel/camel-mapi-folder.c:1293
 #, c-format
 msgid "Failed to empty Trash: %s"
 msgstr "Не удалось очистить корзину: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1345
+#: ../src/camel/camel-mapi-folder.c:1299
 msgid "Failed to empty Trash"
 msgstr "Не удалось очистить корзину"
 
-#: ../src/camel/camel-mapi-folder.c:1517
+#. Translators: The first %s is replaced with a message ID,
+#. the second %s is replaced with a detailed error string
+#: ../src/camel/camel-mapi-folder.c:1477
 #, c-format
 msgid "Cannot get message %s: %s"
 msgstr "Не удалось загрузить сообщение %s: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1518
+#: ../src/camel/camel-mapi-folder.c:1478
 msgid "No such message"
 msgstr "Сообщение отсутствует"
 
-#: ../src/camel/camel-mapi-folder.c:1543 ../src/camel/camel-mapi-folder.c:1575
+#: ../src/camel/camel-mapi-folder.c:1503 ../src/camel/camel-mapi-folder.c:1537
 #, c-format
 msgid "Could not get message: %s"
 msgstr "Не удалось получить сообщение: %s"
 
-#: ../src/camel/camel-mapi-folder.c:1549 ../src/camel/camel-mapi-folder.c:1582
+#: ../src/camel/camel-mapi-folder.c:1509 ../src/camel/camel-mapi-folder.c:1544
 #, c-format
 msgid "Could not get message"
 msgstr "Не удалось получить сообщение"
 
-#: ../src/camel/camel-mapi-folder.c:1957
+#: ../src/camel/camel-mapi-folder.c:1934
 msgid "Receive quota"
 msgstr "Получить квоту"
 
-#: ../src/camel/camel-mapi-folder.c:1963
+#: ../src/camel/camel-mapi-folder.c:1940
 msgid "Send quota"
 msgstr "Отправить квоту"
 
-#: ../src/camel/camel-mapi-folder.c:1985
+#: ../src/camel/camel-mapi-folder.c:1962
 msgid "No quota information available"
 msgstr "Информация о квотах недоступна"
 
-#: ../src/camel/camel-mapi-folder.c:2087
+#: ../src/camel/camel-mapi-folder.c:2067
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Не удалось загрузить сводку для %s"
 
-#: ../src/camel/camel-mapi-provider.c:45
+#: ../src/camel/camel-mapi-provider.c:43
 msgid "Checking for new mail"
 msgstr "Проверка новой почты"
 
-#: ../src/camel/camel-mapi-provider.c:47
+#: ../src/camel/camel-mapi-provider.c:45
 msgid "C_heck for new messages in all folders"
 msgstr "Пр_оверить новые сообщения во всех каталогах"
+
+#: ../src/camel/camel-mapi-provider.c:47
+msgid "Lis_ten for server change notifications"
+msgstr "_Отслеживать уведомления от сервера"
 
 #: ../src/camel/camel-mapi-provider.c:51
 msgid "Options"
 msgstr "Параметры"
 
-#: ../src/camel/camel-mapi-provider.c:53
-msgid "Automatically synchroni_ze account locally"
-msgstr "Автоматически синхронизировать _локальное хранилище"
-
 #. i18n: copy from evolution:camel-imap-provider.c
-#: ../src/camel/camel-mapi-provider.c:56
+#: ../src/camel/camel-mapi-provider.c:54
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Применять фильтры к новым сообщениям в папке Входящие на сервере"
 
-#: ../src/camel/camel-mapi-provider.c:58
+#: ../src/camel/camel-mapi-provider.c:56
 msgid "Check new messages for _Junk contents"
 msgstr "Проверять новые сообщения на _спам"
 
-#: ../src/camel/camel-mapi-provider.c:60
+#: ../src/camel/camel-mapi-provider.c:58
 msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Проверять с_пам только в папке Входящие"
 
-#: ../src/camel/camel-mapi-provider.c:62
-#: ../src/configuration/e-mapi-config-utils.c:1642
-msgid "Lis_ten for server notifications"
-msgstr "_Отслеживать уведомления от сервера"
+#: ../src/camel/camel-mapi-provider.c:60
+msgid "Synchroni_ze remote mail locally in all folders"
+msgstr "Синхрони_зировать почту с серверов локально для всех папок"
 
-#: ../src/camel/camel-mapi-provider.c:73
-msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
-msgstr ""
-"Для доступа к серверам Microsoft Exchange 2007/OpenChange c использованием "
-"MAPI"
-
-#: ../src/camel/camel-mapi-provider.c:88
+#: ../src/camel/camel-mapi-provider.c:87
 msgid "Password"
 msgstr "Пароль"
 
-#: ../src/camel/camel-mapi-provider.c:89
+#: ../src/camel/camel-mapi-provider.c:88
 msgid ""
 "This option will connect to the OpenChange server using a plaintext password."
 msgstr "Соединяться с сервером Openchange, передавая пароль открытым текстом."
 
-#: ../src/camel/camel-mapi-sasl-krb.c:28
+#: ../src/camel/camel-mapi-sasl-krb.c:26
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-mapi-sasl-krb.c:30
-#, fuzzy
-#| msgid ""
-#| "This option will connect to the OpenChange server using a plaintext "
-#| "password."
+#: ../src/camel/camel-mapi-sasl-krb.c:28
 msgid "This option will connect to the server using kerberos key."
-msgstr "Соединяться с сервером Openchange, передавая пароль открытым текстом."
+msgstr "Эта опция соединит с сервером используя ключи Kerberos."
 
-#: ../src/camel/camel-mapi-store.c:134 ../src/camel/camel-mapi-store.c:176
+#: ../src/camel/camel-mapi-store.c:132 ../src/camel/camel-mapi-store.c:174
 msgid "Cannot find folder in a local cache"
 msgstr "Не удалось найти папку в локальном кэше"
 
-#: ../src/camel/camel-mapi-store.c:491 ../src/camel/camel-mapi-store.c:1212
+#: ../src/camel/camel-mapi-store.c:489 ../src/camel/camel-mapi-store.c:1173
 msgid "Folder list is not available in offline mode"
 msgstr "Список папок не доступен в автономном режиме"
 
-#: ../src/camel/camel-mapi-store.c:879
+#: ../src/camel/camel-mapi-store.c:880
 msgid "No public folder found"
 msgstr "Общая папка не найдена"
 
-#: ../src/camel/camel-mapi-store.c:879
+#: ../src/camel/camel-mapi-store.c:880
 msgid "No folder found"
 msgstr "Папка не найдена"
 
-#: ../src/camel/camel-mapi-store.c:1234 ../src/camel/camel-mapi-store.c:2211
+#: ../src/camel/camel-mapi-store.c:1195 ../src/camel/camel-mapi-store.c:2261
 #, c-format
-msgid "Connecting to '%s'"
+msgid "Connecting to “%s”"
 msgstr "Подключение к «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1293
+#: ../src/camel/camel-mapi-store.c:1254
 msgid "Cannot create MAPI folders in offline mode"
-msgstr "Не удается создать папки MAPI в автономном режиме"
+msgstr "Не удаётся создать папки MAPI в автономном режиме"
 
-#: ../src/camel/camel-mapi-store.c:1300
+#: ../src/camel/camel-mapi-store.c:1261
 #, c-format
-msgid "Cannot create new folder '%s'"
+msgid "Cannot create new folder “%s”"
 msgstr "Не удалось создать новую папку «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1309
+#: ../src/camel/camel-mapi-store.c:1270
 #, c-format
 msgid "Authentication failed"
 msgstr "Проверка подлинности не пройдена"
 
-#: ../src/camel/camel-mapi-store.c:1319
-msgid "MAPI folders can be created only within mailbox of the logged user"
+#: ../src/camel/camel-mapi-store.c:1280
+msgid "MAPI folders can be created only within mailbox of the logged in user"
 msgstr ""
+"Папки MAPI могут быть созданы только внутри почтового ящика пользователя "
+"вошедшего в систему"
 
-#: ../src/camel/camel-mapi-store.c:1332 ../src/camel/camel-mapi-store.c:1445
+#: ../src/camel/camel-mapi-store.c:1293 ../src/camel/camel-mapi-store.c:1406
 #, c-format
-msgid "Cannot find folder '%s'"
-msgstr "Не удается найти папку «%s»"
+msgid "Cannot find folder “%s”"
+msgstr "Не удаётся найти папку «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1387
+#: ../src/camel/camel-mapi-store.c:1348
 #, c-format
-msgid "Cannot create folder '%s': %s"
-msgstr "Не удалось создать папку «%s»: %s"
+msgid "Cannot create folder “%s”: %s"
+msgstr "Не удаётся создать папку «%s»: %s"
 
-#: ../src/camel/camel-mapi-store.c:1393
+#: ../src/camel/camel-mapi-store.c:1354
 #, c-format
-msgid "Cannot create folder '%s'"
-msgstr "Не удалось создать папку «%s»"
+msgid "Cannot create folder “%s”"
+msgstr "Не удаётся создать папку «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1423 ../src/camel/camel-mapi-store.c:1435
+#: ../src/camel/camel-mapi-store.c:1384 ../src/camel/camel-mapi-store.c:1396
 msgid "Cannot delete MAPI folders in offline mode"
-msgstr "Не удается удалить папки MAPI в автономном режиме"
+msgstr "Не удаётся удалить папки MAPI в автономном режиме"
 
-#: ../src/camel/camel-mapi-store.c:1491
+#: ../src/camel/camel-mapi-store.c:1452
 #, c-format
-msgid "Cannot remove folder '%s': %s"
-msgstr "Не удалось удалить папку «%s»: %s"
+msgid "Cannot remove folder “%s”: %s"
+msgstr "Не удаётся удалить папку «%s»: %s"
 
-#: ../src/camel/camel-mapi-store.c:1499
+#: ../src/camel/camel-mapi-store.c:1460
 #, c-format
-msgid "Cannot remove folder '%s'"
-msgstr "Не удалось удалить папку «%s»"
+msgid "Cannot remove folder “%s”"
+msgstr "Не удаётся удалить папку «%s»"
 
-#: ../src/camel/camel-mapi-store.c:1529 ../src/camel/camel-mapi-store.c:1544
+#: ../src/camel/camel-mapi-store.c:1490 ../src/camel/camel-mapi-store.c:1505
 msgid "Cannot rename MAPI folders in offline mode"
-msgstr "Не удается переименовать папки MAPI в автономном режиме"
+msgstr "Не удаётся переименовать папки MAPI в автономном режиме"
 
-#: ../src/camel/camel-mapi-store.c:1555
+#. Translators: “%s” is current name of the folder
+#: ../src/camel/camel-mapi-store.c:1516
 #, c-format
-msgid "Cannot rename MAPI folder '%s'. Folder does not exist"
-msgstr "Не удается переименовать папку MAPI «%s». Папка не существует"
+msgid "Cannot rename MAPI folder “%s”. Folder does not exist"
+msgstr "Не удаётся переименовать папку MAPI «%s». Папка не существует"
 
-#: ../src/camel/camel-mapi-store.c:1566
+#. Translators: “%s to %s” is current name of the folder  and
+#. new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1527
 #, c-format
-msgid "Cannot rename MAPI default folder '%s' to '%s'"
-msgstr "Не удается переименовать папку MAPI по умолчанию из «%s» в «%s»"
+msgid "Cannot rename MAPI default folder “%s” to “%s”"
+msgstr "Не удаётся переименовать папку MAPI по умолчанию из «%s» в «%s»"
 
-#. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#: ../src/camel/camel-mapi-store.c:1592 ../src/camel/camel-mapi-store.c:1635
-#: ../src/camel/camel-mapi-store.c:1715
+#. Translators: “%s to %s” is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1553 ../src/camel/camel-mapi-store.c:1596
+#: ../src/camel/camel-mapi-store.c:1676
 #, c-format
-msgid "Cannot rename MAPI folder '%s' to '%s'"
-msgstr "Не удалось переименовать папку MAPI из «%s» в «%s»"
+msgid "Cannot rename MAPI folder “%s” to “%s”"
+msgstr "Не удаётся переименовать папку MAPI из «%s» в «%s»"
 
-#. Translators: '%s to %s' is current name of the folder and new name of the folder.
-#. The last '%s' is a detailed error message.
-#: ../src/camel/camel-mapi-store.c:1627 ../src/camel/camel-mapi-store.c:1708
+#. Translators: “%s to %s” is current name of the folder and new name of the folder.
+#. The last “%s” is a detailed error message.
+#: ../src/camel/camel-mapi-store.c:1588 ../src/camel/camel-mapi-store.c:1669
 #, c-format
-msgid "Cannot rename MAPI folder '%s' to '%s': %s"
-msgstr "Не удалось переименовать папку MAPI из «%s» в «%s»: %s"
+msgid "Cannot rename MAPI folder “%s” to “%s”: %s"
+msgstr "Не удаётся переименовать папку MAPI из «%s» в «%s»: %s"
 
-#: ../src/camel/camel-mapi-store.c:1813
+#: ../src/camel/camel-mapi-store.c:1766
 msgid "Cannot subscribe MAPI folders in offline mode"
-msgstr ""
+msgstr "Не удаётся подписаться на папки MAPI в автономном режиме"
 
-#: ../src/camel/camel-mapi-store.c:1830
+#: ../src/camel/camel-mapi-store.c:1783
 #, c-format
-msgid "Folder '%s' not found"
+msgid "Folder “%s” not found"
 msgstr "Папка «%s» не найдена"
 
-#: ../src/camel/camel-mapi-store.c:1948
+#: ../src/camel/camel-mapi-store.c:1908
 msgid "Cannot unsubscribe MAPI folders in offline mode"
-msgstr ""
+msgstr "Не удаётся отписаться от папок MAPI в автономном режиме"
 
 #. Translators: The %s is replaced with a server's host name
-#: ../src/camel/camel-mapi-store.c:2162
-#: ../src/camel/camel-mapi-transport.c:195
+#: ../src/camel/camel-mapi-store.c:2208 ../src/camel/camel-mapi-transport.c:194
 #, c-format
 msgid "Exchange MAPI server %s"
 msgstr "Сервер Exchange MAPI %s"
@@ -421,81 +342,112 @@ msgstr "Сервер Exchange MAPI %s"
 #. To translators : Example string : Exchange MAPI service for
 #. _username_ on _server host name__
 #. Translators: The first %s is replaced with a user name, the second with a server's host name
-#: ../src/camel/camel-mapi-store.c:2166
-#: ../src/camel/camel-mapi-transport.c:198
+#: ../src/camel/camel-mapi-store.c:2212 ../src/camel/camel-mapi-transport.c:197
 #, c-format
 msgid "Exchange MAPI service for %s on %s"
 msgstr "Сервис Exchange MAPI для %s на %s"
 
-#: ../src/camel/camel-mapi-store.c:2193
-msgid "Cannot connect MAPI store in offline mode"
-msgstr ""
+#: ../src/camel/camel-mapi-store.c:2243
+msgid "Cannot connect to MAPI store in offline mode"
+msgstr "Не удаётся создать источник MAPI в автономном режиме"
 
-#: ../src/camel/camel-mapi-store.c:2246
+#: ../src/camel/camel-mapi-store.c:2296
 #, c-format
-msgid "Mailbox '%s' is full, no new messages will be received or sent."
+msgid "Mailbox “%s” is full, no new messages will be received or sent."
 msgstr ""
 "Почтовый ящик «%s» заполнен, новые сообщения не будут приняты или отправлены."
 
-#: ../src/camel/camel-mapi-store.c:2248
+#: ../src/camel/camel-mapi-store.c:2298
 #, c-format
 msgid ""
-"Mailbox '%s' is near its size limit, message send will be disabled soon."
+"Mailbox “%s” is near its size limit, message send will be disabled soon."
 msgstr ""
 "Почтовый ящик «%s» почти заполнен, отправка сообщений скоро будет отключена."
 
-#: ../src/camel/camel-mapi-store.c:2252
+#: ../src/camel/camel-mapi-store.c:2302
 #, c-format
-msgid "Mailbox '%s' is full, no new messages will be received."
+msgid "Mailbox “%s” is full, no new messages will be received."
 msgstr "Почтовый ящик «%s» заполнен, новые сообщения не будут приняты."
 
-#: ../src/camel/camel-mapi-store.c:2254
+#: ../src/camel/camel-mapi-store.c:2304
 #, c-format
-msgid "Mailbox '%s' is near its size limit."
-msgstr "Почтовый ящик '%s' почти заполнен."
+msgid "Mailbox “%s” is near its size limit."
+msgstr "Почтовый ящик «%s» почти заполнен."
 
-#: ../src/camel/camel-mapi-store.c:2674
+#: ../src/camel/camel-mapi-store.c:2722
+#, c-format
+msgid "Cannot add folder “%s”, failed to add to store’s summary"
+msgstr ""
+"Не удаётся добавить папку «%s», сбой при добавлении в резюме данных хранилища"
+
+#: ../src/camel/camel-mapi-store.c:3006
 msgid "Authentication password not available"
 msgstr "Проверка подлинности пароля недоступна"
 
-#: ../src/camel/camel-mapi-transport.c:146
-#: ../src/camel/camel-mapi-transport.c:168
+#: ../src/camel/camel-mapi-store.c:3042 ../src/camel/camel-mapi-store.c:3458
+msgid "Updating foreign folders"
+msgstr "Обновление других папок"
+
+#. Translators: the first '%s' is replaced with a generic error message,
+#. the second '%s' is replaced with additional error information.
+#: ../src/camel/camel-mapi-store.c:3065 ../src/collection/e-mapi-backend.c:909
+#: ../src/configuration/e-mail-config-mapi-backend.c:404
+#: ../src/configuration/e-mapi-config-utils.c:341
+#, c-format
+msgctxt "gssapi_error"
+msgid "%s (%s)"
+msgstr "%s (%s)"
+
+#: ../src/camel/camel-mapi-store.h:53
+msgid "Favorites"
+msgstr "Избранное"
+
+#: ../src/camel/camel-mapi-store.h:54
+msgid "Foreign folders"
+msgstr "Другие папки"
+
+#: ../src/camel/camel-mapi-transport.c:145
+#: ../src/camel/camel-mapi-transport.c:167
 #, c-format
 msgid "Could not send message."
 msgstr "Не удалось отправить сообщение."
 
-#: ../src/camel/camel-mapi-transport.c:163
+#: ../src/camel/camel-mapi-transport.c:162
 #, c-format
 msgid "Could not send message: %s"
 msgstr "Не удалось отправить сообщение: %s"
 
-#: ../src/collection/e-mapi-backend.c:278
+#: ../src/collection/e-mapi-backend.c:72
+msgid "Cannot connect, no credentials provided"
+msgstr "Не удаётся соединится, нет учётных данных"
+
+#: ../src/collection/e-mapi-backend.c:369
 msgid "Global Address List"
 msgstr "Список глобальных адресов"
 
-#: ../src/collection/e-mapi-backend.c:651
-#: ../src/collection/e-mapi-backend.c:737
+#: ../src/collection/e-mapi-backend.c:732
+#: ../src/collection/e-mapi-backend.c:829
 #, c-format
-msgid "Data source '%s' does not represent a MAPI folder"
-msgstr ""
+msgid "Data source “%s” does not represent a MAPI folder"
+msgstr "Источник «%s» не является папкой MAPI"
 
-#: ../src/configuration/e-book-config-mapigal.c:61
+#: ../src/configuration/e-book-config-mapigal.c:59
 msgid "Allow _partial search results"
-msgstr ""
+msgstr "Разрешить результаты _неполного поиска"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:125
+#: ../src/configuration/e-mail-config-mapi-backend.c:121
 msgid "Select username"
 msgstr "Выберите имя пользователя"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:135
+#: ../src/configuration/e-mail-config-mapi-backend.c:131
 msgid "Full name"
 msgstr "Полное имя"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:140
+#: ../src/configuration/e-mail-config-mapi-backend.c:136
 msgid "Username"
 msgstr "Имя пользователя"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:167
+#: ../src/configuration/e-mail-config-mapi-backend.c:163
 msgid ""
 "There are more users with similar user name on a server.\n"
 "Please select that you would like to use from the below list."
@@ -503,20 +455,20 @@ msgstr ""
 "На сервере есть несколько пользователей с похожим именем.\n"
 "Выберите нужного из списка ниже."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:395
+#: ../src/configuration/e-mail-config-mapi-backend.c:359
 msgid "Authentication finished successfully."
 msgstr "Подлинность проверена."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:397
-#: ../src/configuration/e-mail-config-mapi-backend.c:518
+#: ../src/configuration/e-mail-config-mapi-backend.c:361
+#: ../src/configuration/e-mail-config-mapi-backend.c:499
 msgid "Authentication failed."
 msgstr "Проверка подлинности не пройдена."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:459
+#: ../src/configuration/e-mail-config-mapi-backend.c:442
 msgid "Cannot authenticate MAPI accounts in offline mode"
 msgstr "Невозможно распознать аккаунты MAPI в автономном режиме"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:488
+#: ../src/configuration/e-mail-config-mapi-backend.c:471
 msgid ""
 "Server, username and domain name cannot be empty. Please fill them with "
 "correct values."
@@ -524,8 +476,7 @@ msgstr ""
 "Сервер, имя пользователя и домен не могут быть пустыми. Заполните эти "
 "значения."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:491
-#, fuzzy
+#: ../src/configuration/e-mail-config-mapi-backend.c:474
 msgid ""
 "Realm name cannot be empty when kerberos is selected. Please fill them with "
 "correct values."
@@ -533,374 +484,380 @@ msgstr ""
 "Имя сферы не может быть пустым, когда выбран kerberos. Заполните их "
 "корректными значениями."
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:512
-msgid "Connecting to the server, please wait..."
+#: ../src/configuration/e-mail-config-mapi-backend.c:493
+msgid "Connecting to the server, please wait…"
 msgstr "Подключение к серверу, подождите…"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:720
+#: ../src/configuration/e-mail-config-mapi-backend.c:695
 msgid "Configuration"
 msgstr "Конфигурация"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:729
+#: ../src/configuration/e-mail-config-mapi-backend.c:704
 msgid "_Server:"
 msgstr "_Сервер:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:746
+#: ../src/configuration/e-mail-config-mapi-backend.c:721
 msgid "User_name:"
 msgstr "_Имя пользователя:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:771
+#: ../src/configuration/e-mail-config-mapi-backend.c:746
 msgid "_Domain name:"
 msgstr "_Домен:"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:784
+#: ../src/configuration/e-mail-config-mapi-backend.c:759
 msgid "_Authenticate"
 msgstr "_Проверка подлинности"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:792
+#: ../src/configuration/e-mail-config-mapi-backend.c:767
 msgid "_Use secure connection"
 msgstr "_Использовать безопасное соединение"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:807
+#: ../src/configuration/e-mail-config-mapi-backend.c:782
 msgid "_Kerberos authentication"
 msgstr "_Аутентификация kerberos"
 
-#: ../src/configuration/e-mail-config-mapi-backend.c:819
-#, fuzzy
+#: ../src/configuration/e-mail-config-mapi-backend.c:794
 msgid "_Realm name:"
 msgstr "_Имя сферы:"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:186
-#: ../src/configuration/e-mail-config-mapi-page.c:247
+#: ../src/configuration/e-mail-config-mapi-page.c:177
+#: ../src/configuration/e-mail-config-mapi-page.c:238
 msgid "MAPI Settings"
 msgstr "Параметры MAPI"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:192
+#: ../src/configuration/e-mail-config-mapi-page.c:183
 msgid "View the size of all Exchange folders"
 msgstr "Просмотр размера всех папок Exchange"
 
-#: ../src/configuration/e-mail-config-mapi-page.c:196
+#: ../src/configuration/e-mail-config-mapi-page.c:187
 msgid "Folder _Size"
 msgstr "_Размер папки"
 
-#: ../src/configuration/e-mapi-config-utils.c:455
+#: ../src/configuration/e-mapi-config-utils.c:432
 msgid "Folder"
 msgstr "Папка"
 
-#: ../src/configuration/e-mapi-config-utils.c:460
+#: ../src/configuration/e-mapi-config-utils.c:437
 msgid "Size"
 msgstr "Размер"
 
-#: ../src/configuration/e-mapi-config-utils.c:483
-#: ../src/configuration/e-mapi-config-utils.c:487
+#: ../src/configuration/e-mapi-config-utils.c:460
+#: ../src/configuration/e-mapi-config-utils.c:464
 msgid "Unable to retrieve folder size information"
 msgstr "Не удалось получить информацию о размере папки"
 
-#: ../src/configuration/e-mapi-config-utils.c:554
+#: ../src/configuration/e-mapi-config-utils.c:531
 msgid "Folder Size"
 msgstr "Размер папки"
 
-#: ../src/configuration/e-mapi-config-utils.c:568
+#: ../src/configuration/e-mapi-config-utils.c:545
 msgid "Fetching folder list…"
 msgstr "Извлечение списка папок…"
 
-#: ../src/configuration/e-mapi-config-utils.c:742
+#: ../src/configuration/e-mapi-config-utils.c:612
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:752
+msgid "Subscribe to folder of other MAPI user…"
+msgstr "Подключиться к папки другого пользователя MAPI…"
+
+#: ../src/configuration/e-mapi-config-utils.c:810
 #, c-format
-msgid "Cannot edit permissions of folder '%s', choose other folder."
+msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "Невозможно изменить права доступа к папке «%s», выберите другую папку."
 
-#: ../src/configuration/e-mapi-config-utils.c:805
-msgid "Folder size..."
+#: ../src/configuration/e-mapi-config-utils.c:873
+msgid "Folder size…"
 msgstr "Размер папки…"
 
-#: ../src/configuration/e-mapi-config-utils.c:812
-msgid "Subscribe to folder of other user..."
-msgstr ""
+#: ../src/configuration/e-mapi-config-utils.c:880
+msgid "Subscribe to folder of other user…"
+msgstr "Подключиться к папки другого пользователя…"
 
-#: ../src/configuration/e-mapi-config-utils.c:821
-#: ../src/configuration/e-mapi-config-utils.c:1099
-#: ../src/configuration/e-mapi-config-utils.c:1129
-#: ../src/configuration/e-mapi-config-utils.c:1159
-#: ../src/configuration/e-mapi-config-utils.c:1189
-msgid "Permissions..."
+#: ../src/configuration/e-mapi-config-utils.c:889
+#: ../src/configuration/e-mapi-config-utils.c:1203
+#: ../src/configuration/e-mapi-config-utils.c:1240
+#: ../src/configuration/e-mapi-config-utils.c:1277
+#: ../src/configuration/e-mapi-config-utils.c:1314
+msgid "Permissions…"
 msgstr "Права доступа…"
 
-#: ../src/configuration/e-mapi-config-utils.c:823
+#: ../src/configuration/e-mapi-config-utils.c:891
 msgid "Edit MAPI folder permissions"
 msgstr "Редактировать доступ к папке MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1101
+#: ../src/configuration/e-mapi-config-utils.c:1205
 msgid "Edit MAPI calendar permissions"
 msgstr "Редактировать доступ к календарю MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1131
+#: ../src/configuration/e-mapi-config-utils.c:1242
 msgid "Edit MAPI tasks permissions"
 msgstr "Редактировать доступ к задачам MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1161
+#: ../src/configuration/e-mapi-config-utils.c:1279
 msgid "Edit MAPI memos permissions"
-msgstr ""
+msgstr "Редактировать доступ к заметкам MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1191
+#: ../src/configuration/e-mapi-config-utils.c:1316
 msgid "Edit MAPI contacts permissions"
 msgstr "Редактировать доступ к контактам MAPI"
 
-#: ../src/configuration/e-mapi-config-utils.c:1364
+#: ../src/configuration/e-mapi-config-utils.c:1496
 msgid "Personal Folders"
 msgstr "Личные папки"
 
-#: ../src/configuration/e-mapi-config-utils.c:1595
-#, fuzzy
-#| msgid "Reading folder permissions, please wait..."
-msgid "Searching remote MAPI folder structure, please wait..."
-msgstr "Чтение доступа к папке, пожалуйста, подожите…"
+#: ../src/configuration/e-mapi-config-utils.c:1727
+msgid "Searching remote MAPI folder structure, please wait…"
+msgstr "Поиск по структуре папки MAPI на сервере, пожалуйста, подождите…"
 
-#: ../src/configuration/e-mapi-config-utils.c:1663
+#: ../src/configuration/e-mapi-config-utils.c:1774
+msgid "Lis_ten for server notifications"
+msgstr "_Отслеживать уведомления от сервера"
+
+#: ../src/configuration/e-mapi-config-utils.c:1797
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Невозможно создать календарь MAPI в автономном режиме"
 
-#: ../src/configuration/e-mapi-config-utils.c:1666
+#: ../src/configuration/e-mapi-config-utils.c:1800
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "Невозможно создать список задач MAPI в автономном режиме"
 
-#: ../src/configuration/e-mapi-config-utils.c:1669
+#: ../src/configuration/e-mapi-config-utils.c:1803
 msgid "Cannot create MAPI memo list in offline mode"
-msgstr ""
+msgstr "Не удаётся создать список заметок MAPI в автономном режиме"
 
-#: ../src/configuration/e-mapi-config-utils.c:1672
+#: ../src/configuration/e-mapi-config-utils.c:1806
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "Создание адресной книги MAPI недоступно в автономном режиме"
 
-#: ../src/configuration/e-mapi-config-utils.c:1676
+#: ../src/configuration/e-mapi-config-utils.c:1811
 msgid "Cannot create MAPI source in offline mode"
 msgstr "Невозможно создать источник MAPI в автономном режиме"
 
-#: ../src/configuration/e-mapi-config-utils.c:1696
+#: ../src/configuration/e-mapi-config-utils.c:1831
 msgid "_Location:"
 msgstr "_Положение:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:89
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:87
 msgctxt "PermissionsLevel"
 msgid "None"
-msgstr ""
+msgstr "Никаких"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:90
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:88
 msgctxt "PermissionsLevel"
 msgid "Owner"
 msgstr "Владелец"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:100
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:98
 msgctxt "PermissionsLevel"
 msgid "Publishing Editor"
-msgstr ""
+msgstr "Публикующий редактор"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:109
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:107
 msgctxt "PermissionsLevel"
 msgid "Editor"
 msgstr "Редактор"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:117
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:115
 msgctxt "PermissionsLevel"
 msgid "Publishing Author"
-msgstr ""
+msgstr "Публикующий автор"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:124
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:122
 msgctxt "PermissionsLevel"
 msgid "Author"
 msgstr "Автор"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:130
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:128
 msgctxt "PermissionsLevel"
 msgid "Nonediting Author"
-msgstr ""
+msgstr "Автор без прав на редактирование"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:135
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:133
 msgctxt "PermissionsLevel"
 msgid "Reviewer"
 msgstr "Обозреватель"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:138
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:136
 msgctxt "PermissionsLevel"
 msgid "Contributor"
 msgstr "Участник"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:141
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:139
 msgctxt "PermissionsLevel"
 msgid "Custom"
-msgstr ""
+msgstr "Пользовательские"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:274
-msgid "Writing folder permissions, please wait..."
-msgstr ""
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:272
+msgid "Writing folder permissions, please wait…"
+msgstr "Чтение прав доступа к папке, пожалуйста, подождите…"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:780
-#: ../src/configuration/e-mapi-search-gal-user.c:527
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
+#: ../src/configuration/e-mapi-search-gal-user.c:525
 msgctxt "User"
 msgid "Anonymous"
 msgstr "Аноним"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
-#: ../src/configuration/e-mapi-search-gal-user.c:524
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
+#: ../src/configuration/e-mapi-search-gal-user.c:522
 msgctxt "User"
 msgid "Default"
 msgstr "По умолчанию"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:786
 msgctxt "User"
 msgid "Unknown"
 msgstr "Неизвестный"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:876
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:880
 #: ../src/configuration/e-mapi-search-gal-user.c:600
 msgid "Name"
 msgstr "Имя"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:882
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:886
 msgid "Permission level"
 msgstr "Уровень доступа"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:935
-msgid "Edit MAPI folder permissions..."
-msgstr ""
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:939
+msgid "Edit MAPI folder permissions…"
+msgstr "Редактировать доступ к папке MAPI…"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:960
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:626
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:964
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:773
 msgid "Account:"
 msgstr "Аккаунт:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:986
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:990
 msgid "Folder name:"
 msgstr "Имя папки:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1007
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1011
 msgid "Folder ID:"
 msgstr "ID папки:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1066
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1070
 msgid "Permissions"
 msgstr "Права доступа"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1087
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1091
 msgid "Permi_ssion level:"
 msgstr "У_ровень доступа:"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1115
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1119
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Читать"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1126
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1189
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1130
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1193
 msgctxt "Permissions"
 msgid "None"
-msgstr ""
+msgstr "Никаких"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1131
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1135
 msgctxt "Permissions"
 msgid "Full Details"
-msgstr ""
-
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1136
-msgctxt "Permissions"
-msgid "Simple Free/Busy"
-msgstr ""
+msgstr "Все детали"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:1140
 msgctxt "Permissions"
-msgid "Detailed Free/Busy"
-msgstr ""
+msgid "Simple Free/Busy"
+msgstr "Просто Занят/Свободен"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1147
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1144
+msgctxt "Permissions"
+msgid "Detailed Free/Busy"
+msgstr "Занят/Свободен с деталями"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1151
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Написать"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1158
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
 msgctxt "Permissions"
 msgid "Create items"
-msgstr ""
+msgstr "Создавать элементы"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Создать подпапку"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
-msgctxt "Permissions"
-msgid "Edit own"
-msgstr ""
-
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:1170
 msgctxt "Permissions"
-msgid "Edit all"
-msgstr "Редактировать все"
+msgid "Edit own"
+msgstr "Редактировать своё"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1178
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1174
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "Редактировать всё"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1182
 msgctxt "Permissions"
 msgid "Delete items"
-msgstr "Удалить "
+msgstr "Удалить элементы"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1194
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1198
 msgctxt "Permissions"
 msgid "Own"
-msgstr ""
+msgstr "Владеть"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1199
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1203
 msgctxt "Permissions"
 msgid "All"
 msgstr "Все"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1205
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1209
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Другие"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1216
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Владелец папки"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Контакт папки"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1228
 msgctxt "Permissions"
 msgid "Folder visible"
-msgstr ""
+msgstr "Видеть папку"
 
-#: ../src/configuration/e-mapi-edit-folder-permissions.c:1279
-msgid "Reading folder permissions, please wait..."
-msgstr "Чтение доступа к папке, пожалуйста, подожите…"
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1283
+msgid "Reading folder permissions, please wait…"
+msgstr "Чтение прав доступа к папке, пожалуйста, подождите…"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:223
+#: ../src/configuration/e-mapi-search-gal-user.c:221
 msgid "No users found"
 msgstr "Пользователи не найдены"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:226
+#: ../src/configuration/e-mapi-search-gal-user.c:224
 #, c-format
 msgid "Found one user"
 msgid_plural "Found %d users"
 msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[1] "Найдено %d пользователя"
+msgstr[2] "Найдено %d пользователей"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:231
+#: ../src/configuration/e-mapi-search-gal-user.c:229
 #, c-format
 msgid "Found %d user, but showing only first %d"
 msgid_plural "Found %d users, but showing only first %d"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "Найден %d пользователь, показываю только начальные %d"
+msgstr[1] "Найдено %d пользователя, показываю только начальные %d"
+msgstr[2] "Найдено %d пользователей, показываю только начальные %d"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:519
+#: ../src/configuration/e-mapi-search-gal-user.c:517
 #: ../src/configuration/e-mapi-search-gal-user.c:710
 msgid "Search for a user"
 msgstr "Поиск пользователя"
 
-#: ../src/configuration/e-mapi-search-gal-user.c:535
-msgid "Searching..."
+#: ../src/configuration/e-mapi-search-gal-user.c:533
+msgid "Searching…"
 msgstr "Поиск…"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:606
@@ -908,186 +865,192 @@ msgid "E-mail"
 msgstr "Электронная почта"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:647
-msgid "Choose MAPI user..."
-msgstr "Выбрать пользователя MAPI"
+msgid "Choose MAPI user…"
+msgstr "Выбрать пользователя MAPI…"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:670
 msgid "_Search:"
 msgstr "_Поиск:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:89
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:95
 #, c-format
-msgid "Cannot add folder, folder already exists as '%s'"
+msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Невозможно добавить папку, папка «%s» уже существует"
 
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
-#. Example result: "Mailbox - John Smith"
+#. Example result: "Mailbox — John Smith"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:114
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:120
 #, c-format
 msgctxt "ForeignFolder"
-msgid "Mailbox - %s"
+msgid "Mailbox — %s"
 msgstr "Почтовый ящик - %s"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:143
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:150
 #, c-format
-msgid "Cannot add folder, failed to add to store's summary"
+msgid "Cannot add folder, failed to add to store’s summary"
 msgstr ""
+"Не удаётся добавить папку, не удалось добавить данные в резюме хранилища"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:329
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:373
 #, c-format
 msgid ""
-"Folder '%s' not found. Either it does not exist or you do not have "
+"Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
 msgstr ""
 "Папка «%s» не найдена. Либо она не существует, либо у вас нет права доступа "
 "к ней."
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:364
-msgid "Cannot add folder, cannot determine folder's type"
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:408
+msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Невозможно добавить папку, невозможно определить тип папки"
 
 #. Translators: This is used to name foreign folder.
 #. The first '%s' is replaced with user name to whom the folder belongs,
 #. the second '%s' is replaced with folder name.
-#. Example result: "John Smith - Calendar"
+#. Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:405
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:449
 #, c-format
 msgctxt "ForeignFolder"
-msgid "%s - %s"
-msgstr "%s - %s"
+msgid "%s — %s"
+msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:502
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:704
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:568
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:846
 msgid "Inbox"
 msgstr "Входящие"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:504
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:705
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:570
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:847
 msgid "Contacts"
 msgstr "Контакты"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:506
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:706
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:572
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:848
 msgid "Calendar"
 msgstr "Календарь"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:508
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:707
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:574
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:849
 msgid "Memos"
-msgstr ""
+msgstr "Заметки"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:510
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:708
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:576
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:850
 msgid "Tasks"
 msgstr "Задачи"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:523
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:590
 #, c-format
-msgid "Testing availability of folder '%s' of user '%s', please wait..."
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
 msgstr ""
+"Проверка доступности папки «%s» пользователя «%s», пожалуйста, подождите…"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:605
-msgid "Subscribe to folder of other MAPI user..."
-msgstr ""
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:628
+msgid "Cannot search for user when the account is offline"
+msgstr "Невозможно найти пользователя в автономном режиме"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:654
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:796
 msgid "User"
 msgstr "Пользователь"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:661
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:803
 msgid "_User:"
-msgstr "_Пользователь"
+msgstr "_Пользователь:"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:674
-msgid "C_hoose..."
-msgstr ""
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:816
+msgid "C_hoose…"
+msgstr "_Выбрать…"
 
-#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:689
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:831
 msgid "_Folder name:"
-msgstr "_Имя папки"
+msgstr "_Имя папки:"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:859
+msgid "Include _subfolders"
+msgstr "Включить _подпапки"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2077
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2191
 msgctxt "MeetingResp"
 msgid "Accepted:"
 msgstr "Принято:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2082
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2196
 msgctxt "MeetingResp"
 msgid "Tentative:"
 msgstr "Предварительно:"
 
 #. Translators: This is a meeting response prefix which will be shown in a message Subject
-#: ../src/libexchangemapi/e-mapi-cal-utils.c:2087
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2201
 msgctxt "MeetingResp"
 msgid "Declined:"
 msgstr "Отклонено:"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:140
+#: ../src/libexchangemapi/e-mapi-connection.c:137
 msgid "Failed to login into the server"
 msgstr "Не удалось выполнить вход на сервере"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:141
+#: ../src/libexchangemapi/e-mapi-connection.c:138
 msgid "Cannot create more sessions, session limit was reached"
 msgstr "Не удалось создать сеанс, достигнут лимит количества сеансов"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:142
+#: ../src/libexchangemapi/e-mapi-connection.c:139
 msgid "User cancelled operation"
 msgstr "Пользователь отменил операцию"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:143
+#: ../src/libexchangemapi/e-mapi-connection.c:140
 msgid "Unable to abort"
 msgstr "Не удалось прервать"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:144
+#: ../src/libexchangemapi/e-mapi-connection.c:141
 msgid "Network error"
 msgstr "Ошибка сети"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:145
+#: ../src/libexchangemapi/e-mapi-connection.c:142
 msgid "Disk error"
 msgstr "Ошибка диска"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:146
+#: ../src/libexchangemapi/e-mapi-connection.c:143
 msgid "Password change required"
 msgstr "Необходимо сменить пароль"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:147
+#: ../src/libexchangemapi/e-mapi-connection.c:144
 msgid "Password expired"
 msgstr "Срок действия пароля истёк"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:148
+#: ../src/libexchangemapi/e-mapi-connection.c:145
 msgid "Invalid workstation account"
 msgstr "Некорректная учётная запись рабочей станции"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:149
+#: ../src/libexchangemapi/e-mapi-connection.c:146
 msgid "Invalid access time"
 msgstr "Некорректное время доступа"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:150
+#: ../src/libexchangemapi/e-mapi-connection.c:147
 msgid "Account is disabled"
 msgstr "Учётная запись отключена"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:151
+#: ../src/libexchangemapi/e-mapi-connection.c:148
 msgid "End of session"
 msgstr "Конец сеанса"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:152
+#: ../src/libexchangemapi/e-mapi-connection.c:149
 msgid "MAPI is not initialized or connected"
-msgstr ""
+msgstr "Сервис MAPI не инициализирован или отсутствует соединение"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:153
+#: ../src/libexchangemapi/e-mapi-connection.c:150
 msgid "Permission denied"
 msgstr "В доступе отказано"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:154
+#: ../src/libexchangemapi/e-mapi-connection.c:151
 msgid "Mailbox quota exceeded"
-msgstr ""
+msgstr "Превышена квота почтового ящика"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:162
+#: ../src/libexchangemapi/e-mapi-connection.c:159
 #, c-format
 msgid "MAPI error %s (0x%x) occurred"
 msgstr "Произошла ошибка MAPI %s (0x%x)"
@@ -1095,63 +1058,136 @@ msgstr "Произошла ошибка MAPI %s (0x%x)"
 #. Translators: The first '%s' is replaced with an error context,
 #. aka where the error occurred, the second '%s' is replaced with
 #. the error message.
-#: ../src/libexchangemapi/e-mapi-connection.c:179
+#: ../src/libexchangemapi/e-mapi-connection.c:177
 #, c-format
 msgctxt "EXCHANGEMAPI_ERROR"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:744
+#: ../src/libexchangemapi/e-mapi-connection.c:724
 #, c-format
-msgid "Server '%s' cannot be reached"
-msgstr ""
+msgid "Server “%s” cannot be reached"
+msgstr "Не удаётся подключиться к серверу «%s»"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:872
+#: ../src/libexchangemapi/e-mapi-connection.c:852
 #, c-format
-msgid "Folder name '%s' is not a known default folder name, nor folder ID."
+msgid "Folder name “%s” is not a known default folder name, nor folder ID."
 msgstr ""
+"Имя папки «%s» не является ни известным именем по-умолчанию, ни "
+"идентификатором папки."
 
-#: ../src/libexchangemapi/e-mapi-connection.c:1203
+#: ../src/libexchangemapi/e-mapi-connection.c:1183
 #, c-format
-msgid "Failed to open store for user '%s'"
-msgstr ""
+msgid "Failed to open store for user “%s”"
+msgstr "Не удалось открыть хранилище пользователя «%s»"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:1211
+#: ../src/libexchangemapi/e-mapi-connection.c:1191
 #, c-format
-msgid "Folder of user '%s' not found"
+msgid "Folder of user “%s” not found"
 msgstr "Папка пользователя «%s» не найдена"
 
 #. Translators: %s is replaced with an email address which was found ambiguous on a remote server
-#: ../src/libexchangemapi/e-mapi-connection.c:3840
+#: ../src/libexchangemapi/e-mapi-connection.c:3843
 #, c-format
-msgid "Recipient '%s' is ambiguous"
-msgstr ""
+msgid "Recipient “%s” is ambiguous"
+msgstr "Адресат «%s» неоднозначен"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:4932
+#: ../src/libexchangemapi/e-mapi-connection.c:4935
 #, c-format
 msgid ""
 "Search result exceeded allowed size limit. Use more specific search term, "
 "please"
 msgstr ""
+"Результаты поиска превысили лимит размера. Уточните критерии поиска, "
+"пожалуйста"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6532
+#: ../src/libexchangemapi/e-mapi-connection.c:6563
 msgid "All Public Folders"
 msgstr "Все общие папки"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6799
+#: ../src/libexchangemapi/e-mapi-connection.c:6871
 #, c-format
-msgid "User name '%s' is ambiguous"
-msgstr ""
+msgid "User name “%s” is ambiguous"
+msgstr "Имя пользователя «%s» неоднозначно"
 
-#: ../src/libexchangemapi/e-mapi-connection.c:6802
+#: ../src/libexchangemapi/e-mapi-connection.c:6874
 #, c-format
-msgid "User name '%s' not found"
+msgid "User name “%s” not found"
 msgstr "Имя пользователя «%s» не найдено"
 
-#: ../src/libexchangemapi/e-mapi-folder.c:332
+#: ../src/libexchangemapi/e-mapi-folder.c:330
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Невозможно добавить папку, неподдерживаемый тип папки"
 
-#: ../src/libexchangemapi/e-mapi-folder.c:335
+#: ../src/libexchangemapi/e-mapi-folder.c:333
 msgid "Cannot add folder, master source not found"
+msgstr "Не могу добавить папку, исходная копия не найдена"
+
+#: ../src/libexchangemapi/e-mapi-utils.c:854
+#, c-format
+msgid ""
+"Cannot ask for Kerberos ticket. Obtain the ticket manually, like on command "
+"line with “kinit” or open “Online Accounts” in “Settings” and add the "
+"Kerberos account there. Reported error was: %s"
 msgstr ""
+"Не удаётся запросить ключ Kerberos. Получите ключ вручную, или в консоли "
+"используя «kinit» или откройте «Учётные записи интернет» в «Настройках» и "
+"добавьте учётную запись Kerberos там. Сообщение об ошибке: %s"
+
+#~ msgid "Failed to remove public folder"
+#~ msgstr "Не удалось удалить общий каталог"
+
+#, c-format
+#~ msgid "Caching contact %d"
+#~ msgstr "Кэширование контакта %d"
+
+#, c-format
+#~ msgid "Caching contact %d/%d"
+#~ msgstr "Кэширование контакта %d/%d"
+
+#, c-format
+#~ msgid "Caching GAL contact %d"
+#~ msgstr "Кэширование контакта GAL %d"
+
+#, c-format
+#~ msgid "Caching GAL contact %d/%d"
+#~ msgstr "Кэширование контакта GAL %d/%d"
+
+#, c-format
+#~ msgid "Failed to get folder properties: %s"
+#~ msgstr "Не удалось получить свойства папки: %s"
+
+#, c-format
+#~ msgid "Failed to list objects: %s"
+#~ msgstr "Не удалось получить список объектов: %s"
+
+#, c-format
+#~ msgid "Failed to transfer objects: %s"
+#~ msgstr "Не удалось перенести объекты: %s"
+
+#, c-format
+#~ msgid "Failed to close folder: %s"
+#~ msgstr "Не удалось закрыть папку: %s"
+
+#~ msgid "Could not create cache file"
+#~ msgstr "Не удалось создать файл кэша"
+
+#~ msgid "Cannot remove items from a server"
+#~ msgstr "Невозможно удалить элементы с сервера"
+
+#~ msgid "Automatically synchroni_ze account locally"
+#~ msgstr "Автоматически синхронизировать _локальное хранилище"
+
+#~ msgid "Folder size..."
+#~ msgstr "Размер папки…"
+
+#~ msgid "Permissions..."
+#~ msgstr "Права доступа…"
+
+#~ msgid "Searching..."
+#~ msgstr "Поиск…"
+
+#, c-format
+#~ msgctxt "ForeignFolder"
+#~ msgid "%s - %s"
+#~ msgstr "%s - %s"
