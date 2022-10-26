@@ -44,8 +44,8 @@ void e_module_load (GTypeModule *type_module);
 void e_module_unload (GTypeModule *type_module);
 
 /* Forward Declarations */
-GType e_book_backend_mapi_contacts_factory_get_type ();
-GType e_book_backend_mapi_gal_factory_get_type ();
+GType e_book_backend_mapi_contacts_factory_get_type (void);
+GType e_book_backend_mapi_gal_factory_get_type (void);
 
 G_DEFINE_DYNAMIC_TYPE (
 	EBookBackendMapiContactsFactory,
