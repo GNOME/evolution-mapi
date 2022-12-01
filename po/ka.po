@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: evolution-mapi gnome-43\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-mapi/issues\n"
 "POT-Creation-Date: 2022-10-25 13:41+0000\n"
-"PO-Revision-Date: 2022-12-01 11:40+0100\n"
-"Last-Translator: Temuri Doghonadze <temuri.doghonadze@gmail.com>\n"
+"PO-Revision-Date: 2022-12-01 11:43+0100\n"
+"Last-Translator: Ekaterine Papava <papava.e@gtu.ge>\n"
 "Language-Team: Georgian <ka@li.org>\n"
 "Language: ka\n"
 "MIME-Version: 1.0\n"
@@ -347,6 +347,7 @@ msgstr ""
 #, c-format
 msgid "Mailbox “%s” is full, no new messages will be received or sent."
 msgstr ""
+"საფოსტო ყუთი \"%s\" სავსეა. შეტყობინებების გაგზავნა/მიღება შეუძლებელია."
 
 #: ../src/camel/camel-mapi-store.c:2298
 #, c-format
@@ -418,7 +419,7 @@ msgstr "გლობალური მისამართების სი�
 #: ../src/collection/e-mapi-backend.c:829
 #, c-format
 msgid "Data source “%s” does not represent a MAPI folder"
-msgstr ""
+msgstr "მონაცემების წყარო \"%s\" MAPI საქაღალდეს არ წარმოადგენს"
 
 #: ../src/configuration/e-book-config-mapigal.c:59
 msgid "Allow _partial search results"
@@ -453,7 +454,7 @@ msgstr "ავთენტიკაცია წარუმატებელ�
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:442
 msgid "Cannot authenticate MAPI accounts in offline mode"
-msgstr ""
+msgstr "გათიშულ რეჟიმში MAPI ანგარიშზე ავთენტიკაცია შეუძლებელია"
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:471
 msgid ""
@@ -881,6 +882,7 @@ msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
 msgstr ""
+"საქაღალდე \"%s\" ვერ ვიპოვე. ის ან არ არსებობს, ან მასზე წვდომა არ გაგაჩნიათ."
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:409
 msgid "Cannot add folder, cannot determine folder’s type"
@@ -1055,6 +1057,8 @@ msgstr "სერვერი \"%s\" მიუწვდომელია"
 #, c-format
 msgid "Folder name “%s” is not a known default folder name, nor folder ID."
 msgstr ""
+"საქაღალდის სახელი \"%s\" ცნობილ ნაგულისხმები საქაღალდის სახელს არ "
+"წარმოადგენს. არც საქაღალდის ID-ისას."
 
 #: ../src/libexchangemapi/e-mapi-connection.c:1183
 #, c-format
@@ -1078,6 +1082,7 @@ msgid ""
 "Search result exceeded allowed size limit. Use more specific search term, "
 "please"
 msgstr ""
+"ძებნის შედეგი დაშვებული ზომის ლიმიტს აჭარბებს. გამოიყენეთ უფრო ვიწრო ძებნა"
 
 #: ../src/libexchangemapi/e-mapi-connection.c:6563
 msgid "All Public Folders"
