@@ -1,0 +1,1126 @@
+# Georgian translation for evolution-mapi.
+# Copyright (C) 2022 evolution-mapi's COPYRIGHT HOLDER
+# This file is distributed under the same license as the evolution-mapi package.
+# Ekaterine Papava <papava.e@gtu.ge>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-mapi master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-mapi/issues\n"
+"POT-Creation-Date: 2022-11-04 04:04+0000\n"
+"PO-Revision-Date: 2022-12-03 18:09+0100\n"
+"Last-Translator: Ekaterine Papava <papava.e@gtu.ge>\n"
+"Language-Team: Georgian <ka@li.org>\n"
+"Language: ka\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.2.2\n"
+
+#: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:1
+msgid "Exchange MAPI"
+msgstr "Exchange MAPI"
+
+#: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:2
+#: ../src/camel/camel-mapi-provider.c:72
+msgid "For accessing Microsoft Exchange 2007/OpenChange servers via MAPI"
+msgstr "MS Exchange 2007/Openchange სერვერთან მიერთება MAPI-ის საშუალებით"
+
+#: ../src/addressbook/e-book-backend-mapi.c:89
+#: ../src/calendar/e-cal-backend-mapi.c:105
+#: ../src/camel/camel-mapi-folder.c:1873 ../src/camel/camel-mapi-folder.c:1957
+msgid "Unknown error"
+msgstr "უცნობი შეცდომა"
+
+#: ../src/addressbook/e-book-backend-mapi.c:499
+#: ../src/addressbook/e-book-backend-mapi.c:683
+msgid "Failed to fetch GAL entries"
+msgstr "GAL ჩანაწერების გამოთხოვის შეცდომა"
+
+#: ../src/addressbook/e-book-backend-mapi.c:505
+msgid "Failed to transfer contacts from a server"
+msgstr "სერვერიდან კონტაქტების გამოთხოვის შეცდომა"
+
+#: ../src/addressbook/e-book-backend-mapi.c:690
+#: ../src/calendar/e-cal-backend-mapi.c:1140
+msgid "Failed to list items from a server"
+msgstr "სერვერიდან ჩანაწერების ჩამონათვალის მიღების შეცდომა"
+
+#: ../src/addressbook/e-book-backend-mapi.c:866
+#: ../src/calendar/e-cal-backend-mapi.c:1368
+msgid "Failed to modify item on a server"
+msgstr "სერვერზე ჩანაწერის ჩასწორების შეცდომა"
+
+#: ../src/addressbook/e-book-backend-mapi.c:866
+#: ../src/calendar/e-cal-backend-mapi.c:1368
+#: ../src/calendar/e-cal-backend-mapi.c:1672
+msgid "Failed to create item on a server"
+msgstr "სერვერზე ჩანაწერის შექმნის შეცდომა"
+
+#: ../src/addressbook/e-book-backend-mapi.c:928
+#: ../src/calendar/e-cal-backend-mapi.c:1437
+msgid "Failed to remove item from a server"
+msgstr "სერვერიდან ჩანაწერის წაშლის შეცდომა"
+
+#: ../src/calendar/e-cal-backend-mapi.c:912
+msgid "Failed to transfer objects from a server"
+msgstr "სერვერიდან ობიექტების მიღების შეცდმა"
+
+#: ../src/calendar/e-cal-backend-mapi.c:1285
+msgid ""
+"Support for modifying single instances of a recurring appointment is not yet "
+"implemented. No change was made to the appointment on the server."
+msgstr ""
+"გამეორებადი შეხვედრის ერთი ასლის ჩასწორების მხარდაჭერა ჯერ განხორციელებული "
+"არაა. სერვერზე შეხვედრა არ შეცვლილა."
+
+#: ../src/calendar/e-cal-backend-mapi.c:1722
+msgid "Failed to get Free/Busy data"
+msgstr "თავისუფალი/დაკავებულბის მონაცემების მიღების შეცდმა"
+
+#: ../src/camel/camel-mapi-folder.c:776
+#, c-format
+msgid "Refreshing folder “%s”"
+msgstr "საქაღალდის (\"%s\") განახლება"
+
+#: ../src/camel/camel-mapi-folder.c:844
+#, c-format
+msgid "Downloading messages in folder “%s”"
+msgstr "მიმდინარეობს შეტყობინებების გადმოწერა საქაღალდეში \"%s\""
+
+#: ../src/camel/camel-mapi-folder.c:932 ../src/camel/camel-mapi-folder.c:1492
+#, c-format
+msgid "This message is not available in offline mode."
+msgstr "ეს შეტყობინება გათიშულ რეჟიმში ხელმისაწვდომი არაა."
+
+#: ../src/camel/camel-mapi-folder.c:942 ../src/camel/camel-mapi-folder.c:960
+#, c-format
+msgid "Fetching items failed: %s"
+msgstr "ჩანაწერის გამოთხოვის შეცდომა: %s"
+
+#: ../src/camel/camel-mapi-folder.c:947 ../src/camel/camel-mapi-folder.c:965
+msgid "Fetching items failed"
+msgstr "ჩანაწერის გამოთხოვის შეცდომა"
+
+#: ../src/camel/camel-mapi-folder.c:1170
+#, c-format
+msgid "Cannot append message to folder “%s”"
+msgstr "შეტყობინების საქაღალდეში \"%s\" მიწერის შეცდომა"
+
+#: ../src/camel/camel-mapi-folder.c:1179 ../src/camel/camel-mapi-folder.c:1209
+#, c-format
+msgid "Offline."
+msgstr "გათიშული."
+
+#: ../src/camel/camel-mapi-folder.c:1293
+#, c-format
+msgid "Failed to empty Trash: %s"
+msgstr "სანაგვე ყუთის დაცარიელების შეცდომა: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1299
+msgid "Failed to empty Trash"
+msgstr "სანაგვე ყუთის დაცარიელების შეცდომა"
+
+#. Translators: The first %s is replaced with a message ID,
+#. the second %s is replaced with a detailed error string
+#: ../src/camel/camel-mapi-folder.c:1477
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "შეტყობინების %s მიღების შეცდომა: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1478
+msgid "No such message"
+msgstr "ასეთი შეტყობინება არ არსებობს"
+
+#: ../src/camel/camel-mapi-folder.c:1503 ../src/camel/camel-mapi-folder.c:1537
+#, c-format
+msgid "Could not get message: %s"
+msgstr "შეტყობინების მიღების შეცდომა: %s"
+
+#: ../src/camel/camel-mapi-folder.c:1509 ../src/camel/camel-mapi-folder.c:1544
+#, c-format
+msgid "Could not get message"
+msgstr "შეტყობინების მიღების შეცდომა"
+
+#: ../src/camel/camel-mapi-folder.c:1934
+msgid "Receive quota"
+msgstr "კვოტის მიღება"
+
+#: ../src/camel/camel-mapi-folder.c:1940
+msgid "Send quota"
+msgstr "კვოტის გაგზავნა"
+
+#: ../src/camel/camel-mapi-folder.c:1962
+msgid "No quota information available"
+msgstr "კვოტის ინფორმაცია მიუწვდომელია"
+
+#: ../src/camel/camel-mapi-folder.c:2067
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "%s-სთვის შეჯამების ჩატვირთვის შეცდომა"
+
+#: ../src/camel/camel-mapi-provider.c:43
+msgid "Checking for new mail"
+msgstr "ახალი ელფოსტის შემოწმება"
+
+#: ../src/camel/camel-mapi-provider.c:45
+msgid "C_heck for new messages in all folders"
+msgstr "_ახალი შეტყობინებების შემოწმება ყველა საქაღალდეში"
+
+#: ../src/camel/camel-mapi-provider.c:47
+msgid "Lis_ten for server change notifications"
+msgstr "_სერვერის ცვლილებების გაფრთხილებების მოსმენა"
+
+#: ../src/camel/camel-mapi-provider.c:51
+msgid "Options"
+msgstr "პარამეტრები"
+
+#. i18n: copy from evolution:camel-imap-provider.c
+#: ../src/camel/camel-mapi-provider.c:54
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "სერვერზე შემოსულ ფოსტაზე ფილტრების _გადატარება"
+
+#: ../src/camel/camel-mapi-provider.c:56
+msgid "Check new messages for _Junk contents"
+msgstr "ახალი შეტყობინებების _სპამზე შემოწმება"
+
+#: ../src/camel/camel-mapi-provider.c:58
+msgid "Only check for Junk messag_es in the Inbox folder"
+msgstr "შემოსული საქაღალდის მხოლოდ სპამზე შემოწმება"
+
+#: ../src/camel/camel-mapi-provider.c:60
+msgid "Synchroni_ze remote mail locally in all folders"
+msgstr "დაშორებული ელფოსტის ლოკალურ საქაღალდეებთან სინქრონიზაცია"
+
+#: ../src/camel/camel-mapi-provider.c:87
+msgid "Password"
+msgstr "პაროლი"
+
+#: ../src/camel/camel-mapi-provider.c:88
+msgid ""
+"This option will connect to the OpenChange server using a plaintext password."
+msgstr "ამ პარამეტრით OpenChange სერვერს უბრალო პაროლით მიუერთდებით."
+
+#: ../src/camel/camel-mapi-sasl-krb.c:26
+msgid "Kerberos"
+msgstr "Kerberos"
+
+#: ../src/camel/camel-mapi-sasl-krb.c:28
+msgid "This option will connect to the server using kerberos key."
+msgstr "ამ პარამეტრით სერვერს Kerberos-ის გასაღებით მიუერთდებით."
+
+#: ../src/camel/camel-mapi-store.c:132 ../src/camel/camel-mapi-store.c:174
+msgid "Cannot find folder in a local cache"
+msgstr "ლოკალურ ქეშში საქაღალდე ვერ ვიპოვე"
+
+#: ../src/camel/camel-mapi-store.c:489 ../src/camel/camel-mapi-store.c:1173
+msgid "Folder list is not available in offline mode"
+msgstr "საქაღალდე გათიშულ რეჟიმში ხელმისაწვდომი არაა"
+
+#: ../src/camel/camel-mapi-store.c:880
+msgid "No public folder found"
+msgstr "საჯარო საქაღალდე ვერ ვიპოვე"
+
+#: ../src/camel/camel-mapi-store.c:880
+msgid "No folder found"
+msgstr "საქაღალდე ვერ ვიპოვე"
+
+#: ../src/camel/camel-mapi-store.c:1195 ../src/camel/camel-mapi-store.c:2261
+#, c-format
+msgid "Connecting to “%s”"
+msgstr "\"%s\"-სთან მიერთება"
+
+#: ../src/camel/camel-mapi-store.c:1254
+msgid "Cannot create MAPI folders in offline mode"
+msgstr "გათიშულ რეჟიმში MAPI-ის საქაღალდეებს ვერ შექმნით"
+
+#: ../src/camel/camel-mapi-store.c:1261
+#, c-format
+msgid "Cannot create new folder “%s”"
+msgstr "ახალი საქაღალდის (\"%s\") შექმნის შეცდომა"
+
+#: ../src/camel/camel-mapi-store.c:1270
+#, c-format
+msgid "Authentication failed"
+msgstr "ავთენტიფიკაცია ვერ მოხერდა"
+
+#: ../src/camel/camel-mapi-store.c:1280
+msgid "MAPI folders can be created only within mailbox of the logged in user"
+msgstr ""
+"MAPI საქაღალდეების შექმნა მხოლოდ შესული მომხმარებლის საფოსტო ყუთშია "
+"შესაძლებელი"
+
+#: ../src/camel/camel-mapi-store.c:1293 ../src/camel/camel-mapi-store.c:1406
+#, c-format
+msgid "Cannot find folder “%s”"
+msgstr "საქაღალდის (\"%s\") პოვნა შეუძლებელია"
+
+#: ../src/camel/camel-mapi-store.c:1348
+#, c-format
+msgid "Cannot create folder “%s”: %s"
+msgstr "შეცდომა საქაღალდის შექმნისას '%s': %s"
+
+#: ../src/camel/camel-mapi-store.c:1354
+#, c-format
+msgid "Cannot create folder “%s”"
+msgstr "შეცდომა საქაღალდის შექმნისას '%s'"
+
+#: ../src/camel/camel-mapi-store.c:1384 ../src/camel/camel-mapi-store.c:1396
+msgid "Cannot delete MAPI folders in offline mode"
+msgstr "გათიშულ რეჟიმში MAPI-ის საქაღალდეებს ვერ წაშლით"
+
+#: ../src/camel/camel-mapi-store.c:1452
+#, c-format
+msgid "Cannot remove folder “%s”: %s"
+msgstr "საქაღალდის (\"%s\") წაშლის შეცდომა: %s"
+
+#: ../src/camel/camel-mapi-store.c:1460
+#, c-format
+msgid "Cannot remove folder “%s”"
+msgstr "საქაღალდის (\"%s\") წაშლის შეცდომა"
+
+#: ../src/camel/camel-mapi-store.c:1490 ../src/camel/camel-mapi-store.c:1505
+msgid "Cannot rename MAPI folders in offline mode"
+msgstr "გათიშულ რეჟიმში MAPI-ის საქაღალდეებს სახელს ვერ გადაარქმევთ"
+
+#. Translators: “%s” is current name of the folder
+#: ../src/camel/camel-mapi-store.c:1516
+#, c-format
+msgid "Cannot rename MAPI folder “%s”. Folder does not exist"
+msgstr "MAPI საქაღალდეს (\"%s\") სახელს ვერ გადაარქმევთ. საქაღალდე არ არსებობს"
+
+#. Translators: “%s to %s” is current name of the folder  and
+#. new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1527
+#, c-format
+msgid "Cannot rename MAPI default folder “%s” to “%s”"
+msgstr ""
+"ნაგულისხმები საქაღალდის \"%s\" -ის სახელის \"%s\"-ზე გადარქმევა შეუძლებელია"
+
+#. Translators: “%s to %s” is current name of the folder and new name of the folder.
+#: ../src/camel/camel-mapi-store.c:1553 ../src/camel/camel-mapi-store.c:1596
+#: ../src/camel/camel-mapi-store.c:1676
+#, c-format
+msgid "Cannot rename MAPI folder “%s” to “%s”"
+msgstr "საქაღალდის \"%s\" -ის სახელის \"%s\"-ზე გადარქმევა შეუძლებელია"
+
+#. Translators: “%s to %s” is current name of the folder and new name of the folder.
+#. The last “%s” is a detailed error message.
+#: ../src/camel/camel-mapi-store.c:1588 ../src/camel/camel-mapi-store.c:1669
+#, c-format
+msgid "Cannot rename MAPI folder “%s” to “%s”: %s"
+msgstr ""
+"ნაგულისხმები საქაღალდის \"%s\" -ის სახელის \"%s\"-ზე გადარქმევა შეუძლებელია: "
+"%s"
+
+#: ../src/camel/camel-mapi-store.c:1766
+msgid "Cannot subscribe MAPI folders in offline mode"
+msgstr "გათიშულ რეჟიმში MAPI-ის საქაღალდეების გამოწერას ვერ გააუქმებთ"
+
+#: ../src/camel/camel-mapi-store.c:1783
+#, c-format
+msgid "Folder “%s” not found"
+msgstr "საქაღალდე \"%s\" ვერ ვიპოვე"
+
+#: ../src/camel/camel-mapi-store.c:1908
+msgid "Cannot unsubscribe MAPI folders in offline mode"
+msgstr "გათიშულ რეჟიმში MAPI საქაღალდეების გამოწერის მოხსნა შეუძლებელია"
+
+#. Translators: The %s is replaced with a server's host name
+#: ../src/camel/camel-mapi-store.c:2208 ../src/camel/camel-mapi-transport.c:194
+#, c-format
+msgid "Exchange MAPI server %s"
+msgstr "Exchange MAPI სერვერი %s"
+
+#. To translators : Example string : Exchange MAPI service for
+#. _username_ on _server host name__
+#. Translators: The first %s is replaced with a user name, the second with a server's host name
+#: ../src/camel/camel-mapi-store.c:2212 ../src/camel/camel-mapi-transport.c:197
+#, c-format
+msgid "Exchange MAPI service for %s on %s"
+msgstr "Exchange MAPI სერვისი %s -სთვის %s-ზე"
+
+#: ../src/camel/camel-mapi-store.c:2243
+msgid "Cannot connect to MAPI store in offline mode"
+msgstr "MAPI საცავს გათიშულ რეჟიმში ვერ მივუერთდები"
+
+#: ../src/camel/camel-mapi-store.c:2296
+#, c-format
+msgid "Mailbox “%s” is full, no new messages will be received or sent."
+msgstr ""
+"საფოსტო ყუთი \"%s\" სავსეა. შეტყობინებების გაგზავნა/მიღება შეუძლებელია."
+
+#: ../src/camel/camel-mapi-store.c:2298
+#, c-format
+msgid ""
+"Mailbox “%s” is near its size limit, message send will be disabled soon."
+msgstr "საფოსტო ყუთი \"%s\" ზომის ზღვართან ახლოსაა და მალე გაითიშება."
+
+#: ../src/camel/camel-mapi-store.c:2302
+#, c-format
+msgid "Mailbox “%s” is full, no new messages will be received."
+msgstr "საფოსტო ყუთი \"%s\" სავსეა. ახალ შეტყობინებებს ვერ მიიღებთ."
+
+#: ../src/camel/camel-mapi-store.c:2304
+#, c-format
+msgid "Mailbox “%s” is near its size limit."
+msgstr "საფოსტო ყუთი \"%s\" მალე ზომის ზღვარს მიაღწევს."
+
+#: ../src/camel/camel-mapi-store.c:2722
+#, c-format
+msgid "Cannot add folder “%s”, failed to add to store’s summary"
+msgstr "საქაღალდის (%s) დამატების შეცდომა. საცავის შეჯამების დამატების შეცდომა"
+
+#: ../src/camel/camel-mapi-store.c:3006
+msgid "Authentication password not available"
+msgstr "ავთენტიკაციის პაროლი ხელმიუწვდომელია"
+
+#: ../src/camel/camel-mapi-store.c:3042 ../src/camel/camel-mapi-store.c:3458
+msgid "Updating foreign folders"
+msgstr "გარე საქაღალდეების განახლება"
+
+#. Translators: the first '%s' is replaced with a generic error message,
+#. the second '%s' is replaced with additional error information.
+#: ../src/camel/camel-mapi-store.c:3065 ../src/collection/e-mapi-backend.c:909
+#: ../src/configuration/e-mail-config-mapi-backend.c:404
+#: ../src/configuration/e-mapi-config-utils.c:341
+#, c-format
+msgctxt "gssapi_error"
+msgid "%s (%s)"
+msgstr "%s (%s)"
+
+#: ../src/camel/camel-mapi-store.h:53
+msgid "Favorites"
+msgstr "სანიშნები"
+
+#: ../src/camel/camel-mapi-store.h:54
+msgid "Foreign folders"
+msgstr "გარე საქაღალდეები"
+
+#: ../src/camel/camel-mapi-transport.c:145
+#: ../src/camel/camel-mapi-transport.c:167
+#, c-format
+msgid "Could not send message."
+msgstr "შეტყობინების გაგზავნა შეუძლებელია."
+
+#: ../src/camel/camel-mapi-transport.c:162
+#, c-format
+msgid "Could not send message: %s"
+msgstr "შეტყობინების გაგზავნა შეუძლებელია: %s"
+
+#: ../src/collection/e-mapi-backend.c:72
+msgid "Cannot connect, no credentials provided"
+msgstr "მიერთება შეუძლებელია. ავტორიზაციის დეტალები მითითებული არაა"
+
+#: ../src/collection/e-mapi-backend.c:369
+msgid "Global Address List"
+msgstr "გლობალური მისამართების სია"
+
+#: ../src/collection/e-mapi-backend.c:732
+#: ../src/collection/e-mapi-backend.c:829
+#, c-format
+msgid "Data source “%s” does not represent a MAPI folder"
+msgstr "მონაცემების წყარო \"%s\" MAPI საქაღალდეს არ წარმოადგენს"
+
+#: ../src/configuration/e-book-config-mapigal.c:59
+msgid "Allow _partial search results"
+msgstr "_ძებნის ნაწილობრივი შედეგების დაშვება"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:121
+msgid "Select username"
+msgstr "აირჩიეთ მომხმარებელი"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:131
+msgid "Full name"
+msgstr "სრული სახელი"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:136
+msgid "Username"
+msgstr "მომხმარებლის სახელი"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:163
+msgid ""
+"There are more users with similar user name on a server.\n"
+"Please select that you would like to use from the below list."
+msgstr ""
+"სერვერზე ამ მომხმარებლის სახელის მქონე მომხმარებლები კიდევ არიან.\n"
+"აირჩიეთ, რომელი გინდათ, გამოიყენოთ."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:359
+msgid "Authentication finished successfully."
+msgstr "ავთენტიკაცია წარმატებით დასრულდა."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:361
+#: ../src/configuration/e-mail-config-mapi-backend.c:499
+msgid "Authentication failed."
+msgstr "ავთენტიკაცია წარუმატებელია."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:442
+msgid "Cannot authenticate MAPI accounts in offline mode"
+msgstr "გათიშულ რეჟიმში MAPI ანგარიშზე ავთენტიკაცია შეუძლებელია"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:471
+msgid ""
+"Server, username and domain name cannot be empty. Please fill them with "
+"correct values."
+msgstr ""
+"სერვერი, მომხმარებელი და დომენის სახელი ცარიელი ვერ იქნება. მათი სწორი "
+"მნიშვნელობებით შევსება აუცილებელია."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:474
+msgid ""
+"Realm name cannot be empty when kerberos is selected. Please fill them with "
+"correct values."
+msgstr ""
+"რეალმის სახელი მაშინ, როცა Kerberos-ია არჩეული, ცარიელი ვერ იქნება. მათი "
+"სწორი მნიშვნელობებით შევსება აუცილებელია."
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:493
+msgid "Connecting to the server, please wait…"
+msgstr "მიმდინარეობს სერვერთან მიერთება. გთხოვთ მოითმინოთ…"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:695
+msgid "Configuration"
+msgstr "გამართვა"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:704
+msgid "_Server:"
+msgstr "_სერვერი:"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:721
+msgid "User_name:"
+msgstr "_მომხმარებლის სახელი:"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:746
+msgid "_Domain name:"
+msgstr "_დომენის სახელი:"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:759
+msgid "_Authenticate"
+msgstr "_ავთენტიკაცია"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:767
+msgid "_Use secure connection"
+msgstr "დაცული კავშირის _გამოყენება"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:782
+msgid "_Kerberos authentication"
+msgstr "_Kerberos-ით ავთენტიკაცია"
+
+#: ../src/configuration/e-mail-config-mapi-backend.c:794
+msgid "_Realm name:"
+msgstr "_რეალმის სახელი:"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:177
+#: ../src/configuration/e-mail-config-mapi-page.c:238
+msgid "MAPI Settings"
+msgstr "MAPI -ის მორგება"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:183
+msgid "View the size of all Exchange folders"
+msgstr "Exchange-ის ყველა საქაღალდის ზომის ნახვა"
+
+#: ../src/configuration/e-mail-config-mapi-page.c:187
+msgid "Folder _Size"
+msgstr "საქაღალდის _ზომა"
+
+#: ../src/configuration/e-mapi-config-utils.c:432
+msgid "Folder"
+msgstr "საქაღალდე"
+
+#: ../src/configuration/e-mapi-config-utils.c:437
+msgid "Size"
+msgstr "ზომა"
+
+#: ../src/configuration/e-mapi-config-utils.c:460
+#: ../src/configuration/e-mapi-config-utils.c:464
+msgid "Unable to retrieve folder size information"
+msgstr "საქაღალდის ზომის მიღების შეცდომა"
+
+#: ../src/configuration/e-mapi-config-utils.c:531
+msgid "Folder Size"
+msgstr "საქაღალდის ზომა"
+
+#: ../src/configuration/e-mapi-config-utils.c:545
+msgid "Fetching folder list…"
+msgstr "საქაღალდის ზომის გამოთხოვა…"
+
+#: ../src/configuration/e-mapi-config-utils.c:612
+#: ../src/configuration/e-mapi-config-utils.c:621
+#: ../src/configuration/e-mapi-config-utils.c:630
+#: ../src/configuration/e-mapi-config-utils.c:639
+#: ../src/configuration/e-mapi-config-utils.c:648
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:753
+msgid "Subscribe to folder of other MAPI user…"
+msgstr "სხვა MAPI-ის მომხმარებლის საქაღალდის გამოწერა…"
+
+#: ../src/configuration/e-mapi-config-utils.c:846
+#, c-format
+msgid "Cannot edit permissions of folder “%s”, choose other folder."
+msgstr ""
+"საქაღალდის \"%s\" წვდომების ჩასწორების შეცდომა. აირჩიეთ სხვა საქაღალდე."
+
+#: ../src/configuration/e-mapi-config-utils.c:909
+msgid "Folder size…"
+msgstr "საქაღალდის ზომა…"
+
+#: ../src/configuration/e-mapi-config-utils.c:916
+msgid "Subscribe to folder of other user…"
+msgstr "სხვა მომხმარებლის საქაღალდის გამოწერა…"
+
+#: ../src/configuration/e-mapi-config-utils.c:925
+#: ../src/configuration/e-mapi-config-utils.c:1261
+#: ../src/configuration/e-mapi-config-utils.c:1298
+#: ../src/configuration/e-mapi-config-utils.c:1335
+#: ../src/configuration/e-mapi-config-utils.c:1372
+msgid "Permissions…"
+msgstr "წვდომები…"
+
+#: ../src/configuration/e-mapi-config-utils.c:927
+msgid "Edit MAPI folder permissions"
+msgstr "MAPI საქაღალდის წვდომების ჩასწორება"
+
+#: ../src/configuration/e-mapi-config-utils.c:1263
+msgid "Edit MAPI calendar permissions"
+msgstr "MAPI კალენდარის წვდომების ჩასწორება"
+
+#: ../src/configuration/e-mapi-config-utils.c:1300
+msgid "Edit MAPI tasks permissions"
+msgstr "MAPI ამოცანების წვდომების ჩასწორება"
+
+#: ../src/configuration/e-mapi-config-utils.c:1337
+msgid "Edit MAPI memos permissions"
+msgstr "MAPI ჩანაწერების წვდომების ჩასწორება"
+
+#: ../src/configuration/e-mapi-config-utils.c:1374
+msgid "Edit MAPI contacts permissions"
+msgstr "MAPI კონტაქტების წვდომების ჩასწორება"
+
+#: ../src/configuration/e-mapi-config-utils.c:1554
+msgid "Personal Folders"
+msgstr "პირადი საქაღალდეები"
+
+#: ../src/configuration/e-mapi-config-utils.c:1785
+msgid "Searching remote MAPI folder structure, please wait…"
+msgstr "დაშორებული MAPI საქაღალდის სტრუქტურის ძებნა. გთხოვთ მოითმინოთ…"
+
+#: ../src/configuration/e-mapi-config-utils.c:1832
+msgid "Lis_ten for server notifications"
+msgstr "_სერვერის გაფრთხილებების მოსმენა"
+
+#: ../src/configuration/e-mapi-config-utils.c:1855
+msgid "Cannot create MAPI calendar in offline mode"
+msgstr "გათიშულ რეჟიმში MAPI-ის კალენდარს ვერ შექმნით"
+
+#: ../src/configuration/e-mapi-config-utils.c:1858
+msgid "Cannot create MAPI task list in offline mode"
+msgstr "გათიშულ რეჟიმში MAPI-ის ამოცანების სიას ვერ შექმნით"
+
+#: ../src/configuration/e-mapi-config-utils.c:1861
+msgid "Cannot create MAPI memo list in offline mode"
+msgstr "გათიშულ რეჟიმში MAPI-ის სანიშნების სიას სიას ვერ შექმნით"
+
+#: ../src/configuration/e-mapi-config-utils.c:1864
+msgid "Cannot create MAPI address book in offline mode"
+msgstr "გათიშულ რეჟიმში MAPI-ის მისამართების წიგნაკს ვერ შექმნით"
+
+#: ../src/configuration/e-mapi-config-utils.c:1869
+msgid "Cannot create MAPI source in offline mode"
+msgstr "გათიშულ რეჟიმში MAPI-ის წყაროს ვერ შექმნით"
+
+#: ../src/configuration/e-mapi-config-utils.c:1889
+msgid "_Location:"
+msgstr "_მდებარეობა:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:87
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "არაფერი"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:88
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "მფლობელი"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:98
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "გამოცემის ჩასწორება"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:107
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "რედაქტორი"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:115
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "გამოცემის ავტორი"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:122
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "ავტორი"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:128
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "არაჩამსწორებელი ავტორი"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:133
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "გადამხედი"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:136
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "მოხალისე"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:139
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "განსხვავებული"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:272
+msgid "Writing folder permissions, please wait…"
+msgstr "საქაღლადის წვდომების ჩასწორება. გთხოვთ, მოითმინეთ…"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:782
+#: ../src/configuration/e-mapi-search-gal-user.c:525
+msgctxt "User"
+msgid "Anonymous"
+msgstr "ანონიმურად"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:784
+#: ../src/configuration/e-mapi-search-gal-user.c:522
+msgctxt "User"
+msgid "Default"
+msgstr "ნაგულისხმები"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:786
+msgctxt "User"
+msgid "Unknown"
+msgstr "უცნობი"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:880
+#: ../src/configuration/e-mapi-search-gal-user.c:600
+msgid "Name"
+msgstr "სახელი"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:886
+msgid "Permission level"
+msgstr "წვდომის დონე"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:939
+msgid "Edit MAPI folder permissions…"
+msgstr "MAPI საქაღალდის წვდომების ჩასწორება…"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:964
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:774
+msgid "Account:"
+msgstr "ანგარიში:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:990
+msgid "Folder name:"
+msgstr "საქაღალდის სახელი:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1011
+msgid "Folder ID:"
+msgstr "საქაღალდის ID:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1070
+msgid "Permissions"
+msgstr "ნებართვები"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1091
+msgid "Permi_ssion level:"
+msgstr "_წვდომის დონე:"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1119
+msgctxt "Permissions"
+msgid "Read"
+msgstr "წაკითხვა"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1130
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1193
+msgctxt "Permissions"
+msgid "None"
+msgstr "არაფერი"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1135
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "სრული დეტალები"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1140
+msgctxt "Permissions"
+msgid "Simple Free/Busy"
+msgstr "უბრალო თავისუფალი/დაკავებული"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1144
+msgctxt "Permissions"
+msgid "Detailed Free/Busy"
+msgstr "დეტალური თავისუფალი/დაკავებული"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1151
+msgctxt "Permissions"
+msgid "Write"
+msgstr "ჩასწორება"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1162
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "ჩანაწერების შექმნა"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1166
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "ქვესაქარალდეების შექმნა"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1170
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr "საკუთარის ჩასწორება"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1174
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "ყველას ჩასწორება"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1182
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "ჩანაწერების წაშლა"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1198
+msgctxt "Permissions"
+msgid "Own"
+msgstr "საკუთარი"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1203
+msgctxt "Permissions"
+msgid "All"
+msgstr "ყველა"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1209
+msgctxt "Permissions"
+msgid "Other"
+msgstr "სხვა"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1220
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "საქაღალდის მფლობელი"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1224
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr "საქაღლდის კონტაქტი"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1228
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr "საქაღლდის ხილვადობა"
+
+#: ../src/configuration/e-mapi-edit-folder-permissions.c:1283
+msgid "Reading folder permissions, please wait…"
+msgstr "საქაღალდის წვდომების წაკითხვა. გთხოვთ, მოითმინეთ…"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:221
+msgid "No users found"
+msgstr "მომხმარებლები ვერ მოიძებნა"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:224
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "ვიპოვე %d მომხმარებელი"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:229
+#, c-format
+msgid "Found %d user, but showing only first %d"
+msgid_plural "Found %d users, but showing only first %d"
+msgstr[0] "ვიპოვე %d მომხმარებელი, მაგრამ ნაჩვენებია მხოლოდ პირველი %d"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:517
+#: ../src/configuration/e-mapi-search-gal-user.c:710
+msgid "Search for a user"
+msgstr "მომხმარებლის ძებნა"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:533
+msgid "Searching…"
+msgstr "ძებნა…"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:606
+msgid "E-mail"
+msgstr "ელ-ფოსტა"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:647
+msgid "Choose MAPI user…"
+msgstr "აირჩიეთ MAPI-ის მომხმარებელი…"
+
+#: ../src/configuration/e-mapi-search-gal-user.c:670
+msgid "_Search:"
+msgstr "ძებნა:"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:95
+#, c-format
+msgid "Cannot add folder, folder already exists as “%s”"
+msgstr "საქაღალდის დამატების შეცდომა. ის უკვე არსებობს, როგორც \"%s\""
+
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. Example result: "Mailbox — John Smith"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:121
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox — %s"
+msgstr "საფოსტო ყუთი— %s"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:151
+#, c-format
+msgid "Cannot add folder, failed to add to store’s summary"
+msgstr "საქაღალდის დამატების შეცდომა. საცავის შეჯამების დამატების შეცდომა"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:374
+#, c-format
+msgid ""
+"Folder “%s” not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr ""
+"საქაღალდე \"%s\" ვერ ვიპოვე. ის ან არ არსებობს, ან მასზე წვდომა არ გაგაჩნიათ."
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:409
+msgid "Cannot add folder, cannot determine folder’s type"
+msgstr "საქაღალდის დამატების შეცდომა. საქაღლდის ტიპის ამოცნობა შეუძლებელია"
+
+#. Translators: This is used to name foreign folder.
+#. The first '%s' is replaced with user name to whom the folder belongs,
+#. the second '%s' is replaced with folder name.
+#. Example result: "John Smith — Calendar"
+#.
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:450
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s — %s"
+msgstr "%s — %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:569
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:847
+msgid "Inbox"
+msgstr "საფოსტო ყუთი"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:571
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:848
+msgid "Contacts"
+msgstr "კონტაქტები"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:573
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:849
+msgid "Calendar"
+msgstr "კალენდარი"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:575
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:850
+msgid "Memos"
+msgstr "ჩანაწერები"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:577
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:851
+msgid "Tasks"
+msgstr "ამოცანები"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:591
+#, c-format
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
+msgstr ""
+"საქაღალდის \"%s\" (მომხმარებელი: %s) ხელმისაწვდომობის შემოწმება. გთხოვთ, "
+"მოითმინოთ…"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:629
+msgid "Cannot search for user when the account is offline"
+msgstr "ქსელზე წვდომის არქონის შემთხვევაში მომხმარებელს ვერ მოძებნით"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:797
+msgid "User"
+msgstr "მომხმარებელი"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:804
+msgid "_User:"
+msgstr "_მომხმარებელი:"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:817
+msgid "C_hoose…"
+msgstr "_არჩევა…"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:832
+msgid "_Folder name:"
+msgstr "_საქაღალდის სახელი:"
+
+#: ../src/configuration/e-mapi-subscribe-foreign-folder.c:860
+msgid "Include _subfolders"
+msgstr "_ქვესაქაღალდეების ჩათვლით"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2191
+msgctxt "MeetingResp"
+msgid "Accepted:"
+msgstr "მიღებულია:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2196
+msgctxt "MeetingResp"
+msgid "Tentative:"
+msgstr "სავარაუდო:"
+
+#. Translators: This is a meeting response prefix which will be shown in a message Subject
+#: ../src/libexchangemapi/e-mapi-cal-utils.c:2201
+msgctxt "MeetingResp"
+msgid "Declined:"
+msgstr "უარყოფილია:"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:137
+msgid "Failed to login into the server"
+msgstr "სერვერზე შესვლის შეცდომა"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:138
+msgid "Cannot create more sessions, session limit was reached"
+msgstr "მეტი სესიის შექმნა შეუძლებელია. მიღწეულია სესიების ლიმიტი"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:139
+msgid "User cancelled operation"
+msgstr "მომხმარებელმა ოპერაცია გააუქმა"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:140
+msgid "Unable to abort"
+msgstr "გაუქმება შეუძლებელია"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:141
+msgid "Network error"
+msgstr "ქსელის შეცდომა"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:142
+msgid "Disk error"
+msgstr "დისკის შეცდომა"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:143
+msgid "Password change required"
+msgstr "პაროლის შეცვლა აუცილებელია"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:144
+msgid "Password expired"
+msgstr "პაროლი ვადაგასულია"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:145
+msgid "Invalid workstation account"
+msgstr "სამუშაო მანქანის არასწორი ანგარიში"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:146
+msgid "Invalid access time"
+msgstr "წვდომის არასწორი დრო"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:147
+msgid "Account is disabled"
+msgstr "ანგარიში გათიშულია"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:148
+msgid "End of session"
+msgstr "სესიის დასრულება"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:149
+msgid "MAPI is not initialized or connected"
+msgstr "MAPI ინიციალიზებული ან მიერთებული არაა"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:150
+msgid "Permission denied"
+msgstr "წვდომა აკრძალულია"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:151
+msgid "Mailbox quota exceeded"
+msgstr "საფოსტო ყუთის კვოტა გადაცილებულია"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:159
+#, c-format
+msgid "MAPI error %s (0x%x) occurred"
+msgstr "ნაპოვნია MAPI -ის შეცდომა %s (0x%x)"
+
+#. Translators: The first '%s' is replaced with an error context,
+#. aka where the error occurred, the second '%s' is replaced with
+#. the error message.
+#: ../src/libexchangemapi/e-mapi-connection.c:177
+#, c-format
+msgctxt "EXCHANGEMAPI_ERROR"
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:724
+#, c-format
+msgid "Server “%s” cannot be reached"
+msgstr "სერვერი \"%s\" მიუწვდომელია"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:852
+#, c-format
+msgid "Folder name “%s” is not a known default folder name, nor folder ID."
+msgstr ""
+"საქაღალდის სახელი \"%s\" ცნობილ ნაგულისხმები საქაღალდის სახელს არ "
+"წარმოადგენს. არც საქაღალდის ID-ისას."
+
+#: ../src/libexchangemapi/e-mapi-connection.c:1183
+#, c-format
+msgid "Failed to open store for user “%s”"
+msgstr "მომხმარებლისთვის \"%s\" საცავის გახსნის შეცდომა"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:1191
+#, c-format
+msgid "Folder of user “%s” not found"
+msgstr "მომხმარებლის \"%s\" საქაღალდე ვერ ვიპოვე"
+
+#. Translators: %s is replaced with an email address which was found ambiguous on a remote server
+#: ../src/libexchangemapi/e-mapi-connection.c:3843
+#, c-format
+msgid "Recipient “%s” is ambiguous"
+msgstr "მიმღები \"%s\" გაურკვეველია"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:4935
+#, c-format
+msgid ""
+"Search result exceeded allowed size limit. Use more specific search term, "
+"please"
+msgstr ""
+"ძებნის შედეგი დაშვებული ზომის ლიმიტს აჭარბებს. გამოიყენეთ უფრო ვიწრო ძებნა"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6563
+msgid "All Public Folders"
+msgstr "ყველა საჯარო საქაღლდე"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6871
+#, c-format
+msgid "User name “%s” is ambiguous"
+msgstr "მომხმარებლის სახელი \"%s\" საეჭვოა"
+
+#: ../src/libexchangemapi/e-mapi-connection.c:6874
+#, c-format
+msgid "User name “%s” not found"
+msgstr "მომხმარებლის სახელი \"%s\" ვერ ვიპოვე"
+
+#: ../src/libexchangemapi/e-mapi-folder.c:330
+msgid "Cannot add folder, unsupported folder type"
+msgstr "საქაღალდის დამატების შეცდომა. საქაღალდის ტიპი მხარდაუჭერელია"
+
+#: ../src/libexchangemapi/e-mapi-folder.c:333
+msgid "Cannot add folder, master source not found"
+msgstr "საქაღალდის დაატების შეცდომა. ძირითადი წყარო ვერ ვიპოვე"
+
+#: ../src/libexchangemapi/e-mapi-utils.c:854
+#, c-format
+msgid ""
+"Cannot ask for Kerberos ticket. Obtain the ticket manually, like on command "
+"line with “kinit” or open “Online Accounts” in “Settings” and add the "
+"Kerberos account there. Reported error was: %s"
+msgstr ""
+"Kerberos-ის ბილეთის გამოთხოვის შეცდომა. მიიღეთ ბილეთი ხელით, მაგალითად CLI-"
+"ით \"kinit\" ბრძანებით, ან გახსენით \"პარამეტრებ\" -> \"ონლაინ ანგარიშები\" "
+"და დაამატეთ Kerberos-ის ანგარიში. გადმოცემული შეცდომა: %s"
