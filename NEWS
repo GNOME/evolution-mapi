@@ -1,3 +1,14 @@
+evolution-mapi 3.47.1 2023-01-06
+--------------------------------
+
+Miscellaneous:
+	misc: Declare functions' prototype with no argument as `(void)`, not `()`
+	Fix visibility of "Subscribe to folder of other MAPI user" menu option
+
+Translations:
+	Ekaterine Papava (ka)
+	Hugo Carvalho (pt)
+
 evolution-mapi 3.46.0 2022-09-16
 --------------------------------
 
