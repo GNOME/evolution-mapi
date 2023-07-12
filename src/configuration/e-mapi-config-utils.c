@@ -1843,6 +1843,7 @@ e_mapi_config_utils_insert_widgets (ESourceConfigBackend *backend,
 	if (e_source_mapi_folder_is_public (folder_ext) ||
 	    e_source_mapi_folder_get_foreign_username (folder_ext)) {
 		e_source_config_add_refresh_interval (config, scratch_source);
+		e_source_config_add_refresh_on_metered_network (config, scratch_source);
 		return;
 	}
 
@@ -1935,6 +1936,7 @@ e_mapi_config_utils_insert_widgets (ESourceConfigBackend *backend,
 	}
 
 	e_source_config_add_refresh_interval (config, scratch_source);
+	e_source_config_add_refresh_on_metered_network (config, scratch_source);
 }
 
 gboolean
