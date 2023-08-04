@@ -503,8 +503,8 @@ write_tz_rule_comps (GByteArray *ba,
 		     ICalComponent *daylightcomp,
 		     ICalTimezone *zone)
 {
-	ICalTime *standard_date, *daylight_date, *current_time;
-	guint32 bias, standard_bias, daylight_bias;
+	ICalTime *standard_date = NULL, *daylight_date = NULL, *current_time;
+	guint32 bias, standard_bias = 0, daylight_bias = 0;
 
 	g_return_if_fail (ba != NULL);
 	g_return_if_fail (standardcomp != NULL);
