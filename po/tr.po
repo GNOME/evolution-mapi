@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-mapi/issues\n"
-"POT-Creation-Date: 2023-01-25 17:13+0000\n"
-"PO-Revision-Date: 2023-02-23 05:38+0300\n"
+"POT-Creation-Date: 2023-09-16 12:00+0000\n"
+"PO-Revision-Date: 2023-10-24 02:43+0300\n"
 "Last-Translator: Sabri Ünal <libreajans@gmail.com>\n"
 "Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.1.1\n"
+"X-Generator: Poedit 3.4\n"
 "X-POOTLE-MTIME: 1422571214.000000\n"
 
 #: ../org.gnome.Evolution-mapi.metainfo.xml.in.h:1
@@ -99,7 +99,7 @@ msgstr "“%s” klasöründeki iletiler indiriliyor"
 #: ../src/camel/camel-mapi-folder.c:932 ../src/camel/camel-mapi-folder.c:1492
 #, c-format
 msgid "This message is not available in offline mode."
-msgstr "Bu ileti çevirim dışı kipte mevcut değil."
+msgstr "Bu ileti çevrim dışı kipte mevcut değil."
 
 #: ../src/camel/camel-mapi-folder.c:942 ../src/camel/camel-mapi-folder.c:960
 #, c-format
@@ -118,7 +118,7 @@ msgstr "İleti “%s” klasörüne eklenemiyor"
 #: ../src/camel/camel-mapi-folder.c:1179 ../src/camel/camel-mapi-folder.c:1209
 #, c-format
 msgid "Offline."
-msgstr "Çevrimdışı."
+msgstr "Çevrim dışı."
 
 #: ../src/camel/camel-mapi-folder.c:1293
 #, c-format
@@ -226,7 +226,7 @@ msgstr "Yerel ön bellekte klasör bulunamıyor"
 
 #: ../src/camel/camel-mapi-store.c:489 ../src/camel/camel-mapi-store.c:1173
 msgid "Folder list is not available in offline mode"
-msgstr "Çevrimdışı kipteki klasör listesi kullanılabilir değil"
+msgstr "Çevrim dışı kipteki klasör listesi kullanılabilir değil"
 
 #: ../src/camel/camel-mapi-store.c:880
 msgid "No public folder found"
@@ -243,7 +243,7 @@ msgstr "“%s”e bağlanılıyor"
 
 #: ../src/camel/camel-mapi-store.c:1254
 msgid "Cannot create MAPI folders in offline mode"
-msgstr "Çevrimdışı kipte MAPI klasörleri oluşturulamıyor"
+msgstr "Çevrim dışı kipte MAPI klasörleri oluşturulamıyor"
 
 #: ../src/camel/camel-mapi-store.c:1261
 #, c-format
@@ -278,7 +278,7 @@ msgstr "“%s” klasörü oluşturulamıyor"
 
 #: ../src/camel/camel-mapi-store.c:1384 ../src/camel/camel-mapi-store.c:1396
 msgid "Cannot delete MAPI folders in offline mode"
-msgstr "Çevirim dışı kipte MAPI klasörleri silinemiyor"
+msgstr "Çevrim dışı kipte MAPI klasörleri silinemiyor"
 
 #: ../src/camel/camel-mapi-store.c:1452
 #, c-format
@@ -292,7 +292,7 @@ msgstr "“%s” klasörü silinemiyor"
 
 #: ../src/camel/camel-mapi-store.c:1490 ../src/camel/camel-mapi-store.c:1505
 msgid "Cannot rename MAPI folders in offline mode"
-msgstr "Çevrimdışı kipte MAPI klasörleri yeniden adlandırılamıyor"
+msgstr "Çevrim dışı kipte MAPI klasörleri yeniden adlandırılamıyor"
 
 #. Translators: “%s” is current name of the folder
 #: ../src/camel/camel-mapi-store.c:1516
@@ -323,7 +323,7 @@ msgstr "“%s” MAPI klasörü “%s” olarak yeniden adlandırılamıyor: %s"
 
 #: ../src/camel/camel-mapi-store.c:1766
 msgid "Cannot subscribe MAPI folders in offline mode"
-msgstr "Çevirim dışı kipte MAPI klasörlerine abone olunamıyor"
+msgstr "Çevrim dışı kipte MAPI klasörlerine abone olunamıyor"
 
 #: ../src/camel/camel-mapi-store.c:1783
 #, c-format
@@ -332,7 +332,7 @@ msgstr "“%s” klasörü bulunamadı"
 
 #: ../src/camel/camel-mapi-store.c:1908
 msgid "Cannot unsubscribe MAPI folders in offline mode"
-msgstr "Çevirim dışı kipte MAPI klasörleri aboneliği iptal edilemiyor"
+msgstr "Çevrim dışı kipte MAPI klasörleri aboneliği iptal edilemiyor"
 
 #. Translators: The %s is replaced with a server's host name
 #: ../src/camel/camel-mapi-store.c:2208 ../src/camel/camel-mapi-transport.c:194
@@ -468,7 +468,7 @@ msgstr "Kimlik doğrulanamadı."
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:442
 msgid "Cannot authenticate MAPI accounts in offline mode"
-msgstr "Çevirim dışı kipte MAPI hesapları kimlik doğrulama yapamıyor"
+msgstr "Çevrim dışı kipte MAPI hesapları kimlik doğrulama yapamıyor"
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:471
 msgid ""
@@ -618,27 +618,27 @@ msgstr "Uzak MAPI klasör yapısı aranıyor, lütfen bekleyin…"
 msgid "Lis_ten for server notifications"
 msgstr "Sunucu bildirimlerini din_le"
 
-#: ../src/configuration/e-mapi-config-utils.c:1855
+#: ../src/configuration/e-mapi-config-utils.c:1856
 msgid "Cannot create MAPI calendar in offline mode"
-msgstr "Çevirim dışı kipte MAPI takvimi oluşturulamıyor"
+msgstr "Çevrim dışı kipte MAPI takvimi oluşturulamıyor"
 
-#: ../src/configuration/e-mapi-config-utils.c:1858
+#: ../src/configuration/e-mapi-config-utils.c:1859
 msgid "Cannot create MAPI task list in offline mode"
-msgstr "Çevirim dışı kipte MAPI görev listesi oluşturulamıyor"
+msgstr "Çevrim dışı kipte MAPI görev listesi oluşturulamıyor"
 
-#: ../src/configuration/e-mapi-config-utils.c:1861
+#: ../src/configuration/e-mapi-config-utils.c:1862
 msgid "Cannot create MAPI memo list in offline mode"
-msgstr "Çevirim dışı kipte MAPI hatırlatma not listesi oluşturulamıyor"
+msgstr "Çevrim dışı kipte MAPI hatırlatma not listesi oluşturulamıyor"
 
-#: ../src/configuration/e-mapi-config-utils.c:1864
+#: ../src/configuration/e-mapi-config-utils.c:1865
 msgid "Cannot create MAPI address book in offline mode"
-msgstr "Çevrimdışı kipte MAPI adres defteri oluşturulamıyor"
+msgstr "Çevrim dışı kipte MAPI adres defteri oluşturulamıyor"
 
-#: ../src/configuration/e-mapi-config-utils.c:1869
+#: ../src/configuration/e-mapi-config-utils.c:1870
 msgid "Cannot create MAPI source in offline mode"
-msgstr "Çevirim dışı kipte MAPI kaynağı oluşturulamıyor"
+msgstr "Çevrim dışı kipte MAPI kaynağı oluşturulamıyor"
 
-#: ../src/configuration/e-mapi-config-utils.c:1889
+#: ../src/configuration/e-mapi-config-utils.c:1890
 msgid "_Location:"
 msgstr "_Konum:"
 
@@ -952,7 +952,7 @@ msgstr ""
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:629
 msgid "Cannot search for user when the account is offline"
-msgstr "Hesap çevrimdışıyken kullanıcı aranamıyor"
+msgstr "Hesap çevrim dışıyken kullanıcı aranamıyor"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:797
 msgid "User"
