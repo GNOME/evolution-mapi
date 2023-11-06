@@ -157,7 +157,7 @@ e_mapi_book_utils_contact_from_object (EMapiConnection *conn,
 		const struct mapi_SBinaryArray *members, *members_dlist;
 		const struct FILETIME *last_modification;
 		GSList *attrs = NULL, *a;
-		gint i;
+		gint jj;
 
 		last_modification = get_proptag (PidTagLastModificationTime);
 		if (last_modification) {
@@ -186,13 +186,13 @@ e_mapi_book_utils_contact_from_object (EMapiConnection *conn,
 		/* these two lists should be in sync */
 		g_return_val_if_fail (members_dlist->cValues == members->cValues, NULL);
 
-		for (i = 0; i < members->cValues; i++) {
+		for (jj = 0; jj < members->cValues; jj++) {
 			struct Binary_r br;
 			gchar *display_name = NULL, *email = NULL;
 			gchar *str;
 
-			br.lpb = members->bin[i].lpb;
-			br.cb = members->bin[i].cb;
+			br.lpb = members->bin[jj].lpb;
+			br.cb = members->bin[jj].cb;
 			if (e_mapi_util_recip_entryid_decode (conn, &br, &display_name, &email)) {
 				EVCardAttribute *attr;
 				gchar *value;
@@ -211,7 +211,7 @@ e_mapi_book_utils_contact_from_object (EMapiConnection *conn,
 				g_free (value);
 				g_object_unref (addr);
 
-				str = g_strdup_printf ("%d", i + 1);
+				str = g_strdup_printf ("%d", jj + 1);
 				e_vcard_attribute_add_param_with_value (attr,
 						e_vcard_attribute_param_new (EMA_X_MEMBERID),
 						str);
@@ -219,7 +219,7 @@ e_mapi_book_utils_contact_from_object (EMapiConnection *conn,
 
 				/* keep the value from ListMembers with the email, to not need to generate it on list changes;
 				   new values added in evolution-mapi will be always SMTP addresses anyway */
-				str = bin_to_string (members_dlist->bin[i].lpb, members_dlist->bin[i].cb);
+				str = bin_to_string (members_dlist->bin[jj].lpb, members_dlist->bin[jj].cb);
 				if (str) {
 					e_vcard_attribute_add_param_with_value (attr,
 						e_vcard_attribute_param_new (EMA_X_MEMBERVALUE),

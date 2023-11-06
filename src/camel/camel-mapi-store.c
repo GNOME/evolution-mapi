@@ -523,8 +523,6 @@ mapi_folders_sync (CamelMapiStore *store, guint32 flags, GCancellable *cancellab
 
 	subscription_list = (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST);
 	if (subscription_list) {
-		GError *err = NULL;
-
 		/*Consult the name <-> fid hash table for a FID.*/
 		status = e_mapi_connection_get_pf_folders_list (conn, &folder_list, camel_mapi_update_operation_progress_cb, NULL, cancellable, &err);
 		if (!status)

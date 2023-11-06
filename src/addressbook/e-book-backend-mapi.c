@@ -356,7 +356,6 @@ ebb_mapi_connect_sync (EBookMetaBackend *meta_backend,
 	if (!e_book_backend_mapi_get_is_gal (bbmapi) &&
 	    e_source_mapi_folder_get_server_notification (ext_mapi_folder)) {
 		mapi_object_t obj_folder;
-		GError *mapi_error = NULL;
 
 		g_signal_connect (bbmapi->priv->conn, "server-notification", G_CALLBACK (ebb_mapi_server_notification_cb), bbmapi);
 

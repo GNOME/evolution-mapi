@@ -760,7 +760,6 @@ ecb_mapi_connect_sync (ECalMetaBackend *meta_backend,
 
 	if (e_source_mapi_folder_get_server_notification (ext_mapi_folder)) {
 		mapi_object_t obj_folder;
-		GError *mapi_error = NULL;
 
 		g_signal_connect (cbmapi->priv->conn, "server-notification", G_CALLBACK (ecb_mapi_server_notification_cb), cbmapi);
 

@@ -1572,7 +1572,7 @@ e_mapi_cal_utils_add_attachments (EMapiObject *object,
 
 			if (mapped_file) {
 				EMapiAttachment *attachment;
-				guint8 *attach = (guint8 *) g_mapped_file_get_contents (mapped_file);
+				guint8 *filebytes = (guint8 *) g_mapped_file_get_contents (mapped_file);
 				guint filelength = g_mapped_file_get_length (mapped_file);
 				const gchar *split_name;
 				uint32_t ui32;
@@ -1603,7 +1603,7 @@ e_mapi_cal_utils_add_attachments (EMapiObject *object,
 				set_value (PidTagAttachLongFilename, stored_filename ? stored_filename : split_name);
 
 				data_cb = filelength;
-				data_lpb = talloc_memdup (attachment, attach, data_cb);
+				data_lpb = talloc_memdup (attachment, filebytes, data_cb);
 				e_mapi_attachment_add_streamed (attachment, PidTagAttachDataBinary, data_cb, data_lpb);
 
 #if GLIB_CHECK_VERSION(2,21,3)
