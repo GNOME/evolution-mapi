@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-mapi/issues\n"
-"POT-Creation-Date: 2023-03-18 12:47+0000\n"
-"PO-Revision-Date: 2023-09-11 21:06+0200\n"
+"POT-Creation-Date: 2023-09-16 12:00+0000\n"
+"PO-Revision-Date: 2024-01-04 14:17+0100\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -66,12 +66,10 @@ msgstr "Ustvarjanje predmeta na strežniku je spodletelo"
 
 #: ../src/addressbook/e-book-backend-mapi.c:928
 #: ../src/calendar/e-cal-backend-mapi.c:1437
-#, fuzzy
 msgid "Failed to remove item from a server"
 msgstr "Odstranjevanje predmeta s strežnika je spodletelo"
 
 #: ../src/calendar/e-cal-backend-mapi.c:912
-#, fuzzy
 msgid "Failed to transfer objects from a server"
 msgstr "Prenos predmetov s strežnika je spodletel"
 
@@ -199,7 +197,6 @@ msgid "Only check for Junk messag_es in the Inbox folder"
 msgstr "Vsiljeno pošto preveri le v mapi _dohodnih sporočil"
 
 #: ../src/camel/camel-mapi-provider.c:60
-#, fuzzy
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "_Uskladi oddaljeno pošto krajevno v vseh mapah"
 
@@ -402,7 +399,6 @@ msgid "%s (%s)"
 msgstr "%s (%s)"
 
 #: ../src/camel/camel-mapi-store.h:53
-#, fuzzy
 msgid "Favorites"
 msgstr "Priljubljeni"
 
@@ -620,27 +616,27 @@ msgstr "Poteka preiskovanje oddaljene zgradbe map MAPI ..."
 msgid "Lis_ten for server notifications"
 msgstr "_Prisluhni obvestilom strežnika"
 
-#: ../src/configuration/e-mapi-config-utils.c:1855
+#: ../src/configuration/e-mapi-config-utils.c:1856
 msgid "Cannot create MAPI calendar in offline mode"
 msgstr "Ni mogoče ustvariti koledarja MAPI v načinu brez povezave."
 
-#: ../src/configuration/e-mapi-config-utils.c:1858
+#: ../src/configuration/e-mapi-config-utils.c:1859
 msgid "Cannot create MAPI task list in offline mode"
 msgstr "Ni mogoče ustvariti seznama nalog MAPI v načinu brez povezave."
 
-#: ../src/configuration/e-mapi-config-utils.c:1861
+#: ../src/configuration/e-mapi-config-utils.c:1862
 msgid "Cannot create MAPI memo list in offline mode"
 msgstr "Ni mogoče ustvariti seznama opomnikov MAPI v načinu brez povezave."
 
-#: ../src/configuration/e-mapi-config-utils.c:1864
+#: ../src/configuration/e-mapi-config-utils.c:1865
 msgid "Cannot create MAPI address book in offline mode"
 msgstr "Ni mogoče ustvariti imenika MAPI v načinu brez povezave."
 
-#: ../src/configuration/e-mapi-config-utils.c:1869
+#: ../src/configuration/e-mapi-config-utils.c:1870
 msgid "Cannot create MAPI source in offline mode"
 msgstr "Ni mogoče ustvariti vira MAPI v načinu brez povezave."
 
-#: ../src/configuration/e-mapi-config-utils.c:1889
+#: ../src/configuration/e-mapi-config-utils.c:1890
 msgid "_Location:"
 msgstr "_Mesto:"
 
