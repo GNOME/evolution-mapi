@@ -1,3 +1,14 @@
+evolution-mapi 3.51.1 2024-01-05
+--------------------------------
+
+Miscellaneous:
+	build: Use -Wshadow build option, if available
+
+Translations:
+	Martin (sl)
+	Rūdolfs Mazurs (lv)
+	Sabri Ünal (tr)
+
 evolution-mapi 3.50.0 2023-09-15
 --------------------------------
 
