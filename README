@@ -1,1 +1,4 @@
-https://wiki.gnome.org/Apps/Evolution/MAPIProvider
+This Evolution ( https://gitlab.gnome.org/GNOME/evolution/-/wikis/home ) can
+connect to old Microsoft Exchange servers, which have still enabled MAPI protocol.
+The evolution-mapi has been superseded by evolution-ews, which uses Exchange
+Web Services (EWS) protocol instead.
