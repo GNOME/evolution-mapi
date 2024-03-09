@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-mapi master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-mapi/issues\n"
-"POT-Creation-Date: 2023-09-16 12:01+0000\n"
-"PO-Revision-Date: 2024-01-01 22:31+0200\n"
+"POT-Creation-Date: 2024-01-01 20:35+0000\n"
+"PO-Revision-Date: 2024-03-09 14:57+0200\n"
 "Last-Translator: Rūdolfs Mazurs <rudolfs.mazurs@gmail.com>\n"
 "Language-Team: Latvian <lata-l10n@googlegroups.com>\n"
 "Language: lv\n"
@@ -171,7 +171,6 @@ msgid "C_heck for new messages in all folders"
 msgstr "_Pārbaudīt visās mapēs, vai nav jaunu vēstuļu"
 
 #: ../src/camel/camel-mapi-provider.c:47
-#| msgid "Lis_ten for server notifications"
 msgid "Lis_ten for server change notifications"
 msgstr "Klausī_ties servera izmaiņu paziņojumus"
 
@@ -194,7 +193,7 @@ msgstr "Pārbaudīt mēstul_es tikai iesūtnes mapē"
 
 #: ../src/camel/camel-mapi-provider.c:60
 msgid "Synchroni_ze remote mail locally in all folders"
-msgstr "Sinhroni_zēt lokāli attālinātā pasta visas mapes"
+msgstr "Sinhroni_zēt lokāli attālā pasta visas mapes"
 
 #: ../src/camel/camel-mapi-provider.c:87
 msgid "Password"
@@ -284,34 +283,34 @@ msgstr "Nevar izņemt mapi “%s”"
 
 #: ../src/camel/camel-mapi-store.c:1490 ../src/camel/camel-mapi-store.c:1505
 msgid "Cannot rename MAPI folders in offline mode"
-msgstr "Nevar pārsaukt MAPI mapes nesaistes režīmā"
+msgstr "Nevar pārdēvēt MAPI mapes nesaistes režīmā"
 
 #. Translators: “%s” is current name of the folder
 #: ../src/camel/camel-mapi-store.c:1516
 #, c-format
 msgid "Cannot rename MAPI folder “%s”. Folder does not exist"
-msgstr "Nevar pārsaukt MAPI mapi “%s”. Mape neeksistē"
+msgstr "Nevar pārdēvēt MAPI mapi “%s”. Mape neeksistē"
 
 #. Translators: “%s to %s” is current name of the folder  and
 #. new name of the folder.
 #: ../src/camel/camel-mapi-store.c:1527
 #, c-format
 msgid "Cannot rename MAPI default folder “%s” to “%s”"
-msgstr "Nevar pārsaukt MAPI noklusēto mapi “%s” uz “%s”"
+msgstr "Nevar pārdēvēt MAPI noklusēto mapi “%s” uz “%s”"
 
 #. Translators: “%s to %s” is current name of the folder and new name of the folder.
 #: ../src/camel/camel-mapi-store.c:1553 ../src/camel/camel-mapi-store.c:1596
 #: ../src/camel/camel-mapi-store.c:1676
 #, c-format
 msgid "Cannot rename MAPI folder “%s” to “%s”"
-msgstr "Nevar pārsaukt MAPI mapi “%s” uz “%s”"
+msgstr "Nevar pārdēvēt MAPI mapi “%s” uz “%s”"
 
 #. Translators: “%s to %s” is current name of the folder and new name of the folder.
 #. The last “%s” is a detailed error message.
 #: ../src/camel/camel-mapi-store.c:1588 ../src/camel/camel-mapi-store.c:1669
 #, c-format
 msgid "Cannot rename MAPI folder “%s” to “%s”: %s"
-msgstr "Nevar pārsaukt MAPI mapi “%s” uz “%s” — %s"
+msgstr "Nevar pārdēvēt MAPI mapi “%s” uz “%s” — %s"
 
 #: ../src/camel/camel-mapi-store.c:1766
 msgid "Cannot subscribe MAPI folders in offline mode"
@@ -476,7 +475,6 @@ msgstr ""
 "aizpildiet tos ar korektām vērtībām."
 
 #: ../src/configuration/e-mail-config-mapi-backend.c:493
-#| msgid "Connecting to the server, please wait..."
 msgid "Connecting to the server, please wait…"
 msgstr "Savienojas ar serveri, lūdzu, uzgaidiet…"
 
@@ -552,7 +550,6 @@ msgstr "Iegūst mapju sarakstu..."
 #: ../src/configuration/e-mapi-config-utils.c:639
 #: ../src/configuration/e-mapi-config-utils.c:648
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:753
-#| msgid "Subscribe to folder of other MAPI user..."
 msgid "Subscribe to folder of other MAPI user…"
 msgstr "Abonēt cita MAPI lietotāja mapi…"
 
@@ -562,12 +559,10 @@ msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "Nevar rediģēt atļaujas mapei “%s”. Izvēlieties citu mapi."
 
 #: ../src/configuration/e-mapi-config-utils.c:909
-#| msgid "Folder Size"
 msgid "Folder size…"
 msgstr "Mapes izmērs…"
 
 #: ../src/configuration/e-mapi-config-utils.c:916
-#| msgid "Subscribe to folder of other user..."
 msgid "Subscribe to folder of other user…"
 msgstr "Abonēt cita lietotāja mapi…"
 
@@ -576,7 +571,6 @@ msgstr "Abonēt cita lietotāja mapi…"
 #: ../src/configuration/e-mapi-config-utils.c:1298
 #: ../src/configuration/e-mapi-config-utils.c:1335
 #: ../src/configuration/e-mapi-config-utils.c:1372
-#| msgid "Permissions"
 msgid "Permissions…"
 msgstr "Atļaujas…"
 
@@ -605,9 +599,8 @@ msgid "Personal Folders"
 msgstr "Personiskās mapes"
 
 #: ../src/configuration/e-mapi-config-utils.c:1785
-#| msgid "Searching remote MAPI folder structure, please wait..."
 msgid "Searching remote MAPI folder structure, please wait…"
-msgstr "Meklē attālinātā MAPI mapju struktūrā. Lūdzu, uzgaidiet…"
+msgstr "Meklē attālā MAPI mapju struktūrā. Lūdzu, uzgaidiet…"
 
 #: ../src/configuration/e-mapi-config-utils.c:1832
 msgid "Lis_ten for server notifications"
@@ -688,7 +681,6 @@ msgid "Custom"
 msgstr "Pielāgotas"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:272
-#| msgid "Writing folder permissions, please wait..."
 msgid "Writing folder permissions, please wait…"
 msgstr "Raksta mapes atļaujas. Lūdzu, uzgaidiet…"
 
@@ -719,7 +711,6 @@ msgid "Permission level"
 msgstr "Pieejas līmenis"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:939
-#| msgid "Edit MAPI folder permissions"
 msgid "Edit MAPI folder permissions…"
 msgstr "Rediģēt MAPI mapju atļaujas…"
 
@@ -831,7 +822,6 @@ msgid "Folder visible"
 msgstr "Mapes redzamība"
 
 #: ../src/configuration/e-mapi-edit-folder-permissions.c:1283
-#| msgid "Reading folder permissions, please wait..."
 msgid "Reading folder permissions, please wait…"
 msgstr "Nolasa mapes atļaujas. Lūdzu, uzgaidiet…"
 
@@ -861,7 +851,6 @@ msgid "Search for a user"
 msgstr "Meklē lietotāju"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:533
-#| msgid "Searching"
 msgid "Searching…"
 msgstr "Meklē…"
 
@@ -870,7 +859,6 @@ msgid "E-mail"
 msgstr "E-pasts"
 
 #: ../src/configuration/e-mapi-search-gal-user.c:647
-#| msgid "Choose MAPI user..."
 msgid "Choose MAPI user…"
 msgstr "Izvēlieties MAPI lietotāju…"
 
@@ -949,12 +937,10 @@ msgstr "Uzdevumi"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:591
 #, c-format
-#| msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgid "Testing availability of folder “%s” of user “%s”, please wait…"
 msgstr "Pārbauda mapes “%s” no lietotāja “%s” pieejamību. Lūdzu, uzgaidiet…"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:629
-#| msgid "Cannot authenticate MAPI accounts in offline mode"
 msgid "Cannot search for user when the account is offline"
 msgstr "Nevar meklēt lietotāju, kad konts ir nesaistē"
 
@@ -967,7 +953,6 @@ msgid "_User:"
 msgstr "_Lietotājs:"
 
 #: ../src/configuration/e-mapi-subscribe-foreign-folder.c:817
-#| msgid "C_hoose..."
 msgid "C_hoose…"
 msgstr "I_zvēlēties…"
 
@@ -1136,9 +1121,9 @@ msgid ""
 "line with “kinit” or open “Online Accounts” in “Settings” and add the "
 "Kerberos account there. Reported error was: %s"
 msgstr ""
-"Nevar paprasīt Kerberos biļeti. Saņemiet biļeti pašrocīgi, piemēram,"
-" komandrindā ar komandu “kinit”, vai “iestatījumos” atverot “tiešsaistes"
-" kontus” un tur pievienojot Kerberos kontu. Ziņotā kļūda — %s"
+"Nevar paprasīt Kerberos biļeti. Saņemiet biļeti pašrocīgi, piemēram, "
+"komandrindā ar komandu “kinit”, vai “iestatījumos” atverot “tiešsaistes "
+"kontus” un tur pievienojot Kerberos kontu. Ziņotā kļūda — %s"
 
 #~ msgid "Folder size..."
 #~ msgstr "Mapes izmērs..."
