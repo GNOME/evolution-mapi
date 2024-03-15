@@ -1,3 +1,15 @@
+evolution-mapi 3.52.0 2024-03-15
+--------------------------------
+
+Miscellaneous:
+	build: Bump CMake version requirement to 3.15
+	SetupBuildFlags.cmake: Remove "-Wl,--no-undefined" from compiler flags
+	Replace https://wiki.gnome.org/Apps/Evolution in the sources
+	metainfo.xml.in: Update homepage URI from GNOME wiki to GNOME GitLab (Andre Klapper)
+
+Translations:
+	Rūdolfs Mazurs (lv)
+
 evolution-mapi 3.51.1 2024-01-05
 --------------------------------
 
