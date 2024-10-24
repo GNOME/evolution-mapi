@@ -578,9 +578,11 @@ e_mapi_config_utils_run_folder_size_dialog (ESourceRegistry *registry,
 }
 
 static void
-action_global_subscribe_foreign_folder_cb (GtkAction *action,
-					   EShellView *shell_view)
+action_global_subscribe_foreign_folder_cb (EUIAction *action,
+					   GVariant *parameter,
+					   gpointer user_data)
 {
+	EShellView *shell_view = user_data;
 	EShell *shell;
 	EShellBackend *shell_backend;
 	EShellWindow *shell_window;
@@ -606,49 +608,49 @@ action_global_subscribe_foreign_folder_cb (GtkAction *action,
 	g_object_unref (session);
 }
 
-static GtkActionEntry global_mapi_mail_entries[] = {
+static const EUIActionEntry global_mapi_mail_entries[] = {
 	{ "mapi-mail-global-subscribe-foreign-folder",
 	  NULL,
 	  N_("Subscribe to folder of other MAPI user…"),
 	  NULL,
-	  NULL,  /* XXX Add a tooltip! */
-	  G_CALLBACK (action_global_subscribe_foreign_folder_cb) }
+	  NULL,
+	  action_global_subscribe_foreign_folder_cb, NULL, NULL, NULL }
 };
 
-static GtkActionEntry global_mapi_book_entries[] = {
+static const EUIActionEntry global_mapi_book_entries[] = {
 	{ "mapi-contact-global-subscribe-foreign-folder",
 	  NULL,
 	  N_("Subscribe to folder of other MAPI user…"),
 	  NULL,
-	  NULL,  /* XXX Add a tooltip! */
-	  G_CALLBACK (action_global_subscribe_foreign_folder_cb) }
+	  NULL,
+	  action_global_subscribe_foreign_folder_cb, NULL, NULL, NULL }
 };
 
-static GtkActionEntry global_mapi_cal_entries[] = {
+static const EUIActionEntry global_mapi_cal_entries[] = {
 	{ "mapi-calendar-global-subscribe-foreign-folder",
 	  NULL,
 	  N_("Subscribe to folder of other MAPI user…"),
 	  NULL,
-	  NULL,  /* XXX Add a tooltip! */
-	  G_CALLBACK (action_global_subscribe_foreign_folder_cb) }
+	  NULL,
+	  action_global_subscribe_foreign_folder_cb, NULL, NULL, NULL }
 };
 
-static GtkActionEntry global_mapi_task_entries[] = {
+static const EUIActionEntry global_mapi_task_entries[] = {
 	{ "mapi-task-global-subscribe-foreign-folder",
 	  NULL,
 	  N_("Subscribe to folder of other MAPI user…"),
 	  NULL,
-	  NULL,  /* XXX Add a tooltip! */
-	  G_CALLBACK (action_global_subscribe_foreign_folder_cb) }
+	  NULL,
+	  action_global_subscribe_foreign_folder_cb, NULL, NULL, NULL }
 };
 
-static GtkActionEntry global_mapi_memo_entries[] = {
+static const EUIActionEntry global_mapi_memo_entries[] = {
 	{ "mapi-memo-global-subscribe-foreign-folder",
 	  NULL,
 	  N_("Subscribe to folder of other MAPI user…"),
 	  NULL,
-	  NULL,  /* XXX Add a tooltip! */
-	  G_CALLBACK (action_global_subscribe_foreign_folder_cb) }
+	  NULL,
+	  action_global_subscribe_foreign_folder_cb, NULL, NULL, NULL }
 };
 
 static gboolean
@@ -755,9 +757,11 @@ get_profile_name_from_folder_tree (EShellView *shell_view,
 }
 
 static void
-action_folder_size_cb (GtkAction *action,
-		       EShellView *shell_view)
+action_folder_size_cb (EUIAction *action,
+		       GVariant *parameter,
+		       gpointer user_data)
 {
+	EShellView *shell_view = user_data;
 	gchar *profile;
 	CamelSession *session;
 	CamelStore *store = NULL;
@@ -790,9 +794,11 @@ action_folder_size_cb (GtkAction *action,
 }
 
 static void
-action_subscribe_foreign_folder_cb (GtkAction *action,
-				    EShellView *shell_view)
+action_subscribe_foreign_folder_cb (EUIAction *action,
+				    GVariant *parameter,
+				    gpointer user_data)
 {
+	EShellView *shell_view = user_data;
 	gchar *profile;
 	GtkWindow *parent;
 	EShell *shell;
@@ -820,9 +826,11 @@ action_subscribe_foreign_folder_cb (GtkAction *action,
 }
 
 static void
-action_folder_permissions_mail_cb (GtkAction *action,
-				   EShellView *shell_view)
+action_folder_permissions_mail_cb (EUIAction *action,
+				   GVariant *parameter,
+				   gpointer user_data)
 {
+	EShellView *shell_view = user_data;
 	gchar *profile, *folder_path = NULL;
 	EShellWindow *shell_window;
 	GtkWindow *parent;
@@ -878,8 +886,8 @@ action_folder_permissions_mail_cb (GtkAction *action,
 }
 
 static void
-mapi_ui_enable_actions (GtkActionGroup *action_group,
-			const GtkActionEntry *entries,
+mapi_ui_enable_actions (EUIActionGroup *action_group,
+			const EUIActionEntry *entries,
 			guint n_entries,
 			gboolean can_show,
 			gboolean is_online)
@@ -890,69 +898,51 @@ mapi_ui_enable_actions (GtkActionGroup *action_group,
 	g_return_if_fail (entries != NULL);
 
 	for (ii = 0; ii < n_entries; ii++) {
-		GtkAction *action;
+		EUIAction *action;
 
-		action = gtk_action_group_get_action (action_group, entries[ii].name);
+		action = e_ui_action_group_get_action (action_group, entries[ii].name);
 		if (!action)
 			continue;
 
-		gtk_action_set_visible (action, can_show);
+		e_ui_action_set_visible (action, can_show);
 		if (can_show)
-			gtk_action_set_sensitive (action, is_online);
+			e_ui_action_set_sensitive (action, is_online);
 	}
 }
 
-static GtkActionEntry mail_account_context_entries[] = {
-
+static const EUIActionEntry mail_account_context_entries[] = {
 	{ "mail-mapi-folder-size",
 	  NULL,
 	  N_("Folder size…"),
 	  NULL,
-	  NULL,  /* XXX Add a tooltip! */
-	  G_CALLBACK (action_folder_size_cb) },
+	  NULL,
+	  action_folder_size_cb, NULL, NULL, NULL },
 
 	{ "mail-mapi-subscribe-foreign-folder",
 	  NULL,
 	  N_("Subscribe to folder of other user…"),
 	  NULL,
-	  NULL,  /* XXX Add a tooltip! */
-	  G_CALLBACK (action_subscribe_foreign_folder_cb) }
+	  NULL,
+	  action_subscribe_foreign_folder_cb, NULL, NULL, NULL }
 };
 
-static GtkActionEntry mail_folder_context_entries[] = {
+static const EUIActionEntry mail_folder_context_entries[] = {
 	{ "mail-mapi-folder-permissions",
 	  "folder-new",
 	  N_("Permissions…"),
 	  NULL,
 	  N_("Edit MAPI folder permissions"),
-	  G_CALLBACK (action_folder_permissions_mail_cb) }
+	  action_folder_permissions_mail_cb, NULL, NULL, NULL }
 };
-
-static const gchar *mapi_ui_mail_def =
-	"<menubar name='main-menu'>\n"
-	"  <menu action='file-menu'>\n"
-	"    <placeholder name='long-running-actions'>\n"
-	"      <menuitem action=\"mapi-mail-global-subscribe-foreign-folder\"/>\n"
-	"    </placeholder>\n"
-	"  </menu>\n"
-	"</menubar>\n"
-	"<popup name=\"mail-folder-popup\">\n"
-	"  <placeholder name=\"mail-folder-popup-actions\">\n"
-	"    <menuitem action=\"mail-mapi-folder-size\"/>\n"
-	"    <menuitem action=\"mail-mapi-subscribe-foreign-folder\"/>\n"
-	"    <menuitem action=\"mail-mapi-folder-permissions\"/>\n"
-	"  </placeholder>\n"
-	"</popup>\n";
 
 static void
 mapi_ui_update_actions_mail_cb (EShellView *shell_view,
-				GtkActionEntry *entries)
+				gpointer user_data)
 {
-	EShellWindow *shell_window;
 	EShellBackend *backend;
 	CamelSession *session = NULL;
-	GtkActionGroup *action_group;
-	GtkUIManager *ui_manager;
+	EUIActionGroup *action_group;
+	EUIManager *ui_manager;
 	EShellSidebar *shell_sidebar;
 	EMFolderTree *folder_tree;
 	CamelStore *selected_store = NULL;
@@ -979,9 +969,8 @@ mapi_ui_update_actions_mail_cb (EShellView *shell_view,
 
 	g_free (selected_path);
 
-	shell_window = e_shell_view_get_shell_window (shell_view);
-	ui_manager = e_shell_window_get_ui_manager (shell_window);
-	action_group = e_lookup_action_group (ui_manager, "mail");
+	ui_manager = e_shell_view_get_ui_manager (shell_view);
+	action_group = e_ui_manager_get_action_group (ui_manager, "mail");
 
 	backend = e_shell_view_get_shell_backend (shell_view);
 	g_object_get (G_OBJECT (backend), "session", &session, NULL);
@@ -999,35 +988,38 @@ mapi_ui_update_actions_mail_cb (EShellView *shell_view,
 }
 
 static void
-mapi_ui_init_mail (GtkUIManager *ui_manager,
-                   EShellView *shell_view,
-		   gchar **ui_definition)
+mapi_ui_init_mail (EShellView *shell_view)
 {
-	EShellWindow *shell_window;
-	GtkActionGroup *action_group;
+	static const gchar *eui =
+		"<eui>"
+		  "<menu id='main-menu'>"
+		    "<submenu action='file-menu'>"
+		      "<placeholder id='long-running-actions'>"
+			"<item action='mapi-mail-global-subscribe-foreign-folder'/>"
+		      "</placeholder>"
+		    "</submenu>"
+		  "</menu>"
+		  "<menu id='mail-folder-popup'>"
+		    "<placeholder id='mail-folder-popup-actions'>"
+		      "<item action='mail-mapi-folder-size'/>"
+		      "<item action='mail-mapi-subscribe-foreign-folder'/>"
+		      "<item action='mail-mapi-folder-permissions'/>"
+		    "</placeholder>"
+		  "</menu>"
+		"</eui>";
 
-	g_return_if_fail (ui_definition != NULL);
+	EUIManager *ui_manager;
 
-	*ui_definition = g_strdup (mapi_ui_mail_def);
-
-	shell_window = e_shell_view_get_shell_window (shell_view);
-	action_group = e_shell_window_get_action_group (shell_window, "mail");
-
-	/* Add actions to the "mail" action group. */
-	e_action_group_add_actions_localized (action_group, GETTEXT_PACKAGE,
+	ui_manager = e_shell_view_get_ui_manager (shell_view);
+	e_ui_manager_add_actions (ui_manager, "mail", GETTEXT_PACKAGE,
 		mail_account_context_entries, G_N_ELEMENTS (mail_account_context_entries), shell_view);
-	e_action_group_add_actions_localized (action_group, GETTEXT_PACKAGE,
+	e_ui_manager_add_actions (ui_manager, "mail", GETTEXT_PACKAGE,
 		mail_folder_context_entries, G_N_ELEMENTS (mail_folder_context_entries), shell_view);
-
-	/* Add global actions */
-	e_action_group_add_actions_localized (
-		action_group, GETTEXT_PACKAGE,
-		global_mapi_mail_entries, G_N_ELEMENTS (global_mapi_mail_entries), shell_view);
+	e_ui_manager_add_actions_with_eui_data (ui_manager, "mail", GETTEXT_PACKAGE,
+		global_mapi_mail_entries, G_N_ELEMENTS (global_mapi_mail_entries), shell_view, eui);
 
 	/* Decide whether we want this option to be visible or not */
-	g_signal_connect (shell_view, "update-actions",
-			  G_CALLBACK (mapi_ui_update_actions_mail_cb),
-			  shell_view);
+	g_signal_connect (shell_view, "update-actions", G_CALLBACK (mapi_ui_update_actions_mail_cb), NULL);
 }
 
 static gboolean
@@ -1088,13 +1080,13 @@ get_selected_mapi_source (EShellView *shell_view,
 
 static void
 update_mapi_source_entries_cb (EShellView *shell_view,
-			       GtkActionEntry *entries)
+			       const EUIActionEntry *entries)
 {
-	GtkActionGroup *action_group;
+	EUIActionGroup *action_group;
 	EShell *shell;
 	EShellWindow *shell_window;
 	ESource *source = NULL;
-	GtkActionEntry *global_entries = NULL;
+	const EUIActionEntry *global_entries = NULL;
 	guint n_global_entries = 0;
 	const gchar *group;
 	gboolean is_mapi_source, is_online;
@@ -1141,7 +1133,7 @@ update_mapi_source_entries_cb (EShellView *shell_view,
 	shell = e_shell_window_get_shell (shell_window);
 
 	is_online = shell && e_shell_get_online (shell);
-	action_group = e_shell_window_get_action_group (shell_window, group);
+	action_group = e_ui_manager_get_action_group (e_shell_view_get_ui_manager (shell_view), group);
 
 	mapi_ui_enable_actions (action_group, entries, MAPI_ESOURCE_NUM_ENTRIES, is_mapi_source, is_online);
 	mapi_ui_enable_actions (action_group, global_entries, n_global_entries,
@@ -1150,18 +1142,16 @@ update_mapi_source_entries_cb (EShellView *shell_view,
 
 static void
 setup_mapi_source_actions (EShellView *shell_view,
-			   GtkUIManager *ui_manager,
-			   GtkActionEntry *entries,
-			   guint n_entries)
+			   const EUIActionEntry *entries,
+			   guint n_entries,
+			   const gchar *eui)
 {
-	EShellWindow *shell_window;
-	GtkActionGroup *action_group;
-	GtkActionEntry *global_entries = NULL;
+	EUIManager *ui_manager;
+	const EUIActionEntry *global_entries = NULL;
 	guint n_global_entries = 0;
 	const gchar *group;
 
 	g_return_if_fail (shell_view != NULL);
-	g_return_if_fail (ui_manager != NULL);
 	g_return_if_fail (entries != NULL);
 	g_return_if_fail (n_entries > 0);
 	g_return_if_fail (n_entries == MAPI_ESOURCE_NUM_ENTRIES);
@@ -1186,25 +1176,19 @@ setup_mapi_source_actions (EShellView *shell_view,
 		g_return_if_reached ();
 	}
 
-	shell_window = e_shell_view_get_shell_window (shell_view);
-	action_group = e_shell_window_get_action_group (shell_window, group);
+	ui_manager = e_shell_view_get_ui_manager (shell_view);
+	e_ui_manager_add_actions (ui_manager, group, GETTEXT_PACKAGE, entries, n_entries, shell_view);
+	e_ui_manager_add_actions_with_eui_data (ui_manager, group, GETTEXT_PACKAGE, global_entries, n_global_entries, shell_view, eui);
 
-	e_action_group_add_actions_localized (
-		action_group, GETTEXT_PACKAGE,
-		entries, MAPI_ESOURCE_NUM_ENTRIES, shell_view);
-
-	/* Add global actions */
-	e_action_group_add_actions_localized (
-		action_group, GETTEXT_PACKAGE,
-		global_entries, n_global_entries, shell_view);
-
-	g_signal_connect (shell_view, "update-actions", G_CALLBACK (update_mapi_source_entries_cb), entries);
+	g_signal_connect (shell_view, "update-actions", G_CALLBACK (update_mapi_source_entries_cb), (gpointer) entries);
 }
 
 static void
-action_folder_permissions_source_cb (GtkAction *action,
-				     EShellView *shell_view)
+action_folder_permissions_source_cb (EUIAction *action,
+				     GVariant *parameter,
+				     gpointer user_data)
 {
+	EShellView *shell_view = user_data;
 	ESourceRegistry *registry = NULL;
 	ESource *source = NULL, *parent_source;
 	ESourceMapiFolder *folder_ext;
@@ -1220,7 +1204,7 @@ action_folder_permissions_source_cb (GtkAction *action,
 	g_return_if_fail (get_selected_mapi_source (shell_view, &source, &registry));
 	g_return_if_fail (source != NULL);
 	g_return_if_fail (e_source_has_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER));
-	g_return_if_fail (gtk_action_get_name (action) != NULL);
+	g_return_if_fail (g_action_get_name (G_ACTION (action)) != NULL);
 
 	folder_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_MAPI_FOLDER);
 	folder_id = e_source_mapi_folder_get_id (folder_ext);
@@ -1247,186 +1231,155 @@ action_folder_permissions_source_cb (GtkAction *action,
 		is_public ? E_MAPI_FOLDER_CATEGORY_PUBLIC :
 		E_MAPI_FOLDER_CATEGORY_PERSONAL,
 		foreign_username,
-		strstr (gtk_action_get_name (action), "calendar") != NULL);
+		strstr (g_action_get_name (G_ACTION (action)), "calendar") != NULL);
 
 	g_object_unref (source);
 	g_object_unref (parent_source);
 	g_object_unref (registry);
 }
 
-static GtkActionEntry calendar_context_entries[] = {
-
-	{ "calendar-mapi-folder-permissions",
-	  "folder-new",
-	  N_("Permissions…"),
-	  NULL,
-	  N_("Edit MAPI calendar permissions"),
-	  G_CALLBACK (action_folder_permissions_source_cb) }
-};
-
-static const gchar *mapi_ui_cal_def =
-	"<menubar name='main-menu'>\n"
-	"  <menu action='file-menu'>\n"
-	"    <placeholder name='long-running-actions'>\n"
-	"      <menuitem action=\"mapi-calendar-global-subscribe-foreign-folder\"/>\n"
-	"    </placeholder>\n"
-	"  </menu>\n"
-	"</menubar>\n"
-	"<popup name=\"calendar-popup\">\n"
-	"  <placeholder name=\"calendar-popup-actions\">\n"
-	"    <menuitem action=\"calendar-mapi-folder-permissions\"/>\n"
-	"  </placeholder>\n"
-	"</popup>\n";
-
 static void
-mapi_ui_init_calendar (GtkUIManager *ui_manager,
-		       EShellView *shell_view,
-		       gchar **ui_definition)
+mapi_ui_init_calendar (EShellView *shell_view)
 {
-	g_return_if_fail (ui_definition != NULL);
+	static const gchar *eui =
+		"<eui>"
+		  "<menu id='main-menu'>"
+		    "<submenu action='file-menu'>"
+		      "<placeholder id='long-running-actions'>"
+			"<item action='mapi-calendar-global-subscribe-foreign-folder'/>"
+		      "</placeholder>"
+		    "</submenu>"
+		  "</menu>"
+		  "<menu id='calendar-popup'>"
+		    "<placeholder id='calendar-popup-actions'>"
+		      "<item action='calendar-mapi-folder-permissions'/>"
+		    "</placeholder>"
+		  "</menu>"
+		"</eui>";
 
-	*ui_definition = g_strdup (mapi_ui_cal_def);
+	static const EUIActionEntry entries[] = {
+		{ "calendar-mapi-folder-permissions",
+		  "folder-new",
+		  N_("Permissions…"),
+		  NULL,
+		  N_("Edit MAPI calendar permissions"),
+		  action_folder_permissions_source_cb, NULL, NULL, NULL }
+	};
 
-	setup_mapi_source_actions (shell_view, ui_manager,
-		calendar_context_entries, G_N_ELEMENTS (calendar_context_entries));
+
+	setup_mapi_source_actions (shell_view, entries, G_N_ELEMENTS (entries), eui);
 }
 
-static GtkActionEntry tasks_context_entries[] = {
-
-	{ "tasks-mapi-folder-permissions",
-	  "folder-new",
-	  N_("Permissions…"),
-	  NULL,
-	  N_("Edit MAPI tasks permissions"),
-	  G_CALLBACK (action_folder_permissions_source_cb) }
-};
-
-static const gchar *mapi_ui_task_def =
-	"<menubar name='main-menu'>\n"
-	"  <menu action='file-menu'>\n"
-	"    <placeholder name='long-running-actions'>\n"
-	"      <menuitem action=\"mapi-task-global-subscribe-foreign-folder\"/>\n"
-	"    </placeholder>\n"
-	"  </menu>\n"
-	"</menubar>\n"
-	"<popup name=\"task-list-popup\">\n"
-	"  <placeholder name=\"task-list-popup-actions\">\n"
-	"    <menuitem action=\"tasks-mapi-folder-permissions\"/>\n"
-	"  </placeholder>\n"
-	"</popup>\n";
-
 static void
-mapi_ui_init_tasks (GtkUIManager *ui_manager,
-		    EShellView *shell_view,
-		    gchar **ui_definition)
+mapi_ui_init_tasks (EShellView *shell_view)
 {
-	g_return_if_fail (ui_definition != NULL);
+	static const gchar *eui =
+		"<eui>"
+		  "<menu id='main-menu'>"
+		    "<submenu action='file-menu'>"
+		      "<placeholder id='long-running-actions'>"
+			"<item action='mapi-task-global-subscribe-foreign-folder'/>"
+		      "</placeholder>"
+		    "</submenu>"
+		  "</menu>"
+		  "<menu id='task-list-popup'>"
+		    "<placeholder id='task-list-popup-actions'>"
+		      "<item action='tasks-mapi-folder-permissions'/>"
+		    "</placeholder>"
+		  "</menu>"
+		"</eui>";
 
-	*ui_definition = g_strdup (mapi_ui_task_def);
+	static const EUIActionEntry entries[] = {
+		{ "tasks-mapi-folder-permissions",
+		  "folder-new",
+		  N_("Permissions…"),
+		  NULL,
+		  N_("Edit MAPI tasks permissions"),
+		  action_folder_permissions_source_cb, NULL, NULL, NULL }
+	};
 
-	setup_mapi_source_actions (shell_view, ui_manager,
-		tasks_context_entries, G_N_ELEMENTS (tasks_context_entries));
+	setup_mapi_source_actions (shell_view, entries, G_N_ELEMENTS (entries), eui);
 }
 
-static GtkActionEntry memos_context_entries[] = {
-
-	{ "memos-mapi-folder-permissions",
-	  "folder-new",
-	  N_("Permissions…"),
-	  NULL,
-	  N_("Edit MAPI memos permissions"),
-	  G_CALLBACK (action_folder_permissions_source_cb) }
-};
-
-static const gchar *mapi_ui_memo_def =
-	"<menubar name='main-menu'>\n"
-	"  <menu action='file-menu'>\n"
-	"    <placeholder name='long-running-actions'>\n"
-	"      <menuitem action=\"mapi-memo-global-subscribe-foreign-folder\"/>\n"
-	"    </placeholder>\n"
-	"  </menu>\n"
-	"</menubar>\n"
-	"<popup name=\"memo-list-popup\">\n"
-	"  <placeholder name=\"memo-list-popup-actions\">\n"
-	"    <menuitem action=\"memos-mapi-folder-permissions\"/>\n"
-	"  </placeholder>\n"
-	"</popup>\n";
-
 static void
-mapi_ui_init_memos (GtkUIManager *ui_manager,
-		    EShellView *shell_view,
-		    gchar **ui_definition)
+mapi_ui_init_memos (EShellView *shell_view)
 {
-	g_return_if_fail (ui_definition != NULL);
+	static const gchar *eui =
+		"<eui>"
+		  "<menu id='main-menu'>"
+		    "<submenu action='file-menu'>"
+		      "<placeholder id='long-running-actions'>"
+			"<item action='mapi-memo-global-subscribe-foreign-folder'/>"
+		      "</placeholder>"
+		    "</submenu>"
+		  "</menu>"
+		  "<menu id='memo-list-popup'>"
+		    "<placeholder id='memo-list-popup-actions'>"
+		      "<item action='memos-mapi-folder-permissions'/>"
+		    "</placeholder>"
+		  "</menu>"
+		"</eui>";
 
-	*ui_definition = g_strdup (mapi_ui_memo_def);
+	static const EUIActionEntry entries[] = {
+		{ "memos-mapi-folder-permissions",
+		  "folder-new",
+		  N_("Permissions…"),
+		  NULL,
+		  N_("Edit MAPI memos permissions"),
+		  action_folder_permissions_source_cb, NULL, NULL, NULL }
+	};
 
-	setup_mapi_source_actions (shell_view, ui_manager,
-		memos_context_entries, G_N_ELEMENTS (memos_context_entries));
+	setup_mapi_source_actions (shell_view, entries, G_N_ELEMENTS (entries), eui);
 }
 
-static GtkActionEntry contacts_context_entries[] = {
-
-	{ "contacts-mapi-folder-permissions",
-	  "folder-new",
-	  N_("Permissions…"),
-	  NULL,
-	  N_("Edit MAPI contacts permissions"),
-	  G_CALLBACK (action_folder_permissions_source_cb) }
-};
-
-static const gchar *mapi_ui_book_def =
-	"<menubar name='main-menu'>\n"
-	"  <menu action='file-menu'>\n"
-	"    <placeholder name='long-running-actions'>\n"
-	"      <menuitem action=\"mapi-contact-global-subscribe-foreign-folder\"/>\n"
-	"    </placeholder>\n"
-	"  </menu>\n"
-	"</menubar>\n"
-	"<popup name=\"address-book-popup\">\n"
-	"  <placeholder name=\"address-book-popup-actions\">\n"
-	"    <menuitem action=\"contacts-mapi-folder-permissions\"/>\n"
-	"  </placeholder>\n"
-	"</popup>\n";
-
 static void
-mapi_ui_init_contacts (GtkUIManager *ui_manager,
-		       EShellView *shell_view,
-		       gchar **ui_definition)
+mapi_ui_init_contacts (EShellView *shell_view)
 {
-	g_return_if_fail (ui_definition != NULL);
+	static const gchar *eui =
+		"<eui>"
+		  "<menu id='main-menu'>"
+		    "<submenu action='file-menu'>"
+		      "<placeholder id='long-running-actions'>"
+			"<item action='mapi-contact-global-subscribe-foreign-folder'/>"
+		      "</placeholder>"
+		    "</submenu>"
+		  "</menu>"
+		  "<menu id='address-book-popup'>"
+		    "<placeholder id='address-book-popup-actions'>"
+		      "<item action='contacts-mapi-folder-permissions'/>"
+		    "</placeholder>"
+		  "</menu>"
+		"</eui>";
 
-	*ui_definition = g_strdup (mapi_ui_book_def);
+	static const EUIActionEntry entries[] = {
+		{ "contacts-mapi-folder-permissions",
+		  "folder-new",
+		  N_("Permissions…"),
+		  NULL,
+		  N_("Edit MAPI contacts permissions"),
+		  action_folder_permissions_source_cb, NULL, NULL, NULL }
+	};
 
-	setup_mapi_source_actions (shell_view, ui_manager,
-		contacts_context_entries, G_N_ELEMENTS (contacts_context_entries));
+	setup_mapi_source_actions (shell_view, entries, G_N_ELEMENTS (entries), eui);
 }
 
 void
 e_mapi_config_utils_init_ui (EShellView *shell_view,
-			     const gchar *ui_manager_id,
-			     gchar **ui_definition)
+			     const gchar *ui_manager_id)
 {
-	EShellWindow *shell_window;
-	GtkUIManager *ui_manager;
-
 	g_return_if_fail (shell_view != NULL);
 	g_return_if_fail (ui_manager_id != NULL);
-	g_return_if_fail (ui_definition != NULL);
-
-	shell_window = e_shell_view_get_shell_window (shell_view);
-	ui_manager = e_shell_window_get_ui_manager (shell_window);
 
 	if (g_strcmp0 (ui_manager_id, "org.gnome.evolution.mail") == 0)
-		mapi_ui_init_mail (ui_manager, shell_view, ui_definition);
+		mapi_ui_init_mail (shell_view);
 	else if (g_strcmp0 (ui_manager_id, "org.gnome.evolution.calendars") == 0)
-		mapi_ui_init_calendar (ui_manager, shell_view, ui_definition);
+		mapi_ui_init_calendar (shell_view);
 	else if (g_strcmp0 (ui_manager_id, "org.gnome.evolution.tasks") == 0)
-		mapi_ui_init_tasks (ui_manager, shell_view, ui_definition);
+		mapi_ui_init_tasks (shell_view);
 	else if (g_strcmp0 (ui_manager_id, "org.gnome.evolution.memos") == 0)
-		mapi_ui_init_memos (ui_manager, shell_view, ui_definition);
+		mapi_ui_init_memos (shell_view);
 	else if (g_strcmp0 (ui_manager_id, "org.gnome.evolution.contacts") == 0)
-		mapi_ui_init_contacts (ui_manager, shell_view, ui_definition);
+		mapi_ui_init_contacts (shell_view);
 }
 
 gboolean

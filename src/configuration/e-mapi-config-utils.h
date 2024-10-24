@@ -59,8 +59,7 @@ void			e_mapi_config_utils_run_folder_size_dialog		(ESourceRegistry *registry,
 										 CamelMapiSettings *mapi_settings);
 
 void			e_mapi_config_utils_init_ui				(EShellView *shell_view,
-										 const gchar *ui_manager_id,
-										 gchar **ui_definition);
+										 const gchar *ui_manager_id);
 
 gboolean		e_mapi_config_utils_is_online				(void);
 

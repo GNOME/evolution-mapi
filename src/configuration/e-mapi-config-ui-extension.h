@@ -29,9 +29,6 @@ typedef struct _EMapiConfigUIExtensionClass EMapiConfigUIExtensionClass;
 struct _EMapiConfigUIExtension
 {
 	EExtension parent;
-
-	guint current_ui_id;
-	GHashTable *ui_definitions;
 };
 
 struct _EMapiConfigUIExtensionClass
