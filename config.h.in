@@ -20,3 +20,6 @@
 
 /* libmapi supports RES_NOT restrictions */
 #cmakedefine HAVE_RES_NOT_SUPPORTED 1
+
+/* Define if libical-glib has i_cal_recurrence_get_by() */
+#cmakedefine HAVE_I_CAL_RECURRENCE_GET_BY 1

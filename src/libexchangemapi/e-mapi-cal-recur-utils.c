@@ -819,6 +819,8 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb,
 
 		if (rp->PatternType == PatternType_Month ||
 		    rp->PatternType == PatternType_MonthEnd) {
+			gshort value;
+			gboolean value_set = TRUE;
 			/* Monthly every N months on day D or last day. */
 
 			check_calendar = TRUE;
@@ -828,12 +830,23 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb,
 
 			/* MONTH_DAY */
 			if (rp->PatternType == PatternType_Month)
-				i_cal_recurrence_set_by_month_day (rt, 0, (short) (rp->PatternTypeSpecific));
+				value = (gshort) rp->PatternTypeSpecific;
 			else if (rp->PatternType == PatternType_MonthEnd)
-				i_cal_recurrence_set_by_month_day (rt, 0, (short) (-1));
+				value = -1;
+			else
+				value_set = FALSE;
 
+			if (value_set) {
+				#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+				i_cal_recurrence_resize_by_array (rt, I_CAL_BY_MONTH_DAY, 1);
+				i_cal_recurrence_set_by (rt, I_CAL_BY_MONTH_DAY, 0, value);
+				#else
+				i_cal_recurrence_set_by_month_day (rt, 0, value);
+				#endif
+			}
 		} else if (rp->PatternType == PatternType_MonthNth) {
 			gboolean post_process = FALSE;
+			gshort day_value = 0;
 			/* Monthly every N months on the Xth Y */
 
 			check_calendar = TRUE;
@@ -843,32 +856,51 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb,
 
 			/* BITMASK */
 			if (rp->PatternTypeSpecific == olSunday)
-				i_cal_recurrence_set_by_day (rt, 0, I_CAL_SUNDAY_WEEKDAY);
+				day_value = I_CAL_SUNDAY_WEEKDAY;
 			else if (rp->PatternTypeSpecific == olMonday)
-				i_cal_recurrence_set_by_day (rt, 0, I_CAL_MONDAY_WEEKDAY);
+				day_value = I_CAL_MONDAY_WEEKDAY;
 			else if (rp->PatternTypeSpecific == olTuesday)
-				i_cal_recurrence_set_by_day (rt, 0, I_CAL_TUESDAY_WEEKDAY);
+				day_value = I_CAL_TUESDAY_WEEKDAY;
 			else if (rp->PatternTypeSpecific == olWednesday)
-				i_cal_recurrence_set_by_day (rt, 0, I_CAL_WEDNESDAY_WEEKDAY);
+				day_value = I_CAL_WEDNESDAY_WEEKDAY;
 			else if (rp->PatternTypeSpecific == olThursday)
-				i_cal_recurrence_set_by_day (rt, 0, I_CAL_THURSDAY_WEEKDAY);
+				day_value = I_CAL_THURSDAY_WEEKDAY;
 			else if (rp->PatternTypeSpecific == olFriday)
-				i_cal_recurrence_set_by_day (rt, 0, I_CAL_FRIDAY_WEEKDAY);
+				day_value = I_CAL_FRIDAY_WEEKDAY;
 			else if (rp->PatternTypeSpecific == olSaturday)
-				i_cal_recurrence_set_by_day (rt, 0, I_CAL_SATURDAY_WEEKDAY);
+				day_value = I_CAL_SATURDAY_WEEKDAY;
 			else {
 				post_process = TRUE;
 			}
 
 			/* RecurrenceN */
 			if (!post_process) {
-				i_cal_recurrence_set_by_set_pos (rt, 0, get_ical_pos (rp->N));
-				if (i_cal_recurrence_get_by_set_pos (rt, 0) == 0)
+				gshort pos_value = get_ical_pos (rp->N);
+
+				#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+				i_cal_recurrence_resize_by_array (rt, I_CAL_BY_DAY, 1);
+				i_cal_recurrence_set_by (rt, I_CAL_BY_DAY, 0, day_value);
+				i_cal_recurrence_resize_by_array (rt, I_CAL_BY_SET_POS, 1);
+				i_cal_recurrence_set_by (rt, I_CAL_BY_SET_POS, 0, pos_value);
+				#else
+				i_cal_recurrence_set_by_day (rt, 0, day_value);
+				i_cal_recurrence_set_by_set_pos (rt, 0, pos_value);
+				#endif
+
+				if (pos_value == 0)
 					goto cleanup;
 			} else {
 				if (rp->PatternTypeSpecific == (olSunday | olMonday | olTuesday | olWednesday | olThursday | olFriday | olSaturday)) {
-					i_cal_recurrence_set_by_month_day (rt, 0, get_ical_pos (rp->N));
-					if (i_cal_recurrence_get_by_month_day (rt, 0) == 0)
+					gshort monthday_value = get_ical_pos (rp->N);
+
+					#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+					i_cal_recurrence_resize_by_array (rt, I_CAL_BY_MONTH_DAY, 1);
+					i_cal_recurrence_set_by (rt, I_CAL_BY_MONTH_DAY, 0, monthday_value);
+					#else
+					i_cal_recurrence_set_by_month_day (rt, 0, monthday_value);
+					#endif
+
+					if (monthday_value == 0)
 						goto cleanup;
 				} else {
 				/* FIXME: Can we/LibICAL support any other types here? Namely, weekday and weekend-day */
@@ -907,20 +939,35 @@ e_mapi_cal_util_bin_to_rrule (const guint8 *lpb,
 	     (rp->RecurFrequency == RecurFrequency_Weekly &&
 	      rp->PatternType == PatternType_Week) ) {
 		i = 0;
+		#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+		#define add_by_day_value(_val) G_STMT_START { \
+			i_cal_recurrence_resize_by_array (rt, I_CAL_BY_DAY, i + 1); \
+			i_cal_recurrence_set_by (rt, I_CAL_BY_DAY, i, _val); \
+			i++; \
+			} G_STMT_END
+		#else
+		#define add_by_day_value(_val) G_STMT_START { \
+			i_cal_recurrence_set_by_day (rt, i, _val); \
+			i++; \
+			} G_STMT_END
+		#endif
+
 		if (rp->PatternTypeSpecific & olSunday)
-			i_cal_recurrence_set_by_day (rt, i++, I_CAL_SUNDAY_WEEKDAY);
+			add_by_day_value (I_CAL_SUNDAY_WEEKDAY);
 		if (rp->PatternTypeSpecific & olMonday)
-			i_cal_recurrence_set_by_day (rt, i++, I_CAL_MONDAY_WEEKDAY);
+			add_by_day_value (I_CAL_MONDAY_WEEKDAY);
 		if (rp->PatternTypeSpecific & olTuesday)
-			i_cal_recurrence_set_by_day (rt, i++, I_CAL_TUESDAY_WEEKDAY);
+			add_by_day_value (I_CAL_TUESDAY_WEEKDAY);
 		if (rp->PatternTypeSpecific & olWednesday)
-			i_cal_recurrence_set_by_day (rt, i++, I_CAL_WEDNESDAY_WEEKDAY);
+			add_by_day_value (I_CAL_WEDNESDAY_WEEKDAY);
 		if (rp->PatternTypeSpecific & olThursday)
-			i_cal_recurrence_set_by_day (rt, i++, I_CAL_THURSDAY_WEEKDAY);
+			add_by_day_value (I_CAL_THURSDAY_WEEKDAY);
 		if (rp->PatternTypeSpecific & olFriday)
-			i_cal_recurrence_set_by_day (rt, i++, I_CAL_FRIDAY_WEEKDAY);
+			add_by_day_value (I_CAL_FRIDAY_WEEKDAY);
 		if (rp->PatternTypeSpecific & olSaturday)
-			i_cal_recurrence_set_by_day (rt, i++, I_CAL_SATURDAY_WEEKDAY);
+			add_by_day_value (I_CAL_SATURDAY_WEEKDAY);
+
+		#undef add_by_day_value
 	}
 
 	/* Only some calendar types supported */
@@ -1287,40 +1334,60 @@ e_mapi_cal_util_rrule_to_bin (ECalComponent *comp,
 
 		/* BITMASK */
 		for (i = 0; i < I_CAL_BY_DAY_SIZE; ++i) {
-			if (i_cal_recurrence_get_by_day (rt, i) == I_CAL_SUNDAY_WEEKDAY)
+			gshort value;
+
+			#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+			value = i_cal_recurrence_get_by (rt, I_CAL_BY_DAY, i);
+			#else
+			value = i_cal_recurrence_get_by_day (rt, i);
+			#endif
+
+			if (value == I_CAL_SUNDAY_WEEKDAY)
 				rp->PatternTypeSpecific |= olSunday;
-			else if (i_cal_recurrence_get_by_day (rt, i) == I_CAL_MONDAY_WEEKDAY)
+			else if (value == I_CAL_MONDAY_WEEKDAY)
 				rp->PatternTypeSpecific |= olMonday;
-			else if (i_cal_recurrence_get_by_day (rt, i) == I_CAL_TUESDAY_WEEKDAY)
+			else if (value == I_CAL_TUESDAY_WEEKDAY)
 				rp->PatternTypeSpecific |= olTuesday;
-			else if (i_cal_recurrence_get_by_day (rt, i) == I_CAL_WEDNESDAY_WEEKDAY)
+			else if (value == I_CAL_WEDNESDAY_WEEKDAY)
 				rp->PatternTypeSpecific |= olWednesday;
-			else if (i_cal_recurrence_get_by_day (rt, i) == I_CAL_THURSDAY_WEEKDAY)
+			else if (value == I_CAL_THURSDAY_WEEKDAY)
 				rp->PatternTypeSpecific |= olThursday;
-			else if (i_cal_recurrence_get_by_day (rt, i) == I_CAL_FRIDAY_WEEKDAY)
+			else if (value == I_CAL_FRIDAY_WEEKDAY)
 				rp->PatternTypeSpecific |= olFriday;
-			else if (i_cal_recurrence_get_by_day (rt, i) == I_CAL_SATURDAY_WEEKDAY)
+			else if (value == I_CAL_SATURDAY_WEEKDAY)
 				rp->PatternTypeSpecific |= olSaturday;
 			else
 				break;
 		}
 
 	} else if (i_cal_recurrence_get_freq (rt) == I_CAL_MONTHLY_RECURRENCE) {
-		guint16 pattern = 0x0; guint32 mask = 0x0, flag = 0x0;
+		gshort bymonthday, byday, bysetpos;
+		guint16 pattern = 0x0;
+		guint32 mask = 0x0, flag = 0x0;
+
+		#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+		bymonthday = i_cal_recurrence_get_by_array_size (rt, I_CAL_BY_MONTH_DAY) > 0 ? i_cal_recurrence_get_by (rt, I_CAL_BY_MONTH_DAY, 0) : 0;
+		byday = i_cal_recurrence_get_by_array_size (rt, I_CAL_BY_DAY) > 0 ? i_cal_recurrence_get_by (rt, I_CAL_BY_DAY, 0) : 0;
+		bysetpos = i_cal_recurrence_get_by_array_size (rt, I_CAL_BY_SET_POS) > 0 ? i_cal_recurrence_get_by (rt, I_CAL_BY_SET_POS, 0) : 0;
+		#else
+		bymonthday = i_cal_recurrence_get_by_month_day (rt, 0);
+		byday = i_cal_recurrence_get_by_day (rt, 0);
+		bysetpos = i_cal_recurrence_get_by_set_pos (rt, 0);
+		#endif
 
 		rp->RecurFrequency = RecurFrequency_Monthly;
 
-		if (i_cal_recurrence_get_by_month_day (rt, 0) >= 1 && i_cal_recurrence_get_by_month_day (rt, 0) <= 31) {
+		if (bymonthday >= 1 && bymonthday <= 31) {
 			pattern = PatternType_Month;
-			flag = i_cal_recurrence_get_by_month_day (rt, 0);
-		} else if (i_cal_recurrence_get_by_month_day (rt, 0) == -1) {
+			flag = bymonthday;
+		} else if (bymonthday == -1) {
 			pattern = PatternType_MonthNth;
 			mask = (olSunday | olMonday | olTuesday | olWednesday | olThursday | olFriday | olSaturday);
 			flag = RecurrenceN_Last;
-		} else if (i_cal_recurrence_get_by_day (rt, 0) >= I_CAL_SUNDAY_WEEKDAY && i_cal_recurrence_get_by_day (rt, 0) <= I_CAL_SATURDAY_WEEKDAY) {
+		} else if (byday >= I_CAL_SUNDAY_WEEKDAY && byday <= I_CAL_SATURDAY_WEEKDAY) {
 			pattern = PatternType_MonthNth;
-			mask = get_mapi_day (i_cal_recurrence_get_by_day (rt, 0));
-			flag = get_mapi_pos (i_cal_recurrence_get_by_set_pos (rt, 0));
+			mask = get_mapi_day (byday);
+			flag = get_mapi_pos (bysetpos);
 		}
 
 		rp->PatternType = pattern;
