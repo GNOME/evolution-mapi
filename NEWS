@@ -1,3 +1,14 @@
+evolution-mapi 3.55.1 2025-01-03
+--------------------------------
+
+Bug Fixes:
+	M!6 - Set project-wide emacs formatting rules (Дилян Палаузов)
+	eds-I#570 - Adapt to libical icalrecurrencetype changes
+
+Miscellaneous:
+	build: Update CMake uninstall file
+	Adapt to GtkUIManager removal from Evolution
+
 evolution-mapi 3.54.0 2024-09-13
 --------------------------------
 
